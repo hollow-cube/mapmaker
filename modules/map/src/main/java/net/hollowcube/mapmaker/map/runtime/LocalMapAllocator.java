@@ -12,6 +12,7 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.util.ComponentUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.metadata.PlayerMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -90,7 +91,6 @@ public class LocalMapAllocator implements MapAllocator {
     @Override
     public @NotNull Future<Boolean> destroy(@NotNull String worldId, @NotNull Component reason) {
         Callable<Boolean> task = () -> {
-            System.out.println("intask");
             for (var map : List.copyOf(maps.entrySet())) {
                 var key = map.getKey();
                 var world = FutureUtil.getUnchecked(map.getValue());

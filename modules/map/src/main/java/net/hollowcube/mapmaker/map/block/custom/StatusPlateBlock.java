@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.map.block.custom;
 
 import net.hollowcube.common.util.dfu.DFU;
-import net.hollowcube.mapmaker.entity.PlayerCooldown;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.handler.PressurePlateBlockMixin;
@@ -14,26 +13,25 @@ import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
 import net.hollowcube.mapmaker.map.util.InteractTarget;
 import net.hollowcube.mapmaker.object.ObjectType;
+import net.hollowcube.mapmaker.util.TagCooldown;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
-import net.minestom.server.utils.time.Cooldown;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class StatusPlateBlock implements ObjectBlockHandler, InteractTarget, PressurePlateBlockMixin, DebugCommand.BlockDebug, PlayerCooldown {
+public class StatusPlateBlock implements ObjectBlockHandler, InteractTarget, PressurePlateBlockMixin, DebugCommand.BlockDebug {
     private static final Tag<StatusEffectData> DATA_TAG = DFU.View(StatusEffectData.CODEC);
-    private static final Tag<Cooldown> APPLY_COOLDOWN_TAG = Tag.Transient("mapmaker:status_plate_cooldown");
-    private static final Duration COOLDOWN_TIME = Duration.of(250L, ChronoUnit.MILLIS);
+    public static final Tag<StatusEffectData> ENTITY_DATA_TAG = DFU.Tag(StatusEffectData.CODEC, "status").path("data");
+
+    public static final TagCooldown APPLY_COOLDOWN = new TagCooldown("mapmaker:status_plate_cooldown", 250);
 
     public static final ObjectType OBJECT_TYPE = ObjectType.builder("mapmaker:status_plate")
             .requiredVariant(MapVariant.PARKOUR)
@@ -90,25 +88,16 @@ public class StatusPlateBlock implements ObjectBlockHandler, InteractTarget, Pre
     public void onPlatePressed(@NotNull Tick tick, @NotNull Player player) {
         var world = MapWorld.forPlayerOptional(player);
         if (world == null) return;
-        tryUseCooldown(player, () -> {
+
+        if (APPLY_COOLDOWN.test(player)) {
             var data = tick.getBlock().getTag(DATA_TAG);
             var statusId = createObjectId(tick.getBlockPosition());
             world.callEvent(new MapPlayerStatusChangeEvent(player, world, statusId, data));
-        });
+        }
     }
 
     @Override
     public void sendDebugInfo(@NotNull Player player, @NotNull Block block) {
         block.getTag(DATA_TAG).sendDebugInfo(player);
-    }
-
-    @Override
-    public @NotNull Tag<Cooldown> cooldownTag() {
-        return APPLY_COOLDOWN_TAG;
-    }
-
-    @Override
-    public @NotNull Duration cooldownDuration() {
-        return COOLDOWN_TIME;
     }
 }

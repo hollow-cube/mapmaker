@@ -42,6 +42,7 @@ java_junit5_test(
         "@maven//:com_google_code_gson_gson",
         "@maven//:net_kyori_adventure_api",
         "@maven//:com_github_mworzala_Minestom",
+        "//modules/common",
         "//modules/core",
         #        "//modules/command",
         #        "//modules/common",

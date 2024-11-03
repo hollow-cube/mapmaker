@@ -63,6 +63,8 @@ public class DebugStickItem extends ItemHandler {
         var blockPosition = click.blockPosition();
         var block = instance.getBlock(blockPosition, Block.Getter.Condition.TYPE); // Never set the block so fine to exclude handler
 
+        // TODO: use the debug stick item component
+
         var oldProperty = itemStack.getTag(TAG_PROPERTY);
         var newProperty = selectProperty(block, oldProperty, true);
         if (newProperty == null) {

@@ -4,9 +4,9 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
-import net.hollowcube.mapmaker.entity.PlayerCooldown;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.util.InteractTarget;
+import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
@@ -23,13 +23,10 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.server.utils.time.Cooldown;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -38,7 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * <p>
  * The registry always contains all vanilla items, available in the command context.
  */
-public class ItemRegistry implements PlayerCooldown {
+public class ItemRegistry {
 
     public static @NotNull Argument<@Nullable ItemStack> Argument(@NotNull String id) {
         return Argument.Word(id).map(
@@ -100,6 +97,8 @@ public class ItemRegistry implements PlayerCooldown {
 
     // Contains all the "public" item names known by this registry. Used for completions.
     private final Set<NamespaceID> allItemNames = new TreeSet<>((a, b) -> a.asString().compareToIgnoreCase(b.asString()));
+
+    private final TagCooldown useCooldown = new TagCooldown("mapmaker:hotbar_cooldown", 250);
 
     public ItemRegistry() {
         for (var item : Material.values()) {
@@ -195,7 +194,8 @@ public class ItemRegistry implements PlayerCooldown {
         // so is playerUseItemOnBlockEvent so we filter this one out.
         var player = event.getPlayer();
         if (player.getTag(TRIGGER_TAG) != null) return;
-        tryUseCooldown(player, () -> {
+
+        if (useCooldown.test(player)) {
             player.setTag(TRIGGER_TAG, true);
             itemHandler.rightClicked(new ItemHandler.Click(
                     itemHandler,
@@ -205,7 +205,7 @@ public class ItemRegistry implements PlayerCooldown {
                     null, null,
                     null, null
             ));
-        });
+        }
 
         event.setCancelled(true);
     }
@@ -224,7 +224,8 @@ public class ItemRegistry implements PlayerCooldown {
         var itemStack = player.getItemInHand(event.getHand());
         var itemHandler = getHandlerFromItemStack(itemStack);
         if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_BLOCK)) return;
-        tryUseCooldown(player, () -> {
+
+        if (useCooldown.test(player)) {
             player.setTag(TRIGGER_TAG, true);
             var placeOffset = event.getBlockFace().toDirection();
             itemHandler.rightClicked(new ItemHandler.Click(
@@ -235,7 +236,7 @@ public class ItemRegistry implements PlayerCooldown {
                     event.getBlockFace(),
                     null
             ));
-        });
+        }
 
         event.setBlockingItemUse(true);
     }
@@ -249,7 +250,8 @@ public class ItemRegistry implements PlayerCooldown {
         var itemStack = player.getItemInHand(event.getHand());
         var itemHandler = getHandlerFromItemStack(itemStack);
         if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_ENTITY)) return;
-        tryUseCooldown(player, () -> {
+
+        if (useCooldown.test(player)) {
             player.setTag(TRIGGER_TAG, true);
             itemHandler.rightClicked(new ItemHandler.Click(
                     itemHandler, player,
@@ -259,21 +261,23 @@ public class ItemRegistry implements PlayerCooldown {
                     null,
                     event.getTarget()
             ));
-        });
+        }
     }
 
     private void handlePlaceBlock(@NotNull PlayerBlockPlaceEvent event) {
         if (event.isCancelled()) return;
         if (event.getHand() != Player.Hand.MAIN) return;
 
-        var itemStack = event.getPlayer().getItemInHand(event.getHand());
+        var player = event.getPlayer();
+        var itemStack = player.getItemInHand(event.getHand());
         var itemHandler = getHandlerFromItemStack(itemStack);
         if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_BLOCK)) return;
-        tryUseCooldown(event.getPlayer(), () -> {
+
+        if (useCooldown.test(player)) {
             var placeOffset = event.getBlockFace().toDirection();
             itemHandler.rightClicked(new ItemHandler.Click(
                     itemHandler,
-                    event.getPlayer(),
+                    player,
                     itemStack,
                     event.getHand(),
                     event.getBlockPosition().sub(placeOffset.normalX(), placeOffset.normalY(), placeOffset.normalZ()),
@@ -281,26 +285,31 @@ public class ItemRegistry implements PlayerCooldown {
                     event.getBlockFace(),
                     null
             ));
-        });
+        }
 
         event.setCancelled(true);
     }
 
     private void handleBreakBlock(@NotNull PlayerBlockBreakEvent event) {
         if (event.isCancelled()) return;
-        var itemStack = event.getPlayer().getItemInHand(Player.Hand.MAIN);
+
+        var player = event.getPlayer();
+        var itemStack = player.getItemInHand(Player.Hand.MAIN);
         var itemHandler = getHandlerFromItemStack(itemStack);
         if (itemHandler == null || !itemHandler.allows(ItemHandler.LEFT_CLICK_BLOCK)) return;
-        tryUseCooldown(event.getPlayer(), () -> itemHandler.leftClicked(new ItemHandler.Click(
-                itemHandler,
-                event.getPlayer(),
-                itemStack,
-                Player.Hand.MAIN,
-                event.getBlockPosition(),
-                null,
-                event.getBlockFace(),
-                null
-        )));
+
+        if (useCooldown.test(player)) {
+            itemHandler.leftClicked(new ItemHandler.Click(
+                    itemHandler,
+                    event.getPlayer(),
+                    itemStack,
+                    Player.Hand.MAIN,
+                    event.getBlockPosition(),
+                    null,
+                    event.getBlockFace(),
+                    null
+            ));
+        }
 
         event.setCancelled(true);
     }
@@ -347,17 +356,7 @@ public class ItemRegistry implements PlayerCooldown {
         return customModelDataToItemHandler.get(itemStack.get(ItemComponent.CUSTOM_MODEL_DATA, -1));
     }
 
-    private static final Tag<Cooldown> COOLDOWN_TAG = Tag.Transient("mapmaker:hotbar_cooldown");
-
-    private static final Duration COOLDOWN_TIME = Duration.of(250, ChronoUnit.MILLIS);
-
-    @Override
-    public @NotNull Tag<Cooldown> cooldownTag() {
-        return COOLDOWN_TAG;
-    }
-
-    @Override
-    public @NotNull Duration cooldownDuration() {
-        return COOLDOWN_TIME;
+    public boolean isOnCooldown(@NotNull Player player) {
+        return !useCooldown.test(player);
     }
 }
