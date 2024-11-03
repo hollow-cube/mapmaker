@@ -6,6 +6,7 @@ import net.hollowcube.command.CommandBuilder;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.map.legacy.MapLegacyCommand;
+import net.hollowcube.mapmaker.kafka.FriendlyProducer;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.perm.PermManager;
@@ -21,6 +22,7 @@ public class MapCommand extends CommandDsl {
     public final MapEditCommand edit;
     public final MapLeaderboardCommand leaderboard;
     public final MapAlterCommand alter;
+    public final MapDrainCommand drain;
 
     @Inject
     public MapCommand(
@@ -28,7 +30,8 @@ public class MapCommand extends CommandDsl {
             @NotNull PlayerService playerService,
             @NotNull MapService mapService,
             @NotNull PermManager permManager,
-            @NotNull ServerBridge bridge
+            @NotNull ServerBridge bridge,
+            @NotNull FriendlyProducer producer
     ) {
         super("map");
 
@@ -46,6 +49,7 @@ public class MapCommand extends CommandDsl {
         addSubcommand(this.edit = new MapEditCommand(mapService, permManager, bridge));
         addSubcommand(this.leaderboard = new MapLeaderboardCommand(playerService, mapService, permManager));
         this.alter = new MapAlterCommand(mapService, permManager);
+        addSubcommand(this.drain = new MapDrainCommand(mapService, permManager, producer));
 
         // Testing
 //        addSubcommand(new MapLookupCommand(mapService));

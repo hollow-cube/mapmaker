@@ -76,13 +76,15 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
 
     private final AsyncLoadingCache<String, Optional<Punishment>> playerMuteCache;
 
-    public ChatMessageListener(@NotNull SessionManager sessionManager, @NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull PunishmentService punishmentService, @NotNull String kafkaBrokers) {
+    public ChatMessageListener(@NotNull SessionManager sessionManager, @NotNull PlayerService playerService,
+                               @NotNull MapService mapService, @NotNull PunishmentService punishmentService,
+                               @NotNull String kafkaBrokers, @NotNull FriendlyProducer producer) {
         super(CHAT_OUT_TOPIC, "chat", ChatMessageListener::fromJson, kafkaBrokers);
         this.sessionManager = sessionManager;
         this.playerService = playerService;
         this.mapService = mapService;
         this.punishmentService = punishmentService;
-        this.producer = new FriendlyProducer(kafkaBrokers);
+        this.producer = producer;
 
         this.playerMuteCache = Caffeine.newBuilder()
                 .expireAfterWrite(10, TimeUnit.MINUTES)

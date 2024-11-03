@@ -119,6 +119,9 @@ public class MapServerRunner extends AbstractMapServer {
         if (!globalConfig.noop()) {
             mapJoinConsumer = new MapJoinConsumer(kafkaConfig.bootstrapServersStr());
             shutdowner().queue("map-join-listener", mapJoinConsumer::close);
+
+            var mapMgmtConsumer = new MapMgmtConsumerImpl((LocalMapAllocator) allocator(), kafkaConfig.bootstrapServersStr());
+            shutdowner().queue("map-mgmt-listener", mapMgmtConsumer::close);
         }
 
         this.terraform = initBuildLogic(mapService(), commandManager());
@@ -130,8 +133,6 @@ public class MapServerRunner extends AbstractMapServer {
         registerCommands(this, commandManager());
 
         initFeatureFlagMonitor(bridge(), allocator());
-
-        //todo need to bring back mapMgmtConsumer to listen for map deletions and close them.
 
         this.features = FeatureList.load(config);
         addBinding(FeatureList.class, features);

@@ -50,6 +50,7 @@ import net.hollowcube.mapmaker.invite.MapInviteAcceptedOrRejectedListener;
 import net.hollowcube.mapmaker.invite.MapInviteListener;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.invite.PlayerInviteServiceImpl;
+import net.hollowcube.mapmaker.kafka.FriendlyProducer;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
@@ -261,6 +262,11 @@ public abstract class AbstractMapServer implements MapServer {
         else
             this.inviteService = new PlayerInviteServiceImpl("http://localhost:9127", playerService, mapService, sessionManager, bridge, permManager); // tilt
 
+        // Create one producer to reuse.
+        var producer = new FriendlyProducer(kafkaConfig.bootstrapServersStr());
+        injector.bind(FriendlyProducer.class, producer);
+        shutdowner.queue("kafka-producer", producer::close);
+
         if (!globalConfig.noop()) {
             mapInviteListener = new MapInviteListener(mapService, playerService, sessionManager, kafkaConfig.bootstrapServersStr());
             shutdowner.queue("map-invite-listener", mapInviteListener::close);
@@ -271,7 +277,7 @@ public abstract class AbstractMapServer implements MapServer {
             var punishmentCreatedListener = new PunishmentManagementListener(playerService, permManager, kafkaConfig.bootstrapServersStr());
             shutdowner.queue("punishment-listener", punishmentCreatedListener::close);
 
-            chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, kafkaConfig.bootstrapServersStr());
+            chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, kafkaConfig.bootstrapServersStr(), producer);
             injector.bind(ChatMessageListener.class, chatMessageListener);
             shutdowner.queue("chat-message-listener", chatMessageListener::close);
             packetListenerManager.setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
@@ -501,6 +507,13 @@ public abstract class AbstractMapServer implements MapServer {
     private CompletableFuture<Void> awaitQuiescence() {
         var connectionManager = MinecraftServer.getConnectionManager();
         if (connectionManager.getOnlinePlayers().isEmpty()) return CompletableFuture.completedFuture(null);
+
+        if (ServerRuntime.getRuntime().isDevelopment()) {
+            for (var player : List.copyOf(connectionManager.getOnlinePlayers())) {
+                player.kick(Component.text("Dev server shutdown"));
+            }
+            return CompletableFuture.completedFuture(null);
+        }
 
         // Wait for all players to disconnect
         var future = new CompletableFuture<Void>();

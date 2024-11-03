@@ -180,7 +180,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id) {
-        logger.log(System.Logger.Level.INFO, "getting map " + id);
         var req = HttpRequest.newBuilder()
                 .uri(URI.create(url + "/" + id))
                 .header(AUTHORIZER_HEADER, authorizer)
@@ -195,7 +194,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public @NotNull MapData getMapByPublishedId(@NotNull String authorizer, long publishedId) {
-        logger.log(System.Logger.Level.INFO, "getting map by published id " + publishedId);
         var req = HttpRequest.newBuilder()
                 .uri(URI.create(url + "/" + publishedId))
                 .header(AUTHORIZER_HEADER, authorizer)
@@ -210,7 +208,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update) {
-        logger.log(System.Logger.Level.INFO, "updating map " + id);
         var reqBody = GSON.toJson(update);
         var req = HttpRequest.newBuilder()
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(reqBody))
@@ -227,7 +224,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public void deleteMap(@NotNull String authorizer, @NotNull String id, @Nullable String reason) {
-        logger.log(System.Logger.Level.INFO, "deleting map " + id);
         var body = new HashMap<String, String>();
         body.put("reason", reason);
         var reqBody = GSON.toJson(body);
@@ -246,7 +242,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public void beginVerification(@NotNull String authorizer, @NotNull String mapId) {
-        logger.log(System.Logger.Level.INFO, "beginning verification for map " + mapId);
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.noBody())
                 .uri(URI.create(url + "/" + mapId + "/verify"))
@@ -262,7 +257,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public void deleteVerification(@NotNull String authorizer, @NotNull String mapId) {
-        logger.log(System.Logger.Level.INFO, "deleting verification for map " + mapId);
         var req = HttpRequest.newBuilder()
                 .method("DELETE", HttpRequest.BodyPublishers.noBody())
                 .uri(URI.create(url + "/" + mapId + "/verify"))
@@ -279,7 +273,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public @NotNull MapData publishMap(@NotNull String authorizer, @NotNull String id) {
-        logger.log(System.Logger.Level.INFO, "publishing map " + id);
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.noBody())
                 .uri(URI.create(url + "/" + id + "/publish"))

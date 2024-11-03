@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.hub.feature.misc;
 
 import com.google.inject.Inject;
 import net.hollowcube.common.math.Quaternion;
-import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
@@ -35,27 +34,22 @@ public class CyberpunkTrainFeature implements HubFeature {
         metaFront.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),
                 Math.toRadians(-90)).into());
         metaFront.setTranslation(new Vec(-10, 0, 1));
-        metaFront.setBrightnessOverride(240);
-        FutureUtil.getUnchecked(trainFront.setInstance(world.instance(), new Pos(TRAIN_START, 27.5f, 0)));
+        trainFront.setInstance(world.instance(), new Pos(TRAIN_START, 27.5f, 0));
 
-        FutureUtil.getUnchecked(trainMiddle.setInstance(world.instance(), new Vec(0, 40, 0)));
         trainMiddle.setModel(Material.STICK, 6);
         trainMiddle.getEntityMeta().setScale(new Vec(4));
         var metaMiddle = trainMiddle.getEntityMeta();
         metaMiddle.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),
                 Math.toRadians(-90)).into());
-        metaMiddle.setBrightnessOverride(240);
-        FutureUtil.getUnchecked(trainMiddle.setInstance(world.instance(), new Pos(TRAIN_START, 27.5f, 0)));
+        trainMiddle.setInstance(world.instance(), new Pos(TRAIN_START, 27.5f, 0));
 
-        FutureUtil.getUnchecked(trainBack.setInstance(world.instance(), new Vec(0, 40, 0)));
         trainBack.setModel(Material.STICK, 7);
         trainBack.getEntityMeta().setScale(new Vec(4));
         var metaBack = trainBack.getEntityMeta();
         metaBack.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),
                 Math.toRadians(-90)).into());
         metaBack.setTranslation(new Vec(-5, 0, -1));
-        metaBack.setBrightnessOverride(240);
-        FutureUtil.getUnchecked(trainBack.setInstance(world.instance(), new Pos(TRAIN_START, -180 + 26f, 0)));
+        trainBack.setInstance(world.instance(), new Pos(TRAIN_START, -180 + 26f, 0));
 
         scheduler.submitTask(this::trainUpdate);
     }

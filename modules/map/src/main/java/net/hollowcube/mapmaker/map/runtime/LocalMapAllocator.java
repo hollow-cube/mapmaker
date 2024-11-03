@@ -90,6 +90,7 @@ public class LocalMapAllocator implements MapAllocator {
     @Override
     public @NotNull Future<Boolean> destroy(@NotNull String worldId, @NotNull Component reason) {
         Callable<Boolean> task = () -> {
+            System.out.println("intask");
             for (var map : List.copyOf(maps.entrySet())) {
                 var key = map.getKey();
                 var world = FutureUtil.getUnchecked(map.getValue());

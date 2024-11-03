@@ -7,6 +7,8 @@ import net.hollowcube.common.util.MojangUtil;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServerRunner;
+import net.hollowcube.mapmaker.kafka.KafkaConfig;
+import net.hollowcube.mapmaker.map.MapMgmtConsumerImpl;
 import net.hollowcube.mapmaker.map.MapServerRunner;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
@@ -93,6 +95,10 @@ public class DevServerRunner extends AbstractMapServer {
 
         performMapInit(); // Map first so placements are registered
         performHubInit();
+        
+        var kafkaConfig = config.get(KafkaConfig.class);
+        var mapMgmtConsumer = new MapMgmtConsumerImpl((LocalMapAllocator) allocator(), kafkaConfig.bootstrapServersStr());
+        shutdowner().queue("map-mgmt-listener", mapMgmtConsumer::close);
     }
 
     private void performHubInit() {

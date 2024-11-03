@@ -77,6 +77,11 @@ public class FeatureFlagsPoller {
     }
 
     private void pollLoop() {
+        if (this.projectApiKey.isEmpty() || this.personalApiKey.isEmpty()) {
+            logger.warn("Project API key or personal API key is empty, feature flags will not be fetched");
+            return;
+        }
+
         do {
             try {
                 fetchLocalEvaluationFlags();

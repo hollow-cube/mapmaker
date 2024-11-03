@@ -25,6 +25,9 @@ public class NpcItemModel extends BaseNpcEntity {
     public NpcItemModel(@NotNull UUID uuid) {
         super(EntityType.ITEM_DISPLAY, uuid);
 
+        // Minestom doesnt handle entity sync correctly for display entities, it resets interpolation
+        setSynchronizationTicks(Long.MAX_VALUE);
+
         hasPhysics = false;
         setNoGravity(true);
     }
