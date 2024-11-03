@@ -1,8 +1,5 @@
 package net.hollowcube.mapmaker.feature;
 
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
-import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,29 +8,13 @@ import org.jetbrains.annotations.NotNull;
  * and which can differ based on some context provided such as player id or map id.
  *
  * <p>Because feature flags may be changed at runtime, it is <i>never</i> acceptable
- * to cache a returned true or false value. {@link #test(FlagContext...)} will never block
+ * to cache a returned true or false value. {@link #test(Object...)} will never block
  * so it is safe to call at any point.</p>
  */
 public interface FeatureFlag {
 
     static @NotNull FeatureFlag of(@NotNull String name) {
         return new BasicFeatureFlag(name);
-    }
-
-    static @NotNull FlagContext player(@NotNull Player player) {
-        return player(PlayerDataV2.fromPlayer(player).id());
-    }
-
-    static @NotNull FlagContext player(@NotNull String playerId) {
-        return new FlagContext("userId", playerId);
-    }
-
-    static @NotNull FlagContext map(@NotNull MapData map) {
-        return map(map.id());
-    }
-
-    static @NotNull FlagContext map(@NotNull String mapId) {
-        return new FlagContext("mapId", mapId);
     }
 
     /**

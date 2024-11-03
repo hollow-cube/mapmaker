@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.map;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
-import net.hollowcube.mapmaker.util.dfu.DFU;
+import net.hollowcube.common.util.dfu.DFU;
 import org.jetbrains.annotations.NotNull;
 
 public class SaveStateUpdateRequest {

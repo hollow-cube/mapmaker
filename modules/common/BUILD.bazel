@@ -14,6 +14,7 @@ java_library(
     deps = [
         "//third_party:adventure_all",
         "//third_party:minestom",
+        "@maven//:com_github_hollow_cube_datafixerupper",
         "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_inject_guice",
         "@maven//:it_unimi_dsi_fastutil",

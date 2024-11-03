@@ -22,6 +22,7 @@ java_library(
         "//third_party:minestom",
         "//third_party:spicedb",
         "//third_party:otel",
+        "//modules/posthog",
         #        "//tools/compile",
         "@maven//:net_kyori_adventure_nbt",
         "@maven//:com_github_ben_manes_caffeine_caffeine",

@@ -10,7 +10,6 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.gui.play.details.DetailsTimesTabView;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -329,7 +328,6 @@ public class MapDetailsView extends View {
     }
 
     public void handleReportMap(@NotNull Player player) {
-        if (!CoreFeatureFlags.MAP_REPORTS.test(player)) return;
         pushView(c -> new ReportMapView(c, map));
     }
 

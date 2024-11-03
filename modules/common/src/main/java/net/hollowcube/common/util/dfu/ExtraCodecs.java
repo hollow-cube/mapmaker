@@ -1,10 +1,8 @@
-package net.hollowcube.mapmaker.util.dfu;
+package net.hollowcube.common.util.dfu;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.hollowcube.common.util.BlockUtil;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
@@ -20,6 +18,7 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Supplier;
 
 public final class ExtraCodecs {
@@ -64,10 +63,48 @@ public final class ExtraCodecs {
     public static final Codec<Block> BLOCK_STATE_STRING = Codec.STRING
             .xmap(BlockUtil::fromString, BlockUtil::toString);
 
+    public static final Codec<Object> ANY_PRIMITIVE = Codec.of(new Encoder<>() {
+        @Override
+        public <T> DataResult<T> encode(Object input, DynamicOps<T> ops, T prefix) {
+            return switch (input) {
+                case Boolean b -> DataResult.success(ops.createBoolean(b));
+                case Byte b -> DataResult.success(ops.createByte(b));
+                case Short s -> DataResult.success(ops.createShort(s));
+                case Integer i -> DataResult.success(ops.createInt(i));
+                case Long l -> DataResult.success(ops.createLong(l));
+                case Float f -> DataResult.success(ops.createFloat(f));
+                case Double d -> DataResult.success(ops.createDouble(d));
+                case String s -> DataResult.success(ops.createString(s));
+                default -> DataResult.error("Unsupported/non-primitive type: " + input.getClass());
+            };
+        }
+    }, new Decoder<>() {
+        @Override
+        public <T> DataResult<Pair<Object, T>> decode(DynamicOps<T> ops, T input) {
+            var bool = ops.getBooleanValue(input);
+            if (bool.result().isPresent())
+                return DataResult.success(Pair.of(bool.result().get(), ops.empty()));
+            var number = ops.getNumberValue(input);
+            if (number.result().isPresent())
+                return DataResult.success(Pair.of(number.result().get(), ops.empty()));
+            var str = ops.getStringValue(input);
+            if (str.result().isPresent())
+                return DataResult.success(Pair.of(str.result().get(), ops.empty()));
+            return DataResult.error("Unsupported/non-primitive type: " + input);
+        }
+    });
+
     // Enum as ordinal integer
     public static <T extends Enum<T>> @NotNull Codec<T> EnumI(@NotNull Class<T> enumClass) {
         var values = enumClass.getEnumConstants();
         return Codec.INT.xmap(ord -> values[ord], Enum::ordinal);
+    }
+
+    // Enum as string
+    public static <T extends Enum<T>> @NotNull Codec<T> Enum(@NotNull Class<T> enumClass) {
+        return Codec.STRING.xmap(
+                name -> Enum.valueOf(enumClass, name.toUpperCase(Locale.ROOT)),
+                value -> value.name().toLowerCase(Locale.ROOT));
     }
 
     public static <T> @NotNull Codec<T> Lazy(Supplier<Codec<T>> supplier) {

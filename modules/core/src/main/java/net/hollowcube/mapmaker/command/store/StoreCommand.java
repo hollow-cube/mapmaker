@@ -4,13 +4,10 @@ import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
-import static net.hollowcube.mapmaker.command.arg.CoreCondition.feature;
 
 public class StoreCommand extends CommandDsl {
     private final Controller guiController;
@@ -23,7 +20,6 @@ public class StoreCommand extends CommandDsl {
         category = CommandCategories.GLOBAL;
         description = "Opens our in-game store";
 
-        setCondition(feature(CoreFeatureFlags.STORE));
         addSyntax(playerOnly(this::handleOpenStore));
     }
 

@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.hollowcube.mapmaker.util.dfu.DFU;
+import net.hollowcube.common.util.dfu.DFU;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;

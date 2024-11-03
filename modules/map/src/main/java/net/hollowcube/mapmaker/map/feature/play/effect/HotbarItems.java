@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.map.feature.play.effect;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.hollowcube.mapmaker.util.dfu.ExtraCodecs;
+import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

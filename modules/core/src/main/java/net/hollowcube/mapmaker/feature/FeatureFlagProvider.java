@@ -19,4 +19,7 @@ public interface FeatureFlagProvider {
 
     boolean test(@NotNull String name, @NotNull Object... context);
 
+    default void close() {
+    }
+
 }

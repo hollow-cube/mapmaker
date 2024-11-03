@@ -15,7 +15,6 @@ import java.util.function.Predicate;
 
 import static net.hollowcube.command.CommandCondition.ALLOW;
 import static net.hollowcube.command.CommandCondition.HIDE;
-import static net.hollowcube.mapmaker.feature.FeatureFlag.map;
 
 public final class MapCondition {
     //todo(mattw) check over these i think i broke them tbh
@@ -71,7 +70,7 @@ public final class MapCondition {
             var world = MapWorld.forPlayerOptional(player);
             if (world == null) return HIDE;
 
-            return flag.test(map(world.map())) ? ALLOW : HIDE;
+            return flag.test(world.map()) ? ALLOW : HIDE;
         };
     }
 

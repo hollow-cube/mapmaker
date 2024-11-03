@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.util.dfu;
+package net.hollowcube.common.util.dfu;
 
 import com.google.gson.*;
 import com.mojang.datafixers.util.Pair;

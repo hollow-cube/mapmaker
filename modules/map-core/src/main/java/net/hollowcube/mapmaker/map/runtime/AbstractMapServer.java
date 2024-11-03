@@ -229,16 +229,20 @@ public abstract class AbstractMapServer implements MapServer {
         // Dependent service init
 
         var unleashConfig = config.get(UnleashConfig.class);
-        if (unleashConfig.enabled()) {
+        if (unleashConfig.enabled() && false) {
             logger.info("Unleash is enabled, loading feature flag provider");
             var provider = new UnleashFeatureFlagProvider(unleashConfig, shutdowner);
             FeatureFlagProvider.replaceGlobals(provider);
-        } else if (unleashConfig.usePosthog()) {
+        } else if (unleashConfig.usePosthog() || true) {
             logger.info("Posthog is enabled, loading feature flag provider");
-            FeatureFlagProvider.replaceGlobals(new PostHogFeatureFlagProvider());
+            FeatureFlagProvider.replaceGlobals(new PostHogFeatureFlagProvider(
+                    unleashConfig.posthogProjectApiKey(),
+                    unleashConfig.posthogPersonalApiKey()
+            ));
         } else {
             FeatureFlagProvider.replaceGlobals((ignored1, ignored2) -> unleashConfig.defaultAction());
         }
+        shutdowner.queue("feature-flag-provider", FeatureFlagProvider.current()::close);
 
         allocator = createAllocator();
         shutdowner.queue("map-allocator", allocator::close);

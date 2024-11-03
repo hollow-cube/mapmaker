@@ -1,46 +1,47 @@
 package net.hollowcube.mapmaker.feature.posthog;
 
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
-import net.hollowcube.mapmaker.feature.FlagContext;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.metrics.MetricWriterPosthog;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.posthog.flag.FeatureFlagsPoller;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 public class PostHogFeatureFlagProvider implements FeatureFlagProvider {
     private static final Logger log = LoggerFactory.getLogger(PostHogFeatureFlagProvider.class);
 
-    //    private final PostHog client;
-    private final boolean defaultAction;
+    private final FeatureFlagsPoller poller;
 
-    public PostHogFeatureFlagProvider() {
-//        this.client = MetricWriterPosthog.POSTHOG_CLIENT;
-        this.defaultAction = false;
+    public PostHogFeatureFlagProvider(@NotNull String projectApiKey, @NotNull String personalApiKey) {
+        this.poller = new FeatureFlagsPoller(projectApiKey, personalApiKey);
+        // Has already started polling
     }
 
     @Override
     public boolean test(@NotNull String name, @NotNull Object... context) {
-//        if (client == null) return defaultAction;
         var transformedName = name.replace(".", "_");
         if (context.length == 0)
-            return false;
-//            return client.isFeatureFlagEnabled(transformedName, MetricWriterPosthog.NO_USER);
+            return poller.getFeatureFlag(transformedName, MetricWriterPosthog.NO_USER, Map.of());
         return switch (context[0]) {
-            case FlagContext flag -> {
-                if (flag.name().equals("userId")) {
-                    yield "aceb326f-da15-45bc-bf2f-11940c21780c".equals(flag.value());
-//                    yield client.isFeatureFlagEnabled(transformedName, flag.value());
-                } else {
-                    log.warn("Unknown flag context: {}", flag);
-                    yield false;
-                }
+            case Player player -> {
+                var playerData = PlayerDataV2.fromPlayer(player);
+                yield poller.getFeatureFlag(transformedName, playerData.id(), Map.of(
+                        "username", playerData.username()
+                        // TODO: we should include hypercube status, but we would need to cache that here.
+                        // Would be nice to have playerData.hasHypercube() or something.
+                        // Likely player service would inject the hypercube end date for this player
+                        // and we would compare against now. It would also need to be updated when
+                        // we get a new hypercube event.
+                ));
             }
-            case Player player -> "aceb326f-da15-45bc-bf2f-11940c21780c".equals(PlayerDataV2.fromPlayer(player).id());
-//            case Player player -> client.isFeatureFlagEnabled(transformedName, PlayerDataV2.fromPlayer(player).id());
-            case PlayerDataV2 pd -> "aceb326f-da15-45bc-bf2f-11940c21780c".equals(pd.id());
-//            case PlayerDataV2 pd -> client.isFeatureFlagEnabled(transformedName, pd.id());
+            case PlayerDataV2 playerData -> poller.getFeatureFlag(transformedName, playerData.id(), Map.of(
+                    "username", playerData.username()
+            ));
             case MapData map -> {
                 log.warn("Map context is not supported: {}", map);
                 yield false;
@@ -50,5 +51,10 @@ public class PostHogFeatureFlagProvider implements FeatureFlagProvider {
                 yield false;
             }
         };
+    }
+
+    @Override
+    public void close() {
+        poller.close();
     }
 }

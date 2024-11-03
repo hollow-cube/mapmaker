@@ -3,8 +3,8 @@ package net.hollowcube.mapmaker.map.util.datafix;
 import ca.spottedleaf.dataconverter.util.ExternalDataProvider;
 import com.google.auto.service.AutoService;
 import com.mojang.serialization.DynamicOps;
+import net.hollowcube.common.util.dfu.NbtOps;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.util.dfu.NbtOps;
 import net.kyori.adventure.nbt.BinaryTag;
 import org.jetbrains.annotations.NotNull;
 

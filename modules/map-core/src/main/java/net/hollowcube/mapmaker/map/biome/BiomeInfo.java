@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.map.biome;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.hollowcube.mapmaker.util.dfu.ExtraCodecs;
+import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.NamespaceID;

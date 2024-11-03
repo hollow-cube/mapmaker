@@ -10,7 +10,6 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.event.FeatureFlagReloadEvent;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
-import net.hollowcube.mapmaker.feature.FlagContext;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.util.Shutdowner;
@@ -59,13 +58,6 @@ public class UnleashFeatureFlagProvider implements FeatureFlagProvider {
         var unleashContext = UnleashContext.builder();
         for (var ctx : context) {
             switch (ctx) {
-                case FlagContext flag -> {
-                    if (flag.name().equals("userId")) {
-                        unleashContext.userId(flag.value());
-                    } else {
-                        unleashContext.addProperty(flag.name(), flag.value());
-                    }
-                }
                 case Player player -> unleashContext.userId(PlayerDataV2.fromPlayer(player).id());
                 case PlayerDataV2 pd -> unleashContext.userId(pd.id());
                 case MapData map -> unleashContext.addProperty("mapId", map.id());

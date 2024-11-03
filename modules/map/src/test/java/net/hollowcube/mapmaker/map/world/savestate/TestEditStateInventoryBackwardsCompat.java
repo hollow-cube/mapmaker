@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.hollowcube.mapmaker.util.dfu.DFU;
+import net.hollowcube.common.util.dfu.DFU;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;

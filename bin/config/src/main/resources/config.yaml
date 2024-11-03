@@ -30,6 +30,8 @@ unleash:
   address: ""
   token: ""
   default_action: false
+  posthog_project_api_key: ""
+  posthog_personal_api_key: ""
 
 announcements:
   interval: 1800

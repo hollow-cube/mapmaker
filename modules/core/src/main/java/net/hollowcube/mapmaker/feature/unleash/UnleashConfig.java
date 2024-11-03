@@ -12,6 +12,10 @@ public record UnleashConfig(
         @NotNull String address,
         @NotNull String token,
         @Setting("default_action")
-        boolean defaultAction
+        boolean defaultAction,
+        @Setting("posthog_personal_api_key")
+        @NotNull String posthogPersonalApiKey,
+        @Setting("posthog_project_api_key")
+        @NotNull String posthogProjectApiKey
 ) {
 }

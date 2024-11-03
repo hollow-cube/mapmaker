@@ -229,6 +229,7 @@ public class MapServerRunner extends AbstractMapServer {
     }
 
     public static void initFeatureFlagMonitor(@NotNull ServerBridge bridge, @NotNull MapAllocator allocator) {
+        // TODO: This needs to be reimplemented using posthog flags. we can expose a callback after refresh.
         if (!(allocator instanceof LocalMapAllocator localAllocator)) return;
         MinecraftServer.getGlobalEventHandler().addListener(FeatureFlagReloadEvent.class, $ -> {
             if (!CoreFeatureFlags.MAP_DISABLE_ALL.test()) return;
