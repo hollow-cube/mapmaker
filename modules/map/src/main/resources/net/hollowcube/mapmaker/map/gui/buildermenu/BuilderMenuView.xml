@@ -9,7 +9,7 @@
         <BackButton2/>
         <label translationKey="gui.builder_menu.information" sprite="generic/information"/>
         <text id="tab_name" width="5" translationKey="gui.builder_menu.tab"
-             sprite="generic/text_display_5" font="map_details_author" centered="true"/>
+              sprite="generic/text_display_5" font="map_details_author" centered="true"/>
         <label translationKey="gui.builder_menu.invite_players"/>
         <button id="save_and_exit" translationKey="gui.builder_menu.save_and_exit" sprite="builder_menu/save_and_exit"/>
     </box>
@@ -17,18 +17,18 @@
     <box width="9" height="3" align="ttb">
         <box width="9" height="1" align="ltr">
             <switch id="tab_custom_blocks_switch" width="3" height="1">
-                <button id="tab_custom_blocks_off" width="3" height="1" translationKey="gui.builder_menu.tab_custom_blocks.unselected"/>
-                <button id="tab_custom_blocks_on" width="3" height="1" translationKey="gui.builder_menu.tab_custom_blocks.selected"
+                <button id="tab_custom_blocks_off" width="3" height="1" translationKey="gui.builder_menu.tab_custom_blocks"/>
+                <button id="tab_custom_blocks_on" width="3" height="1" translationKey="gui.builder_menu.tab_custom_blocks"
                         sprite="builder_menu/custom_blocks/tab"/>
             </switch>
             <switch id="tab_build_tools_switch" width="3" height="1">
-                <button id="tab_build_tools_off" width="3" height="1" translationKey="gui.builder_menu.tab_build_tools.unselected"/>
-                <button id="tab_build_tools_on" width="3" height="1" translationKey="gui.builder_menu.tab_build_tools.selected"
+                <button id="tab_build_tools_off" width="3" height="1" translationKey="gui.builder_menu.tab_build_tools"/>
+                <button id="tab_build_tools_on" width="3" height="1" translationKey="gui.builder_menu.tab_build_tools"
                         sprite="builder_menu/build_tools/tab"/>
             </switch>
             <switch id="tab_custom_items_switch" width="3" height="1">
-                <button id="tab_custom_items_off" width="3" height="1" translationKey="gui.builder_menu.tab_custom_items.unselected"/>
-                <button id="tab_custom_items_on" width="3" height="1" translationKey="gui.builder_menu.tab_custom_items.selected"
+                <button id="tab_custom_items_off" width="3" height="1" translationKey="gui.builder_menu.tab_custom_items"/>
+                <button id="tab_custom_items_on" width="3" height="1" translationKey="gui.builder_menu.tab_custom_items"
                         sprite="builder_menu/custom_items/tab"/>
             </switch>
         </box>
