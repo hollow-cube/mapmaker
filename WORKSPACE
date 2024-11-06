@@ -49,7 +49,7 @@ maven_install(
         "com.google.auto.service:auto-service-annotations:1.1.1",
 
         # Minestom
-        "net.minestom:minestom-snapshots:1_21_2-63fb5bf72b",
+        "net.minestom:minestom-snapshots:1_21_2-58a1eb1b25",
         "dev.hollowcube:polar:1.11.4",
         "dev.hollowcube:dataconverter:1.21.3-rv1",
         "dev.hollowcube:mql:1.1.0",
