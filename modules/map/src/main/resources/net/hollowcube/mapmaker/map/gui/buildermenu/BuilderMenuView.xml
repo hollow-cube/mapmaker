@@ -17,18 +17,18 @@
     <box width="9" height="3" align="ttb">
         <box width="9" height="1" align="ltr">
             <switch id="tab_custom_blocks_switch" width="3" height="1">
-                <button id="tab_custom_blocks_off" width="3" height="1" translationKey="gui.builder_menu.tab_custom_blocks"/>
-                <button id="tab_custom_blocks_on" width="3" height="1" translationKey="gui.builder_menu.tab_custom_blocks"
+                <button id="tab_custom_blocks_off" width="3" height="1" translationKey="gui.builder_menu.tab_custom_blocks.unselected"/>
+                <button id="tab_custom_blocks_on" width="3" height="1" translationKey="gui.builder_menu.tab_custom_blocks.selected"
                         sprite="builder_menu/custom_blocks/tab"/>
             </switch>
             <switch id="tab_build_tools_switch" width="3" height="1">
-                <button id="tab_build_tools_off" width="3" height="1" translationKey="gui.builder_menu.tab_build_tools"/>
-                <button id="tab_build_tools_on" width="3" height="1" translationKey="gui.builder_menu.tab_build_tools"
+                <button id="tab_build_tools_off" width="3" height="1" translationKey="gui.builder_menu.tab_build_tools.unselected"/>
+                <button id="tab_build_tools_on" width="3" height="1" translationKey="gui.builder_menu.tab_build_tools.selected"
                         sprite="builder_menu/build_tools/tab"/>
             </switch>
             <switch id="tab_custom_items_switch" width="3" height="1">
-                <button id="tab_custom_items_off" width="3" height="1" translationKey="gui.builder_menu.tab_custom_items"/>
-                <button id="tab_custom_items_on" width="3" height="1" translationKey="gui.builder_menu.tab_custom_items"
+                <button id="tab_custom_items_off" width="3" height="1" translationKey="gui.builder_menu.tab_custom_items.unselected"/>
+                <button id="tab_custom_items_on" width="3" height="1" translationKey="gui.builder_menu.tab_custom_items.selected"
                         sprite="builder_menu/custom_items/tab"/>
             </switch>
         </box>
