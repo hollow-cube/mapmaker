@@ -66,10 +66,15 @@ public class FeatureFlagsPoller {
         // TODO variant support
         //  https://github.com/PostHog/posthog-go/blob/master/featureflags.go#L209
 
-        var flag = this.featureFlags.get(flagKey);
-        if (flag == null) return false;
+        try {
+            var flag = this.featureFlags.get(flagKey);
+            if (flag == null) return false;
 
-        return computeFlagLocally(flag, distinctId, new HashMap<>(), properties, new HashMap<>(), new HashMap<>()) == EvaluationResult.TRUE;
+            return computeFlagLocally(flag, distinctId, new HashMap<>(), properties, new HashMap<>(), new HashMap<>()) == EvaluationResult.TRUE;
+        } catch (Throwable e) {
+            logger.error("Error while evaluating feature flag", e);
+            return false;
+        }
     }
 
     public void close() {
