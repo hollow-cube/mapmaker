@@ -14,11 +14,28 @@
         <button id="save_and_exit" translationKey="gui.builder_menu.save_and_exit" sprite="builder_menu/save_and_exit"/>
     </box>
 
-    <box width="9" height="4" align="ttb">
+    <box width="9" height="3" align="ttb">
+        <box width="9" height="1" align="ltr">
+            <switch id="tab_custom_blocks_switch" width="3" height="1">
+                <button id="tab_custom_blocks_off" width="3" height="1" translationKey="gui.builder_menu.tab_custom_blocks"/>
+                <button id="tab_custom_blocks_on" width="3" height="1" translationKey="gui.builder_menu.tab_custom_blocks"
+                        sprite="builder_menu/custom_blocks/tab"/>
+            </switch>
+            <switch id="tab_build_tools_switch" width="3" height="1">
+                <button id="tab_build_tools_off" width="3" height="1" translationKey="gui.builder_menu.tab_build_tools"/>
+                <button id="tab_build_tools_on" width="3" height="1" translationKey="gui.builder_menu.tab_build_tools"
+                        sprite="builder_menu/build_tools/tab"/>
+            </switch>
+            <switch id="tab_custom_items_switch" width="3" height="1">
+                <button id="tab_custom_items_off" width="3" height="1" translationKey="gui.builder_menu.tab_custom_items"/>
+                <button id="tab_custom_items_on" width="3" height="1" translationKey="gui.builder_menu.tab_custom_items"
+                        sprite="builder_menu/custom_items/tab"/>
+            </switch>
+        </box>
         <spacer/>
-        <box width="9" height="2" align="ltr">
-            <spacer width="2"/>
-            <switch id="tab_content" width="5" height="2">
+        <box width="9" height="1" align="ltr">
+            <spacer width="1"/>
+            <switch id="tab_content" width="7" height="1">
                 <CustomBlocksView id="custom_blocks"/>
                 <BuildToolsView id="build_tools"/>
                 <CustomItemsView id="custom_items"/>
@@ -26,30 +43,4 @@
         </box>
     </box>
 
-    <box width="9" height="1" align="ltr">
-        <spacer width="2"/>
-        <switch id="tab_custom_blocks_switch" width="1" height="1">
-            <button id="tab_custom_blocks_off" width="1" height="1" translationKey="gui.builder_menu.tab_custom_blocks"
-                    backgroundSprite="builder_menu/custom_blocks/icon_unselected_bg"
-                    sprite="builder_menu/custom_blocks/icon"/>
-            <button id="tab_custom_blocks_on" width="1" height="1" translationKey="gui.builder_menu.tab_custom_blocks"
-                    sprite="builder_menu/custom_blocks/icon_selected"/>
-        </switch>
-        <spacer/>
-        <switch id="tab_build_tools_switch" width="1" height="1">
-            <button id="tab_build_tools_off" width="1" height="1" translationKey="gui.builder_menu.tab_build_tools"
-                    backgroundSprite="builder_menu/build_tools/icon_unselected_bg"
-                    sprite="builder_menu/build_tools/icon"/>
-            <button id="tab_build_tools_on" width="1" height="1" translationKey="gui.builder_menu.tab_build_tools"
-                    sprite="builder_menu/build_tools/icon_selected"/>
-        </switch>
-        <spacer/>
-        <switch id="tab_custom_items_switch" width="1" height="1">
-            <button id="tab_custom_items_off" width="1" height="1" translationKey="gui.builder_menu.tab_custom_items"
-                    backgroundSprite="builder_menu/custom_items/icon_unselected_bg"
-                    sprite="builder_menu/custom_items/icon"/>
-            <button id="tab_custom_items_on" width="1" height="1" translationKey="gui.builder_menu.tab_custom_items"
-                    sprite="builder_menu/custom_items/icon_selected"/>
-        </switch>
-    </box>
 </component>
