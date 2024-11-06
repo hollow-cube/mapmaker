@@ -142,19 +142,19 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
 
             // Send registry data ourself to allow custom biomes per map
             var serverProcess = MinecraftServer.process();
-            player.sendPacket(serverProcess.chatType().registryDataPacket(excludeVanilla));
-            player.sendPacket(serverProcess.dimensionType().registryDataPacket(excludeVanilla));
+            player.sendPacket(serverProcess.chatType().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(serverProcess.dimensionType().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(biomes().registryDataPacket(excludeVanilla));
-            player.sendPacket(serverProcess.damageType().registryDataPacket(excludeVanilla));
-            player.sendPacket(serverProcess.trimMaterial().registryDataPacket(excludeVanilla));
-            player.sendPacket(serverProcess.trimPattern().registryDataPacket(excludeVanilla));
-            player.sendPacket(serverProcess.bannerPattern().registryDataPacket(excludeVanilla));
-            player.sendPacket(serverProcess.wolfVariant().registryDataPacket(excludeVanilla));
-            player.sendPacket(serverProcess.enchantment().registryDataPacket(excludeVanilla));
-            player.sendPacket(serverProcess.paintingVariant().registryDataPacket(excludeVanilla));
-            player.sendPacket(serverProcess.jukeboxSong().registryDataPacket(excludeVanilla));
+            player.sendPacket(serverProcess.damageType().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(serverProcess.trimMaterial().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(serverProcess.trimPattern().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(serverProcess.bannerPattern().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(serverProcess.wolfVariant().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(serverProcess.enchantment().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(serverProcess.paintingVariant().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(serverProcess.jukeboxSong().registryDataPacket(serverProcess, excludeVanilla));
 
-            player.sendPacket(MinecraftServer.getTagManager().packet());
+            player.sendPacket(MinecraftServer.getTagManager().packet(serverProcess));
             event.setSendRegistryData(false);
 
             // Set the instance and spawn point of the player.
