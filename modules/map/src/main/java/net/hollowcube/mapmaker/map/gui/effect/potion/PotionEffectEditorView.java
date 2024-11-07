@@ -13,8 +13,9 @@ import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.utils.MathUtils;
-import org.apache.kafka.common.protocol.types.Field;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.TimeUnit;
 
 public class PotionEffectEditorView extends View {
 
@@ -22,14 +23,16 @@ public class PotionEffectEditorView extends View {
     private @Outlet("header") Text headerText;
 
     private @Outlet("level") Text levelText;
-    private @Outlet("level_dec_switch") Switch levelDecSwitch;
-    private @Outlet("level_inc_switch") Switch levelIncSwitch;
+    private @Outlet("level_dec5_switch") Switch levelDec5Switch;
+    private @Outlet("level_dec1_switch") Switch levelDec1Switch;
+    private @Outlet("level_inc1_switch") Switch levelInc1Switch;
+    private @Outlet("level_inc5_switch") Switch levelInc5Switch;
 
     private @Outlet("time") Text timeText;
     private @Outlet("time_dec5_switch") Switch timeDec5Switch;
     private @Outlet("time_dec1_switch") Switch timeDec1Switch;
-    private @Outlet("time_inc5_switch") Switch timeInc5Switch;
     private @Outlet("time_inc1_switch") Switch timeInc1Switch;
+    private @Outlet("time_inc5_switch") Switch timeInc5Switch;
 
     private final PotionEffectList.Entry effect;
     private final Runnable save;
@@ -56,16 +59,30 @@ public class PotionEffectEditorView extends View {
         updateFromEffect();
     }
 
-    @Action("level_dec_on")
-    public void handleDecLevel() {
+    @Action("level_dec5_on")
+    public void handleLevelDec5() {
+        effect.setLevel(Math.max(1, effect.level() - 5));
+        updateFromEffect();
+        save.run();
+    }
+
+    @Action("level_dec1_on")
+    public void handleLevelDec1() {
         effect.setLevel(Math.max(1, effect.level() - 1));
         updateFromEffect();
         save.run();
     }
 
-    @Action("level_inc_on")
-    public void handleIncLevel() {
+    @Action("level_inc1_on")
+    public void handleLevelInc1() {
         effect.setLevel(Math.min(effect.type().maxLevel(), effect.level() + 1));
+        updateFromEffect();
+        save.run();
+    }
+
+    @Action("level_inc5_on")
+    public void handleLevelInc5() {
+        effect.setLevel(Math.min(effect.type().maxLevel(), effect.level() + 5));
         updateFromEffect();
         save.run();
     }
@@ -133,7 +150,7 @@ public class PotionEffectEditorView extends View {
 
         try {
             var newDuration = (int) (Double.parseDouble(input) * 1000.0);
-            effect.setDuration(Math.max(0, newDuration));
+            effect.setDuration(Math.max(0, Math.min(newDuration, PotionEffectList.MAX_DURATION_MS)));
             updateFromEffect();
             save.run();
         } catch (NumberFormatException ignored) {
@@ -143,15 +160,17 @@ public class PotionEffectEditorView extends View {
     private void updateFromEffect() {
         levelText.setText(String.valueOf(effect.level()));
         levelText.setArgs(Component.text(String.valueOf(effect.level())));
-        levelDecSwitch.setOption(effect.level() > 1);
-        levelIncSwitch.setOption(effect.level() < effect.type().maxLevel());
+        levelDec5Switch.setOption(effect.level() > 5);
+        levelDec1Switch.setOption(effect.level() > 1);
+        levelInc1Switch.setOption(effect.level() < effect.type().maxLevel());
+        levelInc5Switch.setOption(effect.level() < effect.type().maxLevel() - 5);
 
-        timeText.setArgs(effect.durationComponent());
+        timeText.setArgs(effect.readableDurationComponent());
         timeText.setText(PlainTextComponentSerializer.plainText().serialize(effect.durationComponent()));
-        timeDec5Switch.setOption(effect.duration() >= PotionEffectList.MIN_DURATION_MS + 5000);
+        timeDec5Switch.setOption(effect.duration() >= PotionEffectList.MIN_DURATION_MS + 1000);
         timeDec1Switch.setOption(effect.duration() >= PotionEffectList.MIN_DURATION_MS + 1000);
-        timeInc5Switch.setOption(effect.duration() < PotionEffectList.MAX_DURATION_MS - 5000);
-        timeInc1Switch.setOption(effect.duration() < PotionEffectList.MAX_DURATION_MS - 1000);
+        timeInc5Switch.setOption(effect.duration() <= PotionEffectList.MAX_DURATION_MS - 5000);
+        timeInc1Switch.setOption(effect.duration() <= PotionEffectList.MAX_DURATION_MS - 1000);
     }
 
     @Signal(Element.SIG_CLOSE)

@@ -1,8 +1,8 @@
 {
     "type": "sprite",
     "origin": [
-        -1,
+        1,
         0
     ],
-    "shift_y": 94
+    "shift_y": 42
 }

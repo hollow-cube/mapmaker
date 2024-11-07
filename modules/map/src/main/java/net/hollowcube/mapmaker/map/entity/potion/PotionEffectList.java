@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
     public static final Codec<PotionEffectList> CODEC = Entry.CODEC.listOf()
@@ -143,6 +144,39 @@ public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
                 return Component.translatable("gui.effect.potion.duration.infinite");
             } else {
                 return Component.text(String.format("%.2f", duration() / 1000.0));
+            }
+        }
+
+        public @NotNull Component readableDurationComponent() {
+            if (duration <= 0) {
+                return Component.translatable("gui.effect.potion.duration.infinite");
+            } else {
+                long hours = TimeUnit.MILLISECONDS.toHours(duration);
+                long minutes = TimeUnit.MILLISECONDS.toMinutes(duration) % 60;
+                long seconds = TimeUnit.MILLISECONDS.toSeconds(duration) % 60;
+                double fractionalSeconds = (duration % 1000) / 1000.0 + seconds;
+
+                StringBuilder formattedTime = new StringBuilder();
+
+                if (hours > 0) {
+                    formattedTime.append(hours).append(" Hour").append(hours > 1 ? "s" : "");
+                    if (minutes > 0 || fractionalSeconds > 0) {
+                        formattedTime.append(", ");
+                    }
+                }
+
+                if (minutes > 0) {
+                    formattedTime.append(minutes).append(" Minute").append(minutes > 1 ? "s" : "");
+                    if (fractionalSeconds > 0) {
+                        formattedTime.append(", ");
+                    }
+                }
+
+                if (fractionalSeconds > 0) { // don't show 0 seconds (duh)
+                    formattedTime.append(String.format("%.3f Seconds", fractionalSeconds));
+                }
+
+                return Component.text(formattedTime.toString());
             }
         }
 

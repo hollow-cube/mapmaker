@@ -16,30 +16,26 @@
         <label translationKey="gui.status.pick_up"/>
     </box>
 
+    <!-- Tab Buttons -->
+    <box width="9" height="1" align="ltr">
+        <switch id="tab_settings_state_switch" width="4">
+            <button id="tab_settings" width="4" translationKey="gui.status.tab.settings.unselected"/>
+            <button id="tab_settings_set" width="4" translationKey="gui.status.tab.settings.selected"
+                    sprite="effect/settings/tab"/>
+        </switch>
+
+        <spacer/>
+
+        <switch id="tab_actions_state_switch" width="4">
+            <button id="tab_actions" width="4" translationKey="gui.status.tab.actions.unselected"/>
+            <button id="tab_actions_set" width="4" translationKey="gui.status.tab.actions.selected"
+                    sprite="effect/actions/tab"/>
+        </switch>
+    </box>
+
     <switch id="tab_switch" width="9" height="4">
         <StatusSettingsTab id="settings"/>
         <StatusActionsTab id="actions"/>
     </switch>
 
-    <!-- Tab Buttons -->
-    <box width="9" height="1" align="ltr" sprite="effect/status/tab_container">
-        <spacer width="3"/>
-
-        <switch id="tab_settings_state_switch">
-            <button id="tab_settings" translationKey="gui.status.tab.settings"
-                    sprite="effect/tab_settings_icon" backgroundSprite="effect/tab_settings_bg"/>
-            <button id="tab_settings_set" translationKey="gui.status.tab.settings"
-                    sprite="effect/tab_settings_selected"/>
-        </switch>
-
-        <spacer/>
-
-        <switch id="tab_actions_state_switch">
-            <button id="tab_actions" translationKey="gui.status.tab.actions"
-                    sprite="effect/tab_actions_icon" backgroundSprite="effect/tab_actions_bg"/>
-            <button id="tab_actions_set" translationKey="gui.status.tab.actions"
-                    sprite="effect/tab_actions_selected"/>
-        </switch>
-
-    </box>
 </component>
