@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
-<component width="7" height="1" align="ttb">
-    <box width="7" align="ltr">
+<component width="5" height="2" align="ttb">
+    <box width="5" align="ltr">
         <button id="give_details_item" translationKey="gui.builder_menu.custom_items.edit_map_details"
                 sprite="hud/hotbar/edit_map_details"/>
         <button id="give_test_mode_item" translationKey="gui.builder_menu.custom_items.enter_testing_mode"

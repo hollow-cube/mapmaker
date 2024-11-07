@@ -1,10 +1,11 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
-<component width="7" height="1" align="ttb">
-    <box width="7" align="ltr">
+<component width="5" height="2" align="ttb">
+    <box width="5" align="ltr">
         <button id="give_debug_stick" translationKey="gui.builder_menu.build_tools.debug_stick"
                 sprite="minecraft:debug_stick"/>
         <button id="give_wand" translationKey="gui.builder_menu.build_tools.wand"
                 sprite="minecraft:wooden_axe"/>
     </box>
+    <box width="5" align="ltr"/>
 </component>
