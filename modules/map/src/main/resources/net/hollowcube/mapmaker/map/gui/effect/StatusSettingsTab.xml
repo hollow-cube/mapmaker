@@ -3,9 +3,9 @@
 <component width="9" height="4" align="ttb">
 
     <box width="9" align="ltr" sprite="effect/settings/name_and_progress_index">
-        <text id="name_text" width="6" font="line_1" shift="19"
+        <text id="name_text" width="6" font="line_2" shift="19"
               translationKey="gui.status.name"/>
-        <text id="progress_index_text" width="3" font="line_1" centered="true"
+        <text id="progress_index_text" width="3" font="line_2" centered="true"
               translationKey="gui.status.progress_index"/>
     </box>
 

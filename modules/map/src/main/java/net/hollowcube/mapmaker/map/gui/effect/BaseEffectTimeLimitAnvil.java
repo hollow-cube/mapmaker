@@ -25,7 +25,7 @@ public class BaseEffectTimeLimitAnvil extends View {
     public BaseEffectTimeLimitAnvil(@NotNull Context context, @Nullable String startingInput) {
         super(context);
 
-        titleText.setText("Set Time Limit");
+        titleText.setText("Add Time");
 
         if (startingInput == null) {
             startingInput = "";
