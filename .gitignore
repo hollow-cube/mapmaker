@@ -5,6 +5,7 @@ tools/compile/build
 bazel-*
 .idea
 .ijwb
+.ijwb-old
 
 .DS_Store
 

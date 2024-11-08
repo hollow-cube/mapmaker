@@ -1,0 +1,23 @@
+directories:
+  .
+
+# Automatically includes all relevant targets under the 'directories' above
+derive_targets_from_directories: true
+
+workspace_type: java
+java_language_level: jdk_21_preview
+
+targets:
+  # If source code isn't resolving, add additional targets that compile it here
+
+additional_languages:
+  # Uncomment any additional languages you want supported
+  # android
+  # dart
+  # go
+  # javascript
+  # kotlin
+  # python
+  # scala
+  # typescript
+

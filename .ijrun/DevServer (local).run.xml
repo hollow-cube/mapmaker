@@ -1,14 +1,11 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="DevServer (local)" type="BlazeCommandRunConfigurationType" factoryName="Bazel Command">
-    <blaze-settings handler-id="BlazeJavaRunConfigurationHandlerProvider" kind="java_binary" blaze-command="run" blaze-binary="/opt/homebrew/bin/bazel">
-      <blaze-target>//bin/development:development</blaze-target>
-      <blaze-user-exe-flag>MAPMAKER_UNLEASH_DEFAULT_ACTION=true</blaze-user-exe-flag>
-      <env_state>
-        <envs />
-      </env_state>
-    </blaze-settings>
+  <configuration default="false" name="DevServer (local)" type="BspRunConfiguration">
+    <bsp-state handler-provider-id="JvmBspRunHandlerProvider">
+      <bsp-target>@//bin/development:development</bsp-target>
+      <handler-state />
+    </bsp-state>
     <method v="2">
-      <option name="Blaze.BeforeRunTask" enabled="true" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Build RP" run_configuration_type="ShConfigurationType" />
     </method>
   </configuration>
 </component>

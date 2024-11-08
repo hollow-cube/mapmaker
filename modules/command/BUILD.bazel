@@ -31,18 +31,18 @@ java_junit5_test(
     ],
 )
 
-java_binary(
-    name = "command_demo_server",
-    srcs = glob(include = ["src/test/java/**/*.java"]),
-    main_class = "net.hollowcube.command.demo.DemoServer",
-    resources = glob(include = ["src/test/resources/**/*"]),
-    deps = [
-        ":command",
-        "//modules/test",
-        "//third_party:minestom",
-        "@maven//:it_unimi_dsi_fastutil",
-        "@maven//:net_kyori_adventure_api",
-        "@maven//:net_kyori_adventure_text_serializer_plain",
-        "@maven//:org_jetbrains_kotlin_kotlin_stdlib",
-    ],
-)
+# java_binary(
+#     name = "command_demo_server",
+#     srcs = glob(include = ["src/test/java/**/*.java"]),
+#     main_class = "net.hollowcube.command.demo.DemoServer",
+#     resources = glob(include = ["src/test/resources/**/*"]),
+#     deps = [
+#         ":command",
+#         "//modules/test",
+#         "//third_party:minestom",
+#         "@maven//:it_unimi_dsi_fastutil",
+#         "@maven//:net_kyori_adventure_api",
+#         "@maven//:net_kyori_adventure_text_serializer_plain",
+#         "@maven//:org_jetbrains_kotlin_kotlin_stdlib",
+#     ],
+# )
