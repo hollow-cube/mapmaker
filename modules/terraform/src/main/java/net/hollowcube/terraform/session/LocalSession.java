@@ -250,7 +250,7 @@ public class LocalSession {
             insertMarker(buffer);
 
             // History
-            buffer.write(VAR_INT, historyPointer);
+//            buffer.write(VAR_INT, historyPointer);
 //            buffer.write(VAR_INT, history.size());
 //            for (var change : history) {
             //todo write the changes
@@ -278,10 +278,10 @@ public class LocalSession {
 
         // History
         if (buffer.readableBytes() > 0) {
-            this.historyPointer = buffer.read(VAR_INT);
+//            this.historyPointer = buffer.read(VAR_INT);
             //todo
         }
 
-        assert buffer.readableBytes() == 0 : "Buffer not fully read";
+//        assert buffer.readableBytes() == 0 : "Buffer not fully read";
     }
 }
