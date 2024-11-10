@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class TestBoundedBlockBufferBuilder extends BaseBufferBuilderTest {
+class BoundedBlockBufferBuilderTest extends BufferBuilderTestBase {
 
     @Override
     @NotNull BlockBuffer.Builder createBuilder() {

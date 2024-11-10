@@ -296,7 +296,6 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         player.setPermissionLevel(4);
         player.setGameMode(GameMode.CREATIVE);
         saveState.setPlayStartTime(System.currentTimeMillis());
-
         // Read from savestate
         var editState = saveState.state(EditState.class);
         editState.inventory().forEach(player.getInventory()::setItemStack);

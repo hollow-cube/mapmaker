@@ -6,14 +6,16 @@ import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomRequestMarkerDa
 import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomUpdateMarkerDataEvent;
 import net.hollowcube.terraform.compat.axiom.packet.client.*;
 import net.hollowcube.terraform.compat.axiom.packet.server.*;
+import net.hollowcube.terraform.compat.axiom.util.NbtUtil;
 import net.hollowcube.terraform.compat.axiom.world.property.WorldPropertiesRegistry;
 import net.hollowcube.terraform.entity.TerraformEntity;
 import net.hollowcube.terraform.event.TerraformModifyEntityEvent;
 import net.hollowcube.terraform.event.TerraformMoveEntityEvent;
-import net.hollowcube.terraform.event.TerraformPreSpawnEntityEvent;
-import net.hollowcube.terraform.event.TerraformSpawnEntityEvent;
 import net.hollowcube.terraform.session.LocalSession;
+import net.kyori.adventure.nbt.BinaryTag;
+import net.kyori.adventure.nbt.BinaryTagTypes;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.ListBinaryTag;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Pos;
@@ -27,10 +29,14 @@ import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.network.packet.server.play.AcknowledgeBlockChangePacket;
+import net.minestom.server.utils.UniqueIdUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.Set;
 
 public final class AxiomPacketListener {
     private static final Logger logger = LoggerFactory.getLogger(AxiomPacketListener.class);
@@ -176,37 +182,38 @@ public final class AxiomPacketListener {
 
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public void handleSpawnEntities(@NotNull Player player, @NotNull AxiomClientSpawnEntitiesPacket packet) {
         if (!Axiom.isEnabled(player)) return;
 
         var instance = player.getInstance();
         for (var entry : packet.entries()) {
+            if (instance.getEntityByUuid(entry.uuid()) != null) continue;
+
             try {
                 CompoundBinaryTag nbt = entry.nbt();
                 if (entry.copyFrom() != null) {
                     final Entity copyEntity = instance.getEntityByUuid(entry.copyFrom());
                     if (!(copyEntity instanceof TerraformEntity entity)) return;
-                    nbt = entity.writeToTag();
+                    var copyEntityTag = TerraformEntity.writeToTagWithPassengers(entity);
+                    nbt = NbtUtil.mergeNbtCompounds(nbt, copyEntityTag);
                 }
 
-                var entityTypeName = nbt.getString("id");
-                var entityType = EntityType.fromNamespaceId(entityTypeName);
-                if (entityType == null) throw new NullPointerException("unknown entity type: " + entityTypeName);
+                // We are going to now spawn an entity based on the given inputs, but we need to make a few edits:
+                // - Root should have the ID given by Axiom
+                // - Root should have the position given by Axiom
+                // - Passengers should have random IDs
+                nbt = nbt.put(Map.of(
+                        "UUID", UniqueIdUtils.toNbt(entry.uuid()),
+                        "Pos", NbtUtil.toPosTag(entry.pos()),
+                        "Rotation", NbtUtil.toRotationTag(entry.pos()),
+                        "Passengers", ListBinaryTag.listBinaryTag(BinaryTagTypes.COMPOUND, nbt
+                                .getList("Passengers", BinaryTagTypes.COMPOUND)
+                                .stream().map(passengerTag -> (BinaryTag) ((CompoundBinaryTag) passengerTag).remove("UUID"))
+                                .toList())
+                ));
 
-                var preEvent = new TerraformPreSpawnEntityEvent(player, instance);
-                EventDispatcher.call(preEvent);
-                if (preEvent.isCancelled()) continue;
-
-                var entity = preEvent.getConstructor().apply(entityType, entry.uuid());
-                if (entity instanceof TerraformEntity tfEntity) {
-                    final CompoundBinaryTag fnbt = nbt;
-                    entity.editEntityMeta(EntityMeta.class, _ -> tfEntity.readData(fnbt));
-                }
-
-                var event = new TerraformSpawnEntityEvent(player, instance, entity, entry.pos());
-                EventDispatcher.callCancellable(event, () -> event.getEntity().setInstance(instance, event.getPosition()));
-
-                //todo handle passengers
+                TerraformEntity.spawnWithPassengers(player, instance, nbt);
             } catch (Exception e) {
                 logger.warn("Failed to spawn axiom entity: {}", e.getMessage());
                 player.sendMessage(Component.translatable("axiom.entity_spawn_failed"));
@@ -246,11 +253,40 @@ public final class AxiomPacketListener {
                     var event = new TerraformAxiomUpdateMarkerDataEvent(player, entry.uuid(), entry.nbt());
                     EventDispatcher.call(event);
                 } else if (entity instanceof TerraformEntity tfEntity) {
-                    entity.editEntityMeta(EntityMeta.class, _ -> tfEntity.readData(entry.nbt()));
+                    entity.editEntityMeta(EntityMeta.class, ignored -> tfEntity.readData(entry.nbt()));
                 }
             }
 
-            //todo passengers
+            switch (entry.passengerChange()) {
+                case NONE -> {
+                }
+                case REMOVE_ALL -> Set.copyOf(entity.getPassengers()).forEach(entity::removePassenger);
+                case ADD_LIST -> {
+                    for (var newPassengerId : entry.passengers()) {
+                        var newPassenger = instance.getEntityByUuid(newPassengerId);
+                        var isInvalidPassenger = newPassenger == null ||
+                                newPassenger.getEntityId() == entity.getEntityId() ||
+                                newPassenger.getVehicle() != null ||
+                                newPassenger instanceof Player ||
+                                newPassenger.getPassengers().stream().anyMatch(otherPassenger ->
+                                        otherPassenger instanceof Player || otherPassenger.getEntityId() == entity.getEntityId());
+                        if (isInvalidPassenger) continue;
+                        entity.addPassenger(newPassenger);
+                    }
+                }
+                case REMOVE_LIST -> {
+                    for (var newPassengerId : entry.passengers()) {
+                        var newPassenger = instance.getEntityByUuid(newPassengerId);
+                        var isInvalidPassenger = newPassenger == null ||
+                                newPassenger.getEntityId() == entity.getEntityId() ||
+                                newPassenger instanceof Player ||
+                                newPassenger.getPassengers().stream().anyMatch(Player.class::isInstance) ||
+                                newPassenger.getVehicle() != entity;
+                        if (isInvalidPassenger) continue;
+                        entity.removePassenger(entity);
+                    }
+                }
+            }
 
             EventDispatcher.call(new TerraformModifyEntityEvent(entity));
         }

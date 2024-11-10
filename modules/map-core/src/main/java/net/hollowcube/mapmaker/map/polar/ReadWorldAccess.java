@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -127,7 +128,7 @@ public class ReadWorldAccess implements PolarWorldAccess {
 
         // Load the chunk NBT
         ListBinaryTag entities = chunkData.getList("entities", BinaryTagTypes.COMPOUND);
-        for (var entity : entities) loadEntity(chunk, (CompoundBinaryTag) entity);
+        for (var entity : entities) loadEntityWithPassengers(chunk, (CompoundBinaryTag) entity);
     }
 
     protected static final int WORLD_BOTTOM = 16;
@@ -151,22 +152,45 @@ public class ReadWorldAccess implements PolarWorldAccess {
         return mapWorld.biomes().getLoadedBiomeName(id);
     }
 
-    private void loadEntity(@NotNull Chunk chunk, @NotNull CompoundBinaryTag tag) {
+    private void loadEntityWithPassengers(@NotNull Chunk chunk, @NotNull CompoundBinaryTag tag) {
+        var entity = createEntityUnspawned(tag);
+        if (entity == null) return;
+
+        var pos = NbtUtil.from(tag.getList("Pos", BinaryTagTypes.DOUBLE));
+        var spawnPosition = NbtUtil.readRotation(pos, tag.getList("Rotation", BinaryTagTypes.FLOAT));
+
+        // Try to load as a marker immediately which would shortcut the rest (markers cannot have passengers anyway).
+        if (tryLoadMarker(entity, spawnPosition)) return;
+
+        var passengers = new ArrayList<Entity>();
+        for (var passengerTag : tag.getList("Passengers", BinaryTagTypes.COMPOUND)) {
+            var passenger = createEntityUnspawned((CompoundBinaryTag) passengerTag);
+            if (passenger == null) continue;
+            passengers.add(passenger);
+        }
+
+        // Spawn in the world with passengers
+        entity.setInstance(chunk.getInstance(), spawnPosition);
+        for (var passenger : passengers)
+            passenger.setInstance(chunk.getInstance(), spawnPosition);
+
+        // Add passengers on first tick because instance is not fully set up yet.
+        entity.scheduleNextTick(ignored -> passengers.forEach(entity::addPassenger));
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private @Nullable Entity createEntityUnspawned(@NotNull CompoundBinaryTag tag) {
         EntityType entityType = EntityType.fromNamespaceId(tag.getString("id"));
         if (entityType == null) {
             logger.warn("Unknown entity type {}", tag.getString("id"));
-            return;
+            return null;
         }
         UUID uuid = tag.get("UUID") instanceof IntArrayBinaryTag uuidTag ? UniqueIdUtils.fromNbt(uuidTag) : UUID.randomUUID();
 
         var entity = MapEntityType.create(entityType, uuid);
         if (entity instanceof MapEntity mapEntity) mapEntity.readData(tag);
 
-        var pos = NbtUtil.from(tag.getList("Pos", BinaryTagTypes.DOUBLE));
-        var spawnPosition = NbtUtil.readRotation(pos, tag.getList("Rotation", BinaryTagTypes.FLOAT));
-
-        if (tryLoadMarker(entity, spawnPosition)) return;
-        entity.setInstance(chunk.getInstance(), spawnPosition);
+        return entity;
     }
 
     private boolean tryLoadMarker(@NotNull Entity entity, @NotNull Pos spawnPosition) {

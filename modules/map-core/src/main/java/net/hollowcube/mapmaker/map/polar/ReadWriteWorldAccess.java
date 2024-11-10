@@ -4,6 +4,7 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
+import net.hollowcube.terraform.entity.TerraformEntity;
 import net.kyori.adventure.nbt.BinaryTagTypes;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.ListBinaryTag;
@@ -59,17 +60,17 @@ public class ReadWriteWorldAccess extends ReadWorldAccess {
     private @NotNull ListBinaryTag saveEntities(@NotNull Chunk chunk) {
         ListBinaryTag.Builder<CompoundBinaryTag> entitiesTag = ListBinaryTag.builder(BinaryTagTypes.COMPOUND);
 
-        for (var entity : getEntities(chunk)) {
-            entitiesTag.add(entity.writeToTag());
+        for (var entity : getRootEntities(chunk)) {
+            entitiesTag.add(TerraformEntity.writeToTagWithPassengers(entity));
         }
 
         return entitiesTag.build();
     }
 
-    private @NotNull Set<MapEntity> getEntities(@NotNull Chunk chunk) {
+    private @NotNull Set<MapEntity> getRootEntities(@NotNull Chunk chunk) {
         var entities = chunk.getInstance().getChunkEntities(chunk);
         return entities.stream()
-                .filter(e -> e instanceof MapEntity)
+                .filter(e -> e instanceof MapEntity && e.getVehicle() == null)
                 .map(e -> (MapEntity) e)
                 .collect(Collectors.toSet());
     }

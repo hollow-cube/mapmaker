@@ -56,7 +56,7 @@ public record AxiomClientModifyEntitiesPacket(
             public Entry read(@NotNull NetworkBuffer buffer) {
                 var uuid = buffer.read(NetworkBuffer.UUID);
                 byte flags = buffer.read(NetworkBuffer.BYTE);
-                var pos = flags > 0 ? buffer.read(NetworkBuffer.POS) : null;
+                var pos = flags >= 0 ? buffer.read(NetworkBuffer.POS) : null;
                 var nbt = buffer.read(NetworkBuffer.NBT) instanceof CompoundBinaryTag nbtCompound ? nbtCompound : CompoundBinaryTag.empty();
                 var passengerChange = buffer.read(PassengerChange.NETWORK_TYPE);
                 var passengers = passengerChange.hasEntries() ? buffer.read(UUID_LIST) : null;

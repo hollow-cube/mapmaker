@@ -5,7 +5,7 @@ import net.hollowcube.test.TestEnv;
 import org.junit.jupiter.api.Test;
 
 @ServerTest
-class TestSetBlocksIntegration {
+class SetBlocksIntegrationTest {
 
     @Test
     void abc(TestEnv test) {

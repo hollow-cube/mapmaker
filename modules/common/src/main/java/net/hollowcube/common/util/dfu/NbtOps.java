@@ -271,11 +271,41 @@ public class NbtOps implements DynamicOps<BinaryTag> {
         return DataResult.error("not a list: " + input);
     }
 
+    private static final List<BinaryTagType<?>> NUMBER_ORDER = List.of(
+            BinaryTagTypes.BYTE, BinaryTagTypes.SHORT,
+            BinaryTagTypes.INT, BinaryTagTypes.LONG,
+            BinaryTagTypes.FLOAT, BinaryTagTypes.DOUBLE
+    );
+
     @Override
     public BinaryTag createList(Stream<BinaryTag> input) {
         var values = input.toList();
         if (values.isEmpty()) {
             return EndBinaryTag.endBinaryTag();
+        }
+        boolean areAllNumbers = values.stream().allMatch(e -> e instanceof NumberBinaryTag);
+        if (areAllNumbers) {
+            // If they are all numbers, we need to make them a consistent number type
+            // The preference order is byte > short > int > long > float > double
+            int index = 0;
+            for (var value : values)
+                index = Math.max(index, NUMBER_ORDER.indexOf(value.type()));
+            int finalIndex = index;
+            var finalType = NUMBER_ORDER.get(index);
+            return ListBinaryTag.listBinaryTag(finalType, values.stream()
+                    .map(v -> {
+                        if (v.type() == finalType) return v;
+                        return switch (finalIndex) {
+                            case 0 -> ByteBinaryTag.byteBinaryTag(((NumberBinaryTag) v).byteValue());
+                            case 1 -> ShortBinaryTag.shortBinaryTag(((NumberBinaryTag) v).shortValue());
+                            case 2 -> IntBinaryTag.intBinaryTag(((NumberBinaryTag) v).intValue());
+                            case 3 -> LongBinaryTag.longBinaryTag(((NumberBinaryTag) v).longValue());
+                            case 4 -> FloatBinaryTag.floatBinaryTag(((NumberBinaryTag) v).floatValue());
+                            case 5 -> DoubleBinaryTag.doubleBinaryTag(((NumberBinaryTag) v).doubleValue());
+                            default -> throw new IllegalStateException("Unexpected value: " + finalIndex);
+                        };
+                    })
+                    .toList());
         }
         return ListBinaryTag.listBinaryTag(values.get(0).type(), values);
     }

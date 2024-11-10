@@ -1,4 +1,4 @@
-load("@contrib_rules_jvm//java:defs.bzl", "JUNIT5_DEPS", "java_junit5_test")
+load("@contrib_rules_jvm//java:defs.bzl", "JUNIT5_DEPS", "java_test_suite")
 load("@rules_java//java:defs.bzl", "java_library")
 load("//third_party/rules_jmh:defs.bzl", "jmh_java_benchmarks")
 
@@ -40,23 +40,64 @@ java_binary(
     ],
 )
 
-java_junit5_test(
+# java_junit5_test(
+#     name = "terraform_test",
+#     srcs = glob(include = ["src/test/java/**/*.java"]),
+#     resources = glob(include = ["src/test/resources/**/*"]),
+#     test_class = "net.hollowcube.terraform.TerraformTestSuite",
+#     deps = [
+#         ":terraform",
+#         "@maven//:net_kyori_adventure_nbt",
+#         "//modules/command",
+#         "//modules/common",
+#         "//modules/test",
+#         "//third_party:minestom",
+#         "@maven//:it_unimi_dsi_fastutil",
+#         "@maven//:net_kyori_adventure_api",
+#         "@maven//:net_kyori_adventure_text_serializer_plain",
+#     ],
+# )
+
+java_library(
+     name = "terraform_test_lib",
+        srcs = glob(include = ["src/test/java/net/hollowcube/test/**/*.java"]),
+        deps = [
+            "@maven//:dev_hollowcube_dataconverter",
+            "//modules/common",
+            "//modules/core",  # TODO: This is a terrible dependency, but need the action bar stuff for debug stick.
+            "//third_party:minestom",
+            "@maven//:com_google_code_gson_gson",
+            "@maven//:net_kyori_adventure_text_serializer_gson",
+        ":terraform",
+        "@maven//:net_kyori_adventure_nbt",
+        "//modules/command",
+        "//modules/test",
+        "@maven//:it_unimi_dsi_fastutil",
+        "@maven//:net_kyori_adventure_api",
+        "@maven//:net_kyori_adventure_text_serializer_plain",
+        ],
+)
+
+java_test_suite(
     name = "terraform_test",
-    srcs = glob(include = ["src/test/java/**/*.java"]),
+    srcs = glob(include = ["src/test/java/net/hollowcube/terraform/**/*.java"]),
     resources = glob(include = ["src/test/resources/**/*"]),
-    test_class = "net.hollowcube.terraform.TerraformTestSuite",
+    runner = "junit5",
+    package = "net.hollowcube.terraform",
+    test_suffixes = ["Test.java", "IntegrationTest.java"],
     deps = [
         ":terraform",
+        ":terraform_test_lib",
+        "//modules/map-core",
         "@maven//:net_kyori_adventure_nbt",
         "//modules/command",
         "//modules/common",
         "//modules/test",
         "//third_party:minestom",
-        #        "@maven//:com_github_mworzala_mc_debug_renderer_minestom",
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:net_kyori_adventure_api",
         "@maven//:net_kyori_adventure_text_serializer_plain",
-        "@maven//:org_jetbrains_kotlin_kotlin_stdlib",
+        "@maven//:com_github_hollow_cube_datafixerupper",
     ],
 )
 

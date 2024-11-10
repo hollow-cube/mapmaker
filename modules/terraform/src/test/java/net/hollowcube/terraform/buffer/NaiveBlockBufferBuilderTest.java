@@ -2,7 +2,7 @@ package net.hollowcube.terraform.buffer;
 
 import org.jetbrains.annotations.NotNull;
 
-class TestNaiveBlockBufferBuilder extends BaseBufferBuilderTest {
+class NaiveBlockBufferBuilderTest extends BufferBuilderTestBase {
 
     @Override
     @NotNull BlockBuffer.Builder createBuilder() {
