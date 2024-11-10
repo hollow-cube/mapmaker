@@ -172,6 +172,8 @@ public class FeatureFlagsPoller {
 
         for (var condition : sortedConditions) {
             var result = isConditionMatch(flag, distinctId, condition, properties, cohorts);
+            if (result == EvaluationResult.FALSE) continue;
+
             if (result == EvaluationResult.INCONCLUSIVE) {
                 isInconclusive = true;
             } else if (result == EvaluationResult.TRUE) {
