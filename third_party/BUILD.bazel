@@ -25,7 +25,7 @@ java_library(
 
 alias(
     name = "minestom",
-    actual = "@maven//:net_minestom_minestom_snapshots",
+    actual = "@maven//:com_github_mworzala_Minestom",
 )
 
 java_library(

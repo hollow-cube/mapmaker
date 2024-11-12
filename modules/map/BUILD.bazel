@@ -41,7 +41,7 @@ java_junit5_test(
         "@maven//:com_github_hollow_cube_datafixerupper",
         "@maven//:com_google_code_gson_gson",
         "@maven//:net_kyori_adventure_api",
-        "@maven//:net_minestom_minestom_snapshots",
+        "@maven//:com_github_mworzala_Minestom",
         "//modules/common",
         "//modules/core",
         #        "//modules/command",
