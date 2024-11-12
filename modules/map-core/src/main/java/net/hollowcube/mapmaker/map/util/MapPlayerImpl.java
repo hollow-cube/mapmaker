@@ -4,7 +4,6 @@ import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.minestom.server.entity.*;
-import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
@@ -14,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -64,33 +62,33 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
         visibilityByEntity.clear();
     }
 
-    @Override
-    public void sendPacketToViewers(@NotNull SendablePacket packet) {
-        // We need to intercept the metadata packet to ensure the invisible flag is set if we are supposed to be invisible.
-        if ((!(packet instanceof EntityMetaDataPacket metaPacket))) {
-            super.sendPacketToViewers(packet);
-            return;
-        }
-
-        // If the update isnt changing the base entity bitflags we can just forward it.
-        var flagsEntry = metaPacket.entries().get(0);
-        if (flagsEntry == null) {
-            super.sendPacketToViewers(packet);
-            return;
-        }
-
-        var newEntries = new HashMap<>(metaPacket.entries());
-        var bits = ((Metadata.Entry<Byte>) flagsEntry).value().byteValue();
-        bits |= 0x20;
-        newEntries.put(0, Metadata.Byte(bits));
-        var invisPacket = new EntityMetaDataPacket(metaPacket.entityId(), newEntries);
-
-        // Forward the original or new packet depending if we are invisible to them
-        for (var viewer : getViewers()) {
-            viewer.sendPacket(visibilityByEntity.get(viewer.getEntityId()) != Visibility.VISIBLE.ordinal()
-                    ? invisPacket : metaPacket);
-        }
-    }
+//    @Override
+//    public void sendPacketToViewers(@NotNull SendablePacket packet) {
+//        // We need to intercept the metadata packet to ensure the invisible flag is set if we are supposed to be invisible.
+//        if ((!(packet instanceof EntityMetaDataPacket metaPacket))) {
+//            super.sendPacketToViewers(packet);
+//            return;
+//        }
+//
+//        // If the update isnt changing the base entity bitflags we can just forward it.
+//        var flagsEntry = metaPacket.entries().get(0);
+//        if (flagsEntry == null) {
+//            super.sendPacketToViewers(packet);
+//            return;
+//        }
+//
+//        var newEntries = new HashMap<>(metaPacket.entries());
+//        var bits = ((Metadata.Entry<Byte>) flagsEntry).value().byteValue();
+//        bits |= 0x20;
+//        newEntries.put(0, Metadata.Byte(bits));
+//        var invisPacket = new EntityMetaDataPacket(metaPacket.entityId(), newEntries);
+//
+//        // Forward the original or new packet depending if we are invisible to them
+//        for (var viewer : getViewers()) {
+//            viewer.sendPacket(visibilityByEntity.get(viewer.getEntityId()) != Visibility.VISIBLE.ordinal()
+//                    ? invisPacket : metaPacket);
+//        }
+//    }
 
     private void updateVisibility(@NotNull Player other) {
         if (visibilityFunc == null) return;
