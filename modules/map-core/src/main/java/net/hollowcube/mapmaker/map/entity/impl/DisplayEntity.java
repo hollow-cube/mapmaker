@@ -78,7 +78,12 @@ public class DisplayEntity extends MapEntity {
 
         if (meta.getBillboardRenderConstraints() != AbstractDisplayMeta.BillboardConstraints.FIXED)
             tag.put("billboard", BILLBOARD_CONSTRAINTS.write(meta.getBillboardRenderConstraints()));
-        //todo brightness override
+        if (meta.getBrightnessOverride() >= 0) {
+            tag.put("brightness", CompoundBinaryTag.builder()
+                    .putInt("block", (meta.getBrightnessOverride() >> 4) & 0xF)
+                    .putInt("sky", (meta.getBrightnessOverride() >> 20) & 0xF)
+                    .build());
+        }
         if (meta.getViewRange() != 0)
             tag.putFloat("view_range", meta.getViewRange());
         if (meta.getShadowRadius() != 0)
@@ -120,7 +125,13 @@ public class DisplayEntity extends MapEntity {
         }
         if (tag.get("billboard") instanceof StringBinaryTag billboardName)
             meta.setBillboardRenderConstraints(BILLBOARD_CONSTRAINTS.read(billboardName));
-        //todo brightness override
+        if (tag.get("brightness") instanceof CompoundBinaryTag brightnessTag) {
+            int brightness = (brightnessTag.getInt("block") << 4)
+                    | (brightnessTag.getInt("sky") << 20);
+            meta.setBrightnessOverride(brightness);
+        } else {
+            meta.setBrightnessOverride(-1);
+        }
         if (tag.get("view_range") instanceof NumberBinaryTag viewRange)
             meta.setViewRange(viewRange.floatValue());
         if (tag.get("shadow_radius") instanceof NumberBinaryTag shadowRadius)
