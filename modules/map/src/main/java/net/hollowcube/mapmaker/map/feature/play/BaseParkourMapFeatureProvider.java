@@ -152,7 +152,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 //                    var ghostBlocks = GhostBlockHolder.forPlayer(event.getPlayer());
 //                    block = ghostBlocks.getBlock(event.getBlockPosition());
 //                    var newOpen = String.valueOf("false".equals(block.getProperty("open")));
-////                    event.getInstance().setBlock(event.getBlockPosition(), block.withProperty("open", newOpen));
+    /// /                    event.getInstance().setBlock(event.getBlockPosition(), block.withProperty("open", newOpen));
 //                    ghostBlocks.setBlock(event.getBlockPosition(), block.withProperty("open", newOpen));
 //
 //                    event.setCancelled(true);
@@ -259,10 +259,13 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             }
         }
 
-        var visibilityPredicate = new PlayerVisibilityPredicate(player);
-        player.updateViewerRule(visibilityPredicate);
-        if (player instanceof PlayerVisibilityExtension ve)
-            ve.setVisibilityFunc(visibilityPredicate);
+        player.scheduleNextTick(ignored -> {
+            // This must happen on the tick thread, it requires a lock on nearby players
+            var visibilityPredicate = new PlayerVisibilityPredicate(player);
+            player.updateViewerRule(visibilityPredicate);
+            if (player instanceof PlayerVisibilityExtension ve)
+                ve.setVisibilityFunc(visibilityPredicate);
+        });
 
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState != null) {
@@ -305,10 +308,13 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
         }
 
-        // Only visibility extension, no viewer rule (spectators can see anyone)
-        player.updateViewerRule(null);
-        if (player instanceof PlayerVisibilityExtension ve)
-            ve.setVisibilityFunc(new PlayerVisibilityPredicate(player));
+        player.scheduleNextTick(ignored -> {
+            // Only visibility extension, no viewer rule (spectators can see anyone)
+            // Must happen on tick thread, needs lock on nearby players to update viewer rule.
+            player.updateViewerRule(null);
+            if (player instanceof PlayerVisibilityExtension ve)
+                ve.setVisibilityFunc(new PlayerVisibilityPredicate(player));
+        });
     }
 
     public void initFinishedPlayer(@NotNull MapPlayerStartFinishedEvent event) {
