@@ -335,10 +335,12 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
         }
 
-        // Only visibility extension, no viewer rule (spectators can see anyone)
-        player.updateViewerRule(null);
-        if (player instanceof PlayerVisibilityExtension ve)
-            ve.setVisibilityFunc(new PlayerVisibilityPredicate(player));
+        player.scheduleNextTick(ignored -> {
+            // Only visibility extension, no viewer rule (spectators can see anyone)
+            player.updateViewerRule(null);
+            if (player instanceof PlayerVisibilityExtension ve)
+                ve.setVisibilityFunc(new PlayerVisibilityPredicate(player));
+        });
     }
 
     public void deinitPlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
