@@ -15,6 +15,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
+import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 import net.minestom.server.entity.metadata.display.TextDisplayMeta;
 import net.minestom.server.instance.Instance;
@@ -54,10 +55,10 @@ public class CreateMapsItem extends ItemHandler {
 
         var player = click.player();
         var target = click.entity();
-        if (target.getEntityType() != EntityType.PLAYER) return;
+        if (target.getEntityType() != EntityType.PLAYER || !(target instanceof Player bonkee)) return;
 
         player.playSound(Sound.sound(Key.key("item.toy.squeak"), Sound.Source.MASTER, 1f, ThreadLocalRandom.current().nextFloat(0.9f, 1.1f)), Sound.Emitter.self());
-        spawnBonkEntity(click.instance(), target.getPosition(), player);
+        spawnBonkEntity(click.instance(), target.getPosition(), player, bonkee);
     }
 
     @Override
@@ -66,7 +67,7 @@ public class CreateMapsItem extends ItemHandler {
         guiController.show(player, CreateMaps::new);
     }
 
-    private static void spawnBonkEntity(Instance instance, Point position, Player viewer) {
+    private static void spawnBonkEntity(Instance instance, Point position, Player bonker, Player bonkee) {
         var random = ThreadLocalRandom.current();
         var bonkEntity = new Entity(EntityType.TEXT_DISPLAY) {{
             hasPhysics = false;
@@ -78,27 +79,32 @@ public class CreateMapsItem extends ItemHandler {
         meta.setBillboardRenderConstraints(AbstractDisplayMeta.BillboardConstraints.CENTER);
         meta.setShadow(true);
         meta.setBackgroundColor(0);
-        meta.setScale(new Vec(0.75, 0.75, 1));
-        meta.setNotifyAboutChanges(true);
-        bonkEntity.setInstance(instance, position.add(random.nextDouble(-1, 1), random.nextDouble(2, 2.5), random.nextDouble(-1, 1)));
-        bonkEntity.addViewer(viewer);
 
-        bonkEntity.scheduler().buildTask(() -> doBonkAnimation(meta))
+        double bonkeeScale = bonkee.getAttributeValue(Attribute.SCALE);
+        double scale = 0.75 * bonkeeScale;
+        meta.setScale(new Vec(scale, scale, 1));
+        meta.setNotifyAboutChanges(true);
+        var offsetPosition = new Vec(random.nextDouble(-1, 1), random.nextDouble(2, 2.5), random.nextDouble(-1, 1))
+                .mul(bonkeeScale); // Tiny bonk for tiny person
+        bonkEntity.setInstance(instance, position.add(offsetPosition));
+        bonkEntity.addViewer(bonker);
+
+        bonkEntity.scheduler().buildTask(() -> doBonkAnimation(meta, scale, bonkeeScale))
                 .delay(TaskSchedule.tick(3))
                 .repeat(TaskSchedule.tick(4))
                 .schedule();
         bonkEntity.scheduleRemove(10, TimeUnit.SERVER_TICK);
     }
 
-    private static void doBonkAnimation(TextDisplayMeta meta) {
+    private static void doBonkAnimation(TextDisplayMeta meta, double startScale, double bonkeeScale) {
         meta.setNotifyAboutChanges(false);
         meta.setText(Component.text("BONK!", NamedTextColor.RED));
         meta.setTransformationInterpolationDuration(3);
         meta.setTransformationInterpolationStartDelta(0);
-        if (meta.getScale().x() == 0.75) {
-            meta.setScale(new Vec(1.5, 1.5, 1));
+        if (meta.getScale().x() == startScale) {
+            meta.setScale(new Vec(1.5 * bonkeeScale, 1.5 * bonkeeScale, 1));
         } else {
-            meta.setScale(new Vec(1.2, 1.2, 1));
+            meta.setScale(new Vec(1.2 * bonkeeScale, 1.2 * bonkeeScale, 1));
         }
         meta.setNotifyAboutChanges(true);
     }
