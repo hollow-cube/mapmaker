@@ -14,7 +14,4 @@
     <logger name="io.helidon" level="WARN"/>
     <logger name="jdk.event.security" level="WARN"/>
     <logger name="org.apache.kafka" level="WARN"/>
-    <logger name="net.minestom.server.thread" level="WARN"/>
-    <logger name="net.minestom.server.entity" level="WARN"/>
-    <logger name="net.hollowcube.mapmaker.map.util" level="WARN"/>
 </configuration>

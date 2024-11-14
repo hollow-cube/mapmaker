@@ -91,24 +91,31 @@ public final class FutureUtil {
         }
     }
 
-    public static void assertThread() {
+    private static boolean isUnsafeThread() {
         var thread = Thread.currentThread();
-        if (thread.isVirtual()) return;
+        if (thread.isVirtual()) return false;
         if (thread instanceof ForkJoinWorkerThread fjwt && fjwt.getPool() == ForkJoinPool.commonPool())
-            return;
+            return false;
 
-        throw new IllegalStateException("Unsafe blocking call on '" + thread.getName() + "'");
+        return true;
+    }
+
+    public static void assertThread() {
+        if (!isUnsafeThread()) return;
+        throw new IllegalStateException("Unsafe blocking call on '" + Thread.currentThread().getName() + "'");
     }
 
     private static final Logger logger = LoggerFactory.getLogger(FutureUtil.class);
 
     public static void assertThreadWarn() {
-        var thread = Thread.currentThread();
-        if (isShuttingDown || thread.isVirtual()) return;
-        if (thread instanceof ForkJoinWorkerThread fjwt && fjwt.getPool() == ForkJoinPool.commonPool())
-            return;
+        if (!isUnsafeThread()) return;
 
-        logger.error("Unsafe blocking call on '{}'", thread.getName(), new RuntimeException("dummy exception for stacktrace"));
+        logger.error("Unsafe blocking call on '{}'", Thread.currentThread().getName(), new RuntimeException("dummy exception for stacktrace"));
+    }
+
+    public static void assertTickThreadWarn() {
+        if (isUnsafeThread()) return;
+        logger.error("Unsafe tick thread only call on '{}'", Thread.currentThread().getName(), new RuntimeException("dummy exception for stacktrace"));
     }
 
     @Contract("null -> null")

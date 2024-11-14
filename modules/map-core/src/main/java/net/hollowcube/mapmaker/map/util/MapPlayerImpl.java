@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.util;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.hollowcube.command.util.CommandHandlingPlayer;
+import net.hollowcube.common.util.FutureUtil;
 import net.minestom.server.entity.*;
 import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
@@ -11,11 +12,14 @@ import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Implements some interfaces.
@@ -24,6 +28,8 @@ import java.util.function.Function;
  * - Always set listed to false on tab list entries. They will be managed by the session manager.
  */
 public abstract class MapPlayerImpl extends CommandHandlingPlayer implements PlayerVisibilityExtension {
+    private static final Logger logger = LoggerFactory.getLogger(MapPlayerImpl.class);
+
     private Function<Player, Visibility> visibilityFunc = null;
 
     // entity id -> visibility ordinal
@@ -97,20 +103,21 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
         if (old == current) return; // Do nothing
 
         other.sendPacket(new BundlePacket());
+        try {
+            if (old != Visibility.VISIBLE) {
+                sendMetaInvisUpdate(other, false);
+                if (old == Visibility.SPECTATOR)
+                    sendGameModeUpdate(other, getGameMode());
+            }
 
-        if (old != Visibility.VISIBLE) {
-            sendMetaInvisUpdate(other, false);
-            if (old == Visibility.SPECTATOR)
-                sendGameModeUpdate(other, getGameMode());
+            if (current != Visibility.VISIBLE) {
+                sendMetaInvisUpdate(other, true);
+                if (current == Visibility.SPECTATOR)
+                    sendGameModeUpdate(other, GameMode.SPECTATOR);
+            }
+        } finally {
+            other.sendPacket(new BundlePacket());
         }
-
-        if (current != Visibility.VISIBLE) {
-            sendMetaInvisUpdate(other, true);
-            if (current == Visibility.SPECTATOR)
-                sendGameModeUpdate(other, GameMode.SPECTATOR);
-        }
-
-        other.sendPacket(new BundlePacket());
 
         visibilityByEntity.put(other.getEntityId(), current.ordinal());
     }
@@ -145,5 +152,29 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
     @Override
     public void spawn() {
         super.spawn();
+    }
+
+    @Override
+    public void updateViewableRule() {
+        FutureUtil.assertTickThreadWarn();
+        super.updateViewableRule();
+    }
+
+    @Override
+    public void updateViewableRule(@Nullable Predicate<Player> predicate) {
+        FutureUtil.assertTickThreadWarn();
+        super.updateViewableRule(predicate);
+    }
+
+    @Override
+    public void updateViewerRule() {
+        FutureUtil.assertTickThreadWarn();
+        super.updateViewerRule();
+    }
+
+    @Override
+    public void updateViewerRule(@Nullable Predicate<Entity> predicate) {
+        FutureUtil.assertTickThreadWarn();
+        super.updateViewerRule(predicate);
     }
 }
