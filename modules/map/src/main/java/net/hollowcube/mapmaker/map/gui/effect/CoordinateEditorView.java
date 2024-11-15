@@ -95,17 +95,40 @@ public class CoordinateEditorView extends View {
     }
 
     private void updateFromPos() {
-        updateSingle(xText, pos.x());
-        updateSingle(yText, pos.y());
-        updateSingle(zText, pos.z());
-        updateSingle(yawText, pos.yaw());
-        updateSingle(pitchText, pos.pitch());
+        textLengthThreeSlots(xText, pos.x());
+        textLengthThreeSlots(yText, pos.y());
+        textLengthThreeSlots(zText, pos.z());
+        textLengthTwoSlots(yawText, pos.yaw());
+        textLengthTwoSlots(pitchText, pos.pitch());
     }
 
-    private void updateSingle(@NotNull Text text, double value) {
+    private void textLengthThreeSlots(@NotNull Text text, double value) {
+        StringBuilder displayText = new StringBuilder();
         String raw = String.valueOf(value);
-        if (raw.length() > 16) raw = raw.substring(0, 16);
-        text.setText(raw);
+
+        if (raw.length() > 7) {
+            raw = raw.substring(0, 7);
+            displayText.append(raw).append("...");
+        } else {
+            displayText.append(raw);
+        }
+
+        text.setText(displayText.toString());
+        text.setArgs(Component.text(value));
+    }
+
+    private void textLengthTwoSlots(@NotNull Text text, double value) {
+        StringBuilder displayText = new StringBuilder();
+        String raw = String.valueOf(value);
+
+        if (raw.length() > 4) {
+            raw = raw.substring(0, 4);
+            displayText.append(raw).append("...");
+        } else {
+            displayText.append(raw);
+        }
+
+        text.setText(displayText.toString());
         text.setArgs(Component.text(value));
     }
 

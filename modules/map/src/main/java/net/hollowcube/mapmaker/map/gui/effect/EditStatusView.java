@@ -22,6 +22,7 @@ public class EditStatusView extends View {
 
     private @Outlet("settings") StatusSettingsTab settingsTab;
     private @Outlet("actions") StatusActionsTab actionsTab;
+    private @Outlet("tab_switch_middle_slot") Switch tabSwitchMiddleSlot;
 
     private final Runnable onClose;
 
@@ -35,6 +36,7 @@ public class EditStatusView extends View {
         tabText.setArgs(Component.text("Status Plate Settings"));
         settingsTab.setData(data, maxResetHeight);
         actionsTab.setData(data, onClose);
+        tabSwitchMiddleSlot.setOption(1);
     }
 
     @Action("tab_settings")
@@ -53,6 +55,18 @@ public class EditStatusView extends View {
         tabText.setArgs(Component.text("Status Plate Actions"));
         tabSettingsStateSwitch.setOption(false);
         tabActionsStateSwitch.setOption(true);
+    }
+
+    @Action("tab_middle_slot_settings")
+    public void handleTabMiddleSlot1() {
+        handleSelectSettingsTab();
+        tabSwitchMiddleSlot.setOption(1);
+    }
+
+    @Action("tab_middle_slot_actions")
+    public void handleTabMiddleSlot2() {
+        handleSelectActionsTab();
+        tabSwitchMiddleSlot.setOption(0);
     }
 
     @Signal(Element.SIG_CLOSE)
