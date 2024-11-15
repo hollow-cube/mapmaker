@@ -143,7 +143,7 @@ public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
             if (duration <= 0) {
                 return Component.translatable("gui.effect.potion.duration.infinite");
             } else {
-                return Component.text(String.format("%.2f", duration() / 1000.0));
+                return Component.text(String.format("%.3f", duration() / 1000.0));
             }
         }
 

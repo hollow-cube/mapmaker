@@ -26,39 +26,21 @@ public class CheckpointSettingsTab extends AbstractEffectSettingsTab<CheckpointE
 
     @Action("checkpoint_lives_inactive")
     public void handleCheckpointLivesInactive() {
-        openCheckpointLivesAnvil();
+        openCheckpointLivesView();
     }
 
     @Action("checkpoint_lives_active")
     public void handleCheckpointLivesActive(@NotNull Player player, int slot, @NotNull ClickType clickType) {
         if (clickType == ClickType.LEFT_CLICK) {
-            openCheckpointLivesAnvil();
+            openCheckpointLivesView();
         } else if (clickType == ClickType.SHIFT_LEFT_CLICK) {
             data.setLives(CheckpointEffectData.NO_LIVES);
             updateFromData();
         }
     }
 
-    private void openCheckpointLivesAnvil() {
-        pushView(context -> new CheckpointLivesAnvil(context, data.lives() ==
-                CheckpointEffectData.NO_LIVES ? "" : String.valueOf(data.lives())));
-    }
-
-    @Signal(CheckpointLivesAnvil.SIG_UPDATE_NAME)
-    public void handleUpdateLives(@NotNull String index) {
-        if (index.isEmpty() || "0".equals(index) || "none".equals(index)) {
-            data.setLives(CheckpointEffectData.NO_LIVES);
-            updateFromData();
-            return;
-        }
-
-        try {
-            var newIndex = Integer.parseInt(index);
-            newIndex = MathUtils.clamp(newIndex, 1, 20);
-            data.setLives(newIndex);
-            updateFromData();
-        } catch (NumberFormatException ignored) {
-        }
+    private void openCheckpointLivesView() {
+        pushView(CheckpointLivesView::new);
     }
 
     @Override

@@ -1,0 +1,93 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<?import net.hollowcube.mapmaker.map.gui.effect ?>
+<component width="9" height="10" align="ttb" sprite="effect/checkpoint/lives_container">
+    <text id="title" width="0" height="0" translationKey=""
+          font="map_details_title2" shift="57"/>
+    <!-- Header -->
+    <box width="9" align="ltr">
+        <BackButton2/>
+        <label translationKey="gui.checkpoint.information" sprite="generic/information"/>
+    </box>
+
+    <spacer width="9"/>
+    
+    <!-- Set Lives Amount -->
+    <box width="9" height="1" align="ltr">
+        <spacer/>
+
+        <switch id="amount_dec5_switch">
+            <button id="amount_dec5_off" translationKey="gui.effect.potion.amount.dec5_off"
+                    sprite="generic/modify_r1/disabled_minus"/>
+            <button id="amount_dec5_on" translationKey="gui.effect.potion.amount.dec5_on"
+                    sprite="generic/modify_r1/two_minus"/>
+        </switch>
+        <switch id="amount_dec1_switch">
+            <button id="amount_dec1_off" translationKey="gui.effect.potion.amount.dec1_off"
+                    sprite="generic/modify_r1/disabled_minus"/>
+            <button id="amount_dec1_on" translationKey="gui.effect.potion.amount.dec1_on"
+                    sprite="generic/modify_r1/one_minus"/>
+        </switch>
+
+        <text id="amount" width="3" translationKey="gui.checkpoint.lives.amount.current"
+              font="line_2" centered="true" shift="1"/>
+
+        <switch id="amount_inc1_switch">
+            <button id="amount_inc1_off" translationKey="gui.effect.potion.amount.inc1_off"
+                    sprite="generic/modify_r1/disabled_plus"/>
+            <button id="amount_inc1_on" translationKey="gui.effect.potion.amount.inc1_on"
+                    sprite="generic/modify_r1/one_plus"/>
+        </switch>
+        <switch id="amount_inc5_switch">
+            <button id="amount_inc5_off" translationKey="gui.effect.potion.amount.inc5_off"
+                    sprite="generic/modify_r1/disabled_plus"/>
+            <button id="amount_inc5_on" translationKey="gui.effect.potion.amount.inc5_on"
+                    sprite="generic/modify_r1/two_plus"/>
+        </switch>
+
+    </box>
+
+    <spacer width="9"/>
+
+    <switch id="lives_type_switch" width="9" height="6">
+        <box width="9" height="6" align="ltr">
+            <button id="lives_switch_teleport" width="9" height="1" translationKey="gui.checkpoint.lives.teleport"
+                    sprite="effect/checkpoint/lives_container_switch_reset"/>
+        </box>
+
+        <box width="9" height="6" align="ttb">
+            <button id="lives_switch_reset" width="9" height="1" translationKey="gui.checkpoint.lives.reset"
+                    sprite="effect/checkpoint/lives_container_switch_teleport"/>
+            <spacer/>
+            <box width="9" height="1" align="ltr">
+                <spacer/>
+                <text id="x" width="4" height="1"
+                      translationKey="gui.effect.coordinate.x"
+                      font="line_2" shift="21"/>
+                <text id="pitch" width="3" height="1"
+                      translationKey="gui.effect.coordinate.pitch"
+                      font="line_2" shift="29"/>
+            </box>
+
+            <box width="9" height="1" align="ltr">
+                <spacer/>
+                <text id="y" width="4" height="1"
+                      translationKey="gui.effect.coordinate.y"
+                      font="line_3" shift="21"/>
+                <text id="yaw" width="3" height="1"
+                      translationKey="gui.effect.coordinate.yaw"
+                      font="line_3" shift="29"/>
+            </box>
+
+            <box width="9" height="1" align="ltr">
+                <spacer/>
+                <text id="z" width="4" height="1"
+                      translationKey="gui.effect.coordinate.z"
+                      font="line_4" shift="21"/>
+                <button width="3" id="set_external" translationKey="gui.effect.coordinate.set_external"/>
+            </box>
+        </box>
+
+    </switch>
+
+</component>
