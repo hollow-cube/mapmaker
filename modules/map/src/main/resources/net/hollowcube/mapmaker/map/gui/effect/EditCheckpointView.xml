@@ -24,7 +24,10 @@
                     sprite="effect/settings/tab"/>
         </switch>
 
-        <spacer width="1"/>
+        <switch id="tab_switch_middle_slot">
+            <button id="tab_middle_slot_settings" translationKey="gui.checkpoint.tab.settings.unselected"/>
+            <button id="tab_middle_slot_actions" translationKey="gui.checkpoint.tab.actions.unselected"/>
+        </switch>
 
         <switch id="tab_actions_state_switch" width="4">
             <button id="tab_actions" width="4" translationKey="gui.checkpoint.tab.actions.unselected"/>

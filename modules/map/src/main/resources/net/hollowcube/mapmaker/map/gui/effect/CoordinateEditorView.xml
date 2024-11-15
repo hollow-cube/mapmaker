@@ -8,45 +8,36 @@
     <box width="9" align="ltr">
         <BackButton2/>
         <label translationKey="gui.effect.coordinate.information" sprite="generic/information"/>
-
-        <spacer width="6"/>
-
-        <button id="set_external" translationKey="gui.effect.coordinate.set_external"/>
     </box>
+
+    <spacer width="9"/>
 
     <box width="9" height="1" align="ltr">
         <spacer/>
-        <text id="x" width="7" height="1"
+        <text id="x" width="4" height="1"
               translationKey="gui.effect.coordinate.x"
-              font="line_1" shift="23"/>
-    </box>
-
-    <box width="9" height="1" align="ltr">
-        <spacer/>
-        <text id="y" width="7" height="1"
-              translationKey="gui.effect.coordinate.y"
-              font="line_2" shift="23"/>
-    </box>
-
-    <box width="9" height="1" align="ltr">
-        <spacer/>
-        <text id="z" width="7" height="1"
-              translationKey="gui.effect.coordinate.z"
-              font="line_3" shift="23"/>
-    </box>
-
-    <box width="9" height="1" align="ltr">
-        <spacer/>
-        <text id="pitch" width="7" height="1"
+              font="line_2" shift="21"/>
+        <text id="pitch" width="3" height="1"
               translationKey="gui.effect.coordinate.pitch"
-              font="line_4" shift="23"/>
+              font="line_2" shift="29"/>
     </box>
 
     <box width="9" height="1" align="ltr">
         <spacer/>
-        <text id="yaw" width="7" height="1"
+        <text id="y" width="4" height="1"
+              translationKey="gui.effect.coordinate.y"
+              font="line_3" shift="21"/>
+        <text id="yaw" width="3" height="1"
               translationKey="gui.effect.coordinate.yaw"
-              font="line_5" shift="23"/>
+              font="line_3" shift="29"/>
+    </box>
+
+    <box width="9" height="1" align="ltr">
+        <spacer/>
+        <text id="z" width="4" height="1"
+              translationKey="gui.effect.coordinate.z"
+              font="line_4" shift="21"/>
+        <button width="3" id="set_external" translationKey="gui.effect.coordinate.set_external"/>
     </box>
 
 </component>
