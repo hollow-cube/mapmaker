@@ -25,7 +25,7 @@ import java.util.*;
 public class MapServiceImpl extends AbstractHttpService implements MapService {
     private static final System.Logger logger = System.getLogger(MapServiceImpl.class.getName());
 
-    private static final String AUTHORIZER_HEADER = "x-hc-user-id";
+    public static final String AUTHORIZER_HEADER = "x-hc-user-id";
     private static final String WORLD_SESSION_HEADER = "x-hc-map-session";
 
     private static final String POLAR_CONTENT_TYPE = "application/vnd.hollowcube.polar";

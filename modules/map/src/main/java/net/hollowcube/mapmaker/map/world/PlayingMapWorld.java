@@ -87,6 +87,21 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
     @Override
     public void load() {
+        loadWorld();
+
+        super.load();
+        //todo load features
+
+        try {
+            this.ownerBossBarName = server().playerService().getPlayerDisplayName2(map().owner())
+                    .build(DisplayName.Context.BOSS_BAR);
+        } catch (Exception e) {
+            MinecraftServer.getExceptionManager().handleException(e);
+            this.ownerBossBarName = Component.text("!error!", NamedTextColor.RED);
+        }
+    }
+
+    protected void loadWorld() {
         // Load the map itself (eg blocks, if present)
         var mapData = server().mapService().getMapWorld(map().id(), true);
         if (mapData != null) {
@@ -103,23 +118,12 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
             instance.load(mapData, new ReadWorldAccess(this));
         }
-
-        super.load();
-        //todo load features
-
-        try {
-            this.ownerBossBarName = server().playerService().getPlayerDisplayName2(map().owner())
-                    .build(DisplayName.Context.BOSS_BAR);
-        } catch (Exception e) {
-            MinecraftServer.getExceptionManager().handleException(e);
-            this.ownerBossBarName = Component.text("!error!", NamedTextColor.RED);
-        }
     }
 
     @Override
     public void close(@Nullable Component reason) {
         super.close(reason); // Remove players & spectators
-        instance.scheduleNextTick(_ -> instance.unload());
+        instance.scheduleNextTick(ignored -> instance.unload());
     }
 
     public void preAddPlayer(@NotNull AsyncPlayerConfigurationEvent event) {
@@ -161,7 +165,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
         }
     }
 
-    private @NotNull SaveState getOrCreateSaveState(@NotNull Player player) {
+    protected @NotNull SaveState getOrCreateSaveState(@NotNull Player player) {
         var playerData = PlayerDataV2.fromPlayer(player);
 
         var stateType = map().verification() == MapVerification.PENDING ? SaveStateType.VERIFYING : SaveStateType.PLAYING;
@@ -209,9 +213,9 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 //        instance.eventNode().call(new MapPlayerStartFinishedEvent(this, player));
 //
 //        if (teleport) player.teleport(map.settings().getSpawnPoint()).join();
-////        player.sendMessage("Now spectating " + map.settings().getName());
-//    }
 
+    /// /        player.sendMessage("Now spectating " + map.settings().getName());
+//    }
     @Override
     public void removePlayer(@NotNull Player player) {
         if (isPlaying(player)) {

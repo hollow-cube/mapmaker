@@ -23,6 +23,7 @@ import net.hollowcube.mapmaker.map.command.utility.navigation.*;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
 import net.hollowcube.mapmaker.map.hdb.command.HdbCommand;
+import net.hollowcube.mapmaker.map.obungus.ObungusBoxReviewMap;
 import net.hollowcube.mapmaker.map.runtime.*;
 import net.hollowcube.mapmaker.map.terraform.MapServerModule;
 import net.hollowcube.mapmaker.map.util.MapJoinInfo;
@@ -32,6 +33,7 @@ import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.misc.noop.NoopMapService;
+import net.hollowcube.mapmaker.obungus.ObungusCore;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.terraform.Terraform;
@@ -263,9 +265,7 @@ public class MapServerRunner extends AbstractMapServer {
 
             // Create the world, holding the player here until it is ready for them to join.
             var map = mapService().getMap(joinInfo.playerId(), joinInfo.mapId());
-            Class<? extends AbstractMapWorld> worldType = Presence.MAP_BUILDING_STATES.contains(joinInfo.state())
-                    ? EditingMapWorld.class : PlayingMapWorld.class;
-            var mapWorld = Objects.requireNonNull(FutureUtil.getUnchecked(allocator().create(map, worldType)));
+            var mapWorld = Objects.requireNonNull(FutureUtil.getUnchecked(allocator().create(map, worldTypeFor(joinInfo))));
 
             // Ensure resource pack was applied before allowing the player in
             FutureUtil.getUnchecked(resourcePackFuture);
@@ -277,6 +277,16 @@ public class MapServerRunner extends AbstractMapServer {
             logger.error("Error during config phase", e);
             event.getPlayer().kick(Component.text("An unknown error has occurred. Please try again later."));
         }
+    }
+
+    protected @NotNull Class<? extends AbstractMapWorld> worldTypeFor(@NotNull MapJoinInfo joinInfo) {
+        if (joinInfo.mapId().equals(ObungusCore.REVIEW_MAP_ID)) {
+            return ObungusBoxReviewMap.class;
+        }
+
+        return Presence.MAP_BUILDING_STATES.contains(joinInfo.state())
+                ? EditingMapWorld.class
+                : PlayingMapWorld.class;
     }
 
     protected void handleSpawn(@NotNull PlayerSpawnEvent event) {

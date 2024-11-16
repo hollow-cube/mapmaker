@@ -86,7 +86,7 @@ public class NoopMapService implements MapService {
 
     @Override
     public void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update) {
-        throw new UnsupportedOperationException("not implemented");
+        // Just dont do anything
     }
 
     @Override

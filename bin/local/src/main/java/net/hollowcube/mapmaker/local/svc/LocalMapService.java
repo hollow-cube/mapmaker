@@ -31,9 +31,8 @@ public class LocalMapService extends NoopMapService {
 
     @Override
     public @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id) {
-        Check.argCondition(!id.equals(LocalServerRunner.DUMMY_MAP_ID), "invalid map id: " + id);
         return new MapData(
-                LocalServerRunner.DUMMY_MAP_ID, UUID.randomUUID().toString(),
+                id, UUID.randomUUID().toString(),
                 new MapSettings(), -1, null
         );
     }

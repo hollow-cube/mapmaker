@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.local.svc.LocalSessionService;
 import net.hollowcube.mapmaker.map.MapServerRunner;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.util.MapJoinInfo;
+import net.hollowcube.mapmaker.obungus.ObungusCore;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import org.jetbrains.annotations.NotNull;
@@ -50,7 +51,7 @@ public class LocalServerRunner extends MapServerRunner {
 
     @Override
     protected @NotNull CompletableFuture<@Nullable MapJoinInfo> getPendingJoin(@NotNull String playerId, boolean deleteCompleted) {
-        return CompletableFuture.completedFuture(new MapJoinInfo(playerId, DUMMY_MAP_ID, "editing"));
+        return CompletableFuture.completedFuture(new MapJoinInfo(playerId, ObungusCore.REVIEW_MAP_ID, "editing")); // DUMMY_MAP_ID
     }
 
 }

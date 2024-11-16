@@ -68,6 +68,8 @@ import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.ExpBarRenderer;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.misc.noop.*;
+import net.hollowcube.mapmaker.obungus.ObungusService;
+import net.hollowcube.mapmaker.obungus.ObungusServiceImpl;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PermManagerImpl;
 import net.hollowcube.mapmaker.player.*;
@@ -188,6 +190,9 @@ public abstract class AbstractMapServer implements MapServer {
             if (spicedbToken == null) spicedbToken = "supersecretkey";
             permManager = new PermManagerImpl(spicedbUrl, spicedbToken);
         }
+
+        var obungusService = new ObungusServiceImpl(otel, "http://localhost:9125");
+        injector.bind(ObungusService.class, obungusService);
 
         ShopUpgradeCache.init(permManager);
     }

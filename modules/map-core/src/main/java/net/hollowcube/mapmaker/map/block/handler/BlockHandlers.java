@@ -25,6 +25,7 @@ public final class BlockHandlers {
     public static final BlockHandler ENCHANTING_TABLE = new NoopBlockHandler("minecraft:enchanting_table");
     public static final BlockHandler DECORATED_POT = new DecoratedPotBlockHandler();
     public static final BlockHandler CAMPFIRE = new CampfireBlockHandler();
+    public static final BlockHandler STRUCTURE = new StructureBlockHandler();
 
     public static void init() {
         Consumer<BlockHandler> register = handler -> MinecraftServer.getBlockManager()
@@ -47,5 +48,6 @@ public final class BlockHandlers {
         register.accept(ENCHANTING_TABLE);
         register.accept(DECORATED_POT);
         register.accept(CAMPFIRE);
+        register.accept(STRUCTURE);
     }
 }
