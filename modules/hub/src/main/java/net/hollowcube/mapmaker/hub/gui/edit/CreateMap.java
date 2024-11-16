@@ -51,7 +51,7 @@ public class CreateMap extends View {
                 case COLOSSAL -> ShopUpgrade.MAP_SIZE_4;
             };
 
-            if (upgrade == null || ShopUpgradeCache.has(playerId, ShopUpgrade.MAP_SLOT_3, false)) {
+            if (upgrade == null || ShopUpgradeCache.has(playerId, upgrade, false)) {
                 addActionHandler(
                         sizeSwitches[i].id().replace("_switch", "_unset"),
                         Label.ActionHandler.lmb(player -> selectSize(size))
