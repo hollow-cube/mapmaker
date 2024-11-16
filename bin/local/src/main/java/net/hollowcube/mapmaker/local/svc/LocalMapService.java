@@ -31,9 +31,11 @@ public class LocalMapService extends NoopMapService {
 
     @Override
     public @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id) {
+        var settings = new MapSettings();
+        settings.setSize(MapSize.UNLIMITED);
         return new MapData(
                 id, UUID.randomUUID().toString(),
-                new MapSettings(), -1, null
+                settings, -1, null
         );
     }
 
