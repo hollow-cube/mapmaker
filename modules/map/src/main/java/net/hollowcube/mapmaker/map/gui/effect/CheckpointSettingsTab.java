@@ -31,7 +31,7 @@ public class CheckpointSettingsTab extends AbstractEffectSettingsTab<CheckpointE
 
     @Action("checkpoint_lives_active")
     public void handleCheckpointLivesActive(@NotNull Player player, int slot, @NotNull ClickType clickType) {
-        if (clickType == ClickType.LEFT_CLICK || clickType == ClickType.RIGHT_CLICK) {
+        if (clickType == ClickType.LEFT_CLICK) {
             openCheckpointLivesAnvil();
         } else if (clickType == ClickType.SHIFT_LEFT_CLICK) {
             data.setLives(CheckpointEffectData.NO_LIVES);
