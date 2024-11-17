@@ -8,10 +8,13 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
+    public static final DecimalFormat DURATION_NUM_FORMAT = new DecimalFormat("#.###");
+
     public static final Codec<PotionEffectList> CODEC = Entry.CODEC.listOf()
             .xmap(PotionEffectList::new, PotionEffectList::entries);
     public static final MapCodec<PotionEffectList> NULL_MAPPED_CODEC = CODEC.optionalFieldOf("potionEffects")
@@ -143,7 +146,7 @@ public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
             if (duration <= 0) {
                 return Component.translatable("gui.effect.potion.duration.infinite");
             } else {
-                return Component.text(String.format("%.3f", duration() / 1000.0));
+                return Component.text(DURATION_NUM_FORMAT.format(duration() / 1000.0));
             }
         }
 
@@ -159,21 +162,21 @@ public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
                 StringBuilder formattedTime = new StringBuilder();
 
                 if (hours > 0) {
-                    formattedTime.append(hours).append(" Hour").append(hours > 1 ? "s" : "");
+                    formattedTime.append(hours).append("h");
                     if (minutes > 0 || fractionalSeconds > 0) {
-                        formattedTime.append(", ");
+                        formattedTime.append(" ");
                     }
                 }
 
                 if (minutes > 0) {
-                    formattedTime.append(minutes).append(" Minute").append(minutes > 1 ? "s" : "");
+                    formattedTime.append(minutes).append("m");
                     if (fractionalSeconds > 0) {
-                        formattedTime.append(", ");
+                        formattedTime.append(" ");
                     }
                 }
 
                 if (fractionalSeconds > 0) { // don't show 0 seconds (duh)
-                    formattedTime.append(String.format("%.3f Seconds", fractionalSeconds));
+                    formattedTime.append(String.format("%.3fs", fractionalSeconds));
                 }
 
                 return Component.text(formattedTime.toString());

@@ -12,8 +12,6 @@ import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Locale;
-
 public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extends View {
 
     private @Outlet("name_text") Text nameText;
@@ -42,22 +40,32 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
     }
 
     @Action("name_text")
-    public void handleChangeName() {
-        pushView(context -> new BaseEffectNameAnvil(context, data.hasName() ? data.displayName() : ""));
+    public void handleChangeName(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        if (clickType == ClickType.LEFT_CLICK) {
+            pushView(context -> new BaseEffectNameAnvil(context, data.hasName() ? data.displayName() : ""));
+        } else if (clickType == ClickType.SHIFT_LEFT_CLICK) {
+            data.setName(null);
+            updateFromData();
+        }
     }
 
     @Signal(BaseEffectNameAnvil.SIG_UPDATE_NAME)
     public void handleUpdateName(@NotNull String name) {
-        name = name.toLowerCase(Locale.ROOT);
-        if (name.isEmpty() || name.equals(data.displayName())) return;
+        name = name.trim();
         if (name.length() > 16) name = name.substring(0, 16);
-        data.setName(name);
+        if (name.equals(data.displayName())) return;
+        data.setName(name.isEmpty() ? null : name);
         updateFromData();
     }
 
     @Action("progress_index_text")
-    public void handleChangeIndex() {
-        pushView(context -> new BaseEffectIndexAnvil(context, data.progressIndex() < 1 ? "" : String.valueOf(data.progressIndex())));
+    public void handleChangeIndex(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+        if (clickType == ClickType.LEFT_CLICK) {
+            pushView(context -> new BaseEffectIndexAnvil(context, data.progressIndex() < 1 ? "" : String.valueOf(data.progressIndex())));
+        } else if (clickType == ClickType.SHIFT_LEFT_CLICK) {
+            data.setProgressIndex(-1);
+            updateFromData();
+        }
     }
 
     @Signal(BaseEffectIndexAnvil.SIG_UPDATE_NAME)
@@ -171,7 +179,7 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
             nameText.setText(data.displayName());
         } else {
             nameText.setArgs(Component.translatable("gui.effect.name.none"));
-            nameText.setText(data.displayName(), TextColor.color(0xB0B0B0));
+            nameText.setText(data.displayName(), TextColor.color(0xEEEEEE));
         }
 
         if (data.progressIndex() == -1) {
