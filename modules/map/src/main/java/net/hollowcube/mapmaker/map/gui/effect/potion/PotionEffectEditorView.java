@@ -158,6 +158,7 @@ public class PotionEffectEditorView extends View {
     }
 
     private void updateFromEffect() {
+        levelText.setText(String.valueOf(effect.level()));
         levelText.setArgs(Component.text(String.valueOf(effect.level())));
         levelDec5Switch.setOption(effect.level() > 5);
         levelDec1Switch.setOption(effect.level() > 1);
