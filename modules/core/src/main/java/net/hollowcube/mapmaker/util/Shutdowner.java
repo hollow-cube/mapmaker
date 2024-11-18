@@ -79,7 +79,7 @@ public class Shutdowner implements HealthCheck {
 
             logger.info("Players have drained successfully, .");
             FutureUtil.markShutdown();
-            for (var hook : shutdownHooks.reversed()) {
+            for (var hook : shutdownHooks) {
                 try {
                     hook.run();
                 } catch (Throwable e) {

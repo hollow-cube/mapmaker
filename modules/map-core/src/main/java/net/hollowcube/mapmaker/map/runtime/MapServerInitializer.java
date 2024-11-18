@@ -128,7 +128,6 @@ public final class MapServerInitializer {
         var minestomConfig = config.get(MinestomConfig.class);
         minecraftServer.start(minestomConfig.host(), minestomConfig.port());
         MinecraftServer.getBenchmarkManager().enable(Duration.ofSeconds(2));
-        server.shutdowner().queue("minestom-stop", MinecraftServer::stopCleanly);
         server.shutdowner().queue("minestom-kick", () -> {
             // todo why doesn't Minestom do this on its own?
             var connectionManager = MinecraftServer.getConnectionManager();
@@ -137,6 +136,7 @@ public final class MapServerInitializer {
                 EventDispatcher.call(new PlayerDisconnectEvent(player));
             }
         });
+        server.shutdowner().queue("minestom-stop", MinecraftServer::stopCleanly);
 
         logger.info("Server started in {}ms", (System.nanoTime() - start) / 1_000_000);
     }

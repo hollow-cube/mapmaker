@@ -5,7 +5,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -40,10 +39,5 @@ public class IWGTextElement extends IWGElement {
         if (pixelWidth <= 1) return Vec.ZERO; // No text, no size
 
         return new Vec(0, DEFAULT_LINE_HEIGHT_BLOCKS * textLines.size(), 0);
-    }
-
-    @Override
-    public void setInstance(@NotNull Instance instance, @NotNull Point position) {
-
     }
 }
