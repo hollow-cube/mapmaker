@@ -36,7 +36,7 @@ public record ObungusBoxData(
         }
 
         if ((shape & FLAG_IS_RIGHT) != 0)
-            return new Vec(-1, 3, 6);
+            return new Vec(0, 3, 7);
         if ((shape & FLAG_IS_STRAIGHT) != 0)
             return new Vec(7, 3, size.blockZ() - 1);
         return null;
