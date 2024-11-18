@@ -627,7 +627,7 @@ public abstract class AbstractMapServer implements MapServer {
         )));
 
         // Player init
-        player.setDisplayName(playerData.displayName2().build());
+        player.setDisplayName(playerData.displayName2().build(DisplayName.Context.TAB_LIST));
         MiscFunctionality.assignTeam(player);
         Emoji.sendTabCompletions(player);
 

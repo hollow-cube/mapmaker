@@ -38,6 +38,16 @@
       }
     },
     {
+      "type": "space",
+      "advances": {
+        "\uF830": 0,
+        "\uF831": 0,
+        "\uF832": 0,
+        "\uF833": 0,
+        "\uF834": 0
+      }
+    },
+    {
       "type": "bitmap",
       "file": "minecraft:font/inventory_border.png",
       "ascent": 29,

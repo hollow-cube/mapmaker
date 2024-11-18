@@ -19,12 +19,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+@SuppressWarnings("UnstableApiUsage")
 public class SyntheticTabListManager {
     private static final Logger logger = LoggerFactory.getLogger(SyntheticTabListManager.class);
 
     private static final EnumSet<PlayerInfoUpdatePacket.Action> ACTIONS = EnumSet.of(
             PlayerInfoUpdatePacket.Action.ADD_PLAYER, PlayerInfoUpdatePacket.Action.UPDATE_LISTED,
-            PlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME, PlayerInfoUpdatePacket.Action.UPDATE_LIST_ORDER
+            PlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME
     );
 
     private final SessionManager sessionManager;

@@ -24,6 +24,8 @@ public record DisplayName(
     public enum Context {
         DEFAULT,
         PLAIN,
+        // Like DEFAULT, but includes an ordering character before the badge
+        TAB_LIST,
         // Like DEFAULT, but uses offset characters vertically
         BOSS_BAR
     }
@@ -57,6 +59,17 @@ public record DisplayName(
                 case "badge" -> {
                     if (context == Context.PLAIN) continue;
 
+                    if (context == Context.TAB_LIST) {
+                        builder.append(Component.text(switch (part.text) {
+                            case "dev_3", "mod_3", "ct_3" -> '\uF830';
+                            case "dev_2", "mod_2", "ct_2" -> '\uF831';
+                            case "dev_1", "mod_1", "ct_1" -> '\uF832';
+                            case null, default -> '\uF833';
+                        }));
+                    }
+
+                    // FontUtil.rewrite("bossbar_ascii_1", ownerNamePlain)
+
                     var icon = part.text.contains("hypercube") ? "icon/" + part.text : "icon/staff/" + part.text;
                     if (context == Context.BOSS_BAR) icon += "_bb";
                     builder.append(Component.text(BadSprite.require(icon).fontChar() + FontUtil.computeOffset(1), NamedTextColor.WHITE)
@@ -82,26 +95,18 @@ public record DisplayName(
         return null;
     }
 
-    public int orderIndex() {
-        for (var part : parts) {
-            if (!"badge".equals(part.type)) continue;
-
-            return switch (part.text) {
-                case "dev_3", "mod_3", "ct_3" -> 40;
-                case "dev_2", "mod_2", "ct_2" -> 30;
-                case "dev_1", "mod_1", "ct_1" -> 20;
-                case "hypercube/gold" -> 10;
-                case null, default -> 0;
-            };
-        }
-        return 0;
-    }
-
     public @NotNull String getUsernameForTabList() {
+        char sortPrefix = switch (getBadgeName()) {
+            case "dev_3", "mod_3", "ct_3" -> '\uF830';
+            case "dev_2", "mod_2", "ct_2" -> '\uF831';
+            case "dev_1", "mod_1", "ct_1" -> '\uF832';
+            case "media" -> '\uF833';
+            case null, default -> '\uF834';
+        };
         // Need to cut off the end of their username to not hit the max length.
         var username = Objects.requireNonNull(getUsername(), "unknown");
-        if (username.length() > 16) username = username.substring(0, 16);
-        return username;
+        if (username.length() > 14) username = username.substring(0, 14);
+        return sortPrefix + username;
     }
 
 }

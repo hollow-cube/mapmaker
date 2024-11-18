@@ -203,16 +203,14 @@ public class SessionManager {
         Audiences.players().sendMessage(leaveMessage);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public void configureVanishedPlayer(@NotNull Player player) {
-        player.scheduleNextTick(ignored -> {
-            player.updateViewableRule(p -> hasSeeVanishedPerm.test(PlayerDataV2.fromPlayer(p).id()));
-        });
+        player.updateViewableRule(p -> hasSeeVanishedPerm.test(PlayerDataV2.fromPlayer(p).id()));
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private void configureVisiblePlayer(@NotNull Player player) {
-        player.scheduleNextTick(ignored -> {
-            player.updateViewableRule(null);
-        });
+        player.updateViewableRule(null);
     }
 
     private class ConsumerImpl extends BaseConsumer<SessionUpdateMessage> {

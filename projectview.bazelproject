@@ -5,7 +5,7 @@ directories:
 derive_targets_from_directories: true
 
 workspace_type: java
-java_language_level: jdk_21_preview
+java_language_level: jdk_20_preview
 
 targets:
   # If source code isn't resolving, add additional targets that compile it here
