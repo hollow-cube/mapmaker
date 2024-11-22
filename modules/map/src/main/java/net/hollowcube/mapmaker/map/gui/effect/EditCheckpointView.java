@@ -48,6 +48,7 @@ public class EditCheckpointView extends View {
         tabText.setArgs(Component.text("Checkpoint Settings"));
         tabSettingsStateSwitch.setOption(true);
         tabActionsStateSwitch.setOption(false);
+        tabSwitchMiddleSlot.setOption(1);
     }
 
     @Action("tab_actions")
@@ -57,6 +58,7 @@ public class EditCheckpointView extends View {
         tabText.setArgs(Component.text("Checkpoint Actions"));
         tabSettingsStateSwitch.setOption(false);
         tabActionsStateSwitch.setOption(true);
+        tabSwitchMiddleSlot.setOption(0);
     }
 
     @Action("tab_middle_slot_settings")
