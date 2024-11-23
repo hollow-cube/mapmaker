@@ -1,20 +1,7 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
 <?import net.hollowcube.mapmaker.gui.play.details ?>
-<component width="9" height="5" align="ttb" sprite="play_maps/details/tab_times/container">
-
-    <!-- Top bar -->
-    <box width="9" align="ltr">
-        <BackButton/>
-        <button id="information" translationKey="gui.map_details.top_times_tab.information"/>
-        <text id="map_author" width="5" translationKey="gui.map_details.creator_profile"
-              font="map_details_author" centered="true"/>
-        <button id="toggle_top_ten_btn" translationKey="gui.map_details.top_times_tab.other_top_times"
-                sprite="play_maps/details/tab_times/toggle_top_ten"/>
-        <button translationKey="gui.map_details.top_times_tab.toggle_first_completions"
-                sprite="play_maps/details/tab_times/toggle_first"/>
-    </box>
-
+<component width="9" height="4" align="ttb" sprite="play_maps/details/tab_times/container">
     <!-- Center content (top 3 times/4-9 times) -->
     <switch id="view_switch" width="9" height="3" loader="centered">
         <TimesTopThreeView id="top_three"/>
@@ -23,10 +10,18 @@
 
     <!-- Viewer time -->
     <box width="9" height="1" align="ltr">
-        <spacer width="2"/>
+        <spacer/>
+        <switch id="top_times_switch" width="1">
+            <button id="toggle_top_ten_btn" width="1" translationKey="gui.map_details.top_times_tab.other_top_times"
+                    sprite="play_maps/details/tab_times/notepad" backgroundSprite="play_maps/details/tab_times/notepad_bg"/>
+            <button id="toggle_wr_btn" width="1" translationKey="gui.map_details.top_times_tab.wr_top_times"
+                    sprite="play_maps/details/tab_times/notepad" backgroundSprite="play_maps/details/tab_times/notepad_selected_bg"/>
+        </switch>
         <text id="viewer_entry" width="5" translationKey="gui.map_details.top_times_tab.personal_best"
               sprite="minecraft:player_head@1" spritePos="0"
-              font="line_4" centered="true"/>
+              font="line_5" centered="true"/>
+        <label translationKey="gui.map_details.top_times_tab.toggle_first_completions"
+               sprite="play_maps/details/tab_times/flag"/>
     </box>
 
 </component>

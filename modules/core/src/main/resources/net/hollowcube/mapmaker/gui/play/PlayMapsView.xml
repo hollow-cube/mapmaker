@@ -3,14 +3,14 @@
 <?import net.hollowcube.mapmaker.gui.play ?>
 <?import net.hollowcube.mapmaker.gui.play.simple ?>
 <component width="9" height="10" align="ttb" sprite="play_maps/search/container">
+    <text id="title" width="0" height="0" translationKey=""
+          font="map_details_title2" shift="56"/>
     <!-- Top bar -->
     <box width="9" align="ltr">
-        <button id="close" translationKey="gui.generic.close_menu"
-                backgroundSprite="generic/close_bg"
-                sprite="generic/close"/>
-        <label translationKey="gui.play_maps.simple.information"/>
+        <BackButton2/>
+        <label translationKey="gui.play_maps.simple.information" sprite="generic/information"/>
         <text id="page_text" width="5" height="1" translationKey="gui.play_maps.page"
-              font="play_maps_page" centered="true"/>
+              font="play_maps_page" centered="true" sprite="generic/text_display_5"/>
         <button translationKey="gui.play_maps.simple.toggle_complex_mode"/>
         <Query/>
     </box>

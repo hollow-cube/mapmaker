@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.gui.play;
 
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Label;
+import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
@@ -14,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 public class SetReportCommentView extends View {
     public static final String SIG_UPDATE_NAME = "set_report_comment_view_update_name";
 
+    private @Outlet("title") Text titleText;
     private @Outlet("input") Label inputField;
     private @Outlet("output") Label outputField;
 
@@ -23,6 +25,7 @@ public class SetReportCommentView extends View {
         super(context);
         input = name;
         inputField.setArgs(Component.text(name));
+        titleText.setText("Add Comment");
     }
 
     @Signal(Element.SIG_ANVIL_INPUT)
