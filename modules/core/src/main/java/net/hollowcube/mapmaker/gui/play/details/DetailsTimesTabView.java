@@ -10,7 +10,6 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.util.FontUtil;
-import net.hollowcube.common.util.MojangUtil;
 import net.hollowcube.mapmaker.map.LeaderboardData;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -39,8 +38,7 @@ public class DetailsTimesTabView extends View {
     private @ContextObject MapService mapService;
     private @ContextObject Player player;
 
-    private @Outlet("map_author") Text mapAuthorText;
-
+    private @Outlet("top_times_switch") Switch topTimesSwitch;
     private @Outlet("view_switch") Switch viewSwitch;
     private @Outlet("top_three") TimesTopThreeView topThreeView;
     private @Outlet("top_ten") TimesTopTenView topTenView;
@@ -54,14 +52,13 @@ public class DetailsTimesTabView extends View {
         super(context);
 
         viewSwitch.setState(State.LOADING);
+        topTimesSwitch.setOption(0);
     }
 
     // Required immediately on load, but no requests will be made until a #show call is made.
     public void setMap(@NotNull MapData map, @NotNull String authorTextContent, @NotNull Component authorDisplayName) {
         this.map = map;
 
-        mapAuthorText.setText(authorTextContent);
-        mapAuthorText.setArgs(authorDisplayName);
     }
 
     public void show() {
@@ -92,6 +89,13 @@ public class DetailsTimesTabView extends View {
     @Action("toggle_top_ten_btn")
     private void handleToggleView() {
         viewSwitch.setOption(viewSwitch.getOption() == 0 ? 1 : 0);
+        topTimesSwitch.setOption(topTimesSwitch.getOption() == 0 ? 1 : 0);
+    }
+
+    @Action("toggle_wr_btn")
+    private void handleToggleView2() {
+        viewSwitch.setOption(viewSwitch.getOption() == 0 ? 1 : 0);
+        topTimesSwitch.setOption(topTimesSwitch.getOption() == 0 ? 1 : 0);
     }
 
     private void fillPlayerEntry(@Nullable LeaderboardData.Entry entry) {
@@ -117,7 +121,7 @@ public class DetailsTimesTabView extends View {
     static @NotNull ItemStack getPlayerHead2d(@Nullable String uuid, int model) {
         if (uuid == null) return MISSING_ITEM.with(ItemComponent.CUSTOM_MODEL_DATA, model);
         return HEAD_CACHE.get(uuid, key -> {
-            var skin = Objects.requireNonNull(MojangUtil.getSkinFromUuid(key));
+            var skin = PlayerSkin.fromUuid(key);
             return ItemStack.builder(Material.PLAYER_HEAD)
                     .set(ItemComponent.PROFILE, new HeadProfile(skin))
                     .build();

@@ -7,7 +7,6 @@
                 sprite="play_maps/search/filter/best/icon"/>
         <button id="selected"
                 translationKey="gui.play_maps.simple.sorting_preset.best.already_selected"
-                backgroundSprite="play_maps/search/filter/best/bg_selected"
-                sprite="play_maps/search/filter/best/icon"/>
+                sprite="play_maps/search/filter/best/bg_selected"/>
     </switch>
 </component>

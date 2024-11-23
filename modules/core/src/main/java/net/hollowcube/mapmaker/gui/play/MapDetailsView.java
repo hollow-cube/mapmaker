@@ -13,6 +13,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.gui.play.details.DetailsTimesTabView;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -42,7 +43,6 @@ public class MapDetailsView extends View {
 
     private @Outlet("tab_switch") Switch tabSwitch;
     private @Outlet("tab_info_switch") Switch tabInfoSwitch;
-    private @Outlet("tab_stats_switch") Switch tabStatsSwitch;
     private @Outlet("tab_times_switch") Switch tabTimesSwitch;
     private @Outlet("tab_reviews_switch") Switch tabReviewswitch;
     private @Outlet("tab_info_switch_building") Switch tabInfoSwitchBuilding;
@@ -113,7 +113,9 @@ public class MapDetailsView extends View {
     private @Outlet("variant_icon_switch") Switch variantIconSwitch;
     private @Outlet("title") Text titleText;
     private @Outlet("author") Text authorText;
+    private @Outlet("play_leave_switch") Switch playLeaveSwitch;
     private @Outlet("play_map") Label playMapButton;
+    private @Outlet("leave_map") Label leaveMapButton;
 
     private @Outlet("times_view") DetailsTimesTabView topTimesView;
 
@@ -148,7 +150,7 @@ public class MapDetailsView extends View {
             this.tabSwitches = new Switch[]{tabInfoSwitchBuilding, tabStatsSwitchBuilding, tabReviewswitchBuilding};
         } else {
             tabContainerSwitch.setOption(1);
-            this.tabSwitches = new Switch[]{tabInfoSwitch, tabStatsSwitch, tabTimesSwitch, tabReviewswitch};
+            this.tabSwitches = new Switch[]{tabInfoSwitch, tabTimesSwitch, tabReviewswitch};
         }
 
         selectTab(0);
@@ -327,6 +329,13 @@ public class MapDetailsView extends View {
         authorText.setArgs(authorDisplayName);
 
         topTimesView.setMap(map, authorTextContent, authorDisplayName);
+
+        var currentMap = MiscFunctionality.getCurrentMap(sessionManager, mapService, context.player());
+        if (currentMap != null) {
+            playLeaveSwitch.setOption(1);
+        } else {
+            playLeaveSwitch.setOption(0);
+        }
     }
 
     public void handleReportMap(@NotNull Player player) {
@@ -353,6 +362,11 @@ public class MapDetailsView extends View {
         }
     }
 
+    @Action(value = "leave_map", async = true)
+    public void handleLeaveMap(@NotNull Player player) {
+        bridge.joinHub(player);
+    }
+
     // TAB SWITCHING
 
     @Action("tab_info")
@@ -360,15 +374,10 @@ public class MapDetailsView extends View {
         selectTab(0);
     }
 
-    @Action("tab_stats")
-    public void showStatsTab() {
-//        selectTab(1);
-    }
-
     @Action("tab_times")
     public void showTimesTab() {
         topTimesView.show(); // Kick off loading the entries
-        selectTab(2);
+        selectTab(1);
     }
 
     @Action("tab_reviews")
