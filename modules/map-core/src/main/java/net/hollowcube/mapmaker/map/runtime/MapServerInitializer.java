@@ -151,6 +151,9 @@ public final class MapServerInitializer {
         PyroscopeAgent.start(new Config.Builder()
                 .setApplicationName("mapmaker-" + role)
                 .setProfilingEvent(EventType.ITIMER)
+                .setProfilingInterval(Duration.ofMillis(10))
+                .setProfilingLock("10ms")
+                .setProfilingAlloc("512k")
                 .setFormat(Format.JFR)
                 .setServerAddress(endpoint)
                 .build());
