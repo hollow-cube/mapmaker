@@ -28,11 +28,12 @@ public abstract class BaseElement implements Element, Loadable {
 
     public static final ItemStack LOADING_BROKEN_ITEM = ItemStack.builder(Material.STICK)
             .set(ItemComponent.HIDE_TOOLTIP, null)
-            .set(ItemComponent.CUSTOM_MODEL_DATA, 2)
+            // TODO(1.21.4) these should be processed by packer.
+            .set(ItemComponent.ITEM_MODEL, "mapmaker:canvas_broken")
             .build();
     public static final ItemStack LOADING_SPINNER_ITEM = ItemStack.builder(Material.STICK)
             .set(ItemComponent.HIDE_TOOLTIP, null)
-            .set(ItemComponent.CUSTOM_MODEL_DATA, 3)
+            .set(ItemComponent.ITEM_MODEL, "mapmaker:canvas_loader_1")
             .build();
 
 

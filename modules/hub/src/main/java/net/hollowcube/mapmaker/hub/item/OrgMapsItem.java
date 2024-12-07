@@ -3,12 +3,18 @@ package net.hollowcube.mapmaker.hub.item;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.mapmaker.hub.gui.org.OrgMapsView;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
-import net.minestom.server.item.Material;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.item.ItemComponent;
+import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class OrgMapsItem extends ItemHandler {
+    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hammer"));
     public static final String ID = "mapmaker:org_maps";
 
     private final Controller guiController;
@@ -19,13 +25,8 @@ public class OrgMapsItem extends ItemHandler {
     }
 
     @Override
-    public @NotNull Material material() {
-        return Material.DIAMOND_PICKAXE;
-    }
-
-    @Override
-    public int customModelData() {
-        return 5556;
+    public @Nullable BadSprite sprite() {
+        return SPRITE;
     }
 
     @Override
@@ -36,6 +37,12 @@ public class OrgMapsItem extends ItemHandler {
             return;
         }
         guiController.show(click.player(), context -> new OrgMapsView(context, targetOrg));
+    }
+
+    @Override
+    public @NotNull ItemStack buildItemStack(@Nullable CompoundBinaryTag nbt) {
+        return super.buildItemStack(nbt)
+                .with(ItemComponent.ENCHANTMENT_GLINT_OVERRIDE, true);
     }
 
     private static final Map<String, String> USER_ORGS = Map.ofEntries(

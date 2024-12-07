@@ -1,21 +1,13 @@
 package net.hollowcube.mapmaker;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.marhali.json5.Json5;
-import de.marhali.json5.Json5Object;
-import net.hollowcube.mapmaker.type.ServerSprite;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 public class ModelTransform {
     private static final Json5 json5 = new Json5();
@@ -28,31 +20,38 @@ public class ModelTransform {
     }
 
     public void process(@NotNull PackContext ctx) throws IOException {
-        Path fontBaseDir = ctx.resources().resolve("models");
-        try (Stream<Path> fontFileSet = Files.walk(fontBaseDir)) {
-            List<Path> files = fontFileSet.sorted(Comparator.comparing(Path::toString)).toList();
-            for (Path itemModelFile : files) {
-                if (!itemModelFile.getFileName().toString().endsWith(".json5")) continue;
-
-                String name = itemModelFile.getFileName().toString().replace(".json5", "");
-                Json5Object config = json5.parse(Files.readString(itemModelFile)).getAsJson5Object();
-                String type = config.get("type").getAsString();
-                if (!"basic".equals(type)) throw new IllegalArgumentException("Invalid model type: " + type);
-
-                // texture
-                byte[] texture = Files.readAllBytes(itemModelFile.resolveSibling(name + ".png"));
-                String texId = ctx.writeTexture("item", name, texture);
-
-                // Copy the 3d model
-                JsonObject modelObj = new Gson().fromJson(Files.readString(itemModelFile.resolveSibling(name + "_model.json")), JsonObject.class);
-                fixModelTextures(modelObj, texId);
-                String model = ctx.writeModel(name, modelObj);
-                int cmd = ctx.addBasicItem(ModelType.COLORED, name, model);
-
-                String fullName = "models/" + fontBaseDir.relativize(itemModelFile).toString().replace(".json5", "").replace("\\", "/");
-                ctx.addServerSprite(ServerSprite.customModelData(fullName, cmd));
-            }
-        }
+        // TODO(1.21.4)
+//        Path fontBaseDir = ctx.resources().resolve("models");
+//        try (Stream<Path> fontFileSet = Files.walk(fontBaseDir)) {
+//            List<Path> files = fontFileSet.sorted(Comparator.comparing(Path::toString)).toList();
+//            for (Path itemModelFile : files) {
+//                if (!itemModelFile.getFileName().toString().endsWith(".json5")) continue;
+//
+//                String name = itemModelFile.getFileName().toString().replace(".json5", "");
+//                Json5Object config = json5.parse(Files.readString(itemModelFile)).getAsJson5Object();
+//                String type = config.get("type").getAsString();
+//                if (!"basic".equals(type)) throw new IllegalArgumentException("Invalid model type: " + type);
+//
+//                // texture
+//                byte[] texture = Files.readAllBytes(itemModelFile.resolveSibling(name + ".png"));
+//                String texId = ctx.writeTexture("item", name, texture);
+//
+//                // Copy the 3d model
+//                JsonObject modelObj = new Gson().fromJson(Files.readString(itemModelFile.resolveSibling(name + "_model.json")), JsonObject.class);
+//                fixModelTextures(modelObj, texId);
+//                String model = ctx.writeModel(name, modelObj);
+//                int cmd = ctx.addBasicItem(ModelType.COLORED, name, model);
+//
+//                JsonObject serverSpriteConf = new JsonObject();
+//                String fullName = "models/" + fontBaseDir.relativize(itemModelFile).toString().replace(".json5", "").replace("\\", "/");
+////                System.out.println("processing " + fullName);
+//                serverSpriteConf.addProperty("name", fullName);
+//                serverSpriteConf.addProperty("cmd", cmd);
+//                serverSpriteConf.addProperty("width", 0);
+//                serverSpriteConf.addProperty("offsetX", 0);
+//                ctx.getServerSprites().add(serverSpriteConf);
+//            }
+//        }
     }
 
     private void fixModelTextures(@NotNull JsonObject model, @NotNull String texId) {

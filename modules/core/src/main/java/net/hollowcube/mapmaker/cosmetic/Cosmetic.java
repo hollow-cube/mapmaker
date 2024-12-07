@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.component.CustomModelData;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,6 +18,7 @@ import java.util.*;
 import java.util.function.Function;
 
 public class Cosmetic {
+    private static final CustomModelData LOCKED_CMD = new CustomModelData(List.of(), List.of(true), List.of(), List.of());
     private static final Map<CosmeticType, Map<String, Cosmetic>> COSMETICS = new HashMap<>();
 
     public static final Codec<Cosmetic> CODEC = Codec.STRING.xmap(Cosmetic::byPathRequired, Cosmetic::path);
@@ -99,13 +101,9 @@ public class Cosmetic {
         this.icon = ItemStack.builder(Material.DIAMOND)
                 .set(ItemComponent.CUSTOM_NAME, displayName)
                 .set(ItemComponent.LORE, lore)
-                .set(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("cosmetic/" + type.id() + "/" + id + "/icon").cmd())
+                .set(ItemComponent.ITEM_MODEL, BadSprite.require("cosmetic/" + type.id() + "/" + id).model())
                 .build().withTag(COSMETIC_TAG, true);
-        this.iconLocked = ItemStack.builder(Material.DIAMOND)
-                .set(ItemComponent.CUSTOM_NAME, displayName)
-                .set(ItemComponent.LORE, lore)
-                .set(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("cosmetic/" + type.id() + "/" + id + "/icon_locked").cmd())
-                .build().withTag(COSMETIC_TAG, true);
+        this.iconLocked = icon.with(ItemComponent.CUSTOM_MODEL_DATA, LOCKED_CMD);
 
         this.impl = implFunc.apply(this);
     }

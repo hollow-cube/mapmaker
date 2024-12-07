@@ -6,6 +6,7 @@ import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.dfu.DFU;
 import net.hollowcube.terraform.instance.TerraformInstanceBiomes;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.network.packet.server.CachedPacket;

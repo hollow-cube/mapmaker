@@ -14,7 +14,6 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.ExplosionPacket;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.sound.SoundEvent;
@@ -64,7 +63,8 @@ public class LauncherFeature implements HubFeature {
 
         public LauncherEntity() {
             setStatic(true);
-            setModel(Material.STICK, 12);
+            // TODO(1.21.4)
+//            setModel(Material.STICK, 12);
             getEntityMeta().setScale(new Vec(16));
         }
 

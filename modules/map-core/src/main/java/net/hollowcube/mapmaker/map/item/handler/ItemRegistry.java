@@ -25,6 +25,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -95,7 +96,7 @@ public class ItemRegistry {
 
     private final ReentrantLock lock = new ReentrantLock();
     private final Map<String, ItemHandler> idToItemHandler = new HashMap<>();
-    private final Int2ObjectMap<ItemHandler> customModelDataToItemHandler = new Int2ObjectArrayMap<>();
+    private final Map<String, ItemHandler> modelToItemHandler = new HashMap<>();
     private final Int2ObjectMap<ItemHandler> materialToItemHandler = new Int2ObjectArrayMap<>();
 
     // Contains all the "public" item names known by this registry. Used for completions.
@@ -117,10 +118,15 @@ public class ItemRegistry {
         try {
             lock.lock();
             idToItemHandler.put(itemHandler.id().asString().toLowerCase(Locale.ROOT), itemHandler);
-            if (itemHandler.customModelData() != -1) {
-                customModelDataToItemHandler.put(itemHandler.customModelData(), itemHandler);
+            var sprite = itemHandler.sprite();
+            var material = itemHandler.material();
+            if (sprite != null) {
+                modelToItemHandler.put(sprite.model(), itemHandler);
+                Check.argCondition(material != null, "material must be null if sprite is not");
+            } else if (material != null) {
+                materialToItemHandler.put(material.id(), itemHandler);
             } else {
-                materialToItemHandler.put(itemHandler.material().id(), itemHandler);
+                throw new IllegalArgumentException("ItemHandler must provide either a sprite or material");
             }
 
             allItemNames.add(itemHandler.id());
@@ -137,10 +143,15 @@ public class ItemRegistry {
         try {
             lock.lock();
             idToItemHandler.put(itemHandler.id().asString().toLowerCase(Locale.ROOT), itemHandler);
-            if (itemHandler.customModelData() != -1) {
-                customModelDataToItemHandler.put(itemHandler.customModelData(), itemHandler);
+            var sprite = itemHandler.sprite();
+            var material = itemHandler.material();
+            if (sprite != null) {
+                modelToItemHandler.put(sprite.model(), itemHandler);
+                Check.argCondition(material != null, "material must be null if sprite is not");
+            } else if (material != null) {
+                materialToItemHandler.put(material.id(), itemHandler);
             } else {
-                materialToItemHandler.put(itemHandler.material().id(), itemHandler);
+                throw new IllegalArgumentException("ItemHandler must provide either a sprite or material");
             }
         } finally {
             lock.unlock();
@@ -362,7 +373,7 @@ public class ItemRegistry {
     private @Nullable ItemHandler getHandlerFromItemStack(@NotNull ItemStack itemStack) {
         var itemHandler = materialToItemHandler.get(itemStack.material().id());
         if (itemHandler != null) return itemHandler;
-        return customModelDataToItemHandler.get(itemStack.get(ItemComponent.CUSTOM_MODEL_DATA, -1));
+        return modelToItemHandler.get(itemStack.get(ItemComponent.ITEM_MODEL, ""));
     }
 
     public boolean isOnCooldown(@NotNull Player player) {

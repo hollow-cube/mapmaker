@@ -8,7 +8,6 @@ import net.hollowcube.mapmaker.map.MapServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.item.Material;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,7 +26,8 @@ public class CyberpunkTrainFeature implements HubFeature {
 
     @Override
     public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
-        trainFront.setModel(Material.STICK, 7);
+        // TODO(1.21.4)
+//        trainFront.setModel(Material.STICK, 7);
         trainFront.getEntityMeta().setScale(new Vec(4));
         var metaFront = trainFront.getEntityMeta();
         metaFront.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),
@@ -35,14 +35,16 @@ public class CyberpunkTrainFeature implements HubFeature {
         metaFront.setTranslation(new Vec(-10, 0, 1));
         trainFront.setInstance(world.instance(), new Pos(TRAIN_START, 27.5f, 0));
 
-        trainMiddle.setModel(Material.STICK, 6);
+        // TODO(1.21.4)
+//        trainMiddle.setModel(Material.STICK, 6);
         trainMiddle.getEntityMeta().setScale(new Vec(4));
         var metaMiddle = trainMiddle.getEntityMeta();
         metaMiddle.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),
                 Math.toRadians(-90)).into());
         trainMiddle.setInstance(world.instance(), new Pos(TRAIN_START, 27.5f, 0));
 
-        trainBack.setModel(Material.STICK, 7);
+        // TODO(1.21.4)
+//        trainBack.setModel(Material.STICK, 7);
         trainBack.getEntityMeta().setScale(new Vec(4));
         var metaBack = trainBack.getEntityMeta();
         metaBack.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),

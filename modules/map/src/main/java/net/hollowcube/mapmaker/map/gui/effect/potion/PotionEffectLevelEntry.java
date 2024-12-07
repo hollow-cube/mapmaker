@@ -40,7 +40,7 @@ public class PotionEffectLevelEntry extends View {
         if (level != -1) {
             var sprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("effect/potion/level/" + level), "effect/potion/level/" + level);
             var item = ItemStack.builder(Material.DIAMOND)
-                    .set(ItemComponent.CUSTOM_MODEL_DATA, sprite.cmd())
+                    .set(ItemComponent.ITEM_MODEL, Objects.requireNonNull(sprite.model(), "sprite must have a model"))
                     .build();
             selectLabel.setItemSprite(item);
             selectSelectedLabel.setItemSprite(item);

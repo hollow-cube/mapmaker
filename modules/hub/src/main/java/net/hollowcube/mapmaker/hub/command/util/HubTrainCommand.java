@@ -16,7 +16,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
-import net.minestom.server.item.Material;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
@@ -71,9 +70,10 @@ public class HubTrainCommand extends CommandDsl {
             NpcItemModel trainFront = new NpcItemModel();
             NpcItemModel trainMiddle = new NpcItemModel();
             NpcItemModel trainBack = new NpcItemModel();
-            trainFront.setModel(Material.STICK, 7);
-            trainMiddle.setModel(Material.STICK, 6);
-            trainBack.setModel(Material.STICK, 7);
+            // TODO(1.21.4)
+//            trainFront.setModel(Material.STICK, 7);
+//            trainMiddle.setModel(Material.STICK, 6);
+//            trainBack.setModel(Material.STICK, 7);
             train = List.of(trainFront, trainMiddle, trainBack);
         }
 

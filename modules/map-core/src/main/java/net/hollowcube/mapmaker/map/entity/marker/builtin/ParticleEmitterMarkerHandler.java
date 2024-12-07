@@ -144,7 +144,7 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
             }
 
             var computedParticle = particle.apply(variables);
-            entity.sendPacketToViewers(new ParticlePacket(computedParticle, false, position, computedOffset, computedSpeed, computedCount));
+            entity.sendPacketToViewers(new ParticlePacket(computedParticle, false, false, position, computedOffset, computedSpeed, computedCount));
         }
     }
 

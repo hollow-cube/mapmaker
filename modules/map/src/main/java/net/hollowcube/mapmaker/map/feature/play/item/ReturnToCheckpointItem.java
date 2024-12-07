@@ -13,8 +13,8 @@ import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
-import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -22,23 +22,17 @@ public class ReturnToCheckpointItem extends ItemHandler {
     private static final TagCooldown CONFIRM_COOLDOWN = new TagCooldown("mapmaker:play/checkpoint_item_confirm", 2000);
     private static final int MIN_RESET_TIME = 1 * 60 * 1000; // 1 minute
 
+    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/return_to_checkpoint"));
     public static final String ID = "mapmaker:return_to_checkpoint";
     public static final ReturnToCheckpointItem INSTANCE = new ReturnToCheckpointItem();
-
-    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/return_to_checkpoint"));
 
     private ReturnToCheckpointItem() {
         super(ID, RIGHT_CLICK_ANY);
     }
 
     @Override
-    public @NotNull Material material() {
-        return Material.DIAMOND;
-    }
-
-    @Override
-    public int customModelData() {
-        return SPRITE.cmd();
+    public @Nullable BadSprite sprite() {
+        return SPRITE;
     }
 
     @Override

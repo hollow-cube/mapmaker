@@ -1,18 +1,13 @@
 package net.hollowcube.mapmaker;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.marhali.json5.Json5;
 import de.marhali.json5.Json5Object;
-import net.hollowcube.mapmaker.type.ServerSprite;
+import net.hollowcube.mapmaker.util.ModelUtil;
+import net.hollowcube.mapmaker.util.Templates;
 import org.jetbrains.annotations.NotNull;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,13 +18,6 @@ import java.util.stream.Stream;
 
 public class ItemModelTransform {
     private static final Json5 json5 = new Json5();
-
-    private int nextChar = 0;
-
-    public void init(@NotNull PackContext ctx, @NotNull FontTransform fontTransform) throws IOException {
-        nextChar = fontTransform.getNextChar();
-
-    }
 
     public void process(@NotNull PackContext ctx) throws IOException {
         Path fontBaseDir = ctx.resources().resolve("item_models");
@@ -43,70 +31,32 @@ public class ItemModelTransform {
                 String type = config.get("type").getAsString();
                 if (!"item_model".equals(type)) throw new IllegalArgumentException("Invalid item model type: " + type);
 
-                // Copy the textures
-                byte[] img2d = setAlpha(Files.readAllBytes(itemModelFile.resolveSibling(name + "_2d.png")), 221);
+                // Create the 2d model
+                byte[] img2d = Files.readAllBytes(itemModelFile.resolveSibling(name + "_2d.png"));
                 String tex2d = ctx.writeTexture("item", name + "_2d", img2d);
-                byte[] img3d = setAlpha(Files.readAllBytes(itemModelFile.resolveSibling(name + "_3d.png")), 225);
+                String model2d = ctx.writeModel(name + "_2d", ModelUtil.createItemGenerated(tex2d));
+
+                // Create the 3d model
+                byte[] img3d = Files.readAllBytes(itemModelFile.resolveSibling(name + "_3d.png"));
                 String tex3d = ctx.writeTexture("item", name + "_3d", img3d);
+                JsonObject modelObj3d = new Gson().fromJson(Files.readString(itemModelFile.resolveSibling(name + "_3d.json")), JsonObject.class);
+                String model3d = ctx.writeModel(name + "_3d", transform3dModel(modelObj3d, tex3d));
 
-                // Fix the 3d model
-                JsonObject modelObj = new Gson().fromJson(Files.readString(itemModelFile.resolveSibling(name + "_3d.json")), JsonObject.class);
-                add2dModel(modelObj, tex2d, tex3d);
-                String model = ctx.writeModel(name, modelObj);
-                int cmd = ctx.addBasicItem(ModelType.DEFAULT, name, model);
-
-                ctx.addServerSprite(ServerSprite.customModelData(name, cmd));
+                // Create the composite model
+                ctx.addItemModel(name, Templates.applyObject("2d_3d_composite",
+                        Map.of("2d", model2d, "3d", model3d)));
             }
         }
     }
 
-    private void add2dModel(@NotNull JsonObject model, @NotNull String tex2d, @NotNull String tex3d) {
+    private @NotNull JsonObject transform3dModel(@NotNull JsonObject model, @NotNull String tex3d) {
         JsonObject textures = model.getAsJsonObject("textures");
         String oldTextureName = findReplaceableTexture(textures);
 
-        textures.remove(oldTextureName);
-        textures.addProperty("3d", tex3d);
-        textures.addProperty("2d", tex2d);
-        textures.addProperty("particle", tex2d);
+        textures.addProperty(oldTextureName, tex3d);
+        textures.addProperty("particle", tex3d);
 
-        JsonArray elements = model.getAsJsonArray("elements");
-        for (JsonElement elem : elements) {
-            JsonObject element = elem.getAsJsonObject();
-
-            for (Map.Entry<String, JsonElement> entry : element.getAsJsonObject("faces").entrySet()) {
-                JsonObject face = entry.getValue().getAsJsonObject();
-                face.addProperty("texture", "#3d");
-            }
-        }
-
-        String elem2dStr = "{" +
-                "    \"from\": [0, 0, 16]," +
-                "    \"to\": [16, 16, 16]," +
-                "    \"faces\": {" +
-                "    \"north\": {\"uv\": [0, 0, 16, 16], \"texture\": \"#2d\"}," +
-                "    \"east\": {\"uv\": [0, 0, 0, 8], \"texture\": \"#missing\"}," +
-                "    \"south\": {\"uv\": [0, 0, 16, 16], \"texture\": \"#2d\"}," +
-                "    \"west\": {\"uv\": [0, 0, 0, 8], \"texture\": \"#missing\"}," +
-                "    \"up\": {\"uv\": [0, 0, 8, 0], \"texture\": \"#missing\"}," +
-                "    \"down\": {\"uv\": [0, 0, 8, 0], \"texture\": \"#missing\"}" +
-                "}}";
-        JsonObject elem2d = new Gson().fromJson(elem2dStr, JsonObject.class);
-        elements.add(elem2d);
-    }
-
-    private byte[] setAlpha(byte[] data, int alpha) throws IOException {
-        BufferedImage src = ImageIO.read(new ByteArrayInputStream(data));
-        BufferedImage dst = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        for (int x = 0; x < src.getWidth(); x++) {
-            for (int y = 0; y < src.getHeight(); y++) {
-                int rgb = src.getRGB(x, y);
-                if ((rgb & 0xFF000000) == 0) continue;
-                dst.setRGB(x, y, (src.getRGB(x, y) & 0xFFFFFF) | (alpha << 24));
-            }
-        }
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(dst, "png", baos);
-        return baos.toByteArray();
+        return model;
     }
 
     private String findReplaceableTexture(@NotNull JsonObject textures) {

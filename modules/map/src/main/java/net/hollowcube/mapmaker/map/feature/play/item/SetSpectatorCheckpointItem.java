@@ -6,8 +6,8 @@ import net.hollowcube.mapmaker.util.GenericTempActionBarProvider;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.entity.Player;
-import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -25,13 +25,8 @@ public class SetSpectatorCheckpointItem extends ItemHandler {
     }
 
     @Override
-    public @NotNull Material material() {
-        return Material.DIAMOND;
-    }
-
-    @Override
-    public int customModelData() {
-        return SPRITE.cmd();
+    public @Nullable BadSprite sprite() {
+        return SPRITE;
     }
 
     @Override
@@ -46,6 +41,5 @@ public class SetSpectatorCheckpointItem extends ItemHandler {
             actionBar.addProvider(new GenericTempActionBarProvider("Added temporary checkpoint!", 1000));
 //        }
     }
-
 
 }

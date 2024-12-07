@@ -30,11 +30,6 @@ public class DebugStickItem extends ItemHandler {
     }
 
     @Override
-    public int customModelData() {
-        return -1; // Match based on material not custom model data.
-    }
-
-    @Override
     protected void leftClicked(@NotNull Click click) {
         var player = click.player();
         var block = click.instance().getBlock(click.blockPosition(), Block.Getter.Condition.TYPE);

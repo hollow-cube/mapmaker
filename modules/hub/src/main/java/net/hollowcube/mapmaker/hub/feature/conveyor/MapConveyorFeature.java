@@ -11,7 +11,6 @@ import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.format.TextColor;
-import net.minestom.server.color.Color;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -20,10 +19,8 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.event.instance.AddEntityToInstanceEvent;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.component.DyedItemColor;
 import net.minestom.server.network.packet.server.ServerPacket;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
@@ -360,21 +357,24 @@ public class MapConveyorFeature implements HubFeature {
             theEntities.forEach(e -> e.addViewer(player));
         });
 
-        ((ItemDisplayMeta) clawPillar.getEntityMeta()).setItemStack(ItemStack.of(Material.STICK).with(ItemComponent.CUSTOM_MODEL_DATA, 17));
+        // TODO(1.21.4)
+//        ((ItemDisplayMeta) clawPillar.getEntityMeta()).setItemStack(ItemStack.of(Material.STICK).with(ItemComponent.CUSTOM_MODEL_DATA, 17));
         clawPillar.getEntityMeta().setScale(new Vec(10));
         clawPillar.getInterp().setTranslation(new Vec(-2 / 4., 20 / 4., 0));
         clawPillar.setInstance(world.instance());
         clawPillar.getInterp().setPosition(new Pos(-64.5, 37, 38.5, 180, 0));
         theEntities.add(clawPillar);
 
-        ((ItemDisplayMeta) clawClaw.getEntityMeta()).setItemStack(ItemStack.of(Material.STICK).with(ItemComponent.CUSTOM_MODEL_DATA, 16));
+        // TODO(1.21.4)
+//        ((ItemDisplayMeta) clawClaw.getEntityMeta()).setItemStack(ItemStack.of(Material.STICK).with(ItemComponent.CUSTOM_MODEL_DATA, 16));
         clawClaw.getEntityMeta().setScale(new Vec(9));
         clawClaw.getInterp().setTranslation(new Vec(8 / 4., 12 / 4., 0));
         clawClaw.setInstance(world.instance());
         clawClaw.getInterp().setPosition(new Pos(-64.5, 42, 38.5, 180, 0));
         theEntities.add(clawClaw);
 
-        ((ItemDisplayMeta) sealPiston.getEntityMeta()).setItemStack(ItemStack.of(Material.STICK).with(ItemComponent.CUSTOM_MODEL_DATA, 16));
+        // TODO(1.21.4)
+//        ((ItemDisplayMeta) sealPiston.getEntityMeta()).setItemStack(ItemStack.of(Material.STICK).with(ItemComponent.CUSTOM_MODEL_DATA, 16));
         var sealMeta = (ItemDisplayMeta) sealPiston.getEntityMeta();
         sealMeta.setDisplayContext(ItemDisplayMeta.DisplayContext.THIRD_PERSON_RIGHT_HAND);
         sealMeta.setItemStack(makeItemStack(PISTON_SPRITE));
@@ -440,9 +440,11 @@ public class MapConveyorFeature implements HubFeature {
     }
 
     private @NotNull ItemStack makeItemStack(@NotNull BadSprite sprite) {
-        return ItemStack.of(Material.LEATHER_HORSE_ARMOR)
-                .with(ItemComponent.CUSTOM_MODEL_DATA, sprite.cmd())
-                .with(ItemComponent.DYED_COLOR, new DyedItemColor(new Color(0x77c652)));
+        // TODO(1.21.4)
+        return ItemStack.of(Material.APPLE);
+//        return ItemStack.of(Material.LEATHER_HORSE_ARMOR)
+//                .with(ItemComponent.CUSTOM_MODEL_DATA, sprite.cmd())
+//                .with(ItemComponent.DYED_COLOR, new DyedItemColor(new Color(0x77c652)));
     }
 
 }

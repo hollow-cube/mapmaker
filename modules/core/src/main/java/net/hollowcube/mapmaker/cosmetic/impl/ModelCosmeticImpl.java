@@ -16,10 +16,10 @@ public class ModelCosmeticImpl extends CosmeticImpl {
 
     public ModelCosmeticImpl(@NotNull Cosmetic cosmetic) {
         super(cosmetic);
-        this.model = ItemStack.builder(Material.LEATHER_HORSE_ARMOR)
+        this.model = ItemStack.builder(Material.STICK)
                 .set(ItemComponent.CUSTOM_NAME, cosmetic.displayName())
                 .set(ItemComponent.LORE, cosmetic.lore())
-                .set(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("cosmetic/" + cosmetic.type().id() + "/" + cosmetic.id()).cmd())
+                .set(ItemComponent.ITEM_MODEL, BadSprite.require("cosmetic/" + cosmetic.type().id() + "/" + cosmetic.id()).model())
                 .set(ItemComponent.DYED_COLOR, new DyedItemColor(new Color(255, 255, 255), false))
                 .hideExtraTooltip()
                 .build()

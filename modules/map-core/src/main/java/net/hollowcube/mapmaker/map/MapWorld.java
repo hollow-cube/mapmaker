@@ -23,7 +23,7 @@ import java.util.Objects;
 import java.util.function.UnaryOperator;
 
 public sealed interface MapWorld extends TagReadable, TagWritable permits AbstractMapWorld {
-    int DATA_VERSION = HCVersions.V1_21_3_HC1;
+    int DATA_VERSION = HCVersions.V1_21_4_HC1;
 
     interface Constructor<T extends AbstractMapWorld> {
         @NotNull T create(@NotNull MapServer server, @NotNull MapData map);

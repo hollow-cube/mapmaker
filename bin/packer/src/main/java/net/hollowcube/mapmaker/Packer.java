@@ -48,9 +48,9 @@ public class Packer {
         fontTransform.process(ctx);
 
         ItemModelTransform itemModelTransform = new ItemModelTransform();
-        itemModelTransform.init(ctx, fontTransform);
         itemModelTransform.process(ctx);
 
+        //TODO(1.21.4) What did this do and why is it disabled
 //        ModelTransform modelTransform = new ModelTransform();
 //        modelTransform.init(ctx, fontTransform);
 //        modelTransform.process(ctx);
@@ -64,7 +64,7 @@ public class Packer {
 
         Hub5x5Transform hub5x5Transform = new Hub5x5Transform();
         hub5x5Transform.init(ctx);
-        hub5x5Transform.process(ctx);
+//        hub5x5Transform.process(ctx);
 
         new LangCloner().process(ctx);
 

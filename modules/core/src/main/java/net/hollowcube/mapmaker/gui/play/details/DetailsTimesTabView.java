@@ -120,13 +120,14 @@ public class DetailsTimesTabView extends View {
             .build();
 
     static @NotNull ItemStack getPlayerHead2d(@Nullable String uuid, int model) {
-        if (uuid == null) return MISSING_ITEM.with(ItemComponent.CUSTOM_MODEL_DATA, model);
-        return HEAD_CACHE.get(uuid, key -> {
-            var profile = OpUtils.map(PlayerSkin.fromUuid(key), HeadProfile::new);
-            return ItemStack.builder(Material.PLAYER_HEAD)
-                    .set(ItemComponent.PROFILE, Objects.requireNonNullElse(profile, HeadProfile.EMPTY))
-                    .build();
-        }).with(ItemComponent.CUSTOM_MODEL_DATA, model);
+        // if (uuid == null) return MISSING_ITEM.with(ItemComponent.CUSTOM_MODEL_DATA, model);
+        // return HEAD_CACHE.get(uuid, key -> {
+        //     var profile = OpUtils.map(PlayerSkin.fromUuid(key), HeadProfile::new);
+        //     return ItemStack.builder(Material.PLAYER_HEAD)
+        //             .set(ItemComponent.PROFILE, Objects.requireNonNullElse(profile, HeadProfile.EMPTY))
+        //             .build();
+        // }).with(ItemComponent.CUSTOM_MODEL_DATA, model);
+        return ItemStack.of(Material.APPLE);
     }
 
 }

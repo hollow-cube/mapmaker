@@ -13,7 +13,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
-import net.minestom.server.item.Material;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +41,8 @@ public class MapOfTheWeekFeature implements HubFeature {
 
         // Spinning map
         mapEntity.setHandler(this::handleMapInteract);
-        mapEntity.setModel(Material.STICK, 5);
+        // TODO(1.21.4)
+//        mapEntity.setModel(Material.STICK, 5);
         mapEntity.getEntityMeta().setScale(new Vec(4));
         mapEntity.setInstance(world.instance(), MAP_ENTITY_POS);
         mapEntity.setInteractionBox(6, 6, new Pos(0, -0.5, 0));

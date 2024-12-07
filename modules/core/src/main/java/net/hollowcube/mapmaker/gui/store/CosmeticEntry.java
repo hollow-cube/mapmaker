@@ -126,7 +126,7 @@ public class CosmeticEntry extends View {
         onIcon.setItemSprite(itemIcon);
 
         var sprite = SELECTED_SPRITES[row];
-        onIcon.setSprite(sprite.fontChar(), sprite.cmd(), sprite.width(), sprite.offsetX(), sprite.rightOffset());
+        onIcon.setSprite(sprite.fontChar(), sprite.model(), sprite.width(), sprite.offsetX(), sprite.rightOffset());
 
         {
             var lore = new ArrayList<>(itemIcon.get(ItemComponent.LORE, List.of()));

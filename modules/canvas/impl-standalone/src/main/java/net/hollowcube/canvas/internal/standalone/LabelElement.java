@@ -20,7 +20,7 @@ import java.util.List;
 
 public class LabelElement extends BaseElement implements Label, SpriteHolder, ItemSpriteHolder {
     private static final ItemStack BLANK_ITEM = NoxesiumAPI.setImmovable(ItemStack.builder(Material.STICK))
-            .set(ItemComponent.CUSTOM_MODEL_DATA, System.getProperty("canvas.debug_blank", "0").equals("1") ? 2 : 1)
+            .set(ItemComponent.ITEM_MODEL, "mapmaker:empty")
             .build();
 
     private final String translationKey;
@@ -78,8 +78,8 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
     }
 
     @Override
-    public void setSprite(char fontChar, int cmd, int width, int offsetX, int rightOffset) {
-        setSprite(new Sprite(fontChar, cmd, null, width, offsetX, rightOffset));
+    public void setSprite(char fontChar, String model, int width, int offsetX, int rightOffset) {
+        setSprite(new Sprite(fontChar, model, width, offsetX, rightOffset));
     }
 
     protected void updateItem(@NotNull List<Component> args) {

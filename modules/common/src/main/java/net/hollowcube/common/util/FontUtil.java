@@ -3,6 +3,7 @@ package net.hollowcube.common.util;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMaps;
@@ -250,9 +251,9 @@ public final class FontUtil {
                 for (var entry : allSprites) {
                     var obj = entry.getAsJsonObject();
                     if (!obj.has("fontChar")) continue;
-                    int width = 0;
-                    if (obj.has("width")) width = obj.get("width").getAsInt() + 1;
-                    ALL_GLYPH_WIDTHS.put(obj.get("fontChar").getAsString().charAt(0), width);
+                    var width = obj.get("width");
+                    ALL_GLYPH_WIDTHS.put(obj.get("fontChar").getAsString().charAt(0),
+                            (width instanceof JsonPrimitive prim ? prim.getAsInt() : 0) + 1);
                 }
             }
         } catch (IOException e) {
@@ -290,7 +291,7 @@ public final class FontUtil {
         ));
         allWidths.put('\uF824', allWidths.get(' '));
         for (var sprite : BadSprite.SPRITE_MAP.values()) {
-            if (sprite.fontChar() == 0 || sprite.cmd() != 0) continue;
+            if (sprite.fontChar() == 0 || sprite.model() != null) continue;
             allWidths.put(sprite.fontChar(), sprite.width() + 1);
         }
         for (int i = 0; i < POSITIVE_SPACE.size(); i++)

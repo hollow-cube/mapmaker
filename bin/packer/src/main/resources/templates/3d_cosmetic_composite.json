@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:model",
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:display_context",
+    "cases": [
+      {
+        "when": ["gui"],
+        "model": {
+          "type": "minecraft:condition",
+          "property": "minecraft:custom_model_data",
+          "index": 0,
+          "on_false": {
+            "type": "minecraft:model",
+            "model": "$icon"
+          },
+          "on_true": {
+            "type": "minecraft:model",
+            "model": "$icon_locked"
+          }
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "$model"
+    }
+  }
+}

@@ -124,7 +124,7 @@ public record PotionInfo(
                 return this;
             }
             return setIcon(ItemStack.builder(Material.DIAMOND)
-                    .set(ItemComponent.CUSTOM_MODEL_DATA, sprite.cmd()));
+                    .set(ItemComponent.ITEM_MODEL, Objects.requireNonNull(sprite.model(), "Sprite model not set")));
         }
 
         public @NotNull Builder setIcon(@NotNull ItemStack.Builder icon) {

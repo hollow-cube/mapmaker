@@ -72,8 +72,9 @@ public enum BackpackItem {
         this.category = category;
         this.rarity = rarity;
 
-        var spriteName = String.format("cosmetic/%s/%s", category.name().toLowerCase(Locale.ROOT), name().toLowerCase(Locale.ROOT));
-        this.sprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spriteName), spriteName);
+//        var spriteName = String.format("cosmetic/%s/%s", category.name().toLowerCase(Locale.ROOT), name().toLowerCase(Locale.ROOT));
+//        this.sprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spriteName), spriteName);
+        this.sprite = BadSprite.require("hammer"); // TODO(1.21.4)
     }
 
     public static @Nullable BackpackItem byId(@NotNull String item) {
@@ -133,8 +134,9 @@ public enum BackpackItem {
         lore.add(rarity.asComponent());
         lore.add(Component.empty());
         lore.addAll(LanguageProviderV2.translateMulti(translationKeyBase + ".lore", List.of()));
-        return ItemStack.builder(Material.DIAMOND)
-                .set(ItemComponent.CUSTOM_MODEL_DATA, sprite.cmd() + amount)
+        // TODO(1.21.4)
+        return ItemStack.builder(Material.APPLE)
+//                .set(ItemComponent.CUSTOM_MODEL_DATA, sprite.cmd() + amount)
                 .set(ItemComponent.CUSTOM_NAME, displayName())
                 .set(ItemComponent.LORE, lore)
                 .build();

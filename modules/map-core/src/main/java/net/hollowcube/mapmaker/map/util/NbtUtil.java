@@ -100,17 +100,24 @@ public final class NbtUtil {
 
     public static @NotNull BinaryTag writeItemStack(@NotNull ItemStack itemStack) {
         var tag = (CompoundBinaryTag) ItemStack.NBT_TYPE.write(itemStack);
-        var cmdId = BadSprite.getCmdId(itemStack.get(ItemComponent.CUSTOM_MODEL_DATA));
-        if (cmdId != null) tag = tag.putString("custom_model_data", cmdId);
+        var modelId = BadSprite.modelToId(itemStack.get(ItemComponent.ITEM_MODEL));
+        if (modelId != null) tag = tag.putString("item_model", modelId);
         return tag;
     }
 
     public static @NotNull ItemStack readItemStack(@NotNull BinaryTag tag) {
         if (!(tag instanceof CompoundBinaryTag compound)) return ItemStack.AIR;
         var itemStack = ItemStack.NBT_TYPE.read(compound);
-        if (compound.get("custom_model_data") instanceof StringBinaryTag cmdId) {
-            int cmd = BadSprite.getIdCmd(cmdId.value());
-            if (cmd > 0) itemStack = itemStack.with(ItemComponent.CUSTOM_MODEL_DATA, cmd);
+
+        if (compound.get("item_model") instanceof StringBinaryTag modelId) {
+            var model = BadSprite.idToModel(modelId.value());
+            if (model != null) itemStack = itemStack.with(ItemComponent.ITEM_MODEL, model);
+        } else if (compound.get("custom_model_data") instanceof StringBinaryTag cmdId) {
+            // We used to replace custom model data with the string id to handle the resource pack changing
+            // We now do the same with model, however we need to handle the legacy custom model data option too.
+            // todo ideally this would be done with a DFU migration but i am lazy at the moment.
+            var model = BadSprite.idToModel(cmdId.value());
+            if (model != null) itemStack = itemStack.with(ItemComponent.ITEM_MODEL, model);
         }
         return itemStack;
     }

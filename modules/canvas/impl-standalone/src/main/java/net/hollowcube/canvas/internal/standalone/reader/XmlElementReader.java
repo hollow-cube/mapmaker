@@ -266,15 +266,9 @@ public class XmlElementReader {
                     }
                 } else {
                     if (elem instanceof ItemSpriteHolder trait) {
-                        if (sprite.model() != null) {
-                            trait.setItemSprite(ItemStack.builder(Material.STICK)
-                                    .set(ItemComponent.ITEM_MODEL, sprite.model())
-                                    .build(), spritePos);
-                        } else {
-                            trait.setItemSprite(ItemStack.builder(Material.DIAMOND)
-                                    .set(ItemComponent.CUSTOM_MODEL_DATA, sprite.cmd())
-                                    .build(), spritePos);
-                        }
+                        trait.setItemSprite(ItemStack.builder(Material.DIAMOND)
+                                .set(ItemComponent.ITEM_MODEL, Objects.requireNonNull(sprite.model(), "Sprite must have a model"))
+                                .build(), spritePos);
                     } else {
                         throw new IllegalArgumentException("Element does not support item sprites: " + elem.getClass().getSimpleName());
                     }
@@ -290,7 +284,9 @@ public class XmlElementReader {
                 }
                 var builder = ItemStack.builder(material);
                 if (split.length > 1) {
-                    builder.set(ItemComponent.CUSTOM_MODEL_DATA, Integer.parseInt(split[1]));
+//                    builder.set(ItemComponent.CUSTOM_MODEL_DATA, Integer.parseInt(split[1]));
+                    // TODO(1.21.4)
+                    throw new UnsupportedOperationException("TODO: remove support for custom model data in xml");
                 }
                 if (elem instanceof ItemSpriteHolder trait) {
                     trait.setItemSprite(builder.build(), spritePos);

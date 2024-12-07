@@ -12,7 +12,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,7 +46,8 @@ public class Leaderboard2 {
             @NotNull Function<String, Component> displayNameSupplier,
             double screenAngle
     ) {
-        screenModel.setModel(Material.STICK, 4);
+        // TODO(1.21.4)
+//        screenModel.setModel(Material.STICK, 4);
         screenModel.getEntityMeta().setScale(new Vec(MODEL_SCALE));
         screenModel.getEntityMeta().setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),
                 Math.toRadians(screenAngle)).into());

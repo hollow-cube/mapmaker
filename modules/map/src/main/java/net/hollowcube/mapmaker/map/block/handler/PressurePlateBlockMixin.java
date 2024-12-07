@@ -108,7 +108,7 @@ public interface PressurePlateBlockMixin extends BlockHandler {
 
         PacketSendingUtils.sendGroupedPacket(world.players(), new ParticlePacket(
                 Particle.DUST.withProperties(new Color(0, 255, 0), 1f),
-                true, blockPosition.x() + 0.5, blockPosition.y() + 0.5, blockPosition.z() + 0.5,
+                false, true, blockPosition.x() + 0.5, blockPosition.y() + 0.5, blockPosition.z() + 0.5,
                 0.25f, 0.25f, 0.25f, 0, 5
         ));
     }

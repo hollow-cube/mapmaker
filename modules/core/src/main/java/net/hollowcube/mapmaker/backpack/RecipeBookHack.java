@@ -26,7 +26,8 @@ public class RecipeBookHack {
 
     public static final ItemStack BLANK_ITEM_CRAFTABLE = ItemStack.builder(Material.STICK)
             .set(ItemComponent.HIDE_TOOLTIP, Unit.INSTANCE)
-            .set(ItemComponent.CUSTOM_MODEL_DATA, 1)
+            // TODO(1.21.4)
+//            .set(ItemComponent.CUSTOM_MODEL_DATA, 1)
             // If this has a name it no longer matches in recipes
 //            .displayName(Component.text(""))
             .build();

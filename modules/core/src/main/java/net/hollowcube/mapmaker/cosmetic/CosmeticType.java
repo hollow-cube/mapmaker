@@ -58,8 +58,8 @@ public enum CosmeticType {
         if (emptyIcon == null) {
             this.blankIcon = ItemStack.AIR;
         } else {
-            var builder = ItemStack.builder(Material.DIAMOND)
-                    .set(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("icon/inventory/" + emptyIcon).cmd())
+            var builder = ItemStack.builder(Material.STICK)
+                    .set(ItemComponent.ITEM_MODEL, BadSprite.require("icon/inventory/" + emptyIcon).model())
                     .set(ItemComponent.CUSTOM_NAME, Component.translatable(baseTranslation + ".name"))
                     .set(ItemComponent.LORE, LanguageProviderV2.translateMulti(baseTranslation + ".lore", List.of()));
             if (equipmentSlot != null) {
