@@ -1,11 +1,9 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="DevServer (local)" type="BspRunConfiguration">
+  <configuration default="false" name="DevServer (local)" type="BazelRunConfigurationType">
     <bsp-state handler-provider-id="JvmBspRunHandlerProvider">
-      <bsp-target>@//bin/development:development</bsp-target>
-      <handler-state />
+      <bsp-target>@//bin/development</bsp-target>
+      <handler-state programArguments="MAPMAKER_UNLEASH_DEFAULT_ACTION=true" />
     </bsp-state>
-    <method v="2">
-      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Build RP" run_configuration_type="ShConfigurationType" />
-    </method>
+    <method v="2" />
   </configuration>
 </component>

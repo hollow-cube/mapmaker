@@ -115,11 +115,12 @@ public class MapEntity extends Entity implements TerraformEntity {
             return PreDataFixFixes.readEntityMeta1_20_4(type, b1);
         });
         for (var entry : loadedMetadata.entrySet()) {
-
             metadata.setIndex(entry.getKey(), entry.getValue());
         }
 
-        // Read the nbt
-        tagHandler().updateContent((CompoundBinaryTag) buffer.read(NetworkBuffer.NBT));
+        // Read the nbt (can be end tag with no data)
+        if (buffer.read(NetworkBuffer.NBT) instanceof CompoundBinaryTag compound) {
+            tagHandler().updateContent(compound);
+        }
     }
 }

@@ -341,8 +341,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
                 logger.info("Updated data for {}", player.getUuid());
             }
-        } catch (Exception e) {
-            logger.error("Failed to save player state for {}", player.getUuid(), e);
+        } catch (Throwable t) {
+            logger.error("Failed to save player state for {}", player.getUuid(), t);
         } finally {
             player.removeTag(SaveState.TAG);
             super.removePlayer(player);

@@ -10,6 +10,8 @@ import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
+import net.minestom.server.snapshot.PlayerSnapshot;
+import net.minestom.server.snapshot.SnapshotUpdater;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -18,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -52,12 +55,14 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
 
     @Override
     public void updateNewViewer(@NotNull Player player) {
+        FutureUtil.assertTickThreadWarn();
         super.updateNewViewer(player);
         updateVisibility(player);
     }
 
     @Override
     public void updateOldViewer(@NotNull Player player) {
+        FutureUtil.assertTickThreadWarn();
         super.updateOldViewer(player);
         visibilityByEntity.remove(player.getEntityId());
     }
@@ -155,9 +160,15 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
     }
 
     @Override
-    public void updateViewableRule() {
+    public boolean isAutoViewable() {
         FutureUtil.assertTickThreadWarn();
-        super.updateViewableRule();
+        return super.isAutoViewable();
+    }
+
+    @Override
+    public void setAutoViewable(boolean autoViewable) {
+        FutureUtil.assertTickThreadWarn();
+        super.setAutoViewable(autoViewable);
     }
 
     @Override
@@ -167,14 +178,50 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
     }
 
     @Override
-    public void updateViewerRule() {
+    public void updateViewableRule() {
         FutureUtil.assertTickThreadWarn();
-        super.updateViewerRule();
+        super.updateViewableRule();
+    }
+
+    @Override
+    public boolean autoViewEntities() {
+        FutureUtil.assertTickThreadWarn();
+        return super.autoViewEntities();
+    }
+
+    @Override
+    public void setAutoViewEntities(boolean autoViewer) {
+        FutureUtil.assertTickThreadWarn();
+        super.setAutoViewEntities(autoViewer);
     }
 
     @Override
     public void updateViewerRule(@Nullable Predicate<Entity> predicate) {
         FutureUtil.assertTickThreadWarn();
         super.updateViewerRule(predicate);
+    }
+
+    @Override
+    public void updateViewerRule() {
+        FutureUtil.assertTickThreadWarn();
+        super.updateViewerRule();
+    }
+
+    @Override
+    public @NotNull Set<Player> getViewers() {
+        FutureUtil.assertTickThreadWarn();
+        return super.getViewers();
+    }
+
+    @Override
+    public boolean hasPredictableViewers() {
+        FutureUtil.assertTickThreadWarn();
+        return super.hasPredictableViewers();
+    }
+
+    @Override
+    public @NotNull PlayerSnapshot updateSnapshot(@NotNull SnapshotUpdater updater) {
+        FutureUtil.assertTickThreadWarn();
+        return super.updateSnapshot(updater);
     }
 }

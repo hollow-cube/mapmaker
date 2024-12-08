@@ -7,6 +7,9 @@ ADD https://github.com/async-profiler/async-profiler/releases/download/v2.9/asyn
 RUN tar -xzf async-profiler.tar.gz && rm async-profiler.tar.gz && mv async-profiler-2.9-linux-x64 async-profiler
 RUN chmod +x async-profiler/profiler.sh
 
+# Install jattach
+RUN apk add --no-cache jattach --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/
+
 COPY ./map_deploy.jar /app/server.jar
 
 EXPOSE 25565
