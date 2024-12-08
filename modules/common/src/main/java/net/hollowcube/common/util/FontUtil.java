@@ -252,7 +252,7 @@ public final class FontUtil {
                     var obj = entry.getAsJsonObject();
                     if (!obj.has("fontChar")) continue;
                     var width = obj.get("width");
-                    ALL_GLYPH_WIDTHS.put(obj.get("fontChar").getAsString().charAt(0),
+                    ALL_GLYPH_WIDTHS.put(obj.get("fontChar").getAsInt(),
                             (width instanceof JsonPrimitive prim ? prim.getAsInt() : 0) + 1);
                 }
             }

@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.misc;
 
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.mapmaker.cosmetic.Cosmetic;
+import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;

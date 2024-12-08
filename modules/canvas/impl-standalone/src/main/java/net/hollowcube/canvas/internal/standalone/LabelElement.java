@@ -20,7 +20,7 @@ import java.util.List;
 
 public class LabelElement extends BaseElement implements Label, SpriteHolder, ItemSpriteHolder {
     private static final ItemStack BLANK_ITEM = NoxesiumAPI.setImmovable(ItemStack.builder(Material.STICK))
-            .set(ItemComponent.ITEM_MODEL, "mapmaker:empty")
+            .set(ItemComponent.ITEM_MODEL, "minecraft:air")
             .build();
 
     private final String translationKey;

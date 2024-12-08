@@ -84,10 +84,10 @@ public class SpriteTransform {
                         ctx.addItemModel(name, ModelUtil.createBasicItem(itemModel));
                     } else if (config.get("type").getAsString().equals("numbered")) {
                         // TODO: Implement numbered sprites
-//                        BufferedImage baseImage = ImageIO.read(imageFile.toFile());
-//                        if (baseImage.getWidth() != 16 || baseImage.getHeight() != 16)
-//                            throw new RuntimeException("Numbered sprites must be 16x");
-//
+                        BufferedImage baseImage = ImageIO.read(imageFile.toFile());
+                        if (baseImage.getWidth() != 16 || baseImage.getHeight() != 16)
+                            throw new RuntimeException("Numbered sprites must be 16x");
+
 //                        BufferedImage rescaledImage = new BufferedImage(32, 32, baseImage.getType());
 //                        Graphics2D g = rescaledImage.createGraphics();
 //                        g.drawImage(baseImage, 1, 1, 16, 16, null);

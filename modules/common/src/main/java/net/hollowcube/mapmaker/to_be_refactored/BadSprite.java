@@ -44,7 +44,7 @@ public record BadSprite(char fontChar, @Nullable String model, int width, int of
                     char fontChar = 0;
                     String model = null;
                     if (obj.has("fontChar"))
-                        fontChar = obj.get("fontChar").getAsString().charAt(0);
+                        fontChar = (char) obj.get("fontChar").getAsInt();
                     else {
                         model = obj.get("model").getAsString();
                         modelIdMap.put(model, key);

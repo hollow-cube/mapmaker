@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class OrgMapsItem extends ItemHandler {
-    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hammer"));
+    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("org_maps_hammer"));
     public static final String ID = "mapmaker:org_maps";
 
     private final Controller guiController;

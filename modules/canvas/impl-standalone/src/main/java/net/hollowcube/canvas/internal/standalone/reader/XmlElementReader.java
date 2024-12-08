@@ -286,7 +286,7 @@ public class XmlElementReader {
                 if (split.length > 1) {
 //                    builder.set(ItemComponent.CUSTOM_MODEL_DATA, Integer.parseInt(split[1]));
                     // TODO(1.21.4)
-                    throw new UnsupportedOperationException("TODO: remove support for custom model data in xml");
+//                    throw new UnsupportedOperationException("TODO: remove support for custom model data in xml");
                 }
                 if (elem instanceof ItemSpriteHolder trait) {
                     trait.setItemSprite(builder.build(), spritePos);
