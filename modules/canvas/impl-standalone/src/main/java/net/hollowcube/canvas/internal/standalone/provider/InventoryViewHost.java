@@ -372,7 +372,7 @@ public class InventoryViewHost {
             ItemStack[] convertedSlots = new ItemStack[PlayerInventory.INVENTORY_SIZE];
             Arrays.fill(convertedSlots, ItemStack.AIR);
             for (int i = 0; i < convertedSlots.length; i++) {
-                var packetSlot = PlayerInventoryUtils.convertToPacketSlot(i); //minestomToProtocol
+                var packetSlot = PlayerInventoryUtils.convertMinestomSlotToWindowSlot(i);
                 var chestSlot = convertPlayerSlotToChestSlot(i);
                 if (i < 9 * 4 && chestSlot < 9 * playerInventoryRows) {
                     convertedSlots[packetSlot] = playerInv[chestSlot];

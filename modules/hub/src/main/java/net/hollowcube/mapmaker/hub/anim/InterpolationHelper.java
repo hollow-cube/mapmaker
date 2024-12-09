@@ -6,6 +6,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Metadata;
+import net.minestom.server.entity.MetadataDef;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 import net.minestom.server.network.packet.server.play.EntityHeadLookPacket;
@@ -130,19 +131,19 @@ public class InterpolationHelper {
 
     private @NotNull EntityMetaDataPacket getCurrentMetadataPacket() {
         var entries = new HashMap<>(entity.getMetadataPacket().entries());
-        entries.remove(AbstractDisplayMeta.OFFSET + 0); // interp start delta
-        entries.remove(AbstractDisplayMeta.OFFSET + 1); // transform duration
-        entries.remove(AbstractDisplayMeta.OFFSET + 2); // posrot duration
-        entries.put(AbstractDisplayMeta.OFFSET + 3, Metadata.Vector3(getCurrentTranslation()));
+        entries.remove(MetadataDef.Display.INTERPOLATION_DELAY.index());
+        entries.remove(MetadataDef.Display.TRANSFORMATION_INTERPOLATION_DURATION.index()); // transform duration
+        entries.remove(MetadataDef.Display.POSITION_ROTATION_INTERPOLATION_DURATION.index()); // posrot duration
+        entries.put(MetadataDef.Display.TRANSLATION.index(), Metadata.Vector3(getCurrentTranslation()));
         return new EntityMetaDataPacket(entity.getEntityId(), entries);
     }
 
     private @NotNull EntityMetaDataPacket getNextMetadataPacket() {
         var entries = new HashMap<>(entity.getMetadataPacket().entries());
         var remaining = interpolationDuration - (entity.getAliveTicks() - interpolationStart);
-        entries.put(AbstractDisplayMeta.OFFSET + 0, Metadata.VarInt(0)); // interp start delta
-        entries.put(AbstractDisplayMeta.OFFSET + 1, Metadata.VarInt((int) remaining)); // transform duration
-        entries.put(AbstractDisplayMeta.OFFSET + 2, Metadata.VarInt((int) remaining)); // posrot duration
+        entries.put(MetadataDef.Display.INTERPOLATION_DELAY.index(), Metadata.VarInt(0)); // interp start delta
+        entries.put(MetadataDef.Display.TRANSFORMATION_INTERPOLATION_DURATION.index(), Metadata.VarInt((int) remaining)); // transform duration
+        entries.put(MetadataDef.Display.POSITION_ROTATION_INTERPOLATION_DURATION.index(), Metadata.VarInt((int) remaining)); // posrot duration
         return new EntityMetaDataPacket(entity.getEntityId(), entries);
     }
 
@@ -161,7 +162,7 @@ public class InterpolationHelper {
 
         if (!isInterpolating()) return;
 
-        player.scheduleNextTick(_ -> {
+        player.scheduleNextTick(ignored -> {
             player.sendPacket(getNextMetadataPacket());
             if (nextPosition != null) {
                 player.sendPacket(new EntityTeleportPacket(entity.getEntityId(), nextPosition, Vec.ZERO, 0, entity.isOnGround()));

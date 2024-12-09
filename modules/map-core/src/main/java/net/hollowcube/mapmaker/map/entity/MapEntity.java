@@ -115,7 +115,11 @@ public class MapEntity extends Entity implements TerraformEntity {
             return PreDataFixFixes.readEntityMeta1_20_4(type, b1);
         });
         for (var entry : loadedMetadata.entrySet()) {
-            metadata.setIndex(entry.getKey(), entry.getValue());
+            MetadataDef.Entry<Object> defEntry = new MetadataDef.Entry.Index<>(
+                    entry.getKey(), t -> {
+                throw new UnsupportedOperationException("unreachable");
+            }, entry.getValue());
+            metadata.set(defEntry, entry.getValue());
         }
 
         // Read the nbt (can be end tag with no data)

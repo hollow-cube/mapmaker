@@ -647,7 +647,8 @@ public abstract class AbstractMapServer implements MapServer {
         FutureUtil.submitVirtual(() -> {
             try {
                 world.addPlayer(player);
-                player.setAutoViewEntities(true); // See comment in AbstractMapWorld#configurePlayer
+                // See comment in AbstractMapWorld#configurePlayer
+                player.scheduleNextTick(ignored -> player.setAutoViewEntities(true));
             } catch (Exception e) {
                 MinecraftServer.getExceptionManager().handleException(e);
                 player.kick(Component.text("Failed to join the world. Please try again later."));

@@ -11,7 +11,6 @@ import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.item.ItemUpdateStateEvent;
 import net.minestom.server.event.player.PlayerPreEatEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.item.ItemComponent;
@@ -26,8 +25,9 @@ public class TridentFeatureProvider implements FeatureProvider {
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:vanilla/trident", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::handleInitPlayer)
-            .addListener(PlayerPreEatEvent.class, this::handleBeginTridentThrow)
-            .addListener(ItemUpdateStateEvent.class, this::handleTridentThrow);
+            .addListener(PlayerPreEatEvent.class, this::handleBeginTridentThrow);
+    // TODO: Fix from 1.21.3 update
+//            .addListener(ItemUpdateStateEvent.class, this::handleTridentThrow);
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
@@ -54,39 +54,39 @@ public class TridentFeatureProvider implements FeatureProvider {
         event.setEatingTime(72000);
     }
 
-    private void handleTridentThrow(@NotNull ItemUpdateStateEvent event) {
-        var itemStack = event.getItemStack();
-        if (itemStack.material().id() != Material.TRIDENT.id())
-            return;
-
-        var riptideLevel = itemStack.get(ItemComponent.ENCHANTMENTS, EnchantmentList.EMPTY)
-                .enchantments().getOrDefault(Enchantment.RIPTIDE, 0);
-        if (riptideLevel > 1) {
-            beginRiptideAttack(event, riptideLevel);
-        } else {
-            throwTridentEntity();
-        }
-    }
+//    private void handleTridentThrow(@NotNull ItemUpdateStateEvent event) {
+//        var itemStack = event.getItemStack();
+//        if (itemStack.material().id() != Material.TRIDENT.id())
+//            return;
+//
+//        var riptideLevel = itemStack.get(ItemComponent.ENCHANTMENTS, EnchantmentList.EMPTY)
+//                .enchantments().getOrDefault(Enchantment.RIPTIDE, 0);
+//        if (riptideLevel > 1) {
+//            beginRiptideAttack(event, riptideLevel);
+//        } else {
+//            throwTridentEntity();
+//        }
+//    }
 
     private void throwTridentEntity() {
         //todo actually do the trident throw
     }
 
-    private void beginRiptideAttack(@NotNull ItemUpdateStateEvent event, int riptideLevel) {
-        event.setRiptideSpinAttack(true);
-
-        var player = event.getPlayer();
-        if (player instanceof PlayerRiptideExtension p) {
-            p.beginRiptideAttack(20);
-
-            var soundEvent = riptideLevel >= 3
-                    ? SoundEvent.ITEM_TRIDENT_RIPTIDE_3
-                    : riptideLevel == 2
-                    ? SoundEvent.ITEM_TRIDENT_RIPTIDE_2
-                    : SoundEvent.ITEM_TRIDENT_RIPTIDE_1;
-            var sound = Sound.sound(soundEvent, Sound.Source.PLAYER, 1.0f, 1.0f);
-            player.getViewersAsAudience().playSound(sound);
-            player.playSound(sound);
-        }
-    }
+//    private void beginRiptideAttack(@NotNull ItemUpdateStateEvent event, int riptideLevel) {
+//        event.setRiptideSpinAttack(true);
+//
+//        var player = event.getPlayer();
+//        if (player instanceof PlayerRiptideExtension p) {
+//            p.beginRiptideAttack(20);
+//
+//            var soundEvent = riptideLevel >= 3
+//                    ? SoundEvent.ITEM_TRIDENT_RIPTIDE_3
+//                    : riptideLevel == 2
+//                    ? SoundEvent.ITEM_TRIDENT_RIPTIDE_2
+//                    : SoundEvent.ITEM_TRIDENT_RIPTIDE_1;
+//            var sound = Sound.sound(soundEvent, Sound.Source.PLAYER, 1.0f, 1.0f);
+//            player.getViewersAsAudience().playSound(sound);
+//            player.playSound(sound);
+//        }
+//    }
 }

@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.common.util.FutureUtil;
 import net.minestom.server.entity.*;
+import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
@@ -17,10 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -128,7 +126,8 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
     }
 
     private void sendMetaInvisUpdate(@NotNull Player player, boolean invisible) {
-        byte metaFlags = EntityMetadataStealer.steal(this).getIndex(0, (byte) 0);
+        byte metaFlags = Objects.requireNonNullElseGet((Metadata.Entry<Byte>) EntityMetadataStealer.steal(this).getEntries().get(0),
+                () -> Metadata.Byte((byte) 0)).value();
         if (invisible) metaFlags |= 0x20; // Ensure the invisible flag is set
         player.sendPacket(new EntityMetaDataPacket(getEntityId(), Map.of(0, Metadata.Byte(metaFlags))));
     }
@@ -191,7 +190,8 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
 
     @Override
     public void setAutoViewEntities(boolean autoViewer) {
-        FutureUtil.assertTickThreadWarn();
+        if (playerConnection.getConnectionState() == ConnectionState.PLAY)
+            FutureUtil.assertTickThreadWarn();
         super.setAutoViewEntities(autoViewer);
     }
 
@@ -209,7 +209,8 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
 
     @Override
     public @NotNull Set<Player> getViewers() {
-        FutureUtil.assertTickThreadWarn();
+        // Left to make clear that it is excluded from tick thread warnings. The set only locks itself,
+        // so should never be in a position to create a deadlock.
         return super.getViewers();
     }
 
