@@ -216,7 +216,8 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
 
     @Override
     public boolean hasPredictableViewers() {
-        FutureUtil.assertTickThreadWarn();
+        // Left to make clear that it is excluded from tick thread warnings. Only locks itself,
+        // so should never be in a position to create a deadlock.
         return super.hasPredictableViewers();
     }
 
