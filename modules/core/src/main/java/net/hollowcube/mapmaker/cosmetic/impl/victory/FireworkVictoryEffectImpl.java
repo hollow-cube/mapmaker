@@ -34,13 +34,13 @@ public class FireworkVictoryEffectImpl extends AbstractVictoryEffectImpl {
     public void trigger(@NotNull Player player, @NotNull Point position) {
         var viewersAndSelf = new ArrayList<>(player.getViewers());
         viewersAndSelf.add(player);
-        showFirework(
+        player.scheduleNextTick(ignored -> showFirework(
                 PacketGroupingAudience.of(viewersAndSelf),
                 player.getInstance(),
                 position,
                 15,
                 List.of(randomColorEffect())
-        );
+        ));
     }
 
     public static void showFirework(PacketGroupingAudience audience, Instance instance, Point point, int ticks, List<FireworkExplosion> effects) {

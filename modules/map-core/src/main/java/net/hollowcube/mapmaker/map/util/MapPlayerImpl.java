@@ -53,14 +53,14 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
 
     @Override
     public void updateNewViewer(@NotNull Player player) {
-        FutureUtil.assertTickThreadWarn();
+        FutureUtil.assertTickThreadWarn(acquirable());
         super.updateNewViewer(player);
         updateVisibility(player);
     }
 
     @Override
     public void updateOldViewer(@NotNull Player player) {
-        FutureUtil.assertTickThreadWarn();
+        FutureUtil.assertTickThreadWarn(acquirable());
         super.updateOldViewer(player);
         visibilityByEntity.remove(player.getEntityId());
     }
@@ -160,50 +160,50 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
 
     @Override
     public boolean isAutoViewable() {
-        FutureUtil.assertTickThreadWarn();
+        FutureUtil.assertTickThreadWarn(acquirable());
         return super.isAutoViewable();
     }
 
     @Override
     public void setAutoViewable(boolean autoViewable) {
-        FutureUtil.assertTickThreadWarn();
+        FutureUtil.assertTickThreadWarn(acquirable());
         super.setAutoViewable(autoViewable);
     }
 
     @Override
     public void updateViewableRule(@Nullable Predicate<Player> predicate) {
-        FutureUtil.assertTickThreadWarn();
+        FutureUtil.assertTickThreadWarn(acquirable());
         super.updateViewableRule(predicate);
     }
 
     @Override
     public void updateViewableRule() {
-        FutureUtil.assertTickThreadWarn();
+        FutureUtil.assertTickThreadWarn(acquirable());
         super.updateViewableRule();
     }
 
     @Override
     public boolean autoViewEntities() {
-        FutureUtil.assertTickThreadWarn();
+        FutureUtil.assertTickThreadWarn(acquirable());
         return super.autoViewEntities();
     }
 
     @Override
     public void setAutoViewEntities(boolean autoViewer) {
         if (playerConnection.getConnectionState() == ConnectionState.PLAY)
-            FutureUtil.assertTickThreadWarn();
+            FutureUtil.assertTickThreadWarn(acquirable());
         super.setAutoViewEntities(autoViewer);
     }
 
     @Override
     public void updateViewerRule(@Nullable Predicate<Entity> predicate) {
-        FutureUtil.assertTickThreadWarn();
+        FutureUtil.assertTickThreadWarn(acquirable());
         super.updateViewerRule(predicate);
     }
 
     @Override
     public void updateViewerRule() {
-        FutureUtil.assertTickThreadWarn();
+        FutureUtil.assertTickThreadWarn(acquirable());
         super.updateViewerRule();
     }
 
@@ -223,7 +223,7 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
 
     @Override
     public @NotNull PlayerSnapshot updateSnapshot(@NotNull SnapshotUpdater updater) {
-        FutureUtil.assertTickThreadWarn();
+        FutureUtil.assertTickThreadWarn(acquirable());
         return super.updateSnapshot(updater);
     }
 }

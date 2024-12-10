@@ -1,6 +1,7 @@
 package net.hollowcube.common.util;
 
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -91,8 +92,10 @@ public final class FutureUtil {
         }
     }
 
-    private static boolean isUnsafeThread() {
+    private static boolean isUnsafeThread(@Nullable Acquirable<?> acquirable) {
         var thread = Thread.currentThread();
+        if (acquirable != null && !acquirable.isLocal() && !acquirable.assignedThread().lock().isHeldByCurrentThread())
+            return true; // Above means: We have acquirable, we are not on its thread, and we do not hold the lock of its thread
         if (thread.isVirtual()) return false;
         if (thread instanceof ForkJoinWorkerThread fjwt && fjwt.getPool() == ForkJoinPool.commonPool())
             return false;
@@ -101,20 +104,24 @@ public final class FutureUtil {
     }
 
     public static void assertThread() {
-        if (!isUnsafeThread()) return;
+        if (!isUnsafeThread(null)) return;
         throw new IllegalStateException("Unsafe blocking call on '" + Thread.currentThread().getName() + "'");
     }
 
     private static final Logger logger = LoggerFactory.getLogger(FutureUtil.class);
 
     public static void assertThreadWarn() {
-        if (!isUnsafeThread()) return;
+        if (!isUnsafeThread(null)) return;
 
         logger.error("Unsafe blocking call on '{}'", Thread.currentThread().getName(), new RuntimeException("dummy exception for stacktrace"));
     }
 
     public static void assertTickThreadWarn() {
-        if (isUnsafeThread()) return;
+        assertTickThreadWarn(null);
+    }
+
+    public static void assertTickThreadWarn(@Nullable Acquirable<?> acquirable) {
+        if (isUnsafeThread(acquirable)) return;
         logger.error("Unsafe tick thread only call on '{}'", Thread.currentThread().getName(), new RuntimeException("dummy exception for stacktrace"));
     }
 

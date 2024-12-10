@@ -134,12 +134,15 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
             // Teleport to the spawn point of the map, and update the pose to what the server thinks it should be.
             // This is to prevent a but where the player can remain in crawling state 1 tick after leaving spec
             // and go into a 1 block gap.
-            player.sendPacket(new BundlePacket());
-            player.teleport(saveState.state(PlayState.class).pos().orElse(map().settings().getSpawnPoint()),
-                    Vec.ZERO, null, RelativeFlags.NONE);
-            ((MapPlayerImplImpl) player).updatePose();
-            player.sendPacket(new EntityMetaDataPacket(player.getEntityId(), Map.of(6, Metadata.Pose(player.getPose()))));
-            player.sendPacket(new BundlePacket());
+            final var finalSaveState = saveState;
+            player.acquirable().sync(localPlayer -> {
+                localPlayer.sendPacket(new BundlePacket());
+                localPlayer.teleport(finalSaveState.state(PlayState.class).pos().orElse(map().settings().getSpawnPoint()),
+                        Vec.ZERO, null, RelativeFlags.NONE);
+                ((MapPlayerImplImpl) player).updatePose();
+                localPlayer.sendPacket(new EntityMetaDataPacket(localPlayer.getEntityId(), Map.of(6, Metadata.Pose(localPlayer.getPose()))));
+                localPlayer.sendPacket(new BundlePacket());
+            });
         }
 
         super.addPlayer(player); // Add to player list & reset inventory.

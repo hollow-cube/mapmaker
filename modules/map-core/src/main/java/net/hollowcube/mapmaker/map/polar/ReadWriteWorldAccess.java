@@ -8,6 +8,7 @@ import net.hollowcube.terraform.entity.TerraformEntity;
 import net.kyori.adventure.nbt.BinaryTagTypes;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.ListBinaryTag;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
@@ -61,7 +62,11 @@ public class ReadWriteWorldAccess extends ReadWorldAccess {
         ListBinaryTag.Builder<CompoundBinaryTag> entitiesTag = ListBinaryTag.builder(BinaryTagTypes.COMPOUND);
 
         for (var entity : getRootEntities(chunk)) {
-            entitiesTag.add(TerraformEntity.writeToTagWithPassengers(entity));
+            try { // Wrap to isolate single failures and prevent them from stopping the entire save process
+                entitiesTag.add(TerraformEntity.writeToTagWithPassengers(entity));
+            } catch (Throwable t) {
+                MinecraftServer.getExceptionManager().handleException(t);
+            }
         }
 
         return entitiesTag.build();

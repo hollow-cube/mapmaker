@@ -96,7 +96,7 @@ public class MapSpawnIndicatorFeatureProvider implements FeatureProvider {
     private void handleSpawnInTestMode(@NotNull MapPlayerInitEvent event) {
         var world = event.getMapWorld();
         var spawnMarker = world.getTag(SPAWN_MARKER_TAG);
-        if (spawnMarker != null) spawnMarker.updateViewableRule();
+        if (spawnMarker != null) spawnMarker.scheduleNextTick(Entity::updateViewableRule);
     }
 
     @SuppressWarnings("UnstableApiUsage")
