@@ -7,7 +7,9 @@ import net.hollowcube.mapmaker.map.util.MapMessages;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -52,7 +54,7 @@ public class SpawnPointItem extends ItemHandler {
     }
 
     private void teleportToSpawn(@NotNull Player player, @NotNull MapData map) {
-        player.teleport(map.settings().getSpawnPoint());
+        player.teleport(map.settings().getSpawnPoint(), Vec.ZERO, null, RelativeFlags.NONE);
         player.sendMessage(Component.translatable("teleport.spawn"));
     }
 

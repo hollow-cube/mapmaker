@@ -12,8 +12,10 @@ import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
@@ -97,7 +99,7 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
 
         var startingPos = player.getPosition();
         player.setTag(SPECTATOR_CHECKPOINT, startingPos);
-        player.teleport(startingPos); //todo is this necessary it seems hella dumb?
+        player.teleport(startingPos, Vec.ZERO, null, RelativeFlags.NONE); //todo is this necessary it seems hella dumb?
 
         var isMapJoin = player.getAndSetTag(FIRST_JOIN_TAG, null) != null;
         callEvent(new MapPlayerInitEvent(this, player, true, isMapJoin));

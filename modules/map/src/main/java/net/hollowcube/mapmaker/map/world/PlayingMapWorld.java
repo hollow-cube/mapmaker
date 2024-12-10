@@ -27,9 +27,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Metadata;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -133,7 +135,8 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
             // This is to prevent a but where the player can remain in crawling state 1 tick after leaving spec
             // and go into a 1 block gap.
             player.sendPacket(new BundlePacket());
-            player.teleport(saveState.state(PlayState.class).pos().orElse(map().settings().getSpawnPoint()));
+            player.teleport(saveState.state(PlayState.class).pos().orElse(map().settings().getSpawnPoint()),
+                    Vec.ZERO, null, RelativeFlags.NONE);
             ((MapPlayerImplImpl) player).updatePose();
             player.sendPacket(new EntityMetaDataPacket(player.getEntityId(), Map.of(6, Metadata.Pose(player.getPose()))));
             player.sendPacket(new BundlePacket());

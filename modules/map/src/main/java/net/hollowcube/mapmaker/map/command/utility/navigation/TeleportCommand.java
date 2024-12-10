@@ -8,7 +8,9 @@ import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.utils.entity.EntityFinder;
 import org.jetbrains.annotations.NotNull;
 
@@ -59,7 +61,7 @@ public class TeleportCommand extends CommandDsl {
         }
 
         // Actually do the teleport
-        player.teleport(target.getPosition()).thenRun(() -> {
+        player.teleport(target.getPosition(), Vec.ZERO, null, RelativeFlags.NONE).thenRun(() -> {
             player.sendMessage(Component.translatable("teleport.success", Component.translatable(target.getUsername())));
         });
     }
