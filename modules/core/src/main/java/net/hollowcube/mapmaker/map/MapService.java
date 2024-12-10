@@ -4,7 +4,9 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.channels.Channels;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -57,6 +59,11 @@ public interface MapService {
     @NotNull MapData publishMap(@NotNull String authorizer, @NotNull String id);
 
     byte @Nullable [] getMapWorld(@NotNull String id, boolean write);
+
+    default @Nullable ReadableMapData getMapWorldAsStream(@NotNull String id, boolean write) {
+        var result = getMapWorld(id, write);
+        return result == null ? null : new ReadableMapData(Channels.newChannel(new ByteArrayInputStream(result)), result.length);
+    }
 
     void updateMapWorld(@NotNull String id, byte @NotNull [] worldData);
 

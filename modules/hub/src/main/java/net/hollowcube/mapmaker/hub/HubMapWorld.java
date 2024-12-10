@@ -8,21 +8,15 @@ import net.hollowcube.mapmaker.backpack.RecipeBookHack;
 import net.hollowcube.mapmaker.hub.entity.marker.HubMarkerLoader;
 import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
 import net.hollowcube.mapmaker.hub.item.*;
-import net.hollowcube.mapmaker.hub.util.OldChunkUtils;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
-import net.hollowcube.mapmaker.map.AbstractMapWorld;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapServer;
-import net.hollowcube.mapmaker.map.MapSettings;
+import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.polar.PolarDataFixer;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.misc.BossBars;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerSetting;
-import net.hollowcube.mapmaker.util.NoopChunkLoader;
 import net.hollowcube.polar.PolarLoader;
-import net.hollowcube.polar.PolarReader;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -39,19 +33,19 @@ import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
-import net.minestom.server.instance.Chunk;
+import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.channels.Channels;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("UnstableApiUsage")
 public class HubMapWorld extends AbstractMapWorld {
@@ -117,34 +111,28 @@ public class HubMapWorld extends AbstractMapWorld {
     @Override
     public void load() {
         logger.info("Loading hub world (map id = {})", map().id());
-        byte[] mapWorldData;
+        ReadableMapData mapWorldData;
         if (!map().id().equals(Uuids.ZERO)) {
-            mapWorldData = server().mapService().getMapWorld(map().id(), false);
+            mapWorldData = server().mapService().getMapWorldAsStream(map().id(), false);
             Check.notNull(mapWorldData, "No world generated for hub world!");
         } else {
             try (var is = getClass().getResourceAsStream("/spawn/hcspawn.polar")) {
                 if (is == null) throw new IOException("hcspawn.polar not found");
-                mapWorldData = Objects.requireNonNull(is.readAllBytes());
+                var worldFileContent = Objects.requireNonNull(is.readAllBytes());
+                mapWorldData = new ReadableMapData(Channels.newChannel(new ByteArrayInputStream(worldFileContent)), worldFileContent.length);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        var loader = new PolarLoader(PolarReader.read(mapWorldData, PolarDataFixer.INSTANCE))
-                .setWorldAccess(new ReadWorldAccess(this, new HubMarkerLoader()))
-                .setLoadLighting(false);
-        var instance = (MapInstance) instance();
-        instance.setChunkLoader(loader);
-
-        loader.loadInstance(instance); // Load world data
-
-        var loadingChunks = new ArrayList<CompletableFuture<Chunk>>();
-        OldChunkUtils.forChunksInRange(0, 0, 16, (x, z) -> loadingChunks.add(instance.loadChunk(x, z)));
-        CompletableFuture.allOf(loadingChunks.toArray(CompletableFuture[]::new))
-                .thenRun(() -> logger.info("Loaded spawn chunks"));
-
-        // Since we never save this world, delete the polar world and associated copy of the world
-        instance.setChunkLoader(NoopChunkLoader.INSTANCE);
+        PolarLoader.streamLoad(
+                (InstanceContainer) instance(),
+                mapWorldData.data(),
+                mapWorldData.length(),
+                PolarDataFixer.INSTANCE,
+                new ReadWorldAccess(this, new HubMarkerLoader()),
+                false
+        );
     }
 
     @Override

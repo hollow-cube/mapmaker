@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.instance;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
+import net.hollowcube.mapmaker.map.ReadableMapData;
 import net.hollowcube.mapmaker.map.polar.PolarDataFixer;
 import net.hollowcube.mapmaker.util.NoopChunkLoader;
 import net.hollowcube.polar.*;
@@ -71,6 +72,11 @@ public class MapInstance extends InstanceContainer {
 
         // Delete the polar world to avoid the second copy of the world data
         setChunkLoader(NoopChunkLoader.INSTANCE);
+    }
+
+    public void loadStream(@NotNull ReadableMapData data, @Nullable PolarWorldAccess worldAccess) {
+        FutureUtil.getUnchecked(PolarLoader.streamLoad(this, data.data(), data.length(),
+                PolarDataFixer.INSTANCE, worldAccess, hasLighting));
     }
 
     @Blocking

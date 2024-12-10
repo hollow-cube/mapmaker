@@ -301,6 +301,39 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         };
     }
 
+//    @Override
+//    public @Nullable ReadableMapData getMapWorldAsStream(@NotNull String id, boolean write) {
+//        var req = HttpRequest.newBuilder()
+//                .uri(URI.create(url + "/" + id + "/world?scope=" + (write ? "write" : "read")))
+//                .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
+//                .build();
+//        var res = doRequest(req, HttpResponse.BodyHandlers.ofInputStream());
+//        return switch (res.statusCode()) {
+//            case 200 -> {
+//                OptionalLong contentLength = res.headers().firstValueAsLong("content-length");
+//                if (contentLength.isEmpty()) {
+//                    // Unknown content length so we need to read the entire body here.
+//                    try (var bodyStream = res.body()) {
+//                        byte[] body = bodyStream.readAllBytes();
+//                        yield new ReadableMapData(Channels.newChannel(new ByteArrayInputStream(body)), body.length);
+//                    } catch (IOException e) {
+//                        throw new RuntimeException(e);
+//                    }
+//                }
+//                yield new ReadableMapData(Channels.newChannel(res.body()), contentLength.getAsLong());
+//            }
+//            case 204 -> null;
+//            case 404 -> throw new NotFoundError(id);
+//            default -> {
+//                try {
+//                    throw new InternalError("Failed to get map world: " + new String(res.body().readAllBytes()));
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//        };
+//    }
+
     @Override
     public void updateMapWorld(@NotNull String id, byte @NotNull [] worldData) {
         var req = HttpRequest.newBuilder()

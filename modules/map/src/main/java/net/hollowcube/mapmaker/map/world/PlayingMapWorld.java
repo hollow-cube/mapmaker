@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map.world;
 
 import com.google.inject.Inject;
 import net.hollowcube.common.util.FontUtil;
-import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
@@ -12,7 +11,6 @@ import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
-import net.hollowcube.mapmaker.map.polar.PolarDataFixer;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.util.CustomizableHotbarManager;
 import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
@@ -24,8 +22,6 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
-import net.hollowcube.polar.PolarReader;
-import net.hollowcube.polar.PolarWriter;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -103,20 +99,9 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
     protected void loadWorld() {
         // Load the map itself (eg blocks, if present)
-        var mapData = server().mapService().getMapWorld(map().id(), true);
+        var mapData = server().mapService().getMapWorldAsStream(map().id(), true);
         if (mapData != null) {
-            var world = PolarReader.read(mapData, PolarDataFixer.INSTANCE);
-            if (world.dataVersion() < MapWorld.DATA_VERSION) {
-                logger.warn("Map data version is out of date: {} < {} (updating remote)", world.dataVersion(), MapWorld.DATA_VERSION);
-                if (!MapFeatureFlags.MAP_NO_REMOTE_UPGRADE.test()) {
-                    FutureUtil.submitVirtual(() -> {
-                        var updatedMapData = PolarWriter.write(world, PolarDataFixer.INSTANCE);
-                        server().mapService().updateMapWorld(map().id(), updatedMapData);
-                    });
-                }
-            }
-
-            instance.load(mapData, new ReadWorldAccess(this));
+            instance.loadStream(mapData, new ReadWorldAccess(this));
         }
     }
 

@@ -50,7 +50,7 @@ maven_install(
 
         # Minestom
         "net.minestom:minestom-snapshots:d760a60a5c",
-        "dev.hollowcube:polar:1.11.4",
+        "dev.hollowcube:polar:1.12.0",
         "dev.hollowcube:dataconverter:1.21.3-rv1",
         "dev.hollowcube:mql:1.1.0",
         #        "com.github.mworzala.mc_debug_renderer:minestom:74b86984b6",
@@ -130,7 +130,7 @@ maven_install(
     fetch_javadoc = True,
     fetch_sources = True,
     repositories = [
-#                "m2Local",
+#         "m2Local",
         "https://repo1.maven.org/maven2",
         "https://jitpack.io",
         "https://repo.papermc.io/repository/maven-public/",
