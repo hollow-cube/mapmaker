@@ -94,7 +94,7 @@ public final class FutureUtil {
 
     private static boolean isUnsafeThread(@Nullable Acquirable<?> acquirable) {
         var thread = Thread.currentThread();
-        if (acquirable != null && !acquirable.isLocal() && !acquirable.assignedThread().lock().isHeldByCurrentThread())
+        if (acquirable != null && !acquirable.isLocal() && acquirable.assignedThread() != null && !acquirable.assignedThread().lock().isHeldByCurrentThread())
             return true; // Above means: We have acquirable, we are not on its thread, and we do not hold the lock of its thread
         if (thread.isVirtual()) return false;
         if (thread instanceof ForkJoinWorkerThread fjwt && fjwt.getPool() == ForkJoinPool.commonPool())
