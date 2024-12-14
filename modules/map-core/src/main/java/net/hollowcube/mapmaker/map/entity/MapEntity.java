@@ -117,7 +117,7 @@ public class MapEntity extends Entity implements TerraformEntity {
         for (var entry : loadedMetadata.entrySet()) {
             MetadataDef.Entry<Object> defEntry = new MetadataDef.Entry.Index<>(
                     entry.getKey(), t -> {
-                throw new UnsupportedOperationException("unreachable");
+                return (Metadata.Entry<Object>) entry.getValue();
             }, entry.getValue());
             metadata.set(defEntry, entry.getValue());
         }

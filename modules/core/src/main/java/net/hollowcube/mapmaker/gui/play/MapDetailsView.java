@@ -18,6 +18,8 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -378,7 +380,13 @@ public class MapDetailsView extends View {
     public void showInformation(@NotNull Player player) {
         player.closeInventory();
 
-        var authorName = playerService.getPlayerDisplayName2(map.owner()).build(DisplayName.Context.DEFAULT);
+        Component authorName;
+        try {
+            authorName = playerService.getPlayerDisplayName2(map.owner()).build(DisplayName.Context.DEFAULT);
+        } catch (Throwable t) {
+            MinecraftServer.getExceptionManager().handleException(t);
+            authorName = Component.text("Unknown", NamedTextColor.RED);
+        }
         player.sendMessage(LanguageProviderV2.translateMultiMerged("gui.map_details.map_info_tab.published_id", List.of(
                 Component.text(map.id()),
                 Component.text(Objects.requireNonNullElse(map.publishedIdString(), "None/Not Published")),

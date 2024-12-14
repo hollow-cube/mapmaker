@@ -5,6 +5,7 @@ import ca.spottedleaf.dataconverter.minecraft.MCVersions;
 import ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.entity.EntityMetadataStealer;
 import net.minestom.server.entity.Metadata;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -37,7 +38,7 @@ public final class PreDataFixFixes {
         return switch (type) {
             // Read old ItemStack format
             case 7 -> Metadata.ItemStack(readItemStack1_20_4(buffer));
-            default -> Metadata.Entry.SERIALIZER.read(buffer);
+            default -> EntityMetadataStealer.legacyReadEntry(buffer, type);
         };
     }
 
