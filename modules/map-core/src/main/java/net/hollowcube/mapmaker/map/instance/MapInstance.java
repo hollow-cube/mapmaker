@@ -21,8 +21,6 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -77,15 +75,8 @@ public class MapInstance extends InstanceContainer {
     }
 
     public void loadStream(@NotNull ReadableMapData data, @Nullable PolarWorldAccess worldAccess) {
-        try {
-            var bytes = ByteBuffer.allocate((int) data.length());
-            data.data().read(bytes);
-            load(bytes.array(), worldAccess);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-//        FutureUtil.getUnchecked(PolarLoader.streamLoad(this, data.data(), data.length(),
-//                PolarDataFixer.INSTANCE, worldAccess, hasLighting));
+        FutureUtil.getUnchecked(PolarLoader.streamLoad(this, data.data(), data.length(),
+                PolarDataFixer.INSTANCE, worldAccess, hasLighting));
     }
 
     @Blocking
