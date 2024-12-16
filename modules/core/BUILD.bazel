@@ -8,8 +8,6 @@ java_library(
     visibility = ["//visibility:public"],
     exports = [
         "//modules/command",
-        #        "//tools/compile",
-        "@maven//:com_google_guava_guava",
         "@maven//:com_google_inject_guice",
         "@maven//:org_apache_kafka_kafka_clients",
     ],
@@ -25,7 +23,6 @@ java_library(
         "@maven//:com_github_ben_manes_caffeine_caffeine",
         "@maven//:com_google_code_gson_gson",
         "@maven//:com_miguelfonseca_completely_completely_core",
-        "@maven//:com_google_guava_guava",
         "@maven//:com_google_inject_guice",
         "@maven//:dev_hollowcube_polar",
         "@maven//:io_prometheus_simpleclient",

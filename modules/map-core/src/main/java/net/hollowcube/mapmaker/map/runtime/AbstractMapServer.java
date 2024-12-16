@@ -183,10 +183,10 @@ public abstract class AbstractMapServer implements MapServer {
             permManager = new NoopPermManager();
         } else {
             var spicedbUrl = System.getenv("MAPMAKER_SPICEDB_URL");
-            if (spicedbUrl == null) spicedbUrl = "localhost:50051";
+            if (spicedbUrl == null) spicedbUrl = "http://localhost:8443";
             var spicedbToken = System.getenv("MAPMAKER_SPICEDB_TOKEN");
             if (spicedbToken == null) spicedbToken = "supersecretkey";
-            permManager = new PermManagerImpl(spicedbUrl, spicedbToken);
+            permManager = new PermManagerImpl(otel, spicedbUrl, spicedbToken);
         }
 
         var obungusService = new ObungusServiceImpl(otel, "http://localhost:9125");

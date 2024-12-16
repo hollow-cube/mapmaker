@@ -148,18 +148,15 @@ public class DevServerRunner extends AbstractMapServer {
             if (targetWorld == null) {
                 // Move the session to the hub and spawn the player
                 var hubPresence = new Presence(Presence.TYPE_MAPMAKER_HUB, "__hub_unused__", "devserver", "hub");
-                super.transferPlayerSession(player, hubPresence);
+                try {
+                    super.transferPlayerSession(player, hubPresence);
+                } catch (Throwable t) {
+                    logger.error("Error transferring player to hub", t);
+                    event.getPlayer().kick(Component.text("An unknown error has occurred. Please try again later."));
+                    return;
+                }
 
                 hubWorld.configurePlayer(event);
-
-//                Thread.startVirtualThread(() -> {
-//                    try {
-//                        Thread.sleep(3000);
-//                    } catch (InterruptedException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                    bridge().joinMap(player, "", ServerBridge.JoinMapState.EDITING, "");
-//                });
 
                 return;
             }
@@ -171,16 +168,6 @@ public class DevServerRunner extends AbstractMapServer {
             super.transferPlayerSession(player, presence);
 
             world.configurePlayer(event);
-
-
-//            Thread.startVirtualThread(() -> {
-//                try {
-//                    Thread.sleep(3000);
-//                } catch (InterruptedException e) {
-//                    throw new RuntimeException(e);
-//                }
-//                bridge().joinHub(player);
-//            });
         } catch (Exception e) {
             logger.error("Error during config phase", e);
             event.getPlayer().kick(Component.text("An unknown error has occurred. Please try again later."));
@@ -190,27 +177,6 @@ public class DevServerRunner extends AbstractMapServer {
     protected void handleSpawn(@NotNull PlayerSpawnEvent event) {
         if (!event.isFirstSpawn()) return;
         super.handleFirstSpawn(event.getPlayer());
-
-//        var p = event.getPlayer();
-//        p.scheduleNextTick($ -> {
-//            TheSneaky.getTheSneaky().send(p);
-//        });
-
-//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "ct_1", null), new DisplayName.Part("username", "notmattw", "#46FA32"))).build());
-//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "ct_2", null), new DisplayName.Part("username", "notmattw", "#30FBFF"))).build());
-//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "ct_3", null), new DisplayName.Part("username", "notmattw", "#fa4141"))).build());
-//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "mod_1", null), new DisplayName.Part("username", "notmattw", "#46FA32"))).build());
-//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "mod_2", null), new DisplayName.Part("username", "notmattw", "#30FBFF"))).build());
-//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "mod_3", null), new DisplayName.Part("username", "notmattw", "#fa4141"))).build());
-//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "dev_1", null), new DisplayName.Part("username", "notmattw", "#46FA32"))).build());
-//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "dev_2", null), new DisplayName.Part("username", "notmattw", "#30FBFF"))).build());
-//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "dev_3", null), new DisplayName.Part("username", "notmattw", "#fa4141"))).build());
-//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "hypercube/gold", null), new DisplayName.Part("username", "notmattw", "#ffb700"))).build());
-//        event.getPlayer().sendMessage(new DisplayName(List.of(new DisplayName.Part("badge", "media", null), new DisplayName.Part("username", "notmattw", "#cc39e9"))).build());
-
-//        for (var quality : MapQuality.values()) {
-//            event.getPlayer().sendMessage(MapData.rewriteWithQualityFont(quality, "Hello world!"));
-//        }
     }
 
     protected void handleDisconnect(@NotNull PlayerDisconnectEvent event) {

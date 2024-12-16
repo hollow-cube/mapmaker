@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.perm;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.gson.JsonObject;
+import io.opentelemetry.api.OpenTelemetry;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.MinecraftServer;
@@ -71,7 +72,8 @@ public class PermManagerImpl extends AbstractHttpService implements PermManager 
     private final Map<String, Cache<String, Boolean>> platformPermissions = new CopyOnWriteMap<>();
     private final Map<PlatformPermLike, PrefetchCondition> prefetchConditions = new CopyOnWriteMap<>();
 
-    public PermManagerImpl(@NotNull String address, @NotNull String token) {
+    public PermManagerImpl(@NotNull OpenTelemetry otel, @NotNull String address, @NotNull String token) {
+        super(otel);
         this.baseUrl = address;
         this.token = token;
 

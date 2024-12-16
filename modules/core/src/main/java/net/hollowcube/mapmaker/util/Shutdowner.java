@@ -74,7 +74,7 @@ public class Shutdowner implements HttpServerWrapper.HealthCheck {
                 logger.error("Error waiting for quiescence", e);
             }
 
-            logger.info("Players have drained successfully, .");
+            logger.info("Players have drained successfully, running shutdown hooks.");
             FutureUtil.markShutdown();
             for (var hook : shutdownHooks) {
                 try {
