@@ -46,7 +46,8 @@ record ConfigLoaderV3Impl(@NotNull JsonObject root) implements ConfigLoaderV3 {
     public static @NotNull ConfigLoaderV3Impl loadFromText(byte @NotNull [] text, @NotNull Map<String, String> env) {
         try {
             var root = GSON.fromJson(new String(text, StandardCharsets.UTF_8), JsonObject.class);
-            replaceEnvVarOverrides(env, new ArrayList<>(), root);
+            root = (JsonObject) replaceEnvVarOverrides(env, new ArrayList<>(), root);
+
             //todo: load secrets from secret file.
             return new ConfigLoaderV3Impl(root);
         } catch (Exception e) {
@@ -88,13 +89,13 @@ record ConfigLoaderV3Impl(@NotNull JsonObject root) implements ConfigLoaderV3 {
                 yield replaced;
             }
             case JsonPrimitive primitive -> {
-                var envKey = (ENV_PREFIX + String.join("_", path)).toUpperCase(Locale.ROOT);
+                var envKey = (ENV_PREFIX + "_" + String.join("_", path)).toUpperCase(Locale.ROOT);
                 var value = env.get(envKey);
                 if (value == null) yield primitive;
                 yield new JsonPrimitive(value);
             }
             case JsonNull ignored -> {
-                var envKey = (ENV_PREFIX + String.join("_", path)).toUpperCase(Locale.ROOT);
+                var envKey = (ENV_PREFIX + "_" + String.join("_", path)).toUpperCase(Locale.ROOT);
                 var value = env.get(envKey);
                 if (value == null) yield JsonNull.INSTANCE;
                 yield new JsonPrimitive(value);
