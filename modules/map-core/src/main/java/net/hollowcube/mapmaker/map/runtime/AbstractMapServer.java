@@ -87,13 +87,10 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.entity.Player;
-import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
-import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.extras.velocity.VelocityProxy;
-import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.client.play.ClientUpdateSignPacket;
 import net.minestom.server.network.packet.server.common.ServerLinksPacket;
@@ -106,7 +103,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.StructuredTaskScope;
 import java.util.function.Function;
@@ -427,21 +423,6 @@ public abstract class AbstractMapServer implements MapServer {
         if (fullInstance) FutureUtil.submitVirtual(() -> commandManager.register(createInstance(MuteCommand.class)));
         if (fullInstance) commandManager.register(createInstance(UnmuteCommand.class));
         if (fullInstance) commandManager.register(createInstance(KickCommand.class));
-
-        // In 1.21 mojang introduced a bug which results in horse armor in the off hand being
-        // swapped with the main hand when right clicking with anything. This is a workaround.
-        // https://bugs.mojang.com/browse/MC-273300
-        var problemMaterials = Set.of(
-                Material.LEATHER_HORSE_ARMOR, Material.IRON_HORSE_ARMOR,
-                Material.GOLDEN_HORSE_ARMOR, Material.DIAMOND_HORSE_ARMOR,
-                Material.WOLF_ARMOR
-        );
-        globalEventHandler.addListener(PlayerUseItemEvent.class, event -> {
-            if (event.getHand() != PlayerHand.OFF) return;
-            var material = event.getItemStack().material();
-            if (!problemMaterials.contains(material)) return;
-            event.setCancelled(true);
-        });
     }
 
     public @NotNull List<HttpServerWrapper.HealthCheck> healthChecks() {
