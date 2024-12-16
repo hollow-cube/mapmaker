@@ -107,6 +107,7 @@ maven_install(
     excluded_artifacts = [
         "com.velocitypowered:velocity-brigadier",  # Weird dependency issue, so just exclude it.
         "io.opentelemetry:opentelemetry-exporter-sender-okhttp",
+        "com.github.hollow-cube:datafixerupper",  # Included by dataconverter but we replace it with our local version.
     ],
     fail_on_missing_checksum = False,
     fetch_javadoc = True,
