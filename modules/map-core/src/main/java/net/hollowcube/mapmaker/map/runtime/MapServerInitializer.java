@@ -1,9 +1,7 @@
 package net.hollowcube.mapmaker.map.runtime;
 
-import io.helidon.metrics.prometheus.PrometheusSupport;
-import io.helidon.webserver.WebServer;
-import io.helidon.webserver.observe.ObserveFeature;
-import io.helidon.webserver.observe.health.HealthObserver;
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.exporter.HTTPServer;
 import io.pyroscope.http.Format;
 import io.pyroscope.javaagent.EventType;
 import io.pyroscope.javaagent.PyroscopeAgent;
@@ -12,6 +10,7 @@ import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.HttpConfig;
 import net.hollowcube.mapmaker.config.MetricsConfig;
 import net.hollowcube.mapmaker.config.MinestomConfig;
+import net.hollowcube.mapmaker.util.HttpServerWrapper;
 import net.hollowcube.mapmaker.util.MinestomPrometheus;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
@@ -93,35 +92,22 @@ public final class MapServerInitializer {
             }
         });
 
-        HealthObserver healthObserver = HealthObserver.builder()
-                .details(true)
-                .addCheck(server.shutdowner())
-                .addHealthChecks(server.healthChecks())
-                .build();
-
-        ObserveFeature observe = ObserveFeature.builder()
-//                .config(config.get("server.features.observe"))
-                .addObserver(healthObserver)
-                .build();
-
         var httpConfig = config.get(HttpConfig.class);
-        WebServer webServer = WebServer.builder()
-                .host(httpConfig.host()).port(httpConfig.port())
-                .addFeature(observe)
-                .routing(b -> b.register(PrometheusSupport.create().service().orElseThrow()))
-                .build()
-                .start();
+        var httpServer = new HttpServerWrapper(httpConfig);
+        httpServer.addRoute("/metrics", new HTTPServer.HTTPMetricHandler(CollectorRegistry.defaultRegistry));
+        httpServer.addRoute("/alive", new HttpServerWrapper.AliveHttpHandler());
+        httpServer.addRoute("/ready", new HttpServerWrapper.ReadyHttpHandler(server.healthChecks()));
+        httpServer.start();
 
-        logger.info("Web server is running at {}:{}", httpConfig.host(), webServer.port());
-        server.shutdowner().queue("webserver", webServer::stop);
-
-        // Start everything
+        logger.info("Web server is running at {}:{}", httpConfig.host(), httpServer.port());
+        // We add the web server shutdown task last so that it is the last thing to shut down.
 
         try {
             server.start();
         } catch (Exception e) {
             logger.error("server start failed, shutting down", e);
             server.shutdowner().performShutdown();
+            httpServer.shutdown();
             System.exit(1);
         }
 
@@ -138,6 +124,7 @@ public final class MapServerInitializer {
         });
         server.shutdowner().queue("minestom-stop", MinecraftServer::stopCleanly);
 
+        server.shutdowner().queue("http-server", httpServer::shutdown);
         logger.info("Server started in {}ms", (System.nanoTime() - start) / 1_000_000);
     }
 

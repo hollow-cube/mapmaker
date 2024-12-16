@@ -58,7 +58,7 @@ public class NbtOps implements DynamicOps<BinaryTag> {
             case LongBinaryTag nbt -> DataResult.success(nbt.value());
             case FloatBinaryTag nbt -> DataResult.success(nbt.value());
             case DoubleBinaryTag nbt -> DataResult.success(nbt.value());
-            default -> DataResult.error("Not a number: " + input);
+            default -> DataResult.error(() -> "Not a number: " + input);
         };
     }
 
@@ -85,7 +85,7 @@ public class NbtOps implements DynamicOps<BinaryTag> {
             case LongBinaryTag nbt -> DataResult.success(nbt.value() != 0);
             case FloatBinaryTag nbt -> DataResult.success(nbt.value() != 0);
             case DoubleBinaryTag nbt -> DataResult.success(nbt.value() != 0);
-            default -> DataResult.error("Not a boolean: " + input);
+            default -> DataResult.error(() -> "Not a boolean: " + input);
         };
     }
 
@@ -104,7 +104,7 @@ public class NbtOps implements DynamicOps<BinaryTag> {
             case FloatBinaryTag nbt -> DataResult.success(Float.toString(nbt.value()));
             case DoubleBinaryTag nbt -> DataResult.success(Double.toString(nbt.value()));
             case StringBinaryTag nbt -> DataResult.success(nbt.value());
-            default -> DataResult.error("Not a string: " + input);
+            default -> DataResult.error(() -> "Not a string: " + input);
         };
     }
 
@@ -117,7 +117,7 @@ public class NbtOps implements DynamicOps<BinaryTag> {
     public DataResult<BinaryTag> mergeToList(BinaryTag nbt, BinaryTag value) {
         if (nbt instanceof ListBinaryTag list) {
             if (!list.elementType().equals(value.type())) {
-                return DataResult.error("Could not insert " + value.type() + " into list of " + list.elementType());
+                return DataResult.error(() -> "Could not insert " + value.type() + " into list of " + list.elementType());
             }
 
             return DataResult.success(list.add(value));
@@ -127,7 +127,7 @@ public class NbtOps implements DynamicOps<BinaryTag> {
             return DataResult.success(ListBinaryTag.listBinaryTag(value.type(), List.of(value)));
         }
 
-        return DataResult.error("Could not append " + value.type() + " to " + nbt.type());
+        return DataResult.error(() -> "Could not append " + value.type() + " to " + nbt.type());
     }
 
     @Override
@@ -137,7 +137,7 @@ public class NbtOps implements DynamicOps<BinaryTag> {
                 return DataResult.success(nbt);
             }
             if (!list.elementType().equals(values.get(0).type())) {
-                return DataResult.error("Could not insert " + values.get(0).type() + " into list of " + list.elementType());
+                return DataResult.error(() -> "Could not insert " + values.get(0).type() + " into list of " + list.elementType());
             }
 
             return DataResult.success(list.add(values));
@@ -149,13 +149,13 @@ public class NbtOps implements DynamicOps<BinaryTag> {
             return DataResult.success(ListBinaryTag.listBinaryTag(values.get(0).type(), values));
         }
 
-        return DataResult.error("Could not append to " + nbt.type());
+        return DataResult.error(() -> "Could not append to " + nbt.type());
     }
 
     @Override
     public DataResult<BinaryTag> mergeToMap(BinaryTag input, BinaryTag key, BinaryTag value) {
         if (!(key instanceof StringBinaryTag keyString)) {
-            return DataResult.error("Key is not a string: " + key);
+            return DataResult.error(() -> "Key is not a string: " + key);
         }
         if (value instanceof EndBinaryTag) {
             return DataResult.success(input);
@@ -164,7 +164,7 @@ public class NbtOps implements DynamicOps<BinaryTag> {
             return DataResult.success(CompoundBinaryTag.from(Map.of(keyString.value(), value)));
         }
         if (!(input instanceof CompoundBinaryTag compound)) {
-            return DataResult.error("Not a map: " + input);
+            return DataResult.error(() -> "Not a map: " + input);
         }
         //noinspection unchecked
         return DataResult.success(compound.put(keyString.value(), value));
@@ -181,7 +181,7 @@ public class NbtOps implements DynamicOps<BinaryTag> {
             return DataResult.success(result.build());
         }
         if (!(input instanceof CompoundBinaryTag compound)) {
-            return DataResult.error("Not a map: " + input);
+            return DataResult.error(() -> "Not a map: " + input);
         }
         var result = CompoundBinaryTag.builder();
         result.put(compound);
@@ -195,7 +195,7 @@ public class NbtOps implements DynamicOps<BinaryTag> {
     @Override
     public DataResult<Stream<Pair<BinaryTag, BinaryTag>>> getMapValues(BinaryTag input) {
         if (!(input instanceof CompoundBinaryTag compound)) {
-            return DataResult.error("Not a map: " + input);
+            return DataResult.error(() -> "Not a map: " + input);
         }
         return DataResult.success(StreamSupport.stream(compound.spliterator(), false).map(entry ->
                 Pair.of(createString(entry.getKey()), entry.getValue() instanceof EndBinaryTag ? null : entry.getValue())));
@@ -204,7 +204,7 @@ public class NbtOps implements DynamicOps<BinaryTag> {
     @Override
     public DataResult<Consumer<BiConsumer<BinaryTag, BinaryTag>>> getMapEntries(BinaryTag input) {
         if (!(input instanceof CompoundBinaryTag compound)) {
-            return DataResult.error("Not a map: " + input);
+            return DataResult.error(() -> "Not a map: " + input);
         }
         return DataResult.success(c -> {
             for (var entry : compound) {
@@ -216,7 +216,7 @@ public class NbtOps implements DynamicOps<BinaryTag> {
     @Override
     public DataResult<MapLike<BinaryTag>> getMap(BinaryTag input) {
         if (!(input instanceof CompoundBinaryTag compound)) {
-            return DataResult.error("Not a map: " + input);
+            return DataResult.error(() -> "Not a map: " + input);
         }
         return DataResult.success(new MapLike<>() {
             @Nullable
@@ -256,7 +256,7 @@ public class NbtOps implements DynamicOps<BinaryTag> {
         if (input instanceof ListBinaryTag list) {
             return DataResult.success(list.stream().map(e -> e instanceof EndBinaryTag ? null : e));
         }
-        return DataResult.error("not a list: " + input);
+        return DataResult.error(() -> "not a list: " + input);
     }
 
     @Override
@@ -268,7 +268,7 @@ public class NbtOps implements DynamicOps<BinaryTag> {
                 }
             });
         }
-        return DataResult.error("not a list: " + input);
+        return DataResult.error(() -> "not a list: " + input);
     }
 
     private static final List<BinaryTagType<?>> NUMBER_ORDER = List.of(
@@ -407,7 +407,7 @@ public class NbtOps implements DynamicOps<BinaryTag> {
                 result.put(builder.build());
                 return DataResult.success(result.build());
             }
-            return DataResult.error("mergeToMap called with not a map: " + prefix);
+            return DataResult.error(() -> "mergeToMap called with not a map: " + prefix);
         }
     }
 }

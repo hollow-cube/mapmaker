@@ -25,12 +25,7 @@ java_binary(
         "//modules/terraform",
         "//third_party:adventure_all",
         "//third_party:auto_service",
-        "//third_party:helidon",
         "//third_party:minestom",
-        "//third_party:spicedb",
         "@maven//:ch_qos_logback_logback_classic",
-        #        "@maven//:com_google_code_gson_gson",
-        #        "@maven//:io_getunleash_unleash_client_java",
-        #        "@maven//:io_helidon_webserver_helidon_webserver",
     ],
 )

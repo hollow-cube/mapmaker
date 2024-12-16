@@ -7,9 +7,9 @@ java_library(
     visibility = ["//visibility:public"],
     deps = [
         "//modules/common",
-        "@maven//:com_github_hollow_cube_datafixerupper",
         "@maven//:com_google_code_gson_gson",
         "@maven//:org_jetbrains_annotations",
         "@maven//:org_slf4j_slf4j_api",
+        "@maven//:org_jctools_jctools_core",
     ],
 )

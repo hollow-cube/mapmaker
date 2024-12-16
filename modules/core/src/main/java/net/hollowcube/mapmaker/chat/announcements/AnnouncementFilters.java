@@ -5,14 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-@ConfigSerializable
 public record AnnouncementFilters(
-        @Setting("session_type")
         @Nullable String sessionType,
-        @Setting("session_state")
         @Nullable String sessionState
 ) {
     private static final Logger logger = LoggerFactory.getLogger(AnnouncementFilters.class);

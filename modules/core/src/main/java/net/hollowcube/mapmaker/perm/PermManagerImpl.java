@@ -1,15 +1,10 @@
 package net.hollowcube.mapmaker.perm;
 
-import com.authzed.api.v1.Core.ObjectReference;
-import com.authzed.api.v1.Core.SubjectReference;
-import com.authzed.api.v1.PermissionsServiceGrpc;
-import com.authzed.grpcutil.BearerToken;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.google.protobuf.Struct;
-import com.google.protobuf.Value;
-import io.grpc.ManagedChannelBuilder;
+import com.google.gson.JsonObject;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
@@ -20,6 +15,10 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -29,14 +28,9 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
-import static com.authzed.api.v1.PermissionService.*;
-import static com.authzed.api.v1.PermissionsServiceGrpc.PermissionsServiceBlockingStub;
-
 @Blocking
-public class PermManagerImpl implements PermManager {
+public class PermManagerImpl extends AbstractHttpService implements PermManager {
     private static final Logger logger = LoggerFactory.getLogger(PermManagerImpl.class);
-
-    private static final ObjectReference PLATFORM_OBJECT = ObjectReference.newBuilder().setObjectType("mapmaker/platform").setObjectId("0").build();
 
     private static final SimpleDateFormat TIME_FORMAT;
 
@@ -46,15 +40,40 @@ public class PermManagerImpl implements PermManager {
         TIME_FORMAT.setTimeZone(tz);
     }
 
-    private final PermissionsServiceBlockingStub svc;
-    private final Map<String, Cache<String, Boolean>> platformPermissions = new CopyOnWriteMap<>();
+    // language=JSON
+    private static final String PLATFORM_QUERY_TEMPLATE = """
+            {
+              "consistency": {
+                "minimizeLatency": true
+              },
+              "resource": {
+                "objectType": "mapmaker/platform",
+                "objectId": "0"
+              },
+              "permission": "%s",
+              "subject": {
+                "object": {
+                  "objectType": "mapmaker/player",
+                  "objectId": "%s"
+                }
+              },
+              "context": {
+                "never_set": true,
+                "current_time": "%s"
+              }
+            }
+            """;
 
+    private final HttpClient client = HttpClient.newHttpClient();
+    private final String baseUrl;
+    private final String token;
+
+    private final Map<String, Cache<String, Boolean>> platformPermissions = new CopyOnWriteMap<>();
     private final Map<PlatformPermLike, PrefetchCondition> prefetchConditions = new CopyOnWriteMap<>();
 
     public PermManagerImpl(@NotNull String address, @NotNull String token) {
-        var channel = ManagedChannelBuilder.forTarget(address).usePlaintext().build();
-        svc = PermissionsServiceGrpc.newBlockingStub(channel)
-                .withCallCredentials(new BearerToken(token));
+        this.baseUrl = address;
+        this.token = token;
 
         MinecraftServer.getGlobalEventHandler()
                 .addListener(AsyncPlayerPreLoginEvent.class, event -> prefetchConditions.values().forEach(c -> c.addPlayer(event.getGameProfile().uuid().toString())))
@@ -109,21 +128,28 @@ public class PermManagerImpl implements PermManager {
 
     private boolean hasPlatformPermission0(@NotNull String playerId, @NotNull PlatformPermLike perm) {
         FutureUtil.assertThreadWarn();
-        var req = CheckPermissionRequest.newBuilder()
-                .setConsistency(Consistency.newBuilder().setMinimizeLatency(true).build())
-                .setResource(PLATFORM_OBJECT)
-                .setSubject(SubjectReference.newBuilder()
-                        .setObject(ObjectReference.newBuilder().setObjectType("mapmaker/player").setObjectId(playerId).build())
-                        .build())
-                .setPermission(perm.permName())
-                //todo my audit log hack is not working
-                .setContext(Struct.newBuilder()
-                        .putFields("never_set", Value.newBuilder().setBoolValue(true).build())
-                        .putFields("current_time", Value.newBuilder().setStringValue(TIME_FORMAT.format(new Date())).build())
-                        .build())
-                .build();
-        var res = svc.checkPermission(req);
-        var state = res.getPermissionship() != CheckPermissionResponse.Permissionship.PERMISSIONSHIP_NO_PERMISSION;
+
+        var body = PLATFORM_QUERY_TEMPLATE.formatted(perm.permName(), playerId, TIME_FORMAT.format(new Date()));
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/v1/permissions/check"))
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .header("Authorization", "Bearer " + token)
+                .header("Content-Type", "application/json");
+        var res = doRequest("check_permission", req, HttpResponse.BodyHandlers.ofString());
+        var result = GSON.fromJson(res.body(), JsonObject.class);
+
+        enum Permissionship {
+            PERMISSIONSHIP_UNSPECIFIED,
+            PERMISSIONSHIP_NO_PERMISSION,
+            PERMISSIONSHIP_HAS_PERMISSION,
+            PERMISSIONSHIP_CONDITIONAL_PERMISSION;
+        }
+
+        var permissionship = Permissionship.valueOf(result.get("permissionship").getAsString());
+        var state = permissionship == Permissionship.PERMISSIONSHIP_HAS_PERMISSION ||
+                // Conditional is allowed here because of audit log hack.
+                permissionship == Permissionship.PERMISSIONSHIP_CONDITIONAL_PERMISSION;
+
         if (perm instanceof PlatformPerm) logger.info("platform perm check: {} {} -> {}", playerId, perm, state);
         return state;
     }

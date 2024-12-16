@@ -119,10 +119,10 @@ public class MapServerRunner extends AbstractMapServer {
 
         var kafkaConfig = config.get(KafkaConfig.class);
         if (!globalConfig.noop()) {
-            mapJoinConsumer = new MapJoinConsumer(kafkaConfig.bootstrapServersStr());
+            mapJoinConsumer = new MapJoinConsumer(kafkaConfig.bootstrapServers());
             shutdowner().queue("map-join-listener", mapJoinConsumer::close);
 
-            var mapMgmtConsumer = new MapMgmtConsumerImpl((LocalMapAllocator) allocator(), kafkaConfig.bootstrapServersStr());
+            var mapMgmtConsumer = new MapMgmtConsumerImpl((LocalMapAllocator) allocator(), kafkaConfig.bootstrapServers());
             shutdowner().queue("map-mgmt-listener", mapMgmtConsumer::close);
         }
 

@@ -1,31 +1,28 @@
 package net.hollowcube.mapmaker.config;
 
+import com.google.gson.*;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.ConfigurationVisitor;
-import org.spongepowered.configurate.serialize.SerializationException;
-import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
-final class ConfigLoaderV3Impl implements ConfigLoaderV3 {
+record ConfigLoaderV3Impl(@NotNull JsonObject root) implements ConfigLoaderV3 {
     private static final String ENV_PREFIX = "MAPMAKER";
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigLoaderV3Impl.class);
+    private static final Gson GSON = new GsonBuilder()
+            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .disableJdkUnsafe()
+            .create();
 
     public static @NotNull ConfigLoaderV3Impl loadDefault(String[] args) {
-        try (var is = ConfigLoaderV3Impl.class.getResourceAsStream("/config.yaml")) {
+        try (var is = ConfigLoaderV3Impl.class.getResourceAsStream("/default_config.json")) {
             if (is == null) {
-                logger.error("config.yaml not present in binary");
+                logger.error("default_config.json not present in binary");
                 System.exit(1);
             }
 
@@ -48,14 +45,10 @@ final class ConfigLoaderV3Impl implements ConfigLoaderV3 {
 
     public static @NotNull ConfigLoaderV3Impl loadFromText(byte @NotNull [] text, @NotNull Map<String, String> env) {
         try {
-            var loader = YamlConfigurationLoader.builder()
-                    .source(() -> new BufferedReader(new InputStreamReader(new ByteArrayInputStream(text))))
-                    .build();
-
-            var rootNode = loader.load();
-            rootNode.visit(new EnvVarOverrideVisitor(env));
+            var root = GSON.fromJson(new String(text, StandardCharsets.UTF_8), JsonObject.class);
+            replaceEnvVarOverrides(env, new ArrayList<>(), root);
             //todo: load secrets from secret file.
-            return new ConfigLoaderV3Impl(rootNode);
+            return new ConfigLoaderV3Impl(root);
         } catch (Exception e) {
             logger.error("failed to load config file", e);
 
@@ -65,45 +58,48 @@ final class ConfigLoaderV3Impl implements ConfigLoaderV3 {
         }
     }
 
-    private final ConfigurationNode root;
-
-    private ConfigLoaderV3Impl(ConfigurationNode root) {
-        this.root = root;
-    }
-
     @Override
     public <C> @NotNull C get(@NotNull Class<C> clazz) {
-        try {
-            var path = clazz.getSimpleName().replace("Config", "")
-                    .toLowerCase(Locale.ROOT);
-            return Objects.requireNonNull(root.node(path).get(clazz));
-        } catch (SerializationException e) {
-            //todo
-            throw new RuntimeException(e);
-        }
+        var path = clazz.getSimpleName().replace("Config", "")
+                .toLowerCase(Locale.ROOT);
+        var element = GSON.fromJson(root.get(path), clazz);
+        Check.notNull(element, "Config path " + path + " not found. Add entry in default_config.json.");
+        return element;
     }
 
-    private static class EnvVarOverrideVisitor implements ConfigurationVisitor.Stateless<Exception> {
-        private final Map<String, String> env;
-
-        private EnvVarOverrideVisitor(@NotNull Map<String, String> env) {
-            this.env = env;
-        }
-
-        @Override
-        public void enterNode(ConfigurationNode node) {
-            // Do not care about non-leaf nodes
-            if (!node.childrenMap().isEmpty()) return;
-
-            var path = new StringBuilder().append(ENV_PREFIX);
-            for (int i = 0; i < node.path().size(); i++)
-                path.append("_").append(node.path().get(i).toString().toUpperCase(Locale.ROOT));
-            if (path.isEmpty()) return;
-
-            var value = this.env.get(path.toString());
-            if (value == null) return;
-
-            node.raw(value);
-        }
+    private static JsonElement replaceEnvVarOverrides(@NotNull Map<String, String> env, List<String> path, JsonElement element) {
+        return switch (element) {
+            case JsonObject object -> {
+                JsonObject replaced = new JsonObject();
+                for (var entry : object.entrySet()) {
+                    path.add(entry.getKey());
+                    replaced.add(entry.getKey(), replaceEnvVarOverrides(env, path, entry.getValue()));
+                    path.removeLast();
+                }
+                yield replaced;
+            }
+            case JsonArray array -> {
+                JsonArray replaced = new JsonArray();
+                for (int i = 0; i < array.size(); i++) {
+                    path.add(Integer.toString(i));
+                    replaced.add(replaceEnvVarOverrides(env, path, array.get(i)));
+                    path.removeLast();
+                }
+                yield replaced;
+            }
+            case JsonPrimitive primitive -> {
+                var envKey = (ENV_PREFIX + String.join("_", path)).toUpperCase(Locale.ROOT);
+                var value = env.get(envKey);
+                if (value == null) yield primitive;
+                yield new JsonPrimitive(value);
+            }
+            case JsonNull ignored -> {
+                var envKey = (ENV_PREFIX + String.join("_", path)).toUpperCase(Locale.ROOT);
+                var value = env.get(envKey);
+                if (value == null) yield JsonNull.INSTANCE;
+                yield new JsonPrimitive(value);
+            }
+            default -> element;
+        };
     }
 }

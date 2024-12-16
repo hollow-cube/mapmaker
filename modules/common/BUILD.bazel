@@ -6,15 +6,16 @@ java_library(
     resources = glob(include = ["src/main/resources/**/*"]),
     visibility = ["//visibility:public"],
     exports = [
+        "//modules/datafixerupper:datafixerupper",
         "//third_party:auto_service",
         "@maven//:com_google_inject_guice",
         "@maven//:org_jetbrains_annotations",
         "@maven//:org_slf4j_slf4j_api",
     ],
     deps = [
+        "//modules/datafixerupper:datafixerupper",
         "//third_party:adventure_all",
         "//third_party:minestom",
-        "@maven//:com_github_hollow_cube_datafixerupper",
         "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_inject_guice",
         "@maven//:it_unimi_dsi_fastutil",

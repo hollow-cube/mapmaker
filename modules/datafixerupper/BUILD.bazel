@@ -1,0 +1,13 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
+java_library(
+    name = "datafixerupper",
+    srcs = glob(include = ["src/main/java/**/*.java"]),
+    resources = glob(include = ["src/main/resources/**/*"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "@maven//:it_unimi_dsi_fastutil",
+        "@maven//:com_google_code_gson_gson",
+        "@maven//:org_jetbrains_annotations",
+    ],
+)

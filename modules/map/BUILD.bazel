@@ -17,10 +17,7 @@ java_library(
         "//modules/map-core",
         "//modules/replay",
         "//modules/terraform",
-        "//third_party:helidon",
         "//third_party:minestom",
-        "@maven//:com_github_hollow_cube_datafixerupper",
-        #        "@maven//:com_github_mworzala_mc_debug_renderer_minestom",
         "@maven//:com_google_code_gson_gson",
         "@maven//:dev_hollowcube_polar",
         "@maven//:it_unimi_dsi_fastutil",
@@ -38,7 +35,6 @@ java_junit5_test(
     test_class = "net.hollowcube.mapmaker.map.MapTestSuite",
     deps = [
         ":map",
-        "@maven//:com_github_hollow_cube_datafixerupper",
         "@maven//:com_google_code_gson_gson",
         "@maven//:net_kyori_adventure_api",
         "@maven//:net_minestom_minestom_snapshots",

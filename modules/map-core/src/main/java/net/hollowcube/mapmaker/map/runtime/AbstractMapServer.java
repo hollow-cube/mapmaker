@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.runtime;
 
-import io.helidon.health.HealthCheck;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
@@ -45,7 +44,6 @@ import net.hollowcube.mapmaker.event.util.UpdateSignTextEvent;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.posthog.PostHogFeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.unleash.UnleashConfig;
-import net.hollowcube.mapmaker.feature.unleash.UnleashFeatureFlagProvider;
 import net.hollowcube.mapmaker.invite.MapInviteAcceptedOrRejectedListener;
 import net.hollowcube.mapmaker.invite.MapInviteListener;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
@@ -81,6 +79,7 @@ import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
+import net.hollowcube.mapmaker.util.HttpServerWrapper;
 import net.hollowcube.mapmaker.util.ServerStatsHud;
 import net.hollowcube.mapmaker.util.Shutdowner;
 import net.kyori.adventure.text.Component;
@@ -112,7 +111,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.StructuredTaskScope;
 import java.util.function.Function;
 
-@SuppressWarnings("UnstableApiUsage")
 public abstract class AbstractMapServer implements MapServer {
     private final Logger logger = LoggerFactory.getLogger(MapServer.class);
 
@@ -235,11 +233,7 @@ public abstract class AbstractMapServer implements MapServer {
         // Dependent service init
 
         var unleashConfig = config.get(UnleashConfig.class);
-        if (unleashConfig.enabled() && false) {
-            logger.info("Unleash is enabled, loading feature flag provider");
-            var provider = new UnleashFeatureFlagProvider(unleashConfig, shutdowner);
-            FeatureFlagProvider.replaceGlobals(provider);
-        } else if (unleashConfig.usePosthog() || true) {
+        if (unleashConfig.usePosthog()) {
             logger.info("Posthog is enabled, loading feature flag provider");
             FeatureFlagProvider.replaceGlobals(new PostHogFeatureFlagProvider(
                     unleashConfig.posthogProjectApiKey(),
@@ -268,26 +262,26 @@ public abstract class AbstractMapServer implements MapServer {
             this.inviteService = new PlayerInviteServiceImpl("http://localhost:9127", playerService, mapService, sessionManager, bridge, permManager); // tilt
 
         // Create one producer to reuse.
-        var producer = new FriendlyProducer(kafkaConfig.bootstrapServersStr());
+        var producer = new FriendlyProducer(kafkaConfig.bootstrapServers());
         injector.bind(FriendlyProducer.class, producer);
         shutdowner.queue("kafka-producer", producer::close);
 
         if (!globalConfig.noop()) {
-            mapInviteListener = new MapInviteListener(mapService, playerService, sessionManager, kafkaConfig.bootstrapServersStr());
+            mapInviteListener = new MapInviteListener(mapService, playerService, sessionManager, kafkaConfig.bootstrapServers());
             shutdowner.queue("map-invite-listener", mapInviteListener::close);
 
-            mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(mapService, playerService, sessionManager, bridge(), kafkaConfig.bootstrapServersStr());
+            mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(mapService, playerService, sessionManager, bridge(), kafkaConfig.bootstrapServers());
             shutdowner.queue("map-invite-acceptance-listener", mapInviteAcceptedOrRejectedListener::close);
 
-            var punishmentCreatedListener = new PunishmentManagementListener(playerService, permManager, kafkaConfig.bootstrapServersStr());
+            var punishmentCreatedListener = new PunishmentManagementListener(playerService, permManager, kafkaConfig.bootstrapServers());
             shutdowner.queue("punishment-listener", punishmentCreatedListener::close);
 
-            chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, kafkaConfig.bootstrapServersStr(), producer);
+            chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, kafkaConfig.bootstrapServers(), producer);
             injector.bind(ChatMessageListener.class, chatMessageListener);
             shutdowner.queue("chat-message-listener", chatMessageListener::close);
             packetListenerManager.setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
 
-            playerDataUpdateConsumer = new PlayerDataUpdateConsumer(kafkaConfig.bootstrapServersStr(), playerService);
+            playerDataUpdateConsumer = new PlayerDataUpdateConsumer(kafkaConfig.bootstrapServers(), playerService);
             shutdowner.queue("player-data-listener", playerDataUpdateConsumer::close);
         }
 
@@ -450,8 +444,9 @@ public abstract class AbstractMapServer implements MapServer {
         });
     }
 
-    public @NotNull List<HealthCheck> healthChecks() {
+    public @NotNull List<HttpServerWrapper.HealthCheck> healthChecks() {
         return List.of(
+                shutdowner(),
                 new AnonHealthCheck("minestom", MinecraftServer::isStarted),
                 new AnonHealthCheck("hub", () -> isReady),
                 new AnonHealthCheck("tick", () -> {
@@ -537,9 +532,9 @@ public abstract class AbstractMapServer implements MapServer {
 
         var tracingConfig = config.get(TracingConfig.class);
         SpanExporter spanExporter;
-        if (tracingConfig.otlpHttp() != null && !tracingConfig.otlpHttp().isEmpty()) {
+        if (tracingConfig.otlpEndpoint() != null && !tracingConfig.otlpEndpoint().isEmpty()) {
             spanExporter = OtlpHttpSpanExporter.builder()
-                    .setEndpoint(tracingConfig.otlpHttp())
+                    .setEndpoint(tracingConfig.otlpEndpoint())
                     .build();
         } else {
             spanExporter = LoggingSpanExporter.create();

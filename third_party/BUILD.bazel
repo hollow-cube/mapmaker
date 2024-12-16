@@ -29,21 +29,6 @@ alias(
 )
 
 java_library(
-    name = "helidon",
-    exports = [
-        "@maven//:io_helidon_health_helidon_health",
-        "@maven//:io_helidon_health_helidon_health_checks",
-        "@maven//:io_helidon_logging_helidon_logging_slf4j",
-        "@maven//:io_helidon_metrics_helidon_metrics_prometheus",
-        "@maven//:io_helidon_metrics_helidon_metrics_system_meters",
-        "@maven//:io_helidon_webserver_helidon_webserver",
-        "@maven//:io_helidon_webserver_observe_helidon_webserver_observe",
-        "@maven//:io_helidon_webserver_observe_helidon_webserver_observe_health",
-        "@maven//:io_helidon_webserver_observe_helidon_webserver_observe_metrics",
-    ],
-)
-
-java_library(
     name = "adventure_all",
     exports = [
         "@maven//:net_kyori_adventure_api",
@@ -52,17 +37,6 @@ java_library(
         "@maven//:net_kyori_adventure_text_minimessage",
         "@maven//:net_kyori_adventure_text_serializer_gson",
         "@maven//:net_kyori_adventure_text_serializer_plain",
-    ],
-)
-
-java_library(
-    name = "spicedb",
-    exports = [
-        "@maven//:com_authzed_api_authzed",
-        "@maven//:com_google_protobuf_protobuf_java",
-        "@maven//:io_grpc_grpc_api",
-        "@maven//:io_grpc_grpc_protobuf",
-        "@maven//:io_grpc_grpc_stub",
     ],
 )
 

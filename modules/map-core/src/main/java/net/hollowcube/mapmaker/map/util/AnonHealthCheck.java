@@ -1,21 +1,17 @@
 package net.hollowcube.mapmaker.map.util;
 
-import io.helidon.health.HealthCheck;
-import io.helidon.health.HealthCheckResponse;
-import io.helidon.health.HealthCheckType;
+import net.hollowcube.mapmaker.util.HttpServerWrapper;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 
-public record AnonHealthCheck(@NotNull String name, @NotNull HealthCheckType type,
-                              @NotNull Supplier<HealthCheckResponse> fn) implements HealthCheck {
-
-    public AnonHealthCheck(@NotNull String name, @NotNull Supplier<Boolean> fn) {
-        this(name, HealthCheckType.READINESS, () -> HealthCheckResponse.builder().status(fn.get()).build());
-    }
+public record AnonHealthCheck(
+        @NotNull String name,
+        @NotNull BooleanSupplier fn
+) implements HttpServerWrapper.HealthCheck {
 
     @Override
-    public HealthCheckResponse call() {
-        return fn.get();
+    public boolean healthCheck() {
+        return fn.getAsBoolean();
     }
 }

@@ -95,9 +95,9 @@ public class DevServerRunner extends AbstractMapServer {
 
         performMapInit(); // Map first so placements are registered
         performHubInit();
-        
+
         var kafkaConfig = config.get(KafkaConfig.class);
-        var mapMgmtConsumer = new MapMgmtConsumerImpl((LocalMapAllocator) allocator(), kafkaConfig.bootstrapServersStr());
+        var mapMgmtConsumer = new MapMgmtConsumerImpl((LocalMapAllocator) allocator(), kafkaConfig.bootstrapServers());
         shutdowner().queue("map-mgmt-listener", mapMgmtConsumer::close);
     }
 

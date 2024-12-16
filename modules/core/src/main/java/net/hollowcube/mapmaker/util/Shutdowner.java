@@ -1,8 +1,5 @@
 package net.hollowcube.mapmaker.util;
 
-import io.helidon.health.HealthCheck;
-import io.helidon.health.HealthCheckResponse;
-import io.helidon.health.HealthCheckType;
 import net.hollowcube.common.util.FutureUtil;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -19,7 +16,7 @@ import java.util.function.Supplier;
 /**
  * Handles the typical shutdown sequence for a server.
  */
-public class Shutdowner implements HealthCheck {
+public class Shutdowner implements HttpServerWrapper.HealthCheck {
     private static final Logger logger = LoggerFactory.getLogger(Shutdowner.class);
     private static final long SHUTDOWN_MAX_WAIT_MILLIS;
 
@@ -93,17 +90,7 @@ public class Shutdowner implements HealthCheck {
     }
 
     @Override
-    public HealthCheckResponse call() {
-        return HealthCheckResponse.builder().status(!isShuttingDown()).build();
-    }
-
-    @Override
-    public HealthCheckType type() {
-        return HealthCheckType.READINESS;
-    }
-
-    @Override
-    public String name() {
-        return "shutdowner";
+    public boolean healthCheck() {
+        return !isShuttingDown();
     }
 }

@@ -58,7 +58,7 @@ public class SessionManager {
         this.sessionService = sessionService;
         this.playerService = playerService;
 
-        if (!noop) this.consumer = new ConsumerImpl(String.join(",", kafkaConfig.bootstrapServers()));
+        if (!noop) this.consumer = new ConsumerImpl(String.join(",", kafkaConfig.bootstrapServerList()));
         else this.consumer = null;
 
         this.syntheticTab = new SyntheticTabListManager(this, playerService);

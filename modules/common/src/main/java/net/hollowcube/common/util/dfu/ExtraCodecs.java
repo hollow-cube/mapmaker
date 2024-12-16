@@ -75,7 +75,7 @@ public final class ExtraCodecs {
                 case Float f -> DataResult.success(ops.createFloat(f));
                 case Double d -> DataResult.success(ops.createDouble(d));
                 case String s -> DataResult.success(ops.createString(s));
-                default -> DataResult.error("Unsupported/non-primitive type: " + input.getClass());
+                default -> DataResult.error(() -> "Unsupported/non-primitive type: " + input.getClass());
             };
         }
     }, new Decoder<>() {
@@ -90,7 +90,7 @@ public final class ExtraCodecs {
             var str = ops.getStringValue(input);
             if (str.result().isPresent())
                 return DataResult.success(Pair.of(str.result().get(), ops.empty()));
-            return DataResult.error("Unsupported/non-primitive type: " + input);
+            return DataResult.error(() -> "Unsupported/non-primitive type: " + input);
         }
     });
 

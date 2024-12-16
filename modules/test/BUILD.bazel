@@ -24,7 +24,6 @@ java_library(
         "@maven//:net_kyori_adventure_api",
         "@maven//:net_kyori_adventure_text_serializer_plain",
         "@maven//:org_jetbrains_annotations",
-        "@maven//:org_jetbrains_kotlin_kotlin_stdlib",
         "@maven//:org_junit_jupiter_junit_jupiter_api",
         "@maven//:org_junit_jupiter_junit_jupiter_params",
         "@maven//:org_opentest4j_opentest4j",
