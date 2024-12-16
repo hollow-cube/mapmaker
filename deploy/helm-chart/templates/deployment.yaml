@@ -46,11 +46,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /observe/health/live
+              path: /alive
               port: http
           readinessProbe:
             httpGet:
-              path: /observe/health/ready
+              path: /ready
               port: http
           lifecycle:
             preStop:
