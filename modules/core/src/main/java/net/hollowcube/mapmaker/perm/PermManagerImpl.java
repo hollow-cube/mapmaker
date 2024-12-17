@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.text.SimpleDateFormat;
@@ -65,7 +64,6 @@ public class PermManagerImpl extends AbstractHttpService implements PermManager 
             }
             """;
 
-    private final HttpClient client = HttpClient.newHttpClient();
     private final String baseUrl;
     private final String token;
 
