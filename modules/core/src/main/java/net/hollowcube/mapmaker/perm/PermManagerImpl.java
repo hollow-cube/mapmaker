@@ -140,20 +140,25 @@ public class PermManagerImpl extends AbstractHttpService implements PermManager 
         var res = doRequest("check_permission", req, HttpResponse.BodyHandlers.ofString());
         var result = GSON.fromJson(res.body(), JsonObject.class);
 
-        enum Permissionship {
-            PERMISSIONSHIP_UNSPECIFIED,
-            PERMISSIONSHIP_NO_PERMISSION,
-            PERMISSIONSHIP_HAS_PERMISSION,
-            PERMISSIONSHIP_CONDITIONAL_PERMISSION;
+        if (res.statusCode() == 200) {
+            enum Permissionship {
+                PERMISSIONSHIP_UNSPECIFIED,
+                PERMISSIONSHIP_NO_PERMISSION,
+                PERMISSIONSHIP_HAS_PERMISSION,
+                PERMISSIONSHIP_CONDITIONAL_PERMISSION;
+            }
+
+            var permissionship = Permissionship.valueOf(result.get("permissionship").getAsString());
+            var state = permissionship == Permissionship.PERMISSIONSHIP_HAS_PERMISSION ||
+                    // Conditional is allowed here because of audit log hack.
+                    permissionship == Permissionship.PERMISSIONSHIP_CONDITIONAL_PERMISSION;
+
+            if (perm instanceof PlatformPerm) logger.info("platform perm check: {} {} -> {}", playerId, perm, state);
+            return state;
         }
 
-        var permissionship = Permissionship.valueOf(result.get("permissionship").getAsString());
-        var state = permissionship == Permissionship.PERMISSIONSHIP_HAS_PERMISSION ||
-                // Conditional is allowed here because of audit log hack.
-                permissionship == Permissionship.PERMISSIONSHIP_CONDITIONAL_PERMISSION;
-
-        if (perm instanceof PlatformPerm) logger.info("platform perm check: {} {} -> {}", playerId, perm, state);
-        return state;
+        logger.error("platform perm check failed: {} {} {} -> {}", playerId, perm, res.statusCode(), result);
+        return false;
     }
 
     private class PrefetchCondition implements Predicate<String> {
