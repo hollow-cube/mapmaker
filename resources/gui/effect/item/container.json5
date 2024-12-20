@@ -1,0 +1,9 @@
+{
+  "type": "sprite",
+  // Sets the zero position of the image RELATIVE TO THE TOP LEFT CORNER OF THE TOP LEFT SLOT
+  // In practice, the Y offset is used to set the ascent of the font character and the X is given to the server for alignment.
+  "origin": [
+    -11,
+    27
+  ]
+}

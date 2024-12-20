@@ -6,6 +6,8 @@ import net.hollowcube.mapmaker.local.svc.LocalPlayerService;
 import net.hollowcube.mapmaker.local.svc.LocalSessionService;
 import net.hollowcube.mapmaker.map.MapServerRunner;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.command.DebugCommand;
+import net.hollowcube.mapmaker.map.gui.effect.item.ItemEditorView;
 import net.hollowcube.mapmaker.map.util.MapJoinInfo;
 import net.hollowcube.mapmaker.obungus.ObungusCore;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -54,4 +56,12 @@ public class LocalServerRunner extends MapServerRunner {
         return CompletableFuture.completedFuture(new MapJoinInfo(playerId, ObungusCore.REVIEW_MAP_ID, "editing")); // DUMMY_MAP_ID
     }
 
+    @Override
+    protected @NotNull DebugCommand createDebugCommand() {
+        var cmd = super.createDebugCommand();
+        cmd.createLocalSubcommand("item", (sender, context) -> {
+            guiController().show(sender, ItemEditorView::new);
+        }, "item editor");
+        return cmd;
+    }
 }

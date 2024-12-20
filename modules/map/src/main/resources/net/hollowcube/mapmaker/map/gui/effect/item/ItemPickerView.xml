@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<component width="9" height="10" align="ttb" sprite="effect/item/picker/container">
+    <text id="title" width="0" height="0" translationKey=""
+          font="map_details_title2" shift="49"/>
+    <!-- Header -->
+    <box width="9" align="ltr">
+        <BackButton2/>
+        <label translationKey="gui.effect.item.picker.information"/>
+
+        <spacer width="5"/>
+
+        <button id="reset" width="2" translationKey="gui.effect.item.reset"/>
+    </box>
+
+    <spacer/>
+
+    <box width="9" height="2" align="ltr">
+        <spacer width="1"/>
+        <switch id="item_firework_switch">
+            <button id="item_firework_off" translationKey="todo" sprite="minecraft:firework_rocket"
+                    backgroundSprite="effect/item/picker/bg_unselected"/>
+            <button id="item_firework_on" translationKey="todo" sprite="minecraft:firework_rocket"
+                    backgroundSprite="effect/item/picker/bg_selected"/>
+        </switch>
+        <switch id="item_trident_switch">
+            <button id="item_trident_off" translationKey="todo" sprite="minecraft:trident"
+                    backgroundSprite="effect/item/picker/bg_unselected"/>
+            <button id="item_trident_on" translationKey="todo" sprite="minecraft:trident"
+                    backgroundSprite="effect/item/picker/bg_selected"/>
+        </switch>
+        <switch id="item_air_switch">
+            <button id="item_air_off" translationKey="todo" sprite="effect/item/air"
+                    backgroundSprite="effect/item/picker/bg_unselected"/>
+            <button id="item_air_on" translationKey="todo" sprite="effect/item/air"
+                    backgroundSprite="effect/item/picker/bg_selected"/>
+        </switch>
+    </box>
+
+</component>

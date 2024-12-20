@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<component width="9" height="10" align="ttb" sprite="effect/item/container">
+    <!-- Header -->
+    <box width="9" align="ltr">
+        <BackButton2/>
+        <label translationKey="gui.effect.item.information"/>
+
+        <text id="slots_used" width="5" translationKey="todo"
+              font="slot_title" centered="true"/>
+
+        <button id="reset" width="2" translationKey="gui.effect.item.reset"/>
+    </box>
+
+    <spacer/>
+
+    <box width="9" height="2" align="ltr">
+        <spacer width="3"/>
+        <box height="2" align="ttb">
+            <button id="item_1_icon" translationKey="todo" sprite="effect/item/plus"/>
+            <switch id="item_1_opts_switch">
+                <button id="item_1_opts_off" translationKey="todo" sprite="effect/item/opts/enchant_off"/>
+                <button id="item_1_opts_enchant" translationKey="todo" sprite="effect/item/opts/enchant_on"/>
+                <button id="item_1_opts_settings" translationKey="todo" sprite="effect/item/opts/settings_on"/>
+            </switch>
+        </box>
+        <box height="2" align="ttb">
+            <button id="item_2_icon" translationKey="todo" sprite="effect/item/plus"/>
+            <switch id="item_2_opts_switch">
+                <button id="item_2_opts_off" translationKey="todo" sprite="effect/item/opts/enchant_off"/>
+                <button id="item_2_opts_enchant" translationKey="todo" sprite="effect/item/opts/enchant_on"/>
+                <button id="item_2_opts_settings" translationKey="todo" sprite="effect/item/opts/settings_on"/>
+            </switch>
+        </box>
+        <box height="2" align="ttb">ju
+            <button id="item_3_icon" translationKey="todo" sprite="effect/item/plus"/>
+            <switch id="item_3_opts_switch">
+                <button id="item_3_opts_off" translationKey="todo" sprite="effect/item/opts/enchant_off"/>
+                <button id="item_3_opts_enchant" translationKey="todo" sprite="effect/item/opts/enchant_on"/>
+                <button id="item_3_opts_settings" translationKey="todo" sprite="effect/item/opts/settings_on"/>
+            </switch>
+        </box>
+    </box>
+
+    <spacer/>
+
+    <box width="9" height="1" align="ltr">
+        <spacer/>
+
+        <switch id="elytra_cycle_switch">
+            <button id="elytra_cycle_keep" translationKey="todo" sprite="effect/item/elytra/keep_icon"/>
+            <button id="elytra_cycle_give" translationKey="todo" sprite="effect/item/elytra/give_icon"/>
+            <button id="elytra_cycle_take" translationKey="todo" sprite="effect/item/elytra/take_icon"/>
+        </switch>
+        <switch id="elytra_keep_switch" width="2">
+            <button id="elytra_keep_off" width="2" translationKey="todo" sprite="effect/item/elytra/keep_off"/>
+            <button id="elytra_keep_on" width="2" translationKey="todo" sprite="effect/item/elytra/keep_on"/>
+        </switch>
+        <switch id="elytra_give_switch" width="2">
+            <button id="elytra_give_off" width="2" translationKey="todo" sprite="effect/item/elytra/give_off"/>
+            <button id="elytra_give_on" width="2" translationKey="todo" sprite="effect/item/elytra/give_on"/>
+        </switch>
+        <switch id="elytra_take_switch" width="2">
+            <button id="elytra_take_off" width="2" translationKey="todo" sprite="effect/item/elytra/take_off"/>
+            <button id="elytra_take_on" width="2" translationKey="todo" sprite="effect/item/elytra/take_on"/>
+        </switch>
+    </box>
+
+</component>
