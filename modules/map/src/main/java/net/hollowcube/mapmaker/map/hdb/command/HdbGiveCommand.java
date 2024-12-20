@@ -30,14 +30,9 @@ public class HdbGiveCommand extends CommandDsl {
     }
 
     private void handleGiveHead(@NotNull Player player, @NotNull CommandContext context) {
-        if (!hdb.isLoaded()) {
-            player.sendMessage(HdbMessages.GENERIC_UNLOADED);
-            return;
-        }
-
         var query = context.get(queryArg);
 
-        var results = hdb.suggest(query.replace("_", " "), 1);
+        var results = hdb.getSuggestions(query.replace("_", " "), 1);
         if (results.isEmpty()) {
             player.sendMessage(HdbMessages.COMMAND_GIVE_NO_RESULT.with(query));
             return;

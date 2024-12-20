@@ -29,11 +29,6 @@ public class HdbSearchCommand extends CommandDsl {
     }
 
     private void handleSearch(@NotNull Player player, @NotNull CommandContext context) {
-        if (!hdb.isLoaded()) {
-            player.sendMessage(HdbMessages.GENERIC_UNLOADED);
-            return;
-        }
-
         guiController.show(player, c -> new HdbSearchView(c, context.get(queryArg)));
     }
 

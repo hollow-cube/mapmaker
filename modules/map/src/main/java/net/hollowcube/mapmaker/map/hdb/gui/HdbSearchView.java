@@ -50,7 +50,7 @@ public class HdbSearchView extends View {
         task = scheduler.buildTask(() -> {
             inputField.setArgs(Component.text(input));
             pagination.reset();
-        }).delay(500, TimeUnit.MILLISECOND).schedule();
+        }).delay(1, TimeUnit.SECOND).schedule();
 
         this.input = input;
     }
@@ -60,18 +60,17 @@ public class HdbSearchView extends View {
         player.closeInventory();
     }
 
-    @Action("page")
+    @Action(value = "page", async = true)
     private void createPage(@NotNull Pagination.PageRequest<HeadIconView> request) {
-        List<HeadIconView> result;
+        List<HeadIconView> result = new ArrayList<>();
         if (input.isEmpty()) {
             // Add some random items
-            result = hdb.random()
-                    .limit(request.pageSize())
-                    .map(head -> new HeadIconView(request.context(), head))
-                    .toList();
+            for (var head : hdb.getRandom(request.pageSize())) {
+                result.add(new HeadIconView(request.context(), head));
+            }
         } else {
             result = new ArrayList<>();
-            for (var suggestion : hdb.suggest(input, request.pageSize())) {
+            for (var suggestion : hdb.getSuggestions(input, request.pageSize())) {
                 result.add(new HeadIconView(request.context(), suggestion));
             }
 
@@ -80,6 +79,6 @@ public class HdbSearchView extends View {
                 result.add(new HeadIconView(request.context()));
             }
         }
-        request.respond(result, false);
+        request.respond(result, result.size() <= request.pageSize());
     }
 }

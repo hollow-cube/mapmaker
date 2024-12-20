@@ -117,6 +117,7 @@ public abstract class AbstractMapServer implements MapServer {
     protected final ConfigLoaderV3 config;
     protected final GlobalConfig globalConfig;
 
+    protected final OpenTelemetry otel;
     private final MetricWriter metrics;
     private final SessionService sessionService;
     private final PlayerService playerService;
@@ -147,7 +148,7 @@ public abstract class AbstractMapServer implements MapServer {
         this.config = config;
         this.globalConfig = config.get(GlobalConfig.class);
 
-        var otel = initTracing(config);
+        this.otel = initTracing(config);
 
         this.metrics = createMetricWriter(config);
         shutdowner.queue("metric-writer", metrics::close);

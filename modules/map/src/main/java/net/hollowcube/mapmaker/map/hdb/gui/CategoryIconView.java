@@ -30,7 +30,7 @@ public class CategoryIconView extends View {
         var categoryIcon = hdb.categoryIcon(category);
 
         rootSwitch.setOption(0);
-        var args = List.<Component>of(Component.text(hdb.size(category)));
+        var args = List.<Component>of(Component.text(0));
         var name = Component.translatable("hdb.category." + category + ".name");
         var loreOff = LanguageProviderV2.translateMulti("hdb.category." + category + ".unselected.lore", args);
         labelOff.setItemSprite(categoryIcon);

@@ -4,8 +4,6 @@ import net.hollowcube.terraform.util.MessageSet;
 import org.jetbrains.annotations.NotNull;
 
 public enum HdbMessages implements MessageSet {
-    GENERIC_UNLOADED("hdb.generic.unloaded"),
-
     COMMAND_BASE64_NOT_A_PLAYER_HEAD("command.hdb.base64.not_a_player_head"),
     COMMAND_BASE64_NO_BLOCK("command.hdb.base64.no_block"),
     COMMAND_BASE64_NO_TEXTURE("command.hdb.base64.no_texture"),

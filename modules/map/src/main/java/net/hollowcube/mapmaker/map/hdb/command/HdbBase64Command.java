@@ -1,12 +1,10 @@
 package net.hollowcube.mapmaker.map.hdb.command;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.map.block.handler.PlayerHeadBlockHandler;
 import net.hollowcube.mapmaker.map.hdb.HdbMessages;
-import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
 import net.hollowcube.mapmaker.map.util.PlayerUtil;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
@@ -22,12 +20,8 @@ public class HdbBase64Command extends CommandDsl {
             .with("hand", "block").defaultValue("hand")
             .description("Whether to check hand or target block");
 
-    private final HeadDatabase hdb;
-
-    @Inject
-    public HdbBase64Command(@NotNull HeadDatabase hdb) {
+    public HdbBase64Command() {
         super("base64");
-        this.hdb = hdb;
 
         description = "Fetch the base64 texture value of a head";
 
