@@ -17,6 +17,10 @@ public interface FeatureFlag {
         return new BasicFeatureFlag(name);
     }
 
+    static @NotNull FeatureFlag never() {
+        return ignored -> false;
+    }
+
     /**
      * Tests whether the feature is enabled with the given context.
      *
