@@ -177,7 +177,7 @@ public class InventoryViewHost {
 
     private void drawCurrentElement() {
         if (inventory == null || history.isEmpty()) return; // Inventory closed
-        logger.log(System.Logger.Level.INFO, "redraw (view = {0})", history.getLast());
+        logger.log(System.Logger.Level.DEBUG, "redraw (view = {0})", history.getLast());
 //        List.of(Thread.currentThread().getStackTrace())
 //                .stream()
 //                .map(StackTraceElement::toString)

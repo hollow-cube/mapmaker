@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.gui.effect.item;
 
+import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
@@ -18,12 +19,18 @@ import org.jetbrains.annotations.NotNull;
 import static net.hollowcube.mapmaker.map.gui.effect.item.ItemEditorView.itemSettings;
 
 public class ItemPickerView extends View {
-    private static final ItemStack FIREWORK_ITEM = FireworkRocketItem.DEFAULT_ITEM;
+    private static final ItemStack FIREWORK_ITEM = FireworkRocketItem.withCount(FireworkRocketItem.DEFAULT_ITEM, 0); // Infinite
     private static final ItemStack TRIDENT_ITEM = ItemStack.of(Material.TRIDENT)
-            .with(ItemComponent.ENCHANTMENTS, EnchantmentList.EMPTY.with(Enchantment.RIPTIDE, 1));
+            .with(ItemComponent.ENCHANTMENTS, EnchantmentList.EMPTY.with(Enchantment.RIPTIDE, 1))
+            .without(ItemComponent.ATTRIBUTE_MODIFIERS);
     private static final ItemStack AIR_ITEM = ItemStack.of(Material.AIR);
 
     private @Outlet("title") Text titleText;
+
+    private @Outlet("item_firework_off") Label fireworkOffLabel;
+    private @Outlet("item_firework_on") Label fireworkOnLabel;
+    private @Outlet("item_trident_off") Label tridentOffLabel;
+    private @Outlet("item_trident_on") Label tridentOnLabel;
 
     private @Outlet("item_firework_switch") Switch fireworkSwitch;
     private @Outlet("item_trident_switch") Switch tridentSwitch;
@@ -38,6 +45,10 @@ public class ItemPickerView extends View {
         this.index = index;
 
         titleText.setText("Item Slot #" + (index + 1));
+        fireworkOffLabel.setItemSprite(FIREWORK_ITEM);
+        fireworkOnLabel.setItemSprite(FIREWORK_ITEM);
+        tridentOffLabel.setItemSprite(TRIDENT_ITEM);
+        tridentOnLabel.setItemSprite(TRIDENT_ITEM);
 
         var item = items.getItem(index);
         if (item != null) {

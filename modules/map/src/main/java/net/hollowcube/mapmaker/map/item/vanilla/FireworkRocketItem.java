@@ -6,7 +6,7 @@ import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.minestom.server.ServerFlag;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
@@ -23,11 +23,13 @@ import java.util.List;
 public class FireworkRocketItem extends ItemHandler {
     private static final Tag<Entity> FIREWORK_TAG = Tag.Transient("mapmaker:elytra_firework");
     private static final Tag<Integer> DURATION_TAG = Tag.Integer("firework_duration").defaultValue(0);
+    private static final int INFINITE_CUSTOM_MODEL_DATA = 1;
 
     public static final FireworkRocketItem INSTANCE = new FireworkRocketItem();
     public static final ItemStack DEFAULT_ITEM = setDurationMillis(
             ItemStack.of(Material.FIREWORK_ROCKET)
-                    .with(ItemComponent.HIDE_ADDITIONAL_TOOLTIP),
+                    .without(ItemComponent.FIREWORKS)
+                    .with(ItemComponent.MAX_STACK_SIZE, 99),
             1000);
 
     public static void removeRocket(@NotNull Player player) {
@@ -48,6 +50,24 @@ public class FireworkRocketItem extends ItemHandler {
                         Component.text("TODO: Improve this text", NamedTextColor.WHITE)
                                 .decoration(TextDecoration.ITALIC, false)
                 ));
+    }
+
+    public static boolean isInfinite(@NotNull ItemStack itemStack) {
+        return itemStack.get(ItemComponent.CUSTOM_MODEL_DATA, 0) == 1;
+    }
+
+    public static int getCount(@NotNull ItemStack itemStack) {
+        return isInfinite(itemStack) ? 0 : itemStack.amount();
+    }
+
+    public static @NotNull ItemStack withCount(@NotNull ItemStack itemStack, int count) {
+        if (count <= 0) {
+            return itemStack.withAmount(1)
+                    .with(ItemComponent.CUSTOM_MODEL_DATA, INFINITE_CUSTOM_MODEL_DATA);
+        } else {
+            return itemStack.withAmount(count)
+                    .without(ItemComponent.CUSTOM_MODEL_DATA);
+        }
     }
 
     private FireworkRocketItem() {
@@ -75,10 +95,11 @@ public class FireworkRocketItem extends ItemHandler {
         //todo
 //            if (!player.hasTag(IS_GLIDING_TAG)) return;
 
-        int durationTicks = click.itemStack().getTag(DURATION_TAG) / ServerFlag.SERVER_TICKS_PER_SECOND;
-        if (durationTicks <= 0) return;
+        int durationTicks = click.itemStack().getTag(DURATION_TAG) / MinecraftServer.TICK_MS;
         spawnRocketEntity(player, durationTicks);
-        click.updateItemStack(b -> b.amount(click.itemStack().amount() - 1));
+        if (!isInfinite(click.itemStack())) {
+            click.updateItemStack(b -> b.amount(click.itemStack().amount() - 1));
+        }
     }
 
     private void spawnRocketEntity(@NotNull Player player, int durationTicks) {

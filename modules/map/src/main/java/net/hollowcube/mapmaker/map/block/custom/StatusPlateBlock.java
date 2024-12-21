@@ -77,9 +77,8 @@ public class StatusPlateBlock implements ObjectBlockHandler, InteractTarget, Pre
             var instance = interaction.getInstance();
             var blockPosition = interaction.getBlockPosition();
 
-            var newTag = TagHandler.newHandler();
-            newTag.setTag(DATA_TAG, data);
-            instance.setBlock(blockPosition, interaction.getBlock().withNbt(newTag.asCompound()));
+            var newNbt = DFU.encodeNbt(StatusEffectData.CODEC, data);
+            instance.setBlock(blockPosition, interaction.getBlock().withNbt(newNbt));
         }));
 
         return false;

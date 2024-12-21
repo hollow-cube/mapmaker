@@ -47,6 +47,7 @@ import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.TimedPotion;
 import net.minestom.server.sound.SoundEvent;
@@ -739,7 +740,22 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             ghostBlocks.load(state.ghostBlocks());
         }
 
-        // TODO: apply hotbar items
+        // Apply items to current state.
+        var item1 = state.items().item1();
+        if (item1 != null) player.getInventory().setItemStack(3, item1);
+        var item2 = state.items().item2();
+        if (item2 != null) player.getInventory().setItemStack(5, item2);
+        var item3 = state.items().item3();
+        if (item3 != null) player.getInventory().setItemStack(6, item3);
+        var elytra = state.items().elytra();
+        if (elytra != null) {
+            if (elytra) {
+                player.setChestplate(player.getChestplate().with(ItemComponent.GLIDER));
+            } else {
+                player.setChestplate(player.getChestplate().without(ItemComponent.GLIDER));
+            }
+        }
+
     }
 
     private void updateViewership(@NotNull MapWorld world) {

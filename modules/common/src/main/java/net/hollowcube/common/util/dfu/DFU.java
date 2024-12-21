@@ -43,6 +43,10 @@ public final class DFU {
         );
     }
 
+    public static <T> @NotNull CompoundBinaryTag encodeNbt(@NotNull Codec<T> codec, @NotNull T value) {
+        return (CompoundBinaryTag) unwrap(codec.encode(value, NbtOps.INSTANCE, null));
+    }
+
     private static <T> @NotNull Supplier<T> codecEmptySupplier(@NotNull Codec<T> codec) {
         return () -> unwrap(codec.decode(NbtOps.INSTANCE, CompoundBinaryTag.empty()).map(Pair::getFirst));
     }

@@ -12,8 +12,8 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemFireworkEditor extends ItemAbstractEditor {
-    private static final int MIN_AMOUNT = 1;
-    private static final int MAX_AMOUNT = 10; // todo should support unlimited (with enchant glint) -> is it possible to add an ∞ overlay with rp somehow?
+    private static final int MIN_AMOUNT = 0;
+    private static final int MAX_AMOUNT = 99; // todo should support unlimited (with enchant glint) -> is it possible to add an ∞ overlay with rp somehow?
     private static final int MIN_DURATION = 50;
     private static final int MAX_DURATION = 86_400_000; // todo should support unlimited
 
@@ -37,12 +37,12 @@ public class ItemFireworkEditor extends ItemAbstractEditor {
     protected void updateFromState() {
         boolean isFirework = item != null && item.material().id() == Material.FIREWORK_ROCKET.id();
 
-        int amount = item == null ? 1 : item.amount();
+        int amount = item == null ? 1 : FireworkRocketItem.getCount(item);
         amtMinusBigSwitch.setOption(isFirework && amount > MIN_AMOUNT);
         amtMinusSmallSwitch.setOption(isFirework && amount > MIN_AMOUNT);
         amtPlusSmallSwitch.setOption(isFirework && amount < MAX_AMOUNT);
         amtPlusBigSwitch.setOption(isFirework && amount < MAX_AMOUNT);
-        amtText.setText(String.valueOf(amount));
+        amtText.setText(amount <= 0 ? "Infinite" : String.valueOf(amount));
 
         int duration = item == null ? 0 : FireworkRocketItem.getDurationMillis(item);
         durMinusBigSwitch.setOption(isFirework && duration > MIN_DURATION);
@@ -54,8 +54,8 @@ public class ItemFireworkEditor extends ItemAbstractEditor {
 
     private void addAmount(int delta) {
         if (item == null) return;
-        int amount = Math.max(MIN_AMOUNT, Math.min(MAX_AMOUNT, item.amount() + delta));
-        updateItem(item.withAmount(amount));
+        int amount = Math.max(MIN_AMOUNT, Math.min(MAX_AMOUNT, FireworkRocketItem.getCount(item) + delta));
+        updateItem(FireworkRocketItem.withCount(item, amount));
     }
 
     private void addDuration(int deltaMillis) {

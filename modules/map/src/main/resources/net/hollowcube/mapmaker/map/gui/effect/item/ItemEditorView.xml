@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
 <component width="9" height="10" align="ttb" sprite="effect/item/container">
+    <text id="title" width="0" height="0" translationKey=""
+          font="map_details_title2" shift="49" value="Manage Items"/>
     <!-- Header -->
     <box width="9" align="ltr">
         <BackButton2/>

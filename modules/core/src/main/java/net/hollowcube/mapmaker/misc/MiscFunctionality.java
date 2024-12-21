@@ -18,6 +18,7 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.item.ItemComponent;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -124,8 +125,12 @@ public final class MiscFunctionality {
     public static void applyCosmetics(@NotNull Player player, @NotNull PlayerDataV2 playerData) {
         for (var cosmeticType : CosmeticType.VALUES) {
             var cosmetic = Cosmetic.byId(cosmeticType, playerData.getCosmetic(cosmeticType));
-            player.getInventory().setItemStack(cosmeticType.iconSlot(), cosmetic == null
-                    ? cosmeticType.blankIcon() : cosmetic.impl().iconItem());
+            var itemStack = cosmetic == null ? cosmeticType.blankIcon() : cosmetic.impl().iconItem();
+            // If the itemstack has a glider we need to preserve it.
+            if (player.getInventory().getItemStack(cosmeticType.iconSlot()).has(ItemComponent.GLIDER)) {
+                itemStack = itemStack.with(ItemComponent.GLIDER);
+            }
+            player.getInventory().setItemStack(cosmeticType.iconSlot(), itemStack);
         }
 //        var newDisplayedSkinParts = player.getSettings().getDisplayedSkinParts();
 //        newDisplayedSkinParts &= ~0x40;

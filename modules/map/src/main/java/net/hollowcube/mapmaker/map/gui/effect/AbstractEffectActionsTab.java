@@ -6,6 +6,8 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
+import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
+import net.hollowcube.mapmaker.map.gui.effect.item.ItemEditorView;
 import net.hollowcube.mapmaker.map.gui.effect.potion.PotionEffectListView;
 import net.hollowcube.mapmaker.map.gui.effect.potion.PotionEffectSelectorView;
 import net.hollowcube.mapmaker.util.CoordinateUtil;
@@ -111,6 +113,14 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
     @Action("teleport_on")
     public void handleTeleportInteractB(@NotNull Player player, int slot, @NotNull ClickType clickType) {
         handleTeleportInteractA(player, slot, clickType);
+    }
+
+    @Action("add_item_off")
+    public void handleAddItemA() {
+        pushView(c -> new ItemEditorView(c, new HotbarItems.Mutable(data.items(), newItems -> {
+            data.setItems(newItems);
+            save.run();
+        })));
     }
 
     protected void updateFromData() {
