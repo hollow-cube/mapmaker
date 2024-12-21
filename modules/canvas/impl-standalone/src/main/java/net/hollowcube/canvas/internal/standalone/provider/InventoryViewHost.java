@@ -67,12 +67,16 @@ public class InventoryViewHost {
     }
 
     public void popView() {
-        if (history.size() < 2) {
+        if (history.isEmpty()) {
+            inventory.getViewers().forEach(Player::closeInventory);
+            return;
+        } else if (history.size() == 1 && history.getLast().element() == element) {
             inventory.getViewers().forEach(Player::closeInventory);
             return;
         }
 
-        history.removeLast();
+        if (history.getLast().element() == element)
+            history.removeLast();
         replaceInventory((ViewContainer) history.getLast().element());
     }
 
