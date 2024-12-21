@@ -5,6 +5,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.map.MapFeatureFlags;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.map.gui.effect.item.ItemEditorView;
@@ -116,7 +117,8 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
     }
 
     @Action("add_item_off")
-    public void handleAddItemA() {
+    public void handleAddItemA(@NotNull Player player) {
+        if (!MapFeatureFlags.ITEM_EDITOR.test(player)) return;
         pushView(c -> new ItemEditorView(c, new HotbarItems.Mutable(data.items(), newItems -> {
             data.setItems(newItems);
             save.run();
