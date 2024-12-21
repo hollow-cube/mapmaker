@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
-import java.util.function.Function;
 
 public class ItemEditorView extends View {
     private static final ItemStack PLUS_ITEM = ItemStack.builder(Material.DIAMOND)
@@ -28,6 +27,8 @@ public class ItemEditorView extends View {
 
     private @OutletGroup("item_\\d+_icon") Label[] itemIcons;
     private @OutletGroup("item_\\d+_opts_switch") Switch[] itemOptsSwitches;
+    private @OutletGroup("item_\\d+_opts_enchant") Label[] itemOptButtonsA;
+    private @OutletGroup("item_\\d+_opts_settings") Label[] itemOptButtonsB;
 
     private @Outlet("elytra_cycle_switch") Switch elytraCycleSwitch;
     private @Outlet("elytra_keep_switch") Switch elytraKeepSwitch;
@@ -52,6 +53,17 @@ public class ItemEditorView extends View {
             });
         }
 
+        for (int i = 0; i < itemOptButtonsA.length; i++) {
+            int finalI = i;
+            addActionHandler(itemOptButtonsA[i].id(), Label.ActionHandler
+                    .lmb(ignored -> openItemSettings(finalI)));
+        }
+        for (int i = 0; i < itemOptButtonsB.length; i++) {
+            int finalI = i;
+            addActionHandler(itemOptButtonsB[i].id(), Label.ActionHandler
+                    .lmb(ignored -> openItemSettings(finalI)));
+        }
+
         updateFromState();
         items.onChange(ignored -> updateFromState());
     }
@@ -73,7 +85,12 @@ public class ItemEditorView extends View {
                 itemIcons[i].setItemSprite(PLUS_ITEM);
                 itemOptsSwitches[i].setOption(0);
             } else {
-                itemIcons[i].setItemSprite(item.material().id() == Material.AIR.id() ? AIR_ITEM : item);
+                if (item.material().id() == Material.AIR.id()) {
+                    itemIcons[i].setItemSprite(AIR_ITEM);
+                } else {
+                    itemIcons[i].setItemDirect(item);
+                }
+
                 var settingsPage = itemSettings(item);
                 itemOptsSwitches[i].setOption(settingsPage == null ? 0 : settingsPage.getValue() ? 1 : 2);
                 count++;
@@ -121,17 +138,24 @@ public class ItemEditorView extends View {
         items.setElytra(newState);
     }
 
-    static @Nullable Map.Entry<Function<Context, View>, Boolean> itemSettings(@Nullable ItemStack itemStack) {
+    private void openItemSettings(int index) {
+        var settings = itemSettings(items.getItem(index));
+        if (settings == null) return;
+
+        pushView(c -> settings.getKey().create(c, items, index));
+    }
+
+    interface ItemSettingsView {
+        View create(@NotNull Context context, @NotNull HotbarItems.Mutable items, int index);
+    }
+
+    static @Nullable Map.Entry<ItemSettingsView, Boolean> itemSettings(@Nullable ItemStack itemStack) {
         if (itemStack == null) return null;
         var material = itemStack.material();
         if (material.id() == Material.FIREWORK_ROCKET.id()) {
-            return Map.entry(c -> {
-                throw new RuntimeException("Not implemented");
-            }, false);
+            return Map.entry(ItemFireworkEditor::new, false);
         } else if (material.id() == Material.TRIDENT.id()) {
-            return Map.entry(c -> {
-                throw new RuntimeException("Not implemented");
-            }, true);
+            return Map.entry(ItemTridentEditor::new, true);
         } else return null;
     }
 }

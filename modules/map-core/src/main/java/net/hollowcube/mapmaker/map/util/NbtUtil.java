@@ -2,6 +2,8 @@ package net.hollowcube.mapmaker.map.util;
 
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.nbt.*;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -13,6 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+
+import static net.kyori.adventure.text.Component.text;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class NbtUtil {
@@ -109,5 +113,96 @@ public final class NbtUtil {
             if (cmd > 0) itemStack = itemStack.with(ItemComponent.CUSTOM_MODEL_DATA, cmd);
         }
         return itemStack;
+    }
+
+    public static @NotNull Component prettyPrint(@NotNull BinaryTag tag) {
+        return switch (tag) {
+            case EndBinaryTag ignored -> text("END");
+            case ByteBinaryTag byteTag ->
+                    text(byteTag.value(), NamedTextColor.GOLD).append(text("b", NamedTextColor.RED));
+            case ShortBinaryTag shortTag ->
+                    text(shortTag.value(), NamedTextColor.GOLD).append(text("s", NamedTextColor.RED));
+            case IntBinaryTag intTag -> text(intTag.value(), NamedTextColor.GOLD);
+            case LongBinaryTag longTag ->
+                    text(longTag.value(), NamedTextColor.GOLD).append(text("L", NamedTextColor.RED));
+            case FloatBinaryTag floatTag ->
+                    text(floatTag.value(), NamedTextColor.GOLD).append(text("f", NamedTextColor.RED));
+            case DoubleBinaryTag doubleTag -> text(doubleTag.value(), NamedTextColor.GOLD);
+            case ByteArrayBinaryTag byteArrayTag -> {
+                var builder = text();
+                builder.append(text("[", NamedTextColor.WHITE), text("B"), text(";", NamedTextColor.WHITE));
+                for (int i = 0; i < byteArrayTag.value().length; i++) {
+                    builder.append(text(byteArrayTag.value()[i], NamedTextColor.GOLD), text("b", NamedTextColor.RED));
+                    if (i < byteArrayTag.value().length - 1) builder.append(text(",", NamedTextColor.WHITE));
+                }
+                builder.append(text("]", NamedTextColor.WHITE));
+                yield builder.build();
+            }
+            case StringBinaryTag stringTag -> text().append(text('"', NamedTextColor.WHITE),
+                    text(stringTag.value(), NamedTextColor.GREEN), text('"', NamedTextColor.WHITE)).build();
+            case ListBinaryTag listTag -> {
+                var builder = text();
+                builder.append(text("[", NamedTextColor.WHITE));
+                for (int i = 0; i < listTag.size(); i++) {
+                    builder.append(prettyPrint(listTag.get(i)));
+                    if (i < listTag.size() - 1) builder.append(text(", ", NamedTextColor.WHITE));
+                }
+                builder.append(text("]", NamedTextColor.WHITE));
+                yield builder.build();
+            }
+            case CompoundBinaryTag compoundTag -> {
+                var builder = text();
+                builder.append(text("{", NamedTextColor.WHITE));
+                var iter = compoundTag.iterator();
+                while (iter.hasNext()) {
+                    var entry = iter.next();
+                    builder.append(text(entry.getKey(), NamedTextColor.AQUA), text(": ", NamedTextColor.WHITE), prettyPrint(entry.getValue()));
+                    if (iter.hasNext()) builder.append(text(", ", NamedTextColor.WHITE));
+                }
+                builder.append(text("}", NamedTextColor.WHITE));
+                yield builder.build();
+            }
+            case IntArrayBinaryTag intArrayTag -> {
+                var builder = text();
+                builder.append(text("[", NamedTextColor.WHITE), text("I"), text(";", NamedTextColor.WHITE));
+                for (int i = 0; i < intArrayTag.value().length; i++) {
+                    builder.append(text(intArrayTag.value()[i], NamedTextColor.GOLD));
+                    if (i < intArrayTag.value().length - 1) builder.append(text(",", NamedTextColor.WHITE));
+                }
+                builder.append(text("]", NamedTextColor.WHITE));
+                yield builder.build();
+            }
+            case LongArrayBinaryTag longArrayTag -> {
+                var builder = text();
+                builder.append(text("[", NamedTextColor.WHITE), text("L"), text(";", NamedTextColor.WHITE));
+                for (int i = 0; i < longArrayTag.value().length; i++) {
+                    builder.append(text(longArrayTag.value()[i], NamedTextColor.GOLD), text("L", NamedTextColor.RED));
+                    if (i < longArrayTag.value().length - 1) builder.append(text(",", NamedTextColor.WHITE));
+                }
+                builder.append(text("]", NamedTextColor.WHITE));
+                yield builder.build();
+            }
+            default -> Component.empty();
+        };
+    }
+
+    public static <T extends BinaryTag> T deepMerge(@NotNull T left, @NotNull T right) {
+        if (left instanceof CompoundBinaryTag leftC && right instanceof CompoundBinaryTag rightC) {
+            var builder = CompoundBinaryTag.builder();
+            builder.put(leftC);
+            for (var entry : rightC) {
+                var key = entry.getKey();
+                var leftValue = leftC.get(key);
+                var rightValue = entry.getValue();
+                if (leftValue != null) {
+                    builder.put(key, deepMerge(leftValue, rightValue));
+                } else {
+                    builder.put(key, rightValue);
+                }
+            }
+            //noinspection unchecked
+            return (T) builder.build();
+        }
+        return right;
     }
 }

@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<component width="9" height="10" align="ttb" sprite="effect/item/opts/1/container">
+    <text id="title" width="0" height="0" translationKey=""
+          font="map_details_title2" shift="49" value="Item Editor"/>
+    <!-- Header -->
+    <box width="9" align="ltr">
+        <BackButton2/>
+        <label translationKey="gui.effect.item.settings.information"/>
+
+        <text id="subtitle" width="5" translationKey="todo"
+              font="slot_title" centered="true" value="Trident"/>
+
+        <button id="reset" width="2" translationKey="gui.effect.item.settings.reset"/>
+    </box>
+
+    <spacer/>
+
+    <box width="9" height="2" align="ttb">
+        <box width="9" align="ltr" sprite="effect/item/opts/1/riptide_level"/>
+        <box width="9" align="ltr">
+            <spacer/>
+            <switch id="rl_minus_big_switch">
+                <button id="rl_minus_big_disabled" translationKey="todo"
+                        sprite="effect/item/opts/1/disabled_minus"/>
+                <button id="rl_minus_big" translationKey="todo"
+                        sprite="effect/item/opts/1/big_minus"/>
+            </switch>
+            <switch id="rl_minus_small_switch">
+                <button id="rl_minus_small_disabled" translationKey="todo"
+                        sprite="effect/item/opts/1/disabled_minus"/>
+                <button id="rl_minus_small" translationKey="todo"
+                        sprite="effect/item/opts/1/small_minus"/>
+            </switch>
+            <text id="rl_text" width="3" translationKey="todo" font="line_3" centered="true"/>
+            <switch id="rl_plus_small_switch">
+                <button id="rl_plus_small_disabled" translationKey="todo"
+                        sprite="effect/item/opts/1/disabled_plus"/>
+                <button id="rl_plus_small" translationKey="todo"
+                        sprite="effect/item/opts/1/small_plus"/>
+            </switch>
+            <switch id="rl_plus_big_switch">
+                <button id="rl_plus_big_disabled" translationKey="todo"
+                        sprite="effect/item/opts/1/disabled_plus"/>
+                <button id="rl_plus_big" translationKey="todo"
+                        sprite="effect/item/opts/1/big_plus"/>
+            </switch>
+        </box>
+    </box>
+
+</component>

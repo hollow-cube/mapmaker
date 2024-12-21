@@ -14,16 +14,19 @@ public class TextElement extends ButtonElement implements Text {
     private final String font;
     private final int shift;
     private final boolean centered;
+    private final String initialText;
 
     private String text = "";
     private TextColor color = NamedTextColor.WHITE;
 
     public TextElement(@NotNull ElementContext context, @Nullable String id, int width, int height,
-                       @NotNull String translationKey, @NotNull String font, int shift, boolean centered) {
+                       @NotNull String translationKey, @NotNull String font, int shift, boolean centered,
+                       @NotNull String initialText) {
         super(context, id, width, height, translationKey);
         this.font = font;
         this.shift = shift;
         this.centered = centered;
+        this.initialText = this.text = initialText;
     }
 
     protected TextElement(@NotNull ElementContext context, @NotNull TextElement other) {
@@ -31,6 +34,7 @@ public class TextElement extends ButtonElement implements Text {
         this.font = other.font;
         this.shift = other.shift;
         this.centered = other.centered;
+        this.initialText = this.text = other.initialText;
     }
 
     @Override

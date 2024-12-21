@@ -7,15 +7,20 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
+import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.component.EnchantmentList;
+import net.minestom.server.item.enchant.Enchantment;
 import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.map.gui.effect.item.ItemEditorView.itemSettings;
 
 public class ItemPickerView extends View {
-    private static final ItemStack FIREWORK_ITEM = ItemStack.of(Material.FIREWORK_ROCKET);
-    private static final ItemStack TRIDENT_ITEM = ItemStack.of(Material.TRIDENT);
+    private static final ItemStack FIREWORK_ITEM = FireworkRocketItem.DEFAULT_ITEM;
+    private static final ItemStack TRIDENT_ITEM = ItemStack.of(Material.TRIDENT)
+            .with(ItemComponent.ENCHANTMENTS, EnchantmentList.EMPTY.with(Enchantment.RIPTIDE, 1));
     private static final ItemStack AIR_ITEM = ItemStack.of(Material.AIR);
 
     private @Outlet("title") Text titleText;
@@ -54,7 +59,7 @@ public class ItemPickerView extends View {
             return;
         }
 
-        pushView(settings.getKey());
+        pushView(c -> settings.getKey().create(c, items, index));
     }
 
     @Action("item_firework_off")
@@ -85,5 +90,10 @@ public class ItemPickerView extends View {
     @Action("item_air_on")
     private void airOn() {
         updateItem(AIR_ITEM);
+    }
+
+    @Action("reset")
+    private void reset() {
+        items.setItem(index, null);
     }
 }

@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.map.gui.effect.item.ItemEditorView;
+import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.util.MapJoinInfo;
 import net.hollowcube.mapmaker.obungus.ObungusCore;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -61,7 +62,9 @@ public class LocalServerRunner extends MapServerRunner {
     protected @NotNull DebugCommand createDebugCommand() {
         var cmd = super.createDebugCommand();
         cmd.createLocalSubcommand("item", (sender, context) -> {
-            guiController().show(sender, c -> new ItemEditorView(c, new HotbarItems.Mutable(HotbarItems.EMPTY, null)));
+            var items = new HotbarItems.Mutable(HotbarItems.EMPTY, null);
+            items.setItem(0, FireworkRocketItem.DEFAULT_ITEM);
+            guiController().show(sender, c -> new ItemEditorView(c, items));
         }, "item editor");
         return cmd;
     }

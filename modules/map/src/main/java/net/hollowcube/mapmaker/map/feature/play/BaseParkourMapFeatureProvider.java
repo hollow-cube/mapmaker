@@ -17,6 +17,7 @@ import net.hollowcube.mapmaker.map.event.vnext.MapPlayerStatusChangeEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
+import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.map.feature.play.item.*;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
@@ -405,7 +406,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
                 Optional.of(checkpointPos),
                 state.maxLives(),
                 state.lives(),
-                Map.copyOf(state.ghostBlocks())
+                Map.copyOf(state.ghostBlocks()),
+                state.items()
         ));
 
         // Update the player based on the new state
@@ -659,11 +661,19 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         }
         if (data.teleport().isPresent()) {
             player.teleport(data.teleport().get(), Vec.ZERO, null, RelativeFlags.NONE).thenRun(() -> {
-
-                // OOO YAY ender pearl sound, so nice. sfx!
                 player.playSound(Sound.sound(SoundEvent.ENTITY_PLAYER_TELEPORT, Sound.Source.PLAYER, 0.5f, 1f), player.getPosition());
             });
         }
+        var newItem1 = state.items().item1();
+        if (data.items().item1() != null) newItem1 = data.items().item1();
+        var newItem2 = state.items().item2();
+        if (data.items().item2() != null) newItem2 = data.items().item2();
+        var newItem3 = state.items().item3();
+        if (data.items().item3() != null) newItem3 = data.items().item3();
+        var newElytra = state.items().elytra();
+        if (data.items().elytra() != null) newElytra = data.items().elytra();
+
+        state.setItems(new HotbarItems(newItem1, newItem2, newItem3, newElytra));
     }
 
     private void updateStateFromPlayer(@NotNull Player player, @NotNull PlayState state) {
@@ -728,6 +738,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             var ghostBlocks = GhostBlockHolder.forPlayer(player);
             ghostBlocks.load(state.ghostBlocks());
         }
+
+        // TODO: apply hotbar items
     }
 
     private void updateViewership(@NotNull MapWorld world) {

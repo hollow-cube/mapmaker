@@ -7,6 +7,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
+import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.map.util.datafix.HCTypeRegistry;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
@@ -34,7 +35,8 @@ public final class PlayState {
                 ExtraCodecs.POS.optionalFieldOf("pos").forGetter(PlayState::pos),
                 Codec.INT.optionalFieldOf("maxLives").forGetter(PlayState::maxLives),
                 Codec.INT.optionalFieldOf("lives").forGetter(PlayState::lives),
-                GHOST_BLOCKS_CODEC.forGetter(PlayState::ghostBlocks)
+                GHOST_BLOCKS_CODEC.forGetter(PlayState::ghostBlocks),
+                HotbarItems.CODEC.optionalFieldOf("items", HotbarItems.EMPTY).forGetter(PlayState::items)
         ).apply(i, PlayState::new));
     }
 
@@ -69,6 +71,7 @@ public final class PlayState {
     private Optional<Integer> maxLives; // Maximum number of lives for the current state
     private Optional<Integer> lives; // Number of lives remaining for the current state
     private Map<Long, Block> ghostBlocks;
+    private HotbarItems items;
 
     private boolean tempReset = false;
 
@@ -76,7 +79,7 @@ public final class PlayState {
         this(Optional.empty(), List.of(), Optional.empty(),
                 Optional.empty(), Optional.empty(), new PotionEffectList(),
                 Optional.empty(), Optional.empty(), Optional.empty(),
-                Map.of());
+                Map.of(), HotbarItems.EMPTY);
     }
 
     public PlayState(
@@ -85,7 +88,7 @@ public final class PlayState {
             Optional<Integer> resetHeight,
             PotionEffectList potionEffects, Optional<Pos> pos,
             Optional<Integer> maxLives, Optional<Integer> lives,
-            Map<Long, Block> ghostBlocks
+            Map<Long, Block> ghostBlocks, HotbarItems items
     ) {
         this.lastState = lastState;
         this.history = new ArrayList<>(statusEffects);
@@ -97,6 +100,7 @@ public final class PlayState {
         this.maxLives = maxLives;
         this.lives = lives;
         this.ghostBlocks = new HashMap<>(ghostBlocks);
+        this.items = items;
 
         this.tempReset = true;
     }
@@ -193,10 +197,19 @@ public final class PlayState {
         this.tempReset = tempReset;
     }
 
+    public HotbarItems items() {
+        return items;
+    }
+
+    public void setItems(HotbarItems items) {
+        this.items = items;
+    }
+
     public @NotNull PlayState copy() {
         return new PlayState(
                 lastState, history, progressIndex, timeLimit, resetHeight,
-                potionEffects.copy(), pos, maxLives, lives, new HashMap<>(ghostBlocks)
+                potionEffects.copy(), pos, maxLives, lives, new HashMap<>(ghostBlocks),
+                items
         );
     }
 

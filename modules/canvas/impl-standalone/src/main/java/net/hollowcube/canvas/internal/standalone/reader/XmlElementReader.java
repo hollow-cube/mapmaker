@@ -145,8 +145,9 @@ public class XmlElementReader {
         var fontName = getString(node, "font", "default");
         var shift = getInt(node, "shift", 0);
         var centered = getBool(node, "centered");
+        var initialValue = getString(node, "value", "");
         var elem = new TextElement(context, getId(node), getWidth(node), getHeight(node),
-                translationKey, fontName, shift, centered);
+                translationKey, fontName, shift, centered, initialValue);
         return applyTraits(node, elem);
     }
 
