@@ -64,8 +64,7 @@ public enum CosmeticType {
                     .set(ItemComponent.LORE, LanguageProviderV2.translateMulti(baseTranslation + ".lore", List.of()));
             if (equipmentSlot != null) {
                 builder.set(ItemComponent.EQUIPPABLE, new Equippable(equipmentSlot, SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
-                        equipmentSlot == EquipmentSlot.CHESTPLATE ? "minecraft:elytra" : null, null,
-                        null, false, false, false));
+                        null, null, null, false, false, false));
             }
             this.blankIcon = builder.build().withTag(COSMETIC_TAG, true);
         }

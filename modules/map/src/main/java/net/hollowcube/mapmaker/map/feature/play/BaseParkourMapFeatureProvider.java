@@ -34,6 +34,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.entity.attribute.Attribute;
@@ -48,6 +49,7 @@ import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemComponent;
+import net.minestom.server.item.component.Equippable;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.TimedPotion;
 import net.minestom.server.sound.SoundEvent;
@@ -91,6 +93,13 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     private static final Sound PLAYER_DEATH_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_DEATH, Sound.Source.PLAYER, 1, 1f);
 
     private static final AttributeModifier NO_FALL_DAMAGE_MODIFIER = new AttributeModifier("mapmaker:play.no_fall_damage", 500, AttributeOperation.ADD_VALUE);
+
+    private static final Equippable EMPTY_EQUIPPABLE = new Equippable(EquipmentSlot.CHESTPLATE, SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
+            null, null, null, false,
+            false, false);
+    private static final Equippable ELYTRA_EQUIPPABLE = new Equippable(EquipmentSlot.CHESTPLATE, SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
+            "minecraft:elytra", null, null,
+            false, false, false);
 
     private static final CustomizableHotbarManager TESTING_HOTBAR = CustomizableHotbarManager.builder("hotbar/parkour/test")
             .defaultItem(0, MapDetailsItem.ID)
@@ -750,9 +759,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var elytra = state.items().elytra();
         if (elytra != null) {
             if (elytra) {
-                player.setChestplate(player.getChestplate().with(ItemComponent.GLIDER));
+                player.setChestplate(player.getChestplate().with(ItemComponent.GLIDER)
+                        .with(ItemComponent.EQUIPPABLE, ELYTRA_EQUIPPABLE));
             } else {
-                player.setChestplate(player.getChestplate().without(ItemComponent.GLIDER));
+                player.setChestplate(player.getChestplate().without(ItemComponent.GLIDER)
+                        .with(ItemComponent.EQUIPPABLE, EMPTY_EQUIPPABLE));
             }
         }
 

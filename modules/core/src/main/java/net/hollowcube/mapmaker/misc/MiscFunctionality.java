@@ -19,6 +19,7 @@ import net.kyori.adventure.title.Title;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemComponent;
+import net.minestom.server.item.component.Equippable;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -129,6 +130,9 @@ public final class MiscFunctionality {
             // If the itemstack has a glider we need to preserve it.
             if (player.getInventory().getItemStack(cosmeticType.iconSlot()).has(ItemComponent.GLIDER)) {
                 itemStack = itemStack.with(ItemComponent.GLIDER);
+                var equippable = itemStack.get(ItemComponent.EQUIPPABLE);
+                if (equippable != null) itemStack = itemStack.with(ItemComponent.EQUIPPABLE,
+                        equippable.withModel("minecraft:elytra"));
             }
             player.getInventory().setItemStack(cosmeticType.iconSlot(), itemStack);
         }
