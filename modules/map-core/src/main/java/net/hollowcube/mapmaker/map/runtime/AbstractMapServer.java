@@ -196,7 +196,6 @@ public abstract class AbstractMapServer implements MapServer {
         var metricsConfig = config.get(MetricsConfig.class);
         if (metricsConfig.password() != null && !metricsConfig.password().isEmpty()) {
             return new MetricWriterPosthog();
-//            this.metrics = new MetricWriterImpl(metricsConfig.password());
         }
         return new MetricWriterNoop();
     }

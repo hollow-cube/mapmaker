@@ -2,13 +2,8 @@ package net.hollowcube.mapmaker.map.runtime;
 
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.HTTPServer;
-import io.pyroscope.http.Format;
-import io.pyroscope.javaagent.EventType;
-import io.pyroscope.javaagent.PyroscopeAgent;
-import io.pyroscope.javaagent.config.Config;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.HttpConfig;
-import net.hollowcube.mapmaker.config.MetricsConfig;
 import net.hollowcube.mapmaker.config.MinestomConfig;
 import net.hollowcube.mapmaker.util.HttpServerWrapper;
 import net.hollowcube.mapmaker.util.MinestomPrometheus;
@@ -63,7 +58,6 @@ public final class MapServerInitializer {
         // Init tasks (minestom server, map server components, web server)
 
         var config = loadConfig.get();
-        enablePyroscopeProfiling(config);
 
         var minecraftServer = MinecraftServer.init();
         MinestomPrometheus.init();
@@ -126,24 +120,6 @@ public final class MapServerInitializer {
 
         server.shutdowner().queue("http-server", httpServer::shutdown);
         logger.info("Server started in {}ms", (System.nanoTime() - start) / 1_000_000);
-    }
-
-    private static void enablePyroscopeProfiling(@NotNull ConfigLoaderV3 config) {
-        var endpoint = config.get(MetricsConfig.class).pyroscopeEndpoint();
-        if (endpoint == null || endpoint.trim().isEmpty()) return;
-        var role = System.getenv("MAPMAKER_ROLE");
-        if (role == null || role.trim().isEmpty()) return;
-
-        logger.info("Enabling Pyroscope profiling (role={}, endpoint={})", role, endpoint);
-        PyroscopeAgent.start(new Config.Builder()
-                .setApplicationName("mapmaker-" + role)
-                .setProfilingEvent(EventType.ITIMER)
-                .setProfilingInterval(Duration.ofMillis(10))
-                .setProfilingLock("10ms")
-                .setProfilingAlloc("512k")
-                .setFormat(Format.JFR)
-                .setServerAddress(endpoint)
-                .build());
     }
 
 }

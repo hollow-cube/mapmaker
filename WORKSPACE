@@ -80,7 +80,6 @@ maven_install(
         "io.prometheus:simpleclient:0.16.0",
         "io.prometheus:simpleclient_hotspot:0.16.0",
         "io.prometheus:simpleclient_httpserver:0.16.0",
-        "io.pyroscope:agent:0.14.0",
         "io.opentelemetry:opentelemetry-api:1.45.0",
         "io.opentelemetry:opentelemetry-context:1.45.0",
         "io.opentelemetry:opentelemetry-sdk:1.45.0",

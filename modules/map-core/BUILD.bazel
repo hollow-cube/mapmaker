@@ -28,7 +28,6 @@ java_library(
         "@maven//:io_prometheus_simpleclient",
         "@maven//:io_prometheus_simpleclient_hotspot",
         "@maven//:io_prometheus_simpleclient_httpserver",
-        "@maven//:io_pyroscope_agent",
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:net_kyori_adventure_api",
         "@maven//:net_kyori_adventure_nbt",

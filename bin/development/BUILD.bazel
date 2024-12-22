@@ -32,7 +32,6 @@ java_binary(
         "@maven//:dev_hollowcube_polar",
         "@maven//:io_prometheus_simpleclient",
         "@maven//:io_prometheus_simpleclient_hotspot",
-        "@maven//:io_pyroscope_agent",
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:org_slf4j_jul_to_slf4j",
     ],
