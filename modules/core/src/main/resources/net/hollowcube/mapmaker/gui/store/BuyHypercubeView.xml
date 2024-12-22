@@ -1,14 +1,35 @@
 <?xml version="1.0" ?>
 <component width="9" height="5" align="ttb" sprite="store/hypercube">
 
-    <button width="9" height="4" translationKey="gui.store.hypercube.perks"/>
-
-    <box width="9" height="1" align="ltr">
+    <box width="9" align="ltr">
         <spacer/>
-        <button id="buy_30d" width="3" height="1"
+        <label translationKey="gui.store.hypercube.perks.unlimited_map_slots"/>
+        <spacer width="5"/>
+        <label translationKey="gui.store.hypercube.perks.all_map_sizes"/>
+    </box>
+
+    <box width="9" align="ltr">
+        <spacer/>
+        <label translationKey="gui.store.hypercube.perks.unlimited_map_slots"/>
+        <label width="2" translationKey="gui.store.hypercube.perks.beta_testing"/>
+        <label translationKey="gui.store.hypercube.perks.badge"/>
+        <label width="2" translationKey="gui.store.hypercube.perks.more_emojis"/>
+        <label translationKey="gui.store.hypercube.perks.all_map_sizes"/>
+    </box>
+
+    <box width="9" align="ltr">
+        <spacer width="3"/>
+        <label translationKey="gui.store.hypercube.perks.beta_testing"/>
+        <label translationKey="gui.store.hypercube.perks.badge"/>
+        <label translationKey="gui.store.hypercube.perks.more_emojis"/>
+    </box>
+
+    <box width="9" height="2" align="ltr">
+        <spacer/>
+        <button id="buy_30d" width="3" height="2"
                 translationKey="gui.store.hypercube.1month"/>
         <spacer/>
-        <button id="buy_365d" width="3" height="1"
+        <button id="buy_365d" width="3" height="2"
                 translationKey="gui.store.hypercube.1year"/>
         <spacer/>
     </box>

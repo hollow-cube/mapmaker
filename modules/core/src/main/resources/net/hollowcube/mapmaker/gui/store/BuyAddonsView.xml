@@ -55,47 +55,32 @@
 
         <spacer/>
 
-        <!-- Folder -->
-        <button id="folder" width="1" height="1"
-                translationKey="gui.store.addons.folder"
-                sprite="store/addons/folders_locked_bg"/>
-
-    </box>
-
-    <spacer width="9" height="1"/>
-
-    <box width="9" height="1" align="ltr">
-        <spacer/>
-
         <!-- Build Tools -->
         <switch id="terraform_switch" width="1" height="1">
             <button id="terraform_advanced" width="1" height="1"
                     translationKey="gui.store.addons.terraform_advanced"
-                    sprite="store/addons/build_tools_icon"
-                    backgroundSprite="store/addons/build_tools_locked_bg"/>
+                    sprite="store/addons/build_tools_icon"/>
             <button id="terraform_maxed" width="1" height="1"
                     translationKey="gui.store.addons.terraform_maxed"
                     sprite="store/addons/build_tools_unlocked"/>
         </switch>
 
-        <spacer/>
-
-        <!-- Personal world -->
-        <switch id="personal_world_switch" width="1" height="1">
-            <button id="personal_world_locked" width="1" height="1"
-                    translationKey="gui.store.addons.personal_world_locked"
-                    sprite="store/addons/personal_world_locked_bg"/>
-            <button id="personal_world_unlocked" width="1" height="1"
-                    translationKey="gui.store.addons.personal_world_unlocked"
-                    sprite="store/addons/personal_world_locked_bg"/>
-        </switch>
-
     </box>
 
-    <text id="map_slots_cost"
-          width="0" height="0" translationKey="irrelevant"
-          font="addons_tab_line1" shift="29" centered="true"/>
-    <text id="map_size_cost"
-          width="0" height="0" translationKey="irrelevant"
-          font="addons_tab_line1" shift="68" centered="true"/>
+    <box width="9" align="ltr">
+        <spacer/>
+        <switch id="map_slots_cost">
+            <label translationKey="gui.store.addons.cost_50_cubits" sprite="store/addons/cost_50_cubits"/>
+            <label translationKey="gui.store.addons.cost_100_cubits" sprite="store/addons/cost_100_cubits"/>
+            <label translationKey="gui.store.addons.cost_150_cubits" sprite="store/addons/cost_150_cubits"/>
+            <label translationKey="gui.store.addons.cost_maxed" sprite="store/addons/cost_maxed"/>
+        </switch>
+        <spacer/>
+        <switch id="map_size_cost">
+            <label translationKey="gui.store.addons.cost_50_cubits" sprite="store/addons/cost_50_cubits"/>
+            <label translationKey="gui.store.addons.cost_100_cubits" sprite="store/addons/cost_100_cubits"/>
+            <label translationKey="gui.store.addons.cost_150_cubits" sprite="store/addons/cost_150_cubits"/>
+            <label translationKey="gui.store.addons.cost_maxed" sprite="store/addons/cost_maxed"/>
+        </switch>
+    </box>
 </component>
