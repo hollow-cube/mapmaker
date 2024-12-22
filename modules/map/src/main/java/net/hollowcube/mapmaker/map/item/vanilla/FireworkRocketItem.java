@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.item.vanilla;
 
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.feature.play.vanilla.ElytraFeatureProvider;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
@@ -92,8 +93,7 @@ public class FireworkRocketItem extends ItemHandler {
         if (world == null || !world.isPlaying(player)) return; // Sanity
 
         // You can only start a rocket boost while already gliding
-        //todo
-//            if (!player.hasTag(IS_GLIDING_TAG)) return;
+        if (!player.hasTag(ElytraFeatureProvider.IS_GLIDING_TAG)) return;
 
         int durationTicks = click.itemStack().getTag(DURATION_TAG) / MinecraftServer.TICK_MS;
         spawnRocketEntity(player, durationTicks);
@@ -132,6 +132,8 @@ public class FireworkRocketItem extends ItemHandler {
 
             getEntityMeta().setShooter(ridingPlayer);
             getEntityMeta().setFireworkInfo(EMPTY_FIREWORK);
+
+            this.updateViewableRule(other -> other == ridingPlayer || ridingPlayer.isViewer(other));
         }
 
         @Override
@@ -158,6 +160,7 @@ public class FireworkRocketItem extends ItemHandler {
                 return;
             }
 
+            if (isRemoved() || instance == null) return;
             refreshPosition(ridingPlayer.getPosition());
         }
     }

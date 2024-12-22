@@ -18,9 +18,10 @@ import org.jetbrains.annotations.NotNull;
 
 @AutoService(FeatureProvider.class)
 public class ElytraFeatureProvider implements FeatureProvider {
-    private static final Tag<Boolean> IS_GLIDING_TAG = Tag.Transient("mapmaker:elytra_gliding");
+    public static final Tag<Boolean> IS_GLIDING_TAG = Tag.Transient("mapmaker:elytra_gliding");
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("elytra-feature-provider", EventFilter.INSTANCE)
+            .addListener(PlayerStartFlyingWithElytraEvent.class, this::handleStartFlying)
             .addListener(MapWorldPlayerStopPlayingEvent.class, this::handleStopPlaying)
             .addListener(PlayerStopFlyingWithElytraEvent.class, this::handleStopFlying);
 

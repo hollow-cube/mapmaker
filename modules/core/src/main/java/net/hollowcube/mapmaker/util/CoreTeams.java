@@ -13,6 +13,7 @@ public final class CoreTeams {
     public static final Team DEFAULT = TEAM_MANAGER.createBuilder("default")
             .nameTagVisibility(TeamsPacket.NameTagVisibility.ALWAYS)
             .collisionRule(TeamsPacket.CollisionRule.NEVER)
+            .allowFriendlyFire()
             .seeInvisiblePlayers()
 //            .prefix(Component.text("PREFIX"))
 //            .suffix(Component.text("SUFFIX"))

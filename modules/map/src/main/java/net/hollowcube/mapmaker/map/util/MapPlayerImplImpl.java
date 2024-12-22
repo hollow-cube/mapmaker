@@ -63,9 +63,10 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
             riptideTicks--;
 
             // Stop if we hit a wall
-            if (nextPhysicsResult.collisionX() || nextPhysicsResult.collisionZ()) {
+            if (nextPhysicsResult.collisionX() || nextPhysicsResult.collisionZ())
                 riptideTicks = 0;
-            }
+            // Stop if we hit a player
+            if (isHittingNearbyEntity()) riptideTicks = 0;
 
             if (riptideTicks <= 0) {
                 getPlayerMeta().setInRiptideSpinAttack(false);
@@ -153,5 +154,20 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private boolean isHittingNearbyEntity() {
+        var instance = getInstance();
+        if (instance == null) return false; // Sanity
+
+        var position = getPosition();
+        for (var entity : getInstance().getNearbyEntities(position, 2.0)) {
+            if (!entity.isViewer(this)) continue;
+
+            if (intersectEntity(position, entity))
+                return true;
+        }
+        
+        return false;
     }
 }

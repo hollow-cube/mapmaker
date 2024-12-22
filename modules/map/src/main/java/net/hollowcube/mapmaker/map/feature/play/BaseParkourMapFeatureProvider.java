@@ -49,6 +49,7 @@ import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemComponent;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.component.Equippable;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.TimedPotion;
@@ -57,10 +58,7 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -750,23 +748,16 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         }
 
         // Apply items to current state.
-        var item1 = state.items().item1();
-        if (item1 != null) player.getInventory().setItemStack(3, item1);
-        var item2 = state.items().item2();
-        if (item2 != null) player.getInventory().setItemStack(5, item2);
-        var item3 = state.items().item3();
-        if (item3 != null) player.getInventory().setItemStack(6, item3);
-        var elytra = state.items().elytra();
-        if (elytra != null) {
-            if (elytra) {
-                player.setChestplate(player.getChestplate().with(ItemComponent.GLIDER)
-                        .with(ItemComponent.EQUIPPABLE, ELYTRA_EQUIPPABLE));
-            } else {
-                player.setChestplate(player.getChestplate().without(ItemComponent.GLIDER)
-                        .with(ItemComponent.EQUIPPABLE, EMPTY_EQUIPPABLE));
-            }
+        player.getInventory().setItemStack(3, Objects.requireNonNullElse(state.items().item1(), ItemStack.AIR));
+        player.getInventory().setItemStack(5, Objects.requireNonNullElse(state.items().item2(), ItemStack.AIR));
+        player.getInventory().setItemStack(6, Objects.requireNonNullElse(state.items().item3(), ItemStack.AIR));
+        if (Objects.requireNonNullElse(state.items().elytra(), false)) {
+            player.setChestplate(player.getChestplate().with(ItemComponent.GLIDER)
+                    .with(ItemComponent.EQUIPPABLE, ELYTRA_EQUIPPABLE));
+        } else {
+            player.setChestplate(player.getChestplate().without(ItemComponent.GLIDER)
+                    .with(ItemComponent.EQUIPPABLE, EMPTY_EQUIPPABLE));
         }
-
     }
 
     private void updateViewership(@NotNull MapWorld world) {

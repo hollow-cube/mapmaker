@@ -5,14 +5,20 @@ import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
+import net.hollowcube.mapmaker.map.instance.ChunkExt;
+import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.hollowcube.mapmaker.map.util.PlayerRiptideExtension;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.kyori.adventure.sound.Sound;
+import net.minestom.server.collision.BoundingBox;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.PlayerPreEatEvent;
+import net.minestom.server.event.item.PlayerBeginItemUseEvent;
+import net.minestom.server.event.item.PlayerCancelItemUseEvent;
 import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.EnchantmentList;
@@ -25,9 +31,8 @@ public class TridentFeatureProvider implements FeatureProvider {
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:vanilla/trident", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::handleInitPlayer)
-            .addListener(PlayerPreEatEvent.class, this::handleBeginTridentThrow);
-    // TODO: Fix from 1.21.3 update
-//            .addListener(ItemUpdateStateEvent.class, this::handleTridentThrow);
+            .addListener(PlayerBeginItemUseEvent.class, this::handleBeginTridentThrow)
+            .addListener(PlayerCancelItemUseEvent.class, this::handleTridentThrow);
 
     @Override
     public boolean initMap(@NotNull MapWorld world) {
@@ -46,47 +51,87 @@ public class TridentFeatureProvider implements FeatureProvider {
             p.cancelRiptideAttack();
     }
 
-    private void handleBeginTridentThrow(@NotNull PlayerPreEatEvent event) {
+    private void handleBeginTridentThrow(@NotNull PlayerBeginItemUseEvent event) {
         var itemStack = event.getItemStack();
         if (itemStack.material().id() != Material.TRIDENT.id())
             return;
 
-        event.setEatingTime(72000);
+        if (!isWet(event.getPlayer())) {
+            event.setCancelled(true);
+            return;
+        }
+
+        event.setItemUseDuration(72000);
     }
 
-//    private void handleTridentThrow(@NotNull ItemUpdateStateEvent event) {
-//        var itemStack = event.getItemStack();
-//        if (itemStack.material().id() != Material.TRIDENT.id())
-//            return;
-//
-//        var riptideLevel = itemStack.get(ItemComponent.ENCHANTMENTS, EnchantmentList.EMPTY)
-//                .enchantments().getOrDefault(Enchantment.RIPTIDE, 0);
-//        if (riptideLevel > 1) {
-//            beginRiptideAttack(event, riptideLevel);
-//        } else {
-//            throwTridentEntity();
-//        }
-//    }
+    private void handleTridentThrow(@NotNull PlayerCancelItemUseEvent event) {
+        var itemStack = event.getItemStack();
+        if (itemStack.material().id() != Material.TRIDENT.id() || event.getUseDuration() < 10)
+            return;
+
+        var riptideLevel = itemStack.get(ItemComponent.ENCHANTMENTS, EnchantmentList.EMPTY)
+                .enchantments().getOrDefault(Enchantment.RIPTIDE, 0);
+        if (riptideLevel > 1) {
+            beginRiptideAttack(event, riptideLevel);
+        } else {
+            throwTridentEntity();
+        }
+    }
 
     private void throwTridentEntity() {
         //todo actually do the trident throw
     }
 
-//    private void beginRiptideAttack(@NotNull ItemUpdateStateEvent event, int riptideLevel) {
-//        event.setRiptideSpinAttack(true);
-//
-//        var player = event.getPlayer();
-//        if (player instanceof PlayerRiptideExtension p) {
-//            p.beginRiptideAttack(20);
-//
-//            var soundEvent = riptideLevel >= 3
-//                    ? SoundEvent.ITEM_TRIDENT_RIPTIDE_3
-//                    : riptideLevel == 2
-//                    ? SoundEvent.ITEM_TRIDENT_RIPTIDE_2
-//                    : SoundEvent.ITEM_TRIDENT_RIPTIDE_1;
-//            var sound = Sound.sound(soundEvent, Sound.Source.PLAYER, 1.0f, 1.0f);
-//            player.getViewersAsAudience().playSound(sound);
-//            player.playSound(sound);
-//        }
-//    }
+    private void beginRiptideAttack(@NotNull PlayerCancelItemUseEvent event, int riptideLevel) {
+        event.setRiptideSpinAttack(true);
+
+        var player = event.getPlayer();
+        if (player instanceof PlayerRiptideExtension p) {
+            p.beginRiptideAttack(20);
+
+            var soundEvent = switch (riptideLevel) {
+                case 1 -> SoundEvent.ITEM_TRIDENT_RIPTIDE_1;
+                case 2 -> SoundEvent.ITEM_TRIDENT_RIPTIDE_2;
+                default -> SoundEvent.ITEM_TRIDENT_RIPTIDE_3;
+            };
+            var sound = Sound.sound(soundEvent, Sound.Source.PLAYER, 1.0f, 1.0f);
+            player.getViewersAsAudience().playSound(sound);
+            player.playSound(sound);
+        }
+    }
+
+    private static boolean isWet(@NotNull Player player) {
+        return isRaining(player) || isInWater(player);
+    }
+
+    private static boolean isRaining(@NotNull Player player) {
+        var position = player.getPosition();
+        var isRaining = player.getInstance().getWeather().isRaining();
+        if (!isRaining) return false;
+
+        if (!(player.getChunk() instanceof ChunkExt chunk))
+            return false;
+
+        return chunk.getHeight(Heightmaps.MOTION_BLOCKING, position) <= position.y();
+    }
+
+    private static boolean isInWater(@NotNull Player player) {
+        final BoundingBox bb = player.getBoundingBox();
+        var position = player.getPosition();
+        var instance = player.getInstance();
+
+        var iter = bb.getBlocks(position);
+        while (iter.hasNext()) {
+            var posMut = iter.next();
+
+            // We dont keep track of bounding boxes for water apparently so we cant be smarter than this
+            // its imperfect, but it should be fine enough for now.
+            var block = instance.getBlock(posMut.blockX(), posMut.blockY(), posMut.blockZ(),
+                    Block.Getter.Condition.TYPE);
+            if (block != null && block.id() == Block.WATER.id())
+                return true;
+        }
+
+        return false;
+    }
 }
