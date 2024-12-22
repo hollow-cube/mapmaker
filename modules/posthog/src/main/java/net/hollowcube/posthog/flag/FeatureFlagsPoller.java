@@ -32,13 +32,12 @@ import java.util.regex.PatternSyntaxException;
  */
 public class FeatureFlagsPoller {
     private static final int POLLING_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
-    private static final String POSTHOG_ENDPOINT = "https://app.posthog.com";
+    private static final String POSTHOG_ENDPOINT = "https://us.i.posthog.com";
     private static final String LOCAL_EVALUATION_ENDPOINT = "/api/feature_flag/local_evaluation";
 
     private static final Logger logger = LoggerFactory.getLogger(FeatureFlagsPoller.class);
     private static final Gson gson = new GsonBuilder().disableJdkUnsafe().create();
 
-    private final String projectApiKey;
     private final String personalApiKey;
 
     private final HttpClient httpClient;
@@ -46,11 +45,7 @@ public class FeatureFlagsPoller {
 
     private final Map<String, FeatureFlag> featureFlags = new ConcurrentHashMap<>();
 
-    public FeatureFlagsPoller(
-            @NotNull String projectApiKey,
-            @NotNull String personalApiKey
-    ) {
-        this.projectApiKey = projectApiKey;
+    public FeatureFlagsPoller(@NotNull String personalApiKey) {
         this.personalApiKey = personalApiKey;
 
         this.httpClient = HttpClient.newHttpClient();
@@ -82,8 +77,8 @@ public class FeatureFlagsPoller {
     }
 
     private void pollLoop() {
-        if (this.projectApiKey.isEmpty() || this.personalApiKey.isEmpty()) {
-            logger.warn("Project API key or personal API key is empty, feature flags will not be fetched");
+        if (this.personalApiKey.isEmpty()) {
+            logger.warn("Personal API key is empty, feature flags will not be fetched");
             return;
         }
 
@@ -103,8 +98,7 @@ public class FeatureFlagsPoller {
 
     @Blocking
     private void fetchLocalEvaluationFlags() throws IOException, InterruptedException {
-        var endpoint = POSTHOG_ENDPOINT + LOCAL_EVALUATION_ENDPOINT
-                + "?token=" + this.projectApiKey + "&send_cohors=true";
+        var endpoint = POSTHOG_ENDPOINT + LOCAL_EVALUATION_ENDPOINT;
         var request = HttpRequest.newBuilder(URI.create(endpoint))
                 .header("Authorization", "Bearer " + this.personalApiKey)
                 .header("User-Agent", "github.com/hollow-cube/mapmaker")

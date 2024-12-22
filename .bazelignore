@@ -12,3 +12,5 @@ WORKSPACE
 bin/development/deploy
 
 README.md
+
+.env

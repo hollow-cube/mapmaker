@@ -2,7 +2,7 @@
   <configuration default="false" name="DevServer (local)" type="BazelRunConfigurationType">
     <bsp-state handler-provider-id="JvmBspRunHandlerProvider">
       <bsp-target>@//bin/development</bsp-target>
-      <handler-state programArguments="MAPMAKER_UNLEASH_DEFAULT_ACTION=true" />
+      <handler-state />
     </bsp-state>
     <method v="2" />
   </configuration>

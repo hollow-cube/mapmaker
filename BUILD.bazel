@@ -11,3 +11,5 @@ packer_bundle(
     ],
     visibility = ["//visibility:public"],
 )
+
+exports_files([".env"])

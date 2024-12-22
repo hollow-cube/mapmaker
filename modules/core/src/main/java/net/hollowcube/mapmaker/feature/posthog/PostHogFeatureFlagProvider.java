@@ -17,8 +17,8 @@ public class PostHogFeatureFlagProvider implements FeatureFlagProvider {
 
     private final FeatureFlagsPoller poller;
 
-    public PostHogFeatureFlagProvider(@NotNull String projectApiKey, @NotNull String personalApiKey) {
-        this.poller = new FeatureFlagsPoller(projectApiKey, personalApiKey);
+    public PostHogFeatureFlagProvider(@NotNull String projectApiKey) {
+        this.poller = new FeatureFlagsPoller(projectApiKey);
         // Has already started polling
     }
 

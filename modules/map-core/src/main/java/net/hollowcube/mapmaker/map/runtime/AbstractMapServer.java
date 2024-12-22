@@ -232,7 +232,6 @@ public abstract class AbstractMapServer implements MapServer {
         if (unleashConfig.usePosthog()) {
             logger.info("Posthog is enabled, loading feature flag provider");
             FeatureFlagProvider.replaceGlobals(new PostHogFeatureFlagProvider(
-                    unleashConfig.posthogProjectApiKey(),
                     unleashConfig.posthogPersonalApiKey()
             ));
         } else {

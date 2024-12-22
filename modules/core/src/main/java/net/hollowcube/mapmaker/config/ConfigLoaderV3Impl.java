@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 record ConfigLoaderV3Impl(@NotNull JsonObject root) implements ConfigLoaderV3 {
@@ -27,10 +29,21 @@ record ConfigLoaderV3Impl(@NotNull JsonObject root) implements ConfigLoaderV3 {
             }
 
             var envmap = new HashMap<>(System.getenv());
+            // Load env overrides from cli args
             for (var arg : args) {
                 var split = arg.split("=");
                 if (split.length != 2) continue;
                 envmap.put(split[0], split[1]);
+            }
+            // Load env overrides from .env
+            Path dotEnvPath = Path.of(".env");
+            if (Files.exists(dotEnvPath)) {
+                for (var line : Files.readAllLines(dotEnvPath)) {
+                    if (line.isBlank() || line.startsWith("#")) continue;
+                    var split = line.split("=");
+                    if (split.length != 2) continue;
+                    envmap.put(split[0].trim(), split[1].trim());
+                }
             }
 
             return loadFromText(is.readAllBytes(), envmap);

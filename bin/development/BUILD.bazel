@@ -35,4 +35,7 @@ java_binary(
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:org_slf4j_jul_to_slf4j",
     ],
+    data = [
+        "//:.env",
+    ],
 )

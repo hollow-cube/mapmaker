@@ -23,3 +23,5 @@ bazel-*
 
 profile.jfr
 /test.http
+
+.env
