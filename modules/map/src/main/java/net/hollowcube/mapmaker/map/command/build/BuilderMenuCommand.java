@@ -1,18 +1,16 @@
 package net.hollowcube.mapmaker.map.command.build;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.gui.buildermenu.BuilderMenuView;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import net.hollowcube.mapmaker.map.gui.buildermenu.BuilderMenuView;
 
 import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
 
 public class BuilderMenuCommand extends CommandDsl {
 
-    @Inject
     public BuilderMenuCommand() {
         super("buildermenu", "bm");
 

@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.command.build;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.map.MapWorld;
@@ -18,7 +17,6 @@ import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
 
 public class AddMarkerCommand extends CommandDsl {
 
-    @Inject
     public AddMarkerCommand() {
         super("addmarker");
 

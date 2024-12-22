@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.command.utility;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -17,7 +16,6 @@ public class FlySpeedCommand extends CommandDsl {
             .description("How fast to fly (from 0 to 10)");
 //            .errorHandler((sender, context) -> sender.sendMessage("invalid fly speed todo: "));
 
-    @Inject
     public FlySpeedCommand() {
         super("flyspeed");
 

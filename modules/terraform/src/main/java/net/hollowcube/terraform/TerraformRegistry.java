@@ -14,7 +14,7 @@ public sealed interface TerraformRegistry permits EmptyTerraformRegistry, Terraf
 
     RegionSelector.@UnknownNullability Factory regionType(@NotNull String id);
 
-    @Nullable Class<? extends TerraformStorage> storage(@NotNull String name);
+    @Nullable TerraformStorage storage(@NotNull String name);
 
     @UnknownNullability Block blockState(int stateId);
 

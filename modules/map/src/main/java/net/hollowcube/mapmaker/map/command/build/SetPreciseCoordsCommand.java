@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.command.build;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -30,7 +29,6 @@ public class SetPreciseCoordsCommand extends CommandDsl {
     private final Argument<Float> pitchArgument = Argument.Float("pitch")
             .description("The pitch to teleport to");
 
-    @Inject
     public SetPreciseCoordsCommand() {
         super("setprecisecoords", "spc");
 

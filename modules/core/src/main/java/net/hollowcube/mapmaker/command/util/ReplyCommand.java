@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command.util;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -26,7 +25,6 @@ public class ReplyCommand extends CommandDsl {
     private final MapService mapService;
     private final ChatMessageListener messageListener;
 
-    @Inject
     public ReplyCommand(@NotNull SessionManager sessionManager, @NotNull MapService mapService, @NotNull ChatMessageListener messageListener) {
         super("reply", "r");
         this.sessionManager = sessionManager;

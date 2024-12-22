@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub.command.util;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ArgumentEntity;
@@ -32,7 +31,6 @@ public class HubTrainCommand extends CommandDsl {
     private final ArgumentEntity players = Argument.Entity("player").onlyPlayers(true);
     private final Scheduler scheduler;
 
-    @Inject
     public HubTrainCommand(@NotNull PermManager permManager, @NotNull Scheduler scheduler) {
         super("train");
         this.scheduler = scheduler;

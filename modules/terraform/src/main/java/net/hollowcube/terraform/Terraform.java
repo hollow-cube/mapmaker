@@ -93,28 +93,12 @@ public sealed interface Terraform permits TerraformImpl {
 
 
     class Builder {
-        private final Map<Class<?>, Object> context = new HashMap<>();
-
         private final List<Supplier<TerraformModule>> modules = new ArrayList<>();
         private String storage = "net.hollowcube.terraform.storage.TerraformStorageMemory";
 
         private EventNode<InstanceEvent> eventNode;
         private CommandManager commandManager = new CommandManagerImpl();
         private CommandCondition commandCondition = null;
-
-        /**
-         * Adds a context object to the Terraform instance. This object will be available in the Guice Injector,
-         * so may be used by any component.
-         *
-         * @param type     The type of the object
-         * @param instance The instance to add
-         * @param <T>      The type of the object
-         * @return this
-         */
-        public <T> @NotNull Builder context(@NotNull Class<T> type, @NotNull T instance) {
-            context.put(type, instance);
-            return this;
-        }
 
         public @NotNull Builder module(@NotNull TerraformModule module) {
             modules.add(() -> module);
@@ -163,7 +147,7 @@ public sealed interface Terraform permits TerraformImpl {
 
         public @NotNull Terraform build() {
             return new TerraformImpl(
-                    context, List.copyOf(modules),
+                    List.copyOf(modules),
                     storage, eventNode,
                     commandManager, commandCondition
             );

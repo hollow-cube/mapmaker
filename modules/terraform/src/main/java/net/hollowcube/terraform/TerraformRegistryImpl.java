@@ -2,7 +2,6 @@ package net.hollowcube.terraform;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.inject.Injector;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.terraform.selection.region.RegionSelector;
@@ -20,7 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
@@ -36,7 +37,7 @@ final class TerraformRegistryImpl implements TerraformRegistry {
     private static final Logger logger = LoggerFactory.getLogger(TerraformRegistry.class);
 
     private final Map<String, RegionSelector.Factory> regionTypes;
-    private final Set<Class<? extends TerraformStorage>> storageTypes;
+    private final Map<String, TerraformStorage> storageTypes;
 
     private final CommandManager commandManager;
 
@@ -45,12 +46,12 @@ final class TerraformRegistryImpl implements TerraformRegistry {
     private final Map<String, Block> legacyBlockStates;
 
     TerraformRegistryImpl(
-            @NotNull Injector injector, @NotNull Collection<Supplier<TerraformModule>> modules,
+            @NotNull Collection<Supplier<TerraformModule>> modules,
             @NotNull EventNode<InstanceEvent> rootEventNode,
             @NotNull CommandManager commandManager, @Nullable CommandCondition condition
     ) {
         var regionTypes = new HashMap<String, RegionSelector.Factory>();
-        var storageTypes = new HashSet<Class<? extends TerraformStorage>>();
+        var storageTypes = new HashMap<String, TerraformStorage>();
 
         // Copy vanilla blocks by their state IDs
         for (short i = 0; i < Short.MAX_VALUE; i++) {
@@ -61,39 +62,40 @@ final class TerraformRegistryImpl implements TerraformRegistry {
 
         int stateOverrides = 0;
         for (var moduleFunc : modules) {
-            var module = moduleFunc.get();
+            try {
+                var module = moduleFunc.get();
 
-            for (var regionType : module.regionTypes()) {
-                regionTypes.put(regionType.id(), regionType);
-            }
+                for (var regionType : module.regionTypes()) {
+                    regionTypes.put(regionType.id(), regionType);
+                }
 
-            storageTypes.addAll(module.storageTypes());
+                for (var storage : module.storageTypes()) {
+                    storageTypes.put(storage.getClass().getName(), storage);
+                }
 
-            for (var eventNode : module.eventNodes()) {
-                rootEventNode.addChild(eventNode);
-            }
+                for (var eventNode : module.eventNodes()) {
+                    rootEventNode.addChild(eventNode);
+                }
 
-            for (var commandClass : module.commands()) {
-                try {
-                    var command = injector.getInstance(commandClass);
+                for (var command : module.commands()) {
                     if (condition != null) {
                         var existing = command.getCondition();
                         command.setCondition(existing == null ? condition : and(existing, condition));
                     }
                     commandManager.register(command);
-                } catch (Exception e) {
-                    logger.error("Failed to register command {}", commandClass.getName(), e);
                 }
-            }
 
-            for (var state : module.blockStateOverrides().entrySet()) {
-                blocksByState.set(state.getKey(), state.getValue());
-                stateOverrides++;
+                for (var state : module.blockStateOverrides().entrySet()) {
+                    blocksByState.set(state.getKey(), state.getValue());
+                    stateOverrides++;
+                }
+            } catch (Exception e) {
+                logger.error("Failed to load module: {}", moduleFunc, e);
             }
         }
 
         this.regionTypes = Map.copyOf(regionTypes);
-        this.storageTypes = Set.copyOf(storageTypes);
+        this.storageTypes = Map.copyOf(storageTypes);
         this.commandManager = commandManager;
 
         blocksByState.trim();
@@ -107,15 +109,15 @@ final class TerraformRegistryImpl implements TerraformRegistry {
     }
 
     @Override
-    public @Nullable Class<? extends TerraformStorage> storage(@NotNull String name) {
-        Class<? extends TerraformStorage> type = null;
-        for (var storageTypeClass : storageTypes) {
-            if (storageTypeClass.getName().endsWith(name)) {
+    public @Nullable TerraformStorage storage(@NotNull String name) {
+        TerraformStorage type = null;
+        for (var storageTypeClass : storageTypes.entrySet()) {
+            if (storageTypeClass.getKey().endsWith(name)) {
                 if (type != null) {
                     throw new IllegalStateException("Storage name matches multiple implementations: " +
-                            type.getName() + " and " + storageTypeClass.getName());
+                            type.getClass().getName() + " and " + storageTypeClass.getKey());
                 }
-                type = storageTypeClass;
+                type = storageTypeClass.getValue();
             }
         }
         return type;

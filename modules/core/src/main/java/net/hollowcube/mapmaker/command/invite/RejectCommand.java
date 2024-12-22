@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command.invite;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -10,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class RejectCommand extends AbstractInviteServiceCommand {
 
-    @Inject
     public RejectCommand(@NotNull PlayerInviteService inviteService, @NotNull PlayerService playerService,
                          @NotNull SessionManager sessionManager) {
         super("reject", inviteService, playerService, sessionManager, "The player to reject");

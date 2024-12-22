@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command.util;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.kyori.adventure.text.Component;
@@ -9,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class MinestomCommand extends CommandDsl {
 
-    @Inject
     public MinestomCommand() {
         super("minestom", "plugins", "pl", "server");
 

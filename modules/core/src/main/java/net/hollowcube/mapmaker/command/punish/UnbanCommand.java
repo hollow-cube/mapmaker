@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command.punish;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -24,7 +23,6 @@ public class UnbanCommand extends CommandDsl {
 
     private final PunishmentService punishmentService;
 
-    @Inject
     public UnbanCommand(
             @NotNull PunishmentService punishmentService,
             @NotNull PlayerService playerService,

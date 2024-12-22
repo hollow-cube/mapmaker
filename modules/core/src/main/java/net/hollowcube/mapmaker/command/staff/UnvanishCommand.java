@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command.staff;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -23,7 +22,6 @@ public class UnvanishCommand extends CommandDsl {
     private final SessionManager sessionManager;
     private final PlayerService playerService;
 
-    @Inject
     public UnvanishCommand(@NotNull SessionManager sessionManager, @NotNull PlayerService playerService, @NotNull PermManager permManager) {
         super("unvanish");
         this.sessionManager = sessionManager;

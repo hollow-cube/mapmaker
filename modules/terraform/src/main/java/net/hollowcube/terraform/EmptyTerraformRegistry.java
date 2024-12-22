@@ -20,7 +20,7 @@ final class EmptyTerraformRegistry implements TerraformRegistry {
     }
 
     @Override
-    public @Nullable Class<? extends TerraformStorage> storage(@NotNull String name) {
+    public @Nullable TerraformStorage storage(@NotNull String name) {
         return null;
     }
 

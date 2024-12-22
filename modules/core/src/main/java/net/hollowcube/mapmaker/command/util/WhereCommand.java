@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command.util;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -23,9 +22,7 @@ public class WhereCommand extends CommandDsl {
     private final SessionManager sessionManager;
     private final PlayerService playerService;
     private final MapService mapService;
-    private final PermManager permManager;
 
-    @Inject
     public WhereCommand(
             @NotNull SessionManager sessionManager,
             @NotNull PlayerService playerService,
@@ -36,7 +33,6 @@ public class WhereCommand extends CommandDsl {
         this.sessionManager = sessionManager;
         this.playerService = playerService;
         this.mapService = mapService;
-        this.permManager = permManager;
 
         this.description = "Shows where someone is on the server";
         this.category = CommandCategories.SOCIAL;

@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.command.utility;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
@@ -11,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class FixTheDripleafCommand extends CommandDsl {
 
-    @Inject
     public FixTheDripleafCommand(@NotNull PermManager permManager) {
         super("fixthedripleaf");
 

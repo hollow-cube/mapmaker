@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.command.build;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -24,7 +23,6 @@ public class SetSpawnCommand extends CommandDsl {
     private final Argument<Float> pitchArgument = Argument.Float("pitch")
             .description("The pitch to set the spawn point to");
 
-    @Inject
     public SetSpawnCommand() {
         super("setspawn", "setstart");
 

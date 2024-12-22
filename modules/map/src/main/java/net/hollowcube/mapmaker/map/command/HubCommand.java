@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.command;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.LanguageProviderV2;
@@ -19,7 +18,6 @@ public class HubCommand extends CommandDsl {
 
     private final ServerBridge bridge;
 
-    @Inject
     public HubCommand(@NotNull ServerBridge bridge) {
         super("hub", "leave", "l", "lobby");
         this.bridge = bridge;

@@ -1,7 +1,5 @@
 package net.hollowcube.terraform;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandManager;
@@ -41,7 +39,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -67,19 +64,10 @@ public final class TerraformImpl implements Terraform {
     private final ExecutorService threadPoolApply;
 
     TerraformImpl(
-            @NotNull Map<Class<?>, Object> context, @NotNull Collection<Supplier<TerraformModule>> modules,
+            @NotNull Collection<Supplier<TerraformModule>> modules,
             @NotNull String storage, @Nullable EventNode<InstanceEvent> eventNode,
             @NotNull CommandManager commandManager, @Nullable CommandCondition commandCondition
     ) {
-        var injector = Guice.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(Terraform.class).toInstance(TerraformImpl.this);
-                //noinspection unchecked
-                context.forEach((type, instance) -> bind((Class<Object>) type).toInstance(instance));
-            }
-        });
-
         // Set the eventNode or register a new one.
         if (eventNode != null) this.eventNode = eventNode;
         else {
@@ -91,11 +79,10 @@ public final class TerraformImpl implements Terraform {
         this.eventNode.addChild(this.toolHandler.eventNode());
 
         // Construct the registry immediately
-        this.registry = new TerraformRegistryImpl(injector, modules, this.eventNode, commandManager, commandCondition);
+        this.registry = new TerraformRegistryImpl(modules, this.eventNode, commandManager, commandCondition);
 
-        var storageFactory = Objects.requireNonNull(this.registry.storage(storage),
+        this.storage = Objects.requireNonNull(this.registry.storage(storage),
                 "No matching storage implementation: " + storage);
-        this.storage = injector.getInstance(storageFactory);
 
         this.threadPoolCompute = Executors.newFixedThreadPool(3, new ThreadUtil.NamedThreadFactory("tf-compute"));
         this.threadPoolApply = Executors.newFixedThreadPool(3, new ThreadUtil.NamedThreadFactory("tf-apply"));

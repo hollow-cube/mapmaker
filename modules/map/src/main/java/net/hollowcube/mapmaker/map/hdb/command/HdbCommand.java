@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.hdb.command;
 
-import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -15,7 +14,6 @@ public class HdbCommand extends CommandDsl {
 
     private final Controller guiController;
 
-    @Inject
     public HdbCommand(@NotNull HeadDatabase hdb, @NotNull Controller guiController) {
         super("headdb", "hdb");
         this.guiController = guiController;

@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command.punish;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -27,7 +26,6 @@ public class PStatusCommand extends CommandDsl {
     private final PlayerService playerService;
     private final PunishmentService punishmentService;
 
-    @Inject
     public PStatusCommand(
             @NotNull PlayerService playerService,
             @NotNull PunishmentService punishmentService,

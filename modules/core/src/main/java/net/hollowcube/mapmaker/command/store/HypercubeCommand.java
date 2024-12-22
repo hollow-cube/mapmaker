@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command.store;
 
-import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -23,7 +22,6 @@ public class HypercubeCommand extends CommandDsl {
     private final PlayerService playerService;
     private final Controller guiController;
 
-    @Inject
     public HypercubeCommand(@NotNull PlayerService playerService, @NotNull Controller guiController) {
         super("hypercube");
 

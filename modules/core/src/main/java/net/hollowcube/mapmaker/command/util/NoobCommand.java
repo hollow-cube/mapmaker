@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command.util;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategories;
@@ -29,7 +28,6 @@ public class NoobCommand extends CommandDsl {
     private static final ItemStack NOOB_LEGGINGS = ItemStack.of(Material.LEATHER_LEGGINGS);
     private static final ItemStack NOOB_BOOTS = ItemStack.of(Material.LEATHER_BOOTS);
 
-    @Inject
     public NoobCommand(@NotNull PermManager permManager) {
         super("noob");
 

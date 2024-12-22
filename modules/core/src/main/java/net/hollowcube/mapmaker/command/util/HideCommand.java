@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command.util;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.PlayerSettings;
@@ -17,7 +16,6 @@ import java.util.Locale;
 public class HideCommand extends CommandDsl {
     private final PlayerService playerService;
 
-    @Inject
     public HideCommand(@NotNull PlayerService playerService) {
         super("hide");
         this.playerService = playerService;

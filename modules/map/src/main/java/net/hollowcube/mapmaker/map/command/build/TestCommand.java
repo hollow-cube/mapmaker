@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.command.build;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -15,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class TestCommand extends CommandDsl {
 
-    @Inject
     public TestCommand() {
         super("test");
 

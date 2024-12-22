@@ -63,7 +63,6 @@ maven_install(
         "com.github.ben-manes.caffeine:caffeine:3.1.8",
         "info.debatty:java-string-similarity:2.0.0",
         "com.velocitypowered:velocity-api:3.1.1",
-        "com.google.inject:guice:7.0.0",
         "org.jctools:jctools-core:4.0.5",
 
         # Adventure

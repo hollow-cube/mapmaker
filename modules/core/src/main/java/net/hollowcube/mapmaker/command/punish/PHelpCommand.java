@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command.punish;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -27,7 +26,6 @@ public class PHelpCommand extends CommandDsl {
 
     private final PunishmentService punishmentService;
 
-    @Inject
     public PHelpCommand(@NotNull PunishmentService punishmentService, @NotNull PermManager permManager) {
         super("phelp");
         this.punishmentService = punishmentService;

@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command.store;
 
-import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -12,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 public class StoreCommand extends CommandDsl {
     private final Controller guiController;
 
-    @Inject
     public StoreCommand(@NotNull Controller guiController) {
         super("store", "buy");
         this.guiController = guiController;

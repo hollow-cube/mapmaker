@@ -12,7 +12,6 @@ java_library(
         "velocity_ap",
     ],
     exports = [
-        "@maven//:com_google_inject_guice",
         "@maven//:com_velocitypowered_velocity_api",
         "@maven//:net_kyori_adventure_api",
         "@maven//:net_kyori_adventure_key",

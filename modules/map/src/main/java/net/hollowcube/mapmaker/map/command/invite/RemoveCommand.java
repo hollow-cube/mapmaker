@@ -1,11 +1,10 @@
 package net.hollowcube.mapmaker.map.command.invite;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.entity.EntityFinder;
@@ -21,7 +20,6 @@ public class RemoveCommand extends CommandDsl {
 
     private final ServerBridge bridge;
 
-    @Inject
     public RemoveCommand(@NotNull ServerBridge bridge) {
         super("remove");
         this.bridge = bridge;

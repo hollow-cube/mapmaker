@@ -1,9 +1,8 @@
 package net.hollowcube.mapmaker.hub.item;
 
-import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
-import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.gui.store.CosmeticView;
+import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +16,6 @@ public class OpenCosmeticsMenuItem extends ItemHandler {
 
     private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/cosmetic_menu"));
 
-    @Inject
     public OpenCosmeticsMenuItem(@NotNull Controller guiController) {
         super(ID, RIGHT_CLICK_ANY);
         this.guiController = guiController;

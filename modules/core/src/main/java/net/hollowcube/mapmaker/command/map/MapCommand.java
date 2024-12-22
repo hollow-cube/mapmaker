@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command.map;
 
-import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandBuilder;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -24,7 +23,6 @@ public class MapCommand extends CommandDsl {
     public final MapAlterCommand alter;
     public final MapDrainCommand drain;
 
-    @Inject
     public MapCommand(
             @NotNull Controller guiController,
             @NotNull PlayerService playerService,

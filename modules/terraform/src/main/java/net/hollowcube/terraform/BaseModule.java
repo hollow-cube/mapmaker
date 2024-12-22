@@ -21,44 +21,44 @@ final class BaseModule implements TerraformModule {
     }
 
     @Override
-    public @NotNull Set<Class<? extends TerraformStorage>> storageTypes() {
-        return Set.of(TerraformStorageMemory.class);
+    public @NotNull Set<TerraformStorage> storageTypes() {
+        return Set.of(new TerraformStorageMemory());
     }
 
     @Override
-    public @NotNull Set<Class<? extends CommandDsl>> commands() {
+    public @NotNull Set<CommandDsl> commands() {
         return Set.of(
                 // Root/Debug
-                TerraformCommand.class
+                new TerraformCommand()
 
                 // Selection
-//                PosCommand.Primary.class, PosCommand.Secondary.class,
-//                HPosCommand.Primary.class, HPosCommand.Secondary.class,
-//                SelCommand.class,
+//                new PosCommand.Primary.class, PosCommand.Secondary(),
+//                new HPosCommand.Primary.class, HPosCommand.Secondary(),
+//                new SelCommand(),
 //                new SelectionCommands.Outset(condition),
 //                new SelectionCommands.Inset(condition),
 //                new SelectionCommands.Chunk(condition),
 //                new SelectionCommands.Size(condition),
 
                 // Region
-//                SetCommand.class, ReplaceCommand.class,
-//                StackCommand.class, SmearCommand.class,
-//                MoveCommand.class,
-//                SetLightCommand.class,
+//                new SetCommand.class, ReplaceCommand(),
+//                new StackCommand.class, SmearCommand(),
+//                new MoveCommand(),
+//                new SetLightCommand(),
 
                 // History
-//                UndoCommand.class, RedoCommand.class,
-//                ClearHistoryCommand.class,
+//                new UndoCommand.class, RedoCommand(),
+//                new ClearHistoryCommand(),
 
                 // Clipboard
-//                CopyCommand.class, CutCommand.class, PasteCommand.class,
-//                ClipboardCommand.class,
+//                new CopyCommand.class, CutCommand.class, PasteCommand(),
+//                new ClipboardCommand(),
 
                 // Schematic
-//                SchemCommand.class,
+//                new SchemCommand(),
 
                 // Tools
-//                ToolCommand.class
+//                new ToolCommand()
         );
     }
 }

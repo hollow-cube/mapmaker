@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub.item;
 
-import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
@@ -33,7 +32,6 @@ public class CreateMapsItem extends ItemHandler {
 
     private final Controller guiController;
 
-    @Inject
     public CreateMapsItem(@NotNull Controller guiController) {
         super(ID, RIGHT_CLICK_ANY | LEFT_CLICK_ENTITY);
         this.guiController = guiController;

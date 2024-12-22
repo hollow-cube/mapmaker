@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command.punish;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -22,7 +21,6 @@ public class KickCommand extends CommandDsl {
     private final Argument<String> targetArgument;
     private final Argument<String> reasonArgument = Argument.GreedyString("reason");
 
-    @Inject
     public KickCommand(
             @NotNull PunishmentService service,
             @NotNull SessionManager sessionManager,

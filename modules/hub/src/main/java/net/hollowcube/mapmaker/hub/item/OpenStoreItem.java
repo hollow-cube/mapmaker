@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub.item;
 
-import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
@@ -17,7 +16,6 @@ public class OpenStoreItem extends ItemHandler {
 
     private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/store_menu"));
 
-    @Inject
     public OpenStoreItem(@NotNull Controller guiController) {
         super(ID, RIGHT_CLICK_ANY);
         this.guiController = guiController;

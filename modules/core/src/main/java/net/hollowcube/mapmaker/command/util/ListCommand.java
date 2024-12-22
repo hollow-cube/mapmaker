@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command.util;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategories;
@@ -16,7 +15,6 @@ public class ListCommand extends CommandDsl {
     private final SessionManager sessionManager;
     private final PlayerService playerService;
 
-    @Inject
     public ListCommand(@NotNull SessionManager sessionManager, @NotNull PlayerService playerService) {
         super("list");
         this.sessionManager = sessionManager;

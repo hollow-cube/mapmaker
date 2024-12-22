@@ -25,7 +25,7 @@ public interface TerraformModule {
         return Set.of();
     }
 
-    default @NotNull Set<Class<? extends TerraformStorage>> storageTypes() {
+    default @NotNull Set<TerraformStorage> storageTypes() {
         return Set.of();
     }
 
@@ -36,7 +36,7 @@ public interface TerraformModule {
     /**
      * Returns any commands to register.
      */
-    default @NotNull Set<Class<? extends CommandDsl>> commands() {
+    default @NotNull Set<CommandDsl> commands() {
         return Set.of();
     }
 

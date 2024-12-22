@@ -17,15 +17,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public class MapServerModule implements TerraformModule {
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("map-terraform", EventFilter.INSTANCE)
             .addListener(TerraformPreSpawnEntityEvent.class, this::handleSpawnEntity);
 
     @Override
-    public @NotNull Set<Class<? extends TerraformStorage>> storageTypes() {
-        return Set.of(TerraformStorageHttp.class);
+    public @NotNull Set<TerraformStorage> storageTypes() {
+        return Set.of(new TerraformStorageHttp());
     }
 
     @Override

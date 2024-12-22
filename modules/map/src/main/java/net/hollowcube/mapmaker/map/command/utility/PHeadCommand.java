@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.command.utility;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -19,7 +18,6 @@ public class PHeadCommand extends CommandDsl {
     private final Argument<String> nameArg = Argument.Word("name")
             .description("The player to obtain a head of");
 
-    @Inject
     public PHeadCommand() {
         super("phead", "skull");
 

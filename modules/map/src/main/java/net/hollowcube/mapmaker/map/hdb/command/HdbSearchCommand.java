@@ -1,11 +1,9 @@
 package net.hollowcube.mapmaker.map.hdb.command;
 
-import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.map.hdb.HdbMessages;
 import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
 import net.hollowcube.mapmaker.map.hdb.gui.HdbSearchView;
 import net.minestom.server.entity.Player;
@@ -18,7 +16,6 @@ public class HdbSearchCommand extends CommandDsl {
     private final HeadDatabase hdb;
     private final Controller guiController;
 
-    @Inject
     public HdbSearchCommand(@NotNull HeadDatabase hdb, @NotNull Controller guiController) {
         super("search");
         this.hdb = hdb;

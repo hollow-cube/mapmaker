@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command.staff;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -26,7 +25,6 @@ public class SFindCommand extends CommandDsl {
     private final PlayerService playerService;
     private final SessionManager sessionManager;
 
-    @Inject
     public SFindCommand(
             @NotNull MapService mapService,
             @NotNull PlayerService playerService,

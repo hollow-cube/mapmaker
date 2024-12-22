@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.world;
 
-import com.google.inject.Inject;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
@@ -83,7 +82,6 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
     private final ReentrantLock saveLock = new ReentrantLock();
     private Task autoSaveTask = null;
 
-    @Inject
     public EditingMapWorld(@NotNull MapServer server, @NotNull MapData map) {
         super(server, map, new MapInstance(map.createDimensionName('e'), map.getSetting(MapSettings.LIGHTING)));
 

@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub.item;
 
-import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.mapmaker.hub.gui.org.OrgMapsView;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
@@ -14,7 +13,6 @@ public class OrgMapsItem extends ItemHandler {
 
     private final Controller guiController;
 
-    @Inject
     public OrgMapsItem(@NotNull Controller guiController) {
         super(ID, RIGHT_CLICK_ANY);
         this.guiController = guiController;

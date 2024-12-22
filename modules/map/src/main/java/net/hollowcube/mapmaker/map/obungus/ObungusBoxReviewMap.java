@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.obungus;
 
-import com.google.inject.Inject;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.block.handler.StructureBlockHandler;
@@ -30,7 +29,6 @@ public class ObungusBoxReviewMap extends PlayingMapWorld {
 
     private final ObungusService obungusService;
 
-    @Inject
     public ObungusBoxReviewMap(@NotNull MapServer server, @NotNull MapData map) {
         super(server, map);
         this.obungusService = server.facet(ObungusService.class);

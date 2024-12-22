@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.command;
 
-import com.google.inject.Inject;
 import com.sun.management.HotSpotDiagnosticMXBean;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandContext;
@@ -52,7 +51,6 @@ public class DebugCommand extends CommandDsl {
     private final CommandCondition adminCondition;
     private final CommandCondition localCondition;
 
-    @Inject
     public DebugCommand(@NotNull PlayerService playerService, @NotNull PermManager permManager, @NotNull MapService mapService, @NotNull MapAllocator allocator) {
         super("debug");
         this.allocator = allocator;
@@ -72,7 +70,7 @@ public class DebugCommand extends CommandDsl {
                 "Show information about yourself");
         createPermissionlessSubcommand("server", this::handleDebugServer,
                 "Show information about the current server");
-        createPermissionedSubcommand("gc", (_, _) -> System.gc(),
+        createPermissionedSubcommand("gc", (ignored1, ignored2) -> System.gc(),
                 "Force a garbage collection");
 
         // Minestom stuff

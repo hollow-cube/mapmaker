@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.command.build;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
@@ -35,7 +34,6 @@ public class DataCommand extends CommandDsl {
     public final Get get;
     public final Merge merge;
 
-    @Inject
     public DataCommand() {
         super("data");
 

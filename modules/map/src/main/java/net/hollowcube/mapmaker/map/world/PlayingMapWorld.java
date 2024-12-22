@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.world;
 
-import com.google.inject.Inject;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
@@ -75,7 +74,6 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
     public static final Constructor<PlayingMapWorld> CTOR = AbstractMapWorld.ctor(PlayingMapWorld::new, PlayingMapWorld.class);
 
-    @Inject
     public PlayingMapWorld(@NotNull MapServer server, @NotNull MapData map) {
         super(server, map, new MapInstance(map.createDimensionName('p'), false));
         instance.setGenerator(MapGenerators.voidWorld());
