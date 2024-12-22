@@ -12,7 +12,6 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.util.ComponentUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.entity.metadata.PlayerMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -60,7 +59,7 @@ public class LocalMapAllocator implements MapAllocator {
 
     @SuppressWarnings("unchecked")
     @Override
-    public @NotNull <T extends AbstractMapWorld> Future<@Nullable T> create(@NotNull MapData map, @NotNull Class<T> worldType) {
+    public @NotNull <T extends AbstractMapWorld> Future<@Nullable T> create(@NotNull MapData map, @NotNull MapWorld.Constructor<T> ctor) {
         return VIRTUAL_EXECUTOR.submit(() -> {
             Future<T> future;
 
@@ -71,13 +70,13 @@ public class LocalMapAllocator implements MapAllocator {
 
             lock.lock();
             try {
-                var key = new MapKey(map.id(), worldType);
+                var key = new MapKey(map.id(), ctor.type());
 
                 // Return existing world if present.
                 future = (Future<T>) maps.get(key);
                 if (future == null) {
                     // No existing world, create a new one and keep track of it
-                    future = VIRTUAL_EXECUTOR.submit(() -> allocateTracked(map, worldType));
+                    future = VIRTUAL_EXECUTOR.submit(() -> allocateTracked(map, ctor));
                     maps.put(key, (Future<AbstractMapWorld>) future);
                 }
             } finally {
@@ -162,9 +161,9 @@ public class LocalMapAllocator implements MapAllocator {
     }
 
     // Small wrapper around direct allocator to keep track of players in the instance
-    private <T extends AbstractMapWorld> T allocateTracked(@NotNull MapData map, @NotNull Class<T> worldType) {
-        metrics.write(new MapInstanceCreatedEvent(map.id(), worldType.getSimpleName()));
-        var createdWorld = direct.allocateDirect(map, worldType);
+    private <T extends AbstractMapWorld> T allocateTracked(@NotNull MapData map, @NotNull MapWorld.Constructor<T> ctor) {
+        metrics.write(new MapInstanceCreatedEvent(map.id(), ctor.type().getSimpleName()));
+        var createdWorld = direct.allocateDirect(map, ctor);
         createdWorld.instance().eventNode().addListener(PlayerInstanceLeaveEvent.class, event -> {
             // Get the world from the instance because 1: the player is no longer in a world, and 2: we care about the root world (editing, not testing)
             var world = MapWorld.unsafeFromInstance(event.getInstance());
@@ -188,8 +187,8 @@ public class LocalMapAllocator implements MapAllocator {
     // Direct allocator delegated calls.
 
     @Override
-    public <T extends AbstractMapWorld> @NotNull T allocateDirect(@NotNull MapData map, @NotNull Class<T> worldType) {
-        return direct.allocateDirect(map, worldType);
+    public <T extends AbstractMapWorld> @NotNull T allocateDirect(@NotNull MapData map, @NotNull MapWorld.Constructor<T> ctor) {
+        return direct.allocateDirect(map, ctor);
     }
 
     @Override

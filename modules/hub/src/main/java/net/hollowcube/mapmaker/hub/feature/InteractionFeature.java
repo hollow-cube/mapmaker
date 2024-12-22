@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.hub.feature;
 
 import com.google.auto.service.AutoService;
-import com.google.inject.Inject;
 import net.hollowcube.common.physics.RayUtils2;
 import net.hollowcube.common.physics.SweepResult2;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.util.InteractionEntity;
+import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.util.PlayerUtil;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.event.EventFilter;
@@ -23,12 +23,11 @@ public class InteractionFeature implements HubFeature {
     private final EventNode<InstanceEvent> eventNode = EventNode.type("interaction-event", EventFilter.INSTANCE)
             .addListener(InstanceTickEvent.class, this::onTick)
             .addListener(PlayerEntityInteractEvent.class, this::handleEntityInteract);
-    private final HubMapWorld world;
+    private HubMapWorld world;
 
-    @Inject
-    public InteractionFeature(@NotNull HubMapWorld world) {
+    @Override
+    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
         this.world = world;
-
         world.eventNode().addChild(eventNode);
     }
 

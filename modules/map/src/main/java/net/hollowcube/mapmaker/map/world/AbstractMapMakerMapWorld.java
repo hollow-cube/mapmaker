@@ -25,12 +25,9 @@ public abstract class AbstractMapMakerMapWorld extends AbstractMapWorld {
     private final FeatureList features;
     private List<FeatureProvider> enabledFeatures;
 
-    protected AbstractMapMakerMapWorld(
-            @NotNull MapServer server, @NotNull MapData map,
-            @NotNull FeatureList features, @NotNull MapInstance instance) {
+    protected AbstractMapMakerMapWorld(@NotNull MapServer server, @NotNull MapData map, @NotNull MapInstance instance) {
         super(server, map, instance);
-
-        this.features = features;
+        this.features = server.facet(FeatureList.class);
 
         // Add support for adding and removing potion effects
         eventNode().addChild(PotionHandler.EVENT_NODE);

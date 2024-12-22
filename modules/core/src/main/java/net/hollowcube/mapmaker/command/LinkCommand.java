@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -17,7 +16,6 @@ public class LinkCommand extends CommandDsl {
 
     private final PlayerService playerService;
 
-    @Inject
     public LinkCommand(@NotNull PlayerService playerService) {
         super("link");
 

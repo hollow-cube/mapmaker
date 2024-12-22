@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -24,7 +23,6 @@ public class PlayCommand extends CommandDsl {
     private final SessionManager sessionManager;
     private final ServerBridge bridge;
 
-    @Inject
     public PlayCommand(@NotNull MapService mapService, @NotNull SessionManager sessionManager, @NotNull ServerBridge bridge) {
         super("play");
         this.mapService = mapService;

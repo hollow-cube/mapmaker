@@ -28,17 +28,18 @@ public interface MapAllocator {
      *
      * <p>The map returned by this function will never be removed automatically, even if it has zero players.</p>
      *
-     * @param map       The map data to create a world for
-     * @param worldType The type of world to create
-     * @param <T>       The type of world to create
+     * @param map  The map data to create a world for
+     * @param ctor The type of world to create
+     * @param <T>  The type of world to create
      * @return The created world
      */
-    @Blocking <T extends AbstractMapWorld> @NotNull T allocateDirect(@NotNull MapData map, @NotNull Class<T> worldType);
+    @Blocking
+    <T extends AbstractMapWorld> @NotNull T allocateDirect(@NotNull MapData map, @NotNull MapWorld.Constructor<T> ctor);
 
     /**
      * Closes the given world immediately, attempting to send all players to the hub and kicking them if unable.
      *
-     * <p>It is valid to call this function on a {@link #allocateDirect(MapData, Class)} world to close it.</p>
+     * <p>It is valid to call this function on a {@link #allocateDirect(MapData, net.hollowcube.mapmaker.map.MapWorld.Constructor)} world to close it.</p>
      *
      * @param world The world to close.
      */
@@ -52,12 +53,12 @@ public interface MapAllocator {
      *
      * <p>Capacity rules will be enforced, and the created map will be removed when it has no players.</p>
      *
-     * @param map       The map data to create a world for
-     * @param worldType The type of world to create
+     * @param map  The map data to create a world for
+     * @param ctor The type of world to create
      * @return A future holding the world, or null if it could not be created
      */
     @NonBlocking
-    <T extends AbstractMapWorld> @NotNull Future<@Nullable T> create(@NotNull MapData map, @NotNull Class<T> worldType);
+    <T extends AbstractMapWorld> @NotNull Future<@Nullable T> create(@NotNull MapData map, @NotNull MapWorld.Constructor<T> ctor);
 
     /**
      * Frees a world by its {@link MapWorld#worldId()} if and only if it is owned by this allocator.
@@ -72,7 +73,7 @@ public interface MapAllocator {
     /**
      * Closes all maps with the given ID, attempting to send all players to the hub and kicking them if unable.
      *
-     * <p>Note that this will NOT close maps created with {@link #allocateDirect(MapData, Class)}.</p>
+     * <p>Note that this will NOT close maps created with {@link #allocateDirect(MapData, net.hollowcube.mapmaker.map.MapWorld.Constructor)}.</p>
      *
      * @param mapId The ID of the map to close.
      * @return The number of maps closed.

@@ -6,7 +6,6 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
-import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.ItemTags;
 import net.hollowcube.mapmaker.map.item.vanilla.DebugStickItem;
@@ -77,18 +76,18 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
             .addListener(ItemDropEvent.class, event -> event.setCancelled(true))
             .addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true));
 
+    public static final Constructor<EditingMapWorld> CTOR = AbstractMapWorld.ctor(EditingMapWorld::new, EditingMapWorld.class);
+
     private volatile TestingMapWorld testWorld = null;
 
     private final ReentrantLock saveLock = new ReentrantLock();
     private Task autoSaveTask = null;
 
     @Inject
-    public EditingMapWorld(
-            @NotNull MapServer server, @NotNull Terraform terraform,
-            @NotNull FeatureList features, @NotNull MapData map
-    ) {
-        super(server, map, features, new MapInstance(map.createDimensionName('e'), map.getSetting(MapSettings.LIGHTING)));
-        this.terraform = terraform;
+    public EditingMapWorld(@NotNull MapServer server, @NotNull MapData map) {
+        super(server, map, new MapInstance(map.createDimensionName('e'), map.getSetting(MapSettings.LIGHTING)));
+
+        this.terraform = server.facet(Terraform.class);
 
         instance.setGenerator(MapGenerators.voidWorld());
         instance.eventNode().addChild(readWriteNode); // Needs spectators, so register on instance.

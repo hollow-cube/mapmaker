@@ -1,6 +1,5 @@
 package net.hollowcube.proxy;
 
-import com.google.inject.Inject;
 import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
@@ -69,7 +68,6 @@ public class ProxyPlugin {
     private final Set<UUID> playersWithSession = new CopyOnWriteArraySet<>();
     private final Set<UUID> playersJustJoined = new CopyOnWriteArraySet<>();
 
-    @Inject
     public ProxyPlugin(@NotNull Logger logger, @NotNull ProxyServer proxy) {
         this.logger = logger;
         this.proxy = proxy;

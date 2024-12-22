@@ -36,6 +36,10 @@ public sealed interface Terraform permits TerraformImpl {
     @NotNull
     Supplier<TerraformModule> AXIOM_MODULE = AxiomModule::new;
 
+    interface Provider {
+        @NotNull Terraform terraform();
+    }
+
     static @NotNull Builder builder() {
         return new Builder();
     }

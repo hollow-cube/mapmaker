@@ -1,12 +1,12 @@
 package net.hollowcube.mapmaker.hub.feature.misc;
 
 import com.google.auto.service.AutoService;
-import com.google.inject.Inject;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.BaseNpcEntity;
 import net.hollowcube.mapmaker.hub.entity.NpcHandler;
 import net.hollowcube.mapmaker.hub.entity.NpcPlayer;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.minestom.server.coordinate.Pos;
@@ -20,8 +20,8 @@ import org.jetbrains.annotations.NotNull;
 public class MiscNpcsFeature implements HubFeature {
     private static final Pos PLAYTIME_NPC_POS = new Pos(50, 37, 0.5, 90, 0);
 
-    @Inject
-    public MiscNpcsFeature(@NotNull HubMapWorld world) {
+    @Override
+    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
         world.instance().eventNode().addChild(NpcHandler.EVENT_NODE);
 
         var skin = new PlayerSkin(

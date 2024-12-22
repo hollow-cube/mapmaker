@@ -1,12 +1,12 @@
 package net.hollowcube.mapmaker.hub.feature.misc;
 
 import com.google.auto.service.AutoService;
-import com.google.inject.Inject;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.physics.BoundingBox;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.hollowcube.mapmaker.map.MapServer;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -23,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
-@SuppressWarnings("UnstableApiUsage")
 @AutoService(HubFeature.class)
 public class LauncherFeature implements HubFeature {
     private static final SoundEvent EMPTY_SOUND = SoundEvent.of(NamespaceID.from("not.a.real.sound"), 0f);
@@ -32,8 +31,8 @@ public class LauncherFeature implements HubFeature {
     private final LauncherEntity left = new LauncherEntity();
     private final LauncherEntity right = new LauncherEntity();
 
-    @Inject
-    public LauncherFeature(@NotNull HubMapWorld world) {
+    @Override
+    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
         left.setInstance(world.instance(), new Pos(-14.5, 37.5, 8.5, 180, 0));
         right.setInstance(world.instance(), new Pos(-14.5, 37.5, -7.5, 180, 0));
     }

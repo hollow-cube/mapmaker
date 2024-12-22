@@ -11,7 +11,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
@@ -27,9 +26,9 @@ final class DirectMapAllocator implements MapAllocator {
     }
 
     @Override
-    public <T extends AbstractMapWorld> @NotNull T allocateDirect(@NotNull MapData map, @NotNull Class<T> worldType) {
+    public <T extends AbstractMapWorld> @NotNull T allocateDirect(@NotNull MapData map, @NotNull MapWorld.Constructor<T> ctor) {
         try {
-            var world = server.createInstance(worldType, Map.of(MapData.class, map));
+            var world = ctor.create(server, map);
             world.load();
             return world;
         } catch (Exception e) {
@@ -52,7 +51,7 @@ final class DirectMapAllocator implements MapAllocator {
     }
 
     @Override
-    public @NotNull <T extends AbstractMapWorld> Future<@Nullable T> create(@NotNull MapData map, @NotNull Class<T> worldType) {
+    public @NotNull <T extends AbstractMapWorld> Future<@Nullable T> create(@NotNull MapData map, @NotNull MapWorld.Constructor<T> ctor) {
         return CompletableFuture.completedFuture(null);
     }
 

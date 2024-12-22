@@ -1,12 +1,12 @@
 package net.hollowcube.mapmaker.hub.feature.motw;
 
 import com.google.auto.service.AutoService;
-import com.google.inject.Inject;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.BaseNpcEntity;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
@@ -15,7 +15,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.item.Material;
 import net.minestom.server.timer.ExecutionType;
-import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -33,13 +32,13 @@ public class MapOfTheWeekFeature implements HubFeature {
     private final NpcItemModel mapEntity = new NpcItemModel();
     private int mapEntityRotationTarget = 0;
 
-    @Inject
-    public MapOfTheWeekFeature(@NotNull ServerBridge bridge, @NotNull HubMapWorld world, @NotNull Scheduler scheduler) {
-        this.bridge = bridge;
+    @Override
+    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
+        this.bridge = server.bridge();
 
         // Timer init (the big countdown above the map)
         var timer = new CountdownTimer(world.instance());
-        scheduler.submitTask(timer, ExecutionType.TICK_START);
+        server.scheduler().submitTask(timer, ExecutionType.TICK_START);
 
         // Spinning map
         mapEntity.setHandler(this::handleMapInteract);
@@ -47,7 +46,7 @@ public class MapOfTheWeekFeature implements HubFeature {
         mapEntity.getEntityMeta().setScale(new Vec(4));
         mapEntity.setInstance(world.instance(), MAP_ENTITY_POS);
         mapEntity.setInteractionBox(6, 6, new Pos(0, -0.5, 0));
-        scheduler.submitTask(this::mapEntityUpdate, ExecutionType.TICK_START);
+        server.scheduler().submitTask(this::mapEntityUpdate, ExecutionType.TICK_START);
     }
 
     private void handleMapInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {

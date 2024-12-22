@@ -1,17 +1,15 @@
 package net.hollowcube.mapmaker.hub.feature.leaderboard;
 
 import com.google.auto.service.AutoService;
-import com.google.inject.Inject;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -26,11 +24,12 @@ public class MainLeaderboardFeature implements HubFeature {
     private Leaderboard2 parkourLeaderboard;
     private Leaderboard2 buildingLeaderboard;
 
-    @Inject
-    public MainLeaderboardFeature(@NotNull MapService mapService, @NotNull PlayerService playerService,
-                                  @NotNull HubMapWorld world, @NotNull Scheduler scheduler) {
+    @Override
+    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
         if (ServerRuntime.getRuntime().isDevelopment()) return;
 
+        var mapService = server.mapService();
+        var playerService = server.playerService();
         parkourLeaderboard = new Leaderboard2(
                 () -> mapService.getGlobalLeaderboard(MapService.LEADERBOARD_MAPS_BEATEN, null),
                 playerId -> mapService.getGlobalLeaderboard(MapService.LEADERBOARD_MAPS_BEATEN, playerId).player().score(),
@@ -57,7 +56,7 @@ public class MainLeaderboardFeature implements HubFeature {
         FutureUtil.submitVirtual(() -> parkourLeaderboard.update());
         FutureUtil.submitVirtual(() -> buildingLeaderboard.update());
 
-        scheduler.scheduleTask(this::update, SCHEDULE, SCHEDULE);
+        server.scheduler().scheduleTask(this::update, SCHEDULE, SCHEDULE);
     }
 
     // Called once every minute to update the leaderboards (tick up the time since update then update if necessary)

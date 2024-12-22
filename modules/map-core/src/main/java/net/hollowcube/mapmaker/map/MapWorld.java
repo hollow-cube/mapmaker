@@ -25,6 +25,12 @@ import java.util.function.UnaryOperator;
 public sealed interface MapWorld extends TagReadable, TagWritable permits AbstractMapWorld {
     int DATA_VERSION = HCVersions.V1_21_3_HC1;
 
+    interface Constructor<T extends AbstractMapWorld> {
+        @NotNull T create(@NotNull MapServer server, @NotNull MapData map);
+
+        @NotNull Class<T> type();
+    }
+
     @NonBlocking
     static @NotNull MapWorld forPlayer(@NotNull Player player) {
         return Objects.requireNonNull(forPlayerOptional(player));

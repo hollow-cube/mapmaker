@@ -1,15 +1,14 @@
 package net.hollowcube.mapmaker.hub.feature.misc;
 
-import com.google.inject.Inject;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.hollowcube.mapmaker.map.MapServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.item.Material;
-import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,8 +25,8 @@ public class CyberpunkTrainFeature implements HubFeature {
 
     private boolean moving = false;
 
-    @Inject
-    public CyberpunkTrainFeature(@NotNull HubMapWorld world, @NotNull Scheduler scheduler) {
+    @Override
+    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
         trainFront.setModel(Material.STICK, 7);
         trainFront.getEntityMeta().setScale(new Vec(4));
         var metaFront = trainFront.getEntityMeta();
@@ -51,7 +50,7 @@ public class CyberpunkTrainFeature implements HubFeature {
         metaBack.setTranslation(new Vec(-5, 0, -1));
         trainBack.setInstance(world.instance(), new Pos(TRAIN_START, -180 + 26f, 0));
 
-        scheduler.submitTask(this::trainUpdate);
+        server.scheduler().submitTask(this::trainUpdate);
     }
 
     private @NotNull TaskSchedule trainUpdate() {

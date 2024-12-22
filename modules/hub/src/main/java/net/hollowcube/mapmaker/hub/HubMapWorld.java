@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub;
 
-import com.google.inject.Inject;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.Uuids;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
@@ -69,6 +68,8 @@ public class HubMapWorld extends AbstractMapWorld {
     private static final Vec HUB_BB_MIN = new Vec(-250, -30, -100);
     private static final Vec HUB_BB_MAX = new Vec(60, 130, 150);
 
+    public static final Constructor<HubMapWorld> CTOR = AbstractMapWorld.ctor(HubMapWorld::new, HubMapWorld.class);
+
     private static HubMapWorld instance; // Currently just ensures there is only ever one hub per runtime.
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("hub-events", EventFilter.INSTANCE)
@@ -80,8 +81,7 @@ public class HubMapWorld extends AbstractMapWorld {
             .addListener(PlayerMoveEvent.class, this::handlePlayerMove)
             .addListener(PlayerChangeHeldSlotEvent.class, this::handleSwitchSlot);
 
-    @Inject
-    public HubMapWorld(@NotNull MapServer server) {
+    public HubMapWorld(@NotNull MapServer server, @NotNull MapData map) {
         super(server, HUB_MAP_DATA, new MapInstance(HUB_MAP_DATA.id(), false));
         Check.stateCondition(HubMapWorld.instance != null, "HubMapWorld already created");
         HubMapWorld.instance = this;
@@ -90,11 +90,11 @@ public class HubMapWorld extends AbstractMapWorld {
 
         instance().eventNode().addChild(eventNode); // Needs spectators, so register on instance.
 
-        itemRegistry().register(server().createInstance(PlayMapsItem.class));
-        itemRegistry().register(server().createInstance(CreateMapsItem.class));
-        itemRegistry().register(server().createInstance(OrgMapsItem.class));
-        itemRegistry().register(server().createInstance(OpenCosmeticsMenuItem.class));
-        itemRegistry().register(server().createInstance(OpenStoreItem.class));
+        itemRegistry().register(new PlayMapsItem(server.guiController()));
+        itemRegistry().register(new CreateMapsItem(server.guiController()));
+        itemRegistry().register(new OrgMapsItem(server.guiController()));
+        itemRegistry().register(new OpenCosmeticsMenuItem(server.guiController()));
+        itemRegistry().register(new OpenStoreItem(server.guiController()));
     }
 
     @Override

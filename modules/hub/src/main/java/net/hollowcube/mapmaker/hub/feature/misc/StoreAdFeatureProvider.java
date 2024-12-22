@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.hub.feature.misc;
 
 import com.google.auto.service.AutoService;
-import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.mapmaker.gui.store.StoreView;
@@ -9,6 +8,7 @@ import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.BaseNpcEntity;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.hollowcube.mapmaker.map.MapServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
@@ -19,7 +19,6 @@ import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.timer.ExecutionType;
-import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,14 +29,14 @@ public class StoreAdFeatureProvider implements HubFeature {
     private static final Pos GOLD_BLOCK_ENTITY_POS = new Pos(-4.5, 45, -29.5, 0, -90);
     private static final int GOLD_BLOCK_ENTITY_UPDATE_INTERVAL = 5; // Seconds
 
-    private final Controller guiController;
+    private Controller guiController;
 
     private final NpcItemModel goldBlockEntity = new NpcItemModel();
     private int goldBlockEntityRotationTarget = 0;
 
-    @Inject
-    public StoreAdFeatureProvider(@NotNull HubMapWorld world, @NotNull Scheduler scheduler, @NotNull Controller guiController) {
-        this.guiController = guiController;
+    @Override
+    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
+        this.guiController = server.guiController();
 
         var viewStoreEntity = BaseNpcEntity.createInteractionEntity(
                 3, 4, this::handleStoreClick);
@@ -47,7 +46,7 @@ public class StoreAdFeatureProvider implements HubFeature {
                 .with(ItemComponent.ENCHANTMENT_GLINT_OVERRIDE, true));
         goldBlockEntity.getEntityMeta().setScale(new Vec(1));
         goldBlockEntity.setInstance(world.instance(), GOLD_BLOCK_ENTITY_POS);
-        scheduler.submitTask(this::mapEntityUpdate, ExecutionType.TICK_START);
+        server.scheduler().submitTask(this::mapEntityUpdate, ExecutionType.TICK_START);
     }
 
     private void handleStoreClick(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {

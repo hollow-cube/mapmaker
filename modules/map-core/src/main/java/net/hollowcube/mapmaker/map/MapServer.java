@@ -13,10 +13,9 @@ import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.minestom.server.entity.Player;
+import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
 import java.util.function.Function;
 
 public interface MapServer {
@@ -37,9 +36,17 @@ public interface MapServer {
 
     @NotNull Controller guiController();
 
-    // Other
-    <T> @NotNull T createInstance(@NotNull Class<T> type);
-    <T> @NotNull T createInstance(@NotNull Class<T> type, @Nullable Map<Class<?>, Object> context);
+    @NotNull Scheduler scheduler();
+
+    /**
+     * More generic API to get facets of the server which may or may not be present in different environments.
+     *
+     * @param type The type of the facet
+     * @param <T>  facet type
+     * @return The facet
+     * @throws IllegalArgumentException if the facet is not present
+     */
+    <T> @NotNull T facet(@NotNull Class<T> type);
 
     void showView(@NotNull Player player, @NotNull Function<Context, View> viewProvider);
 

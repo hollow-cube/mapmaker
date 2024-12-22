@@ -31,10 +31,26 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiFunction;
 
 @SuppressWarnings("UnstableApiUsage")
 public non-sealed abstract class AbstractMapWorld implements MapWorld {
     private static final Logger logger = LoggerFactory.getLogger(AbstractMapWorld.class);
+
+    protected static <T extends AbstractMapWorld> @NotNull Constructor<T> ctor(@NotNull BiFunction<MapServer, MapData, T> create, @NotNull Class<T> type) {
+        return new Constructor<>() {
+            @Override
+            public @NotNull T create(@NotNull MapServer server, @NotNull MapData map) {
+                return create.apply(server, map);
+            }
+
+            @Override
+            public @NotNull Class<T> type() {
+                return type;
+            }
+        };
+    }
+
     static final Tag<MapWorld> SELF_TAG = Tag.Transient("mapworld");
 
     public static final Component CLOSED_MESSAGE = Component.translatable("map.closed");

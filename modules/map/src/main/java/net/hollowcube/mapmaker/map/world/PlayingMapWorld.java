@@ -8,7 +8,6 @@ import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartFinishedEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartSpectatorEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
-import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
@@ -74,10 +73,11 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
     private static final BadSprite FINISHED_SPRITE = BadSprite.require("hud/finished");
     private final ActionBar.Provider finishedActionBarProvider = this::buildFinishedWidget;
 
+    public static final Constructor<PlayingMapWorld> CTOR = AbstractMapWorld.ctor(PlayingMapWorld::new, PlayingMapWorld.class);
 
     @Inject
-    public PlayingMapWorld(@NotNull MapServer server, @NotNull FeatureList features, @NotNull MapData map) {
-        super(server, map, features, new MapInstance(map.createDimensionName('p'), false));
+    public PlayingMapWorld(@NotNull MapServer server, @NotNull MapData map) {
+        super(server, map, new MapInstance(map.createDimensionName('p'), false));
         instance.setGenerator(MapGenerators.voidWorld());
 
         instance.eventNode().addChild(eventNode); // Needs spectators, so register on instance.

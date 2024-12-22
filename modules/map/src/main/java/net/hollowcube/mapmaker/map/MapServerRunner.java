@@ -130,9 +130,7 @@ public class MapServerRunner extends AbstractMapServer {
         addBinding(Terraform.class, terraform);
 
         var hdb = new HeadDatabase(otel);
-        addBinding(HeadDatabase.class, hdb, "hdb");
-
-        registerCommands(this, commandManager());
+        registerCommands(this, commandManager(), hdb);
 
         initFeatureFlagMonitor(bridge(), allocator());
 
@@ -182,7 +180,7 @@ public class MapServerRunner extends AbstractMapServer {
     }
 
     // Static so it can be referenced from dev server runner
-    public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager) {
+    public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager, @NotNull HeadDatabase hdb) {
         // Register two help commands. One for terraform commands, and one for regular.
         // We test terraform commands simply by checking if they start with / (eg // commands)
         commandManager.register(new HelpCommand(
@@ -196,39 +194,39 @@ public class MapServerRunner extends AbstractMapServer {
                 entry -> entry.getKey().startsWith("/")
         ));
 
-        commandManager.register(server.createInstance(HubCommand.class));
+        commandManager.register(new HubCommand(server.bridge()));
 
-        commandManager.register(server.createInstance(TopTimesCommand.class));
+        commandManager.register(new TopTimesCommand(server.mapService(), server.playerService(), server.sessionManager()));
 
-        commandManager.register(server.createInstance(TestCommand.class));
-        commandManager.register(server.createInstance(BuilderMenuCommand.class));
-        commandManager.register(server.createInstance(SetPreciseCoordsCommand.class));
-        commandManager.register(server.createInstance(BuildCommand.class));
-        commandManager.register(server.createInstance(SetSpawnCommand.class));
+        commandManager.register(new TestCommand());
+        commandManager.register(new BuilderMenuCommand());
+        commandManager.register(new SetPreciseCoordsCommand());
+        commandManager.register(new BuildCommand());
+        commandManager.register(new SetSpawnCommand());
 
-        commandManager.register(server.createInstance(FlyCommand.class));
-        commandManager.register(server.createInstance(FlySpeedCommand.class));
-        commandManager.register(server.createInstance(ClearInventoryCommand.class));
-        commandManager.register(server.createInstance(SpawnCommand.class));
-        commandManager.register(server.createInstance(GiveCommand.class));
+        commandManager.register(new FlyCommand());
+        commandManager.register(new FlySpeedCommand());
+        commandManager.register(new ClearInventoryCommand());
+        commandManager.register(new SpawnCommand());
+        commandManager.register(new GiveCommand());
 
-        commandManager.register(server.createInstance(TeleportCommand.class));
-        commandManager.register(server.createInstance(AscendCommand.class));
-        commandManager.register(server.createInstance(DescendCommand.class));
-        commandManager.register(server.createInstance(JumpToCommand.class));
-        commandManager.register(server.createInstance(ThruCommand.class));
-        commandManager.register(server.createInstance(UpCommand.class));
+        commandManager.register(new TeleportCommand());
+        commandManager.register(new AscendCommand());
+        commandManager.register(new DescendCommand());
+        commandManager.register(new JumpToCommand());
+        commandManager.register(new ThruCommand());
+        commandManager.register(new UpCommand());
 
-        commandManager.register(server.createInstance(PHeadCommand.class));
-        commandManager.register(server.createInstance(HdbCommand.class));
+        commandManager.register(new PHeadCommand());
+        commandManager.register(new HdbCommand(hdb, server.guiController()));
 
-        commandManager.register(server.createInstance(BiomesCommand.class));
-//        commandManager.register(server.createInstance(SetBiomeCommand.class));
+        commandManager.register(new BiomesCommand());
+//        commandManager.register(new SetBiomeCommand());
 
-        commandManager.register(server.createInstance(AddMarkerCommand.class));
-        commandManager.register(server.createInstance(EntitiesCommand.class));
+        commandManager.register(new AddMarkerCommand());
+        commandManager.register(new EntitiesCommand());
 
-        commandManager.register(server.createInstance(FixTheDripleafCommand.class));
+        commandManager.register(new FixTheDripleafCommand(server.permManager()));
     }
 
     public static void initFeatureFlagMonitor(@NotNull ServerBridge bridge, @NotNull MapAllocator allocator) {
@@ -279,14 +277,14 @@ public class MapServerRunner extends AbstractMapServer {
         }
     }
 
-    protected @NotNull Class<? extends AbstractMapWorld> worldTypeFor(@NotNull MapJoinInfo joinInfo) {
+    protected @NotNull MapWorld.Constructor<? extends AbstractMapWorld> worldTypeFor(@NotNull MapJoinInfo joinInfo) {
         if (joinInfo.mapId().equals(ObungusCore.REVIEW_MAP_ID)) {
-            return ObungusBoxReviewMap.class;
+            return ObungusBoxReviewMap.CTOR;
         }
 
         return Presence.MAP_BUILDING_STATES.contains(joinInfo.state())
-                ? EditingMapWorld.class
-                : PlayingMapWorld.class;
+                ? EditingMapWorld.CTOR
+                : PlayingMapWorld.CTOR;
     }
 
     protected void handleSpawn(@NotNull PlayerSpawnEvent event) {

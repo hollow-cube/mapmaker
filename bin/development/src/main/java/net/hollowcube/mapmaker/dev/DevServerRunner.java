@@ -102,11 +102,11 @@ public class DevServerRunner extends AbstractMapServer {
     }
 
     private void performHubInit() {
-        this.hubWorld = allocator().allocateDirect(HubMapWorld.HUB_MAP_DATA, HubMapWorld.class);
+        this.hubWorld = allocator().allocateDirect(HubMapWorld.HUB_MAP_DATA, HubMapWorld.CTOR);
         addBinding(HubMapWorld.class, hubWorld, "world", "hubWorld", "hubMapWorld");
 
-        HubServerRunner.registerCommands(this, hubCommandManager);
-        HubServerRunner.loadHubFeatures(this);
+        HubServerRunner.registerCommands(this, hubCommandManager, hubWorld, MinecraftServer.getSchedulerManager());
+        HubServerRunner.loadHubFeatures(this, hubWorld);
     }
 
     private void performMapInit() {
@@ -114,9 +114,7 @@ public class DevServerRunner extends AbstractMapServer {
         addBinding(Terraform.class, terraform);
 
         var hdb = new HeadDatabase(otel);
-        addBinding(HeadDatabase.class, hdb, "hdb");
-
-        MapServerRunner.registerCommands(this, mapCommandManager);
+        MapServerRunner.registerCommands(this, mapCommandManager, hdb);
 
         MapServerRunner.initFeatureFlagMonitor(bridge(), allocator());
 

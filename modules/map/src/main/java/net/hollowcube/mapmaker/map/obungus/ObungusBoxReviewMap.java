@@ -2,12 +2,8 @@ package net.hollowcube.mapmaker.map.obungus;
 
 import com.google.inject.Inject;
 import net.hollowcube.common.math.Quaternion;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapServer;
-import net.hollowcube.mapmaker.map.SaveState;
-import net.hollowcube.mapmaker.map.SaveStateType;
+import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.block.handler.StructureBlockHandler;
-import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.obungus.ObungusCore;
@@ -30,17 +26,14 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class ObungusBoxReviewMap extends PlayingMapWorld {
+    public static final Constructor<ObungusBoxReviewMap> CTOR = AbstractMapWorld.ctor(ObungusBoxReviewMap::new, ObungusBoxReviewMap.class);
+
     private final ObungusService obungusService;
 
     @Inject
-    public ObungusBoxReviewMap(
-            @NotNull MapServer server,
-            @NotNull FeatureList features,
-            @NotNull MapData map,
-            @NotNull ObungusService obungusService
-    ) {
-        super(server, features, map);
-        this.obungusService = obungusService;
+    public ObungusBoxReviewMap(@NotNull MapServer server, @NotNull MapData map) {
+        super(server, map);
+        this.obungusService = server.facet(ObungusService.class);
     }
 
     @Override

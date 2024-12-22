@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.hub.feature.misc;
 
 import com.google.auto.service.AutoService;
-import com.google.inject.Inject;
 import net.hollowcube.common.physics.BoundingBox;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.hollowcube.mapmaker.map.MapServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
@@ -13,7 +13,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.play.ChangeGameStatePacket;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,17 +42,17 @@ public class CyberpunkRainFeature implements HubFeature {
             new Vec(-109, 94, -63)
     );
 
-    private final Instance instance;
+    private Instance instance;
     private final Set<Player> rainyPlayers = new HashSet<>();
 
     private Entity lightningEntity = null;
 
-    @Inject
-    public CyberpunkRainFeature(@NotNull HubMapWorld world, @NotNull Scheduler scheduler) {
+    @Override
+    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
         this.instance = world.instance();
 
-        scheduler.submitTask(this::updateCollision);
-        scheduler.submitTask(this::lightningTask);
+        server.scheduler().submitTask(this::updateCollision);
+        server.scheduler().submitTask(this::lightningTask);
     }
 
     private @NotNull TaskSchedule lightningTask() {

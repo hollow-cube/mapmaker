@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.hub.feature.misc;
 
 import com.google.auto.service.AutoService;
-import com.google.inject.Inject;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.mapmaker.gui.play.PlayMapsView;
 import net.hollowcube.mapmaker.gui.play.QueryMapsView;
@@ -11,6 +10,7 @@ import net.hollowcube.mapmaker.hub.entity.util.InteractionEntity;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
 import net.hollowcube.mapmaker.hub.util.ScreenCursorIcon;
+import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.color.Color;
@@ -26,7 +26,6 @@ import net.minestom.server.item.Material;
 import net.minestom.server.item.component.DyedItemColor;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.timer.ExecutionType;
-import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,14 +44,14 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
     private static final double BASE_OFFSET = 1.8;
     private static final int ENTITY_UPDATE_INTERVAL = 5; // Seconds
 
-    private final Controller guiController;
+    private Controller guiController;
 
     private final NpcItemModel[] edgeEntities = new NpcItemModel[5];
     private int entityHeightTarget = 0;
 
-    @Inject
-    public PlayMapStatueFeatureProvider(@NotNull HubMapWorld world, @NotNull Scheduler scheduler, @NotNull Controller guiController) {
-        this.guiController = guiController;
+    @Override
+    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
+        this.guiController = server.guiController();
 
         edgeEntities[0] = new NpcItemModel();
         edgeEntities[0].setModel(Material.DIAMOND, BadSprite.require("icon/map/create_map").cmd());
@@ -91,7 +90,7 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
             meta.setBillboardRenderConstraints(AbstractDisplayMeta.BillboardConstraints.VERTICAL);
         }
 
-        scheduler.submitTask(this::entityUpdate, ExecutionType.TICK_START);
+        server.scheduler().submitTask(this::entityUpdate, ExecutionType.TICK_START);
     }
 
     private void handleCreateMapsClick(@NotNull Player player) {

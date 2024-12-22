@@ -33,7 +33,7 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
     private final EditingMapWorld parent;
 
     public TestingMapWorld(@NotNull EditingMapWorld parent) {
-        super(parent.server(), parent.map(), parent.features(), (MapInstance) parent.instance());
+        super(parent.server(), parent.map(), (MapInstance) parent.instance());
         this.parent = parent;
     }
 

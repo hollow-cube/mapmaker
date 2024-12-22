@@ -21,7 +21,6 @@ import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.common.util.Injectors;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
@@ -56,7 +55,6 @@ import net.hollowcube.mapmaker.map.entity.MapEntities;
 import net.hollowcube.mapmaker.map.object.ObjectTypes;
 import net.hollowcube.mapmaker.map.util.AnonHealthCheck;
 import net.hollowcube.mapmaker.map.util.DynamicController;
-import net.hollowcube.mapmaker.map.util.DynamicInjector;
 import net.hollowcube.mapmaker.map.util.MapPlayerImpl;
 import net.hollowcube.mapmaker.map.util.datafix.HCTypeRegistry;
 import net.hollowcube.mapmaker.metrics.MetricWriter;
@@ -94,12 +92,14 @@ import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.client.play.ClientUpdateSignPacket;
 import net.minestom.server.network.packet.server.common.ServerLinksPacket;
+import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -129,6 +129,7 @@ public abstract class AbstractMapServer implements MapServer {
     // Listeners for other features
     private MapAllocator allocator;
     private ServerBridge bridge;
+    private FriendlyProducer producer;
 
     private SessionManager sessionManager;
     private ChatMessageListener chatMessageListener;
@@ -139,7 +140,7 @@ public abstract class AbstractMapServer implements MapServer {
     private final CommandManager commandManager = new CommandManagerImpl();
 
     private DynamicController guiController = new DynamicController();
-    private DynamicInjector injector = new DynamicInjector();
+    private Map<Class<?>, Object> facets = new HashMap<>(); // Not concurrent, not editable after start.
 
     private volatile boolean isReady = false; // Corresponds to the associated health check
     private final Shutdowner shutdowner = new Shutdowner(this::awaitQuiescence);
@@ -187,7 +188,7 @@ public abstract class AbstractMapServer implements MapServer {
         }
 
         var obungusService = new ObungusServiceImpl(otel, "http://localhost:9125");
-        injector.bind(ObungusService.class, obungusService);
+        addBinding(ObungusService.class, obungusService, "obungus", "obungusService");
 
         ShopUpgradeCache.init(permManager);
     }
@@ -201,6 +202,11 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     protected abstract @NotNull String name();
+
+    @Override
+    public <T> @NotNull T facet(@NotNull Class<T> type) {
+        return type.cast(facets.get(type));
+    }
 
     @Blocking
     public final void start() {
@@ -257,8 +263,8 @@ public abstract class AbstractMapServer implements MapServer {
             this.inviteService = new PlayerInviteServiceImpl("http://localhost:9127", playerService, mapService, sessionManager, bridge, permManager); // tilt
 
         // Create one producer to reuse.
-        var producer = new FriendlyProducer(kafkaConfig.bootstrapServers());
-        injector.bind(FriendlyProducer.class, producer);
+        producer = new FriendlyProducer(kafkaConfig.bootstrapServers());
+        facets.put(FriendlyProducer.class, producer);
         shutdowner.queue("kafka-producer", producer::close);
 
         if (!globalConfig.noop()) {
@@ -272,7 +278,7 @@ public abstract class AbstractMapServer implements MapServer {
             shutdowner.queue("punishment-listener", punishmentCreatedListener::close);
 
             chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, kafkaConfig.bootstrapServers(), producer);
-            injector.bind(ChatMessageListener.class, chatMessageListener);
+            facets.put(ChatMessageListener.class, chatMessageListener);
             shutdowner.queue("chat-message-listener", chatMessageListener::close);
             packetListenerManager.setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
 
@@ -282,10 +288,13 @@ public abstract class AbstractMapServer implements MapServer {
 
         ChatAnnouncer.setupAnnouncements(config, sessionManager(), shutdowner);
 
-        injector.bind(Controller.class, guiController);
+        facets.put(Controller.class, guiController);
         prepareStart();
 
         var ignored = ObjectTypes.CHECKPOINT_PLATE; // Will fix when reworking ram usage
+
+        // Copy the facets map to prevent modification
+        facets = Map.copyOf(facets);
 
         // Finally, mark the service as ready for Kubernetes
         isReady = true;
@@ -350,6 +359,11 @@ public abstract class AbstractMapServer implements MapServer {
         return guiController;
     }
 
+    @Override
+    public @NotNull Scheduler scheduler() {
+        return MinecraftServer.getSchedulerManager();
+    }
+
     protected abstract @NotNull MapAllocator createAllocator();
     protected abstract @NotNull ServerBridge createBridge();
 
@@ -383,45 +397,55 @@ public abstract class AbstractMapServer implements MapServer {
 
         boolean fullInstance = !globalConfig.noop();
 
-        commandManager.register(createInstance(MinestomCommand.class));
-        commandManager.register(createInstance(EmojisCommand.class));
-        if (fullInstance) commandManager.register(createInstance(CosmeticsCommand.class));
-        if (fullInstance) commandManager.register(createInstance(RulesCommand.class));
+        commandManager.register(new MinestomCommand());
+        commandManager.register(new EmojisCommand());
+        if (fullInstance) commandManager.register(new CosmeticsCommand(guiController()));
+        if (fullInstance) commandManager.register(new RulesCommand());
         commandManager.register(createDebugCommand());
-        if (fullInstance) commandManager.register(createInstance(StoreCommand.class));
-        if (fullInstance) commandManager.register(createInstance(HypercubeCommand.class));
-        commandManager.register(createInstance(DiscordCommand.class));
-        if (fullInstance) commandManager.register(createInstance(LinkCommand.class));
-        commandManager.register(createInstance(NoobCommand.class));
-        commandManager.register(createInstance(HideCommand.class));
+        if (fullInstance) commandManager.register(new StoreCommand(guiController()));
+        if (fullInstance) commandManager.register(new HypercubeCommand(playerService(), guiController()));
+        commandManager.register(new DiscordCommand());
+        if (fullInstance) commandManager.register(new LinkCommand(playerService()));
+        commandManager.register(new NoobCommand(permManager()));
+        commandManager.register(new HideCommand(playerService()));
 
-        if (fullInstance) commandManager.register(createInstance(PlayCommand.class));
-        if (fullInstance) commandManager.register(createInstance(WhereCommand.class));
-        if (fullInstance) commandManager.register(createInstance(ListCommand.class));
-        if (fullInstance) commandManager.register(createInstance(MsgCommand.class));
-        if (fullInstance) commandManager.register(createInstance(ReplyCommand.class));
+        if (fullInstance) {
+            commandManager.register(new PlayCommand(mapService(), sessionManager(), bridge()));
+            commandManager.register(new WhereCommand(sessionManager(), playerService(), mapService(), permManager()));
+            commandManager.register(new ListCommand(sessionManager(), playerService()));
+            commandManager.register(new MsgCommand(sessionManager(), mapService(), chatMessageListener));
+            commandManager.register(new ReplyCommand(sessionManager(), mapService(), chatMessageListener));
+        }
 
-        if (fullInstance) commandManager.register(createInstance(RequestCommand.class));
-        if (fullInstance) commandManager.register(createInstance(RejectCommand.class));
-        if (fullInstance) commandManager.register(createInstance(InviteCommand.class));
-        if (fullInstance) commandManager.register(createInstance(AcceptCommand.class));
-        if (fullInstance) commandManager.register(createInstance(JoinCommand.class));
+        if (fullInstance) {
+            commandManager.register(new RequestCommand(inviteService(), playerService(), sessionManager()));
+            commandManager.register(new RejectCommand(inviteService(), playerService(), sessionManager()));
+            commandManager.register(new InviteCommand(inviteService(), playerService(), sessionManager()));
+            commandManager.register(new AcceptCommand(inviteService(), playerService(), sessionManager()));
+            commandManager.register(new JoinCommand(inviteService(), playerService(), sessionManager()));
+        }
 
-        commandManager.register(createInstance(MapCommand.class));
+        commandManager.register(new MapCommand(guiController(), playerService(), mapService(), permManager(), bridge(), producer));
 
-        if (fullInstance) commandManager.register(createInstance(SFindCommand.class));
-        if (fullInstance) commandManager.register(createInstance(VanishCommand.class));
-        if (fullInstance) commandManager.register(createInstance(UnvanishCommand.class));
+        if (fullInstance) {
+            commandManager.register(new SFindCommand(mapService(), playerService(), sessionManager(), permManager()));
+            commandManager.register(new VanishCommand(sessionManager(), playerService(), permManager()));
+            commandManager.register(new UnvanishCommand(sessionManager(), playerService(), permManager()));
+        }
 
-        if (fullInstance) commandManager.register(createInstance(PHelpCommand.class));
-        if (fullInstance) commandManager.register(createInstance(PStatusCommand.class));
-        if (fullInstance) commandManager.register(createInstance(PHistoryCommand.class));
+        if (fullInstance) {
+            commandManager.register(new PHelpCommand(punishmentService(), permManager()));
+            commandManager.register(new PStatusCommand(playerService(), punishmentService(), permManager()));
+            commandManager.register(new PHistoryCommand(playerService(), punishmentService(), permManager()));
+        }
 
-        if (fullInstance) FutureUtil.submitVirtual(() -> commandManager.register(createInstance(BanCommand.class)));
-        if (fullInstance) commandManager.register(createInstance(UnbanCommand.class));
-        if (fullInstance) FutureUtil.submitVirtual(() -> commandManager.register(createInstance(MuteCommand.class)));
-        if (fullInstance) commandManager.register(createInstance(UnmuteCommand.class));
-        if (fullInstance) commandManager.register(createInstance(KickCommand.class));
+        if (fullInstance) {
+            FutureUtil.submitVirtual(() -> commandManager.register(new BanCommand(punishmentService(), playerService(), permManager())));
+            commandManager.register(new UnbanCommand(punishmentService(), playerService(), permManager()));
+            FutureUtil.submitVirtual(() -> commandManager.register(new MuteCommand(punishmentService(), playerService(), permManager())));
+            commandManager.register(new UnmuteCommand(punishmentService(), playerService(), permManager()));
+            commandManager.register(new KickCommand(punishmentService(), sessionManager(), permManager()));
+        }
     }
 
     public @NotNull List<HttpServerWrapper.HealthCheck> healthChecks() {
@@ -442,32 +466,17 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     protected <T> void addBinding(@Nullable Class<T> type, @NotNull T instance, @NotNull String... names) {
+        if (!type.isAssignableFrom(instance.getClass())) {
+            throw new IllegalArgumentException("Instance " + instance + " is not of type " + type);
+        }
+
         if (type != null) {
-            injector.bind(type, instance);
+            facets.put(type, instance);
             guiController.addBinding(type.getSimpleName().toLowerCase(Locale.ROOT), instance);
         }
 
         for (var name : names) {
             guiController.addBinding(name, instance);
-        }
-    }
-
-    @Override
-    public <T> @NotNull T createInstance(@NotNull Class<T> type) {
-        return createInstance(type, null);
-    }
-
-    @Override
-    public <T> @NotNull T createInstance(@NotNull Class<T> type, @Nullable Map<Class<?>, Object> context) {
-        try {
-            var injector = this.injector.injector();
-            if (context != null && !context.isEmpty()) {
-                injector = Injectors.child(injector, context);
-            }
-
-            return injector.getInstance(type);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create instance of " + type, e);
         }
     }
 
@@ -533,7 +542,7 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     protected @NotNull DebugCommand createDebugCommand() {
-        return createInstance(DebugCommand.class);
+        return new DebugCommand(playerService(), permManager(), mapService(), allocator());
     }
 
     public void handleUncaughtException(@NotNull Throwable t) {

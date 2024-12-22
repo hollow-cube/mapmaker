@@ -40,9 +40,9 @@ public class DevServerBridge implements ServerBridge {
 
         var playerId = PlayerDataV2.fromPlayer(player).id();
         var map = mapService.getMap(playerId, mapId);
-        Class<? extends AbstractMapWorld> worldType = switch (joinMapState) {
-            case PLAYING, SPECTATING -> PlayingMapWorld.class;
-            case EDITING -> EditingMapWorld.class;
+        MapWorld.Constructor<? extends AbstractMapWorld> worldType = switch (joinMapState) {
+            case PLAYING, SPECTATING -> PlayingMapWorld.CTOR;
+            case EDITING -> EditingMapWorld.CTOR;
         };
         var worldFuture = allocator.create(map, worldType);
 

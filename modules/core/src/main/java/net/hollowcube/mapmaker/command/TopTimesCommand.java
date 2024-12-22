@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command;
 
-import com.google.inject.Inject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -23,7 +22,6 @@ public class TopTimesCommand extends CommandDsl {
     private final PlayerService playerService;
     private final SessionManager sessionManager;
 
-    @Inject
     public TopTimesCommand(@NotNull MapService mapService, @NotNull PlayerService playerService, @NotNull SessionManager sessionManager) {
         super("toptimes", "tt");
         this.mapService = mapService;

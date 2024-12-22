@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.hub.feature.misc;
 
 import com.google.auto.service.AutoService;
-import com.google.inject.Inject;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.hollowcube.mapmaker.map.MapServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
@@ -21,7 +21,6 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.monitoring.BenchmarkManager;
 import net.minestom.server.monitoring.TickMonitor;
 import net.minestom.server.timer.ExecutionType;
-import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.MathUtils;
 import org.jetbrains.annotations.NotNull;
@@ -44,8 +43,8 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
     private BlockDisplayMeta tickTimeBar;
     private BlockDisplayMeta memoryUsageBar;
 
-    @Inject
-    public CyberpunkStatDisplayFeature(@NotNull HubMapWorld world, @NotNull Scheduler scheduler) {
+    @Override
+    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
         EVENT_HANDLER.addListener(ServerTickMonitorEvent.class, event -> LAST_TICK.set(event.getTickMonitor()));
 
         // Nice positions for toying locally
@@ -81,7 +80,7 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
         rightText.setAlignRight(true);
 
         // Start the task
-        scheduler.submitTask(this::handleDisplayUpdate, ExecutionType.TICK_START);
+        server.scheduler().submitTask(this::handleDisplayUpdate, ExecutionType.TICK_START);
     }
 
     public TaskSchedule handleDisplayUpdate() {

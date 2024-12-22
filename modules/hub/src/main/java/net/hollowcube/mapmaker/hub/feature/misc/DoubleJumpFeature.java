@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.hub.feature.misc;
 
 import com.google.auto.service.AutoService;
-import com.google.inject.Inject;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.hollowcube.mapmaker.map.MapServer;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.PlayerMoveEvent;
@@ -19,8 +19,8 @@ public class DoubleJumpFeature implements HubFeature {
     public static final Tag<Boolean> TAG = net.minestom.server.tag.Tag.Boolean("mapmaker:hub-double-jump").defaultValue(true);
     private static final Tag<Boolean> COOLDOWN_TAG = Tag.Boolean("mapmaker:hub-double-jump-cooldown");
 
-    @Inject
-    public DoubleJumpFeature(@NotNull HubMapWorld world) {
+    @Override
+    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
         world.eventNode().addListener(PlayerStartFlyingEvent.class, this::handleStartFlying)
                 .addListener(PlayerMoveEvent.class, this::handleMovement);
     }

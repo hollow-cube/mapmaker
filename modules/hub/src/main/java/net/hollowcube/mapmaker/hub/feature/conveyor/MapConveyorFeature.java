@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub.feature.conveyor;
 
-import com.google.inject.Inject;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.anim.AnimationEntity;
@@ -8,6 +7,7 @@ import net.hollowcube.mapmaker.hub.anim.Channel;
 import net.hollowcube.mapmaker.hub.anim.ChannelImpl;
 import net.hollowcube.mapmaker.hub.anim.Keyframe;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.format.TextColor;
@@ -28,7 +28,6 @@ import net.minestom.server.network.packet.server.ServerPacket;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.sound.SoundEvent;
-import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
@@ -325,10 +324,10 @@ public class MapConveyorFeature implements HubFeature {
 
     private final List<Entity> theEntities = new ArrayList<>();
 
-    @Inject
-    public MapConveyorFeature(@NotNull HubMapWorld world, @NotNull Scheduler scheduler) {
+    @Override
+    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
         this.world = world;
-        scheduler.submitTask(() -> {
+        server.scheduler().submitTask(() -> {
             if (spawnIndex++ % 2 == 0) {
                 spawnEntity(world, LEFT_COMPLEX_MAP, MAP_SPRITES, true);
             } else {
