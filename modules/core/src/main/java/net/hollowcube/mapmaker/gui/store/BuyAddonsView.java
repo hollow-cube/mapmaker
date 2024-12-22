@@ -10,6 +10,7 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
+import net.hollowcube.mapmaker.gui.common.ConfirmAction;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -139,8 +140,15 @@ public class BuyAddonsView extends View {
             return;
         }
 
-        //todo this should have a confirm gui, maybe with some extra details
+        pushView(context -> new ConfirmAction(context, () -> tryUpgradePurchase(upgrade),
+                Component.translatable("purchase this upgrade for " + upgrade.cubits() + " Cubits")));
+
+    }
+
+    private void tryUpgradePurchase(@NotNull ShopUpgrade upgrade) {
         try {
+            var playerData = PlayerDataV2.fromPlayer(player);
+
             var meta = new JsonObject();
             meta.addProperty("source", "ingame/store");
             playerService.buyUpgrade(playerData.id(), upgrade.name().toLowerCase(Locale.ROOT), upgrade.cubits(), meta);
