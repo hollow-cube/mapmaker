@@ -1,9 +1,6 @@
 package net.hollowcube.mapmaker.map.hdb.gui;
 
-import net.hollowcube.canvas.Element;
-import net.hollowcube.canvas.Label;
-import net.hollowcube.canvas.Pagination;
-import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.*;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
@@ -25,6 +22,7 @@ public class HdbSearchView extends View {
     private @ContextObject HeadDatabase hdb;
     private @ContextObject Scheduler scheduler;
 
+    private @Outlet("title") Text titleText;
     private @Outlet("input") Label inputField;
     private @Outlet("page") Pagination pagination;
 
@@ -39,6 +37,7 @@ public class HdbSearchView extends View {
         super(context);
         this.input = input;
 
+        titleText.setText("Search Heads");
         inputField.setArgs(Component.text(input));
     }
 

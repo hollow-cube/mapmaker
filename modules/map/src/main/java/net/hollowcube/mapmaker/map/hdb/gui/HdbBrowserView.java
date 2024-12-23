@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.hdb.gui;
 
 import net.hollowcube.canvas.Pagination;
+import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
@@ -9,11 +10,14 @@ import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
 import net.hollowcube.mapmaker.map.hdb.HeadInfo;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class HdbBrowserView extends View {
     private static final String DEFAULT_CATEGORY = "alphabet";
@@ -22,13 +26,25 @@ public class HdbBrowserView extends View {
 
     private @ContextObject HeadDatabase hdb;
 
+    private @Outlet("title") Text titleText;
     private @Outlet("heads") Pagination headsPagination;
+    private @Outlet("hdb_browser_title") Text hdbBrowserTitle; //TODO make these match the translation keys without creating aids
 
     private String category;
     private String subCategory; // Only used for alphabet
 
     public HdbBrowserView(@NotNull Context context) {
         this(context, DEFAULT_CATEGORY);
+        titleText.setText("Head Database");
+
+        hdbBrowserTitle.setText(formatCategoryName(category));
+        hdbBrowserTitle.setArgs(Component.text(formatCategoryName(category)));
+    }
+
+    private String formatCategoryName(String category) {
+        return Arrays.stream(category.replace("-", " & ").split(" "))
+                .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1))
+                .collect(Collectors.joining(" "));
     }
 
     public HdbBrowserView(@NotNull Context context, @NotNull String category) {
@@ -87,12 +103,31 @@ public class HdbBrowserView extends View {
         headsPagination.nextPage();
     }
 
-    @Action("categories")
-    private void createCategoryList(@NotNull Pagination.PageRequest<CategoryIconView> request) {
+    @Action("categories_row_1")
+    private void createCategoryList1(@NotNull Pagination.PageRequest<CategoryIconView> request) {
         var result = new ArrayList<CategoryIconView>();
-        for (var category : hdb.categories())
-            result.add(new CategoryIconView(request.context(), hdb, category));
+        var categories = new ArrayList<>(hdb.categories());
+        int limit = Math.min(categories.size(), 7);  // limit to 7 categories for the 1st row
+        for (int i = 0; i < limit; i++) {
+            result.add(new CategoryIconView(request.context(), hdb, categories.get(i)));
+        }
         request.respond(result, false);
+    }
+
+    @Action("categories_row_2")
+    private void createCategoryList2(@NotNull Pagination.PageRequest<CategoryIconView2> request) {
+        var result = new ArrayList<CategoryIconView2>();
+        var categories = new ArrayList<>(hdb.categories());
+        int start = Math.max(0, categories.size() - 3); //get the last 3 categories and limit it to that for the 2nd row
+        for (int i = start; i < categories.size(); i++) {
+            result.add(new CategoryIconView2(request.context(), hdb, categories.get(i)));
+        }
+        request.respond(result, false);
+    }
+
+    @Action("hdb_browser_search")
+    private void openSearchMenu() {
+        pushView(context -> new HdbSearchView(context, "")); //TODO make the back button work in this UI
     }
 
     @Signal(CategoryIconView.SIG_SELECTED)
@@ -105,6 +140,8 @@ public class HdbBrowserView extends View {
             this.category = newCategory;
             this.subCategory = null;
         }
+        hdbBrowserTitle.setText(formatCategoryName(category));
+        hdbBrowserTitle.setArgs(Component.text(formatCategoryName(category)));
         this.headsPagination.reset();
     }
 }
