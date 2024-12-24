@@ -1,0 +1,14 @@
+java_library(
+    name = "ni-helper",
+    srcs = glob(include = [
+        "src/main/java/**/*.java",
+    ]),
+    resources = glob(include = [
+        "src/main/resources/**/*",
+    ]),
+    deps = [
+        "@maven//:org_graalvm_sdk_nativeimage",
+        "@maven//:io_github_classgraph_classgraph",
+    ],
+    visibility = ["//visibility:public"],
+)

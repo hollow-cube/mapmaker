@@ -22,7 +22,8 @@
     "bootstrap_servers": "localhost:9093"
   },
   "tracing": {
-    "otlp_endpoint": ""
+    "otlp_endpoint": "",
+    "noop": false
   },
   "unleash": {
     "enabled": false,

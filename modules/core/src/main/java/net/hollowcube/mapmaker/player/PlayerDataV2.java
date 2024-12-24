@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.player;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
+import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.kyori.adventure.text.Component;
@@ -17,6 +18,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+@RuntimeGson
 public class PlayerDataV2 {
     public static final Tag<PlayerDataV2> TAG = Tag.Transient("mapmaker:player_data");
 

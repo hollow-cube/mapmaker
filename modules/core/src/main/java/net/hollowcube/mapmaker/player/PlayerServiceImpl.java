@@ -133,7 +133,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
             var res = doRequest("getPlayerDisplayName2", req, HttpResponse.BodyHandlers.ofString());
             return switch (res.statusCode()) {
                 case 200 -> GSON.fromJson(res.body(), DisplayName.class);
-                case 404 -> new DisplayName(List.of());
+                case 404 -> new DisplayName(List.of(new DisplayName.Part("username", "!error!", null)));
                 default ->
                         throw new SessionService.InternalError("Failed to get player display name (" + res.statusCode() + "): " + res.body());
             };

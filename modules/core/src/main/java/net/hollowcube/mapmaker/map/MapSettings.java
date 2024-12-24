@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map;
 
 import com.google.gson.JsonObject;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.map.setting.TimeOfDay;
 import net.hollowcube.mapmaker.map.setting.WeatherType;
@@ -19,6 +20,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@RuntimeGson
 public class MapSettings {
     public static final MapSetting<Boolean> ONLY_SPRINT = MapSetting.Embedded("only_sprint", MapSettings::isOnlySprint, MapUpdateRequest::setOnlySprint);
     public static final MapSetting<Boolean> NO_SPRINT = MapSetting.Embedded("no_sprint", MapSettings::isNoSprint, MapUpdateRequest::setNoSprint);
