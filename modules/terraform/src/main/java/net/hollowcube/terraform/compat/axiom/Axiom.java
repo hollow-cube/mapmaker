@@ -94,7 +94,7 @@ public class Axiom {
     }
 
     static final Tag<Boolean> ENABLED_TAG = Tag.Boolean("terraform:axiom/enabled");
-    public static final Tag<ClientInfo> CLIENT_INFO_TAG = Tag.Structure("terraform:axiom/client_info", ClientInfo.class);
+    public static final Tag<ClientInfo> CLIENT_INFO_TAG = Tag.Transient("terraform:axiom/client_info");
 
     public static @NotNull PluginMessagePacket writePacket(@NotNull AxiomServerPacket packet) {
         final AxiomPacketRegistry.PacketInfo<AxiomServerPacket> spec = SERVER_PACKETS.packetInfo(packet.getClass());

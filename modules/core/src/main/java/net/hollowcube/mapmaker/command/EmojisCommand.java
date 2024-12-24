@@ -23,7 +23,7 @@ public class EmojisCommand extends CommandDsl {
 
         this.emojiList = buildMessage();
 
-        addSyntax((sender, _) -> sender.sendMessage(emojiList));
+        addSyntax((sender, ignored) -> sender.sendMessage(emojiList));
     }
 
     private static @NotNull Component buildMessage() {

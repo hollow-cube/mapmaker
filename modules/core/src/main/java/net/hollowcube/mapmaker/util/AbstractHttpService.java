@@ -49,6 +49,7 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(SaveStateType.class, new EnumTypeAdapter<>(SaveStateType.class))
             .registerTypeAdapter(BackpackItem.class, new EnumTypeAdapter<>(BackpackItem.class))
             .registerTypeAdapter(RewardType.class, new EnumTypeAdapter<>(RewardType.class))
+            .registerTypeAdapter(MapTags.Tag.class, new EnumTypeAdapter<>(MapTags.Tag.class))
             .registerTypeAdapter(MapVerification.class, new EnumOrdinalTypeAdapter<>(MapVerification.class))
             .registerTypeAdapter(MapSize.class, new EnumOrdinalTypeAdapter<>(MapSize.class))
             .registerTypeAdapter(PersonalizedMapData.Progress.class, new EnumOrdinalTypeAdapter<>(PersonalizedMapData.Progress.class))

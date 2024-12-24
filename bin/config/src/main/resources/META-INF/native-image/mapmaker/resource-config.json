@@ -1,0 +1,48 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "pattern": "\\QMETA-INF/services/net.hollowcube.common.ServerRuntime\\E"
+      }, {
+        "pattern": "\\QMETA-INF/services/net.hollowcube.mapmaker.hub.feature.HubFeature\\E"
+      }, {
+        "pattern": "\\QMETA-INF/services/net.hollowcube.mapmaker.map.feature.FeatureProvider\\E"
+      }, {
+        "pattern": "\\QMETA-INF/services/net.hollowcube.mapmaker.map.util.datafix.versions.DataFix\\E"
+      }, {
+        "pattern": "\\QMETA-INF/services/net.hollowcube.terraform.tool.BuiltinTool\\E"
+      }, {
+        "pattern": "\\Qdefault_config.json\\E"
+      }, {
+        "pattern": "\\Qen_US.json\\E"
+      }, {
+        "pattern": "\\Qlegacy_ids.json\\E"
+      }, {
+        "pattern": "\\Qmotw/motw_num_0.schem\\E"
+      }, {
+        "pattern": "\\Qmotw/motw_num_1.schem\\E"
+      }, {
+        "pattern": "\\Qmotw/motw_num_2.schem\\E"
+      }, {
+        "pattern": "\\Qmotw/motw_num_3.schem\\E"
+      }, {
+        "pattern": "\\Qmotw/motw_num_4.schem\\E"
+      }, {
+        "pattern": "\\Qmotw/motw_num_5.schem\\E"
+      }, {
+        "pattern": "\\Qmotw/motw_num_6.schem\\E"
+      }, {
+        "pattern": "\\Qmotw/motw_num_7.schem\\E"
+      }, {
+        "pattern": "\\Qmotw/motw_num_8.schem\\E"
+      }, {
+        "pattern": "\\Qmotw/motw_num_9.schem\\E"
+      }, {
+        "pattern": "\\Qspawn/hcspawn.polar\\E"
+      }, {
+        "pattern": "\\Qsprites.json\\E"
+      }
+    ]
+  },
+  "bundles": []
+}

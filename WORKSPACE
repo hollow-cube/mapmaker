@@ -38,6 +38,30 @@ load("//third_party/rules_jmh:defs.bzl", "rules_jmh_maven_deps")
 
 rules_jmh_maven_deps()
 
+http_archive(
+    name = "rules_graalvm",
+    sha256 = "8faf2e1db03e8e370b67007197029a3b407306201dd83d20ca5a3e760a56288d",
+    strip_prefix = "rules_graalvm-2c87605c9d65679f48d5b88082c6ccbd4785daf0",
+    urls = [
+        "https://github.com/sgammon/rules_graalvm/archive/2c87605c9d65679f48d5b88082c6ccbd4785daf0.zip",
+    ],
+)
+
+load("@rules_graalvm//graalvm:repositories.bzl", "graalvm_repository")
+
+graalvm_repository(
+    name = "graalvm",
+    distribution = "oracle",  # `oracle`, `ce`, or `community`
+    java_version = "21",  # `17`, `20`, `22`, `23`, etc.
+    version = "21.0.0",  # pass graalvm or specific jdk version supported by gvm
+)
+
+load("@rules_graalvm//graalvm:workspace.bzl", "register_graalvm_toolchains", "rules_graalvm_repositories")
+
+rules_graalvm_repositories()
+
+register_graalvm_toolchains()
+
 load("@rules_jvm_external//:defs.bzl", "maven_install")
 load("@rules_jvm_external//:specs.bzl", "maven")
 
@@ -49,7 +73,7 @@ maven_install(
         "com.google.auto.service:auto-service-annotations:1.1.1",
 
         # Minestom
-        "net.minestom:minestom-snapshots:c976f345d1",
+        "net.minestom:minestom-snapshots:dev",  # c976f345d1
         "dev.hollowcube:polar:1.12.1",
         "dev.hollowcube:dataconverter:1.21.3-rv1",
         "dev.hollowcube:mql:1.1.0",
@@ -89,6 +113,8 @@ maven_install(
         "io.opentelemetry:opentelemetry-exporter-otlp:1.45.0",
         "io.opentelemetry:opentelemetry-exporter-sender-jdk:1.45.0",
         "io.opentelemetry.semconv:opentelemetry-semconv:1.28.0-alpha",
+        "org.graalvm.sdk:nativeimage:24.1.1",
+        "io.github.classgraph:classgraph:4.8.179",
 
         # Testing
         "org.junit.jupiter:junit-jupiter-api:5.10.0",
@@ -111,7 +137,7 @@ maven_install(
     fetch_javadoc = True,
     fetch_sources = True,
     repositories = [
-        #         "m2Local",
+        "m2Local",
         "https://repo1.maven.org/maven2",
         "https://jitpack.io",
         "https://repo.papermc.io/repository/maven-public/",

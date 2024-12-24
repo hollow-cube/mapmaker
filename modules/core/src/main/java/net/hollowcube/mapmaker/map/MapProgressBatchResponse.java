@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.common.util.RuntimeGson;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@RuntimeGson
 public final class MapProgressBatchResponse {
     private List<Entry> progress = new ArrayList<>();
     private transient Map<String, PersonalizedMapData.Progress> progressByMap;

@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
 import net.hollowcube.mapmaker.hub.item.*;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.instance.EmptyChunk;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.polar.PolarDataFixer;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
@@ -132,7 +133,8 @@ public class HubMapWorld extends AbstractMapWorld {
                 PolarDataFixer.INSTANCE,
                 new ReadWorldAccess(this, new HubMarkerLoader()),
                 false
-        );
+        ).join();
+        instance().setChunkSupplier(EmptyChunk::new);
     }
 
     @Override

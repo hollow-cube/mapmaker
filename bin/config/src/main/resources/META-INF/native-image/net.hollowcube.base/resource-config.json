@@ -1,0 +1,51 @@
+{
+  "resources":{
+  "includes":[{
+    "pattern":"\\QMETA-INF/services/ca.spottedleaf.dataconverter.util.ExternalDataProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/ch.qos.logback.classic.spi.Configurator\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.sun.net.httpserver.spi.HttpServerProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.opentelemetry.context.ContextStorageProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.net.spi.InetAddressResolverProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.net.spi.URLStreamHandlerProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.nio.channels.spi.SelectorProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.time.zone.ZoneRulesProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/javax.xml.parsers.SAXParserFactory\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/net.kyori.adventure.text.logger.slf4j.ComponentLoggerProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/net.kyori.adventure.text.minimessage.MiniMessage$Provider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/net.kyori.adventure.text.serializer.gson.GsonComponentSerializer$Provider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/net.kyori.adventure.text.serializer.json.JSONComponentSerializer$Provider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer$Provider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer$Provider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E"
+  }, {
+    "pattern":"\\Qdarwin/aarch64/libzstd-jni-1.5.5-3.dylib\\E"
+  }, {
+    "pattern":"\\Qkafka/kafka-version.properties\\E"
+  }, {
+    "pattern":"\\Qlogback-test.xml\\E"
+  }, {
+    "pattern":"\\Qlogback.xml\\E"
+  }, {
+    "pattern":"java.base:\\Qjdk/internal/icu/impl/data/icudt72b/nfc.nrm\\E"
+  }, {
+    "pattern":"jdk.jfr:\\Qjdk/jfr/internal/query/view.ini\\E"
+  }]},
+  "bundles":[]
+}

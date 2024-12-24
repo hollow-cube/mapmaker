@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.minestom.server.entity.Player;
@@ -9,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
+@RuntimeGson
 public class MapPlayerData {
     public static final Tag<MapPlayerData> TAG = Tag.Transient("mapmaker:map_player_data");
 

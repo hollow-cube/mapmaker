@@ -1,12 +1,12 @@
-java_binary(
-    name = "development",
+load("@rules_java//java:defs.bzl", "java_binary", "java_library")
+load("@rules_graalvm//graalvm:defs.bzl", "native_image")
+load("@rules_graalvm//internal/native_image:settings.bzl", "native_image_settings")
+
+java_library(
+    name = "development_lib",
     srcs = glob(include = [
         "src/main/java/**/*.java",
     ]),
-    javacopts = [
-        #        "-Xplugin:HollowCubeCompilePlugin",
-    ],
-    main_class = "net.hollowcube.mapmaker.dev.DevServer",
     resources = glob(include = [
         "src/main/resources/**/*",
     ]) + [
@@ -35,7 +35,42 @@ java_binary(
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:org_slf4j_jul_to_slf4j",
     ],
-    data = [
-        "//:.env",
+)
+
+java_binary(
+    name = "development",
+    main_class = "net.hollowcube.mapmaker.dev.DevServer",
+    runtime_deps = [":development_lib"],
+    data = ["//:.env"],
+)
+
+native_image_settings(
+    name = "pgo_settings",
+    opt = "2",
+    libc = "glibc",
+    compiler_backend = "native",
+)
+
+native_image(
+    name = "development_native",
+    deps = [
+        ":development_lib",
+        "//tools/ni-helper",
     ],
+    main_class = "net.hollowcube.mapmaker.dev.DevServer",
+    native_features = ["net.hollowcube.nativeimage.helper.CanvasReflectionFeature"],
+    allow_fallback = False,
+    extra_args = [
+        "--enable-preview",
+        "-H:+StrictImageHeap",
+        "-H:+UseCompressedReferences",
+        "--enable-monitoring=heapdump,jfr",
+        "-R:MaxHeapSize=100M",
+        #         "-H:+BuildReport",
+        #         "--pgo-instrument",
+    ],
+    #     profiles = ["default.iprof"],
+    optimization_mode = "",
+    native_image_settings = [":pgo_settings"],
+    native_image_tool = "@graalvm//:native-image",
 )

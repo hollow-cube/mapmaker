@@ -32,44 +32,44 @@ public class InteractionFeature implements HubFeature {
     }
 
     private void onTick(@NotNull InstanceTickEvent event) {
-        for (var player : world.players()) {
-            var rayStart = player.getPosition().add(0, player.getEyeHeight(), 0);
-            var rayDirection = rayStart.direction();
-
-            InteractionEntity hitEntity = null;
-            boolean wasInside = false;
-            var result = new SweepResult2();
-            for (var e : world.instance().getEntities()) {
-                if (!(e instanceof InteractionEntity entity)) continue;
-
-                final BoundingBox entityBB = entity.getBoundingBox();
-
-                if (RayUtils2.BoundingBoxIntersectionCheck(rayStart, rayDirection, entityBB, entity.getPosition(), result)) {
-                    hitEntity = entity;
-                } else if (RayUtils2.boundingBoxContainsPoint(entityBB, entity.getPosition(), rayStart)) {
-                    hitEntity = entity;
-                    wasInside = true;
-                    break; // If we are inside the entity its always a hit
-                }
-            }
-
-            // Now ensure we arent looking at a block before the entity, and that the entity is closer than the target interaction distance.
-            if (!wasInside && hitEntity != null) {
-                double distance = rayStart.distance(result.collidedPositionX(), result.collidedPositionY(), result.collidedPositionZ());
-                if (hitEntity.interactionDistance() < distance) hitEntity = null;
-                else if (PlayerUtil.getTargetBlock(player, distance) != null) hitEntity = null;
-            }
-
-            var lastEntity = player.getTag(LAST_ENTITY);
-            if (lastEntity == hitEntity) continue;
-            if (lastEntity != null) lastEntity.target().endHover(player);
-            if (hitEntity != null) {
-                hitEntity.target().beginHover(player);
-                player.setTag(LAST_ENTITY, hitEntity);
-            } else {
-                player.removeTag(LAST_ENTITY);
-            }
-        }
+//        for (var player : world.players()) {
+//            var rayStart = player.getPosition().add(0, player.getEyeHeight(), 0);
+//            var rayDirection = rayStart.direction();
+//
+//            InteractionEntity hitEntity = null;
+//            boolean wasInside = false;
+//            var result = new SweepResult2();
+//            for (var e : world.instance().getEntities()) {
+//                if (!(e instanceof InteractionEntity entity)) continue;
+//
+//                final BoundingBox entityBB = entity.getBoundingBox();
+//
+//                if (RayUtils2.BoundingBoxIntersectionCheck(rayStart, rayDirection, entityBB, entity.getPosition(), result)) {
+//                    hitEntity = entity;
+//                } else if (RayUtils2.boundingBoxContainsPoint(entityBB, entity.getPosition(), rayStart)) {
+//                    hitEntity = entity;
+//                    wasInside = true;
+//                    break; // If we are inside the entity its always a hit
+//                }
+//            }
+//
+//            // Now ensure we arent looking at a block before the entity, and that the entity is closer than the target interaction distance.
+//            if (!wasInside && hitEntity != null) {
+//                double distance = rayStart.distance(result.collidedPositionX(), result.collidedPositionY(), result.collidedPositionZ());
+//                if (hitEntity.interactionDistance() < distance) hitEntity = null;
+//                else if (PlayerUtil.getTargetBlock(player, distance) != null) hitEntity = null;
+//            }
+//
+//            var lastEntity = player.getTag(LAST_ENTITY);
+//            if (lastEntity == hitEntity) continue;
+//            if (lastEntity != null) lastEntity.target().endHover(player);
+//            if (hitEntity != null) {
+//                hitEntity.target().beginHover(player);
+//                player.setTag(LAST_ENTITY, hitEntity);
+//            } else {
+//                player.removeTag(LAST_ENTITY);
+//            }
+//        }
     }
 
     private void handleEntityInteract(PlayerEntityInteractEvent event) {

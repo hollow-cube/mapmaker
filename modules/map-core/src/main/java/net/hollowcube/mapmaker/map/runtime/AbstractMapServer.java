@@ -78,6 +78,7 @@ import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.HttpServerWrapper;
+import net.hollowcube.mapmaker.util.NoopSpanExporter;
 import net.hollowcube.mapmaker.util.ServerStatsHud;
 import net.hollowcube.mapmaker.util.Shutdowner;
 import net.kyori.adventure.text.Component;
@@ -525,6 +526,8 @@ public abstract class AbstractMapServer implements MapServer {
             spanExporter = OtlpHttpSpanExporter.builder()
                     .setEndpoint(tracingConfig.otlpEndpoint())
                     .build();
+        } else if (tracingConfig.noop()) {
+            spanExporter = NoopSpanExporter.INSTANCE;
         } else {
             spanExporter = LoggingSpanExporter.create();
         }

@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.object.ObjectData;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+@RuntimeGson
 public class MapData {
     public static final String DEFAULT_NAME = "Untitled Map";
 

@@ -11,7 +11,6 @@ import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
@@ -76,69 +75,69 @@ public class LauncherFeature implements HubFeature {
 
         @Override
         public void update(long time) {
-            if (this.state == State.COOLDOWN) {
-                var sound = remaining % 2 == 0 ? SoundEvent.BLOCK_STONE_BUTTON_CLICK_OFF : SoundEvent.BLOCK_WOODEN_BUTTON_CLICK_OFF;
-                getViewersAsAudience().playSound(Sound.sound(sound, Sound.Source.BLOCK, 0.5f, 0.3f),
-                        getPosition().x(), getPosition().y(), getPosition().z());
-            }
-
-            if (remaining > 0) {
-                remaining--;
-                return;
-            }
-
-            switch (this.state) {
-                case IDLE -> {
-                    // Try to find players to launch
-
-                    int launched = 0;
-                    for (var player : getInstance().getPlayers()) {
-                        var isInBox = this.bb.intersectBox(player.getPosition().mul(-1), player.getBoundingBox());
-                        if (!isInBox) continue;
-
-                        Vec motion;
-                        if (player.getPosition().yaw() > 90 || player.getPosition().yaw() < -90) {
-                            motion = new Vec(-16.5, 3, getPosition().x() < 0 ? -1f : 2f); // Send to middle
-                        } else {
-                            motion = new Vec(-16, 3, getPosition().x() < 0 ? 2f : -1f); // Send to edge
-                        }
-                        player.setVelocity(Vec.ZERO);
-                        player.sendPacket(makeExplosion(player.getPosition(), motion));
-                        launched++;
-                    }
-
-                    if (launched > 0) setState(State.LAUNCHING);
-                    else this.remaining = 5;
-                }
-                case LAUNCHING -> {
-                    editEntityMeta(ItemDisplayMeta.class, meta -> {
-                        meta.setTransformationInterpolationStartDelta(0);
-                        meta.setTransformationInterpolationDuration(3);
-                        meta.setLeftRotation(new Quaternion(new Vec(0, 0, 1), Math.toRadians(-90)).into());
-                    });
-
-                    this.remaining = state.duration;
-                    this.state = State.LAUNCHED;
-                }
-                case LAUNCHED -> {
-                    this.remaining = state.duration;
-                    this.state = State.RETURNING;
-                }
-                case RETURNING -> {
-                    editEntityMeta(ItemDisplayMeta.class, meta -> {
-                        meta.setTransformationInterpolationStartDelta(0);
-                        meta.setTransformationInterpolationDuration(20);
-                        meta.setLeftRotation(new Quaternion(new Vec(0, 0, 1), Math.toRadians(0)).into());
-                    });
-
-                    this.remaining = state.duration;
-                    this.state = State.COOLDOWN;
-                }
-                case COOLDOWN -> {
-                    this.remaining = state.duration;
-                    this.state = State.IDLE;
-                }
-            }
+//            if (this.state == State.COOLDOWN) {
+//                var sound = remaining % 2 == 0 ? SoundEvent.BLOCK_STONE_BUTTON_CLICK_OFF : SoundEvent.BLOCK_WOODEN_BUTTON_CLICK_OFF;
+//                getViewersAsAudience().playSound(Sound.sound(sound, Sound.Source.BLOCK, 0.5f, 0.3f),
+//                        getPosition().x(), getPosition().y(), getPosition().z());
+//            }
+//
+//            if (remaining > 0) {
+//                remaining--;
+//                return;
+//            }
+//
+//            switch (this.state) {
+//                case IDLE -> {
+//                    // Try to find players to launch
+//
+//                    int launched = 0;
+//                    for (var player : getInstance().getPlayers()) {
+//                        var isInBox = this.bb.intersectBox(player.getPosition().mul(-1), player.getBoundingBox());
+//                        if (!isInBox) continue;
+//
+//                        Vec motion;
+//                        if (player.getPosition().yaw() > 90 || player.getPosition().yaw() < -90) {
+//                            motion = new Vec(-16.5, 3, getPosition().x() < 0 ? -1f : 2f); // Send to middle
+//                        } else {
+//                            motion = new Vec(-16, 3, getPosition().x() < 0 ? 2f : -1f); // Send to edge
+//                        }
+//                        player.setVelocity(Vec.ZERO);
+//                        player.sendPacket(makeExplosion(player.getPosition(), motion));
+//                        launched++;
+//                    }
+//
+//                    if (launched > 0) setState(State.LAUNCHING);
+//                    else this.remaining = 5;
+//                }
+//                case LAUNCHING -> {
+//                    editEntityMeta(ItemDisplayMeta.class, meta -> {
+//                        meta.setTransformationInterpolationStartDelta(0);
+//                        meta.setTransformationInterpolationDuration(3);
+//                        meta.setLeftRotation(new Quaternion(new Vec(0, 0, 1), Math.toRadians(-90)).into());
+//                    });
+//
+//                    this.remaining = state.duration;
+//                    this.state = State.LAUNCHED;
+//                }
+//                case LAUNCHED -> {
+//                    this.remaining = state.duration;
+//                    this.state = State.RETURNING;
+//                }
+//                case RETURNING -> {
+//                    editEntityMeta(ItemDisplayMeta.class, meta -> {
+//                        meta.setTransformationInterpolationStartDelta(0);
+//                        meta.setTransformationInterpolationDuration(20);
+//                        meta.setLeftRotation(new Quaternion(new Vec(0, 0, 1), Math.toRadians(0)).into());
+//                    });
+//
+//                    this.remaining = state.duration;
+//                    this.state = State.COOLDOWN;
+//                }
+//                case COOLDOWN -> {
+//                    this.remaining = state.duration;
+//                    this.state = State.IDLE;
+//                }
+//            }
         }
 
         private void setState(@NotNull State state) {
