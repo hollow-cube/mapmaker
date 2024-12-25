@@ -51,8 +51,8 @@ public class CyberpunkRainFeature implements HubFeature {
     public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
         this.instance = world.instance();
 
-//        server.scheduler().submitTask(this::updateCollision);
-//        server.scheduler().submitTask(this::lightningTask);
+        server.scheduler().submitTask(this::updateCollision);
+        server.scheduler().submitTask(this::lightningTask);
     }
 
     private @NotNull TaskSchedule lightningTask() {

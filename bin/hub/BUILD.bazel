@@ -1,14 +1,14 @@
-load("@rules_java//java:defs.bzl", "java_binary")
+load("@rules_java//java:defs.bzl", "java_binary", "java_library")
+load("@rules_graalvm//graalvm:defs.bzl", "native_image")
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
+load("@aspect_bazel_lib//lib:testing.bzl", "assert_archive_contains")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_load")
 
-java_binary(
-    name = "hub",
+java_library(
+    name = "hub_lib",
     srcs = glob(include = [
         "src/main/java/**/*.java",
     ]),
-    javacopts = [
-        #        "-Xplugin:HollowCubeCompilePlugin",
-    ],
-    main_class = "net.hollowcube.mapmaker.hub.Main",
     resources = glob(include = [
         "src/main/resources/**/*",
     ]) + [
@@ -30,4 +30,77 @@ java_binary(
         "@maven//:io_prometheus_simpleclient_hotspot",
         "@maven//:org_slf4j_jul_to_slf4j",
     ],
+)
+
+java_binary(
+    name = "hub",
+    main_class = "net.hollowcube.mapmaker.hub.Main",
+    runtime_deps = [":hub_lib"],
+)
+
+native_image(
+    name = "hub_native",
+    executable_name = "hub-native",
+    deps = [
+        ":hub_lib",
+        "//tools/ni-helper",
+    ],
+    main_class = "net.hollowcube.mapmaker.hub.Main",
+    native_features = ["net.hollowcube.nativeimage.helper.CanvasReflectionFeature"],
+    allow_fallback = False,
+    extra_args = [
+        "--enable-preview",
+        "-H:+StrictImageHeap",
+        "-H:+UseCompressedReferences",
+        "--enable-monitoring=heapdump",
+        "-R:MaxHeapSize=100M",
+    ],
+    native_image_settings = ["//third_party:native_image_default"],
+    native_image_tool = "@graalvm//:native-image",
+)
+
+pkg_tar(
+    name = "app_layer",
+    srcs = [":hub_native"],
+    # If the binary depends on RUNFILES, uncomment the attribute below.
+    # include_runfiles = True
+)
+
+genrule(
+    name = "minestom_data_layer.tar",
+    srcs = ["@maven//:net_minestom_data"],
+    outs = ["minestom_data.tar"],
+    cmd = """
+        mkdir -p $(@D)/temp_extract && \
+        unzip -X -q $(location @maven//:net_minestom_data) -d $(@D)/temp_extract && \
+        tar --no-xattrs -cf $(@D)/minestom_data.tar -C $(@D)/temp_extract .
+    """,
+    output_to_bindir = False,
+)
+
+# Prove that the application is at the path we expect in that tar.
+assert_archive_contains(
+    name = "test_app_layer",
+    archive = "app_layer.tar",
+    expected = ["hub-native"],
+)
+
+# Prove that the application is at the path we expect in that tar.
+assert_archive_contains(
+    name = "test_minestom_data_layer",
+    archive = "minestom_data_layer.tar",
+    expected = ["./blocks.json"],
+)
+
+oci_image(
+    name = "image",
+    base = "@distroless_base",
+    entrypoint = ["/hub-native"],
+    tars = [":app_layer", ":minestom_data_layer.tar"],
+)
+
+oci_load(
+    name = "image_load",
+    image = ":image",
+    repo_tags = ["mapmaker-hub:latest"],
 )
