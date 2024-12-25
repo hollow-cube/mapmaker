@@ -114,7 +114,7 @@ maven_install(
         "com.google.auto.service:auto-service-annotations:1.1.1",
 
         # Minestom
-        "net.minestom:minestom-snapshots:dev",  # c976f345d1
+        "net.minestom:minestom-snapshots:file_registries-4c14c81dba",
         "dev.hollowcube:polar:1.12.1",
         "dev.hollowcube:dataconverter:1.21.3-rv1",
         "dev.hollowcube:mql:1.1.0",
