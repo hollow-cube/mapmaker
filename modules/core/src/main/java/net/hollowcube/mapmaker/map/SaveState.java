@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.common.util.RuntimeGson;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -7,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
+@RuntimeGson
 public class SaveState {
     public static final Tag<SaveState> TAG = Tag.Transient("mapmaker:map/save_state");
 
