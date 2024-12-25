@@ -49,7 +49,7 @@ native_image(
     native_features = ["net.hollowcube.nativeimage.helper.CanvasReflectionFeature"],
     allow_fallback = False,
     extra_args = [
-        "--static-nolibc",
+        "-H:+StaticExecutableWithDynamicLibC",
         "--enable-preview",
         "-H:+StrictImageHeap",
         "-H:+UseCompressedReferences",
