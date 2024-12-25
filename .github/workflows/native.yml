@@ -1,0 +1,40 @@
+name: Staging Build (Native)
+concurrency: Staging-Native
+
+on:
+  workflow_dispatch: { }
+
+jobs:
+  build-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Import Secrets
+        uses: hollow-cube/actions/secrets@main
+        with:
+          token: ${{ secrets.VAULT_TOKEN }}
+          path: global/github
+
+      - uses: actions/checkout@v3
+      - name: Cache Bazel
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/bazel
+          key: ${{ runner.os }}-bazel-hub-native-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-hub-native-
+
+      # Build native binary and image
+      - name: Build image
+        run: bazel build //bin/hub:image_load
+
+      # Push docker image
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: mworzala
+          password: ${{ env.DOCKER_PASS }}
+      - name: Retag and Push
+        run: |
+          docker image tag mapmaker-hub:latest mworzala/mapmaker-hub-native:${{ github.sha }}
+          docker push mworzala/mapmaker-hub-native:${{ github.sha }}

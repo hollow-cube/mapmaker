@@ -1,6 +1,5 @@
 load("@rules_java//java:defs.bzl", "java_binary", "java_library")
 load("@rules_graalvm//graalvm:defs.bzl", "native_image")
-load("@rules_graalvm//internal/native_image:settings.bzl", "native_image_settings")
 
 java_library(
     name = "development_lib",
@@ -44,13 +43,6 @@ java_binary(
     data = ["//:.env"],
 )
 
-native_image_settings(
-    name = "pgo_settings",
-    opt = "2",
-    libc = "glibc",
-    compiler_backend = "native",
-)
-
 native_image(
     name = "development_native",
     deps = [
@@ -70,7 +62,7 @@ native_image(
         #         "--pgo-instrument",
     ],
     #     profiles = ["default.iprof"],
-    optimization_mode = "",
-    native_image_settings = [":pgo_settings"],
+    #     optimization_mode = "",
+    native_image_settings = ["//third_party:native_image_default"],
     native_image_tool = "@graalvm//:native-image",
 )

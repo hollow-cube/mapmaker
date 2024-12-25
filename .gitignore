@@ -25,3 +25,4 @@ profile.jfr
 /test.http
 
 .env
+.bazelbsp

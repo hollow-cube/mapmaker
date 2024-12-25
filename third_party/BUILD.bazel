@@ -1,4 +1,5 @@
 load("@rules_java//java:defs.bzl", "java_library", "java_plugin")
+load("@rules_graalvm//internal/native_image:settings.bzl", "native_image_settings")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -53,6 +54,13 @@ java_library(
         "@maven//:io_opentelemetry_opentelemetry_sdk_trace",
         "@maven//:io_opentelemetry_semconv_opentelemetry_semconv",
     ],
+)
+
+native_image_settings(
+    name = "native_image_default",
+    opt = "2",
+    libc = "glibc",
+    compiler_backend = "native",
 )
 
 exports_files(["genfile.bzl"])
