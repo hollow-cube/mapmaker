@@ -114,6 +114,7 @@ public class DevServerRunner extends AbstractMapServer {
         addBinding(Terraform.class, terraform);
 
         var hdb = new HeadDatabase(otel);
+        addBinding(HeadDatabase.class, hdb, "headDatabase", "hdb");
         MapServerRunner.registerCommands(this, mapCommandManager, hdb);
 
         MapServerRunner.initFeatureFlagMonitor(bridge(), allocator());

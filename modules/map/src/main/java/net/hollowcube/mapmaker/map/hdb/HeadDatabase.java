@@ -95,8 +95,6 @@ public class HeadDatabase extends AbstractHttpService {
         if (category != null)
             url.append("&category=").append(URLEncoder.encode(category, StandardCharsets.UTF_8).replaceAll("\\+", "%20"));
 
-        System.out.println(url.toString());
-        System.out.println(URI.create(url.toString()));
         var resp = doRequest("getHeads", HttpRequest.newBuilder()
                         .GET().uri(URI.create(url.toString()))
                         .header("Authorization", authToken),
