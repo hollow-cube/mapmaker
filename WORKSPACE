@@ -53,7 +53,7 @@ graalvm_repository(
     name = "graalvm",
     distribution = "oracle",
     java_version = "21",
-    version = "21.0.0",
+    version = "21.0.2",
 )
 
 load("@rules_graalvm//graalvm:workspace.bzl", "register_graalvm_toolchains", "rules_graalvm_repositories")
