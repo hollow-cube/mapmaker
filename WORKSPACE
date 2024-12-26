@@ -51,9 +51,9 @@ load("@rules_graalvm//graalvm:repositories.bzl", "graalvm_repository")
 
 graalvm_repository(
     name = "graalvm",
-    distribution = "oracle",  # `oracle`, `ce`, or `community`
-    java_version = "21",  # `17`, `20`, `22`, `23`, etc.
-    version = "21.0.0",  # pass graalvm or specific jdk version supported by gvm
+    distribution = "oracle",
+    java_version = "21",
+    version = "21.0.0",
 )
 
 load("@rules_graalvm//graalvm:workspace.bzl", "register_graalvm_toolchains", "rules_graalvm_repositories")
@@ -95,12 +95,9 @@ load("@rules_oci//oci:pull.bzl", "oci_pull")
 
 oci_pull(
     name = "distroless_base",
-    digest = "sha256:ccaef5ee2f1850270d453fdf700a5392534f8d1a8ca2acda391fbb6a06b81c86",
-    image = "gcr.io/distroless/base",
-    platforms = [
-        "linux/amd64",
-        "linux/arm64",
-    ],
+    tag = "sha256:e9d0321de8927f69ce20e39bfc061343cce395996dfc1f0db6540e5145bc63a5",
+    image = "gcr.io/distroless/base-debian12",
+    platforms = ["linux/amd64", "linux/arm64/v8", "linux/arm/v7", "linux/s390x", "linux/ppc64le"],
 )
 
 load("@rules_jvm_external//:defs.bzl", "maven_install")
