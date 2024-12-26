@@ -821,24 +821,6 @@
     ]
   },
   {
-    "name": "net.minestom.server.entity.MetadataDef"
-  },
-  {
-    "name": "net.minestom.server.entity.MetadataDef$BlockDisplay"
-  },
-  {
-    "name": "net.minestom.server.entity.MetadataDef$Display"
-  },
-  {
-    "name": "net.minestom.server.entity.MetadataDef$Interaction"
-  },
-  {
-    "name": "net.minestom.server.entity.MetadataDef$ItemDisplay"
-  },
-  {
-    "name": "net.minestom.server.entity.MetadataDef$TextDisplay"
-  },
-  {
     "name": "net.minestom.server.entity.MetadataHolder",
     "fields": [
       {

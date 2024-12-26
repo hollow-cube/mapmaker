@@ -41,9 +41,12 @@ public class CanvasReflectionFeature implements Feature {
                     .forEach(ci -> processRecordClass(access, ci));
             scanResult.getClassesWithAnnotation("net.hollowcube.common.util.RuntimeGson")
                     .forEach(ci -> processRuntimeGsonClass(access, ci));
+
+            processMinestomMetadataDef(access);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     private void processViewClass(BeforeAnalysisAccess access, ClassInfo info) {
@@ -102,8 +105,17 @@ public class CanvasReflectionFeature implements Feature {
             RuntimeReflection.register(ctor);
         for (var field : gsonClass.getDeclaredFields())
             RuntimeReflection.register(field);
+    }
 
-        System.out.println("Gson class: " + gsonClass.getName());
+    private void processMinestomMetadataDef(BeforeAnalysisAccess access) {
+        var metadataDefClass = access.findClassByName("net.minestom.server.entity.MetadataDef");
+        RuntimeReflection.registerClassLookup(metadataDefClass.getName());
+
+        // Also add all the subclasses.
+        for (Class<?> subclass : metadataDefClass.getDeclaredClasses()) {
+            RuntimeReflection.registerClassLookup(subclass.getName());
+            System.out.println("MetadataDef subclass: " + subclass.getName());
+        }
     }
 
     private Constructor<?> getContextConstructor(Class<?> viewClass) {
