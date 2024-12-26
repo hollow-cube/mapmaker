@@ -116,7 +116,7 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
         handleTeleportInteractA(player, slot, clickType);
     }
 
-    @Action("add_item_off")
+    @Action("add_item_inactive")
     public void handleAddItemA(@NotNull Player player) {
         if (!MapFeatureFlags.ITEM_EDITOR.test(player)) return;
         pushView(c -> new ItemEditorView(c, new HotbarItems.Mutable(data.items(), newItems -> {
