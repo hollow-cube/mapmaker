@@ -6,6 +6,7 @@ public class DevServer {
 
     public static void main(String[] args) throws Exception {
         MapServerInitializer.run(DevServerRunner::new, args);
+
 //        var path = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/modules/hub/src/main/resources/spawn/hcspawn.polar");
 //        var world = PolarReader.read(Files.readAllBytes(path));
 //
