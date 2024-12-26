@@ -362,6 +362,8 @@ public class InventoryViewHost {
                         }
                     }
                     if (dirty) drawCurrentElement();
+                } catch (Exception e) {
+                    MinecraftServer.getExceptionManager().handleException(e);
                 } finally {
                     // If result was set to a future then the click was async and will be released later.
                     if (result == null) {

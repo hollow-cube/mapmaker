@@ -1,9 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.mapmaker.feature.FeatureFlag;
-import net.minestom.server.entity.Player;
 
-import java.util.Locale;
 import java.util.Set;
 
 public final class MapFeatureFlags {
@@ -20,13 +18,7 @@ public final class MapFeatureFlags {
     public static final FeatureFlag ANIMATION_BUILDER = FeatureFlag.of("map.animation_builder");
 
     private static final Set<String> ITEM_EDITOR_PLAYERS = Set.of("notmattw", "ontal", "itmg", "sethprg");
-    public static final FeatureFlag ITEM_EDITOR = context -> {
-        for (var contextObject : context) {
-            if (!(contextObject instanceof Player player)) continue;
-            return ITEM_EDITOR_PLAYERS.contains(player.getUsername().toLowerCase(Locale.ROOT));
-        }
-        return false;
-    };
+    public static final FeatureFlag ITEM_EDITOR = FeatureFlag.of("map.item_editor");
 
     public static final FeatureFlag MARKER_TOOL = FeatureFlag.of("map.marker_tool");
 
