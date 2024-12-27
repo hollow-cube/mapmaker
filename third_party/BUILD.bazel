@@ -58,7 +58,7 @@ java_library(
 
 native_image_settings(
     name = "native_image_default",
-    opt = "2",
+    opt = "0",
     libc = "glibc",
     compiler_backend = "native",
 )
