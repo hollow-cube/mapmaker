@@ -44,7 +44,6 @@ public class HubServerRunner extends AbstractMapServer {
                 .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
                 .addListener(PlayerSpawnEvent.class, this::handleSpawn)
                 .addListener(PlayerDisconnectEvent.class, this::handleDisconnect));
-
     }
 
     @Override

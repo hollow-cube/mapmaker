@@ -130,7 +130,7 @@ public class SessionManager {
     }
 
     private void handleSessionCreate(@NotNull PlayerSession session) {
-        logger.info("remote session created for {}", session.playerId());
+        logger.debug("remote session created for {}", session.playerId());
         sessions.put(session.playerId(), session);
 
         // Do not send a join message/add to tab list if the player is hidden
@@ -147,7 +147,7 @@ public class SessionManager {
     }
 
     private void handleSessionDelete(@NotNull SessionUpdateMessage message) {
-        logger.info("remote session deleted for {}", message.playerId());
+        logger.debug("remote session deleted for {}", message.playerId());
         // Do not send a leave message if the player is hidden
         var removed = sessions.remove(message.playerId());
         if (removed == null || removed.hidden()) return;
@@ -157,7 +157,7 @@ public class SessionManager {
     }
 
     private void handleSessionUpdate(@NotNull PlayerSession session, @NotNull SessionStateUpdateRequest.Metadata metadata) {
-        logger.info("remote session updated for {}", session.playerId());
+        logger.debug("remote session updated for {}", session.playerId());
 
         //todo need to make this more complicated so that people who have extra perms to see invis players can see them. they still get the leave message probably
         var oldSession = sessions.put(session.playerId(), session);

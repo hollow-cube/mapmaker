@@ -53,7 +53,7 @@ native_image(
         "--enable-preview",
         "-H:+StrictImageHeap",
         "-H:+UseCompressedReferences",
-        "--enable-monitoring=heapdump",
+        "--enable-monitoring=heapdump,jfr",
         "-R:MaxHeapSize=100M",
     ],
     native_image_settings = ["//third_party:native_image_default"],
