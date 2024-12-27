@@ -40,10 +40,10 @@ rules_jmh_maven_deps()
 
 http_archive(
     name = "rules_graalvm",
-    sha256 = "8faf2e1db03e8e370b67007197029a3b407306201dd83d20ca5a3e760a56288d",
-    strip_prefix = "rules_graalvm-2c87605c9d65679f48d5b88082c6ccbd4785daf0",
+    sha256 = "f718f9f87d2f5c0dfde7a9d0d550b26f3fe53218077c34b9b502f20ef585f8a8",
+    strip_prefix = "rules_graalvm-de2c73a8f7fa498c1cf49913bf37cc421434f2d6",
     urls = [
-        "https://github.com/sgammon/rules_graalvm/archive/2c87605c9d65679f48d5b88082c6ccbd4785daf0.zip",
+        "https://github.com/hollow-cube/rules_graalvm/archive/de2c73a8f7fa498c1cf49913bf37cc421434f2d6.zip",
     ],
 )
 
@@ -53,7 +53,7 @@ graalvm_repository(
     name = "graalvm",
     distribution = "oracle",
     java_version = "21",
-    version = "21.0.2",
+    version = "21.0.5",
 )
 
 load("@rules_graalvm//graalvm:workspace.bzl", "register_graalvm_toolchains", "rules_graalvm_repositories")
