@@ -32,7 +32,6 @@ java_library(
     ],
 )
 
-# -H:-IncludeMethodsData
 java_binary(
     name = "hub",
     main_class = "net.hollowcube.mapmaker.hub.Main",
@@ -54,7 +53,7 @@ native_image(
         "--enable-preview",
         "-H:+StrictImageHeap",
         "-H:+UseCompressedReferences",
-        "--enable-monitoring=heapdump,jfr",
+        #         "--enable-monitoring=heapdump,jfr",
         "-R:MaxHeapSize=100M",
     ],
     native_image_settings = ["//third_party:native_image_default"],
