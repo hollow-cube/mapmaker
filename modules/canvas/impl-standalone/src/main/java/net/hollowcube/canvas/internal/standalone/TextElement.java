@@ -60,6 +60,7 @@ public class TextElement extends ButtonElement implements Text {
         }
 
         sb.color(color);
+        sb.withShadow(true);
         // Note that we provide the length, because it needs to be the width of the text before being rewritten
         sb.append(FontUtil.rewrite(font, text), textWidth);
     }
