@@ -95,7 +95,7 @@ public class TridentFeatureProvider implements FeatureProvider {
                 default -> SoundEvent.ITEM_TRIDENT_RIPTIDE_3;
             };
             var sound = Sound.sound(soundEvent, Sound.Source.PLAYER, 1.0f, 1.0f);
-            player.getViewersAsAudience().playSound(sound);
+            player.getViewersAsAudience().playSound(sound, player);
             player.playSound(sound);
         }
     }
