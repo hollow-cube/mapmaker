@@ -11,7 +11,6 @@ import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
-import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -27,8 +26,6 @@ public final class FontUtil {
 
     private FontUtil() {
     }
-
-    public static final TextColor NO_SHADOW = TextColor.color(78, 92, 36);
 
     public static final Map<Integer, Integer> GLYPH_WIDTHS = Map.<Integer, Integer>ofEntries(
             Map.entry(65, 6), Map.entry(196, 6), Map.entry(197, 6), Map.entry(198, 6),

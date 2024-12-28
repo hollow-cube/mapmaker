@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.misc;
 
-import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
+import net.kyori.adventure.text.format.ShadowColor;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -63,7 +63,7 @@ public class ExpBarRenderer implements ActionBar.Provider {
         var hasExperienceBar = player.getGameMode() == GameMode.SURVIVAL || player.getGameMode() == GameMode.ADVENTURE;
         if (hasExperienceBar) return; // Use the builtin one for these.
 
-        builder.pushColor(FontUtil.NO_SHADOW);
+        builder.pushShadowColor(ShadowColor.none());
 
         int pixel = (int) (XP_BAR_WIDTH * player.getExp());
 

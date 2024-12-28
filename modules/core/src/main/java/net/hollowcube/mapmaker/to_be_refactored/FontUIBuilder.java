@@ -4,6 +4,7 @@ import net.hollowcube.common.util.FontUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,6 +21,7 @@ public class FontUIBuilder {
 //    private final StringBuilder builder = new StringBuilder();
 
     private final List<TextColor> colorStack = new ArrayList<>();
+    private final List<ShadowColor> shadowColorStack = new ArrayList<>();
     private int pos = 0;
 
     /**
@@ -82,6 +84,16 @@ public class FontUIBuilder {
         return this;
     }
 
+    public @NotNull FontUIBuilder pushShadowColor(@NotNull ShadowColor shadowColor) {
+        this.shadowColorStack.add(shadowColor);
+        return this;
+    }
+
+    public @NotNull FontUIBuilder popShadowColor() {
+        this.shadowColorStack.remove(this.shadowColorStack.size() - 1);
+        return this;
+    }
+
     public int mark() {
         return colorStack.size();
     }
@@ -109,6 +121,7 @@ public class FontUIBuilder {
 
     private void appendRaw(@NotNull String text) {
         var color = colorStack.isEmpty() ? NamedTextColor.WHITE : colorStack.get(colorStack.size() - 1);
-        builder.append(Component.text(text, color));
+        var shadowColor = shadowColorStack.isEmpty() ? null : shadowColorStack.get(shadowColorStack.size() - 1);
+        builder.append(Component.text(text, color).shadowColor(shadowColor));
     }
 }

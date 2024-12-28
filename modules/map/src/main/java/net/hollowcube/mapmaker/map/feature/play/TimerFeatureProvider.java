@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.map.feature.play;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
@@ -14,6 +13,7 @@ import net.hollowcube.mapmaker.misc.BackgroundSpriteSet;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
+import net.kyori.adventure.text.format.ShadowColor;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -83,7 +83,7 @@ public class TimerFeatureProvider implements FeatureProvider {
         // Text + spacing of same size of the ends of the background + timer width
         var width = FontUtil.measureTextV2(text) + BACKGROUND_PADDING * 4 + TIMER.width();
 
-        builder.pushColor(FontUtil.NO_SHADOW);
+        builder.pushShadowColor(ShadowColor.none());
         builder.pos(-width / 2);
         builder.append(BACKGROUND.build(width - BACKGROUND_PADDING * 2), width);
         builder.offset(-width);
@@ -91,6 +91,6 @@ public class TimerFeatureProvider implements FeatureProvider {
         builder.drawInPlace(TIMER);
         builder.offset(BACKGROUND_PADDING);
         builder.append("bossbar_ascii_1", text);
-        builder.popColor();
+        builder.popShadowColor();
     }
 }

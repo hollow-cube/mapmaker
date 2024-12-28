@@ -50,7 +50,9 @@ public class FireworkRocketItem extends ItemHandler {
     }
 
     public static boolean isInfinite(@NotNull ItemStack itemStack) {
-        return itemStack.get(ItemComponent.CUSTOM_MODEL_DATA, 0) == 1;
+        // TODO(1.21.4)
+        return false;
+//        return itemStack.get(ItemComponent.CUSTOM_MODEL_DATA, 0) == 1;
     }
 
     public static int getCount(@NotNull ItemStack itemStack) {
@@ -59,8 +61,9 @@ public class FireworkRocketItem extends ItemHandler {
 
     public static @NotNull ItemStack withCount(@NotNull ItemStack itemStack, int count) {
         if (count <= 0) {
-            return itemStack.withAmount(1)
-                    .with(ItemComponent.CUSTOM_MODEL_DATA, INFINITE_CUSTOM_MODEL_DATA);
+            // TODO(1.21.4)
+            return itemStack.withAmount(1);
+//                    .with(ItemComponent.CUSTOM_MODEL_DATA, INFINITE_CUSTOM_MODEL_DATA);
         } else {
             return itemStack.withAmount(count)
                     .without(ItemComponent.CUSTOM_MODEL_DATA);
@@ -75,12 +78,6 @@ public class FireworkRocketItem extends ItemHandler {
     public @NotNull Material material() {
         return Material.FIREWORK_ROCKET;
     }
-
-    @Override
-    public int customModelData() {
-        return -1; // Match based on material not custom model data.
-    }
-
 
     @Override
     protected void rightClicked(@NotNull Click click) {

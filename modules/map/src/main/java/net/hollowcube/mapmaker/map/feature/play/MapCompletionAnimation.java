@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.player.AppliedRewards;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.title.Title;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
@@ -109,7 +110,7 @@ public final class MapCompletionAnimation implements Supplier<TaskSchedule> {
 
         var builder = new FontUIBuilder();
         var mark = builder.mark();
-        builder.pushColor(FontUtil.NO_SHADOW);
+        builder.pushShadowColor(ShadowColor.none());
 
         // This function is a little confusing but basically we need to know the entire width before we start drawing,
         // so we figure out the texts and lengths first, then draw background and foreground.

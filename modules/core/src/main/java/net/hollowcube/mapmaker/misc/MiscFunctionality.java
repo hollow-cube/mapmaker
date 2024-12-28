@@ -14,12 +14,12 @@ import net.hollowcube.mapmaker.util.CoreTeams;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemComponent;
-import net.minestom.server.item.component.Equippable;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -62,7 +62,9 @@ public final class MiscFunctionality {
                 .appendNewline()
                 .appendNewline()
                 .appendNewline()
-                .append(Component.text(FontUtil.computeOffset(-15) + tabLogoSprite.fontChar(), FontUtil.NO_SHADOW).append(Component.text(" Hollow Cube", blueColor))).appendNewline()
+                .append(Component.empty()
+                        .append(Component.text(FontUtil.computeOffset(-15) + tabLogoSprite.fontChar()).shadowColor(ShadowColor.none()))
+                        .append(Component.text(" Hollow Cube", blueColor))).appendNewline()
                 .append(Component.text(cubeOffset + "ᴇᴀʀʟʏ ᴀᴄᴄᴇѕѕ", darkGrayColor))
                 .appendNewline()
                 .build();
@@ -85,7 +87,7 @@ public final class MiscFunctionality {
 
         var playerData = PlayerDataV2.fromPlayer(p);
 
-        builder.pushColor(FontUtil.NO_SHADOW);
+        builder.pushShadowColor(ShadowColor.none());
         builder.pos(11).drawInPlace(CURRENCY_DISPLAY);
 
         int MAX_TEXT_WIDTH = 22;
@@ -106,7 +108,7 @@ public final class MiscFunctionality {
         var hasExperienceBar = p.getGameMode() == GameMode.SURVIVAL || p.getGameMode() == GameMode.ADVENTURE;
         if (hasExperienceBar) return; // Use the builtin one for these.
 
-        builder.pushColor(FontUtil.NO_SHADOW);
+        builder.pushShadowColor(ShadowColor.none());
         builder.pos(-(XP_BAR_BACKGROUND.width() / 2)).drawInPlace(XP_BAR_BACKGROUND);
     }
 
@@ -132,7 +134,7 @@ public final class MiscFunctionality {
                 itemStack = itemStack.with(ItemComponent.GLIDER);
                 var equippable = itemStack.get(ItemComponent.EQUIPPABLE);
                 if (equippable != null) itemStack = itemStack.with(ItemComponent.EQUIPPABLE,
-                        equippable.withModel("minecraft:elytra"));
+                        equippable.withAssetId("minecraft:elytra"));
             }
             player.getInventory().setItemStack(cosmeticType.iconSlot(), itemStack);
         }

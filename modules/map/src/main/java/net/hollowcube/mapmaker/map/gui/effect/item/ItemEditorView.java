@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class ItemEditorView extends View {
     private static final ItemStack PLUS_ITEM = ItemStack.builder(Material.DIAMOND)
-            .set(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("effect/item/plus").cmd())
+            .set(ItemComponent.ITEM_MODEL, BadSprite.require("effect/item/plus").model())
             .build();
 
     private @Outlet("slots_used") Text slotsUsedText;

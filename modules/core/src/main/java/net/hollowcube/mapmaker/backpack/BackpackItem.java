@@ -4,6 +4,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.ShadowColor;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -124,7 +125,7 @@ public enum BackpackItem {
     public @NotNull Component iconComponent() {
         //todo the base sprite should also contain this sprite
         var iconSprite = "icon/material/" + name().toLowerCase();
-        return Component.text(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(iconSprite), iconSprite).fontChar(), FontUtil.NO_SHADOW);
+        return Component.text(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(iconSprite), iconSprite).fontChar()).shadowColor(ShadowColor.none());
     }
 
     public @NotNull ItemStack getItemStack(int amount) {
