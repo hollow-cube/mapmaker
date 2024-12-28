@@ -32,6 +32,25 @@ public final class FutureUtil {
         }
     }
 
+    public static <T> @NotNull CompletableFuture<T> fork(@NotNull Callable<T> callable) {
+        var future = new CompletableFuture<T>();
+        submitVirtual(() -> {
+            try {
+                future.complete(callable.call());
+            } catch (Throwable e) {
+                future.completeExceptionally(e);
+            }
+        });
+        return future;
+    }
+
+    public static @NotNull CompletableFuture<Void> fork(@NotNull Runnable runnable) {
+        return fork(() -> {
+            runnable.run();
+            return null;
+        });
+    }
+
     @SuppressWarnings("TypeParameterUnusedInFormals")
     public static <T> @Nullable T handleException(@NotNull Throwable t) {
         MinecraftServer.getExceptionManager().handleException(t);

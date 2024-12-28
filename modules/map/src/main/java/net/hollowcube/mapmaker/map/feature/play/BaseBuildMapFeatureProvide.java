@@ -23,7 +23,7 @@ public class BaseBuildMapFeatureProvide implements FeatureProvider {
 
     private static final CustomizableHotbarManager BUILDING_HOTBAR = CustomizableHotbarManager.builder("hotbar/build")
             .defaultItem(0, MapDetailsItem.ID)
-            .defaultItem(2, RateMapItem.ID, (_, world) -> MapRatingFeatureProvider.isMapRatable(world))
+            .defaultItem(2, RateMapItem.ID, (ignored, world) -> MapRatingFeatureProvider.isMapRatable(world))
             .defaultItem(8, ReturnToHubItem.ID)
             .build();
 

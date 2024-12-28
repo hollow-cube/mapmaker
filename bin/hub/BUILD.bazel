@@ -32,6 +32,7 @@ java_library(
     ],
 )
 
+# -H:-IncludeMethodsData
 java_binary(
     name = "hub",
     main_class = "net.hollowcube.mapmaker.hub.Main",

@@ -40,7 +40,7 @@ public class StoreView extends View {
             var tabIndex = i;
             addActionHandler(
                     Objects.requireNonNull(tabButtons[tabIndex].id()),
-                    Label.ActionHandler.lmb(_ -> selectTab(tabIndex))
+                    Label.ActionHandler.lmb(ignored -> selectTab(tabIndex))
             );
         }
 

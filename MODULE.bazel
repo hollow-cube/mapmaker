@@ -1,6 +1,131 @@
-###############################################################################
-# Bazel now uses Bzlmod by default to manage external dependencies.
-# Please consider migrating your external dependencies from WORKSPACE to MODULE.bazel.
-#
-# For more details, please check https://github.com/bazelbuild/bazel/issues/18958
-###############################################################################
+module(name = "mapmaker")
+
+bazel_dep(name = "rules_java", version = "8.6.3")
+bazel_dep(name = "rules_jvm_external", version = "6.6")
+bazel_dep(name = "contrib_rules_jvm", version = "0.27.0")
+bazel_dep(name = "rules_oci", version = "2.2.0")
+bazel_dep(name = "rules_pkg", version = "1.0.1")
+bazel_dep(name = "aspect_bazel_lib", version = "2.10.0")
+bazel_dep(name = "rules_graalvm", version = "0.12.0")
+git_override(
+    module_name = "rules_graalvm",
+    commit = "2c87605c9d65679f48d5b88082c6ccbd4785daf0",
+    remote = "https://github.com/sgammon/rules_graalvm.git",
+)
+
+# GraalVM Install
+
+gvm = use_extension("@rules_graalvm//:extensions.bzl", "graalvm")
+gvm.graalvm(
+    name = "graalvm",
+    distribution = "oracle",
+    java_version = "23",
+    version = "23.0.1",
+)
+use_repo(gvm, "graalvm")
+
+register_toolchains("@graalvm//:jvm")
+
+register_toolchains("@graalvm//:sdk")
+register_toolchains("@graalvm//:toolchain")
+
+# Maven Dependencies
+
+maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
+maven.install(
+    artifacts = [
+        # Quality
+        "org.jetbrains:annotations:24.0.1",
+        "com.google.auto.service:auto-service:1.1.1",
+        "com.google.auto.service:auto-service-annotations:1.1.1",
+
+        # Minestom
+        "net.minestom:minestom-snapshots:9803f2bfe3",
+        "dev.hollowcube:polar:1.12.1",
+        "dev.hollowcube:dataconverter:1.21.3-rv1",
+        "dev.hollowcube:mql:1.1.0",
+
+        # Misc
+        "com.google.code.gson:gson:2.10.1",
+        "de.marhali:json5-java:2.0.0",
+        "it.unimi.dsi:fastutil:8.5.13",
+        "org.apache.kafka:kafka-clients:3.4.0",
+        "com.miguelfonseca.completely:completely-core:0.9.0",
+        "com.github.ben-manes.caffeine:caffeine:3.1.8",
+        "info.debatty:java-string-similarity:2.0.0",
+        "com.velocitypowered:velocity-api:3.1.1",
+        "org.jctools:jctools-core:4.0.5",
+
+        # Adventure
+        "net.kyori:adventure-api:4.16.0",
+        "net.kyori:adventure-key:4.16.0",
+        "net.kyori:adventure-text-minimessage:4.16.0",
+        "net.kyori:adventure-text-serializer-plain:4.16.0",
+        "net.kyori:adventure-nbt:4.16.0",
+
+        # Logging/Monitoring
+        "org.slf4j:slf4j-api:2.0.9",
+        "org.slf4j:jul-to-slf4j:2.0.6",
+        "ch.qos.logback:logback-classic:1.4.5",
+        "io.prometheus:simpleclient:0.16.0",
+        "io.prometheus:simpleclient_hotspot:0.16.0",
+        "io.prometheus:simpleclient_httpserver:0.16.0",
+        "io.opentelemetry:opentelemetry-api:1.45.0",
+        "io.opentelemetry:opentelemetry-context:1.45.0",
+        "io.opentelemetry:opentelemetry-sdk:1.45.0",
+        "io.opentelemetry:opentelemetry-sdk-common:1.45.0",
+        "io.opentelemetry:opentelemetry-sdk-trace:1.45.0",
+        "io.opentelemetry:opentelemetry-extension-trace-propagators:1.45.0",
+        "io.opentelemetry:opentelemetry-exporter-logging:1.45.0",
+        "io.opentelemetry:opentelemetry-exporter-otlp:1.45.0",
+        "io.opentelemetry:opentelemetry-exporter-sender-jdk:1.45.0",
+        "io.opentelemetry.semconv:opentelemetry-semconv:1.28.0-alpha",
+        "org.graalvm.sdk:nativeimage:24.1.1",
+        "io.github.classgraph:classgraph:4.8.179",
+
+        # Testing
+        "org.junit.jupiter:junit-jupiter-api:5.10.0",
+        "org.junit.jupiter:junit-jupiter-engine:5.10.0",
+        "org.junit.jupiter:junit-jupiter-params:5.10.0",
+        "org.junit.platform:junit-platform-suite-api:1.10.0",
+        "org.junit.platform:junit-platform-launcher:1.10.0",
+        "org.junit.platform:junit-platform-reporting:1.10.0",
+        "org.junit.platform:junit-platform-suite-engine:1.10.0",
+
+        # Compiler plugin util
+        "org.burningwave:core:12.62.7",
+    ],
+    excluded_artifacts = [
+        "com.velocitypowered:velocity-brigadier",  # Weird dependency issue, so just exclude it.
+        "io.opentelemetry:opentelemetry-exporter-sender-okhttp",
+        "com.github.hollow-cube:datafixerupper",  # Included by dataconverter but we replace it with our local version.
+    ],
+    fail_on_missing_checksum = False,
+    fetch_javadoc = True,
+    fetch_sources = True,
+    repositories = [
+        #         "m2Local",
+        "https://repo1.maven.org/maven2",
+        "https://jitpack.io",
+        "https://repo.papermc.io/repository/maven-public/",
+        "https://packages.confluent.io/maven/",  # For schema registry client
+    ],
+)
+use_repo(maven, "maven")
+
+# OCI Images
+
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+oci.pull(
+    name = "distroless_base",
+    image = "gcr.io/distroless/base-debian12",
+    platforms = [
+        "linux/amd64",
+        "linux/arm64/v8",
+        "linux/arm/v7",
+        "linux/s390x",
+        "linux/ppc64le",
+    ],
+    tag = "sha256:e9d0321de8927f69ce20e39bfc061343cce395996dfc1f0db6540e5145bc63a5",
+)
+use_repo(oci, "distroless_base", "distroless_base_linux_amd64", "distroless_base_linux_arm64_v8", "distroless_base_linux_arm_v7", "distroless_base_linux_ppc64le", "distroless_base_linux_s390x")

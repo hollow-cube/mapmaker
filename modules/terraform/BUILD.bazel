@@ -1,6 +1,5 @@
 load("@contrib_rules_jvm//java:defs.bzl", "JUNIT5_DEPS", "java_test_suite")
 load("@rules_java//java:defs.bzl", "java_library")
-load("//third_party/rules_jmh:defs.bzl", "jmh_java_benchmarks")
 
 java_library(
     name = "terraform",
@@ -13,7 +12,6 @@ java_library(
         "//modules/common",
         "//modules/core",  # TODO: This is a terrible dependency, but need the action bar stuff for debug stick.
         "//third_party:minestom",
-        #        "@maven//:com_github_mworzala_mc_debug_renderer_minestom",
         "@maven//:com_google_code_gson_gson",
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:net_kyori_adventure_api",
@@ -95,21 +93,6 @@ java_test_suite(
         "//modules/test",
         "//third_party:minestom",
         "@maven//:it_unimi_dsi_fastutil",
-        "@maven//:net_kyori_adventure_api",
-        "@maven//:net_kyori_adventure_text_serializer_plain",
-    ],
-)
-
-jmh_java_benchmarks(
-    name = "terraform_bench",
-    srcs = glob(include = ["src/bench/java/**/*.java"]),
-    resources = glob(include = ["src/bench/resources/**/*"]),
-    deps = [
-        ":terraform",
-        "//modules/command",
-        "//modules/common",
-        "//modules/test",
-        "//third_party:minestom",
         "@maven//:net_kyori_adventure_api",
         "@maven//:net_kyori_adventure_text_serializer_plain",
     ],

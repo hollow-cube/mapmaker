@@ -54,10 +54,10 @@ public final class MapCondition {
             if (!(sender instanceof Player player)) return HIDE;
             var world = MapWorld.forPlayerOptional(player);
             return switch (world) {
-                case PlayingMapWorld _ ->
+                case PlayingMapWorld ignored ->
                         playing && (world.isPlaying(player) || (allowSpectators && world.isSpectating(player))) ? ALLOW : HIDE;
-                case EditingMapWorld _ -> editing && world.canEdit(player) ? ALLOW : HIDE;
-                case TestingMapWorld _ ->
+                case EditingMapWorld ignored -> editing && world.canEdit(player) ? ALLOW : HIDE;
+                case TestingMapWorld ignored ->
                         testing && (world.isPlaying(player) || (allowSpectators && world.isSpectating(player))) ? ALLOW : HIDE;
                 case null, default -> HIDE;
             };

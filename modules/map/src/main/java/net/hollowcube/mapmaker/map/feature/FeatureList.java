@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.feature;
 
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.minestom.server.MinecraftServer;
@@ -10,8 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.concurrent.Executors;
-import java.util.concurrent.StructuredTaskScope;
+import java.util.concurrent.CompletableFuture;
 
 public class FeatureList {
     private static final Logger logger = LoggerFactory.getLogger(FeatureList.class);
@@ -20,18 +20,17 @@ public class FeatureList {
         var blockManager = MinecraftServer.getBlockManager();
 
         var features = new ArrayList<FeatureProvider>();
-        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+        try {
+            var futures = new ArrayList<CompletableFuture<Void>>();
             for (var feature : ServiceLoader.load(FeatureProvider.class)) {
                 features.add(feature);
                 for (var blockHandler : feature.blockHandlers()) {
                     blockManager.registerHandler(blockHandler.get().getNamespaceId(), blockHandler);
                 }
-                scope.fork(Executors.callable(() -> feature.init(config)));
+                futures.add(FutureUtil.fork(() -> feature.init(config)));
             }
 
-            scope.join();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
         } catch (Exception e) {
             logger.error("Failed to initialize features", e);
             throw new RuntimeException(e);
@@ -47,23 +46,15 @@ public class FeatureList {
 
     public @NotNull List<FeatureProvider> loadMap(@NotNull MapWorld world) {
         var enabledFeatures = new ArrayList<FeatureProvider>();
-        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+        try {
             // Load each feature in parallel
-            var enabledFutures = new StructuredTaskScope.Subtask[features.size()];
+            var enabledFutures = new CompletableFuture[features.size()];
             for (int i = 0; i < features.size(); i++) {
                 var feature = features.get(i);
-                enabledFutures[i] = scope.fork(() -> {
-                    try {
-                        return feature.initMap(world);
-                    } catch (Exception e) {
-                        MinecraftServer.getExceptionManager().handleException(new RuntimeException(
-                                "failed to load feature " + feature.getClass().getName(), e));
-                        return false;
-                    }
-                });
+                enabledFutures[i] = FutureUtil.fork(() -> feature.initMap(world));
             }
 
-            scope.join();
+            CompletableFuture.allOf(enabledFutures).join();
 
             // Add each feature to the enabled list if it is enabled.
             for (int i = 0; i < features.size(); i++) {
@@ -74,6 +65,9 @@ public class FeatureList {
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            logger.error("Failed to initialize features", e);
+            throw new RuntimeException(e);
         }
         return enabledFeatures;
     }

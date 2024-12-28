@@ -237,7 +237,7 @@ public class ParticleEmitterMarkerHandler extends MarkerHandler {
                 throw new IllegalArgumentException(name + ": failed to compile script: " + e.getMessage());
             }
         } else if (tag instanceof NumberBinaryTag numberTag) {
-            return (_, _) -> numberTag.doubleValue();
+            return (ignored1, ignored2) -> numberTag.doubleValue();
         } else {
             throw new IllegalArgumentException(name + ": expected number or script, got " + tag.getClass().getSimpleName());
         }
@@ -247,14 +247,14 @@ public class ParticleEmitterMarkerHandler extends MarkerHandler {
         switch (rawParticle) {
             case Particle.Block blockParticle when data.get("block") instanceof StringBinaryTag blockName -> {
                 try {
-                    particle = _ -> blockParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
+                    particle = ignored -> blockParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
                 } catch (ArgumentSyntaxException e) {
                     throw new IllegalArgumentException("Invalid block state: " + e.getMessage());
                 }
             }
             case Particle.BlockMarker blockMarkerParticle when data.get("block") instanceof StringBinaryTag blockName -> {
                 try {
-                    particle = _ -> blockMarkerParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
+                    particle = ignored -> blockMarkerParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
                 } catch (ArgumentSyntaxException e) {
                     throw new IllegalArgumentException("Invalid block state: " + e.getMessage());
                 }
@@ -313,7 +313,7 @@ public class ParticleEmitterMarkerHandler extends MarkerHandler {
             }
             case Particle.DustPillar dustPillarParticle when data.get("block") instanceof StringBinaryTag blockName -> {
                 try {
-                    particle = _ -> dustPillarParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
+                    particle = ignored -> dustPillarParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
                 } catch (ArgumentSyntaxException e) {
                     throw new IllegalArgumentException("Invalid block state: " + e.getMessage());
                 }
@@ -321,7 +321,7 @@ public class ParticleEmitterMarkerHandler extends MarkerHandler {
             // EntityEffect
             case Particle.FallingDust fallingDustParticle when data.get("block") instanceof StringBinaryTag blockName -> {
                 try {
-                    particle = _ -> fallingDustParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
+                    particle = ignored -> fallingDustParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
                 } catch (ArgumentSyntaxException e) {
                     throw new IllegalArgumentException("Invalid block state: " + e.getMessage());
                 }
@@ -329,12 +329,12 @@ public class ParticleEmitterMarkerHandler extends MarkerHandler {
             case Particle.Item itemParticle when data.get("item") instanceof StringBinaryTag itemName -> {
                 var material = Material.fromNamespaceId(itemName.value());
                 Check.argCondition(material == null, "Unknown item: " + itemName);
-                particle = _ -> itemParticle.withItem(ItemStack.of(material));
+                particle = ignored -> itemParticle.withItem(ItemStack.of(material));
                 //todo should support custom model data and maybe other components.
             }
             // SculkCharge, Shriek, Vibration
             default -> {
-                particle = _ -> rawParticle;
+                particle = ignored -> rawParticle;
             } // No data or unsupported
         }
     }

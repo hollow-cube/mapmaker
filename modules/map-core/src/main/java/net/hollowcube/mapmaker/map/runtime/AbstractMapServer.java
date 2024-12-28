@@ -105,7 +105,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.StructuredTaskScope;
 import java.util.function.Function;
 
 public abstract class AbstractMapServer implements MapServer {
@@ -562,16 +561,16 @@ public abstract class AbstractMapServer implements MapServer {
         // the other two requests (getting map player data, getting backpack) are idempotent/valid to do at
         // any point.
         var playerId = player.getUuid().toString();
-        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+        try {
             var transferReq = new SessionTransferRequest(
                     presence.instanceId(), presence.type(),
                     presence.state(), presence.mapId()
             );
-            var sessionResponseFuture = scope.fork(FutureUtil.wrap(() -> sessionService.transferSessionV2(playerId, transferReq)));
-            var mapPlayerDataFuture = scope.fork(FutureUtil.wrap(() -> mapService.getMapPlayerData(playerId)));
-            var backpackDataFuture = scope.fork(FutureUtil.wrap(() -> playerService.getPlayerBackpack(playerId)));
+            var sessionResponseFuture = FutureUtil.fork(() -> sessionService.transferSessionV2(playerId, transferReq));
+            var mapPlayerDataFuture = FutureUtil.fork(() -> mapService.getMapPlayerData(playerId));
+            var backpackDataFuture = FutureUtil.fork(() -> playerService.getPlayerBackpack(playerId));
 
-            scope.join();
+            CompletableFuture.allOf(sessionResponseFuture, mapPlayerDataFuture, backpackDataFuture).join();
 
             var sessionResponse = sessionResponseFuture.get();
             player.setTag(PlayerDataV2.TAG, sessionResponse.data());
