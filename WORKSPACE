@@ -111,7 +111,7 @@ maven_install(
         "com.google.auto.service:auto-service-annotations:1.1.1",
 
         # Minestom
-        "net.minestom:minestom-snapshots:file_registries-4c14c81dba",
+        "net.minestom:minestom-snapshots:9803f2bfe3",
         "dev.hollowcube:polar:1.12.1",
         "dev.hollowcube:dataconverter:1.21.3-rv1",
         "dev.hollowcube:mql:1.1.0",
@@ -175,7 +175,7 @@ maven_install(
     fetch_javadoc = True,
     fetch_sources = True,
     repositories = [
-        "m2Local",
+        #         "m2Local",
         "https://repo1.maven.org/maven2",
         "https://jitpack.io",
         "https://repo.papermc.io/repository/maven-public/",
