@@ -114,7 +114,7 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
 
     @Action("add_item_inactive")
     public void handleAddItemA(@NotNull Player player) {
-        //if (!MapFeatureFlags.ITEM_EDITOR.test(player)) return;
+        if (!MapFeatureFlags.ITEM_EDITOR.test(player)) return;
         pushView(c -> new ItemEditorView(c, new HotbarItems.Mutable(data.items(), newItems -> {
             data.setItems(newItems);
             save.run();
