@@ -50,17 +50,6 @@
                     sprite="effect/actions/give_item_active"/>
         </switch>
 
-        <switch id="remove_item_switch" width="2" height="2">
-            <button id="remove_item_inactive" width="2" height="2"
-                    translationKey="gui.effect.actions.remove_item"
-                    sprite="effect/actions/remove_item_inactive"/>
-            <button id="remove_item_active" width="2" height="2"
-                    translationKey="gui.effect.actions.remove_item"
-                    sprite="effect/actions/remove_item_active"/>
-        </switch>
-
-        <spacer/>
-
         <switch id="add_time_switch" width="2" height="2">
             <button id="add_time_inactive" width="2" height="2"
                     translationKey="gui.effect.actions.add_time"

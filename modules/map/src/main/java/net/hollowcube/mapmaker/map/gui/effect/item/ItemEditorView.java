@@ -7,6 +7,7 @@ import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -21,6 +22,9 @@ public class ItemEditorView extends View {
             .build();
     private static final ItemStack AIR_ITEM = ItemStack.builder(Material.DIAMOND)
             .set(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("effect/item/air").cmd())
+            .customName(Component.translatable("gui.effect.item.remove.name"))
+            .lore(Component.translatable("gui.effect.item.remove.lore"),
+                    Component.text(""), Component.translatable("gui.generic.click_to_select.lore"))
             .build();
 
     private @Outlet("slots_used") Text slotsUsedText;
@@ -86,7 +90,7 @@ public class ItemEditorView extends View {
                 itemOptsSwitches[i].setOption(0);
             } else {
                 if (item.material().id() == Material.AIR.id()) {
-                    itemIcons[i].setItemSprite(AIR_ITEM);
+                    itemIcons[i].setItemDirect(AIR_ITEM);
                 } else {
                     itemIcons[i].setItemDirect(item);
                 }
@@ -97,6 +101,7 @@ public class ItemEditorView extends View {
             }
         }
         slotsUsedText.setText(count + "/3 Slots Used");
+        slotsUsedText.setArgs(Component.text(count));
 
         elytraCycleSwitch.setOption(items.getElytra() == null ? 0 : items.getElytra() != null && items.getElytra() == true ? 1 : 2);
         elytraKeepSwitch.setOption(items.getElytra() == null);

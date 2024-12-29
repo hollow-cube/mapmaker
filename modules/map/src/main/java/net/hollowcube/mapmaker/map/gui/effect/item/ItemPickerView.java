@@ -9,6 +9,8 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -21,11 +23,14 @@ import static net.hollowcube.mapmaker.map.gui.effect.item.ItemEditorView.itemSet
 public class ItemPickerView extends View {
     private static final ItemStack FIREWORK_ITEM = FireworkRocketItem.withCount(FireworkRocketItem.DEFAULT_ITEM, 0); // Infinite
     private static final ItemStack TRIDENT_ITEM = ItemStack.of(Material.TRIDENT)
-            .with(ItemComponent.ENCHANTMENTS, EnchantmentList.EMPTY.with(Enchantment.RIPTIDE, 1))
+            .with(ItemComponent.ENCHANTMENTS, EnchantmentList.EMPTY.with(Enchantment.RIPTIDE, 1)) // TODO fix only ever displays as 1
             .without(ItemComponent.ATTRIBUTE_MODIFIERS);
-    private static final ItemStack AIR_ITEM = ItemStack.of(Material.AIR);
+    private static final ItemStack AIR_ITEM = ItemStack.of(Material.AIR)
+            .withCustomName(Component.text("Remove Item").color(TextColor.color(0xFA4141)))
+            .withLore(Component.text("Removes whatever item the player has in this slot.").color(TextColor.color(0xB0B0B0)));
 
     private @Outlet("title") Text titleText;
+    private @Outlet("item_slot") Text itemSlot;
 
     private @Outlet("item_firework_off") Label fireworkOffLabel;
     private @Outlet("item_firework_on") Label fireworkOnLabel;
@@ -44,7 +49,9 @@ public class ItemPickerView extends View {
         this.items = items;
         this.index = index;
 
-        titleText.setText("Item Slot #" + (index + 1));
+        titleText.setText("Choose Item");
+        itemSlot.setText("Item Slot #" + (index + 1));
+        itemSlot.setArgs(Component.text(index + 1));
         fireworkOffLabel.setItemSprite(FIREWORK_ITEM);
         fireworkOnLabel.setItemSprite(FIREWORK_ITEM);
         tridentOffLabel.setItemSprite(TRIDENT_ITEM);
@@ -106,5 +113,6 @@ public class ItemPickerView extends View {
     @Action("reset")
     private void reset() {
         items.setItem(index, null);
+        popView();
     }
 }
