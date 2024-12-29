@@ -58,15 +58,15 @@
 
         <switch id="time_dec5_switch">
             <button id="time_dec5_off" translationKey="gui.effect.potion.time.dec5_off"
-                    sprite="generic/modify_r2/disabled_minus"/>
+                    sprite="generic/modify_r3/disabled_minus"/>
             <button id="time_dec5_on" translationKey="gui.effect.potion.time.dec5_on"
-                    sprite="generic/modify_r2/two_minus"/>
+                    sprite="generic/modify_r3/two_minus"/>
         </switch>
         <switch id="time_dec1_switch">
             <button id="time_dec1_off" translationKey="gui.effect.potion.time.dec1_off"
-                    sprite="generic/modify_r2/disabled_minus"/>
+                    sprite="generic/modify_r3/disabled_minus"/>
             <button id="time_dec1_on" translationKey="gui.effect.potion.time.dec1_on"
-                    sprite="generic/modify_r2/one_minus"/>
+                    sprite="generic/modify_r3/one_minus"/>
         </switch>
 
         <text id="time" width="3" translationKey="gui.effect.potion.duration.current"
@@ -74,15 +74,15 @@
 
         <switch id="time_inc1_switch">
             <button id="time_inc1_off" translationKey="gui.effect.potion.time.inc1_off"
-                    sprite="generic/modify_r2/disabled_plus"/>
+                    sprite="generic/modify_r3/disabled_plus"/>
             <button id="time_inc1_on" translationKey="gui.effect.potion.time.inc1_on"
-                    sprite="generic/modify_r2/one_plus"/>
+                    sprite="generic/modify_r3/one_plus"/>
         </switch>
         <switch id="time_inc5_switch">
             <button id="time_inc5_off" translationKey="gui.effect.potion.time.inc5_off"
-                    sprite="generic/modify_r2/disabled_plus"/>
+                    sprite="generic/modify_r3/disabled_plus"/>
             <button id="time_inc5_on" translationKey="gui.effect.potion.time.inc5_on"
-                    sprite="generic/modify_r2/two_plus"/>
+                    sprite="generic/modify_r3/two_plus"/>
         </switch>
     </box>
 

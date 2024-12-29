@@ -2,16 +2,16 @@
 <?import net.hollowcube.mapmaker.gui.common ?>
 <component width="9" height="10" align="ttb" sprite="effect/item/opts/1/container">
     <text id="title" width="0" height="0" translationKey=""
-          font="map_details_title2" shift="49" value="Item Editor"/>
+          font="map_details_title2" shift="54" value="Item Editor"/>
     <!-- Header -->
     <box width="9" align="ltr">
         <BackButton2/>
-        <label translationKey="gui.effect.item.settings.information"/>
+        <label translationKey="gui.effect.item.trident.options.information" sprite="generic/information"/>
 
-        <text id="subtitle" width="5" translationKey="todo"
-              font="slot_title" centered="true" value="Trident"/>
+        <text id="subtitle" width="5" translationKey="gui.effect.item.trident"
+              font="slot_title" centered="true" value="Trident" sprite="generic/text_display_5"/>
 
-        <button id="reset" width="2" translationKey="gui.effect.item.settings.reset"/>
+        <button id="reset" width="2" translationKey="gui.effect.item.trident.settings.reset" sprite="generic/2x1s/reset"/>
     </box>
 
     <spacer/>
@@ -21,29 +21,31 @@
         <box width="9" align="ltr">
             <spacer/>
             <switch id="rl_minus_big_switch">
-                <button id="rl_minus_big_disabled" translationKey="todo"
-                        sprite="effect/item/opts/1/disabled_minus"/>
-                <button id="rl_minus_big" translationKey="todo"
-                        sprite="effect/item/opts/1/big_minus"/>
+                <button id="rl_minus_big_disabled" translationKey="gui.effect.item.enchant.level.dec5_off"
+                        sprite="generic/modify_r2/disabled_minus"/>
+                <button id="rl_minus_big" translationKey="gui.effect.item.enchant.level.dec5_on"
+                        sprite="generic/modify_r2/two_minus"/>
             </switch>
             <switch id="rl_minus_small_switch">
-                <button id="rl_minus_small_disabled" translationKey="todo"
-                        sprite="effect/item/opts/1/disabled_minus"/>
-                <button id="rl_minus_small" translationKey="todo"
-                        sprite="effect/item/opts/1/small_minus"/>
+                <button id="rl_minus_small_disabled" translationKey="gui.effect.item.enchant.level.dec1_off"
+                        sprite="generic/modify_r2/disabled_minus"/>
+                <button id="rl_minus_small" translationKey="gui.effect.item.enchant.level.dec1_on"
+                        sprite="generic/modify_r2/one_minus"/>
             </switch>
-            <text id="rl_text" width="3" translationKey="todo" font="line_3" centered="true"/>
+
+            <text id="rl_text" width="3" translationKey="gui.effect.item.trident.enchant.level" font="line_3" centered="true"/>
+
             <switch id="rl_plus_small_switch">
-                <button id="rl_plus_small_disabled" translationKey="todo"
-                        sprite="effect/item/opts/1/disabled_plus"/>
-                <button id="rl_plus_small" translationKey="todo"
-                        sprite="effect/item/opts/1/small_plus"/>
+                <button id="rl_plus_small_disabled" translationKey="gui.effect.item.enchant.level.inc1_off"
+                        sprite="generic/modify_r2/disabled_plus"/>
+                <button id="rl_plus_small" translationKey="gui.effect.item.enchant.level.inc1_on"
+                        sprite="generic/modify_r2/one_plus"/>
             </switch>
             <switch id="rl_plus_big_switch">
-                <button id="rl_plus_big_disabled" translationKey="todo"
-                        sprite="effect/item/opts/1/disabled_plus"/>
-                <button id="rl_plus_big" translationKey="todo"
-                        sprite="effect/item/opts/1/big_plus"/>
+                <button id="rl_plus_big_disabled" translationKey="gui.effect.item.enchant.level.inc5_off"
+                        sprite="generic/modify_r2/disabled_plus"/>
+                <button id="rl_plus_big" translationKey="gui.effect.item.enchant.level.inc5_on"
+                        sprite="generic/modify_r2/two_plus"/>
             </switch>
         </box>
     </box>

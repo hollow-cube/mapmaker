@@ -40,10 +40,6 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
     private @Outlet("add_item_inactive") Label addItemOffLabel;
     private @Outlet("add_item_active") Label addItemOnLabel;
 
-    private @Outlet("remove_item_switch") Switch removeItemSwitch;
-    private @Outlet("remove_item_inactive") Label removeItemOffLabel;
-    private @Outlet("remove_item_active") Label removeItemOnLabel;
-
     protected EffectData data;
     protected Runnable save;
 
@@ -118,7 +114,7 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
 
     @Action("add_item_inactive")
     public void handleAddItemA(@NotNull Player player) {
-        if (!MapFeatureFlags.ITEM_EDITOR.test(player)) return;
+        //if (!MapFeatureFlags.ITEM_EDITOR.test(player)) return;
         pushView(c -> new ItemEditorView(c, new HotbarItems.Mutable(data.items(), newItems -> {
             data.setItems(newItems);
             save.run();
@@ -145,6 +141,5 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
 
         settingsSwitch.setOption(0);
         addItemSwitch.setOption(0);
-        removeItemSwitch.setOption(0);
     }
 }

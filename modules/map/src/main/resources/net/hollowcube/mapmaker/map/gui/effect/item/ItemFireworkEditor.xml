@@ -2,16 +2,16 @@
 <?import net.hollowcube.mapmaker.gui.common ?>
 <component width="9" height="10" align="ttb" sprite="effect/item/opts/2/container">
     <text id="title" width="0" height="0" translationKey=""
-          font="map_details_title2" shift="49" value="Item Editor"/>
+          font="map_details_title2" shift="54" value="Item Editor"/>
     <!-- Header -->
     <box width="9" align="ltr">
         <BackButton2/>
-        <label translationKey="gui.effect.item.settings.information"/>
+        <label translationKey="gui.effect.item.firework_rocket.options.information" sprite="generic/information"/>
 
-        <text id="subtitle" width="5" translationKey="todo"
-              font="slot_title" centered="true" value="Firework Rocket"/>
+        <text id="subtitle" width="5" translationKey="gui.effect.item.firework_rocket"
+              font="slot_title" centered="true" value="Firework Rocket" sprite="generic/text_display_5"/>
 
-        <button id="reset" width="2" translationKey="gui.effect.item.settings.reset"/>
+        <button id="reset" width="2" translationKey="gui.effect.item.firework_rocket.settings.reset" sprite="generic/2x1s/reset"/>
     </box>
 
     <box width="9" height="2" align="ttb">
@@ -19,29 +19,31 @@
         <box width="9" align="ltr">
             <spacer/>
             <switch id="amt_minus_big_switch">
-                <button id="amt_minus_big_disabled" translationKey="todo"
-                        sprite="effect/item/opts/2/1_disabled_minus"/>
-                <button id="amt_minus_big" translationKey="todo"
-                        sprite="effect/item/opts/2/1_big_minus"/>
+                <button id="amt_minus_big_disabled" translationKey="gui.effect.item.amount.dec5_off"
+                        sprite="generic/modify_r1/disabled_minus"/>
+                <button id="amt_minus_big" translationKey="gui.effect.item.amount.dec5_on"
+                        sprite="generic/modify_r1/two_minus"/>
             </switch>
             <switch id="amt_minus_small_switch">
-                <button id="amt_minus_small_disabled" translationKey="todo"
-                        sprite="effect/item/opts/2/1_disabled_minus"/>
-                <button id="amt_minus_small" translationKey="todo"
-                        sprite="effect/item/opts/2/1_small_minus"/>
+                <button id="amt_minus_small_disabled" translationKey="gui.effect.item.amount.dec1_off"
+                        sprite="generic/modify_r1/disabled_minus"/>
+                <button id="amt_minus_small" translationKey="gui.effect.item.amount.dec1_on"
+                        sprite="generic/modify_r1/one_minus"/>
             </switch>
-            <text id="amt_text" width="3" translationKey="todo" font="line_2" centered="true"/>
+
+            <text id="amt_text" width="3" translationKey="gui.effect.item.firework_rocket.amount" font="line_2" centered="true"/>
+
             <switch id="amt_plus_small_switch">
-                <button id="amt_plus_small_disabled" translationKey="todo"
-                        sprite="effect/item/opts/2/1_disabled_plus"/>
-                <button id="amt_plus_small" translationKey="todo"
-                        sprite="effect/item/opts/2/1_small_plus"/>
+                <button id="amt_plus_small_disabled" translationKey="gui.effect.item.amount.inc1_off"
+                        sprite="generic/modify_r1/disabled_plus"/>
+                <button id="amt_plus_small" translationKey="gui.effect.item.amount.inc1_on"
+                        sprite="generic/modify_r1/one_plus"/>
             </switch>
             <switch id="amt_plus_big_switch">
-                <button id="amt_plus_big_disabled" translationKey="todo"
-                        sprite="effect/item/opts/2/1_disabled_plus"/>
-                <button id="amt_plus_big" translationKey="todo"
-                        sprite="effect/item/opts/2/1_big_plus"/>
+                <button id="amt_plus_big_disabled" translationKey="gui.effect.item.amount.inc5_off"
+                        sprite="generic/modify_r1/disabled_plus"/>
+                <button id="amt_plus_big" translationKey="gui.effect.item.amount.inc5_on"
+                        sprite="generic/modify_r1/two_plus"/>
             </switch>
         </box>
     </box>
@@ -51,29 +53,31 @@
         <box width="9" align="ltr">
             <spacer/>
             <switch id="dur_minus_big_switch">
-                <button id="dur_minus_big_disabled" translationKey="todo"
-                        sprite="effect/item/opts/2/2_disabled_minus"/>
-                <button id="dur_minus_big" translationKey="todo"
-                        sprite="effect/item/opts/2/2_big_minus"/>
+                <button id="dur_minus_big_disabled" translationKey="gui.effect.item.duration.dec5_off"
+                        sprite="generic/modify_r3/disabled_minus"/>
+                <button id="dur_minus_big" translationKey="gui.effect.item.duration.dec5_on"
+                        sprite="generic/modify_r3/two_minus"/>
             </switch>
             <switch id="dur_minus_small_switch">
-                <button id="dur_minus_small_disabled" translationKey="todo"
-                        sprite="effect/item/opts/2/2_disabled_minus"/>
-                <button id="dur_minus_small" translationKey="todo"
-                        sprite="effect/item/opts/2/2_small_minus"/>
+                <button id="dur_minus_small_disabled" translationKey="gui.effect.item.duration.dec1_off"
+                        sprite="generic/modify_r3/disabled_minus"/>
+                <button id="dur_minus_small" translationKey="gui.effect.item.duration.dec1_on"
+                        sprite="generic/modify_r3/one_minus"/>
             </switch>
-            <text id="dur_text" width="3" translationKey="todo" font="line_4" centered="true"/>
+
+            <text id="dur_text" width="3" translationKey="gui.effect.item.firework_rocket.duration" font="line_4" centered="true"/>
+
             <switch id="dur_plus_small_switch">
-                <button id="dur_plus_small_disabled" translationKey="todo"
-                        sprite="effect/item/opts/2/2_disabled_plus"/>
-                <button id="dur_plus_small" translationKey="todo"
-                        sprite="effect/item/opts/2/2_small_plus"/>
+                <button id="dur_plus_small_disabled" translationKey="gui.effect.item.duration.inc1_off"
+                        sprite="generic/modify_r3/disabled_plus"/>
+                <button id="dur_plus_small" translationKey="gui.effect.item.duration.inc1_on"
+                        sprite="generic/modify_r3/one_plus"/>
             </switch>
             <switch id="dur_plus_big_switch">
-                <button id="dur_plus_big_disabled" translationKey="todo"
-                        sprite="effect/item/opts/2/2_disabled_plus"/>
-                <button id="dur_plus_big" translationKey="todo"
-                        sprite="effect/item/opts/2/2_big_plus"/>
+                <button id="dur_plus_big_disabled" translationKey="gui.effect.item.duration.inc5_off"
+                        sprite="generic/modify_r3/disabled_plus"/>
+                <button id="dur_plus_big" translationKey="gui.effect.item.duration.inc5_on"
+                        sprite="generic/modify_r3/two_plus"/>
             </switch>
         </box>
     </box>

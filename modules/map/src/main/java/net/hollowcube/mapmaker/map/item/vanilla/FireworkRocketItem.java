@@ -46,11 +46,7 @@ public class FireworkRocketItem extends ItemHandler {
         return itemStack.withTag(DURATION_TAG, durationMillis)
                 .with(ItemComponent.LORE, List.of(
                         Component.text("Duration: " + NumberUtil.formatDuration(durationMillis), NamedTextColor.WHITE)
-                                .decoration(TextDecoration.ITALIC, false),
-                        Component.text(""),
-                        Component.text("TODO: Improve this text", NamedTextColor.WHITE)
-                                .decoration(TextDecoration.ITALIC, false)
-                ));
+                                .decoration(TextDecoration.ITALIC, false)));
     }
 
     public static boolean isInfinite(@NotNull ItemStack itemStack) {

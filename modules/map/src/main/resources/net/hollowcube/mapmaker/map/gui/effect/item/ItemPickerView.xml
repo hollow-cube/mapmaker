@@ -6,11 +6,12 @@
     <!-- Header -->
     <box width="9" align="ltr">
         <BackButton2/>
-        <label translationKey="gui.effect.item.picker.information"/>
+        <label translationKey="gui.effect.item.picker.information" sprite="generic/information"/>
 
-        <spacer width="5"/>
+        <text id="item_slot" width="5" translationKey="gui.effect.item.slot.current"
+              font="slot_title" centered="true" sprite="generic/text_display_5"/>
 
-        <button id="reset" width="2" translationKey="gui.effect.item.reset"/>
+        <button id="reset" width="2" translationKey="gui.effect.item.picker.reset" sprite="generic/2x1s/reset"/>
     </box>
 
     <spacer/>
@@ -18,21 +19,21 @@
     <box width="9" height="2" align="ltr">
         <spacer width="1"/>
         <switch id="item_firework_switch">
-            <button id="item_firework_off" translationKey="todo" sprite="minecraft:firework_rocket"
+            <button id="item_firework_off" translationKey="gui.effect.item.firework_rocket.off" sprite="minecraft:firework_rocket"
                     backgroundSprite="effect/item/picker/bg_unselected"/>
-            <button id="item_firework_on" translationKey="todo" sprite="minecraft:firework_rocket"
+            <button id="item_firework_on" translationKey="gui.effect.item.firework_rocket.on" sprite="minecraft:firework_rocket"
                     backgroundSprite="effect/item/picker/bg_selected"/>
         </switch>
         <switch id="item_trident_switch">
-            <button id="item_trident_off" translationKey="todo" sprite="minecraft:trident"
+            <button id="item_trident_off" translationKey="gui.effect.item.trident.off" sprite="minecraft:trident"
                     backgroundSprite="effect/item/picker/bg_unselected"/>
-            <button id="item_trident_on" translationKey="todo" sprite="minecraft:trident"
+            <button id="item_trident_on" translationKey="gui.effect.item.trident.on" sprite="minecraft:trident"
                     backgroundSprite="effect/item/picker/bg_selected"/>
         </switch>
         <switch id="item_air_switch">
-            <button id="item_air_off" translationKey="todo" sprite="effect/item/air"
+            <button id="item_air_off" translationKey="gui.effect.item.remove.off" sprite="effect/item/air"
                     backgroundSprite="effect/item/picker/bg_unselected"/>
-            <button id="item_air_on" translationKey="todo" sprite="effect/item/air"
+            <button id="item_air_on" translationKey="gui.effect.item.remove.on" sprite="effect/item/air"
                     backgroundSprite="effect/item/picker/bg_selected"/>
         </switch>
     </box>
