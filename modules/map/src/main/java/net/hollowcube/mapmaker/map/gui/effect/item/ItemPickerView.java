@@ -21,13 +21,13 @@ import org.jetbrains.annotations.NotNull;
 import static net.hollowcube.mapmaker.map.gui.effect.item.ItemEditorView.itemSettings;
 
 public class ItemPickerView extends View {
-    private static final ItemStack FIREWORK_ITEM = FireworkRocketItem.withCount(FireworkRocketItem.DEFAULT_ITEM, 0); // Infinite
-    private static final ItemStack TRIDENT_ITEM = ItemStack.of(Material.TRIDENT)
+    private static final ItemStack FIREWORK_ITEM = FireworkRocketItem.withCount(FireworkRocketItem.DEFAULT_ITEM, 0); // Infinite //TODO add item settings into the lore
+    private static final ItemStack TRIDENT_ITEM = ItemStack.of(Material.TRIDENT) //TODO add item enchants into the lore
             .with(ItemComponent.ENCHANTMENTS, EnchantmentList.EMPTY.with(Enchantment.RIPTIDE, 1)) // TODO fix only ever displays as 1
             .without(ItemComponent.ATTRIBUTE_MODIFIERS);
     private static final ItemStack AIR_ITEM = ItemStack.of(Material.AIR)
-            .withCustomName(Component.text("Remove Item").color(TextColor.color(0xFA4141)))
-            .withLore(Component.text("Removes whatever item the player has in this slot.").color(TextColor.color(0xB0B0B0)));
+            .withCustomName(Component.translatable("gui.effect.item.remove.name"))
+            .withLore(Component.translatable("gui.effect.item.remove.lore"));
 
     private @Outlet("title") Text titleText;
     private @Outlet("item_slot") Text itemSlot;
