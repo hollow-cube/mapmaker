@@ -27,18 +27,6 @@ public class ItemEditorView extends View {
                     Component.text(""), Component.translatable("gui.generic.click_to_change.lore"),
                     Component.translatable("gui.generic.shift_click_to_remove.lore"))
             .build();
-    //NOTE: the below two items are ONLY for the item display in this menu.
-    //probably a better way to do this though cause this seems very stinky!
-    private static final ItemStack TRIDENT_ITEM = ItemStack.builder(Material.TRIDENT) //TODO add item enchants into the lore
-            .customName(Component.translatable("gui.effect.item.trident.name"))
-            .lore(Component.translatable("gui.generic.click_to_change.lore"),
-                    Component.translatable("gui.generic.shift_click_to_remove.lore"))
-            .build();
-    private static final ItemStack FIREWORK_ROCKET_ITEM = ItemStack.builder(Material.FIREWORK_ROCKET) //TODO add item settings into the lore and show itemstack amount
-            .customName(Component.translatable("gui.effect.item.firework_rocket.name"))
-            .lore(Component.translatable("gui.generic.click_to_change.lore"),
-                    Component.translatable("gui.generic.shift_click_to_remove.lore"))
-            .build();
 
     private @Outlet("slots_used") Text slotsUsedText;
 
@@ -105,9 +93,17 @@ public class ItemEditorView extends View {
                 if (item.material().id() == Material.AIR.id()) {
                     itemIcons[i].setItemDirect(AIR_ITEM);
                 } else if (item.material().id() == Material.TRIDENT.id()) {
-                    itemIcons[i].setItemDirect(TRIDENT_ITEM);
+                    itemIcons[i].setItemDirect(item.withCustomName(
+                                    Component.translatable("gui.effect.item.trident.name"))
+                            .withLore(Component.text(""),
+                                    Component.translatable("gui.generic.click_to_change.lore"),
+                                    Component.translatable("gui.generic.shift_click_to_remove.lore")));
                 } else if (item.material().id() == Material.FIREWORK_ROCKET.id()) {
-                    itemIcons[i].setItemDirect(FIREWORK_ROCKET_ITEM);
+                    itemIcons[i].setItemDirect(item.withCustomName( //TODO fix only ever says flight duration 1 or nothing at all
+                            Component.translatable("gui.effect.item.firework_rocket.name"))
+                            .withLore(Component.text(""),
+                                    Component.translatable("gui.generic.click_to_change.lore"),
+                                    Component.translatable("gui.generic.shift_click_to_remove.lore")));
                 } else {
                     itemIcons[i].setItemDirect(item);
                 }
