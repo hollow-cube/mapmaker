@@ -7,27 +7,18 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItem;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
-import net.minestom.server.item.component.EnchantmentList;
-import net.minestom.server.item.enchant.Enchantment;
 import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.map.gui.effect.item.ItemEditorView.itemSettings;
 
 public class ItemPickerView extends View {
-    private static final ItemStack FIREWORK_ITEM = FireworkRocketItem.withCount(FireworkRocketItem.DEFAULT_ITEM, 0); // Infinite //TODO add item settings into the lore
-    private static final ItemStack TRIDENT_ITEM = ItemStack.of(Material.TRIDENT) //TODO add item enchants into the lore
-            .with(ItemComponent.ENCHANTMENTS, EnchantmentList.EMPTY.with(Enchantment.RIPTIDE, 1)) // TODO fix only ever displays as 1
-            .without(ItemComponent.ATTRIBUTE_MODIFIERS);
-    private static final ItemStack AIR_ITEM = ItemStack.of(Material.AIR)
-            .withCustomName(Component.translatable("gui.effect.item.remove.name"))
-            .withLore(Component.translatable("gui.effect.item.remove.lore"));
+    private static final ItemStack FIREWORK_ITEM = HotbarItem.FireworkRocket.DEFAULT.toItemStack(true);
+    private static final ItemStack TRIDENT_ITEM = HotbarItem.Trident.DEFAULT.toItemStack(true);
 
     private @Outlet("title") Text titleText;
     private @Outlet("item_slot") Text itemSlot;
@@ -59,15 +50,15 @@ public class ItemPickerView extends View {
 
         var item = items.getItem(index);
         if (item != null) {
-            fireworkSwitch.setOption(item.material().id() == Material.FIREWORK_ROCKET.id());
-            tridentSwitch.setOption(item.material().id() == Material.TRIDENT.id());
-            airSwitch.setOption(item.material().id() == Material.AIR.id());
+            fireworkSwitch.setOption(item instanceof HotbarItem.FireworkRocket);
+            tridentSwitch.setOption(item instanceof HotbarItem.Trident);
+            airSwitch.setOption(item instanceof HotbarItem.Remove);
         }
     }
 
-    private void updateItem(@NotNull ItemStack newItem) {
+    private void updateItem(@NotNull HotbarItem newItem) {
         var existing = items.getItem(index);
-        if (existing == null || existing.material().id() != newItem.material().id()) {
+        if (existing == null || !existing.name().equals(newItem.name())) {
             items.setItem(index, newItem);
         }
 
@@ -82,32 +73,32 @@ public class ItemPickerView extends View {
 
     @Action("item_firework_off")
     private void fireworkOff() {
-        updateItem(FIREWORK_ITEM);
+        updateItem(HotbarItem.FireworkRocket.DEFAULT);
     }
 
     @Action("item_firework_on")
     private void fireworkOn() {
-        updateItem(FIREWORK_ITEM);
+        updateItem(HotbarItem.FireworkRocket.DEFAULT);
     }
 
     @Action("item_trident_off")
     private void tridentOff() {
-        updateItem(TRIDENT_ITEM);
+        updateItem(HotbarItem.Trident.DEFAULT);
     }
 
     @Action("item_trident_on")
     private void tridentOn() {
-        updateItem(TRIDENT_ITEM);
+        updateItem(HotbarItem.Trident.DEFAULT);
     }
 
     @Action("item_air_off")
     private void airOff() {
-        updateItem(AIR_ITEM);
+        updateItem(HotbarItem.Remove.INSTANCE);
     }
 
     @Action("item_air_on")
     private void airOn() {
-        updateItem(AIR_ITEM);
+        updateItem(HotbarItem.Remove.INSTANCE);
     }
 
     @Action("reset")

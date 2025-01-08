@@ -6,11 +6,10 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItem;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
-import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemFireworkEditor extends ItemAbstractEditor {
@@ -31,15 +30,28 @@ public class ItemFireworkEditor extends ItemAbstractEditor {
     private @Outlet("dur_plus_big_switch") Switch durPlusBigSwitch;
     private @Outlet("dur_text") Text durText;
 
+    private HotbarItem.FireworkRocket item;
+
     public ItemFireworkEditor(@NotNull Context context, HotbarItems.@NotNull Mutable items, int index) {
         super(context, items, index);
+
+        if (!(items.getItem(index) instanceof HotbarItem.FireworkRocket rocket))
+            throw new IllegalArgumentException("Item at index is not a firework rocket");
+        item = rocket;
+        updateFromState();
+    }
+
+    @Override
+    protected void updateItem(@NotNull HotbarItem newItem) {
+        this.item = (HotbarItem.FireworkRocket) newItem;
+        super.updateItem(newItem);
     }
 
     @Override
     protected void updateFromState() {
-        boolean isFirework = item != null && item.material().id() == Material.FIREWORK_ROCKET.id();
+        boolean isFirework = item != null;
 
-        int amount = item == null ? 1 : FireworkRocketItem.getCount(item);
+        int amount = item == null ? 1 : item.quantity();
         amtMinusBigSwitch.setOption(isFirework && amount > MIN_AMOUNT);
         amtMinusSmallSwitch.setOption(isFirework && amount > MIN_AMOUNT);
         amtPlusSmallSwitch.setOption(isFirework && amount < MAX_AMOUNT);
@@ -47,7 +59,7 @@ public class ItemFireworkEditor extends ItemAbstractEditor {
         amtText.setText(amount <= 0 ? "Infinite" : String.valueOf(amount));
         amtText.setArgs(Component.text(amount <= 0 ? "Infinite" : String.valueOf(amount)));
 
-        int duration = item == null ? 0 : FireworkRocketItem.getDurationMillis(item);
+        int duration = item == null ? 0 : item.duration();
         durMinusBigSwitch.setOption(isFirework && duration > MIN_DURATION);
         durMinusSmallSwitch.setOption(isFirework && duration > MIN_DURATION);
         durPlusSmallSwitch.setOption(isFirework && duration < MAX_DURATION);
@@ -58,34 +70,34 @@ public class ItemFireworkEditor extends ItemAbstractEditor {
 
     private void addAmount(int delta) {
         if (item == null) return;
-        int amount = Math.max(MIN_AMOUNT, Math.min(MAX_AMOUNT, FireworkRocketItem.getCount(item) + delta));
-        updateItem(FireworkRocketItem.withCount(item, amount));
+        int amount = Math.max(MIN_AMOUNT, Math.min(MAX_AMOUNT, item.quantity() + delta));
+        updateItem(item.withQuantity(amount));
     }
 
     private void addDuration(int deltaMillis) {
         if (item == null) return;
-        int duration = Math.max(MIN_DURATION, Math.min(MAX_DURATION, FireworkRocketItem.getDurationMillis(item) + deltaMillis));
-        updateItem(FireworkRocketItem.setDurationMillis(item, duration));
+        int duration = Math.max(MIN_DURATION, Math.min(MAX_DURATION, item.duration() + deltaMillis));
+        updateItem(item.withDuration(duration));
     }
 
     private int getAmount() {
-        return FireworkRocketItem.getCount(item);
+        return item.quantity();
     }
 
     private int getDuration() {
-        return FireworkRocketItem.getDurationMillis(item);
+        return item.duration();
     }
 
     private void setAmount(int newAmount) {
         if (item == null) return;
         int amount = Math.max(MIN_AMOUNT, Math.min(MAX_AMOUNT, newAmount));
-        updateItem(FireworkRocketItem.withCount(item, amount));
+        updateItem(item.withQuantity(amount));
     }
 
     private void setDuration(int newDurationMillis) {
         if (item == null) return;
         int duration = Math.max(MIN_DURATION, Math.min(MAX_DURATION, newDurationMillis));
-        updateItem(FireworkRocketItem.setDurationMillis(item, duration));
+        updateItem(item.withDuration(duration));
     }
 
     @Action("reset")

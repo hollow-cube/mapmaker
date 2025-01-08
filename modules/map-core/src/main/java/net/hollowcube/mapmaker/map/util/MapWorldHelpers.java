@@ -47,7 +47,10 @@ public final class MapWorldHelpers {
         player.setVelocity(Vec.ZERO);
         player.clearEffects();
         player.getInventory().clear();
-        player.scheduleNextTick(ignored -> player.updateViewerRule(null));
+        player.scheduleNextTick(ignored -> {
+            player.updateViewerRule(null);
+            player.getPlayerMeta().setFlyingWithElytra(false);
+        });
 
         // Reapply the cosmetics they have on
         var playerData = PlayerDataV2.fromPlayer(player);

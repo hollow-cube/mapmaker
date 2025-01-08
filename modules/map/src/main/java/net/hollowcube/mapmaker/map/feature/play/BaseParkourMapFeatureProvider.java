@@ -17,10 +17,12 @@ import net.hollowcube.mapmaker.map.event.vnext.MapPlayerStatusChangeEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
+import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItem;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.map.feature.play.item.*;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
+import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.util.CustomizableHotbarManager;
 import net.hollowcube.mapmaker.map.util.MapMessages;
 import net.hollowcube.mapmaker.map.util.PlayerVisibilityExtension;
@@ -32,6 +34,7 @@ import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EquipmentSlot;
@@ -45,6 +48,7 @@ import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
+import net.minestom.server.event.player.PlayerStopFlyingWithElytraEvent;
 import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
@@ -59,6 +63,7 @@ import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -523,7 +528,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         } else if (world.isSpectating(player)) {
             if (player.getPosition().y() < world.instance().getCachedDimensionType().minY()) {
                 var checkpoint = player.getTag(SPECTATOR_CHECKPOINT);
-                player.teleport(checkpoint == null ? world.spawnPoint(player) : checkpoint, Vec.ZERO, null, RelativeFlags.NONE);
+                resetTeleport(player, checkpoint == null ? world.spawnPoint(player) : checkpoint);
             }
         }
     }
@@ -556,7 +561,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         player.removeTag(SPECTATOR_CHECKPOINT);
         player.removeTag(COUNTDOWN_END);
 
-        player.teleport(world.map().settings().getSpawnPoint(), Vec.ZERO, null, RelativeFlags.NONE).thenRun(() -> {
+        resetTeleport(player, world.map().settings().getSpawnPoint()).thenRun(() -> {
             updatePlayerFromState(player, newPlayState);
             abstractWorld.addPlayerImmediate(player);
 
@@ -582,11 +587,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             var playState = saveState.state(PlayState.class);
             var resetHeight = playState.resetHeight().orElse(world.instance().getTag(DEFAULT_RESET_HEIGHT));
             if (checkpoint.y() < resetHeight) {
-                player.teleport(world.spawnPoint(player), Vec.ZERO, null, RelativeFlags.NONE).thenRun(() -> {
+                resetTeleport(player, world.spawnPoint(player)).thenRun(() -> {
                     EventDispatcher.call(new MapPlayerInitEvent(world, player, false, false));
                 });
             } else {
-                player.teleport(checkpoint, Vec.ZERO, null, RelativeFlags.NONE).thenRun(() -> {
+                resetTeleport(player, checkpoint).thenRun(() -> {
                     EventDispatcher.call(new MapPlayerInitEvent(world, player, false, false));
                 });
             }
@@ -621,7 +626,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         player.removeTag(COUNTDOWN_END); // Remove so it is reapplied by updatePlayerFromState
         // Apply the current state to the player and teleport them
         updatePlayerFromState(player, playState);
-        player.teleport(playState.pos().orElseThrow(), Vec.ZERO, null, RelativeFlags.NONE).thenRun(() -> {
+        resetTeleport(player, playState.pos().orElseThrow()).thenRun(() -> {
             abstractWorld.addPlayerImmediate(player);
 
             EventDispatcher.call(new MapPlayerInitEvent(world, player, false, false));
@@ -668,7 +673,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             }
         }
         if (data.teleport().isPresent()) {
-            player.teleport(data.teleport().get(), Vec.ZERO, null, RelativeFlags.NONE).thenRun(() -> {
+            resetTeleport(player, data.teleport().get()).thenRun(() -> {
                 player.playSound(Sound.sound(SoundEvent.ENTITY_PLAYER_TELEPORT, Sound.Source.PLAYER, 0.5f, 1f), player.getPosition());
             });
         }
@@ -712,6 +717,14 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         var ghostBlocks = GhostBlockHolder.forPlayerOptional(player);
         state.setGhostBlocks(ghostBlocks == null ? Map.of() : ghostBlocks.save());
+
+        var items = state.items();
+        state.setItems(new HotbarItems(
+                items.item1() == null ? HotbarItem.Remove.INSTANCE : items.item1().fromItemStack(player.getInventory().getItemStack(3)),
+                items.item2() == null ? HotbarItem.Remove.INSTANCE : items.item2().fromItemStack(player.getInventory().getItemStack(5)),
+                items.item3() == null ? HotbarItem.Remove.INSTANCE : items.item3().fromItemStack(player.getInventory().getItemStack(6)),
+                items.elytra()
+        ));
     }
 
     private void updatePlayerFromState(@NotNull Player player, @NotNull PlayState state) {
@@ -748,9 +761,15 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         }
 
         // Apply items to current state.
-        player.getInventory().setItemStack(3, Objects.requireNonNullElse(state.items().item1(), ItemStack.AIR));
-        player.getInventory().setItemStack(5, Objects.requireNonNullElse(state.items().item2(), ItemStack.AIR));
-        player.getInventory().setItemStack(6, Objects.requireNonNullElse(state.items().item3(), ItemStack.AIR));
+        var item1 = state.items().item1();
+        player.getInventory().setItemStack(3, item1 == null || item1 instanceof HotbarItem.Remove
+                ? ItemStack.AIR : item1.toItemStack(false));
+        var item2 = state.items().item2();
+        player.getInventory().setItemStack(5, item2 == null || item2 instanceof HotbarItem.Remove
+                ? ItemStack.AIR : item2.toItemStack(false));
+        var item3 = state.items().item3();
+        player.getInventory().setItemStack(6, item3 == null || item3 instanceof HotbarItem.Remove
+                ? ItemStack.AIR : item3.toItemStack(false));
         if (Objects.requireNonNullElse(state.items().elytra(), false)) {
             player.setChestplate(player.getChestplate().with(ItemComponent.GLIDER)
                     .with(ItemComponent.EQUIPPABLE, ELYTRA_EQUIPPABLE));
@@ -844,6 +863,13 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
                 return PlayerVisibilityExtension.Visibility.SPECTATOR;
             } else return PlayerVisibilityExtension.Visibility.VISIBLE;
         }
+    }
+
+    private static CompletableFuture<Void> resetTeleport(@NotNull Player player, @NotNull Pos position) {
+        FireworkRocketItem.removeRocket(player);
+        player.getPlayerMeta().setFlyingWithElytra(false);
+        player.getInstance().eventNode().call(new PlayerStopFlyingWithElytraEvent(player));
+        return player.teleport(position, Vec.ZERO, null, RelativeFlags.NONE);
     }
 
 }

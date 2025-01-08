@@ -4,6 +4,8 @@
       <bsp-target>@//bin/development</bsp-target>
       <handler-state />
     </bsp-state>
-    <method v="2" />
+    <method v="2">
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Kill old" run_configuration_type="ShConfigurationType" />
+    </method>
   </configuration>
 </component>

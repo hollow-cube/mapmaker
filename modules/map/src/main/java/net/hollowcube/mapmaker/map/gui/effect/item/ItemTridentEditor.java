@@ -6,12 +6,9 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItem;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.item.ItemComponent;
-import net.minestom.server.item.Material;
-import net.minestom.server.item.component.EnchantmentList;
-import net.minestom.server.item.enchant.Enchantment;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemTridentEditor extends ItemAbstractEditor {
@@ -24,32 +21,36 @@ public class ItemTridentEditor extends ItemAbstractEditor {
     private @Outlet("rl_plus_big_switch") Switch rlPlusBigSwitch;
     private @Outlet("rl_text") Text rlText;
 
+    private HotbarItem.Trident item;
+
     public ItemTridentEditor(@NotNull Context context, @NotNull HotbarItems.Mutable items, int index) {
         super(context, items, index);
+
+        if (!(items.getItem(index) instanceof HotbarItem.Trident trident))
+            throw new IllegalArgumentException("Item at index is not a Trident");
+        item = trident;
+        updateFromState();
     }
 
-    private int getRiptideLevel() {
-        var enchants = item != null ? item.get(ItemComponent.ENCHANTMENTS, EnchantmentList.EMPTY) : EnchantmentList.EMPTY;
-        return enchants.level(Enchantment.RIPTIDE);
+    @Override
+    protected void updateItem(@NotNull HotbarItem newItem) {
+        this.item = (HotbarItem.Trident) newItem;
+        super.updateItem(newItem);
     }
 
     private void setRiptideLevel(int level) {
         level = Math.max(MIN_LEVEL, Math.min(MAX_LEVEL, level));
-        var enchants = item.get(ItemComponent.ENCHANTMENTS, EnchantmentList.EMPTY);
-        if (enchants.level(Enchantment.RIPTIDE) == level) return;
-        enchants = enchants.with(Enchantment.RIPTIDE, level);
-        updateItem(item.with(ItemComponent.ENCHANTMENTS, enchants));
+        updateItem(item.withRiptideLevel(level));
     }
 
     @Override
     protected void updateFromState() {
-        var isTrident = item != null && item.material().id() == Material.TRIDENT.id();
-        var level = getRiptideLevel();
+        var level = item == null ? 1 : item.riptideLevel();
 
-        rlMinusBigSwitch.setOption(isTrident && level > MIN_LEVEL);
-        rlMinusSmallSwitch.setOption(isTrident && level > MIN_LEVEL);
-        rlPlusSmallSwitch.setOption(isTrident && level < MAX_LEVEL);
-        rlPlusBigSwitch.setOption(isTrident && level < MAX_LEVEL);
+        rlMinusBigSwitch.setOption(level > MIN_LEVEL);
+        rlMinusSmallSwitch.setOption(level > MIN_LEVEL);
+        rlPlusSmallSwitch.setOption(level < MAX_LEVEL);
+        rlPlusBigSwitch.setOption(level < MAX_LEVEL);
         rlText.setText(switch (level) {
             case 0 -> "None";
             case 1 -> "I";
@@ -67,27 +68,27 @@ public class ItemTridentEditor extends ItemAbstractEditor {
 
     @Action("rl_minus_big")
     private void rlMinusBig() {
-        setRiptideLevel(getRiptideLevel() - 5);
+        setRiptideLevel(item.riptideLevel() - 5);
     }
 
     @Action("rl_minus_small")
     private void rlMinusSmall() {
-        setRiptideLevel(getRiptideLevel() - 1);
+        setRiptideLevel(item.riptideLevel() - 1);
     }
 
     @Action("rl_plus_small")
     private void rlPlusSmall() {
-        setRiptideLevel(getRiptideLevel() + 1);
+        setRiptideLevel(item.riptideLevel() + 1);
     }
 
     @Action("rl_plus_big")
     private void rlPlusBig() {
-        setRiptideLevel(getRiptideLevel() + 5);
+        setRiptideLevel(item.riptideLevel() + 5);
     }
 
     @Action("rl_text")
     private void handleSetCustomLevel() {
-        pushView(c -> new TridentRiptideCustomLevelAnvil(c, String.valueOf(getRiptideLevel())));
+        pushView(c -> new TridentRiptideCustomLevelAnvil(c, String.valueOf(item.riptideLevel())));
     }
 
     @Signal(TridentRiptideCustomLevelAnvil.SIG_UPDATE_NAME)

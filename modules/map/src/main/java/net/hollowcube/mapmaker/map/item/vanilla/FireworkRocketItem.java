@@ -5,7 +5,7 @@ import net.hollowcube.mapmaker.map.feature.play.vanilla.ElytraFeatureProvider;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
@@ -27,7 +27,7 @@ public class FireworkRocketItem extends ItemHandler {
     private static final int INFINITE_CUSTOM_MODEL_DATA = 1;
 
     public static final FireworkRocketItem INSTANCE = new FireworkRocketItem();
-    public static final ItemStack DEFAULT_ITEM = setDurationMillis(
+    public static final ItemStack DEFAULT = setDurationMillis(
             ItemStack.of(Material.FIREWORK_ROCKET)
                     .without(ItemComponent.FIREWORKS)
                     .with(ItemComponent.MAX_STACK_SIZE, 99),
@@ -45,7 +45,7 @@ public class FireworkRocketItem extends ItemHandler {
     public static @NotNull ItemStack setDurationMillis(@NotNull ItemStack itemStack, int durationMillis) {
         return itemStack.withTag(DURATION_TAG, durationMillis)
                 .with(ItemComponent.LORE, List.of(
-                        Component.text("Duration: " + NumberUtil.formatDuration(durationMillis), NamedTextColor.WHITE)
+                        Component.text("Duration: " + NumberUtil.formatDuration(durationMillis), TextColor.color(0xB0B0B0))
                                 .decoration(TextDecoration.ITALIC, false)));
     }
 

@@ -5,6 +5,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItem;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
@@ -14,18 +15,13 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class ItemEditorView extends View {
     private static final ItemStack PLUS_ITEM = ItemStack.builder(Material.DIAMOND)
             .set(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("effect/item/plus").cmd())
-            .build();
-    private static final ItemStack AIR_ITEM = ItemStack.builder(Material.DIAMOND)
-            .set(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("effect/item/air").cmd())
-            .customName(Component.translatable("gui.effect.item.remove.name"))
-            .lore(Component.translatable("gui.effect.item.remove.lore"),
-                    Component.text(""), Component.translatable("gui.generic.click_to_change.lore"),
-                    Component.translatable("gui.generic.shift_click_to_remove.lore"))
             .build();
 
     private @Outlet("slots_used") Text slotsUsedText;
@@ -90,22 +86,30 @@ public class ItemEditorView extends View {
                 itemIcons[i].setItemSprite(PLUS_ITEM);
                 itemOptsSwitches[i].setOption(0);
             } else {
-                if (item.material().id() == Material.AIR.id()) {
-                    itemIcons[i].setItemDirect(AIR_ITEM);
-                } else if (item.material().id() == Material.TRIDENT.id()) {
-                    itemIcons[i].setItemDirect(item.withCustomName(
-                                    Component.translatable("gui.effect.item.trident.name"))
-                            .withLore(Component.text(""),
-                                    Component.translatable("gui.generic.click_to_change.lore"),
+                if (item instanceof HotbarItem.Remove) {
+                    itemIcons[i].setItemDirect(item.toItemStack(false)
+                            .withCustomName(Component.translatable("gui.effect.item.remove.name"))
+                            .withLore(Component.translatable("gui.effect.item.remove.lore"),
+                                    Component.text(""), Component.translatable("gui.generic.click_to_change.lore"),
                                     Component.translatable("gui.generic.shift_click_to_remove.lore")));
-                } else if (item.material().id() == Material.FIREWORK_ROCKET.id()) {
-                    itemIcons[i].setItemDirect(item.withCustomName( //TODO fix only ever says flight duration 1 or nothing at all
-                            Component.translatable("gui.effect.item.firework_rocket.name"))
-                            .withLore(Component.text(""),
-                                    Component.translatable("gui.generic.click_to_change.lore"),
-                                    Component.translatable("gui.generic.shift_click_to_remove.lore")));
+                } else if (item instanceof HotbarItem.Trident rocket) {
+                    var baseTridentItem = item.toItemStack(false)
+                            .withCustomName(Component.translatable("gui.effect.item.trident.name"));
+                    var tridentLore = new ArrayList<>(baseTridentItem.get(ItemComponent.LORE, List.of()));
+                    tridentLore.addAll(List.of(Component.text(""),
+                            Component.translatable("gui.generic.click_to_change.lore"),
+                            Component.translatable("gui.generic.shift_click_to_remove.lore")));
+                    itemIcons[i].setItemDirect(baseTridentItem.withLore(tridentLore));
+                } else if (item instanceof HotbarItem.FireworkRocket rocket) {
+                    var baseFireworkItem = item.toItemStack(false)
+                            .withCustomName(Component.translatable("gui.effect.item.firework_rocket.name"));
+                    var fireworkLore = new ArrayList<>(baseFireworkItem.get(ItemComponent.LORE, List.of()));
+                    fireworkLore.addAll(List.of(Component.text(""),
+                            Component.translatable("gui.generic.click_to_change.lore"),
+                            Component.translatable("gui.generic.shift_click_to_remove.lore")));
+                    itemIcons[i].setItemDirect(baseFireworkItem.withLore(fireworkLore));
                 } else {
-                    itemIcons[i].setItemDirect(item);
+                    itemIcons[i].setItemDirect(item.toItemStack(false));
                 }
 
                 var settingsPage = itemSettings(item);
@@ -167,13 +171,11 @@ public class ItemEditorView extends View {
         View create(@NotNull Context context, @NotNull HotbarItems.Mutable items, int index);
     }
 
-    static @Nullable Map.Entry<ItemSettingsView, Boolean> itemSettings(@Nullable ItemStack itemStack) {
-        if (itemStack == null) return null;
-        var material = itemStack.material();
-        if (material.id() == Material.FIREWORK_ROCKET.id()) {
-            return Map.entry(ItemFireworkEditor::new, false);
-        } else if (material.id() == Material.TRIDENT.id()) {
-            return Map.entry(ItemTridentEditor::new, true);
-        } else return null;
+    static @Nullable Map.Entry<ItemSettingsView, Boolean> itemSettings(@Nullable HotbarItem item) {
+        return switch (item) {
+            case HotbarItem.FireworkRocket ignored -> Map.entry(ItemFireworkEditor::new, false);
+            case HotbarItem.Trident ignored -> Map.entry(ItemTridentEditor::new, true);
+            case null, default -> null;
+        };
     }
 }

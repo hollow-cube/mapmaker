@@ -7,9 +7,9 @@ import net.hollowcube.mapmaker.local.svc.LocalSessionService;
 import net.hollowcube.mapmaker.map.MapServerRunner;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
+import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItem;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.map.gui.effect.item.ItemEditorView;
-import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.util.MapJoinInfo;
 import net.hollowcube.mapmaker.obungus.ObungusCore;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -63,7 +63,7 @@ public class LocalServerRunner extends MapServerRunner {
         var cmd = super.createDebugCommand();
         cmd.createLocalSubcommand("item", (sender, context) -> {
             var items = new HotbarItems.Mutable(HotbarItems.EMPTY, null);
-            items.setItem(0, FireworkRocketItem.DEFAULT_ITEM);
+            items.setItem(0, HotbarItem.FireworkRocket.DEFAULT);
             guiController().show(sender, c -> new ItemEditorView(c, items));
         }, "item editor");
         return cmd;
