@@ -1,10 +1,9 @@
 package net.hollowcube.common.lang;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.TranslationArgument;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.Context;
@@ -31,6 +30,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,11 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("UnstableApiUsage")
 public class LanguageProviderV2 {
+
     private static final Logger logger = LoggerFactory.getLogger("LanguageProvider");
+
+    private static final Pattern ARG_PATTERN = Pattern.compile("<(?<index>[0-9]+)(?::(?<format>[0#.,E;\\-%?¤X']+))?>");
+    private static final Map<String, NumberFormat> NUMBER_FORMATTERS = new ConcurrentHashMap<>();
 
     private static final JsonObject langData;
 
@@ -53,6 +58,22 @@ public class LanguageProviderV2 {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        for (var entry : lang.entrySet()) {
+            var value = entry.getValue();
+            Iterable<JsonElement> elements = value.isJsonPrimitive() ? List.of(value) : value.getAsJsonArray();
+            for (var element : elements) {
+                if (!element.isJsonPrimitive()) continue;
+                ARG_PATTERN.matcher(entry.getValue().getAsString())
+                        .results()
+                        .forEachOrdered(match -> {
+                            var format = match.group("format");
+                            if (format == null || NUMBER_FORMATTERS.containsKey(format)) return;
+                            NUMBER_FORMATTERS.put(format, new DecimalFormat(format));
+                        });
+            }
+        }
+
         langData = lang;
     }
 
@@ -134,7 +155,6 @@ public class LanguageProviderV2 {
 
     // Use of a lot of internal Minimessage APIs below. May break in the future and need to write this ourselves.
 
-    private static final Pattern ARG_PATTERN = Pattern.compile("<[0-9]+>");
     private static final PlainTextComponentSerializer PLAIN_TEXT = PlainTextComponentSerializer.plainText();
     private static final MiniMessage MINI_MESSAGE = MiniMessage.builder()
             .build();
@@ -199,12 +219,16 @@ public class LanguageProviderV2 {
     static @NotNull String replaceInString(@NotNull String value, @NotNull List<Component> args) {
         return ARG_PATTERN.matcher(value)
                 .replaceAll(match -> {
-                    var rawGroup = match.group();
-                    var index = Integer.parseInt(rawGroup.substring(1, rawGroup.length() - 1));
+                    var index = Integer.parseInt(match.group("index"));
                     if (index < 0 || index >= args.size()) {
                         return "$$" + index;
                     } else {
-                        return PLAIN_TEXT.serialize(args.get(index));
+                        var component = args.get(index);
+                        var formatter = NUMBER_FORMATTERS.get(match.group("format"));
+                        if (formatter != null && component instanceof TranslationArgument argument && argument.value() instanceof Number number){
+                            return formatter.format(number);
+                        }
+                        return PLAIN_TEXT.serialize(component);
                     }
                 });
     }
