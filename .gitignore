@@ -6,6 +6,7 @@ bazel-*
 .idea
 .ijwb
 .ijwb-old
+*.iml
 
 .DS_Store
 
