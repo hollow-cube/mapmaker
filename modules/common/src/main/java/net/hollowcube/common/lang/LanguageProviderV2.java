@@ -2,6 +2,7 @@ package net.hollowcube.common.lang;
 
 import com.google.gson.*;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.TranslationArgument;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -161,14 +162,14 @@ public class LanguageProviderV2 {
 
     public static final Component BASE_EMPTY = Component.text("", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false);
 
-    private record PlaceholderTag(int index) implements Tag {
+    private record PlaceholderTag(int index, @Nullable NumberFormat formatter) implements Tag {
         private static final TagResolver RESOLVER = new TagResolver() {
             @Override
             public @Nullable Tag resolve(@NotNull String name, @NotNull ArgumentQueue arguments, @NotNull Context ctx) throws ParsingException {
                 try {
                     var index = Integer.parseInt(name);
                     if (index < 0) return null;
-                    return new PlaceholderTag(index);
+                    return new PlaceholderTag(index, arguments.hasNext() ? NUMBER_FORMATTERS.get(arguments.pop().value()) : null);
                 } catch (NumberFormatException ignored) {
                     return null;
                 }
@@ -260,9 +261,29 @@ public class LanguageProviderV2 {
             }
 
             if (tag instanceof PlaceholderTag placeholderTag) {
-                if (placeholderTag.index >= args.size())
+                if (placeholderTag.index >= args.size()) {
                     comp = Component.text("$$" + placeholderTag.index);
-                else comp = args.get(placeholderTag.index);
+                } else {
+                    comp = args.get(placeholderTag.index);
+                    if (placeholderTag.formatter != null) {
+                        // We need to parse the number from the component and format it being changed to Component.text()
+                        Number number = switch (comp) {
+                            case TranslationArgument argument -> {
+                                var value = argument.value();
+                                yield value instanceof Number ? (Number) value : null;
+                            }
+                            case TextComponent text -> {
+                                try {
+                                    yield Double.parseDouble(text.content());
+                                } catch (NumberFormatException e) {
+                                    yield null;
+                                }
+                            }
+                            default -> null;
+                        };
+                        if (number != null) comp = Component.text(placeholderTag.formatter.format(number));
+                    }
+                }
             }
         }
 
