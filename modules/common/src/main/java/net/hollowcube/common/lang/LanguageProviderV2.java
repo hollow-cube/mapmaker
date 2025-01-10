@@ -64,7 +64,7 @@ public class LanguageProviderV2 {
             Iterable<JsonElement> elements = value.isJsonPrimitive() ? List.of(value) : value.getAsJsonArray();
             for (var element : elements) {
                 if (!element.isJsonPrimitive()) continue;
-                ARG_PATTERN.matcher(entry.getValue().getAsString())
+                ARG_PATTERN.matcher(element.getAsString())
                         .results()
                         .forEachOrdered(match -> {
                             var format = match.group("format");
