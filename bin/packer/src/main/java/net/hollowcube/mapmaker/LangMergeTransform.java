@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -68,7 +70,7 @@ public class LangMergeTransform {
 
                 try (InputStream is = Files.newInputStream(langFile)) {
                     Properties properties = new Properties();
-                    properties.load(is);
+                    properties.load(new InputStreamReader(is, StandardCharsets.UTF_8));
 
                     for (Map.Entry<Object, Object> entry : properties.entrySet()) {
                         String key = entry.getKey().toString();
@@ -78,6 +80,12 @@ public class LangMergeTransform {
                             logger.log(System.Logger.Level.ERROR, String.format(
                                     "Duplicate key: %s in %s (originally in %s)",
                                     key, langFile.getFileName(), keySources.get(key)
+                            ));
+                            continue;
+                        }
+                        if (value.contains("\u0000")) {
+                            logger.log(System.Logger.Level.ERROR, String.format(
+                                    "Invalid character in translation: %s", key
                             ));
                             continue;
                         }
