@@ -19,6 +19,7 @@ java_library(
         "//modules/core",
         "//modules/hub",
         "//modules/map",
+        "//modules/nbs",
         "//modules/map-core",
         "//modules/terraform",
         "//modules/datafixerupper",
