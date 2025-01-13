@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.map.item.vanilla;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.util.GenericTempActionBarProvider;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
@@ -12,32 +11,10 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
 public class DebugStickItem extends ItemHandler {
     public static final DebugStickItem INSTANCE = new DebugStickItem();
 
     private static final Tag<String> TAG_PROPERTY = Tag.String("property");
-
-    private static final Int2ObjectMap<Map<String, String[]>> VALID_PROPERTIES;
-
-    static {
-        var blockmap = new Int2ObjectOpenHashMap<Map<String, String[]>>();
-        for (var block : Block.values()) {
-            var blockprops = new HashMap<String, String[]>();
-            for (var propName : block.properties().keySet()) {
-                var propValues = new HashSet<>();
-                for (var state : block.possibleStates()) {
-                    propValues.add(state.getProperty(propName));
-                }
-                blockprops.put(propName, propValues.toArray(new String[0]));
-            }
-            blockmap.put(block.id(), blockprops);
-        }
-        VALID_PROPERTIES = blockmap;
-    }
 
     private DebugStickItem() {
         super("minecraft:debug_stick", RIGHT_CLICK_BLOCK | LEFT_CLICK_BLOCK);
@@ -96,7 +73,7 @@ public class DebugStickItem extends ItemHandler {
 
         // Get the next value
         String name = null;
-        var props = VALID_PROPERTIES.get(block.id()).get(newProperty);
+        var props = BlockUtil.getBlockProperties(block).get(newProperty);
         for (int i = 0; i < props.length; i++) {
             if (props[i].equals(block.getProperty(newProperty))) {
                 name = props[(i + 1) % props.length];
