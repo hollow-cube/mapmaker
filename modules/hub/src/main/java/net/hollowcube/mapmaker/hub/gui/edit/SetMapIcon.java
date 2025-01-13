@@ -33,7 +33,7 @@ public class SetMapIcon extends View {
         inputField.setArgs(Component.text(input));
     }
 
-    private static Task task = null;
+    private Task task = null;
 
     @Signal(Element.SIG_ANVIL_INPUT)
     public void handleAnvilInput(@NotNull String input) {
@@ -81,6 +81,13 @@ public class SetMapIcon extends View {
     @Signal(MapIconPreview.SIG_SELECTED)
     private void handleSelectIcon(@NotNull Material material) {
         popView(SIG_UPDATE_ICON, material);
+    }
+
+    @Signal(SIG_CLOSE)
+    private void handleClose() {
+        var task = this.task;
+        this.task = null;
+        if (task != null) task.cancel();
     }
 
 }
