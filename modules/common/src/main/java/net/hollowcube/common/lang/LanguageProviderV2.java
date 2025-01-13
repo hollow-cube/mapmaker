@@ -225,7 +225,8 @@ public class LanguageProviderV2 {
                         return "$$" + index;
                     } else {
                         var component = args.get(index);
-                        var formatter = NUMBER_FORMATTERS.get(match.group("format"));
+                        var format = match.group("format");
+                        var formatter = format == null ? null : NUMBER_FORMATTERS.get(format);
                         if (formatter != null && component instanceof TranslationArgument argument && argument.value() instanceof Number number){
                             return formatter.format(number);
                         }
