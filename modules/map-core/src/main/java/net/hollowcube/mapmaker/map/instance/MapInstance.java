@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.instance;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
+import net.hollowcube.mapmaker.map.MapSize;
 import net.hollowcube.mapmaker.map.ReadableMapData;
 import net.hollowcube.mapmaker.map.polar.PolarDataFixer;
 import net.hollowcube.mapmaker.util.NoopChunkLoader;
@@ -31,11 +32,11 @@ public class MapInstance extends InstanceContainer {
 
     private final boolean hasLighting;
 
-    public MapInstance(@NotNull String dimensionName, boolean hasLighting) {
-        this(dimensionName, hasLighting ? DimensionType.OVERWORLD : DimensionTypes.FULL_BRIGHT, hasLighting);
+    public MapInstance(@NotNull String dimensionName, boolean hasLighting, @NotNull MapSize size) {
+        this(dimensionName, DimensionTypes.forSize(size, hasLighting), hasLighting);
     }
 
-    public MapInstance(@NotNull String dimensionName, @NotNull DynamicRegistry.Key<DimensionType> dimensionType, boolean hasLighting) {
+    private MapInstance(@NotNull String dimensionName, @NotNull DynamicRegistry.Key<DimensionType> dimensionType, boolean hasLighting) {
         super(UUID.randomUUID(), dimensionType, null, NamespaceID.from(dimensionName));
         this.hasLighting = hasLighting;
 

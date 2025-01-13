@@ -205,6 +205,18 @@ public class DevServerRunner extends AbstractMapServer {
             }
         }, "Enables progress index add mode for the current map");
 
+//        dbg.createPermissionlessSubcommand("song", (player, context) -> {
+//            try {
+//                var bytes = Files.readAllBytes(Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/modules/nbs/Spirit of Adventure.nbs"));
+//                var song = NBSReader.nbsReader().read(bytes);
+//
+//                var nbsPlayer = new NBSPlayer.Impl(player, song);
+//                player.scheduler().buildTask(nbsPlayer::tick).repeat(TaskSchedule.tick(2)).schedule();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }, "testing songs");
+
         return dbg;
     }
 }

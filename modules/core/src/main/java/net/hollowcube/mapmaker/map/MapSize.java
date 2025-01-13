@@ -7,7 +7,9 @@ public enum MapSize {
     LARGE(1, 300),
     MASSIVE(2, 600),
     COLOSSAL(3, 1200),
-    UNLIMITED(-1, /*Minecraft world limit*/29_999_984) // POWER!!!
+    UNLIMITED(-1, /*Minecraft world limit*/29_999_984), // POWER!!!
+    TALL_2K(-1, 300), // 2k blocks tall
+    TALL_4K(-1, 300), // 4k blocks tall
     ;
 
     private final int id;

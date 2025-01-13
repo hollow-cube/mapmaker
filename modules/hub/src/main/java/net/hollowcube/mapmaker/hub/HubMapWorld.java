@@ -83,7 +83,7 @@ public class HubMapWorld extends AbstractMapWorld {
             .addListener(PlayerChangeHeldSlotEvent.class, this::handleSwitchSlot);
 
     public HubMapWorld(@NotNull MapServer server, @NotNull MapData map) {
-        super(server, HUB_MAP_DATA, new MapInstance(HUB_MAP_DATA.id(), false));
+        super(server, HUB_MAP_DATA, new MapInstance(HUB_MAP_DATA.id(), false, map.settings().getSize()));
         Check.stateCondition(HubMapWorld.instance != null, "HubMapWorld already created");
         HubMapWorld.instance = this;
 

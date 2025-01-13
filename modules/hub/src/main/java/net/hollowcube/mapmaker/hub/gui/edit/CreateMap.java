@@ -45,10 +45,10 @@ public class CreateMap extends View {
         for (int i = 0; i < sizeSwitches.length; i++) {
             final MapSize size = MapSize.values()[i];
             final ShopUpgrade upgrade = switch (size) {
-                case NORMAL, UNLIMITED -> null;
                 case LARGE -> ShopUpgrade.MAP_SIZE_2;
                 case MASSIVE -> ShopUpgrade.MAP_SIZE_3;
                 case COLOSSAL -> ShopUpgrade.MAP_SIZE_4;
+                case null, default -> null;
             };
 
             if (upgrade == null || ShopUpgradeCache.has(playerId, upgrade, false)) {

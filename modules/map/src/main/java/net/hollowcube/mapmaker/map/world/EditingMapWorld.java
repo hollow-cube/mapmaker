@@ -83,7 +83,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
     private Task autoSaveTask = null;
 
     public EditingMapWorld(@NotNull MapServer server, @NotNull MapData map) {
-        super(server, map, new MapInstance(map.createDimensionName('e'), map.getSetting(MapSettings.LIGHTING)));
+        super(server, map, new MapInstance(map.createDimensionName('e'), map.getSetting(MapSettings.LIGHTING), map.settings().getSize()));
 
         this.terraform = server.facet(Terraform.class);
 
