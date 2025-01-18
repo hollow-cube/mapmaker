@@ -4,10 +4,12 @@ import ca.spottedleaf.dataconverter.minecraft.MCDataConverter;
 import ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry;
 import com.google.gson.JsonObject;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.block.custom.CheckpointPlateBlock;
 import net.hollowcube.polar.*;
 import net.kyori.adventure.nbt.*;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.InstanceContainer;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.palette.Palettes;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.world.DimensionType;
@@ -134,9 +136,25 @@ public class SlimeToPolar {
         var loader = new PolarLoader(world);
         instance.setChunkLoader(loader);
 
+        for (var chunk : loader.world().chunks()) {
+            instance.loadChunk(chunk.x(), chunk.z()).join();
+        }
 
+        if (mapData.has("checkpoints")) {
+            for (var checkpointRaw : mapData.getAsJsonArray("checkpoints")) {
+                var checkpoint = checkpointRaw.getAsJsonObject();
+                var x = checkpoint.get("x").getAsInt();
+                var y = checkpoint.get("y").getAsInt();
+                var z = checkpoint.get("z").getAsInt();
 
-        return PolarWriter.write(world);
+                instance.setBlock(x, y, z, Block.HEAVY_WEIGHTED_PRESSURE_PLATE
+                        .withHandler(new CheckpointPlateBlock()));
+            }
+        }
+
+        instance.saveChunksToStorage().join();
+
+        return PolarWriter.write(loader.world());
     }
 
     private static String blockPropertiesToString(@NotNull CompoundBinaryTag tag) {
