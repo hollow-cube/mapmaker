@@ -23,6 +23,9 @@ void main() {
     // More book handling
     if (Color == vec4(78/255., 92/255., 38/255., Color.a)) {
         pos.x -= 9;
+    } else if (Color == vec4(78/255., 90/255., Color.b, Color.a)) {
+        // TODO: need to also offset the shadow
+        pos.y += (Color.b * 255) - 50;
     }
 
     gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);
@@ -34,5 +37,13 @@ void main() {
     if (Color == vec4(78/255., 92/255., 38/255., Color.a)) {
         vertexColor = vec4(texelFetch(Sampler2, UV2 / 16, 0).xyz, vertexColor.a);
         return;
+    }
+
+    // Remove the color from the vertical shift color so it only reflects the underlying texture.
+    if (Color == vec4(78/255., 90/255., Color.b, Color.a)) {
+        vertexColor = vec4(texelFetch(Sampler2, UV2 / 16, 0).xyz, vertexColor.a);
+    } else if (false) {
+        // TODO: we need to also handle the shadow color here.
+        vertexColor = vec4(0);
     }
 }

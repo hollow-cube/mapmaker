@@ -1,5 +1,10 @@
 load("@contrib_rules_jvm//java:defs.bzl", "JUNIT5_DEPS", "java_junit5_test")
-load("@rules_java//java:defs.bzl", "java_library")
+load("@rules_java//java:defs.bzl", "java_import", "java_library")
+
+java_import(
+    name = "local_truffle_js",
+    jars = ["//modules/map/third_party:truffle-js.jar"],
+)
 
 java_library(
     name = "map",
@@ -7,6 +12,7 @@ java_library(
     resources = glob(include = ["src/main/resources/**/*"]),
     visibility = ["//visibility:public"],
     deps = [
+        ":local_truffle_js",
         "//modules/canvas:api",
         "//modules/command",
         "//modules/common",

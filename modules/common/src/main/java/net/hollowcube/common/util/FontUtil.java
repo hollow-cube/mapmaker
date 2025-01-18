@@ -395,6 +395,13 @@ public final class FontUtil {
         return sb.toString();
     }
 
+    public static @NotNull TextColor computeVerticalOffset(int offset) {
+        if (offset < -50 || offset > 205)
+            throw new IllegalArgumentException("Offset out of range: " + offset);
+
+        return TextColor.color(0x4E5A00 | ((offset + 50) & 0xFF));
+    }
+
     /**
      * Strips all "invalid" characters for use by players. The returned string may be empty, but will never be null.
      *

@@ -34,6 +34,7 @@ java_library(
         "@maven//:io_prometheus_simpleclient",
         "@maven//:io_prometheus_simpleclient_hotspot",
         "@maven//:it_unimi_dsi_fastutil",
+        "@maven//:org_graalvm_polyglot_polyglot",
         "@maven//:org_slf4j_jul_to_slf4j",
     ],
 )

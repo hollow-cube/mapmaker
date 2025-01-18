@@ -2,9 +2,13 @@ package net.hollowcube.mapmaker.dev;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
+import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.MojangUtil;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.dev.element.Node;
+import net.hollowcube.mapmaker.dev.jsx.JSX;
+import net.hollowcube.mapmaker.dev.render.RenderContext;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServerRunner;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
@@ -25,19 +29,31 @@ import net.hollowcube.mapmaker.player.PlayerSkin;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.inventory.Inventory;
+import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.timer.Scheduler;
+import net.minestom.server.timer.TaskSchedule;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Source;
+import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
-import java.util.Optional;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DevServerRunner extends AbstractMapServer {
     private static final Logger logger = LoggerFactory.getLogger(DevServerRunner.class);
@@ -203,6 +219,97 @@ public class DevServerRunner extends AbstractMapServer {
                 player.sendMessage("You are not in an editing world!");
             }
         }, "Enables progress index add mode for the current map");
+
+        dbg.createPermissionlessSubcommand("text", (player, context) -> {
+            var inv = new Inventory(InventoryType.CHEST_1_ROW, Component.empty());
+            player.openInventory(inv);
+
+            var c = new AtomicInteger();
+            player.scheduler()
+                    .buildTask(() -> {
+                        var children = new ArrayList<ComponentLike>();
+                        int start = c.incrementAndGet();
+                        for (int i = start; i < start + 255; i++) {
+                            children.add(Component.text("i", TextColor.color(0x4E5A00 | ((i) & 0xFF))));
+                            children.add(Component.text(FontUtil.computeOffset(-1)));
+                        }
+                        var t = Component.textOfChildren(children.toArray(new ComponentLike[0]));
+                        inv.setTitle(t);
+                    })
+                    .repeat(TaskSchedule.tick(1))
+                    .schedule();
+        }, "");
+
+        dbg.createPermissionlessSubcommand("gui", (player, ignored) -> {
+
+
+            try {
+
+                System.setProperty("polyglot.engine.WarnInterpreterOnly", "false");
+
+                var basePath = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/guilib/dist");
+                List<Path> files;
+                try (var stream = Files.walk(basePath)) {
+                    files = stream.toList();
+                }
+
+                var modules = new HashMap<String, Source>();
+                for (var path : files) {
+                    if (Files.isDirectory(path)) continue;
+                    if (!path.toString().endsWith(".js")) continue;
+
+                    var name = basePath.relativize(path).toString().replace(".js", "");
+                    var source = Source.newBuilder("js", path.toUri().toURL())
+                            .encoding(StandardCharsets.UTF_8)
+                            .content(Files.readString(path))
+                            .build();
+                    modules.put(name, source);
+                }
+
+                AtomicReference<ProxyExecutable> requireRef = new AtomicReference<>();
+                requireRef.set(arguments -> {
+                    if (arguments.length != 1)
+                        throw new IllegalArgumentException("expected 1 argument, got " + arguments.length);
+                    var path = basePath.relativize(basePath.resolve(arguments[0].asString())).toString();
+
+                    Context context = Context.newBuilder("js")
+                            .build(); // TODO THIS IS NOT BEING CLOSED PROPERLY
+                    var js = context.getBindings("js");
+                    js.putMember("require", requireRef.get());
+                    js.putMember("JSX", JSX.INSTANCE);
+                    var module = context.eval("js", "({})");
+                    js.putMember("exports", module);
+
+                    context.eval(modules.get(path));
+                    return module;
+                });
+
+                try (Context context = Context.newBuilder("js")
+                        .build()) {
+                    var js = context.getBindings("js");
+                    js.putMember("require", requireRef.get());
+                    js.putMember("JSX", JSX.INSTANCE);
+
+                    var finalResult = context.eval("js", "JSX.createElement(require('./TestComponent').default, null)");
+
+                    var rc = new RenderContext(9, 6);
+                    ((Node) finalResult.asHostObject()).render(rc);
+
+                    var inventory = new Inventory(InventoryType.CHEST_6_ROW, rc.getTitleText());
+                    var items = rc.getItems();
+                    for (int i = 0; i < items.length; i++) {
+                        inventory.setItemStack(i, items[i]);
+                    }
+
+                    player.openInventory(inventory);
+
+                    System.out.println(finalResult.asHostObject().toString());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }, "");
 
         return dbg;
     }

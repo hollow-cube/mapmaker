@@ -87,6 +87,10 @@ maven.install(
         "io.github.classgraph:classgraph:4.8.179",
         "com.google.inject:guice:7.0.0",  # For Velocity
 
+        # Scripting
+        "org.graalvm.polyglot:polyglot:24.1.1",
+        "org.graalvm.polyglot:js:24.1.1",
+
         # Testing
         "org.junit.jupiter:junit-jupiter-api:5.10.0",
         "org.junit.jupiter:junit-jupiter-engine:5.10.0",

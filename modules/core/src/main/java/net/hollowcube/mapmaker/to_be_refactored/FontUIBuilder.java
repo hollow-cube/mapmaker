@@ -119,7 +119,7 @@ public class FontUIBuilder {
         return builder.build();
     }
 
-    private void appendRaw(@NotNull String text) {
+    public void appendRaw(@NotNull String text) {
         var color = colorStack.isEmpty() ? NamedTextColor.WHITE : colorStack.get(colorStack.size() - 1);
         var shadowColor = shadowColorStack.isEmpty() ? null : shadowColorStack.get(shadowColorStack.size() - 1);
         builder.append(Component.text(text, color).shadowColor(shadowColor));
