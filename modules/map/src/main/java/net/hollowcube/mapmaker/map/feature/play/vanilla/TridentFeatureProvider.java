@@ -7,18 +7,18 @@ import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
+import net.hollowcube.mapmaker.map.util.PlayerLiquidExtension;
 import net.hollowcube.mapmaker.map.util.PlayerRiptideExtension;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.kyori.adventure.sound.Sound;
-import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.item.PlayerBeginItemUseEvent;
 import net.minestom.server.event.item.PlayerCancelItemUseEvent;
+import net.minestom.server.event.player.PlayerTickEndEvent;
 import net.minestom.server.event.trait.InstanceEvent;
-import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.EnchantmentList;
@@ -116,22 +116,6 @@ public class TridentFeatureProvider implements FeatureProvider {
     }
 
     private static boolean isInWater(@NotNull Player player) {
-        final BoundingBox bb = player.getBoundingBox();
-        var position = player.getPosition();
-        var instance = player.getInstance();
-
-        var iter = bb.getBlocks(position);
-        while (iter.hasNext()) {
-            var posMut = iter.next();
-
-            // We dont keep track of bounding boxes for water apparently so we cant be smarter than this
-            // its imperfect, but it should be fine enough for now.
-            var block = instance.getBlock(posMut.blockX(), posMut.blockY(), posMut.blockZ(),
-                    Block.Getter.Condition.TYPE);
-            if (block != null && block.id() == Block.WATER.id())
-                return true;
-        }
-
-        return false;
+        return player instanceof PlayerLiquidExtension ple && ple.isInWater();
     }
 }

@@ -17,11 +17,13 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Field;
 
 // I(matt)DK what to name this class lol
-public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerRiptideExtension {
+public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerRiptideExtension, PlayerLiquidExtension {
     private int riptideTicks = 0;
 
     // Only present sometimes (eg during riptide)
     private PhysicsResult nextPhysicsResult = null;
+
+    private boolean isInWater, isInLava;
 
     public MapPlayerImplImpl(@NotNull PlayerConnection playerConnection, @NotNull GameProfile gameProfile) {
         super(playerConnection, gameProfile);
@@ -42,6 +44,16 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
 
     private boolean needsPhysicsPrediction() {
         return riptideTicks > 0;
+    }
+
+    @Override
+    public boolean isInWater() {
+        return isInWater;
+    }
+
+    @Override
+    public boolean isInLava() {
+        return isInLava;
     }
 
     @Override
@@ -109,6 +121,48 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
         }
 
         if (newPose != oldPose) setPose(newPose);
+        updateWaterLavaState();
+    }
+
+    private void updateWaterLavaState() {
+        final BoundingBox bb = getBoundingBox().contract(0.001, 0.001, 0.001);
+        var position = getPosition();
+        var instance = getInstance();
+
+        isInWater = isInLava = false;
+        var iter = bb.getBlocks(position);
+        while (iter.hasNext()) {
+            if (isInWater && isInLava) break;
+            var posMut = iter.next();
+
+            var block = instance.getBlock(posMut.blockX(), posMut.blockY(),
+                    posMut.blockZ(), Block.Getter.Condition.TYPE);
+            double fluidHeight = getFluidHeight(block);
+            if (fluidHeight < 0) continue;
+
+            var blockAbove = instance.getBlock(posMut.blockX(), posMut.blockY() + 1,
+                    posMut.blockZ(), Block.Getter.Condition.TYPE);
+            fluidHeight = block.id() == blockAbove.id() ? 1 : (fluidHeight / 9.0);
+            if (posMut.blockY() + fluidHeight < bb.minY()) continue; // Not in fluid
+
+            if (block.id() == Block.WATER.id()) {
+                isInWater = true;
+            } else if (block.id() == Block.LAVA.id()) {
+                isInLava = true;
+            }
+        }
+    }
+
+    private static double getFluidHeight(@NotNull Block block) {
+        var level = block.getProperty("level");
+        if (level == null) return -1;
+
+        try {
+            var height = Math.min(8, Double.parseDouble(level));
+            return height == 0 ? 8 : 8 - height;
+        } catch (NumberFormatException ignored) {
+            return -1;
+        }
     }
 
     private boolean canFitWithBoundingBox(@NotNull EntityPose pose) {
@@ -167,7 +221,7 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
             if (intersectEntity(position, entity))
                 return true;
         }
-        
+
         return false;
     }
 }

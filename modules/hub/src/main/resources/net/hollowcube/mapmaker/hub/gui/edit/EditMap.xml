@@ -481,6 +481,26 @@
                                 sprite="create_maps/tab_settings/tab_gameplay/setting_nospec_icon"
                                 backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nospec_selected"/>
                     </switch>
+                    <switch id="map_settings_reset_water_switch">
+                        <button id="map_settings_reset_water_unset"
+                                translationKey="gui.create_maps.map_settings_tab.gameplay.reset_water"
+                                sprite="create_maps/tab_settings/tab_gameplay/setting_reset_water_icon"
+                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_reset_water_bg"/>
+                        <button id="map_settings_reset_water_set"
+                                translationKey="gui.create_maps.map_settings_tab.gameplay.reset_water.selected"
+                                sprite="create_maps/tab_settings/tab_gameplay/setting_reset_water_icon"
+                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_reset_water_selected"/>
+                    </switch>
+                    <switch id="map_settings_reset_lava_switch">
+                        <button id="map_settings_reset_lava_unset"
+                                translationKey="gui.create_maps.map_settings_tab.gameplay.reset_lava"
+                                sprite="create_maps/tab_settings/tab_gameplay/setting_reset_lava_icon"
+                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_reset_lava_bg"/>
+                        <button id="map_settings_reset_lava_set"
+                                translationKey="gui.create_maps.map_settings_tab.gameplay.reset_lava.selected"
+                                sprite="create_maps/tab_settings/tab_gameplay/setting_reset_lava_icon"
+                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_reset_lava_selected"/>
+                    </switch>
                 </box>
             </switch>
         </box>
