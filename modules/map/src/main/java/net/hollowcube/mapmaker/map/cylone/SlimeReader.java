@@ -8,7 +8,6 @@ import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,8 +50,8 @@ public class SlimeReader {
         var extra = readCompound(readCompressed(buffer));
 
         var cdata = extra.getByteArray("cdata_-32_-16");
-        var t = BinaryTagIO.unlimitedReader().read(new ByteArrayInputStream(cdata));
-        var a = BinaryTagIO.writer().write(t, new ByteArrayOutputStream());
+//        var t = BinaryTagIO.unlimitedReader().read(new ByteArrayInputStream(cdata));
+//        var a = BinaryTagIO.writer().write(t, new ByteArrayOutputStream());
         // Double.longBitsToDOuble or whatever
 
         return new SlimeWorld(worldVersion, chunks, blockEntities, entities);
