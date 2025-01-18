@@ -33,6 +33,11 @@ public record RootContext(
     }
 
     @Override
+    public void clearHistory() {
+        throw new UnsupportedOperationException("Cannot clear history on root context");
+    }
+
+    @Override
     public void pushView(@NotNull View view, boolean isTransient) {
         throw new UnsupportedOperationException("Cannot push view on root context");
     }

@@ -61,6 +61,10 @@ public class InventoryViewHost {
         return !history.isEmpty();
     }
 
+    public void clearHistory() {
+        history.clear();
+    }
+
     public void pushView(@NotNull View view, boolean isTransient) {
         if (!isTransient) history.addLast(view);
         replaceInventory((ViewContainer) view.element());

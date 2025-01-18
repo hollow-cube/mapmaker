@@ -26,6 +26,7 @@ java_library(
         "@maven//:io_prometheus_simpleclient",
         "@maven//:com_miguelfonseca_completely_completely_core",
         "@maven//:net_kyori_adventure_text_serializer_plain",
+        "@maven//:net_kyori_adventure_text_minimessage",
     ],
 )
 

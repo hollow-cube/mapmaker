@@ -1,0 +1,93 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<?import net.hollowcube.mapmaker.map.gui.displayentity ?>
+<?import net.hollowcube.mapmaker.map.gui.displayentity.object ?>
+<component width="9" height="10" align="ttb" sprite="displayentity/container">
+    <text id="title" width="0" height="0" translationKey="" font="map_details_title2" shift="43"/>
+
+    <!-- Header -->
+    <box width="9" align="ltr">
+        <BackButton2/>
+        <label translationKey="gui.checkpoint.information" sprite="generic/information"/>
+
+        <text id="tab_text" width="5" height="1" translationKey="gui.checkpoint.tab" sprite="generic/text_display_5"
+              font="play_maps_page" centered="true"/>
+
+        <button id="create" width="2" translationKey="gui.display_entity.create"/>
+    </box>
+
+    <box width="9" height="5" align="ttb">
+        <box width="9" height="1" align="ltr">
+            <switch id="tab_properties_switch" width="4" height="1">
+                <button id="tab_properties_off" width="4" height="1"
+                        translationKey="gui.builder_menu.tab_custom_blocks.unselected"/>
+                <button id="tab_properties_on" width="4" height="1"
+                        translationKey="gui.builder_menu.tab_custom_blocks.selected"
+                        sprite="displayentity/properties/tab"/>
+            </switch>
+
+            <switch id="tab_switch_middle_slot">
+                <button id="tab_middle_slot_properties" translationKey="gui.checkpoint.tab.settings.unselected"/>
+                <button id="tab_middle_slot_transforms" translationKey="gui.checkpoint.tab.actions.unselected"/>
+            </switch>
+
+            <switch id="tab_transforms_switch" width="4" height="1">
+                <button id="tab_transforms_off" width="4" height="1"
+                        translationKey="gui.builder_menu.tab_build_tools.unselected"/>
+                <button id="tab_transforms_on" width="4" height="1"
+                        translationKey="gui.builder_menu.tab_build_tools.selected"
+                        sprite="displayentity/transforms/tab"/>
+            </switch>
+        </box>
+
+        <switch id="page" width="9" height="4">
+            <box width="9" height="4" align="ttb" backgroundSprite="displayentity/properties/block/container">
+                <spacer/>
+                <box width="9" height="1" align="ltr">
+                    <spacer/>
+                    <switch id="option_billboard">
+                        <button id="option_billboard_fixed"
+                                translationKey="gui.display_entity.properties.billboard.fixed"
+                                sprite="create_maps/tab_settings/tab_visual/time/noon_icon"
+                                backgroundSprite="displayentity/properties/option"
+                        />
+                        <button id="option_billboard_vertical"
+                                translationKey="gui.display_entity.properties.billboard.vertical"
+                                sprite="create_maps/tab_settings/tab_visual/time/sunset_icon"
+                                backgroundSprite="displayentity/properties/option"
+                        />
+                        <button id="option_billboard_horizontal"
+                                translationKey="gui.display_entity.properties.billboard.horizontal"
+                                sprite="create_maps/tab_settings/tab_visual/time/sunrise_icon"
+                                backgroundSprite="displayentity/properties/option"
+                        />
+                        <button id="option_billboard_center"
+                                translationKey="gui.display_entity.properties.billboard.center"
+                                sprite="create_maps/tab_settings/tab_visual/time/night_icon"
+                                backgroundSprite="displayentity/properties/option"
+                        />
+                    </switch>
+                </box>
+                <spacer/>
+                <box width="9" height="1" align="ltr">
+                    <spacer/>
+                    <button id="block" translationKey="gui.display_entity.properties.block"/>
+                    <pagination id="properties" width="6" height="1" child="PropertyEntry"/>
+                </box>
+            </box>
+            <DisplayTransformsTab/>
+        </switch>
+    </box>
+
+    <spacer/>
+
+    <box width="9" height="1" align="ltr">
+        <spacer/>
+        <button id="duplicate" translationKey="gui.display_entity.duplicate" sprite="hud/hotbar/spawn_point"/>
+        <button id="teleport" translationKey="gui.display_entity.teleport" sprite="hud/hotbar/spawn_point"/>
+        <button id="deselect" translationKey="gui.display_entity.deselect" sprite="hud/hotbar/spawn_point"/>
+        <spacer width="3"/>
+        <button id="delete" translationKey="gui.display_entity.delete" sprite="hud/hotbar/edit_map_details"/>
+    </box>
+
+</component>

@@ -73,6 +73,20 @@ public abstract class View implements Element {
         return context.canPopView();
     }
 
+    public void replaceView(@NotNull Function<Context, View> viewProvider) {
+        try {
+            context.clearHistory();
+            context.pushView(viewProvider.apply(context), false);
+        } catch (Exception e) {
+            MinecraftServer.getExceptionManager().handleException(e);
+        }
+    }
+
+    public void replaceView(@NotNull View view) {
+        context.clearHistory();
+        context.pushView(view, false);
+    }
+
     public void pushView(@NotNull Function<Context, View> viewProvider) {
         try {
             context.pushView(viewProvider.apply(context), false);

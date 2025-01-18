@@ -85,6 +85,8 @@ public class XmlElementReader {
             case "component" -> throw new IllegalStateException("There may only be one root component");
             case "box" -> loadBox(node);
             case "label" -> loadLabel(node);
+            case "sprite" -> loadSprite(node);
+            case "item" -> loadItem(node);
             case "button" -> loadButton(node);
             case "spacer" -> loadSpacer(node);
             case "switch" -> loadSwitch(node);
@@ -106,6 +108,16 @@ public class XmlElementReader {
         var translationKey = Objects.requireNonNull(getString(node, "translationKey", null), "Label must have a translation key");
         var elem = new LabelElement(context, getId(node), getWidth(node), getHeight(node), translationKey);
         return applyTraits(node, elem);
+    }
+
+    private @NotNull BaseElement loadSprite(@NotNull Node node) {
+        Check.argCondition(!node.getNodeName().equals("sprite"), "Node must be `sprite`");
+        return applyTraits(node, new LabelElement(context, getId(node), 0, 0, ""));
+    }
+
+    private @NotNull BaseElement loadItem(@NotNull Node node) {
+        Check.argCondition(!node.getNodeName().equals("item"), "Node must be `item`");
+        return applyTraits(node, new ItemElement(context, getId(node), getWidth(node), getHeight(node)));
     }
 
     private @NotNull BaseElement loadButton(@NotNull Node node) {
