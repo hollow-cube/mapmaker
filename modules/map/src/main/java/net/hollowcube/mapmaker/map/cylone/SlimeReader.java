@@ -49,7 +49,7 @@ public class SlimeReader {
         }
         var extra = readCompound(readCompressed(buffer));
 
-        var cdata = extra.getByteArray("cdata_-32_-16");
+//        var cdata = extra.getByteArray("cdata_-32_-16");
 //        var t = BinaryTagIO.unlimitedReader().read(new ByteArrayInputStream(cdata));
 //        var a = BinaryTagIO.writer().write(t, new ByteArrayOutputStream());
         // Double.longBitsToDOuble or whatever
