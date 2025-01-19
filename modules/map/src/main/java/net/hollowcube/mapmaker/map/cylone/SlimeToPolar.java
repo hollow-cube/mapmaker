@@ -3,19 +3,26 @@ package net.hollowcube.mapmaker.map.cylone;
 import ca.spottedleaf.dataconverter.minecraft.MCDataConverter;
 import ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry;
 import com.google.gson.JsonObject;
+import it.unimi.dsi.fastutil.ints.IntIntPair;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.custom.CheckpointPlateBlock;
 import net.hollowcube.polar.*;
 import net.kyori.adventure.nbt.*;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.instance.Chunk;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.instance.palette.Palettes;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class SlimeToPolar {
@@ -88,15 +95,15 @@ public class SlimeToPolar {
             var blockEntities = new ArrayList<PolarChunk.BlockEntity>();
             for (var tileEntity : slimeWorld.blockEntities()) {
                 var upgradedTileEntity = MCDataConverter.convertTag(MCTypeRegistry.TILE_ENTITY, tileEntity, slimeWorld.dataVersion(), MapWorld.DATA_VERSION);
-                var x = upgradedTileEntity.getInt("x") >> 4;
+                var x = upgradedTileEntity.getInt("x");
                 var y = upgradedTileEntity.getInt("y");
-                var z = upgradedTileEntity.getInt("z") >> 4;
+                var z = upgradedTileEntity.getInt("z");
                 var id = upgradedTileEntity.getString("id");
                 if (id.isEmpty()) throw new RuntimeException("uh oh bad");
 
-                if (x != pos.x() || z != pos.z()) continue;
+                if (x >> 4 != pos.x() || z >> 4 != pos.z()) continue;
 
-                blockEntities.add(new PolarChunk.BlockEntity(x, y, z, id, upgradedTileEntity));
+                blockEntities.add(new PolarChunk.BlockEntity(x & 0xF, y, z & 0xF, id, upgradedTileEntity));
             }
 
             var entities = new ArrayList<BinaryTag>();
@@ -133,7 +140,42 @@ public class SlimeToPolar {
                 worldData, chunks);
 
         var instance = new InstanceContainer(UUID.randomUUID(), DimensionType.OVERWORLD);
-        var loader = new PolarLoader(world);
+        var loader = new PolarLoader(world)
+                .setWorldAccess(new PolarWorldAccess() {
+                    private byte[] worldData;
+                    private final Map<IntIntPair, byte[]> chunkData = new HashMap<>();
+                    private final Map<IntIntPair, int[][]> chunkHeightMaps = new HashMap<>();
+
+                    @Override
+                    public void loadWorldData(@NotNull Instance instance, @Nullable NetworkBuffer userData) {
+                        worldData = userData.read(NetworkBuffer.RAW_BYTES);
+                    }
+
+                    @Override
+                    public void saveWorldData(@NotNull Instance instance, @NotNull NetworkBuffer userData) {
+                        userData.write(NetworkBuffer.RAW_BYTES, worldData);
+                    }
+
+                    @Override
+                    public void loadChunkData(@NotNull Chunk chunk, @Nullable NetworkBuffer userData) {
+                        chunkData.put(IntIntPair.of(chunk.getChunkX(), chunk.getChunkZ()), userData.read(NetworkBuffer.RAW_BYTES));
+                    }
+
+                    @Override
+                    public void saveChunkData(@NotNull Chunk chunk, @NotNull NetworkBuffer userData) {
+                        userData.write(NetworkBuffer.RAW_BYTES, chunkData.get(IntIntPair.of(chunk.getChunkX(), chunk.getChunkZ())));
+                    }
+
+                    @Override
+                    public void loadHeightmaps(@NotNull Chunk chunk, int[][] heightmaps) {
+                        chunkHeightMaps.put(IntIntPair.of(chunk.getChunkX(), chunk.getChunkZ()), heightmaps);
+                    }
+
+                    @Override
+                    public void saveHeightmaps(@NotNull Chunk chunk, int[][] heightmaps) {
+                        System.arraycopy(heightmaps, 0, chunkHeightMaps.get(IntIntPair.of(chunk.getChunkX(), chunk.getChunkZ())), 0, heightmaps.length);
+                    }
+                });
         instance.setChunkLoader(loader);
 
         for (var chunk : loader.world().chunks()) {
@@ -150,6 +192,21 @@ public class SlimeToPolar {
                 instance.setBlock(x, y, z, Block.HEAVY_WEIGHTED_PRESSURE_PLATE
                         .withHandler(new CheckpointPlateBlock()));
             }
+        }
+
+        for (var tileEntity : slimeWorld.blockEntities()) {
+            var upgradedTileEntity = MCDataConverter.convertTag(MCTypeRegistry.TILE_ENTITY, tileEntity, slimeWorld.dataVersion(), MapWorld.DATA_VERSION);
+            var x = upgradedTileEntity.getInt("x");
+            var y = upgradedTileEntity.getInt("y");
+            var z = upgradedTileEntity.getInt("z");
+            var id = upgradedTileEntity.getString("id");
+            if (id.isEmpty()) throw new RuntimeException("uh oh bad");
+
+            System.out.println("block entity: " + id + " at " + x + ", " + y + ", " + z + ": " + TagStringIOExt.writeTag(upgradedTileEntity));
+            var block = instance.getBlock(x, y, z)
+                    .withHandler(BlockHandler.Dummy.get(id))
+                    .withNbt(upgradedTileEntity);
+            instance.setBlock(x, y, z, block);
         }
 
         instance.saveChunksToStorage().join();

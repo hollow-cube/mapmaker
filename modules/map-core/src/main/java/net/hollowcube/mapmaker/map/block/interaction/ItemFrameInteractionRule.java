@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
-import net.hollowcube.mapmaker.map.entity.impl.ItemFrameEntity;
+import net.hollowcube.mapmaker.map.entity.impl.other.ItemFrameEntity;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.metadata.other.ItemFrameMeta;

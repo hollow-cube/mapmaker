@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
-import net.hollowcube.mapmaker.map.entity.impl.EndCrystalEntity;
+import net.hollowcube.mapmaker.map.entity.impl.other.EndCrystalEntity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
