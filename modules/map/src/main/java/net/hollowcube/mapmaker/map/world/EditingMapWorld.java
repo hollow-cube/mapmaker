@@ -157,6 +157,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
     @Override
     public void load() {
+        features().preinitMap(this);
+
         var mapData = server().mapService().getMapWorld(map().id(), true);
         if (mapData != null) {
             instance.load(mapData, new ReadWorldAccess(this));

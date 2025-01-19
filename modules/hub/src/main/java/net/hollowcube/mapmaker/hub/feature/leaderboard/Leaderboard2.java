@@ -4,8 +4,8 @@ import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
-import net.hollowcube.mapmaker.hub.entity.NpcTextModel;
 import net.hollowcube.mapmaker.map.LeaderboardData;
+import net.hollowcube.mapmaker.util.LeaderboardDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Pos;
@@ -20,8 +20,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static net.hollowcube.mapmaker.hub.feature.leaderboard.LeaderboardDisplay.SUBTITLE_SCALE;
-import static net.hollowcube.mapmaker.hub.feature.leaderboard.LeaderboardDisplay.initTextEntity;
+import static net.hollowcube.mapmaker.util.LeaderboardDisplay.SUBTITLE_SCALE;
+import static net.hollowcube.mapmaker.util.LeaderboardDisplay.initTextEntity;
 
 public class Leaderboard2 {
     private static final double CENTER_BIAS = 0.5; // Higher value moves the text closer to together. Used for manual horizontal alignment
@@ -31,7 +31,7 @@ public class Leaderboard2 {
     private static final Component NOW_TEXT = Component.text("ᴜᴘᴅᴀᴛᴇᴅ ᴊᴜѕᴛ ɴᴏᴡ", NamedTextColor.DARK_GRAY);
 
     private final NpcItemModel screenModel = new NpcItemModel();
-    private final NpcTextModel updatedTextEntity = new NpcTextModel();
+    private final LeaderboardDisplay.TextDisplay updatedTextEntity = new LeaderboardDisplay.TextDisplay();
 
     public final LeaderboardDisplay left;
     public final LeaderboardDisplay right;
@@ -61,11 +61,11 @@ public class Leaderboard2 {
         //    however it looked kinda strange so i did a completely arbitrary subtraction of 0.5 to bias the text towards the center.
         if (leftGlobalLeaderboardSupplier != null && leftPlayerScoreSupplier != null) {
             left = new LeaderboardDisplay(screenModel, leftGlobalLeaderboardSupplier, leftPlayerScoreSupplier, displayNameSupplier,
-                    -(SCREEN_WIDTH - CENTER_BIAS) / 4, screenAngle);
+                    -(SCREEN_WIDTH - CENTER_BIAS) / 4, screenAngle, 1.6, 1);
         } else left = null;
         if (rightGlobalLeaderboardSupplier != null && rightPlayerScoreSupplier != null) {
             right = new LeaderboardDisplay(screenModel, rightGlobalLeaderboardSupplier, rightPlayerScoreSupplier, displayNameSupplier,
-                    (SCREEN_WIDTH - CENTER_BIAS) / 4, screenAngle);
+                    (SCREEN_WIDTH - CENTER_BIAS) / 4, screenAngle, 1.6, 1);
         } else right = null;
     }
 

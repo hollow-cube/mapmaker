@@ -83,10 +83,11 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
     @Override
     public void load() {
+        features().preinitMap(this);
+        
         loadWorld();
 
         super.load();
-        //todo load features
 
         try {
             this.ownerBossBarName = server().playerService().getPlayerDisplayName2(map().owner())

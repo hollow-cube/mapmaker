@@ -28,6 +28,9 @@ public interface FeatureProvider {
         return List.of();
     }
 
+    default void preinitMap(@NotNull MapWorld world) {
+    }
+
     /**
      * Called when a map is being initialized. Implementation should register any events or
      * other implementation details to make the feature functional.

@@ -26,4 +26,12 @@ public abstract class MarkerHandler {
     protected void onTick() {
     }
 
+    protected void addViewer(@NotNull Player player) {
+
+    }
+
+    protected void removeViewer(@NotNull Player player) {
+
+    }
+
 }

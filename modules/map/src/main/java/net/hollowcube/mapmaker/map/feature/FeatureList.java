@@ -44,6 +44,12 @@ public class FeatureList {
         this.features = List.copyOf(features);
     }
 
+    public void preinitMap(@NotNull MapWorld world) {
+        for (var feature : features) {
+            feature.preinitMap(world);
+        }
+    }
+
     public @NotNull List<FeatureProvider> loadMap(@NotNull MapWorld world) {
         var enabledFeatures = new ArrayList<FeatureProvider>();
         try {
