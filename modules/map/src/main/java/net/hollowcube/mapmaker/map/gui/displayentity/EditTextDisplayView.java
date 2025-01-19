@@ -8,6 +8,8 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ActionGroup;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.gui.common.anvil.TextInputBuilder;
+import net.hollowcube.mapmaker.gui.common.anvil.TextInputView;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -29,13 +31,23 @@ public class EditTextDisplayView extends AbstractEditDisplayView<DisplayEntity.T
     private @Outlet("lines") Label displayLines;
     private @Outlet("text") Text displayText;
 
+    private final TextInputBuilder<String, ?> input;
+
     private final List<String> lines;
     private int line = 0;
+
 
     public EditTextDisplayView(@NotNull Context context, DisplayEntity.Text display) {
         super(context, display);
 
         this.lines = MiniMessage.miniMessage().serialize(this.meta().getText()).lines().collect(Collectors.toList());
+        this.input = TextInputView.builder()
+                .icon("anvil/earth")
+                .title("Text Input")
+                .callback(input -> {
+                    this.lines.set(this.line, input);
+                    this.updateText();
+                });
 
         this.updateState();
     }
@@ -112,21 +124,14 @@ public class EditTextDisplayView extends AbstractEditDisplayView<DisplayEntity.T
             this.line = this.lines.size();
             this.lines.add("");
             this.updateText();
-
-            this.pushView(context -> new TextInputView(context, input -> {
-                this.lines.set(this.line, input);
-                this.updateText();
-            }, this.lines.get(this.line)));
+            this.pushView(context -> this.input.build(context, this.lines.get(this.line)));
         }
     }
 
     @Action("text")
     private void onText(Player player, int slot, ClickType type) {
         if (type == ClickType.LEFT_CLICK) {
-            this.pushView(context -> new TextInputView(context, input -> {
-                this.lines.set(this.line, input);
-                this.updateText();
-            }, this.lines.get(this.line)));
+            this.pushView(context -> this.input.build(context, this.lines.get(this.line)));
         } else if (type == ClickType.SHIFT_LEFT_CLICK) {
             this.lines.remove(this.line);
             this.line = Math.min(this.line, this.lines.size() - 1);

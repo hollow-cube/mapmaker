@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.map.gui.displayentity.object;
 
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.gui.common.AbstractSearchView;
+import net.hollowcube.mapmaker.gui.common.anvil.AbstractSearchView;
 import net.hollowcube.mapmaker.util.Autocompletors;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;

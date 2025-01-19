@@ -112,7 +112,7 @@ public class XmlElementReader {
 
     private @NotNull BaseElement loadSprite(@NotNull Node node) {
         Check.argCondition(!node.getNodeName().equals("sprite"), "Node must be `sprite`");
-        return applyTraits(node, new LabelElement(context, getId(node), 0, 0, ""));
+        return applyTraits(node, new SpriteElement(context, getId(node)));
     }
 
     private @NotNull BaseElement loadItem(@NotNull Node node) {

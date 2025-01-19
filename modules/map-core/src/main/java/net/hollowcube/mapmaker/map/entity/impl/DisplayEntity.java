@@ -29,7 +29,7 @@ import java.util.UUID;
 import static net.kyori.adventure.nbt.FloatBinaryTag.floatBinaryTag;
 
 @SuppressWarnings("UnstableApiUsage")
-public sealed class DisplayEntity extends MapEntity permits DisplayEntity.Block, DisplayEntity.Item, DisplayEntity.Text {
+public sealed abstract class DisplayEntity extends MapEntity permits DisplayEntity.Block, DisplayEntity.Item, DisplayEntity.Text {
     private static final BinaryTagSerializer<AbstractDisplayMeta.BillboardConstraints> BILLBOARD_CONSTRAINTS = BinaryTagSerializer.fromEnumStringable(AbstractDisplayMeta.BillboardConstraints.class);
 
     public static final Tag<UUID> SELECTED_DISPLAY_ENTITY = Tag.Transient("mapmaker:selected_display_entity");

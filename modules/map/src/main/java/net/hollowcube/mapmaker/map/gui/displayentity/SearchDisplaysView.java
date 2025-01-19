@@ -2,26 +2,14 @@ package net.hollowcube.mapmaker.map.gui.displayentity;
 
 import com.miguelfonseca.completely.AutocompleteEngine;
 import com.miguelfonseca.completely.data.Indexable;
-import net.hollowcube.canvas.Element;
-import net.hollowcube.canvas.Label;
-import net.hollowcube.canvas.Pagination;
-import net.hollowcube.canvas.View;
-import net.hollowcube.canvas.annotation.Action;
-import net.hollowcube.canvas.annotation.Outlet;
-import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.gui.common.AbstractSearchView;
+import net.hollowcube.mapmaker.gui.common.anvil.AbstractSearchView;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.gui.displayentity.object.DisplayEntityEntry;
 import net.hollowcube.mapmaker.util.Autocompletors;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.item.ItemComponent;
-import net.minestom.server.timer.Task;
-import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
@@ -89,7 +77,6 @@ public class SearchDisplaysView extends AbstractSearchView<DisplayEntityEntry> {
                     var text = MiniMessage.miniMessage().serialize(entity.getEntityMeta().getText());
                     yield List.of(text);
                 }
-                default -> List.of();
             };
         }
     }

@@ -7,8 +7,8 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.math.Quaternion;
+import net.hollowcube.mapmaker.gui.common.anvil.TextInputView;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
-import net.hollowcube.mapmaker.map.gui.effect.CoordinateInputAnvil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -130,16 +130,20 @@ public class DisplayTransformsTab extends View {
     }
 
     private void pushNumberInput(double current, BiPredicate<DisplayEntity, Double> updater) {
-        pushView(context -> new CoordinateInputAnvil(context, input -> {
-            try {
-                double value = Double.parseDouble(input);
-                if (updater.test(this.display, value)) {
-                    this.updateText();
-                    return;
-                }
-            } catch (NumberFormatException ignored) {}
-            this.player().sendMessage(Component.translatable("gui.display_entity.invalid_number"));
-        }, String.valueOf(current)));
+        var builder = TextInputView.builder()
+                .icon("anvil/ruler")
+                .title("Set Value")
+                .callback(input -> {
+                    try {
+                        double value = Double.parseDouble(input);
+                        if (updater.test(this.display, value)) {
+                            this.updateText();
+                            return;
+                        }
+                    } catch (NumberFormatException ignored) {}
+                    this.player().sendMessage(Component.translatable("gui.display_entity.invalid_number"));
+                });
+        pushView(context -> builder.build(context, String.valueOf(current)));
     }
 
     private void setText(@NotNull Text text, double value) {
