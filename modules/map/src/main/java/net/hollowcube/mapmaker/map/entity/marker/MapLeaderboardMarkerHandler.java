@@ -20,6 +20,7 @@ public class MapLeaderboardMarkerHandler extends MarkerHandler {
     public static final String ID = "mapmaker:leaderboard";
 
     private LeaderboardDisplay leaderboard;
+    private int ticksUntilUpdate = ONE_MINUTE_TICKS;
 
     public MapLeaderboardMarkerHandler(@NotNull MarkerEntity entity) {
         super(ID, entity);
@@ -62,16 +63,20 @@ public class MapLeaderboardMarkerHandler extends MarkerHandler {
         leaderboard.setTargetWidth(150);
         leaderboard.setTrueCenter(false);
         entity.scheduleNextTick(ignored -> leaderboard.setInstance(world.instance(), entity.getPosition()));
+
+        FutureUtil.submitVirtual(() -> leaderboard.update());
     }
 
     @Override
     protected void onTick() {
         super.onTick();
 
-        if (entity.getAliveTicks() % ONE_MINUTE_TICKS == 0) {
+        ticksUntilUpdate--;
+        if (ticksUntilUpdate == 0) {
             FutureUtil.submitVirtual(() -> {
                 leaderboard.update();
                 entity.getViewers().forEach(leaderboard::update);
+                ticksUntilUpdate = ONE_MINUTE_TICKS;
             });
         }
     }

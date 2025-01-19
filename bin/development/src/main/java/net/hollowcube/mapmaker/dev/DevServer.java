@@ -1,15 +1,11 @@
 package net.hollowcube.mapmaker.dev;
 
-import net.hollowcube.mapmaker.map.cylone.CyloneImport;
 import net.hollowcube.mapmaker.map.runtime.MapServerInitializer;
 
 public class DevServer {
 
     public static void main(String[] args) throws Exception {
-
-        CyloneImport.tempConvert();
-
-//        MapServerInitializer.run(DevServerRunner::new, args);
+        MapServerInitializer.run(DevServerRunner::new, args);
 
 //        var path = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/modules/hub/src/main/resources/spawn/hcspawn.polar");
 //        var world = PolarReader.read(Files.readAllBytes(path));
