@@ -1,8 +1,9 @@
-package net.hollowcube.mapmaker.map.gui.displayentity.object;
+package net.hollowcube.mapmaker.map.gui.displayentity.search;
 
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.gui.common.anvil.AbstractSearchView;
+import net.hollowcube.mapmaker.map.gui.displayentity.object.ObjectEntry;
 import net.hollowcube.mapmaker.util.Autocompletors;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -12,13 +13,13 @@ import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
-public class SetDisplayObject extends AbstractSearchView<ObjectEntry> {
+public class SearchMaterialsView extends AbstractSearchView<ObjectEntry> {
 
-    public static final String SIGNAL = "set_display_object.selected";
+    public static final String SIGNAL = "search_materials.selected";
 
     private final Predicate<Material> filter;
 
-    public SetDisplayObject(@NotNull Context context, Predicate<Material> filter) {
+    public SearchMaterialsView(@NotNull Context context, Predicate<Material> filter) {
         super(context);
 
         this.filter = filter;

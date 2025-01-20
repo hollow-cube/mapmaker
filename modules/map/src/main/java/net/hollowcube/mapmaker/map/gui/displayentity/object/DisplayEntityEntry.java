@@ -6,14 +6,16 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.util.TagUtil;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,42 +25,57 @@ public class DisplayEntityEntry extends View {
 
     private @Outlet("label") Label label;
 
-    private final @Nullable DisplayEntity entity;
+    private final @NotNull DisplayEntity entity;
 
-    public DisplayEntityEntry(@NotNull Context context, @Nullable DisplayEntity entity) {
+    public DisplayEntityEntry(@NotNull Context context, @NotNull DisplayEntity entity) {
         super(context);
 
         this.entity = entity;
 
-        if (this.entity != null) {
-            var material = switch (entity) {
-                case DisplayEntity.Item item -> item.getEntityMeta().getItemStack().material();
-                case DisplayEntity.Block block ->
-                        Objects.requireNonNullElse(block.getEntityMeta().getBlockStateId().registry().material(), Material.BARRIER);
-                case DisplayEntity.Text ignored -> Material.PAPER;
-                default -> Material.BARRIER;
-            };
-            var iconItem = ItemStack.builder(material);
-            TagUtil.removeTooltipExtras(iconItem);
-            this.label.setItemSprite(iconItem.build());
-            this.label.setArgs(
-                    Component.text(entity.getDistance(context.player())),
-                    Component.text(entity.getEntityType().namespace().toString()),
-                    switch (entity) {
-                        case DisplayEntity.Item item -> LanguageProviderV2.getVanillaTranslation(item.getEntityMeta().getItemStack().material());
-                        case DisplayEntity.Block block -> LanguageProviderV2.getVanillaTranslation(block.getEntityMeta().getBlockStateId());
-                        case DisplayEntity.Text text -> Component.text('"').append(text.getEntityMeta().getText()).append(Component.text('"'));
-                        default -> Component.empty();
-                    }
-            );
-        } else {
-            this.label.setComponentsDirect(Component.translatable("gui.display_entity.no_results"), List.of());
+        var material = switch (entity) {
+            case DisplayEntity.Item item -> item.getEntityMeta().getItemStack().material();
+            case DisplayEntity.Block block -> block.getEntityMeta().getBlockStateId().registry().material();
+            case DisplayEntity.Text ignored -> Material.PAPER;
+        };
+
+        List<Component> lore = new ArrayList<>();
+        lore.add(Component.translatable("gui.display_entity.search.entry.type", Component.text(entity.getEntityType().namespace().toString())));
+        lore.add(Component.empty());
+        switch (entity) {
+            case DisplayEntity.Item item -> lore.add(Component.translatable(
+                    "gui.display_entity.search.entry.current",
+                    LanguageProviderV2.getVanillaTranslation(item.getEntityMeta().getItemStack().material())
+            ));
+            case DisplayEntity.Block block -> lore.add(Component.translatable(
+                    "gui.display_entity.search.entry.current",
+                    LanguageProviderV2.getVanillaTranslation(block.getEntityMeta().getBlockStateId())
+            ));
+            case DisplayEntity.Text text -> {
+                lore.add(Component.translatable("gui.display_entity.search.entry.current", Component.empty()));
+
+                MiniMessage.miniMessage().serialize(text.getEntityMeta().getText()).lines().forEach(line ->
+                    lore.add(Component.translatable(
+                            "gui.display_entity.search.entry.current.entry",
+                            Component.text('"').append(Component.text(line)).append(Component.text('"'))
+                    ))
+                );
+            }
         }
+        lore.add(Component.empty());
+        lore.add(Component.translatable("gui.display_entity.search.entry.footer"));
+
+        this.label.setItemSprite(OpUtils.build(ItemStack.builder(
+                Objects.requireNonNullElse(material, Material.BARRIER)),
+                TagUtil::removeTooltipExtras
+        ).build());
+        this.label.setComponentsDirect(
+                Component.translatable("gui.display_entity.search.entry.name", Component.text(entity.getDistance(context.player()))),
+                lore
+        );
     }
 
     @Action("label")
     private void handleSelect() {
-        if (this.entity == null) return;
         performSignal(SIGNAL, this.entity.getUuid());
     }
 

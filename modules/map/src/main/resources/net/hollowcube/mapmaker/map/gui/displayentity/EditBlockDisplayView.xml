@@ -20,23 +20,27 @@
         <box width="9" height="1" align="ltr">
             <switch id="tab_properties_switch" width="4" height="1">
                 <button id="tab_properties_off" width="4" height="1"
-                        translationKey="gui.builder_menu.tab_custom_blocks.unselected"/>
+                        translationKey="gui.display_entity.tab.properties.unselected"
+                />
                 <button id="tab_properties_on" width="4" height="1"
-                        translationKey="gui.builder_menu.tab_custom_blocks.selected"
-                        sprite="displayentity/properties/tab"/>
+                        translationKey="gui.display_entity.tab.properties.selected"
+                        sprite="displayentity/properties/tab"
+                />
             </switch>
 
             <switch id="tab_switch_middle_slot">
-                <button id="tab_middle_slot_properties" translationKey="gui.checkpoint.tab.settings.unselected"/>
-                <button id="tab_middle_slot_transforms" translationKey="gui.checkpoint.tab.actions.unselected"/>
+                <button id="tab_middle_slot_properties" translationKey="gui.display_entity.tab.properties.unselected"/>
+                <button id="tab_middle_slot_transforms" translationKey="gui.display_entity.tab.transforms.unselected"/>
             </switch>
 
             <switch id="tab_transforms_switch" width="4" height="1">
                 <button id="tab_transforms_off" width="4" height="1"
-                        translationKey="gui.builder_menu.tab_build_tools.unselected"/>
+                        translationKey="gui.display_entity.tab.transforms.unselected"
+                />
                 <button id="tab_transforms_on" width="4" height="1"
-                        translationKey="gui.builder_menu.tab_build_tools.selected"
-                        sprite="displayentity/transforms/tab"/>
+                        translationKey="gui.display_entity.tab.transforms.selected"
+                        sprite="displayentity/transforms/tab"
+                />
             </switch>
         </box>
 

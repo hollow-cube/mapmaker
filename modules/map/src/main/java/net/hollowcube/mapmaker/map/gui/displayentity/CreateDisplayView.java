@@ -7,6 +7,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.feature.edit.DisplayEntityEditingFeatureProvider;
+import net.hollowcube.mapmaker.map.gui.displayentity.search.SearchDisplaysView;
 import net.hollowcube.terraform.event.TerraformPreSpawnEntityEvent;
 import net.hollowcube.terraform.event.TerraformSpawnEntityEvent;
 import net.kyori.adventure.text.Component;
@@ -76,31 +77,24 @@ public class CreateDisplayView extends View {
     private <T extends DisplayEntity> void spawnEntity(Player player, EntityType type, Class<T> clazz, Consumer<T> operations) {
         Instance instance = player.getInstance();
 
-        var preEvent = new TerraformPreSpawnEntityEvent(player, instance);
-        EventDispatcher.call(preEvent);
+        var preEvent = OpUtils.build(new TerraformPreSpawnEntityEvent(player, instance), EventDispatcher::call);
         if (preEvent.isCancelled()) return;
 
         var entity = preEvent.getConstructor().apply(type, UUID.randomUUID());
         if (entity == null) return;
 
         var playerPos = player.getPosition();
-        var normalizedPos = new Pos(
-                playerPos.blockX() + 0.5,
-                playerPos.blockY() + 0.5,
-                playerPos.blockZ() + 0.5
-        );
+        var pos = new Pos(playerPos.blockX() + 0.5, playerPos.blockY() + 0.5, playerPos.blockZ() + 0.5);
 
-        var event = new TerraformSpawnEntityEvent(player, instance, entity, normalizedPos);
-        EventDispatcher.call(event);
+        var event = OpUtils.build(new TerraformSpawnEntityEvent(player, instance, entity, pos), EventDispatcher::call);
         if (event.isCancelled()) return;
 
         var display = OpUtils.safeCast(event.getEntity(), clazz);
+        if (display == null) return;
 
-        if (display != null) {
-            display.setInstance(instance, event.getPosition());
-            operations.accept(display);
-            DisplayEntityEditingFeatureProvider.setSelectedDisplayEntity(player, display);
-            replaceView(context -> AbstractEditDisplayView.create(context, display));
-        }
+        display.setInstance(instance, event.getPosition());
+        operations.accept(display);
+        DisplayEntityEditingFeatureProvider.setSelectedDisplayEntity(player, display);
+        replaceView(context -> AbstractEditDisplayView.create(context, display));
     }
 }

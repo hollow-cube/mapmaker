@@ -37,8 +37,8 @@ public class DisplayEntityItem extends ItemHandler {
             if (selectedEntity != null) {
                 if (player.isSneaking() && click.placePosition() != null) {
                     selectedEntity.teleport(Pos.fromPoint(click.placePosition().add(0.5)));
-                } else {
-                    world.server().showView(player, context -> AbstractEditDisplayView.create(context, selectedEntity));
+                } else if (selectedEntity instanceof DisplayEntity display) {
+                    world.server().showView(player, context -> AbstractEditDisplayView.create(context, display));
                 }
             } else {
                 player.removeTag(DisplayEntity.SELECTED_DISPLAY_ENTITY);

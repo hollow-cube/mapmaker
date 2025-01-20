@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.map.gui.displayentity.search ?>
+<?import net.hollowcube.mapmaker.map.gui.displayentity.object ?>
+<component id="anvil" width="9" height="5" align="ttb" sprite="anvil/search_container">
+    <text id="title" width="0" height="0" translationKey="" font="anvil_title" shift="-6"/>
+
+    <box width="3" height="1" align="ltr">
+        <button id="input" translationKey="forced.input" sprite="anvil/back" backgroundSprite="anvil/back_bg"/>
+        <item id="info" sprite="anvil/magnifying_glass"/>
+        <item id="output"/>
+    </box>
+
+    <pagination id="page" width="9" height="3" child="ObjectEntry"/>
+
+    <sprite id="no_results" sprite="anvil/search_no_results"/>
+</component>

@@ -10,7 +10,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.gui.displayentity.object.PropertyEntry;
-import net.hollowcube.mapmaker.map.gui.displayentity.object.SetDisplayObject;
+import net.hollowcube.mapmaker.map.gui.displayentity.search.SearchMaterialsView;
 import net.minestom.server.entity.metadata.display.BlockDisplayMeta;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
@@ -45,7 +45,7 @@ public class EditBlockDisplayView extends AbstractEditDisplayView<DisplayEntity.
 
     @Action("block")
     private void openBlockChooser() {
-        this.pushView(context -> new SetDisplayObject(context, FILTER));
+        this.pushView(context -> new SearchMaterialsView(context, FILTER));
     }
 
     @Action("properties")
@@ -72,7 +72,7 @@ public class EditBlockDisplayView extends AbstractEditDisplayView<DisplayEntity.
         this.meta().setBlockState(this.meta().getBlockStateId().withProperty(property, value));
     }
 
-    @Signal(SetDisplayObject.SIGNAL)
+    @Signal(SearchMaterialsView.SIGNAL)
     private void handleSetDisplayItem(Material material) {
         this.meta().setBlockState(material.block());
         this.updateState();

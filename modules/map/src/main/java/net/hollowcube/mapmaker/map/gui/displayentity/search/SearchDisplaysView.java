@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.map.gui.displayentity;
+package net.hollowcube.mapmaker.map.gui.displayentity.search;
 
 import com.miguelfonseca.completely.AutocompleteEngine;
 import com.miguelfonseca.completely.data.Indexable;
@@ -18,7 +18,7 @@ import java.util.UUID;
 
 public class SearchDisplaysView extends AbstractSearchView<DisplayEntityEntry> {
 
-    public static final String SIGNAL = "search_display.selected";
+    public static final String SIGNAL = "search_displays.selected";
 
     private final AutocompleteEngine<IndexableDisplay> engine = Autocompletors.createEngine();
 
@@ -64,7 +64,7 @@ public class SearchDisplaysView extends AbstractSearchView<DisplayEntityEntry> {
 
         @Override
         public List<String> getFields() {
-            return switch (display) {
+            return switch (this.display) {
                 case DisplayEntity.Item item -> {
                     var material = item.getEntityMeta().getItemStack().material();
                     yield List.of(material.name(), material.namespace().path(), material.namespace().path().replace("_", " "));
@@ -73,10 +73,8 @@ public class SearchDisplaysView extends AbstractSearchView<DisplayEntityEntry> {
                     var material = block.getEntityMeta().getBlockStateId();
                     yield List.of(material.name(), material.namespace().path(), material.namespace().path().replace("_", " "));
                 }
-                case DisplayEntity.Text entity -> {
-                    var text = MiniMessage.miniMessage().serialize(entity.getEntityMeta().getText());
-                    yield List.of(text);
-                }
+                case DisplayEntity.Text entity ->
+                        List.of(MiniMessage.miniMessage().serialize(entity.getEntityMeta().getText()));
             };
         }
     }

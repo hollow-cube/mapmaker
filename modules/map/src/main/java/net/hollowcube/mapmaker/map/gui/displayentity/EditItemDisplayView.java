@@ -12,7 +12,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.gui.displayentity.object.ComponentEntry;
-import net.hollowcube.mapmaker.map.gui.displayentity.object.SetDisplayObject;
+import net.hollowcube.mapmaker.map.gui.displayentity.search.SearchMaterialsView;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.component.DataComponent;
 import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
@@ -68,7 +68,7 @@ public class EditItemDisplayView extends AbstractEditDisplayView<DisplayEntity.I
 
     @Action("item")
     private void openItemChooser() {
-        this.pushView(context -> new SetDisplayObject(context, FILTER));
+        this.pushView(context -> new SearchMaterialsView(context, FILTER));
     }
 
     @Action("components")
@@ -94,7 +94,7 @@ public class EditItemDisplayView extends AbstractEditDisplayView<DisplayEntity.I
         this.meta().setItemStack(this.meta().getItemStack().with(component, value));
     }
 
-    @Signal(SetDisplayObject.SIGNAL)
+    @Signal(SearchMaterialsView.SIGNAL)
     private void onSetItem(Material material) {
         this.meta().setItemStack(ItemStack.of(material));
         this.updateState();

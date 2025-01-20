@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.gui.displayentity;
 
 import net.hollowcube.canvas.Switch;
+import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ActionGroup;
@@ -11,7 +12,6 @@ import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.feature.edit.DisplayEntityEditingFeatureProvider;
 import net.hollowcube.terraform.entity.TerraformEntity;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
@@ -28,6 +28,7 @@ public class AbstractEditDisplayView<E extends DisplayEntity, M extends Abstract
     private @Outlet("option_billboard") Switch billboardOption;
 
     private @Outlet("page") Switch page;
+    private @Outlet("tab_text") Text title;
 
     protected final E display;
 
@@ -108,14 +109,22 @@ public class AbstractEditDisplayView<E extends DisplayEntity, M extends Abstract
         this.tabSwitchMiddleSlot.setOption(page ^ 1);
         this.tabTransformsSwitch.setOption(page);
         this.page.setOption(page);
+
+        var title = switch (page) {
+            case 0 -> Component.translatable("gui.display_entity.tab.properties");
+            case 1 -> Component.translatable("gui.display_entity.tab.transforms");
+            default -> Component.empty();
+        };
+
+        this.title.setText(title);
+        this.title.setArgs(title);
     }
 
-    public static View create(@NotNull Context context, Entity entity) {
+    public static View create(@NotNull Context context, DisplayEntity entity) {
         return switch (entity) {
             case DisplayEntity.Block block -> new EditBlockDisplayView(context, block);
             case DisplayEntity.Item item -> new EditItemDisplayView(context, item);
             case DisplayEntity.Text text -> new EditTextDisplayView(context, text);
-            default -> new CreateDisplayView(context);
         };
     }
 

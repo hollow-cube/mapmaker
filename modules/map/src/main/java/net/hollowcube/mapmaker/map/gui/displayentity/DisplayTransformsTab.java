@@ -56,77 +56,73 @@ public class DisplayTransformsTab extends View {
 
     @Action("x")
     public void handleChangeX() {
-        pushNumberInput(this.display.getPosition().x(), (display, value) -> setPos(display, Pos::withX, value));
+        pushNumberInput(this.display.getPosition().x(), updatePosition(Pos::withX));
     }
 
     @Action("y")
     public void handleChangeY() {
-        pushNumberInput(this.display.getPosition().y(), (display, value) -> setPos(display, Pos::withY, value));
+        pushNumberInput(this.display.getPosition().y(), updatePosition(Pos::withY));
     }
 
     @Action("z")
     public void handleChangeZ() {
-        pushNumberInput(this.display.getPosition().z(), (display, value) -> setPos(display, Pos::withZ, value));
+        pushNumberInput(this.display.getPosition().z(), updatePosition(Pos::withZ));
     }
 
     @Action("yaw")
     public void handleChangeYaw() {
-        pushNumberInput(getRotation(this.display).x(), (display, value) -> setRot(display, Axis.X, value));
+        pushNumberInput(getRotation(this.display).x(), updateRotation(Vec::withX));
     }
 
     @Action("pitch")
     public void handleChangePitch() {
-        pushNumberInput(getRotation(this.display).y(), (display, value) -> setRot(display, Axis.Y, value));
+        pushNumberInput(getRotation(this.display).y(), updateRotation(Vec::withY));
     }
 
     @Action("roll")
     public void handleChangeRoll() {
-        pushNumberInput(getRotation(this.display).z(), (display, value) -> setRot(display, Axis.Z, value));
+        pushNumberInput(getRotation(this.display).z(), updateRotation(Vec::withZ));
     }
 
     @Action("scaleX")
     public void handleChangeScaleX() {
-        pushNumberInput(getScale(this.display).x(), (display, value) -> setScale(display, Axis.X, value));
+        pushNumberInput(getScale(this.display).x(), updateScale(Vec::withX));
     }
 
     @Action("scaleY")
     public void handleChangeScaleY() {
-        pushNumberInput(getScale(this.display).y(), (display, value) -> setScale(display, Axis.Y, value));
+        pushNumberInput(getScale(this.display).y(), updateScale(Vec::withY));
     }
 
     @Action("scaleZ")
     public void handleChangeScaleZ() {
-        pushNumberInput(getScale(this.display).z(), (display, value) -> setScale(display, Axis.Z, value));
+        pushNumberInput(getScale(this.display).z(), updateScale(Vec::withZ));
     }
 
-    private static boolean setScale(DisplayEntity entity, Axis type, double value) {
-        if (value == 0.0) return false;
-        var scale = entity.getEntityMeta().getScale();
-        switch (type) {
-            case X -> entity.scaleDisplay(new Vec(value, scale.y(), scale.z()));
-            case Y -> entity.scaleDisplay(new Vec(scale.x(), value, scale.z()));
-            case Z -> entity.scaleDisplay(new Vec(scale.x(), scale.y(), value));
-        }
-        return true;
-    }
-
-    private static boolean setRot(DisplayEntity entity, Axis type, double value) {
-        var rot = getRotation(entity);
-        switch (type) {
-            case X -> entity.rotateDisplay(new Vec(value, rot.y(), rot.z()));
-            case Y -> entity.rotateDisplay(new Vec(rot.x(), value, rot.z()));
-            case Z -> entity.rotateDisplay(new Vec(rot.x(), rot.y(), value));
-        }
-        return true;
-    }
-
-    private static boolean setPos(DisplayEntity entity, BiFunction<Pos, Double, Pos> updater, double value) {
-        var newPos = updater.apply(entity.getPosition(), value);
-        if (entity.getInstance().getWorldBorder().inBounds(newPos)) {
-            entity.teleport(newPos);
+    private static BiPredicate<DisplayEntity, Double> updateScale(BiFunction<Vec, Double, Vec> updater) {
+        return (display, value) -> {
+            if (value.isInfinite() || value.isNaN() || value == 0.0) return false;
+            display.rotateDisplay(updater.apply(getScale(display), value));
             return true;
-        }
-        return false;
+        };
+    }
+
+    private static BiPredicate<DisplayEntity, Double> updateRotation(BiFunction<Vec, Double, Vec> updater) {
+        return (display, value) -> {
+            display.rotateDisplay(updater.apply(getRotation(display), value));
+            return true;
+        };
+    }
+
+    private static BiPredicate<DisplayEntity, Double> updatePosition(BiFunction<Pos, Double, Pos> updater) {
+        return (display, value) -> {
+            var newPos = updater.apply(display.getPosition(), value);
+            if (display.getInstance().getWorldBorder().inBounds(newPos)) {
+                display.teleport(newPos);
+                return true;
+            }
+            return false;
+        };
     }
 
     private void pushNumberInput(double current, BiPredicate<DisplayEntity, Double> updater) {
@@ -173,9 +169,5 @@ public class DisplayTransformsTab extends View {
 
     private static double roundTo16(double value) {
         return Math.round(value * 16.0) / 16.0;
-    }
-
-    private enum Axis {
-        X, Y, Z
     }
 }
