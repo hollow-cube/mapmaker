@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 @RuntimeGson
 public class MapSettings {
+    public static final MapSetting<Boolean> BOAT = MapSetting.Embedded("boat", MapSettings::isBoat, MapUpdateRequest::setBoat);
     public static final MapSetting<Boolean> ONLY_SPRINT = MapSetting.Embedded("only_sprint", MapSettings::isOnlySprint, MapUpdateRequest::setOnlySprint);
     public static final MapSetting<Boolean> NO_SPRINT = MapSetting.Embedded("no_sprint", MapSettings::isNoSprint, MapUpdateRequest::setNoSprint);
     public static final MapSetting<Boolean> NO_JUMP = MapSetting.Embedded("no_jump", MapSettings::isNoJump, MapUpdateRequest::setNoJump);
@@ -34,6 +35,10 @@ public class MapSettings {
     public static final MapSetting<TimeOfDay> TIME_OF_DAY = MapSetting.Enum("time_of_day", TimeOfDay.NOON);
     public static final MapSetting<WeatherType> WEATHER_TYPE = MapSetting.Enum("weather_type", WeatherType.CLEAR);
     public static final MapSetting<Boolean> LIGHTING = MapSetting.Bool("lighting", false);
+
+    public static final MapSetting<Boolean>[] TOOLTIP_SETTINGS = new MapSetting[]{
+            BOAT, ONLY_SPRINT, NO_SPRINT, NO_JUMP, NO_SNEAK,
+    };
 
     // Weird/one off/experimental settings
     public static final MapSetting<Boolean> PROGRESS_INDEX_ADDITION = MapSetting.Bool("progress_index_addition", false);
@@ -183,10 +188,14 @@ public class MapSettings {
         return name;
     }
 
-    public @NotNull Component getNameComponent() {
+    public @NotNull String getNameSafe() {
         if (name == null || name.isEmpty())
-            return Component.text(MapData.DEFAULT_NAME);
-        return Component.text(name);
+            return MapData.DEFAULT_NAME;
+        return name;
+    }
+
+    public @NotNull Component getNameComponent() {
+        return Component.text(getNameSafe());
     }
 
     public @NotNull Component getTagsComponent() {

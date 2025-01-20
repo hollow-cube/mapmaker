@@ -196,7 +196,7 @@ public class PlayMapsView extends View {
                     if (page != pagination.page()) return;
                     pagination.<MapEntry>forEachEntry(page, entry -> {
                         var progress = resp.getProgress(entry.map().id());
-                        if (progress != null) entry.setProgress(progress);
+                        if (progress != null) entry.setProgress(progress.getKey(), progress.getValue());
                     });
                 });
             });

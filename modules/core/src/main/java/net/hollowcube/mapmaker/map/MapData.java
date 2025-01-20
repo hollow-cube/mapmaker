@@ -1,28 +1,52 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.object.ObjectData;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @RuntimeGson
 public class MapData {
     public static final String DEFAULT_NAME = "Untitled Map";
+
+    public enum Difficulty {
+        UNKNOWN,
+        EASY,
+        MEDIUM,
+        HARD,
+        EXPERT,
+        NIGHTMARE;
+
+        private static final BadSprite[] TOOLTIP_ICONS = new BadSprite[]{
+                BadSprite.require("icon/map_tooltip/difficulty_unknown"),
+                BadSprite.require("icon/map_tooltip/difficulty_0"),
+                BadSprite.require("icon/map_tooltip/difficulty_1"),
+                BadSprite.require("icon/map_tooltip/difficulty_2"),
+                BadSprite.require("icon/map_tooltip/difficulty_3"),
+                BadSprite.require("icon/map_tooltip/difficulty_4"),
+        };
+
+        public @NotNull BadSprite tooltipIcon() {
+            return TOOLTIP_ICONS[ordinal()];
+        }
+    }
 
     public static final int MIN_PLAYS_FOR_DIFFICULTY = 10;
 
@@ -36,6 +60,7 @@ public class MapData {
     private long publishedId;
     private Instant publishedAt;
 
+    private int likes;
     private int uniquePlays;
     private double clearRate;
 
@@ -121,6 +146,10 @@ public class MapData {
         return publishedAt;
     }
 
+    public int likes() {
+        return likes;
+    }
+
     public int uniquePlays() {
         return uniquePlays;
     }
@@ -129,32 +158,23 @@ public class MapData {
         return clearRate;
     }
 
-    public @NotNull Component getDifficultyComponent() {
+    public @NotNull Difficulty getDifficulty() {
         if (uniquePlays() < MIN_PLAYS_FOR_DIFFICULTY)
-            return Component.translatable("gui.play_maps.map_display.difficulty.unknown");
+            return Difficulty.UNKNOWN;
+        var cr = clearRate();
+        if (cr < 0.05) return Difficulty.NIGHTMARE;
+        if (cr < 0.25) return Difficulty.EXPERT;
+        if (cr < 0.5) return Difficulty.HARD;
+        if (cr < 0.75) return Difficulty.MEDIUM;
+        return Difficulty.EASY;
+    }
 
-        return Component.translatable(
-                "gui.play_maps.map_display.difficulty." + getDifficultyName(),
-                Component.text(getClearRateString())
-        );
+    public @NotNull Component getDifficultyComponent() {
+        return Component.translatable("gui.play_maps.map_display.difficulty." + getDifficulty().name().toLowerCase(Locale.ROOT));
     }
 
     public @NotNull String getDifficultyName() {
-        var cr = clearRate();
-        if (cr < 0.05) return "nightmare";
-        if (cr < 0.25) return "expert";
-        if (cr < 0.5) return "hard";
-        if (cr < 0.75) return "medium";
-        return "easy";
-    }
-
-    public @NotNull String getClearRateString() {
-        var cr = clearRate() * 100;
-        if (cr >= 100) return "100";
-        else if (cr <= 0) return "0";
-        else if (cr >= 10) return String.format("%.1f", cr);
-        else if (cr >= 1) return String.format("%.2f", cr);
-        else return String.format("%.3f", cr);
+        return getDifficulty().name().toLowerCase(Locale.ROOT);
     }
 
     public @NotNull MapQuality quality() {
@@ -276,128 +296,119 @@ public class MapData {
         }
     }
 
+    // Returns title and lore (mutable list)
+    @NonBlocking
+    public static @NotNull Map.Entry<Component, List<Component>> createHoverComponents(
+            @NotNull MapData map, @NotNull Component authorName,
+            @Nullable Map.Entry<PersonalizedMapData.Progress, Integer> personalProgress
+    ) {
+        class Holder {
+            static final BadSprite PLAYS_ICON = BadSprite.require("icon/map_tooltip/plays");
+            static final Component PLAYS_ICON_TEXT = Component.text(PLAYS_ICON.fontChar() + FontUtil.computeOffset(2));
+            static final BadSprite LIKES_ICON = BadSprite.require("icon/map_tooltip/likes");
+            static final Component LIKES_ICON_TEXT = Component.text(LIKES_ICON.fontChar() + FontUtil.computeOffset(2));
+        }
 
-    /**
-     * Returns a component with the map name and a hover text that shows the map details GUI basically.
-     * <p>
-     * If the map is published it will also have a join link
-     *
-     * @return
-     */
-    public static @NotNull Component createHeadlessComponent(@NotNull MapData map, @NotNull PlayerService playerService) {
+        var title = MapData.rewriteWithQualityFont(map.quality(), map.settings().getNameSafe())
+                .decoration(TextDecoration.ITALIC, false);
+
+        // TODO support building maps in this
+
+        var quality = map.quality();
+        var starText = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            if (i <= quality.ordinal()) {
+                starText.append(quality.starSprite().fontChar());
+            } else {
+                starText.append(MapQuality.EMPTY_STAR.fontChar());
+            }
+        }
+
         var lore = new ArrayList<Component>();
-        lore.add(Component.text(map.name()));
-        var authorName = playerService.getPlayerDisplayName2(map.owner());
-        lore.add(Component.translatable("gui.play_maps.map_display.author", authorName.build()));
+        lore.add(Component.translatable("gui.play_maps.map_display.author", authorName));
         lore.add(Component.empty());
-        lore.add(Component.translatable("gui.play_maps.map_display.type", getMapTypeComponent(map)));
-        if (map.settings().getVariant() == MapVariant.PARKOUR)
-            lore.add(Component.translatable("gui.play_maps.map_display.difficulty", map.getDifficultyComponent()));
-        if (map.quality() == MapQuality.GOOD) {
-            lore.add(Component.translatable("gui.play_maps.map_display.rating.good"));
-        } else if (map.quality() == MapQuality.GREAT) {
-            lore.add(Component.translatable("gui.play_maps.map_display.rating.great"));
-        } else if (map.quality() == MapQuality.EXCELLENT) {
-            lore.add(Component.translatable("gui.play_maps.map_display.rating.excellent"));
-        } else if (map.quality() == MapQuality.OUTSTANDING) {
-            lore.add(Component.translatable("gui.play_maps.map_display.rating.outstanding"));
-        } else if (map.quality() == MapQuality.MASTERPIECE) {
-            lore.add(Component.translatable("gui.play_maps.map_display.rating.masterpiece"));
-        } else {
-            lore.add(Component.translatable("gui.play_maps.map_display.rating.unrated"));
-        }
-
-        lore.add(Component.translatable("gui.play_maps.map_display.id", Component.text(map.publishedIdString())));
-        var tags = map.settings().getTags();
-        if (!tags.isEmpty()) {
-            lore.add(Component.empty());
-            lore.add(Component.translatable("gui.play_maps.map_display.tags_header"));
-            for (var tag : tags) {
-                lore.add(Component.translatable("gui.play_maps.map_display.tags_single", Component.text(tag.displayName())));
-            }
-        }
-
-        if (map.settings().isOnlySprint() || map.settings().isNoSprint() || map.settings().isNoJump()
-                || map.settings().isNoSneak() || map.settings().isBoat()) {
-            lore.add(Component.empty());
-            lore.add(Component.translatable("gui.play_maps.map_display.settings_header"));
-
-            int settingsCount = 0;
-            int extraSettingsCount = 0;
-
-            if (map.settings().isOnlySprint()) {
-                lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("Only Sprint")));
-                settingsCount++;
-            }
-            if (map.settings().isNoSprint()) {
-                lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("No Sprint")));
-                settingsCount++;
-            }
-            if (map.settings().isNoJump()) {
-                lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("No Jump")));
-                settingsCount++;
-            }
-            if (map.settings().isNoSneak()) {
-                if (settingsCount < 3) {
-                    lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("No Sneak")));
-                } else {
-                    extraSettingsCount++;
-                }
-                settingsCount++;
-            }
-            if (map.settings().isBoat()) {
-                if (settingsCount < 3) {
-                    lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("Boats")));
-                } else {
-                    extraSettingsCount++;
-                }
-                settingsCount++;
-            }
-
-            if (settingsCount > 3) {
-                lore.add(Component.translatable("gui.play_maps.map_display.setting_more", Component.text(extraSettingsCount)));
-            }
-        }
-
+        lore.add(Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
+                .append(Component.text(quality.tooltipBorderSprite().fontChar(), FontUtil.NO_SHADOW))
+                .append(Component.text(FontUtil.computeOffset(4)))
+                .append(map.getDifficultyComponent())
+                .append(Component.text(FontUtil.computeOffset(6)))
+                .append(getMapTypeComponent(map)));
+        lore.add(Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
+                .append(Component.text(map.getDifficulty().tooltipIcon().fontChar(), FontUtil.NO_SHADOW))
+                .append(Component.text(FontUtil.computeOffset(5)))
+                .append(Component.text(starText.toString()))
+                .append(Component.text(FontUtil.computeOffset(6)))
+                .append(Holder.PLAYS_ICON_TEXT
+                        .append(Component.text(NumberUtil.formatCurrency(map.uniquePlays()), TextColor.color(0xaeaeae)))
+                        .append(Component.text(FontUtil.computeOffset(6)))
+                        .append(Holder.LIKES_ICON_TEXT)
+                        .append(Component.text(map.likes(), TextColor.color(0xaeaeae)))));
         lore.add(Component.empty());
-        lore.addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display_headless.footer", List.of()));
 
-        var builder = Component.text();
-        for (int i = 0; i < lore.size(); i++) {
-            builder.append(LanguageProviderV2.translate(lore.get(i)));
-            if (i < lore.size() - 1) {
-                builder.appendNewline();
+        var settingsLine = createSettingsLine(map);
+        if (settingsLine != null) {
+            lore.add(Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
+                    .append(Component.text(BadSprite.require("icon/map_tooltip/settings").fontChar(), FontUtil.NO_SHADOW))
+                    .append(Component.text(FontUtil.computeOffset(2)))
+                    .append(settingsLine));
+            lore.add(Component.empty());
+        }
+
+        if (personalProgress != null) {
+            var progress = personalProgress.getKey();
+            var playtime = personalProgress.getValue();
+            if (progress == PersonalizedMapData.Progress.COMPLETE) {
+                lore.add(Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
+                        .append(Component.text(BadSprite.require("icon/map_tooltip/completed").fontChar(), FontUtil.NO_SHADOW))
+                        .append(Component.text(FontUtil.computeOffset(6)))
+                        .append(Component.translatable("gui.play_maps.map_display.completed", Component.text(NumberUtil.formatMapPlaytime(playtime, true)))));
+                lore.add(Component.empty());
+            } else if (progress == PersonalizedMapData.Progress.STARTED) {
+                lore.add(Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
+                        .append(Component.translatable("gui.play_maps.map_display.in_progress", Component.text(NumberUtil.formatMapPlaytime(playtime, true)))));
+                lore.add(Component.empty());
             }
         }
 
-        var comp = Component.text(map.name(), TextColor.color(0x15ADD3));
-        if (map.isPublished()) {
-            comp = comp.hoverEvent(HoverEvent.showText(builder.build()))
-                    .clickEvent(ClickEvent.runCommand("/play " + MapData.formatPublishedId(map.publishedId())));
-        }
-//        else {
-//            var hoverText = Component.text("Click to view details!")
-//                    .appendNewline()
-//                    .append(Component.text("LINE 2"));
-//            comp = comp.hoverEvent(HoverEvent.showText(hoverText))
-//                    .clickEvent(ClickEvent.runCommand("/map details " + map.id()));
-//        }
+        lore.addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display.footer", List.of()));
 
-        return comp;
-//        return builder.build();
+        return Map.entry(title, lore);
+    }
+
+    private static @Nullable Component createSettingsLine(@NotNull MapData map) {
+        class Holder {
+            static final Component SEPARATOR = Component.text(", ", TextColor.color(0xB0B0B0));
+        }
+
+        var components = new ArrayList<ComponentLike>();
+        int enabledExtra = 0;
+        for (var setting : MapSettings.TOOLTIP_SETTINGS) {
+            if (!map.getSetting(setting)) continue;
+
+            if (!components.isEmpty()) components.add(Holder.SEPARATOR);
+            if (components.size() < 4) { // 4 = 2 separators & 2 settings
+                components.add(Component.translatable("gui.play_maps.map_display." + setting.key()));
+            } else enabledExtra++;
+        }
+        if (enabledExtra > 0) {
+            components.add(Holder.SEPARATOR.append(Component.text("+" + enabledExtra)));
+        }
+
+        if (components.isEmpty()) return null;
+        return Component.textOfChildren(components.toArray(new ComponentLike[0]));
     }
 
     private static @NotNull Component getMapTypeComponent(@NotNull MapData map) {
         if (map.settings().getVariant() == MapVariant.PARKOUR) {
             return switch (map.settings().getParkourSubVariant()) {
-                case SPEEDRUN -> Component.text("Speedrun Parkour", TextColor.color(0x15ADD3));
-                case SECTIONED -> Component.text("Sectioned Parkour", TextColor.color(0x15ADD3));
-                case RANKUP -> Component.text("Rankup Parkour", TextColor.color(0x15ADD3));
-                case GAUNTLET -> Component.text("Gauntlet Parkour", TextColor.color(0x15ADD3));
-                case DROPPER -> Component.text("Dropper Parkour", TextColor.color(0x15ADD3));
-                case ONE_JUMP -> Component.text("One Jump Parkour", TextColor.color(0x15ADD3));
-                case INFORMATIVE -> Component.text("Informative Parkour", TextColor.color(0x15ADD3));
-                case null -> Component.text("Generic Parkour", TextColor.color(0x15ADD3));
+                case SPEEDRUN -> Component.text("Speedrun Parkour", TextColor.color(0x55ffff));
+                case SECTIONED -> Component.text("Sectioned Parkour", TextColor.color(0x55ffff));
+                case RANKUP -> Component.text("Rankup Parkour", TextColor.color(0x55ffff));
+                case GAUNTLET -> Component.text("Gauntlet Parkour", TextColor.color(0x55ffff));
+                case DROPPER -> Component.text("Dropper Parkour", TextColor.color(0x55ffff));
+                case ONE_JUMP -> Component.text("One Jump Parkour", TextColor.color(0x55ffff));
+                case INFORMATIVE -> Component.text("Informative Parkour", TextColor.color(0x55ffff));
+                case null -> Component.text("Generic Parkour", TextColor.color(0x55ffff));
             };
         } else if (map.settings().getVariant() == MapVariant.BUILDING) {
             return switch (map.settings().getBuildingSubVariant()) {
@@ -417,7 +428,7 @@ public class MapData {
 
         //todo use values directly from placeholders/tx keys rather than duplicating here
         return switch (quality) {
-            case UNRATED -> Component.text(text, TextColor.color(0xF04B3D)); // placeholders.json5 -> light_red
+            case UNRATED -> Component.text(text, TextColor.color(0xF2F2F2)); // placeholders.json5 -> white
             case GOOD -> Component.text(text, TextColor.color(0xF5DC3B)); // placeholders.json5 -> lemon
             case GREAT -> Component.text(text, TextColor.color(0x8CDB46)); // placeholders.json5 -> toxic_green
             case EXCELLENT ->

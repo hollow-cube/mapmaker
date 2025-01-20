@@ -174,7 +174,7 @@
   // #46FA32 - Lime (CT Rank, Success, Accept, Confirm, Available, Free, Easy Difficulty)
   "lime": {
     "type": "raw",
-    "value": "#46FA32"
+    "value": "#45f731"
   },
   // #FFE11C - Yellow (QA Icon, Status Update, In-Progress, Waiting, Pending, Warning, Medium Difficulty)
   "yellow": {
