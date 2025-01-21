@@ -6,10 +6,12 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ActionGroup;
 import net.hollowcube.canvas.annotation.Outlet;
+import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.gui.common.ConfirmAction;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.feature.edit.DisplayEntityEditingFeatureProvider;
+import net.hollowcube.mapmaker.map.gui.displayentity.search.SearchDisplaysView;
 import net.hollowcube.terraform.entity.TerraformEntity;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -18,6 +20,7 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class AbstractEditDisplayView<E extends DisplayEntity, M extends AbstractDisplayMeta> extends View {
 
@@ -101,7 +104,22 @@ public class AbstractEditDisplayView<E extends DisplayEntity, M extends Abstract
 
     @Action("create")
     private void onCreateClick(@NotNull Player player) {
-        replaceView(CreateDisplayView::new);
+        pushView(CreateDisplayView::new);
+    }
+
+    @Action("search")
+    private void onSearchClick(@NotNull Player player) {
+        pushView(SearchDisplaysView::new);
+    }
+
+    @Signal(SearchDisplaysView.SIGNAL)
+    private void onSearchDisplaySelected(UUID uuid) {
+        var player = this.player();
+        var entity = player.getInstance().getEntityByUuid(uuid);
+        if (entity instanceof DisplayEntity it) {
+            DisplayEntityEditingFeatureProvider.setSelectedDisplayEntity(player, it);
+            replaceView(context -> AbstractEditDisplayView.create(context, it));
+        }
     }
 
     private void setPage(int page) {

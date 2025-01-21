@@ -13,7 +13,8 @@
         <text id="tab_text" width="5" height="1" translationKey="gui.checkpoint.tab" sprite="generic/text_display_5"
               font="play_maps_page" centered="true"/>
 
-        <button id="create" width="2" translationKey="gui.display_entity.create"/>
+        <button id="create" translationKey="gui.display_entity.create" sprite="hud/hotbar/edit_map_details"/>
+        <button id="search" translationKey="gui.display_entity.search" sprite="hud/hotbar/edit_map_details"/>
     </box>
 
     <box width="9" height="5" align="ttb">
