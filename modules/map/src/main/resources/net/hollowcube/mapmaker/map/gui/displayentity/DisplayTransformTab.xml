@@ -1,45 +1,45 @@
 <?xml version="1.0" ?>
 <?import net.hollowcube.mapmaker.gui.common ?>
 <?import net.hollowcube.mapmaker.map.gui.displayentity ?>
-<component width="9" height="4" align="ttb" backgroundSprite="displayentity/transforms/container">
+<component width="9" height="4" align="ttb" backgroundSprite="displayentity/transform/container">
     <spacer/>
     <box width="9" height="1" align="ltr">
         <spacer/>
-        <label translationKey="gui.display_entity.transforms.position"/>
+        <label translationKey="gui.display_entity.transform.position"/>
         <text id="x" width="2" height="1"
-              translationKey="gui.display_entity.transforms.position.x"
+              translationKey="gui.display_entity.transform.position.x"
               font="line_3" shift="5"/>
         <text id="y" width="2" height="1"
-              translationKey="gui.display_entity.transforms.position.y"
+              translationKey="gui.display_entity.transform.position.y"
               font="line_3" shift="9"/>
         <text id="z" width="2" height="1"
-              translationKey="gui.display_entity.transforms.position.z"
+              translationKey="gui.display_entity.transform.position.z"
               font="line_3" shift="13"/>
     </box>
     <box width="9" height="1" align="ltr">
         <spacer/>
-        <label translationKey="gui.display_entity.transforms.rotation"/>
+        <label translationKey="gui.display_entity.transform.rotation"/>
         <text id="yaw" width="2" height="1"
-              translationKey="gui.display_entity.transforms.rotation.yaw"
+              translationKey="gui.display_entity.transform.rotation.yaw"
               font="line_4" shift="5"/>
         <text id="pitch" width="2" height="1"
-              translationKey="gui.display_entity.transforms.rotation.pitch"
+              translationKey="gui.display_entity.transform.rotation.pitch"
               font="line_4" shift="9"/>
         <text id="roll" width="2" height="1"
-              translationKey="gui.display_entity.transforms.rotation.roll"
+              translationKey="gui.display_entity.transform.rotation.roll"
               font="line_4" shift="13"/>
     </box>
     <box width="9" height="1" align="ltr">
         <spacer/>
-        <label translationKey="gui.display_entity.transforms.rotation"/>
+        <label translationKey="gui.display_entity.transform.rotation"/>
         <text id="scaleX" width="2" height="1"
-              translationKey="gui.display_entity.transforms.rotation.scale_x"
+              translationKey="gui.display_entity.transform.rotation.scale_x"
               font="line_5" shift="5"/>
         <text id="scaleY" width="2" height="1"
-              translationKey="gui.display_entity.transforms.rotation.scale_y"
+              translationKey="gui.display_entity.transform.rotation.scale_y"
               font="line_5" shift="9"/>
         <text id="scaleZ" width="2" height="1"
-              translationKey="gui.display_entity.transforms.rotation.scale_z"
+              translationKey="gui.display_entity.transform.rotation.scale_z"
               font="line_5" shift="13"/>
     </box>
 </component>

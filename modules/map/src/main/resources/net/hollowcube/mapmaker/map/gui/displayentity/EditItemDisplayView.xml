@@ -29,16 +29,16 @@
 
             <switch id="tab_switch_middle_slot">
                 <button id="tab_middle_slot_properties" translationKey="gui.display_entity.tab.properties.unselected"/>
-                <button id="tab_middle_slot_transforms" translationKey="gui.display_entity.tab.transforms.unselected"/>
+                <button id="tab_middle_slot_transform" translationKey="gui.display_entity.tab.transform.unselected"/>
             </switch>
 
-            <switch id="tab_transforms_switch" width="4" height="1">
-                <button id="tab_transforms_off" width="4" height="1"
-                        translationKey="gui.display_entity.tab.transforms.unselected"
+            <switch id="tab_transform_switch" width="4" height="1">
+                <button id="tab_transform_off" width="4" height="1"
+                        translationKey="gui.display_entity.tab.transform.unselected"
                 />
-                <button id="tab_transforms_on" width="4" height="1"
-                        translationKey="gui.display_entity.tab.transforms.selected"
-                        sprite="displayentity/transforms/tab"
+                <button id="tab_transform_on" width="4" height="1"
+                        translationKey="gui.display_entity.tab.transform.selected"
+                        sprite="displayentity/transform/tab"
                 />
             </switch>
         </box>
@@ -125,7 +125,7 @@
                     <pagination id="components" width="6" height="1" child="ComponentEntry"/>
                 </box>
             </box>
-            <DisplayTransformsTab/>
+            <DisplayTransformTab/>
         </switch>
     </box>
 

@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 
-public class DisplayTransformsTab extends View {
+public class DisplayTransformTab extends View {
 
     private @ContextObject("display") DisplayEntity display;
 
@@ -33,7 +33,7 @@ public class DisplayTransformsTab extends View {
     private @Outlet("scaleY") Text scaleYText;
     private @Outlet("scaleZ") Text scaleZText;
 
-    public DisplayTransformsTab(@NotNull Context context) {
+    public DisplayTransformTab(@NotNull Context context) {
         super(context);
 
         this.updateText();

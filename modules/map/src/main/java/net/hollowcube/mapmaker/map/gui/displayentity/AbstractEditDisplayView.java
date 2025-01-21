@@ -23,7 +23,7 @@ public class AbstractEditDisplayView<E extends DisplayEntity, M extends Abstract
 
     private @Outlet("tab_properties_switch") Switch tabPropertiesSwitch;
     private @Outlet("tab_switch_middle_slot") Switch tabSwitchMiddleSlot;
-    private @Outlet("tab_transforms_switch") Switch tabTransformsSwitch;
+    private @Outlet("tab_transform_switch") Switch tabTransformSwitch;
 
     private @Outlet("option_billboard") Switch billboardOption;
 
@@ -63,8 +63,8 @@ public class AbstractEditDisplayView<E extends DisplayEntity, M extends Abstract
         this.setPage(0);
     }
 
-    @ActionGroup("tab_transforms_off|tab_middle_slot_transforms")
-    private void openTransformsTab() {
+    @ActionGroup("tab_transform_off|tab_middle_slot_transform")
+    private void openTransformTab() {
         this.setPage(1);
     }
 
@@ -107,12 +107,12 @@ public class AbstractEditDisplayView<E extends DisplayEntity, M extends Abstract
     private void setPage(int page) {
         this.tabPropertiesSwitch.setOption(page ^ 1);
         this.tabSwitchMiddleSlot.setOption(page ^ 1);
-        this.tabTransformsSwitch.setOption(page);
+        this.tabTransformSwitch.setOption(page);
         this.page.setOption(page);
 
         var title = switch (page) {
             case 0 -> Component.translatable("gui.display_entity.tab.properties");
-            case 1 -> Component.translatable("gui.display_entity.tab.transforms");
+            case 1 -> Component.translatable("gui.display_entity.tab.transform");
             default -> Component.empty();
         };
 
