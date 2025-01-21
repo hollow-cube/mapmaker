@@ -56,6 +56,9 @@ maven.install(
         "com.velocitypowered:velocity-api:3.1.1",
         "org.jctools:jctools-core:4.0.5",
 
+        # Compat
+        "com.noxcrew.noxesium:api:2.5.0",
+
         # Adventure
         "net.kyori:adventure-api:4.16.0",
         "net.kyori:adventure-key:4.16.0",
@@ -109,6 +112,7 @@ maven.install(
         "https://jitpack.io",
         "https://repo.papermc.io/repository/maven-public/",
         "https://packages.confluent.io/maven/",  # For schema registry client
+        "https://maven.noxcrew.com/public", # For noxesium
     ],
 )
 use_repo(maven, "maven")
