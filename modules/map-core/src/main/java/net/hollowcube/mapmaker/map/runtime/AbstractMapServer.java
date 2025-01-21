@@ -21,6 +21,7 @@ import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
@@ -373,6 +374,8 @@ public abstract class AbstractMapServer implements MapServer {
      */
     protected void prepareStart() {
         var globalEventHandler = MinecraftServer.getGlobalEventHandler();
+
+        CompatProvider.load(globalEventHandler);
 
         CosmeticInventoryHandler.init(guiController);
         AbstractAccessoryImpl.addListeners(globalEventHandler);
