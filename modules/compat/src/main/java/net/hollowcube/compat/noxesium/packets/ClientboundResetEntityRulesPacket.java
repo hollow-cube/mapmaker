@@ -3,13 +3,10 @@ package net.hollowcube.compat.noxesium.packets;
 import net.hollowcube.compat.api.packet.ClientboundModPacket;
 import net.hollowcube.compat.noxesium.NoxesiumAPI;
 import net.hollowcube.compat.noxesium.rules.NoxesiumEntityRule;
-import net.hollowcube.compat.noxesium.rules.NoxesiumEntityRules;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public record ClientboundResetEntityRulesPacket(
