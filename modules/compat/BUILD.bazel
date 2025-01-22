@@ -10,6 +10,7 @@ java_library(
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:org_jetbrains_annotations",
         "@maven//:com_noxcrew_noxesium_api",
+        "@maven//:net_kyori_adventure_api",
         "@maven//:net_kyori_adventure_nbt",
     ],
 )

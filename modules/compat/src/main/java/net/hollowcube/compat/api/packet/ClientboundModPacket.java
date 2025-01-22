@@ -1,9 +1,12 @@
 package net.hollowcube.compat.api.packet;
 
 import net.hollowcube.compat.impl.PacketRegistryImpl;
+import net.minestom.server.Viewable;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.validate.Check;
+
+import java.util.Collection;
 
 public interface ClientboundModPacket<T extends ClientboundModPacket<T>>  {
 
@@ -11,6 +14,14 @@ public interface ClientboundModPacket<T extends ClientboundModPacket<T>>  {
 
     default void send(Player player) {
         send(player, false);
+    }
+
+    default void sendToViewers(Collection<Player> players) {
+        players.forEach(this::send);
+    }
+
+    default void sendToViewers(Viewable viewable) {
+        sendToViewers(viewable.getViewers());
     }
 
     @SuppressWarnings("unchecked")
