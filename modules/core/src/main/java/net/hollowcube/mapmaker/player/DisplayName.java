@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Objects;
 
 public record DisplayName(
         @NotNull List<Part> parts
@@ -59,15 +58,6 @@ public record DisplayName(
                 case "badge" -> {
                     if (context == Context.PLAIN) continue;
 
-                    if (context == Context.TAB_LIST) {
-                        builder.append(Component.text(switch (part.text) {
-                            case "dev_3", "mod_3", "ct_3" -> '\uF830';
-                            case "dev_2", "mod_2", "ct_2" -> '\uF831';
-                            case "dev_1", "mod_1", "ct_1" -> '\uF832';
-                            case null, default -> '\uF833';
-                        }));
-                    }
-
                     // FontUtil.rewrite("bossbar_ascii_1", ownerNamePlain)
 
                     var icon = part.text.contains("hypercube") ? "icon/" + part.text : "icon/staff/" + part.text;
@@ -95,18 +85,15 @@ public record DisplayName(
         return null;
     }
 
-    public @NotNull String getUsernameForTabList() {
-        char sortPrefix = switch (getBadgeName()) {
-            case "dev_3", "mod_3", "ct_3" -> '\uF830';
-            case "dev_2", "mod_2", "ct_2" -> '\uF831';
-            case "dev_1", "mod_1", "ct_1" -> '\uF832';
-            case "media" -> '\uF833';
-            case null, default -> '\uF834';
+    public int getTabListOrder() {
+        return switch (getBadgeName()) {
+            case "dev_3", "mod_3", "ct_3" -> 5;
+            case "dev_2", "mod_2", "ct_2" -> 4;
+            case "dev_1", "mod_1", "ct_1" -> 3;
+            case "media" -> 2;
+            case "hypercube/gold" -> 1;
+            case null, default -> 0;
         };
-        // Need to cut off the end of their username to not hit the max length.
-        var username = Objects.requireNonNull(getUsername(), "unknown");
-        if (username.length() > 14) username = username.substring(0, 14);
-        return sortPrefix + username;
     }
 
 }
