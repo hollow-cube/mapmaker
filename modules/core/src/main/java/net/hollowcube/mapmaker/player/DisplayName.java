@@ -23,8 +23,6 @@ public record DisplayName(
     public enum Context {
         DEFAULT,
         PLAIN,
-        // Like DEFAULT, but includes an ordering character before the badge
-        TAB_LIST,
         // Like DEFAULT, but uses offset characters vertically
         BOSS_BAR
     }
