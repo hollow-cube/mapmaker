@@ -61,13 +61,16 @@ public class TimerFeatureProvider implements FeatureProvider {
         if (saveState == null) return;
 
         long time = saveState.getRealPlaytime();
+        var effects = world.getTag(BaseParkourMapFeatureProvider.SPAWN_CHECKPOINT_EFFECTS);
 
         // Append the countdown timer, but only if it's not a testing map.
         // We should not show the normal timer in testing mode.
+        // If the countdown is not and it's the start of the map show the time limit.
         var countdownEnd = player.getTag(BaseParkourMapFeatureProvider.COUNTDOWN_END);
         if (countdownEnd != -1) {
-            time = countdownEnd - System.currentTimeMillis();
-            if (time < 0) time = 0;
+            time = Math.max(countdownEnd - System.currentTimeMillis(), 0);
+        } else if (time == 0 && effects != null && effects.timeLimit() > 0) {
+            time = effects.timeLimit();
         } else if (world instanceof TestingMapWorld) {
             return;
         }
