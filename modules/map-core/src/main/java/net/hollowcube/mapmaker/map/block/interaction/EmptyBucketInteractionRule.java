@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
+import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.hollowcube.mapmaker.map.util.PlayerUtil;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
-@SuppressWarnings("UnstableApiUsage")
 public class EmptyBucketInteractionRule implements BlockInteractionRule, BlockInteractionRule.AirInteractionRule {
 
     @Override
@@ -14,6 +14,17 @@ public class EmptyBucketInteractionRule implements BlockInteractionRule, BlockIn
 
     @Override
     public boolean handleInteraction(@NotNull Interaction interaction) {
+        var blockPosition = interaction.blockPosition();
+        var block = interaction.getBlock(blockPosition);
+        if (BlockTags.CAULDRONS.contains(block.namespace()) && !interaction.player().isSneaking()) {
+            interaction.setBlock(blockPosition, Block.CAULDRON);
+            return true;
+        }
+        // If the block is waterlog-able and waterlogged, remove the waterlog.
+        if ("true".equals(block.getProperty("waterlogged"))) {
+            interaction.setBlock(blockPosition, block.withProperty("waterlogged", "false"));
+            return true;
+        }
         return false;
     }
 

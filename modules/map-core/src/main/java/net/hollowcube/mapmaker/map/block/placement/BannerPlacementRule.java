@@ -1,10 +1,14 @@
 package net.hollowcube.mapmaker.map.block.placement;
 
 
+import net.hollowcube.mapmaker.map.block.handler.BannerBlockHandler;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
+import net.minestom.server.item.ItemComponent;
+import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -28,11 +32,11 @@ public class BannerPlacementRule extends BaseBlockPlacementRule {
             float yaw = playerPosition.yaw() + 180;
             int rotation = (int) (Math.round(yaw / 22.5d) % 16);
 
-            return withBannerData(block)
+            return withBannerData(block, placementState.usedItemStack())
                     .withProperty("rotation", String.valueOf(rotation));
         }
 
-        return withBannerData(toWallBlock(block))
+        return withBannerData(toWallBlock(block), placementState.usedItemStack())
                 .withProperty("facing", blockFace.name().toLowerCase());
     }
 
@@ -47,10 +51,8 @@ public class BannerPlacementRule extends BaseBlockPlacementRule {
                 .withHandler(block.handler());
     }
 
-    private Block withBannerData(Block block/*, BannerMeta meta*/) {
-        // TODO missing banner meta, waiting for https://github.com/Minestom/Minestom/pull/1274
-        //  Also missing ItemMeta from placeBlock() in https://github.com/Minestom/Minestom/pull/1758
-        return block;
+    private Block withBannerData(Block block, @Nullable ItemStack stack) {
+        return block.withTag(BannerBlockHandler.PATTERNS, stack == null ? null : stack.get(ItemComponent.BANNER_PATTERNS));
     }
 
 }

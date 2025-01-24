@@ -1,14 +1,18 @@
 package net.hollowcube.common.util;
 
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.component.DataComponent;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.tag.TagSerializer;
 import net.minestom.server.tag.TagWritable;
+import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 public final class ExtraTags {
     private ExtraTags() {
@@ -43,6 +47,15 @@ public final class ExtraTags {
      */
     public static <T> Tag<T> Transient(String name) {
         return (Tag<T>) Tag.Structure(name, EMPTY_SERIALIZER);
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static <T> Tag<T> DataComponent(@NotNull String name, @NotNull DataComponent<T> component) {
+        Supplier<BinaryTagSerializer.Context> factory = () -> new BinaryTagSerializer.ContextWithRegistries(MinecraftServer.process());
+        return Tag.NBT(name).map(
+                tag -> component.read(factory.get(), tag),
+                value -> component.write(factory.get(), value)
+        );
     }
 
 }
