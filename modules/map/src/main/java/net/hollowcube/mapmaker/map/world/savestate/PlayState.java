@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.world.savestate;
 
-import ca.spottedleaf.dataconverter.minecraft.datatypes.MCDataType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -8,6 +7,7 @@ import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
+import net.hollowcube.mapmaker.map.feature.play.setting.SavedMapSettings;
 import net.hollowcube.mapmaker.map.util.datafix.HCTypeRegistry;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
@@ -16,46 +16,30 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class PlayState {
     public static final int NO_RESET_HEIGHT = Integer.MIN_VALUE;
 
     private static final MapCodec<Map<Long, Block>> GHOST_BLOCKS_CODEC = Codec.unboundedMap(ExtraCodecs.LONG_STRING, ExtraCodecs.BLOCK_STATE_STRING)
             .optionalFieldOf("ghostBlocks", Map.of());
-    public static Codec<PlayState> CODEC;
+    public static Codec<PlayState> CODEC = Codec.recursive("PlayState", codec -> RecordCodecBuilder.create(i -> i.group(
+            codec.optionalFieldOf("lastState").forGetter(PlayState::lastState),
+            Codec.STRING.listOf().fieldOf("history").orElseGet(s -> {
+            }, ArrayList::new).forGetter(PlayState::history),
+            Codec.INT.optionalFieldOf("progressIndex").forGetter(PlayState::progressIndex),
+            Codec.LONG.optionalFieldOf("timeLimit").forGetter(PlayState::timeLimit),
+            Codec.INT.optionalFieldOf("resetHeight").forGetter(PlayState::resetHeight),
+            PotionEffectList.NULL_MAPPED_CODEC.forGetter(PlayState::potionEffects),
+            ExtraCodecs.POS.optionalFieldOf("pos").forGetter(PlayState::pos),
+            Codec.INT.optionalFieldOf("maxLives").forGetter(PlayState::maxLives),
+            Codec.INT.optionalFieldOf("lives").forGetter(PlayState::lives),
+            GHOST_BLOCKS_CODEC.forGetter(PlayState::ghostBlocks),
+            HotbarItems.CODEC.optionalFieldOf("items", HotbarItems.EMPTY).forGetter(PlayState::items),
+            SavedMapSettings.CODEC.fieldOf("settings").orElseGet(s -> {
+            }, SavedMapSettings::new).forGetter(PlayState::settings)
+    ).apply(i, PlayState::new)));
 
-    static {
-        CODEC = RecordCodecBuilder.create(i -> i.group(
-                ExtraCodecs.Lazy(() -> CODEC).optionalFieldOf("lastState").forGetter(PlayState::lastState),
-                Codec.STRING.listOf().fieldOf("history").orElseGet(s -> {
-                }, ArrayList::new).forGetter(PlayState::history),
-                Codec.INT.optionalFieldOf("progressIndex").forGetter(PlayState::progressIndex),
-                Codec.LONG.optionalFieldOf("timeLimit").forGetter(PlayState::timeLimit),
-                Codec.INT.optionalFieldOf("resetHeight").forGetter(PlayState::resetHeight),
-                PotionEffectList.NULL_MAPPED_CODEC.forGetter(PlayState::potionEffects),
-                ExtraCodecs.POS.optionalFieldOf("pos").forGetter(PlayState::pos),
-                Codec.INT.optionalFieldOf("maxLives").forGetter(PlayState::maxLives),
-                Codec.INT.optionalFieldOf("lives").forGetter(PlayState::lives),
-                GHOST_BLOCKS_CODEC.forGetter(PlayState::ghostBlocks),
-                HotbarItems.CODEC.optionalFieldOf("items", HotbarItems.EMPTY).forGetter(PlayState::items)
-        ).apply(i, PlayState::new));
-    }
-
-    public static final SaveStateType.Serializer<PlayState> SERIALIZER = new SaveStateType.Serializer<>() {
-        @Override
-        public @NotNull String name() {
-            return "playState";
-        }
-
-        @Override
-        public @NotNull Codec<PlayState> codec() {
-            return CODEC;
-        }
-
-        @Override
-        public @NotNull MCDataType dataType() {
-            return HCTypeRegistry.PLAY_STATE;
-        }
-    };
+    public static final SaveStateType.Serializer<PlayState> SERIALIZER = SaveStateType.serializer("playState", CODEC, HCTypeRegistry.PLAY_STATE);
 
     private Optional<PlayState> lastState; // The previous state of the player (ie at the last checkpoint)
 
@@ -72,6 +56,7 @@ public final class PlayState {
     private Optional<Integer> lives; // Number of lives remaining for the current state
     private Map<Long, Block> ghostBlocks;
     private HotbarItems items;
+    private final SavedMapSettings overridenSettings;
 
     private boolean tempReset = false;
 
@@ -79,7 +64,7 @@ public final class PlayState {
         this(Optional.empty(), List.of(), Optional.empty(),
                 Optional.empty(), Optional.empty(), new PotionEffectList(),
                 Optional.empty(), Optional.empty(), Optional.empty(),
-                Map.of(), HotbarItems.EMPTY);
+                Map.of(), HotbarItems.EMPTY, new SavedMapSettings());
     }
 
     public PlayState(
@@ -88,7 +73,8 @@ public final class PlayState {
             Optional<Integer> resetHeight,
             PotionEffectList potionEffects, Optional<Pos> pos,
             Optional<Integer> maxLives, Optional<Integer> lives,
-            Map<Long, Block> ghostBlocks, HotbarItems items
+            Map<Long, Block> ghostBlocks, HotbarItems items,
+            SavedMapSettings overridenSettings
     ) {
         this.lastState = lastState;
         this.history = new ArrayList<>(statusEffects);
@@ -101,6 +87,7 @@ public final class PlayState {
         this.lives = lives;
         this.ghostBlocks = new HashMap<>(ghostBlocks);
         this.items = items;
+        this.overridenSettings = overridenSettings;
 
         this.tempReset = true;
     }
@@ -205,11 +192,15 @@ public final class PlayState {
         this.items = items;
     }
 
+    public SavedMapSettings settings() {
+        return overridenSettings;
+    }
+
     public @NotNull PlayState copy() {
         return new PlayState(
                 lastState, history, progressIndex, timeLimit, resetHeight,
                 potionEffects.copy(), pos, maxLives, lives, new HashMap<>(ghostBlocks),
-                items
+                items, overridenSettings.copy()
         );
     }
 

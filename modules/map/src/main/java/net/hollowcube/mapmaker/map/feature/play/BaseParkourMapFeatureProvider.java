@@ -6,10 +6,7 @@ import net.hollowcube.common.util.dfu.DFU;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
-import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
-import net.hollowcube.mapmaker.map.event.MapPlayerStartFinishedEvent;
-import net.hollowcube.mapmaker.map.event.MapPlayerStartSpectatorEvent;
-import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
+import net.hollowcube.mapmaker.map.event.*;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointChangeEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointPreChangeEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerResetEvent;
@@ -291,7 +288,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
                 updateCheckpointEffectState(world, player, world.getTag(SPAWN_CHECKPOINT_EFFECTS), playState);
             }
 
-            updatePlayerFromState(player, playState);
+            updatePlayerFromState(world, player, playState);
 
             // If this is OS, reset the player as they are added
             if (world.map().settings().isOnlySprint() && !player.getTag(RESET_TAG)) {
@@ -420,11 +417,12 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
                 state.maxLives(),
                 state.lives(),
                 Map.copyOf(state.ghostBlocks()),
-                state.items()
+                state.items(),
+                state.settings().copy()
         ));
 
         // Update the player based on the new state
-        updatePlayerFromState(player, state);
+        updatePlayerFromState(event.getMapWorld(), player, state);
 
         event.getMapWorld().callEvent(new MapPlayerCheckpointChangeEvent(player, event.getMapWorld(), event.checkpointId(), data));
         player.sendMessage(MapMessages.CHECKPOINT_REACHED);
@@ -443,14 +441,15 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         // Apply the status changes
         updateStateFromPlayer(player, state);
-        updateBaseEffectState(MapWorld.forPlayer(player), player, data, state);
+        updateBaseEffectState(world, player, data, state);
         if (data.extraTime() > 0 && state.timeLimit().isPresent()) {
             state.setTimeLimit(state.timeLimit().get() + data.extraTime());
         }
         state.addStatus(event.statusId());
+        state.settings().update(data.settings());
 
         // Update the player based on the new state
-        updatePlayerFromState(player, state);
+        updatePlayerFromState(world, player, state);
     }
 
     private boolean checkProgressIndex(@NotNull Player player, @NotNull MapWorld world, @NotNull PlayState state, @NotNull BaseEffectData data) {
@@ -562,7 +561,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         player.removeTag(COUNTDOWN_END);
 
         resetTeleport(player, world.map().settings().getSpawnPoint()).thenRun(() -> {
-            updatePlayerFromState(player, newPlayState);
+            updatePlayerFromState(world, player, newPlayState);
             abstractWorld.addPlayerImmediate(player);
 
             EventDispatcher.call(new MapPlayerInitEvent(world, player, true, false));
@@ -625,7 +624,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         player.removeTag(COUNTDOWN_END); // Remove so it is reapplied by updatePlayerFromState
         // Apply the current state to the player and teleport them
-        updatePlayerFromState(player, playState);
+        updatePlayerFromState(world, player, playState);
         resetTeleport(player, playState.pos().orElseThrow()).thenRun(() -> {
             abstractWorld.addPlayerImmediate(player);
 
@@ -642,6 +641,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             state.setMaxLives(-1);
             state.setLives(-1);
         }
+        state.settings().update(data.settings());
     }
 
     private void updateBaseEffectState(@NotNull MapWorld world, @NotNull Player player, @NotNull BaseEffectData data, @NotNull PlayState state) {
@@ -727,7 +727,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         ));
     }
 
-    private void updatePlayerFromState(@NotNull Player player, @NotNull PlayState state) {
+    private void updatePlayerFromState(@NotNull MapWorld world, @NotNull Player player, @NotNull PlayState state) {
         // Set the player health to the number of lives they have (1 heart = 1 life)
         if (state.maxLives().isPresent() && state.lives().isPresent()) {
             player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(2 * state.maxLives().get());
@@ -777,6 +777,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             player.setChestplate(player.getChestplate().without(ItemComponent.GLIDER)
                     .with(ItemComponent.EQUIPPABLE, EMPTY_EQUIPPABLE));
         }
+
+        world.callEvent(new MapPlayerUpdateStateEvent(world, player));
     }
 
     private void updateViewership(@NotNull MapWorld world) {

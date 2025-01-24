@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.setting;
 
 import com.google.gson.JsonElement;
+import com.mojang.serialization.Codec;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapUpdateRequest;
 import org.jetbrains.annotations.NotNull;
@@ -11,8 +12,13 @@ import java.util.function.Function;
 public record MapSettingImpl<T>(
         @NotNull String key, @NotNull T defaultValue,
         @NotNull Function<T, JsonElement> serialize,
-        @NotNull Function<JsonElement, T> deserialize
+        @NotNull Function<JsonElement, T> deserialize,
+        @NotNull Codec<T> codec
 ) implements MapSetting<T> {
+
+    public MapSettingImpl {
+        MapSetting.ID_MAP.put(key, this);
+    }
 
     @Override
     public T read(@NotNull MapSettings mapSettings) {
@@ -37,6 +43,10 @@ public record MapSettingImpl<T>(
             @NotNull BiConsumer<MapUpdateRequest, Boolean> write
     ) implements MapSetting<Boolean> {
 
+        public Embedded {
+            MapSetting.ID_MAP.put(key, this);
+        }
+
         @Override
         public @NotNull Boolean defaultValue() {
             return false;
@@ -50,6 +60,11 @@ public record MapSettingImpl<T>(
         @Override
         public void write(@NotNull MapSettings settings, @NotNull Boolean newValue) {
             settings.modifyUpdateRequest(updates -> write.accept(updates, newValue));
+        }
+
+        @Override
+        public Codec<Boolean> codec() {
+            return Codec.BOOL;
         }
     }
 }

@@ -1,0 +1,49 @@
+package net.hollowcube.mapmaker.map.feature.play.setting;
+
+import com.mojang.serialization.Codec;
+import net.hollowcube.mapmaker.map.MapSettings;
+import net.hollowcube.mapmaker.map.setting.MapSetting;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class SavedMapSettings {
+
+    public static final Codec<SavedMapSettings> CODEC = Codec.<MapSetting<?>, Object>dispatchedMap(MapSetting.CODEC, MapSetting::codec)
+            .xmap(SavedMapSettings::new, settings -> settings.settings);
+
+    private final Map<MapSetting<?>, Object> settings = new HashMap<>();
+
+    public SavedMapSettings() {
+    }
+
+    private SavedMapSettings(Map<MapSetting<?>, ?> settings) {
+        this.settings.putAll(settings);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T get(MapSetting<T> setting, MapSettings settings) {
+        return (T) this.settings.getOrDefault(setting, setting.read(settings));
+    }
+
+    public <T> void set(MapSetting<T> setting, T value) {
+        this.settings.put(setting, value);
+    }
+
+    public void update(SavedMapSettings settings) {
+        this.settings.clear();
+        this.settings.putAll(settings.settings);
+    }
+
+    public void update(MapSettings settings) {
+        this.settings.clear();
+        for (MapSetting<?> value : MapSetting.ID_MAP.values()) {
+            this.settings.put(value, value.read(settings));
+        }
+    }
+
+    public SavedMapSettings copy() {
+        return new SavedMapSettings(this.settings);
+    }
+
+}
