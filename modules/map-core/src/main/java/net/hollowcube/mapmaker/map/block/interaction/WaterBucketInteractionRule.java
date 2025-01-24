@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
+import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +26,10 @@ public class WaterBucketInteractionRule implements BlockInteractionRule {
         if (block.id() == Block.FARMLAND.id()) {
             var newValue = "7".equals(block.getProperty("moisture")) ? "0" : "7";
             interaction.setBlock(blockPosition, block.withProperty("moisture", newValue));
+            return true;
+        }
+        if (BlockTags.CAULDRONS.contains(block.namespace()) && !interaction.player().isSneaking()) {
+            interaction.setBlock(blockPosition, Block.WATER_CAULDRON.withProperty("level", "3"));
             return true;
         }
 

@@ -166,6 +166,7 @@ public final class BlockTags {
     public static final Collection<NamespaceID> PRE_WATERLOGGED_BLOCKS = create(
             Block.KELP, Block.KELP_PLANT
     );
+    public static final Collection<NamespaceID> CAULDRONS = builtin("minecraft:cauldrons");
 
     private static @NotNull Collection<NamespaceID> extend(@NotNull Collection<NamespaceID> tag, @NotNull Block... block) {
         var set = new HashSet<>(tag);

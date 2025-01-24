@@ -148,7 +148,7 @@ public final class PlacementRules {
         register(Block.DETECTOR_RAIL, b -> new RailPlacementRule(b, true));
         register(Block.POWERED_RAIL, b -> new RailPlacementRule(b, true));
 
-        register(Block.DECORATED_POT, WaterloggedPlacementRule::new); //todo
+        register(Block.DECORATED_POT, DecoratedPotPlacementRule::new);
         register(Block.SPAWNER, NoopPlacementRule::new);
         register(Block.END_PORTAL, NoopPlacementRule::new);
 
