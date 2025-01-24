@@ -21,22 +21,39 @@ public class SavedMapSettings {
         this.settings.putAll(settings);
     }
 
+    public boolean isEmpty() {
+        return this.settings.isEmpty();
+    }
+
     @SuppressWarnings("unchecked")
     public <T> T get(MapSetting<T> setting, MapSettings settings) {
         return (T) this.settings.getOrDefault(setting, setting.read(settings));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getOrNull(MapSetting<T> setting) {
+        return (T) this.settings.get(setting);
     }
 
     public <T> void set(MapSetting<T> setting, T value) {
         this.settings.put(setting, value);
     }
 
-    public void update(SavedMapSettings settings) {
+    public <T> void reset(MapSetting<T> setting) {
+        this.settings.remove(setting);
+    }
+
+    public void clear() {
         this.settings.clear();
+    }
+
+    public void update(SavedMapSettings settings) {
+        this.clear();
         this.settings.putAll(settings.settings);
     }
 
     public void update(MapSettings settings) {
-        this.settings.clear();
+        this.clear();
         for (MapSetting<?> value : MapSetting.ID_MAP.values()) {
             this.settings.put(value, value.read(settings));
         }

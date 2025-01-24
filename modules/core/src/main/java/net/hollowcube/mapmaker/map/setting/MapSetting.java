@@ -42,7 +42,7 @@ public interface MapSetting<T> {
                 }
             }
             return defaultValue;
-        }, ExtraCodecs.EnumI(type));
+        }, ExtraCodecs.Enum(type));
     }
 
 
