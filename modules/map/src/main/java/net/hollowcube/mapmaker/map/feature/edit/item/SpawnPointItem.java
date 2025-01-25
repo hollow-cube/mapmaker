@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.feature.edit.item;
 
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.event.vnext.MapChangeSpawnPointEvent;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.util.MapMessages;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -47,7 +48,7 @@ public class SpawnPointItem extends ItemHandler {
 
         if (player.isSneaking()) {
             if (!world.canEdit(player)) return;
-            updateSpawnPoint(player, world.map());
+            updateSpawnPoint(player, world);
         } else {
             teleportToSpawn(player, world.map());
         }
@@ -58,14 +59,15 @@ public class SpawnPointItem extends ItemHandler {
         player.sendMessage(Component.translatable("teleport.spawn"));
     }
 
-    private void updateSpawnPoint(@NotNull Player player, @NotNull MapData map) {
+    private void updateSpawnPoint(@NotNull Player player, @NotNull MapWorld world) {
         var newSpawnPoint = player.getPosition();
         if (!player.getInstance().getWorldBorder().inBounds(newSpawnPoint)) {
             player.sendMessage(Component.translatable("command.set_spawn.out_of_world"));
             return;
         }
 
-        map.settings().setSpawnPoint(newSpawnPoint);
+        world.callEvent(new MapChangeSpawnPointEvent(world, newSpawnPoint));
+        world.map().settings().setSpawnPoint(newSpawnPoint);
         player.sendMessage(MapMessages.COMMAND_SETSPAWN_SUCCESS.with(
                 Component.text(newSpawnPoint.blockX()).hoverEvent(Component.text(newSpawnPoint.x(), NamedTextColor.WHITE)),
                 Component.text(newSpawnPoint.blockY()).hoverEvent(Component.text(newSpawnPoint.y(), NamedTextColor.WHITE)),
