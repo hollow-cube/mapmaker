@@ -27,6 +27,9 @@ public class QibEntity extends Entity {
     public QibEntity(@NotNull UUID uuid) {
         super(EntityType.INTERACTION, uuid);
 
+        this.setNoGravity(true);
+        this.collidesWithEntities = false;
+
         this.updateViewableRule(player -> NoxesiumAPI.canUseFeature(player, NoxesiumFeature.STABLE_CLIENT_QIBS));
     }
 

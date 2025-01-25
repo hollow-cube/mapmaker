@@ -6,6 +6,7 @@ java_library(
     resources = glob(include = ["src/main/resources/**/*"]),
     visibility = ["//visibility:public"],
     deps = [
+        "//third_party:auto_service",
         "//third_party:minestom",
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:org_jetbrains_annotations",
