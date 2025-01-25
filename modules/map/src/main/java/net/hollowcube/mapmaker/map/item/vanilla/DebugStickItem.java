@@ -47,7 +47,7 @@ public class DebugStickItem extends ItemHandler {
         if (newProperty == null) {
             sendActionBar(player, block.name() + " has no properties");
         } else {
-            sendActionBar(player, String.format("Selected \"%s\" (%s)", property, block.getProperty(property)));
+            sendActionBar(player, String.format("Selected \"%s\" (%s)", newProperty, block.getProperty(newProperty)));
             if (!newProperty.equals(property)) {
                 click.updateItemStack(b -> b.set(TAG_PROPERTY, state.set(blockId, newProperty)));
             }
