@@ -12,7 +12,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.*;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.sound.SoundEvent;
-import net.minestom.server.utils.UniqueIdUtils;
+import net.minestom.server.utils.UUIDUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,7 +118,7 @@ public class MapEntity extends Entity implements TerraformEntity {
     @Override
     public void writeData(@NotNull CompoundBinaryTag.Builder tag) {
         tag.putString("id", getEntityType().name());
-        tag.put("uuid", UniqueIdUtils.toNbt(getUuid()));
+        tag.put("uuid", UUIDUtils.toNbt(getUuid()));
         tag.put("Pos", NbtUtil.into(getPosition()));
         tag.put("Rotation", NbtUtil.writeRotation(getPosition()));
 

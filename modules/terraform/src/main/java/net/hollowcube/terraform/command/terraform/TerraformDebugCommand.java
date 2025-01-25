@@ -28,7 +28,7 @@ public final class TerraformDebugCommand extends CommandDsl {
         // Print local session info
         var localSession = LocalSession.forPlayer(player);
         player.sendMessage(Component.text("Local Session:"));
-        player.sendMessage(Component.text("  Instance: " + localSession.instance().getUniqueId()));
+        player.sendMessage(Component.text("  Instance: " + localSession.instance().getUuid()));
         player.sendMessage(Component.text("  History: " + localSession.undoCount() + "/" + localSession.redoCount()));
         player.sendMessage(Component.text("  Selections: " + localSession.selectionNames().size()));
 

@@ -71,7 +71,7 @@ public class DemoServer {
                     player.setGameMode(GameMode.CREATIVE);
 
                     //todo this is not a safe call. it blocks the tick thread during instance change.
-                    terraform.initLocalSession(player, player.getInstance().getUniqueId().toString());
+                    terraform.initLocalSession(player, player.getInstance().getUuid().toString());
                 })
                 .addListener(RemoveEntityFromInstanceEvent.class, event -> {
                     if (!(event.getEntity() instanceof Player player)) return;
