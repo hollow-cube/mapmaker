@@ -8,10 +8,7 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.terraform.util.PlayerUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -26,6 +23,10 @@ public class BuilderMenuView extends View {
     private @Outlet("tab_content") Switch tabContentSwitch;
     private @OutletGroup("tab_.+_switch") Switch[] tabSwitches;
 
+    private @Outlet("custom_blocks") BuilderMenuTab customBlocksTab;
+    private @Outlet("build_tools") BuilderMenuTab buildToolsTab;
+    private @Outlet("custom_items") BuilderMenuTab customItemsTab;
+
     private int selectedTab = -1;
 
     public BuilderMenuView(@NotNull Context context) {
@@ -33,6 +34,10 @@ public class BuilderMenuView extends View {
 
         titleText.setText("Builder Menu");
         selectTab(0);
+
+        customBlocksTab.setItems(BuilderMenuTabItems.CUSTOM_BLOCKS);
+        buildToolsTab.setItems(BuilderMenuTabItems.BUILD_TOOLS);
+        customItemsTab.setItems(BuilderMenuTabItems.CUSTOM_ITEMS);
     }
 
     private void selectTab(int ordinal) {
@@ -65,15 +70,6 @@ public class BuilderMenuView extends View {
     private void saveAndExit(@NotNull Player player) {
         player.closeInventory();
         bridge.joinHub(player);
-    }
-
-    static void giveCustomItem(@NotNull Player player, @NotNull ItemHandler item) {
-        var world = MapWorld.forPlayerOptional(player);
-        if (world == null || !world.canEdit(player)) return;
-
-        var itemStack = world.itemRegistry().getItemStack(item.id(), null);
-        PlayerUtil.smartAddItemStack(player, itemStack);
-        player.closeInventory();
     }
 
 }
