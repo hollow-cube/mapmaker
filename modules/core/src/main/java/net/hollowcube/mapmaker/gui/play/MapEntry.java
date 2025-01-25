@@ -7,6 +7,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.PersonalizedMapData;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -15,6 +16,7 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.TagUtil;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
@@ -87,7 +89,12 @@ public class MapEntry extends View {
 
         var entry = MapData.createHoverComponents(map, authorName.build(),
                 progress == null ? null : Map.entry(progress, playtime));
-        label.setComponentsDirect(entry.getKey(), entry.getValue());
+        entry.getValue().addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display.footer", List.of()));
+        label.setItemDirect(ItemStack.of(Material.PAPER)
+                .withCustomName(entry.getKey())
+                .withLore(entry.getValue())
+                .with(ItemComponent.TOOLTIP_STYLE, "minecraft:masterpiece"));
+//        label.setComponentsDirect(entry.getKey(), entry.getValue());
 
         label.setState(State.ACTIVE);
     }

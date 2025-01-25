@@ -18,7 +18,6 @@ public final class MapFeatureFlags {
     public static final FeatureFlag ANIMATION_BUILDER = FeatureFlag.of("map.animation_builder");
 
     private static final Set<String> ITEM_EDITOR_PLAYERS = Set.of("notmattw", "ontal", "itmg", "sethprg");
-    public static final FeatureFlag ITEM_EDITOR = FeatureFlag.of("map.item_editor");
 
     public static final FeatureFlag MARKER_TOOL = FeatureFlag.of("map.marker_tool");
 
