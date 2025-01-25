@@ -55,9 +55,8 @@ public class ArgumentDirection extends Argument<@Nullable Direction> {
             case ME -> DirectionUtil.fromView(player.getPosition());
             case FORWARD -> DirectionUtil.fromYaw(player.getPosition());
             case BACK -> DirectionUtil.fromYaw(player.getPosition()).opposite();
-            case LEFT ->
-                    DirectionUtil.rotate(DirectionUtil.rotate(DirectionUtil.rotate(DirectionUtil.fromYaw(player.getPosition()))));
-            case RIGHT -> DirectionUtil.rotate(DirectionUtil.fromYaw(player.getPosition()));
+            case LEFT -> DirectionUtil.rotate(DirectionUtil.fromYaw(player.getPosition()), false);
+            case RIGHT -> DirectionUtil.rotate(DirectionUtil.fromYaw(player.getPosition()), true);
         });
     }
 

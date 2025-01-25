@@ -37,12 +37,12 @@ public final class DirectionUtil {
         }
     }
 
-    public static @NotNull Direction rotate(@NotNull Direction direction) {
+    public static @NotNull Direction rotate(@NotNull Direction direction, boolean clockwise) {
         return switch (direction) {
-            case NORTH -> Direction.EAST;
-            case EAST -> Direction.SOUTH;
-            case SOUTH -> Direction.WEST;
-            case WEST -> Direction.NORTH;
+            case NORTH -> clockwise ? Direction.EAST : Direction.WEST;
+            case EAST -> clockwise ? Direction.SOUTH : Direction.NORTH;
+            case SOUTH -> clockwise ? Direction.WEST : Direction.EAST;
+            case WEST -> clockwise ? Direction.NORTH : Direction.SOUTH;
             default -> direction;
         };
     }
