@@ -1,5 +1,6 @@
 package net.hollowcube.compat.noxesium;
 
+import com.google.auto.service.AutoService;
 import com.noxcrew.noxesium.api.NoxesiumReferences;
 import com.noxcrew.noxesium.api.qib.QibDefinition;
 import net.hollowcube.compat.api.CompatProvider;
@@ -16,6 +17,7 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 
 import java.util.Map;
 
+@AutoService(CompatProvider.class)
 public class NoxesiumCompatProvider implements CompatProvider {
 
     @Override

@@ -2,10 +2,9 @@ package net.hollowcube.compat.api;
 
 import net.hollowcube.compat.api.packet.PacketRegistry;
 import net.hollowcube.compat.impl.PacketRegistryImpl;
-import net.hollowcube.compat.noxesium.NoxesiumCompatProvider;
 import net.minestom.server.event.GlobalEventHandler;
 
-import java.util.List;
+import java.util.ServiceLoader;
 
 /**
  * Provides compatibility with other mods or services.
@@ -19,13 +18,8 @@ public interface CompatProvider {
     }
 
     static void load(GlobalEventHandler events) {
-        List<CompatProvider> providers = List.of(
-                new NoxesiumCompatProvider()
-        );
-
-
         PacketRegistryImpl packets = PacketRegistryImpl.init(events);
-        for (CompatProvider provider : providers) {
+        for (CompatProvider provider : ServiceLoader.load(CompatProvider.class)) {
             provider.registerPackets(packets);
             provider.registerListeners(events);
         }
