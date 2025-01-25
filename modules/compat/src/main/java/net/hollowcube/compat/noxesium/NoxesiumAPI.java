@@ -10,7 +10,8 @@ import net.minestom.server.tag.Tag;
 
 public class NoxesiumAPI {
 
-    public static final Tag<Byte> NOXESIUM_VERSION = Tag.Transient("noxesium:version");
+    public static final Tag<Byte> NOXESIUM_VERSION = Tag.<Byte>Transient("noxesium:version")
+            .defaultValue((byte) -1);
     public static final String CHANNEL = "noxesium-v2";
 
     private static final Tag<BinaryTag> BUKKIT_TAG = Tag.NBT(NoxesiumReferences.BUKKIT_COMPOUND_ID);
@@ -25,7 +26,6 @@ public class NoxesiumAPI {
     }
 
     public static boolean canUseFeature(Player player, NoxesiumFeature feature) {
-        Byte version = player.getTag(NOXESIUM_VERSION);
-        return version != null && version >= feature.getMinProtocolVersion();
+        return player.getTag(NOXESIUM_VERSION) >= feature.getMinProtocolVersion();
     }
 }
