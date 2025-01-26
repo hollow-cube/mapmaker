@@ -5,6 +5,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.map.MapFeatureFlags;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.map.gui.effect.item.ItemEditorView;
