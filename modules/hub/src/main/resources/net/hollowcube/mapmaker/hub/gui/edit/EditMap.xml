@@ -406,15 +406,15 @@
                         <button id="map_settings_time_of_day_noon"
                                 translationKey="gui.create_maps.map_settings_tab.visual.time_of_day.noon"
                                 sprite="create_maps/tab_settings/tab_visual/time/noon_icon"/>
-                        <button id="map_settings_time_of_day_sunrise"
-                                translationKey="gui.create_maps.map_settings_tab.visual.time_of_day.sunrise"
-                                sprite="create_maps/tab_settings/tab_visual/time/sunrise_icon"/>
                         <button id="map_settings_time_of_day_sunset"
                                 translationKey="gui.create_maps.map_settings_tab.visual.time_of_day.sunset"
                                 sprite="create_maps/tab_settings/tab_visual/time/sunset_icon"/>
                         <button id="map_settings_time_of_day_night"
                                 translationKey="gui.create_maps.map_settings_tab.visual.time_of_day.night"
                                 sprite="create_maps/tab_settings/tab_visual/time/night_icon"/>
+                        <button id="map_settings_time_of_day_sunrise"
+                                translationKey="gui.create_maps.map_settings_tab.visual.time_of_day.sunrise"
+                                sprite="create_maps/tab_settings/tab_visual/time/sunrise_icon"/>
                     </switch>
                     <switch id="map_settings_weather_type_switch">
                         <button id="map_settings_weather_type_clear"
