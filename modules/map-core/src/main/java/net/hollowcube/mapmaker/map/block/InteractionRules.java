@@ -48,6 +48,7 @@ public class InteractionRules {
 
         item(Material.WATER_BUCKET, new WaterBucketInteractionRule());
         item(Material.LAVA_BUCKET, new LavaBucketInteractionRule());
+        item(Material.POWDER_SNOW_BUCKET, new PowderSnowBucketInteractionRule());
         item(Material.BUCKET, new EmptyBucketInteractionRule());
         item(Material.FLINT_AND_STEEL, new FireInteractionRule());
         item(Material.FIRE_CHARGE, new FireInteractionRule());
@@ -61,6 +62,7 @@ public class InteractionRules {
         item(Material.END_CRYSTAL, new EndCrystalInteractionRule());
         item(Material.SCAFFOLDING, ScaffoldingInteractionRule.INSTANCE);
         item(Material.BONE_MEAL, new BonemealInteractionRule());
+        item(Material.LILY_PAD, new LilyPadInteractionRule());
     }
 
     public static void register(@NotNull EventNode<InstanceEvent> eventNode) {

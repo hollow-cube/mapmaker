@@ -282,13 +282,14 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState != null) {
             var playState = saveState.state(PlayState.class);
+            var isStarting = saveState.getPlayStartTime() == 0 && saveState.getPlaytime() == 0;
 
             // If this is a fresh save state, attempt to add the base effect state
-            if (world.hasTag(SPAWN_CHECKPOINT_EFFECTS) && saveState.getPlayStartTime() == 0 && saveState.getPlaytime() == 0) {
+            if (world.hasTag(SPAWN_CHECKPOINT_EFFECTS) && isStarting) {
                 updateCheckpointEffectState(world, player, world.getTag(SPAWN_CHECKPOINT_EFFECTS), playState);
             }
 
-            updatePlayerFromState(world, player, playState);
+            updatePlayerFromState(world, player, playState, isStarting);
 
             // If this is OS, reset the player as they are added
             if (world.map().settings().isOnlySprint() && !player.getTag(RESET_TAG)) {
@@ -500,6 +501,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         // Start the timer.
         saveState.setPlayStartTime(System.currentTimeMillis());
+
+        var effects = world.getTag(SPAWN_CHECKPOINT_EFFECTS);
+        if (effects != null && effects.timeLimit() > 0) {
+            player.setTag(COUNTDOWN_END, System.currentTimeMillis() + effects.timeLimit());
+        }
     }
 
     public void handlePlayerTick(@NotNull PlayerTickEvent event) {
@@ -561,7 +567,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         player.removeTag(COUNTDOWN_END);
 
         resetTeleport(player, world.map().settings().getSpawnPoint()).thenRun(() -> {
-            updatePlayerFromState(world, player, newPlayState);
+            updatePlayerFromState(world, player, newPlayState, true);
             abstractWorld.addPlayerImmediate(player);
 
             EventDispatcher.call(new MapPlayerInitEvent(world, player, true, false));
@@ -727,7 +733,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         ));
     }
 
-    private void updatePlayerFromState(@NotNull MapWorld world, @NotNull Player player, @NotNull PlayState state) {
+    private void updatePlayerFromState(MapWorld world, @NotNull Player player, @NotNull PlayState state) {
+        updatePlayerFromState(player, state, false);
+    }
+
+    private void updatePlayerFromState(MapWorld world, @NotNull Player player, @NotNull PlayState state, boolean start) {
         // Set the player health to the number of lives they have (1 heart = 1 life)
         if (state.maxLives().isPresent() && state.lives().isPresent()) {
             player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(2 * state.maxLives().get());
@@ -738,7 +748,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         }
 
         // Update the countdown timer (time may have been added
-        if (state.timeLimit().isPresent()) {
+        if (state.timeLimit().isPresent() && !start) {
             player.setTag(COUNTDOWN_END, System.currentTimeMillis() + state.timeLimit().get());
         } else {
             player.removeTag(COUNTDOWN_END);

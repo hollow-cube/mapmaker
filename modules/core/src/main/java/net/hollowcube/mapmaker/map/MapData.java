@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map;
 
-import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
@@ -159,7 +158,7 @@ public class MapData {
     }
 
     public @NotNull Difficulty getDifficulty() {
-        if (uniquePlays() < MIN_PLAYS_FOR_DIFFICULTY)
+        if (uniquePlays() < MIN_PLAYS_FOR_DIFFICULTY || settings().getVariant() != MapVariant.PARKOUR)
             return Difficulty.UNKNOWN;
         var cr = clearRate();
         if (cr < 0.05) return Difficulty.NIGHTMARE;
@@ -307,12 +306,12 @@ public class MapData {
             static final Component PLAYS_ICON_TEXT = Component.text(PLAYS_ICON.fontChar() + FontUtil.computeOffset(2));
             static final BadSprite LIKES_ICON = BadSprite.require("icon/map_tooltip/likes");
             static final Component LIKES_ICON_TEXT = Component.text(LIKES_ICON.fontChar() + FontUtil.computeOffset(2));
+
+            static final int QUALITY_BORDER_WIDTH = 30;
         }
 
         var title = MapData.rewriteWithQualityFont(map.quality(), map.settings().getNameSafe())
                 .decoration(TextDecoration.ITALIC, false);
-
-        // TODO support building maps in this
 
         var quality = map.quality();
         var starText = new StringBuilder();
@@ -324,25 +323,31 @@ public class MapData {
             }
         }
 
+        var isParkour = map.settings().getVariant() == MapVariant.PARKOUR;
         var lore = new ArrayList<Component>();
         lore.add(Component.translatable("gui.play_maps.map_display.author", authorName));
         lore.add(Component.empty());
-        lore.add(Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
+        var contentLine1 = Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
                 .append(Component.text(quality.tooltipBorderSprite().fontChar(), FontUtil.NO_SHADOW))
-                .append(Component.text(FontUtil.computeOffset(4)))
-                .append(map.getDifficultyComponent())
-                .append(Component.text(FontUtil.computeOffset(6)))
-                .append(getMapTypeComponent(map)));
+                .append(Component.text(FontUtil.computeOffset(5)));
+        if (isParkour) contentLine1 = contentLine1.append(map.getDifficultyComponent())
+                .append(Component.text(FontUtil.computeOffset(6)));
+        lore.add(contentLine1.append(getMapTypeComponent(map)));
+        var difficultyIcon = map.getDifficulty().tooltipIcon();
+        var totalPadding = Holder.QUALITY_BORDER_WIDTH - difficultyIcon.width();
+        var leftPadding = (int) Math.ceil(totalPadding / 2.0) + (map.getDifficulty() == Difficulty.MEDIUM ? -1 : 0); // Cursed bias for medium :sob:
+        var playsLikes = isParkour ? Holder.PLAYS_ICON_TEXT
+                .append(Component.text(NumberUtil.formatCurrency(map.uniquePlays()), TextColor.color(0xaeaeae)))
+                .append(Component.text(FontUtil.computeOffset(6))) : Component.empty();
+        playsLikes = playsLikes
+                .append(Holder.LIKES_ICON_TEXT)
+                .append(Component.text(map.likes(), TextColor.color(0xaeaeae)));
         lore.add(Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
-                .append(Component.text(map.getDifficulty().tooltipIcon().fontChar(), FontUtil.NO_SHADOW))
+                .append(Component.text(FontUtil.computeOffset(leftPadding) + difficultyIcon.fontChar() + FontUtil.computeOffset(totalPadding - leftPadding), FontUtil.NO_SHADOW))
                 .append(Component.text(FontUtil.computeOffset(5)))
                 .append(Component.text(starText.toString()))
                 .append(Component.text(FontUtil.computeOffset(6)))
-                .append(Holder.PLAYS_ICON_TEXT
-                        .append(Component.text(NumberUtil.formatCurrency(map.uniquePlays()), TextColor.color(0xaeaeae)))
-                        .append(Component.text(FontUtil.computeOffset(6)))
-                        .append(Holder.LIKES_ICON_TEXT)
-                        .append(Component.text(map.likes(), TextColor.color(0xaeaeae)))));
+                .append(playsLikes));
         lore.add(Component.empty());
 
         var settingsLine = createSettingsLine(map);
@@ -369,8 +374,6 @@ public class MapData {
                 lore.add(Component.empty());
             }
         }
-
-        lore.addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display.footer", List.of()));
 
         return Map.entry(title, lore);
     }

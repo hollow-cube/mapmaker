@@ -250,11 +250,13 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
 
                                 var components = MapData.createHoverComponents(m, displayName, progress);
                                 var hoverText = components.getValue();
-                                hoverText.addFirst(components.getKey());
                                 hoverText.addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display_headless.footer", List.of()));
 
+                                var result = Component.text().append(components.getKey());
+                                for (var c : hoverText)
+                                    result = result.appendNewline().append(LanguageProviderV2.translate(c));
                                 return Component.text(m.name(), TextColor.color(0x15ADD3))
-                                        .hoverEvent(HoverEvent.showText(Component.textOfChildren(hoverText.toArray(new Component[0]))))
+                                        .hoverEvent(HoverEvent.showText(result.build()))
                                         .clickEvent(ClickEvent.runCommand("/play " + MapData.formatPublishedId(m.publishedId())));
                             }));
                         }

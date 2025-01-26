@@ -7,7 +7,10 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
+import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.RelativeFlags;
@@ -19,12 +22,14 @@ import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
 public class TeleportCommand extends CommandDsl {
     private final Argument<EntityFinder> targetArg = Argument.Entity("target").singleEntity(true).onlyPlayers(true).sameWorld(true)
             .description("The player to teleport to");
+    private final Argument<Point> locArg = Argument.RelativeVec3("location")
+            .description("The location to teleport to");
 
     public TeleportCommand() {
         super("tp");
 
         category = CommandCategories.MAP;
-        description = "Teleports you to a player";
+        description = "Teleports you to a location or player";
 
         setCondition(CommandCondition.or(
                 // Always allowed in editing maps for anyone
@@ -38,6 +43,7 @@ public class TeleportCommand extends CommandDsl {
                 }
         ));
 
+        addSyntax(playerOnly(this::handleTeleportToLocation), locArg);
         addSyntax(playerOnly(this::handleTeleportToTarget), targetArg);
     }
 
@@ -62,7 +68,19 @@ public class TeleportCommand extends CommandDsl {
 
         // Actually do the teleport
         player.teleport(target.getPosition(), Vec.ZERO, null, RelativeFlags.NONE).thenRun(() -> {
-            player.sendMessage(Component.translatable("teleport.success", Component.translatable(target.getUsername())));
+            player.sendMessage(Component.translatable("teleport.target.success", Component.translatable(target.getUsername())));
         });
+    }
+
+    private void handleTeleportToLocation(@NotNull Player player, @NotNull CommandContext context) {
+        var loc = context.get(locArg);
+        var instance = player.getInstance();
+        if (instance.getWorldBorder().inBounds(loc)) {
+            player.teleport(Pos.fromPoint(loc), Vec.ZERO, null, RelativeFlags.NONE).thenRun(() -> {
+                player.sendMessage(Component.translatable("teleport.location.success", CoordinateUtil.asTranslationArgs(loc)));
+            });
+        } else {
+            player.sendMessage(Component.translatable("teleport.out_of_bounds"));
+        }
     }
 }

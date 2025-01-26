@@ -21,6 +21,7 @@ public final class ItemTags {
     public static Collection<NamespaceID> SAPLINGS = builtin("minecraft:saplings");
     public static Collection<NamespaceID> BOOKSHELF_BOOKS = builtin("minecraft:bookshelf_books");
     public static Collection<NamespaceID> SPAWN_EGGS = create("spawn_egg");
+    public static Collection<NamespaceID> SHERDS = create("_sherd");
 
 
     private static @NotNull Collection<NamespaceID> builtin(@NotNull String name) {

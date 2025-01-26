@@ -7,6 +7,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.PersonalizedMapData;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -87,6 +88,7 @@ public class MapEntry extends View {
 
         var entry = MapData.createHoverComponents(map, authorName.build(),
                 progress == null ? null : Map.entry(progress, playtime));
+        entry.getValue().addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display.footer", List.of()));
         label.setComponentsDirect(entry.getKey(), entry.getValue());
 
         label.setState(State.ACTIVE);

@@ -14,7 +14,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.utils.UniqueIdUtils;
+import net.minestom.server.utils.UUIDUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -84,7 +84,7 @@ public interface TerraformEntity {
         EventDispatcher.call(preEvent);
         if (preEvent.isCancelled()) return null;
 
-        var uuid = tag.get("UUID") instanceof IntArrayBinaryTag uuidTag ? UniqueIdUtils.fromNbt(uuidTag) : UUID.randomUUID();
+        var uuid = tag.get("UUID") instanceof IntArrayBinaryTag uuidTag ? UUIDUtils.fromNbt(uuidTag) : UUID.randomUUID();
         var entity = preEvent.getConstructor().apply(entityType, uuid);
         if (entity instanceof TerraformEntity tfEntity) {
             final CompoundBinaryTag fnbt = tag;
