@@ -21,6 +21,8 @@ public class CyloneImport {
     private static final String AUTHORIZER = "aceb326f-da15-45bc-bf2f-11940c21780c";
     private static final String CYLONE_ORG_ID = "7a7ef7d2-3f3f-4a95-913e-0d3d70c0d122";
 
+    private static final List<String> FINISHED_IDS = List.of("3x3", "Agony", "Ancient", "AquaticPrison", "Balloons", "BigBook");
+
     public static void tempConvert() throws Exception {
         var json = Files.readString(Path.of("/Users/matt/Downloads/Export to Hollow Cube/cylone_v2.parkour_map_definitions.json"));
         var array = new Gson().fromJson(json, JsonArray.class);
@@ -34,7 +36,8 @@ public class CyloneImport {
         var fileList = Files.list(base).toList();
         for (var slimeWorld : fileList) {
             var name = slimeWorld.getFileName().toString().replaceAll(".slime", "").replaceAll("active_", "");
-            if (!"Spiral".equals(name)) continue;
+            if (FINISHED_IDS.contains(name)) continue;
+            if (!"Arcadia".equals(name)) continue;
 
             JsonObject mapDetails = null;
             for (var element : array) {

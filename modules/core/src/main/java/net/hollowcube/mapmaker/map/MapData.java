@@ -158,6 +158,8 @@ public class MapData {
     }
 
     public @NotNull Difficulty getDifficulty() {
+        // Note that this is also computed in the map service currently (though it should just send the
+        // difficulty as an enum). If this is changed, make sure to update the service as well.
         if (uniquePlays() < MIN_PLAYS_FOR_DIFFICULTY || settings().getVariant() != MapVariant.PARKOUR)
             return Difficulty.UNKNOWN;
         var cr = clearRate();
