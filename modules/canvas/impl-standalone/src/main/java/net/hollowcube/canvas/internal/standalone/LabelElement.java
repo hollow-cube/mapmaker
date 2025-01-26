@@ -6,6 +6,7 @@ import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.hollowcube.canvas.internal.standalone.trait.ItemSpriteHolder;
 import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.compat.noxesium.NoxesiumAPI;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
@@ -18,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class LabelElement extends BaseElement implements Label, SpriteHolder, ItemSpriteHolder {
-    private static final ItemStack BLANK_ITEM = ItemStack.builder(Material.STICK)
+    private static final ItemStack BLANK_ITEM = NoxesiumAPI.setImmovable(ItemStack.builder(Material.STICK))
             .set(ItemComponent.CUSTOM_MODEL_DATA, System.getProperty("canvas.debug_blank", "0").equals("1") ? 2 : 1)
             .build();
 
@@ -85,10 +86,14 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
         itemSprite = this.itemSprite.with(builder -> {
             builder.set(ItemComponent.CUSTOM_NAME, Component.translatable(translationKey + ".name", args));
             builder.set(ItemComponent.LORE, LanguageProviderV2.translateMulti(translationKey + ".lore", args));
+
+            NoxesiumAPI.setImmovable(builder);
         });
         itemBlank = BLANK_ITEM.with(builder -> {
             builder.set(ItemComponent.CUSTOM_NAME, Component.translatable(translationKey + ".name", args));
             builder.set(ItemComponent.LORE, LanguageProviderV2.translateMulti(translationKey + ".lore", args));
+
+            NoxesiumAPI.setImmovable(builder);
         });
         context.markDirty();
     }
@@ -98,20 +103,26 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
         itemSprite = this.itemSprite.with(builder -> {
             if (title != null) builder.set(ItemComponent.CUSTOM_NAME, title);
             if (lore != null) builder.set(ItemComponent.LORE, lore);
+
+            NoxesiumAPI.setImmovable(builder);
         });
         itemBlank = BLANK_ITEM.with(builder -> {
             if (title != null) builder.set(ItemComponent.CUSTOM_NAME, title);
             if (lore != null) builder.set(ItemComponent.LORE, lore);
+
+            NoxesiumAPI.setImmovable(builder);
         });
         context.markDirty();
     }
 
     @Override
     public void setItemDirect(@NotNull ItemStack itemStack) {
-        itemSprite = itemStack;
+        itemSprite = NoxesiumAPI.setImmovable(itemStack);
         itemBlank = BLANK_ITEM.with(builder -> {
             builder.set(ItemComponent.CUSTOM_NAME, itemStack.get(ItemComponent.CUSTOM_NAME));
             builder.set(ItemComponent.LORE, itemStack.get(ItemComponent.LORE, List.of()));
+
+            NoxesiumAPI.setImmovable(builder);
         });
         context.markDirty();
     }

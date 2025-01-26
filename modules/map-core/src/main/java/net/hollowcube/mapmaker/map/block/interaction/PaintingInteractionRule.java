@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
-import net.hollowcube.mapmaker.map.entity.impl.PaintingEntity;
+import net.hollowcube.mapmaker.map.entity.impl.other.PaintingEntity;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;

@@ -29,7 +29,7 @@ import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.network.packet.server.play.AcknowledgeBlockChangePacket;
-import net.minestom.server.utils.UniqueIdUtils;
+import net.minestom.server.utils.UUIDUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -204,7 +204,7 @@ public final class AxiomPacketListener {
                 // - Root should have the position given by Axiom
                 // - Passengers should have random IDs
                 nbt = nbt.put(Map.of(
-                        "UUID", UniqueIdUtils.toNbt(entry.uuid()),
+                        "UUID", UUIDUtils.toNbt(entry.uuid()),
                         "Pos", NbtUtil.toPosTag(entry.pos()),
                         "Rotation", NbtUtil.toRotationTag(entry.pos()),
                         "Passengers", ListBinaryTag.listBinaryTag(BinaryTagTypes.COMPOUND, nbt

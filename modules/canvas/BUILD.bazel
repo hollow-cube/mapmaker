@@ -21,6 +21,7 @@ java_library(
     deps = [
         ":api",
         "//modules/common",
+        "//modules/compat",
         "//third_party:minestom",
         "@maven//:com_google_code_gson_gson",
         "@maven//:net_kyori_adventure_api",

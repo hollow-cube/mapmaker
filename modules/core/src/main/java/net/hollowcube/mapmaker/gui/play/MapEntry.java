@@ -9,15 +9,11 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapQuality;
-import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.PersonalizedMapData;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.TagUtil;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
@@ -25,8 +21,8 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class MapEntry extends View {
 
@@ -37,6 +33,7 @@ public class MapEntry extends View {
 
     private final MapData map;
     private PersonalizedMapData.Progress progress = null; // null is unknown
+    private int playtime = 0;
     private DisplayName authorName = null;
 
     public MapEntry(@NotNull Context context, @NotNull MapData map) {
@@ -51,16 +48,10 @@ public class MapEntry extends View {
         return map;
     }
 
-    public void setProgress(PersonalizedMapData.Progress progress) {
+    public void setProgress(PersonalizedMapData.Progress progress, int playtime) {
         this.progress = progress;
-
-        var newTitle = Component.translatable(switch (map.settings().getVariant()) {
-            case PARKOUR -> "gui.play_maps.map_display.map_name.parkour";
-            case BUILDING -> "gui.play_maps.map_display.map_name.building";
-            case ADVENTURE -> "gui.play_maps.map_display.map_name.adventure";
-        }, map.settings().getNameComponent(), getCompletionStateText());
-
-        label.setComponentsDirect(newTitle, null);
+        this.playtime = playtime;
+        async(this::updateIcon);
     }
 
     @Action("btn")
@@ -95,121 +86,11 @@ public class MapEntry extends View {
             }
         }
 
-        var title = Component.translatable(switch (map.settings().getVariant()) {
-            case PARKOUR -> "gui.play_maps.map_display.map_name.parkour";
-            case BUILDING -> "gui.play_maps.map_display.map_name.building";
-            case ADVENTURE -> "gui.play_maps.map_display.map_name.adventure";
-        }, map.settings().getNameComponent(), getCompletionStateText());
-
-        var lore = new ArrayList<Component>();
-        lore.add(Component.translatable("gui.play_maps.map_display.author", authorName));
-        lore.add(Component.empty());
-        lore.add(Component.translatable("gui.play_maps.map_display.type", getMapTypeComponent()));
-        if (map.settings().getVariant() == MapVariant.PARKOUR)
-            lore.add(Component.translatable("gui.play_maps.map_display.difficulty", map.getDifficultyComponent()));
-        if (map.quality() == MapQuality.GOOD) {
-            lore.add(Component.translatable("gui.play_maps.map_display.rating.good"));
-        } else if (map.quality() == MapQuality.GREAT) {
-            lore.add(Component.translatable("gui.play_maps.map_display.rating.great"));
-        } else if (map.quality() == MapQuality.EXCELLENT) {
-            lore.add(Component.translatable("gui.play_maps.map_display.rating.excellent"));
-        } else if (map.quality() == MapQuality.OUTSTANDING) {
-            lore.add(Component.translatable("gui.play_maps.map_display.rating.outstanding"));
-        } else if (map.quality() == MapQuality.MASTERPIECE) {
-            lore.add(Component.translatable("gui.play_maps.map_display.rating.masterpiece"));
-        } else {
-            lore.add(Component.translatable("gui.play_maps.map_display.rating.unrated"));
-        }
-
-        lore.add(Component.translatable("gui.play_maps.map_display.id", Component.text(map.publishedIdString())));
-        var tags = map.settings().getTags();
-        if (!tags.isEmpty()) {
-            lore.add(Component.empty());
-            lore.add(Component.translatable("gui.play_maps.map_display.tags_header"));
-            for (var tag : tags) {
-                lore.add(Component.translatable("gui.play_maps.map_display.tags_single", Component.text(tag.displayName())));
-            }
-        }
-
-        if (map.settings().isOnlySprint() || map.settings().isNoSprint() || map.settings().isNoJump()
-                || map.settings().isNoSneak() || map.settings().isBoat()) {
-            lore.add(Component.empty());
-            lore.add(Component.translatable("gui.play_maps.map_display.settings_header"));
-
-            int settingsCount = 0;
-            int extraSettingsCount = 0;
-
-            if (map.settings().isOnlySprint()) {
-                lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("Only Sprint")));
-                settingsCount++;
-            }
-            if (map.settings().isNoSprint()) {
-                lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("No Sprint")));
-                settingsCount++;
-            }
-            if (map.settings().isNoJump()) {
-                lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("No Jump")));
-                settingsCount++;
-            }
-            if (map.settings().isNoSneak()) {
-                if (settingsCount < 3) {
-                    lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("No Sneak")));
-                } else {
-                    extraSettingsCount++;
-                }
-                settingsCount++;
-            }
-            if (map.settings().isBoat()) {
-                if (settingsCount < 3) {
-                    lore.add(Component.translatable("gui.play_maps.map_display.settings_single", Component.text("Boats")));
-                } else {
-                    extraSettingsCount++;
-                }
-                settingsCount++;
-            }
-
-            if (settingsCount > 3) {
-                lore.add(Component.translatable("gui.play_maps.map_display.setting_more", Component.text(extraSettingsCount)));
-            }
-        }
-
-        lore.add(Component.empty());
-        lore.addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display.footer", List.of()));
-
-        label.setComponentsDirect(title, lore);
+        var entry = MapData.createHoverComponents(map, authorName.build(),
+                progress == null ? null : Map.entry(progress, playtime));
+        entry.getValue().addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display.footer", List.of()));
+        label.setComponentsDirect(entry.getKey(), entry.getValue());
 
         label.setState(State.ACTIVE);
-    }
-
-    private @NotNull Component getMapTypeComponent() {
-        if (map.settings().getVariant() == MapVariant.PARKOUR) {
-            return switch (map.settings().getParkourSubVariant()) {
-                case SPEEDRUN -> Component.text("Speedrun Parkour", TextColor.color(0x15ADD3));
-                case SECTIONED -> Component.text("Sectioned Parkour", TextColor.color(0x15ADD3));
-                case RANKUP -> Component.text("Rankup Parkour", TextColor.color(0x15ADD3));
-                case GAUNTLET -> Component.text("Gauntlet Parkour", TextColor.color(0x15ADD3));
-                case DROPPER -> Component.text("Dropper Parkour", TextColor.color(0x15ADD3));
-                case ONE_JUMP -> Component.text("One Jump Parkour", TextColor.color(0x15ADD3));
-                case INFORMATIVE -> Component.text("Informative Parkour", TextColor.color(0x15ADD3));
-                case null -> Component.text("Generic Parkour", TextColor.color(0x15ADD3));
-            };
-        } else if (map.settings().getVariant() == MapVariant.BUILDING) {
-            return switch (map.settings().getBuildingSubVariant()) {
-                case SHOWCASE -> Component.text("Building Showcase", TextColor.color(0x0B9F0B));
-                case TUTORIAL -> Component.text("Building Tutorial", TextColor.color(0x0B9F0B));
-                case null -> Component.text("Generic Building", TextColor.color(0x0B9F0B));
-            };
-        } else {
-            return Component.text("Adventure Map", TextColor.color(0x9F0B0B));
-        }
-    }
-
-    public @NotNull Component getCompletionStateText() {
-        return Component.translatable(switch (progress) {
-            case null -> "gui.play_maps.map_display.progress_unknown";
-            case NONE -> "gui.play_maps.map_display.progress_none";
-            case STARTED -> "gui.play_maps.map_display.progress_started";
-            case COMPLETE -> "gui.play_maps.map_display.progress_complete";
-        });
     }
 }

@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
+import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -13,9 +14,16 @@ public class LavaBucketInteractionRule implements BlockInteractionRule {
 
     @Override
     public boolean handleInteraction(@NotNull Interaction interaction) {
+        var blockPosition = interaction.blockPosition();
+        var block = interaction.getBlock(blockPosition);
+
+        if (BlockTags.CAULDRONS.contains(block.namespace()) && !interaction.player().isSneaking()) {
+            interaction.setBlock(blockPosition, Block.LAVA_CAULDRON);
+            return true;
+        }
+
         // Try to place on the block we clicked. This is required for replacement
         // (eg left + right click at the same time to replace the block)
-        var blockPosition = interaction.blockPosition();
         if (tryPlaceLava(interaction, blockPosition, true)) return true;
 
         // Try to place on the neighbor block

@@ -7,11 +7,12 @@ import net.hollowcube.mapmaker.util.ProtocolUtil;
 import net.hollowcube.terraform.entity.TerraformEntity;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.*;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.sound.SoundEvent;
-import net.minestom.server.utils.UniqueIdUtils;
+import net.minestom.server.utils.UUIDUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,15 +96,41 @@ public class MapEntity extends Entity implements TerraformEntity {
 
     @Override
     public void readData(@NotNull CompoundBinaryTag tag) {
-        //todo read metadata fields
+        var keys = tag.keySet();
+
+        var meta = getEntityMeta();
+        if (keys.contains("CustomName")) {
+            var name = GsonComponentSerializer.gson().deserialize(tag.getString("CustomName"));
+            meta.setCustomName(name);
+        }
+        meta.setCustomNameVisible(tag.getBoolean("CustomNameVisible", false));
+        meta.setHasGlowingEffect(tag.getBoolean("Glowing", false));
+        meta.setOnFire(tag.getBoolean("HasVisualFire", false));
+        if (tag.getBoolean("NoGravity", false)) {
+            setNoGravity(true);
+            hasPhysics = false;
+        } else {
+            setNoGravity(false);
+            hasPhysics = true;
+        }
     }
 
     @Override
     public void writeData(@NotNull CompoundBinaryTag.Builder tag) {
         tag.putString("id", getEntityType().name());
-        tag.put("uuid", UniqueIdUtils.toNbt(getUuid()));
+        tag.put("uuid", UUIDUtils.toNbt(getUuid()));
         tag.put("Pos", NbtUtil.into(getPosition()));
         tag.put("Rotation", NbtUtil.writeRotation(getPosition()));
+
+        var meta = getEntityMeta();
+        if (meta.getCustomName() != null) {
+            var name = GsonComponentSerializer.gson().serialize(meta.getCustomName());
+            tag.putString("CustomName", name);
+        }
+        if (meta.isCustomNameVisible()) tag.putBoolean("CustomNameVisible", true);
+        if (meta.isHasGlowingEffect()) tag.putBoolean("Glowing", true);
+        if (meta.isOnFire()) tag.putBoolean("HasVisualFire", true);
+        if (hasNoGravity()) tag.putBoolean("NoGravity", true);
     }
 
     @Deprecated // Should never be used, but cannot be removed for backwards compatibility.

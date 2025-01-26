@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.block.handler;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.hollowcube.common.util.CollectionUtil;
 import net.hollowcube.mapmaker.event.util.UpdateSignTextEvent;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.BlockTags;
@@ -53,7 +54,7 @@ public class SignBlockHandler implements BlockHandler, InteractTarget {
             public void write(@NotNull TagWritable writer, @NotNull SignData value) {
                 writer.setTag(HAS_GLOWING_TEXT, value.hasGlowingText);
                 writer.setTag(COLOR, value.color);
-                writer.setTag(LINES, List.of(value.lines));
+                writer.setTag(LINES, CollectionUtil.copyWithMinSize(4, Component::empty, value.lines));
             }
         };
     }

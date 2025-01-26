@@ -110,6 +110,12 @@ public class MarkerEntity extends MapEntity {
         return getTag(REGION_MAX_TAG);
     }
 
+    public void setRegion(@Nullable Vec min, @Nullable Vec max) {
+        setTag(REGION_MIN_TAG, min);
+        setTag(REGION_MAX_TAG, max);
+        updateBoundingBox();
+    }
+
     public void setType(@NotNull NamespaceID type) {
         setTag(TYPE_TAG, type);
         updateForViewers();
@@ -135,7 +141,7 @@ public class MarkerEntity extends MapEntity {
 
         setTag(DATA_TAG, tag.getCompound("data"));
         updateBoundingBox();
-
+        updateForViewers();
     }
 
     @Override
@@ -151,9 +157,12 @@ public class MarkerEntity extends MapEntity {
 
         // see below for why this is commented
         var world = MapWorld.forPlayerOptional(player);
-        if (world == null || !world.canEdit(player)) return;
+        if (world == null) return;
 
-        Axiom.sendPacket(player, createAxiomAddPacket());
+        if (handler != null) handler.addViewer(player);
+        if (world.canEdit(player)) {
+            Axiom.sendPacket(player, createAxiomAddPacket());
+        }
     }
 
     @Override
@@ -161,10 +170,13 @@ public class MarkerEntity extends MapEntity {
         // Do not call super because we never actually spawned the entity on the client
 
         var world = MapWorld.forPlayerOptional(player);
-        if (world == null || !world.canEdit(player)) return;
+        if (world == null) return;
 
-        // Destroy the axiom marker (if it is enabled/installed)
-        Axiom.sendPacket(player, new AxiomMarkerDataPacket(getUuid()));
+        if (handler != null) handler.removeViewer(player);
+        if (world.canEdit(player)) {
+            // Destroy the axiom marker (if it is enabled/installed)
+            Axiom.sendPacket(player, new AxiomMarkerDataPacket(getUuid()));
+        }
     }
 
     @Override

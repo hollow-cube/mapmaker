@@ -70,6 +70,13 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
     }
 
     @Override
+    public void load() {
+        features().preinitMap(this);
+        
+        super.load();
+    }
+
+    @Override
     public void close(@Nullable Component reason) {
         super.close(reason);
 

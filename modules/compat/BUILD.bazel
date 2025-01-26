@@ -1,0 +1,17 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
+java_library(
+    name = "compat",
+    srcs = glob(include = ["src/main/java/**/*.java"]),
+    resources = glob(include = ["src/main/resources/**/*"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//third_party:auto_service",
+        "//third_party:minestom",
+        "@maven//:it_unimi_dsi_fastutil",
+        "@maven//:org_jetbrains_annotations",
+        "@maven//:com_noxcrew_noxesium_api",
+        "@maven//:net_kyori_adventure_api",
+        "@maven//:net_kyori_adventure_nbt",
+    ],
+)

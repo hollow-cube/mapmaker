@@ -6,12 +6,15 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
-import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
+import net.minestom.server.network.packet.server.play.CustomChatCompletionPacket;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Random;
+import java.util.Set;
 import java.util.function.Function;
 
 public record Emoji(
@@ -19,7 +22,6 @@ public record Emoji(
         boolean showInHelp,
         @NotNull Function<Random, Component> supplier
 ) {
-    private static final List<PlayerInfoUpdatePacket.Entry> EMOJI_PACKET_ENTRIES = new ArrayList<>();
     private static final LinkedHashMap<String, Emoji> EMOJI_MAP = new LinkedHashMap<>();
     private static final Set<String> PUBLIC_EMOJIS = Set.of(new String[]{
             // MUST BE KEPT IN SYNC WITH SESSION SERVICE
@@ -43,17 +45,11 @@ public record Emoji(
         return EMOJI_MAP.sequencedValues();
     }
 
-    /**
-     * Send the fake emoji players to the player for tab completions.
-     *
-     * <p>This is accomplished by sending an unlisted (on tab) player with each emoji name so that
-     * when you press tab in chat it will show completions for them.</p>
-     */
     public static void sendTabCompletions(@NotNull Player player) {
-        //noinspection UnstableApiUsage
-        player.sendPacket(new PlayerInfoUpdatePacket(
-                EnumSet.of(PlayerInfoUpdatePacket.Action.ADD_PLAYER, PlayerInfoUpdatePacket.Action.UPDATE_LISTED),
-                EMOJI_PACKET_ENTRIES
+        // TODO in the future may be can make it so that it only sends the emojis that the player has access to.
+        player.sendPacket(new CustomChatCompletionPacket(
+            CustomChatCompletionPacket.Action.ADD,
+            EMOJI_MAP.keySet().stream().map(name -> ":" + name + ":").toList()
         ));
     }
 
@@ -170,11 +166,6 @@ public record Emoji(
             Check.stateCondition(supplier == null, "No sprite set for emoji: " + id);
             var emoji = new Emoji(id, showInHelp, supplier);
             EMOJI_MAP.put(id, emoji);
-            EMOJI_PACKET_ENTRIES.add(new PlayerInfoUpdatePacket.Entry(
-                    UUID.randomUUID(), ":" + id + ":",
-                    List.of(), false, 0, null,
-                    null, null, 0
-            ));
             return emoji;
         }
     }

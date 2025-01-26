@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.util.RuntimeGson;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +11,7 @@ import java.util.stream.Collectors;
 @RuntimeGson
 public final class MapProgressBatchResponse {
     private List<Entry> progress = new ArrayList<>();
-    private transient Map<String, PersonalizedMapData.Progress> progressByMap;
+    private transient Map<String, Map.Entry<PersonalizedMapData.Progress, Integer>> progressByMap;
 
     public MapProgressBatchResponse() {
         // Gson constructor
@@ -26,15 +25,16 @@ public final class MapProgressBatchResponse {
         return progress;
     }
 
-    public PersonalizedMapData.@UnknownNullability Progress getProgress(@NotNull String mapId) {
+    public Map.Entry<PersonalizedMapData.Progress, Integer> getProgress(@NotNull String mapId) {
         if (progressByMap == null) {
-            progressByMap = progress.stream().collect(Collectors.toMap(Entry::mapId, Entry::progress));
+            progressByMap = progress.stream()
+                    .collect(Collectors.toMap(Entry::mapId, e -> Map.entry(e.progress, e.playtime)));
         }
 
         return progressByMap.get(mapId);
     }
 
-    public record Entry(@NotNull String mapId, @NotNull PersonalizedMapData.Progress progress) {
+    public record Entry(@NotNull String mapId, @NotNull PersonalizedMapData.Progress progress, int playtime) {
 
     }
 }

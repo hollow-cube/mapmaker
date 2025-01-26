@@ -32,7 +32,7 @@ public class MobSpawnerBlockHandler implements BlockHandler {
     public boolean onInteract(@NotNull BlockHandler.Interaction interaction) {
         ItemStack itemStack = interaction.getPlayer().getItemInHand(interaction.getHand());
         EntityType entityType = itemStack.material().registry().spawnEntityType();
-        if (entityType == null) return false;
+        if (entityType == null) return true;
 
         String entityId = entityType.namespace().asString();
 
@@ -42,7 +42,7 @@ public class MobSpawnerBlockHandler implements BlockHandler {
 
         interaction.getInstance().setBlock(interaction.getBlockPosition(), newBlock);
 
-        return true;
+        return false;
     }
 
     @Override

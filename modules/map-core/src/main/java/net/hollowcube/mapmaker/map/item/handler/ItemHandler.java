@@ -70,7 +70,7 @@ public abstract class ItemHandler {
     public @NotNull ItemStack buildItemStack(@Nullable CompoundBinaryTag nbt) {
         var builder = ItemStack.builder(material());
         var baseTranslationKey = String.format("item.%s.%s", id().namespace(), id().path());
-        builder.set(ItemComponent.CUSTOM_NAME, Component.translatable(baseTranslationKey + ".name"));
+        builder.set(ItemComponent.CUSTOM_NAME, LanguageProviderV2.translate(Component.translatable(baseTranslationKey + ".name")));
         builder.set(ItemComponent.LORE, LanguageProviderV2.translateMulti(baseTranslationKey + ".lore", List.of()));
         updateItemStack(builder, nbt != null ? TagHandler.fromCompound(nbt) : TagHandler.newHandler());
         builder.set(ItemComponent.CUSTOM_MODEL_DATA, customModelData());

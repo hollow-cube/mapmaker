@@ -21,6 +21,7 @@ import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
@@ -89,6 +90,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
+import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.client.play.ClientUpdateSignPacket;
@@ -217,7 +219,7 @@ public abstract class AbstractMapServer implements MapServer {
             VelocityProxy.enable(velocityConfig.secret());
         } else {
             logger.info("Velocity not configured, using online mode...");
-//            MojangAuth.init();
+            MojangAuth.init();
         }
 
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
@@ -372,6 +374,8 @@ public abstract class AbstractMapServer implements MapServer {
      */
     protected void prepareStart() {
         var globalEventHandler = MinecraftServer.getGlobalEventHandler();
+
+        CompatProvider.load(globalEventHandler);
 
         CosmeticInventoryHandler.init(guiController);
         AbstractAccessoryImpl.addListeners(globalEventHandler);
@@ -613,7 +617,7 @@ public abstract class AbstractMapServer implements MapServer {
         )));
 
         // Player init
-        player.setDisplayName(playerData.displayName2().build(DisplayName.Context.TAB_LIST));
+        player.setDisplayName(playerData.displayName2().build(DisplayName.Context.DEFAULT));
         MiscFunctionality.assignTeam(player);
         Emoji.sendTabCompletions(player);
 

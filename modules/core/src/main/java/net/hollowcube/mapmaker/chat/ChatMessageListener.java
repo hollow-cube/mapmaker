@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.chat;
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.gson.Gson;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
@@ -244,7 +245,19 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                         case MAP -> {
                             builder.append(maps.computeIfAbsent(part.mapId(), mapId -> {
                                 var m = mapService.getMap(message.sender(), mapId);
-                                return MapData.createHeadlessComponent(m, playerService);
+                                var progress = mapService.getMapProgress(message.sender(), List.of(mapId)).getProgress(mapId);
+                                var displayName = playerService.getPlayerDisplayName2(m.owner()).build();
+
+                                var components = MapData.createHoverComponents(m, displayName, progress);
+                                var hoverText = components.getValue();
+                                hoverText.addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display_headless.footer", List.of()));
+
+                                var result = Component.text().append(components.getKey());
+                                for (var c : hoverText)
+                                    result = result.appendNewline().append(LanguageProviderV2.translate(c));
+                                return Component.text(m.name(), TextColor.color(0x15ADD3))
+                                        .hoverEvent(HoverEvent.showText(result.build()))
+                                        .clickEvent(ClickEvent.runCommand("/play " + MapData.formatPublishedId(m.publishedId())));
                             }));
                         }
                         case URL -> {

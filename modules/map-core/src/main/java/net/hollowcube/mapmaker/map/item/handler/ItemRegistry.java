@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
+import net.hollowcube.compat.noxesium.packets.ClientboundChangeServerRulesPacket;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.util.InteractTarget;
 import net.hollowcube.mapmaker.util.TagCooldown;
@@ -86,6 +87,7 @@ public class ItemRegistry {
             .addListener(PlayerEntityInteractEvent.class, this::handleUseItemOnEntity)
             .addListener(EntityAttackEvent.class, this::handleHitEntity)
             .addListener(InstanceTickEvent.class, this::handleInstanceTick)
+            .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn)
             .addListener(EventListener.builder(InventoryPreClickEvent.class)
                     .handler(this::handleLeftClickGui)
                     .ignoreCancelled(false)
@@ -349,6 +351,12 @@ public class ItemRegistry {
                 itemHandler, player, itemStack, PlayerHand.MAIN,
                 null, null, null, null
         ));
+    }
+
+    private void handlePlayerSpawn(PlayerSpawnEvent event) {
+        if (!event.isFirstSpawn()) return;
+        List<ItemStack> items = this.idToItemHandler.keySet().stream().map(it -> getItemStack(it, null)).toList();
+        ClientboundChangeServerRulesPacket.creativeTab(items).send(event.getPlayer());
     }
 
     private @Nullable ItemHandler getHandlerFromItemStack(@NotNull ItemStack itemStack) {

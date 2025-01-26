@@ -1,11 +1,13 @@
 package net.hollowcube.mapmaker.map.feature.edit;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.custom.BouncePadBlock;
 import net.hollowcube.mapmaker.map.block.custom.CheckpointPlateBlock;
 import net.hollowcube.mapmaker.map.block.custom.FinishPlateBlock;
 import net.hollowcube.mapmaker.map.block.custom.StatusPlateBlock;
+import net.hollowcube.mapmaker.map.entity.marker.MapLeaderboardMarkerHandler;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.event.entity.MarkerEntityEnteredEvent;
@@ -54,6 +56,14 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
                 BouncePadBlock::new,
                 StatusPlateBlock::new
         );
+    }
+
+    @Override
+    public void preinitMap(@NotNull MapWorld world) {
+        if (world.map().settings().getVariant() != MapVariant.PARKOUR)
+            return;
+
+        world.markerRegistry().register(MapLeaderboardMarkerHandler.ID, MapLeaderboardMarkerHandler::new);
     }
 
     @Override

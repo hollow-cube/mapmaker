@@ -22,16 +22,23 @@ import java.util.stream.Collectors;
 
 @RuntimeGson
 public class MapSettings {
+    public static final MapSetting<Boolean> BOAT = MapSetting.Embedded("boat", MapSettings::isBoat, MapUpdateRequest::setBoat);
     public static final MapSetting<Boolean> ONLY_SPRINT = MapSetting.Embedded("only_sprint", MapSettings::isOnlySprint, MapUpdateRequest::setOnlySprint);
     public static final MapSetting<Boolean> NO_SPRINT = MapSetting.Embedded("no_sprint", MapSettings::isNoSprint, MapUpdateRequest::setNoSprint);
     public static final MapSetting<Boolean> NO_JUMP = MapSetting.Embedded("no_jump", MapSettings::isNoJump, MapUpdateRequest::setNoJump);
     public static final MapSetting<Boolean> NO_SNEAK = MapSetting.Embedded("no_sneak", MapSettings::isNoSneak, MapUpdateRequest::setNoSneak);
 
     public static final MapSetting<Boolean> NO_SPECTATOR = MapSetting.Bool("no_spectator", false);
+    public static final MapSetting<Boolean> RESET_IN_WATER = MapSetting.Bool("reset_in_water", false);
+    public static final MapSetting<Boolean> RESET_IN_LAVA = MapSetting.Bool("reset_in_lava", false);
 
     public static final MapSetting<TimeOfDay> TIME_OF_DAY = MapSetting.Enum("time_of_day", TimeOfDay.NOON);
     public static final MapSetting<WeatherType> WEATHER_TYPE = MapSetting.Enum("weather_type", WeatherType.CLEAR);
     public static final MapSetting<Boolean> LIGHTING = MapSetting.Bool("lighting", false);
+
+    public static final MapSetting<Boolean>[] TOOLTIP_SETTINGS = new MapSetting[]{
+            BOAT, ONLY_SPRINT, NO_SPRINT, NO_JUMP, NO_SNEAK,
+    };
 
     // Weird/one off/experimental settings
     public static final MapSetting<Boolean> PROGRESS_INDEX_ADDITION = MapSetting.Bool("progress_index_addition", false);
@@ -74,6 +81,8 @@ public class MapSettings {
         NOSNEAK(SettingType.GAMEPLAY, "No Sneak", SettingValueType.BOOLEAN, null),
 
         NOSPEC(SettingType.GAMEPLAY, "No Spectator", SettingValueType.BOOLEAN, null),
+        RESET_WATER(SettingType.GAMEPLAY, "Reset in Water", SettingValueType.BOOLEAN, null),
+        RESET_LAVA(SettingType.GAMEPLAY, "Reset in Lava", SettingValueType.BOOLEAN, null),
 
         TIME_OF_DAY(SettingType.VISUAL, "Time of Day", SettingValueType.ENUM, TimeOfDay.class),
         WEATHER_TYPE(SettingType.VISUAL, "Weather", SettingValueType.ENUM, WeatherType.class),
@@ -179,10 +188,14 @@ public class MapSettings {
         return name;
     }
 
-    public @NotNull Component getNameComponent() {
+    public @NotNull String getNameSafe() {
         if (name == null || name.isEmpty())
-            return Component.text(MapData.DEFAULT_NAME);
-        return Component.text(name);
+            return MapData.DEFAULT_NAME;
+        return name;
+    }
+
+    public @NotNull Component getNameComponent() {
+        return Component.text(getNameSafe());
     }
 
     public @NotNull Component getTagsComponent() {

@@ -166,6 +166,7 @@ public final class BlockTags {
     public static final Collection<NamespaceID> PRE_WATERLOGGED_BLOCKS = create(
             Block.KELP, Block.KELP_PLANT
     );
+    public static final Collection<NamespaceID> CAULDRONS = builtin("minecraft:cauldrons");
     public static final Collection<NamespaceID> UNRENDERABLE_DISPLAY_ENTITY_BLOCKS = group(
             SIGNS,
             ALL_HANGING_SIGNS,

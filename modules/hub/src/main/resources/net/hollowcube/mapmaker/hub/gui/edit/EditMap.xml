@@ -406,15 +406,15 @@
                         <button id="map_settings_time_of_day_noon"
                                 translationKey="gui.create_maps.map_settings_tab.visual.time_of_day.noon"
                                 sprite="create_maps/tab_settings/tab_visual/time/noon_icon"/>
-                        <button id="map_settings_time_of_day_sunrise"
-                                translationKey="gui.create_maps.map_settings_tab.visual.time_of_day.sunrise"
-                                sprite="create_maps/tab_settings/tab_visual/time/sunrise_icon"/>
                         <button id="map_settings_time_of_day_sunset"
                                 translationKey="gui.create_maps.map_settings_tab.visual.time_of_day.sunset"
                                 sprite="create_maps/tab_settings/tab_visual/time/sunset_icon"/>
                         <button id="map_settings_time_of_day_night"
                                 translationKey="gui.create_maps.map_settings_tab.visual.time_of_day.night"
                                 sprite="create_maps/tab_settings/tab_visual/time/night_icon"/>
+                        <button id="map_settings_time_of_day_sunrise"
+                                translationKey="gui.create_maps.map_settings_tab.visual.time_of_day.sunrise"
+                                sprite="create_maps/tab_settings/tab_visual/time/sunrise_icon"/>
                     </switch>
                     <switch id="map_settings_weather_type_switch">
                         <button id="map_settings_weather_type_clear"
@@ -480,6 +480,26 @@
                                 translationKey="gui.create_maps.map_settings_tab.gameplay.no_spec.selected"
                                 sprite="create_maps/tab_settings/tab_gameplay/setting_nospec_icon"
                                 backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nospec_selected"/>
+                    </switch>
+                    <switch id="map_settings_reset_water_switch">
+                        <button id="map_settings_reset_water_unset"
+                                translationKey="gui.create_maps.map_settings_tab.gameplay.reset_water"
+                                sprite="create_maps/tab_settings/tab_gameplay/setting_reset_water_icon"
+                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_reset_water_bg"/>
+                        <button id="map_settings_reset_water_set"
+                                translationKey="gui.create_maps.map_settings_tab.gameplay.reset_water.selected"
+                                sprite="create_maps/tab_settings/tab_gameplay/setting_reset_water_icon"
+                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_reset_water_selected"/>
+                    </switch>
+                    <switch id="map_settings_reset_lava_switch">
+                        <button id="map_settings_reset_lava_unset"
+                                translationKey="gui.create_maps.map_settings_tab.gameplay.reset_lava"
+                                sprite="create_maps/tab_settings/tab_gameplay/setting_reset_lava_icon"
+                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_reset_lava_bg"/>
+                        <button id="map_settings_reset_lava_set"
+                                translationKey="gui.create_maps.map_settings_tab.gameplay.reset_lava.selected"
+                                sprite="create_maps/tab_settings/tab_gameplay/setting_reset_lava_icon"
+                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_reset_lava_selected"/>
                     </switch>
                 </box>
             </switch>

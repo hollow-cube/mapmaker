@@ -23,7 +23,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.UniqueIdUtils;
+import net.minestom.server.utils.UUIDUtils;
 import net.minestom.server.utils.validate.Check;
 import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
@@ -185,7 +185,7 @@ public class ReadWorldAccess implements PolarWorldAccess {
             logger.warn("Unknown entity type {}", tag.getString("id"));
             return null;
         }
-        UUID uuid = tag.get("UUID") instanceof IntArrayBinaryTag uuidTag ? UniqueIdUtils.fromNbt(uuidTag) : UUID.randomUUID();
+        UUID uuid = tag.get("UUID") instanceof IntArrayBinaryTag uuidTag ? UUIDUtils.fromNbt(uuidTag) : UUID.randomUUID();
 
         var entity = MapEntityType.create(entityType, uuid);
         if (entity instanceof MapEntity mapEntity) mapEntity.readData(tag);

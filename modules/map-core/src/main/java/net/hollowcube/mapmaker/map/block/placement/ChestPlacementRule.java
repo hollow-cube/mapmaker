@@ -12,7 +12,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
-@SuppressWarnings("UnstableApiUsage")
 public class ChestPlacementRule extends WaterloggedPlacementRule {
 
     private static final BlockFace[][] CONNECTION_FACES = new BlockFace[][]{
@@ -31,7 +30,7 @@ public class ChestPlacementRule extends WaterloggedPlacementRule {
     public @Nullable Block blockPlace(@NotNull BlockPlacementRule.PlacementState placement) {
         final Point blockPosition = placement.placePosition();
         final Pos playerPosition = Objects.requireNonNullElse(placement.playerPosition(), Pos.ZERO);
-        final BlockFace facing = BlockFace.fromYaw(playerPosition.yaw()).getOppositeFace();
+        BlockFace facing = BlockFace.fromYaw(playerPosition.yaw()).getOppositeFace();
 
         String type = "single";
         if (!placement.isPlayerShifting()) {
@@ -48,6 +47,23 @@ public class ChestPlacementRule extends WaterloggedPlacementRule {
 
                 type = i == 0 ? "left" : "right";
                 break;
+            }
+        } else if (placement.blockFace() != null) {
+            Point pos = blockPosition.relative(placement.blockFace().getOppositeFace());
+            Block neighbor = placement.instance().getBlock(pos, Block.Getter.Condition.TYPE);
+
+            if (neighbor.id() == this.block.id() && neighbor.getProperty("type").equals("single")) {
+                BlockFace neighborFacing = BlockFace.valueOf(neighbor.getProperty("facing").toUpperCase(Locale.ROOT));
+
+                if (neighborFacing.isSimilar(facing)) {
+                    facing = neighborFacing;
+
+                    if (CONNECTION_FACES[neighborFacing.ordinal() - 2][0] == placement.blockFace()) {
+                        type = "right";
+                    } else {
+                        type = "left";
+                    }
+                }
             }
         }
 

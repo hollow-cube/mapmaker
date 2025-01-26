@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.map.entity.impl;
+package net.hollowcube.mapmaker.map.entity.impl.other;
 
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
@@ -114,7 +114,7 @@ public class ItemFrameEntity extends MapEntity {
         super.writeData(tag);
 
         var meta = getEntityMeta();
-        tag.putByte("facing", (byte) meta.getOrientation().ordinal());
+        tag.putByte("Facing", (byte) meta.getOrientation().ordinal());
         if (meta.isInvisible()) tag.putBoolean("Invisible", true);
         if (!meta.getItem().isAir()) tag.put("Item", ItemStack.NBT_TYPE.write(meta.getItem()));
 
@@ -143,7 +143,7 @@ public class ItemFrameEntity extends MapEntity {
     }
 
     private @NotNull ItemFrameMeta.Orientation readOrientation(@NotNull CompoundBinaryTag tag) {
-        int id = tag.getByte("facing", (byte) 2);
+        int id = tag.getByte("Facing", tag.getByte("facing", (byte) 2));
         for (var orientation : ItemFrameMeta.Orientation.values()) {
             if (orientation.ordinal() == id) return orientation;
         }

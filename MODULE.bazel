@@ -40,8 +40,8 @@ maven.install(
         "com.google.auto.service:auto-service-annotations:1.1.1",
 
         # Minestom
-        "net.minestom:minestom-snapshots:jar:c96413678c",
-        "dev.hollowcube:polar:1.12.1",
+        "net.minestom:minestom-snapshots:jar:96543a894f",
+        "dev.hollowcube:polar:1.12.2",
         "dev.hollowcube:dataconverter:1.21.3-rv1",
         "dev.hollowcube:mql:1.1.0",
 
@@ -55,6 +55,9 @@ maven.install(
         "info.debatty:java-string-similarity:2.0.0",
         "com.velocitypowered:velocity-api:3.1.1",
         "org.jctools:jctools-core:4.0.5",
+
+        # Compat
+        "com.noxcrew.noxesium:api:2.5.0",
 
         # Adventure
         "net.kyori:adventure-api:4.16.0",
@@ -109,6 +112,7 @@ maven.install(
         "https://jitpack.io",
         "https://repo.papermc.io/repository/maven-public/",
         "https://packages.confluent.io/maven/",  # For schema registry client
+        "https://maven.noxcrew.com/public", # For noxesium
     ],
 )
 use_repo(maven, "maven")
