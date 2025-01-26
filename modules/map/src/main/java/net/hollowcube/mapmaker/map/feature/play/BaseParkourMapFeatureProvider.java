@@ -734,7 +734,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     }
 
     private void updatePlayerFromState(MapWorld world, @NotNull Player player, @NotNull PlayState state) {
-        updatePlayerFromState(player, state, false);
+        updatePlayerFromState(world, player, state, false);
     }
 
     private void updatePlayerFromState(MapWorld world, @NotNull Player player, @NotNull PlayState state, boolean start) {
