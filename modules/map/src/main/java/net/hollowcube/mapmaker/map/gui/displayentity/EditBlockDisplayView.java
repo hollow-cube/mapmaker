@@ -8,6 +8,7 @@ import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.BlockUtil;
+import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.gui.displayentity.object.PropertyEntry;
 import net.hollowcube.mapmaker.map.gui.displayentity.search.SearchMaterialsView;
@@ -23,7 +24,9 @@ import java.util.function.Predicate;
 
 public class EditBlockDisplayView extends AbstractEditDisplayView<DisplayEntity.Block, BlockDisplayMeta> {
 
-    private static final Predicate<Material> FILTER = material -> material.isBlock() && !material.block().isAir();
+    private static final Predicate<Material> FILTER = material -> material.isBlock() &&
+            !material.block().isAir() &&
+            !BlockTags.UNRENDERABLE_DISPLAY_ENTITY_BLOCKS.contains(material.block().namespace());
     private static final Set<String> IGNORED_PROPERTIES = Set.of("waterlogged");
 
     private @Outlet("block") Label block;

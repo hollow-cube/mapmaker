@@ -166,6 +166,22 @@ public final class BlockTags {
     public static final Collection<NamespaceID> PRE_WATERLOGGED_BLOCKS = create(
             Block.KELP, Block.KELP_PLANT
     );
+    public static final Collection<NamespaceID> UNRENDERABLE_DISPLAY_ENTITY_BLOCKS = group(
+            SIGNS,
+            ALL_HANGING_SIGNS,
+            BANNERS,
+            SKULLS,
+            create(Block.BELL, Block.DECORATED_POT)
+    );
+
+    @SafeVarargs
+    private static @NotNull Collection<NamespaceID> group(@NotNull Collection<NamespaceID>... tags) {
+        var set = new HashSet<NamespaceID>();
+        for (var tag : tags) {
+            set.addAll(tag);
+        }
+        return Set.copyOf(set);
+    }
 
     private static @NotNull Collection<NamespaceID> extend(@NotNull Collection<NamespaceID> tag, @NotNull Block... block) {
         var set = new HashSet<>(tag);

@@ -102,7 +102,7 @@ public class DisplayTransformTab extends View {
     private static BiPredicate<DisplayEntity, Double> updateScale(BiFunction<Vec, Double, Vec> updater) {
         return (display, value) -> {
             if (value.isInfinite() || value.isNaN() || value == 0.0) return false;
-            display.rotateDisplay(updater.apply(getScale(display), value));
+            display.scaleDisplay(updater.apply(getScale(display), value));
             return true;
         };
     }
