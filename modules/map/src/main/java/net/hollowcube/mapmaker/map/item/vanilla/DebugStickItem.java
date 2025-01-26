@@ -67,11 +67,11 @@ public class DebugStickItem extends ItemHandler {
         if (newProperty == null) {
             sendActionBar(player, block.name() + " has no properties");
         } else {
-            final var value = block.getProperty(property);
-            final var newValue = cycle(BlockUtil.getBlockProperties(block).get(property), value, player.isSneaking() ? -1 : 1);
-            click.instance().setBlock(click.blockPosition(), block.withProperty(property, newValue), false);
+            final var value = block.getProperty(newProperty);
+            final var newValue = cycle(BlockUtil.getBlockProperties(block).get(newProperty), value, player.isSneaking() ? -1 : 1);
+            click.instance().setBlock(click.blockPosition(), block.withProperty(newProperty, newValue), false);
 
-            sendActionBar(player, String.format("Set \"%s\" to %s", property, newValue));
+            sendActionBar(player, String.format("Set \"%s\" to %s", newProperty, newValue));
 
             if (!newProperty.equals(property)) {
                 click.updateItemStack(b -> b.set(TAG_PROPERTY, state.set(blockId, newProperty)));
