@@ -14,6 +14,7 @@ import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
+import net.minestom.server.network.packet.server.play.data.LightData;
 import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
@@ -21,8 +22,7 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -44,7 +44,27 @@ public class MapInstance extends InstanceContainer {
 
         // Lighting and dummy chunk loader. The chunk loader will be replaced if there is world data
         // for the map to load, otherwise we keep this one.
-        setChunkSupplier(hasLighting ? LitChunk::new : UnlitChunk::new);
+        if (hasLighting) {
+            setChunkSupplier(LitChunk::new);
+        } else {
+            BitSet fullBitSet = new BitSet();
+            fullBitSet.set(0, this.getCachedDimensionType().height() / 16);
+            byte[] full = new byte[2048];
+            Arrays.fill(full, (byte) 0b1111_1111);
+
+            byte[][] empty = new byte[this.getCachedDimensionType().height() / 16][];
+            Arrays.fill(empty, full);
+
+            var fullBrightLightData = new LightData(
+                    fullBitSet,
+                    new BitSet(),
+                    new BitSet(),
+                    fullBitSet,
+                    Arrays.asList(empty),
+                    List.of()
+            );
+            setChunkSupplier((instance, chunkX, chunkZ) -> new UnlitChunk(instance, chunkX, chunkZ, fullBrightLightData));
+        }
         setChunkLoader(new PolarLoader(new PolarWorld()));
 
         eventNode().addListener(RemoveEntityFromInstanceEvent.class, this::handleEntityRemoved);

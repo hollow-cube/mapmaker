@@ -5,16 +5,20 @@ import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
+import net.minestom.server.network.packet.server.play.data.LightData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
 public class UnlitChunk extends DynamicChunk implements ChunkExt {
-    private final Heightmaps heightmaps;
 
-    public UnlitChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
+    private final Heightmaps heightmaps;
+    private final LightData light;
+
+    public UnlitChunk(@NotNull Instance instance, int chunkX, int chunkZ, LightData light) {
         super(instance, chunkX, chunkZ);
+        this.light = light;
         this.heightmaps = new Heightmaps(this);
     }
 
@@ -55,5 +59,10 @@ public class UnlitChunk extends DynamicChunk implements ChunkExt {
     @Override
     protected CompoundBinaryTag getHeightmapNBT() {
         return heightmaps.getProtocolData();
+    }
+
+    @Override
+    protected LightData createLightData(boolean requiredFullChunk) {
+        return this.light;
     }
 }
