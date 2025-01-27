@@ -36,9 +36,9 @@
         <box width="9" height="1" align="ltr">
             <spacer width="1"/>
             <switch id="tab_content" width="7" height="1">
-                <CustomBlocksView id="custom_blocks"/>
-                <BuildToolsView id="build_tools"/>
-                <CustomItemsView id="custom_items"/>
+                <BuilderMenuTab id="custom_blocks"/>
+                <BuilderMenuTab id="build_tools"/>
+                <BuilderMenuTab id="custom_items"/>
             </switch>
         </box>
     </box>
