@@ -15,12 +15,21 @@ import net.minestom.server.item.Material;
 import net.minestom.server.timer.Task;
 import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 
 public class SetMapIcon extends View {
+
+    private static final Predicate<@Nullable Material> SEARCH_PREDICATE = material ->
+            material != null &&
+                    material != Material.AIR &&
+                    material != Material.SCULK_SENSOR &&
+                    material != Material.CALIBRATED_SCULK_SENSOR &&
+                    material != Material.RECOVERY_COMPASS;
+
     public static final String SIG_UPDATE_ICON = "set_map_icon.selected";
 
     private @Outlet("input") Label inputField;
@@ -60,13 +69,13 @@ public class SetMapIcon extends View {
             // Add some random items
             result = ThreadLocalRandom.current().ints(1, Material.values().size())
                     .mapToObj(Material::fromId)
-                    .filter(m -> m != null && !Autocompletors.MATERIAL_BLACKLIST.contains(m))
+                    .filter(SEARCH_PREDICATE)
                     .limit(request.pageSize())
                     .map(m -> new MapIconPreview(request.context(), m))
                     .toList();
         } else {
             result = new ArrayList<>();
-            for (var suggestion : Autocompletors.mapIconMaterial(input, request.pageSize())) {
+            for (var suggestion : Autocompletors.searchMaterials(input, request.pageSize(), SEARCH_PREDICATE)) {
                 result.add(new MapIconPreview(request.context(), suggestion));
             }
 

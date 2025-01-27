@@ -13,67 +13,64 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
+import java.util.function.Predicate;
 
 public final class Autocompletors {
 
-    public static final Set<Material> MATERIAL_BLACKLIST = Set.of(
-            Material.AIR, // Obvious
-            Material.BUNDLE, // Adds a slot lore element
-            // Stuff that glows
-            Material.DEBUG_STICK, Material.NETHER_STAR, Material.EXPERIENCE_BOTTLE, Material.LIGHT,
-            Material.ENCHANTED_GOLDEN_APPLE, Material.ENCHANTED_BOOK, Material.END_CRYSTAL,
-            // Stuff that moves
-            Material.SCULK_SENSOR, Material.CALIBRATED_SCULK_SENSOR, Material.RECOVERY_COMPASS
-    );
-
-    private static final AutocompleteEngine<IndexableMaterial> materials = new AutocompleteEngine.Builder<IndexableMaterial>()
-            .setIndex(createDefaultIndexAdapter())
-            .setAnalyzers(new LowerCaseTransformer(), new WordTokenizer())
-            .build();
-
-    private record IndexableMaterial(
-            @NotNull Material material
-    ) implements Indexable {
-        @Override
-        public List<String> getFields() {
-            return List.of(material.name(), material.namespace().path(), material.namespace().path().replace("_", " "));
-        }
-    }
+    private static final AutocompleteEngine<IndexableMaterial> materials = createEngine();
 
     static {
         for (var material : Material.values()) {
-            if (MATERIAL_BLACKLIST.contains(material)) continue;
             materials.add(new IndexableMaterial(material));
         }
     }
 
-    public static @NotNull List<Material> mapIconMaterial(@NotNull String input, int limit) {
-        return materials.search(input, limit).stream().map(IndexableMaterial::material).toList();
+    public static @NotNull List<Material> searchMaterials(@NotNull String query, int limit, Predicate<Material> predicate) {
+        List<Material> output = new ArrayList<>(limit);
+        for (IndexableMaterial material : materials.search(query)) {
+            if (output.size() >= limit) break;
+            if (predicate.test(material.material())) {
+                output.add(material.material());
+            }
+        }
+        return output;
     }
 
-    public static <T> @NotNull IndexAdapter<T> createDefaultIndexAdapter() {
-        return new IndexAdapter<>() {
-            private final FuzzyIndex<T> index = new PatriciaTrie<>();
+    public static <T extends Indexable> AutocompleteEngine<T> createEngine() {
+        return new AutocompleteEngine.Builder<T>()
+                .setIndex(new Indexer<>())
+                .setAnalyzers(new LowerCaseTransformer(), new WordTokenizer())
+                .build();
+    }
 
-            @Override
-            public Collection<ScoredObject<T>> get(String token) {
-                double threshold = Math.log(Math.max(token.length() - 1, 1));
-                return index.getAny(new EditDistanceAutomaton(token, threshold));
-            }
+    private static class Indexer<T> implements IndexAdapter<T> {
+        private final FuzzyIndex<T> index = new PatriciaTrie<>();
 
-            @Override
-            public boolean put(String token, @Nullable T value) {
-                return index.put(token, value);
-            }
+        @Override
+        public Collection<ScoredObject<T>> get(String token) {
+            double threshold = Math.log(Math.max(token.length() - 1, 1));
+            return index.getAny(new EditDistanceAutomaton(token, threshold));
+        }
 
-            @Override
-            public boolean remove(T value) {
-                return index.remove(value);
-            }
-        };
+        @Override
+        public boolean put(String token, @Nullable T value) {
+            return index.put(token, value);
+        }
+
+        @Override
+        public boolean remove(T value) {
+            return index.remove(value);
+        }
+    }
+
+    private record IndexableMaterial(@NotNull Material material) implements Indexable {
+        @Override
+        public List<String> getFields() {
+            return List.of(material.name(), material.namespace().path(), material.namespace().path().replace("_", " "));
+        }
     }
 
 }

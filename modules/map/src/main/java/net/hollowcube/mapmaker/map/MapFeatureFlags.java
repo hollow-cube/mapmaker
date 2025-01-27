@@ -16,6 +16,7 @@ public final class MapFeatureFlags {
     public static final FeatureFlag CUSTOMIZABLE_HOTBAR = FeatureFlag.never();
     public static final FeatureFlag BIOME_EDITOR = FeatureFlag.of("map.biome_editor");
     public static final FeatureFlag ANIMATION_BUILDER = FeatureFlag.of("map.animation_builder");
+    public static final FeatureFlag DISPLAY_ENTITY_EDITOR = FeatureFlag.of("map.display_entity_editor");
 
     private static final Set<String> ITEM_EDITOR_PLAYERS = Set.of("notmattw", "ontal", "itmg", "sethprg");
 

@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class ViewProviderImpl implements ViewProvider {
@@ -130,13 +131,25 @@ public class ViewProviderImpl implements ViewProvider {
 
         for (var method : viewClass.getDeclaredMethods()) {
             var action = method.getAnnotation(Action.class);
-            if (action == null) continue;
+            var group = method.getAnnotation(ActionGroup.class);
 
-            var name = action.value();
-            var element = root.findById(name);
-            Check.notNull(element, "Action not found: " + name);
+            Check.stateCondition(action != null && group != null, "Method cannot have both Action and ActionGroup annotations");
 
-            element.wireAction(view, method, new Action.Descriptor(action.value(), action.async()));
+            if (action != null) {
+                var element = root.findById(action.value());
+                Check.notNull(element, "Action not found: " + action.value());
+
+                element.wireAction(view, method, new Action.Descriptor(action.value(), action.async()));
+            } else if (group != null) {
+                var pattern = Pattern.compile(group.value());
+                var elements = new ArrayList<Element>();
+                root.collectById(pattern.asMatchPredicate(), elements);
+
+                for (var element : elements) {
+                    if (!(element instanceof BaseElement base)) continue;
+                    base.wireAction(view, method, new Action.Descriptor(Objects.requireNonNull(element.id()), group.async()));
+                }
+            }
         }
     }
 

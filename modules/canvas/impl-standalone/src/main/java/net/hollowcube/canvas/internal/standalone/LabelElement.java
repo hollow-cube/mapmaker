@@ -25,8 +25,8 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
 
     private final String translationKey;
 
-    private ItemStack itemSprite = BLANK_ITEM;
-    private ItemStack itemBlank = BLANK_ITEM;
+    protected ItemStack itemSprite = BLANK_ITEM;
+    protected ItemStack itemBlank = BLANK_ITEM;
     private Integer itemPosition = null;
 
     public LabelElement(@NotNull ElementContext context, @Nullable String id, int width, int height, @NotNull String translationKey) {
@@ -82,7 +82,7 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
         setSprite(new Sprite(fontChar, cmd, width, offsetX, rightOffset));
     }
 
-    private void updateItem(@NotNull List<Component> args) {
+    protected void updateItem(@NotNull List<Component> args) {
         itemSprite = this.itemSprite.with(builder -> {
             builder.set(ItemComponent.CUSTOM_NAME, Component.translatable(translationKey + ".name", args));
             builder.set(ItemComponent.LORE, LanguageProviderV2.translateMulti(translationKey + ".lore", args));

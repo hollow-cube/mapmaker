@@ -51,6 +51,7 @@ public class SwitchElement extends ContainerElement implements Switch, SpriteHol
 
     @Override
     public void buildTitle(@NotNull FontUIBuilder sb, int x, int y) {
+        drawBackgroundSprite(sb, x, y);
         children().get(state).buildTitle(sb, x, y);
     }
 

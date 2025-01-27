@@ -16,6 +16,7 @@ import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCompleteMapEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerStatusChangeEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.feature.edit.item.BuilderMenuItem;
+import net.hollowcube.mapmaker.map.feature.edit.item.DisplayEntityItem;
 import net.hollowcube.mapmaker.map.feature.edit.item.EnterTestModeItem;
 import net.hollowcube.mapmaker.map.feature.edit.item.SpawnPointItem;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
@@ -77,6 +78,7 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
             world.itemRegistry().register(BuilderMenuItem.INSTANCE);
             world.itemRegistry().register(EnterTestModeItem.INSTANCE);
             world.itemRegistry().register(SpawnPointItem.INSTANCE);
+            world.itemRegistry().register(DisplayEntityItem.INSTANCE);
 
             world.eventNode().addChild(eventNode);
 
