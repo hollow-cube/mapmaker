@@ -35,7 +35,7 @@ public class BuilderMenuTab extends View {
         request.respond(entries, false);
     }
 
-    public void setItems(BuilderMenuTabItems.Item... items) {
+    public void setItems(@NotNull BuilderMenuTabItems.Item... items) {
         this.items.clear();
         this.items.addAll(List.of(items));
         this.entries.reset();

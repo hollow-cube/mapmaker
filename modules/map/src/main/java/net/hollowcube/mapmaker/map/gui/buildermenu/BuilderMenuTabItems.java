@@ -90,32 +90,32 @@ public class BuilderMenuTabItems {
             )
     };
 
-    private static ItemCondition variant(MapVariant variant) {
+    private static ItemCondition variant(@NotNull MapVariant variant) {
         return (world, player) -> TriState.byBoolean(world.map().settings().getVariant() == variant);
     }
 
     public record Item(
-            Consumer<Player> giver,
-            String translation,
-            Either<BadSprite, Material> icon,
-            ItemCondition condition
+            @NotNull Consumer<Player> giver,
+            @NotNull String translation,
+            @NotNull Either<BadSprite, Material> icon,
+            @NotNull ItemCondition condition
     ) {
 
-        private static Item of(ItemHandler item, String key, String sprite, ItemCondition condition) {
+        private static @NotNull Item of(@NotNull ItemHandler item, @NotNull String key, @NotNull String sprite, @NotNull ItemCondition condition) {
             return new Item(player -> giveCustomItem(player, item), key, Either.left(BadSprite.require(sprite)), condition);
         }
 
-        private static Item of(Consumer<Player> giver, String key, Material icon, ItemCondition condition) {
+        private static @NotNull Item of(@NotNull Consumer<Player> giver, @NotNull String key, @NotNull Material icon, @NotNull ItemCondition condition) {
             return new Item(giver, key, Either.right(icon), condition);
         }
 
-        public void give(Player player) {
-            if (this.condition.check(MapWorld.forPlayerOptional(player), player) == TriState.TRUE) {
+        public void give(@NotNull Player player) {
+            if (this.condition.check(MapWorld.forPlayer(player), player) == TriState.TRUE) {
                 this.giver.accept(player);
             }
         }
 
-        public boolean isVisible(MapWorld world, Player player) {
+        public boolean isVisible(@NotNull MapWorld world, @NotNull Player player) {
             return condition.check(world, player) != TriState.FALSE;
         }
     }
@@ -132,6 +132,6 @@ public class BuilderMenuTabItems {
     @FunctionalInterface
     private interface ItemCondition {
 
-        TriState check(MapWorld world, Player player);
+        @NotNull TriState check(@NotNull MapWorld world, @NotNull Player player);
     }
 }

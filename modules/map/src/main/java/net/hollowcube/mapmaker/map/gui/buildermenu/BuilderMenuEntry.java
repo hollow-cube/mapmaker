@@ -19,7 +19,7 @@ public class BuilderMenuEntry extends View {
 
     protected BuilderMenuEntry(
             @NotNull Context context,
-            BuilderMenuTabItems.Item item
+            @NotNull BuilderMenuTabItems.Item item
     ) {
         super(context);
 
