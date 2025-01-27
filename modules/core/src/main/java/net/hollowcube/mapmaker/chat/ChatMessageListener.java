@@ -319,9 +319,15 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
 //                                builder.append(MapData.createMapHoverText(map));
                 }
                 case URL -> {
-                    builder.append(Component.text(part.text(), NamedTextColor.GRAY)
+                    String url = part.text().replaceFirst("^https?://", "");
+                    var text = Component.text(url, NamedTextColor.BLUE)
+                            .append(Component.text(FontUtil.computeOffset(2)))
+                            .append(Component.text(BadSprite.require("icon/chat/external_link").fontChar(), NamedTextColor.BLUE));
+
+                    builder.append(text
                             .hoverEvent(HoverEvent.showText(Component.text("Click to open link")))
-                            .clickEvent(ClickEvent.openUrl(part.text())));
+                            .clickEvent(ClickEvent.openUrl("https://%s".formatted(url)))
+                    );
                 }
             }
         }
