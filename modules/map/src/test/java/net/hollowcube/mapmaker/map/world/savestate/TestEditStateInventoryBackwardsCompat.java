@@ -5,7 +5,6 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.hollowcube.common.util.dfu.DFU;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
@@ -65,6 +64,6 @@ class TestEditStateInventoryBackwardsCompat {
         class Holder {
             static final Gson gson = new Gson();
         }
-        return DFU.unwrap(codec.decode(JsonOps.INSTANCE, Holder.gson.fromJson(json, JsonElement.class))).getFirst();
+        return codec.parse(JsonOps.INSTANCE, Holder.gson.fromJson(json, JsonElement.class)).getOrThrow();
     }
 }

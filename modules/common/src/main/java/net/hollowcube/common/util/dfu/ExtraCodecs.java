@@ -1,6 +1,5 @@
 package net.hollowcube.common.util.dfu;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -20,7 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public final class ExtraCodecs {
 
@@ -122,39 +120,6 @@ public final class ExtraCodecs {
             public <T1> DataResult<T1> encode(T input, DynamicOps<T1> ops, T1 prefix) {
                 if (codec == null) codec = supplier.get();
                 return codec.encode(input, ops, prefix);
-            }
-        };
-    }
-
-    /**
-     * <p>Attempts to decode the input with the primary codec, and if that fails tries the secondary codec.</p>
-     *
-     * <p>Always encoded using the primary codec.</p>
-     *
-     * @param primary   The first codec to try, always used for encoding
-     * @param secondary The second codec to try if the first fails
-     * @param <T>       The type of the codec
-     * @return A codec that tries the primary codec first, then the secondary
-     */
-    public static <T> @NotNull Codec<T> withAlternative(@NotNull Codec<T> primary, @NotNull Codec<T> secondary) {
-        return Codec.either(primary, secondary).xmap(either -> either.map(t -> t, t -> t), Either::left);
-    }
-
-    public static <T> @NotNull MapCodec<T> unitMap(@NotNull T value) {
-        return new MapCodec<T>() {
-            @Override
-            public <T1> Stream<T1> keys(DynamicOps<T1> ops) {
-                return Stream.empty();
-            }
-
-            @Override
-            public <T1> DataResult<T> decode(DynamicOps<T1> ops, MapLike<T1> input) {
-                return DataResult.success(value);
-            }
-
-            @Override
-            public <T1> RecordBuilder<T1> encode(T input, DynamicOps<T1> ops, RecordBuilder<T1> prefix) {
-                return prefix;
             }
         };
     }

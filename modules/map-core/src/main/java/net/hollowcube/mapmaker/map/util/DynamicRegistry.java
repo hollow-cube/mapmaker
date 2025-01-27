@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
-import net.hollowcube.common.util.dfu.DFU;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +25,7 @@ public final class DynamicRegistry {
         var obj = REGISTRY.get(name);
         var map = new HashMap<String, T>();
         for (var entry : obj.entrySet()) {
-            var result = DFU.unwrap(codec.decode(JsonOps.INSTANCE, entry.getValue())).getFirst();
+            var result = codec.parse(JsonOps.INSTANCE, entry.getValue()).getOrThrow();
             map.put(entry.getKey(), result);
         }
         return Map.copyOf(map);

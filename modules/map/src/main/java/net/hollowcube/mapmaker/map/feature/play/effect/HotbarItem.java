@@ -34,7 +34,7 @@ public sealed interface HotbarItem {
         public static final Remove INSTANCE = new Remove();
 
         public static final String ID = "remove";
-        public static final MapCodec<Remove> CODEC = ExtraCodecs.unitMap(INSTANCE);
+        public static final MapCodec<Remove> CODEC = MapCodec.unit(INSTANCE);
 
         private static final ItemStack ITEM_STACK = ItemStack.builder(Material.DIAMOND)
                 .set(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("effect/item/air").cmd())

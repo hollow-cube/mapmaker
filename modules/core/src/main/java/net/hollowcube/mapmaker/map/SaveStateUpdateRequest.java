@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.map;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
-import net.hollowcube.common.util.dfu.DFU;
 import org.jetbrains.annotations.NotNull;
 
 public class SaveStateUpdateRequest {
@@ -28,7 +27,7 @@ public class SaveStateUpdateRequest {
     }
 
     public @NotNull SaveStateUpdateRequest setState(@NotNull Object state, @NotNull SaveStateType.Serializer<?> serializer) {
-        updates.add(serializer.name(), DFU.unwrap(((Codec<Object>) serializer.codec()).encodeStart(JsonOps.INSTANCE, state)));
+        updates.add(serializer.name(), ((Codec<Object>) serializer.codec()).encodeStart(JsonOps.INSTANCE, state).getOrThrow());
         return this;
     }
 
