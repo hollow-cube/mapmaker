@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.gson.Gson;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
@@ -22,6 +23,7 @@ import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.temp.ChatMessageData;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -261,9 +263,15 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                             }));
                         }
                         case URL -> {
-                            builder.append(Component.text(part.text(), NamedTextColor.GRAY)
+                            String url = part.text().replaceFirst("^https?://", "");
+                            var text = Component.text(url, NamedTextColor.BLUE)
+                                    .append(Component.text(FontUtil.computeOffset(2)))
+                                    .append(Component.text(BadSprite.require("icon/chat/external_link").fontChar(), NamedTextColor.BLUE));
+
+                            builder.append(text
                                     .hoverEvent(HoverEvent.showText(Component.text("Click to open link")))
-                                    .clickEvent(ClickEvent.openUrl(part.text())));
+                                    .clickEvent(ClickEvent.openUrl("https://%s".formatted(url)))
+                            );
                         }
                     }
                 }
