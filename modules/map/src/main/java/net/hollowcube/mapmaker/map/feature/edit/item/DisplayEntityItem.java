@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.feature.edit.item;
 
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.mapmaker.map.MapFeatureFlags;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.gui.displayentity.AbstractEditDisplayView;
@@ -31,6 +32,7 @@ public class DisplayEntityItem extends ItemHandler {
         var world = MapWorld.forPlayerOptional(player);
         if (world == null) return;
         if (!world.canEdit(player)) return;
+        if (!MapFeatureFlags.DISPLAY_ENTITY_EDITOR.test(player)) return;
 
         var selectedId = player.getTag(DisplayEntity.SELECTED_DISPLAY_ENTITY);
 

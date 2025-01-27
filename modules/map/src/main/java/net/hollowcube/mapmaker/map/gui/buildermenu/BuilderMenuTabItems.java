@@ -1,11 +1,14 @@
 package net.hollowcube.mapmaker.map.gui.buildermenu;
 
 import com.mojang.datafixers.util.Either;
+import net.hollowcube.mapmaker.feature.FeatureFlag;
+import net.hollowcube.mapmaker.map.MapFeatureFlags;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.custom.CheckpointPlateBlock;
 import net.hollowcube.mapmaker.map.block.custom.FinishPlateBlock;
 import net.hollowcube.mapmaker.map.block.custom.StatusPlateBlock;
+import net.hollowcube.mapmaker.map.feature.edit.item.DisplayEntityItem;
 import net.hollowcube.mapmaker.map.feature.edit.item.EnterTestModeItem;
 import net.hollowcube.mapmaker.map.feature.edit.item.SpawnPointItem;
 import net.hollowcube.mapmaker.map.feature.play.item.MapDetailsItem;
@@ -25,26 +28,25 @@ public class BuilderMenuTabItems {
 
     private static final ItemCondition ALWAYS = (world, player) -> TriState.TRUE;
     private static final ItemCondition DISABLED = (world, player) -> TriState.NOT_SET;
-    private static final ItemCondition PARKOUR_ONLY_VISIBLE = variant(MapVariant.PARKOUR);
 
     public static final Item[] CUSTOM_BLOCKS = new Item[]{
             Item.of(
                     FinishPlateBlock.ITEM,
                     "gui.builder_menu.custom_blocks.finish_plate",
                     "builder_menu/custom_blocks/finish_plate",
-                    PARKOUR_ONLY_VISIBLE
+                    variant(MapVariant.PARKOUR)
             ),
             Item.of(
                     CheckpointPlateBlock.ITEM,
                     "gui.builder_menu.custom_blocks.checkpoint_plate",
                     "builder_menu/custom_blocks/checkpoint_plate",
-                    PARKOUR_ONLY_VISIBLE
+                    variant(MapVariant.PARKOUR)
             ),
             Item.of(
                     StatusPlateBlock.ITEM,
                     "gui.builder_menu.custom_blocks.status_plate",
                     "builder_menu/custom_blocks/status_plate",
-                    PARKOUR_ONLY_VISIBLE
+                    variant(MapVariant.PARKOUR)
             )
     };
 
@@ -80,15 +82,25 @@ public class BuilderMenuTabItems {
                     EnterTestModeItem.INSTANCE,
                     "gui.builder_menu.custom_items.enter_testing_mode",
                     "hud/hotbar/enter_test_mode",
-                    PARKOUR_ONLY_VISIBLE
+                    variant(MapVariant.PARKOUR)
             ),
             Item.of(
                     SpawnPointItem.INSTANCE,
                     "gui.builder_menu.custom_items.spawn_point",
                     "hud/hotbar/spawn_point",
                     ALWAYS
+            ),
+            Item.of(
+                    DisplayEntityItem.INSTANCE,
+                    "gui.builder_menu.custom_items.display_entity",
+                    "hud/hotbar/cosmetic_menu",
+                    featureFlag(MapFeatureFlags.DISPLAY_ENTITY_EDITOR)
             )
     };
+
+    private static ItemCondition featureFlag(@NotNull FeatureFlag flag) {
+        return ($, player) -> TriState.byBoolean(flag.test(player));
+    }
 
     private static ItemCondition variant(@NotNull MapVariant variant) {
         return (world, player) -> TriState.byBoolean(world.map().settings().getVariant() == variant);
