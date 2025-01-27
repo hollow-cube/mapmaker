@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.map.util.PlayerUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
+import net.minestom.server.FeatureFlag;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
@@ -172,6 +173,9 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
 
             player.sendPacket(MinecraftServer.getTagManager().packet(serverProcess));
             event.setSendRegistryData(false);
+
+            // Send feature flag so that vanilla doesnt show disabled items tooltip
+            event.addFeatureFlag(FeatureFlag.WINTER_DROP); // TODO remove in 1.21.5
 
             // Set the instance and spawn point of the player.
             event.setSpawningInstance(instance());
