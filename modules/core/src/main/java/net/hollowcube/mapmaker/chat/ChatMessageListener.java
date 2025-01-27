@@ -3,14 +3,11 @@ package net.hollowcube.mapmaker.chat;
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.gson.Gson;
-import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.chat.components.MessageComponents;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -23,15 +20,9 @@ import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.temp.ChatMessageData;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
-import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextReplacementConfig;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.listener.manager.PacketPlayListenerConsumer;
@@ -51,7 +42,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 public class ChatMessageListener extends BaseConsumer<ChatMessageData> implements PacketPlayListenerConsumer<ClientChatMessagePacket> {
     private static final Logger logger = LoggerFactory.getLogger(ChatMessageListener.class);
@@ -79,6 +69,8 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
 
     private final AsyncLoadingCache<String, Optional<Punishment>> playerMuteCache;
 
+    private final MessageComponents components;
+
     public ChatMessageListener(@NotNull SessionManager sessionManager, @NotNull PlayerService playerService,
                                @NotNull MapService mapService, @NotNull PunishmentService punishmentService,
                                @NotNull String kafkaBrokers, @NotNull FriendlyProducer producer) {
@@ -93,6 +85,9 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                 .expireAfterWrite(10, TimeUnit.MINUTES)
                 .executor(FutureUtil.VIRTUAL)
                 .buildAsync(this::fetchActiveMute);
+
+        this.components = new MessageComponents(mapService, playerService);
+
         MinecraftServer.getGlobalEventHandler()
                 .addListener(PunishmentCreatedEvent.class, this::handlePunishmentCreated)
                 .addListener(PunishmentRevokedEvent.class, this::handlePunishmentRevoked);
@@ -202,81 +197,17 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
     @Blocking
     protected void handleGlobalChatUnsigned(@NotNull ChatMessageData message) {
         logger.info("Received chat message: {}", message);
-        try {
-            // todo This is braindead inefficient
-            //  Awful garbage code
 
+        try {
             var senderDisplyName = playerService.getPlayerDisplayName2(message.sender());
             var sender = senderDisplyName.build(DisplayName.Context.DEFAULT);
             var key = senderDisplyName.parts().size() > 1 ? "chat.channel.global.white" : "chat.channel.global.default";
-            Random random = message.seed() == 0 ? null : new Random();
-
-            var maps = new HashMap<String, Component>();
 
             for (var recipient : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-                if (random != null) random.setSeed(message.seed()); // reset seed for each player so its synchronized
-                var builder = Component.text();
+                var data = this.components.createGlobalMessage(recipient, message);
+                if (data.ping()) recipient.playSound(TAG_DING);
 
-                boolean hasDing = false;
-                for (var part : message.parts()) {
-                    switch (part.type()) {
-                        case RAW -> {
-                            Component component = Component.text(part.text());
-
-                            var namePattern = Pattern.compile(String.format("(?:^|\\s)(%s)", recipient.getUsername()), Pattern.CASE_INSENSITIVE);
-                            if (namePattern.matcher(part.text()).find()) {
-                                if (!hasDing && !recipient.getUuid().toString().equals(message.sender()))
-                                    recipient.playSound(TAG_DING);
-                                hasDing = true;
-                                component = component.replaceText(TextReplacementConfig.builder()
-                                        .match(namePattern)
-                                        .replacement((match, unused) -> Component.text(match.group(), TextColor.color(0xffe59e)))
-                                        .build());
-                            }
-
-                            builder.append(component);
-                        }
-                        case EMOJI -> {
-                            var emoji = Emoji.findByName(part.name());
-                            if (emoji == null) {
-                                builder.append(Component.text(":" + part.name() + ":"));
-                            } else {
-                                builder.append(emoji.supplier().apply(random));
-                            }
-                        }
-                        case MAP -> {
-                            builder.append(maps.computeIfAbsent(part.mapId(), mapId -> {
-                                var m = mapService.getMap(message.sender(), mapId);
-                                var progress = mapService.getMapProgress(message.sender(), List.of(mapId)).getProgress(mapId);
-                                var displayName = playerService.getPlayerDisplayName2(m.owner()).build();
-
-                                var components = MapData.createHoverComponents(m, displayName, progress);
-                                var hoverText = components.getValue();
-                                hoverText.addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display_headless.footer", List.of()));
-
-                                var result = Component.text().append(components.getKey());
-                                for (var c : hoverText)
-                                    result = result.appendNewline().append(LanguageProviderV2.translate(c));
-                                return Component.text(m.name(), TextColor.color(0x15ADD3))
-                                        .hoverEvent(HoverEvent.showText(result.build()))
-                                        .clickEvent(ClickEvent.runCommand("/play " + MapData.formatPublishedId(m.publishedId())));
-                            }));
-                        }
-                        case URL -> {
-                            String url = part.text().replaceFirst("^https?://", "");
-                            var text = Component.text(url, NamedTextColor.BLUE)
-                                    .append(Component.text(FontUtil.computeOffset(2)))
-                                    .append(Component.text(BadSprite.require("icon/chat/external_link").fontChar(), NamedTextColor.BLUE));
-
-                            builder.append(text
-                                    .hoverEvent(HoverEvent.showText(Component.text("Click to open link")))
-                                    .clickEvent(ClickEvent.openUrl("https://%s".formatted(url)))
-                            );
-                        }
-                    }
-                }
-
-                recipient.sendMessage(Component.translatable(key, sender, builder.build()));
+                recipient.sendMessage(Component.translatable(key, sender, data.text()));
             }
 
             // If there is an extra message, handle it
@@ -289,59 +220,37 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
     }
 
     private void handleDirectMessage(@NotNull ChatMessageData message) {
-        System.out.println(message);
+        try {
+            var sender = CONNECTION_MANAGER.getOnlinePlayerByUuid(UUID.fromString(message.sender()));
+            var target = CONNECTION_MANAGER.getOnlinePlayerByUuid(UUID.fromString(message.channel()));
+            var spies = new ArrayList<Player>(); // People spying todo
 
-        var sender = CONNECTION_MANAGER.getOnlinePlayerByUuid(UUID.fromString(message.sender()));
-        var target = CONNECTION_MANAGER.getOnlinePlayerByUuid(UUID.fromString(message.channel()));
-        var spies = new ArrayList<Player>(); // People spying todo
+            if (sender == null && target == null && spies.isEmpty()) return; // Not relevant to this server
 
-        if (sender == null && target == null && spies.isEmpty()) return; // Not relevant to this server
+            var targetDisplayName = playerService.getPlayerDisplayName2(message.channel()).build();
+            var senderDisplayName = playerService.getPlayerDisplayName2(message.sender()).build();
 
-        var targetDisplayName = playerService.getPlayerDisplayName2(message.channel()).build();
-        var senderDisplayName = playerService.getPlayerDisplayName2(message.sender()).build();
-        Random random = message.seed() == 0 ? null : new Random(message.seed());
-
-        var builder = Component.text();
-        for (var part : message.parts()) {
-            switch (part.type()) {
-                case RAW -> {
-                    builder.append(Component.text(part.text()));
-                }
-                case EMOJI -> {
-                    var emoji = Emoji.findByName(part.name());
-                    if (emoji == null) {
-                        builder.append(Component.text(":" + part.name() + ":"));
-                    } else builder.append(emoji.supplier().apply(random));
-                }
-                case MAP -> {
-                    builder.append(Component.text("[map - todo]"));
-//                                var map = maps.computeIfAbsent(part.mapId(), mapId -> mapService.getMap(message.sender(), mapId));
-//                                builder.append(MapData.createMapHoverText(map));
-                }
-                case URL -> {
-                    String url = part.text().replaceFirst("^https?://", "");
-                    var text = Component.text(url, NamedTextColor.BLUE)
-                            .append(Component.text(FontUtil.computeOffset(2)))
-                            .append(Component.text(BadSprite.require("icon/chat/external_link").fontChar(), NamedTextColor.BLUE));
-
-                    builder.append(text
-                            .hoverEvent(HoverEvent.showText(Component.text("Click to open link")))
-                            .clickEvent(ClickEvent.openUrl("https://%s".formatted(url)))
-                    );
-                }
+            if (target != null) {
+                var data = this.components.createDirectMessage(target, message);
+                target.playSound(TAG_DING);
+                target.sendMessage(Component.translatable(
+                        "chat.channel.dm.receive", List.of(senderDisplayName, targetDisplayName, data.text())
+                ));
             }
-        }
-
-        var args = List.of(senderDisplayName, targetDisplayName, builder.build());
-        if (target != null) {
-            target.playSound(TAG_DING);
-            target.sendMessage(Component.translatable("chat.channel.dm.receive", args));
-        }
-        if (sender != null) {
-            sender.sendMessage(Component.translatable("chat.channel.dm.send", args));
-        }
-        for (var spy : spies) {
-            spy.sendMessage(Component.translatable("chat.channel.dm.spy", args));
+            if (sender != null) {
+                var data = this.components.createDirectMessage(sender, message);
+                sender.sendMessage(Component.translatable(
+                        "chat.channel.dm.send", List.of(senderDisplayName, targetDisplayName, data.text())
+                ));
+            }
+            for (var spy : spies) {
+                var data = this.components.createDirectMessage(spy, message);
+                spy.sendMessage(Component.translatable(
+                        "chat.channel.dm.spy", List.of(senderDisplayName, targetDisplayName, data.text())
+                ));
+            }
+        } catch (Exception e) {
+            MinecraftServer.getExceptionManager().handleException(e);
         }
     }
 
