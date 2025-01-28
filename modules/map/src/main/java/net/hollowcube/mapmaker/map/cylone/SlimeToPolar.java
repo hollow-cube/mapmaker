@@ -20,16 +20,86 @@ import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+
+import static net.kyori.adventure.nbt.StringBinaryTag.stringBinaryTag;
 
 public class SlimeToPolar {
 
     static {
         MinecraftServer.init();
     }
+
+    private static final Map<String, String> PATTERN_UPDATE = new HashMap<>();
+
+    static {
+        PATTERN_UPDATE.put("b", "minecraft:base");
+        PATTERN_UPDATE.put("bl", "minecraft:square_bottom_left");
+        PATTERN_UPDATE.put("br", "minecraft:square_bottom_right");
+        PATTERN_UPDATE.put("tl", "minecraft:square_top_left");
+        PATTERN_UPDATE.put("tr", "minecraft:square_top_right");
+        PATTERN_UPDATE.put("bs", "minecraft:stripe_bottom");
+        PATTERN_UPDATE.put("ts", "minecraft:stripe_top");
+        PATTERN_UPDATE.put("ls", "minecraft:stripe_left");
+        PATTERN_UPDATE.put("rs", "minecraft:stripe_right");
+        PATTERN_UPDATE.put("cs", "minecraft:stripe_center");
+        PATTERN_UPDATE.put("ms", "minecraft:stripe_middle");
+        PATTERN_UPDATE.put("drs", "minecraft:stripe_downright");
+        PATTERN_UPDATE.put("dls", "minecraft:stripe_downleft");
+        PATTERN_UPDATE.put("ss", "minecraft:small_stripes");
+        PATTERN_UPDATE.put("cr", "minecraft:cross");
+        PATTERN_UPDATE.put("sc", "minecraft:straight_cross");
+        PATTERN_UPDATE.put("bt", "minecraft:triangle_bottom");
+        PATTERN_UPDATE.put("tt", "minecraft:triangle_top");
+        PATTERN_UPDATE.put("bts", "minecraft:triangles_bottom");
+        PATTERN_UPDATE.put("tts", "minecraft:triangles_top");
+        PATTERN_UPDATE.put("ld", "minecraft:diagonal_left");
+        PATTERN_UPDATE.put("rd", "minecraft:diagonal_up_right");
+        PATTERN_UPDATE.put("lud", "minecraft:diagonal_up_left");
+        PATTERN_UPDATE.put("rud", "minecraft:diagonal_right");
+        PATTERN_UPDATE.put("mc", "minecraft:circle");
+        PATTERN_UPDATE.put("mr", "minecraft:rhombus");
+        PATTERN_UPDATE.put("vh", "minecraft:half_vertical");
+        PATTERN_UPDATE.put("hh", "minecraft:half_horizontal");
+        PATTERN_UPDATE.put("vhr", "minecraft:half_vertical_right");
+        PATTERN_UPDATE.put("hhb", "minecraft:half_horizontal_bottom");
+        PATTERN_UPDATE.put("bo", "minecraft:border");
+        PATTERN_UPDATE.put("cbo", "minecraft:curly_border");
+        PATTERN_UPDATE.put("gra", "minecraft:gradient");
+        PATTERN_UPDATE.put("gru", "minecraft:gradient_up");
+        PATTERN_UPDATE.put("bri", "minecraft:bricks");
+        PATTERN_UPDATE.put("glb", "minecraft:globe");
+        PATTERN_UPDATE.put("cre", "minecraft:creeper");
+        PATTERN_UPDATE.put("sku", "minecraft:skull");
+        PATTERN_UPDATE.put("flo", "minecraft:flower");
+        PATTERN_UPDATE.put("moj", "minecraft:mojang");
+        PATTERN_UPDATE.put("pig", "minecraft:piglin");
+    }
+
+
+    private static final String[] BANNER_COLOURS = new String[]{
+            "white",
+            "orange",
+            "magenta",
+            "light_blue",
+            "yellow",
+            "lime",
+            "pink",
+            "gray",
+            "light_gray",
+            "cyan",
+            "purple",
+            "blue",
+            "brown",
+            "green",
+            "red",
+            "black",
+    };
+
+    public static String getBannerColour(final int id) {
+        return id >= 0 && id < BANNER_COLOURS.length ? BANNER_COLOURS[id] : BANNER_COLOURS[0];
+    }
+
 
     public static byte[] convertSlimeToPolar(byte[] slimeWorldData, JsonObject mapData) throws Exception {
         var slimeWorld = SlimeReader.read(slimeWorldData);
@@ -114,11 +184,25 @@ public class SlimeToPolar {
 
                 if (x != pos.x() || z != pos.z()) continue;
 
-                var upgradedEntity = MCDataConverter.convertTag(MCTypeRegistry.ENTITY,
-                        slimeEntity, slimeWorld.dataVersion(), MapWorld.DATA_VERSION);
+                CompoundBinaryTag upgradedEntity;
+                try {
+                    upgradedEntity = MCDataConverter.convertTag(MCTypeRegistry.ENTITY,
+                            slimeEntity, slimeWorld.dataVersion(), MapWorld.DATA_VERSION);
+                } catch (Exception e) {
+                    System.out.println("ENTITY UPGRADE FAIL: " + TagStringIOExt.writeTag(slimeEntity));
+                    e.printStackTrace();
+                    upgradedEntity = slimeEntity;
+                }
                 entities.add(upgradedEntity);
             }
 
+            for (var entity : entities) {
+                var entityTag = ((CompoundBinaryTag) entity);
+                if (entityTag.getString("id").equals("minecraft:painting")) {
+                    var pos2 = entityTag.getList("Pos");
+                    System.out.println("/tp " + pos2.getInt(0) + " " + pos2.getInt(1) + " " + pos2.getInt(2) + ": " + entityTag.getString("variant"));
+                }
+            }
             var chunkData = NetworkBuffer.makeArray(buffer -> {
                 buffer.write(NetworkBuffer.VAR_INT, 5);
                 buffer.write(NetworkBuffer.NBT, CompoundBinaryTag.builder()
@@ -202,7 +286,19 @@ public class SlimeToPolar {
             var id = upgradedTileEntity.getString("id");
             if (id.isEmpty()) throw new RuntimeException("uh oh bad");
 
-            System.out.println("block entity: " + id + " at " + x + ", " + y + ", " + z + ": " + TagStringIOExt.writeTag(upgradedTileEntity));
+            if (upgradedTileEntity.getString("id").equals("minecraft:banner")) {
+                var newPatterns = ListBinaryTag.builder();
+                for (var patternTag : upgradedTileEntity.getList("patterns")) {
+                    var pattern = ((CompoundBinaryTag) patternTag);
+                    var newPattern = pattern.put("pattern", stringBinaryTag(Objects.requireNonNull(PATTERN_UPDATE.get(pattern.getString("Pattern")))))
+                            .remove("Pattern")
+                            .put("color", stringBinaryTag(Objects.requireNonNull(getBannerColour(pattern.getInt("Color")))))
+                            .remove("Color");
+                    newPatterns.add(newPattern);
+                }
+                upgradedTileEntity = upgradedTileEntity.put("patterns", newPatterns.build());
+            }
+
             var block = instance.getBlock(x, y, z)
                     .withHandler(BlockHandler.Dummy.get(id))
                     .withNbt(upgradedTileEntity);
