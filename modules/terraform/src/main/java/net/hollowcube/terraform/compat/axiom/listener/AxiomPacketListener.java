@@ -21,6 +21,7 @@ import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.event.EventDispatcher;
@@ -64,6 +65,11 @@ public final class AxiomPacketListener {
 
     public void handleSetGamemode(@NotNull Player player, @NotNull AxiomClientSetGameModePacket packet) {
         if (!Axiom.isEnabled(player)) return;
+        if (!packet.gameMode().allowFlying()) {
+            // Axiom is very annoying and set it on the client too
+            player.setGameMode(GameMode.CREATIVE);
+            return;
+        }
         player.setGameMode(packet.gameMode());
     }
 
