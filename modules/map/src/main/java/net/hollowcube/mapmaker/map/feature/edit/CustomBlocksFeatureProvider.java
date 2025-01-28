@@ -154,6 +154,10 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
                 var finishId = marker.getUuid().toString();
                 world.callEvent(new MapPlayerCompleteMapEvent(player, world, finishId));
             }
+            case "mapmaker:bounce_pad" -> {
+                var data = marker.getTag(BouncePadBlock.ENTITY_DATA_TAG);
+                BouncePadBlock.applyVelocity(data, player);
+            }
         }
     }
 

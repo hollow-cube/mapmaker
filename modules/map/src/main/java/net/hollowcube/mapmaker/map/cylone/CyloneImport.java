@@ -37,7 +37,7 @@ public class CyloneImport {
         for (var slimeWorld : fileList) {
             var name = slimeWorld.getFileName().toString().replaceAll(".slime", "").replaceAll("active_", "");
             if (FINISHED_IDS.contains(name)) continue;
-            if (!"Arcadia".equals(name)) continue;
+            if (!"Multiverse".equals(name)) continue;
 
             JsonObject mapDetails = null;
             for (var element : array) {
@@ -89,7 +89,7 @@ public class CyloneImport {
                 System.out.println("v9: " + name);
                 continue;
             } catch (Exception e) {
-                System.out.println("other issue: " + name + " " + e.getMessage());
+                e.printStackTrace();
                 continue;
             }
 

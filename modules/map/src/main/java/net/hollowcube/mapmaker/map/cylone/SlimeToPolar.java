@@ -184,8 +184,15 @@ public class SlimeToPolar {
 
                 if (x != pos.x() || z != pos.z()) continue;
 
-                var upgradedEntity = MCDataConverter.convertTag(MCTypeRegistry.ENTITY,
-                        slimeEntity, slimeWorld.dataVersion(), MapWorld.DATA_VERSION);
+                CompoundBinaryTag upgradedEntity;
+                try {
+                    upgradedEntity = MCDataConverter.convertTag(MCTypeRegistry.ENTITY,
+                            slimeEntity, slimeWorld.dataVersion(), MapWorld.DATA_VERSION);
+                } catch (Exception e) {
+                    System.out.println("ENTITY UPGRADE FAIL: " + TagStringIOExt.writeTag(slimeEntity));
+                    e.printStackTrace();
+                    upgradedEntity = slimeEntity;
+                }
                 entities.add(upgradedEntity);
             }
 
