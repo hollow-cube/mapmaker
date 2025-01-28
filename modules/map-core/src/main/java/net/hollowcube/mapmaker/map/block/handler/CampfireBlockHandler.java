@@ -40,8 +40,11 @@ public class CampfireBlockHandler implements BlockHandler {
 
     @Override
     public boolean onInteract(@NotNull BlockHandler.Interaction interaction) {
+        var player = interaction.getPlayer();
         if (interaction.getHand() != PlayerHand.MAIN) return true;
-        var handItemStack = interaction.getPlayer().getItemInHand(interaction.getHand());
+        if (player.isSneaking()) return true;
+
+        var handItemStack = player.getItemInHand(interaction.getHand());
 
         var block = interaction.getBlock();
         int index = getClickIndex(interaction.getCursorPosition(), block);
