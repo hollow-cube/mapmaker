@@ -656,7 +656,7 @@ public class EditMap extends View {
 
             performSignal(CreateMaps.SIG_RESET);
             player.sendMessage(Component.translatable("command.map.delete.success"));
-            pushView(CreateMaps::new);
+            replaceView(CreateMaps::new);
         } catch (Exception e) {
             player.sendMessage(Component.translatable("command.map.delete.failure"));
             logger.log(System.Logger.Level.ERROR, "failed to delete map", e);
