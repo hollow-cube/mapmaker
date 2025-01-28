@@ -311,17 +311,22 @@ public final class FontUtil {
         return width;
     }
 
+    public static int measureTextV2(@NotNull String text) {
+        int width = 0;
+        for (char c : text.toCharArray()) {
+            int charWidth = ALL_GLYPH_WIDTHS_V2.getOrDefault(c, Integer.MAX_VALUE);
+            if (charWidth == Integer.MAX_VALUE) {
+                throw new RuntimeException("unknown char: " + c + " in " + text);
+            }
+            width += charWidth;
+        }
+        return width;
+    }
+
     public static int measureTextV2(@NotNull Component comp) {
         int width = 0;
         if (comp instanceof TextComponent text) {
-            char[] content = text.content().toCharArray();
-            for (char c : content) {
-                int charWidth = ALL_GLYPH_WIDTHS_V2.getOrDefault(c, Integer.MAX_VALUE);
-                if (charWidth == Integer.MAX_VALUE) {
-                    throw new RuntimeException("unknown char: " + c + " in " + text.content());
-                }
-                width += charWidth;
-            }
+            width += measureTextV2(text.content());
         } else if (comp instanceof TranslatableComponent translate) {
             throw new RuntimeException("Cannot measure unresolved translation key: " + translate.key());
         } else {

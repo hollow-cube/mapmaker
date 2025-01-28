@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
+import net.hollowcube.mapmaker.misc.BackgroundSpriteSet;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
@@ -23,7 +24,10 @@ import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
 @AutoService(FeatureProvider.class)
 public class TimerFeatureProvider implements FeatureProvider {
-    private static final BadSprite TIMER_CONTAINER = BadSprite.SPRITE_MAP.get("hud/timer_container");
+
+    private static final BackgroundSpriteSet BACKGROUND = new BackgroundSpriteSet("hud/bossbar/line1");
+    private static final BadSprite TIMER = BadSprite.SPRITE_MAP.get("hud/timer");
+    private static final int BACKGROUND_PADDING = 2;
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("hud/timer", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::handleStartPlaying)
@@ -76,9 +80,17 @@ public class TimerFeatureProvider implements FeatureProvider {
         }
 
         var text = formatMapPlaytime(time, false);
+        // Text + spacing of same size of the ends of the background + timer width
+        var width = FontUtil.measureTextV2(text) + BACKGROUND_PADDING * 4 + TIMER.width();
 
         builder.pushColor(FontUtil.NO_SHADOW);
-        builder.pos(-TIMER_CONTAINER.width() / 2).drawInPlace(TIMER_CONTAINER);
-        builder.pos(-TIMER_CONTAINER.width() / 2 + 19).append(text);
+        builder.pos(-width / 2);
+        builder.append(BACKGROUND.build(width - BACKGROUND_PADDING * 2), width);
+        builder.offset(-width);
+        builder.offset(BACKGROUND_PADDING);
+        builder.drawInPlace(TIMER);
+        builder.offset(BACKGROUND_PADDING);
+        builder.append("bossbar_ascii_1", text);
+        builder.popColor();
     }
 }
