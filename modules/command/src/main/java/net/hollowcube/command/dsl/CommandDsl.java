@@ -90,6 +90,7 @@ public class CommandDsl {
     public void addSyntax(@NotNull CommandExecutor executor, @NotNull Argument<?>... args) {
         if (syntaxes == null) syntaxes = new ArrayList<>();
         syntaxes.add(new Syntax(null, executor, args));
+        syntaxes.sort((a, b) -> Integer.compare(b.args.length, a.args.length));
     }
 
     public static @NotNull CommandExecutor playerOnly(@NotNull CommandExecutor.PlayerOnly executor) {
