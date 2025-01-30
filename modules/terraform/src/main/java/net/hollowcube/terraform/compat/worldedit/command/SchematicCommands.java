@@ -2,7 +2,10 @@ package net.hollowcube.terraform.compat.worldedit.command;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.common.types.Axis;
+import net.hollowcube.schem.Rotation;
 import net.hollowcube.terraform.buffer.BlockBuffer;
+import net.hollowcube.terraform.command.util.ArgumentRotation;
 import net.hollowcube.terraform.compat.worldedit.command.arg.WEArgument;
 import net.hollowcube.terraform.compat.worldedit.util.WECommand;
 import net.hollowcube.terraform.compat.worldedit.util.WEMessages;
@@ -17,6 +20,7 @@ import net.hollowcube.terraform.session.PlayerSession;
 import net.hollowcube.terraform.task.edit.WorldView;
 import net.hollowcube.terraform.util.Format;
 import net.hollowcube.terraform.util.Messages;
+import net.hollowcube.terraform.util.transformations.SchematicTransformation;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
@@ -169,7 +173,7 @@ public final class SchematicCommands {
                 var session = PlayerSession.forPlayer(player);
                 var clipboard = session.clipboard(Clipboard.DEFAULT);
 
-                var schemData = clipboard.getSchematic();
+                var schemData = clipboard.getInitialSchematic();
                 if (schemData == null) {
                     player.sendMessage(Messages.GENERIC_NO_CLIPBOARD);
                     return;
@@ -353,7 +357,7 @@ public final class SchematicCommands {
 
             var playerSession = PlayerSession.forPlayer(player);
             var clipboard = playerSession.clipboard(Clipboard.DEFAULT);
-            var schem = clipboard.getSchematicWithRotations();
+            var schem = clipboard.getTransformedSchematic();
 
             var session = LocalSession.forPlayer(player);
             var selection = session.selection(Selection.DEFAULT);
@@ -402,9 +406,9 @@ public final class SchematicCommands {
     }
 
     public static class Rotate extends WECommand {
-        private final Argument<Double> yArg = Argument.Double("rotateY");
-        private final Argument<Double> xArg = Argument.Double("rotateX").defaultValue(0.0);
-        private final Argument<Double> zArg = Argument.Double("rotateZ").defaultValue(0.0);
+        private final Argument<Rotation> yArg = ArgumentRotation.of("rotateY");
+        private final Argument<Rotation> xArg = ArgumentRotation.of("rotateX").defaultValue(Rotation.NONE);
+        private final Argument<Rotation> zArg = ArgumentRotation.of("rotateZ").defaultValue(Rotation.NONE);
 
         public Rotate() {
             super("/rotate");
@@ -426,7 +430,11 @@ public final class SchematicCommands {
                 return;
             }
 
-            clipboard.rotate(xRot, yRot, zRot);
+            clipboard.transform(SchematicTransformation.of(
+                    SchematicTransformation.rotate(Axis.X, xRot),
+                    SchematicTransformation.rotate(Axis.Y, yRot),
+                    SchematicTransformation.rotate(Axis.Z, zRot)
+            ));
             player.sendMessage(Messages.CLIPBOARD_ROTATED);
         }
     }
@@ -451,7 +459,7 @@ public final class SchematicCommands {
                 return;
             }
 
-            clipboard.flip(direction.normalX() != 0, direction.normalY() != 0, direction.normalZ() != 0);
+            clipboard.transform(SchematicTransformation.flip(direction.normalX() != 0, direction.normalY() != 0, direction.normalZ() != 0));
             player.sendMessage(Messages.CLIPBOARD_FLIPPED);
         }
     }

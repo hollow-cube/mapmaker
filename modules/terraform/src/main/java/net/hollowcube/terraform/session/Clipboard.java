@@ -1,66 +1,54 @@
 package net.hollowcube.terraform.session;
 
-import net.hollowcube.common.util.NetworkBufferTypes;
 import net.hollowcube.schem.Schematic;
 import net.hollowcube.schem.builder.SchematicBuilder;
 import net.hollowcube.schem.reader.SpongeSchematicReader;
 import net.hollowcube.schem.writer.SpongeSchematicWriter;
-import net.hollowcube.terraform.util.math.AffineTransform;
-import net.minestom.server.coordinate.Point;
-import net.minestom.server.instance.block.Block;
+import net.hollowcube.terraform.util.transformations.SchematicTransformation;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.utils.validate.Check;
+import net.minestom.server.network.NetworkBufferTemplate;
 import org.intellij.lang.annotations.RegExp;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
-import static net.minestom.server.network.NetworkBuffer.*;
 
 public class Clipboard {
-    private static final NetworkBuffer.Type<Schematic> OPT_SCHEMATIC_NETWORK_TYPE = NetworkBufferTypes
-            .readOnly(b -> new SpongeSchematicReader().read(b.read(BYTE_ARRAY))).optional();
-    public static final NetworkBuffer.Type<Clipboard> NETWORK_TYPE = new NetworkBuffer.Type<>() {
-        @Override
-        public void write(@NotNull NetworkBuffer buffer, Clipboard value) {
-            value.write(buffer);
-        }
 
-        @Override
-        public Clipboard read(@NotNull NetworkBuffer buffer) {
-            return new Clipboard(buffer);
-        }
-    };
+    public static final NetworkBuffer.Type<Clipboard> NETWORK_TYPE = NetworkBufferTemplate.template(
+            NetworkBuffer.STRING, Clipboard::name,
+            NetworkBuffer.BYTE_ARRAY.transform(
+                    bytes -> new SpongeSchematicReader().read(bytes),
+                    schematic -> new SpongeSchematicWriter().write(schematic)
+            ).optional(), Clipboard::getInitialSchematic,
+            Clipboard::new
+    );
 
     public static final @NotNull String DEFAULT = "default";
     @RegExp
     public static final @NotNull String NAME_REGEX = "[a-z0-9_]+";
 
     private final String name;
+    private final List<SchematicTransformation> transformations = new ArrayList<>();
 
-    private Schematic schematic = null; // The current block data stored in this clipboard.
-    private List<AffineTransform> transforms; // The transforms, applied in list order.
+    private Schematic schematic; // The current block data stored in this clipboard.
 
     public Clipboard(@NotNull String name) {
-        this.name = name;
-
-        this.schematic = null;
-        this.transforms = new ArrayList<>();
+        this(name, null);
     }
 
-    public Clipboard(@NotNull NetworkBuffer buffer) {
-        this.name = buffer.read(STRING);
-
-        this.schematic = buffer.read(OPT_SCHEMATIC_NETWORK_TYPE);
-        this.transforms = new ArrayList<>();
+    private Clipboard(@NotNull String name, @Nullable Schematic schematic) {
+        this.name = name;
+        this.schematic = schematic;
     }
 
     public @NotNull String name() {
         return name;
+    }
+
+    public @Nullable Schematic getInitialSchematic() {
+        return schematic;
     }
 
     public boolean isEmpty() {
@@ -74,94 +62,31 @@ public class Clipboard {
 
     public void clear() {
         this.schematic = null;
-        this.transforms = new ArrayList<>();
+        this.transformations.clear();
     }
 
-    @Deprecated
-    public Schematic getSchematic() {
-        return schematic;
-    }
+    public @NotNull Schematic getTransformedSchematic() {
+        var builder = SchematicBuilder.builder();
 
-    @Deprecated
-    public Schematic getSchematicWithRotations() {
-//        var newSize = schematic.size();
-//        for (var transform : transforms) {
-//            newSize = transform.apply2(newSize);
-//        }
-
-//        var newSchem = SchematicBuilder.builder();
-//        newSchem.offset(schematic.offset());
-//        schematic.forEachBlock((p, block) -> {
-//            for (var transform : transforms) {
-//                p = transform.apply2(p);
-//                if (hasRotationProperty(block)) {
-//                    block = transform.applyToBlock(block);
-//                }
-//            }
-//            newSchem.block(p, block);
-//        });
-//        return newSchem.build();
-        return schematic;
-    }
-
-    public @NotNull CompletableFuture<Void> apply(@NotNull LocalSession session, @NotNull Point pos) {
-        Check.stateCondition(isEmpty(), "Clipboard is empty");
-        //todo rewrite to use actions and add to history stack
-//
-//        var newSize = schematic.size();
-//        for (var transform : transforms) {
-//            newSize = transform.apply2(newSize);
-//        }
-
-        var newSchem = SchematicBuilder.builder();
-        schematic.forEachBlock((p, block) -> {
-            for (var transform : transforms) {
-                p = transform.apply2(p);
-                if (hasRotationProperty(block)) {
-                    block = transform.applyToBlock(block);
-                }
+        schematic.forEachBlock((pos, block) -> {
+            for (SchematicTransformation transformation : transformations) {
+                pos = transformation.apply(pos, schematic.size(), schematic.offset());
+                block = transformation.apply(block);
             }
-            newSchem.block(p, block);
+            // Check why this needs its offset subtracted
+            builder.block(pos.sub(schematic.offset()), block);
         });
 
-        var future = new CompletableFuture<Void>();
-        newSchem.build().createBatch().apply(session.instance(), pos, () -> future.complete(null));
-        return future;
-    }
-
-    private boolean hasRotationProperty(@NotNull Block block) {
-        var properties = block.properties();
-        return properties.containsKey("facing") || properties.containsKey("rotation") || properties.containsKey("axis");
-    }
-
-    public void rotate(double x, double y, double z) {
-        var transform = new AffineTransform();
-        //todo that transform class seems kinda borked, or i am misunderstanding something but realistically i should not have to do this (yzx or -)
-        if (x != 0) transform = transform.rotateY(-x);
-        if (y != 0) transform = transform.rotateX(-y);
-        if (z != 0) transform = transform.rotateZ(-z);
-        transforms.add(transform);
-    }
-
-    public void flip(boolean x, boolean y, boolean z) {
-        var transform = new AffineTransform().scale(x ? -1 : 1, y ? -1 : 1, z ? -1 : 1);
-        if (Boolean.getBoolean("terraform.feature.flip-inplace")) {
-            //todo proper feature flags
-            transform = transform.translate(schematic.offset().mul(x ? -1 : 0, y ? -1 : 0, z ? -1 : 0));
+        var offset = schematic.offset();
+        for (SchematicTransformation transformation : transformations) {
+            offset = transformation.apply(offset, schematic.size());
         }
-        transforms.add(transform);
+        builder.offset(offset);
+
+        return builder.build();
     }
 
-    // Serialization
-
-    @ApiStatus.Internal
-    public void write(@NotNull NetworkBuffer buffer) {
-        buffer.write(STRING, name);
-
-        //todo writeoptional?? need network buffer type for schematic
-        buffer.write(BOOLEAN, schematic != null);
-        if (schematic != null) {
-            buffer.write(BYTE_ARRAY, new SpongeSchematicWriter().write(schematic));
-        }
+    public void transform(@NotNull SchematicTransformation transformation) {
+        this.transformations.add(transformation);
     }
 }

@@ -5,6 +5,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.session.Clipboard;
 import net.hollowcube.terraform.session.PlayerSession;
+import net.hollowcube.terraform.util.transformations.SchematicTransformation;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -34,9 +35,9 @@ public class ClipFlipCommand extends CommandDsl {
         if (context.has(axisArg)) {
             String axis = context.get(axisArg).toLowerCase(Locale.ROOT);
             switch (axis) {
-                case "x" -> clipboard.flip(true, false, false);
-                case "y" -> clipboard.flip(false, true, false);
-                case "z" -> clipboard.flip(false, false, true);
+                case "x" -> clipboard.transform(SchematicTransformation.flip(true, false, false));
+                case "y" -> clipboard.transform(SchematicTransformation.flip(false, true, false));
+                case "z" -> clipboard.transform(SchematicTransformation.flip(false, false, true));
                 default -> {
                     player.sendMessage(Component.translatable("terraform.clipboard.flip.unknown_axis", Component.text(axis)));
                     return;
