@@ -1,5 +1,6 @@
 package net.hollowcube.terraform.compat.worldedit.command;
 
+import com.mojang.datafixers.util.Function3;
 import it.unimi.dsi.fastutil.ints.Int2IntSortedMap;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
@@ -27,54 +28,43 @@ import java.util.EnumSet;
 
 public final class SelectionCommands {
 
-    public static class Pos1 extends WECommand {
-        private final Argument<Vec> coordinatesArg = WEArgument.CommaSeparatedVec3("coordinates");
+    public static class Pos extends WECommand {
 
-        public Pos1() {
-            super("/pos1");
+        private final Argument<Vec> coordinatesArg = WEArgument.CommaSeparatedVec3("coordinates");
+        private final Argument<Point> positionArg = Argument.RelativeVec3("position");
+
+        private final Messages alreadySetMessage;
+        private final Function3<Selection, Point, Boolean, Boolean> setter;
+
+        private Pos(@NotNull String command, @NotNull Messages alreadySetMessage, Function3<Selection, Point, Boolean, Boolean> setter) {
+            super(command);
+
+            this.alreadySetMessage = alreadySetMessage;
+            this.setter = setter;
 
             addSyntax(playerOnly(this::execute));
+            addSyntax(playerOnly(this::execute), positionArg);
             addSyntax(playerOnly(this::execute), coordinatesArg);
+        }
+
+        public static Pos Pos1() {
+            return new Pos("/pos1", Messages.SELECTION_POS1_ALREADY_SET, Selection::selectPrimary);
+        }
+
+        public static Pos Pos2() {
+            return new Pos("/pos2", Messages.SELECTION_POS2_ALREADY_SET, Selection::selectSecondary);
         }
 
         private void execute(@NotNull Player player, @NotNull CommandContext context) {
             Point coordinates = context.get(coordinatesArg);
-            if (coordinates == null) {
-                coordinates = player.getPosition();
-            }
+            if (coordinates == null) coordinates = context.get(positionArg);
+            if (coordinates == null) coordinates = player.getPosition();
 
             var session = LocalSession.forPlayer(player);
             var selection = session.selection(Selection.DEFAULT);
 
-            var changed = selection.selectPrimary(coordinates, true);
-            if (!changed) {
-                player.sendMessage(Messages.SELECTION_POS1_ALREADY_SET);
-            }
-        }
-    }
-
-    public static class Pos2 extends WECommand {
-        private final Argument<Vec> coordinatesArg = WEArgument.CommaSeparatedVec3("coordinates");
-
-        public Pos2() {
-            super("/pos2");
-
-            addSyntax(playerOnly(this::execute));
-            addSyntax(playerOnly(this::execute), coordinatesArg);
-        }
-
-        private void execute(@NotNull Player player, @NotNull CommandContext context) {
-            Point coordinates = context.get(coordinatesArg);
-            if (coordinates == null) {
-                coordinates = player.getPosition();
-            }
-
-            var session = LocalSession.forPlayer(player);
-            var selection = session.selection(Selection.DEFAULT);
-
-            var changed = selection.selectSecondary(coordinates, true);
-            if (!changed) {
-                player.sendMessage(Messages.SELECTION_POS2_ALREADY_SET);
+            if (!this.setter.apply(selection, coordinates, true)) {
+                player.sendMessage(this.alreadySetMessage);
             }
         }
     }

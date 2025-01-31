@@ -31,6 +31,7 @@ public class ArgumentRelativeVec3 extends Argument<Point> {
         var word = reader.readWord(WordType.GREEDY);
         var isRelative = !word.isEmpty() && word.charAt(0) == '~';
         if (isRelative) word = word.substring(1);
+        if (word.isEmpty()) return isRelative ? origin : null;
 
         try {
             return Double.parseDouble(word) + (isRelative ? origin : 0);

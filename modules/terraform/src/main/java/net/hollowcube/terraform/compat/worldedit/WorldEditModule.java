@@ -19,8 +19,8 @@ public class WorldEditModule implements TerraformModule {
 //                new GeneralCommands.GMask(), //todo
 
                 // Selection
-                new SelectionCommands.Pos1(),
-                new SelectionCommands.Pos2(),
+                SelectionCommands.Pos.Pos1(),
+                SelectionCommands.Pos.Pos2(),
                 new SelectionCommands.HPos1(),
                 new SelectionCommands.HPos2(),
                 new SelectionCommands.Chunk(),
