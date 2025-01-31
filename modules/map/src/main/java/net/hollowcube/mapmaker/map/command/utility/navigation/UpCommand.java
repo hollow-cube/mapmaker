@@ -15,7 +15,7 @@ import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
 public class UpCommand extends CommandDsl {
     private static final Component ERR_NO_SPACE = Component.translatable("command.up.no_space");
 
-    private final Argument<Integer> distanceArg = Argument.Int("distance").clamp(1, 500).defaultValue(1)
+    private final Argument<Integer> distanceArg = Argument.Int("distance").clamp(0, 500).defaultValue(1)
             .description("The number of blocks to ascend");
 
     public UpCommand() {
@@ -45,7 +45,10 @@ public class UpCommand extends CommandDsl {
             return;
         }
 
-        instance.setBlock(target.sub(0, 1, 0), Block.GLASS);
+        if (instance.getBlock(target.sub(0, 1, 0)).isAir()) {
+            instance.setBlock(target.sub(0, 1, 0), Block.GLASS);
+        }
+
         player.teleport(target);
         player.sendMessage(Component.translatable("command.jumpto.success"));
     }
