@@ -4,6 +4,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerResetEvent;
+import net.hollowcube.mapmaker.map.feature.play.handlers.SpectateHandler;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
@@ -17,8 +18,6 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-
-import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 
 public class ResetSaveStateItem extends ItemHandler {
     private static final TagCooldown CONFIRM_COOLDOWN = new TagCooldown("mapmaker:play/reset_item_confirm", 2000);
@@ -71,7 +70,7 @@ public class ResetSaveStateItem extends ItemHandler {
 
     private boolean requireConfirmation(@NotNull Player player, @NotNull SaveState saveState) {
         // If you have a spectator checkpoint, never require confirmation
-        if (player.hasTag(SPECTATOR_CHECKPOINT)) return false;
+        if (SpectateHandler.getSpectatorCheckpoint(player) != null) return false;
         // The reset item requires confirm click if the playtime is > MIN_RESET_TIME or if the player has a checkpoint
         if (saveState.getRealPlaytime() > MIN_RESET_TIME) return true;
         var playState = saveState.state(PlayState.class);

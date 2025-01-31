@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.entity.potion.PotionHandler;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
+import net.hollowcube.mapmaker.map.feature.play.handlers.SpectateHandler;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.misc.BossBars;
 import net.kyori.adventure.bossbar.BossBar;
@@ -16,8 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-
-import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 
 public abstract class AbstractMapMakerMapWorld extends AbstractMapWorld {
     protected static final Tag<Boolean> FIRST_JOIN_TAG = Tag.Boolean("mapworld.firstjoin");
@@ -65,8 +64,7 @@ public abstract class AbstractMapMakerMapWorld extends AbstractMapWorld {
 
     @Override
     public void removePlayer(@NotNull Player player) {
-        player.removeTag(SPECTATOR_CHECKPOINT);
-
+        SpectateHandler.clearSpectatorCheckpoint(player);
         super.removePlayer(player);
     }
 

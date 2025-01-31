@@ -78,12 +78,14 @@ public final class MapCondition {
     }
 
     public static @NotNull CommandCondition mapFeature(@NotNull FeatureFlag flag) {
+        return map(world -> flag.test(world.map()));
+    }
+
+    public static @NotNull CommandCondition map(Predicate<MapWorld> predicate) {
         return (sender, context) -> {
             if (!(sender instanceof Player player)) return HIDE;
             var world = MapWorld.forPlayerOptional(player);
-            if (world == null) return HIDE;
-
-            return flag.test(world.map()) ? ALLOW : HIDE;
+            return world != null && predicate.test(world) ? ALLOW : HIDE;
         };
     }
 

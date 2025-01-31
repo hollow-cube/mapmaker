@@ -6,7 +6,7 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointChangeEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCompleteMapEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
-import net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem;
+import net.hollowcube.mapmaker.map.feature.play.handlers.SpectateHandler;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.event.EventFilter;
@@ -43,7 +43,7 @@ public class TestCompletionFeatureProvider implements FeatureProvider {
 
     private void handleOverrideSpecCheckpoint(@NotNull MapPlayerCheckpointChangeEvent event) {
         // Remove the spectator checkpoint when they get a new one so that they reset there.
-        event.getPlayer().removeTag(SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT);
+        SpectateHandler.clearSpectatorCheckpoint(event.player());
     }
 
 }

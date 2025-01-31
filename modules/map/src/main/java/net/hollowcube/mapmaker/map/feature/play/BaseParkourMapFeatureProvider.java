@@ -19,6 +19,7 @@ import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItem;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
+import net.hollowcube.mapmaker.map.feature.play.handlers.SpectateHandler;
 import net.hollowcube.mapmaker.map.feature.play.item.*;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
@@ -66,8 +67,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 
 @SuppressWarnings("UnstableApiUsage")
 @AutoService(FeatureProvider.class)
@@ -533,7 +532,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             }
         } else if (world.isSpectating(player)) {
             if (player.getPosition().y() < world.instance().getCachedDimensionType().minY()) {
-                var checkpoint = player.getTag(SPECTATOR_CHECKPOINT);
+                var checkpoint = SpectateHandler.getSpectatorCheckpoint(player);
                 resetTeleport(player, checkpoint == null ? world.spawnPoint(player) : checkpoint);
             }
         }
@@ -564,7 +563,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var newPlayState = new PlayState();
         saveState.setState(newPlayState);
 
-        player.removeTag(SPECTATOR_CHECKPOINT);
+        SpectateHandler.clearSpectatorCheckpoint(player);
         player.removeTag(COUNTDOWN_END);
 
         resetTeleport(player, world.map().settings().getSpawnPoint()).thenRun(() -> {
@@ -586,7 +585,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         if (!(world instanceof AbstractMapWorld abstractWorld)) return;
 
         // If they have a spectator checkpoint return to that always.
-        var checkpoint = player.getTag(SPECTATOR_CHECKPOINT);
+        var checkpoint = SpectateHandler.getSpectatorCheckpoint(player);
         if (checkpoint != null) {
             // If the checkpoint is below the reset height, teleport to the spawn instead to prevent getting stuck.
             // If they set the spawn below the world then its a joke map anyway and i don't care.

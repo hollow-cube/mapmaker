@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
+import net.hollowcube.mapmaker.map.feature.play.handlers.SpectateHandler;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -24,8 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
-
-import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 
 public final class TestingMapWorld extends AbstractMapMakerMapWorld {
     private static final Logger logger = LoggerFactory.getLogger(TestingMapWorld.class);
@@ -105,7 +104,7 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
         player.setGameMode(GameMode.ADVENTURE);
 
         var startingPos = player.getPosition();
-        player.setTag(SPECTATOR_CHECKPOINT, startingPos);
+        SpectateHandler.setSpectatorCheckpoint(player, startingPos);
         player.teleport(startingPos, Vec.ZERO, null, RelativeFlags.NONE); //todo is this necessary it seems hella dumb?
 
         var isMapJoin = player.getAndSetTag(FIRST_JOIN_TAG, null) != null;
