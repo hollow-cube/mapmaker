@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Locale;
 import java.util.UUID;
 
-@SuppressWarnings("UnstableApiUsage")
 public class PaintingEntity extends MapEntity {
     private static final DynamicRegistry<PaintingMeta.Variant> PAINTING_REGISTRY = MinecraftServer.getPaintingVariantRegistry();
 
