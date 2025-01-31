@@ -24,7 +24,7 @@ public class RedstoneWirePlacementRule extends BaseBlockPlacementRule {
         super(block);
 
         var lowPriorityChild = EventNode.event("redstone-wire-placement-rule", EventFilter.ALL, e -> e instanceof PlayerBlockBreakEvent);
-        lowPriorityChild.setPriority(Integer.MIN_VALUE);
+        lowPriorityChild.setPriority(Integer.MAX_VALUE);
         lowPriorityChild.addListener(PlayerBlockBreakEvent.class, this::handleGlobalBlockBreak);
         MinecraftServer.getGlobalEventHandler().addChild(lowPriorityChild);
     }
