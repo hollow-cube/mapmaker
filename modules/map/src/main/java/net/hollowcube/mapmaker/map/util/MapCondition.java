@@ -64,6 +64,19 @@ public final class MapCondition {
         };
     }
 
+    public static @NotNull CommandCondition spectatorFilter(boolean playing, boolean editing, boolean testing) {
+        return (sender, context) -> {
+            if (!(sender instanceof Player player)) return HIDE;
+            var world = MapWorld.forPlayerOptional(player);
+            return switch (world) {
+                case PlayingMapWorld ignored -> playing && world.isSpectating(player) ? ALLOW : HIDE;
+                case EditingMapWorld ignored -> editing && world.canEdit(player) ? ALLOW : HIDE;
+                case TestingMapWorld ignored -> testing && world.isSpectating(player) ? ALLOW : HIDE;
+                case null, default -> HIDE;
+            };
+        };
+    }
+
     public static @NotNull CommandCondition mapFeature(@NotNull FeatureFlag flag) {
         return (sender, context) -> {
             if (!(sender instanceof Player player)) return HIDE;

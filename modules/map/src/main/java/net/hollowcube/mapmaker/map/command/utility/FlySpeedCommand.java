@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.command.utility;
 
+import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -8,6 +9,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
+import static net.hollowcube.mapmaker.map.util.MapCondition.spectatorFilter;
 
 public class FlySpeedCommand extends CommandDsl {
     private static final float DEFAULT_SPEED = 0.05f;
@@ -21,7 +23,10 @@ public class FlySpeedCommand extends CommandDsl {
 
         description = "Changes how fast you fly when building";
 
-        setCondition(mapFilter(false, true, false));
+        setCondition(CommandCondition.or(
+                mapFilter(false, true, false),
+                spectatorFilter(true, false, false)
+        ));
         addSyntax(playerOnly(this::handleSetFlySpeed), speedArg);
     }
 
