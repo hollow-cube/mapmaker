@@ -3,10 +3,10 @@ package net.hollowcube.mapmaker.hub.feature;
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.physics.RayUtils2;
 import net.hollowcube.common.physics.SweepResult2;
+import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.util.InteractionEntity;
 import net.hollowcube.mapmaker.map.MapServer;
-import net.hollowcube.mapmaker.map.util.PlayerUtil;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -57,7 +57,7 @@ public class InteractionFeature implements HubFeature {
             if (!wasInside && hitEntity != null) {
                 double distance = rayStart.distance(result.collidedPositionX(), result.collidedPositionY(), result.collidedPositionZ());
                 if (hitEntity.interactionDistance() < distance) hitEntity = null;
-                else if (PlayerUtil.getTargetBlock(player, distance) != null) hitEntity = null;
+                else if (PlayerUtil.getTargetBlock(player, distance, true) != null) hitEntity = null;
             }
 
             var lastEntity = player.getTag(LAST_ENTITY);

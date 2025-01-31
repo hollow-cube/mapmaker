@@ -1,13 +1,13 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerHandlerRegistry;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
-import net.hollowcube.mapmaker.map.util.PlayerUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.FeatureFlag;
@@ -141,13 +141,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         try {
             List<SelectKnownPacksPacket.Entry> knownPacks;
             try {
-                var knownPacksFuture = PlayerUtil.stealKnownPacksFuture(player);
-                if (knownPacksFuture == null) {
-                    // There is a race here which could result in the client responding too quickly. In that case we need to re request
-                    // the known packs. todo: find a better way around this, its really cursed.
-                    knownPacksFuture = player.getPlayerConnection().requestKnownPacks(List.of(SelectKnownPacksPacket.MINECRAFT_CORE));
-                }
-                knownPacks = knownPacksFuture.get(5, TimeUnit.SECONDS);
+                knownPacks = PlayerUtil.stealKnownPacksFuture(player).get(5, TimeUnit.SECONDS);
             } catch (InterruptedException | TimeoutException e) {
                 logger.warn("Client failed to respond to known packs request", e);
                 knownPacks = null;

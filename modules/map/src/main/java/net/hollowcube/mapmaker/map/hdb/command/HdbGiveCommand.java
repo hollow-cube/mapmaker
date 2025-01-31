@@ -3,9 +3,9 @@ package net.hollowcube.mapmaker.map.hdb.command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.map.hdb.HdbMessages;
 import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
-import net.hollowcube.mapmaker.map.util.PlayerUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemComponent;
@@ -37,7 +37,7 @@ public class HdbGiveCommand extends CommandDsl {
         }
 
         var itemStack = results.getFirst().createItemStack();
-        PlayerUtil.smartAddItemStack(player, itemStack);
+        PlayerUtil.giveItem(player, itemStack);
         player.sendMessage(HdbMessages.COMMAND_GIVE_RESULT.with(
                 Objects.requireNonNull(itemStack.get(ItemComponent.CUSTOM_NAME, Component.empty())).hoverEvent(itemStack.asHoverEvent())));
     }

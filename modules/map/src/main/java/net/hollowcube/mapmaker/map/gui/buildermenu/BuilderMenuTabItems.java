@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.gui.buildermenu;
 
 import com.mojang.datafixers.util.Either;
+import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.feature.FeatureFlag;
 import net.hollowcube.mapmaker.map.MapFeatureFlags;
 import net.hollowcube.mapmaker.map.MapVariant;
@@ -15,7 +16,6 @@ import net.hollowcube.mapmaker.map.feature.play.item.MapDetailsItem;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.terraform.session.LocalSession;
-import net.hollowcube.terraform.util.PlayerUtil;
 import net.kyori.adventure.util.TriState;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
@@ -52,7 +52,7 @@ public class BuilderMenuTabItems {
 
     public static final Item[] BUILD_TOOLS = new Item[]{
             Item.of(
-                    player -> PlayerUtil.smartAddItemStack(
+                    player -> PlayerUtil.giveItem(
                             player,
                             ItemStack.of(Material.DEBUG_STICK)
                     ),
@@ -61,7 +61,7 @@ public class BuilderMenuTabItems {
                     ALWAYS
             ),
             Item.of(
-                    player -> PlayerUtil.smartAddItemStack(
+                    player -> PlayerUtil.giveItem(
                             player,
                             LocalSession.forPlayer(player).terraform().toolHandler().createBuiltinTool("terraform:wand")
                     ),
@@ -137,7 +137,7 @@ public class BuilderMenuTabItems {
         if (world == null || !world.canEdit(player)) return;
 
         var itemStack = world.itemRegistry().getItemStack(item.id(), null);
-        PlayerUtil.smartAddItemStack(player, itemStack);
+        PlayerUtil.giveItem(player, itemStack);
         player.closeInventory();
     }
 

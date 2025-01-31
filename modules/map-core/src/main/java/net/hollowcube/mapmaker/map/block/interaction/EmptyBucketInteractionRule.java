@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
+import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.map.block.BlockTags;
-import net.hollowcube.mapmaker.map.util.PlayerUtil;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,7 +31,7 @@ public class EmptyBucketInteractionRule implements BlockInteractionRule, BlockIn
     @Override
     public boolean handleAirInteraction(@NotNull Interaction interaction) {
         var player = interaction.player();
-        var blockPosition = PlayerUtil.getTargetBlock(player, PlayerUtil.DEFAULT_PLACE_REACH);
+        var blockPosition = PlayerUtil.getTargetBlock(player, PlayerUtil.DEFAULT_PLACEMENT_DISTANCE, true);
         if (blockPosition == null) return false;
 
         var block = interaction.getBlock(blockPosition, Block.Getter.Condition.TYPE);

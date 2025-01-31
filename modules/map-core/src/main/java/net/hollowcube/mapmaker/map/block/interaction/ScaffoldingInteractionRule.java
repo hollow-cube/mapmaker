@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
-import net.hollowcube.mapmaker.map.util.PlayerUtil;
+import net.hollowcube.common.util.PlayerUtil;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
@@ -63,7 +63,7 @@ public class ScaffoldingInteractionRule implements BlockInteractionRule {
                     var player = interaction.player();
                     player.playSound(Sound.sound(SoundEvent.BLOCK_SCAFFOLDING_PLACE, Sound.Source.BLOCK, 1f, 1f),
                             blockPosition.x(), blockPosition.y(), blockPosition.z());
-                    PlayerUtil.swingHand(player, interaction.hand(), true);
+                    PlayerUtil.swing(player, interaction.hand(), true);
                 }
 
                 break;

@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Function3;
 import it.unimi.dsi.fastutil.ints.Int2IntSortedMap;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.terraform.compat.worldedit.command.arg.WEArgument;
 import net.hollowcube.terraform.compat.worldedit.util.WECommand;
 import net.hollowcube.terraform.compat.worldedit.util.WEMessages;
@@ -14,7 +15,6 @@ import net.hollowcube.terraform.selection.region.Region;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.util.MessageSet;
 import net.hollowcube.terraform.util.Messages;
-import net.hollowcube.terraform.util.PlayerUtil;
 import net.hollowcube.terraform.util.math.CoordinateUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
@@ -78,7 +78,7 @@ public final class SelectionCommands {
 
         private void execute(@NotNull Player player, @NotNull CommandContext context) {
             // Determine the target position
-            var targetBlock = PlayerUtil.getTargetBlock(player, 512);
+            var targetBlock = PlayerUtil.getTargetBlock(player, 512, true);
             if (targetBlock == null) {
                 player.sendMessage(Messages.SELECTION_HPOS_NO_BLOCK);
                 return;
@@ -103,7 +103,7 @@ public final class SelectionCommands {
 
         private void execute(@NotNull Player player, @NotNull CommandContext context) {
             // Determine the target position
-            var targetBlock = PlayerUtil.getTargetBlock(player, 512);
+            var targetBlock = PlayerUtil.getTargetBlock(player, 512, true);
             if (targetBlock == null) {
                 player.sendMessage(Messages.SELECTION_HPOS_NO_BLOCK);
                 return;
@@ -213,7 +213,7 @@ public final class SelectionCommands {
             var tf = LocalSession.forPlayer(player).terraform();
             var itemStack = tf.toolHandler().createBuiltinTool("terraform:wand");
 
-            PlayerUtil.smartAddItemStack(player, itemStack);
+            PlayerUtil.giveItem(player, itemStack);
             player.sendMessage(Messages.TOOL_CREATED.with(Component.text("wand")));
         }
     }

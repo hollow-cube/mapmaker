@@ -2,8 +2,8 @@ package net.hollowcube.mapmaker.map.command.utility.navigation;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.command.CommandCategories;
-import net.hollowcube.mapmaker.map.util.PlayerUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
@@ -28,7 +28,7 @@ public class ThruCommand extends CommandDsl {
 
     private void handleThru(@NotNull Player player, @NotNull CommandContext context) {
         // Immediately find the first block in front of the player
-        var position = PlayerUtil.getTargetBlock(player, MAX_START);
+        var position = PlayerUtil.getTargetBlock(player, MAX_START, false);
         if (position == null) {
             player.sendMessage(ERR_NO_SPACE);
             return;
