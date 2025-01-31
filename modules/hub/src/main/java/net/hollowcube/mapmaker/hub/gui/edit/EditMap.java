@@ -213,6 +213,7 @@ public class EditMap extends View {
     public void showMap(@NotNull MapData map, int slot) {
         this.map = Objects.requireNonNull(map);
         this.slot = slot;
+        this.showInfoTab();
 
         for (var slotId : slotIds) {
             slotId.setText(String.format("Slot #%d", slot + 1));
