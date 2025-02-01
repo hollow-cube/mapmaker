@@ -5,6 +5,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
+import net.hollowcube.mapmaker.map.feature.edit.TeleportHistoryFeatureProvider;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.ItemTags;
 import net.hollowcube.mapmaker.map.item.vanilla.DebugStickItem;
@@ -344,6 +345,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
             logger.error("Failed to save player state for {}", player.getUuid(), t);
         } finally {
             player.removeTag(SaveState.TAG);
+            player.removeTag(TeleportHistoryFeatureProvider.LAST_LOCATION);
             super.removePlayer(player);
         }
     }

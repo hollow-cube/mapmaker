@@ -6,10 +6,9 @@ import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerResetEvent;
+import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
-import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,7 +32,7 @@ public class SpawnCommand extends CommandDsl {
 
         // If the world is an editor OR the player is spectating OR the world is a building map, just teleport them to the spawn.
         if (world.canEdit(player) || world.isSpectating(player) || world.map().settings().getVariant() == MapVariant.BUILDING) {
-            player.teleport(world.spawnPoint(player), Vec.ZERO, null, RelativeFlags.NONE);
+            MapWorldHelpers.teleportPlayer(player, world.spawnPoint(player));
             player.sendMessage(Component.translatable("teleport.spawn"));
         } else if (world.map().settings().getVariant() == MapVariant.PARKOUR && world.isPlaying(player)) {
             // If it is a parkour world and they are playing, reset them

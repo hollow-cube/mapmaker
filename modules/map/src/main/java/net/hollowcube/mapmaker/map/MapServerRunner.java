@@ -220,6 +220,7 @@ public class MapServerRunner extends AbstractMapServer {
         commandManager.register(new JumpToCommand());
         commandManager.register(new ThruCommand());
         commandManager.register(new UpCommand());
+        commandManager.register(new BackCommand());
 
         commandManager.register(new PHeadCommand());
         commandManager.register(new HdbCommand(hdb, server.guiController()));
