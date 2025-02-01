@@ -67,7 +67,7 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
         var world = (PlayingMapWorld) event.getMapWorld(); // Safe because this is only enabled on playing worlds.
 
         var saveState = SaveState.fromPlayer(player);
-        saveState.setCompleted(true); // Also stops recording time here
+        saveState.complete(event.timestamp()); // Also stops recording time here
         var finishFuture = player.getTag(BEST_SAVE_STATE_TAG); // Fetch now because it will be removed when player is removed from world.
 
         // Pre-remove the playing tags

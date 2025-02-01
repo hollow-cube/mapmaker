@@ -65,14 +65,14 @@ public class SaveState {
         return completed;
     }
 
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
+    public void uncomplete() {
+        this.completed = false;
+    }
 
-        // If completing, update the playtime for the final time.
-        if (completed) {
-            updatePlaytime();
-            playStartTime = 0;
-        }
+    public void complete(long time) {
+        this.completed = true;
+        updatePlaytime(time);
+        playStartTime = 0;
     }
 
     public long getPlaytime() {
@@ -100,9 +100,13 @@ public class SaveState {
     }
 
     public void updatePlaytime() {
+        updatePlaytime(System.currentTimeMillis());
+    }
+
+    public void updatePlaytime(long currentTime) {
         if (playStartTime == 0) return;
-        setPlaytime(playtime + System.currentTimeMillis() - playStartTime);
-        playStartTime = System.currentTimeMillis();
+        setPlaytime(playtime + currentTime - playStartTime);
+        playStartTime = currentTime;
     }
 
     public <T> @NotNull T state(@NotNull Class<T> stateType) {

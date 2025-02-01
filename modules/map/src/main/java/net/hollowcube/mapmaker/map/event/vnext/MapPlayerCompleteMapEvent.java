@@ -9,8 +9,13 @@ import org.jetbrains.annotations.NotNull;
 public record MapPlayerCompleteMapEvent(
         @NotNull Player player,
         @NotNull MapWorld mapWorld,
-        @NotNull String finishId
+        @NotNull String finishId,
+        long timestamp
 ) implements PlayerEvent, MapWorldEvent {
+
+    public MapPlayerCompleteMapEvent(@NotNull Player player, @NotNull MapWorld mapWorld, @NotNull String finishId) {
+        this(player, mapWorld, finishId, System.currentTimeMillis());
+    }
 
     @Override
     public @NotNull Player getPlayer() {

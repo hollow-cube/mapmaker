@@ -524,7 +524,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             RESETS_AFTER_30_MINUTES.inc();
         }
 
-        saveState.setCompleted(false);
+        saveState.uncomplete();
         saveState.setPlaytime(0);
         saveState.setPlayStartTime(0);
         var newPlayState = new PlayState();
