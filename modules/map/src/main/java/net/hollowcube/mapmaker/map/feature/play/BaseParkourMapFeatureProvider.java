@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.map.feature.play;
 import com.google.auto.service.AutoService;
 import io.prometheus.client.Counter;
 import net.hollowcube.common.util.dfu.DFU;
-import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
@@ -26,18 +25,15 @@ import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.util.CustomizableHotbarManager;
 import net.hollowcube.mapmaker.map.util.MapMessages;
-import net.hollowcube.mapmaker.map.util.PlayerVisibilityExtension;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.RelativeFlags;
@@ -60,13 +56,13 @@ import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.TimedPotion;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 @SuppressWarnings("UnstableApiUsage")
 @AutoService(FeatureProvider.class)
@@ -222,12 +218,6 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         itemRegistry.registerSilent(ToggleFlightItem.INSTANCE_OFF);
         itemRegistry.registerSilent(RateMapItem.INSTANCE);
 
-        // Controls player visibility
-        world.instance().scheduler()
-                .buildTask(() -> updateViewership(world))
-                .repeat(TaskSchedule.tick(5))
-                .schedule();
-
         computeDefaultResetHeight(world.instance());
 
         return true;
@@ -273,14 +263,6 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             }
         }
 
-        player.scheduleNextTick(ignored -> {
-            // This must happen on the tick thread, it requires a lock on nearby players
-            var visibilityPredicate = new PlayerVisibilityPredicate(player);
-            player.updateViewerRule(visibilityPredicate);
-            if (player instanceof PlayerVisibilityExtension ve)
-                ve.setVisibilityFunc(visibilityPredicate);
-        });
-
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState != null) {
             var playState = saveState.state(PlayState.class);
@@ -322,14 +304,6 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             inventory.setItemStack(7, itemRegistry.getItemStack(ToggleFlightItem.ID_OFF, null));
             inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
         }
-
-        player.scheduleNextTick(ignored -> {
-            // Only visibility extension, no viewer rule (spectators can see anyone)
-            // Must happen on tick thread, needs lock on nearby players to update viewer rule.
-            player.updateViewerRule(null);
-            if (player instanceof PlayerVisibilityExtension ve)
-                ve.setVisibilityFunc(new PlayerVisibilityPredicate(player));
-        });
     }
 
     public void initFinishedPlayer(@NotNull MapPlayerStartFinishedEvent event) {
@@ -349,13 +323,6 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
             inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
         }
-
-        player.scheduleNextTick(ignored -> {
-            // Only visibility extension, no viewer rule (spectators can see anyone)
-            player.updateViewerRule(null);
-            if (player instanceof PlayerVisibilityExtension ve)
-                ve.setVisibilityFunc(new PlayerVisibilityPredicate(player));
-        });
     }
 
     public void deinitPlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
@@ -788,18 +755,6 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         }
     }
 
-    private void updateViewership(@NotNull MapWorld world) {
-        for (Player p : Set.copyOf(world.players())) {
-            p.updateViewerRule(); // Only players have special viewable rules
-            if (p instanceof PlayerVisibilityExtension ve)
-                ve.updateVisibility();
-        }
-        for (Player p : Set.copyOf(world.spectators())) {
-            if (p instanceof PlayerVisibilityExtension ve)
-                ve.updateVisibility();
-        }
-    }
-
     private void computeDefaultResetHeight(@NotNull Instance instance) {
         int worldMinHeight = instance.getCachedDimensionType().minY();
         int minBlockY = instance.getCachedDimensionType().maxY();
@@ -823,55 +778,6 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // Sanity check in case there are literally no blocks in the world.
         if (minBlockY == instance.getCachedDimensionType().maxY()) minBlockY = worldMinHeight;
         instance.setTag(DEFAULT_RESET_HEIGHT, minBlockY - RESET_HEIGHT_OFFSET);
-    }
-
-    private static class PlayerVisibilityPredicate implements Predicate<Entity>, Function<Player, PlayerVisibilityExtension.Visibility> {
-        // This implements a viewER (not viewABLE) predicate for each player. This is used to determine if the player
-        // (the one in the field `player`) can see each other entity. If `#test` returns true, they will be visible.
-        // Otherwise, they will not.
-        // Additionally, this implements a visibility function to decide when to make another player a ghost.
-
-        private static final double PLAYER_HIDE_DISTANCE = 3.5;
-        private static final double SPECTATOR_HIDE_DISTANCE = PLAYER_HIDE_DISTANCE * 2;
-
-        private final Player player;
-        private final PlayerDataV2 playerData;
-        private final MapWorld world;
-
-        private PlayerVisibilityPredicate(@NotNull Player player) {
-            this.player = player;
-            this.playerData = PlayerDataV2.fromPlayer(player);
-            this.world = MapWorld.forPlayerOptional(player);
-        }
-
-        @Override
-        public boolean test(@NotNull Entity otherEntity) {
-            if (!(otherEntity instanceof Player other)) return true; // Always show non-players
-            if (world.isPlaying(other) || (world instanceof TestingMapWorld testWorld && testWorld.buildWorld().isPlaying(other))) {
-                var rule = playerData.getSetting(PlayerSettings.NEARBY_PLAYER_VISIBILITY);
-                // If the ghost rule is used then we never hide the player (but they will become invisible)
-                if (rule == VisibilityRule.GHOST) return true;
-                // Otherwise, hide the player if they are too close
-//                return player.getDistanceSquared(other) > PLAYER_HIDE_DISTANCE * PLAYER_HIDE_DISTANCE;
-                return false; // Always hide all others
-            } else if (world.isSpectating(other)) {
-                // Always hide spectators if they are too close. Note that this does not execute for spectators
-                // so this will not stop them from seeing each other.
-                return player.getDistanceSquared(other) > SPECTATOR_HIDE_DISTANCE * SPECTATOR_HIDE_DISTANCE;
-            } else return true;
-        }
-
-        // Called for every other player, returns how we should be visible to them
-        @Override
-        public @NotNull PlayerVisibilityExtension.Visibility apply(Player other) {
-            if (world.isPlaying(other) || (world instanceof TestingMapWorld testWorld && testWorld.buildWorld().isPlaying(other))) {
-                if (player.getDistanceSquared(other) > PLAYER_HIDE_DISTANCE * PLAYER_HIDE_DISTANCE)
-                    return PlayerVisibilityExtension.Visibility.VISIBLE;
-                return PlayerVisibilityExtension.Visibility.INVISIBLE;
-            } else if (world.isSpectating(player)) {
-                return PlayerVisibilityExtension.Visibility.SPECTATOR;
-            } else return PlayerVisibilityExtension.Visibility.VISIBLE;
-        }
     }
 
     private static CompletableFuture<Void> resetTeleport(@NotNull Player player, @NotNull Pos position) {
