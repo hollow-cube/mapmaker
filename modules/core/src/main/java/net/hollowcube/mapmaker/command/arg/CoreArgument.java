@@ -75,12 +75,10 @@ public final class CoreArgument {
     // Map Stuff
 
     /**
-     * PlayableMap returns an argument for a playable map according to the player context.
-     *
-     * @param id
-     * @param mapService
-     * @return
+     * @deprecated Use {@link #Map(String, MapService)} instead.
+     * This method does not provide adequate error handling and the optional version should be used instead.
      */
+    @Deprecated
     public static @NotNull Argument<MapData> PlayableMap(
             @NotNull String id,
             @NotNull MapService mapService
@@ -114,6 +112,10 @@ public final class CoreArgument {
                 {
                 }
         );
+    }
+
+    public static MapArgument Map(@NotNull String id, @NotNull MapService mapService) {
+        return new MapArgument(id, mapService);
     }
 
     private CoreArgument() {

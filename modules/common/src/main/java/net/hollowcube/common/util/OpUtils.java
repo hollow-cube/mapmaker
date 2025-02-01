@@ -1,12 +1,15 @@
 package net.hollowcube.common.util;
 
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Utility class for doing common operations.
@@ -19,6 +22,14 @@ public class OpUtils {
     @Contract("null, _ -> null")
     public static <I, O> O map(@Nullable I input, Function<I, O> mapper) {
         return input == null ? null : mapper.apply(input);
+    }
+
+    /**
+     * Takes an input and returns a fallback value if the input is null, the fallback can also be null.
+     */
+    @UnknownNullability
+    public static <O, A extends O, B extends O> O or(@Nullable A input, @NotNull Supplier<B> fallback) {
+        return input == null ? fallback.get() : input;
     }
 
     /**
