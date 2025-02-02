@@ -351,7 +351,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         if (data.teleport().isPresent()) return;
         var pos = state.pos().orElse(null);
         if (pos == null) return;
-        var newPos = pos.withView(player.getPosition().yaw(), player.getPosition().pitch());
+        var newPos = pos.withYaw(player.getPosition().yaw());
         state.setPos(newPos);
         state.lastState().ifPresent(s -> s.setPos(newPos));
     }
