@@ -226,6 +226,18 @@ public class EditMap extends View {
 
     @Action(value = "edit_in_world", async = true)
     private @Blocking void editMap(@NotNull Player player) {
+        if (map.verification() != MapVerification.UNVERIFIED) {
+            pushView(context -> new ConfirmAction(
+                    context,
+                    () -> actuallyEditMap(player),
+                    Component.translatable("edit.map.confirm")
+            ));
+        } else {
+            actuallyEditMap(player);
+        }
+    }
+
+    private void actuallyEditMap(Player player) {
         try {
             if (map.verification() != MapVerification.UNVERIFIED) {
                 player.sendMessage(Component.translatable("progress.verification.lost"));
