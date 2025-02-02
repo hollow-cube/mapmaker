@@ -64,7 +64,7 @@ public abstract class AbstractMapMakerMapWorld extends AbstractMapWorld {
 
     @Override
     public void removePlayer(@NotNull Player player) {
-        SpectateHandler.clearSpectatorCheckpoint(player);
+        SpectateHandler.setCheckpoint(player, null);
         super.removePlayer(player);
     }
 

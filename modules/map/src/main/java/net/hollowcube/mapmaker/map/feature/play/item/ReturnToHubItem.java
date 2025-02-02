@@ -44,7 +44,7 @@ public class ReturnToHubItem extends ItemHandler {
 
         FutureUtil.submitVirtual(() -> {
             try {
-                SpectateHandler.clearSpectatorCheckpoint(player);
+                SpectateHandler.setCheckpoint(player, null);
                 world.removePlayer(player);
                 world.server().bridge().joinHub(player);
             } catch (Exception e) {

@@ -60,7 +60,7 @@ public class ReturnToCheckpointItem extends ItemHandler {
 
     private boolean requireConfirmation(@NotNull Player player, @NotNull SaveState saveState) {
         // If you have a spectator checkpoint, never require confirmation
-        if (SpectateHandler.getSpectatorCheckpoint(player) != null) return false;
+        if (SpectateHandler.getCheckpoint(player) != null) return false;
         // The reset item requires confirm click if the playtime is > MIN_RESET_TIME and the player does _not_ have a checkpoint
         if (saveState.getRealPlaytime() <= MIN_RESET_TIME) return false;
         var playState = saveState.state(PlayState.class);

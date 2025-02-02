@@ -43,7 +43,7 @@ public class TestCompletionFeatureProvider implements FeatureProvider {
 
     private void handleOverrideSpecCheckpoint(@NotNull MapPlayerCheckpointChangeEvent event) {
         // Remove the spectator checkpoint when they get a new one so that they reset there.
-        SpectateHandler.clearSpectatorCheckpoint(event.player());
+        SpectateHandler.setCheckpoint(event.player(), null);
     }
 
 }

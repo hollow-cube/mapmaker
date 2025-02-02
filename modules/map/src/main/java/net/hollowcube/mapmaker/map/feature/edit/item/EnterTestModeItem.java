@@ -46,7 +46,7 @@ public class EnterTestModeItem extends ItemHandler {
         }
 
         FutureUtil.submitVirtual(() -> {
-            SpectateHandler.clearSpectatorCheckpoint(player);
+            SpectateHandler.setCheckpoint(player, null);
             buildMode.enterTestMode(player);
         });
     }

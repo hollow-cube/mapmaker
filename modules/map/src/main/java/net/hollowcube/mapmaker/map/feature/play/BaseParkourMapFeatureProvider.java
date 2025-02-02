@@ -513,7 +513,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             }
         } else if (world.isSpectating(player)) {
             if (player.getPosition().y() < world.instance().getCachedDimensionType().minY()) {
-                var checkpoint = SpectateHandler.getSpectatorCheckpoint(player);
+                var checkpoint = SpectateHandler.getCheckpoint(player);
                 resetTeleport(player, checkpoint == null ? world.spawnPoint(player) : checkpoint);
             }
         }
@@ -544,7 +544,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var newPlayState = new PlayState();
         saveState.setState(newPlayState);
 
-        SpectateHandler.clearSpectatorCheckpoint(player);
+        SpectateHandler.setCheckpoint(player, null);
         player.removeTag(COUNTDOWN_END);
 
         resetTeleport(player, world.map().settings().getSpawnPoint()).thenRun(() -> {
@@ -566,7 +566,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         if (!(world instanceof AbstractMapWorld abstractWorld)) return;
 
         // If they have a spectator checkpoint return to that always.
-        var checkpoint = SpectateHandler.getSpectatorCheckpoint(player);
+        var checkpoint = SpectateHandler.getCheckpoint(player);
         if (checkpoint != null) {
             // If the checkpoint is below the reset height, teleport to the spawn instead to prevent getting stuck.
             // If they set the spawn below the world then its a joke map anyway and i don't care.

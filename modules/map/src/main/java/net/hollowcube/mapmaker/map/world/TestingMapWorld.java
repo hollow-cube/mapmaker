@@ -104,7 +104,7 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
         player.setGameMode(GameMode.ADVENTURE);
 
         var startingPos = player.getPosition();
-        SpectateHandler.setSpectatorCheckpoint(player, startingPos);
+        SpectateHandler.setCheckpoint(player, startingPos);
         player.teleport(startingPos, Vec.ZERO, null, RelativeFlags.NONE); //todo is this necessary it seems hella dumb?
 
         var isMapJoin = player.getAndSetTag(FIRST_JOIN_TAG, null) != null;

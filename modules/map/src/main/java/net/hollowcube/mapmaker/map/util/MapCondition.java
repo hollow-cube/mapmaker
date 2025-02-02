@@ -70,7 +70,7 @@ public final class MapCondition {
             var world = MapWorld.forPlayerOptional(player);
             return switch (world) {
                 case PlayingMapWorld ignored -> playing && world.isSpectating(player) ? ALLOW : HIDE;
-                case EditingMapWorld ignored -> editing && world.canEdit(player) ? ALLOW : HIDE;
+                case EditingMapWorld ignored -> editing && world.canEdit(player) && world.isSpectating(player) ? ALLOW : HIDE;
                 case TestingMapWorld ignored -> testing && world.isSpectating(player) ? ALLOW : HIDE;
                 case null, default -> HIDE;
             };

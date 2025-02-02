@@ -39,7 +39,7 @@ public class ExitTestModeItem extends ItemHandler {
         if (!(world instanceof TestingMapWorld testWorld)) return;
 
         FutureUtil.submitVirtual(() -> {
-            SpectateHandler.clearSpectatorCheckpoint(player);
+            SpectateHandler.setCheckpoint(player, null);
             testWorld.exitTestMode(player);
         });
     }

@@ -34,7 +34,7 @@ public class ReturnToSpectatorCheckpointItem extends ItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
-        var checkpoint = SpectateHandler.getSpectatorCheckpoint(player);
+        var checkpoint = SpectateHandler.getCheckpoint(player);
         if (checkpoint == null) return; // Sanity check
 
         player.teleport(checkpoint, Vec.ZERO, null, RelativeFlags.NONE);
