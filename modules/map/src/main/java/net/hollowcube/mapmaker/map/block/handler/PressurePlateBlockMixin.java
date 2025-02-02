@@ -83,8 +83,15 @@ public interface PressurePlateBlockMixin extends BlockHandler {
 
         // Diff the new players with the old players
         for (var player : newPlayers) {
-            if (!currentPlayers.contains(player)) {
+            if (!currentPlayers.remove(player)) {
                 onPlatePressed(tick, player);
+            }
+        }
+
+        if (!currentPlayers.isEmpty()) {
+            for (Player currentPlayer : currentPlayers) {
+                if (!currentPlayer.isActive()) continue;
+                onPlateReleased(tick, currentPlayer);
             }
         }
         currentPlayers.clear();
@@ -107,6 +114,10 @@ public interface PressurePlateBlockMixin extends BlockHandler {
     }
 
     void onPlatePressed(@NotNull Tick tick, @NotNull Player player);
+
+    default void onPlateReleased(@NotNull Tick tick, @NotNull Player player) {
+        // Default implementation does nothing
+    }
 
     /**
      * MUST return a mutable set used for internal statekeeping.

@@ -9,10 +9,7 @@ import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartFinishedEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartSpectatorEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
-import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointChangeEvent;
-import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointPreChangeEvent;
-import net.hollowcube.mapmaker.map.event.vnext.MapPlayerResetEvent;
-import net.hollowcube.mapmaker.map.event.vnext.MapPlayerStatusChangeEvent;
+import net.hollowcube.mapmaker.map.event.vnext.*;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
@@ -145,6 +142,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             .addListener(MapPlayerStartFinishedEvent.class, this::initFinishedPlayer)
 
             .addListener(MapPlayerCheckpointPreChangeEvent.class, this::handleCheckpointChange)
+            .addListener(MapPlayerCheckpointPostChangeEvent.class, this::handleCheckpointPostChange)
             .addListener(MapPlayerStatusChangeEvent.class, this::handleStatusChange)
             .addListener(MapPlayerResetEvent.class, this::handlePlayerReset)
             .addListener(PlayerMoveEvent.class, this::handleInitTimerFromMove)
@@ -340,6 +338,22 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         player.removeTag(COUNTDOWN_END);
 
         player.getAttribute(Attribute.SAFE_FALL_DISTANCE).removeModifier(NO_FALL_DAMAGE_MODIFIER);
+    }
+
+    public void handleCheckpointPostChange(@NotNull MapPlayerCheckpointPostChangeEvent event) {
+        var player = event.getPlayer();
+        var state = SaveState.fromPlayer(player).state(PlayState.class);
+        var data = event.effectData();
+
+        if (state.history().isEmpty()) return;
+        if (state.lastState().isEmpty()) return;
+        if (!state.history().getLast().equals(event.checkpointId())) return;
+        if (data.teleport().isPresent()) return;
+        var pos = state.pos().orElse(null);
+        if (pos == null) return;
+        var newPos = pos.withView(player.getPosition().yaw(), player.getPosition().pitch());
+        state.setPos(newPos);
+        state.lastState().ifPresent(s -> s.setPos(newPos));
     }
 
     public void handleCheckpointChange(@NotNull MapPlayerCheckpointPreChangeEvent event) {

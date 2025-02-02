@@ -4,6 +4,7 @@ import net.hollowcube.common.util.dfu.DFU;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
+import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointPostChangeEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointPreChangeEvent;
 import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
 import net.hollowcube.mapmaker.map.gui.effect.EditCheckpointView;
@@ -87,6 +88,15 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget,
         var data = tick.getBlock().getTag(DATA_TAG);
         var checkpointId = createObjectId(tick.getBlockPosition());
         world.callEvent(new MapPlayerCheckpointPreChangeEvent(player, world, checkpointId, data));
+    }
+
+    @Override
+    public void onPlateReleased(@NotNull Tick tick, @NotNull Player player) {
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null) return;
+        var data = tick.getBlock().getTag(DATA_TAG);
+        var checkpointId = createObjectId(tick.getBlockPosition());
+        world.callEvent(new MapPlayerCheckpointPostChangeEvent(player, world, checkpointId, data));
     }
 
     @Override
