@@ -445,11 +445,12 @@ public final class SelectionCommands {
     }
 
     public static class Count extends WECommand {
-        private final Argument<Mask> maskArg = WEArgument.Mask("mask");
+        private final Argument<Mask> maskArg = WEArgument.Mask("mask").defaultValue(Mask.not(Mask.air()));
 
         public Count() {
             super("/count");
 
+            addSyntax(playerOnly(this::execute));
             addSyntax(playerOnly(this::execute), maskArg);
         }
 
