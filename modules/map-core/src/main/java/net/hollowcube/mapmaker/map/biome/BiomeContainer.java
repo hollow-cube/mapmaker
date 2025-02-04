@@ -204,7 +204,8 @@ public class BiomeContainer implements TerraformInstanceBiomes {
         if (this.initialized) return;
         this.initialized = true;
 
-        this.biomes.addAll(reader.getTag(TAG));
+        var biomes = reader.getTag(TAG);
+        if (biomes != null) this.biomes.addAll(biomes);
 
         int nextId = FIRST_BIOME_ID;
         for (var info : this.biomes) {
