@@ -1,7 +1,6 @@
 package net.hollowcube.terraform.instance;
 
 import net.hollowcube.terraform.util.ProtocolUtil;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.ChunkHack;
 import net.minestom.server.instance.Section;
@@ -71,11 +70,41 @@ public final class TerraformBiomeChunk {
 
         var biomes = TerraformInstanceBiomes.forInstance(chunk.getInstance());
         int id = biomes != null ? biomes.getId(biome) : -1;
-        if (id == -1) id = MinecraftServer.getBiomeRegistry().getId(biome);
         if (id == -1) throw new IllegalStateException("Biome has not been registered: " + biome.namespace());
 
         for (Section section : chunk.getSections()) {
             section.biomePalette().fill(id);
+        }
+    }
+
+    public static void fillBiome(
+            @NotNull Chunk chunk,
+            @NotNull DynamicRegistry.Key<Biome> biome,
+            @NotNull BiomePredicate predicate
+    ) {
+        assert Thread.holdsLock(chunk) : "Chunk must be locked before access";
+        ChunkHack.invalidateChunk(chunk);
+
+        var biomes = TerraformInstanceBiomes.forInstance(chunk.getInstance());
+        int id = biomes != null ? biomes.getId(biome) : -1;
+        if (id == -1) throw new IllegalStateException("Biome has not been registered: " + biome.namespace());
+
+        int xOffset = chunk.getChunkX() * 16;
+        int yOffset = chunk.getMinSection();
+        int zOffset = chunk.getChunkZ() * 16;
+
+        int i = 0;
+        for (Section section : chunk.getSections()) {
+            final int index = i;
+            section.biomePalette().replaceAll((x, y, z, old) -> {
+                x *= 4;
+                y *= 4;
+                z *= 4;
+
+                var oldBiome = biomes.getKey(old);
+                return predicate.test(x + xOffset, y + (index + yOffset) * 16, z + zOffset, oldBiome) ? id : old;
+            });
+            i++;
         }
     }
 
@@ -102,5 +131,10 @@ public final class TerraformBiomeChunk {
                 viewer.sendPacket(packet);
             }
         }
+    }
+
+    @FunctionalInterface
+    public interface BiomePredicate {
+        boolean test(int x, int y, int z, @Nullable DynamicRegistry.Key<Biome> old);
     }
 }

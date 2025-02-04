@@ -8,8 +8,12 @@ import net.hollowcube.terraform.compat.worldedit.command.arg.WEArgument;
 import net.hollowcube.terraform.compat.worldedit.util.WECommand;
 import net.hollowcube.terraform.instance.TerraformBiomeChunk;
 import net.hollowcube.terraform.instance.TerraformInstanceBiomes;
+import net.hollowcube.terraform.selection.Selection;
+import net.hollowcube.terraform.session.LocalSession;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Chunk;
 import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
@@ -104,14 +108,41 @@ public final class BiomeCommands {
         }
 
         private void execute(@NotNull Player player, @NotNull CommandContext context) {
-            var chunk = player.getInstance().getChunkAt(player.getPosition());
             var biomes = TerraformInstanceBiomes.forInstance(player.getInstance());
-            if (chunk == null || biomes == null) return;
+            if (biomes == null) return;
+
+            var session = LocalSession.forPlayer(player);
+            var selection = session.selection(Selection.DEFAULT);
 
             var biome = context.get(this.biome);
 
-            TerraformBiomeChunk.fillBiome(chunk, biome);
-            TerraformBiomeChunk.sendBiomeUpdates(List.of(chunk));
+            var region = selection.region();
+            if (region == null) return;
+
+            var min = region.min();
+            var max = region.max();
+
+            var minRounded = new Vec((min.blockX() >> 2) << 2, 0, (min.blockZ() >> 2) << 2);
+            var maxRounded = new Vec(((max.blockX() >> 2) + 1) << 2, 0, ((max.blockZ() >> 2) + 1) << 2);
+
+            var chunks = new ArrayList<Chunk>();
+
+            for (int cx = min.blockX() >> 4; cx <= max.blockX() >> 4; cx++) {
+                for (int cz = min.blockZ() >> 4; cz <= max.blockZ() >> 4; cz++) {
+                    var chunk = player.getInstance().getChunk(cx, cz);
+                    if (chunk != null) {
+                        chunks.add(chunk);
+
+                        TerraformBiomeChunk.fillBiome(chunk, biome, (x, y, z, old) -> {
+                            if (z < minRounded.blockZ() || z > maxRounded.blockZ()) return false;
+                            if (x < minRounded.blockX() || x > maxRounded.blockX()) return false;
+                            return !biome.equals(old);
+                        });
+                    }
+                }
+            }
+
+            TerraformBiomeChunk.sendBiomeUpdates(chunks);
 
             player.sendMessage(ExtraComponents.translatable("commands.set_biome.success")
                     .with(biomes.getName(biome))
