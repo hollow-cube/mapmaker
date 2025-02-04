@@ -1,10 +1,13 @@
 package net.hollowcube.mapmaker.map.instance;
 
+import net.hollowcube.terraform.instance.TerraformBiomeChunk;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
+import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,5 +58,18 @@ public class LitChunk extends LightingChunk implements ChunkExt {
     @Override
     protected CompoundBinaryTag getHeightmapNBT() {
         return heightmaps.getProtocolData();
+    }
+
+    @Override
+    public @NotNull DynamicRegistry.Key<Biome> getBiome(int x, int y, int z) {
+        var key = TerraformBiomeChunk.getBiome(this, x, y, z);
+        return key != null ? key : super.getBiome(x, y, z);
+    }
+
+    @Override
+    public void setBiome(int x, int y, int z, @NotNull DynamicRegistry.Key<Biome> biome) {
+        if (!TerraformBiomeChunk.setBiome(this, x, y, z, biome)) {
+            super.setBiome(x, y, z, biome);
+        }
     }
 }

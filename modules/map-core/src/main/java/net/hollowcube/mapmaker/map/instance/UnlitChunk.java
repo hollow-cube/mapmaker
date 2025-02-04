@@ -1,11 +1,14 @@
 package net.hollowcube.mapmaker.map.instance;
 
+import net.hollowcube.terraform.instance.TerraformBiomeChunk;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.network.packet.server.play.data.LightData;
+import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -65,6 +68,19 @@ public class UnlitChunk extends DynamicChunk implements ChunkExt {
     @Override
     protected LightData createLightData(boolean requiredFullChunk) {
         return this.light;
+    }
+
+    @Override
+    public @NotNull DynamicRegistry.Key<Biome> getBiome(int x, int y, int z) {
+        var key = TerraformBiomeChunk.getBiome(this, x, y, z);
+        return key != null ? key : super.getBiome(x, y, z);
+    }
+
+    @Override
+    public void setBiome(int x, int y, int z, @NotNull DynamicRegistry.Key<Biome> biome) {
+        if (!TerraformBiomeChunk.setBiome(this, x, y, z, biome)) {
+            super.setBiome(x, y, z, biome);
+        }
     }
 
     @SuppressWarnings("UnstableApiUsage")

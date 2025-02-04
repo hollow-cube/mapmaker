@@ -4,7 +4,9 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.terraform.mask.Mask;
 import net.hollowcube.terraform.pattern.Pattern;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.utils.Direction;
+import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
@@ -42,6 +44,10 @@ public final class WEArgument {
 
     public static @NotNull Argument<@NotNull Direction> Direction(@NotNull String id) {
         return new ArgumentDirection(id).defaultValue(ArgumentDirection::getDefault);
+    }
+
+    public static @NotNull Argument<DynamicRegistry.Key<Biome>> Biome(@NotNull String id) {
+        return new ArgumentBiome(id);
     }
 
     private WEArgument() {

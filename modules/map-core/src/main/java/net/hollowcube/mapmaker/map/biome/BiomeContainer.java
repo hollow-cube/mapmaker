@@ -1,12 +1,12 @@
 package net.hollowcube.mapmaker.map.biome;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.dfu.DFU;
+import net.hollowcube.terraform.instance.TerraformInstanceBiomes;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
-import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.SendablePacket;
@@ -18,7 +18,6 @@ import net.minestom.server.tag.TagWritable;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import net.minestom.server.world.biome.Biome;
-import net.minestom.server.world.biome.BiomeEffects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -40,7 +39,7 @@ import java.util.*;
  * be used to identify a biome in stored data.</p>
  */
 @SuppressWarnings("UnstableApiUsage")
-public class BiomeContainer {
+public class BiomeContainer implements TerraformInstanceBiomes {
     private static final Logger logger = LoggerFactory.getLogger(BiomeContainer.class);
 
     // This is copied from BiomeImpl because Minestom does not expose this type. Probably Minestom should expose this.
@@ -62,13 +61,7 @@ public class BiomeContainer {
             }
     );
 
-    // Exists because DFU.Tag requires an object, not a list.
-    private record TagWrapper(List<BiomeInfo> biomes) {
-    }
-
-    private static final Tag<TagWrapper> TAG = DFU.Tag(RecordCodecBuilder.create(i -> i.group(
-            Codec.list(BiomeInfo.CODEC).optionalFieldOf("biomes", List.of()).forGetter(TagWrapper::biomes)
-    ).apply(i, TagWrapper::new)), "biomes");
+    private static final Tag<List<BiomeInfo>> TAG = DFU.Tag(BiomeInfo.CODEC.listOf().optionalFieldOf("biomes", List.of()).codec(), "biomes");
     private static final DynamicRegistry.Key<Biome> DEFAULT_BIOME = Biome.PLAINS;
 
     private static final int FIRST_BIOME_ID;
@@ -87,8 +80,10 @@ public class BiomeContainer {
 
     private final DynamicRegistry<Biome> parent = MinecraftServer.getBiomeRegistry();
     private final List<BiomeInfo> biomes = new ArrayList<>(); // Raw biome data
-    private final Int2ObjectMap<Biome> loadedBiomes = new Int2ObjectArrayMap<>(); // Custom biomes that are loaded (ie have a Minestom biome)
-    private final Int2ObjectMap<NamespaceID> loadedBiomeNames = new Int2ObjectArrayMap<>();
+
+    private final Map<DynamicRegistry.Key<Biome>, RegisteredBiome> keyToBiome = new HashMap<>();
+    private final Int2ObjectMap<RegisteredBiome> idToBiome = new Int2ObjectArrayMap<>();
+
     private boolean initialized = false;
 
     /**
@@ -102,15 +97,50 @@ public class BiomeContainer {
     public @NotNull DynamicRegistry.Key<Biome> getLoadedBiome(@NotNull String name) {
         var namespace = NamespaceID.from(name);
 
-        for (var biomeName : loadedBiomeNames.values()) {
-
-            if (biomeName.equals(namespace))
-                return DynamicRegistry.Key.of(biomeName);
+        for (var biome : keyToBiome.values()) {
+            if (biome.namespace().equals(namespace))
+                return DynamicRegistry.Key.of(biome.namespace());
         }
 
         if (parent.get(namespace) != null)
             return DynamicRegistry.Key.of(namespace);
         return DEFAULT_BIOME;
+    }
+
+    @Override
+    public @Nullable Biome getBiome(@NotNull DynamicRegistry.Key<Biome> key) {
+        var biome = this.keyToBiome.get(key);
+        return biome != null ? biome.biome() : this.parent.get(key);
+    }
+
+    @Override
+    public int getId(@NotNull DynamicRegistry.Key<Biome> key) {
+        var biome = this.keyToBiome.get(key);
+        return biome != null ? biome.id() : this.parent.getId(key);
+    }
+
+    @Override
+    public DynamicRegistry.Key<Biome> getKey(int id) {
+        return Objects.requireNonNullElse(
+                OpUtils.map(this.idToBiome.get(id), RegisteredBiome::key),
+                this.parent.getKey(id)
+        );
+    }
+
+    @Override
+    public @NotNull Collection<DynamicRegistry.Key<Biome>> keys() {
+        List<DynamicRegistry.Key<Biome>> keys = new ArrayList<>();
+        parent.values().forEach(biome -> keys.add(parent.getKey(biome)));
+        keys.addAll(keyToBiome.keySet());
+        return keys;
+    }
+
+    @Override
+    public @NotNull Component getName(@NotNull DynamicRegistry.Key<Biome> key) {
+        var biome = keyToBiome.get(key);
+        if (biome != null) return biome.name();
+        var translationKey = "biome.%s.%s".formatted(key.namespace().namespace(), key.namespace().path());
+        return Component.translatable(translationKey, key.namespace().asString());
     }
 
     /**
@@ -123,8 +153,8 @@ public class BiomeContainer {
      */
     public @NotNull String getLoadedBiomeName(int id) {
         // Try from local biomes first, then from parent
-        var local = loadedBiomeNames.get(id);
-        if (local != null) return local.asString();
+        var biome = idToBiome.get(id);
+        if (biome != null) return biome.namespace().asString();
         return Objects.requireNonNullElse(parent.getKey(id), DEFAULT_BIOME).name();
     }
 
@@ -143,11 +173,11 @@ public class BiomeContainer {
     }
 
     public boolean hasCustomBiome(@NotNull String name) {
-        return biomes.stream().anyMatch(b -> b.getName().equals(name));
+        return this.biomes.stream().anyMatch(b -> b.getName().equals(name));
     }
 
     public boolean isLoaded(@NotNull BiomeInfo info) {
-        return loadedBiomeNames.containsValue(info.namespace());
+        return this.keyToBiome.values().stream().anyMatch(b -> b.info().equals(info));
     }
 
     public int size() {
@@ -163,32 +193,38 @@ public class BiomeContainer {
     }
 
     public @NotNull List<Biome> loadedBiomes() {
-        var allBiomes = new ArrayList<>(parent.values());
-        allBiomes.addAll(loadedBiomes.values());
+        var allBiomes = new ArrayList<>(this.parent.values());
+        for (RegisteredBiome value : this.keyToBiome.values()) {
+            allBiomes.add(value.biome());
+        }
         return allBiomes;
     }
 
-    public void init(@NotNull TagReadable dataReader) {
-        if (initialized) return;
-        initialized = true;
+    public void init(@NotNull TagReadable reader) {
+        if (this.initialized) return;
+        this.initialized = true;
 
-        var tag = dataReader.getTag(TAG);
-        if (tag != null) biomes.addAll(tag.biomes());
+        this.biomes.addAll(reader.getTag(TAG));
 
         int nextId = FIRST_BIOME_ID;
-        for (var biome : biomes) {
-            var minestomBiome = createMinestomBiome(biome);
+        for (var info : this.biomes) {
+            var minestomBiome = info.build();
             if (minestomBiome == null) continue;
 
-            var protocolId = nextId++;
-            loadedBiomes.put(protocolId, minestomBiome);
-            loadedBiomeNames.put(protocolId, biome.namespace());
-            logger.info("Loaded custom biome {} (id #{})", biome.namespace().asString(), protocolId);
+            var namespace = Objects.requireNonNull(info.namespace());
+            var key = DynamicRegistry.Key.<Biome>of(namespace);
+
+            var biome = new RegisteredBiome(nextId++, namespace, info, minestomBiome);
+
+            idToBiome.put(biome.id(), biome);
+            keyToBiome.put(key, biome);
+
+            logger.info("Loaded custom biome {} (id #{})", namespace.asString(), biome.id());
         }
     }
 
-    public void write(@NotNull TagWritable dataWriter) {
-        dataWriter.setTag(TAG, new TagWrapper(biomes));
+    public void write(@NotNull TagWritable writer) {
+        writer.setTag(TAG, this.biomes);
     }
 
     public @NotNull SendablePacket registryDataPacket(boolean excludeVanilla) {
@@ -205,41 +241,15 @@ public class BiomeContainer {
             if (excludeVanilla) {
                 entries.add(new RegistryDataPacket.Entry(name, null));
             } else {
-                entries.add(new RegistryDataPacket.Entry(name, (CompoundBinaryTag) REGISTRY_NBT_TYPE.write(biome)));
+                entries.add(new RegistryDataPacket.Entry(name, REGISTRY_NBT_TYPE.write(biome)));
             }
         }
 
         // Add overwrite biomes (never vanilla ones so always write entire value)
-        for (var entry : loadedBiomes.int2ObjectEntrySet()) {
-            String name = loadedBiomeNames.get(entry.getIntKey()).asString();
-            entries.add(new RegistryDataPacket.Entry(name, (CompoundBinaryTag) REGISTRY_NBT_TYPE.write(entry.getValue())));
+        for (RegisteredBiome value : this.keyToBiome.values()) {
+            entries.add(new RegistryDataPacket.Entry(value.namespace().asString(), REGISTRY_NBT_TYPE.write(value.biome())));
         }
 
         return new RegistryDataPacket("minecraft:worldgen/biome", entries);
-    }
-
-    private @Nullable Biome createMinestomBiome(@NotNull BiomeInfo bi) {
-        var namespace = bi.namespace();
-        if (namespace == null) return null;
-
-        var effectBuilder = BiomeEffects.builder()
-                .skyColor(TextColor.fromCSSHexString(bi.getSkyColor()).value())
-                .fogColor(TextColor.fromCSSHexString(bi.getFogColor()).value())
-                .waterColor(TextColor.fromCSSHexString(bi.getWaterColor()).value())
-                .waterFogColor(TextColor.fromCSSHexString(bi.getWaterFogColor()).value());
-        if (bi.getGrassColor() != null) {
-            var color = TextColor.fromCSSHexString(bi.getGrassColor());
-            if (color != null) effectBuilder.grassColor(color.value());
-        }
-        if (bi.getFoliageColor() != null) {
-            var color = TextColor.fromCSSHexString(bi.getFoliageColor());
-            if (color != null) effectBuilder.foliageColor(color.value());
-        }
-
-        return Biome.builder()
-                .temperature(0.8F) // IDK what this affects
-                .downfall(0.4F) // IDK what this affects
-                .effects(effectBuilder.build())
-                .build();
     }
 }

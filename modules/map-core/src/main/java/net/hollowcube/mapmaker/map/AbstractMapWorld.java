@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.map.entity.marker.MarkerHandlerRegistry;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
+import net.hollowcube.terraform.instance.TerraformInstanceBiomes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.FeatureFlag;
@@ -88,6 +89,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         // Set the instance self tag so that this world can be discovered via MapWorld#unsafeFromInstance
         // If there is already a tag do nothing, it means that this is a child world and the parent has already set the tag.
         if (!instance.hasTag(SELF_TAG)) instance.setTag(SELF_TAG, this);
+        instance.setTag(TerraformInstanceBiomes.BIOMES, biomeContainer);
     }
 
     @Override

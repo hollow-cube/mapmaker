@@ -90,9 +90,9 @@ public class WorldEditModule implements TerraformModule {
                 //todo
 
                 // Biome
-//                new BiomeCommands.BiomeList(), //todo
-//                new BiomeCommands.BiomeInfo(), //todo
-//                new BiomeCommands.SetBiome(), //todo
+                new BiomeCommands.BiomeList(),
+                new BiomeCommands.BiomeInfo(),
+                new BiomeCommands.SetBiome(),
 
                 // Chunk
 //                new ChunkCommands.ChunkInfo(), //todo

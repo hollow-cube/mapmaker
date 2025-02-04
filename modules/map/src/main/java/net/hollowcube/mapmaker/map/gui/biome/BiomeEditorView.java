@@ -6,6 +6,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.biome.BiomeInfo;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -72,7 +73,7 @@ public class BiomeEditorView extends View {
 
     @Action("sky_color")
     public void handleSkyColorButton() {
-        pushView(c -> new HexInputAnvil(c, "sky_color_rename", biomeInfo.getSkyColor()));
+        pushView(c -> new HexInputAnvil(c, "sky_color_rename", biomeInfo.getSkyColor().asHexString()));
     }
 
     @Signal("sky_color_rename")
@@ -82,7 +83,7 @@ public class BiomeEditorView extends View {
 
     @Action("fog_color")
     public void handleFogColorButton() {
-        pushView(c -> new HexInputAnvil(c, "fog_color_rename", biomeInfo.getFogColor()));
+        pushView(c -> new HexInputAnvil(c, "fog_color_rename", biomeInfo.getFogColor().asHexString()));
     }
 
     @Signal("fog_color_rename")
@@ -92,7 +93,7 @@ public class BiomeEditorView extends View {
 
     @Action("water_color")
     public void handleWaterColorButton() {
-        pushView(c -> new HexInputAnvil(c, "water_color_rename", biomeInfo.getWaterColor()));
+        pushView(c -> new HexInputAnvil(c, "water_color_rename", biomeInfo.getWaterColor().asHexString()));
     }
 
     @Signal("water_color_rename")
@@ -102,7 +103,7 @@ public class BiomeEditorView extends View {
 
     @Action("water_fog_color")
     public void handleWaterFogColorButton() {
-        pushView(c -> new HexInputAnvil(c, "water_fog_color_rename", biomeInfo.getWaterFogColor()));
+        pushView(c -> new HexInputAnvil(c, "water_fog_color_rename", biomeInfo.getWaterFogColor().asHexString()));
     }
 
     @Signal("water_fog_color_rename")
@@ -112,7 +113,7 @@ public class BiomeEditorView extends View {
 
     @Action("grass_color")
     public void handleGrassColorButton() {
-        pushView(c -> new HexInputAnvil(c, "grass_color_rename", biomeInfo.getGrassColor()));
+        pushView(c -> new HexInputAnvil(c, "grass_color_rename", OpUtils.map(biomeInfo.getGrassColor(), TextColor::asHexString)));
     }
 
     @Signal("grass_color_rename")
@@ -122,7 +123,7 @@ public class BiomeEditorView extends View {
 
     @Action("foliage_color")
     public void handleFoliageColorButton() {
-        pushView(c -> new HexInputAnvil(c, "foliage_color_rename", biomeInfo.getFoliageColor()));
+        pushView(c -> new HexInputAnvil(c, "foliage_color_rename", OpUtils.map(biomeInfo.getFoliageColor(), TextColor::asHexString)));
     }
 
     @Signal("foliage_color_rename")
@@ -130,22 +131,20 @@ public class BiomeEditorView extends View {
         updateColorField(color, biomeInfo::setFoliageColor);
     }
 
-    private void updateColorField(@NotNull String newColor, @NotNull Consumer<String> setter) {
+    private void updateColorField(@NotNull String newColor, @NotNull Consumer<TextColor> setter) {
         var parsed = TextColor.fromCSSHexString(newColor);
         if (parsed == null) return;
-        setter.accept(newColor);
+        setter.accept(parsed);
         updateContents();
     }
 
-    private void updateColorText(@NotNull Text text, @Nullable String colorHex) {
-        if (colorHex == null) {
+    private void updateColorText(@NotNull Text text, @Nullable TextColor color) {
+        if (color == null) {
             text.setSpriteColorModifier(COLOR_MISSING_BG);
             text.setText("None", COLOR_MISSING_FG);
         } else {
-            var color1 = TextColor.fromCSSHexString(colorHex);
-            if (color1 == null) return;
-            text.setSpriteColorModifier(color1);
-            text.setText(colorHex, getForegroundColor(color1));
+            text.setSpriteColorModifier(color);
+            text.setText(color.asHexString(), getForegroundColor(color));
         }
     }
 
