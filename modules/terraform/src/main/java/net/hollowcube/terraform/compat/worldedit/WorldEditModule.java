@@ -127,8 +127,8 @@ public class WorldEditModule implements TerraformModule {
             var itemStack = tf.toolHandler().createBuiltinTool("terraform:wand");
             inventory.setItemStack(event.slot(), itemStack);
             inventory.update();
-        }
 
-        event.setCancelled(true);
+            event.setCancelled(true);
+        }
     }
 }
