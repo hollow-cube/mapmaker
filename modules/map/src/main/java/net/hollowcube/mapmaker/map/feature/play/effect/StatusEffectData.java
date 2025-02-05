@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
+import net.hollowcube.mapmaker.map.feature.play.setting.SavedMapSettings;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +24,8 @@ public class StatusEffectData extends BaseEffectData {
             HotbarItems.CODEC.optionalFieldOf("items", HotbarItems.EMPTY).forGetter(StatusEffectData::items),
             // StatusEffectData
             Codec.BOOL.optionalFieldOf("repeatable", false).forGetter(StatusEffectData::repeatable),
-            Codec.INT.optionalFieldOf("extraTime", 0).forGetter(StatusEffectData::extraTime)
+            Codec.INT.optionalFieldOf("extraTime", 0).forGetter(StatusEffectData::extraTime),
+            SavedMapSettings.CODEC.fieldOf("settings").orElseGet(s -> {}, SavedMapSettings::new).forGetter(StatusEffectData::settings)
     ).apply(i, StatusEffectData::new));
 
     private boolean repeatable;
@@ -36,9 +38,10 @@ public class StatusEffectData extends BaseEffectData {
             Optional<Pos> teleport,
             HotbarItems items,
             boolean repeatable,
-            int extraTime
+            int extraTime,
+            SavedMapSettings settings
     ) {
-        super(name, progressIndex, timeLimit, resetHeight, clearPotionEffects, potionEffects, teleport, items);
+        super(name, progressIndex, timeLimit, resetHeight, clearPotionEffects, potionEffects, teleport, items, settings);
         this.repeatable = repeatable;
         this.extraTime = extraTime;
     }

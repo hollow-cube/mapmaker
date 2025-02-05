@@ -19,6 +19,7 @@ public final class MapFeatureFlags {
     public static final FeatureFlag DISPLAY_ENTITY_EDITOR = FeatureFlag.of("map.display_entity_editor");
 
     private static final Set<String> ITEM_EDITOR_PLAYERS = Set.of("notmattw", "ontal", "itmg", "sethprg");
+    public static final FeatureFlag EFFECT_MAP_SETTINGS = FeatureFlag.of("map.effect_map_settings"); // Settings for toggle map settings in the checkpoints and status plates
 
     public static final FeatureFlag MARKER_TOOL = FeatureFlag.of("map.marker_tool");
 

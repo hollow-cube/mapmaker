@@ -5,11 +5,13 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.map.MapFeatureFlags;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.map.gui.effect.item.ItemEditorView;
 import net.hollowcube.mapmaker.map.gui.effect.potion.PotionEffectListView;
 import net.hollowcube.mapmaker.map.gui.effect.potion.PotionEffectSelectorView;
+import net.hollowcube.mapmaker.map.gui.effect.settings.SettingsEditorView;
 import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -119,6 +121,18 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
         })));
     }
 
+    @Action("settings_inactive")
+    public void handleSettingsA(@NotNull Player player) {
+        if (!MapFeatureFlags.EFFECT_MAP_SETTINGS.test(player)) return;
+        pushView(c -> new SettingsEditorView(c, data.settings(), save));
+    }
+
+    @Action("settings_active")
+    public void handleSettingsB(@NotNull Player player) {
+        if (!MapFeatureFlags.EFFECT_MAP_SETTINGS.test(player)) return;
+        handleSettingsA(player);
+    }
+
     protected void updateFromData() {
         potionEffectsSwitch.setOption(data.potionEffects().isEmpty() ? 0 : 1);
 
@@ -137,7 +151,7 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
             teleportOffLabel.setArgs(TELEPORT_NONE);
         }
 
-        settingsSwitch.setOption(0);
+        settingsSwitch.setOption(!data.settings().isEmpty());
         addItemSwitch.setOption(0);
     }
 }

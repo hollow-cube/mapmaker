@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.feature.play.effect;
 
 import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
+import net.hollowcube.mapmaker.map.feature.play.setting.SavedMapSettings;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -28,13 +29,14 @@ public abstract class BaseEffectData {
     private Optional<Pos> teleport;
     //todo settings
     private HotbarItems items;
+    private final SavedMapSettings settings;
 
     public BaseEffectData(
             String name, int progressIndex, int timeLimit,
             int resetHeight, boolean clearPotionEffects,
             PotionEffectList potionEffects,
             Optional<Pos> teleport,
-            HotbarItems items
+            HotbarItems items, SavedMapSettings settings
     ) {
         this.name = name;
         this.progressIndex = progressIndex;
@@ -44,6 +46,7 @@ public abstract class BaseEffectData {
         this.potionEffects = potionEffects;
         this.teleport = teleport;
         this.items = items;
+        this.settings = settings;
     }
 
     public @NotNull String displayName() {
@@ -89,6 +92,10 @@ public abstract class BaseEffectData {
 
     public @NotNull HotbarItems items() {
         return items;
+    }
+
+    public SavedMapSettings settings() {
+        return settings;
     }
 
     public void setName(@Nullable String name) {
