@@ -64,13 +64,28 @@ public final class MapCondition {
         };
     }
 
-    public static @NotNull CommandCondition mapFeature(@NotNull FeatureFlag flag) {
+    public static @NotNull CommandCondition spectatorFilter(boolean playing, boolean editing, boolean testing) {
         return (sender, context) -> {
             if (!(sender instanceof Player player)) return HIDE;
             var world = MapWorld.forPlayerOptional(player);
-            if (world == null) return HIDE;
+            return switch (world) {
+                case PlayingMapWorld ignored -> playing && world.isSpectating(player) ? ALLOW : HIDE;
+                case EditingMapWorld ignored -> editing && world.canEdit(player) && world.isSpectating(player) ? ALLOW : HIDE;
+                case TestingMapWorld ignored -> testing && world.isSpectating(player) ? ALLOW : HIDE;
+                case null, default -> HIDE;
+            };
+        };
+    }
 
-            return flag.test(world.map()) ? ALLOW : HIDE;
+    public static @NotNull CommandCondition mapFeature(@NotNull FeatureFlag flag) {
+        return map(world -> flag.test(world.map()));
+    }
+
+    public static @NotNull CommandCondition map(Predicate<MapWorld> predicate) {
+        return (sender, context) -> {
+            if (!(sender instanceof Player player)) return HIDE;
+            var world = MapWorld.forPlayerOptional(player);
+            return world != null && predicate.test(world) ? ALLOW : HIDE;
         };
     }
 

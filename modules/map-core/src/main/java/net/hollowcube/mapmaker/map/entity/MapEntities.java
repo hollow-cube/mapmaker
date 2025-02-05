@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.map.entity;
 
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
-import net.hollowcube.mapmaker.map.entity.impl.living.ArmorStandEntity;
+import net.hollowcube.mapmaker.map.entity.impl.living.*;
 import net.hollowcube.mapmaker.map.entity.impl.other.EndCrystalEntity;
 import net.hollowcube.mapmaker.map.entity.impl.other.ItemFrameEntity;
 import net.hollowcube.mapmaker.map.entity.impl.other.PaintingEntity;
@@ -25,8 +25,12 @@ public final class MapEntities {
         MapEntityType.override(EntityType.GLOW_ITEM_FRAME, ItemFrameEntity.Glowing::new);
         MapEntityType.override(EntityType.PAINTING, PaintingEntity::new);
         MapEntityType.override(EntityType.ARMOR_STAND, ArmorStandEntity::new);
-
         MapEntityType.override(EntityType.END_CRYSTAL, EndCrystalEntity::new);
+
+        MapEntityType.override(EntityType.PANDA, PandaEntity::new);
+        MapEntityType.override(EntityType.FOX, FoxEntity::new);
+        MapEntityType.override(EntityType.WOLF, WolfEntity::new);
+        MapEntityType.override(EntityType.CHICKEN, ChickenEntity::new);
 
         MapEntityType.override(EntityType.BLOCK_DISPLAY, DisplayEntity.Block::new);
         MapEntityType.override(EntityType.ITEM_DISPLAY, DisplayEntity.Item::new);

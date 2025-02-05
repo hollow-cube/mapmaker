@@ -5,16 +5,21 @@ import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
+import net.minestom.server.network.packet.server.play.data.LightData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
-import java.util.Objects;
+import java.util.*;
 
 public class UnlitChunk extends DynamicChunk implements ChunkExt {
-    private final Heightmaps heightmaps;
 
-    public UnlitChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
+    private final Heightmaps heightmaps;
+    private final LightData light;
+
+    public UnlitChunk(@NotNull Instance instance, int chunkX, int chunkZ, LightData light) {
         super(instance, chunkX, chunkZ);
+        this.light = light;
         this.heightmaps = new Heightmaps(this);
     }
 
@@ -55,5 +60,50 @@ public class UnlitChunk extends DynamicChunk implements ChunkExt {
     @Override
     protected CompoundBinaryTag getHeightmapNBT() {
         return heightmaps.getProtocolData();
+    }
+
+    @Override
+    protected LightData createLightData(boolean requiredFullChunk) {
+        return this.light;
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static LightData createStaticLightData(
+            @NotNull Instance instance,
+            @Range(from = 0, to = 15) int skyLight,
+            @Range(from = 0, to = 15) int blockLight
+    ) {
+        int sectionCount = instance.getCachedDimensionType().height() / 16;
+
+        BitSet full = new BitSet();
+        full.set(0, sectionCount);
+
+        List<byte[]> sky;
+        List<byte[]> block;
+
+        if (skyLight != 0) {
+            byte[] skyData = new byte[2048];
+            Arrays.fill(skyData, (byte) (skyLight | (skyLight << 4)));
+            sky = Collections.nCopies(sectionCount, skyData);
+        } else {
+            sky = List.of();
+        }
+
+        if (blockLight != 0) {
+            byte[] blockData = new byte[2048];
+            Arrays.fill(blockData, (byte) (blockLight | (blockLight << 4)));
+            block = Collections.nCopies(sectionCount, blockData);
+        } else {
+            block = List.of();
+        }
+
+        return new LightData(
+                skyLight == 0 ? new BitSet() : full,
+                blockLight == 0 ? new BitSet() : full,
+                skyLight != 0 ? new BitSet() : full,
+                blockLight != 0 ? new BitSet() : full,
+                sky,
+                block
+        );
     }
 }

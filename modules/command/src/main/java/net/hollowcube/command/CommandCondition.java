@@ -45,7 +45,7 @@ public interface CommandCondition {
                     return result;
                 }
             }
-            return DENY;
+            return HIDE;
         };
     }
 

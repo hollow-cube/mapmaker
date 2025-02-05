@@ -18,6 +18,7 @@ public final class TagUtil {
         item.remove(ItemComponent.FIREWORKS); // Has flight duration lore
         item.remove(ItemComponent.ENCHANTMENTS);
         item.remove(ItemComponent.JUKEBOX_PLAYABLE);
+        item.remove(ItemComponent.OMINOUS_BOTTLE_AMPLIFIER);
         // Note: Just removing attribute modifiers does not remove the armor extras tooltip
         // we actually have to set attributes with nothing for that to happen.
         item.set(ItemComponent.ATTRIBUTE_MODIFIERS, new AttributeList(List.of(), false));

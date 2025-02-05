@@ -11,6 +11,8 @@ public class ToggleLitInteractionRule implements BlockInteractionRule {
 
     @Override
     public boolean handleInteraction(@NotNull Interaction interaction) {
+        var item = interaction.item();
+        if (item.material().isBlock()) return false;
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition);
 

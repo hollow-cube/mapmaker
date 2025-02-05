@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.feature.play.item;
 
+import net.hollowcube.mapmaker.map.feature.play.handlers.SpectateHandler;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.coordinate.Vec;
@@ -8,8 +9,6 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-
-import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 
 public class ReturnToSpectatorCheckpointItem extends ItemHandler {
 
@@ -35,7 +34,7 @@ public class ReturnToSpectatorCheckpointItem extends ItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
-        var checkpoint = player.getTag(SPECTATOR_CHECKPOINT);
+        var checkpoint = SpectateHandler.getCheckpoint(player);
         if (checkpoint == null) return; // Sanity check
 
         player.teleport(checkpoint, Vec.ZERO, null, RelativeFlags.NONE);

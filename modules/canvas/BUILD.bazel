@@ -8,6 +8,7 @@ java_library(
     deps = [
         "//third_party:minestom",
         "@maven//:net_kyori_adventure_api",
+        "@maven//:net_kyori_adventure_text_serializer_plain",
         "@maven//:org_jetbrains_annotations",
     ],
 )

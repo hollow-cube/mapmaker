@@ -17,6 +17,7 @@ import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.command.HubCommand;
 import net.hollowcube.mapmaker.map.command.build.*;
+import net.hollowcube.mapmaker.map.command.play.SpectateCommand;
 import net.hollowcube.mapmaker.map.command.utility.*;
 import net.hollowcube.mapmaker.map.command.utility.entity.EntitiesCommand;
 import net.hollowcube.mapmaker.map.command.utility.navigation.*;
@@ -205,6 +206,8 @@ public class MapServerRunner extends AbstractMapServer {
         commandManager.register(new BuildCommand());
         commandManager.register(new SetSpawnCommand());
 
+        commandManager.register(new SpectateCommand());
+
         commandManager.register(new FlyCommand());
         commandManager.register(new FlySpeedCommand());
         commandManager.register(new ClearInventoryCommand());
@@ -217,6 +220,7 @@ public class MapServerRunner extends AbstractMapServer {
         commandManager.register(new JumpToCommand());
         commandManager.register(new ThruCommand());
         commandManager.register(new UpCommand());
+        commandManager.register(new BackCommand());
 
         commandManager.register(new PHeadCommand());
         commandManager.register(new HdbCommand(hdb, server.guiController()));

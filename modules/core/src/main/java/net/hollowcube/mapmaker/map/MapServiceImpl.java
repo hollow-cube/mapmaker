@@ -6,7 +6,6 @@ import com.google.gson.reflect.TypeToken;
 import com.mojang.serialization.JsonOps;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.common.util.dfu.DFU;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -473,7 +472,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             }
 
             saveState.serializer = serializer;
-            saveState.state = DFU.unwrap(serializer.codec().decode(JsonOps.INSTANCE, stateObj)).getFirst();
+            saveState.state = serializer.codec().parse(JsonOps.INSTANCE, stateObj).getOrThrow();
         }
         return saveState;
     }

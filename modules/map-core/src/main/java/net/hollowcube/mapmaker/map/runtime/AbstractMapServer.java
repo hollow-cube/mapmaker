@@ -40,6 +40,7 @@ import net.hollowcube.mapmaker.config.*;
 import net.hollowcube.mapmaker.consumer.PlayerDataUpdateConsumer;
 import net.hollowcube.mapmaker.cosmetic.CosmeticInventoryHandler;
 import net.hollowcube.mapmaker.cosmetic.impl.accessory.AbstractAccessoryImpl;
+import net.hollowcube.mapmaker.event.PlayerGiveCreativeItemEvent;
 import net.hollowcube.mapmaker.event.util.UpdateSignTextEvent;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.posthog.PostHogFeatureFlagProvider;
@@ -93,6 +94,7 @@ import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
+import net.minestom.server.network.packet.client.play.ClientCreativeInventoryActionPacket;
 import net.minestom.server.network.packet.client.play.ClientUpdateSignPacket;
 import net.minestom.server.network.packet.server.common.ServerLinksPacket;
 import net.minestom.server.timer.Scheduler;
@@ -233,6 +235,7 @@ public abstract class AbstractMapServer implements MapServer {
 
         var packetListenerManager = MinecraftServer.getPacketListenerManager();
         packetListenerManager.setPlayListener(ClientUpdateSignPacket.class, UpdateSignTextEvent::packetListener);
+        packetListenerManager.setPlayListener(ClientCreativeInventoryActionPacket.class, PlayerGiveCreativeItemEvent::post);
 
         // Dependent service init
 

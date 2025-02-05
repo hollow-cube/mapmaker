@@ -213,6 +213,7 @@ public class EditMap extends View {
     public void showMap(@NotNull MapData map, int slot) {
         this.map = Objects.requireNonNull(map);
         this.slot = slot;
+        this.showInfoTab();
 
         for (var slotId : slotIds) {
             slotId.setText(String.format("Slot #%d", slot + 1));
@@ -225,6 +226,18 @@ public class EditMap extends View {
 
     @Action(value = "edit_in_world", async = true)
     private @Blocking void editMap(@NotNull Player player) {
+        if (map.verification() != MapVerification.UNVERIFIED) {
+            pushView(context -> new ConfirmAction(
+                    context,
+                    () -> actuallyEditMap(player),
+                    Component.translatable("edit.map.confirm")
+            ));
+        } else {
+            actuallyEditMap(player);
+        }
+    }
+
+    private void actuallyEditMap(Player player) {
         try {
             if (map.verification() != MapVerification.UNVERIFIED) {
                 player.sendMessage(Component.translatable("progress.verification.lost"));
@@ -656,7 +669,7 @@ public class EditMap extends View {
 
             performSignal(CreateMaps.SIG_RESET);
             player.sendMessage(Component.translatable("command.map.delete.success"));
-            pushView(CreateMaps::new);
+            replaceView(CreateMaps::new);
         } catch (Exception e) {
             player.sendMessage(Component.translatable("command.map.delete.failure"));
             logger.log(System.Logger.Level.ERROR, "failed to delete map", e);

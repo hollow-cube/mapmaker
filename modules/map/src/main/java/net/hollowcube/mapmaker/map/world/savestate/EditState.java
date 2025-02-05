@@ -18,7 +18,7 @@ import java.util.Optional;
 
 public final class EditState {
     @TestOnly
-    static final Codec<Map<Integer, ItemStack>> INVENTORY_CODEC = ExtraCodecs.withAlternative(
+    static final Codec<Map<Integer, ItemStack>> INVENTORY_CODEC = Codec.withAlternative(
             Codec.unboundedMap(ExtraCodecs.INT_STRING, ExtraCodecs.ITEM_STACK),
             LegacyCodecs.ITEM_STACK_MAP_AS_BASE64
     );

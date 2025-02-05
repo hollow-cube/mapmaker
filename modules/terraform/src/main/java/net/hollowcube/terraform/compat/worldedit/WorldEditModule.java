@@ -1,13 +1,23 @@
 package net.hollowcube.terraform.compat.worldedit;
 
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.event.PlayerGiveCreativeItemEvent;
 import net.hollowcube.terraform.TerraformModule;
 import net.hollowcube.terraform.compat.worldedit.command.*;
+import net.hollowcube.terraform.session.LocalSession;
+import net.minestom.server.entity.GameMode;
+import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
 public class WorldEditModule implements TerraformModule {
+
+    private final EventNode<InstanceEvent> eventNode = EventNode.type("map-worldedit", EventFilter.INSTANCE)
+            .addListener(PlayerGiveCreativeItemEvent.class, this::onGiveCreativeItem);
 
     @Override
     public @NotNull Set<CommandDsl> commands() {
@@ -19,8 +29,8 @@ public class WorldEditModule implements TerraformModule {
 //                new GeneralCommands.GMask(), //todo
 
                 // Selection
-                new SelectionCommands.Pos1(),
-                new SelectionCommands.Pos2(),
+                SelectionCommands.Pos.Pos1(),
+                SelectionCommands.Pos.Pos2(),
                 new SelectionCommands.HPos1(),
                 new SelectionCommands.HPos2(),
                 new SelectionCommands.Chunk(),
@@ -100,5 +110,25 @@ public class WorldEditModule implements TerraformModule {
                 new UtilityCommands.ReplaceNear()
 //                new UtilityCommands.Help() //todo
         );
+    }
+
+    @Override
+    public @NotNull Set<EventNode<InstanceEvent>> eventNodes() {
+        return Set.of(eventNode);
+    }
+
+    private void onGiveCreativeItem(@NotNull PlayerGiveCreativeItemEvent event) {
+        if (event.getPlayer().getGameMode() != GameMode.CREATIVE) return;
+        var inventory = event.getPlayer().getInventory();
+        if (event.slot() < 0 || event.slot() >= inventory.getSize()) return;
+
+        if (event.item().material() == Material.WOODEN_AXE) {
+            var tf = LocalSession.forPlayer(event.getPlayer()).terraform();
+            var itemStack = tf.toolHandler().createBuiltinTool("terraform:wand");
+            inventory.setItemStack(event.slot(), itemStack);
+            inventory.update();
+
+            event.setCancelled(true);
+        }
     }
 }

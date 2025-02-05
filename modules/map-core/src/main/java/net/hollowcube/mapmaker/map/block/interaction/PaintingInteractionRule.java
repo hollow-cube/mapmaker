@@ -43,6 +43,8 @@ public class PaintingInteractionRule implements BlockInteractionRule {
         entity.setInstance(interaction.instance(), pos);
         entity.playSpawnSound();
 
+        interaction.player().swingMainHand();
+
         return true;
     }
 

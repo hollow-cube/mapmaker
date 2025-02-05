@@ -1,17 +1,17 @@
 package net.hollowcube.mapmaker.map.block.placement;
 
+import net.hollowcube.terraform.util.math.DirectionUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
+import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
 
-@SuppressWarnings("UnstableApiUsage")
 public class DoorPlacementRule extends BaseBlockPlacementRule {
     public DoorPlacementRule(@NotNull Block block) {
         super(block);
@@ -28,8 +28,7 @@ public class DoorPlacementRule extends BaseBlockPlacementRule {
 
         var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
         var facing = BlockFace.fromYaw(playerPosition.yaw());
-        var isLeftHinge = computeHinge(facing, Objects.requireNonNullElse(placementState.cursorPosition(), Vec.ZERO));
-        //todo doors need to connect to other doors
+        var isLeftHinge = computeHinge(instance, blockPosition, facing.toDirection(), placementState.cursorPosition());
         var placedBlock = block.withProperties(Map.of(
                 "facing", facing.name().toLowerCase(),
                 "hinge", isLeftHinge ? "left" : "right")
@@ -41,12 +40,20 @@ public class DoorPlacementRule extends BaseBlockPlacementRule {
         return placedBlock;
     }
 
-    private boolean computeHinge(@NotNull BlockFace blockFace, @NotNull Point cursorPosition) {
-        return switch (blockFace) {
-            case NORTH -> cursorPosition.x() < 0.5;
-            case SOUTH -> cursorPosition.x() > 0.5;
-            case WEST -> cursorPosition.z() > 0.5;
-            case EAST -> cursorPosition.z() < 0.5;
+    private boolean computeHinge(@NotNull Block.Getter instance, @NotNull Point position, @NotNull Direction direction, @Nullable Point cursor) {
+        var left = position.relative(BlockFace.fromDirection(DirectionUtil.rotate(direction, false)));
+        var right = position.relative(BlockFace.fromDirection(DirectionUtil.rotate(direction, true)));
+        var leftBlock = instance.getBlock(left);
+        var rightBlock = instance.getBlock(right);
+        if (Objects.equals(leftBlock.getProperty("hinge"), "left")) return false;
+        if (Objects.equals(rightBlock.getProperty("hinge"), "right")) return true;
+        if (cursor == null) return false;
+
+        return switch (direction) {
+            case NORTH -> cursor.x() < 0.5;
+            case SOUTH -> cursor.x() > 0.5;
+            case WEST -> cursor.z() > 0.5;
+            case EAST -> cursor.z() < 0.5;
             default -> false;
         };
     }

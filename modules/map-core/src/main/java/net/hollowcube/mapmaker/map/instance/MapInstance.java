@@ -44,7 +44,12 @@ public class MapInstance extends InstanceContainer {
 
         // Lighting and dummy chunk loader. The chunk loader will be replaced if there is world data
         // for the map to load, otherwise we keep this one.
-        setChunkSupplier(hasLighting ? LitChunk::new : UnlitChunk::new);
+        if (hasLighting) {
+            setChunkSupplier(LitChunk::new);
+        } else {
+            var fullBrightLightData = UnlitChunk.createStaticLightData(this, 15, 0);
+            setChunkSupplier((instance, chunkX, chunkZ) -> new UnlitChunk(instance, chunkX, chunkZ, fullBrightLightData));
+        }
         setChunkLoader(new PolarLoader(new PolarWorld()));
 
         eventNode().addListener(RemoveEntityFromInstanceEvent.class, this::handleEntityRemoved);

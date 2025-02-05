@@ -1,20 +1,17 @@
 package net.hollowcube.mapmaker.map.feature.play.item;
 
-import net.hollowcube.mapmaker.map.util.GenericTempActionBarProvider;
+import net.hollowcube.mapmaker.map.feature.play.handlers.SpectateHandler;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
+import net.hollowcube.mapmaker.map.util.GenericTempActionBarProvider;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.Material;
-import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
 public class SetSpectatorCheckpointItem extends ItemHandler {
-
-    public static Tag<Pos> SPECTATOR_CHECKPOINT = Tag.Transient("mapmaker:spectator_checkpoint"); //todo the usage of this needs to be centralized. its used in sooooo many places
 
     public static final String ID_SPECTATOR = "mapmaker:set_spectator_checkpoint";
     public static final SetSpectatorCheckpointItem INSTANCE_SPECTATOR = new SetSpectatorCheckpointItem(ID_SPECTATOR);
@@ -39,19 +36,16 @@ public class SetSpectatorCheckpointItem extends ItemHandler {
 
     @Override
     protected void rightClicked(@NotNull Click click) {
-        var player = click.player();
+        Player player = click.player();
+        ActionBar actionBar = ActionBar.forPlayer(player);
         if (player.isSneaking()) {
-            player.removeTag(SPECTATOR_CHECKPOINT);
-            sendActionBar(player, "Cleared temporary checkpoint!");
+            SpectateHandler.setCheckpoint(player, null);
+            actionBar.addProvider(new GenericTempActionBarProvider("Cleared temporary checkpoint!", 1000));
         } else {
-            player.setTag(SPECTATOR_CHECKPOINT, player.getPosition());
-            sendActionBar(player, "Added temporary checkpoint!");
+            SpectateHandler.setCheckpoint(player, player.getPosition());
+            actionBar.addProvider(new GenericTempActionBarProvider("Added temporary checkpoint!", 1000));
         }
     }
 
-    private void sendActionBar(@NotNull Player player, @NotNull String message) {
-        var ab = ActionBar.forPlayer(player);
-        ab.addProvider(new GenericTempActionBarProvider(message, 1000L));
-    }
 
 }

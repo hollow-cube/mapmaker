@@ -4,15 +4,21 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.SaveStateType;
+import net.hollowcube.mapmaker.map.event.MapPlayerTeleportingEvent;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.entity.attribute.Attribute;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.concurrent.CompletableFuture;
 
 public final class MapWorldHelpers {
     private MapWorldHelpers() {
@@ -55,6 +61,12 @@ public final class MapWorldHelpers {
         // Reapply the cosmetics they have on
         var playerData = PlayerDataV2.fromPlayer(player);
         MiscFunctionality.applyCosmetics(player, playerData);
+    }
+
+    public static CompletableFuture<Void> teleportPlayer(@NotNull Player player, @NotNull Point position) {
+        MapWorld world = MapWorld.forPlayer(player);
+        world.callEvent(new MapPlayerTeleportingEvent(world, player, position));
+        return player.teleport(Pos.fromPoint(position), Vec.ZERO, null, RelativeFlags.NONE);
     }
 
 }

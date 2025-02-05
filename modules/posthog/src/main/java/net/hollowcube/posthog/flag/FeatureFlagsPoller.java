@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.JsonOps;
-import net.hollowcube.common.util.dfu.DFU;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -107,8 +106,8 @@ public class FeatureFlagsPoller {
         var response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         var responseJson = gson.fromJson(response.body(), JsonElement.class);
-        var responseFlags = FeatureFlagsResponse.CODEC.decode(JsonOps.INSTANCE, responseJson);
-        var flags = DFU.unwrap(responseFlags).getFirst();
+        var responseFlags = FeatureFlagsResponse.CODEC.parse(JsonOps.INSTANCE, responseJson);
+        var flags = responseFlags.getOrThrow();
 
         var newFlagMap = new HashMap<String, FeatureFlag>();
         for (var flag : flags.flags())

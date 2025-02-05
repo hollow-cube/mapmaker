@@ -1,16 +1,11 @@
 package net.hollowcube.common.util.dfu;
 
-import com.google.gson.*;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.JsonOps;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagSerializer;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Type;
 import java.util.function.Supplier;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -38,44 +33,16 @@ public final class DFU {
 
     private static <T> @NotNull TagSerializer<T> codecTagSerializer(@NotNull Codec<T> codec) {
         return TagSerializer.fromCompound(
-                compound -> unwrap(codec.decode(NbtOps.INSTANCE, compound).map(Pair::getFirst)),
-                value -> (CompoundBinaryTag) unwrap(codec.encode(value, NbtOps.INSTANCE, null))
+                compound -> codec.parse(NbtOps.INSTANCE, compound).getOrThrow(),
+                value -> (CompoundBinaryTag) codec.encode(value, NbtOps.INSTANCE, null).getOrThrow()
         );
     }
 
     public static <T> @NotNull CompoundBinaryTag encodeNbt(@NotNull Codec<T> codec, @NotNull T value) {
-        return (CompoundBinaryTag) unwrap(codec.encode(value, NbtOps.INSTANCE, null));
+        return (CompoundBinaryTag) codec.encode(value, NbtOps.INSTANCE, null).getOrThrow();
     }
 
     private static <T> @NotNull Supplier<T> codecEmptySupplier(@NotNull Codec<T> codec) {
-        return () -> unwrap(codec.decode(NbtOps.INSTANCE, CompoundBinaryTag.empty()).map(Pair::getFirst));
-    }
-
-    public static <T, S extends JsonSerializer<T> & JsonDeserializer<T>> @NotNull S JsonSerializer(@NotNull Codec<T> codec) {
-        //noinspection unchecked
-        return (S) new CodecJsonSerializer<>(codec);
-    }
-
-    private record CodecJsonSerializer<T>(@NotNull Codec<T> codec) implements JsonSerializer<T>, JsonDeserializer<T> {
-
-        @Override
-        public T deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            return codec.decode(JsonOps.INSTANCE, json).result().orElseThrow().getFirst();
-        }
-
-        @Override
-        public JsonElement serialize(T src, Type typeOfSrc, JsonSerializationContext context) {
-            return codec.encode(src, JsonOps.INSTANCE, null).result().orElseThrow();
-        }
-    }
-
-    public static <T> @NotNull T unwrap(@NotNull DataResult<T> result) {
-        if (result.result().isPresent()) {
-            return result.result().get();
-        } else if (result.error().isPresent()) {
-            throw new RuntimeException(result.error().get().message());
-        } else {
-            throw new RuntimeException("Unknown error");
-        }
+        return () -> codec.parse(NbtOps.INSTANCE, CompoundBinaryTag.empty()).getOrThrow();
     }
 }

@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.feature.play.item;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.feature.play.handlers.SpectateHandler;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.item.Material;
@@ -12,8 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Objects;
-
-import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 
 public class ReturnToHubItem extends ItemHandler {
     private static final Logger logger = LoggerFactory.getLogger(ReturnToHubItem.class);
@@ -45,7 +44,7 @@ public class ReturnToHubItem extends ItemHandler {
 
         FutureUtil.submitVirtual(() -> {
             try {
-                player.removeTag(SPECTATOR_CHECKPOINT);
+                SpectateHandler.setCheckpoint(player, null);
                 world.removePlayer(player);
                 world.server().bridge().joinHub(player);
             } catch (Exception e) {

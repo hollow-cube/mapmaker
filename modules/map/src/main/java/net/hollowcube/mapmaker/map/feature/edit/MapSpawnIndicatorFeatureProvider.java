@@ -68,6 +68,7 @@ public class MapSpawnIndicatorFeatureProvider implements FeatureProvider {
         var spawnMarker = world.getTag(SPAWN_MARKER_TAG);
         if (spawnMarker == null) return;
 
+        spawnMarker.setView(event.newSpawnPoint().yaw(), event.newSpawnPoint().pitch());
         spawnMarker.teleport(event.newSpawnPoint());
     }
 

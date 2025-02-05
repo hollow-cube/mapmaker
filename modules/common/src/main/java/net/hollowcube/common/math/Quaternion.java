@@ -1,5 +1,6 @@
 package net.hollowcube.common.math;
 
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
@@ -199,6 +200,20 @@ public final class Quaternion {
         matrixs[8] = (float) (2.0f * ((x * z) - (y * w)));
         matrixs[9] = (float) (2.0f * ((y * z) + (x * w)));
         matrixs[10] = (float) (1.0f - (2.0f * ((x * x) + (y * y))));
+    }
+
+    public Point toEulerAngles() {
+        return new Vec(
+                Math.toDegrees(Math.asin(-2 * (this.y * this.z - this.w * this.x))), // pitch
+                Math.toDegrees(Math.atan2(2 * (this.x * this.z + this.w * this.y), this.w * this.w - this.x * this.x - this.y * this.y + this.z * this.z)), // yaw
+                Math.toDegrees(Math.atan2(2 * (this.x * this.y + this.w * this.z), this.w * this.w - this.x * this.x + this.y * this.y - this.z * this.z)) // roll
+        );
+    }
+
+    public static Quaternion fromEulerAngles(Point angles) {
+        return new Quaternion(new Vec(1, 0, 0), Math.toRadians(angles.x()))
+                .mulThis(new Quaternion(new Vec(0, 1, 0), Math.toRadians(angles.y())))
+                .mulThis(new Quaternion(new Vec(0, 0, 1), Math.toRadians(angles.z())));
     }
 
 }

@@ -1,16 +1,12 @@
 package net.hollowcube.mapmaker.map.feature.play.item;
 
-import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.feature.play.handlers.SpectateHandler;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
-import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-
-import static net.hollowcube.mapmaker.map.feature.play.item.SetSpectatorCheckpointItem.SPECTATOR_CHECKPOINT;
 
 public class ExitSpectatorModeItem extends ItemHandler {
 
@@ -35,14 +31,6 @@ public class ExitSpectatorModeItem extends ItemHandler {
 
     @Override
     protected void rightClicked(@NotNull Click click) {
-        var player = click.player();
-        var world = MapWorld.forPlayer(player);
-        if (!(world instanceof PlayingMapWorld)) return;
-
-        FutureUtil.submitVirtual(() -> {
-            player.removeTag(SPECTATOR_CHECKPOINT);
-            world.removePlayer(player); // Remove spectator
-            world.addPlayer(player); // Add back as playing player
-        });
+        SpectateHandler.setSpectating(click.player(), false);
     }
 }

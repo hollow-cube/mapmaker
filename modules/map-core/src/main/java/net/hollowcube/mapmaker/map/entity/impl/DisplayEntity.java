@@ -1,26 +1,38 @@
 package net.hollowcube.mapmaker.map.entity.impl;
 
+import net.hollowcube.common.math.Quaternion;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.kyori.adventure.nbt.*;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.Metadata;
+import net.minestom.server.entity.MetadataDef;
+import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 import net.minestom.server.entity.metadata.display.BlockDisplayMeta;
 import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.entity.metadata.display.TextDisplayMeta;
+import net.minestom.server.network.packet.server.SendablePacket;
+import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static net.kyori.adventure.nbt.FloatBinaryTag.floatBinaryTag;
 
 @SuppressWarnings("UnstableApiUsage")
-public class DisplayEntity extends MapEntity {
+public sealed abstract class DisplayEntity extends MapEntity permits DisplayEntity.Block, DisplayEntity.Item, DisplayEntity.Text {
     private static final BinaryTagSerializer<AbstractDisplayMeta.BillboardConstraints> BILLBOARD_CONSTRAINTS = BinaryTagSerializer.fromEnumStringable(AbstractDisplayMeta.BillboardConstraints.class);
+
+    public static final Tag<UUID> SELECTED_DISPLAY_ENTITY = Tag.Transient("mapmaker:selected_display_entity");
 
     protected DisplayEntity(@NotNull EntityType entityType, @NotNull UUID uuid) {
         super(entityType, uuid);
@@ -146,7 +158,78 @@ public class DisplayEntity extends MapEntity {
             meta.setGlowColorOverride(glowColor.intValue());
     }
 
-    public static class Block extends DisplayEntity {
+    @Override
+    public void sendPacketToViewersAndSelf(@NotNull SendablePacket packet) {
+        if (packet instanceof EntityMetaDataPacket(int entity, Map<Integer, Metadata.Entry<?>> entries)) {
+            var glowingPacket = new EntityMetaDataPacket(entity, OpUtils.copyAndEdit(entries, it -> {
+                byte current = (Byte) it.getOrDefault(MetadataDef.HAS_GLOWING_EFFECT.index(), Metadata.Byte((byte) 0)).value();
+                it.put(MetadataDef.HAS_GLOWING_EFFECT.index(), Metadata.Byte((byte) (current | (byte) 0x40)));
+            }));
+
+            for (Player viewer : this.getViewers()) {
+                if (this.getUuid().equals(viewer.getTag(SELECTED_DISPLAY_ENTITY))) {
+                    viewer.sendPacket(glowingPacket);
+                } else {
+                    viewer.sendPacket(packet);
+                }
+            }
+        } else {
+            super.sendPacketToViewersAndSelf(packet);
+        }
+    }
+
+    /**
+     * Sends a metadata update to all viewers.
+     */
+    public void forceSendMetaPacket() {
+        var flags = this.metadata.get(MetadataDef.ENTITY_FLAGS);
+        this.metadata.set(MetadataDef.ENTITY_FLAGS, flags);
+    }
+
+    /**
+     * Translates the entity by the given point.
+     */
+    public void translateDisplay(Point point) {
+        getEntityMeta().setTranslation(new Vec(point.x(), point.y(), point.z()));
+    }
+
+    /**
+     * Rotates the entity by the given point but keeping it self-centered on its translation.
+     */
+    public void rotateDisplay(Point point) {
+        var left = Quaternion.fromEulerAngles(point);
+        getEntityMeta().setLeftRotation(left.into());
+        getEntityMeta().setRightRotation(new float[]{0, 0, 0, 1});
+
+        double x = left.getX(), y = left.getY(), z = left.getZ(), w = left.getW();
+
+        double n = 1.0 / Math.fma(x, x, Math.fma(y, y, Math.fma(z, z, w * w)));
+        double qx = x * n, qy = y * n, qz = z * n, qw = w * n;
+        double xx = qx * qx, yy = qy * qy, zz = qz * qz, ww = qw * qw;
+        double xy = qx * qy, xz = qx * qz, yz = qy * qz, xw = qx * qw;
+        double zw = qz * qw, yw = qy * qw;
+        double k = 1.0 / (xx + yy + zz + ww);
+
+        var translation = getEntityMeta().getTranslation();
+        getEntityMeta().setTranslation(new Vec(
+                Math.fma(2 * (xz + yw) * k, translation.x(), Math.fma(2 * (yz - xw) * k, translation.y(), ((zz - xx - yy + ww) * k) * translation.z())),
+                Math.fma(2 * (xy - zw) * k, translation.x(), Math.fma((yy - xx - zz + ww) * k, translation.y(), (2 * (yz + xw) * k) * translation.z())),
+                Math.fma((xx - yy - zz + ww) * k, translation.x(), Math.fma(2 * (xy + zw) * k, translation.y(), (2 * (xz - yw) * k) * translation.z()))
+        ));
+    }
+
+    /**
+     * Scales the entity by the given point but keeping it self-centered on its translation.
+     */
+    public void scaleDisplay(Point point) {
+        Point scale = getEntityMeta().getScale();
+        Point translation = getEntityMeta().getTranslation();
+        double x = translation.x() / scale.x(), y = translation.y() / scale.y(), z = translation.z() / scale.z();
+        getEntityMeta().setTranslation(new Vec(x * point.x(), y * point.y(), z * point.z()));
+        getEntityMeta().setScale(new Vec(point.x(), point.y(), point.z()));
+    }
+
+    public static final class Block extends DisplayEntity {
 
         public Block(@NotNull UUID uuid) {
             super(EntityType.BLOCK_DISPLAY, uuid);
@@ -181,7 +264,7 @@ public class DisplayEntity extends MapEntity {
 
     }
 
-    public static class Item extends DisplayEntity {
+    public static final class Item extends DisplayEntity {
         private static final BinaryTagSerializer<ItemDisplayMeta.DisplayContext> DISPLAY_CONTEXT = BinaryTagSerializer.fromEnumStringable(ItemDisplayMeta.DisplayContext.class);
 
         public Item(@NotNull UUID uuid) {
@@ -219,7 +302,7 @@ public class DisplayEntity extends MapEntity {
 
     }
 
-    public static class Text extends DisplayEntity {
+    public static final class Text extends DisplayEntity {
         private static final int DEFAULT_BACKGROUND = 1073741824;
 
         public Text(@NotNull UUID uuid) {

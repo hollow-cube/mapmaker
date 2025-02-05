@@ -11,11 +11,14 @@ import net.hollowcube.mapmaker.map.entity.marker.MapLeaderboardMarkerHandler;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.event.entity.MarkerEntityEnteredEvent;
+import net.hollowcube.mapmaker.map.event.entity.MarkerEntityExitedEvent;
+import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointPostChangeEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointPreChangeEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCompleteMapEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerStatusChangeEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.feature.edit.item.BuilderMenuItem;
+import net.hollowcube.mapmaker.map.feature.edit.item.DisplayEntityItem;
 import net.hollowcube.mapmaker.map.feature.edit.item.EnterTestModeItem;
 import net.hollowcube.mapmaker.map.feature.edit.item.SpawnPointItem;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
@@ -44,7 +47,8 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
             .addListener(MapWorldPlayerStopPlayingEvent.class, this::cleanupPlayer)
             .addListener(TerraformAxiomRequestMarkerDataEvent.class, this::handleMarkerClick);
     private final EventNode<InstanceEvent> playingNode = EventNode.type("custom-blocks-event-node", EventFilter.INSTANCE)
-            .addListener(MarkerEntityEnteredEvent.class, this::handleEffectMarkerEnter);
+            .addListener(MarkerEntityEnteredEvent.class, this::handleEffectMarkerEnter)
+            .addListener(MarkerEntityExitedEvent.class, this::handleEffectMarkerExit);
 
 
     @Override
@@ -77,6 +81,7 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
             world.itemRegistry().register(BuilderMenuItem.INSTANCE);
             world.itemRegistry().register(EnterTestModeItem.INSTANCE);
             world.itemRegistry().register(SpawnPointItem.INSTANCE);
+            world.itemRegistry().register(DisplayEntityItem.INSTANCE);
 
             world.eventNode().addChild(eventNode);
 
@@ -152,6 +157,23 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
                 var finishId = marker.getUuid().toString();
                 world.callEvent(new MapPlayerCompleteMapEvent(player, world, finishId));
             }
+            case "mapmaker:bounce_pad" -> {
+                var data = marker.getTag(BouncePadBlock.ENTITY_DATA_TAG);
+                BouncePadBlock.applyVelocity(data, player);
+            }
+        }
+    }
+
+    private void handleEffectMarkerExit(@NotNull MarkerEntityExitedEvent event) {
+        var marker = event.getMarkerEntity();
+        var world = event.getMapWorld();
+        var player = event.getPlayer();
+        if (marker.getType().equals("mapmaker:checkpoint")) {
+            var checkpoint = marker.getTag(CheckpointPlateBlock.ENTITY_DATA_TAG);
+            if (checkpoint == null) return;
+
+            var checkpointId = marker.getUuid().toString();
+            world.callEvent(new MapPlayerCheckpointPostChangeEvent(player, world, checkpointId, checkpoint));
         }
     }
 

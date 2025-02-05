@@ -52,6 +52,11 @@ public record RenderableContext(
     }
 
     @Override
+    public void clearHistory() {
+        inventory.clearHistory();
+    }
+
+    @Override
     public void pushView(@NotNull View view, boolean isTransient) {
         inventory.pushView(view, isTransient);
     }

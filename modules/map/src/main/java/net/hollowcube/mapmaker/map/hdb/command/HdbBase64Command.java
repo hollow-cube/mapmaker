@@ -3,9 +3,9 @@ package net.hollowcube.mapmaker.map.hdb.command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.map.block.handler.PlayerHeadBlockHandler;
 import net.hollowcube.mapmaker.map.hdb.HdbMessages;
-import net.hollowcube.mapmaker.map.util.PlayerUtil;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemComponent;
@@ -48,7 +48,7 @@ public class HdbBase64Command extends CommandDsl {
 
             base64 = skin.textures();
         } else {
-            var targetBlockPosition = PlayerUtil.getTargetBlock(player, PlayerUtil.DEFAULT_PLACE_REACH);
+            var targetBlockPosition = PlayerUtil.getTargetBlock(player, PlayerUtil.DEFAULT_PLACEMENT_DISTANCE, true);
             if (targetBlockPosition == null) {
                 player.sendMessage(HdbMessages.COMMAND_BASE64_NO_BLOCK);
                 return;

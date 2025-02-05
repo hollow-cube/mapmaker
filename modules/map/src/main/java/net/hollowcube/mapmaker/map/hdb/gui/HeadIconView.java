@@ -6,8 +6,8 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.map.hdb.HeadInfo;
-import net.hollowcube.mapmaker.map.util.PlayerUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
@@ -47,7 +47,7 @@ public class HeadIconView extends View {
             return;
         }
 
-        PlayerUtil.smartAddItemStack(player, head.createItemStack());
+        PlayerUtil.giveItem(player, head.createItemStack());
         if (clickType == ClickType.LEFT_CLICK) player.closeInventory();
     }
 }
