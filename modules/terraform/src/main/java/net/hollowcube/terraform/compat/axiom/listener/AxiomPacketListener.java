@@ -28,6 +28,7 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.trait.CancellableEvent;
+import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.network.packet.server.play.AcknowledgeBlockChangePacket;
 import net.minestom.server.utils.UUIDUtils;
@@ -142,8 +143,15 @@ public final class AxiomPacketListener {
                 // Update the block if the event isnt cancelled
                 if (event != null) EventDispatcher.call(event);
                 if (event == null || !event.isCancelled()) {
-                    if (!(event instanceof PlayerBlockInteractEvent interact) || !interact.isBlockingItemUse())
-                        instance.setBlock(blockPosition, block, packet.updateNeighbors());
+                    if (!(event instanceof PlayerBlockInteractEvent interact) || !interact.isBlockingItemUse()) {
+                        var hit = packet.blockHit();
+                        var cursor = hit.cursorPosition();
+                        BlockHandler.Placement placement = new BlockHandler.PlayerPlacement(
+                                block, instance, blockPosition, player, packet.hand(),
+                                hit.blockFace(), (float) cursor.x(), (float) cursor.y(), (float) cursor.z()
+                        );
+                        instance.placeBlock(placement, packet.updateNeighbors());
+                    }
                 }
             }
         } finally {
