@@ -5,22 +5,23 @@ import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
-import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.schem.Rotation;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ArgumentRotation extends Argument<Rotation> {
 
-    private static final Map<String, Rotation> VALUES = OpUtils.build(new ConcurrentHashMap<>(), map -> {
-        List.of("0", "0.0").forEach(value -> map.put(value, Rotation.NONE));
-        List.of("90", "90.0", "-270", "-270.0").forEach(value -> map.put(value, Rotation.CLOCKWISE_90));
-        List.of("180", "180.0", "-180", "-180.0").forEach(value -> map.put(value, Rotation.CLOCKWISE_180));
-        List.of("270", "270.0", "-90", "-90.0").forEach(value -> map.put(value, Rotation.CLOCKWISE_270));
-    });
+    private static final Map<String, Rotation> VALUES;
+    static {
+        Map<String, Rotation> values = new HashMap<>();
+        List.of("0", "0.0").forEach(value -> values.put(value, Rotation.NONE));
+        List.of("90", "90.0", "-270", "-270.0").forEach(value -> values.put(value, Rotation.CLOCKWISE_90));
+        List.of("180", "180.0", "-180", "-180.0").forEach(value -> values.put(value, Rotation.CLOCKWISE_180));
+        List.of("270", "270.0", "-90", "-90.0").forEach(value -> values.put(value, Rotation.CLOCKWISE_270));
+        VALUES = Map.copyOf(values);
+    }
 
     private final Set<Rotation> excluded;
 

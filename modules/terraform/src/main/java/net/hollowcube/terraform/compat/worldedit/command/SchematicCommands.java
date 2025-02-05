@@ -173,14 +173,15 @@ public final class SchematicCommands {
                 var session = PlayerSession.forPlayer(player);
                 var clipboard = session.clipboard(Clipboard.DEFAULT);
 
-                var schemData = clipboard.getInitialSchematic();
-                if (schemData == null) {
+                if (clipboard.isEmpty()) {
                     player.sendMessage(Messages.GENERIC_NO_CLIPBOARD);
                     return;
                 }
 
+                var schemData = clipboard.getTransformedSchematic();
                 var storage = session.terraform().storage();
                 var result = storage.createSchematic(session.id(), name, schemData, flags.contains(Flags.FORCE));
+
                 player.sendMessage(switch (result) {
                     case SUCCESS -> Messages.SCHEM_SAVED.with(name);
                     case DUPLICATE_ENTRY -> Messages.SCHEM_DUPLICATE.with(name);

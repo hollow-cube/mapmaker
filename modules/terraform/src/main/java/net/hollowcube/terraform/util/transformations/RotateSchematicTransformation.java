@@ -24,7 +24,7 @@ public record RotateSchematicTransformation(@NotNull Axis axis, @NotNull Rotatio
             Map<String, String> properties = block.properties();
             Map<String, String> newProperties = new HashMap<>();
             var facing = OpUtils.map(PropertyUtil.getFacing(properties), this.rotation::rotate);
-            var axis = OpUtils.map(PropertyUtil.getAxis(properties), this.rotation::rotate);
+            var axis = OpUtils.map(PropertyUtil.getAxis(properties), this.rotation::rotateAroundY);
             var rotation = OpUtils.map(PropertyUtil.getRotation(properties), this.rotation::rotate);
             var connections = OpUtils.map(PropertyUtil.getConnections(properties), this.rotation::rotate);
 

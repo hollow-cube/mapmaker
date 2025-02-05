@@ -59,7 +59,7 @@ public enum Rotation {
         };
     }
 
-    public @NotNull Axis rotate(@NotNull Axis axis) {
+    public @NotNull Axis rotateAroundY(@NotNull Axis axis) {
         return switch (this) {
             case NONE, CLOCKWISE_180 -> axis;
             case CLOCKWISE_90, CLOCKWISE_270 -> switch (axis) {
