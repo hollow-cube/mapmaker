@@ -19,6 +19,7 @@ import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.events.EventExtensions;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.compat.api.CompatProvider;
@@ -40,8 +41,6 @@ import net.hollowcube.mapmaker.config.*;
 import net.hollowcube.mapmaker.consumer.PlayerDataUpdateConsumer;
 import net.hollowcube.mapmaker.cosmetic.CosmeticInventoryHandler;
 import net.hollowcube.mapmaker.cosmetic.impl.accessory.AbstractAccessoryImpl;
-import net.hollowcube.mapmaker.event.PlayerGiveCreativeItemEvent;
-import net.hollowcube.mapmaker.event.util.UpdateSignTextEvent;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.posthog.PostHogFeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.unleash.UnleashConfig;
@@ -94,8 +93,6 @@ import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
-import net.minestom.server.network.packet.client.play.ClientCreativeInventoryActionPacket;
-import net.minestom.server.network.packet.client.play.ClientUpdateSignPacket;
 import net.minestom.server.network.packet.server.common.ServerLinksPacket;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.Blocking;
@@ -233,9 +230,7 @@ public abstract class AbstractMapServer implements MapServer {
             }
         });
 
-        var packetListenerManager = MinecraftServer.getPacketListenerManager();
-        packetListenerManager.setPlayListener(ClientUpdateSignPacket.class, UpdateSignTextEvent::packetListener);
-        packetListenerManager.setPlayListener(ClientCreativeInventoryActionPacket.class, PlayerGiveCreativeItemEvent::post);
+        EventExtensions.init();
 
         // Dependent service init
 
@@ -285,7 +280,7 @@ public abstract class AbstractMapServer implements MapServer {
             chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, kafkaConfig.bootstrapServers(), producer);
             facets.put(ChatMessageListener.class, chatMessageListener);
             shutdowner.queue("chat-message-listener", chatMessageListener::close);
-            packetListenerManager.setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
+            MinecraftServer.getPacketListenerManager().setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
 
             playerDataUpdateConsumer = new PlayerDataUpdateConsumer(kafkaConfig.bootstrapServers(), playerService);
             shutdowner.queue("player-data-listener", playerDataUpdateConsumer::close);

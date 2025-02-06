@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.event;
+package net.hollowcube.common.events;
 
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;

@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.util.thesneaky;
 
-import net.hollowcube.mapmaker.event.util.UpdateSignTextEvent;
+import net.hollowcube.common.events.UpdateSignTextEvent;
 import net.kyori.adventure.nbt.BinaryTagTypes;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.ListBinaryTag;
@@ -141,7 +141,7 @@ public final class TheSneaky {
                 .build();
 
         MinecraftServer.getGlobalEventHandler().addListener(EventListener.builder(UpdateSignTextEvent.class)
-                .filter(e -> e.getPlayer() == player && e.blockPosition().sameBlock(signPos))
+                .filter(e -> e.getPlayer() == player && e.position().sameBlock(signPos))
                 .expireCount(1)
                 .handler(e -> {
                     var content = e.lines().stream().collect(Collectors.joining());

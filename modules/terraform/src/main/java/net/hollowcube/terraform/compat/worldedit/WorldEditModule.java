@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.compat.worldedit;
 
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.event.PlayerGiveCreativeItemEvent;
+import net.hollowcube.common.events.PlayerGiveCreativeItemEvent;
 import net.hollowcube.terraform.TerraformModule;
 import net.hollowcube.terraform.compat.worldedit.command.*;
 import net.hollowcube.terraform.session.LocalSession;
@@ -10,6 +10,7 @@ import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.item.Material;
+import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
@@ -125,8 +126,9 @@ public class WorldEditModule implements TerraformModule {
         if (event.item().material() == Material.WOODEN_AXE) {
             var tf = LocalSession.forPlayer(event.getPlayer()).terraform();
             var itemStack = tf.toolHandler().createBuiltinTool("terraform:wand");
-            inventory.setItemStack(event.slot(), itemStack);
-            inventory.update();
+            int slot = PlayerInventoryUtils.convertWindow0SlotToMinestomSlot(event.slot());
+            inventory.setItemStack(slot, itemStack);
+            inventory.sendSlotRefresh(slot, itemStack, itemStack);
 
             event.setCancelled(true);
         }
