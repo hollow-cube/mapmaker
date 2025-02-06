@@ -8,12 +8,9 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.util.RGBLike;
+import net.minestom.server.color.AlphaColor;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -27,25 +24,26 @@ import java.util.Objects;
 public class ColorPickerView extends View {
 
     private static final BadSprite COLOR_PREVIEW = BadSprite.require("anvil/color_preview");
+    private static final AlphaColor BLACK = new AlphaColor(255, 0, 0, 0);
 
     private @Outlet("title") Text title;
     private @Outlet("input") Label input;
     private @Outlet("preview") Label preview;
     private @Outlet("output") Label output;
 
-    private final TextInputBuilder<RGBLike, ColorPickerView> settings;
+    private final TextInputBuilder<AlphaColor, ColorPickerView> settings;
 
-    private TextColor color;
+    private AlphaColor color;
 
     private ColorPickerView(
             @NotNull Context context,
-            @NotNull TextInputBuilder<RGBLike, ColorPickerView> settings,
-            @Nullable RGBLike input
+            @NotNull TextInputBuilder<AlphaColor, ColorPickerView> settings,
+            @Nullable AlphaColor input
     ) {
         super(context);
         this.settings = settings;
 
-        this.color = Objects.requireNonNullElse(OpUtils.map(input, TextColor::color), NamedTextColor.BLACK);
+        this.color = Objects.requireNonNullElse(input, BLACK);
 
         this.input.setItemSprite(this.input.getItemDirect().with(ItemComponent.HIDE_TOOLTIP));
         this.preview.setItemSprite(
@@ -57,17 +55,19 @@ public class ColorPickerView extends View {
         );
         this.output.setItemSprite(this.output.getItemDirect().with(ItemComponent.HIDE_TOOLTIP));
 
-        this.title.setText("Enter a color code:");
-        this.input.setArgs(Component.text(this.color.asHexString()));
+        this.title.setText(this.settings.title);
+        String hex = this.color.alpha() == 0 ? String.format("#%02x%02x%02x", this.color.red(), this.color.green(), this.color.blue()) :
+                String.format("#%02x%02x%02x%02x", this.color.alpha(), this.color.red(), this.color.green(), this.color.blue());
+        this.input.setArgs(Component.text(hex));
     }
 
-    public static TextInputBuilder<RGBLike, ColorPickerView> builder() {
+    public static TextInputBuilder<AlphaColor, ColorPickerView> builder() {
         return new TextInputBuilder<>(ColorPickerView::new);
     }
 
     @Signal(Element.SIG_ANVIL_INPUT)
     public void handleAnvilInput(@NotNull String input) {
-        var newColor = Objects.requireNonNullElse(TextColor.fromCSSHexString(input), NamedTextColor.BLACK);
+        var newColor = Objects.requireNonNullElse(parseColor(input), BLACK);
         if (newColor.equals(this.color)) return;
         this.color = newColor;
 
@@ -106,5 +106,35 @@ public class ColorPickerView extends View {
         } else {
             popView(this.settings.signal, this.color);
         }
+    }
+
+    private @Nullable AlphaColor parseColor(@NotNull String input) {
+        if (input.startsWith("#")) input = input.substring(1);
+        else if (input.startsWith("0x")) input = input.substring(2);
+
+        try {
+            if (input.length() == 3 || input.length() == 4) {
+                var one = Integer.parseInt(input.substring(0, 1), 16) * 17;
+                var two = Integer.parseInt(input.substring(1, 2), 16) * 17;
+                var three = Integer.parseInt(input.substring(2, 3), 16) * 17;
+                if (input.length() == 3) {
+                    return new AlphaColor(255, one, two, three);
+                } else{
+                    var four = Integer.parseInt(input.substring(3, 4), 16) * 17;
+                    return new AlphaColor(one, two, three, four);
+                }
+            } else if (input.length() == 6 || input.length() == 8) {
+                var one = Integer.parseInt(input.substring(0, 2), 16);
+                var two = Integer.parseInt(input.substring(2, 4), 16);
+                var three = Integer.parseInt(input.substring(4, 6), 16);
+                if (input.length() == 6) {
+                    return new AlphaColor(255, one, two, three);
+                } else {
+                    var four = Integer.parseInt(input.substring(6, 8), 16);
+                    return new AlphaColor(one, two, three, four);
+                }
+            }
+        } catch (NumberFormatException ignored) {}
+        return null;
     }
 }
