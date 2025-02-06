@@ -30,7 +30,7 @@ public final class SpectateHandler {
             if (world.map().getSetting(MapSettings.NO_SPECTATOR)) return;
 
             // Must be standing on the ground (not falling) to enter spectator mode
-            if (!player.isOnGround()) {
+            if (!player.isOnGround() && player.getVehicle() == null) {
                 player.sendMessage(Component.translatable("map.spectator_mode.solid_ground"));
                 return;
             }

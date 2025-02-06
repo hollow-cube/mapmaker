@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.feature.play;
 
 import com.google.auto.service.AutoService;
 import io.prometheus.client.Counter;
+import net.hollowcube.common.events.PlayerMoveVehicleEvent;
 import net.hollowcube.common.util.dfu.DFU;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
@@ -142,7 +143,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             .addListener(MapPlayerCheckpointPostChangeEvent.class, this::handleCheckpointPostChange)
             .addListener(MapPlayerStatusChangeEvent.class, this::handleStatusChange)
             .addListener(MapPlayerResetEvent.class, this::handlePlayerReset)
-            .addListener(PlayerMoveEvent.class, this::handleInitTimerFromMove)
+            .addListener(PlayerMoveEvent.class, event -> handleInitTimerFromMove(event.getPlayer(), event.getNewPosition()))
+            .addListener(PlayerMoveVehicleEvent.class, event -> handleInitTimerFromMove(event.getPlayer(), event.getNewPosition()))
             .addListener(PlayerTickEvent.class, this::handlePlayerTick)
 
             .addListener(InventoryPreClickEvent.class, event -> {
@@ -466,8 +468,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         }
     }
 
-    private void handleInitTimerFromMove(@NotNull PlayerMoveEvent event) {
-        var player = event.getPlayer();
+    private void handleInitTimerFromMove(@NotNull Player player, @NotNull Pos newPos) {
         var world = MapWorld.forPlayerOptional(player);
         if (world == null || !world.isPlaying(player)) return;
 
@@ -475,8 +476,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         if (saveState == null || saveState.getPlayStartTime() != 0) return;
 
         var oldPosition = player.getPosition();
-        var newPosition = event.getNewPosition();
-        if (Vec.fromPoint(oldPosition).equals(Vec.fromPoint(newPosition)))
+        if (Vec.fromPoint(oldPosition).equals(Vec.fromPoint(newPos)))
             return; // Player did not actually move, just turn their head
 
         // Start the timer.
