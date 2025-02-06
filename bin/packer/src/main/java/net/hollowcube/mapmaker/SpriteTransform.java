@@ -1,10 +1,7 @@
 package net.hollowcube.mapmaker;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import de.marhali.json5.Json5;
-import de.marhali.json5.Json5Array;
-import de.marhali.json5.Json5Object;
+import com.google.gson.*;
+import de.marhali.json5.*;
 import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
@@ -92,13 +89,18 @@ public class SpriteTransform {
                                 display.add("head", head);
                                 obj.add("display", display);
                             };
+                        } else if (config.has("display")) {
+                            modelEditor = obj -> obj.add("display", toGson(config.getAsJson5Object("display")));
                         }
+
+                        ModelType modelType = config.get("colored") != null && config.get("colored").getAsBoolean() ?
+                                ModelType.COLORED : ModelType.DEFAULT;
 
                         int cmd;
                         if (debug) {
-                            cmd = context.addBasicItemTexture(ModelType.DEFAULT, name, baos.toByteArray(), modelEditor);
+                            cmd = context.addBasicItemTexture(modelType, name, baos.toByteArray(), modelEditor);
                         } else {
-                            cmd = context.addBasicItemTexture(ModelType.DEFAULT, name, Files.readAllBytes(imageFile), modelEditor);
+                            cmd = context.addBasicItemTexture(modelType, name, Files.readAllBytes(imageFile), modelEditor);
                         }
 
                         JsonObject serverSpriteConf = new JsonObject();
@@ -242,4 +244,27 @@ public class SpriteTransform {
         entries.put(name, fontChar);
     }
 
+    private static JsonElement toGson(Json5Element element) {
+        return switch (element) {
+            case Json5Object obj -> {
+                JsonObject ret = new JsonObject();
+                for (var entry : obj.entrySet()) {
+                    ret.add(entry.getKey(), toGson(entry.getValue()));
+                }
+                yield ret;
+            }
+            case Json5Array arr -> {
+                JsonArray ret = new JsonArray();
+                for (var value : arr) {
+                    ret.add(toGson(value));
+                }
+                yield ret;
+            }
+            case Json5String str -> new JsonPrimitive(str.getAsString());
+            case Json5Number num -> new JsonPrimitive(num.getAsNumber());
+            case Json5Boolean bool -> new JsonPrimitive(bool.getAsBoolean());
+            case Json5Null ignored -> JsonNull.INSTANCE;
+            default -> throw new IllegalStateException("Unexpected value: " + element);
+        };
+    }
 }
