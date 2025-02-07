@@ -38,11 +38,11 @@ public final class NetworkBufferTypes {
             tag -> tag instanceof CompoundBinaryTag compound ? compound : CompoundBinaryTag.empty(),
             compound -> compound.keySet().isEmpty() ? EndBinaryTag.endBinaryTag() : compound);
 
-    public static <T> NetworkBuffer.@NotNull Type<T> readOnly(@NotNull Function<NetworkBuffer, T> reader) {
+    public static <T> NetworkBuffer.@NotNull Type<T> of(@NotNull Function<NetworkBuffer, T> reader, @NotNull BiConsumer<NetworkBuffer, T> writer) {
         return new NetworkBuffer.Type<>() {
             @Override
             public void write(@NotNull NetworkBuffer buffer, T value) {
-                throw new UnsupportedOperationException();
+                writer.accept(buffer, value);
             }
 
             @Override
@@ -52,18 +52,16 @@ public final class NetworkBufferTypes {
         };
     }
 
-    public static <T> NetworkBuffer.@NotNull Type<T> writeOnly(@NotNull BiConsumer<NetworkBuffer, T> writer) {
-        return new NetworkBuffer.Type<>() {
-            @Override
-            public void write(@NotNull NetworkBuffer buffer, T value) {
-                writer.accept(buffer, value);
-            }
+    public static <T> NetworkBuffer.@NotNull Type<T> readOnly(@NotNull Function<NetworkBuffer, T> reader) {
+        return of(reader, (buffer, value) -> {
+            throw new UnsupportedOperationException();
+        });
+    }
 
-            @Override
-            public T read(@NotNull NetworkBuffer buffer) {
-                throw new UnsupportedOperationException();
-            }
-        };
+    public static <T> NetworkBuffer.@NotNull Type<T> writeOnly(@NotNull BiConsumer<NetworkBuffer, T> writer) {
+        return of(buffer -> {
+            throw new UnsupportedOperationException();
+        }, writer);
     }
 
     public static final NetworkBuffer.Type<@Nullable Point> OPT_VECTOR3 = NetworkBuffer.VECTOR3.optional();
