@@ -52,7 +52,7 @@ public class PasteCommand extends CommandDsl {
                 .metadata()
                 .compute((task, world) -> {
                     var buffer = BlockBuffer.builder(world);
-                    var schem = source.getSchematicWithRotations();
+                    var schem = source.getTransformedSchematic();
                     var schemWorld = WorldView.empty(task);
                     schem.forEachBlock((p, block) -> {
                         try {
