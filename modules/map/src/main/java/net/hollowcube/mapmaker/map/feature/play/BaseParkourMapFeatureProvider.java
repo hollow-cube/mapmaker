@@ -680,7 +680,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         var countdownEnd = player.getTag(COUNTDOWN_END);
         if (countdownEnd != -1) {
-            state.setTimeLimit(countdownEnd - now);
+            // We have to clamp it to 1 because if we don't when they rejoin their time limit will
+            // be less than or equal to 0 meaning it will allow them to play forever due tp <= 0 being infinite time.
+            state.setTimeLimit(Math.max(countdownEnd - now, 1));
         }
 
         // Update remaining time for the remaining effects (and remove if expired)
