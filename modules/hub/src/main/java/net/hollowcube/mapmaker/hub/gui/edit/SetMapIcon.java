@@ -28,7 +28,8 @@ public class SetMapIcon extends View {
                     material != Material.AIR &&
                     material != Material.SCULK_SENSOR &&
                     material != Material.CALIBRATED_SCULK_SENSOR &&
-                    material != Material.RECOVERY_COMPASS;
+                    material != Material.RECOVERY_COMPASS &&
+                    !material.name().endsWith("glass_pane");
 
     public static final String SIG_UPDATE_ICON = "set_map_icon.selected";
 
