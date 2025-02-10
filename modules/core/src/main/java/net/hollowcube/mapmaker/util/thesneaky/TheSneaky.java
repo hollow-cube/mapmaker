@@ -83,6 +83,7 @@ public final class TheSneaky {
             // Impact: Hacked client, dont think its updated to 1.20.4
             // Baritone: Hacked client, not sure how to detect
             // RusherHack: Costs $20, pass.
+            // JumpOverFences: (text.autoconfig.jumpoverfences.title) They let you change the jump height for certain blocks for the client only
     );
 
     public enum State {
