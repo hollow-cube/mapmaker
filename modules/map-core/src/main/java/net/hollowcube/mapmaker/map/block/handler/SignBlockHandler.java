@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.map.block.handler;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.common.util.CollectionUtil;
-import net.hollowcube.mapmaker.event.util.UpdateSignTextEvent;
+import net.hollowcube.common.events.UpdateSignTextEvent;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.hollowcube.mapmaker.map.util.InteractTarget;
@@ -173,7 +173,7 @@ public class SignBlockHandler implements BlockHandler, InteractTarget {
     public static void handleUpdateSignPacket(@NotNull UpdateSignTextEvent event) {
         var instance = event.getInstance();
 
-        var blockPosition = event.blockPosition();
+        var blockPosition = event.position();
         var block = instance.getBlock(blockPosition);
         if (block.handler() != BlockHandlers.SIGN && block.handler() != BlockHandlers.HANGING_SIGN)
             return;

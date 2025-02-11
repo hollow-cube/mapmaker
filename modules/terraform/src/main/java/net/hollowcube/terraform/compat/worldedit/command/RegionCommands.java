@@ -276,6 +276,7 @@ public final class RegionCommands {
 
             addSyntax(playerOnly(this::execute));
             addSyntax(playerOnly(this::execute), countArg);
+            addSyntax(playerOnly(this::execute), flagsArg);
             addSyntax(playerOnly(this::execute), countArg, directionArg);
             addSyntax(playerOnly(this::execute), countArg, directionArg, replaceArg);
             addSyntax(playerOnly(this::execute), flagsArg, countArg);
@@ -354,6 +355,7 @@ public final class RegionCommands {
 
             addSyntax(playerOnly(this::execute));
             addSyntax(playerOnly(this::execute), countArg);
+            addSyntax(playerOnly(this::execute), flagsArg);
             addSyntax(playerOnly(this::execute), countArg, directionArg);
             addSyntax(playerOnly(this::execute), flagsArg, countArg);
             addSyntax(playerOnly(this::execute), flagsArg, countArg, directionArg);

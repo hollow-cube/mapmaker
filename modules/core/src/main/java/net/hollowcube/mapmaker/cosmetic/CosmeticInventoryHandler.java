@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.cosmetic;
 
 import net.hollowcube.canvas.internal.Controller;
-import net.hollowcube.mapmaker.event.PlayerGiveCreativeItemEvent;
+import net.hollowcube.common.events.PlayerGiveCreativeItemEvent;
 import net.hollowcube.mapmaker.gui.store.CosmeticView;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.PlayerDataV2;

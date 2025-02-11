@@ -26,7 +26,7 @@ public class SchemSaveCommand extends CommandDsl {
 
         var session = PlayerSession.forPlayer(player);
         var storage = session.terraform().storage();
-        var schemData = clipboard.getSchematic();
+        var schemData = clipboard.getInitialSchematic();
         if (schemData == null) {
             player.sendMessage("No schematic data in clipboard");
             return;

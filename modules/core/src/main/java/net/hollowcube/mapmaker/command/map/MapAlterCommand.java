@@ -171,7 +171,7 @@ public class MapAlterCommand {
         var map = context.get(mapArg);
         var tag = context.get(tagArg);
 
-        var added = map.settings().removeTag(tag);
+        var added = map.settings().addTag(tag);
         if (!added) {
             player.sendMessage(Component.text("Map already has tag " + tag));
             return;

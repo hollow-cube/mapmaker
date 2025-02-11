@@ -13,6 +13,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.impl.ModelCosmeticImpl;
+import net.hollowcube.mapmaker.gui.common.ConfirmAction;
 import net.hollowcube.mapmaker.hub.merchant.MerchantTrade;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -20,6 +21,7 @@ import net.hollowcube.mapmaker.store.CostEntry;
 import net.hollowcube.mapmaker.store.CostList;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
@@ -159,7 +161,13 @@ public class CosmeticEntry extends View {
         switch (clickType) {
             case LEFT_CLICK -> {
                 if (isLocked) {
-                    tryBuyCosmetic();
+                    if (!canAfford()) return;
+                    String name = PlainTextComponentSerializer.plainText().serialize(cosmetic.displayName());
+                    pushView(context -> new ConfirmAction(
+                            context,
+                            this::tryBuyCosmetic,
+                            Component.translatable("purchase the " + name + " cosmetic")
+                    ));
                     return;
                 }
 
@@ -201,11 +209,15 @@ public class CosmeticEntry extends View {
         return cosmetic.id().equals(playerData.getCosmetic(cosmetic.type()));
     }
 
+    private boolean canAfford() {
+        var trade = TEMP_COSMETIC_TRADES.get(cosmetic.path());
+        return trade != null && trade.canAfford(playerData, PlayerBackpack.fromPlayer(player));
+    }
+
     private void tryBuyCosmetic() {
         // DELETE ME WHEN NO LONGER SELLING COSMETICS HERE DIRECTLY. THIS LOGIC IS DUPLICATED FROM TradeEntry.
         var trade = TEMP_COSMETIC_TRADES.get(cosmetic.path());
-        if (trade == null || !trade.canAfford(PlayerDataV2.fromPlayer(player), PlayerBackpack.fromPlayer(player)))
-            return;
+        if (!canAfford()) return;
 
         Integer cubits = null;
         for (var entry : trade.inputs().entries().entrySet()) {
