@@ -1,15 +1,20 @@
 declare namespace JSX {
     export type Element = any;
 
+    export type Layer = 'background' | 'default' | 'item'
+
+    export type BaseProps = {
+        layer?: Layer;
+        x?: number;
+        y?: number;
+    }
+
     export interface IntrinsicElements {
         row: { [key: string]: any };
         column: { [key: string]: any };
 
-        sprite: {
-            layer?: 'container' | 'background'; // Default container
+        sprite: BaseProps & {
             src: string;
-            x?: number;
-            y?: number;
         }
 
         text: { [key: string]: any };

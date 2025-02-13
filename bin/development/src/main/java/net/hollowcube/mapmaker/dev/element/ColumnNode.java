@@ -1,15 +1,24 @@
 package net.hollowcube.mapmaker.dev.element;
 
 import net.hollowcube.mapmaker.dev.render.RenderContext;
+import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class ColumnNode implements Node {
-    private final List<Node> children;
+import static net.hollowcube.mapmaker.dev.element.PropHelper.childrenAsList;
 
-    public ColumnNode(@NotNull List<Node> children) {
-        this.children = children;
+public class ColumnNode extends Node {
+    private List<Node> children;
+
+    @Override
+    public @NotNull ColumnNode readProps(@NotNull Value props, @NotNull Value[] children) {
+        super.readProps(props, children);
+
+        // TODO need to manage contexts here.
+        this.children = childrenAsList(children);
+
+        return this;
     }
 
     @Override

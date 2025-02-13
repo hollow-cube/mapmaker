@@ -7,6 +7,7 @@ const [CUBITS, HYPERCUBE, ADDONS] = [0, 1, 2] as const;
 function StoreView() {
     const [tab, setTab] = useShared<0 | 1 | 2>('tab', CUBITS);
 
+
     return <column>
         <sprite src='store/container' layer='background' x={-12} y={-49}/>
         <text layer='background'>Store</text>

@@ -46,6 +46,11 @@ public class FontUIBuilder {
         return this;
     }
 
+    public @NotNull FontUIBuilder unsafeOffset(int delta) {
+        this.pos += delta;
+        return this;
+    }
+
     /**
      * Moves to this absolute position
      */

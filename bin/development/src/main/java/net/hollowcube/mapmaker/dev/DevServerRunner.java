@@ -6,9 +6,7 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.MojangUtil;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
-import net.hollowcube.mapmaker.dev.element.Node;
-import net.hollowcube.mapmaker.dev.jsx.JSX;
-import net.hollowcube.mapmaker.dev.render.RenderContext;
+import net.hollowcube.mapmaker.dev.inventory.InventoryHost;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServerRunner;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
@@ -27,11 +25,14 @@ import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.player.PlayerSkin;
 import net.hollowcube.mapmaker.session.Presence;
+import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
+import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
@@ -41,19 +42,14 @@ import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Source;
-import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class DevServerRunner extends AbstractMapServer {
     private static final Logger logger = LoggerFactory.getLogger(DevServerRunner.class);
@@ -240,75 +236,19 @@ public class DevServerRunner extends AbstractMapServer {
                     .schedule();
         }, "");
 
+        dbg.createPermissionlessSubcommand("a", (player, ignored) -> {
+            ActionBar.forPlayer(player).addProvider(new ActionBar.Provider() {
+                @Override public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
+                    builder.pushColor(FontUtil.computeVerticalOffset(-50));
+                    builder.append("Hello, world");
+                    builder.popColor();
+                }
+            });
+        }, "");
+
+
         dbg.createPermissionlessSubcommand("gui", (player, ignored) -> {
-
-
-            try {
-
-                System.setProperty("polyglot.engine.WarnInterpreterOnly", "false");
-
-                var basePath = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/guilib/dist");
-                List<Path> files;
-                try (var stream = Files.walk(basePath)) {
-                    files = stream.toList();
-                }
-
-                var modules = new HashMap<String, Source>();
-                for (var path : files) {
-                    if (Files.isDirectory(path)) continue;
-                    if (!path.toString().endsWith(".js")) continue;
-
-                    var name = basePath.relativize(path).toString().replace(".js", "");
-                    var source = Source.newBuilder("js", path.toUri().toURL())
-                            .encoding(StandardCharsets.UTF_8)
-                            .content(Files.readString(path))
-                            .build();
-                    modules.put(name, source);
-                }
-
-                AtomicReference<ProxyExecutable> requireRef = new AtomicReference<>();
-                requireRef.set(arguments -> {
-                    if (arguments.length != 1)
-                        throw new IllegalArgumentException("expected 1 argument, got " + arguments.length);
-                    var path = basePath.relativize(basePath.resolve(arguments[0].asString())).toString();
-
-                    Context context = Context.newBuilder("js")
-                            .build(); // TODO THIS IS NOT BEING CLOSED PROPERLY
-                    var js = context.getBindings("js");
-                    js.putMember("require", requireRef.get());
-                    js.putMember("JSX", JSX.INSTANCE);
-                    var module = context.eval("js", "({})");
-                    js.putMember("exports", module);
-
-                    context.eval(modules.get(path));
-                    return module;
-                });
-
-                try (Context context = Context.newBuilder("js")
-                        .build()) {
-                    var js = context.getBindings("js");
-                    js.putMember("require", requireRef.get());
-                    js.putMember("JSX", JSX.INSTANCE);
-
-                    var finalResult = context.eval("js", "JSX.createElement(require('./TestComponent').default, null)");
-
-                    var rc = new RenderContext(9, 6);
-                    ((Node) finalResult.asHostObject()).render(rc);
-
-                    var inventory = new Inventory(InventoryType.CHEST_6_ROW, rc.getTitleText());
-                    var items = rc.getItems();
-                    for (int i = 0; i < items.length; i++) {
-                        inventory.setItemStack(i, items[i]);
-                    }
-
-                    player.openInventory(inventory);
-
-                    System.out.println(finalResult.asHostObject().toString());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
+            new InventoryHost(player, "./TestComponent");
         }, "");
 
         return dbg;

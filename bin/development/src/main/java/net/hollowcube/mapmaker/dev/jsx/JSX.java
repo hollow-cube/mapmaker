@@ -1,18 +1,13 @@
 package net.hollowcube.mapmaker.dev.jsx;
 
-import net.hollowcube.mapmaker.dev.element.ColumnNode;
-import net.hollowcube.mapmaker.dev.element.FCNode;
-import net.hollowcube.mapmaker.dev.element.Node;
-import net.hollowcube.mapmaker.dev.element.SpriteNode;
+import net.hollowcube.mapmaker.dev.element.*;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class JSX {
     public static final JSX INSTANCE = new JSX();
@@ -28,11 +23,14 @@ public class JSX {
             throw new UnsupportedOperationException("todo");
         }
         if (tag.isString()) { // Primitive
-            return context.asValue(switch (tag.asString()) {
-                case "column" -> new ColumnNode(childrenAsList(children));
-                case "sprite" -> new SpriteNode(getString(props, "src"));
+            var node = switch (tag.asString()) {
+                case "column" -> new ColumnNode();
+                case "row" -> new RowNode();
+                case "sprite" -> new SpriteNode();
+                case "text" -> new TextNode();
                 default -> throw new IllegalArgumentException("Unknown tag: " + tag.asString());
-            });
+            };
+            return context.asValue(node.readProps(props, children));
         }
         if (tag.canExecute()) { // Functional Component
             //todo in the future we would push a new state stack here.
@@ -45,6 +43,7 @@ public class JSX {
     }
 
     private @NotNull List<Node> childrenAsList(@NotNull Value[] children) {
+        System.out.println(Arrays.toString(children));
         return Arrays.stream(children)
                 .map(Value::asHostObject)
                 .map(Node.class::cast)
@@ -57,16 +56,6 @@ public class JSX {
         return value.asHostObject();
     }
 
-    private @NotNull String getString(Value props, String key) {
-        return Objects.requireNonNull(getString(props, key, null), () -> key + " is required");
-    }
-
-    private @UnknownNullability String getString(Value props, String key, String defaultValue) {
-        if (props.hasMember(key)) {
-            return props.getMember(key).asString();
-        }
-        return defaultValue;
-    }
 
     private JSX() {
     }

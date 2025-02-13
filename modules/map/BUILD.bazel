@@ -32,6 +32,8 @@ java_library(
         "@maven//:dev_hollowcube_polar",
         "@maven//:io_prometheus_simpleclient",
         "@maven//:it_unimi_dsi_fastutil",
+        "@maven//:org_graalvm_polyglot_js",
+        "@maven//:org_graalvm_polyglot_polyglot",
     ],
 )
 
