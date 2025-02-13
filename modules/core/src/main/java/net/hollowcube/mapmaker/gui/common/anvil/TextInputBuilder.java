@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class TextInputBuilder<T, V extends View> {
 
@@ -16,7 +17,7 @@ public class TextInputBuilder<T, V extends View> {
     String title = "";
     BadSprite icon = BadSprite.require("anvil/speech_bubble");
     String signal = null;
-    Consumer<T> callback = null;
+    Predicate<T> callback = null;
 
     TextInputBuilder(TextInputFactory<T, V> factory) {
         this.factory = factory;
@@ -39,6 +40,15 @@ public class TextInputBuilder<T, V extends View> {
     }
 
     public TextInputBuilder<T, V> callback(Consumer<T> callback) {
+        Check.stateCondition(this.signal != null, "Callback and signal cannot be set at the same time");
+        this.callback = (it) -> {
+            callback.accept(it);
+            return true;
+        };
+        return this;
+    }
+
+    public TextInputBuilder<T, V> callback(Predicate<T> callback) {
         Check.stateCondition(this.signal != null, "Callback and signal cannot be set at the same time");
         this.callback = callback;
         return this;

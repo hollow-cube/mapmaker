@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.Hats;
 import net.hollowcube.mapmaker.player.*;
+import net.hollowcube.mapmaker.player.responses.TotpSetupResponse;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -82,4 +83,18 @@ public class NoopPlayerService implements PlayerService {
         throw new UnsupportedOperationException("");
     }
 
+    @Override
+    public @NotNull TotpResult checkTotp(@NotNull String playerId, @NotNull String code) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @Nullable TotpSetupResponse beginTotpSetup(@NotNull String playerId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @NotNull TotpSetupResult completeTotpSetup(@NotNull String playerId, @NotNull String code) {
+        throw new UnsupportedOperationException();
+    }
 }

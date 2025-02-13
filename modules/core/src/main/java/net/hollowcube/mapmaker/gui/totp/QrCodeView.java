@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.gui.common.cartography;
+package net.hollowcube.mapmaker.gui.totp;
 
 import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
@@ -6,12 +6,14 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.gui.common.cartography.AbstractImageView;
 import net.minestom.server.map.Framebuffer;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.image.BufferedImage;
 import java.util.Base64;
 import java.util.BitSet;
+import java.util.function.Function;
 
 public class QrCodeView extends AbstractImageView {
 
@@ -20,17 +22,17 @@ public class QrCodeView extends AbstractImageView {
     private @Outlet("title") Text title;
 
     private final BufferedImage qrCode;
-    private final Runnable callback;
+    private final Function<Context, View> newView;
 
     /**
-     * @param context  The view context
-     * @param base64   The base64 encoded QR code bits, 1 is black, 0 is white, must be a square
-     * @param callback The callback to run when the user confirms the QR code
+     * @param context The view context
+     * @param base64  The base64 encoded QR code bits, 1 is black, 0 is white, must be a square
+     * @param newView The callback to run when the user confirms the QR code
      */
-    public QrCodeView(@NotNull Context context, String base64, Runnable callback) {
+    public QrCodeView(@NotNull Context context, String base64, int size, Function<Context, View> newView) {
         super(context);
-        this.qrCode = createQrCode(base64);
-        this.callback = callback;
+        this.qrCode = createQrCode(base64, size);
+        this.newView = newView;
 
         this.title.setText("Scan 2FA Code");
     }
@@ -45,12 +47,11 @@ public class QrCodeView extends AbstractImageView {
 
     @Action("confirm")
     public void onConfirm() {
-        this.callback.run();
+        this.pushView(this.newView);
     }
 
-    private static BufferedImage createQrCode(String base64Bits) {
+    private static BufferedImage createQrCode(String base64Bits, int size) {
         var bits = BitSet.valueOf(Base64.getDecoder().decode(base64Bits));
-        int size = (int) Math.ceil(Math.sqrt(bits.length()));
         int scale = size < SIZE ? Math.floorDiv(SIZE, size) : 1;
         var image = new BufferedImage(size * scale, size * scale, BufferedImage.TYPE_INT_ARGB);
 

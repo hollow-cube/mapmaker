@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import io.opentelemetry.api.OpenTelemetry;
 import io.prometheus.client.Summary;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
+import net.hollowcube.mapmaker.player.responses.TotpSetupResponse;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +32,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
 
     public PlayerServiceImpl(@Nullable OpenTelemetry otel, @NotNull String url) {
         super(otel);
-        this.url = String.format("%s/v1/internal", url);
+        this.url = String.format("%s/v2/internal", url);
     }
 
     @Override
@@ -205,4 +206,60 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         };
     }
 
+    @Override
+    public @NotNull TotpResult checkTotp(@NotNull String playerId, @NotNull String code) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/players/" + playerId + "/totp/" + code))
+                .GET();
+
+        var response = doRequest("checkTotp", req, HttpResponse.BodyHandlers.ofString());
+
+        return switch (response.statusCode()) {
+            case 200 -> TotpResult.VALID_CODE;
+            case 400 -> TotpResult.INVALID_FORMAT;
+            case 401 -> TotpResult.INVALID_CODE;
+            case 404 -> TotpResult.NOT_ENABLED;
+            default ->
+                    throw new InternalError("Totp check failed: (" + response.statusCode() + "): " + response.body());
+        };
+    }
+
+    @Override
+    public @Nullable TotpSetupResponse beginTotpSetup(@NotNull String playerId) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/players/" + playerId + "/totp/setup"))
+                .POST(HttpRequest.BodyPublishers.noBody());
+
+        var response = doRequest("beginTotpSetup", req, HttpResponse.BodyHandlers.ofString());
+
+        return switch (response.statusCode()) {
+            case 201 -> GSON.fromJson(response.body(), TotpSetupResponse.class);
+            case 404 -> throw new NotFoundError();
+            case 409 -> null;
+            default ->
+                    throw new InternalError("Failed to begin totp setup: (" + response.statusCode() + "): " + response.body());
+        };
+    }
+
+    @Override
+    public @NotNull TotpSetupResult completeTotpSetup(@NotNull String playerId, @NotNull String code) {
+        var body = GSON.toJson(Map.of(
+                "code", code
+        ));
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/players/" + playerId + "/totp/setup"))
+                .method("PATCH", HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8));
+
+        var response = doRequest("completeTotpSetup", req, HttpResponse.BodyHandlers.ofString());
+
+        return switch (response.statusCode()) {
+            case 200 -> TotpSetupResult.COMPLETED;
+            case 400 -> TotpSetupResult.INVALID_FORMAT;
+            case 401 -> TotpSetupResult.INVALID_CODE;
+            case 404 -> TotpSetupResult.NOT_STARTED;
+            case 409 -> TotpSetupResult.ALREADY_ENABLED;
+            default ->
+                    throw new InternalError("Failed to complete totp setup: (" + response.statusCode() + "): " + response.body());
+        };
+    }
 }
