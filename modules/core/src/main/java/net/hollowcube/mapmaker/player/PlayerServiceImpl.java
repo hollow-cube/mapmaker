@@ -207,20 +207,36 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull TotpResult checkTotp(@NotNull String playerId, @NotNull String code) {
+    public @NotNull TotpResult checkTotp(@NotNull String playerId, @Nullable String code) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/players/" + playerId + "/totp/" + code))
+                .uri(URI.create(url + "/players/" + playerId + "/totp" + (code != null ? "?code=" + code : "")))
                 .GET();
 
         var response = doRequest("checkTotp", req, HttpResponse.BodyHandlers.ofString());
 
         return switch (response.statusCode()) {
-            case 200 -> TotpResult.VALID_CODE;
+            case 200 -> TotpResult.SUCCESS;
             case 400 -> TotpResult.INVALID_FORMAT;
             case 401 -> TotpResult.INVALID_CODE;
             case 404 -> TotpResult.NOT_ENABLED;
             default ->
                     throw new InternalError("Totp check failed: (" + response.statusCode() + "): " + response.body());
+        };
+    }
+
+    @Override
+    public @NotNull TotpResult removeTotp(@NotNull String playerId) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/players/" + playerId + "/totp"))
+                .DELETE();
+
+        var response = doRequest("removeTotp", req, HttpResponse.BodyHandlers.ofString());
+
+        return switch (response.statusCode()) {
+            case 204 -> TotpResult.SUCCESS;
+            case 404 -> TotpResult.NOT_ENABLED;
+            default ->
+                    throw new InternalError("Failed to remove totp: (" + response.statusCode() + "): " + response.body());
         };
     }
 
@@ -242,7 +258,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull TotpSetupResult completeTotpSetup(@NotNull String playerId, @NotNull String code) {
+    public @NotNull TotpResult completeTotpSetup(@NotNull String playerId, @NotNull String code) {
         var body = GSON.toJson(Map.of(
                 "code", code
         ));
@@ -253,13 +269,15 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         var response = doRequest("completeTotpSetup", req, HttpResponse.BodyHandlers.ofString());
 
         return switch (response.statusCode()) {
-            case 200 -> TotpSetupResult.COMPLETED;
-            case 400 -> TotpSetupResult.INVALID_FORMAT;
-            case 401 -> TotpSetupResult.INVALID_CODE;
-            case 404 -> TotpSetupResult.NOT_STARTED;
-            case 409 -> TotpSetupResult.ALREADY_ENABLED;
+            case 200 -> TotpResult.SUCCESS;
+            case 400 -> TotpResult.INVALID_FORMAT;
+            case 401 -> TotpResult.INVALID_CODE;
+            case 404 -> TotpResult.NOT_ENABLED;
+            case 409 -> TotpResult.ALREADY_ENABLED;
             default ->
                     throw new InternalError("Failed to complete totp setup: (" + response.statusCode() + "): " + response.body());
         };
     }
+
+
 }

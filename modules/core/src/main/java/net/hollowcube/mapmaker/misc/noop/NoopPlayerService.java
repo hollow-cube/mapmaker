@@ -84,7 +84,12 @@ public class NoopPlayerService implements PlayerService {
     }
 
     @Override
-    public @NotNull TotpResult checkTotp(@NotNull String playerId, @NotNull String code) {
+    public @NotNull TotpResult checkTotp(@NotNull String playerId, @Nullable String code) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @NotNull TotpResult removeTotp(@NotNull String playerId) {
         throw new UnsupportedOperationException();
     }
 
@@ -94,7 +99,7 @@ public class NoopPlayerService implements PlayerService {
     }
 
     @Override
-    public @NotNull TotpSetupResult completeTotpSetup(@NotNull String playerId, @NotNull String code) {
+    public @NotNull TotpResult completeTotpSetup(@NotNull String playerId, @NotNull String code) {
         throw new UnsupportedOperationException();
     }
 }

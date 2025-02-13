@@ -47,7 +47,7 @@ public class QrCodeView extends AbstractImageView {
 
     @Action("confirm")
     public void onConfirm() {
-        this.pushView(this.newView);
+        this.pushTransientView(this.newView);
     }
 
     private static BufferedImage createQrCode(String base64Bits, int size) {

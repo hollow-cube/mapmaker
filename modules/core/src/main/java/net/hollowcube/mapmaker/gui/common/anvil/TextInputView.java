@@ -65,9 +65,7 @@ public final class TextInputView extends View {
     @Action(value = "output", async = true)
     public void handleAccept() {
         if (this.settings.callback != null) {
-            if (this.settings.callback.test(this.lastInput.trim())) {
-                this.popView();
-            }
+            this.settings.callback.accept(this, this.lastInput.trim());
         } else {
             popView(this.settings.signal, this.lastInput.trim());
         }

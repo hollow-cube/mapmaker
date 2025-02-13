@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.player;
 
 import com.google.gson.JsonObject;
-import com.mojang.datafixers.util.Either;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.player.responses.TotpSetupResponse;
 import org.jetbrains.annotations.Blocking;
@@ -63,25 +62,20 @@ public interface PlayerService {
     @NotNull LinkResult attemptVerify(@NotNull String playerId, @NotNull String secret);
 
     enum TotpResult {
-        VALID_CODE,
+        SUCCESS,
         INVALID_FORMAT,
         INVALID_CODE,
         NOT_ENABLED,
-    }
-
-    @NotNull TotpResult checkTotp(@NotNull String playerId, @NotNull String code);
-
-    @Nullable TotpSetupResponse beginTotpSetup(@NotNull String playerId);
-
-    enum TotpSetupResult {
-        COMPLETED,
-        INVALID_FORMAT,
-        INVALID_CODE,
-        NOT_STARTED,
         ALREADY_ENABLED,
     }
 
-    @NotNull TotpSetupResult completeTotpSetup(@NotNull String playerId, @NotNull String code);
+    @NotNull TotpResult checkTotp(@NotNull String playerId, @Nullable String code);
+
+    @NotNull TotpResult removeTotp(@NotNull String playerId);
+
+    @Nullable TotpSetupResponse beginTotpSetup(@NotNull String playerId);
+
+    @NotNull TotpResult completeTotpSetup(@NotNull String playerId, @NotNull String code);
 
     class NotFoundError extends RuntimeException {
 

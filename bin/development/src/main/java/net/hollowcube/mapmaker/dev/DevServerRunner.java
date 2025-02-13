@@ -5,8 +5,6 @@ import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.MojangUtil;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
-import net.hollowcube.mapmaker.gui.common.anvil.TextInputView;
-import net.hollowcube.mapmaker.gui.totp.QrCodeView;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServerRunner;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
@@ -206,28 +204,6 @@ public class DevServerRunner extends AbstractMapServer {
                 player.sendMessage("You are not in an editing world!");
             }
         }, "Enables progress index add mode for the current map");
-
-        // TODO remove
-
-        dbg.createPermissionlessSubcommand("totp", (player, context) -> {
-            player.sendMessage(playerService().checkTotp(player.getUuid().toString(), "").toString());
-        }, "");
-
-        dbg.createPermissionlessSubcommand("totpsetup", (player, context) -> {
-            var response = playerService().beginTotpSetup(player.getUuid().toString());
-            if (response == null) {
-                player.sendMessage("Failed to begin TOTP setup");
-            } else {
-                guiController().show(player, c -> new QrCodeView(c, response.qrCode(), response.qrCodeSize(), (c2) -> TextInputView.builder()
-                        .icon("anvil/earth")
-                        .title("Enter 2FA Code")
-                        .callback(code -> {
-                            var result = playerService().completeTotpSetup(player.getUuid().toString(), code);
-                            player.sendMessage(result.toString());
-                        })
-                        .build(c2)));
-            }
-        }, "");
 
         return dbg;
     }
