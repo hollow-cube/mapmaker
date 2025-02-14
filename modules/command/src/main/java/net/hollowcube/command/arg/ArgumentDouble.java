@@ -35,7 +35,8 @@ public class ArgumentDouble extends Argument<Double> {
         try {
             var value = Double.parseDouble(word);
             if (Double.isNaN(value) || Double.isInfinite(value)) return syntaxError();
-            if (value < min || value > max) return syntaxError(); //todo custom message
+            if (value < min) return syntaxError("%s must be at least %.2f".formatted(this.id(), this.min));
+            if (value > max) return syntaxError("%s must be at most %.2f".formatted(this.id(), this.max));
             return success(value);
         } catch (NumberFormatException e) {
             return syntaxError();

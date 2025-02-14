@@ -25,7 +25,7 @@ public class ArgumentAxis extends Argument<ArgumentAxis.Result> {
             if (c == 'x') x = true;
             else if (c == 'y') y = true;
             else if (c == 'z') z = true;
-            else return syntaxError(); //todo custom error message
+            else return syntaxError("Invalid axis '%c' for %s".formatted(c, this.id()));
         }
         return success(new Result(x, y, z));
     }

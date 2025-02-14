@@ -153,6 +153,10 @@ public abstract class Argument<T> {
         return new ParseResult.Failure<>(-1);
     }
 
+    public @NotNull ParseResult<T> syntaxError(@NotNull String message) {
+        return new ParseResult.Failure<>(-1, message);
+    }
+
     public @NotNull ParseResult<T> syntaxError(int start) {
         return new ParseResult.Failure<>(start);
     }

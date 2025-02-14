@@ -40,7 +40,7 @@ public class ArgumentPattern extends Argument<Pattern> {
             return success(tree.into(session.terraform().registry()));
         } catch (ParseException e) {
 //            System.out.println(e.getMessage());
-            return partial();
+            return partial(e.getMessage());
         }
     }
 
