@@ -14,6 +14,7 @@ import org.jetbrains.annotations.UnknownNullability;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * A command node represents a single node of a command syntax tree.
@@ -138,7 +139,7 @@ public class CommandNode {
             if (redirect.condition != null) {
                 var result = redirect.condition.test(sender, new ConditionContext(sender, CommandContext.Pass.EXECUTE));
                 if (result == CommandCondition.DENY) return CommandResult.denied(this);
-                if (result == CommandCondition.HIDE) return CommandResult.syntaxError(reader.pos(), null, true);
+                if (result == CommandCondition.HIDE) return CommandResult.notFound();
             }
 
             return redirect.execute(sender, reader, context);
@@ -180,35 +181,39 @@ public class CommandNode {
                 // Try to parse the childs argument
                 var mark = reader.mark();
                 var result = argument.parse(sender, reader);
-                if (result instanceof ParseResult.Success<?> success) {
+                if (result instanceof ParseResult.Success<?>(Supplier<?> valueFunc)) {
                     // If it succeeds we have matched and can execute the child
-                    context.setArgValue(argument.id(), reader.rawSince(mark).trim(), success.valueFunc().get());
-                    return unwrap(node.execute(sender, reader, context));
+                    context.setArgValue(argument.id(), reader.rawSince(mark).trim(), valueFunc.get());
+                    return node.execute(sender, reader, context);
                 }
 
                 // Otherwise store the error and try the next argument.
                 if (pendingError == null) {
-                    if (result instanceof ParseResult.Failure<?> failure) {
-                        int errorStart = failure.start() == -1 ? reader.pos(mark) : failure.start();
-                        pendingError = CommandResult.syntaxError(errorStart, argument);
+                    if (result instanceof ParseResult.Failure<?>(int start, String message)) {
+                        int errorStart = start == -1 ? reader.pos(mark) : start;
+                        pendingError = CommandResult.syntaxError(errorStart, argument, message);
+                    } else if (result instanceof ParseResult.Partial<?>(String message)) {
+                        pendingError = CommandResult.syntaxError(reader.pos(), argument, message);
                     } else {
                         pendingError = CommandResult.syntaxError(reader.pos(), argument);
                     }
                 }
+
                 reader.restore(mark);
             }
 
             // If we reach here, we have no matching child, so return the pending error
             if (pendingError != null) {
-                Objects.requireNonNull(pendingError, "pendingError sanity check");
-                if (pendingError instanceof CommandResult.SyntaxError syntaxError) {
-                    return CommandResult.syntaxError(syntaxError.start(), syntaxError.arg(), this instanceof RootCommandNode);
-                } else return pendingError;
+                if (pendingError instanceof CommandResult.SyntaxError && this instanceof RootCommandNode) {
+                    return CommandResult.notFound();
+                } else {
+                    return pendingError;
+                }
             }
         }
 
         // At this point we reached a leaf node but we still have input left so its an error
-        return CommandResult.syntaxError(reader.pos(), null, true);
+        return CommandResult.notFound();
     }
 
 
@@ -267,22 +272,6 @@ public class CommandNode {
         var node = new CommandNode();
         children.add(new ArgumentPair(argument, node));
         return node;
-    }
-
-    protected @NotNull CommandResult unwrap(@NotNull CommandResult result) {
-        // This is a bad solution for handling not found errors. Basically any error that _could_ be a not found error
-        // is created as a syntax error with isNotFound set to true. Then, when a command returns one it is `unwrap`ed
-        // to remove that error EXCEPT for at the root command manager which will not do that unwrap step resulting
-        // in a syntax error with isNotFound being returned only for root errors.
-
-        if (result instanceof CommandResult.SyntaxError syntaxError) {
-            if (!syntaxError.isNotFound()) return result;
-
-            // Remove the isNotFound flag
-            return CommandResult.syntaxError(syntaxError.start(), syntaxError.arg());
-        }
-
-        return result;
     }
 
     protected record ArgumentPair(Argument<?> argument, CommandNode node) {

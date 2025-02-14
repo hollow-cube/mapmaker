@@ -137,6 +137,10 @@ public abstract class Argument<T> {
         return new ParseResult.Partial<>();
     }
 
+    public @NotNull ParseResult<T> partial(@Nullable String message) {
+        return new ParseResult.Partial<>(message);
+    }
+
     public @NotNull ParseResult<T> success(@NotNull Supplier<@UnknownNullability T> valueFunc) {
         return new ParseResult.Success<>(valueFunc);
     }
@@ -151,6 +155,10 @@ public abstract class Argument<T> {
 
     public @NotNull ParseResult<T> syntaxError(int start) {
         return new ParseResult.Failure<>(start);
+    }
+
+    public @NotNull ParseResult<T> syntaxError(int start, @Nullable String message) {
+        return new ParseResult.Failure<>(start, message);
     }
 
 
