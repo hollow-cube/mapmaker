@@ -1,12 +1,13 @@
 package net.hollowcube.mapmaker.map.block.handler;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.hollowcube.common.util.CollectionUtil;
 import net.hollowcube.common.events.UpdateSignTextEvent;
+import net.hollowcube.common.util.ExtraTags;
+import net.hollowcube.common.util.MaterialInfo;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.BlockTags;
+import net.hollowcube.mapmaker.map.block.handler.sign.SignData;
 import net.hollowcube.mapmaker.map.util.InteractTarget;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
@@ -15,78 +16,27 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.Material;
+import net.minestom.server.network.packet.server.play.BlockEntityDataPacket;
+import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.network.packet.server.play.OpenSignEditorPacket;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.tag.TagReadable;
-import net.minestom.server.tag.TagSerializer;
-import net.minestom.server.tag.TagWritable;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 import static net.hollowcube.mapmaker.map.block.handler.BlockHandlerHelpers.applyStoredBlockData;
 
 public class SignBlockHandler implements BlockHandler, InteractTarget {
-    public record SignData(
-            boolean hasGlowingText,
-            String color,
-            Component[] lines // Always 4 long
-    ) {
-        private static final TagSerializer<SignData> SERIALIZER = new TagSerializer<>() {
-            private static final List<Component> DEFAULT_MESSAGES = List.of(Component.empty(), Component.empty(), Component.empty(), Component.empty());
-            private static final Tag<Boolean> HAS_GLOWING_TEXT = Tag.Boolean("has_glowing_text").defaultValue(false);
-            private static final Tag<String> COLOR = Tag.String("color").defaultValue("black");
-            private static final Tag<List<Component>> LINES = Tag.Component("messages").list().defaultValue(DEFAULT_MESSAGES);
-
-            @Override
-            public @NotNull SignData read(@NotNull TagReadable reader) {
-                return new SignData(
-                        reader.getTag(HAS_GLOWING_TEXT),
-                        reader.getTag(COLOR),
-                        reader.getTag(LINES).toArray(Component[]::new)
-                );
-            }
-
-            @Override
-            public void write(@NotNull TagWritable writer, @NotNull SignData value) {
-                writer.setTag(HAS_GLOWING_TEXT, value.hasGlowingText);
-                writer.setTag(COLOR, value.color);
-                writer.setTag(LINES, CollectionUtil.copyWithMinSize(4, Component::empty, value.lines));
-            }
-        };
-    }
 
     public static final Tag<Boolean> IS_WAXED = Tag.Boolean("is_waxed").defaultValue(false);
-    public static final Tag<SignData> FRONT_TEXT = Tag.Structure("front_text", SignData.SERIALIZER)
-            .defaultValue(new SignData(false, "black", new Component[0]));
-    public static final Tag<SignData> BACK_TEXT = Tag.Structure("back_text", SignData.SERIALIZER)
-            .defaultValue(new SignData(false, "black", new Component[0]));
-
-    private static final Int2ObjectMap<String> DYE_MAP = new Int2ObjectArrayMap<>();
+    public static final Tag<SignData> FRONT_TEXT = Tag.Structure("front_text", SignData.SERIALIZER).defaultValue(SignData.empty());
+    public static final Tag<SignData> BACK_TEXT = Tag.Structure("back_text", SignData.SERIALIZER).defaultValue(SignData.empty());
 
     static {
         MinecraftServer.getGlobalEventHandler()
                 .addListener(UpdateSignTextEvent.class, SignBlockHandler::handleUpdateSignPacket);
-
-        DYE_MAP.put(Material.WHITE_DYE.id(), "white");
-        DYE_MAP.put(Material.LIGHT_GRAY_DYE.id(), "light_gray");
-        DYE_MAP.put(Material.GRAY_DYE.id(), "gray");
-        DYE_MAP.put(Material.BLACK_DYE.id(), "black");
-        DYE_MAP.put(Material.BROWN_DYE.id(), "brown");
-        DYE_MAP.put(Material.RED_DYE.id(), "red");
-        DYE_MAP.put(Material.ORANGE_DYE.id(), "orange");
-        DYE_MAP.put(Material.YELLOW_DYE.id(), "yellow");
-        DYE_MAP.put(Material.LIME_DYE.id(), "lime");
-        DYE_MAP.put(Material.GREEN_DYE.id(), "green");
-        DYE_MAP.put(Material.CYAN_DYE.id(), "cyan");
-        DYE_MAP.put(Material.LIGHT_BLUE_DYE.id(), "light_blue");
-        DYE_MAP.put(Material.BLUE_DYE.id(), "blue");
-        DYE_MAP.put(Material.PURPLE_DYE.id(), "purple");
-        DYE_MAP.put(Material.MAGENTA_DYE.id(), "magenta");
-        DYE_MAP.put(Material.PINK_DYE.id(), "pink");
     }
 
     private final NamespaceID id;
@@ -109,8 +59,7 @@ public class SignBlockHandler implements BlockHandler, InteractTarget {
 
         // Otherwise, open the sign editor
         var blockPosition = placement.getBlockPosition();
-        var packet = new OpenSignEditorPacket(blockPosition, true);
-        p.getPlayer().sendPacket(packet);
+        p.getPlayer().sendPacket(new OpenSignEditorPacket(blockPosition, true));
     }
 
     @Override
@@ -127,35 +76,37 @@ public class SignBlockHandler implements BlockHandler, InteractTarget {
         if (world == null || !world.canEdit(player)) return false;
         if (world.itemRegistry().isOnCooldown(player)) return true;
 
+        var data = block.getTag(isFront ? FRONT_TEXT : BACK_TEXT);
+
         if (itemStack.material().equals(Material.GLOW_INK_SAC)) {
-            var signData = block.getTag(isFront ? FRONT_TEXT : BACK_TEXT);
-            signData = new SignData(!signData.hasGlowingText, signData.color, signData.lines);
-            block = block.withTag(isFront ? FRONT_TEXT : BACK_TEXT, signData);
-            instance.setBlock(blockPosition, block);
+            data = data.withGlows(!data.hasGlowingText());
+            instance.setBlock(blockPosition, block.withTag(isFront ? FRONT_TEXT : BACK_TEXT, data));
             return false;
         }
 
-        var dyeColor = DYE_MAP.get(itemStack.material().id());
+        var dyeColor = MaterialInfo.DYE_COLORS.get(itemStack.material());
         if (dyeColor != null) {
-            var signData = block.getTag(isFront ? FRONT_TEXT : BACK_TEXT);
-            signData = new SignData(signData.hasGlowingText, dyeColor, signData.lines);
-            block = block.withTag(isFront ? FRONT_TEXT : BACK_TEXT, signData);
-            instance.setBlock(blockPosition, block);
-            System.out.println(signData + " " + Arrays.toString(signData.lines));
+            data = data.withColor(dyeColor);
+            instance.setBlock(blockPosition, block.withTag(isFront ? FRONT_TEXT : BACK_TEXT, data));
             return false;
         }
 
         // Skip sign editing if player is sneaking
-        if (interaction.getPlayer().isSneaking()) {
-            return true;
-        }
+        if (!player.isSneaking()) {
+            // Handle editing the sign
+            var map = MapWorld.forPlayerOptional(player);
+            if (map != null && !map.map().isPublished()) {
+                // Set the data to the actual data and then open the editor and then set it back
+                var realBlockData = CompoundBinaryTag.builder();
+                realBlockData.put(isFront ? "front_text" : "back_text", data.toNbt());
 
-        // Handle editing the sign
-        var packet = new OpenSignEditorPacket(blockPosition, isFront);
-        var playerMap = MapWorld.forPlayerOptional(player);
-        if (!(playerMap == null) && !playerMap.map().isPublished()) {
-            player.sendPacket(packet);
-            return false; // Stop block placing if you are editing the sign
+                player.sendPacket(new BundlePacket());
+                player.sendPacket(new BlockEntityDataPacket(blockPosition, 7, realBlockData.build()));
+                player.sendPacket(new OpenSignEditorPacket(blockPosition, isFront));
+                player.sendPacket(new BundlePacket());
+
+                return false;
+            }
         }
         return true;
     }
@@ -167,23 +118,29 @@ public class SignBlockHandler implements BlockHandler, InteractTarget {
 
     @Override
     public @NotNull Collection<Tag<?>> getBlockEntityTags() {
-        return List.of(IS_WAXED, FRONT_TEXT, BACK_TEXT);
+        return List.of(
+                IS_WAXED,
+                ExtraTags.MappedView(FRONT_TEXT, SignData::withFormatting),
+                ExtraTags.MappedView(BACK_TEXT, SignData::withFormatting)
+        );
     }
 
     public static void handleUpdateSignPacket(@NotNull UpdateSignTextEvent event) {
         var instance = event.getInstance();
+        var pos = event.position();
 
-        var blockPosition = event.position();
-        var block = instance.getBlock(blockPosition);
-        if (block.handler() != BlockHandlers.SIGN && block.handler() != BlockHandlers.HANGING_SIGN)
-            return;
+        var block = instance.getBlock(pos);
+        if (!(block.handler() instanceof SignBlockHandler)) return;
+
+        var map = MapWorld.forPlayerOptional(event.getPlayer());
+        if (map == null || !map.canEdit(event.getPlayer())) return;
 
         var tag = event.isFrontText() ? FRONT_TEXT : BACK_TEXT;
-        var signData = block.getTag(tag);
-        var lines = event.lines().stream().map(Component::text).toArray(Component[]::new);
-        block = block.withTag(tag, new SignData(signData.hasGlowingText, signData.color, lines));
+        var data = block.getTag(tag);
 
-        instance.setBlock(blockPosition, block);
+        var lines = event.lines().stream().map(Component::text).toArray(Component[]::new);
+
+        instance.setBlock(pos, block.withTag(tag, data.withLines(lines)));
     }
 
     private boolean isFacingFront(@NotNull Block block, @NotNull Point blockPosition, @NotNull Player player) {
