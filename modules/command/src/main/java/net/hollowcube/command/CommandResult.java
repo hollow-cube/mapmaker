@@ -10,7 +10,7 @@ public sealed interface CommandResult {
 
     record Denied(@NotNull CommandNode node) implements CommandResult {}
 
-    record SyntaxError(int start, @Nullable Argument<?> arg, boolean isNotFound, @Nullable String message) implements CommandResult {}
+    record SyntaxError(int start, @Nullable Argument<?> arg, @Nullable String message) implements CommandResult {}
 
     record NotFound() implements CommandResult {}
 
@@ -27,11 +27,11 @@ public sealed interface CommandResult {
     }
 
     static @NotNull CommandResult.SyntaxError syntaxError(int start, @Nullable Argument<?> arg) {
-        return new SyntaxError(start, arg, false, null);
+        return new SyntaxError(start, arg, null);
     }
 
     static @NotNull CommandResult.SyntaxError syntaxError(int start, @Nullable Argument<?> arg, @Nullable String message) {
-        return new SyntaxError(start, arg, false, message);
+        return new SyntaxError(start, arg, message);
     }
 
     static @NotNull CommandResult.ExecutionError execError(@NotNull Throwable cause) {
