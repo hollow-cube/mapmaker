@@ -10,10 +10,10 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.PersonalizedMapData;
+import net.hollowcube.mapmaker.util.ItemUtils;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerService;
-import net.hollowcube.mapmaker.util.TagUtil;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
@@ -71,9 +71,7 @@ public class MapEntry extends View {
         if (icon == null) {
             label.setItemSprite(ItemStack.of(Material.PAPER));
         } else {
-            var item = ItemStack.builder(icon);
-            TagUtil.removeTooltipExtras(item);
-            label.setItemSprite(item.build());
+            label.setItemSprite(ItemUtils.asDisplay(icon));
         }
 
         // todo we could update the icon + title immediately and only update the lore once we have the player name perhaps

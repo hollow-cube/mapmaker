@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.map.command.utility;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.map.item.ItemUtils;
+import net.hollowcube.mapmaker.util.ItemUtils;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.util.MapMessages;
 import net.minestom.server.entity.Player;

@@ -6,9 +6,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.common.util.OpUtils;
-import net.hollowcube.mapmaker.util.TagUtil;
-import net.minestom.server.item.ItemStack;
+import net.hollowcube.mapmaker.util.ItemUtils;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,7 +22,7 @@ public class ObjectEntry extends View {
 
         this.material = material;
 
-        this.label.setItemSprite(OpUtils.build(ItemStack.builder(material), TagUtil::removeTooltipExtras).build());
+        this.label.setItemSprite(ItemUtils.asDisplay(material));
         this.label.setArgs(LanguageProviderV2.getVanillaTranslation(material));
     }
 

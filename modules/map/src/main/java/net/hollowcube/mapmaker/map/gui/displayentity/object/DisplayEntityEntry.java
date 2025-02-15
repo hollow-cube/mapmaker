@@ -6,12 +6,10 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
-import net.hollowcube.mapmaker.util.TagUtil;
+import net.hollowcube.mapmaker.util.ItemUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
@@ -64,10 +62,7 @@ public class DisplayEntityEntry extends View {
         lore.add(Component.empty());
         lore.add(Component.translatable("gui.display_entity.search.entry.footer"));
 
-        this.label.setItemSprite(OpUtils.build(ItemStack.builder(
-                Objects.requireNonNullElse(material, Material.BARRIER)),
-                TagUtil::removeTooltipExtras
-        ).build());
+        this.label.setItemSprite(ItemUtils.asDisplay(Objects.requireNonNullElse(material, Material.BARRIER)));
         this.label.setComponentsDirect(
                 Component.translatable("gui.display_entity.search.entry.name", Component.text(entity.getDistance(context.player()))),
                 lore
