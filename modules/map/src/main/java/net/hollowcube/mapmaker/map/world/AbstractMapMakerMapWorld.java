@@ -42,8 +42,6 @@ public abstract class AbstractMapMakerMapWorld extends AbstractMapWorld {
 
     @Override
     public void load() {
-        super.load();
-
         this.enabledFeatures = features.loadMap(this);
     }
 

@@ -256,9 +256,12 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
     }
 
     @Blocking
-    public void load() {
+    public void onDataLoaded() {
         this.biomes().init(this);
     }
+
+    @Blocking
+    public abstract void load();
 
     @Blocking
     public void close(@Nullable Component reason) {
