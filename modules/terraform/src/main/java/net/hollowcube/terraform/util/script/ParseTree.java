@@ -16,7 +16,7 @@ public interface ParseTree<T> {
      * @return the parsed value
      * @throws ParseException if the parse tree is invalid
      */
-    default @NotNull T into(@NotNull TerraformRegistry registry) throws ParseException {
+    default @NotNull T into(@NotNull ParseContext context) throws ParseException {
         throw new ParseException(start(), end(), "not implemented");
     }
 

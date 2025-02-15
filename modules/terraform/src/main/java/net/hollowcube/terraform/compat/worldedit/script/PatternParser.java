@@ -2,6 +2,7 @@ package net.hollowcube.terraform.compat.worldedit.script;
 
 import net.hollowcube.terraform.util.script.Lexer;
 import net.hollowcube.terraform.util.script.Token;
+import net.minestom.server.entity.PlayerHand;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,8 +45,8 @@ public class PatternParser {
         if (entries.isEmpty())
             return null;
         // If there is only one unweighted entry, return it alone.
-        if (trailingComma == -1 && entries.size() == 1 && !(entries.get(0) instanceof PatternTree.Weighted))
-            return entries.get(0);
+        if (trailingComma == -1 && entries.size() == 1 && !(entries.getFirst() instanceof PatternTree.Weighted))
+            return entries.getFirst();
         return new PatternTree.WeightedList(trailingComma, entries);
     }
 
@@ -56,7 +57,7 @@ public class PatternParser {
         return switch (tok.type()) {
             case NUMBER -> //noinspection DataFlowIssue
                     topLevel ? weightOrBlockId() : legacyBlock(lexer.next());
-            case IDENT -> blockState();
+            case IDENT -> identifier(lexer.span(tok));
             case STAR -> randomState();
             case HASH -> tagOrNamed();
             case CARET -> typeStateApply();
@@ -182,8 +183,15 @@ public class PatternParser {
         );
     }
 
-    private @NotNull PatternTree blockState() {
-        return new PatternTree.BlockState(namespaceId(), propertyList());
+    private PatternTree identifier(String identifier) {
+        return switch (identifier) {
+            case "hand", "h", "offhand", "oh" -> {
+                var token = Objects.requireNonNull(lexer.next());
+                var hand = identifier.startsWith("o") ? PlayerHand.OFF : PlayerHand.MAIN;
+                yield new PatternTree.Hand(token.start(), token.end(), hand);
+            }
+            default -> new PatternTree.BlockState(namespaceId(), propertyList());
+        };
     }
 
     private @NotNull PatternTree.NamespaceId namespaceId() {

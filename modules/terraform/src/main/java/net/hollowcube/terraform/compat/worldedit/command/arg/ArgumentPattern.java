@@ -9,6 +9,7 @@ import net.hollowcube.terraform.compat.worldedit.script.PatternParser;
 import net.hollowcube.terraform.compat.worldedit.script.PatternTree;
 import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.session.LocalSession;
+import net.hollowcube.terraform.util.script.ParseContext;
 import net.hollowcube.terraform.util.script.ParseException;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
@@ -37,7 +38,7 @@ public class ArgumentPattern extends Argument<Pattern> {
 
         try {
 //            System.out.println("tree: " + tree);
-            return success(tree.into(session.terraform().registry()));
+            return success(tree.into(ParseContext.of(session.terraform().registry(), player)));
         } catch (ParseException e) {
 //            System.out.println(e.getMessage());
             return partial();

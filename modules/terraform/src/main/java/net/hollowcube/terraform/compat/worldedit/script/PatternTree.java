@@ -10,11 +10,14 @@ import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.terraform.TerraformRegistry;
 import net.hollowcube.terraform.mask.script.Tree;
 import net.hollowcube.terraform.pattern.*;
+import net.hollowcube.terraform.util.script.ParseContext;
 import net.hollowcube.terraform.util.script.ParseException;
 import net.hollowcube.terraform.util.script.ParseTree;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.Material;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +50,7 @@ public interface PatternTree extends ParseTree<Pattern> {
         }
 
         @Override
-        public @NotNull Pattern into(@NotNull TerraformRegistry registry) throws ParseException {
+        public @NotNull Pattern into(@NotNull ParseContext context) throws ParseException {
             var block = namespaceId.toBlock();
             var propertyList = props().toPropertyList();
 
@@ -66,7 +69,7 @@ public interface PatternTree extends ParseTree<Pattern> {
             }
 
             // Remap the block to the Terraform registry block
-            var registryBlock = registry.blockState(block.stateId());
+            var registryBlock = context.registry().blockState(block.stateId());
             return new BlockPattern(registryBlock);
         }
 
@@ -97,9 +100,9 @@ public interface PatternTree extends ParseTree<Pattern> {
             int data // -1 if not present
     ) implements PatternTree {
         @Override
-        public @NotNull Pattern into(@NotNull TerraformRegistry registry) throws ParseException {
+        public @NotNull Pattern into(@NotNull ParseContext context) throws ParseException {
             var data = this.data == -1 ? 0 : this.data;
-            var legacyBlock = registry.legacyBlockState(id, data);
+            var legacyBlock = context.registry().legacyBlockState(id, data);
             if (legacyBlock == null)
                 throw new ParseException(start, end, String.format("no such block: %d:%d", id, data));
             return new BlockPattern(legacyBlock);
@@ -115,13 +118,13 @@ public interface PatternTree extends ParseTree<Pattern> {
             int start, int end,
             @Nullable NamespaceId namespaceId
     ) implements PatternTree {
-        @SuppressWarnings({"DataFlowIssue", "UnstableApiUsage"})
+        @SuppressWarnings({"DataFlowIssue"})
         private static final List<String> DEFAULT_SUGGESTIONS = BlockState.BLOCKS.stream()
                 .filter(id -> Block.fromNamespaceId(id).possibleStates().size() > 1)
                 .map(NamespaceID::path).limit(20).toList();
 
         @Override
-        public @NotNull Pattern into(@NotNull TerraformRegistry registry) throws ParseException {
+        public @NotNull Pattern into(@NotNull ParseContext context) throws ParseException {
             if (namespaceId == null)
                 throw new ParseException(end, end, "expected block");
             return new RandomStatePattern(namespaceId.toBlock().id());
@@ -155,7 +158,7 @@ public interface PatternTree extends ParseTree<Pattern> {
                 .map(net.minestom.server.gamedata.tags.Tag::getName).toList();
 
         @Override
-        public @NotNull Pattern into(@NotNull TerraformRegistry registry) throws ParseException {
+        public @NotNull Pattern into(@NotNull ParseContext context) throws ParseException {
             if (namespaceId == null)
                 throw new ParseException(end, end, "expected tag");
             var tagId = namespaceId.toNamespaceId();
@@ -192,7 +195,7 @@ public interface PatternTree extends ParseTree<Pattern> {
     ) implements PatternTree {
 
         @Override
-        public @NotNull Pattern into(@NotNull TerraformRegistry registry) throws ParseException {
+        public @NotNull Pattern into(@NotNull ParseContext context) throws ParseException {
             if (namespaceId == null && props == null)
                 throw new ParseException(end, end, "expected block or properties");
             if (props != null && props.size() == 0)
@@ -248,16 +251,16 @@ public interface PatternTree extends ParseTree<Pattern> {
 
         @Override
         public int start() {
-            return entries.get(0).start();
+            return entries.getFirst().start();
         }
 
         @Override
         public int end() {
-            return entries.get(entries.size() - 1).end();
+            return entries.getLast().end();
         }
 
         @Override
-        public @NotNull Pattern into(@NotNull TerraformRegistry registry) throws ParseException {
+        public @NotNull Pattern into(@NotNull ParseContext context) throws ParseException {
             if (trailingComma != -1)
                 throw new ParseException(trailingComma, trailingComma, "expected pattern");
 
@@ -265,14 +268,13 @@ public interface PatternTree extends ParseTree<Pattern> {
             var total = 0;
 
             for (var entry : this.entries) {
-                if (entry instanceof Weighted weighted) {
-                    if (weighted.pattern == null)
-                        throw new ParseException(weighted.start, weighted.end, "expected pattern");
-                    var child = weighted.pattern.into(registry);
-                    results.add(new RandomPatternPattern.Entry(weighted.weight, child));
-                    total += weighted.weight;
+                if (entry instanceof Weighted(int start, int end, int weight, PatternTree pattern)) {
+                    ParseException.requireNonNull(pattern, start, end,"expected pattern");
+                    var child = pattern.into(context);
+                    results.add(new RandomPatternPattern.Entry(weight, child));
+                    total += weight;
                 } else {
-                    results.add(new RandomPatternPattern.Entry(1, entry.into(registry)));
+                    results.add(new RandomPatternPattern.Entry(1, entry.into(context)));
                     total += 1;
                 }
             }
@@ -287,7 +289,7 @@ public interface PatternTree extends ParseTree<Pattern> {
                 fillEmptySuggestion(registry, suggestion, trailingComma + 1);
             } else {
                 // shift to the end and suggest
-                var lastEntry = entries.get(entries.size() - 1);
+                var lastEntry = entries.getLast();
                 suggestion.setAbsolute(lastEntry.start());
                 lastEntry.suggest(registry, suggestion);
             }
@@ -303,7 +305,7 @@ public interface PatternTree extends ParseTree<Pattern> {
             @Nullable PatternTree pattern
     ) implements PatternTree {
         @Override
-        public @NotNull Pattern into(@NotNull TerraformRegistry registry) throws ParseException {
+        public @NotNull Pattern into(@NotNull ParseContext context) throws ParseException {
             throw new ParseException(start, end, "intermediate, this should not happen.");
         }
 
@@ -319,9 +321,22 @@ public interface PatternTree extends ParseTree<Pattern> {
         }
     }
 
+    record Hand(int start, int end, @NotNull PlayerHand hand) implements PatternTree {
+
+        @Override
+        public @NotNull Pattern into(@NotNull ParseContext context) throws ParseException {
+            var item = context.getPlayer().getItemInHand(this.hand).material();
+            var block = ParseException.requireNonNull(
+                    item == Material.AIR ? Block.AIR : item.block(),
+                    start, end, "no block in hand"
+            );
+            return new BlockPattern(context.registry().blockState(block.stateId()));
+        }
+    }
+
     record Error(int start, int end) implements PatternTree {
         @Override
-        public @NotNull Pattern into(@NotNull TerraformRegistry registry) throws ParseException {
+        public @NotNull Pattern into(@NotNull ParseContext context) throws ParseException {
             throw new ParseException(start, end, "not implemented");
         }
     }
@@ -479,7 +494,7 @@ public interface PatternTree extends ParseTree<Pattern> {
             }
 
             // Otherwise, delegate to the last property
-            properties.get(properties.size() - 1).suggest(suggestion, validProperties);
+            properties.getLast().suggest(suggestion, validProperties);
         }
 
         public record Property(

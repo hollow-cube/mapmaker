@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.compat.worldedit.script;
 
-import net.hollowcube.terraform.TerraformRegistry;
 import net.hollowcube.terraform.pattern.*;
+import net.hollowcube.terraform.util.script.ParseContext;
 import net.hollowcube.terraform.util.script.ParseException;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.gamedata.tags.Tag;
@@ -110,7 +110,7 @@ class WEPatternBuildTest {
         void testSingleEntry() {
             // Parser cannot create this so its mostly a sanity check
             var tree = new PatternTree.WeightedList(-1, List.of(new PatternTree.LegacyBlock(0, 1, -1, 1, 0)));
-            var pattern = assertInstanceOf(RandomPatternPattern.class, assertDoesNotThrow(() -> tree.into(TerraformRegistry.EMPTY)));
+            var pattern = assertInstanceOf(RandomPatternPattern.class, assertDoesNotThrow(() -> tree.into(ParseContext.EMPTY)));
             assertEquals(1, pattern.total());
             assertEquals(1, pattern.entries().size());
             var child = assertInstanceOf(BlockPattern.class, pattern.entries().get(0).pattern());
@@ -261,14 +261,14 @@ class WEPatternBuildTest {
     private static <T extends Pattern> @NotNull T assertBuilds(@NotNull Class<T> type, @NotNull String input) {
         var parser = new PatternParser(input);
         var tree = assertDoesNotThrow(parser::parse);
-        var pattern = assertDoesNotThrow(() -> tree.into(TerraformRegistry.EMPTY));
+        var pattern = assertDoesNotThrow(() -> tree.into(ParseContext.EMPTY));
         return assertInstanceOf(type, pattern);
     }
 
     private static void assertDoesNotBuild(@Nullable String expectedError, @NotNull String input) {
         var parser = new PatternParser(input);
         var tree = assertDoesNotThrow(parser::parse);
-        var error = assertThrows(ParseException.class, () -> tree.into(TerraformRegistry.EMPTY));
+        var error = assertThrows(ParseException.class, () -> tree.into(ParseContext.EMPTY));
         if (expectedError != null) {
             assertEquals(expectedError, error.getMessage());
         }
