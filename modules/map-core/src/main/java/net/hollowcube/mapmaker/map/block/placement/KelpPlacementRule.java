@@ -29,13 +29,18 @@ public class KelpPlacementRule extends BaseBlockPlacementRule {
     public @NotNull Block blockPlace(@NotNull PlacementState placementState) {
         var posBelow = placementState.placePosition().add(0, -1, 0);
         var blockBelow = placementState.instance().getBlock(posBelow, Block.Getter.Condition.TYPE);
-        if (blockBelow.id() == Block.KELP.id() || blockBelow.id() == Block.KELP_PLANT.id())
-            return this.block;
 
         var posAbove = placementState.placePosition().add(0, 1, 0);
         var blockAbove = placementState.instance().getBlock(posAbove, Block.Getter.Condition.TYPE);
-        if (blockAbove.id() == Block.KELP.id() || blockAbove.id() == Block.KELP_PLANT.id())
+
+        var isKelpAbove = blockAbove.id() == Block.KELP.id() || blockAbove.id() == Block.KELP_PLANT.id();
+        var isKelpBelow = blockBelow.id() == Block.KELP.id() || blockBelow.id() == Block.KELP_PLANT.id();
+
+        if (isKelpAbove && isKelpBelow) {
             return Block.KELP_PLANT;
+        } else if (isKelpAbove) {
+            return Block.KELP_PLANT;
+        }
 
         return this.block;
     }
