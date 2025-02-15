@@ -34,12 +34,14 @@ public class BonemealInteractionRule implements BlockInteractionRule {
         if (age == maxAge && block.id() == Block.TORCHFLOWER_CROP.id()) {
             block = Block.TORCHFLOWER;
         } else {
-            if (age >= maxAge) return false;
             age++;
 
-            block = block.withProperty("age", String.valueOf(age));
 
             if (block.id() == Block.PITCHER_CROP.id()) {
+                if (age > maxAge) return false;
+
+                block = block.withProperty("age", String.valueOf(age));
+
                 var half = block.getProperty("half");
                 var otherPosition = blockPosition.add(0, "lower".equals(half) ? 1 : -1, 0);
                 var otherBlock = interaction.getBlock(otherPosition);
@@ -53,6 +55,9 @@ public class BonemealInteractionRule implements BlockInteractionRule {
                 if (otherBlock.id() == Block.PITCHER_CROP.id() && !half.equals(otherBlock.getProperty("half"))) {
                     interaction.setBlock(otherPosition, otherBlock.withProperty("age", String.valueOf(age)));
                 }
+            } else {
+                age %= maxAge;
+                block = block.withProperty("age", String.valueOf(age));
             }
         }
 
