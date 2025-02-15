@@ -51,15 +51,6 @@
       "type": "int",
       "count": 1,
       "values": [0]
-    },
-    {
-      "name": "ScreenSize",
-      "type": "float",
-      "count": 2,
-      "values": [
-        0.0,
-        0.0
-      ]
     }
   ]
 }
