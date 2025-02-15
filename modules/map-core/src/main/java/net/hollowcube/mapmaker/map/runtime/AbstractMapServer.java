@@ -82,6 +82,7 @@ import net.hollowcube.mapmaker.util.HttpServerWrapper;
 import net.hollowcube.mapmaker.util.NoopSpanExporter;
 import net.hollowcube.mapmaker.util.ServerStatsHud;
 import net.hollowcube.mapmaker.util.Shutdowner;
+import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.minestom.server.MinecraftServer;
@@ -101,6 +102,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -237,9 +239,14 @@ public abstract class AbstractMapServer implements MapServer {
         var unleashConfig = config.get(UnleashConfig.class);
         if (unleashConfig.usePosthog()) {
             logger.info("Posthog is enabled, loading feature flag provider");
-            FeatureFlagProvider.replaceGlobals(new PostHogFeatureFlagProvider(
-                    unleashConfig.posthogPersonalApiKey()
-            ));
+            // project api key is not a secret.
+            PostHog.init("phc_mK0jji1aC3hvMBGLOLjuVARqolDGPS9AiuNUOhMwVyA", config -> config
+                    .personalApiKey(unleashConfig.posthogPersonalApiKey())
+                    .endpoint("https://us.i.posthog.com")
+                    .featureFlagsPollingInterval(Duration.ofMinutes(10)));
+            shutdowner.queue("posthog", PostHog::shutdown);
+
+            FeatureFlagProvider.replaceGlobals(new PostHogFeatureFlagProvider());
         } else {
             FeatureFlagProvider.replaceGlobals((ignored1, ignored2) -> unleashConfig.defaultAction());
         }

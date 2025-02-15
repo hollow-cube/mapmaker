@@ -70,7 +70,6 @@ public class MapServerBridge implements ServerBridge {
             MinecraftServer.getExceptionManager().handleException(e);
             player.sendMessage(Component.text("An error occurred while trying to return to the hub. Please try again later."));
         }
-
     }
 
     private void moveBetweenMapsOnThisServer(@NotNull Player player, @NotNull String mapId, @NotNull String state) {

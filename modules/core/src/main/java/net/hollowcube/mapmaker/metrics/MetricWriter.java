@@ -14,5 +14,7 @@ public interface MetricWriter extends Closeable {
     @NonBlocking
     void write(@NotNull Metric metric);
 
-    @Override void close();
+    @Override
+    default void close() {
+    }
 }

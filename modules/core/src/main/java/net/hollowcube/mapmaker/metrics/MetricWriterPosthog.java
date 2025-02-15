@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import net.hollowcube.posthog.PostHog;
+import net.hollowcube.posthog.PostHogNames;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,17 +24,9 @@ public class MetricWriterPosthog implements MetricWriter {
     private static final Type MAP_TYPE = new TypeToken<Map<String, Object>>() {
     }.getType();
 
-    private static final String POSTHOG_API_KEY = "phc_mK0jji1aC3hvMBGLOLjuVARqolDGPS9AiuNUOhMwVyA"; // Not a secret
-    private static final String POSTHOG_HOST = "https://us.i.posthog.com";
-    public static final PostHog POSTHOG_CLIENT = new PostHog(POSTHOG_HOST, POSTHOG_API_KEY);
+    // Uses the global PostHog instance which must have been initialized prior to this moment.
 
     public static final String NO_USER = "00000000-0000-0000-0000-000000000000";
-
-    private final PostHog client;
-
-    public MetricWriterPosthog() {
-        client = POSTHOG_CLIENT;
-    }
 
     @Override
     public void write(@NotNull Metric metric) {
@@ -47,19 +40,16 @@ public class MetricWriterPosthog implements MetricWriter {
             if (properties.containsKey("playerId")) {
                 playerId = properties.get("playerId").toString();
                 properties.remove("playerId");
+            } else {
+                // No player id, do not capture person profile
+                properties.put(PostHogNames.PROCESS_PERSON_PROFILE, false);
             }
 
-            client.capture(playerId, name, properties);
+            PostHog.capture(playerId, name, properties);
         } catch (Exception e) {
             logger.error("Failed to write metric", e);
         }
     }
-
-    @Override
-    public void close() {
-        this.client.shutdown();
-    }
-
 
     static @NotNull String computeMetricName(@NotNull String className) {
         return className.replace("Event", "")
