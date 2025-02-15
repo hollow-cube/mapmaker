@@ -21,9 +21,13 @@ import org.jetbrains.annotations.NotNull;
  *
  * <p>It is valid to override BLAH BLAH BLAH</p>
  */
-@SuppressWarnings("UnstableApiUsage")
 public abstract class CommandHandlingPlayer extends Player {
-    private static boolean initialized = false;
+
+    static {
+        var packetListenerManager = MinecraftServer.getPacketListenerManager();
+        packetListenerManager.setPlayListener(ClientCommandChatPacket.class, CommandHandlingPlayer::execCommand);
+        packetListenerManager.setPlayListener(ClientTabCompletePacket.class, CommandHandlingPlayer::tabCommand);
+    }
 
     public static @NotNull PlayerProvider createDefaultProvider(@NotNull CommandManager commandManager) {
         return (connection, gameProfile) -> new CommandHandlingPlayer(connection, gameProfile) {
@@ -36,54 +40,46 @@ public abstract class CommandHandlingPlayer extends Player {
 
     public CommandHandlingPlayer(@NotNull PlayerConnection connection, @NotNull GameProfile gameProfile) {
         super(connection, gameProfile);
-
-        if (!initialized) {
-            initialized = true;
-
-            var packetListenerManager = MinecraftServer.getPacketListenerManager();
-            packetListenerManager.setPlayListener(ClientCommandChatPacket.class, CommandHandlingPlayer::execCommand);
-            packetListenerManager.setPlayListener(ClientTabCompletePacket.class, CommandHandlingPlayer::tabCommand);
-        }
     }
 
     @Override
     public void refreshCommands() {
-        var declareCommandsPacket = getCommandManager().createCommandPacket(this);
-        if (declareCommandsPacket != null) sendPacket(declareCommandsPacket);
+        sendPacket(getCommandManager().createCommandPacket(this));
     }
 
     public abstract @NotNull CommandManager getCommandManager();
 
     private static void execCommand(@NotNull ClientCommandChatPacket packet, @NotNull Player player) {
         final String command = packet.message();
+
         if (Messenger.canReceiveCommand(player)) {
             Thread.startVirtualThread(() -> {
                 try {
-                    if (player instanceof CommandHandlingPlayer pl) {
-                        switch (pl.getCommandManager().execute(player, command)) {
-                            case CommandResult.Success result -> {
+                    var manager = CommandHandlingPlayer.asHandled(player).getCommandManager();
+
+                    switch (manager.execute(player, command)) {
+                        case CommandResult.Success ignored -> {}
+                        case CommandResult.Denied ignored -> player.sendMessage(Component.translatable("command.not_found"));
+                        case CommandResult.NotFound ignored -> player.sendMessage(Component.translatable("command.not_found"));
+                        case CommandResult.SyntaxError result -> {
+                            var errorMessage = result.message();
+                            var builder = Component.text()
+                                    .append(Component.text("Syntax error:", NamedTextColor.RED))
+                                    .appendNewline()
+                                    .append(Component.text(command.substring(0, result.start()), NamedTextColor.GRAY))
+                                    .append(Component.text(command.substring(result.start()), NamedTextColor.RED, TextDecoration.UNDERLINED))
+                                    .append(Component.text("<--[HERE] ", NamedTextColor.RED));
+                            if (errorMessage != null) {
+                                builder.append(Component.text(errorMessage, NamedTextColor.RED));
                             }
-                            case CommandResult.Denied result ->
-                                    player.sendMessage(Component.translatable("command.not_found"));
-                            case CommandResult.SyntaxError result -> {
-                                if (result.isNotFound()) {
-                                    player.sendMessage(Component.translatable("command.not_found"));
-                                } else {
-                                    player.sendMessage(Component.text()
-                                            .append(Component.text("Syntax error:", NamedTextColor.RED)).appendNewline()
-                                            .append(Component.text(command.substring(0, result.start()), NamedTextColor.GRAY))
-                                            .append(Component.text(command.substring(result.start()), NamedTextColor.RED, TextDecoration.UNDERLINED))
-                                            .append(Component.text("<--[HERE]", NamedTextColor.RED))
-                                            .build());
-                                }
-                            }
-                            case CommandResult.ExecutionError result -> {
-                                player.sendMessage(Component.translatable("generic.unknown_error"));
-                                MinecraftServer.getExceptionManager().handleException(new RuntimeException(
-                                        "An unhandled exception occurred while executing the command '" + command + "'", result.cause()));
-                            }
+                            player.sendMessage(builder.build());
                         }
-                    } else throw new RuntimeException("Player is not a CommandHandlingPlayer");
+                        case CommandResult.ExecutionError result -> {
+                            player.sendMessage(Component.translatable("generic.unknown_error"));
+                            MinecraftServer.getExceptionManager().handleException(new RuntimeException(
+                                    "An unhandled exception occurred while executing the command '" + command + "'", result.cause()));
+                        }
+                    }
                 } catch (Exception e) {
                     MinecraftServer.getExceptionManager().handleException(e);
                 }
@@ -96,10 +92,7 @@ public abstract class CommandHandlingPlayer extends Player {
     private static void tabCommand(@NotNull ClientTabCompletePacket packet, @NotNull Player player) {
         if (!Messenger.canReceiveCommand(player)) return;
 
-        CommandManager commandManager;
-        if (player instanceof CommandHandlingPlayer pl) {
-            commandManager = pl.getCommandManager();
-        } else throw new RuntimeException("Player is not a CommandHandlingPlayer");
+        var manager = CommandHandlingPlayer.asHandled(player).getCommandManager();
 
         // Collect the suggestions
         Thread.startVirtualThread(() -> {
@@ -108,14 +101,17 @@ public abstract class CommandHandlingPlayer extends Player {
                 if (text.startsWith("/"))
                     text = text.substring(1);
 
-                var suggestion = commandManager.suggest(player, text);
+                var suggestion = manager.suggest(player, text);
                 if (!suggestion.isEmpty()) {
                     player.sendPacket(new TabCompletePacket(
                             packet.transactionId(),
                             suggestion.getStart() + 1,
                             suggestion.getLength(),
                             suggestion.getEntries().stream()
-                                    .map(suggestionEntry -> new TabCompletePacket.Match(suggestionEntry.replacement(), suggestionEntry.tooltip()))
+                                    .map(entry -> new TabCompletePacket.Match(
+                                            entry.replacement(),
+                                            entry.tooltip()
+                                    ))
                                     .toList())
                     );
                 }
@@ -123,6 +119,13 @@ public abstract class CommandHandlingPlayer extends Player {
                 MinecraftServer.getExceptionManager().handleException(e);
             }
         });
+    }
+
+    private static CommandHandlingPlayer asHandled(Player player) {
+        if (player instanceof CommandHandlingPlayer handlingPlayer) {
+            return handlingPlayer;
+        }
+        throw new IllegalArgumentException("Player is not a CommandHandlingPlayer");
     }
 
 }

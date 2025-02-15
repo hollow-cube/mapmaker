@@ -24,7 +24,7 @@ public final class ArgumentMask extends Argument<Mask> {
             if (tree == null) return partial();
             return success(tree.toMask());
         } catch (MaskParseException e) {
-            return partial();
+            return partial(e.getMessage());
         }
     }
 }

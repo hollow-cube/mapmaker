@@ -81,13 +81,13 @@ public class CommandManagerImpl implements CommandManager {
         var reader = new StringReader(input);
         var context = new CommandContextImpl(sender);
         var result = root.execute(sender, reader, context);
-        if (parent != null && result instanceof CommandResult.SyntaxError syntaxError && syntaxError.isNotFound())
+        if (parent != null && result instanceof CommandResult.NotFound)
             return parent.execute(sender, input);
         return result;
     }
 
     @Override
-    public @Nullable DeclareCommandsPacket createCommandPacket(@NotNull Player player) {
+    public @NotNull DeclareCommandsPacket createCommandPacket(@NotNull Player player) {
         var nodes = new ArrayList<DeclareCommandsPacket.Node>();
         var root = new DeclareCommandsPacket.Node();
         nodes.add(root);

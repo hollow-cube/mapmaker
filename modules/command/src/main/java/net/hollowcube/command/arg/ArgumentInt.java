@@ -49,7 +49,8 @@ public class ArgumentInt extends Argument<Integer> {
         var word = reader.readWord(WordType.ALPHANUMERIC);
         try {
             var value = Integer.parseInt(word);
-            if (value < min || value > max) return syntaxError();
+            if (value < min) return syntaxError("%s must be at least %d".formatted(this.id(), this.min));
+            if (value > max) return syntaxError("%s must be at most %d".formatted(this.id(), this.max));
             return success(value);
         } catch (NumberFormatException e) {
             return syntaxError();

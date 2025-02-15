@@ -38,7 +38,7 @@ public class ArgumentFlagSet<E extends Enum<E>> extends Argument<EnumSet<E>> {
         var flags = EnumSet.noneOf(enumClass);
         for (int i = 1; i < word.length(); i++) {
             char c = word.charAt(i);
-            if (!flagMap.containsKey(c)) return syntaxError();
+            if (!flagMap.containsKey(c)) return syntaxError("Unknown flag: " + c);
             flags.add(enumClass.getEnumConstants()[flagMap.get(c)]);
         }
 

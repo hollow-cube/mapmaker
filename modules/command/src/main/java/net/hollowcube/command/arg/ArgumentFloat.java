@@ -35,7 +35,8 @@ public class ArgumentFloat extends Argument<Float> {
         try {
             var value = Float.parseFloat(word);
             if (Float.isNaN(value) || Float.isInfinite(value)) return syntaxError();
-            if (value < min || value > max) return syntaxError(); //todo custom message
+            if (value < min) return syntaxError("%s must be at least %.2f".formatted(this.id(), this.min));
+            if (value > max) return syntaxError("%s must be at most %.2f".formatted(this.id(), this.max));
             return success(value);
         } catch (NumberFormatException e) {
             return syntaxError();

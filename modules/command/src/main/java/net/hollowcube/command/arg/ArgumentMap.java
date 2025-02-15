@@ -40,8 +40,8 @@ public class ArgumentMap<S, T> extends Argument<T> {
         return switch (source.parse(sender, reader)) {
             //todo it is probably not great to have the get call here in case the prior argument is a deferred success
             case ParseResult.Success<S> success -> parseFunc.parse(sender, success.valueFunc().get());
-            case ParseResult.Partial<S> ignored -> partial();
-            case ParseResult.Failure<S> failure -> syntaxError(failure.start());
+            case ParseResult.Partial<S> partial -> partial(partial.message());
+            case ParseResult.Failure<S> failure -> syntaxError(failure.start(), failure.message());
         };
     }
 
