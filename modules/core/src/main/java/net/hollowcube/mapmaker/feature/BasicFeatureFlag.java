@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.feature;
 
-import net.minestom.server.MinecraftServer;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import org.jetbrains.annotations.NotNull;
 
 record BasicFeatureFlag(@NotNull String name) implements FeatureFlag {
@@ -10,7 +10,7 @@ record BasicFeatureFlag(@NotNull String name) implements FeatureFlag {
         try {
             return FeatureFlagProvider.current().test(name, context);
         } catch (Exception e) {
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e);
             return false;
         }
     }

@@ -7,11 +7,11 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.GenericMessages;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -73,7 +73,7 @@ public class MapLegacyImportCommand extends CommandDsl {
         } catch (Exception e) {
             player.sendMessage(GenericMessages.COMMAND_MAP_LEGACY_IMPORT_UNKNOWN_ERROR
                     .with(legacyMapId));
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e, player);
         }
     }
 }

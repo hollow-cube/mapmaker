@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.PlayerUtil;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerHandlerRegistry;
@@ -279,7 +280,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
                 }
             } catch (Exception e) {
                 logger.error("failed to move player to hub ({})", player.getUuid(), e);
-                MinecraftServer.getExceptionManager().handleException(e);
+                ExceptionReporter.reportException(e, player);
                 player.kick(CLOSED_MESSAGE);
             }
         }

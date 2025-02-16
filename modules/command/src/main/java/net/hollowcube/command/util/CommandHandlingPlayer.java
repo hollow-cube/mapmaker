@@ -2,6 +2,7 @@ package net.hollowcube.command.util;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandResult;
+import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -15,6 +16,8 @@ import net.minestom.server.network.packet.server.play.TabCompletePacket;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implements a player which handles commands. Can be overridden for additional functionality.
@@ -22,6 +25,8 @@ import org.jetbrains.annotations.NotNull;
  * <p>It is valid to override BLAH BLAH BLAH</p>
  */
 public abstract class CommandHandlingPlayer extends Player {
+
+    private static final Logger log = LoggerFactory.getLogger(CommandHandlingPlayer.class);
 
     static {
         var packetListenerManager = MinecraftServer.getPacketListenerManager();
@@ -58,9 +63,12 @@ public abstract class CommandHandlingPlayer extends Player {
                     var manager = CommandHandlingPlayer.asHandled(player).getCommandManager();
 
                     switch (manager.execute(player, command)) {
-                        case CommandResult.Success ignored -> {}
-                        case CommandResult.Denied ignored -> player.sendMessage(Component.translatable("command.not_found"));
-                        case CommandResult.NotFound ignored -> player.sendMessage(Component.translatable("command.not_found"));
+                        case CommandResult.Success ignored -> {
+                        }
+                        case CommandResult.Denied ignored ->
+                                player.sendMessage(Component.translatable("command.not_found"));
+                        case CommandResult.NotFound ignored ->
+                                player.sendMessage(Component.translatable("command.not_found"));
                         case CommandResult.SyntaxError result -> {
                             var errorMessage = result.message();
                             var builder = Component.text()
@@ -76,12 +84,15 @@ public abstract class CommandHandlingPlayer extends Player {
                         }
                         case CommandResult.ExecutionError result -> {
                             player.sendMessage(Component.translatable("generic.unknown_error"));
-                            MinecraftServer.getExceptionManager().handleException(new RuntimeException(
-                                    "An unhandled exception occurred while executing the command '" + command + "'", result.cause()));
+                            var syntheticException = new RuntimeException(
+                                    "An unhandled exception occurred while executing the command '" + command + "'", result.cause());
+                            PostHog.captureException(syntheticException, player.getUuid().toString());
+                            log.error("command eval failure", syntheticException);
                         }
                     }
                 } catch (Exception e) {
-                    MinecraftServer.getExceptionManager().handleException(e);
+                    PostHog.captureException(e, player.getUuid().toString());
+                    log.error("command failure", e);
                 }
             });
         } else {
@@ -116,7 +127,8 @@ public abstract class CommandHandlingPlayer extends Player {
                     );
                 }
             } catch (Exception e) {
-                MinecraftServer.getExceptionManager().handleException(e);
+                PostHog.captureException(e, player.getUuid().toString());
+                log.error("command suggestion failure", e);
             }
         });
     }

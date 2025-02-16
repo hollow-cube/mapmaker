@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.polar;
 
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
@@ -65,7 +66,7 @@ public class ReadWriteWorldAccess extends ReadWorldAccess {
             try { // Wrap to isolate single failures and prevent them from stopping the entire save process
                 entitiesTag.add(TerraformEntity.writeToTagWithPassengers(entity));
             } catch (Throwable t) {
-                MinecraftServer.getExceptionManager().handleException(t);
+                ExceptionReporter.reportException(t);
             }
         }
 

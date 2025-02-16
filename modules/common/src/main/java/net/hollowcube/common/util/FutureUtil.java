@@ -51,12 +51,6 @@ public final class FutureUtil {
         });
     }
 
-    @SuppressWarnings("TypeParameterUnusedInFormals")
-    public static <T> @Nullable T handleException(@NotNull Throwable t) {
-        MinecraftServer.getExceptionManager().handleException(t);
-        return null;
-    }
-
     public static <T> @NotNull Consumer<T> virtual(@NotNull Consumer<T> consumer) {
         return value -> Thread.startVirtualThread(() -> consumer.accept(value));
     }

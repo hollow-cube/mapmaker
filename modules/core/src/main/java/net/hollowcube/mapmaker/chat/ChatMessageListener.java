@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.gson.Gson;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.chat.components.MessageComponents;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
@@ -37,7 +38,10 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadLocalRandom;
@@ -215,7 +219,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                 handleChatSystem(message.extra());
             }
         } catch (Exception e) {
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e);
         }
     }
 
@@ -250,19 +254,20 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                 ));
             }
         } catch (Exception e) {
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e);
         }
     }
 
     protected void handleChatSystem(@NotNull ChatMessageData message) {
-        try {
-            var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(message.target()));
-            if (player == null) return; // Not relevant to this server
+        var player = MinecraftServer.getConnectionManager()
+                .getOnlinePlayerByUuid(UUID.fromString(message.target()));
+        if (player == null) return; // Not relevant to this server
 
+        try {
             var parts = message.argsSafe().stream().map(Component::text).toList();
             player.sendMessage(Component.translatable(message.key(), parts));
         } catch (Exception e) {
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e, player);
         }
     }
 

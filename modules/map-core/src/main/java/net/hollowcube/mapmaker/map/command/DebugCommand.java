@@ -9,6 +9,7 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.util.CommandCategory;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
@@ -295,12 +296,12 @@ public class DebugCommand extends CommandDsl {
                         mapService.uploadPerfdump(filename, PERF_DUMP_PATH.resolve(filename));
                         sender.sendMessage(Component.text("heap dump uploaded: " + filename).color(NamedTextColor.GREEN));
                     } catch (Exception e) {
-                        MinecraftServer.getExceptionManager().handleException(e);
+                        ExceptionReporter.reportException(e, sender.asPlayer());
                         sender.sendMessage("failed to upload heap dump");
                     }
                 });
             } catch (IOException e) {
-                MinecraftServer.getExceptionManager().handleException(e);
+                ExceptionReporter.reportException(e, sender.asPlayer());
                 sender.sendMessage("failed to create heap dump");
             }
         }
@@ -343,7 +344,7 @@ public class DebugCommand extends CommandDsl {
 
                     sender.sendMessage(Component.text("cpu profile created: " + filename).color(NamedTextColor.GREEN));
                 } catch (IOException | InterruptedException e) {
-                    MinecraftServer.getExceptionManager().handleException(e);
+                    ExceptionReporter.reportException(e, sender.asPlayer());
                     sender.sendMessage("failed to create cpu profile");
                 }
             });

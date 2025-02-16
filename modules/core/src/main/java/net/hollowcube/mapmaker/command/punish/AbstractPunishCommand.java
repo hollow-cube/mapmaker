@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
@@ -11,7 +12,6 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.types.PunishmentLadder;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -88,7 +88,7 @@ abstract class AbstractPunishCommand extends CommandDsl {
             this.service.createPunishment(targetId, executorId, this.type, comment, context.getRaw(ladderArgument));
         } catch (Exception e) {
             sender.sendMessage("An error occurred while executing the command.");
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e, sender);
         }
     }
 }

@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.config.HttpConfig;
 import net.hollowcube.mapmaker.config.MinestomConfig;
 import net.hollowcube.mapmaker.util.HttpServerWrapper;
 import net.hollowcube.mapmaker.util.MinestomPrometheus;
+import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
@@ -53,7 +54,10 @@ public final class MapServerInitializer {
         // Prometheus JVM exporters
         io.prometheus.client.hotspot.DefaultExports.initialize();
         // Default thread death handler
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> logger.error("Uncaught exception in thread {}", t, e));
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            PostHog.captureException(e, null, (Object) Map.of("thread", t.getName()));
+            logger.error("Uncaught exception in thread {}", t, e);
+        });
 
         // Init tasks (minestom server, map server components, web server)
 
@@ -66,7 +70,10 @@ public final class MapServerInitializer {
         MinecraftServer.setBrandName("minestom");
         MinecraftServer.setCompressionThreshold(-1);
 
-        MinecraftServer.getExceptionManager().setExceptionHandler(server::handleUncaughtException);
+        MinecraftServer.getExceptionManager().setExceptionHandler(t -> {
+            logger.error("An uncaught exception has been handled", t);
+            PostHog.captureException(t);
+        });
 
         //todo minestom bug, need to fix
         MinecraftServer.getPacketListenerManager().setPlayListener(ClientInteractEntityPacket.class, (packet, player) -> {

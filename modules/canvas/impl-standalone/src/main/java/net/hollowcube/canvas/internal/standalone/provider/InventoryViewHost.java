@@ -6,6 +6,7 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.standalone.BaseElement;
 import net.hollowcube.canvas.internal.standalone.ViewContainer;
 import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
+import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -23,6 +24,8 @@ import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -34,6 +37,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class InventoryViewHost {
     private static final Scheduler SCHEDULER = MinecraftServer.getSchedulerManager();
     private static final System.Logger logger = System.getLogger(InventoryViewHost.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(InventoryViewHost.class);
 
     static {
         MinecraftServer.getGlobalEventHandler()
@@ -367,7 +371,8 @@ public class InventoryViewHost {
                     }
                     if (dirty) drawCurrentElement();
                 } catch (Exception e) {
-                    MinecraftServer.getExceptionManager().handleException(e);
+                    log.error("Click handler failure", e);
+                    PostHog.captureException(e, player.getUuid().toString());
                 } finally {
                     // If result was set to a future then the click was async and will be released later.
                     if (result == null) {

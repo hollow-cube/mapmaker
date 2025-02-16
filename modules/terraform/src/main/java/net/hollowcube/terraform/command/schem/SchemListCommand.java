@@ -2,6 +2,7 @@ package net.hollowcube.terraform.command.schem;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.hollowcube.terraform.util.Format;
 import net.minestom.server.MinecraftServer;
@@ -22,7 +23,7 @@ public class SchemListCommand extends CommandDsl {
             var schematics = session.terraform().storage().listSchematics(session.id());
             schematics.forEach(s -> player.sendMessage(s.name() + " " + Format.formatBytes(s.size())));
         } catch (Exception e) {
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e, player);
         }
     }
 }

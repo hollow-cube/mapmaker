@@ -9,6 +9,7 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.kyori.adventure.text.Component;
@@ -83,7 +84,7 @@ public abstract class AbstractMapEditor extends View {
                 mapService.updateMap(player().getUuid().toString(), map.id(), req);
                 return true;
             } catch (Exception e) {
-                MinecraftServer.getExceptionManager().handleException(e);
+                ExceptionReporter.reportException(e, player());
                 return false;
             }
         }));
@@ -113,7 +114,7 @@ public abstract class AbstractMapEditor extends View {
                 mapService.updateMap(player().getUuid().toString(), map.id(), req);
                 return true;
             } catch (Exception e) {
-                MinecraftServer.getExceptionManager().handleException(e);
+                ExceptionReporter.reportException(e, player());
                 return false;
             }
         }));

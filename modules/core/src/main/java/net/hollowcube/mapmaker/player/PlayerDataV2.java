@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import net.hollowcube.common.util.RuntimeGson;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.kyori.adventure.text.Component;
@@ -75,7 +76,7 @@ public class PlayerDataV2 {
             updates = new PlayerDataUpdateRequest();
             return true;
         } catch (Exception e) {
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e); // Dont associate with the user, we don't know if they are the initiator
             return false;
         }
     }

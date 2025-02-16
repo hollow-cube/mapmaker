@@ -24,6 +24,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.chat.announcements.ChatAnnouncer;
@@ -556,10 +557,6 @@ public abstract class AbstractMapServer implements MapServer {
         return new DebugCommand(playerService(), permManager(), mapService(), allocator());
     }
 
-    public void handleUncaughtException(@NotNull Throwable t) {
-        logger.error("An uncaught exception has been handled", t);
-    }
-
     /**
      * Transfers the player session to this server and loads the required player data.
      */
@@ -645,7 +642,7 @@ public abstract class AbstractMapServer implements MapServer {
                 // See comment in AbstractMapWorld#configurePlayer
                 player.scheduleNextTick(ignored -> player.setAutoViewEntities(true));
             } catch (Exception e) {
-                MinecraftServer.getExceptionManager().handleException(e);
+                ExceptionReporter.reportException(e, player);
                 player.kick(Component.text("Failed to join the world. Please try again later."));
             }
         });
