@@ -28,7 +28,7 @@ public class ArgumentCommaSeparatedVec3 extends Argument<Vec> {
                         Double.parseDouble(parts[1]),
                         Double.parseDouble(parts[2])
                 ));
-                default -> syntaxError();
+                default -> syntaxError("Expected 1 or 3 values, got " + parts.length);
             };
         } catch (NumberFormatException ignored) {
             return syntaxError();

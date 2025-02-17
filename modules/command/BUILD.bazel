@@ -1,5 +1,5 @@
-load("@rules_java//java:defs.bzl", "java_library")
 load("@contrib_rules_jvm//java:defs.bzl", "JUNIT5_DEPS", "java_junit5_test")
+load("@rules_java//java:defs.bzl", "java_library")
 
 java_library(
     name = "command",
@@ -9,6 +9,7 @@ java_library(
     deps = [
         "//modules/common",
         "//third_party:minestom",
+        "@maven//:dev_hollowcube_posthog_java",
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:net_kyori_adventure_api",
         "@maven//:org_jetbrains_annotations",

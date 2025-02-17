@@ -7,6 +7,7 @@ import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -120,7 +121,7 @@ public class CreateMaps extends View {
             bridge.joinMap(player, spawnMapId, ServerBridge.JoinMapState.EDITING, "hardcoded_spawn_world");
         } catch (Exception e) {
             player.sendMessage(Component.translatable("generic.map.edit.fail"));
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e, player);
         } finally {
             player.closeInventory();
         }

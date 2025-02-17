@@ -9,6 +9,7 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.gui.common.ConfirmAction;
 import net.hollowcube.mapmaker.perm.PermManager;
@@ -163,8 +164,8 @@ public class BuyAddonsView extends View {
         } catch (PlayerService.NotFoundError e) {
             player.sendMessage(Component.translatable("store.add-ons.buy.error"));
         } catch (Exception e) {
-            MinecraftServer.getExceptionManager().handleException(e);
             player.sendMessage(Component.translatable("store.add-ons.buy.error"));
+            ExceptionReporter.reportException(e, player);
         }
     }
 

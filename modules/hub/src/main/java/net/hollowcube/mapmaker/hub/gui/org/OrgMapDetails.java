@@ -5,6 +5,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.hub.gui.edit.AbstractMapEditor;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapPlayerData;
@@ -54,7 +55,7 @@ public class OrgMapDetails extends AbstractMapEditor {
             bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.EDITING, "org_maps_gui");
         } catch (Exception e) {
             player.sendMessage(Component.translatable("edit.map.failure"));
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e, player);
             player.closeInventory();
         }
     }

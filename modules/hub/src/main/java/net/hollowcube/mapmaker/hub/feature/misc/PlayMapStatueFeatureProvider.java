@@ -9,9 +9,7 @@ import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.entity.util.InteractionEntity;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
-import net.hollowcube.mapmaker.hub.util.ScreenCursorIcon;
 import net.hollowcube.mapmaker.map.MapServer;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.color.Color;
 import net.minestom.server.coordinate.Pos;
@@ -121,14 +119,12 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
                 // Enable glowing - This works because we never set any other flags in this set, otherwise
                 // it would be overridden when sending other metadata changes.
                 player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(0, Metadata.Byte((byte) 0x40))));
-                ActionBar.forPlayer(player).addProvider(ScreenCursorIcon.INSTANCE);
             }
 
             @Override
             public void endHover(@NotNull Player player) {
                 // Disable glowing - See above for how/why this is functional.
                 player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(0, Metadata.Byte((byte) 0x0))));
-                ActionBar.forPlayer(player).removeProvider(ScreenCursorIcon.INSTANCE);
             }
 
             @Override

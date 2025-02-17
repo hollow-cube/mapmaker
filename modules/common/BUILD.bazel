@@ -16,6 +16,7 @@ java_library(
         "//third_party:adventure_all",
         "//third_party:minestom",
         "@maven//:com_google_code_gson_gson",
+        "@maven//:dev_hollowcube_posthog_java",
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:org_apache_kafka_kafka_clients",  # This is a really dumb requirement, i use the LRU cache here.
         "@maven//:org_jetbrains_annotations",

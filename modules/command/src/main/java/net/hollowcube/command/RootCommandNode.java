@@ -25,10 +25,4 @@ final class RootCommandNode extends CommandNode {
 
         this.children.add(new ArgumentPair(Argument.Literal(name), node));
     }
-
-    @Override
-    protected @NotNull CommandResult unwrap(@NotNull CommandResult result) {
-        // See the comment on the base implementation of this method
-        return result;
-    }
 }

@@ -10,6 +10,7 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.play.details.DetailsTimesTabView;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -20,7 +21,6 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -393,7 +393,7 @@ public class MapDetailsView extends View {
         try {
             authorName = playerService.getPlayerDisplayName2(map.owner()).build(DisplayName.Context.DEFAULT);
         } catch (Throwable t) {
-            MinecraftServer.getExceptionManager().handleException(t);
+            ExceptionReporter.reportException(t, player);
             authorName = Component.text("Unknown", NamedTextColor.RED);
         }
         player.sendMessage(LanguageProviderV2.translateMultiMerged("gui.map_details.map_info_tab.published_id", List.of(

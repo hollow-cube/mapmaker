@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.TagStringIO;
@@ -70,7 +71,7 @@ public class DataCommand extends CommandDsl {
                         .hoverEvent(Component.text("Click to copy SNBT", NamedTextColor.WHITE))
                         .clickEvent(ClickEvent.copyToClipboard(TagStringIO.get().asString(nbtData)))));
             } catch (IOException e) {
-                MinecraftServer.getExceptionManager().handleException(e);
+                ExceptionReporter.reportException(e, player);
             }
         }
     }

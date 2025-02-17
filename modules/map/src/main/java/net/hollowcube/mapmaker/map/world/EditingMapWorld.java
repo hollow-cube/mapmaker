@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.world;
 
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
@@ -215,7 +216,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
                     return true;
                 } catch (Exception e) {
                     logger.error("Failed to save map settings for {}", map().id(), e);
-                    MinecraftServer.getExceptionManager().handleException(e);
+                    ExceptionReporter.reportException(e);
                     return false;
                 }
             });

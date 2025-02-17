@@ -8,13 +8,13 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.PersonalizedMapData;
-import net.hollowcube.mapmaker.util.ItemUtils;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerService;
-import net.minestom.server.MinecraftServer;
+import net.hollowcube.mapmaker.util.ItemUtils;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -79,7 +79,7 @@ public class MapEntry extends View {
             try {
                 authorName = playerService.getPlayerDisplayName2(map.owner());
             } catch (Exception e) {
-                MinecraftServer.getExceptionManager().handleException(e);
+                ExceptionReporter.reportException(e, player());
                 authorName = new DisplayName(List.of(new DisplayName.Part("username", "!error!", null)));
             }
         }

@@ -8,6 +8,7 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -70,7 +71,7 @@ public class OrgMapsView extends View {
         } catch (Exception e) {
             player.closeInventory();
             player.sendMessage(Component.translatable("generic.unknown_error"));
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e, player);
         }
     }
 

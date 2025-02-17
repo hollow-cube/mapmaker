@@ -9,7 +9,9 @@ java_library(
         "//third_party:minestom",
         "@maven//:net_kyori_adventure_api",
         "@maven//:net_kyori_adventure_text_serializer_plain",
+        "@maven//:dev_hollowcube_posthog_java",
         "@maven//:org_jetbrains_annotations",
+        "@maven//:org_slf4j_slf4j_api",
     ],
 )
 
@@ -24,6 +26,7 @@ java_library(
         "//modules/compat",
         "//third_party:minestom",
         "@maven//:com_google_code_gson_gson",
+        "@maven//:dev_hollowcube_posthog_java",
         "@maven//:net_kyori_adventure_api",
     ],
 )

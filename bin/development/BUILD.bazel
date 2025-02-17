@@ -1,5 +1,5 @@
-load("@rules_java//java:defs.bzl", "java_binary", "java_library")
 load("@rules_graalvm//graalvm:defs.bzl", "native_image")
+load("@rules_java//java:defs.bzl", "java_binary", "java_library")
 
 java_library(
     name = "development_lib",
@@ -17,12 +17,12 @@ java_library(
         "//modules/canvas:impl-standalone",
         "//modules/common",
         "//modules/core",
+        "//modules/datafixerupper",
         "//modules/hub",
         "//modules/map",
-        "//modules/nbs",
         "//modules/map-core",
+        "//modules/nbs",
         "//modules/terraform",
-        "//modules/datafixerupper",
         "//third_party:adventure_all",
         "//third_party:auto_service",
         "//third_party:minestom",
@@ -30,6 +30,7 @@ java_library(
         "@maven//:com_google_code_gson_gson",
         "@maven//:dev_hollowcube_dataconverter",
         "@maven//:dev_hollowcube_polar",
+        "@maven//:io_opentelemetry_opentelemetry_api",
         "@maven//:io_prometheus_simpleclient",
         "@maven//:io_prometheus_simpleclient_hotspot",
         "@maven//:it_unimi_dsi_fastutil",
@@ -39,19 +40,13 @@ java_library(
 
 java_binary(
     name = "development",
+    data = ["//:.env"],
     main_class = "net.hollowcube.mapmaker.dev.DevServer",
     runtime_deps = [":development_lib"],
-    data = ["//:.env"],
 )
 
 native_image(
     name = "development_native",
-    deps = [
-        ":development_lib",
-        "//tools/ni-helper",
-    ],
-    main_class = "net.hollowcube.mapmaker.dev.DevServer",
-    native_features = ["net.hollowcube.nativeimage.helper.CanvasReflectionFeature"],
     allow_fallback = False,
     extra_args = [
         "--enable-preview",
@@ -62,8 +57,14 @@ native_image(
         #         "-H:+BuildReport",
         #         "--pgo-instrument",
     ],
+    main_class = "net.hollowcube.mapmaker.dev.DevServer",
+    native_features = ["net.hollowcube.nativeimage.helper.CanvasReflectionFeature"],
     #     profiles = ["default.iprof"],
     #     optimization_mode = "",
     native_image_settings = ["//third_party:native_image_default"],
     native_image_tool = "@graalvm//:native-image",
+    deps = [
+        ":development_lib",
+        "//tools/ni-helper",
+    ],
 )

@@ -57,7 +57,7 @@ public interface CommandManager {
     @NotNull
     CommandResult execute(@NotNull CommandSender sender, @NotNull String input);
 
-    @Nullable
+    @NotNull
     DeclareCommandsPacket createCommandPacket(@NotNull Player player);
 
     /**

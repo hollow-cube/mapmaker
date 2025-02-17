@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.feature.play;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.MapWorld;
@@ -47,7 +48,7 @@ public class MapRatingFeatureProvider implements FeatureProvider {
             try {
                 return world.server().mapService().getMapRating(world.map().id(), player.getUuid().toString());
             } catch (Exception e) {
-                MinecraftServer.getExceptionManager().handleException(e);
+                ExceptionReporter.reportException(e, player);
                 // It's fine to default to a new rating since its valid to overwrite a rating anyway.
                 return new MapRating();
             }

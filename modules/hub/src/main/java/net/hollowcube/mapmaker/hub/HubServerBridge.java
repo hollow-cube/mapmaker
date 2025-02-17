@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub;
 
 import net.hollowcube.mapmaker.CoreFeatureFlags;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.JoinMapRequest;
@@ -43,7 +44,7 @@ public class HubServerBridge implements ServerBridge {
             logger.info("join map result: {}", res);
             player.sendPluginMessage("mapmaker:transfer", res.serverClusterIp().getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e, player);
             player.sendMessage(Component.translatable("map.join.fail"));
             player.clearTitle();
         }

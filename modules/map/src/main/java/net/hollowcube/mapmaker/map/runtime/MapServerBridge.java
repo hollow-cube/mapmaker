@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.runtime;
 
 import net.hollowcube.mapmaker.CoreFeatureFlags;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapServerRunner;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.player.JoinHubRequest;
@@ -54,7 +55,7 @@ public class MapServerBridge implements ServerBridge {
                 this.moveBetweenServers(player, response.serverClusterIp());
             }
         } catch (Exception e) {
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e, player);
             player.sendMessage(Component.text("An error occurred while trying to join the map. Please try again later."));
         }
     }
@@ -67,10 +68,9 @@ public class MapServerBridge implements ServerBridge {
             logger.info("join hub result: {}", res);
             player.sendPluginMessage("mapmaker:transfer", res.serverClusterIp().getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e, player);
             player.sendMessage(Component.text("An error occurred while trying to return to the hub. Please try again later."));
         }
-
     }
 
     private void moveBetweenMapsOnThisServer(@NotNull Player player, @NotNull String mapId, @NotNull String state) {

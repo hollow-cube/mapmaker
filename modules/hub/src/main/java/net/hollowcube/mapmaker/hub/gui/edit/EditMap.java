@@ -9,6 +9,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.common.ConfirmAction;
 import net.hollowcube.mapmaker.gui.play.MapDetailsView;
 import net.hollowcube.mapmaker.map.*;
@@ -18,7 +19,6 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
@@ -250,7 +250,7 @@ public class EditMap extends View {
             bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.EDITING, "edit_maps_gui");
         } catch (Exception e) {
             player.sendMessage(Component.translatable("edit.map.failure"));
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e, player);
             player.closeInventory();
         }
     }
@@ -269,7 +269,7 @@ public class EditMap extends View {
             bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.PLAYING, "edit_maps_gui_verify");
         } catch (Exception e) {
             player.sendMessage(Component.translatable("map.verify.fail"));
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e, player);
         }
     }
 
@@ -369,7 +369,7 @@ public class EditMap extends View {
                 return true;
             } catch (Exception e) {
                 logger.log(System.Logger.Level.ERROR, "Failed to update map name", e);
-                MinecraftServer.getExceptionManager().handleException(e);
+                ExceptionReporter.reportException(e, player());
                 return false;
             }
         }));
@@ -402,7 +402,7 @@ public class EditMap extends View {
                 return true;
             } catch (Exception e) {
                 logger.log(System.Logger.Level.ERROR, "Failed to update map icon", e);
-                MinecraftServer.getExceptionManager().handleException(e);
+                ExceptionReporter.reportException(e, player());
                 return false;
             }
         }));
@@ -416,7 +416,7 @@ public class EditMap extends View {
                 return true;
             } catch (Exception e) {
                 logger.log(System.Logger.Level.ERROR, "Failed to update map", e);
-                MinecraftServer.getExceptionManager().handleException(e);
+                ExceptionReporter.reportException(e, player());
                 return false;
             }
         }));

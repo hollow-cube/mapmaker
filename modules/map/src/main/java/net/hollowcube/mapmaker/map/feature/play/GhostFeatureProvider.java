@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.feature.play;
 import com.google.auto.service.AutoService;
 import dev.hollowcube.replay.Replay;
 import dev.hollowcube.replay.playback.ReplayPlayer;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
@@ -37,8 +38,8 @@ public class GhostFeatureProvider implements FeatureProvider {
     }
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {
+        var player = event.getPlayer();
         try {
-            var player = event.getPlayer();
             var playerData = PlayerDataV2.fromPlayer(player);
             var world = event.mapWorld();
 
@@ -71,8 +72,7 @@ public class GhostFeatureProvider implements FeatureProvider {
             player.setTag(PLAYBACK_TAG, playback);
 
         } catch (Exception e) {
-            logger.info("failed to load replay", e);
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e, player);
         }
     }
 

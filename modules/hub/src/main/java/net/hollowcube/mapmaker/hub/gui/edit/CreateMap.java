@@ -9,6 +9,7 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapSize;
@@ -104,8 +105,7 @@ public class CreateMap extends View {
             performSignal(SIG_MAP_CREATED, slot, createdMap);
             submitButton.setState(State.ACTIVE);
         } catch (Exception e) {
-            logger.log(System.Logger.Level.ERROR, "Failed to create map", e);
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e, player);
             player.sendMessage(Component.translatable("generic.unknown_error"));
             player.closeInventory();
         }

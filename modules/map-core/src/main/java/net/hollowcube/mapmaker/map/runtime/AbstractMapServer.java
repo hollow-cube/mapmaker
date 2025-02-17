@@ -24,6 +24,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.chat.announcements.ChatAnnouncer;
@@ -82,6 +83,7 @@ import net.hollowcube.mapmaker.util.HttpServerWrapper;
 import net.hollowcube.mapmaker.util.NoopSpanExporter;
 import net.hollowcube.mapmaker.util.ServerStatsHud;
 import net.hollowcube.mapmaker.util.Shutdowner;
+import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.minestom.server.MinecraftServer;
@@ -101,6 +103,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -237,9 +240,14 @@ public abstract class AbstractMapServer implements MapServer {
         var unleashConfig = config.get(UnleashConfig.class);
         if (unleashConfig.usePosthog()) {
             logger.info("Posthog is enabled, loading feature flag provider");
-            FeatureFlagProvider.replaceGlobals(new PostHogFeatureFlagProvider(
-                    unleashConfig.posthogPersonalApiKey()
-            ));
+            // project api key is not a secret.
+            PostHog.init("phc_mK0jji1aC3hvMBGLOLjuVARqolDGPS9AiuNUOhMwVyA", config -> config
+                    .personalApiKey(unleashConfig.posthogPersonalApiKey())
+                    .endpoint("https://us.i.posthog.com")
+                    .featureFlagsPollingInterval(Duration.ofMinutes(10)));
+            shutdowner.queue("posthog", PostHog::shutdown);
+
+            FeatureFlagProvider.replaceGlobals(new PostHogFeatureFlagProvider());
         } else {
             FeatureFlagProvider.replaceGlobals((ignored1, ignored2) -> unleashConfig.defaultAction());
         }
@@ -549,10 +557,6 @@ public abstract class AbstractMapServer implements MapServer {
         return new DebugCommand(playerService(), permManager(), mapService(), allocator());
     }
 
-    public void handleUncaughtException(@NotNull Throwable t) {
-        logger.error("An uncaught exception has been handled", t);
-    }
-
     /**
      * Transfers the player session to this server and loads the required player data.
      */
@@ -638,7 +642,7 @@ public abstract class AbstractMapServer implements MapServer {
                 // See comment in AbstractMapWorld#configurePlayer
                 player.scheduleNextTick(ignored -> player.setAutoViewEntities(true));
             } catch (Exception e) {
-                MinecraftServer.getExceptionManager().handleException(e);
+                ExceptionReporter.reportException(e, player);
                 player.kick(Component.text("Failed to join the world. Please try again later."));
             }
         });

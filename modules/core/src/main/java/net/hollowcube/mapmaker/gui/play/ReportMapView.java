@@ -4,6 +4,7 @@ import net.hollowcube.canvas.*;
 import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapReportRequest;
 import net.hollowcube.mapmaker.map.MapService;
@@ -138,7 +139,7 @@ public class ReportMapView extends View {
                 player.sendMessage(Component.translatable("gui.report_map.submit.success"));
             } catch (Exception e) {
                 player.sendMessage(Component.translatable("gui.report_map.submit.failure"));
-                MinecraftServer.getExceptionManager().handleException(e);
+                ExceptionReporter.reportException(e, player);
             } finally {
                 submitButton.setState(State.ACTIVE);
             }

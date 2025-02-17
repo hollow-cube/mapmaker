@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.world;
 
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
@@ -84,7 +85,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
     @Override
     public void load() {
         features().preinitMap(this);
-        
+
         loadWorld();
 
         super.load();
@@ -93,7 +94,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
             this.ownerBossBarName = server().playerService().getPlayerDisplayName2(map().owner())
                     .build(DisplayName.Context.BOSS_BAR);
         } catch (Exception e) {
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e);
             this.ownerBossBarName = Component.text("!error!", NamedTextColor.RED);
         }
     }

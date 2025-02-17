@@ -3,11 +3,11 @@ package net.hollowcube.mapmaker.command.map.leaderboard;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,7 +19,7 @@ public class MapLeaderboardRestoreCommand extends CommandDsl {
     public MapLeaderboardRestoreCommand(@NotNull MapService mapService) {
         super("restore");
         this.mapService = mapService;
-        
+
         description = "Syncs the leaderboard with internal source of truth. Do not use unless you know this is correct";
 
         mapArg = CoreArgument.PlayableMap("map", mapService)
@@ -38,7 +38,7 @@ public class MapLeaderboardRestoreCommand extends CommandDsl {
             player.sendMessage("restored for " + map.settings().getName());
         } catch (Exception e) {
             player.sendMessage("failed to restore leaderboard");
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e, player);
         }
     }
 }

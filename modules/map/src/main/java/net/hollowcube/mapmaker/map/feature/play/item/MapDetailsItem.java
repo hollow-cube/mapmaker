@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.feature.play.item;
 
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.play.MapDetailsView;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
@@ -45,7 +46,7 @@ public class MapDetailsItem extends ItemHandler {
             try {
                 authorName = world.server().playerService().getPlayerDisplayName2(world.map().owner());
             } catch (Exception e) {
-                MinecraftServer.getExceptionManager().handleException(e);
+                ExceptionReporter.reportException(e, player);
                 authorName = new DisplayName(List.of(new DisplayName.Part("username", "!error!", null)));
             }
             DisplayName finalAuthorName = authorName;

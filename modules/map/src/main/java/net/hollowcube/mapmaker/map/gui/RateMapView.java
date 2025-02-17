@@ -8,6 +8,7 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.play.ReportMapView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapPlayerData;
@@ -92,7 +93,7 @@ public class RateMapView extends View {
             // Update the cached rating on the player.
             player.setTag(MapRatingFeatureProvider.LAST_RATING_TAG, CompletableFuture.completedFuture(rating));
         } catch (Exception e) {
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e, player);
             player.sendMessage(Component.translatable("command.generic.unknown_error"));
         }
     }

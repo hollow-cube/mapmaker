@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.command.staff;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.perm.PermManager;
@@ -11,7 +12,6 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,8 +51,8 @@ public class UnvanishCommand extends CommandDsl {
             playerData.setSetting(PlayerSettings.IS_VANISHED, false);
             playerData.writeUpdatesUpstream(playerService);
         } catch (Exception e) {
-            MinecraftServer.getExceptionManager().handleException(e);
             player.sendMessage("an error occurred while showing you");
+            ExceptionReporter.reportException(e, player);
         }
     }
 

@@ -1,9 +1,12 @@
 package net.hollowcube.canvas;
 
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.posthog.PostHog;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -12,6 +15,7 @@ import java.util.function.Function;
 
 public abstract class View implements Element {
     private static final ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
+    private static final Logger logger = LoggerFactory.getLogger(View.class);
 
     private final Context context;
     private final ViewElement delegate;
@@ -78,7 +82,8 @@ public abstract class View implements Element {
             context.clearHistory();
             context.pushView(viewProvider.apply(context), false);
         } catch (Exception e) {
-            MinecraftServer.getExceptionManager().handleException(e);
+            logger.error("Failed to replace view", e);
+            PostHog.captureException(e, player().getUuid().toString());
         }
     }
 
@@ -91,7 +96,8 @@ public abstract class View implements Element {
         try {
             context.pushView(viewProvider.apply(context), false);
         } catch (Exception e) {
-            MinecraftServer.getExceptionManager().handleException(e);
+            logger.error("Failed to push view", e);
+            PostHog.captureException(e, player().getUuid().toString());
         }
     }
 
@@ -144,7 +150,8 @@ public abstract class View implements Element {
             try {
                 func.run();
             } catch (Exception e) {
-                MinecraftServer.getExceptionManager().handleException(e);
+                logger.error("Async task failure", e);
+                PostHog.captureException(e, player().getUuid().toString());
             }
         });
     }
@@ -159,7 +166,8 @@ public abstract class View implements Element {
             try {
                 return func.call();
             } catch (Exception e) {
-                MinecraftServer.getExceptionManager().handleException(e);
+                logger.error("Async task failure", e);
+                PostHog.captureException(e, player().getUuid().toString());
                 return null;
             }
         });

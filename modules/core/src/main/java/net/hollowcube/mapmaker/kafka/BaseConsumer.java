@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.kafka;
 
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.minestom.server.MinecraftServer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -69,7 +70,7 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
         } catch (WakeupException e) {
             // Intentionally do nothing, this is the exit condition.
         } catch (Exception e) {
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e);
         } finally {
             consumer.close();
         }

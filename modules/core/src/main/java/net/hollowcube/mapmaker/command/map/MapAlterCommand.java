@@ -4,13 +4,13 @@ import net.hollowcube.command.CommandBuilder;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
@@ -222,7 +222,7 @@ public class MapAlterCommand {
             player.sendMessage("Map not found");
         } catch (Exception e) {
             player.sendMessage(Component.translatable("generic.unknown_error"));
-            MinecraftServer.getExceptionManager().handleException(e);
+            ExceptionReporter.reportException(e, player);
         }
         return false;
     }
