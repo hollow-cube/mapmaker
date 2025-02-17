@@ -14,17 +14,17 @@ import java.util.Optional;
 public class StatusEffectData extends BaseEffectData {
     public static final Codec<StatusEffectData> CODEC = RecordCodecBuilder.create(i -> i.group(
             // BaseEffectData
-            Codec.STRING.optionalFieldOf("name", "").forGetter(StatusEffectData::name),
-            Codec.INT.optionalFieldOf("progressIndex", -1).forGetter(StatusEffectData::progressIndex),
-            Codec.INT.optionalFieldOf("timeLimit", 0).forGetter(StatusEffectData::timeLimit),
-            Codec.INT.optionalFieldOf("resetHeight", NO_RESET_HEIGHT).forGetter(StatusEffectData::resetHeight),
-            Codec.BOOL.optionalFieldOf("clearPotionEffects", false).forGetter(StatusEffectData::clearPotionEffects),
+            Codec.STRING.lenientOptionalFieldOf("name", "").forGetter(StatusEffectData::name),
+            Codec.INT.lenientOptionalFieldOf("progressIndex", -1).forGetter(StatusEffectData::progressIndex),
+            Codec.INT.lenientOptionalFieldOf("timeLimit", 0).forGetter(StatusEffectData::timeLimit),
+            Codec.INT.lenientOptionalFieldOf("resetHeight", NO_RESET_HEIGHT).forGetter(StatusEffectData::resetHeight),
+            Codec.BOOL.lenientOptionalFieldOf("clearPotionEffects", false).forGetter(StatusEffectData::clearPotionEffects),
             PotionEffectList.NULL_MAPPED_CODEC.forGetter(StatusEffectData::potionEffects),
-            ExtraCodecs.POS.optionalFieldOf("teleport").forGetter(StatusEffectData::teleport),
-            HotbarItems.CODEC.optionalFieldOf("items", HotbarItems.EMPTY).forGetter(StatusEffectData::items),
+            ExtraCodecs.POS.lenientOptionalFieldOf("teleport").forGetter(StatusEffectData::teleport),
+            HotbarItems.CODEC.lenientOptionalFieldOf("items", HotbarItems.EMPTY).forGetter(StatusEffectData::items),
             // StatusEffectData
-            Codec.BOOL.optionalFieldOf("repeatable", false).forGetter(StatusEffectData::repeatable),
-            Codec.INT.optionalFieldOf("extraTime", 0).forGetter(StatusEffectData::extraTime),
+            Codec.BOOL.lenientOptionalFieldOf("repeatable", false).forGetter(StatusEffectData::repeatable),
+            Codec.INT.lenientOptionalFieldOf("extraTime", 0).forGetter(StatusEffectData::extraTime),
             SavedMapSettings.CODEC.fieldOf("settings").orElseGet(s -> {}, SavedMapSettings::new).forGetter(StatusEffectData::settings)
     ).apply(i, StatusEffectData::new));
 

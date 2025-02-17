@@ -67,10 +67,10 @@ public class BouncePadBlock implements BlockHandler, PressurePlateBlockMixin, De
         private static final double DEFAULT_POWER = 25;
 
         public static final Codec<Data> CODEC = RecordCodecBuilder.create(i -> i.group(
-                Codec.DOUBLE.optionalFieldOf("power", DEFAULT_POWER).forGetter(Data::power),
-                Codec.FLOAT.optionalFieldOf("pitch").forGetter(Data::pitch),
-                Codec.FLOAT.optionalFieldOf("yaw").forGetter(Data::yaw),
-                Codec.BOOL.optionalFieldOf("legacy_cylone_mode", false).forGetter(Data::legacyCyloneMode)
+                Codec.DOUBLE.lenientOptionalFieldOf("power", DEFAULT_POWER).forGetter(Data::power),
+                Codec.FLOAT.lenientOptionalFieldOf("pitch").forGetter(Data::pitch),
+                Codec.FLOAT.lenientOptionalFieldOf("yaw").forGetter(Data::yaw),
+                Codec.BOOL.lenientOptionalFieldOf("legacy_cylone_mode", false).forGetter(Data::legacyCyloneMode)
         ).apply(i, Data::new));
     }
 }

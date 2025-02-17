@@ -16,16 +16,16 @@ public class CheckpointEffectData extends BaseEffectData {
 
     public static final Codec<CheckpointEffectData> CODEC = RecordCodecBuilder.create(i -> i.group(
             // BaseEffectData
-            Codec.STRING.optionalFieldOf("name", "").forGetter(CheckpointEffectData::name),
-            Codec.INT.optionalFieldOf("progressIndex", -1).forGetter(CheckpointEffectData::progressIndex),
-            Codec.INT.optionalFieldOf("timeLimit", 0).forGetter(CheckpointEffectData::timeLimit),
-            Codec.INT.optionalFieldOf("resetHeight", NO_RESET_HEIGHT).forGetter(CheckpointEffectData::resetHeight),
-            Codec.BOOL.optionalFieldOf("clearPotionEffects", false).forGetter(CheckpointEffectData::clearPotionEffects),
+            Codec.STRING.lenientOptionalFieldOf("name", "").forGetter(CheckpointEffectData::name),
+            Codec.INT.lenientOptionalFieldOf("progressIndex", -1).forGetter(CheckpointEffectData::progressIndex),
+            Codec.INT.lenientOptionalFieldOf("timeLimit", 0).forGetter(CheckpointEffectData::timeLimit),
+            Codec.INT.lenientOptionalFieldOf("resetHeight", NO_RESET_HEIGHT).forGetter(CheckpointEffectData::resetHeight),
+            Codec.BOOL.lenientOptionalFieldOf("clearPotionEffects", false).forGetter(CheckpointEffectData::clearPotionEffects),
             PotionEffectList.NULL_MAPPED_CODEC.forGetter(CheckpointEffectData::potionEffects),
-            ExtraCodecs.POS.optionalFieldOf("teleport").forGetter(CheckpointEffectData::teleport),
-            HotbarItems.CODEC.optionalFieldOf("items", HotbarItems.EMPTY).forGetter(CheckpointEffectData::items),
+            ExtraCodecs.POS.lenientOptionalFieldOf("teleport").forGetter(CheckpointEffectData::teleport),
+            HotbarItems.CODEC.lenientOptionalFieldOf("items", HotbarItems.EMPTY).forGetter(CheckpointEffectData::items),
             // CheckpointEffectData
-            Codec.INT.optionalFieldOf("lives", NO_LIVES).forGetter(CheckpointEffectData::lives),
+            Codec.INT.lenientOptionalFieldOf("lives", NO_LIVES).forGetter(CheckpointEffectData::lives),
             SavedMapSettings.CODEC.fieldOf("settings").orElseGet(s -> {}, SavedMapSettings::new).forGetter(CheckpointEffectData::settings)
     ).apply(i, CheckpointEffectData::new));
 
