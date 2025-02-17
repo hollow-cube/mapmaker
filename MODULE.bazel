@@ -44,7 +44,7 @@ maven.install(
         "dev.hollowcube:polar:1.12.2",
         "dev.hollowcube:dataconverter:1.21.3-rv1",
         "dev.hollowcube:mql:1.1.0",
-        "dev.hollowcube:posthog-java:jar:0.1.2",
+        "dev.hollowcube:posthog-java:jar:0.1.3",
 
         # Misc
         "com.google.code.gson:gson:2.10.1",

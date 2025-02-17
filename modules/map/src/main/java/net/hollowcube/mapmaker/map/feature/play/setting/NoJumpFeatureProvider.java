@@ -39,6 +39,8 @@ public class NoJumpFeatureProvider extends AbstractSettingFeatureProvider {
     }
 
     private static boolean canJump(@NotNull Player player, MapWorld world) {
+        if (!world.isPlaying(player)) return true;
+
         var state = SaveState.fromPlayer(player);
         var playstate = state.state(PlayState.class);
         return !playstate.settings().get(MapSettings.NO_JUMP, world.map().settings());
