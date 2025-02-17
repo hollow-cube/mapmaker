@@ -17,6 +17,7 @@ import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
@@ -25,6 +26,7 @@ import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 import java.util.function.Function;
@@ -115,6 +117,16 @@ public class PlayerVisibilityFeatureProvider implements FeatureProvider {
 
     private record PlayerVisibilityRule(Player self, MapWorld world, PlayerDataV2 data) implements Function<Player, PlayerVisibilityExtension.Visibility> {
 
+        private static @Nullable Pos getCheckpoint(Player player) {
+            return OpUtils.map(
+                    SaveState.optionalFromPlayer(player),
+                    state -> state
+                            .tryGetState(PlayState.class)
+                            .flatMap(PlayState::pos)
+                            .orElse(null)
+            );
+        }
+
         // Check if a viewer can see self
         @Override
         public PlayerVisibilityExtension.Visibility apply(Player viewer) {
@@ -125,8 +137,8 @@ public class PlayerVisibilityFeatureProvider implements FeatureProvider {
                 } else if (this.world.spawnPoint(this.self).distanceSquared(ourPos) <= PLAYER_HIDE_DISTANCE_TO_POI_SQR) {
                     return PlayerVisibilityExtension.Visibility.INVISIBLE;
                 } else {
-                    var selfCheckpoint = OpUtils.map(SaveState.optionalFromPlayer(this.self), state -> state.state(PlayState.class).pos().orElse(null));
-                    var otherCheckpoint = OpUtils.map(SaveState.optionalFromPlayer(viewer), state -> state.state(PlayState.class).pos().orElse(null));
+                    var selfCheckpoint = getCheckpoint(this.self);
+                    var otherCheckpoint = getCheckpoint(viewer);
 
                     if (selfCheckpoint != null && selfCheckpoint.distanceSquared(ourPos) <= PLAYER_HIDE_DISTANCE_TO_POI_SQR) {
                         return PlayerVisibilityExtension.Visibility.INVISIBLE;
