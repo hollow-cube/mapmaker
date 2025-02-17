@@ -32,6 +32,8 @@ public class NoSprintFeatureProvider extends AbstractSettingFeatureProvider {
     }
 
     private static boolean canSprint(@NotNull Player player, MapWorld world) {
+        if (!world.isPlaying(player)) return true;
+
         var state = SaveState.fromPlayer(player);
         var playstate = state.state(PlayState.class);
         return !playstate.settings().get(MapSettings.NO_SPRINT, world.map().settings());
