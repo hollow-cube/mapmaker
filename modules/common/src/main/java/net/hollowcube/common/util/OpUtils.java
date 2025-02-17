@@ -7,6 +7,7 @@ import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -22,6 +23,15 @@ public class OpUtils {
     @Contract("null, _ -> null")
     public static <I, O> O map(@Nullable I input, Function<I, O> mapper) {
         return input == null ? null : mapper.apply(input);
+    }
+
+    /**
+     * Maps a nullable input to an output using a mapper function if the input is not null, otherwise returns a fallback value.
+     */
+    @NotNull
+    public static <I, O> O mapOr(@Nullable I input, Function<I, O> mapper, O fallback) {
+        if (input == null) return fallback;
+        return Objects.requireNonNullElse(mapper.apply(input), fallback);
     }
 
     /**

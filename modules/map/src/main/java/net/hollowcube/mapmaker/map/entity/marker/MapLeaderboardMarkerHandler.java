@@ -3,6 +3,8 @@ package net.hollowcube.mapmaker.map.entity.marker;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.mapmaker.map.LeaderboardData;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.util.LeaderboardDisplay;
@@ -40,7 +42,11 @@ public class MapLeaderboardMarkerHandler extends MarkerHandler {
         var hasBackground = data.getBoolean("background", true);
         this.leaderboard = new LeaderboardDisplay(entity,
                 () -> world.server().mapService().getPlaytimeLeaderboard(world.map().id(), null),
-                playerId -> world.server().mapService().getPlaytimeLeaderboard(world.map().id(), playerId).player().score(),
+                playerId -> OpUtils.mapOr(
+                        world.server().mapService().getPlaytimeLeaderboard(world.map().id(), playerId).player(),
+                        LeaderboardData.Entry::score,
+                        0L
+                ),
                 playerId -> world.server().playerService().getPlayerDisplayName2(playerId).build(),
                 0, 0, 0, scale);
         leaderboard.setPadding(true);
