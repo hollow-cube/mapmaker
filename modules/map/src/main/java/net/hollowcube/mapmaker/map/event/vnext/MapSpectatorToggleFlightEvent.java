@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 public record MapSpectatorToggleFlightEvent(
         @NotNull MapWorld mapWorld,
         @NotNull Player player,
-        boolean newState
+        boolean isFlying
 ) implements MapWorldEvent {
     @Override
     public @NotNull MapWorld getMapWorld() {

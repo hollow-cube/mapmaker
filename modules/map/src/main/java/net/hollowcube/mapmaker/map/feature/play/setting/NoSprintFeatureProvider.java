@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.mapmaker.map.MapSettings;
-import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
@@ -10,8 +9,6 @@ import net.hollowcube.mapmaker.map.event.MapPlayerUpdateStateEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapSpectatorToggleFlightEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
-import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
-import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -58,7 +55,7 @@ public class NoSprintFeatureProvider extends AbstractSettingFeatureProvider {
     }
 
     public void handleSpectatorFlightToggle(@NotNull MapSpectatorToggleFlightEvent event) {
-        updatePlayer(event.player(), event.newState());
+        updatePlayer(event.player(), !event.isFlying());
     }
 
     private void updatePlayer(@NotNull Player player, boolean isPlaying) {
