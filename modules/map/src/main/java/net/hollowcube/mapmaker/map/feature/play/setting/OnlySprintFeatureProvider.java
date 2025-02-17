@@ -37,7 +37,9 @@ public class OnlySprintFeatureProvider extends AbstractSettingFeatureProvider {
         return eventNode;
     }
 
-    private static boolean canSprint(@NotNull Player player, MapWorld world) {
+    private static boolean canSprint(@NotNull Player player, @NotNull MapWorld world) {
+        if (!world.isPlaying(player)) return true;
+
         var state = SaveState.fromPlayer(player);
         var playstate = state.state(PlayState.class);
         return !playstate.settings().get(MapSettings.ONLY_SPRINT, world.map().settings());
@@ -45,7 +47,6 @@ public class OnlySprintFeatureProvider extends AbstractSettingFeatureProvider {
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {
         var player = event.getPlayer();
-        if (!event.getMapWorld().isPlaying(player)) return;
         if (canSprint(player, event.getMapWorld())) return;
         if (!event.isMapJoin()) return;
 
@@ -62,8 +63,8 @@ public class OnlySprintFeatureProvider extends AbstractSettingFeatureProvider {
 
     public void onStopSprinting(@NotNull PlayerStopSprintingEvent event) {
         var player = event.getPlayer();
-        var world = MapWorld.forPlayer(player);
-        if (!world.isPlaying(player)) return;
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null || !world.isPlaying(player)) return;
         if (canSprint(player, world)) return;
 
         player.removeTag(ONLY_SPRINT_TAG);
@@ -74,8 +75,8 @@ public class OnlySprintFeatureProvider extends AbstractSettingFeatureProvider {
 
     public void onPlayerMove(@NotNull PlayerMoveEvent event) {
         var player = event.getPlayer();
-        var world = MapWorld.forPlayer(player);
-        if (!world.isPlaying(player)) return;
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null || !world.isPlaying(player)) return;
         if ((player.isSprinting() && !player.isSneaking()) || !player.hasTag(ONLY_SPRINT_TAG)) return;
         if (canSprint(player, world)) return;
 
