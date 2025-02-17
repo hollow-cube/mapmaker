@@ -24,7 +24,6 @@ import java.util.Objects;
  *
  * <p>NOT FOR PUBLIC DISTRIBUTION UNDER ANY CIRCUMSTANCE -- CODE IS DECOMPILED FROM THE VANILLA SERVER</p>
  */
-@SuppressWarnings("UnstableApiUsage")
 public final class VinePlacementRule extends BaseBlockPlacementRule {
     private final boolean hasDown;
 
@@ -43,7 +42,7 @@ public final class VinePlacementRule extends BaseBlockPlacementRule {
         var existingBlock = instance.getBlock(blockPosition);
 
         return Arrays.stream(getNearestLookingDirections(playerPosition, existingBlock.id() == this.block.id(), placeFace))
-                .filter(face -> face != BlockFace.TOP || this.hasDown)
+                .filter(face -> face != BlockFace.BOTTOM || this.hasDown)
                 .map(face -> this.getStateForPlacement(existingBlock, instance, blockPosition, face))
                 .filter(Objects::nonNull)
                 .findFirst()
@@ -61,26 +60,26 @@ public final class VinePlacementRule extends BaseBlockPlacementRule {
         return true;
     }
 
-    private boolean isFaceSupported(BlockFace $$0) {
+    private boolean isFaceSupported(BlockFace face) {
         return true;
     }
 
 
-    public static boolean hasFace(Block $$0, BlockFace $$1) {
-        return "true".equals($$0.getProperty(getPropertyName($$1)));
+    public static boolean hasFace(Block block, BlockFace face) {
+        return "true".equals(block.getProperty(getPropertyName(face)));
     }
 
-    public static boolean canAttachTo(Block.Getter instance, BlockFace $$1, Point $$2, Block block) {
+    public static boolean canAttachTo(Block.Getter instance, BlockFace face, Point pos, Block block) {
         return !block.isAir() && block.id() != Block.GLOW_LICHEN.id() && block.id() != Block.VINE.id() && block.id() != Block.SCULK_VEIN.id();
 //        return Block.isFaceFull($$3.getBlockSupportShape($$0, $$2), $$1.getOppositeFace()) || Block.isFaceFull($$3.getCollisionShape($$0, $$2), $$1.getOpposite());
     }
 
-    public boolean isValidStateForPlacement(Block.Getter $$0, Block $$1, Point $$2, BlockFace $$3) {
-        if (!this.isFaceSupported($$3) || $$1.id() == this.block.id() && hasFace($$1, $$3)) {
+    public boolean isValidStateForPlacement(Block.Getter instance, Block block, Point pos, BlockFace face) {
+        if (!this.isFaceSupported(face) || block.id() == this.block.id() && hasFace(block, face)) {
             return false;
         }
-        Point $$4 = $$2.relative($$3);
-        return canAttachTo($$0, $$3, $$4, $$0.getBlock($$4, Block.Getter.Condition.TYPE));
+        Point posRel = pos.relative(face);
+        return canAttachTo(instance, face, posRel, instance.getBlock(posRel, Block.Getter.Condition.TYPE));
     }
 
     @Nullable
