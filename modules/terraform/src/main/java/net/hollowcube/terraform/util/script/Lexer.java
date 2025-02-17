@@ -93,7 +93,7 @@ public class Lexer {
             case ')' -> new Token(Token.Type.RPAREN, start, cursor);
             case '[' -> new Token(Token.Type.LBRACKET, start, cursor);
             case ']' -> new Token(Token.Type.RBRACKET, start, cursor);
-            default -> throw new RuntimeException("Unexpected symbol: " + c);
+            default -> throw new TokenizerException("Unexpected character: " + c);
         };
     }
 
@@ -110,7 +110,7 @@ public class Lexer {
     }
 
     private char advance() {
-        if (atEnd()) throw new RuntimeException("Unexpected end of input");
+        if (atEnd()) throw new TokenizerException("Input too short");
         return source.charAt(cursor++);
     }
 

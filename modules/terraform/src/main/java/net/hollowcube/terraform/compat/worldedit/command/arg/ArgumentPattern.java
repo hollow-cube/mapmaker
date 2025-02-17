@@ -11,6 +11,7 @@ import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.util.script.ParseContext;
 import net.hollowcube.terraform.util.script.ParseException;
+import net.hollowcube.terraform.util.script.TokenizerException;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -29,18 +30,16 @@ public class ArgumentPattern extends Argument<Pattern> {
         if (!(sender instanceof Player player)) return syntaxError();
         var session = LocalSession.forPlayer(player);
 
-        var word = reader.readWord(WordType.GREEDY).toLowerCase(Locale.ROOT);
-        var tree = new PatternParser(word).parse();
-        if (tree == null) {
-//            System.out.println("tree: none");
-            return partial();
-        }
 
         try {
-//            System.out.println("tree: " + tree);
+            var word = reader.readWord(WordType.GREEDY).toLowerCase(Locale.ROOT);
+            var tree = new PatternParser(word).parse();
+            if (tree == null) {
+                return partial();
+            }
+
             return success(tree.into(ParseContext.of(session.terraform().registry(), player)));
-        } catch (ParseException e) {
-//            System.out.println(e.getMessage());
+        } catch (TokenizerException | ParseException e) {
             return partial(e.getMessage());
         }
     }
@@ -51,11 +50,16 @@ public class ArgumentPattern extends Argument<Pattern> {
         var session = LocalSession.forPlayer(player);
         var registry = session.terraform().registry();
 
-        var tree = new PatternParser(raw).parse();
-        if (tree == null) {
-            PatternTree.fillEmptySuggestion(registry, suggestion, 0);
-        } else {
-            tree.suggest(registry, suggestion);
+        try {
+            var tree = new PatternParser(raw).parse();
+            if (tree == null) {
+                PatternTree.fillEmptySuggestion(registry, suggestion, 0);
+            } else {
+                tree.suggest(registry, suggestion);
+            }
+        } catch (TokenizerException ignored) {
+            // Means that the user typed a character that isn't part of a pattern. This is fine.
+            // We don't need to suggest anything in this case.
         }
     }
 }
