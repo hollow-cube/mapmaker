@@ -48,8 +48,8 @@ public class CampfireBlockHandler implements BlockHandler {
 
         var block = interaction.getBlock();
         int index = getClickIndex(interaction.getCursorPosition(), block);
-        var itemStack = block.getTag(ITEMS_TAG).get(index);
-        if (!itemStack.isAir()) {
+        var items = block.getTag(ITEMS_TAG);
+        if (index < items.size() && !items.get(index).isAir()) {
             // Item is present, remove it
             block = setItemStack(block, index, ItemStack.AIR);
         } else if (!handItemStack.isAir()) {
