@@ -16,6 +16,7 @@ import net.hollowcube.mapmaker.map.block.PlacementRules;
 import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.command.HubCommand;
+import net.hollowcube.mapmaker.command.PlayerInfoCommand;
 import net.hollowcube.mapmaker.map.command.build.*;
 import net.hollowcube.mapmaker.map.command.play.SpectateCommand;
 import net.hollowcube.mapmaker.map.command.utility.*;
@@ -197,6 +198,7 @@ public class MapServerRunner extends AbstractMapServer {
         ));
 
         commandManager.register(new HubCommand(server.bridge()));
+        commandManager.register(new PlayerInfoCommand(server.permManager()));
 
         commandManager.register(new TopTimesCommand(server.mapService(), server.playerService(), server.sessionManager()));
 

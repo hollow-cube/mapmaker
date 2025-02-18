@@ -11,6 +11,7 @@ import net.hollowcube.mapmaker.hub.command.util.HubSpawnCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubTrainCommand;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
+import net.hollowcube.mapmaker.command.PlayerInfoCommand;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.map.runtime.NoopServerBridge;
@@ -87,6 +88,7 @@ public class HubServerRunner extends AbstractMapServer {
     // Static so it can be referenced from DevHubServer
     public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager, @NotNull HubMapWorld hubWorld, @NotNull Scheduler scheduler) {
         commandManager.register(new HelpCommand(commandManager, CommandCategories.GLOBAL));
+        commandManager.register(new PlayerInfoCommand(server.permManager()));
 
         commandManager.register(new HubFlyCommand(server.permManager()));
         commandManager.register(new HubSpawnCommand(hubWorld));
