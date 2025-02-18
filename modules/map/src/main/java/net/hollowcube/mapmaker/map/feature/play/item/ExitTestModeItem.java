@@ -35,7 +35,7 @@ public class ExitTestModeItem extends ItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
-        var world = MapWorld.forPlayer(player);
+        var world = MapWorld.forPlayerOptional(player);
         if (!(world instanceof TestingMapWorld testWorld)) return;
 
         FutureUtil.submitVirtual(() -> {
