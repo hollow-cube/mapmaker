@@ -351,9 +351,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         if (data.teleport().isPresent()) return;
         var pos = state.pos().orElse(null);
         if (pos == null) return;
-        var newPos = pos.withYaw(player.getPosition().yaw());
-        state.setPos(newPos);
-        state.lastState().ifPresent(s -> s.setPos(newPos));
+        float yaw = player.getPosition().yaw();
+        float pitch = player.getPosition().pitch();
+
+        state.setPos(pos.withView(yaw, pitch));
+        state.lastState().ifPresent(s -> s.setPos(s.pos().map(p -> p.withView(yaw, pitch)).orElse(null)));
     }
 
     public void handleCheckpointChange(@NotNull MapPlayerCheckpointPreChangeEvent event) {
