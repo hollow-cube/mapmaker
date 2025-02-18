@@ -344,6 +344,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var state = SaveState.fromPlayer(player).state(PlayState.class);
         var data = event.effectData();
 
+        if (!event.getMapWorld().isPlaying(event.player())) return;
         if (state.history().isEmpty()) return;
         if (state.lastState().isEmpty()) return;
         if (!state.history().getLast().equals(event.checkpointId())) return;
@@ -566,7 +567,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         // If they have a spectator checkpoint return to that always.
         var checkpoint = SpectateHandler.getCheckpoint(player);
-        if (checkpoint != null) {
+        if (checkpoint != null && world.isSpectating(player)) {
             // If the checkpoint is below the reset height, teleport to the spawn instead to prevent getting stuck.
             // If they set the spawn below the world then its a joke map anyway and i don't care.
             var playState = saveState.state(PlayState.class);
