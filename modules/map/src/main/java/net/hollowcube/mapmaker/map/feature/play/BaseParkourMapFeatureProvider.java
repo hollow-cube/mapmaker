@@ -500,7 +500,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             var saveState = SaveState.optionalFromPlayer(player);
             if (saveState == null) return;
 
-            var playState = saveState.state(PlayState.class);
+            var playState = saveState.tryGetState(PlayState.class).orElse(null);
+            if (playState == null) return;
             var resetHeight = playState.resetHeight().orElse(world.instance().getTag(DEFAULT_RESET_HEIGHT));
             if (player.getPosition().y() < resetHeight) {
                 softReset(player, saveState);
