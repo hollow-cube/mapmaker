@@ -28,6 +28,7 @@ public class PlayerInfoCommand extends CommandDsl {
     private static final List<String> KNOWN_MODS = List.of(
             "essential",
             "lunarclient",
+            "feather",
             "noxesium-v2",
             "axiom",
             "worldedit"
