@@ -6,6 +6,8 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public interface Text extends Element, Label {
 
     /**
@@ -16,7 +18,7 @@ public interface Text extends Element, Label {
      * @param component the component to set as text
      */
     default void setText(@NotNull Component component) {
-        setText(component, NamedTextColor.WHITE);
+        setText(component, Objects.requireNonNullElse(component.color(), NamedTextColor.WHITE));
     }
 
     /**
