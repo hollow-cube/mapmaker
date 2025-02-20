@@ -15,7 +15,6 @@ import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.tag.TagWritable;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
@@ -85,27 +84,6 @@ public class BiomeContainer implements TerraformInstanceBiomes {
     private final Int2ObjectMap<RegisteredBiome> idToBiome = new Int2ObjectArrayMap<>();
 
     private boolean initialized = false;
-
-    /**
-     * Returns the biome associated with the given name, including from the parent biome manager.
-     *
-     * <p>Note: only loaded biomes will be returned correctly. If not, the default biome will be returned.</p>
-     *
-     * @param name The name of the biome
-     * @return The Minestom biome if it exists and is loaded, the default biome otherwise.
-     */
-    public @NotNull DynamicRegistry.Key<Biome> getLoadedBiome(@NotNull String name) {
-        var namespace = NamespaceID.from(name);
-
-        for (var biome : keyToBiome.values()) {
-            if (biome.namespace().equals(namespace))
-                return DynamicRegistry.Key.of(biome.namespace());
-        }
-
-        if (parent.get(namespace) != null)
-            return DynamicRegistry.Key.of(namespace);
-        return DEFAULT_BIOME;
-    }
 
     @Override
     public @Nullable Biome getBiome(@NotNull DynamicRegistry.Key<Biome> key) {

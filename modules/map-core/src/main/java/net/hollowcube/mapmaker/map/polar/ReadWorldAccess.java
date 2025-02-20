@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -143,13 +144,15 @@ public class ReadWorldAccess implements PolarWorldAccess {
     }
 
     @Override
-    public @NotNull DynamicRegistry.Key<Biome> getBiome(@NotNull String name) {
-        return mapWorld.biomes().getLoadedBiome(name);
+    public int getBiomeId(@NotNull String name) {
+        var key = DynamicRegistry.Key.<Biome>of(name);
+        var id = mapWorld.biomes().getId(key);
+        return id == -1 ? 0 : id;
     }
 
     @Override
     public @NotNull String getBiomeName(int id) {
-        return mapWorld.biomes().getLoadedBiomeName(id);
+        return Objects.requireNonNullElse(mapWorld.biomes().getKey(id), Biome.PLAINS).name();
     }
 
     private void loadEntityWithPassengers(@NotNull Chunk chunk, @NotNull CompoundBinaryTag tag) {

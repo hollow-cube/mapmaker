@@ -50,8 +50,8 @@ public record LoadingWorldAccess(
     }
 
     @Override
-    public DynamicRegistry.@NotNull Key<Biome> getBiome(@NotNull String name) {
-        return this.delegate.getBiome(name);
+    public int getBiomeId(@NotNull String name) {
+        return this.delegate.getBiomeId(name);
     }
 
     @Override
