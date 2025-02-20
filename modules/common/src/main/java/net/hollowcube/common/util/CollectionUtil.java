@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 public class CollectionUtil {
 
     @SafeVarargs
-    public static <T>List<T> copyWithMinSize(int minSize, Supplier<T> fallback, T... elements) {
+    public static <T> List<T> copyWithMinSize(int minSize, Supplier<T> fallback, T... elements) {
         if (elements.length > minSize) return List.of(elements);
         List<T> list = new ArrayList<>(minSize);
         list.addAll(Arrays.asList(elements));
