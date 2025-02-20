@@ -32,7 +32,9 @@ public class SignBlockHandler implements BlockHandler, InteractTarget {
 
     public static final Tag<Boolean> IS_WAXED = Tag.Boolean("is_waxed").defaultValue(false);
     public static final Tag<SignData> FRONT_TEXT = Tag.Structure("front_text", SignData.SERIALIZER).defaultValue(SignData.empty());
+    public static final Tag<SignData> FRONT_TEXT_FORMATTED = ExtraTags.MappedView(FRONT_TEXT, SignData::withFormatting);
     public static final Tag<SignData> BACK_TEXT = Tag.Structure("back_text", SignData.SERIALIZER).defaultValue(SignData.empty());
+    public static final Tag<SignData> BACK_TEXT_FORMATTED = ExtraTags.MappedView(BACK_TEXT, SignData::withFormatting);
 
     static {
         MinecraftServer.getGlobalEventHandler()
@@ -93,20 +95,16 @@ public class SignBlockHandler implements BlockHandler, InteractTarget {
 
         // Skip sign editing if player is sneaking
         if (!player.isSneaking()) {
-            // Handle editing the sign
-            var map = MapWorld.forPlayerOptional(player);
-            if (map != null && !map.map().isPublished()) {
-                // Set the data to the actual data and then open the editor and then set it back
-                var realBlockData = CompoundBinaryTag.builder();
-                realBlockData.put(isFront ? "front_text" : "back_text", data.toNbt());
+            // Set the data to the actual data and then open the editor and then set it back
+            var realBlockData = CompoundBinaryTag.builder();
+            realBlockData.put(isFront ? "front_text" : "back_text", data.toNbt());
 
-                player.sendPacket(new BundlePacket());
-                player.sendPacket(new BlockEntityDataPacket(blockPosition, 7, realBlockData.build()));
-                player.sendPacket(new OpenSignEditorPacket(blockPosition, isFront));
-                player.sendPacket(new BundlePacket());
+            player.sendPacket(new BundlePacket());
+            player.sendPacket(new BlockEntityDataPacket(blockPosition, 7, realBlockData.build()));
+            player.sendPacket(new OpenSignEditorPacket(blockPosition, isFront));
+            player.sendPacket(new BundlePacket());
 
-                return false;
-            }
+            return false;
         }
         return true;
     }
@@ -120,8 +118,8 @@ public class SignBlockHandler implements BlockHandler, InteractTarget {
     public @NotNull Collection<Tag<?>> getBlockEntityTags() {
         return List.of(
                 IS_WAXED,
-                ExtraTags.MappedView(FRONT_TEXT, SignData::withFormatting),
-                ExtraTags.MappedView(BACK_TEXT, SignData::withFormatting)
+                FRONT_TEXT_FORMATTED,
+                BACK_TEXT_FORMATTED
         );
     }
 
