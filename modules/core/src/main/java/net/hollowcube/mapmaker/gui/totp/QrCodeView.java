@@ -1,9 +1,7 @@
 package net.hollowcube.mapmaker.gui.totp;
 
-import net.hollowcube.canvas.Text;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
-import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.gui.common.cartography.AbstractImageView;
@@ -19,8 +17,6 @@ public class QrCodeView extends AbstractImageView {
 
     private static final int SIZE = Framebuffer.WIDTH;
 
-    private @Outlet("title") Text title;
-
     private final BufferedImage qrCode;
     private final Function<Context, View> newView;
 
@@ -33,8 +29,6 @@ public class QrCodeView extends AbstractImageView {
         super(context);
         this.qrCode = createQrCode(base64, size);
         this.newView = newView;
-
-        this.title.setText("Scan 2FA Code");
     }
 
     @Signal(View.SIG_MOUNT)

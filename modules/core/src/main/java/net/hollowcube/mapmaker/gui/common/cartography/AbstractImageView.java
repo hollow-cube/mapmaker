@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 
 public abstract class AbstractImageView extends View {
 
-    private static final int MAP_ID = 0; // TODO check if we should be hardcoding the map id here - Gravy
+    private static final int MAP_ID = 0;
 
     private @Outlet("image") Label image;
 
