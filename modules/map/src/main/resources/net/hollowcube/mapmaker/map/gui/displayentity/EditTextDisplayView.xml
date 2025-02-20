@@ -100,18 +100,11 @@
                                 backgroundSprite="displayentity/properties/option"
                         />
                     </switch>
-                    <switch id="option_background">
-                        <button id="option_background_false"
-                                translationKey="gui.display_entity.properties.text.background.false"
-                                sprite="create_maps/tab_settings/tab_visual/time/noon_icon"
-                                backgroundSprite="displayentity/properties/option"
-                        />
-                        <button id="option_background_true"
-                                translationKey="gui.display_entity.properties.text.background.true"
-                                sprite="create_maps/tab_settings/tab_visual/time/noon_icon"
-                                backgroundSprite="displayentity/properties/option"
-                        />
-                    </switch>
+                    <button id="option_background"
+                            translationKey="gui.display_entity.properties.text.background"
+                            sprite="create_maps/tab_settings/tab_visual/time/noon_icon"
+                            backgroundSprite="displayentity/properties/option"
+                    />
                     <switch id="option_see_through">
                         <button id="option_see_through_false"
                                 translationKey="gui.display_entity.properties.text.see_through.false"

@@ -1,0 +1,9 @@
+{
+  "type": "item",
+  "colored": true,
+  "display": {
+    "gui": {
+      "translation": [5, 0, 0]
+    }
+  }
+}

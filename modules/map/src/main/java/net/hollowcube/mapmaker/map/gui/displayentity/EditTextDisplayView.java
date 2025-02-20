@@ -8,11 +8,15 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ActionGroup;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.gui.common.anvil.ColorPickerView;
 import net.hollowcube.mapmaker.gui.common.anvil.TextInputBuilder;
 import net.hollowcube.mapmaker.gui.common.anvil.TextInputView;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.minestom.server.color.AlphaColor;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.TextDisplayMeta;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +29,7 @@ public class EditTextDisplayView extends AbstractEditDisplayView<DisplayEntity.T
 
     private @Outlet("option_alignment") Switch alignmentOption;
     private @Outlet("option_shadow") Switch shadowOption;
-    private @Outlet("option_background") Switch backgroundOption;
+    private @Outlet("option_background") Label backgroundOption;
     private @Outlet("option_see_through") Switch seeThroughOption;
 
     private @Outlet("lines") Label displayLines;
@@ -58,7 +62,9 @@ public class EditTextDisplayView extends AbstractEditDisplayView<DisplayEntity.T
 
         this.alignmentOption.setOption(this.meta().getAlignment().ordinal());
         this.shadowOption.setOption(this.meta().isShadow());
-        this.backgroundOption.setOption(this.meta().getBackgroundColor() != 0);
+        this.backgroundOption.setArgs(Component.text(String.format("#%06X", this.meta().getBackgroundColor()))
+                .color(TextColor.lerp(0.2f, TextColor.color(this.meta().getBackgroundColor()), NamedTextColor.WHITE))
+        );
         this.seeThroughOption.setOption(this.meta().isSeeThrough());
 
         this.displayText.setText(this.lines.get(this.line));
@@ -101,10 +107,22 @@ public class EditTextDisplayView extends AbstractEditDisplayView<DisplayEntity.T
         this.updateState();
     }
 
-    @ActionGroup("option_background_.*")
-    public void onCycleBackground() {
-        this.meta().setBackgroundColor(this.meta().getBackgroundColor() == 0 ? 0x40000000 : 0);
-        this.updateState();
+    @Action("option_background")
+    public void setBackground(Player player, int slot, ClickType type) {
+        if (type == ClickType.SHIFT_LEFT_CLICK) {
+            this.meta().setBackgroundColor(0x40000000);
+            this.updateState();
+        } else if (type == ClickType.LEFT_CLICK) {
+            var builder = ColorPickerView.builder()
+                    .title("Set Background Color")
+                    .icon("anvil/item_frame")
+                    .callback(color -> {
+                        this.meta().setBackgroundColor(color.asARGB());
+                        this.updateState();
+                    });
+
+            this.pushView(context -> builder.build(context, new AlphaColor(this.meta().getBackgroundColor())));
+        }
     }
 
     @ActionGroup("option_see_through_.*")
