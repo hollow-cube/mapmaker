@@ -4,8 +4,11 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.hollowcube.common.util.BlockUtil;
+import net.hollowcube.common.util.ColorUtil;
+import net.hollowcube.common.util.OpUtils;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.color.Color;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -97,12 +100,12 @@ public final class ExtraCodecs {
         }
     });
 
-    public static final Codec<TextColor> COLOR = Codec.withAlternative(
+    public static final Codec<Color> COLOR = Codec.withAlternative(
             Codec.STRING.comapFlatMap(
-                    text -> result(TextColor.fromCSSHexString(text), "Invalid color: " + text),
-                    TextColor::asHexString
+                    text -> result(ColorUtil.fromHex(text), "Invalid color: " + text),
+                    ColorUtil::toHex
             ),
-            Codec.INT.xmap(TextColor::color, TextColor::value)
+            Codec.INT.xmap(Color::new, Color::asRGB)
     );
 
     // Enum as ordinal integer

@@ -197,8 +197,6 @@ public class BiomeContainer implements TerraformInstanceBiomes {
 
             idToBiome.put(biome.id(), biome);
             keyToBiome.put(key, biome);
-
-            logger.info("Loaded custom biome {} (id #{})", namespace.asString(), biome.id());
         }
     }
 
