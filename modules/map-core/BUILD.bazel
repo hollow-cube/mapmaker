@@ -10,6 +10,7 @@ java_library(
         "//modules/canvas:api",
         "//modules/common",
         "//modules/compat",
+        "//modules/anticheat",
         "//modules/core",
         "//modules/terraform",
         "//third_party:minestom",

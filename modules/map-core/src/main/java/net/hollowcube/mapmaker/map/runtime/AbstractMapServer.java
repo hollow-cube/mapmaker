@@ -13,6 +13,7 @@ import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.semconv.ResourceAttributes;
+import modules.anticheat.src.main.java.net.hollowcube.anticheat.AntiCheat;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
@@ -234,6 +235,7 @@ public abstract class AbstractMapServer implements MapServer {
         });
 
         EventExtensions.init();
+        AntiCheat.init();
 
         // Dependent service init
 
