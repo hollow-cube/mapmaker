@@ -17,7 +17,7 @@ public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
 
     public static final Codec<PotionEffectList> CODEC = Entry.CODEC.listOf()
             .xmap(PotionEffectList::new, PotionEffectList::entries);
-    public static final MapCodec<PotionEffectList> NULL_MAPPED_CODEC = CODEC.optionalFieldOf("potionEffects")
+    public static final MapCodec<PotionEffectList> NULL_MAPPED_CODEC = CODEC.lenientOptionalFieldOf("potionEffects")
             .xmap(o -> o.orElseGet(PotionEffectList::new), Optional::ofNullable);
 
     public static final int MIN_DURATION_MS = 0;
