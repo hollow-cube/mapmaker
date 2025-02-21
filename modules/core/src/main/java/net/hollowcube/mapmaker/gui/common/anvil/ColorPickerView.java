@@ -101,7 +101,7 @@ public class ColorPickerView extends View {
     @Action("output")
     public void handleAccept() {
         if (this.settings.callback != null) {
-            this.settings.callback.accept(this.color);
+            this.settings.callback.accept(this, this.color);
             this.popView();
         } else {
             popView(this.settings.signal, this.color);
@@ -119,7 +119,7 @@ public class ColorPickerView extends View {
                 var three = Integer.parseInt(input.substring(2, 3), 16) * 17;
                 if (input.length() == 3) {
                     return new AlphaColor(255, one, two, three);
-                } else{
+                } else {
                     var four = Integer.parseInt(input.substring(3, 4), 16) * 17;
                     return new AlphaColor(one, two, three, four);
                 }
@@ -134,7 +134,8 @@ public class ColorPickerView extends View {
                     return new AlphaColor(one, two, three, four);
                 }
             }
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException ignored) {
+        }
         return null;
     }
 }
