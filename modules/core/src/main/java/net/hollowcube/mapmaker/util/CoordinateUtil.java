@@ -7,6 +7,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.instance.WorldBorder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -98,5 +99,18 @@ public final class CoordinateUtil {
         pointArgs.add(Component.text(NumberUtil.format(pos.yaw(), 2)).hoverEvent(Component.text(pos.yaw(), NamedTextColor.WHITE)));
         pointArgs.add(Component.text(NumberUtil.format(pos.pitch(), 2)).hoverEvent(Component.text(pos.pitch(), NamedTextColor.WHITE)));
         return pointArgs;
+    }
+
+    public static boolean inBorder(WorldBorder border, Point position, double padding) {
+        var x = position.x();
+        var z = position.z();
+
+        var cx = border.centerX();
+        var cz = border.centerZ();
+
+        var radius = border.diameter() / 2.0;
+
+        return x >= cx - radius + padding && x <= cx + radius - padding &&
+                z >= cz - radius + padding && z <= cz + radius - padding;
     }
 }

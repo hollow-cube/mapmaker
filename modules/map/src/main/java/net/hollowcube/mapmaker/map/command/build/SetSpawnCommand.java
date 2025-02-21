@@ -42,7 +42,7 @@ public class SetSpawnCommand extends CommandDsl {
     }
 
     private void updateMapPos(@NotNull Player player, @NotNull Pos newSpawnPoint) {
-        if (!player.getInstance().getWorldBorder().inBounds(newSpawnPoint)) {
+        if (!CoordinateUtil.inBorder(player.getInstance().getWorldBorder(), newSpawnPoint, 2)) {
             player.sendMessage(Component.translatable("command.set_spawn.out_of_world"));
             return;
         }
