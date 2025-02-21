@@ -64,7 +64,7 @@ public class NoJumpFeatureProvider extends AbstractSettingFeatureProvider {
 
     private void updatePlayer(@NotNull Player player, boolean isPlaying) {
         var world = MapWorld.forPlayer(player);
-        var canJump = canJump(player, world) && isPlaying;
+        var canJump = canJump(player, world) || !isPlaying;
         setJumpStrength(player, canJump ? Attribute.JUMP_STRENGTH.defaultValue() : 0);
     }
 
