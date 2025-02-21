@@ -7,7 +7,6 @@ import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerUpdateStateEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
-import net.hollowcube.mapmaker.map.event.vnext.MapSpectatorToggleFlightEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.kyori.adventure.text.Component;
@@ -23,8 +22,7 @@ public class NoSprintFeatureProvider extends AbstractSettingFeatureProvider {
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/nosprint", EventFilter.INSTANCE)
             .addListener(MapPlayerInitEvent.class, this::initPlayer)
             .addListener(MapPlayerUpdateStateEvent.class, this::playerUpdated)
-            .addListener(MapWorldPlayerStopPlayingEvent.class, this::removePlayer)
-            .addListener(MapSpectatorToggleFlightEvent.class, this::handleSpectatorFlightToggle);
+            .addListener(MapWorldPlayerStopPlayingEvent.class, this::removePlayer);
 
     @Override
     protected EventNode<InstanceEvent> getEvents() {
@@ -49,20 +47,16 @@ public class NoSprintFeatureProvider extends AbstractSettingFeatureProvider {
     }
 
     public void playerUpdated(@NotNull MapPlayerUpdateStateEvent event) {
-        updatePlayer(event.player(), true);
+        updatePlayer(event.player());
     }
 
     public void removePlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
         event.player().setFood(20);
     }
 
-    public void handleSpectatorFlightToggle(@NotNull MapSpectatorToggleFlightEvent event) {
-        updatePlayer(event.player(), !event.isFlying());
-    }
-
-    private void updatePlayer(@NotNull Player player, boolean isPlaying) {
+    private void updatePlayer(@NotNull Player player) {
         var world = MapWorld.forPlayer(player);
-        var canSprint = canSprint(player, world) || !isPlaying;
+        var canSprint = canSprint(player, world);
         player.setFood(canSprint ? 20 : 6);
     }
 }
