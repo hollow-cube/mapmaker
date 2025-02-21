@@ -214,12 +214,32 @@ public class MarkerEntity extends MapEntity {
         var marker = assertEditableMarker(event.getEditor(), event.getEntityUuid());
         if (marker == null) return;
 
+        var newData = event.getData().getCompound("data");
+        var updating = !newData.getBoolean("axiom:modify", false);
+        var minChanged = newData.get("min") != null;
+        var maxChanged = newData.get("max") != null;
+
         var builder = CompoundBinaryTag.builder();
-        builder.put(event.getData().getCompound("data"));
+        if (updating) builder.put(marker.getTag(DATA_TAG));
+        builder.put(newData);
+
         AXIOM_RESERVED_KEYS.forEach(builder::remove);
 
         var oldType = marker.getType();
         marker.setTag(DATA_TAG, builder.build());
+
+        // TODO cant use update tag here because of a class cast exception, likely a minestom issue - Gravy
+        if (updating) {
+            if (minChanged) {
+                var min = marker.getTag(REGION_MIN_TAG);
+                marker.setTag(REGION_MIN_TAG, min.sub(marker.getPosition()));
+            }
+            if (maxChanged) {
+                var max = marker.getTag(REGION_MAX_TAG);
+                marker.setTag(REGION_MAX_TAG, max.sub(marker.getPosition()));
+            }
+        }
+
         marker.updateForViewers(); // Send updated region to viewers
         marker.updateBoundingBox();
 
