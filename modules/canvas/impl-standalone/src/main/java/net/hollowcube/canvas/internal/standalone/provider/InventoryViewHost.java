@@ -27,10 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -38,6 +35,12 @@ public class InventoryViewHost {
     private static final Scheduler SCHEDULER = MinecraftServer.getSchedulerManager();
     private static final System.Logger logger = System.getLogger(InventoryViewHost.class.getName());
     private static final Logger log = LoggerFactory.getLogger(InventoryViewHost.class);
+
+    private static final Map<String, InventoryType> ID_TO_CUSTOM_TYPES = Map.of(
+            "anvil", InventoryType.ANVIL,
+            "cartography", InventoryType.CARTOGRAPHY
+    );
+    private static final Set<InventoryType> CUSTOM_TYPES = Set.copyOf(ID_TO_CUSTOM_TYPES.values());
 
     static {
         MinecraftServer.getGlobalEventHandler()
@@ -136,10 +139,11 @@ public class InventoryViewHost {
         width = element.width();
         height = element.height();
 
-        // Special case for anvil GUIs
-        if ("anvil".equals(id)) {
+        // Special case for custom inventories
+        var type = ID_TO_CUSTOM_TYPES.get(id);
+        if (type != null) {
             playerInventoryRows = element.height() - 1;
-            return InventoryType.ANVIL;
+            return type;
         }
 
         var inventoryType = switch (element.height()) {
@@ -328,7 +332,7 @@ public class InventoryViewHost {
                 // This means we are in the player inventory with a custom inventory open
                 wrapper = w;
                 // Offset slot to be absolute from the top of the gui
-                var invSize = w.getInventoryType() == InventoryType.ANVIL ? 9 : w.getInventoryType().getSize();
+                var invSize = CUSTOM_TYPES.contains(w.getInventoryType()) ? 9 : w.getInventoryType().getSize();
                 if (slot < 9) {
                     // hotbar
                     slot += invSize + (9 * 3);

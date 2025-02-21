@@ -1,14 +1,17 @@
 package net.hollowcube.common.util;
 
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.component.DataComponent;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagSerializer;
 import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 public final class ExtraTags {
     private ExtraTags() {
@@ -33,4 +36,15 @@ public final class ExtraTags {
         );
     }
 
+    @SuppressWarnings("UnstableApiUsage")
+    public static <T> Tag<T> MappedView(@NotNull Tag<T> tag, @NotNull UnaryOperator<T> mapper) {
+        return Tag.View(TagSerializer.fromCompound(
+                compound -> mapper.apply(tag.read(compound)),
+                value -> {
+                    CompoundBinaryTag.Builder builder = CompoundBinaryTag.builder();
+                    tag.write(builder, mapper.apply(value));
+                    return builder.build();
+                }
+        ));
+    }
 }
