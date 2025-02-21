@@ -78,7 +78,7 @@ public class MapLeaderboardMarkerHandler extends MarkerHandler {
         super.onTick();
 
         ticksUntilUpdate--;
-        if (ticksUntilUpdate == 0) {
+        if (ticksUntilUpdate == 0 && leaderboard != null) {
             FutureUtil.submitVirtual(() -> {
                 leaderboard.update();
                 entity.getViewers().forEach(leaderboard::update);
@@ -89,6 +89,7 @@ public class MapLeaderboardMarkerHandler extends MarkerHandler {
 
     @Override
     protected void addViewer(@NotNull Player player) {
+        if (leaderboard == null) return;
         FutureUtil.submitVirtual(() -> leaderboard.update(player));
     }
 }
