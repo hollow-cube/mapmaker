@@ -35,7 +35,7 @@ public class MapArgument extends Argument<Optional<MapData>> {
             // Try as published ID
             var publishedId = MapData.parsePublishedID(mapId);
             return getOrEmpty(() -> this.mapService.getMapByPublishedId(playerId, publishedId));
-        } catch (IllegalArgumentException ignored) {
+        } catch (IllegalArgumentException | MapService.NotFoundError ignored) {
             // Not a valid published ID
         }
 
@@ -43,7 +43,7 @@ public class MapArgument extends Argument<Optional<MapData>> {
             // Try as a full ID
             var fullId = UUID.fromString(mapId).toString();
             return getOrEmpty(() -> mapService.getMap(playerId, fullId));
-        } catch (IllegalArgumentException ignored) {
+        } catch (IllegalArgumentException | MapService.NotFoundError ignored) {
             // Not a valid UUID
         }
 
