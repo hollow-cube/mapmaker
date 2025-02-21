@@ -62,7 +62,7 @@ public class NoSprintFeatureProvider extends AbstractSettingFeatureProvider {
 
     private void updatePlayer(@NotNull Player player, boolean isPlaying) {
         var world = MapWorld.forPlayer(player);
-        var canSprint = canSprint(player, world) && isPlaying;
+        var canSprint = canSprint(player, world) || !isPlaying;
         player.setFood(canSprint ? 20 : 6);
     }
 }
