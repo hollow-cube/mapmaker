@@ -75,7 +75,7 @@ public class TeleportCommand extends CommandDsl {
         var instance = player.getInstance();
         if (instance.getWorldBorder().inBounds(loc)) {
             MapWorldHelpers.teleportPlayer(player, loc).thenRun(() ->
-                    player.sendMessage(Component.translatable("teleport.target.success", CoordinateUtil.asTranslationArgs(loc)))
+                    player.sendMessage(Component.translatable("teleport.location.success", CoordinateUtil.asTranslationArgs(loc)))
             );
         } else {
             player.sendMessage(Component.translatable("teleport.out_of_bounds"));
