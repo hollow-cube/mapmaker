@@ -29,7 +29,9 @@ public final class PacketRegistryImpl implements PacketRegistry {
 
     private final Map<String, ServerboundModPacket.Type<?>> serverbound = new ConcurrentHashMap<>();
     private final Map<String, ClientboundModPacket.Type<?>> clientbound = new ConcurrentHashMap<>();
+
     private final Map<String, BiConsumer<Player, ?>> handlers = new ConcurrentHashMap<>();
+    private final Map<String, BiConsumer<Player, PlayerPluginMessageEvent>> namespaceHandlers = new ConcurrentHashMap<>();
 
     private boolean frozen = false;
 
@@ -50,8 +52,15 @@ public final class PacketRegistryImpl implements PacketRegistry {
                 });
                 default -> {
                     ServerboundModPacket.Type<?> type = this.serverbound.get(id);
-                    if (type == null) return;
-                    handlePacket(type, event);
+                    if (type == null) {
+                        var namspace = id.split(":", 2)[0];
+                        var handler = this.namespaceHandlers.get(namspace);
+                        if (handler != null) {
+                            handler.accept(player, event);
+                        }
+                    } else {
+                        handlePacket(type, event);
+                    }
                 }
             }
         });
@@ -99,6 +108,14 @@ public final class PacketRegistryImpl implements PacketRegistry {
 
         this.serverbound.put(type.id(), type);
         this.handlers.put(type.id(), handler);
+    }
+
+    @Override
+    public void registerNamespaceHandler(String namespace, BiConsumer<Player, PlayerPluginMessageEvent> handler) {
+        Check.stateCondition(this.frozen, "PacketRegistry is frozen");
+        Check.stateCondition(this.namespaceHandlers.containsKey(namespace), "Duplicate namespace handler: " + namespace);
+
+        this.namespaceHandlers.put(namespace, handler);
     }
 
     public static boolean isRegistered(ClientboundModPacket.Type<?> type) {
