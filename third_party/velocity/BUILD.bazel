@@ -1,0 +1,5 @@
+java_import(
+    name = "velocity_api",
+    jars = ["velocity-api-3.4.0.jar"],
+    visibility = ["//visibility:public"],
+)

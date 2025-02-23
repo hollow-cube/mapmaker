@@ -172,9 +172,9 @@ public abstract class AbstractMapServer implements MapServer {
         }
 
         var sessionServiceUrl = System.getenv("MAPMAKER_SESSION_SERVICE_URL");
-        if (sessionServiceUrl != null) sessionService = new SessionServiceImpl(sessionServiceUrl);
+        if (sessionServiceUrl != null) sessionService = new SessionServiceImpl(otel, sessionServiceUrl);
         else if (globalConfig.noop()) sessionService = new NoopSessionService();
-        else sessionService = new SessionServiceImpl("http://localhost:9127"); // tilt
+        else sessionService = new SessionServiceImpl(otel, "http://localhost:9127"); // tilt
 
         var mapServiceUrl = System.getenv("MAPMAKER_MAP_SERVICE_URL");
         if (mapServiceUrl != null) mapService = new MapServiceImpl(mapServiceUrl);
@@ -265,10 +265,11 @@ public abstract class AbstractMapServer implements MapServer {
         // Must be initialized this late because of all its dependencies. this is pretty yikes im not a big fan
         var inviteServiceUrl = System.getenv("MAPMAKER_PLAYER_INVITE_SERVICE_URL");
         if (inviteServiceUrl != null)
-            this.inviteService = new PlayerInviteServiceImpl(inviteServiceUrl, playerService, mapService, sessionManager, bridge, permManager);
+            this.inviteService = new PlayerInviteServiceImpl(otel, inviteServiceUrl, playerService, mapService, sessionManager, bridge, permManager);
         else if (globalConfig.noop()) this.inviteService = new NoopPlayerInviteService();
-        else
-            this.inviteService = new PlayerInviteServiceImpl("http://localhost:9127", playerService, mapService, sessionManager, bridge, permManager); // tilt
+        else {
+            this.inviteService = new PlayerInviteServiceImpl(otel, "http://localhost:9127", playerService, mapService, sessionManager, bridge, permManager); // tilt
+        }
 
         // Create one producer to reuse.
         producer = new FriendlyProducer(kafkaConfig.bootstrapServers());
@@ -573,7 +574,7 @@ public abstract class AbstractMapServer implements MapServer {
                     presence.instanceId(), presence.type(),
                     presence.state(), presence.mapId()
             );
-            var sessionResponseFuture = FutureUtil.fork(() -> sessionService.transferSessionV2(playerId, transferReq));
+            var sessionResponseFuture = FutureUtil.fork(() -> sessionService.transferSession(playerId, transferReq));
             var mapPlayerDataFuture = FutureUtil.fork(() -> mapService.getMapPlayerData(playerId));
             var backpackDataFuture = FutureUtil.fork(() -> playerService.getPlayerBackpack(playerId));
 

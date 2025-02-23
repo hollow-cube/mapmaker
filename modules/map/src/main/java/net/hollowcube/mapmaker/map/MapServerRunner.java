@@ -6,6 +6,7 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.command.CommandCategories;
+import net.hollowcube.mapmaker.command.PlayerInfoCommand;
 import net.hollowcube.mapmaker.command.TopTimesCommand;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.event.FeatureFlagReloadEvent;
@@ -16,7 +17,6 @@ import net.hollowcube.mapmaker.map.block.PlacementRules;
 import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.command.HubCommand;
-import net.hollowcube.mapmaker.command.PlayerInfoCommand;
 import net.hollowcube.mapmaker.map.command.build.*;
 import net.hollowcube.mapmaker.map.command.play.SpectateCommand;
 import net.hollowcube.mapmaker.map.command.utility.*;
@@ -256,8 +256,10 @@ public class MapServerRunner extends AbstractMapServer {
             // Queue resource pack download/apply while we do other things
             var resourcePackFuture = ResourcePackManager.sendResourcePack(player);
 
+            logger.info("configuring player {}", player.getUuid());
             var playerId = player.getUuid().toString();
             var joinInfo = FutureUtil.getUnchecked(getPendingJoin(playerId, false));
+            logger.info("got pending join {}", joinInfo);
             if (joinInfo == null) {
                 logger.error("timed out waiting for join info for {}", playerId);
                 player.kick(Component.text("Failed to join. Please try again later."));
@@ -267,6 +269,7 @@ public class MapServerRunner extends AbstractMapServer {
             var instanceId = ServerRuntime.getRuntime().hostname();
             var presence = new Presence(Presence.TYPE_MAPMAKER_MAP, joinInfo.state(), instanceId, joinInfo.mapId());
             transferPlayerSession(player, presence);
+            logger.info("transfered session {}", joinInfo);
 
             // Create the world, holding the player here until it is ready for them to join.
             var map = mapService().getMap(joinInfo.playerId(), joinInfo.mapId());

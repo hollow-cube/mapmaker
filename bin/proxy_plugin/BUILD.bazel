@@ -3,7 +3,10 @@ load("@rules_java//java:defs.bzl", "java_library")
 java_plugin(
     name = "velocity_ap",
     processor_class = "com.velocitypowered.api.plugin.ap.PluginAnnotationProcessor",
-    deps = ["@maven//:com_velocitypowered_velocity_api"],
+    deps = [
+        "//third_party/velocity:velocity_api",
+        "@maven//:com_google_code_gson_gson",
+    ],
 )
 
 java_library(
@@ -12,7 +15,7 @@ java_library(
         "velocity_ap",
     ],
     exports = [
-        "@maven//:com_velocitypowered_velocity_api",
+        "//third_party/velocity:velocity_api",
         "@maven//:net_kyori_adventure_api",
         "@maven//:net_kyori_adventure_key",
         "@maven//:net_kyori_adventure_text_serializer_plain",
@@ -27,9 +30,10 @@ java_library(
     visibility = ["//visibility:public"],
     deps = [
         "velocity",
-        "//modules/core",
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:org_jetbrains_annotations",
+        "@maven//:com_google_code_gson_gson",
+        "@maven//:com_google_inject_guice",
     ],
 )
 

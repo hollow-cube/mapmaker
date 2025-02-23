@@ -1,5 +1,7 @@
 package net.hollowcube.proxy;
 
+import com.google.gson.JsonObject;
+import com.google.inject.Inject;
 import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
@@ -18,13 +20,6 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.util.GameProfile;
-import net.hollowcube.mapmaker.player.PlayerSkin;
-import net.hollowcube.mapmaker.player.SessionCreateRequestV2;
-import net.hollowcube.mapmaker.player.SessionService;
-import net.hollowcube.mapmaker.player.SessionServiceImpl;
-import net.hollowcube.mapmaker.punishments.types.Punishment;
-import net.hollowcube.mapmaker.util.AbstractHttpService;
-import net.hollowcube.mapmaker.util.GenericServiceError;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -58,7 +53,7 @@ public class ProxyPlugin {
     private final Logger logger;
     private final ProxyServer proxy;
 
-    private SessionService sessionService;
+    private ProxySessionService sessionService;
 
     private final RegisteredServer anyhubServer;
 
@@ -68,13 +63,14 @@ public class ProxyPlugin {
     private final Set<UUID> playersWithSession = new CopyOnWriteArraySet<>();
     private final Set<UUID> playersJustJoined = new CopyOnWriteArraySet<>();
 
+    @Inject
     public ProxyPlugin(@NotNull Logger logger, @NotNull ProxyServer proxy) {
         this.logger = logger;
         this.proxy = proxy;
 
         var sessionServiceUrl = System.getenv("SESSION_SERVICE_URL");
-        if (sessionServiceUrl != null) sessionService = new SessionServiceImpl(sessionServiceUrl);
-        else sessionService = new SessionServiceImpl("http://session-service:9124"); // tilt
+        if (sessionServiceUrl != null) sessionService = new ProxySessionService(logger, sessionServiceUrl);
+        else sessionService = new ProxySessionService(logger, "http://session-service:9124"); // tilt
 
         proxy.getChannelRegistrar().register(TRANSFER_MESSAGE_ID);
         proxy.getChannelRegistrar().register(RESOURCE_PACK_MESSAGE_ID);
@@ -111,40 +107,32 @@ public class ProxyPlugin {
 
             var pd = sessionService.createSessionV2(
                     player.getUniqueId().toString(),
-                    new SessionCreateRequestV2(
-                            AbstractHttpService.hostname,
+                    new SessionCreateRequest(
+                            ProxySessionService.hostname,
                             player.getUsername(),
                             player.getRemoteAddress().getAddress().getHostAddress(),
-                            new PlayerSkin(skinTexture, skinSignature)
+                            new SessionCreateRequest.Skin(skinTexture, skinSignature)
                     )
             );
             playersWithSession.add(player.getUniqueId());
             playersJustJoined.add(player.getUniqueId());
             logger.info("created session (v2) for {}: {}", player.getUsername(), pd);
-        } catch (SessionService.UnauthorizedError error) {
-            if (error.getError().code().equals("banned")) {
-                event.setResult(ResultedEvent.ComponentResult.denied(buildBannedMessage(error.getError())));
-                return;
-            }
+        } catch (ProxySessionService.BannedException error) {
+//            if (error.getError().code().equals("banned")) {
+            event.setResult(ResultedEvent.ComponentResult.denied(buildBannedMessage(error.getContent())));
+//                return;
+//            }
 
             // this is ok, they will be sent to the limbo
-            logger.info("player {} is not in the beta", player.getUsername());
-            event.setResult(ResultedEvent.ComponentResult.denied(MAINTENANCE));
+//            event.setResult(ResultedEvent.ComponentResult.denied(MAINTENANCE));
         } catch (Exception e) {
             logger.error("failed to create session (v2) for {}", player.getUsername(), e);
             event.setResult(LoginEvent.ComponentResult.denied(Component.text("failed to create session")));
         }
     }
 
-    private @NotNull Component buildBannedMessage(@NotNull GenericServiceError error) {
-        if (error.context() == null) {
-            throw new IllegalStateException("banned error without context");
-        }
-
-        var banContext = error.context().get("ban");
-        var punishment = AbstractHttpService.GSON.fromJson(banContext, Punishment.class);
-
-        return Component.translatable("punishments.banned", Component.text(punishment.comment()));
+    private @NotNull Component buildBannedMessage(@NotNull JsonObject error) {
+        return Component.translatable("You are banned");
     }
 
     @Subscribe

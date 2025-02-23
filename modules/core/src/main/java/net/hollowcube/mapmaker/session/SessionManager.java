@@ -106,7 +106,7 @@ public class SessionManager {
 
     public void updateState(@NotNull String playerId, @NotNull SessionStateUpdateRequest req) {
         Check.stateCondition(!sessions.containsKey(playerId), "session does not exist");
-        updateSessionOptimistic(sessionService.updateSessionState(playerId, req), req.metadata());
+        updateSessionOptimistic(sessionService.updateSessionProperties(playerId, req), req.metadata());
     }
 
     public @NotNull Collection<PlayerSession> sessions(boolean showHidden) {

@@ -15,34 +15,16 @@ import java.util.List;
 public class LocalSessionService extends NoopSessionService {
 
     @Override
-    public @NotNull PlayerDataV2 createSessionV2(@NotNull String id, @NotNull SessionCreateRequestV2 body) {
+    public @NotNull PlayerDataV2 createSession(@NotNull String id, @NotNull String proxy, @NotNull String username, @NotNull String ip, @NotNull PlayerSkin skin) {
         throw new UnsupportedOperationException("i dont think i need this");
-//        return new PlayerDataV2(
-//                id, body.username(),
-//                new DisplayName(List.of(new DisplayName.Part("username", body.username(), null))),
-//                new JsonObject(),
-//                0, 0, 0
-//        );
     }
 
     @Override
-    public @NotNull TransferSessionResponse transferSessionV2(@NotNull String id, @NotNull SessionTransferRequest req) {
+    public @NotNull TransferSessionResponse transferSession(@NotNull String id, @NotNull SessionTransferRequest req) {
         var player = MinecraftServer.getConnectionManager().getConfigPlayers().stream()
                 .filter(p -> p.getUuid().toString().equalsIgnoreCase(id))
                 .findFirst().orElse(null);
         Check.notNull(player, "no player in config");
-
-        // @NotNull String playerId,
-        //        @NotNull Instant createdAt,
-        //
-        //        @NotNull String proxyId,
-        //        @NotNull String serverId,
-        //
-        //        boolean hidden,
-        //        @NotNull String username,
-        //        @NotNull PlayerSkin skin,
-        //
-        //        @UnknownNullability Presence presence
 
         return new TransferSessionResponse(
                 new PlayerDataV2(
@@ -63,7 +45,7 @@ public class LocalSessionService extends NoopSessionService {
     }
 
     @Override
-    public void deleteSessionV2(@NotNull String id) {
+    public void deleteSession(@NotNull String id) {
         throw new UnsupportedOperationException("i dont think i need this");
     }
 }
