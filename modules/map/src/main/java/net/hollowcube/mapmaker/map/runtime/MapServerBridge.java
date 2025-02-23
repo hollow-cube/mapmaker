@@ -4,6 +4,7 @@ import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapServerRunner;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.player.JoinHubRequest;
 import net.hollowcube.mapmaker.player.JoinMapRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -52,7 +53,7 @@ public class MapServerBridge implements ServerBridge {
                 this.moveBetweenMapsOnThisServer(player, mapId, targetState);
             } else {
                 logger.info("moving to other server");
-                this.moveBetweenServers(player, response.serverClusterIp());
+                ProxySupport.transfer(player, response.serverClusterIp());
             }
         } catch (Exception e) {
             ExceptionReporter.reportException(e, player);
@@ -66,7 +67,7 @@ public class MapServerBridge implements ServerBridge {
             var playerData = PlayerDataV2.fromPlayer(player);
             var res = server.sessionService().joinHubV2(new JoinHubRequest(playerData.id()));
             logger.info("join hub result: {}", res);
-            player.sendPluginMessage("mapmaker:transfer", res.serverClusterIp().getBytes(StandardCharsets.UTF_8));
+            ProxySupport.transfer(player, res.serverClusterIp());
         } catch (Exception e) {
             ExceptionReporter.reportException(e, player);
             player.sendMessage(Component.text("An error occurred while trying to return to the hub. Please try again later."));
@@ -91,9 +92,5 @@ public class MapServerBridge implements ServerBridge {
             player.sendMessage("Failed to move to map");
             this.joinHub(player);
         }
-    }
-
-    private void moveBetweenServers(@NotNull Player player, @NotNull String targetServerIp) {
-        player.sendPluginMessage("mapmaker:transfer", targetServerIp.getBytes(StandardCharsets.UTF_8));
     }
 }

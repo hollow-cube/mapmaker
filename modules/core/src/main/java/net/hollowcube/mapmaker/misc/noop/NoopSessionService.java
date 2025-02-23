@@ -13,27 +13,22 @@ import java.util.List;
 public class NoopSessionService implements SessionService {
 
     @Override
-    public boolean ready() {
-        return true;
-    }
-
-    @Override
     public @NotNull List<PlayerSession> sync() {
         return List.of();
     }
 
     @Override
-    public @NotNull PlayerDataV2 createSessionV2(@NotNull String id, @NotNull SessionCreateRequestV2 body) {
+    public @NotNull PlayerDataV2 createSession(@NotNull String id, @NotNull String proxy, @NotNull String username, @NotNull String ip, @NotNull PlayerSkin skin) {
         return new PlayerDataV2(
-                id, body.username(),
-                new DisplayName(List.of(new DisplayName.Part("username", body.username(), null))),
+                id, username,
+                new DisplayName(List.of(new DisplayName.Part("username", username, null))),
                 new JsonObject(),
                 0, 0, 0
         );
     }
 
     @Override
-    public @NotNull TransferSessionResponse transferSessionV2(@NotNull String id, @NotNull SessionTransferRequest req) {
+    public @NotNull TransferSessionResponse transferSession(@NotNull String id, @NotNull SessionTransferRequest req) {
         return new TransferSessionResponse(
                 new PlayerDataV2(
                         id, id,
@@ -48,12 +43,12 @@ public class NoopSessionService implements SessionService {
     }
 
     @Override
-    public void deleteSessionV2(@NotNull String id) {
+    public void deleteSession(@NotNull String id) {
 
     }
 
     @Override
-    public @NotNull PlayerSession updateSessionState(@NotNull String playerId, @NotNull SessionStateUpdateRequest req) {
+    public @NotNull PlayerSession updateSessionProperties(@NotNull String playerId, @NotNull SessionStateUpdateRequest req) {
         throw new UnsupportedOperationException();
     }
 

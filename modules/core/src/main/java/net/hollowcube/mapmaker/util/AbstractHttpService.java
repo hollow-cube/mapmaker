@@ -30,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.net.http.HttpClient;
@@ -186,5 +187,9 @@ public abstract class AbstractHttpService {
 
             return result.toString();
         }
+    }
+
+    protected static @NotNull URI url(@NotNull String format, @NotNull String... args) {
+        return URI.create(String.format(format, (Object[]) args));
     }
 }

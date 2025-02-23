@@ -22,7 +22,6 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.player.PlayerSkin;
-import net.hollowcube.mapmaker.player.SessionCreateRequestV2;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.Component;
@@ -129,14 +128,14 @@ public class DevServerRunner extends AbstractMapServer {
         // on our own here.
         // Note that we dont transfer here, its deferred to config phase (and reconfig)
 
-        net.minestom.server.entity.PlayerSkin skin = MojangUtil.getSkinFromUuid(event.getPlayerUuid().toString());
+        var profile = event.getGameProfile();
+        var playerId = profile.uuid().toString();
+        net.minestom.server.entity.PlayerSkin skin = MojangUtil.getSkinFromUuid(playerId);
 
-        var playerId = event.getPlayerUuid().toString();
-        sessionService().createSessionV2(playerId, new SessionCreateRequestV2(
-                "devserver-integrated", event.getUsername(), "127.0.0.1",
+        sessionService().createSession(playerId, "devserver-integrated", profile.name(), "127.0.0.1",
                 new PlayerSkin(Optional.ofNullable(skin).map(net.minestom.server.entity.PlayerSkin::textures),
                         Optional.ofNullable(skin).map(net.minestom.server.entity.PlayerSkin::signature))
-        ));
+        );
     }
 
     protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
@@ -183,7 +182,7 @@ public class DevServerRunner extends AbstractMapServer {
         super.handlePlayerDisconnect(player);
 
         // Again, need to implement the proxy part of the delete session flow
-        FutureUtil.submitVirtual(() -> sessionService().deleteSessionV2(player.getUuid().toString()));
+        FutureUtil.submitVirtual(() -> sessionService().deleteSession(player.getUuid().toString()));
     }
 
     @Override

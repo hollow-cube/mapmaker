@@ -106,6 +106,7 @@ public final class FutureUtil {
     }
 
     private static boolean isUnsafeThread(@Nullable Acquirable<?> acquirable) {
+        if (isShuttingDown) return false;
         var thread = Thread.currentThread();
         if (acquirable != null && !acquirable.isLocal() && acquirable.assignedThread() != null && !acquirable.assignedThread().lock().isHeldByCurrentThread())
             return true; // Above means: We have acquirable, we are not on its thread, and we do not hold the lock of its thread
