@@ -6,7 +6,6 @@ import net.hollowcube.mapmaker.util.GenericServiceError;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
-import java.net.URI;
 import java.util.List;
 
 @Blocking
@@ -48,6 +47,10 @@ public interface SessionService {
         public @NotNull GenericServiceError getError() {
             return error;
         }
+    }
+
+    class NoAvailableServerException extends RuntimeException {
+        
     }
 
 }

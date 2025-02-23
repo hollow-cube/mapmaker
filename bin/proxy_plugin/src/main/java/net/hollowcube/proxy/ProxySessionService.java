@@ -28,7 +28,7 @@ public class ProxySessionService {
         this.url = String.format("%s/v3/internal/session", url);
     }
 
-    public @NotNull JsonObject createSessionV2(@NotNull String id, @NotNull SessionCreateRequest body) throws BannedException {
+    public @NotNull JsonObject createSessionV2(@NotNull String id, @NotNull SessionCreateRequest body) throws BannedException, MaintenanceException {
         logger.info("creating new session for {} ({}) from {}", id, body.username(), body.ip());
         var reqBody = GSON.toJson(body);
         var req = HttpRequest.newBuilder()
@@ -39,6 +39,7 @@ public class ProxySessionService {
             var res = CLIENT.send(req, HttpResponse.BodyHandlers.ofString());
             return switch (res.statusCode()) {
                 case 201 -> GSON.fromJson(res.body(), JsonObject.class);
+                case 401 -> throw new MaintenanceException();
                 case 403 -> throw new BannedException(GSON.fromJson(res.body(), JsonObject.class));
                 default ->
                         throw new RuntimeException("Failed to create session (" + res.statusCode() + "): " + res.body());
@@ -61,6 +62,10 @@ public class ProxySessionService {
         } catch (InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static final class MaintenanceException extends Exception {
+
     }
 
     public static final class BannedException extends Exception {

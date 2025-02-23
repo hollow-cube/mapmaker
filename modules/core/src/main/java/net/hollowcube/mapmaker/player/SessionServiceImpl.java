@@ -8,7 +8,6 @@ import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.GenericServiceError;
 import org.jetbrains.annotations.NotNull;
 
-import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
@@ -115,6 +114,7 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
         return switch (res.statusCode()) {
             case 200 -> GSON.fromJson(res.body(), JoinMapResponse.class);
             case 401 -> throw createUnauthorizedError(res);
+            case 503 -> throw new NoAvailableServerException();
             default -> throw new InternalError("Failed to join map (" + res.statusCode() + "): " + res.body());
         };
     }
@@ -131,6 +131,7 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
         return switch (res.statusCode()) {
             case 200 -> GSON.fromJson(res.body(), JoinMapResponse.class);
             case 401 -> throw createUnauthorizedError(res);
+            case 503 -> throw new NoAvailableServerException();
             default -> throw new InternalError("Failed to join hub (" + res.statusCode() + "): " + res.body());
         };
     }

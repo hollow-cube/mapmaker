@@ -4,20 +4,27 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.command.CommandCategories;
+import net.hollowcube.mapmaker.command.PlayerInfoCommand;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.hub.command.util.HubFlyCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubSpawnCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubTrainCommand;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.hollowcube.mapmaker.hub.util.HubPlayerState;
 import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
-import net.hollowcube.mapmaker.command.PlayerInfoCommand;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.map.runtime.NoopServerBridge;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
+import net.hollowcube.mapmaker.player.JoinHubRequest;
+import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.session.Presence;
+import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.hollowcube.mapmaker.util.ServerBeginShutdownEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
@@ -44,7 +51,8 @@ public class HubServerRunner extends AbstractMapServer {
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("hub-init")
                 .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
                 .addListener(PlayerSpawnEvent.class, this::handleSpawn)
-                .addListener(PlayerDisconnectEvent.class, this::handleDisconnect));
+                .addListener(PlayerDisconnectEvent.class, this::handleDisconnect)
+                .addListener(ServerBeginShutdownEvent.class, this::handleServerShutdown));
     }
 
     @Override
@@ -128,5 +136,26 @@ public class HubServerRunner extends AbstractMapServer {
 
     protected void handleDisconnect(@NotNull PlayerDisconnectEvent event) {
         super.handlePlayerDisconnect(event.getPlayer());
+    }
+
+    private void handleServerShutdown(@NotNull ServerBeginShutdownEvent ignored) {
+        // When the hub is instructed to shut down, try to move the players to a new hub.
+        var players = MinecraftServer.getConnectionManager().getOnlinePlayers();
+        FutureUtil.submitVirtual(() -> {
+            for (var player : players) {
+                try {
+                    var hub = sessionService().joinHubV2(new JoinHubRequest(
+                            player.getUuid().toString(), AbstractHttpService.hostname));
+
+                    var state = new HubPlayerState(player.getPosition(), player.getHeldSlot());
+                    ProxySupport.transferWithData(player, hub.serverClusterIp(), state);
+                } catch (SessionService.NoAvailableServerException ignored2) {
+                    // No other hub is available. Leave them here for now, they can move on their own
+                    // when a hub becomes available.
+                } catch (Exception e) {
+                    ExceptionReporter.reportException(e, player);
+                }
+            }
+        });
     }
 }

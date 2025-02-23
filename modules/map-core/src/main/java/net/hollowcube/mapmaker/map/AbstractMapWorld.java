@@ -146,7 +146,6 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             } catch (InterruptedException | TimeoutException e) {
                 logger.warn("Client failed to respond to known packs request", e);
                 knownPacks = null;
-//                throw new RuntimeException("Client failed to respond to known packs request", e);
             } catch (ExecutionException e) {
                 throw new RuntimeException("Error receiving known packs", e);
             }

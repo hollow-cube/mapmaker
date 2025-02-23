@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.backpack.RecipeBookHack;
 import net.hollowcube.mapmaker.hub.entity.marker.HubMarkerLoader;
 import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
 import net.hollowcube.mapmaker.hub.item.*;
+import net.hollowcube.mapmaker.hub.util.HubPlayerState;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.instance.EmptyChunk;
@@ -14,6 +15,7 @@ import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.polar.PolarDataFixer;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.misc.BossBars;
+import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.hollowcube.polar.PolarLoader;
@@ -139,7 +141,16 @@ public class HubMapWorld extends AbstractMapWorld {
 
     @Override
     public void preAddPlayer(@NotNull AsyncPlayerConfigurationEvent event) {
-        event.getPlayer().setRespawnPoint(spawnPoint(event.getPlayer()));
+        final Player player = event.getPlayer();
+
+        // Load the state from the previous hub they were on if present.
+        var existingState = ProxySupport.getTransferData(player, HubPlayerState.class);
+        if (existingState != null) {
+            player.setRespawnPoint(existingState.position());
+            player.scheduleNextTick(ignored -> player.setHeldItemSlot((byte) existingState.slot()));
+        } else {
+            player.setRespawnPoint(spawnPoint(player));
+        }
     }
 
     @Override

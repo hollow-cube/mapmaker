@@ -79,16 +79,14 @@ import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
-import net.hollowcube.mapmaker.util.HttpServerWrapper;
-import net.hollowcube.mapmaker.util.NoopSpanExporter;
-import net.hollowcube.mapmaker.util.ServerStatsHud;
-import net.hollowcube.mapmaker.util.Shutdowner;
+import net.hollowcube.mapmaker.util.*;
 import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
@@ -506,6 +504,8 @@ public abstract class AbstractMapServer implements MapServer {
      * <p>The future is not guaranteed to complete before other shutdown tasks are triggered (ie in the timeout case).</p>
      */
     private CompletableFuture<Void> awaitQuiescence() {
+        EventDispatcher.call(new ServerBeginShutdownEvent());
+
         var connectionManager = MinecraftServer.getConnectionManager();
         if (connectionManager.getOnlinePlayers().isEmpty()) return CompletableFuture.completedFuture(null);
 

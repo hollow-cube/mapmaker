@@ -4,17 +4,15 @@ import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
+import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.player.JoinMapRequest;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.session.MapPresence;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.charset.StandardCharsets;
 
 public class HubServerBridge implements ServerBridge {
     private static final Logger logger = LoggerFactory.getLogger(HubServerBridge.class);
@@ -42,7 +40,7 @@ public class HubServerBridge implements ServerBridge {
                 case SPECTATING -> MapPresence.STATE_SPECTATING;
             }, source));
             logger.info("join map result: {}", res);
-            player.sendPluginMessage("mapmaker:transfer", res.serverClusterIp().getBytes(StandardCharsets.UTF_8));
+            ProxySupport.transfer(player, res.serverClusterIp());
         } catch (Exception e) {
             ExceptionReporter.reportException(e, player);
             player.sendMessage(Component.translatable("map.join.fail"));

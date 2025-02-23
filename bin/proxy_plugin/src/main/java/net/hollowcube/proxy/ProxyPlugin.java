@@ -8,9 +8,8 @@ import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.event.permission.PermissionsSetupEvent;
-import com.velocitypowered.api.event.player.KickedFromServerEvent;
-import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
-import com.velocitypowered.api.event.player.ServerPostConnectEvent;
+import com.velocitypowered.api.event.player.*;
+import com.velocitypowered.api.event.player.configuration.PlayerFinishedConfigurationEvent;
 import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -20,8 +19,10 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.util.GameProfile;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,14 +41,15 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class ProxyPlugin {
     private static final ChannelIdentifier TRANSFER_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "transfer");
     private static final ChannelIdentifier RESOURCE_PACK_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "resource_pack");
+    private static final Key TRANSFER_DATA_COOKIE = Key.key("mapmaker", "transfer_data");
 
     public static final TextColor RED = TextColor.color(0xFA4141);
     public static final Component MAINTENANCE = Component.text()
-            .append(Component.text("The server is currently in maintenance!", RED))
+            .append(Component.text("The server is currently in maintenance!", RED, TextDecoration.BOLD))
             .appendNewline().appendNewline()
             .append(Component.text("Join the discord for updates!"))
             .appendNewline()
-            .append(Component.text("discord.hollowcube.net"))
+            .append(Component.text("discord.hollowcube.net", TextColor.color(0x3895FF)))
             .build();
 
     private final Logger logger;
@@ -59,6 +61,7 @@ public class ProxyPlugin {
 
     // Map of player uuid to the resource pack hash they currently have applied
     private final Map<UUID, String> resourcePacks = new ConcurrentHashMap<>();
+    private final Map<UUID, byte[]> transferData = new ConcurrentHashMap<>();
 
     private final Set<UUID> playersWithSession = new CopyOnWriteArraySet<>();
     private final Set<UUID> playersJustJoined = new CopyOnWriteArraySet<>();
@@ -117,14 +120,10 @@ public class ProxyPlugin {
             playersWithSession.add(player.getUniqueId());
             playersJustJoined.add(player.getUniqueId());
             logger.info("created session (v2) for {}: {}", player.getUsername(), pd);
+        } catch (ProxySessionService.MaintenanceException ignored) {
+            event.setResult(ResultedEvent.ComponentResult.denied(MAINTENANCE));
         } catch (ProxySessionService.BannedException error) {
-//            if (error.getError().code().equals("banned")) {
             event.setResult(ResultedEvent.ComponentResult.denied(buildBannedMessage(error.getContent())));
-//                return;
-//            }
-
-            // this is ok, they will be sent to the limbo
-//            event.setResult(ResultedEvent.ComponentResult.denied(MAINTENANCE));
         } catch (Exception e) {
             logger.error("failed to create session (v2) for {}", player.getUsername(), e);
             event.setResult(LoginEvent.ComponentResult.denied(Component.text("failed to create session")));
@@ -143,6 +142,34 @@ public class ProxyPlugin {
         } else if (RESOURCE_PACK_MESSAGE_ID.equals(event.getIdentifier())) {
             handleResourcePack(event);
         }
+    }
+
+    @Subscribe
+    public void handleCookieStore(@NotNull CookieStoreEvent event) {
+        if (!event.getOriginalKey().equals(TRANSFER_DATA_COOKIE))
+            return;
+
+        event.setResult(CookieStoreEvent.ForwardResult.handled()); // Never forward
+        transferData.put(event.getPlayer().getUniqueId(), event.getOriginalData());
+    }
+
+    // We reply on the RECEIVE event, ie replacing the client saying they don't have the cookie.
+    // This should really be done on the CookieRequestEvent, but velocity is brain-damaged and doesn't let
+    // you reply to the cookie in that event. You have to let the cookie go to the client and have them
+    // reply, thus exposing a detail about what we do and making a useless req/res down to the client.
+    // AWESOME JOB GUYS YOU ARE DOING GREAT!!!
+    @Subscribe
+    public void handleCookieResponse(@NotNull CookieReceiveEvent event) {
+        if (!event.getOriginalKey().equals(TRANSFER_DATA_COOKIE))
+            return;
+
+        var data = transferData.get(event.getPlayer().getUniqueId());
+        event.setResult(CookieReceiveEvent.ForwardResult.data(data));
+    }
+
+    @Subscribe
+    public void handleConfigEnd(@NotNull PlayerFinishedConfigurationEvent event) {
+        transferData.remove(event.player().getUniqueId());
     }
 
     private void handleResourcePack(@NotNull PluginMessageEvent event) {
