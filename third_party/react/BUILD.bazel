@@ -1,0 +1,32 @@
+load("@npm//:defs.bzl", "npm_link_all_packages")
+
+npm_link_all_packages(
+    name = "react_deps",
+)
+
+java_binary(
+    name = "java_builder",
+    srcs = ["build/Main.java"],
+    main_class = "build.Main",
+    data = [":react_deps"],
+)
+
+genrule(
+    name = "generate_js_files",
+    srcs = [":react_deps"],
+    outs = ["scheduler.js", "react.js", "react-reconciler.js"],
+    cmd = """
+        $(locations :java_builder) $(locations :react_deps) $(OUTS) > tmp_output
+    """,
+    tools = [":java_builder"],
+)
+
+java_library(
+    name = "react",
+    resources = [
+        ":generate_js_files",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+exports_files(["package.json", "pnpm-lock.yaml"])
