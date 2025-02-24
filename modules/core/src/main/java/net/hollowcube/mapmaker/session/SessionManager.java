@@ -19,6 +19,7 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.validate.Check;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.jctools.queues.MpscArrayQueue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.LockSupport;
 import java.util.function.Predicate;
 
 public class SessionManager {
@@ -203,37 +205,56 @@ public class SessionManager {
         Audiences.players().sendMessage(leaveMessage);
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     public void configureVanishedPlayer(@NotNull Player player) {
         player.updateViewableRule(p -> hasSeeVanishedPerm.test(PlayerDataV2.fromPlayer(p).id()));
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private void configureVisiblePlayer(@NotNull Player player) {
         player.updateViewableRule(null);
     }
 
     private class ConsumerImpl extends BaseConsumer<SessionUpdateMessage> {
+        private final MpscArrayQueue<SessionUpdateMessage> queue = new MpscArrayQueue<>(512);
+        private final Thread thread = Thread.startVirtualThread(this::processQueue);
 
         protected ConsumerImpl(@NotNull String bootstrapServers) {
             super("session-updates", AbstractHttpService.hostname, s -> AbstractHttpService.GSON.fromJson(s, SessionUpdateMessage.class), bootstrapServers);
         }
 
         @Override
+        public void close() {
+            this.thread.interrupt();
+            super.close();
+        }
+
+        @Override
         protected void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull SessionUpdateMessage message) {
-            switch (message.action()) {
-                case CREATE -> FutureUtil.submitVirtual(() -> {
-                    // We have to check if the session exists here because its possible we did an optimistic update on the session before the message arrived.
-                    var oldSession = sessions.get(message.playerId());
-                    if (oldSession == null) {
-                        handleSessionCreate(message.session());
-                    } else {
-                        handleSessionUpdate(message.session(), message.metadata());
+            while (!queue.relaxedOffer(message))
+                FutureUtil.sleep(1000);
+            LockSupport.unpark(thread);
+        }
+
+        private void processQueue() {
+            while (true) {
+                LockSupport.park();
+                if (this.thread.isInterrupted() || !this.thread.isAlive())
+                    return;
+
+                queue.drain(message -> {
+                    switch (message.action()) {
+                        case CREATE -> {
+                            // We have to check if the session exists here because its possible we did an optimistic update on the session before the message arrived.
+                            var oldSession = sessions.get(message.playerId());
+                            if (oldSession == null) {
+                                handleSessionCreate(message.session());
+                            } else {
+                                handleSessionUpdate(message.session(), message.metadata());
+                            }
+                        }
+                        case DELETE -> handleSessionDelete(message);
+                        case UPDATE -> handleSessionUpdate(message.session(), message.metadata());
                     }
                 });
-                case DELETE -> FutureUtil.submitVirtual(() -> handleSessionDelete(message));
-                case UPDATE ->
-                        FutureUtil.submitVirtual(() -> handleSessionUpdate(message.session(), message.metadata()));
             }
         }
     }

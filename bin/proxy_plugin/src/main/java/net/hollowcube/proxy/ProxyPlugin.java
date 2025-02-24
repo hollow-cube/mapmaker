@@ -63,7 +63,6 @@ public class ProxyPlugin {
     private final Map<UUID, String> resourcePacks = new ConcurrentHashMap<>();
     private final Map<UUID, byte[]> transferData = new ConcurrentHashMap<>();
 
-    private final Set<UUID> playersWithSession = new CopyOnWriteArraySet<>();
     private final Set<UUID> playersJustJoined = new CopyOnWriteArraySet<>();
 
     @Inject
@@ -117,7 +116,6 @@ public class ProxyPlugin {
                             new SessionCreateRequest.Skin(skinTexture, skinSignature)
                     )
             );
-            playersWithSession.add(player.getUniqueId());
             playersJustJoined.add(player.getUniqueId());
             logger.info("created session (v2) for {}: {}", player.getUsername(), pd);
         } catch (ProxySessionService.MaintenanceException ignored) {
@@ -218,26 +216,16 @@ public class ProxyPlugin {
 
     @Subscribe
     public void handleDisconnect(@NotNull DisconnectEvent event) {
-        if (!playersWithSession.contains(event.getPlayer().getUniqueId())) return;
-
         var playerId = event.getPlayer().getUniqueId().toString();
         try {
             sessionService.deleteSessionV2(playerId);
-            logger.info("deleted session (v2) for {}", playerId);
         } catch (Exception e) {
             logger.error("failed to delete session (v2) for {}", playerId, e);
         } finally {
             resourcePacks.remove(event.getPlayer().getUniqueId());
-            playersWithSession.remove(event.getPlayer().getUniqueId());
             playersJustJoined.remove(event.getPlayer().getUniqueId());
         }
     }
-
-//    @Subscribe
-//    public void handleInitialServer(PlayerChooseInitialServerEvent event) {
-//        var rs = proxy.createRawRegisteredServer(new ServerInfo("hub-minecraft", new InetSocketAddress("hub-minecraft", 25565)));
-//        event.setInitialServer(rs);
-//    }
 
     @Subscribe
     public void handleKickedFromServer(@NotNull KickedFromServerEvent event) {
