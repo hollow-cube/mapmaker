@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.dev;
 
+import net.hollowcube.mapmaker.scripting.ScriptEngine;
+import net.hollowcube.mapmaker.scripting.gui.react.ReconcilerHostConfig;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Source;
@@ -8,6 +10,7 @@ import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.proxy.ProxyObject;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,10 +62,17 @@ public class DevServer {
     }
 
     public static void runGui() throws Exception {
-//        var engine = new ScriptEngine();
-//
-//        var reactReconciler = engine.loadPrivileged(URI.create("internal://third_party/react/react-reconciler.js"));
-//        var reactReconcilerInst = reactReconciler.exports().execute(new ReconcilerHostConfig());
+        {
+            var engine = new ScriptEngine();
+
+            var reactReconciler = engine.load(URI.create("internal:///third_party/react/react-reconciler.js"));
+            var reactReconcilerInst = reactReconciler.exports().execute(new ReconcilerHostConfig());
+
+
+            if (Math.random() > 0) {
+                System.exit(0);
+            }
+        }
 
 
         Context context = Context.newBuilder("js")

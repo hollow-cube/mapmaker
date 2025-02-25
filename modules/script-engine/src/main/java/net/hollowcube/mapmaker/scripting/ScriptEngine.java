@@ -2,10 +2,15 @@ package net.hollowcube.mapmaker.scripting;
 
 import net.hollowcube.mapmaker.scripting.cjs.Module;
 import net.hollowcube.mapmaker.scripting.node.Process;
+import net.hollowcube.mapmaker.scripting.node.SetTimeout;
 import org.graalvm.polyglot.Context;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * ScriptEngine is the root of a script execution. It can contain multiple scripts (modules) which
@@ -22,6 +27,8 @@ import java.net.URI;
 public class ScriptEngine {
     private final Context context;
 
+    private final Map<URI, Module> moduleCache = new HashMap<>();
+
     public ScriptEngine() {
         this.context = Context.newBuilder().build();
 
@@ -30,6 +37,10 @@ public class ScriptEngine {
 
     public interface ContextCloser extends AutoCloseable {
         @Override void close();
+    }
+
+    public @NotNull Context context() {
+        return context;
     }
 
     /**
@@ -43,27 +54,28 @@ public class ScriptEngine {
         return context::leave;
     }
 
-    /**
-     * Loads (or returns from cache) the module at the given URI with privileged permissions.
-     * If this module has been loaded in a non-privileged context, this method will throw an
-     * exception.
-     *
-     * @param script The URI of the script.
-     * @return
-     */
-    public @NotNull Module loadPrivileged(@NotNull URI script) {
-        throw new UnsupportedOperationException("todo");
-
-    }
-
     public @NotNull Module load(@NotNull URI script) {
-        throw new UnsupportedOperationException("todo");
-
+        return this.moduleCache.computeIfAbsent(script, ignored -> {
+            final String code = switch (script.getScheme()) {
+                case "internal" -> {
+                    try (var is = getClass().getResourceAsStream(script.getPath())) {
+                        if (is == null) throw new IllegalArgumentException("resource not found: " + script);
+                        yield new String(is.readAllBytes(), StandardCharsets.UTF_8);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                case null, default ->
+                        throw new UnsupportedOperationException("unsupported uri scheme: " + script.getScheme());
+            };
+            return new Module(this, script, code);
+        });
     }
 
     private void setupGlobals() {
         var global = context.getBindings("js");
         global.putMember("process", Process.sandboxedProcess());
+        global.putMember("setTimeout", new SetTimeout());
     }
 
 }
