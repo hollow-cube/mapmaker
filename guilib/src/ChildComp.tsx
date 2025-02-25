@@ -1,3 +1,3 @@
 export default function ChildComp() {
-    return <div>Hiiii</div>
+    return <row>Hiiii</row>
 }

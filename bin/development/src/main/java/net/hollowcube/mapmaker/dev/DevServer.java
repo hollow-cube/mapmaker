@@ -8,7 +8,6 @@ import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.proxy.ProxyObject;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,93 +59,90 @@ public class DevServer {
     }
 
     public static void runGui() throws Exception {
-        var modules = new ConcurrentHashMap<String, Value>();
-        modules.put("scheduler", loadNamedModule(modules, true, "scheduler"));
-        modules.put("react", loadNamedModule(modules, true, "react"));
-        modules.put("react-reconciler", loadNamedModule(modules, true, "react-reconciler"));
-
-        var reactReconciler = Objects.requireNonNull(modules.get("react-reconciler"));
-        var reactReconcilerInst = reactReconciler.execute(new ReactHostConfig());
-
-        var react = Objects.requireNonNull(modules.get("react"));
-
-
         Context context = Context.newBuilder("js")
                 .allowHostAccess(HostAccess.ALL)
                 .build(); // TODO not closed
 
-        context.getBindings("js").putMember("React", react);
-        var component = context.eval("js", """
-                function App() {
-                    return React.createElement("div", {});
+        context.getBindings("js").putMember("process", ProxyObject.fromMap(Map.of(
+                "env", Map.of("NODE_ENV", "development")
+        )));
+        context.getBindings("js").putMember("setTimeout", (ProxyExecutable) (args) -> {
+            System.out.println("setTimeout: " + args[1]);
+            args[0].execute();
+            return null;
+        });
+        var modules = new ConcurrentHashMap<String, Value>();
+        context.getBindings("js").putMember("require", (ProxyExecutable) (args) -> {
+            System.out.println("trying to load: " + args[0].asString());
+            return Objects.requireNonNull(modules.get(args[0].asString()));
+        });
+
+        modules.put("scheduler", loadNamedModule(context, "scheduler"));
+        modules.put("react", loadNamedModule(context, "react"));
+        modules.put("react-reconciler", loadNamedModule(context, "react-reconciler"));
+
+        var reactReconciler = Objects.requireNonNull(modules.get("react-reconciler"));
+        var reactReconcilerInst = reactReconciler.execute(new ReactHostConfig());
+
+        var componentModule = loadNamedModule(context, Source.newBuilder("js", "(function (exports, require, module, __filename, __dirname) {" + """
+                "use strict";
+                var __importDefault = (this && this.__importDefault) || function (mod) {
+                    return (mod && mod.__esModule) ? mod : { "default": mod };
+                };
+                Object.defineProperty(exports, "__esModule", { value: true });
+                exports.default = ChildComp;
+                const react_1 = __importDefault(require("react"));
+                function ChildComp() {
+                    return react_1.default.createElement("div", null, "Hiiii");
                 }
-                App.displayName = "App";
-                React.createElement("div", {})
-                """);
-        System.out.println(react.getMemberKeys());
+                """ + "})", "child-comp.js").build());
+        var component = componentModule.getMember("default");
+        var element = modules.get("react").invokeMember("createElement", component, null);
 
         var root = reactReconcilerInst.invokeMember("createContainer",
-                /* containerInfo */ Value.asValue("I AM ROOT"),
+                /* containerInfo */ Value.asValue(Map.of()),
                 /* tag */ 0,
                 /* hydrationCallbacks */ null,
                 /* isStrictMode */ true,
                 /* concurrentUpdatesByDefaultOverride */ null,
                 /* identifierPrefix */ "a",
                 /* onRecoverableError */ (ProxyExecutable) (args) -> {
-//                    throw new RuntimeException("ERROR: " + args[0]);
                     System.out.println("ERROR: " + args[0]);
                     return null;
                 },
                 /* transitionCallbacks */null
         );
         var result = reactReconcilerInst.invokeMember("updateContainer",
-                /* element */ component,
+                /* element */ element,
                 /* container */ root,
                 /* parentComponent */ null,
                 /* callback */ null);
-
         System.out.println("LANE: " + result);
-
-//        Context context = Context.newBuilder("js").build(); // TODO not closed
-//
-//        try (var is = DevServer.class.getResourceAsStream("/third_party/react/scheduler.js")) {
-//            context.getBindings("js").putMember("process", ProxyObject.fromMap(Map.of(
-//                    "env", Map.of("NODE_ENV", "development")
-//            )));
-//            var exports = context.eval("js", "({})");
-//            context.getBindings("js").putMember("exports", exports);
-//            var result = context.eval("js", new String(is.readAllBytes()));
-//            System.out.println(result);
-//            System.out.println(exports);
-//        }
     }
 
-    private static Value loadNamedModule(Map<String, Value> modules, boolean isDevelopment, @NotNull String name) throws Exception {
-        Context context = Context.newBuilder("js")
-                .allowHostAccess(HostAccess.ALL)
-                .build(); // TODO not closed
-
+    private static Value loadNamedModule(Context context, @NotNull String name) throws Exception {
         try (var is = DevServer.class.getResourceAsStream("/third_party/react/" + name + ".js")) {
-            context.getBindings("js").putMember("process", ProxyObject.fromMap(Map.of(
-                    "env", Map.of("NODE_ENV", isDevelopment ? "development" : "production")
-            )));
-            context.getBindings("js").putMember("setTimeout", (ProxyExecutable) (args) -> {
-                System.out.println("setTimeout: " + args[1]);
-                args[0].execute();
-                return null;
-            });
-            context.getBindings("js").putMember("require", (ProxyExecutable) (args) -> {
-                System.out.println("trying to load: " + args[0].asString());
-                return Objects.requireNonNull(modules.get(args[0].asString()));
-            });
-            context.getBindings("js").putMember("exports",
-                    context.eval("js", "({})"));
-            context.getBindings("js").putMember("module",
-                    context.eval("js", "({exports})"));
-
-            var source = Source.newBuilder("js", new InputStreamReader(is), name + ".js").build();
-            context.eval(source);
-            return context.eval("js", "module.exports");
+            // https://github.com/transposit/graal-commonjs-modules/blob/master/src/main/java/graal/Module.java#L299
+            var raw = "(function (exports, require, module, __filename, __dirname) {" + new String(is.readAllBytes()) + "})";
+            var source = Source.newBuilder("js", raw, name + ".js").build();
+            return loadNamedModule(context, source);
         }
+    }
+
+    private static Value loadNamedModule(Context context, @NotNull Source source) throws Exception {
+        var module = context.eval("js", "({})");
+        var exports = context.eval("js", "({})");
+
+        // TODO: these things should be present in the module object
+        module.putMember("exports", exports);
+        // module.putMember("children", new WrappedList(children));
+        // module.putMember("filename", filename);
+        // module.putMember("id", filename);
+        // module.putMember("loaded", false);
+        // module.putMember("parent", parent != null ? parent.module : null);
+
+        var require = context.getBindings("js").getMember("require"); // TODO just dont add require to global scope
+        context.eval(source).execute(exports, require, module, "todo_filename.js", "todo_dirname");
+        return module.getMember("exports");
     }
 }

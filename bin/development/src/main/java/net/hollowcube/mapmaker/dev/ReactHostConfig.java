@@ -3,8 +3,11 @@ package net.hollowcube.mapmaker.dev;
 import net.hollowcube.mapmaker.dev.react.ReactReconcilerConstants;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.proxy.ProxyObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 
 // https://github.com/facebook/react/blob/main/packages/react-reconciler/src/forks/ReactFiberConfig.custom.js
 @SuppressWarnings("unused")
@@ -15,25 +18,26 @@ public class ReactHostConfig {
     public final boolean isPrimaryRenderer = true;
 
     @HostAccess.Export
-    public @Nullable Value createInstance() {
+    public @Nullable Value createInstance(@NotNull String type, @NotNull Value props, @NotNull Value rootContainer, @NotNull Value hostContext, @NotNull Value internalHandle) {
         System.out.println("createInstance");
         return null;
     }
 
     @HostAccess.Export
-    public @Nullable Value createTextInstance() {
+    public @Nullable Value createTextInstance(@NotNull String text, @NotNull Value rootContainer, @NotNull Value hostContext, @NotNull Value internalHandle) {
         System.out.println("createTextInstance");
         return null;
     }
 
     @HostAccess.Export
-    public void appendInitialChild() {
+    public void appendInitialChild(@NotNull Value parentInstance, @NotNull Value child) {
         System.out.println("appendInitialChild");
     }
 
     @HostAccess.Export
-    public void finalizeInitialChildren() {
+    public boolean finalizeInitialChildren(@NotNull Value instance, @NotNull String type, @NotNull Value props, @NotNull Value hostContext) {
         System.out.println("finalizeInitialChildren");
+        return false;
     }
 
     @HostAccess.Export
@@ -42,19 +46,20 @@ public class ReactHostConfig {
     }
 
     @HostAccess.Export
-    public boolean shouldSetTextContent() {
-        return true;
+    public boolean shouldSetTextContent(@NotNull String type, @NotNull Value props) {
+        return false;
     }
 
     @HostAccess.Export
     public @Nullable Value getRootHostContext(@NotNull Value rootContainer) {
         System.out.println("getRootHostContext");
-        return null;
+        return Value.asValue(ProxyObject.fromMap(Map.of()));
     }
 
     @HostAccess.Export
-    public void getChildHostContext() {
-        System.out.println("getChildHostContext");
+    public @NotNull Value getChildHostContext(@NotNull Value parentHostContext, @NotNull String type) {
+        System.out.println("getChildHostContext " + type);
+        return parentHostContext;
     }
 
     @HostAccess.Export
@@ -93,8 +98,9 @@ public class ReactHostConfig {
     public int noTimeout = -1;
 
     @HostAccess.Export
-    public void maySuspendCommit() {
+    public boolean maySuspendCommit(@NotNull String type, @NotNull Value props) {
         System.out.println("maySuspendCommit");
+        return false;
     }
 
 
@@ -177,12 +183,12 @@ public class ReactHostConfig {
     public final boolean supportsMutation = true;
 
     @HostAccess.Export
-    public void appendChild() {
+    public void appendChild(@NotNull Value parent, @NotNull Value child) {
         System.out.println("appendChild");
     }
 
     @HostAccess.Export
-    public void appendChildToContainer() {
+    public void appendChildToContainer(@NotNull Value container, @NotNull Value child) {
         System.out.println("appendChildToContainer");
     }
 
@@ -197,12 +203,12 @@ public class ReactHostConfig {
     }
 
     @HostAccess.Export
-    public void removeChild() {
+    public void removeChild(@NotNull Value parent, @NotNull Value child) {
         System.out.println("removeChild");
     }
 
     @HostAccess.Export
-    public void removeChildFromContainer() {
+    public void removeChildFromContainer(@NotNull Value container, @NotNull Value child, @NotNull Value unknown1, @NotNull Value unknown2, @NotNull Value unknown3) {
         System.out.println("removeChildFromContainer");
     }
 
