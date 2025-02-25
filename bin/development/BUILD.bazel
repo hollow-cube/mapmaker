@@ -24,6 +24,7 @@ java_library(
         "//modules/map-core",
         "//modules/nbs",
         "//modules/terraform",
+        "//modules/script-engine",
         "//third_party:adventure_all",
         "//third_party:auto_service",
         "//third_party:minestom",

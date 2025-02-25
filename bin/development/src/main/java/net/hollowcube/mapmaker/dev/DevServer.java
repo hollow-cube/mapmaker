@@ -59,6 +59,12 @@ public class DevServer {
     }
 
     public static void runGui() throws Exception {
+//        var engine = new ScriptEngine();
+//
+//        var reactReconciler = engine.loadPrivileged(URI.create("internal://third_party/react/react-reconciler.js"));
+//        var reactReconcilerInst = reactReconciler.exports().execute(new ReconcilerHostConfig());
+
+
         Context context = Context.newBuilder("js")
                 .allowHostAccess(HostAccess.ALL)
                 .build(); // TODO not closed
@@ -90,9 +96,9 @@ public class DevServer {
                     return (mod && mod.__esModule) ? mod : { "default": mod };
                 };
                 Object.defineProperty(exports, "__esModule", { value: true });
-                exports.default = ChildComp;
+                exports.default = StoreView;
                 const react_1 = __importDefault(require("react"));
-                function ChildComp() {
+                function StoreView() {
                     return react_1.default.createElement("div", null, "Hiiii");
                 }
                 """ + "})", "child-comp.js").build());

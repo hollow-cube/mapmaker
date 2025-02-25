@@ -1,24 +1,30 @@
-package net.hollowcube.mapmaker.dev;
+package net.hollowcube.mapmaker.scripting.gui.react;
 
-import net.hollowcube.mapmaker.dev.react.ReactReconcilerConstants;
-import net.hollowcube.mapmaker.scripting.gui.InventoryHost;
+import net.hollowcube.mapmaker.scripting.gui.*;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-// https://github.com/facebook/react/blob/main/packages/react-reconciler/src/forks/ReactFiberConfig.custom.js
+/**
+ * Implements the React Reconciler Host Config API.
+ */
 @SuppressWarnings("unused")
-public class ReactHostConfig {
+public class ReconcilerHostConfig {
     // BASE
 
     @HostAccess.Export
     public final boolean isPrimaryRenderer = true;
 
     @HostAccess.Export
-    public @Nullable Value createInstance(@NotNull String type, @NotNull Value props, @NotNull Value rootContainer, @NotNull InventoryHost hostContext, @NotNull Value ignoredInternalHandle) {
-        System.out.println("createInstance " + type + " " + props + " " + rootContainer);
-        return null;
+    public @NotNull Node createInstance(@NotNull String type, @NotNull Value props, @NotNull Value rootContainer, @NotNull InventoryHost hostContext, @NotNull Value internalHandle) {
+        final Node node = switch (type) {
+            case "column" -> new ColumnNode();
+            case "sprite" -> new SpriteNode();
+            default -> throw new IllegalArgumentException("Unknown element type: " + type);
+        };
+        node.updateFromProps(props);
+        return node;
     }
 
     @HostAccess.Export
@@ -28,18 +34,19 @@ public class ReactHostConfig {
     }
 
     @HostAccess.Export
-    public void appendInitialChild(@NotNull Value parentInstance, @NotNull Value child) {
-        System.out.println("appendInitialChild");
+    public void appendInitialChild(@NotNull Node parent, @NotNull Node child) {
+        appendChild(parent, child);
     }
 
     @HostAccess.Export
-    public boolean finalizeInitialChildren(@NotNull Value instance, @NotNull String type, @NotNull Value props, @NotNull Value hostContext) {
+    public boolean finalizeInitialChildren(@NotNull Value instance, @NotNull String type, @NotNull Value props, @NotNull InventoryHost hostContext) {
         System.out.println("finalizeInitialChildren");
         return false;
     }
 
     @HostAccess.Export
     public boolean prepareUpdate() {
+        System.out.println("prepareUpdate");
         return true;
     }
 
@@ -54,8 +61,7 @@ public class ReactHostConfig {
     }
 
     @HostAccess.Export
-    public @NotNull Value getChildHostContext(@NotNull Value parentHostContext, @NotNull String type) {
-        System.out.println("getChildHostContext " + type);
+    public @NotNull InventoryHost getChildHostContext(@NotNull InventoryHost parentHostContext, @NotNull String type) {
         return parentHostContext;
     }
 
@@ -106,7 +112,7 @@ public class ReactHostConfig {
     @HostAccess.Export
     public int getCurrentEventPriority() {
         System.out.println("getCurrentEventPriority");
-        return ReactReconcilerConstants.defaultEventPriority;
+        return ReconcilerConstants.defaultEventPriority;
     }
 
     @HostAccess.Export
@@ -152,13 +158,13 @@ public class ReactHostConfig {
     @HostAccess.Export
     public int getCurrentUpdatePriority() {
         System.out.println("getCurrentUpdatePriority");
-        return ReactReconcilerConstants.defaultEventPriority;
+        return ReconcilerConstants.defaultEventPriority;
     }
 
     @HostAccess.Export
     public int resolveUpdatePriority() {
         System.out.println("resolveUpdatePriority");
-        return ReactReconcilerConstants.defaultEventPriority;
+        return ReconcilerConstants.defaultEventPriority;
     }
 
 
@@ -167,6 +173,7 @@ public class ReactHostConfig {
     @HostAccess.Export
     public final boolean supportsMicrotasks = true;
 
+    @HostAccess.Export
     public void scheduleMicrotask(@NotNull Value callback) {
         System.out.println("scheduleMicrotask");
         callback.executeVoid();
@@ -185,13 +192,16 @@ public class ReactHostConfig {
     public final boolean supportsMutation = true;
 
     @HostAccess.Export
-    public void appendChild(@NotNull Value parent, @NotNull Value child) {
-        System.out.println("appendChild");
+    public void appendChild(@NotNull Node parent, @NotNull Node child) {
+        appendChildToContainer(parent, child);
     }
 
     @HostAccess.Export
-    public void appendChildToContainer(@NotNull Value container, @NotNull Value child) {
-        System.out.println("appendChildToContainer");
+    public void appendChildToContainer(@NotNull Node parent, @NotNull Node child) {
+        if (!(parent instanceof ContainerNode container)) {
+            throw new IllegalArgumentException("Parent must be a container node");
+        }
+        container.appendChild(child);
     }
 
     @HostAccess.Export
