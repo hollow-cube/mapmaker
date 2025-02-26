@@ -1,35 +1,41 @@
 package net.hollowcube.terraform.compat.axiom;
 
+import net.hollowcube.compat.axiom.data.buffers.AxiomBlockBuffer;
+import net.hollowcube.compat.axiom.events.AxiomApplyBufferEvent;
+import net.hollowcube.compat.axiom.events.AxiomTryModifyEntityEvent;
+import net.hollowcube.compat.axiom.events.AxiomTrySpawnEntityEvent;
 import net.hollowcube.terraform.TerraformModule;
-import net.hollowcube.terraform.compat.axiom.listener.AxiomPacketListener;
-import net.hollowcube.terraform.compat.axiom.packet.client.*;
-import net.hollowcube.terraform.compat.axiom.packet.server.AxiomMarkerDataPacket;
+import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomUpdateMarkerDataEvent;
+import net.hollowcube.terraform.compat.axiom.util.AxiomTerraformBuffer;
+import net.hollowcube.terraform.compat.axiom.util.NbtUtil;
+import net.hollowcube.terraform.entity.TerraformEntity;
+import net.hollowcube.terraform.event.TerraformModifyEntityEvent;
+import net.hollowcube.terraform.event.TerraformMoveEntityEvent;
+import net.hollowcube.terraform.session.LocalSession;
+import net.kyori.adventure.nbt.BinaryTag;
+import net.kyori.adventure.nbt.BinaryTagTypes;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.ListBinaryTag;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.event.Event;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.entity.EntitySpawnEvent;
-import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
-import net.minestom.server.event.player.PlayerPluginMessageEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.utils.UUIDUtils;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.Set;
 
 public class AxiomModule implements TerraformModule {
-    static final Logger logger = LoggerFactory.getLogger(AxiomModule.class);
 
     private final EventNode<Event> axiomEvents = EventNode.all("tf/compat/axiom")
-            .addListener(PlayerSpawnEvent.class, this::handlePlayerConfig)
-            .addListener(PlayerPluginMessageEvent.class, this::handlePluginMessage)
-            .addListener(EntitySpawnEvent.class, this::handleEntitySpawn)
-            .addListener(RemoveEntityFromInstanceEvent.class, this::handleEntityRemove);
-
-    private final AxiomPacketListener handler = new AxiomPacketListener();
+            .addListener(AxiomTrySpawnEntityEvent.class, this::handleEntitySpawn)
+            .addListener(AxiomTryModifyEntityEvent.class, this::handleEntityModification)
+            .addListener(AxiomApplyBufferEvent.class, this::handleBufferApplication);
 
     @Override
     public @NotNull Set<EventNode<InstanceEvent>> eventNodes() {
@@ -39,65 +45,102 @@ public class AxiomModule implements TerraformModule {
         return Set.of();
     }
 
-    private void handlePlayerConfig(@NotNull PlayerSpawnEvent event) {
-        if (!event.isFirstSpawn()) return;
+    @SuppressWarnings("UnstableApiUsage")
+    private void handleEntitySpawn(@NotNull AxiomTrySpawnEntityEvent event) {
+        if (event.isHandled()) return;
 
-        var player = event.getPlayer();
-        player.sendPluginMessage("minecraft:register", String.join("\0", Axiom.CLIENT_PACKETS.channels()));
-        //todo minestom needs a way to register incoming plugin messages so multiple sources can do it at once.
-    }
-
-    private void handlePluginMessage(@NotNull PlayerPluginMessageEvent event) {
-        var player = event.getPlayer();
-        if (event.getIdentifier().equals("minecraft:register")) {
-            handleRegisterPluginMessageChannels(player, event.getMessageString());
-            return;
+        CompoundBinaryTag nbt = event.nbt();
+        if (event.copyFrom() != null) {
+            if (!(event.copyFrom() instanceof TerraformEntity entity)) return;
+            var copyEntityTag = TerraformEntity.writeToTagWithPassengers(entity);
+            nbt = NbtUtil.mergeNbtCompounds(nbt, copyEntityTag);
         }
-        if (!event.getIdentifier().startsWith("axiom:")) return;
 
-        switch (Axiom.readPacket(event)) {
-            case AxiomClientHelloPacket packet -> handler.handleHelloMessage(player, packet);
-            case AxiomClientSetGameModePacket packet -> handler.handleSetGamemode(player, packet);
-            case AxiomClientSetFlySpeedPacket packet -> handler.handleSetFlySpeed(player, packet);
-            case AxiomClientSetHotbarSlotPacket packet -> handler.handleSetHotbarSlot(player, packet);
-            case AxiomClientSwitchActiveHotbarPacket packet -> handler.handleSwitchActiveHotbar(player, packet);
-            case AxiomClientTeleportPacket packet -> handler.handleTeleport(player, packet);
-            case AxiomClientSetEditorViewsPacket packet -> handler.handleSetEditorViews(player, packet);
-            case AxiomClientChunkDataRequestPacket packet -> handler.handleRequestChunkData(player, packet);
-            case AxiomClientSetBlockPacket packet -> handler.handleSetBlock(player, packet);
-            case AxiomClientSetBufferPacket packet -> handler.handleSetBuffer(player, packet);
-            case AxiomClientSetWorldPropertyPacket packet -> handler.handleSetWorldProperty(player, packet);
-            case AxiomClientSetTimePacket packet -> handler.handleSetTime(player, packet);
-            case AxiomClientSpawnEntitiesPacket packet -> handler.handleSpawnEntities(player, packet);
-            case AxiomClientModifyEntitiesPacket packet -> handler.handleModifyEntities(player, packet);
-            case AxiomClientDeleteEntitiesPacket packet -> handler.handleDeleteEntities(player, packet);
-            case AxiomClientMarkerNbtRequestPacket packet -> handler.handleRequestMarkerData(player, packet);
-            case AxiomClientAnnotationUpdatePacket packet -> handler.handleAnnotationUpdate(player, packet);
-            case null, default -> logger.warn("Unhandled (incoming) axiom channel: {}", event.getIdentifier());
+        // We are going to now spawn an entity based on the given inputs, but we need to make a few edits:
+        // - Root should have the ID given by Axiom
+        // - Root should have the position given by Axiom
+        // - Passengers should have random IDs
+        nbt = nbt.put(Map.of(
+                "UUID", UUIDUtils.toNbt(event.uuid()),
+                "Pos", NbtUtil.toPosTag(event.pos()),
+                "Rotation", NbtUtil.toRotationTag(event.pos()),
+                "Passengers", ListBinaryTag.listBinaryTag(BinaryTagTypes.COMPOUND, nbt
+                        .getList("Passengers", BinaryTagTypes.COMPOUND)
+                        .stream().map(passengerTag -> (BinaryTag) ((CompoundBinaryTag) passengerTag).remove("UUID"))
+                        .toList())
+        ));
+
+        TerraformEntity.spawnWithPassengers(event.player(), event.getInstance(), nbt);
+
+        event.setHandled(true);
+    }
+
+    private void handleEntityModification(@NotNull AxiomTryModifyEntityEvent event) {
+        if (event.isHandled()) return;
+
+        var instance = event.getInstance();
+        var entity = event.entity();
+        var player = event.player();
+
+        if (event.pos() != null) {
+            var moveEvent = new TerraformMoveEntityEvent(player, entity, event.pos());
+            EventDispatcher.callCancellable(moveEvent, () -> entity.teleport(moveEvent.getNewPosition()));
         }
-    }
 
-    private void handleEntitySpawn(@NotNull EntitySpawnEvent event) {
-        var entity = event.getEntity();
-        if (!entity.getEntityType().equals(EntityType.MARKER)) return;
-
-        var addPacket = new AxiomMarkerDataPacket(new AxiomMarkerDataPacket.Entry(entity.getUuid(), entity.getPosition()));
-        Axiom.sendPacket(event.getSpawnInstance(), addPacket);
-    }
-
-    private void handleEntityRemove(@NotNull RemoveEntityFromInstanceEvent event) {
-        var entity = event.getEntity();
-        if (!entity.getEntityType().equals(EntityType.MARKER)) return;
-
-        var removePacket = new AxiomMarkerDataPacket(entity.getUuid());
-        Axiom.sendPacket(event.getInstance(), removePacket);
-    }
-
-    private void handleRegisterPluginMessageChannels(@NotNull Player player, @NotNull String data) {
-        for (var channel : data.split("\0")) {
-            if (channel.startsWith("axiom:") && !Axiom.SERVER_PACKETS.channels().contains(channel)) {
-                logger.warn("Unhandled (outgoing) axiom channel: {}", channel);
+        if (event.nbt().size() > 0) {
+            if (entity.getEntityType().equals(EntityType.MARKER)) {
+                EventDispatcher.call(new TerraformAxiomUpdateMarkerDataEvent(event.player(), entity.getUuid(), event.nbt()));
+            } else if (entity instanceof TerraformEntity tfEntity) {
+                entity.editEntityMeta(EntityMeta.class, ignored -> tfEntity.readData(event.nbt()));
             }
         }
+
+        switch (event.change()) {
+            case ADD -> {
+                for (var id : event.passengers()) {
+                    var passenger = instance.getEntityByUuid(id);
+                    var isInvalidPassenger = passenger == null ||
+                            passenger.getEntityId() == entity.getEntityId() ||
+                            passenger.getVehicle() != null ||
+                            passenger instanceof Player ||
+                            passenger.getPassengers().stream().anyMatch(otherPassenger ->
+                                    otherPassenger instanceof Player || otherPassenger.getEntityId() == entity.getEntityId());
+
+                    if (isInvalidPassenger) continue;
+                    entity.addPassenger(passenger);
+                }
+            }
+            case REMOVE -> {
+                for (var id : event.passengers()) {
+                    var passenger = instance.getEntityByUuid(id);
+                    var isInvalidPassenger = passenger == null ||
+                            passenger.getEntityId() == entity.getEntityId() ||
+                            passenger instanceof Player ||
+                            passenger.getPassengers().stream().anyMatch(Player.class::isInstance) ||
+                            passenger.getVehicle() != entity;
+                    if (isInvalidPassenger) continue;
+                    entity.removePassenger(entity);
+                }
+            }
+            case CLEAR -> Set.copyOf(entity.getPassengers()).forEach(entity::removePassenger);
+        }
+
+        event.setHandled(true);
+
+        EventDispatcher.call(new TerraformModifyEntityEvent(entity));
+    }
+
+    private void handleBufferApplication(@NotNull AxiomApplyBufferEvent event) {
+        if (event.isHandled()) return;
+        if (!(event.buffer() instanceof AxiomBlockBuffer buffer)) return;
+
+        var session = LocalSession.forPlayer(event.player());
+        session.buildTask("axiom-" + event.id())
+                .metadata()
+                .buffer(new AxiomTerraformBuffer(buffer))
+                .ephemeral()
+                .submit();
+
+        event.setHandled(true);
     }
 }

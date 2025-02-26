@@ -2,10 +2,10 @@ package net.hollowcube.mapmaker.map.world;
 
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.compat.axiom.AxiomPlayer;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
-import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.feature.edit.TeleportHistoryFeatureProvider;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.ItemTags;
@@ -20,15 +20,11 @@ import net.hollowcube.mapmaker.misc.BossBars;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.terraform.Terraform;
-import net.hollowcube.terraform.compat.axiom.Axiom;
-import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomLateEnableEvent;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
@@ -67,8 +63,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
     private final EventNode<InstanceEvent> readWriteNode = EventNode.event("editing-events-rw", EventFilter.INSTANCE, this::canEventWrite)
             .addListener(InstanceTickEvent.class, ev -> tick())
             .addListener(PlayerUseItemEvent.class, this::handleItemUse)
-            .addListener(PlayerBlockBreakEvent.class, this::handleBlockBreak)
-            .addListener(TerraformAxiomLateEnableEvent.class, this::handleAxiomLateInit);
+            .addListener(PlayerBlockBreakEvent.class, this::handleBlockBreak);
     private final EventNode<InstanceEvent> readOnlyNode = EventNode.event("editing-events-ro", EventFilter.INSTANCE, Predicate.not(this::canEventWrite))
             .addListener(PlayerBlockBreakEvent.class, event -> event.setCancelled(true))
             .addListener(PlayerBlockPlaceEvent.class, event -> event.setCancelled(true))
@@ -292,7 +287,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         terraform.initLocalSession(player, playerData.id());
         // We don't actually know if Axiom will become present later, so just send the enable message now
         // and if they do have it installed they will get permission to use it.
-        Axiom.enable(player);
+        AxiomPlayer.setEnabled(player, true);
 
         player.setPermissionLevel(4);
         player.setGameMode(GameMode.CREATIVE);
@@ -333,7 +328,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
                 server().mapService().updateSaveState(map().id(), playerData.id(), saveState.id(), saveStateUpdate);
 
                 // Save terraform state
-                if (Axiom.isPresent(player)) Axiom.disable(player);
+                AxiomPlayer.setEnabled(player, false);
                 terraform.saveLocalSession(player, true);
                 terraform.savePlayerSession(player, true);
 
@@ -408,16 +403,6 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         ItemStack itemStack = event.getItemStack();
         if (itemStack.material() == Material.SUSPICIOUS_STEW) {
             event.setCancelled(true);
-        }
-    }
-
-    private void handleAxiomLateInit(@NotNull TerraformAxiomLateEnableEvent event) {
-        final Player player = event.getPlayer();
-        if (!canEdit(player)) return;
-
-        for (final Entity entity : instance.getEntities()) {
-            if (entity instanceof MarkerEntity m)
-                m.updateNewViewer(player);
         }
     }
 

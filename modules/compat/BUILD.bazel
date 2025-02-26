@@ -8,10 +8,12 @@ java_library(
     deps = [
         "//third_party:auto_service",
         "//third_party:minestom",
+        "//modules/datafixerupper",
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:org_jetbrains_annotations",
         "@maven//:com_noxcrew_noxesium_api",
         "@maven//:net_kyori_adventure_api",
         "@maven//:net_kyori_adventure_nbt",
+        "@maven//:com_github_luben_zstd_jni",
     ],
 )

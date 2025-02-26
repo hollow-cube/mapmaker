@@ -3,10 +3,13 @@ package net.hollowcube.compat.api.packet;
 import net.hollowcube.compat.impl.PacketRegistryImpl;
 import net.minestom.server.Viewable;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.validate.Check;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.function.BiConsumer;
 
 public interface ClientboundModPacket<T extends ClientboundModPacket<T>>  {
 
@@ -18,6 +21,10 @@ public interface ClientboundModPacket<T extends ClientboundModPacket<T>>  {
 
     default void sendToViewers(Collection<Player> players) {
         players.forEach(this::send);
+    }
+
+    default void sendToViewers(Instance instance) {
+        sendToViewers(instance.getPlayers());
     }
 
     default void sendToViewers(Viewable viewable) {
@@ -36,6 +43,21 @@ public interface ClientboundModPacket<T extends ClientboundModPacket<T>>  {
 
         public static <T extends ClientboundModPacket<T>> Type<T> of(String namespace, String path, NetworkBuffer.Type<T> codec) {
             return new Type<>("%s:%s".formatted(namespace, path), codec);
+        }
+
+        public static <T extends ClientboundModPacket<T>> Type<T> of(String namespace, String path, BiConsumer<NetworkBuffer, T> writer) {
+            var type = new NetworkBuffer.Type<T>() {
+                @Override
+                public void write(@NotNull NetworkBuffer buffer, T value) {
+                    writer.accept(buffer, value);
+                }
+
+                @Override
+                public T read(@NotNull NetworkBuffer buffer) {
+                    throw new UnsupportedOperationException("You cannot read a write-only packet type");
+                }
+            };
+            return new Type<>("%s:%s".formatted(namespace, path), type);
         }
     }
 }
