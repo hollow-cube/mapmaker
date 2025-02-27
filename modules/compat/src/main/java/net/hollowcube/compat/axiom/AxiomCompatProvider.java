@@ -32,6 +32,8 @@ public class AxiomCompatProvider implements CompatProvider {
         registry.register(AxiomServerboundSpawnEntitiesPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSpawnEntities));
         registry.register(AxiomServerboundModifyEntitiesPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onModifyEntities));
 
+        registry.register(AxiomServerboundAnnotationUpdatePacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onAnnotationUpdates));
+
         registry.register(AxiomServerboundSetTimePacket.TYPE, AxiomPacketHandler.disabled("Time modification is disabled on HollowCube."));
 
         // clientbound:
@@ -46,6 +48,7 @@ public class AxiomCompatProvider implements CompatProvider {
         registry.register(AxiomClientboundMarkerResponsePacket.TYPE);
         registry.register(AxiomClientboundAllowedGamemodesPacket.TYPE);
         registry.register(AxiomClientboundIgnoreDisplayEntitiesPacket.TYPE);
+        registry.register(AxiomClientboundAnnotationUpdatePacket.TYPE);
     }
 
     @Override

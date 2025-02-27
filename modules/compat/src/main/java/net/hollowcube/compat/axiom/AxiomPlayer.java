@@ -47,7 +47,7 @@ public final class AxiomPlayer {
             var max = new BlockVec(border.centerX() + border.diameter() / 2, dimension.maxY(), border.centerZ() + border.diameter() / 2);
 
             AxiomClientboundSetRestrictionsPacket.Restrictions restrictions = new AxiomClientboundSetRestrictionsPacket.Restrictions(
-                    true, true, true, false, // TODO enable annotations
+                    true, true, true, true, // TODO enable annotations
                     AxiomCapabilities.ALL, -1, 0,
                     Pair.of(min, max)
             );

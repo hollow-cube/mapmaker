@@ -13,6 +13,7 @@ import net.hollowcube.mapmaker.map.item.vanilla.DebugStickItem;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.polar.ReadWriteWorldAccess;
 import net.hollowcube.mapmaker.map.ram.RamUsageOverlay;
+import net.hollowcube.mapmaker.map.terraform.TerraformInstanceStorageImpl;
 import net.hollowcube.mapmaker.map.util.CustomizableHotbarManager;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.map.world.savestate.EditState;
@@ -20,6 +21,7 @@ import net.hollowcube.mapmaker.misc.BossBars;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.terraform.Terraform;
+import net.hollowcube.terraform.storage.TerraformInstanceStorage;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -79,6 +81,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
     private final ReentrantLock saveLock = new ReentrantLock();
     private Task autoSaveTask = null;
 
+    private final TerraformInstanceStorageImpl terraformStorage = new TerraformInstanceStorageImpl();
+
     public EditingMapWorld(@NotNull MapServer server, @NotNull MapData map) {
         super(server, map, new MapInstance(map.createDimensionName('e'), map.getSetting(MapSettings.LIGHTING)));
 
@@ -89,6 +93,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         instance.eventNode().addChild(readOnlyNode); // Needs spectators, so register on instance.
 
         itemRegistry().register(DebugStickItem.INSTANCE);
+
+        instance.setTag(TerraformInstanceStorage.TERRAFORM_INSTANCE_STORAGE_TAG, terraformStorage);
     }
 
     @Override
@@ -170,6 +176,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
                     .repeat(MAP_AUTOSAVE_INTERVAL_SEC, TimeUnit.SECOND)
                     .schedule();
         }
+
+        this.terraformStorage.load(this);
     }
 
     public void closeTestWorld() {
@@ -219,6 +227,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
             // Save the world data (if it is unverified only)
             if (map().verification() != MapVerification.PENDING) {
                 biomes().write(this);
+                this.terraformStorage.save(this);
 
                 var worldData = instance.save(new ReadWriteWorldAccess(this));
                 server().mapService().updateMapWorld(map().id(), worldData);

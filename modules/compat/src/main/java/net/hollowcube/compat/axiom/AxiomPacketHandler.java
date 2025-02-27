@@ -1,10 +1,7 @@
 package net.hollowcube.compat.axiom;
 
 import net.hollowcube.compat.api.packet.ServerboundModPacket;
-import net.hollowcube.compat.axiom.events.AxiomApplyBufferEvent;
-import net.hollowcube.compat.axiom.events.AxiomMarkerDataRequestEvent;
-import net.hollowcube.compat.axiom.events.AxiomTryModifyEntityEvent;
-import net.hollowcube.compat.axiom.events.AxiomTrySpawnEntityEvent;
+import net.hollowcube.compat.axiom.events.*;
 import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundAckWorldPropertyPacket;
 import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundMarkerResponsePacket;
 import net.hollowcube.compat.axiom.packets.serverbound.*;
@@ -190,5 +187,12 @@ final class AxiomPacketHandler {
                     player, entity, pos, entry.nbt(), entry.passengerChange(), entry.passengers()
             ));
         }
+    }
+
+    static void onAnnotationUpdates(@NotNull Player player, @NotNull AxiomServerboundAnnotationUpdatePacket packet) {
+        EventDispatcher.call(new AxiomAnnotationActionEvent(
+                player,
+                packet.actions()
+        ));
     }
 }
