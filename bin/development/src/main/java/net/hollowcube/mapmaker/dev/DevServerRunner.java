@@ -256,7 +256,7 @@ public class DevServerRunner extends AbstractMapServer {
                 inventoryConditionResult.setCancel(true);
 
                 player1.sendMessage("Clicked slot " + slot + " with click type " + clickType);
-                DevServer.host.root.handleClick(clickType, slot);
+                DevServer.host.root.handleClick(clickType, slot % 9, slot / 9);
 
             });
         }, "");

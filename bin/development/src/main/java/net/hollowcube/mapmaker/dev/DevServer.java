@@ -5,7 +5,6 @@ import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.scripting.gui.InventoryHost;
 import net.hollowcube.mapmaker.scripting.gui.react.ReconcilerHostConfig;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
 

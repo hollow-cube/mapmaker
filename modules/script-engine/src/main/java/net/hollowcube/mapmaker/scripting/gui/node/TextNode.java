@@ -1,6 +1,9 @@
 package net.hollowcube.mapmaker.scripting.gui.node;
 
+import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.scripting.gui.MenuBuilder;
+import net.hollowcube.mapmaker.scripting.gui.util.Align;
+import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
 
 public class TextNode extends GroupNode {
@@ -22,8 +25,21 @@ public class TextNode extends GroupNode {
         }
     }
 
+    private final Align x = new Align();
+    private final Align y = new Align();
+
     public TextNode() {
         super("text");
+    }
+
+    @Override
+    public boolean updateFromProps(@NotNull Value props) {
+        boolean changed = super.updateFromProps(props);
+
+        changed |= this.x.updateFromProps(props, "x");
+        changed |= this.y.updateFromProps(props, "y");
+
+        return changed;
     }
 
     @Override
@@ -37,6 +53,9 @@ public class TextNode extends GroupNode {
         var text = string.toString();
         if (text.isEmpty()) return;
 
-        builder.drawText(0, 0, text);
+        int x = this.x.value(FontUtil.measureText(text), builder.availWidth() * 18);
+        int y = this.y.value(FontUtil.DEFAULT_HEIGHT, builder.availHeight() * 18);
+        builder.drawText(x, y, text);
     }
+
 }

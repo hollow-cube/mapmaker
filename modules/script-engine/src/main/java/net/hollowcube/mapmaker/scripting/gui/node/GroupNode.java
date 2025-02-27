@@ -79,46 +79,56 @@ public class GroupNode extends Node {
         // todo it would be nice to be able to make errors like
         //  group.group.button.tooltip > "tooltip" is not valid for XYZ
 
-        int mark = builder.pushSlotBounds(0, 0); //todo replace with mark method
+        int mark = builder.mark();
         for (var child : children) {
 
             int cWidth = child.width(), cHeight = child.height();
+            int before = builder.mark();
+            if (!child.isBackground()) builder.boundsRect(0, 0, cWidth, cHeight);
             child.build(builder);
+            if (!child.isBackground()) builder.restore(before);
 
             switch (this.layout) {
                 case ROW -> {
-                    builder.pushSlotBounds(cWidth, 0);
+                    builder.boundsRect(cWidth, 0);
                 }
                 case COLUMN -> {
-                    builder.pushSlotBounds(0, cHeight);
+                    builder.boundsRect(0, cHeight);
                 }
             }
 
 
         }
 
-        builder.restoreSlotBounds(mark);
+        builder.restore(mark);
     }
 
     @Override
-    public boolean handleClick(@NotNull ClickType clickType, int slot) {
+    public boolean handleClick(@NotNull ClickType clickType, int x, int y) {
         if (this.children.isEmpty()) return false;
         if (this.children.size() == 1) {
-            return this.children.getFirst().handleClick(clickType, slot);
+            return this.children.getFirst().handleClick(clickType, x, y);
         }
 
+        int currX = 0, currY = 0;
         for (var child : children) {
             int cWidth = child.width(), cHeight = child.height();
 
-            if (slot < cWidth || slot < cHeight) {
-                return child.handleClick(clickType, slot);
+            if (x >= currX && x < currX + cWidth && y >= currY && y < currY + cHeight) {
+                return child.handleClick(clickType, x - currX, y - currY);
             }
 
-
+            switch (this.layout) {
+                case ROW -> {
+                    currX += cWidth;
+                }
+                case COLUMN -> {
+                    currY += cHeight;
+                }
+            }
         }
-
-
-        return super.handleClick(clickType, slot);
+        
+        return false;
     }
 
     public void appendChild(@NotNull Node child) {

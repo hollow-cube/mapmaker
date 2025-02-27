@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 public abstract class Node {
     private final String type; // Name of the node type, mostly used for debug purposes
 
+    private boolean background = false;
+
     protected int slotWidth = 0;
     protected int slotHeight = 0;
 
@@ -17,6 +19,10 @@ public abstract class Node {
 
     public @NotNull String type() {
         return this.type;
+    }
+
+    public boolean isBackground() {
+        return background;
     }
 
     public int width() {
@@ -36,13 +42,15 @@ public abstract class Node {
         if (props.hasMember("slotHeight"))
             this.slotHeight = props.getMember("slotHeight").asInt(); // TODO better error handling
 
+        background = props.hasMember("position"); // todo obviously wrong
+
         return lastSlotWidth != this.slotWidth
                 || lastSlotHeight != this.slotHeight;
     }
 
     public abstract void build(@NotNull MenuBuilder builder);
 
-    public boolean handleClick(@NotNull ClickType clickType, int slot) {
+    public boolean handleClick(@NotNull ClickType clickType, int x, int y) {
         return false;
     }
 

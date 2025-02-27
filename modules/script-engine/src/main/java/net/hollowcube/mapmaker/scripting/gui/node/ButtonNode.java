@@ -27,7 +27,7 @@ public class ButtonNode extends GroupNode {
     }
 
     @Override
-    public boolean handleClick(@NotNull ClickType clickType, int slot) {
+    public boolean handleClick(@NotNull ClickType clickType, int x, int y) {
         if (clickType == ClickType.LEFT_CLICK && this.onLeftClick != null) {
             this.onLeftClick.run();
             return true;

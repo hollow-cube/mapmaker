@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.scripting.gui;
 
-import it.unimi.dsi.fastutil.ints.IntIntPair;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
@@ -14,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class MenuBuilder {
     private int absWidth, absHeight;
@@ -22,7 +20,7 @@ public class MenuBuilder {
     private final FontUIBuilder title = new FontUIBuilder();
     private final ItemStack[] items;
 
-    private final List<IntIntPair> slotBounds = new ArrayList<>();
+    private final List<Bounds> slotBounds = new ArrayList<>();
 
     public MenuBuilder(int slotWidth, int slotHeight) {
         this.slotX = this.slotY = 0;
@@ -35,40 +33,48 @@ public class MenuBuilder {
                 .build());
     }
 
-    public void pushItemModifier(@NotNull Consumer<ItemStack.Builder> func) {
-
+    public int availWidth() {
+        return this.slotWidth - this.slotX;
     }
 
-    public void popItemModifier() {
-
+    public int availHeight() {
+        return this.slotHeight - this.slotY;
     }
 
-    public int pushSlotBounds(int x, int y) {
-        if (x == 0 && y == 0) {
-            return this.slotBounds.size();
+    public record Bounds(int x, int y, int width, int height) {
+    }
+
+    public int mark() {
+        return this.slotBounds.size();
+    }
+
+    public void restore(int bounds) {
+        Bounds last = this.slotBounds.get(bounds);
+        while (this.slotBounds.size() > bounds) {
+            this.slotBounds.removeLast();
         }
-        this.slotBounds.add(IntIntPair.of(this.slotX, this.slotY));
+
+        this.slotX = last.x();
+        this.slotY = last.y();
+        this.slotWidth = last.width();
+        this.slotHeight = last.height();
+    }
+
+    public void boundsRect(int x, int y) {
+        this.slotBounds.add(new Bounds(this.slotX, this.slotY, this.slotWidth, this.slotHeight));
         this.slotX += x;
         this.slotY += y;
-        //todo bounds check
-        return this.slotBounds.size() - 1;
     }
 
-    public void restoreSlotBounds(int index) {
-        if (index < 0 || index >= this.slotBounds.size()) {
-            throw new IllegalArgumentException("Invalid slot bounds index");
-        }
-
-        IntIntPair pair = this.slotBounds.get(index);
-        this.slotX = pair.leftInt();
-        this.slotY = pair.rightInt();
-
-        //todo This just grows slot bounds indefinitely, but that's fine for now
+    public void boundsRect(int x, int y, int width, int height) {
+        this.slotBounds.add(new Bounds(this.slotX, this.slotY, this.slotWidth, this.slotHeight));
+        this.slotX += x;
+        this.slotY += y;
+        this.slotWidth = this.slotX + width;
+        this.slotHeight = this.slotY + height;
     }
 
     public <T> void editSlotsWithout(int x, int y, int width, int height, @NotNull DataComponent<T> component) {
-//        final ItemStack item = baseItem.build();
-
         int startX = this.slotX + x;
         int startY = this.slotY + y;
         int endX = startX + width;
@@ -115,6 +121,9 @@ public class MenuBuilder {
     public void drawText(int x, int y, @NotNull String text) {
         int startX = -1 + (this.slotX * 18) + x; // -1 accounts for the gui title offset
         int startY = 4 + (this.slotY * 18) + y; // +4 accounts for the gui title offset
+
+        // Account for font height. Not sure this is the solution i want for that.
+        startY += FontUtil.DEFAULT_HEIGHT - 1;
 
         title.pushColor(FontUtil.computeVerticalOffset(startY));
         title.pos(startX);

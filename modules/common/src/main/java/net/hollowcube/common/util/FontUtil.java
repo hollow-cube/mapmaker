@@ -298,6 +298,8 @@ public final class FontUtil {
         ALL_GLYPH_WIDTHS_V2 = Int2IntMaps.unmodifiable(allWidths);
     }
 
+    public static final int DEFAULT_HEIGHT = 9;
+
     public static int measureText(@NotNull String text) {
         int width = 0;
         for (int i = 0; i < text.length(); i++) {
