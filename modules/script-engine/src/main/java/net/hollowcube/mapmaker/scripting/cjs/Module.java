@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.scripting.cjs;
 
 import net.hollowcube.mapmaker.scripting.ScriptEngine;
+import net.hollowcube.mapmaker.scripting.gui.react.JSX;
 import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
@@ -16,14 +17,16 @@ public class Module {
     private final ScriptEngine engine;
     private final URI uri;
     private final String name;
+    private final boolean tempIncludeJsx;
 
     private final Value exports;
 
-    public Module(@NotNull ScriptEngine engine, @NotNull URI uri, @NotNull String code) {
+    public Module(@NotNull ScriptEngine engine, @NotNull URI uri, @NotNull String code, boolean tempIncludeJsx) {
         this.engine = engine;
         this.uri = uri;
         this.name = extractFileName(uri);
 
+        this.tempIncludeJsx = tempIncludeJsx;
         this.exports = loadJsModule(uri, code);
     }
 
@@ -54,7 +57,8 @@ public class Module {
     private @NotNull Value loadJsModule(@NotNull URI uri, @NotNull String code) {
         try (var ignored = engine.makeCurrent()) {
             // We wrap the evaluation in a function to ensure that modules are evaluated in different scopes.
-            var wrappedCode = "(function (exports, require, module, __filename, __dirname) {" + code + "})";
+            var wrappedCode = !tempIncludeJsx ? "(function (exports, require, module, __filename, __dirname) {" + code + "})"
+                    : "(function (exports, require, module, __filename, __dirname, JSX) {" + code + "})";
             var source = Source.newBuilder("js", wrappedCode, this.name).build();
 
             var context = engine.context();
@@ -71,7 +75,8 @@ public class Module {
             final String uriPath = this.uri.getPath();
             final int lastSlash = uriPath.lastIndexOf('/');
             final String dirname = lastSlash == -1 ? "" : uriPath.substring(0, lastSlash);
-            context.eval(source).execute(exports, (ProxyExecutable) this::moduleRequire, module, this.name, dirname);
+            context.eval(source).execute(exports, (ProxyExecutable) this::moduleRequire, module, this.name, dirname,
+                    tempIncludeJsx ? new JSX(engine.load(URI.create("internal:///third_party/react/react.js"))) : null);
 
             // Refetch exports because it can be totally overwritten (ie module.exports = function() { ... } is valid).
             return module.getMember("exports");

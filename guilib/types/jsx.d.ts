@@ -3,30 +3,17 @@ declare namespace JSX {
 
     export type Layer = 'background' | 'default' | 'item'
 
-    export type BaseProps = {
-        layer?: Layer;
-        x?: number;
-        y?: number;
-    }
+    export type Props = { [key: string]: any }
 
     export interface IntrinsicElements {
-        row: { [key: string]: any };
-        column: { [key: string]: any };
+        group: Props;
 
-        sprite: BaseProps & {
-            src: string;
-        }
+        sprite: Props
 
-        text: { [key: string]: any };
-        button: {
-            translationKey?: string;
-            onclick?: () => void;
-            width?: number;
-            height?: number;
-        };
-
-        div: { [key: string]: any };
-        span?: { style?: string };
+        text: Props;
+        button: Props;
+        tooltip: Props;
+        item: Props;
     }
 
     export const Fragment: any;

@@ -1,19 +1,17 @@
 package net.hollowcube.mapmaker.dev;
 
+import net.hollowcube.mapmaker.map.runtime.MapServerInitializer;
 import net.hollowcube.mapmaker.scripting.ScriptEngine;
+import net.hollowcube.mapmaker.scripting.gui.InventoryHost;
 import net.hollowcube.mapmaker.scripting.gui.react.ReconcilerHostConfig;
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.HostAccess;
-import org.graalvm.polyglot.Source;
-import org.graalvm.polyglot.Value;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.inventory.click.ClickType;
+import net.minestom.server.item.ItemStack;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
-import org.graalvm.polyglot.proxy.ProxyObject;
-import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class DevServer {
 
@@ -23,8 +21,8 @@ public class DevServer {
 
     public static void main(String[] args) throws Exception {
 //        CyloneImport.tempConvert();
-//        MapServerInitializer.run(DevServerRunner::new, args);
         runGui();
+        MapServerInitializer.run(DevServerRunner::new, args);
 
 //        var path = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/modules/hub/src/main/resources/spawn/hcspawn.polar");
 //        var world = PolarReader.read(Files.readAllBytes(path));
@@ -61,62 +59,24 @@ public class DevServer {
 //        Files.write(path, newBytes);
     }
 
+    public static InventoryHost host;
+    public static Component title;
+    public static ItemStack[] itemList;
+
     public static void runGui() throws Exception {
-        {
-            var engine = new ScriptEngine();
+        var engine = new ScriptEngine();
 
-            var reactReconciler = engine.load(URI.create("internal:///third_party/react/react-reconciler.js"));
-            var reactReconcilerInst = reactReconciler.exports().execute(new ReconcilerHostConfig());
+        var reactReconciler = engine.load(URI.create("internal:///third_party/react/react-reconciler.js"));
+        var reactReconcilerInst = reactReconciler.exports().execute(new ReconcilerHostConfig());
 
+        var componentSource = Files.readString(Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/guilib/dist/StoreView.js"));
+        var componentModule = engine.loadText("StoreView.js", componentSource).exports().getMember("default");
+        var react = engine.load(URI.create("internal:///third_party/react/react.js"));
+        var element = react.exports().invokeMember("createElement", componentModule, null);
 
-            if (Math.random() > 0) {
-                System.exit(0);
-            }
-        }
-
-
-        Context context = Context.newBuilder("js")
-                .allowHostAccess(HostAccess.ALL)
-                .build(); // TODO not closed
-
-        context.getBindings("js").putMember("process", ProxyObject.fromMap(Map.of(
-                "env", Map.of("NODE_ENV", "development")
-        )));
-        context.getBindings("js").putMember("setTimeout", (ProxyExecutable) (args) -> {
-            System.out.println("setTimeout: " + args[1]);
-            args[0].execute();
-            return null;
-        });
-        var modules = new ConcurrentHashMap<String, Value>();
-        context.getBindings("js").putMember("require", (ProxyExecutable) (args) -> {
-            System.out.println("trying to load: " + args[0].asString());
-            return Objects.requireNonNull(modules.get(args[0].asString()));
-        });
-
-        modules.put("scheduler", loadNamedModule(context, "scheduler"));
-        modules.put("react", loadNamedModule(context, "react"));
-        modules.put("react-reconciler", loadNamedModule(context, "react-reconciler"));
-
-        var reactReconciler = Objects.requireNonNull(modules.get("react-reconciler"));
-        var reactReconcilerInst = reactReconciler.execute(new ReactHostConfig());
-
-        var componentModule = loadNamedModule(context, Source.newBuilder("js", "(function (exports, require, module, __filename, __dirname) {" + """
-                "use strict";
-                var __importDefault = (this && this.__importDefault) || function (mod) {
-                    return (mod && mod.__esModule) ? mod : { "default": mod };
-                };
-                Object.defineProperty(exports, "__esModule", { value: true });
-                exports.default = StoreView;
-                const react_1 = __importDefault(require("react"));
-                function StoreView() {
-                    return react_1.default.createElement("div", null, "Hiiii");
-                }
-                """ + "})", "child-comp.js").build());
-        var component = componentModule.getMember("default");
-        var element = modules.get("react").invokeMember("createElement", component, null);
-
+        var rootNode = new InventoryHost();
         var root = reactReconcilerInst.invokeMember("createContainer",
-                /* containerInfo */ Value.asValue(Map.of()),
+                /* containerInfo */ rootNode,
                 /* tag */ 0,
                 /* hydrationCallbacks */ null,
                 /* isStrictMode */ true,
@@ -126,7 +86,7 @@ public class DevServer {
                     System.out.println("ERROR: " + args[0]);
                     return null;
                 },
-                /* transitionCallbacks */null
+                /* transitionCallbacks */ null
         );
         var result = reactReconcilerInst.invokeMember("updateContainer",
                 /* element */ element,
@@ -134,31 +94,18 @@ public class DevServer {
                 /* parentComponent */ null,
                 /* callback */ null);
         System.out.println("LANE: " + result);
-    }
+        System.out.println(rootNode);
 
-    private static Value loadNamedModule(Context context, @NotNull String name) throws Exception {
-        try (var is = DevServer.class.getResourceAsStream("/third_party/react/" + name + ".js")) {
-            // https://github.com/transposit/graal-commonjs-modules/blob/master/src/main/java/graal/Module.java#L299
-            var raw = "(function (exports, require, module, __filename, __dirname) {" + new String(is.readAllBytes()) + "})";
-            var source = Source.newBuilder("js", raw, name + ".js").build();
-            return loadNamedModule(context, source);
+        var items = rootNode.build();
+        for (int i = 0; i < 9; i++) {
+            System.out.println(i + ": " + items[i].material().name());
         }
+
+        title = rootNode.titleTemp;
+        itemList = rootNode.itemsTemp;
+        host = rootNode;
+
+
     }
 
-    private static Value loadNamedModule(Context context, @NotNull Source source) throws Exception {
-        var module = context.eval("js", "({})");
-        var exports = context.eval("js", "({})");
-
-        // TODO: these things should be present in the module object
-        module.putMember("exports", exports);
-        // module.putMember("children", new WrappedList(children));
-        // module.putMember("filename", filename);
-        // module.putMember("id", filename);
-        // module.putMember("loaded", false);
-        // module.putMember("parent", parent != null ? parent.module : null);
-
-        var require = context.getBindings("js").getMember("require"); // TODO just dont add require to global scope
-        context.eval(source).execute(exports, require, module, "todo_filename.js", "todo_dirname");
-        return module.getMember("exports");
-    }
 }

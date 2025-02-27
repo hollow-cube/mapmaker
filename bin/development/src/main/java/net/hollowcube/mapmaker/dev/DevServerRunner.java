@@ -6,7 +6,6 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.MojangUtil;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
-import net.hollowcube.mapmaker.dev.inventory.InventoryHost;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServerRunner;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
@@ -248,7 +247,18 @@ public class DevServerRunner extends AbstractMapServer {
 
 
         dbg.createPermissionlessSubcommand("gui", (player, ignored) -> {
-            new InventoryHost(player, "./TestComponent");
+            var inv = new Inventory(InventoryType.CHEST_6_ROW, DevServer.title);
+            for (int i = 0; i < inv.getInnerSize(); i++) {
+                inv.setItemStack(i, DevServer.itemList[i]);
+            }
+            player.openInventory(inv);
+            inv.addInventoryCondition((player1, slot, clickType, inventoryConditionResult) -> {
+                inventoryConditionResult.setCancel(true);
+
+                player1.sendMessage("Clicked slot " + slot + " with click type " + clickType);
+                DevServer.host.root.handleClick(clickType, slot);
+
+            });
         }, "");
 
         return dbg;

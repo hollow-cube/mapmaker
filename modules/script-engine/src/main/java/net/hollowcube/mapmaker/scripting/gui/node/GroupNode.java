@@ -1,0 +1,132 @@
+package net.hollowcube.mapmaker.scripting.gui.node;
+
+import net.hollowcube.mapmaker.scripting.gui.MenuBuilder;
+import net.minestom.server.inventory.click.ClickType;
+import org.graalvm.polyglot.Value;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+public class GroupNode extends Node {
+    protected final List<Node> children = new ArrayList<>();
+
+    private enum Layout {ROW, COLUMN}
+
+    private Layout layout = Layout.COLUMN;
+
+    public GroupNode() {
+        this("group");
+    }
+
+    protected GroupNode(@NotNull String type) {
+        super(type);
+    }
+
+    @Override
+    public int width() {
+        if (this.slotWidth != 0) return this.slotWidth;
+        if (this.children.isEmpty()) return 0;
+        if (this.children.size() == 1) return this.children.getFirst().width();
+
+        int width = 0;
+        for (var child : children) {
+            width = switch (this.layout) {
+                case ROW -> width + child.width();
+                case COLUMN -> Math.max(width, child.width());
+            };
+        }
+        return width;
+    }
+
+    @Override
+    public int height() {
+        if (this.slotHeight != 0) return this.slotHeight;
+        if (this.children.isEmpty()) return 0;
+        if (this.children.size() == 1) return this.children.getFirst().height();
+
+        int height = 0;
+        for (var child : children) {
+            height = switch (this.layout) {
+                case ROW -> Math.max(height, child.height());
+                case COLUMN -> height + child.height();
+            };
+        }
+        return height;
+    }
+
+    @Override
+    public boolean updateFromProps(@NotNull Value props) {
+        boolean changed = super.updateFromProps(props);
+
+        if (props.hasMember("layout")) {
+            this.layout = Layout.valueOf(props.getMember("layout").asString().toUpperCase(Locale.ROOT));
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    @Override
+    public void build(@NotNull MenuBuilder builder) {
+        if (this.children.isEmpty()) return;
+        if (this.children.size() == 1) {
+            this.children.getFirst().build(builder);
+            return;
+        }
+
+        // todo it would be nice to be able to make errors like
+        //  group.group.button.tooltip > "tooltip" is not valid for XYZ
+
+        int mark = builder.pushSlotBounds(0, 0); //todo replace with mark method
+        for (var child : children) {
+
+            int cWidth = child.width(), cHeight = child.height();
+            child.build(builder);
+
+            switch (this.layout) {
+                case ROW -> {
+                    builder.pushSlotBounds(cWidth, 0);
+                }
+                case COLUMN -> {
+                    builder.pushSlotBounds(0, cHeight);
+                }
+            }
+
+
+        }
+
+        builder.restoreSlotBounds(mark);
+    }
+
+    @Override
+    public boolean handleClick(@NotNull ClickType clickType, int slot) {
+        if (this.children.isEmpty()) return false;
+        if (this.children.size() == 1) {
+            return this.children.getFirst().handleClick(clickType, slot);
+        }
+
+        for (var child : children) {
+            int cWidth = child.width(), cHeight = child.height();
+
+            if (slot < cWidth || slot < cHeight) {
+                return child.handleClick(clickType, slot);
+            }
+
+
+        }
+
+
+        return super.handleClick(clickType, slot);
+    }
+
+    public void appendChild(@NotNull Node child) {
+        // This is a little gross, but oh well its fine :)
+        if (!(this instanceof TextNode) && child instanceof TextNode.Raw) {
+            throw new IllegalArgumentException("only text may have raw text contents");
+        }
+
+        this.children.add(child);
+    }
+}

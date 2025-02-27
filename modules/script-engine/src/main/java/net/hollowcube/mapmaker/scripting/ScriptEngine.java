@@ -68,8 +68,13 @@ public class ScriptEngine {
                 case null, default ->
                         throw new UnsupportedOperationException("unsupported uri scheme: " + script.getScheme());
             };
-            return new Module(this, script, code);
+            return new Module(this, script, code, false);
         });
+    }
+
+    public @NotNull Module loadText(@NotNull String name, @NotNull String code) {
+        var uri = URI.create("file:///tmp/" + name);
+        return this.moduleCache.computeIfAbsent(uri, ignored -> new Module(this, uri, code, true));
     }
 
     private void setupGlobals() {

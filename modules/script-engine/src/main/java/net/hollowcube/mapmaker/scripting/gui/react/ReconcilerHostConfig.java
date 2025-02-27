@@ -1,10 +1,15 @@
 package net.hollowcube.mapmaker.scripting.gui.react;
 
-import net.hollowcube.mapmaker.scripting.gui.*;
+import net.hollowcube.mapmaker.scripting.gui.InventoryHost;
+import net.hollowcube.mapmaker.scripting.gui.node.*;
+import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
+
+import java.util.Objects;
 
 /**
  * Implements the React Reconciler Host Config API.
@@ -17,20 +22,27 @@ public class ReconcilerHostConfig {
     public final boolean isPrimaryRenderer = true;
 
     @HostAccess.Export
-    public @NotNull Node createInstance(@NotNull String type, @NotNull Value props, @NotNull Value rootContainer, @NotNull InventoryHost hostContext, @NotNull Value internalHandle) {
-        final Node node = switch (type) {
-            case "column" -> new ColumnNode();
-            case "sprite" -> new SpriteNode();
-            default -> throw new IllegalArgumentException("Unknown element type: " + type);
-        };
-        node.updateFromProps(props);
-        return node;
+    public @NotNull Node createInstance(@NotNull String type, @NotNull Value props, @NotNull Value rootContainer, @NotNull InventoryHost hostContext, @NotNull Value ignoredInternalHandle) {
+        try {
+            final Node node = switch (type) {
+                case "group" -> new GroupNode();
+                case "text" -> new TextNode();
+                case "button" -> new ButtonNode();
+                case "tooltip" -> new TooltipNode();
+                case "sprite" -> new SpriteNode();
+                case "item" -> new ItemNode();
+                default -> throw new IllegalArgumentException("Unknown element type: " + type);
+            };
+            node.updateFromProps(props);
+            return node;
+        } catch (Exception e) {
+            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
     }
 
     @HostAccess.Export
-    public @Nullable Value createTextInstance(@NotNull String text, @NotNull Value rootContainer, @NotNull InventoryHost hostContext, @NotNull Value internalHandle) {
-        System.out.println("createTextInstance");
-        return null;
+    public @NotNull Node createTextInstance(@UnknownNullability String text, @NotNull Value rootContainer, @NotNull InventoryHost hostContext, @NotNull Value internalHandle) {
+        return new TextNode.Raw(Objects.requireNonNull(text, ""));
     }
 
     @HostAccess.Export
@@ -39,7 +51,11 @@ public class ReconcilerHostConfig {
     }
 
     @HostAccess.Export
-    public boolean finalizeInitialChildren(@NotNull Value instance, @NotNull String type, @NotNull Value props, @NotNull InventoryHost hostContext) {
+    public boolean finalizeInitialChildren(@NotNull Value instance, @NotNull String type, @NotNull Value props, @NotNull Value hostContext) {
+        // TODO: This returns true if work needs to be performed when 'finalizing', ie connecting to the 'screen'.
+        // if true is returned then this node will get a commitMount later.
+        // In our case we may want to defer event handlers or something.
+
         System.out.println("finalizeInitialChildren");
         return false;
     }
@@ -61,7 +77,7 @@ public class ReconcilerHostConfig {
     }
 
     @HostAccess.Export
-    public @NotNull InventoryHost getChildHostContext(@NotNull InventoryHost parentHostContext, @NotNull String type) {
+    public @NotNull Value getChildHostContext(@NotNull Value parentHostContext, @NotNull String type) {
         return parentHostContext;
     }
 
@@ -84,7 +100,6 @@ public class ReconcilerHostConfig {
 
     @HostAccess.Export
     public void preparePortalMount(@NotNull Value containerInfo) {
-        System.out.println("preparePortalMount");
     }
 
     @HostAccess.Export
@@ -168,24 +183,6 @@ public class ReconcilerHostConfig {
     }
 
 
-    // MICROTASKS
-
-    @HostAccess.Export
-    public final boolean supportsMicrotasks = true;
-
-    @HostAccess.Export
-    public void scheduleMicrotask(@NotNull Value callback) {
-        System.out.println("scheduleMicrotask");
-        callback.executeVoid();
-    }
-
-
-    // TEST SELECTORS
-
-    @HostAccess.Export
-    public final boolean supportsTestSelectors = false;
-
-
     // MUTATION
 
     @HostAccess.Export
@@ -193,15 +190,15 @@ public class ReconcilerHostConfig {
 
     @HostAccess.Export
     public void appendChild(@NotNull Node parent, @NotNull Node child) {
-        appendChildToContainer(parent, child);
+        if (!(parent instanceof GroupNode group)) {
+            throw new IllegalArgumentException(parent.type() + " may not have children");
+        }
+        group.appendChild(child);
     }
 
     @HostAccess.Export
-    public void appendChildToContainer(@NotNull Node parent, @NotNull Node child) {
-        if (!(parent instanceof ContainerNode container)) {
-            throw new IllegalArgumentException("Parent must be a container node");
-        }
-        container.appendChild(child);
+    public void appendChildToContainer(@NotNull InventoryHost parent, @NotNull Node child) {
+        parent.addChild(child);
     }
 
     @HostAccess.Export
@@ -270,27 +267,32 @@ public class ReconcilerHostConfig {
     }
 
 
-    // PERSISTENCE
+    // VARIOUS UNSUPPORTED FEATURES
+
+    @HostAccess.Export
+    public final boolean supportsMicrotasks = false;
+
+    @HostAccess.Export
+    public final boolean supportsTestSelectors = false;
 
     @HostAccess.Export
     public final boolean supportsPersistence = false;
 
-
-    // HYDRATION
-
     @HostAccess.Export
     public final boolean supportsHydration = false;
-
-
-    // RESOURCES
 
     @HostAccess.Export
     public final boolean supportsResources = false;
 
-
-    // SINGLETONS
-
     @HostAccess.Export
     public final boolean supportsSingletons = false;
 
+
+    private static @NotNull RuntimeException jsError(@NotNull String message) {
+        // TODO: we should cache the error constructor in the engine probably
+        Value jsBindings = Context.getCurrent().getBindings("js");
+        Value errorConstructor = jsBindings.getMember("Error");
+        Value errorObject = errorConstructor.newInstance(message);
+        return errorObject.throwException();
+    }
 }
