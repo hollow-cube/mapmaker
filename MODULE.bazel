@@ -54,7 +54,6 @@ maven.install(
         "com.miguelfonseca.completely:completely-core:0.9.0",
         "com.github.ben-manes.caffeine:caffeine:3.1.8",
         "info.debatty:java-string-similarity:2.0.0",
-        "com.velocitypowered:velocity-api:3.1.1",
         "org.jctools:jctools-core:4.0.5",
 
         # Compat
@@ -86,6 +85,7 @@ maven.install(
         "io.opentelemetry.semconv:opentelemetry-semconv:1.28.0-alpha",
         "org.graalvm.sdk:nativeimage:24.1.1",
         "io.github.classgraph:classgraph:4.8.179",
+        "com.google.inject:guice:7.0.0", # For Velocity
 
         # Testing
         "org.junit.jupiter:junit-jupiter-api:5.10.0",
@@ -100,7 +100,6 @@ maven.install(
         "org.burningwave:core:12.62.7",
     ],
     excluded_artifacts = [
-        "com.velocitypowered:velocity-brigadier",  # Weird dependency issue, so just exclude it.
         "io.opentelemetry:opentelemetry-exporter-sender-okhttp",
         "com.github.hollow-cube:datafixerupper",  # Included by dataconverter but we replace it with our local version.
     ],
@@ -111,7 +110,6 @@ maven.install(
         #         "m2Local",
         "https://repo1.maven.org/maven2",
         "https://jitpack.io",
-        "https://repo.papermc.io/repository/maven-public/",
         "https://packages.confluent.io/maven/",  # For schema registry client
         "https://maven.noxcrew.com/public",  # For noxesium
     ],

@@ -1,14 +1,15 @@
 package net.hollowcube.proxy;
 
+import com.google.gson.JsonObject;
+import com.google.inject.Inject;
 import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.event.permission.PermissionsSetupEvent;
-import com.velocitypowered.api.event.player.KickedFromServerEvent;
-import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
-import com.velocitypowered.api.event.player.ServerPostConnectEvent;
+import com.velocitypowered.api.event.player.*;
+import com.velocitypowered.api.event.player.configuration.PlayerFinishedConfigurationEvent;
 import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -18,15 +19,10 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.util.GameProfile;
-import net.hollowcube.mapmaker.player.PlayerSkin;
-import net.hollowcube.mapmaker.player.SessionCreateRequestV2;
-import net.hollowcube.mapmaker.player.SessionService;
-import net.hollowcube.mapmaker.player.SessionServiceImpl;
-import net.hollowcube.mapmaker.punishments.types.Punishment;
-import net.hollowcube.mapmaker.util.AbstractHttpService;
-import net.hollowcube.mapmaker.util.GenericServiceError;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,36 +41,38 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class ProxyPlugin {
     private static final ChannelIdentifier TRANSFER_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "transfer");
     private static final ChannelIdentifier RESOURCE_PACK_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "resource_pack");
+    private static final Key TRANSFER_DATA_COOKIE = Key.key("mapmaker", "transfer_data");
 
     public static final TextColor RED = TextColor.color(0xFA4141);
     public static final Component MAINTENANCE = Component.text()
-            .append(Component.text("The server is currently in maintenance!", RED))
+            .append(Component.text("The server is currently in maintenance!", RED, TextDecoration.BOLD))
             .appendNewline().appendNewline()
             .append(Component.text("Join the discord for updates!"))
             .appendNewline()
-            .append(Component.text("discord.hollowcube.net"))
+            .append(Component.text("discord.hollowcube.net", TextColor.color(0x3895FF)))
             .build();
 
     private final Logger logger;
     private final ProxyServer proxy;
 
-    private SessionService sessionService;
+    private ProxySessionService sessionService;
 
     private final RegisteredServer anyhubServer;
 
     // Map of player uuid to the resource pack hash they currently have applied
     private final Map<UUID, String> resourcePacks = new ConcurrentHashMap<>();
+    private final Map<UUID, byte[]> transferData = new ConcurrentHashMap<>();
 
-    private final Set<UUID> playersWithSession = new CopyOnWriteArraySet<>();
     private final Set<UUID> playersJustJoined = new CopyOnWriteArraySet<>();
 
+    @Inject
     public ProxyPlugin(@NotNull Logger logger, @NotNull ProxyServer proxy) {
         this.logger = logger;
         this.proxy = proxy;
 
         var sessionServiceUrl = System.getenv("SESSION_SERVICE_URL");
-        if (sessionServiceUrl != null) sessionService = new SessionServiceImpl(sessionServiceUrl);
-        else sessionService = new SessionServiceImpl("http://session-service:9124"); // tilt
+        if (sessionServiceUrl != null) sessionService = new ProxySessionService(logger, sessionServiceUrl);
+        else sessionService = new ProxySessionService(logger, "http://session-service:9124"); // tilt
 
         proxy.getChannelRegistrar().register(TRANSFER_MESSAGE_ID);
         proxy.getChannelRegistrar().register(RESOURCE_PACK_MESSAGE_ID);
@@ -111,40 +109,27 @@ public class ProxyPlugin {
 
             var pd = sessionService.createSessionV2(
                     player.getUniqueId().toString(),
-                    new SessionCreateRequestV2(
-                            AbstractHttpService.hostname,
+                    new SessionCreateRequest(
+                            ProxySessionService.hostname,
                             player.getUsername(),
                             player.getRemoteAddress().getAddress().getHostAddress(),
-                            new PlayerSkin(skinTexture, skinSignature)
+                            new SessionCreateRequest.Skin(skinTexture, skinSignature)
                     )
             );
-            playersWithSession.add(player.getUniqueId());
             playersJustJoined.add(player.getUniqueId());
             logger.info("created session (v2) for {}: {}", player.getUsername(), pd);
-        } catch (SessionService.UnauthorizedError error) {
-            if (error.getError().code().equals("banned")) {
-                event.setResult(ResultedEvent.ComponentResult.denied(buildBannedMessage(error.getError())));
-                return;
-            }
-
-            // this is ok, they will be sent to the limbo
-            logger.info("player {} is not in the beta", player.getUsername());
+        } catch (ProxySessionService.MaintenanceException ignored) {
             event.setResult(ResultedEvent.ComponentResult.denied(MAINTENANCE));
+        } catch (ProxySessionService.BannedException error) {
+            event.setResult(ResultedEvent.ComponentResult.denied(buildBannedMessage(error.getContent())));
         } catch (Exception e) {
             logger.error("failed to create session (v2) for {}", player.getUsername(), e);
             event.setResult(LoginEvent.ComponentResult.denied(Component.text("failed to create session")));
         }
     }
 
-    private @NotNull Component buildBannedMessage(@NotNull GenericServiceError error) {
-        if (error.context() == null) {
-            throw new IllegalStateException("banned error without context");
-        }
-
-        var banContext = error.context().get("ban");
-        var punishment = AbstractHttpService.GSON.fromJson(banContext, Punishment.class);
-
-        return Component.translatable("punishments.banned", Component.text(punishment.comment()));
+    private @NotNull Component buildBannedMessage(@NotNull JsonObject error) {
+        return Component.translatable("You are banned");
     }
 
     @Subscribe
@@ -155,6 +140,34 @@ public class ProxyPlugin {
         } else if (RESOURCE_PACK_MESSAGE_ID.equals(event.getIdentifier())) {
             handleResourcePack(event);
         }
+    }
+
+    @Subscribe
+    public void handleCookieStore(@NotNull CookieStoreEvent event) {
+        if (!event.getOriginalKey().equals(TRANSFER_DATA_COOKIE))
+            return;
+
+        event.setResult(CookieStoreEvent.ForwardResult.handled()); // Never forward
+        transferData.put(event.getPlayer().getUniqueId(), event.getOriginalData());
+    }
+
+    // We reply on the RECEIVE event, ie replacing the client saying they don't have the cookie.
+    // This should really be done on the CookieRequestEvent, but velocity is brain-damaged and doesn't let
+    // you reply to the cookie in that event. You have to let the cookie go to the client and have them
+    // reply, thus exposing a detail about what we do and making a useless req/res down to the client.
+    // AWESOME JOB GUYS YOU ARE DOING GREAT!!!
+    @Subscribe
+    public void handleCookieResponse(@NotNull CookieReceiveEvent event) {
+        if (!event.getOriginalKey().equals(TRANSFER_DATA_COOKIE))
+            return;
+
+        var data = transferData.get(event.getPlayer().getUniqueId());
+        event.setResult(CookieReceiveEvent.ForwardResult.data(data));
+    }
+
+    @Subscribe
+    public void handleConfigEnd(@NotNull PlayerFinishedConfigurationEvent event) {
+        transferData.remove(event.player().getUniqueId());
     }
 
     private void handleResourcePack(@NotNull PluginMessageEvent event) {
@@ -203,26 +216,16 @@ public class ProxyPlugin {
 
     @Subscribe
     public void handleDisconnect(@NotNull DisconnectEvent event) {
-        if (!playersWithSession.contains(event.getPlayer().getUniqueId())) return;
-
         var playerId = event.getPlayer().getUniqueId().toString();
         try {
             sessionService.deleteSessionV2(playerId);
-            logger.info("deleted session (v2) for {}", playerId);
         } catch (Exception e) {
             logger.error("failed to delete session (v2) for {}", playerId, e);
         } finally {
             resourcePacks.remove(event.getPlayer().getUniqueId());
-            playersWithSession.remove(event.getPlayer().getUniqueId());
             playersJustJoined.remove(event.getPlayer().getUniqueId());
         }
     }
-
-//    @Subscribe
-//    public void handleInitialServer(PlayerChooseInitialServerEvent event) {
-//        var rs = proxy.createRawRegisteredServer(new ServerInfo("hub-minecraft", new InetSocketAddress("hub-minecraft", 25565)));
-//        event.setInitialServer(rs);
-//    }
 
     @Subscribe
     public void handleKickedFromServer(@NotNull KickedFromServerEvent event) {
