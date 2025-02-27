@@ -23,6 +23,7 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.player.PlayerSkin;
+import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
@@ -45,6 +46,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
@@ -246,7 +248,10 @@ public class DevServerRunner extends AbstractMapServer {
         }, "");
 
 
+        var guiManager = new ScriptEngine().guiManager();
         dbg.createPermissionlessSubcommand("gui", (player, ignored) -> {
+            guiManager.openGui(player, URI.create("guilib:///StoreView.js"));
+
             var inv = new Inventory(InventoryType.CHEST_6_ROW, DevServer.title);
             for (int i = 0; i < inv.getInnerSize(); i++) {
                 inv.setItemStack(i, DevServer.itemList[i]);

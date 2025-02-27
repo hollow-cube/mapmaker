@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.scripting.cjs;
 
 import net.hollowcube.mapmaker.scripting.ScriptEngine;
-import net.hollowcube.mapmaker.scripting.gui.react.JSX;
 import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
@@ -9,6 +8,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Represents a common-js module in the script engine.
@@ -17,16 +19,16 @@ public class Module {
     private final ScriptEngine engine;
     private final URI uri;
     private final String name;
-    private final boolean tempIncludeJsx;
+    private final Map<String, Object> globals = new LinkedHashMap<>();
 
     private final Value exports;
 
-    public Module(@NotNull ScriptEngine engine, @NotNull URI uri, @NotNull String code, boolean tempIncludeJsx) {
+    public Module(@NotNull ScriptEngine engine, @NotNull URI uri, @NotNull String code, @NotNull Map<String, Object> globals) {
         this.engine = engine;
         this.uri = uri;
         this.name = extractFileName(uri);
+        this.globals.putAll(globals);
 
-        this.tempIncludeJsx = tempIncludeJsx;
         this.exports = loadJsModule(uri, code);
     }
 
@@ -57,9 +59,12 @@ public class Module {
     private @NotNull Value loadJsModule(@NotNull URI uri, @NotNull String code) {
         try (var ignored = engine.makeCurrent()) {
             // We wrap the evaluation in a function to ensure that modules are evaluated in different scopes.
-            var wrappedCode = !tempIncludeJsx ? "(function (exports, require, module, __filename, __dirname) {" + code + "})"
-                    : "(function (exports, require, module, __filename, __dirname, JSX) {" + code + "})";
-            var source = Source.newBuilder("js", wrappedCode, this.name).build();
+            var wrappedCodeBuilder = new StringBuilder();
+            wrappedCodeBuilder.append("(function (exports, require, module, __filename, __dirname");
+            if (!this.globals.isEmpty())
+                wrappedCodeBuilder.append(", ").append(globals.keySet().stream().collect(Collectors.joining(", ")));
+            wrappedCodeBuilder.append(") {").append(code).append("})");
+            var source = Source.newBuilder("js", wrappedCodeBuilder, this.name).build();
 
             var context = engine.context();
             var exports = context.eval("js", "({})");
@@ -75,8 +80,17 @@ public class Module {
             final String uriPath = this.uri.getPath();
             final int lastSlash = uriPath.lastIndexOf('/');
             final String dirname = lastSlash == -1 ? "" : uriPath.substring(0, lastSlash);
-            context.eval(source).execute(exports, (ProxyExecutable) this::moduleRequire, module, this.name, dirname,
-                    tempIncludeJsx ? new JSX(engine.load(URI.create("internal:///third_party/react/react.js"))) : null);
+            Object[] args = new Object[5 + this.globals.size()];
+            args[0] = exports;
+            args[1] = (ProxyExecutable) this::moduleRequire;
+            args[2] = module;
+            args[3] = this.name;
+            args[4] = dirname;
+            int i = 5;
+            for (var entry : this.globals.entrySet()) {
+                args[i++] = entry.getValue();
+            }
+            context.eval(source).execute(args);
 
             // Refetch exports because it can be totally overwritten (ie module.exports = function() { ... } is valid).
             return module.getMember("exports");

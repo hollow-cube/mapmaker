@@ -119,15 +119,11 @@ public class GroupNode extends Node {
             }
 
             switch (this.layout) {
-                case ROW -> {
-                    currX += cWidth;
-                }
-                case COLUMN -> {
-                    currY += cHeight;
-                }
+                case ROW -> currX += cWidth;
+                case COLUMN -> currY += cHeight;
             }
         }
-        
+
         return false;
     }
 

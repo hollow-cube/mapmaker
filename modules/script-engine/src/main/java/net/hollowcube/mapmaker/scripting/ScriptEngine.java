@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.scripting;
 
 import net.hollowcube.mapmaker.scripting.cjs.Module;
+import net.hollowcube.mapmaker.scripting.gui.GuiManager;
 import net.hollowcube.mapmaker.scripting.node.Process;
 import net.hollowcube.mapmaker.scripting.node.SetTimeout;
 import org.graalvm.polyglot.Context;
@@ -29,10 +30,18 @@ public class ScriptEngine {
 
     private final Map<URI, Module> moduleCache = new HashMap<>();
 
+    private GuiManager guiManager = null; // Lazy
+
     public ScriptEngine() {
         this.context = Context.newBuilder().build();
 
         setupGlobals();
+    }
+
+    public @NotNull GuiManager guiManager() {
+        if (this.guiManager == null)
+            this.guiManager = new GuiManager(this);
+        return this.guiManager;
     }
 
     public interface ContextCloser extends AutoCloseable {
@@ -55,6 +64,10 @@ public class ScriptEngine {
     }
 
     public @NotNull Module load(@NotNull URI script) {
+        return load(script, Map.of());
+    }
+
+    public @NotNull Module load(@NotNull URI script, @NotNull Map<String, Object> globals) {
         return this.moduleCache.computeIfAbsent(script, ignored -> {
             final String code = switch (script.getScheme()) {
                 case "internal" -> {
@@ -68,13 +81,13 @@ public class ScriptEngine {
                 case null, default ->
                         throw new UnsupportedOperationException("unsupported uri scheme: " + script.getScheme());
             };
-            return new Module(this, script, code, false);
+            return new Module(this, script, code, globals);
         });
     }
 
     public @NotNull Module loadText(@NotNull String name, @NotNull String code) {
         var uri = URI.create("file:///tmp/" + name);
-        return this.moduleCache.computeIfAbsent(uri, ignored -> new Module(this, uri, code, true));
+        return this.moduleCache.computeIfAbsent(uri, ignored -> new Module(this, uri, code, Map.of()));
     }
 
     private void setupGlobals() {

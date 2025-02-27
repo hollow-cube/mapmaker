@@ -73,7 +73,7 @@ public class DevServer {
         var react = engine.load(URI.create("internal:///third_party/react/react.js"));
         var element = react.exports().invokeMember("createElement", componentModule, null);
 
-        var rootNode = new InventoryHost();
+        var rootNode = new InventoryHost(null);
         var root = reactReconcilerInst.invokeMember("createContainer",
                 /* containerInfo */ rootNode,
                 /* tag */ 0,
