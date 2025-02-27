@@ -16,7 +16,6 @@ public class AxiomCompatProvider implements CompatProvider {
     public void registerPackets(PacketRegistry registry) {
         // serverbound:
         // request entity data, request chunk data,
-        // update annotation
 
         registry.register(AxiomServerboundHelloPacket.TYPE, AxiomPacketHandler::onHello);
         registry.register(AxiomServerboundSetFlySpeedPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSetFlySpeed));
@@ -37,7 +36,7 @@ public class AxiomCompatProvider implements CompatProvider {
         registry.register(AxiomServerboundSetTimePacket.TYPE, AxiomPacketHandler.disabled("Time modification is disabled on HollowCube."));
 
         // clientbound:
-        // annotation update, chunk response, entity response
+        // chunk response, entity response
 
         registry.register(AxiomClientboundEnablePacket.TYPE);
         registry.register(AxiomClientboundMarkerDataPacket.TYPE);
