@@ -3,11 +3,13 @@ package net.hollowcube.compat.axiom;
 import it.unimi.dsi.fastutil.Pair;
 import net.hollowcube.compat.api.packet.ClientboundModPacket;
 import net.hollowcube.compat.axiom.data.AxiomCapabilities;
+import net.hollowcube.compat.axiom.events.AxiomEnabledEvent;
 import net.hollowcube.compat.axiom.packets.clientbound.*;
 import net.hollowcube.compat.axiom.properties.registry.PropertyRegistry;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
@@ -67,6 +69,8 @@ public final class AxiomPlayer {
         }
 
         packets.forEach(packet -> packet.send(player));
+
+        EventDispatcher.call(new AxiomEnabledEvent(player, enabled));
     }
 
     public static int getVersion(@NotNull Player player) {

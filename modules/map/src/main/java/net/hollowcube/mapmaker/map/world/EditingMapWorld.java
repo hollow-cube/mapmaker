@@ -93,8 +93,6 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         instance.eventNode().addChild(readOnlyNode); // Needs spectators, so register on instance.
 
         itemRegistry().register(DebugStickItem.INSTANCE);
-
-        instance.setTag(TerraformInstanceStorage.TERRAFORM_INSTANCE_STORAGE_TAG, terraformStorage);
     }
 
     @Override
@@ -178,6 +176,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         }
 
         this.terraformStorage.load(this);
+        this.instance.setTag(TerraformInstanceStorage.TERRAFORM_INSTANCE_STORAGE_TAG, this.terraformStorage);
     }
 
     public void closeTestWorld() {

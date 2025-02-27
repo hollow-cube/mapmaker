@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class TerraformInstanceStorageImpl implements TerraformInstanceStorage {
 
-    public static final Tag<BinaryTag> TAG = Tag.NBT("terraform:instance_storage");
+    public static final Tag<BinaryTag> TAG = Tag.NBT("terraform:instance_storage_data");
 
     private final TagHandler handler = TagHandler.newHandler();
 

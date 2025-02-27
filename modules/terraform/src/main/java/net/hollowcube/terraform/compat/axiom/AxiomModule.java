@@ -2,12 +2,8 @@ package net.hollowcube.terraform.compat.axiom;
 
 import net.hollowcube.compat.axiom.data.annotations.actions.AnnotationAction;
 import net.hollowcube.compat.axiom.data.buffers.AxiomBlockBuffer;
-import net.hollowcube.compat.axiom.events.AxiomAnnotationActionEvent;
-import net.hollowcube.compat.axiom.events.AxiomApplyBufferEvent;
-import net.hollowcube.compat.axiom.events.AxiomTryModifyEntityEvent;
-import net.hollowcube.compat.axiom.events.AxiomTrySpawnEntityEvent;
+import net.hollowcube.compat.axiom.events.*;
 import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundAnnotationUpdatePacket;
-import net.hollowcube.mapmaker.event.PlayerSpawnInInstanceEvent;
 import net.hollowcube.terraform.TerraformModule;
 import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomUpdateMarkerDataEvent;
 import net.hollowcube.terraform.compat.axiom.util.AxiomAnnotationStorage;
@@ -28,7 +24,6 @@ import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.utils.UUIDUtils;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +40,7 @@ public class AxiomModule implements TerraformModule {
             .addListener(AxiomTryModifyEntityEvent.class, this::handleEntityModification)
             .addListener(AxiomApplyBufferEvent.class, this::handleBufferApplication)
             .addListener(AxiomAnnotationActionEvent.class, this::handleAnnotationActions)
-            .addListener(PlayerSpawnEvent.class, this::handleOnPlayerSpawn);
+            .addListener(AxiomEnabledEvent.class, this::handleAxiomEnabled);
 
     @Override
     public @NotNull Set<EventNode<InstanceEvent>> eventNodes() {
@@ -169,7 +164,9 @@ public class AxiomModule implements TerraformModule {
         event.setHandled(true);
     }
 
-    private void handleOnPlayerSpawn(@NotNull PlayerSpawnEvent event) {
+    private void handleAxiomEnabled(@NotNull AxiomEnabledEvent event) {
+        if (!event.isEnabled()) return;
+
         var storage = AxiomAnnotationStorage.get(event.getPlayer());
         if (storage != null) storage.sendAllTo(event.getPlayer());
     }
