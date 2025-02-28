@@ -731,7 +731,8 @@ public class EditMap extends View {
                 Component.text(map.id()),
                 Component.text("None/Not Published"),
                 Component.text(map.name()),
-                authorName
+                authorName,
+                Component.text("in the future")
         )));
     }
 

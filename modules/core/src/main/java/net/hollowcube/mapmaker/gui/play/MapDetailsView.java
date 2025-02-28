@@ -10,6 +10,7 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.lang.TimeComponent;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.play.details.DetailsTimesTabView;
 import net.hollowcube.mapmaker.map.*;
@@ -400,7 +401,8 @@ public class MapDetailsView extends View {
                 Component.text(map.id()),
                 Component.text(Objects.requireNonNullElse(map.publishedIdString(), "None/Not Published")),
                 Component.text(map.name()),
-                authorName
+                authorName,
+                TimeComponent.of(map.publishedAt())
         )));
     }
 
