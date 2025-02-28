@@ -20,7 +20,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class MsgCommand extends CommandDsl {
     private final Argument<String> targetArg;
-    private final Argument<String> messageArg = Argument.GreedyString("message")
+    private final Argument<String> messageArg = CoreArgument.Message("message")
             .description("The message content to send");
 
     private final SessionManager sessionManager;

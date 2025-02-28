@@ -118,6 +118,10 @@ public final class CoreArgument {
         return new MapArgument(id, mapService);
     }
 
+    public static MessageArgument Message(@NotNull String id) {
+        return new MessageArgument(id);
+    }
+
     private CoreArgument() {
     }
 }
