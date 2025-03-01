@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.gson.Gson;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.chat.components.MessageComponents;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
@@ -24,6 +25,7 @@ import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.listener.manager.PacketPlayListenerConsumer;
@@ -131,13 +133,15 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             return;
         }
 
-        var playerId = PlayerDataV2.fromPlayer(player).id();
-        if (sessionManager.isHidden(playerId)) {
+        var playerData = PlayerDataV2.fromPlayer(player);
+        if (sessionManager.isHidden(playerData.id())) {
             player.sendMessage(Component.text("you cannot chat while vanished"));
             return;
         }
 
         long messageSeed = ThreadLocalRandom.current().nextLong();
+        String channel = playerData.getSetting(PlayerSettings.CHAT_CHANNEL);
+
         FutureUtil.submitVirtual(() -> {
             String currentMapId = null;
             if (message.contains("[map]")) {
@@ -149,9 +153,10 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                 currentMapId = currentMap.id();
             }
 
-            var messageData = new ClientChatMessageData(ClientChatMessageData.Type.CHAT_UNSIGNED,
-                    playerId, message, ClientChatMessageData.CHANNEL_GLOBAL, currentMapId, messageSeed);
-            trySendChatMessage(player, messageData);
+            trySendChatMessage(
+                    player,
+                    new ClientChatMessageData(ClientChatMessageData.Type.CHAT_UNSIGNED, playerData.id(), message, channel, currentMapId, messageSeed)
+            );
         });
     }
 
@@ -190,28 +195,32 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
     protected void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull ChatMessageData message) {
         switch (message.type()) {
             case CHAT_UNSIGNED -> FutureUtil.submitVirtual(() -> {
-                if (ClientChatMessageData.CHANNEL_GLOBAL.equals(message.channel()))
-                    handleGlobalChatUnsigned(message);
-                else handleDirectMessage(message);
+                switch (message.channel()) {
+                    case ClientChatMessageData.CHANNEL_GLOBAL -> handleGlobalChat(message);
+                    case ClientChatMessageData.CHANNEL_LOCAL -> handleLocalChat(message);
+                    default -> handleDirectMessage(message);
+                }
             });
             case CHAT_SYSTEM -> handleChatSystem(message);
         }
     }
 
     @Blocking
-    protected void handleGlobalChatUnsigned(@NotNull ChatMessageData message) {
+    protected void handleGlobalChat(@NotNull ChatMessageData message) {
         logger.info("Received chat message: {}", message);
 
         try {
             var senderDisplyName = playerService.getPlayerDisplayName2(message.sender());
-            var sender = senderDisplyName.build(DisplayName.Context.DEFAULT);
-            var key = senderDisplyName.parts().size() > 1 ? "chat.channel.global.white" : "chat.channel.global.default";
+            var senderName = senderDisplyName.build(DisplayName.Context.DEFAULT);
+            var isColored = senderDisplyName.parts().size() > 1;
 
             for (var recipient : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                 var data = this.components.createGlobalMessage(recipient, message);
                 if (data.ping()) recipient.playSound(TAG_DING);
 
-                recipient.sendMessage(Component.translatable(key, sender, data.text()));
+                var text = data.text().color(isColored ? NamedTextColor.WHITE : NamedTextColor.GRAY);
+
+                recipient.sendMessage(Component.translatable("chat.channel.global", senderName, text));
             }
 
             // If there is an extra message, handle it
@@ -223,6 +232,39 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
         }
     }
 
+    @Blocking
+    protected void handleLocalChat(@NotNull ChatMessageData message) {
+        logger.info("Received chat message: {}", message);
+
+        try {
+            var sender = CONNECTION_MANAGER.getOnlinePlayerByUuid(UUID.fromString(message.sender()));
+            if (sender == null) return; // Not relevant to this server
+
+            var senderDisplyName = playerService.getPlayerDisplayName2(message.sender());
+            var senderName = senderDisplyName.build(DisplayName.Context.DEFAULT);
+            var isColored = senderDisplyName.parts().size() > 1;
+
+            for (var recipient : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+                if (!recipient.getInstance().equals(sender.getInstance())) continue;
+
+                var data = this.components.createGlobalMessage(recipient, message);
+                if (data.ping()) recipient.playSound(TAG_DING);
+
+                var text = data.text().color(isColored ? NamedTextColor.WHITE : NamedTextColor.GRAY);
+
+                recipient.sendMessage(Component.translatable("chat.channel.local", senderName, text));
+            }
+
+            // If there is an extra message, handle it
+            if (message.extra() != null && message.extra().type() == ClientChatMessageData.Type.CHAT_SYSTEM) {
+                handleChatSystem(message.extra());
+            }
+        } catch (Exception e) {
+            ExceptionReporter.reportException(e);
+        }
+    }
+
+    @Blocking
     private void handleDirectMessage(@NotNull ChatMessageData message) {
         try {
             var sender = CONNECTION_MANAGER.getOnlinePlayerByUuid(UUID.fromString(message.sender()));

@@ -1,0 +1,33 @@
+package net.hollowcube.mapmaker.chat;
+
+import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.mapmaker.PlayerSettings;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.temp.ClientChatMessageData;
+import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
+import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+public class ChatChannelDisplay implements ActionBar.Provider  {
+
+    private static final int NORMAL_OFFSET = -96;
+    private static final int OFF_HAND_OFFSET = -125;
+
+    private static final BadSprite GLOBAL = BadSprite.require("hud/chat/global_channel");
+    private static final BadSprite LOCAL = BadSprite.require("hud/chat/local_channel");
+
+    @Override
+    public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
+        var channel = PlayerDataV2.fromPlayer(player).getSetting(PlayerSettings.CHAT_CHANNEL);
+        var sprite = channel.equals(ClientChatMessageData.CHANNEL_GLOBAL) ? GLOBAL : LOCAL;
+        var offset = player.getItemInOffHand().isAir() ? NORMAL_OFFSET : OFF_HAND_OFFSET;
+
+        builder.pos(offset);
+        builder.offset(-sprite.width());
+        builder.pushColor(FontUtil.NO_SHADOW);
+        builder.append(Character.toString(sprite.fontChar()));
+        builder.popColor();
+    }
+}

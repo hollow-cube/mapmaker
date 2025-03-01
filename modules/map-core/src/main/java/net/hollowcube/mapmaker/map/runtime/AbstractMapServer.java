@@ -26,9 +26,13 @@ import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
+import net.hollowcube.mapmaker.chat.ChatChannelDisplay;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.chat.announcements.ChatAnnouncer;
 import net.hollowcube.mapmaker.command.*;
+import net.hollowcube.mapmaker.command.chat.ChatCommand;
+import net.hollowcube.mapmaker.command.chat.MsgCommand;
+import net.hollowcube.mapmaker.command.chat.ReplyCommand;
 import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.command.map.MapCommand;
 import net.hollowcube.mapmaker.command.punish.*;
@@ -425,6 +429,7 @@ public abstract class AbstractMapServer implements MapServer {
             commandManager.register(new ListCommand(sessionManager(), playerService()));
             commandManager.register(new MsgCommand(sessionManager(), mapService(), chatMessageListener));
             commandManager.register(new ReplyCommand(sessionManager(), mapService(), chatMessageListener));
+            commandManager.register(new ChatCommand(playerService()));
         }
 
         if (fullInstance) {
@@ -628,6 +633,7 @@ public abstract class AbstractMapServer implements MapServer {
         PlayerBackpack.fromPlayer(player).refresh();
 
         var actionBar = ActionBar.forPlayer(player);
+        actionBar.addProvider(new ChatChannelDisplay());
         actionBar.addProvider(MiscFunctionality::buildCurrencyDisplay);
         actionBar.addProvider(new ExpBarRenderer());
 

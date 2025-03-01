@@ -2,10 +2,15 @@ package net.hollowcube.mapmaker;
 
 import net.hollowcube.mapmaker.map.VisibilityRule;
 import net.hollowcube.mapmaker.player.PlayerSetting;
+import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 
 public final class PlayerSettings {
     // Note that unlike it claims, this actually is not all declarations of player settings.
     // It is probably worth moving them all here in the future for consistency.
+
+    // General Settings
+
+    public static final PlayerSetting<String> CHAT_CHANNEL = PlayerSetting.String("chat_channel", ClientChatMessageData.CHANNEL_GLOBAL);
 
 
     // Playing (parkour) maps
