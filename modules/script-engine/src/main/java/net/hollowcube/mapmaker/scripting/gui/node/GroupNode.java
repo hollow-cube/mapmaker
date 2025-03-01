@@ -135,4 +135,8 @@ public class GroupNode extends Node {
 
         this.children.add(child);
     }
+
+    public void removeChild(@NotNull Node child) {
+        this.children.remove(child);
+    }
 }

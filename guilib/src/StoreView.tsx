@@ -1,36 +1,7 @@
 import {useState} from "@mapmaker/gui";
+import CubitsTab from "./CubitsTab";
 
 export const inventoryType = "chest_6_row";
-
-function CubitsTab() {
-    return (
-        <group layout='column'>
-            <sprite src='store/cubits' position='absolute' y={1}/>
-
-            <group layout='row'>
-
-                <button onLeftClick={() => console.log('cubits1')}>
-                    <tooltip translationKey="gui.store.cubits.1" slotWidth={3} slotHeight={2}/>
-                </button>
-                <button onLeftClick={() => console.log('cubits2')}>
-                    <tooltip translationKey="gui.store.cubits.2" slotWidth={3} slotHeight={2}/>
-                </button>
-                <button onLeftClick={() => console.log('cubits3')}>
-                    <tooltip translationKey="gui.store.cubits.3" slotWidth={3} slotHeight={2}/>
-                </button>
-            </group>
-
-            <group layout='row'>
-                <tooltip translationKey="gui.store.cubits.4" slotWidth={4} slotHeight={3}/>
-
-                {/* TODO: spacer element? */}
-                <text slotWidth={1}/>
-
-                <tooltip translationKey="gui.store.cubits.5" slotWidth={4} slotHeight={3}/>
-            </group>
-        </group>
-    )
-}
 
 export default function StoreView() {
     const [i, setI] = useState(0);
@@ -71,7 +42,7 @@ export default function StoreView() {
             </group>
 
             {/* TODO: the below group could be in its own BuyCubits component */}
-            <CubitsTab/>
+            {i === 1 && <CubitsTab/>}
 
             {/* Tab Switcher */}
 

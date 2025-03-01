@@ -114,8 +114,13 @@ public class Module {
         final Object extraModule = this.extraModules.get(module);
         if (extraModule != null) return Value.asValue(extraModule);
 
+        if (module.startsWith(".")) {
+            // TODO: appending .js might have to be part of engine.load resolution if it should support json also. not sure
+            return engine.load(uri.resolve(module + ".js"), this.globals, this.extraModules).exports();
+        }
+
         final URI loadUri = URI.create("internal:///third_party/react/" + args[0].asString() + ".js");
-        return engine.load(loadUri).exports();
+        return engine.load(loadUri, this.globals, this.extraModules).exports();
     }
 
     private static @NotNull String extractFileName(@NotNull URI uri) {

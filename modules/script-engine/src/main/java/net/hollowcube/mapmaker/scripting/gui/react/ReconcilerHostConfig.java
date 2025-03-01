@@ -217,8 +217,11 @@ public class ReconcilerHostConfig {
     }
 
     @HostAccess.Export
-    public void removeChild(@NotNull Value parent, @NotNull Value child) {
-        System.out.println("removeChild");
+    public void removeChild(@NotNull Node parent, @NotNull Node child, @NotNull Value unknown1, @NotNull Value unknown2, @NotNull Value unknown3) {
+        if (!(parent instanceof GroupNode group)) {
+            throw new IllegalArgumentException(parent.type() + " may not have children");
+        }
+        group.removeChild(child);
     }
 
     @HostAccess.Export
@@ -232,7 +235,7 @@ public class ReconcilerHostConfig {
     }
 
     @HostAccess.Export
-    public void commitTextUpdate(@NotNull TextNode.Raw textInstance, @NotNull String oldText, @NotNull String newText, @NotNull Value unused1, @NotNull Value unused2) {
+    public void commitTextUpdate(@NotNull TextNode.Raw textInstance, @NotNull String oldText, @NotNull String newText, @NotNull Value unknown1, @NotNull Value unknown2) {
         textInstance.setContent(newText);
         System.out.println("commitTextUpdate");
     }

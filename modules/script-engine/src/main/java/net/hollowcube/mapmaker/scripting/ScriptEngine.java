@@ -70,28 +70,32 @@ public class ScriptEngine {
     }
 
     public @NotNull Module load(@NotNull URI script, @NotNull Map<String, Object> globals, @NotNull Map<String, Object> extraModules) {
-        return this.moduleCache.computeIfAbsent(script, ignored -> {
-            final String code = switch (script.getScheme()) {
-                case "internal" -> {
-                    try (var is = getClass().getResourceAsStream(script.getPath())) {
-                        if (is == null) throw new IllegalArgumentException("resource not found: " + script);
-                        yield new String(is.readAllBytes(), StandardCharsets.UTF_8);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+        final Module existing = this.moduleCache.get(script);
+        if (existing != null) return existing;
+
+        final String code = switch (script.getScheme()) {
+            case "internal" -> {
+                try (var is = getClass().getResourceAsStream(script.getPath())) {
+                    if (is == null) throw new IllegalArgumentException("resource not found: " + script);
+                    yield new String(is.readAllBytes(), StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-                case "guilib" -> {
-                    try {
-                        yield Files.readString(Path.of("./guilib/dist/" + script.getPath()));
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+            }
+            case "guilib" -> {
+                try {
+                    yield Files.readString(Path.of("./guilib/dist/" + script.getPath()));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-                case null, default ->
-                        throw new UnsupportedOperationException("unsupported uri scheme: " + script.getScheme());
-            };
-            return new Module(this, script, code, globals, extraModules);
-        });
+            }
+            case null, default ->
+                    throw new UnsupportedOperationException("unsupported uri scheme: " + script.getScheme());
+        };
+        // TODO: we do not handle circular references here it will be a stack overflow
+        final Module loaded = new Module(this, script, code, globals, extraModules);
+        this.moduleCache.put(script, loaded);
+        return loaded;
     }
 
     public @NotNull Module loadText(@NotNull String name, @NotNull String code) {

@@ -54,6 +54,7 @@ public class InventoryHost {
     }
 
     public void queueRedraw() {
+        if (this.handle == null) return;
         final Task oldTask = this.redrawTask.getAndSet(player.scheduler().scheduleEndOfTick(() ->
                 this.drawCurrentElement(handle.getInventoryType())));
         if (oldTask != null) oldTask.cancel();
