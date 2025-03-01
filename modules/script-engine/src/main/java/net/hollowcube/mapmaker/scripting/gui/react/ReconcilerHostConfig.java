@@ -2,13 +2,16 @@ package net.hollowcube.mapmaker.scripting.gui.react;
 
 import net.hollowcube.mapmaker.scripting.gui.InventoryHost;
 import net.hollowcube.mapmaker.scripting.gui.node.*;
+import net.hollowcube.mapmaker.scripting.util.Proxies;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.proxy.ProxyObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -22,7 +25,7 @@ public class ReconcilerHostConfig {
     public final boolean isPrimaryRenderer = true;
 
     @HostAccess.Export
-    public @NotNull Node createInstance(@NotNull String type, @NotNull Value props, @NotNull Value rootContainer, @NotNull InventoryHost hostContext, @NotNull Value ignoredInternalHandle) {
+    public @NotNull Node createInstance(@NotNull String type, @NotNull Value props, @NotNull Value rootContainer, @NotNull Value hostContext, @NotNull Value ignoredInternalHandle) {
         try {
             final Node node = switch (type) {
                 case "group" -> new GroupNode();
@@ -41,7 +44,7 @@ public class ReconcilerHostConfig {
     }
 
     @HostAccess.Export
-    public @NotNull Node createTextInstance(@UnknownNullability String text, @NotNull Value rootContainer, @NotNull InventoryHost hostContext, @NotNull Value internalHandle) {
+    public @NotNull Node createTextInstance(@UnknownNullability String text, @NotNull Value rootContainer, @NotNull Value hostContext, @NotNull Value internalHandle) {
         return new TextNode.Raw(Objects.requireNonNull(text, ""));
     }
 
@@ -72,8 +75,8 @@ public class ReconcilerHostConfig {
     }
 
     @HostAccess.Export
-    public @NotNull InventoryHost getRootHostContext(@NotNull Value rootContainer) {
-        return new InventoryHost();
+    public @NotNull ProxyObject getRootHostContext(@NotNull Value rootContainer) {
+        return Proxies.freezeObject(Proxies.proxyObject(Map.of())); // TODO
     }
 
     @HostAccess.Export
@@ -94,8 +97,10 @@ public class ReconcilerHostConfig {
     }
 
     @HostAccess.Export
-    public void resetAfterCommit(@NotNull Value containerInfo) {
+    public void resetAfterCommit(@NotNull InventoryHost container) {
+        // We have done an update
         System.out.println("resetAfterCommit");
+        container.queueRedraw();
     }
 
     @HostAccess.Export
@@ -158,8 +163,8 @@ public class ReconcilerHostConfig {
     }
 
     @HostAccess.Export
-    public void detachDeletedInstance() {
-        System.out.println("detachDeletedInstance");
+    public void detachDeletedInstance(@NotNull Node instance) {
+        // noop
     }
 
 
@@ -227,7 +232,8 @@ public class ReconcilerHostConfig {
     }
 
     @HostAccess.Export
-    public void commitTextUpdate() {
+    public void commitTextUpdate(@NotNull TextNode.Raw textInstance, @NotNull String oldText, @NotNull String newText, @NotNull Value unused1, @NotNull Value unused2) {
+        textInstance.setContent(newText);
         System.out.println("commitTextUpdate");
     }
 
@@ -237,7 +243,11 @@ public class ReconcilerHostConfig {
     }
 
     @HostAccess.Export
-    public void commitUpdate() {
+    public void commitUpdate(@NotNull Node instance, @NotNull String type, @NotNull Value prevProps, @NotNull Value nextProps, @NotNull Value internalHandle) {
+        if (!instance.type().equals(type))
+            throw new UnsupportedOperationException("instance type changed, " + instance.type() + " != " + type);
+
+        instance.updateFromProps(nextProps);
         System.out.println("commitUpdate");
     }
 

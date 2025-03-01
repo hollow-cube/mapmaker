@@ -10,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,10 +66,10 @@ public class ScriptEngine {
     }
 
     public @NotNull Module load(@NotNull URI script) {
-        return load(script, Map.of());
+        return load(script, Map.of(), Map.of());
     }
 
-    public @NotNull Module load(@NotNull URI script, @NotNull Map<String, Object> globals) {
+    public @NotNull Module load(@NotNull URI script, @NotNull Map<String, Object> globals, @NotNull Map<String, Object> extraModules) {
         return this.moduleCache.computeIfAbsent(script, ignored -> {
             final String code = switch (script.getScheme()) {
                 case "internal" -> {
@@ -78,16 +80,23 @@ public class ScriptEngine {
                         throw new RuntimeException(e);
                     }
                 }
+                case "guilib" -> {
+                    try {
+                        yield Files.readString(Path.of("./guilib/dist/" + script.getPath()));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
                 case null, default ->
                         throw new UnsupportedOperationException("unsupported uri scheme: " + script.getScheme());
             };
-            return new Module(this, script, code, globals);
+            return new Module(this, script, code, globals, extraModules);
         });
     }
 
     public @NotNull Module loadText(@NotNull String name, @NotNull String code) {
         var uri = URI.create("file:///tmp/" + name);
-        return this.moduleCache.computeIfAbsent(uri, ignored -> new Module(this, uri, code, Map.of()));
+        return this.moduleCache.computeIfAbsent(uri, ignored -> new Module(this, uri, code, Map.of(), Map.of()));
     }
 
     private void setupGlobals() {

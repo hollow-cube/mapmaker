@@ -13,12 +13,12 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
+import net.minestom.server.event.player.PlayerAnvilInputEvent;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.inventory.click.Click;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.network.packet.client.play.ClientNameItemPacket;
 import net.minestom.server.network.packet.server.play.WindowItemsPacket;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.Task;
@@ -234,13 +234,13 @@ public class InventoryViewHost {
     }
 
     static {
-        MinecraftServer.getPacketListenerManager().setPlayListener(ClientNameItemPacket.class, InventoryViewHost::handleAnvilInput);
+        MinecraftServer.getGlobalEventHandler().addListener(PlayerAnvilInputEvent.class, InventoryViewHost::handleAnvilInput);
     }
 
-    private static void handleAnvilInput(@NotNull ClientNameItemPacket packet, @NotNull Player player) {
-        if (!(player.getOpenInventory() instanceof InventoryWrapper inventory)) return;
+    private static void handleAnvilInput(@NotNull PlayerAnvilInputEvent event) {
+        if (!(event.getInventory() instanceof InventoryWrapper inventory)) return;
 
-        inventory.parent().performSignal(Element.SIG_ANVIL_INPUT, packet.itemName());
+        inventory.parent().performSignal(Element.SIG_ANVIL_INPUT, event.getInput());
     }
 
     public @NotNull Player player() {

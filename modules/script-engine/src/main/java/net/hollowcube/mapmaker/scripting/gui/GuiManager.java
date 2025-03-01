@@ -2,9 +2,11 @@ package net.hollowcube.mapmaker.scripting.gui;
 
 import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.scripting.cjs.Module;
+import net.hollowcube.mapmaker.scripting.gui.react.AtMapmakerGuiModule;
 import net.hollowcube.mapmaker.scripting.gui.react.JSX;
 import net.hollowcube.mapmaker.scripting.gui.react.ReconcilerHostConfig;
 import net.minestom.server.entity.Player;
+import net.minestom.server.inventory.InventoryType;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +20,7 @@ public class GuiManager {
     private final Module react;
     private final Value reactReconcilerInst;
     private final Map<String, Object> globals;
+    private final Map<String, Object> extraModules;
 
     public GuiManager(@NotNull ScriptEngine engine) {
         this.engine = engine;
@@ -26,6 +29,7 @@ public class GuiManager {
                 .exports().execute(new ReconcilerHostConfig());
 
         this.globals = Map.of("JSX", new JSX(this.react));
+        this.extraModules = Map.of("@mapmaker/gui", new AtMapmakerGuiModule(this.react));
     }
 
     /**
@@ -35,7 +39,7 @@ public class GuiManager {
      * @param modulePath The module to load
      */
     public void openGui(@NotNull Player player, @NotNull URI modulePath) {
-        final Value componentModule = this.engine.load(modulePath, this.globals).exports();
+        final Value componentModule = this.engine.load(modulePath, this.globals, this.extraModules).exports();
         if (!componentModule.hasMember("default"))
             throw new IllegalArgumentException("Module must have a default export");
         final Value component = componentModule.getMember("default");
@@ -73,6 +77,9 @@ public class GuiManager {
                 /* container */ Objects.requireNonNull(host.reconcilerRoot),
                 /* parentComponent */ null,
                 /* callback */ null);
+
+        // 'Render' the underlying Minestom inventory (items & title)
+        host.drawCurrentElement(InventoryType.CHEST_6_ROW); // TODO read `inventoryType` from module.
     }
 
 }

@@ -20,14 +20,16 @@ public class Module {
     private final URI uri;
     private final String name;
     private final Map<String, Object> globals = new LinkedHashMap<>();
+    private final Map<String, Object> extraModules;
 
     private final Value exports;
 
-    public Module(@NotNull ScriptEngine engine, @NotNull URI uri, @NotNull String code, @NotNull Map<String, Object> globals) {
+    public Module(@NotNull ScriptEngine engine, @NotNull URI uri, @NotNull String code, @NotNull Map<String, Object> globals, @NotNull Map<String, Object> extraModules) {
         this.engine = engine;
         this.uri = uri;
         this.name = extractFileName(uri);
         this.globals.putAll(globals);
+        this.extraModules = Map.copyOf(extraModules);
 
         this.exports = loadJsModule(uri, code);
     }
@@ -102,6 +104,15 @@ public class Module {
     private @NotNull Value moduleRequire(@NotNull Value... args) {
         // We have an implementation of require from within this module because the target path needs to be resolved from here.
         // For now we just delegate immediately to the engine loading internal files.
+
+        if (args.length != 1)
+            throw new IllegalArgumentException("require() must be called with exactly one argument");
+        if (!args[0].isString())
+            throw new IllegalArgumentException("require() argument must be a string");
+        final String module = args[0].asString();
+
+        final Object extraModule = this.extraModules.get(module);
+        if (extraModule != null) return Value.asValue(extraModule);
 
         final URI loadUri = URI.create("internal:///third_party/react/" + args[0].asString() + ".js");
         return engine.load(loadUri).exports();

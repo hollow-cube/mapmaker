@@ -1,3 +1,5 @@
+import {useState} from "@mapmaker/gui";
+
 export const inventoryType = "chest_6_row";
 
 function CubitsTab() {
@@ -31,14 +33,19 @@ function CubitsTab() {
 }
 
 export default function StoreView() {
+    const [i, setI] = useState(0);
+
     return (
         <group layout='column'>
             <sprite src='store/container' x={-10} y={-31} position='absolute'/>
-            <text x='center' y={-23} position='absolute'>Store</text>
+            <text x='center' y={-23} position='absolute'>Store {i}</text>
 
             {/* Title */}
             <group layout='row'>
-                <button onLeftClick={() => console.log('back')}>
+                <button onLeftClick={() => {
+                    console.log('---- RIGHT BEFORE SETTING STATE ----');
+                    setI(current => current + 1);
+                }}>
                     <tooltip translationKey="generic.back">
                         <sprite src='generic2/btn/danger/1_1' position='absolute'/>
                         {/*<sprite src='generic/back' padding={1}/>*/}
@@ -67,7 +74,7 @@ export default function StoreView() {
             <CubitsTab/>
 
             {/* Tab Switcher */}
-            
+
         </group>
     )
 }

@@ -8,6 +8,7 @@ java_library(
     resources = glob(include = [
         "src/main/resources/**/*",
     ]),
+    data = ["//guilib:dist"],
     visibility = ["//visibility:public"],
     deps = [
         "//modules/common",

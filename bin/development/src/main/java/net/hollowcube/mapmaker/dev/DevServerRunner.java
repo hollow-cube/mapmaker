@@ -251,19 +251,7 @@ public class DevServerRunner extends AbstractMapServer {
         var guiManager = new ScriptEngine().guiManager();
         dbg.createPermissionlessSubcommand("gui", (player, ignored) -> {
             guiManager.openGui(player, URI.create("guilib:///StoreView.js"));
-
-            var inv = new Inventory(InventoryType.CHEST_6_ROW, DevServer.title);
-            for (int i = 0; i < inv.getInnerSize(); i++) {
-                inv.setItemStack(i, DevServer.itemList[i]);
-            }
-            player.openInventory(inv);
-            inv.addInventoryCondition((player1, slot, clickType, inventoryConditionResult) -> {
-                inventoryConditionResult.setCancel(true);
-
-                player1.sendMessage("Clicked slot " + slot + " with click type " + clickType);
-                DevServer.host.root.handleClick(clickType, slot % 9, slot / 9);
-
-            });
+            
         }, "");
 
         return dbg;
