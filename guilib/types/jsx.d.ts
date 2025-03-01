@@ -11,9 +11,14 @@ declare namespace JSX {
         sprite: Props
 
         text: Props;
+
         button: Props;
+
         tooltip: Props;
+
         item: Props;
+
+        gap: Props;
     }
 
     export const Fragment: any;

@@ -19,8 +19,7 @@ export default function CubitsTab() {
             <group layout='row'>
                 <tooltip translationKey="gui.store.cubits.4" slotWidth={4} slotHeight={3}/>
 
-                {/* TODO: spacer element? */}
-                <text slotWidth={1}/>
+                <gap slotWidth={1}/>
 
                 <tooltip translationKey="gui.store.cubits.5" slotWidth={4} slotHeight={3}/>
             </group>

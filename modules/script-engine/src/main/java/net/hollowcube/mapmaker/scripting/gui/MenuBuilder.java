@@ -15,17 +15,18 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MenuBuilder {
-    private int absWidth, absHeight;
+    private final int absWidth, absHeight, containerSlotHeight;
     private int slotX, slotY, slotWidth, slotHeight;
     private final FontUIBuilder title = new FontUIBuilder();
     private final ItemStack[] items;
 
     private final List<Bounds> slotBounds = new ArrayList<>();
 
-    public MenuBuilder(int slotWidth, int slotHeight) {
+    public MenuBuilder(int slotWidth, int slotHeight, int containerSlotHeight) {
         this.slotX = this.slotY = 0;
         this.slotWidth = this.absWidth = slotWidth;
         this.slotHeight = this.absHeight = slotHeight;
+        this.containerSlotHeight = containerSlotHeight;
         this.items = new ItemStack[slotWidth * slotHeight];
         Arrays.fill(this.items, ItemStack.builder(Material.STICK)
                 .set(ItemComponent.ITEM_MODEL, "minecraft:air")
@@ -109,8 +110,7 @@ public class MenuBuilder {
     }
 
     public void draw(int x, int y, @NotNull BadSprite sprite) {
-        int startX = -1 + (this.slotX * 18) + x; // -1 accounts for the gui title offset
-        int startY = 4 + (this.slotY * 18) + y; // +4 accounts for the gui title offset
+        int startX = computeAbsoluteX(x), startY = computeAbsoluteY(y);
 
         title.pushColor(FontUtil.computeVerticalOffset(startY));
         title.pos(startX);
@@ -119,8 +119,7 @@ public class MenuBuilder {
     }
 
     public void drawText(int x, int y, @NotNull String text) {
-        int startX = -1 + (this.slotX * 18) + x; // -1 accounts for the gui title offset
-        int startY = 4 + (this.slotY * 18) + y; // +4 accounts for the gui title offset
+        int startX = computeAbsoluteX(x), startY = computeAbsoluteY(y);
 
         // Account for font height. Not sure this is the solution i want for that.
         startY += FontUtil.DEFAULT_HEIGHT - 1;
@@ -137,5 +136,20 @@ public class MenuBuilder {
 
     public ItemStack[] getItems() {
         return items;
+    }
+
+    private int computeAbsoluteX(int offset) {
+        // -1 accounts for the gui title offset
+        return -1 + (this.slotX * 18) + offset;
+    }
+
+    private int computeAbsoluteY(int offset) {
+        // +4 accounts for the gui title offset
+        int y = 4 + (this.slotY * 18) + offset;
+        // If we are past the game container slots into player inv we have to account for that gap:
+        if (this.slotY >= this.containerSlotHeight) y += 14;
+        // If we are past the player inv we need to account for the player inv -> hotbar gap:
+        if (this.slotY >= this.containerSlotHeight + 3) y += 4;
+        return y;
     }
 }

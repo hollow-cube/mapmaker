@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "build2": "tsx builder/main.ts",
+    "build2:watch": "tsx builder/main.ts -w",
     "build": "tsc",
     "watch": "tsc -w"
   },
@@ -11,6 +13,10 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/node": "^22.13.8",
+    "chokidar": "^4.0.3",
+    "react-refresh-typescript": "^2.0.10",
+    "tsx": "^4.19.3",
     "typescript": "^5.7.3"
   }
 }

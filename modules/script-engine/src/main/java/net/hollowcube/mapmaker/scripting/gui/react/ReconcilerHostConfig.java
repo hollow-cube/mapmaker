@@ -34,6 +34,7 @@ public class ReconcilerHostConfig {
                 case "tooltip" -> new TooltipNode();
                 case "sprite" -> new SpriteNode();
                 case "item" -> new ItemNode();
+                case "gap" -> new GapNode();
                 default -> throw new IllegalArgumentException("Unknown element type: " + type);
             };
             node.updateFromProps(props);
@@ -45,12 +46,20 @@ public class ReconcilerHostConfig {
 
     @HostAccess.Export
     public @NotNull Node createTextInstance(@UnknownNullability String text, @NotNull Value rootContainer, @NotNull Value hostContext, @NotNull Value internalHandle) {
-        return new TextNode.Raw(Objects.requireNonNull(text, ""));
+        try {
+            return new TextNode.Raw(Objects.requireNonNull(text, ""));
+        } catch (Exception e) {
+            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
     }
 
     @HostAccess.Export
     public void appendInitialChild(@NotNull Node parent, @NotNull Node child) {
-        appendChild(parent, child);
+        try {
+            appendChild(parent, child);
+        } catch (Exception e) {
+            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
     }
 
     @HostAccess.Export
@@ -76,6 +85,7 @@ public class ReconcilerHostConfig {
 
     @HostAccess.Export
     public @NotNull ProxyObject getRootHostContext(@NotNull Value rootContainer) {
+
         return Proxies.freezeObject(Proxies.proxyObject(Map.of())); // TODO
     }
 
@@ -98,9 +108,13 @@ public class ReconcilerHostConfig {
 
     @HostAccess.Export
     public void resetAfterCommit(@NotNull InventoryHost container) {
-        // We have done an update
-        System.out.println("resetAfterCommit");
-        container.queueRedraw();
+        try {
+            // We have done an update
+            System.out.println("resetAfterCommit");
+            container.queueRedraw();
+        } catch (Exception e) {
+            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
     }
 
     @HostAccess.Export
@@ -195,20 +209,38 @@ public class ReconcilerHostConfig {
 
     @HostAccess.Export
     public void appendChild(@NotNull Node parent, @NotNull Node child) {
-        if (!(parent instanceof GroupNode group)) {
-            throw new IllegalArgumentException(parent.type() + " may not have children");
+        try {
+            if (!(parent instanceof GroupNode group)) {
+                throw new IllegalArgumentException(parent.type() + " may not have children");
+            }
+            group.appendChild(child);
+
+        } catch (Exception e) {
+            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
         }
-        group.appendChild(child);
     }
 
     @HostAccess.Export
     public void appendChildToContainer(@NotNull InventoryHost parent, @NotNull Node child) {
-        parent.addChild(child);
+        try {
+            parent.addChild(child);
+
+        } catch (Exception e) {
+            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
     }
 
     @HostAccess.Export
-    public void insertBefore() {
-        System.out.println("insertBefore");
+    public void insertBefore(@NotNull Node parent, @NotNull Node child, @NotNull Node beforeChild) {
+        try {
+            if (!(parent instanceof GroupNode group)) {
+                throw new IllegalArgumentException(parent.type() + " may not have children");
+            }
+            group.insertBefore(child, beforeChild);
+
+        } catch (Exception e) {
+            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
     }
 
     @HostAccess.Export
@@ -218,15 +250,19 @@ public class ReconcilerHostConfig {
 
     @HostAccess.Export
     public void removeChild(@NotNull Node parent, @NotNull Node child, @NotNull Value unknown1, @NotNull Value unknown2, @NotNull Value unknown3) {
-        if (!(parent instanceof GroupNode group)) {
-            throw new IllegalArgumentException(parent.type() + " may not have children");
+        try {
+            if (!(parent instanceof GroupNode group)) {
+                throw new IllegalArgumentException(parent.type() + " may not have children");
+            }
+            group.removeChild(child);
+        } catch (Exception e) {
+            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
         }
-        group.removeChild(child);
     }
 
     @HostAccess.Export
-    public void removeChildFromContainer(@NotNull Value container, @NotNull Value child, @NotNull Value unknown1, @NotNull Value unknown2, @NotNull Value unknown3) {
-        System.out.println("removeChildFromContainer");
+    public void removeChildFromContainer(@NotNull InventoryHost container, @NotNull Node child, @NotNull Value unknown1, @NotNull Value unknown2, @NotNull Value unknown3) {
+        container.removeChild(child);
     }
 
     @HostAccess.Export
@@ -236,8 +272,13 @@ public class ReconcilerHostConfig {
 
     @HostAccess.Export
     public void commitTextUpdate(@NotNull TextNode.Raw textInstance, @NotNull String oldText, @NotNull String newText, @NotNull Value unknown1, @NotNull Value unknown2) {
-        textInstance.setContent(newText);
-        System.out.println("commitTextUpdate");
+        try {
+            textInstance.setContent(newText);
+            System.out.println("commitTextUpdate");
+
+        } catch (Exception e) {
+            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
     }
 
     @HostAccess.Export
@@ -247,11 +288,16 @@ public class ReconcilerHostConfig {
 
     @HostAccess.Export
     public void commitUpdate(@NotNull Node instance, @NotNull String type, @NotNull Value prevProps, @NotNull Value nextProps, @NotNull Value internalHandle) {
-        if (!instance.type().equals(type))
-            throw new UnsupportedOperationException("instance type changed, " + instance.type() + " != " + type);
+        try {
+            if (!instance.type().equals(type))
+                throw new UnsupportedOperationException("instance type changed, " + instance.type() + " != " + type);
 
-        instance.updateFromProps(nextProps);
-        System.out.println("commitUpdate");
+            instance.updateFromProps(nextProps);
+            System.out.println("commitUpdate");
+
+        } catch (Exception e) {
+            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
     }
 
     @HostAccess.Export

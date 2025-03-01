@@ -14,7 +14,7 @@ java_binary(
 genrule(
     name = "generate_js_files",
     srcs = [":react_deps"],
-    outs = ["scheduler.js", "react.js", "react-reconciler.js"],
+    outs = ["scheduler.js", "react.js", "react-reconciler.js", "react-refresh-runtime.js"],
     cmd = """
         $(locations :java_builder) $(locations :react_deps) $(OUTS) > tmp_output
     """,

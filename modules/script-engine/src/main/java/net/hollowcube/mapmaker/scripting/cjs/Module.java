@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.scripting.cjs;
 
 import net.hollowcube.mapmaker.scripting.ScriptEngine;
+import net.hollowcube.mapmaker.scripting.util.Garbage;
 import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
@@ -8,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -56,6 +58,14 @@ public class Module {
 
     public @NotNull Value exports() {
         return this.exports;
+    }
+
+    public @NotNull Map<String, Object> globals() {
+        return this.globals;
+    }
+
+    public @NotNull Map<String, Object> extraModules() {
+        return this.extraModules;
     }
 
     private @NotNull Value loadJsModule(@NotNull URI uri, @NotNull String code) {
@@ -114,13 +124,21 @@ public class Module {
         final Object extraModule = this.extraModules.get(module);
         if (extraModule != null) return Value.asValue(extraModule);
 
+        final URI loadUri;
         if (module.startsWith(".")) {
             // TODO: appending .js might have to be part of engine.load resolution if it should support json also. not sure
-            return engine.load(uri.resolve(module + ".js"), this.globals, this.extraModules).exports();
+            loadUri = uri.resolve(module + ".js");
+        } else {
+            loadUri = URI.create("internal:///third_party/react/" + args[0].asString() + ".js");
         }
 
-        final URI loadUri = URI.create("internal:///third_party/react/" + args[0].asString() + ".js");
-        return engine.load(loadUri, this.globals, this.extraModules).exports();
+        var globals = new HashMap<>(this.globals);
+        globals.put("__hollowcube_moduleId", loadUri.toString());
+        return engine.load(loadUri, globals, this.extraModules, (code) -> {
+            if (loadUri.getScheme().equals("internal")) return code;
+            // language=JS
+            return String.format(Garbage.REACT_REFRESH_MODULE_TEMPLATE, code);
+        }).exports();
     }
 
     private static @NotNull String extractFileName(@NotNull URI uri) {

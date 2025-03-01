@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 class Main {
-    private static final List<String> REACT_DEPS = List.of("scheduler", "react", "react-reconciler");
+    private static final List<String> REACT_DEPS = List.of("scheduler", "react", "react-reconciler", "react-refresh-runtime");
 
     public static void main(String[] args) throws Exception {
         outer:

@@ -136,6 +136,12 @@ public class GroupNode extends Node {
         this.children.add(child);
     }
 
+    public void insertBefore(@NotNull Node child, @NotNull Node beforeChild) {
+        int index = this.children.indexOf(beforeChild);
+        if (index == -1) throw new IllegalArgumentException("insert target is not a child");
+        this.children.add(index, child);
+    }
+
     public void removeChild(@NotNull Node child) {
         this.children.remove(child);
     }

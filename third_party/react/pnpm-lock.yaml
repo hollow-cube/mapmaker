@@ -11,6 +11,9 @@ dependencies:
   react-reconciler:
     specifier: 0.31.0
     version: 0.31.0(react@19.0.0)
+  react-refresh:
+    specifier: 0.16.0
+    version: 0.16.0
   scheduler:
     specifier: 0.25.0
     version: 0.25.0
@@ -25,6 +28,11 @@ packages:
     dependencies:
       react: 19.0.0
       scheduler: 0.25.0
+    dev: false
+
+  /react-refresh@0.16.0:
+    resolution: {integrity: sha512-FPvF2XxTSikpJxcr+bHut2H4gJ17+18Uy20D5/F+SKzFap62R3cM5wH6b8WN3LyGSYeQilLEcJcR1fjBSI2S1A==}
+    engines: {node: '>=0.10.0'}
     dev: false
 
   /react@19.0.0:

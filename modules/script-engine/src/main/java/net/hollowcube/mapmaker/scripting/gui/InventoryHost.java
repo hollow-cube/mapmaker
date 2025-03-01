@@ -7,6 +7,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.player.PlayerAnvilInputEvent;
+import net.minestom.server.inventory.AbstractInventory;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.PlayerInventory;
@@ -17,6 +18,7 @@ import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import net.minestom.server.utils.validate.Check;
 import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +30,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class InventoryHost {
     private static final Logger logger = LoggerFactory.getLogger(InventoryHost.class);
+
+    public static @Nullable InventoryHost forInventory(@Nullable AbstractInventory inventory) {
+        if (inventory instanceof InventoryWrapper wrapper) {
+            return wrapper.owner;
+        }
+        return null;
+    }
 
     static {
         MinecraftServer.getGlobalEventHandler()
@@ -53,7 +62,13 @@ public class InventoryHost {
         return Objects.requireNonNull(handle);
     }
 
+    public void forceRerender(@NotNull Value newComponentFunc) {
+//        var newElement = owner.react.exports().invokeMember("createElement", newComponentFunc, null);
+//        owner.render(this, null);
+    }
+
     public void queueRedraw() {
+        System.out.println("Redrawing");
         if (this.handle == null) return;
         final Task oldTask = this.redrawTask.getAndSet(player.scheduler().scheduleEndOfTick(() ->
                 this.drawCurrentElement(handle.getInventoryType())));
@@ -68,9 +83,17 @@ public class InventoryHost {
         this.reactRoot = node;
     }
 
+    public void removeChild(@NotNull Node child) {
+        if (this.reactRoot != child) {
+            throw new IllegalStateException("Different element removed from root: " + reactRoot + " != " + child);
+        }
+        this.reactRoot = null;
+    }
+
     public void drawCurrentElement(@NotNull InventoryType type) {
         // Currently we always consume the player inventory so add 4 rows.
-        var menuBuilder = new MenuBuilder(9, (getInterpretedSize(type) / 9) + 4);
+        int containerSizeInRows = getInterpretedSize(type) / 9;
+        var menuBuilder = new MenuBuilder(9, containerSizeInRows + 4, containerSizeInRows);
         this.reactRoot.build(menuBuilder);
 
         if (this.handle != null && this.handle.getInventoryType() == type) {
@@ -110,7 +133,7 @@ public class InventoryHost {
             int mainSize = getInterpretedSize(host.handle.getInventoryType());
 
             // We need to reorder the hotbar to come last
-            slot = mainSize + (offsetSlot < 9 ? 27 : -9);
+            slot = mainSize + offsetSlot + (offsetSlot < 9 ? 27 : -9);
         } else return; // Don't care about this click.
         if (host.reactRoot == null) return; // Sanity check
 
@@ -155,7 +178,7 @@ public class InventoryHost {
         private void copyInventoryContents(@NotNull ItemStack[] items) {
             Check.argCondition(items.length < getSize(), "items length must be at least the size of the inventory");
             System.arraycopy(items, 0, itemStacks, 0, getSize());
-            if (items.length - getSize() > getInterpretedSize(getInventoryType())) {
+            if (items.length > getInterpretedSize(getInventoryType())) {
                 this.playerInventory = Arrays.copyOfRange(items, getSize(), items.length);
             } else this.playerInventory = null;
         }
