@@ -158,7 +158,7 @@ public class AxiomModule implements TerraformModule {
                 var result = storage.apply(event.player(), action);
                 if (result != null) actions.add(result);
             }
-            new AxiomClientboundAnnotationUpdatePacket(actions).sendToViewers(event.getInstance());
+            new AxiomClientboundAnnotationUpdatePacket(actions).sendToInstance(event.getInstance());
         }
 
         event.setHandled(true);

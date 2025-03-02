@@ -19,7 +19,7 @@ public final class AxiomEventHandler {
         }
 
         if (entity.getEntityType().equals(EntityType.MARKER)) {
-            AxiomClientboundMarkerDataPacket.removeMarker(entity.getUuid()).sendToViewers(event.getInstance());
+            AxiomClientboundMarkerDataPacket.removeMarker(entity.getUuid()).sendToInstance(event.getInstance());
         }
     }
 
@@ -27,7 +27,7 @@ public final class AxiomEventHandler {
         var entity = event.getEntity();
 
         if (entity.getEntityType().equals(EntityType.MARKER)) {
-            AxiomClientboundMarkerDataPacket.spawnMarker(entity.getUuid(), entity.getPosition()).sendToViewers(event.getInstance());
+            AxiomClientboundMarkerDataPacket.spawnMarker(entity.getUuid(), entity.getPosition()).sendToInstance(event.getInstance());
         }
     }
 }

@@ -8,11 +8,12 @@ import it.unimi.dsi.fastutil.longs.LongCollection;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
 public record LinesOutlineAnnotation(
-        LongList positions,
+        @NotNull LongList positions,
         int color
 ) implements AnnotationData {
 

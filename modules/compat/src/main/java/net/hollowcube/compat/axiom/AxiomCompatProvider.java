@@ -22,7 +22,9 @@ public class AxiomCompatProvider implements CompatProvider {
         registry.register(AxiomServerboundTeleportPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onTeleport));
         registry.register(AxiomServerboundSetGameModePacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSetGameMode));
         registry.register(AxiomServerboundSetWorldPropertyPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSetWorldProperty));
+
         registry.register(AxiomServerboundMarkerRequestPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onMarkerDataRequest));
+        registry.register(AxiomServerboundEntityRequestPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onEntityDataRequest));
 
         registry.register(AxiomServerboundSetBlockPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSetBlock));
         registry.register(AxiomServerboundSetBufferPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSetBuffer));
@@ -45,6 +47,7 @@ public class AxiomCompatProvider implements CompatProvider {
         registry.register(AxiomClientboundAckWorldPropertyPacket.TYPE);
         registry.register(AxiomClientboundSetRestrictionsPacket.TYPE);
         registry.register(AxiomClientboundMarkerResponsePacket.TYPE);
+        registry.register(AxiomClientboundEntitiesResponsePacket.TYPE);
         registry.register(AxiomClientboundAllowedGamemodesPacket.TYPE);
         registry.register(AxiomClientboundIgnoreDisplayEntitiesPacket.TYPE);
         registry.register(AxiomClientboundAnnotationUpdatePacket.TYPE);

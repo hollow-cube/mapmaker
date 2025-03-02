@@ -2,11 +2,12 @@ package net.hollowcube.compat.axiom.data.annotations.actions;
 
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public record MoveAnnotationAction(
-        UUID id,
+        @NotNull UUID id,
         float x,
         float y,
         float z

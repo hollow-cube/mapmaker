@@ -19,7 +19,7 @@ public interface PropertyDispatcher {
         public <T> void set(@NotNull Player player, @NotNull WorldProperty<T> property, @NotNull T value) {
             var properties = player.getInstance().getTag(PROPERTIES);
             properties.put(property, value);
-            AxiomClientboundSetWorldPropertyPacket.of(property, value).sendToViewers(player.getInstance());
+            AxiomClientboundSetWorldPropertyPacket.of(property, value).sendToInstance(player.getInstance());
         }
 
         @Override

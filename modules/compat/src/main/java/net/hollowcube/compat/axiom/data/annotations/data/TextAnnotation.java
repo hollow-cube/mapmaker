@@ -5,9 +5,10 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
+import org.jetbrains.annotations.NotNull;
 
 public record TextAnnotation(
-        String text,
+        @NotNull String text,
 
         float x,
         float y,

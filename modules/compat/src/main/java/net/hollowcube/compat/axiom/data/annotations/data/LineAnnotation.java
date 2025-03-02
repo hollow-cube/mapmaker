@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.bytes.ByteCollection;
 import it.unimi.dsi.fastutil.bytes.ByteList;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
@@ -17,7 +18,7 @@ public record LineAnnotation(
         int z,
         float width,
         int color,
-        ByteList offsets
+        @NotNull ByteList offsets
 ) implements AnnotationData {
 
     public static final NetworkBuffer.Type<LineAnnotation> SERIALIZER = NetworkBufferTemplate.template(

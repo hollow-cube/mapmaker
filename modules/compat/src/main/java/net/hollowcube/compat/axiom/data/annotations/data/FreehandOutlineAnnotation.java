@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.bytes.ByteArrayList;
 import it.unimi.dsi.fastutil.bytes.ByteList;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
@@ -17,7 +18,7 @@ public record FreehandOutlineAnnotation(
 
         int count,
         int color,
-        ByteList points
+        @NotNull ByteList points
 ) implements AnnotationData {
 
     public static final NetworkBuffer.Type<FreehandOutlineAnnotation> SERIALIZER = NetworkBufferTemplate.template(

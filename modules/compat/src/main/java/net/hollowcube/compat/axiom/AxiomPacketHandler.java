@@ -6,6 +6,7 @@ import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundAckWorldP
 import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundMarkerResponsePacket;
 import net.hollowcube.compat.axiom.packets.serverbound.*;
 import net.hollowcube.compat.axiom.properties.registry.PropertyRegistry;
+import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Pos;
@@ -21,6 +22,8 @@ import net.minestom.server.network.packet.server.play.ChangeGameStatePacket;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 
 @ApiStatus.Internal
@@ -55,7 +58,10 @@ final class AxiomPacketHandler {
     static void onTeleport(@NotNull Player player, @NotNull AxiomServerboundTeleportPacket packet) {
         var playerDimension = player.getInstance().getDimensionName();
         if (!packet.dimension().equals(playerDimension)) {
-//            logger.warn("Received axiom teleport to different dimension ({} -> {}) from {}", playerDimension, packet.dimension(), player.getUuid());
+            PostHog.capture(player.getUuid().toString(), "axiom_teleport_dimension_mismatch", Map.of(
+                    "player_dimension", playerDimension,
+                    "packet_dimension", packet.dimension()
+            ));
             return;
         }
 
@@ -77,11 +83,11 @@ final class AxiomPacketHandler {
             if (property == null) return;
             property.update(player, packet.value());
         } catch (Exception e) {
-            // TODO do some logging of bad world properties
+            PostHog.captureException(e, player.getUuid().toString());
         }
     }
 
-    // Marker Operations
+    // Data Operations
 
     static void onMarkerDataRequest(@NotNull Player player, @NotNull AxiomServerboundMarkerRequestPacket packet) {
         var event = new AxiomMarkerDataRequestEvent(player, packet.id());
@@ -89,6 +95,10 @@ final class AxiomPacketHandler {
         if (event.getData() == null || event.isCancelled()) return;
 
         new AxiomClientboundMarkerResponsePacket(packet.id(), event.getData()).send(player);
+    }
+
+    static void onEntityDataRequest(@NotNull Player player, @NotNull AxiomServerboundEntityRequestPacket packet) {
+
     }
 
     // Blocks/World Operations
@@ -159,7 +169,7 @@ final class AxiomPacketHandler {
                         player, entry.id(), entry.copyFrom(), entry.pos(), entry.nbt()
                 ));
             } catch (Exception e) {
-                // logger.warn("Failed to spawn axiom entity: {}", e.getMessage());
+                PostHog.captureException(e, player.getUuid().toString());
                 player.sendMessage(Component.translatable("axiom.entity_spawn_failed"));
             }
         }
@@ -190,9 +200,6 @@ final class AxiomPacketHandler {
     }
 
     static void onAnnotationUpdates(@NotNull Player player, @NotNull AxiomServerboundAnnotationUpdatePacket packet) {
-        EventDispatcher.call(new AxiomAnnotationActionEvent(
-                player,
-                packet.actions()
-        ));
+        EventDispatcher.call(new AxiomAnnotationActionEvent(player, packet.actions()));
     }
 }
