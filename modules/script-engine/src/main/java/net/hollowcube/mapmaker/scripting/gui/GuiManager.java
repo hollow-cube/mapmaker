@@ -17,10 +17,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static net.hollowcube.mapmaker.scripting.util.Proxies.proxyObject;
+
 public class GuiManager {
     private final ScriptEngine engine;
     final Module react; //todo make me private again
     private final Value reactReconcilerInst;
+    private final Value hostContext;
+
     private final Map<String, Object> globals;
     private final Map<String, Object> extraModules;
 
@@ -37,6 +41,9 @@ public class GuiManager {
         this.reactReconcilerInst = engine.load(URI.create("internal:///third_party/react/react-reconciler.js"))
                 .exports().execute(new ReconcilerHostConfig());
         this.reactReconcilerInst.invokeMember("injectIntoDevTools");
+
+        this.hostContext = this.react.exports().invokeMember("createContext");
+        this.react.exports().putMember("__hollowcube_hostContext", this.hostContext);
 
         this.globals = Map.of("JSX", new JSX(this.react));
         this.extraModules = Map.of("@mapmaker/gui", new AtMapmakerGuiModule(this.react));
@@ -62,10 +69,17 @@ public class GuiManager {
             throw new IllegalArgumentException("Default export must be a functional component");
         final Value reactElement = this.react.exports().invokeMember("createElement", component, null);
 
-        // Mount and do initial render immediately.
         final InventoryHost host = new InventoryHost(this, player);
+
+        // Wrap the element in a context provider
+        final Value contextProviderElement = this.react.exports().invokeMember("createElement",
+                this.hostContext.getMember("Provider"),
+                proxyObject(Map.of("value", host)),
+                reactElement);
+
+        // Mount and do initial render immediately.
         host.reconcilerRoot = mount(host);
-        render(host, reactElement);
+        render(host, contextProviderElement);
 
         player.openInventory(host.handle());
     }
@@ -86,12 +100,18 @@ public class GuiManager {
         );
     }
 
-    private static Value lastReactElement;
+    public void unmount(@NotNull InventoryHost host) {
+        System.out.println("UNMOUNTING");
+        reactReconcilerInst.invokeMember("updateContainer",
+                /* element */ null,
+                /* container */ Objects.requireNonNull(host.reconcilerRoot),
+                /* parentComponent */ null,
+                /* callback */ null);
+    }
 
     public void render(@NotNull InventoryHost host, @NotNull Value reactElement) {
-        if (lastReactElement == null) lastReactElement = reactElement;
         reactReconcilerInst.invokeMember("updateContainer",
-                /* element */ lastReactElement,
+                /* element */ reactElement,
                 /* container */ Objects.requireNonNull(host.reconcilerRoot),
                 /* parentComponent */ null,
                 /* callback */ null);
@@ -113,11 +133,8 @@ public class GuiManager {
         globalThis.putMember("$RefreshReg$", engine.context().eval("js", "() => {}"));
         globalThis.putMember("$RefreshSig$", engine.context().eval("js", "() => type => type"));
         globalThis.putMember("enqueueUpdate", (ProxyExecutable) (args) -> {
-            System.out.println("calling performReactRefresh");
-            var update = reactRefreshRuntime.exports().invokeMember("performReactRefresh");
-            System.out.println("update: " + update);
+            reactRefreshRuntime.exports().invokeMember("performReactRefresh");
             return null;
         });
     }
-
 }

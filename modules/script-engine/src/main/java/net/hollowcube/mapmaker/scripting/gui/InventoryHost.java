@@ -7,7 +7,6 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.player.PlayerAnvilInputEvent;
-import net.minestom.server.inventory.AbstractInventory;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.PlayerInventory;
@@ -18,7 +17,6 @@ import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import net.minestom.server.utils.validate.Check;
 import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,13 +28,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class InventoryHost {
     private static final Logger logger = LoggerFactory.getLogger(InventoryHost.class);
-
-    public static @Nullable InventoryHost forInventory(@Nullable AbstractInventory inventory) {
-        if (inventory instanceof InventoryWrapper wrapper) {
-            return wrapper.owner;
-        }
-        return null;
-    }
 
     static {
         MinecraftServer.getGlobalEventHandler()
@@ -51,7 +42,10 @@ public class InventoryHost {
     private final AtomicReference<Task> redrawTask = new AtomicReference<>();
     private InventoryWrapper handle;
 
-    public Node reactRoot; // TODO: do we need multiple roots?
+    // We only allow a single root currently which means that you cannot for example
+    // have the root node be a Fragment. It might be a relevant limitation eventually
+    // but I (matt) don't think so.
+    public Node reactRoot;
 
     public InventoryHost(@NotNull GuiManager owner, @NotNull Player player) {
         this.owner = owner;
@@ -62,13 +56,7 @@ public class InventoryHost {
         return Objects.requireNonNull(handle);
     }
 
-    public void forceRerender(@NotNull Value newComponentFunc) {
-//        var newElement = owner.react.exports().invokeMember("createElement", newComponentFunc, null);
-//        owner.render(this, null);
-    }
-
     public void queueRedraw() {
-        System.out.println("Redrawing");
         if (this.handle == null) return;
         final Task oldTask = this.redrawTask.getAndSet(player.scheduler().scheduleEndOfTick(() ->
                 this.drawCurrentElement(handle.getInventoryType())));
@@ -76,21 +64,24 @@ public class InventoryHost {
     }
 
     public void addChild(@NotNull Node node) {
-        if (this.reactRoot != null) {
+        if (this.reactRoot != null)
             throw new IllegalStateException("The root of a GUI must be a single element");
-        }
-
         this.reactRoot = node;
     }
 
     public void removeChild(@NotNull Node child) {
-        if (this.reactRoot != child) {
+        if (this.reactRoot != child)
             throw new IllegalStateException("Different element removed from root: " + reactRoot + " != " + child);
-        }
+        this.reactRoot = null;
+    }
+
+    public void clear() {
         this.reactRoot = null;
     }
 
     public void drawCurrentElement(@NotNull InventoryType type) {
+        if (this.reactRoot == null) return; // Check if unmounted
+
         // Currently we always consume the player inventory so add 4 rows.
         int containerSizeInRows = getInterpretedSize(type) / 9;
         var menuBuilder = new MenuBuilder(9, containerSizeInRows + 4, containerSizeInRows);
@@ -135,7 +126,7 @@ public class InventoryHost {
             // We need to reorder the hotbar to come last
             slot = mainSize + offsetSlot + (offsetSlot < 9 ? 27 : -9);
         } else return; // Don't care about this click.
-        if (host.reactRoot == null) return; // Sanity check
+        if (host.reactRoot == null) return; // Check for unmounted.
 
         // TODO: need to reintroduce the click locking mechanism.
         //  also probably handleClick should return a future that can complete later.
@@ -153,7 +144,7 @@ public class InventoryHost {
         // TODO
     }
 
-    private final class InventoryWrapper extends Inventory {
+    private static final class InventoryWrapper extends Inventory {
         private final InventoryHost owner;
 
         // Represents the player inventory slots which will be sent if present.
@@ -202,8 +193,7 @@ public class InventoryHost {
             // If there are zero viewers we assume the inventory was closed
             if (getViewers().isEmpty()) {
                 // Unmount and close
-//                element.performSignal(Element.SIG_UNMOUNT);
-//                element.performSignal(Element.SIG_CLOSE);
+                owner.owner.unmount(owner);
             }
 
             return result;

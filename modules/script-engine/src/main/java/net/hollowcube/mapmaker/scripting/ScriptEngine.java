@@ -2,11 +2,9 @@ package net.hollowcube.mapmaker.scripting;
 
 import net.hollowcube.mapmaker.scripting.cjs.Module;
 import net.hollowcube.mapmaker.scripting.gui.GuiManager;
-import net.hollowcube.mapmaker.scripting.gui.InventoryHost;
 import net.hollowcube.mapmaker.scripting.node.Process;
 import net.hollowcube.mapmaker.scripting.node.SetTimeout;
 import net.hollowcube.mapmaker.scripting.util.Garbage;
-import net.minestom.server.MinecraftServer;
 import org.graalvm.polyglot.Context;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -77,32 +75,15 @@ public class ScriptEngine {
     }
 
     public @NotNull Module load(@NotNull URI script, @NotNull Map<String, Object> globals, @NotNull Map<String, Object> extraModules, @NotNull Function<String, String> codeWrapper) {
-        if (script.equals(URI.create("internal:///third_party/react/react-refresh/runtime.js")) || script.equals(URI.create("internal:///third_party/react/react-refresh-runtime.js"))) {
+        //TODO: fix this, we should just support this resolution mechanism probably
+        if (script.equals(URI.create("internal:///third_party/react/react-refresh/runtime.js"))) {
             script = URI.create("internal:///third_party/react/react-refresh-runtime.js");
         }
         final Module existing = this.moduleCache.get(script);
         if (existing != null) return existing;
-        System.out.println("LOADING AN UNCACHED MODULE " + script);
 
         final String code = switch (script.getScheme()) {
             case "internal" -> {
-                System.out.println("require(" + script + ")");
-                //TODO: fix this, we should just support this resolution mechanism probably
-                if (script.equals(URI.create("internal:///third_party/react/react-refresh/runtime.js")) || script.equals(URI.create("internal:///third_party/react/react-refresh-runtime.js"))) {
-                    script = URI.create("internal:///third_party/react/react-refresh-runtime.js");
-                    try {
-                        yield Files.readString(Path.of("/Users/matt/dev/javascript/hello-react-custom-renderer/node_modules/react-refresh/cjs/react-refresh-runtime.development.js"));
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                if (script.equals(URI.create("internal:///third_party/react/react-reconciler.js"))) {
-                    try {
-                        yield Files.readString(Path.of("/Users/matt/dev/javascript/hello-react-custom-renderer/node_modules/react-reconciler/cjs/react-reconciler.development.js"));
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
                 try (var is = getClass().getResourceAsStream(script.getPath())) {
                     if (is == null) throw new IllegalArgumentException("resource not found: " + script);
                     yield new String(is.readAllBytes(), StandardCharsets.UTF_8);
@@ -125,11 +106,6 @@ public class ScriptEngine {
         final Module loaded = new Module(this, script, codeWrapper.apply(code), globals, extraModules);
         this.moduleCache.put(script, loaded);
         return loaded;
-    }
-
-    public @NotNull Module loadText(@NotNull String name, @NotNull String code) {
-        var uri = URI.create("file:///tmp/" + name);
-        return this.moduleCache.computeIfAbsent(uri, ignored -> new Module(this, uri, code, Map.of(), Map.of()));
     }
 
     private void setupGlobals() {
@@ -161,20 +137,9 @@ public class ScriptEngine {
                                 continue;
                             }
 
-                            // todo this reloads this module for everyone very cursed mega yikes
-                            var newModule = load(moduleUri, removed.globals(), removed.extraModules(), (code) -> {
+                            load(moduleUri, removed.globals(), removed.extraModules(), (code) -> {
                                 return String.format(Garbage.REACT_REFRESH_MODULE_TEMPLATE, code);
                             });
-
-                            MinecraftServer.getConnectionManager().getOnlinePlayers().forEach(player -> {
-                                var host = InventoryHost.forInventory(player.getOpenInventory());
-                                if (host == null) return;
-
-
-                                player.scheduler().scheduleEndOfTick(() -> host.forceRerender(newModule.exports().getMember("default")));
-//                                host.queueRedraw();
-                            });
-
                         }
                         key.reset();
                     }

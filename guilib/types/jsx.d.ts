@@ -1,24 +1,44 @@
 declare namespace JSX {
-    export type Element = any;
+    // TODO: read this: https://www.typescriptlang.org/docs/handbook/jsx.html
+
+    export type Element = unknown;
 
     export type Layer = 'background' | 'default' | 'item'
 
-    export type Props = { [key: string]: any }
+    type Props = { [key: string]: any };
+    type BaseProps = {
+        slotWidth?: number;
+        slotHeight?: number;
+
+        position?: 'absolute'
+    }
+    type GroupProps = BaseProps & {
+        layout?: 'row' | 'column'
+    }
+    type Alignment = number | 'center' | 'start' | 'end';
+    type PositionProps = BaseProps & {
+        x?: number | 'center' | 'start' | 'end';
+        y?: number | 'center' | 'start' | 'end';
+    }
 
     export interface IntrinsicElements {
-        group: Props;
+        group: GroupProps;
+        button: GroupProps & {
+            onLeftClick?: () => void;
+        };
+        tooltip: GroupProps & {
+            translationKey: string;
+        };
 
-        sprite: Props
+        text: PositionProps;
+        sprite: PositionProps & {
+            src: string;
+        };
+        item: BaseProps & {
+            model: string;
+        };
 
-        text: Props;
-
-        button: Props;
-
-        tooltip: Props;
-
-        item: Props;
-
-        gap: Props;
+        gap: BaseProps;
     }
 
     export const Fragment: any;

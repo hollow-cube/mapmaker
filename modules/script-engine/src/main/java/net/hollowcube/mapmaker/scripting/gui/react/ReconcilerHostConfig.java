@@ -14,6 +14,8 @@ import org.jetbrains.annotations.UnknownNullability;
 import java.util.Map;
 import java.util.Objects;
 
+import static net.hollowcube.mapmaker.scripting.util.Proxies.wrapException;
+
 /**
  * Implements the React Reconciler Host Config API.
  */
@@ -40,7 +42,7 @@ public class ReconcilerHostConfig {
             node.updateFromProps(props);
             return node;
         } catch (Exception e) {
-            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
+            throw wrapException(e);
         }
     }
 
@@ -49,7 +51,7 @@ public class ReconcilerHostConfig {
         try {
             return new TextNode.Raw(Objects.requireNonNull(text, ""));
         } catch (Exception e) {
-            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
+            throw wrapException(e);
         }
     }
 
@@ -58,34 +60,25 @@ public class ReconcilerHostConfig {
         try {
             appendChild(parent, child);
         } catch (Exception e) {
-            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
+            throw wrapException(e);
         }
     }
 
     @HostAccess.Export
     public boolean finalizeInitialChildren(@NotNull Value instance, @NotNull String type, @NotNull Value props, @NotNull Value hostContext) {
-        // TODO: This returns true if work needs to be performed when 'finalizing', ie connecting to the 'screen'.
-        // if true is returned then this node will get a commitMount later.
-        // In our case we may want to defer event handlers or something.
-
-        System.out.println("finalizeInitialChildren");
-        return false;
-    }
-
-    @HostAccess.Export
-    public boolean prepareUpdate() {
-        System.out.println("prepareUpdate");
-        return true;
+        return false; // No extra work is ever needed (commitMount also not implemented)
     }
 
     @HostAccess.Export
     public boolean shouldSetTextContent(@NotNull String type, @NotNull Value props) {
+        // Returning true would mean that any node can have its content set to text, ie the html equivalent of
+        // node.textContent = 'somestring'
+        // We don't support that so always return false. If returning true we would need to implement resetTextContent.
         return false;
     }
 
     @HostAccess.Export
-    public @NotNull ProxyObject getRootHostContext(@NotNull Value rootContainer) {
-
+    public @NotNull ProxyObject getRootHostContext(@NotNull InventoryHost rootContainer) {
         return Proxies.freezeObject(Proxies.proxyObject(Map.of())); // TODO
     }
 
@@ -96,39 +89,36 @@ public class ReconcilerHostConfig {
 
     @HostAccess.Export
     public @NotNull Value getPublicInstance(@NotNull Value instance) {
-        System.out.println("getPublicInstance");
         return instance;
     }
 
     @HostAccess.Export
     public @Nullable Value prepareForCommit(@NotNull Value containerInfo) {
-        System.out.println("prepareForCommit");
-        return null;
+        return null; // Noop
     }
 
     @HostAccess.Export
     public void resetAfterCommit(@NotNull InventoryHost container) {
         try {
-            // We have done an update
-            System.out.println("resetAfterCommit");
-            container.queueRedraw();
+            container.queueRedraw(); // We have done an update, redraw at end of tick
         } catch (Exception e) {
-            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
+            throw wrapException(e);
         }
     }
 
     @HostAccess.Export
     public void preparePortalMount(@NotNull Value containerInfo) {
+        // noop
     }
 
     @HostAccess.Export
     public void scheduleTimeout() {
-        System.out.println("scheduleTimeout");
+        System.out.println("scheduleTimeout"); // TODO
     }
 
     @HostAccess.Export
     public void cancelTimeout() {
-        System.out.println("cancelTimeout");
+        System.out.println("cancelTimeout"); // TODO
     }
 
     @HostAccess.Export
@@ -136,44 +126,22 @@ public class ReconcilerHostConfig {
 
     @HostAccess.Export
     public boolean maySuspendCommit(@NotNull String type, @NotNull Value props) {
-        System.out.println("maySuspendCommit");
-        return false;
-    }
-
-
-    // EVENTS
-
-    @HostAccess.Export
-    public int getCurrentEventPriority() {
-        System.out.println("getCurrentEventPriority");
-        return ReconcilerConstants.defaultEventPriority;
+        return false; // Noop
     }
 
     @HostAccess.Export
     public @Nullable Value getInstanceFromNode() {
-        System.out.println("getInstanceFromNode");
-        return null;
+        return null; // Noop
     }
 
     @HostAccess.Export
     public void beforeActiveInstanceBlur() {
-        System.out.println("beforeActiveInstanceBlur");
+        // noop
     }
 
     @HostAccess.Export
     public void afterActiveInstanceBlur() {
-        System.out.println("afterActiveInstanceBlur");
-    }
-
-    @HostAccess.Export
-    public void prepareScopeUpdate() {
-        System.out.println("prepareScopeUpdate");
-    }
-
-    @HostAccess.Export
-    public @Nullable Value getInstanceFromScope() {
-        System.out.println("getInstanceFromScope");
-        return null;
+        // noop
     }
 
     @HostAccess.Export
@@ -184,21 +152,23 @@ public class ReconcilerHostConfig {
 
     // SCHEDULER
 
+    private int currentUpdatePriority = ReconcilerConstants.noEventPriority;
+
     @HostAccess.Export
     public void setCurrentUpdatePriority(int priority) {
-        System.out.println("setCurrentUpdatePriority: " + priority);
+        this.currentUpdatePriority = priority;
     }
 
     @HostAccess.Export
     public int getCurrentUpdatePriority() {
-        System.out.println("getCurrentUpdatePriority");
-        return ReconcilerConstants.defaultEventPriority;
+        return currentUpdatePriority;
     }
 
     @HostAccess.Export
     public int resolveUpdatePriority() {
-        System.out.println("resolveUpdatePriority");
-        return ReconcilerConstants.defaultEventPriority;
+        if (currentUpdatePriority == ReconcilerConstants.noEventPriority)
+            return ReconcilerConstants.defaultEventPriority;
+        return currentUpdatePriority;
     }
 
 
@@ -216,7 +186,7 @@ public class ReconcilerHostConfig {
             group.appendChild(child);
 
         } catch (Exception e) {
-            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
+            throw wrapException(e);
         }
     }
 
@@ -224,9 +194,8 @@ public class ReconcilerHostConfig {
     public void appendChildToContainer(@NotNull InventoryHost parent, @NotNull Node child) {
         try {
             parent.addChild(child);
-
         } catch (Exception e) {
-            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
+            throw wrapException(e);
         }
     }
 
@@ -237,15 +206,14 @@ public class ReconcilerHostConfig {
                 throw new IllegalArgumentException(parent.type() + " may not have children");
             }
             group.insertBefore(child, beforeChild);
-
         } catch (Exception e) {
-            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
+            throw wrapException(e);
         }
     }
 
     @HostAccess.Export
-    public void insertInContainerBefore() {
-        System.out.println("insertInContainerBefore");
+    public void insertInContainerBefore(@NotNull InventoryHost parent, @NotNull Node child, @NotNull Node beforeChild) {
+        throw wrapException("container may only have one child");
     }
 
     @HostAccess.Export
@@ -256,7 +224,7 @@ public class ReconcilerHostConfig {
             }
             group.removeChild(child);
         } catch (Exception e) {
-            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
+            throw wrapException(e);
         }
     }
 
@@ -266,24 +234,17 @@ public class ReconcilerHostConfig {
     }
 
     @HostAccess.Export
-    public void resetTextContent() {
-        System.out.println("resetTextContent");
-    }
-
-    @HostAccess.Export
     public void commitTextUpdate(@NotNull TextNode.Raw textInstance, @NotNull String oldText, @NotNull String newText, @NotNull Value unknown1, @NotNull Value unknown2) {
         try {
             textInstance.setContent(newText);
-            System.out.println("commitTextUpdate");
-
         } catch (Exception e) {
-            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
+            throw wrapException(e);
         }
     }
 
     @HostAccess.Export
-    public void commitMount() {
-        System.out.println("commitMount");
+    public void clearContainer(@NotNull InventoryHost container) {
+        container.clear();
     }
 
     @HostAccess.Export
@@ -293,36 +254,29 @@ public class ReconcilerHostConfig {
                 throw new UnsupportedOperationException("instance type changed, " + instance.type() + " != " + type);
 
             instance.updateFromProps(nextProps);
-            System.out.println("commitUpdate");
-
         } catch (Exception e) {
-            throw jsError(e.getClass().getSimpleName() + ": " + e.getMessage());
+            throw wrapException(e);
         }
     }
 
     @HostAccess.Export
     public void hideInstance() {
-        System.out.println("hideInstance");
+        // Noop
     }
 
     @HostAccess.Export
     public void hideTextInstance() {
-        System.out.println("hideTextInstance");
+        // Noop
     }
 
     @HostAccess.Export
     public void unhideInstance() {
-        System.out.println("unhideInstance");
+        // Noop
     }
 
     @HostAccess.Export
     public void unhideTextInstance() {
-        System.out.println("unhideTextInstance");
-    }
-
-    @HostAccess.Export
-    public void clearContainer(@NotNull Value container) {
-        System.out.println("clearContainer");
+        // Noop
     }
 
 
@@ -346,12 +300,4 @@ public class ReconcilerHostConfig {
     @HostAccess.Export
     public final boolean supportsSingletons = false;
 
-
-    private static @NotNull RuntimeException jsError(@NotNull String message) {
-        // TODO: we should cache the error constructor in the engine probably
-        Value jsBindings = Context.getCurrent().getBindings("js");
-        Value errorConstructor = jsBindings.getMember("Error");
-        Value errorObject = errorConstructor.newInstance(message);
-        return errorObject.throwException();
-    }
 }

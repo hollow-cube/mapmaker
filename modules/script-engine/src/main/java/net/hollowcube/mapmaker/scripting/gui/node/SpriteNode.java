@@ -7,10 +7,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class SpriteNode extends Node {
 
-    // TODO perhaps could handle prop types automagically with some api like this:
-    //  this would make it easier to auto generate so seems relevant.
-//    private final Prop<BadSprite> src = stringProp("src").map(BadSprite::require);
-
     private BadSprite srcSprite = null;
 
     private int x = 0;
@@ -45,7 +41,5 @@ public class SpriteNode extends Node {
         if (srcSprite == null) return;
 
         builder.draw(this.x, this.y, srcSprite);
-
-//        builder.editSlots(0, 0, 1, 1, ItemComponent.ITEM_MODEL, "minecraft:crafting_table");
     }
 }
