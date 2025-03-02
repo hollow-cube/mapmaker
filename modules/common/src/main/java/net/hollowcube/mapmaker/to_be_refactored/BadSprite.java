@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 
 //todo do not duplicate this :(
-public record BadSprite(char fontChar, int cmd, int width, int offsetX, int rightOffset) {
+public record BadSprite(char fontChar, int cmd, String model, int width, int offsetX, int rightOffset) {
     private static final System.Logger logger = System.getLogger(BadSprite.class.getName());
 
     public static final Map<String, BadSprite> SPRITE_MAP;
@@ -52,15 +52,21 @@ public record BadSprite(char fontChar, int cmd, int width, int offsetX, int righ
                     int cmd = 0;
                     if (obj.has("fontChar"))
                         fontChar = obj.get("fontChar").getAsString().charAt(0);
-                    else {
+                    else if (obj.has("cmd")) {
                         cmd = obj.get("cmd").getAsInt();
                         cmdIdMap.put(cmd, key);
                         idCmdMap.put(key, cmd);
+                    } else {
+                        throw new UnsupportedOperationException("Sprite must have either fontChar or cmd: " + obj);
+                    }
+                    String model = null;
+                    if (obj.has("model")) {
+                        model = obj.get("model").getAsString();
                     }
                     var width = obj.get("width");
                     var offsetX = obj.get("offsetX");
                     var rightOffset = obj.get("rightOffset");
-                    sprites.put(key, new BadSprite(fontChar, cmd,
+                    sprites.put(key, new BadSprite(fontChar, cmd, model,
                             width == null ? 0 : width.getAsInt(),
                             offsetX == null ? 0 : offsetX.getAsInt(),
                             rightOffset == null ? 0 : rightOffset.getAsInt()));

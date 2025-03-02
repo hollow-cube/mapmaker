@@ -79,7 +79,7 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
 
     @Override
     public void setSprite(char fontChar, int cmd, int width, int offsetX, int rightOffset) {
-        setSprite(new Sprite(fontChar, cmd, width, offsetX, rightOffset));
+        setSprite(new Sprite(fontChar, cmd, null, width, offsetX, rightOffset));
     }
 
     protected void updateItem(@NotNull List<Component> args) {

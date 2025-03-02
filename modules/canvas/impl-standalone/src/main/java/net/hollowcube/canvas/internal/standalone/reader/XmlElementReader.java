@@ -266,9 +266,15 @@ public class XmlElementReader {
                     }
                 } else {
                     if (elem instanceof ItemSpriteHolder trait) {
-                        trait.setItemSprite(ItemStack.builder(Material.DIAMOND)
-                                .set(ItemComponent.CUSTOM_MODEL_DATA, sprite.cmd())
-                                .build(), spritePos);
+                        if (sprite.model() != null) {
+                            trait.setItemSprite(ItemStack.builder(Material.STICK)
+                                    .set(ItemComponent.ITEM_MODEL, sprite.model())
+                                    .build(), spritePos);
+                        } else {
+                            trait.setItemSprite(ItemStack.builder(Material.DIAMOND)
+                                    .set(ItemComponent.CUSTOM_MODEL_DATA, sprite.cmd())
+                                    .build(), spritePos);
+                        }
                     } else {
                         throw new IllegalArgumentException("Element does not support item sprites: " + elem.getClass().getSimpleName());
                     }

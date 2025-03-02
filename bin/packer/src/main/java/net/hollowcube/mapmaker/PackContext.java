@@ -179,10 +179,6 @@ public class PackContext {
         return cmd;
     }
 
-    public JsonArray getServerSprites() {
-        return serverSprites;
-    }
-
     public void addServerSprite(@NotNull ServerSprite sprite) {
         serverSprites.add(sprite.toJson());
     }
