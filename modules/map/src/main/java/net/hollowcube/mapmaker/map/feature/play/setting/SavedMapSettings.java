@@ -59,7 +59,7 @@ public class SavedMapSettings {
     }
 
     public SavedMapSettings copy() {
-        return new SavedMapSettings(this.settings);
+        return new SavedMapSettings(new HashMap<>(this.settings));
     }
 
     @Override
