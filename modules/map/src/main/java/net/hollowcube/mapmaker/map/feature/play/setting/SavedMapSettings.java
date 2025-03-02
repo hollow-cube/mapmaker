@@ -48,7 +48,6 @@ public class SavedMapSettings {
     }
 
     public void update(SavedMapSettings settings) {
-        this.clear();
         this.settings.putAll(settings.settings);
     }
 
