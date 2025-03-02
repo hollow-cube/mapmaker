@@ -63,4 +63,14 @@ public class SavedMapSettings {
         return new SavedMapSettings(this.settings);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("SavedMapSettings{");
+        for (Map.Entry<MapSetting<?>, Object> entry : this.settings.entrySet()) {
+            builder.append(entry.getKey().key()).append("=").append(entry.getValue()).append(", ");
+        }
+        builder.append("}");
+        return builder.toString();
+    }
 }
