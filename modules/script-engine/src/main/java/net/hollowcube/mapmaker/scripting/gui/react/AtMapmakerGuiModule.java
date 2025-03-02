@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.scripting.gui.react;
 
 import net.hollowcube.mapmaker.scripting.cjs.Module;
+import net.hollowcube.mapmaker.scripting.gui.GuiManager;
 import net.hollowcube.mapmaker.scripting.gui.InventoryHost;
 import net.minestom.server.entity.Player;
 import org.graalvm.polyglot.HostAccess;
@@ -12,7 +13,14 @@ import java.util.Set;
 
 import static net.hollowcube.mapmaker.scripting.util.Proxies.wrapException;
 
-public record AtMapmakerGuiModule(@NotNull Module react) {
+public final class AtMapmakerGuiModule {
+    private final GuiManager guiManager;
+    private final Module react;
+
+    public AtMapmakerGuiModule(@NotNull GuiManager guiManager, @NotNull Module react) {
+        this.guiManager = guiManager;
+        this.react = react;
+    }
 
     private @NotNull InventoryHost useInventoryHost() {
         final Value hostContext = react.exports().getMember("__hollowcube_hostContext");
@@ -30,9 +38,7 @@ public record AtMapmakerGuiModule(@NotNull Module react) {
 
     @HostAccess.Export
     public Value view(@NotNull Value component, @NotNull String inventoryType) {
-        component.putMember("test123", "test123");
-        System.out.println("CREATE VIEW: " + inventoryType);
-        return component;
+        return this.guiManager.wrapView(component, inventoryType);
     }
 
     @HostAccess.Export

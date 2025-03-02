@@ -11,11 +11,8 @@ const tabTitles = {
 }
 
 function StoreView() {
-    const {pushView, close} = useViewStack();
+    const {close} = useViewStack();
     const [tab, setTab] = useState<'cubits' | 'hypercube' | 'addons'>('cubits');
-
-    const Addons2 = view(AddonsTab, 'anvil');
-    pushView(<Addons2 />);
 
     return (
         <group layout='column'>

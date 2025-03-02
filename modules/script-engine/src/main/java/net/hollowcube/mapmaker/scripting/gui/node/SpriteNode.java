@@ -7,7 +7,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class SpriteNode extends Node {
 
-    private BadSprite srcSprite = null;
+    private String src = null;
+    private BadSprite sprite = null;
 
     private int x = 0;
     private int y = 0;
@@ -20,26 +21,35 @@ public class SpriteNode extends Node {
     public boolean updateFromProps(@NotNull Value props) {
         boolean updated = super.updateFromProps(props);
 
-//        var oldSrc = this.src;
-//        this.src = getString(props, "src");
-//        this.sprite = oldSrc == null || !oldSrc.equals(this.src) ? BadSprite.require(this.src) : null;
-        this.srcSprite = BadSprite.require(props.getMember("src").asString());
-        updated = true;
+        var oldSrc = this.src;
+        if (props.hasMember("src")) {
+            this.src = props.getMember("src").asString();
+            if (!this.src.equals(oldSrc)) {
+                this.sprite = BadSprite.require(this.src);
+                updated = true;
+            }
+        } else {
+            this.src = null;
+            this.sprite = null;
+            updated |= oldSrc != null;
+        }
 
+        int oldX = this.x, oldY = this.y;
         if (props.hasMember("x")) {
             this.x = props.getMember("x").asInt();
         } else this.x = 0;
         if (props.hasMember("y")) {
             this.y = props.getMember("y").asInt();
         } else this.y = 0;
+        updated |= oldX != this.x || oldY != this.y;
 
         return updated;
     }
 
     @Override
     public void build(@NotNull MenuBuilder builder) {
-        if (srcSprite == null) return;
+        if (sprite == null) return;
 
-        builder.draw(this.x, this.y, srcSprite);
+        builder.draw(this.x, this.y, sprite);
     }
 }

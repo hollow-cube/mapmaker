@@ -1,11 +1,16 @@
 package net.hollowcube.mapmaker.scripting.gui.node;
 
 import net.hollowcube.mapmaker.scripting.gui.MenuBuilder;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.item.ItemComponent;
 import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemNode extends Node {
+
+    private String model = null;
+    private int customModelData = -1;
+
     public ItemNode() {
         super("item");
 
@@ -16,6 +21,18 @@ public class ItemNode extends Node {
     @Override
     public boolean updateFromProps(@NotNull Value props) {
         boolean changed = super.updateFromProps(props);
+
+        final String oldModel = this.model;
+        if (props.hasMember("model")) {
+            final String rawModel = props.getMember("model").asString();
+            final BadSprite sprite = BadSprite.SPRITE_MAP.get(rawModel);
+            if (sprite != null) {
+                
+            }
+        } else this.model = null;
+        changed |= (oldModel != null && this.model == null)
+                || (oldModel == null && this.model != null)
+                || (oldModel != null && !oldModel.equals(this.model));
 
         if (slotWidth < 1 || slotHeight < 1) {
             throw new IllegalArgumentException("Slot width and height must be at least 1");

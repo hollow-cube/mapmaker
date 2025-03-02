@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run @//bin/development:development using Bazel" type="BspRunConfigurationType">
+    <bsp-state handler-provider-id="JvmBspRunHandlerProvider">
+      <bsp-target>@//bin/development:development</bsp-target>
+      <handler-state />
+    </bsp-state>
+    <method v="2" />
+  </configuration>
+</component>

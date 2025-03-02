@@ -21,9 +21,10 @@ import static net.hollowcube.mapmaker.scripting.util.Proxies.proxyObject;
 
 public class GuiManager {
     private final ScriptEngine engine;
-    final Module react; //todo make me private again
+    private final Module react;
     private final Value reactReconcilerInst;
     private final Value hostContext;
+    private final Value viewSymbol;
 
     private final Map<String, Object> globals;
     private final Map<String, Object> extraModules;
@@ -31,7 +32,7 @@ public class GuiManager {
     public GuiManager(@NotNull ScriptEngine engine) {
         this.engine = engine;
 
-        // todo yikes, find out why we suddenly need this
+        // todo yikes, find out why we suddenly need this (probably only during development)
         engine.context().getBindings("js").putMember("window", engine.context().getBindings("js"));
 
         // todo should only run in a 'development' environment
@@ -45,8 +46,10 @@ public class GuiManager {
         this.hostContext = this.react.exports().invokeMember("createContext");
         this.react.exports().putMember("__hollowcube_hostContext", this.hostContext);
 
+        this.viewSymbol = engine.context().eval("js", "Symbol.for('$$hcView')");
+
         this.globals = Map.of("JSX", new JSX(this.react));
-        this.extraModules = Map.of("@mapmaker/gui", new AtMapmakerGuiModule(this.react));
+        this.extraModules = Map.of("@mapmaker/gui", new AtMapmakerGuiModule(this, this.react));
     }
 
     /**
@@ -67,6 +70,7 @@ public class GuiManager {
         final Value component = componentModule.getMember("default");
         if (!component.canExecute())
             throw new IllegalArgumentException("Default export must be a functional component");
+        final InventoryType inventoryType = getInventoryType(component);
         final Value reactElement = this.react.exports().invokeMember("createElement", component, null);
 
         final InventoryHost host = new InventoryHost(this, player);
@@ -79,7 +83,7 @@ public class GuiManager {
 
         // Mount and do initial render immediately.
         host.reconcilerRoot = mount(host);
-        render(host, contextProviderElement);
+        render(host, contextProviderElement, inventoryType);
 
         player.openInventory(host.handle());
     }
@@ -101,7 +105,6 @@ public class GuiManager {
     }
 
     public void unmount(@NotNull InventoryHost host) {
-        System.out.println("UNMOUNTING");
         reactReconcilerInst.invokeMember("updateContainer",
                 /* element */ null,
                 /* container */ Objects.requireNonNull(host.reconcilerRoot),
@@ -109,7 +112,7 @@ public class GuiManager {
                 /* callback */ null);
     }
 
-    public void render(@NotNull InventoryHost host, @NotNull Value reactElement) {
+    public void render(@NotNull InventoryHost host, @NotNull Value reactElement, @NotNull InventoryType inventoryType) {
         reactReconcilerInst.invokeMember("updateContainer",
                 /* element */ reactElement,
                 /* container */ Objects.requireNonNull(host.reconcilerRoot),
@@ -117,7 +120,13 @@ public class GuiManager {
                 /* callback */ null);
 
         // 'Render' the underlying Minestom inventory (items & title)
-        host.drawCurrentElement(InventoryType.CHEST_6_ROW); // TODO read `inventoryType` from module.
+        host.drawCurrentElement(inventoryType);
+    }
+
+    public @NotNull Value wrapView(@NotNull Value component, @NotNull String inventoryType) {
+        component.putMember("$$hcView", viewSymbol);
+        component.putMember("inventoryType", inventoryType);
+        return component;
     }
 
     private void setupReactRefresh() {
@@ -136,5 +145,16 @@ public class GuiManager {
             reactRefreshRuntime.exports().invokeMember("performReactRefresh");
             return null;
         });
+    }
+
+    private @NotNull InventoryType getInventoryType(@NotNull Value view) {
+        if (!view.getMember("$$hcView").equals(viewSymbol))
+            throw new IllegalArgumentException("Views should be created with `view` from `@mapmake/gui`");
+        return switch (view.getMember("inventoryType").asString()) {
+            case "chest_6_row" -> InventoryType.CHEST_6_ROW;
+            case "anvil" -> InventoryType.ANVIL;
+            case "cartography" -> InventoryType.CARTOGRAPHY;
+            default -> throw new IllegalArgumentException("Unknown inventory type");
+        };
     }
 }
