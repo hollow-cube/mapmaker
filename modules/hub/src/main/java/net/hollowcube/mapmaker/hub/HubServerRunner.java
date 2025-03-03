@@ -107,7 +107,7 @@ public class HubServerRunner extends AbstractMapServer {
     public static void loadHubFeatures(@NotNull AbstractMapServer server, @NotNull HubMapWorld world) {
         for (var feature : ServiceLoader.load(HubFeature.class)) {
             try {
-                logger.info("Loading feature {}", feature.getClass().getName());
+                logger.debug("Loading feature {}", feature.getClass().getName());
                 feature.load(server, world);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to load feature " + feature.getClass().getName(), e);

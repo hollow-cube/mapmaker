@@ -1,5 +1,6 @@
-import {useState, useViewStack, view} from "@mapmaker/gui";
+import {useState, view} from "@mapmaker/gui";
 
+import BackButton from "./BackButton";
 import CubitsTab from "./CubitsTab";
 import HypercubeTab from "./HypercubeTab";
 import AddonsTab from "./AddonsTab";
@@ -11,7 +12,6 @@ const tabTitles = {
 }
 
 function StoreView() {
-    const {close} = useViewStack();
     const [tab, setTab] = useState<'cubits' | 'hypercube' | 'addons'>('cubits');
 
     return (
@@ -21,18 +21,11 @@ function StoreView() {
 
             {/* Title */}
             <group layout='row'>
-                <button onLeftClick={close}>
-                    <tooltip translationKey="generic.back">
-                        <sprite src='generic2/btn/danger/1_1' position='absolute'/>
-                        {/*<sprite src='generic/back' padding={1}/>*/}
-
-                        <item model='minecraft:stone'/>
-                    </tooltip>
-                </button>
+                <BackButton/>
 
                 <tooltip translationKey="gui.store.information" slotWidth={1} slotHeight={1}>
                     <sprite src='generic2/btn/default/1_1' position='absolute'/>
-                    {/*<sprite src="generic/information"/>*/}
+                    <sprite src="generic2/btn/common/info" x={4} y={2}/>
                 </tooltip>
 
                 <tooltip translationKey="gui.store.buy_cubits" slotWidth={5} slotHeight={1}>
@@ -54,21 +47,20 @@ function StoreView() {
             <group layout='row'>
                 <button onLeftClick={() => setTab('cubits')}>
                     <tooltip translationKey='gui.store.cubits' slotWidth={3} slotHeight={3}>
-                        <sprite src={tab === 'cubits' ? 'store/cubits_inactive' : 'store/cubits_active'}/>
+                        <sprite src={tab === 'cubits' ? 'store/cubits_active' : 'store/cubits_inactive'}/>
                     </tooltip>
                 </button>
                 <button onLeftClick={() => setTab('hypercube')}>
                     <tooltip translationKey='gui.store.hypercube' slotWidth={3} slotHeight={3}>
-                        <sprite src={tab === 'hypercube' ? 'store/ranks_inactive' : 'store/ranks_active'}/>
+                        <sprite src={tab === 'hypercube' ? 'store/ranks_active' : 'store/ranks_inactive'}/>
                     </tooltip>
                 </button>
                 <button onLeftClick={() => setTab('addons')}>
                     <tooltip translationKey='gui.store.addons' slotWidth={3} slotHeight={3}>
-                        <sprite src={tab === 'addons' ? 'store/add-ons_inactive' : 'store/add-ons_active'}/>
+                        <sprite src={tab === 'addons' ? 'store/add-ons_active' : 'store/add-ons_inactive'}/>
                     </tooltip>
                 </button>
             </group>
-
         </group>
     )
 }
