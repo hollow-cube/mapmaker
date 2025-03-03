@@ -1,15 +1,15 @@
 package net.hollowcube.compat.axiom.properties;
 
 import net.hollowcube.compat.axiom.properties.types.WidgetType;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 public final class WorldProperty<T> {
 
-    final NamespaceID id;
+    final Key id;
     final String name;
     final boolean localized;
     final WidgetType<T> widget;
@@ -18,7 +18,7 @@ public final class WorldProperty<T> {
 
     @ApiStatus.Internal
     public WorldProperty(
-            NamespaceID id,
+            Key id,
             String name, boolean localized,
             WidgetType<T> widget,
             T initialValue,
@@ -32,7 +32,7 @@ public final class WorldProperty<T> {
         this.dispatcher = dispatcher;
     }
 
-    public NamespaceID id() {
+    public Key id() {
         return id;
     }
 

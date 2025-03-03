@@ -19,7 +19,7 @@ public class AxiomEntitiesDataRequestEvent implements AxiomEvent {
         this(player, uuids.stream()
                 .map(uuid -> player.getInstance().getEntityByUuid(uuid))
                 .filter(Objects::nonNull)
-                .filter(entity -> entity.isViewer(player))
+                .filter(entity -> entity.isViewer(player) && !(entity instanceof Player))
                 .toList());
     }
 
@@ -34,7 +34,7 @@ public class AxiomEntitiesDataRequestEvent implements AxiomEvent {
     }
 
     @Contract(pure = true)
-    public @Nullable List<Entity> entities() {
+    public @NotNull List<Entity> entities() {
         return entities;
     }
 

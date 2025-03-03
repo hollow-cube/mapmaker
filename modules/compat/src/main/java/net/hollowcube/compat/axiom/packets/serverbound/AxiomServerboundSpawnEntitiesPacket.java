@@ -1,5 +1,6 @@
 package net.hollowcube.compat.axiom.packets.serverbound;
 
+import net.hollowcube.compat.api.packet.ExtraNetworkBuffers;
 import net.hollowcube.compat.api.packet.ServerboundModPacket;
 import net.hollowcube.compat.axiom.AxiomAPI;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
@@ -33,14 +34,14 @@ public record AxiomServerboundSpawnEntitiesPacket(
             @NotNull UUID id,
             @NotNull Pos pos,
             @Nullable UUID copyFrom,
-            @NotNull CompoundBinaryTag nbt
+            @Nullable CompoundBinaryTag nbt
     ) {
 
         public static final NetworkBuffer.Type<Entry> SERIALIZER = NetworkBufferTemplate.template(
                 NetworkBuffer.UUID, Entry::id,
                 NetworkBuffer.POS, Entry::pos,
                 NetworkBuffer.UUID.optional(), Entry::copyFrom,
-                NetworkBuffer.NBT_COMPOUND, Entry::nbt,
+                ExtraNetworkBuffers.OPTIONAL_COMPOUND_TAG, Entry::nbt,
                 Entry::new
         );
     }

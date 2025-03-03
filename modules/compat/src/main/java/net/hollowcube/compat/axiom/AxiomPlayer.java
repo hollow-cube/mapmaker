@@ -86,6 +86,6 @@ public final class AxiomPlayer {
             updater.accept(it);
             return it;
         });
-        new AxiomClientboundIgnoreDisplayEntitiesPacket(new ArrayList<>(entities)).send(player);
+        new AxiomClientboundIgnoreDisplayEntitiesPacket(entities).send(player);
     }
 }

@@ -22,7 +22,7 @@ public final class AxiomTryModifyEntityEvent implements AxiomEvent {
     private final @NotNull Entity entity;
     private final @Nullable Pos pos;
 
-    private final @NotNull CompoundBinaryTag nbt;
+    private final @Nullable CompoundBinaryTag nbt;
 
     private final @NotNull AxiomServerboundModifyEntitiesPacket.PassengerChange change;
     private final @NotNull List<UUID> passengers;
@@ -33,7 +33,7 @@ public final class AxiomTryModifyEntityEvent implements AxiomEvent {
             @NotNull Player player,
             @NotNull Entity entity,
             @Nullable Pos pos,
-            @NotNull CompoundBinaryTag nbt,
+            @Nullable CompoundBinaryTag nbt,
             @NotNull AxiomServerboundModifyEntitiesPacket.PassengerChange change,
             @NotNull List<UUID> passengers
     ) {
@@ -58,7 +58,7 @@ public final class AxiomTryModifyEntityEvent implements AxiomEvent {
         return pos;
     }
 
-    public @NotNull CompoundBinaryTag nbt() {
+    public @Nullable CompoundBinaryTag nbt() {
         return nbt;
     }
 

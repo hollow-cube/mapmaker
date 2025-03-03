@@ -20,7 +20,7 @@ public final class AxiomTrySpawnEntityEvent implements AxiomEvent {
     private final @NotNull UUID uuid;
     private final @Nullable Entity copyFrom;
     private final @NotNull Pos pos;
-    private final @NotNull CompoundBinaryTag nbt;
+    private final @Nullable CompoundBinaryTag nbt;
 
     private boolean handled;
 
@@ -29,7 +29,7 @@ public final class AxiomTrySpawnEntityEvent implements AxiomEvent {
             @NotNull UUID uuid,
             @Nullable Entity copyFrom,
             @NotNull Pos pos,
-            @NotNull CompoundBinaryTag nbt
+            @Nullable CompoundBinaryTag nbt
     ) {
         this.player = player;
         this.uuid = uuid;
@@ -43,7 +43,7 @@ public final class AxiomTrySpawnEntityEvent implements AxiomEvent {
             @NotNull UUID uuid,
             @Nullable UUID copyFrom,
             @NotNull Pos pos,
-            @NotNull CompoundBinaryTag nbt
+            @Nullable CompoundBinaryTag nbt
     ) {
         this(player, uuid, copyFrom != null ? player.getInstance().getEntityByUuid(copyFrom) : null, pos, nbt);
     }
@@ -65,7 +65,7 @@ public final class AxiomTrySpawnEntityEvent implements AxiomEvent {
         return pos;
     }
 
-    public @NotNull CompoundBinaryTag nbt() {
+    public @Nullable CompoundBinaryTag nbt() {
         return nbt;
     }
 

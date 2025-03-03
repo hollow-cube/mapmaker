@@ -18,6 +18,7 @@ import net.kyori.adventure.nbt.BinaryTagTypes;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.ListBinaryTag;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.EntityMeta;
@@ -40,7 +41,8 @@ public class AxiomModule implements TerraformModule {
             .addListener(AxiomTryModifyEntityEvent.class, this::handleEntityModification)
             .addListener(AxiomApplyBufferEvent.class, this::handleBufferApplication)
             .addListener(AxiomAnnotationActionEvent.class, this::handleAnnotationActions)
-            .addListener(AxiomEnabledEvent.class, this::handleAxiomEnabled);
+            .addListener(AxiomEnabledEvent.class, this::handleAxiomEnabled)
+            .addListener(AxiomEntitiesDataRequestEvent.class, this::handleEntityDataRequest);
 
     @Override
     public @NotNull Set<EventNode<InstanceEvent>> eventNodes() {
@@ -54,7 +56,7 @@ public class AxiomModule implements TerraformModule {
     private void handleEntitySpawn(@NotNull AxiomTrySpawnEntityEvent event) {
         if (event.isHandled()) return;
 
-        CompoundBinaryTag nbt = event.nbt();
+        CompoundBinaryTag nbt = event.nbt() == null ? CompoundBinaryTag.empty() : event.nbt();
         if (event.copyFrom() != null) {
             if (!(event.copyFrom() instanceof TerraformEntity entity)) return;
             var copyEntityTag = TerraformEntity.writeToTagWithPassengers(entity);
@@ -92,7 +94,7 @@ public class AxiomModule implements TerraformModule {
             EventDispatcher.callCancellable(moveEvent, () -> entity.teleport(moveEvent.getNewPosition()));
         }
 
-        if (event.nbt().size() > 0) {
+        if (event.nbt() != null && event.nbt().size() > 0) {
             if (entity.getEntityType().equals(EntityType.MARKER)) {
                 EventDispatcher.call(new TerraformAxiomUpdateMarkerDataEvent(event.player(), entity.getUuid(), event.nbt()));
             } else if (entity instanceof TerraformEntity tfEntity) {
@@ -133,6 +135,16 @@ public class AxiomModule implements TerraformModule {
         event.setHandled(true);
 
         EventDispatcher.call(new TerraformModifyEntityEvent(entity));
+    }
+
+    private void handleEntityDataRequest(@NotNull AxiomEntitiesDataRequestEvent event) {
+        for (Entity entity : event.entities()) {
+            if (entity instanceof TerraformEntity tfEntity) {
+                var builder = CompoundBinaryTag.builder();
+                tfEntity.writeData(builder);
+                event.setData(entity.getUuid(), builder.build());
+            }
+        }
     }
 
     private void handleBufferApplication(@NotNull AxiomApplyBufferEvent event) {

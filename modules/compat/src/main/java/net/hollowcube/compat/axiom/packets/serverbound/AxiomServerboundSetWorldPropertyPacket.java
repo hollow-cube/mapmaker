@@ -1,14 +1,15 @@
 package net.hollowcube.compat.axiom.packets.serverbound;
 
+import net.hollowcube.compat.api.packet.ExtraNetworkBuffers;
 import net.hollowcube.compat.api.packet.ServerboundModPacket;
 import net.hollowcube.compat.axiom.AxiomAPI;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 public record AxiomServerboundSetWorldPropertyPacket(
-        @NotNull NamespaceID id,
+        @NotNull Key id,
         int type,
         byte[] value,
         int sequence
@@ -17,7 +18,7 @@ public record AxiomServerboundSetWorldPropertyPacket(
     public static final Type<AxiomServerboundSetWorldPropertyPacket> TYPE = Type.of(
             AxiomAPI.CHANNEL, "set_world_property",
             NetworkBufferTemplate.template(
-                    NetworkBuffer.STRING.transform(NamespaceID::from, NamespaceID::asString), AxiomServerboundSetWorldPropertyPacket::id,
+                    ExtraNetworkBuffers.KEY, AxiomServerboundSetWorldPropertyPacket::id,
                     NetworkBuffer.VAR_INT, AxiomServerboundSetWorldPropertyPacket::type,
                     NetworkBuffer.BYTE_ARRAY, AxiomServerboundSetWorldPropertyPacket::value,
                     NetworkBuffer.VAR_INT, AxiomServerboundSetWorldPropertyPacket::sequence,

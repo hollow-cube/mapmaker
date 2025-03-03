@@ -3,10 +3,12 @@ package net.hollowcube.compat.axiom;
 import net.hollowcube.compat.api.packet.ServerboundModPacket;
 import net.hollowcube.compat.axiom.events.*;
 import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundAckWorldPropertyPacket;
+import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundEntitiesResponsePacket;
 import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundMarkerResponsePacket;
 import net.hollowcube.compat.axiom.packets.serverbound.*;
 import net.hollowcube.compat.axiom.properties.registry.PropertyRegistry;
 import net.hollowcube.posthog.PostHog;
+import net.kyori.adventure.nbt.*;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Pos;
@@ -21,13 +23,17 @@ import net.minestom.server.network.packet.server.play.AcknowledgeBlockChangePack
 import net.minestom.server.network.packet.server.play.ChangeGameStatePacket;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 
 @ApiStatus.Internal
 final class AxiomPacketHandler {
+
+    private static final long MAX_ENTITY_PACKET_SIZE = 0x100000L;
 
     static <T extends ServerboundModPacket<T>> BiConsumer<@NotNull Player, @NotNull T> handle(BiConsumer<@NotNull Player, @NotNull T> handler) {
         return (player, packet) -> {
@@ -98,7 +104,34 @@ final class AxiomPacketHandler {
     }
 
     static void onEntityDataRequest(@NotNull Player player, @NotNull AxiomServerboundEntityRequestPacket packet) {
+        var event = new AxiomEntitiesDataRequestEvent(player, packet.ids());
+        EventDispatcher.call(event);
 
+        long size = 0;
+        Map<UUID, CompoundBinaryTag> responses = new HashMap<>();
+
+        for (UUID id : packet.ids()) {
+            var data = event.getData(id);
+            if (data == null) continue;
+
+            long dataSize = getSize(data);
+            if (dataSize > MAX_ENTITY_PACKET_SIZE) {
+                new AxiomClientboundEntitiesResponsePacket(
+                        packet.sequence(), false, Map.of(id, data)
+                ).send(player);
+            } else {
+                if (size + dataSize > MAX_ENTITY_PACKET_SIZE) {
+                    new AxiomClientboundEntitiesResponsePacket(packet.sequence(), false, responses).send(player);
+                    responses.clear();
+                    size = 0;
+                }
+
+                responses.put(id, data);
+                size += dataSize;
+            }
+        }
+
+        new AxiomClientboundEntitiesResponsePacket(packet.sequence(), true, responses).send(player);
     }
 
     // Blocks/World Operations
@@ -201,5 +234,42 @@ final class AxiomPacketHandler {
 
     static void onAnnotationUpdates(@NotNull Player player, @NotNull AxiomServerboundAnnotationUpdatePacket packet) {
         EventDispatcher.call(new AxiomAnnotationActionEvent(player, packet.actions()));
+    }
+
+    // Utils
+
+    private static long getSize(@Nullable BinaryTag tag) {
+        return 1 + switch (tag) {
+            case null -> 0;
+            case ByteBinaryTag ignored -> 1L;
+            case ShortBinaryTag ignored -> 2L;
+            case IntBinaryTag ignored -> 4L;
+            case LongBinaryTag ignored -> 8L;
+            case FloatBinaryTag ignored -> 4L;
+            case DoubleBinaryTag ignored -> 8L;
+            case ByteArrayBinaryTag array -> 4L + array.value().length;
+            case IntArrayBinaryTag array -> 4L + 4L * array.value().length;
+            case LongArrayBinaryTag array -> 4L + 8L * array.value().length;
+            case StringBinaryTag string -> 2L + string.value().length();
+            case ListBinaryTag list -> {
+                long size = 5L;
+                for (var element : list) {
+                    size += getSize(element);
+                }
+                yield size;
+            }
+
+            case CompoundBinaryTag compound -> {
+                long size = 1;
+                for (var key : compound.keySet()) {
+                    size += 1L;
+                    size += 2L + key.length();
+                    size += getSize(compound.get(key));
+                }
+                yield size;
+            }
+
+            default -> throw new IllegalStateException("Unexpected value: " + tag);
+        };
     }
 }

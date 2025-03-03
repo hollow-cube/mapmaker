@@ -1,5 +1,6 @@
 package net.hollowcube.compat.axiom.packets.serverbound;
 
+import net.hollowcube.compat.api.packet.ExtraNetworkBuffers;
 import net.hollowcube.compat.api.packet.ServerboundModPacket;
 import net.hollowcube.compat.axiom.AxiomAPI;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
@@ -36,7 +37,7 @@ public record AxiomServerboundModifyEntitiesPacket(
             @NotNull UUID id,
             @MagicConstant(flagsFromClass = RelativeFlags.class) byte flags,
             @Nullable Pos pos,
-            @NotNull CompoundBinaryTag nbt,
+            @Nullable CompoundBinaryTag nbt,
             @NotNull PassengerChange passengerChange,
             @NotNull List<UUID> passengers
     ) {
@@ -54,7 +55,7 @@ public record AxiomServerboundModifyEntitiesPacket(
                     buffer.write(NetworkBuffer.BYTE, (byte) -1);
                 }
 
-                buffer.write(NetworkBuffer.NBT_COMPOUND, value.nbt());
+                buffer.write(ExtraNetworkBuffers.OPTIONAL_COMPOUND_TAG, value.nbt());
                 buffer.write(PASSENGER_CHANGE, value.passengerChange());
                 if (value.passengerChange().hasEntries()) {
                     buffer.write(PASSENGERS, value.passengers());
@@ -66,7 +67,7 @@ public record AxiomServerboundModifyEntitiesPacket(
                 UUID id = buffer.read(NetworkBuffer.UUID);
                 byte flags = buffer.read(NetworkBuffer.BYTE);
                 Pos pos = flags != -1 ? buffer.read(NetworkBuffer.POS) : null;
-                CompoundBinaryTag nbt = buffer.read(NetworkBuffer.NBT_COMPOUND);
+                CompoundBinaryTag nbt = buffer.read(ExtraNetworkBuffers.OPTIONAL_COMPOUND_TAG);
                 PassengerChange passengerChange = buffer.read(PASSENGER_CHANGE);
                 List<UUID> passengers = passengerChange.hasEntries() ? buffer.read(PASSENGERS) : List.of();
                 return new Entry(id, flags, pos, nbt, passengerChange, passengers);
