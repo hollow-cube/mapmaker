@@ -31,7 +31,7 @@ public final class ExtraCodecs {
     public static final Codec<Integer> INT_STRING = Codec.STRING.xmap(Integer::parseInt, String::valueOf);
     public static final Codec<Long> LONG_STRING = Codec.STRING.xmap(Long::parseLong, String::valueOf);
 
-    public static final Codec<PotionEffect> POTION_EFFECT = Codec.STRING.xmap(PotionEffect::fromNamespaceId, PotionEffect::name);
+    public static final Codec<PotionEffect> POTION_EFFECT = Codec.STRING.xmap(PotionEffect::fromKey, PotionEffect::name);
 
     public static final Codec<Point> POINT = Codec.DOUBLE.listOf().xmap(list -> {
         Check.stateCondition(list.size() != 3, "Expected 3 doubles, got " + list.size());
@@ -46,11 +46,9 @@ public final class ExtraCodecs {
             Codec.FLOAT.optionalFieldOf("pitch", 0f).forGetter(Pos::pitch)
     ).apply(i, Pos::new));
 
-    public static final Codec<Material> MATERIAL = Codec.STRING
-            .xmap(Material::fromNamespaceId, Material::name);
+    public static final Codec<Material> MATERIAL = Codec.STRING.xmap(Material::fromKey, Material::name);
 
-    public static final Codec<Particle> PARTICLE = Codec.STRING
-            .xmap(Particle::fromNamespaceId, Particle::name);
+    public static final Codec<Particle> PARTICLE = Codec.STRING.xmap(Particle::fromKey, Particle::name);
 
     public static final Codec<ItemStack> ITEM_STACK = new Codec<>() {
         @Override

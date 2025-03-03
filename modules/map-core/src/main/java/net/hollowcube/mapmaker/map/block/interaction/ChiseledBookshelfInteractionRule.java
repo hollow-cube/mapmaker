@@ -27,7 +27,7 @@ public class ChiseledBookshelfInteractionRule implements BlockInteractionRule {
         if (clickFace == null) return false;
 
         var material = interaction.item().material();
-        if (material.id() != Material.AIR.id() && !ItemTags.BOOKSHELF_BOOKS.contains(material.namespace()))
+        if (material.id() != Material.AIR.id() && !ItemTags.BOOKSHELF_BOOKS.contains(material.key()))
             return false;
         
         var block = interaction.getBlock(interaction.blockPosition());

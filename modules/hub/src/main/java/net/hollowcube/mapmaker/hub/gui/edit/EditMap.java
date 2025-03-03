@@ -594,8 +594,8 @@ public class EditMap extends View {
             var translationKey = String.format(
                     "%s.%s.%s",
                     icon.isBlock() ? "block" : "item",
-                    icon.namespace().namespace(),
-                    icon.namespace().path()
+                    icon.key().namespace(),
+                    icon.key().value()
             );
             setMapIconSetLabel.setArgs(Component.translatable(translationKey));
             setMapIconSwitch.setOption(1);

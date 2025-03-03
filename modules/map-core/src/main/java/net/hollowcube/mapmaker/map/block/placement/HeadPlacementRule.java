@@ -43,14 +43,14 @@ public class HeadPlacementRule extends BaseBlockPlacementRule {
      */
     private Block toWallBlock(Block block) {
         // Is there a better way to do this?
-        String name = block.namespace().value();
+        String name = block.key().value();
 
         // player_head -> player
         String rawName = name.substring(0, name.lastIndexOf("_"));
         // player_head -> _head
         String rawType = name.substring(rawName.length());
 
-        return Block.fromNamespaceId(rawName + "_wall" + rawType)
+        return Block.fromKey(rawName + "_wall" + rawType)
                 .withHandler(block.handler());
     }
 

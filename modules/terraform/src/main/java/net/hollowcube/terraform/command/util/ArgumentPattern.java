@@ -7,20 +7,20 @@ import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
 import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.session.LocalSession;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
 import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Locale;
 
 public class ArgumentPattern extends Argument<Pattern> {
-    private static final List<NamespaceID> BLOCKS = Block.values().stream()
-            .map(Block::namespace).sorted().toList();
+    private static final List<Key> BLOCKS = Block.values().stream()
+            .map(Block::key).sorted().toList();
 
     ArgumentPattern(@NotNull String id) {
         super(id);
@@ -50,7 +50,7 @@ public class ArgumentPattern extends Argument<Pattern> {
     public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
         var word = raw.toLowerCase(Locale.ROOT);
         for (var block : BLOCKS) {
-            if (block.asString().startsWith(word) || block.path().startsWith(word)) {
+            if (block.asString().startsWith(word) || block.value().startsWith(word)) {
                 suggestion.add(block.asString());
             }
 

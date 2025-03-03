@@ -13,6 +13,7 @@ java_library(
         "//modules/core",
         "//modules/terraform",
         "//third_party:minestom",
+        "//third_party:adventure_all",
         "@maven//:com_google_code_gson_gson",
         "@maven//:dev_hollowcube_dataconverter",
         "@maven//:dev_hollowcube_mql",
@@ -31,9 +32,6 @@ java_library(
         "@maven//:io_prometheus_simpleclient_hotspot",
         "@maven//:io_prometheus_simpleclient_httpserver",
         "@maven//:it_unimi_dsi_fastutil",
-        "@maven//:net_kyori_adventure_api",
-        "@maven//:net_kyori_adventure_nbt",
-        "@maven//:net_kyori_adventure_text_serializer_gson",
         "@maven//:org_slf4j_jul_to_slf4j",
     ],
 )

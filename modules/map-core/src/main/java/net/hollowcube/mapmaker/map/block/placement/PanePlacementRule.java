@@ -37,7 +37,7 @@ public class PanePlacementRule extends WaterloggedPlacementRule {
             var neighbor = instance.getBlock(blockPosition.relative(blockFace));
 
             var neighborFaceIsSolid = neighbor.registry().collisionShape().isFaceFull(blockFace.getOppositeFace());
-            var canConnect = canConnect(neighbor) && (neighborFaceIsSolid || BlockTags.GLASS_PANES.contains(neighbor.namespace()) || BlockTags.WALLS.contains(neighbor.namespace()) || neighbor.id() == Block.IRON_BARS.id());
+            var canConnect = canConnect(neighbor) && (neighborFaceIsSolid || BlockTags.GLASS_PANES.contains(neighbor.key()) || BlockTags.WALLS.contains(neighbor.key()) || neighbor.id() == Block.IRON_BARS.id());
             block = block.withProperty(blockFace.name().toLowerCase(), String.valueOf(canConnect));
         }
         return block;

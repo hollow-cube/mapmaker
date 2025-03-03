@@ -47,8 +47,8 @@ public class FencePlacementRule extends WaterloggedPlacementRule {
     }
 
     private boolean isSimilarFence(@NotNull Block block, @NotNull Block neighbor) {
-        return BlockTags.FENCES.contains(neighbor.namespace()) &&
-                BlockTags.WOODEN_FENCES.contains(block.namespace()) == BlockTags.WOODEN_FENCES.contains(neighbor.namespace());
+        return BlockTags.FENCES.contains(neighbor.key()) &&
+                BlockTags.WOODEN_FENCES.contains(block.key()) == BlockTags.WOODEN_FENCES.contains(neighbor.key());
     }
 
     @Override

@@ -12,11 +12,11 @@ public class ButtonInteractionRule extends AbstractToggleInteractionRule {
     @Override
     protected void playSound(@NotNull Interaction interaction, @NotNull Block block, boolean newState) {
         SoundEvent soundEvent = null;
-        if (BlockTags.WOODEN_BUTTONS.contains(block.namespace())) {
+        if (BlockTags.WOODEN_BUTTONS.contains(block.key())) {
             soundEvent = newState ? SoundEvent.BLOCK_WOODEN_BUTTON_CLICK_OFF : SoundEvent.BLOCK_WOODEN_BUTTON_CLICK_ON;
-        } else if (BlockTags.STONE_BUTTONS.contains(block.namespace())) {
+        } else if (BlockTags.STONE_BUTTONS.contains(block.key())) {
             soundEvent = newState ? SoundEvent.BLOCK_STONE_BUTTON_CLICK_OFF : SoundEvent.BLOCK_STONE_BUTTON_CLICK_ON;
-        } else if (BlockTags.NETHER_WOOD_BUTTONS.contains(block.namespace())) {
+        } else if (BlockTags.NETHER_WOOD_BUTTONS.contains(block.key())) {
             soundEvent = newState ? SoundEvent.BLOCK_NETHER_WOOD_BUTTON_CLICK_OFF : SoundEvent.BLOCK_NETHER_WOOD_BUTTON_CLICK_ON;
         } else if (Block.CHERRY_BUTTON.id() == block.id()) {
             soundEvent = newState ? SoundEvent.BLOCK_CHERRY_WOOD_BUTTON_CLICK_OFF : SoundEvent.BLOCK_CHERRY_WOOD_BUTTON_CLICK_ON;
@@ -24,7 +24,7 @@ public class ButtonInteractionRule extends AbstractToggleInteractionRule {
             soundEvent = newState ? SoundEvent.BLOCK_BAMBOO_WOOD_BUTTON_CLICK_OFF : SoundEvent.BLOCK_BAMBOO_WOOD_BUTTON_CLICK_ON;
         }
 
-        Check.notNull(soundEvent, "soundEvent (" + block.namespace() + ")");
+        Check.notNull(soundEvent, "soundEvent (" + block.key() + ")");
         if (newState) {
             // The client predicts pressing buttons for itself only, so need to send the sound only to viewers
             var viewers = interaction.player().getViewersAsAudience();

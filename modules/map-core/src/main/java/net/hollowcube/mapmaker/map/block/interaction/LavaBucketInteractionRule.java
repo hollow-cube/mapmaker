@@ -17,7 +17,7 @@ public class LavaBucketInteractionRule implements BlockInteractionRule {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition);
 
-        if (BlockTags.CAULDRONS.contains(block.namespace()) && !interaction.player().isSneaking()) {
+        if (BlockTags.CAULDRONS.contains(block.key()) && !interaction.player().isSneaking()) {
             interaction.setBlock(blockPosition, Block.LAVA_CAULDRON);
             return true;
         }

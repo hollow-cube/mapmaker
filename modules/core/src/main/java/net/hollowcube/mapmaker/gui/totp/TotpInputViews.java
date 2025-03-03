@@ -11,6 +11,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,7 +28,7 @@ public class TotpInputViews {
     public static Book backupCodesBook(@NotNull String[] codes) {
         var component = Component.text();
 
-        component.append(Component.text(BadSprite.require("totp/codes").fontChar(), FontUtil.NO_SHADOW));
+        component.append(Component.text(BadSprite.require("totp/codes").fontChar()).shadowColor(ShadowColor.none()));
 
         component.appendNewline().appendNewline().appendNewline().appendNewline().appendNewline();
 

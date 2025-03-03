@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.ints.Int2DoubleFunction;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.attribute.AttributeOperation;
@@ -11,7 +12,6 @@ import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.potion.PotionEffect;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -141,7 +141,7 @@ public record PotionInfo(
         }
 
         public @NotNull Builder attribute(@NotNull Attribute attribute, @NotNull String id, @NotNull Int2DoubleFunction formula, @NotNull AttributeOperation operation) {
-            this.handler = new GenericModifierPotionHandler(attribute, NamespaceID.from(id), formula, operation);
+            this.handler = new GenericModifierPotionHandler(attribute, Key.key(id), formula, operation);
             return this;
         }
 

@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +37,7 @@ public class CakeInteractionRule implements BlockInteractionRule {
     private static @Nullable Block convertCandleToCake(@NotNull Material material) {
         // The corresponding cake for a candle is just "x_candle_cake", e.g. "white_candle" -> "white_candle_cake"
         // This is also true for the normal candle, which is just "candle" -> "candle_cake"
-        String blockName = material.namespace().value() + "_cake";
-        return Block.fromNamespaceId(NamespaceID.from(NamespaceID.MINECRAFT_NAMESPACE, blockName));
+        String blockName = material.key().value() + "_cake";
+        return Block.fromKey(Key.key(Key.MINECRAFT_NAMESPACE, blockName));
     }
 }

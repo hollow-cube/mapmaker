@@ -33,7 +33,7 @@ public class DebugStickItem extends ItemHandler {
     protected void leftClicked(@NotNull Click click) {
         var player = click.player();
         var block = click.instance().getBlock(click.blockPosition(), Block.Getter.Condition.TYPE);
-        var blockId = block.namespace().asString();
+        var blockId = block.key().asString();
 
         final var state = click.itemStack().getTag(TAG_PROPERTY);
         final var property = state.state().get(blockId);
@@ -53,7 +53,7 @@ public class DebugStickItem extends ItemHandler {
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
         var block = click.instance().getBlock(click.blockPosition());
-        var blockId = block.namespace().asString();
+        var blockId = block.key().asString();
 
         final var state = click.itemStack().getTag(TAG_PROPERTY);
         final var property = state.state().get(blockId);

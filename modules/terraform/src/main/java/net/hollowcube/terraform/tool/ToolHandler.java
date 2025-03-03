@@ -1,12 +1,12 @@
 package net.hollowcube.terraform.tool;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,7 +42,7 @@ public class ToolHandler {
         if (discover) {
             for (var tool : ServiceLoader.load(BuiltinTool.class)) {
                 tools.put(tool.name(), tool);
-                names.add(tool.namespace().path());
+                names.add(tool.key().value());
             }
         }
         this.toolNames = List.copyOf(names);
@@ -60,15 +60,15 @@ public class ToolHandler {
     }
 
     public @NotNull ItemStack createBuiltinTool(@NotNull String name) {
-        if (name.contains(":")) return createBuiltinTool(NamespaceID.from(name));
-        return createBuiltinTool(NamespaceID.from("terraform", name));
+        if (name.contains(":")) return createBuiltinTool(Key.key(name));
+        return createBuiltinTool(Key.key("terraform", name));
     }
 
-    public @NotNull ItemStack createBuiltinTool(@NotNull NamespaceID namespace) {
-        var tool = tools.get(namespace.asString());
-        Check.notNull(tool, "missing tool: " + namespace.asString());
+    public @NotNull ItemStack createBuiltinTool(@NotNull Key key) {
+        var tool = tools.get(key.asString());
+        Check.notNull(tool, "missing tool: " + key.asString());
         return ItemStack.of(tool.material())
-                .withTag(BuiltinTool.TYPE, namespace.asString());
+                .withTag(BuiltinTool.TYPE, key.asString());
     }
 
     private void handleBreakBlock(@NotNull PlayerBlockBreakEvent event) {

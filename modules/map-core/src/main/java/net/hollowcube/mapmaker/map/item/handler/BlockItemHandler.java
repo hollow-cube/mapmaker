@@ -32,7 +32,7 @@ public class BlockItemHandler extends ItemHandler {
     }
 
     public BlockItemHandler(@NotNull Supplier<BlockHandler> blockHandler, @NotNull Block block, @Nullable Material material, @Nullable ItemUpdateFunc updateFunc) {
-        super(blockHandler.get().getNamespaceId().asString(), RIGHT_CLICK_BLOCK);
+        super(blockHandler.get().getKey().asString(), RIGHT_CLICK_BLOCK);
         this.block = block.withHandler(blockHandler.get());
         this.material = material != null ? material :
                 Objects.requireNonNull(block.registry().material(), "Block has no material: " + block);

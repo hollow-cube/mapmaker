@@ -14,7 +14,6 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
@@ -50,8 +49,8 @@ public abstract class AbstractMapEditor extends View {
             var translationKey = String.format(
                     "%s.%s.%s",
                     icon.isBlock() ? "block" : "item",
-                    icon.namespace().namespace(),
-                    icon.namespace().path()
+                    icon.key().namespace(),
+                    icon.key().value()
             );
             setMapIconSetLabel.setArgs(Component.translatable(translationKey));
             setMapIconSwitch.setOption(1);

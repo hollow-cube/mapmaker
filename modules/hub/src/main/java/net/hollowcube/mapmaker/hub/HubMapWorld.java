@@ -196,7 +196,7 @@ public class HubMapWorld extends AbstractMapWorld {
 
     private void handleSwitchSlot(@NotNull PlayerChangeHeldSlotEvent event) {
         var playerData = PlayerDataV2.fromPlayer(event.getPlayer());
-        playerData.setSetting(SELECTED_SLOT, (int) event.getSlot());
+        playerData.setSetting(SELECTED_SLOT, (int) event.getNewSlot());
     }
 
     private void handlePlayerMove(@NotNull PlayerMoveEvent event) {

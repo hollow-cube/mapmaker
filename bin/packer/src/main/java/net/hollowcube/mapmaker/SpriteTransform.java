@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker;
 import com.google.gson.*;
 import de.marhali.json5.*;
 import net.hollowcube.mapmaker.type.ServerSprite;
-import net.hollowcube.mapmaker.type.ServerSprite;
 import net.hollowcube.mapmaker.util.ModelUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -79,7 +78,7 @@ public class SpriteTransform {
                             modelEditor = obj -> obj.add("display", toGson(config.getAsJson5Object("display")));
                         }
 
-                        var itemTexture = ctx.writeTexture("item", name, debug ? baos.toByteArray() : Files.readAllBytes(imageFile));
+                        var itemTexture = ctx.writeTexture("item", name, Files.readAllBytes(imageFile));
                         var itemModel = ctx.writeModel(name, ModelUtil.createItemGenerated(itemTexture, modelEditor));
                         ctx.addItemModel(name, ModelUtil.createBasicItem(itemModel));
                     } else if (config.get("type").getAsString().equals("numbered")) {

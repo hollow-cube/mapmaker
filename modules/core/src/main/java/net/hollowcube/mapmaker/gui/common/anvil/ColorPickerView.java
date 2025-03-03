@@ -50,7 +50,8 @@ public class ColorPickerView extends View {
                 ItemStack.builder(Material.LEATHER_HORSE_ARMOR)
                         .set(ItemComponent.DYED_COLOR, new DyedItemColor(this.color, true))
                         .set(ItemComponent.HIDE_TOOLTIP)
-                        .customModelData(COLOR_PREVIEW.cmd())
+                        // TODO(1.21.4) item model
+//                        .customModelData(COLOR_PREVIEW.cmd())
                         .build()
         );
         this.output.setItemSprite(this.output.getItemDirect().with(ItemComponent.HIDE_TOOLTIP));

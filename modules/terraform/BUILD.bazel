@@ -13,6 +13,7 @@ java_library(
         "//modules/core",  # TODO: This is a terrible dependency, but need the action bar stuff for debug stick.
         "//modules/compat",
         "//third_party:minestom",
+        "//third_party:adventure_all",
         "@maven//:com_google_code_gson_gson",
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:net_kyori_adventure_api",

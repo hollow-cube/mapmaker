@@ -60,8 +60,8 @@ public class ComponentEntry extends View {
 
         this.label.setComponentsDirect(
                 Component.translatable("gui.display_entity.properties.item_components.type.%s.%s.name".formatted(
-                        this.component.namespace().namespace(),
-                        this.component.namespace().path()
+                        this.component.key().namespace(),
+                        this.component.key().value()
                 )),
                 lore
         );

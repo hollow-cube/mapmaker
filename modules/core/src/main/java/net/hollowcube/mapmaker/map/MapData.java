@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -330,7 +331,7 @@ public class MapData {
         lore.add(Component.translatable("gui.play_maps.map_display.author", authorName));
         lore.add(Component.empty());
         var contentLine1 = Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
-                .append(Component.text(quality.tooltipBorderSprite().fontChar(), FontUtil.NO_SHADOW))
+                .append(Component.text(quality.tooltipBorderSprite().fontChar()).shadowColor(ShadowColor.none()))
                 .append(Component.text(FontUtil.computeOffset(5)));
         if (isParkour) contentLine1 = contentLine1.append(map.getDifficultyComponent())
                 .append(Component.text(FontUtil.computeOffset(6)));
@@ -345,7 +346,7 @@ public class MapData {
                 .append(Holder.LIKES_ICON_TEXT)
                 .append(Component.text(map.likes(), TextColor.color(0xaeaeae)));
         lore.add(Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
-                .append(Component.text(FontUtil.computeOffset(leftPadding) + difficultyIcon.fontChar() + FontUtil.computeOffset(totalPadding - leftPadding), FontUtil.NO_SHADOW))
+                .append(Component.text(FontUtil.computeOffset(leftPadding) + difficultyIcon.fontChar() + FontUtil.computeOffset(totalPadding - leftPadding)).shadowColor(ShadowColor.none()))
                 .append(Component.text(FontUtil.computeOffset(5)))
                 .append(Component.text(starText.toString()))
                 .append(Component.text(FontUtil.computeOffset(6)))
@@ -355,7 +356,7 @@ public class MapData {
         var settingsLine = createSettingsLine(map);
         if (settingsLine != null) {
             lore.add(Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
-                    .append(Component.text(BadSprite.require("icon/map_tooltip/settings").fontChar(), FontUtil.NO_SHADOW))
+                    .append(Component.text(BadSprite.require("icon/map_tooltip/settings").fontChar()).shadowColor(ShadowColor.none()))
                     .append(Component.text(FontUtil.computeOffset(2)))
                     .append(settingsLine));
             lore.add(Component.empty());
@@ -366,7 +367,7 @@ public class MapData {
             var playtime = personalProgress.getValue();
             if (progress == PersonalizedMapData.Progress.COMPLETE) {
                 lore.add(Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
-                        .append(Component.text(BadSprite.require("icon/map_tooltip/completed").fontChar(), FontUtil.NO_SHADOW))
+                        .append(Component.text(BadSprite.require("icon/map_tooltip/completed").fontChar()).shadowColor(ShadowColor.none()))
                         .append(Component.text(FontUtil.computeOffset(6)))
                         .append(Component.translatable("gui.play_maps.map_display.completed", Component.text(NumberUtil.formatMapPlaytime(playtime, true)))));
                 lore.add(Component.empty());

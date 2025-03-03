@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.object;
 
 import net.hollowcube.mapmaker.map.MapVariant;
-import net.minestom.server.utils.NamespaceID;
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 record ObjectTypeImpl(
-        @NotNull NamespaceID namespaceId,
+        @NotNull Key key,
         int cost,
         @Nullable MapVariant requiredVariant,
         @Nullable String requiredSubVariant
@@ -19,7 +19,7 @@ record ObjectTypeImpl(
 
     @Override
     public @NotNull String id() {
-        return namespaceId.asString();
+        return key.asString();
     }
 
 }

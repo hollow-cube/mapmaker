@@ -183,7 +183,7 @@ public class ReadWorldAccess implements PolarWorldAccess {
 
     @SuppressWarnings("UnstableApiUsage")
     private @Nullable Entity createEntityUnspawned(@NotNull CompoundBinaryTag tag) {
-        EntityType entityType = EntityType.fromNamespaceId(tag.getString("id"));
+        EntityType entityType = EntityType.fromKey(tag.getString("id"));
         if (entityType == null) {
             logger.warn("Unknown entity type {}", tag.getString("id"));
             return null;

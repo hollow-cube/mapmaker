@@ -1,12 +1,12 @@
 package net.hollowcube.mapmaker.map.block.handler;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.component.HeadProfile;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +17,7 @@ import java.util.List;
 public class PlayerHeadBlockHandler implements BlockHandler {
     public static final Tag<BinaryTag> PROFILE = Tag.NBT("profile");
 
-    public static final NamespaceID ID = NamespaceID.from("minecraft:skull");
+    public static final Key ID = Key.key("minecraft:skull");
 
     public static @Nullable HeadProfile extractProfile(@NotNull Block block) {
         var profile = block.getTag(PROFILE);
@@ -29,7 +29,7 @@ public class PlayerHeadBlockHandler implements BlockHandler {
     }
 
     @Override
-    public @NotNull NamespaceID getNamespaceId() {
+    public @NotNull Key getKey() {
         return ID;
     }
 

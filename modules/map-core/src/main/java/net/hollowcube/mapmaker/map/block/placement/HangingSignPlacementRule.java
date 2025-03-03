@@ -112,12 +112,12 @@ public class HangingSignPlacementRule extends WaterloggedPlacementRule {
     }
 
     private boolean isBlockNarrowEnough(@NotNull Block block) {
-        return BlockTags.FENCES.contains(block.namespace());
+        return BlockTags.FENCES.contains(block.key());
     }
 
     private @Nullable Block convertToWallSign(@NotNull Block block) {
-        if (!BlockTags.CEILING_HANGING_SIGNS.contains(block.namespace())) {
-            System.out.println("Tried to convert a non-hanging sign into a wall hanging sign, " + block.namespace());
+        if (!BlockTags.CEILING_HANGING_SIGNS.contains(block.key())) {
+            System.out.println("Tried to convert a non-hanging sign into a wall hanging sign, " + block.key());
             return null;
         }
         // TODO Is there a better way?

@@ -136,7 +136,7 @@ public class BuilderMenuTabItems {
         var world = MapWorld.forPlayerOptional(player);
         if (world == null || !world.canEdit(player)) return;
 
-        var itemStack = world.itemRegistry().getItemStack(item.id(), null);
+        var itemStack = world.itemRegistry().getItemStack(item.key(), null);
         PlayerUtil.giveItem(player, itemStack);
         player.closeInventory();
     }

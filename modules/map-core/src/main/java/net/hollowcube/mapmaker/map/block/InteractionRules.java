@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.mapmaker.map.block.interaction.*;
 import net.hollowcube.mapmaker.map.item.ItemTags;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
@@ -13,7 +14,6 @@ import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -118,7 +118,7 @@ public class InteractionRules {
 
     private static void handleBlockBreak(@NotNull PlayerBlockBreakEvent event) {
         var block = event.getBlock();
-        if ("true".equals(block.getProperty("waterlogged")) || BlockTags.PRE_WATERLOGGED_BLOCKS.contains(block.namespace()))
+        if ("true".equals(block.getProperty("waterlogged")) || BlockTags.PRE_WATERLOGGED_BLOCKS.contains(block.key()))
             event.setResultBlock(Block.WATER);
     }
 
@@ -149,16 +149,16 @@ public class InteractionRules {
         itemRules.put(material.id(), rule);
     }
 
-    private static void item(@NotNull Collection<NamespaceID> tag, @NotNull BlockInteractionRule rule) {
-        tag.forEach(id -> item(Objects.requireNonNull(Material.fromNamespaceId(id)), rule));
+    private static void item(@NotNull Collection<Key> tag, @NotNull BlockInteractionRule rule) {
+        tag.forEach(id -> item(Objects.requireNonNull(Material.fromKey(id)), rule));
     }
 
     private static void block(@NotNull Block block, @NotNull BlockInteractionRule rule) {
         blockRules.put(block.id(), rule);
     }
 
-    private static void block(@NotNull Collection<NamespaceID> tag, @NotNull BlockInteractionRule rule) {
-        tag.forEach(id -> block(Objects.requireNonNull(Block.fromNamespaceId(id)), rule));
+    private static void block(@NotNull Collection<Key> tag, @NotNull BlockInteractionRule rule) {
+        tag.forEach(id -> block(Objects.requireNonNull(Block.fromKey(id)), rule));
     }
 
 }

@@ -42,12 +42,12 @@ public class BannerPlacementRule extends BaseBlockPlacementRule {
 
     private Block toWallBlock(Block block) {
         // Same as skulls, maybe there's a better way
-        String name = block.namespace().value();
+        String name = block.key().value();
 
         // white_banner -> white
         String rawName = name.substring(0, name.lastIndexOf("_"));
 
-        return Block.fromNamespaceId(rawName + "_wall_banner")
+        return Block.fromKey(rawName + "_wall_banner")
                 .withHandler(block.handler());
     }
 

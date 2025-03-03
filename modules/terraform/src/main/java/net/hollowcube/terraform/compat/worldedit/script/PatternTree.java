@@ -13,12 +13,12 @@ import net.hollowcube.terraform.pattern.*;
 import net.hollowcube.terraform.util.script.ParseContext;
 import net.hollowcube.terraform.util.script.ParseException;
 import net.hollowcube.terraform.util.script.ParseTree;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,10 +34,10 @@ public interface PatternTree extends ParseTree<Pattern> {
             @NotNull PropertyList props
     ) implements PatternTree {
         static final List<String> BLOCK_NAMESPACES = Block.values().stream()
-                .map(block -> block.namespace().namespace() + ":")
+                .map(block -> block.key().namespace() + ":")
                 .collect(Collectors.toSet()).stream().toList();
-        static final List<NamespaceID> BLOCKS = Block.values().stream()
-                .map(Block::namespace).sorted().toList();
+        static final List<Key> BLOCKS = Block.values().stream()
+                .map(Block::key).sorted().toList();
 
         @Override
         public int start() {
@@ -120,8 +120,8 @@ public interface PatternTree extends ParseTree<Pattern> {
     ) implements PatternTree {
         @SuppressWarnings({"DataFlowIssue"})
         private static final List<String> DEFAULT_SUGGESTIONS = BlockState.BLOCKS.stream()
-                .filter(id -> Block.fromNamespaceId(id).possibleStates().size() > 1)
-                .map(NamespaceID::path).limit(20).toList();
+                .filter(id -> Block.fromKey(id).possibleStates().size() > 1)
+                .map(Key::value).limit(20).toList();
 
         @Override
         public @NotNull Pattern into(@NotNull ParseContext context) throws ParseException {
@@ -152,16 +152,16 @@ public interface PatternTree extends ParseTree<Pattern> {
         //todo this should come from the registry realistically
         private static final Set<String> BLOCK_TAGS_NAMESPACES = MinecraftServer.getTagManager().getTagMap()
                 .get(net.minestom.server.gamedata.tags.Tag.BasicType.BLOCKS).stream()
-                .map(tag -> tag.getName().namespace()).collect(Collectors.toSet());
-        private static final List<NamespaceID> BLOCK_TAGS = MinecraftServer.getTagManager().getTagMap()
+                .map(tag -> tag.key().namespace()).collect(Collectors.toSet());
+        private static final List<Key> BLOCK_TAGS = MinecraftServer.getTagManager().getTagMap()
                 .get(net.minestom.server.gamedata.tags.Tag.BasicType.BLOCKS).stream()
-                .map(net.minestom.server.gamedata.tags.Tag::getName).toList();
+                .map(net.minestom.server.gamedata.tags.Tag::key).toList();
 
         @Override
         public @NotNull Pattern into(@NotNull ParseContext context) throws ParseException {
             if (namespaceId == null)
                 throw new ParseException(end, end, "expected tag");
-            var tagId = namespaceId.toNamespaceId();
+            var tagId = namespaceId.toKey();
             if (!BLOCK_TAGS.contains(tagId))
                 throw new ParseException(namespaceId.start(), namespaceId.end(), "no such tag: " + tagId);
             return new TagPattern(tagId.asString(), star != -1);
@@ -180,7 +180,7 @@ public interface PatternTree extends ParseTree<Pattern> {
 
             if (namespaceId == null) {
                 for (int i = 0; i < Math.min(20, BLOCK_TAGS.size()); i++) {
-                    suggestion.add(BLOCK_TAGS.get(i).path());
+                    suggestion.add(BLOCK_TAGS.get(i).value());
                 }
             } else {
                 namespaceId.suggest(suggestion, BLOCK_TAGS, BLOCK_TAGS_NAMESPACES, false);
@@ -214,7 +214,7 @@ public interface PatternTree extends ParseTree<Pattern> {
                 // Suggest both an open bracket and some random blocks to start
                 suggestion.add("[", Component.text("Replace by block properties, not block id"));
                 for (int i = 0; i < Math.min(20, BlockState.BLOCKS.size()); i++) {
-                    suggestion.add(BlockState.BLOCKS.get(i).path());
+                    suggestion.add(BlockState.BLOCKS.get(i).value());
                 }
                 return;
             }
@@ -269,7 +269,7 @@ public interface PatternTree extends ParseTree<Pattern> {
 
             for (var entry : this.entries) {
                 if (entry instanceof Weighted(int start, int end, int weight, PatternTree pattern)) {
-                    ParseException.requireNonNull(pattern, start, end,"expected pattern");
+                    ParseException.requireNonNull(pattern, start, end, "expected pattern");
                     var child = pattern.into(context);
                     results.add(new RandomPatternPattern.Entry(weight, child));
                     total += weight;
@@ -350,24 +350,24 @@ public interface PatternTree extends ParseTree<Pattern> {
             @Nullable String right
     ) {
 
-        public @NotNull NamespaceID toNamespaceId() throws ParseException {
+        public @NotNull Key toKey() throws ParseException {
             if (colon != -1 && right == null)
                 throw new ParseException(end, end, "expected block name");
             var namespace = right == null ? "minecraft" : left;
             var path = right == null ? left : right;
-            return NamespaceID.from(namespace, path);
+            return Key.key(namespace, path);
         }
 
         public @NotNull Block toBlock() throws ParseException {
-            var block = Block.fromNamespaceId(toNamespaceId());
+            var block = Block.fromKey(toKey());
             if (block == null)
-                throw new ParseException(start(), end, "no such block: " + toNamespaceId());
+                throw new ParseException(start(), end, "no such block: " + toKey());
             return block;
         }
 
         public void suggest(
                 @NotNull Suggestion suggestion,
-                @NotNull Collection<NamespaceID> values,
+                @NotNull Collection<Key> values,
                 @NotNull Collection<String> namespaces,
                 boolean hasProperties
         ) {
@@ -378,7 +378,7 @@ public interface PatternTree extends ParseTree<Pattern> {
 
             for (var block : values) {
                 // If we hit an exact match then we should suggest a [ to start the property list.
-                if (block.path().equals(path)) {
+                if (block.value().equals(path)) {
                     suggestion.clear();
                     if (hasProperties && hasAnyProps(block.asString())) {
                         suggestion.setStart(suggestion.getStart() + end);
@@ -387,8 +387,8 @@ public interface PatternTree extends ParseTree<Pattern> {
                     return;
                 }
 
-                if (block.path().startsWith(path)) {
-                    suggestion.add(hasNamespace ? block.asString() : block.path());
+                if (block.value().startsWith(path)) {
+                    suggestion.add(hasNamespace ? block.asString() : block.value());
                 }
 
                 if (suggestion.getEntries().size() >= 20)
@@ -407,8 +407,8 @@ public interface PatternTree extends ParseTree<Pattern> {
             }
         }
 
-        private static boolean hasAnyProps(@NotNull String namespaceId) {
-            var block = Block.fromNamespaceId(namespaceId);
+        private static boolean hasAnyProps(@NotNull String key) {
+            var block = Block.fromKey(key);
             assert block != null;
             return PropertyList.POSSIBLE_PROPERTIES.containsKey(block.id());
         }

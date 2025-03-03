@@ -154,7 +154,7 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
         // Particle
         var particleName = data.getString("particle");
         Check.argCondition(particleName.isEmpty(), "Missing particle name");
-        var rawParticle = Particle.fromNamespaceId(particleName);
+        var rawParticle = Particle.fromKey(particleName);
         Check.argCondition(rawParticle == null, "Unknown particle: " + particleName);
         readTypedParticleData(rawParticle, data);
 
@@ -327,7 +327,7 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
                 }
             }
             case Particle.Item itemParticle when data.get("item") instanceof StringBinaryTag itemName -> {
-                var material = Material.fromNamespaceId(itemName.value());
+                var material = Material.fromKey(itemName.value());
                 Check.argCondition(material == null, "Unknown item: " + itemName);
                 particle = ignored -> itemParticle.withItem(ItemStack.of(material));
                 //todo should support custom model data and maybe other components.

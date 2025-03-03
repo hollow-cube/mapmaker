@@ -30,9 +30,9 @@ public class BuilderMenuEntry extends View {
             this.label.setItemSprite(ItemStack.of(material));
         } else if (sprite != null) {
             if (sprite.fontChar() != 0) {
-                this.label.setSprite(sprite.fontChar(), sprite.cmd(), sprite.width(), sprite.offsetX(), sprite.rightOffset());
+                this.label.setSprite(sprite.fontChar(), sprite.model(), sprite.width(), sprite.offsetX(), sprite.rightOffset());
             } else {
-                this.label.setItemSprite(ItemStack.builder(Material.DIAMOND).set(ItemComponent.CUSTOM_MODEL_DATA, sprite.cmd()).build());
+                this.label.setItemSprite(ItemStack.builder(Material.DIAMOND).set(ItemComponent.ITEM_MODEL, sprite.model()).build());
             }
         }
 

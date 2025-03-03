@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.map.feature.play.effect;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
@@ -37,7 +36,7 @@ public sealed interface HotbarItem {
         public static final MapCodec<Remove> CODEC = MapCodec.unit(INSTANCE);
 
         private static final ItemStack ITEM_STACK = ItemStack.builder(Material.DIAMOND)
-                .set(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("effect/item/air").cmd())
+                .set(ItemComponent.ITEM_MODEL, BadSprite.require("effect/item/air").model())
                 .customName(Component.translatable("gui.effect.item.remove.name"))
                 .lore(Component.translatable("gui.effect.item.remove.lore"))
                 .build();

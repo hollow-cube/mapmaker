@@ -21,7 +21,7 @@ public class ShovelInteractionRule implements BlockInteractionRule {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition, Block.Getter.Condition.TYPE);
 
-        if (BlockTags.DIRT_PATH_CONVERTABLE.contains(block.namespace())) {
+        if (BlockTags.DIRT_PATH_CONVERTABLE.contains(block.key())) {
             interaction.setBlock(blockPosition, Block.DIRT_PATH);
             return true;
         }

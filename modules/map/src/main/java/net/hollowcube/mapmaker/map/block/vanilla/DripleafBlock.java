@@ -6,19 +6,19 @@ import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.block.ghost.BlockUpdateTask;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 import java.util.Map;
 
 public class DripleafBlock implements BlockHandler {
-    private static final NamespaceID ID = NamespaceID.from("minecraft:dripleaf");
+    private static final Key ID = Key.key("minecraft:dripleaf");
 
     private static final BoundingBox BOUNDING_BOX = new BoundingBox(1, 2.0 / 16.0, 1);
 
@@ -28,7 +28,7 @@ public class DripleafBlock implements BlockHandler {
     }
 
     @Override
-    public @NotNull NamespaceID getNamespaceId() {
+    public @NotNull Key getKey() {
         return ID;
     }
 

@@ -277,7 +277,7 @@ public class XmlElementReader {
             } else {
                 // Attempt to parse the sprite as an item/cmd in the form `minecraft:stick@1000`
                 var split = spriteName.split("@");
-                var material = Material.fromNamespaceId(split[0]);
+                var material = Material.fromKey(split[0]);
                 if (material == null) {
                     logger.log(System.Logger.Level.WARNING, "Missing sprite: " + spriteName);
                     throw new IllegalArgumentException("Unknown sprite: " + spriteName);

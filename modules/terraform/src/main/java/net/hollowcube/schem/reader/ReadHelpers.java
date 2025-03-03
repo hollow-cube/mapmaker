@@ -40,7 +40,7 @@ final class ReadHelpers {
 
     public static @NotNull Block readBlockState(@NotNull CompoundBinaryTag tag) {
         var name = getRequired(tag, "Name", BinaryTagTypes.STRING).value();
-        var block = Block.fromNamespaceId(name);
+        var block = Block.fromKey(name);
         assertTrue(block != null, "unknown block: {0}", name);
 
         var propsTag = tag.getCompound("Properties");

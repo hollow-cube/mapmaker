@@ -122,7 +122,7 @@ public class UnboundedSchematicBuilder implements SchematicBuilder {
             // Write block entity
             var blockHandler = block.handler();
             if (blockHandler != null) {
-                var blockEntityId = blockHandler.getNamespaceId().asString();
+                var blockEntityId = blockHandler.getKey().asString();
                 var blockEntityData = Objects.requireNonNullElse(block.nbt(), CompoundBinaryTag.empty());
                 blockEntities.put(blockIndex(size, x, y, z), new BlockEntityData(blockEntityId, new Vec(x, y, z), blockEntityData));
             }

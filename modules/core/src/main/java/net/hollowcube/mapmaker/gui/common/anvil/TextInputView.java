@@ -39,7 +39,8 @@ public final class TextInputView extends View {
         this.input.setArgs(Component.text(this.lastInput));
         this.icon.setSprite(
                 this.settings.icon.fontChar(),
-                0,
+                "minecraft:apple", // TODO(1.21.4)
+//                0,
                 this.settings.icon.width(),
                 this.settings.icon.offsetX(),
                 this.settings.icon.rightOffset()

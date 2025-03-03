@@ -7,12 +7,12 @@ import net.hollowcube.mapmaker.map.entity.MapEntityType;
 import net.hollowcube.terraform.TerraformModule;
 import net.hollowcube.terraform.event.TerraformPreSpawnEntityEvent;
 import net.hollowcube.terraform.storage.TerraformStorage;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -67,9 +67,9 @@ public class MapServerModule implements TerraformModule {
         }
     }
 
-    private void register(Map<Integer, Block> overrides, Collection<NamespaceID> tag, BlockHandler handler) {
+    private void register(Map<Integer, Block> overrides, Collection<Key> tag, BlockHandler handler) {
         for (var blockId : tag) {
-            var block = Objects.requireNonNull(Block.fromNamespaceId(blockId));
+            var block = Objects.requireNonNull(Block.fromKey(blockId));
             register(overrides, block, handler);
         }
     }

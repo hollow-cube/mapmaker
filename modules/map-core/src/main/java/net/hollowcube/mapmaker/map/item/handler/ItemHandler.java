@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.item.handler;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
@@ -15,7 +16,6 @@ import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.TagHandler;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -29,7 +29,7 @@ import java.util.function.Consumer;
  * implementations should be implemented as singletons, and registered to the appropriate {@link ItemRegistry} for
  * use within a {@link MapWorld}.
  * <p>
- * Items are identified by their {@link #id()}, which is hashed to set the custom model data of the item stack.
+ * Items are identified by their {@link #key()}, which is hashed to set the custom model data of the item stack.
  */
 public abstract class ItemHandler {
 
@@ -46,19 +46,19 @@ public abstract class ItemHandler {
     public static final int RIGHT_CLICK_ANY = RIGHT_CLICK_AIR | RIGHT_CLICK_BLOCK | RIGHT_CLICK_ENTITY;
     public static final int LEFT_CLICK_ANY = LEFT_CLICK_AIR | LEFT_CLICK_BLOCK | LEFT_CLICK_ENTITY;
 
-    private final NamespaceID id;
+    private final Key key;
     private final int flags;
 
-    protected ItemHandler(@NotNull String id, int... flags) {
-        this.id = NamespaceID.from(id);
+    protected ItemHandler(@NotNull String key, int... flags) {
+        this.key = Key.key(key);
 
         int flag = 0;
         for (int f : flags) flag |= f;
         this.flags = flag;
     }
 
-    public @NotNull NamespaceID id() {
-        return id;
+    public @NotNull Key key() {
+        return key;
     }
 
     /**
@@ -81,7 +81,7 @@ public abstract class ItemHandler {
 
     public @NotNull ItemStack buildItemStack(@Nullable CompoundBinaryTag nbt) {
         var builder = ItemStack.builder(Objects.requireNonNullElse(material(), Material.STICK));
-        var baseTranslationKey = String.format("item.%s.%s", id().namespace(), id().path());
+        var baseTranslationKey = String.format("item.%s.%s", key().namespace(), key().value());
         builder.set(ItemComponent.CUSTOM_NAME, LanguageProviderV2.translate(Component.translatable(baseTranslationKey + ".name")));
         builder.set(ItemComponent.LORE, LanguageProviderV2.translateMulti(baseTranslationKey + ".lore", List.of()));
         updateItemStack(builder, nbt != null ? TagHandler.fromCompound(nbt) : TagHandler.newHandler());

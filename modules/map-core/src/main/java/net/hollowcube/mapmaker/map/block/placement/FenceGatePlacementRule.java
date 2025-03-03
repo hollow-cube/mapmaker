@@ -43,7 +43,7 @@ public class FenceGatePlacementRule extends FacingHorizontalPlacementRule {
 
     private boolean isWall(@NotNull Block.Getter instance, @NotNull Point pos, @NotNull BlockFace blockFace) {
         var block = instance.getBlock(pos.relative(blockFace), Block.Getter.Condition.TYPE);
-        return BlockTags.WALLS.contains(block.namespace());
+        return BlockTags.WALLS.contains(block.key());
     }
 
     @Override
@@ -52,7 +52,7 @@ public class FenceGatePlacementRule extends FacingHorizontalPlacementRule {
     }
 
     public static boolean isConnectableGate(@NotNull Block block, @NotNull BlockFace fenceFace) {
-        if (!BlockTags.FENCE_GATES.contains(block.namespace()))
+        if (!BlockTags.FENCE_GATES.contains(block.key()))
             return false;
 
         var facing = BlockFace.valueOf(block.getProperty("facing").toUpperCase());

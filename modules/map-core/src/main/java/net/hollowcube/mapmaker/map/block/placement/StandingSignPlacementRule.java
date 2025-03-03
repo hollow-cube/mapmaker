@@ -24,8 +24,8 @@ public class StandingSignPlacementRule extends WaterloggedPlacementRule {
     public StandingSignPlacementRule(@NotNull Block block) {
         super(block);
 
-        var wallBlockId = String.format("minecraft:%s_wall_sign", block.namespace().path().replace("_sign", ""));
-        this.wallBlock = Objects.requireNonNull(Block.fromNamespaceId(wallBlockId))
+        var wallBlockId = String.format("minecraft:%s_wall_sign", block.key().value().replace("_sign", ""));
+        this.wallBlock = Objects.requireNonNull(Block.fromKey(wallBlockId))
                 .withNbt(block.nbt()).withHandler(block.handler());
     }
 

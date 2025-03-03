@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.map.feature.experimental.object;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
-import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +13,7 @@ public class TestObjectFeature implements FeatureProvider {
 
     @Override
     public void init(@NotNull ConfigLoaderV3 config) {
-        MinecraftServer.getBlockManager().registerHandler(TestObjectBlock.INSTANCE.getNamespaceId(), () -> TestObjectBlock.INSTANCE);
+        MinecraftServer.getBlockManager().registerHandler(TestObjectBlock.INSTANCE.getKey(), () -> TestObjectBlock.INSTANCE);
     }
 
     @Override

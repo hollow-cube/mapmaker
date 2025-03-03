@@ -13,7 +13,7 @@ import java.util.List;
 public class ItemElement extends LabelElement {
 
     private static final ItemStack BLANK_ITEM = ItemStack.builder(Material.STICK)
-            .set(ItemComponent.CUSTOM_MODEL_DATA, System.getProperty("canvas.debug_blank", "0").equals("1") ? 2 : 1)
+            .set(ItemComponent.ITEM_MODEL, "minecraft:air")
             .set(ItemComponent.HIDE_TOOLTIP)
             .build();
 

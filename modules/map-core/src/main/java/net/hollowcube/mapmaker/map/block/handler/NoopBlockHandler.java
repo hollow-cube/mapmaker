@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.map.block.handler;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockHandler;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -10,14 +10,14 @@ import org.jetbrains.annotations.NotNull;
  * <p>In those cases, we still must have a block handler registered so that the block does not turn invisible.</p>
  */
 public class NoopBlockHandler implements BlockHandler {
-    private final NamespaceID id;
+    private final Key id;
 
     NoopBlockHandler(@NotNull String id) {
-        this.id = NamespaceID.from(id);
+        this.id = Key.key(id);
     }
 
     @Override
-    public @NotNull NamespaceID getNamespaceId() {
+    public @NotNull Key getKey() {
         return id;
     }
 }

@@ -18,7 +18,6 @@ import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 
 import java.nio.file.Files;
@@ -40,7 +39,7 @@ public class DemoServer {
         MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProviderV2.translate(component);
 
         var dimension = MinecraftServer.getDimensionTypeRegistry().register(
-                NamespaceID.from("mapmaker:bright_dim"),
+                "mapmaker:bright_dim",
                 DimensionType.builder().ambientLight(2.0f).build()
         );
 

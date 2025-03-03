@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.map.MapServer;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -17,14 +18,13 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.packet.server.play.ExplosionPacket;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.sound.SoundEvent;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
 @AutoService(HubFeature.class)
 public class LauncherFeature implements HubFeature {
-    private static final SoundEvent EMPTY_SOUND = SoundEvent.of(NamespaceID.from("not.a.real.sound"), 0f);
+    private static final SoundEvent EMPTY_SOUND = SoundEvent.of(Key.key("not.a.real.sound"), 0f);
 
     // From the perspective of the player when they spawn in the world.
     private final LauncherEntity left = new LauncherEntity();

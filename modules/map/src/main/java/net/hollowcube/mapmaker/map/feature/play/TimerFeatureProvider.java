@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.feature.play;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;

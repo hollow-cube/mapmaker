@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.instance.dimension;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.registry.DynamicRegistry;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 
 public final class DimensionTypes {
@@ -15,10 +14,10 @@ public final class DimensionTypes {
 
     static {
         var registry = MinecraftServer.getDimensionTypeRegistry();
-        FULL_BRIGHT = registry.register(NamespaceID.from("mapmaker:bright_dim"), DimensionType.builder()
+        FULL_BRIGHT = registry.register("mapmaker:bright_dim", DimensionType.builder()
                 .ambientLight(2.0f)
                 .build());
-        MAPMAKER_MAP = registry.register(NamespaceID.from("mapmaker:map"), DimensionType.builder()
+        MAPMAKER_MAP = registry.register("mapmaker:map", DimensionType.builder()
                 .ambientLight(2.0f)
                 .build());
     }

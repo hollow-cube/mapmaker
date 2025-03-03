@@ -8,6 +8,7 @@ import net.hollowcube.compat.noxesium.packets.ClientboundChangeServerRulesPacket
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.util.InteractTarget;
 import net.hollowcube.mapmaker.util.TagCooldown;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
@@ -24,7 +25,6 @@ import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -100,13 +100,13 @@ public class ItemRegistry {
     private final Int2ObjectMap<ItemHandler> materialToItemHandler = new Int2ObjectArrayMap<>();
 
     // Contains all the "public" item names known by this registry. Used for completions.
-    private final Set<NamespaceID> allItemNames = new TreeSet<>((a, b) -> a.asString().compareToIgnoreCase(b.asString()));
+    private final Set<Key> allItemNames = new TreeSet<>((a, b) -> a.asString().compareToIgnoreCase(b.asString()));
 
     private final TagCooldown useCooldown = new TagCooldown("mapmaker:hotbar_cooldown", 250);
 
     public ItemRegistry() {
         for (var item : Material.values()) {
-            allItemNames.add(item.namespace());
+            allItemNames.add(item.key());
         }
     }
 
@@ -117,7 +117,7 @@ public class ItemRegistry {
     public void register(@NotNull ItemHandler itemHandler) {
         try {
             lock.lock();
-            idToItemHandler.put(itemHandler.id().asString().toLowerCase(Locale.ROOT), itemHandler);
+            idToItemHandler.put(itemHandler.key().asString().toLowerCase(Locale.ROOT), itemHandler);
             var sprite = itemHandler.sprite();
             var material = itemHandler.material();
             if (sprite != null) {
@@ -129,7 +129,7 @@ public class ItemRegistry {
                 throw new IllegalArgumentException("ItemHandler must provide either a sprite or material");
             }
 
-            allItemNames.add(itemHandler.id());
+            allItemNames.add(itemHandler.key());
         } finally {
             lock.unlock();
         }
@@ -142,7 +142,7 @@ public class ItemRegistry {
         //todo this is still allowing /give to work, need to fix.
         try {
             lock.lock();
-            idToItemHandler.put(itemHandler.id().asString().toLowerCase(Locale.ROOT), itemHandler);
+            idToItemHandler.put(itemHandler.key().asString().toLowerCase(Locale.ROOT), itemHandler);
             var sprite = itemHandler.sprite();
             var material = itemHandler.material();
             if (sprite != null) {
@@ -158,7 +158,7 @@ public class ItemRegistry {
         }
     }
 
-    public @UnknownNullability ItemStack getItemStack(@NotNull NamespaceID id, @Nullable CompoundBinaryTag nbt) {
+    public @UnknownNullability ItemStack getItemStack(@NotNull Key id, @Nullable CompoundBinaryTag nbt) {
         return getItemStack(id.asString(), nbt);
     }
 
@@ -170,7 +170,7 @@ public class ItemRegistry {
             return itemHandler.buildItemStack(nbt);
         }
 
-        var material = Material.fromNamespaceId(namespace);
+        var material = Material.fromKey(namespace);
         if (material == null) return null;
         var builder = ItemStack.builder(material);
         return builder.build();
@@ -178,16 +178,16 @@ public class ItemRegistry {
 
     public @Nullable String getItemId(@NotNull ItemStack itemStack) {
         var itemHandler = getHandlerFromItemStack(itemStack);
-        return itemHandler == null ? null : itemHandler.id().asString();
+        return itemHandler == null ? null : itemHandler.key().asString();
     }
 
     private @NotNull List<String> suggestItems(@Nullable String filter) {
         var normalFilter = filter == null ? "" : filter.toLowerCase(Locale.ROOT);
         return allItemNames.stream()
                 .filter(name -> name.asString().startsWith(normalFilter)
-                        || name.path().startsWith(normalFilter))
+                        || name.value().startsWith(normalFilter))
                 .limit(20)
-                .map(NamespaceID::asString)
+                .map(Key::asString)
                 .toList();
     }
 

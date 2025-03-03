@@ -43,7 +43,7 @@ public final class NbtUtil {
         public @NotNull Block read(@NotNull BinaryTag tag) {
             if (!(tag instanceof CompoundBinaryTag compound)) return Block.AIR;
 
-            var block = Block.fromNamespaceId(compound.getString("Name"));
+            var block = Block.fromKey(compound.getString("Name"));
             if (block == null) return Block.AIR;
 
             for (var entry : compound.getCompound("Properties")) {

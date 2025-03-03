@@ -21,10 +21,10 @@ public class HoeInteractionRule implements BlockInteractionRule {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition, Block.Getter.Condition.TYPE);
 
-        if (BlockTags.FARMLAND_CONVERTABLE.contains(block.namespace())) {
+        if (BlockTags.FARMLAND_CONVERTABLE.contains(block.key())) {
             interaction.setBlock(blockPosition, Block.FARMLAND);
             return true;
-        } else if (BlockTags.DIRT_CONVERTABLE.contains(block.namespace())) {
+        } else if (BlockTags.DIRT_CONVERTABLE.contains(block.key())) {
             interaction.setBlock(blockPosition, Block.DIRT);
             return true;
         }

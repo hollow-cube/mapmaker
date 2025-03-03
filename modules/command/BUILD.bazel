@@ -9,6 +9,7 @@ java_library(
     deps = [
         "//modules/common",
         "//third_party:minestom",
+        "//third_party:adventure_all",
         "@maven//:dev_hollowcube_posthog_java",
         "@maven//:it_unimi_dsi_fastutil",
         "@maven//:net_kyori_adventure_api",
