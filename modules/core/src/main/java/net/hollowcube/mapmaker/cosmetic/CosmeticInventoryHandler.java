@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.cosmetic;
 
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.common.events.PlayerGiveCreativeItemEvent;
-import net.hollowcube.mapmaker.gui.store.CosmeticView;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.MinecraftServer;
@@ -25,11 +24,13 @@ public class CosmeticInventoryHandler {
     private static void handleInventoryCosmeticSelector(@NotNull Controller guiController, @NotNull InventoryPreClickEvent event) {
         if (event.getInventory() != null) return; // Not the player inventory
 
-        var cosmeticType = CosmeticType.byIconSlot(event.getSlot());
-        if (cosmeticType == null) return;
-        if (CosmeticView.DISABLED_TABS.contains(cosmeticType)) return;
+        // TODO(1.21.4)
+//        var cosmeticType = CosmeticType.byIconSlot(event.getSlot());
+//        if (cosmeticType == null) return;
+//        if (CosmeticView.DISABLED_TABS.contains(cosmeticType)) return;
+//
+//        guiController.show(event.getPlayer(), c -> new CosmeticView(c, cosmeticType));
 
-        guiController.show(event.getPlayer(), c -> new CosmeticView(c, cosmeticType));
 
 //        if (event.getInventory() != event.getPlayerInventory())
 //            return; // Not the player inventory (e one, not just lower section)

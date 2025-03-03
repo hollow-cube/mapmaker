@@ -20,7 +20,6 @@ import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
-import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -350,18 +349,21 @@ public class ItemRegistry {
     private void handleLeftClickGui(@NotNull InventoryPreClickEvent event) {
         var player = event.getPlayer();
         if (player.getTag(TRIGGER_TAG) != null) return;
+
+        // TODO(1.21.4)
+
         //todo support other gui actions here
-        if (event.getInventory() != null || event.getClickType() != ClickType.LEFT_CLICK) return;
-
-        var itemStack = event.getClickedItem();
-        var itemHandler = getHandlerFromItemStack(itemStack);
-        if (itemHandler == null || !itemHandler.allows(ItemHandler.LEFT_CLICK_GUI)) return;
-
-        player.setTag(TRIGGER_TAG, true);
-        itemHandler.leftClicked(new ItemHandler.Click(
-                itemHandler, player, itemStack, PlayerHand.MAIN,
-                null, null, null, null
-        ));
+//        if (event.getInventory() != null || event.getClickType() != ClickType.LEFT_CLICK) return;
+//
+//        var itemStack = event.getClickedItem();
+//        var itemHandler = getHandlerFromItemStack(itemStack);
+//        if (itemHandler == null || !itemHandler.allows(ItemHandler.LEFT_CLICK_GUI)) return;
+//
+//        player.setTag(TRIGGER_TAG, true);
+//        itemHandler.leftClicked(new ItemHandler.Click(
+//                itemHandler, player, itemStack, PlayerHand.MAIN,
+//                null, null, null, null
+//        ));
     }
 
     private void handlePlayerSpawn(PlayerSpawnEvent event) {

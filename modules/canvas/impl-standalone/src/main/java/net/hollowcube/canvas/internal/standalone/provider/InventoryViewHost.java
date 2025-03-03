@@ -16,6 +16,7 @@ import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.PlayerInventory;
+import net.minestom.server.inventory.click.Click;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.client.play.ClientNameItemPacket;
 import net.minestom.server.network.packet.server.play.WindowItemsPacket;
@@ -320,11 +321,10 @@ public class InventoryViewHost {
         }
 
         private static void handleInventoryClick(@NotNull InventoryPreClickEvent event) {
-            int slot = event.getSlot();
-            ClickType clickType = switch (event.getClickType()) {
-                case LEFT_CLICK -> ClickType.LEFT_CLICK;
-                case RIGHT_CLICK -> ClickType.RIGHT_CLICK;
-                case START_SHIFT_CLICK -> ClickType.SHIFT_LEFT_CLICK;
+            ClickType clickType = switch (event.getClick()) {
+                case Click.Left ignored -> ClickType.LEFT_CLICK;
+                case Click.Right ignored -> ClickType.RIGHT_CLICK;
+                case Click.LeftShift ignored -> ClickType.SHIFT_LEFT_CLICK;
                 default -> null;
             };
             if (clickType == null) {
@@ -333,25 +333,18 @@ public class InventoryViewHost {
             }
 
             // If the click happened inside the player inventory
-            InventoryWrapper wrapper;
-            if (event.getInventory() instanceof InventoryWrapper w) {
-                wrapper = w;
-            } else if (event.getInventory() == null && event.getPlayer().getOpenInventory() instanceof InventoryWrapper w) {
-                // This means we are in the player inventory with a custom inventory open
-                wrapper = w;
-                // Offset slot to be absolute from the top of the gui
-                var invSize = CUSTOM_TYPES.contains(w.getInventoryType()) ? 9 : w.getInventoryType().getSize();
-                if (slot < 9) {
-                    // hotbar
-                    slot += invSize + (9 * 3);
-                } else {
-                    // main inventory
-                    slot += invSize - 9;
+            int slot = event.getClick().slot();
+            InventoryWrapper wrapper = switch (event.getInventory()) {
+                case InventoryWrapper w -> w;
+                case DelegatingPlayerInventory ignored when event.getPlayer().getOpenInventory() instanceof InventoryWrapper w -> {
+                    // Offset slot to be absolute from the top of the gui
+                    var mainSize = CUSTOM_TYPES.contains(w.getInventoryType()) ? 9 : w.getInventoryType().getSize();
+                    slot += mainSize + (slot < 9 ? 27 : -9);
+                    yield w;
                 }
-            } else {
-                // Not a relevant click
-                return;
-            }
+                default -> null;
+            };
+            if (wrapper == null) return;
 
             var allow = wrapper.tryHandleClick(slot, event.getPlayer(), clickType);
             event.setCancelled(!allow);

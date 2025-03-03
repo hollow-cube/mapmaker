@@ -115,10 +115,12 @@ public class CustomizableHotbarManager {
         if (!MapFeatureFlags.CUSTOMIZABLE_HOTBAR.test(player)) return; // Not enabled for this player
         if (this != player.getTag(TAG) || event.getInventory() != null || player.getOpenInventory() != null)
             return; // Not active on this hotbar or not the player inventory
-        if (event.getSlot() < 0 || event.getSlot() > 8 || event.getClickType() != ClickType.LEFT_CLICK) {
-            event.setCancelled(true);
-            return; // Not the hotbar or not a left click
-        }
+
+        // TODO(1.21.4)
+//        if (event.getSlot() < 0 || event.getSlot() > 8 || event.getClickType() != ClickType.LEFT_CLICK) {
+//            event.setCancelled(true);
+//            return; // Not the hotbar or not a left click
+//        }
 
         // Otherwise we allow the change, and will save the hotbar on the post event.
         // Do it during post so that any other cancellation will be respected
