@@ -2,20 +2,24 @@ package net.hollowcube.mapmaker.scripting;
 
 import net.hollowcube.mapmaker.scripting.cjs.Module;
 import net.hollowcube.mapmaker.scripting.gui.GuiManager;
+import net.hollowcube.mapmaker.scripting.loader.FileSystemLoader;
+import net.hollowcube.mapmaker.scripting.loader.InternalScriptLoader;
+import net.hollowcube.mapmaker.scripting.loader.ScriptLoader;
 import net.hollowcube.mapmaker.scripting.node.Process;
 import net.hollowcube.mapmaker.scripting.node.SetTimeout;
 import net.hollowcube.mapmaker.scripting.util.Garbage;
 import org.graalvm.polyglot.Context;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -29,20 +33,35 @@ import java.util.function.Function;
  * script for each player. If we do apply limits and a player engine exceeds those limits the
  * player will be removed from the map. If a global exceeds those limits, the map world itself
  * will be closed with an error.</p>
+ *
+ * <p>ScriptEngine and Module together implement commonjs module loading with the same mechanisms
+ * and behaviors as nodejs when in doubt (for example, recursive module loading returning partial
+ * results).</p>
  */
 public class ScriptEngine {
     private static final Logger log = LoggerFactory.getLogger(ScriptEngine.class);
     private final Context context;
 
+    private final Map<String, ScriptLoader> loaders = new HashMap<>();
     private final Map<URI, Module> moduleCache = new HashMap<>();
 
+    // Sub handlers, created lazily when needed.
     private GuiManager guiManager = null; // Lazy
 
     public ScriptEngine() {
         this.context = Context.newBuilder().build();
 
+        try {
+            // We always add the internal loader right now, but actually importing React is potentially a privileged action
+            // and should be done through a different mechanism.
+            this.loaders.put("internal", new InternalScriptLoader());
+            // This is also of course temporary, need to figure out how this will be included in dev vs prod.
+            this.loaders.put("guilib", new FileSystemLoader("guilib", Path.of("./guilib/dist/"), this::handleModuleHotSwap));
+        } catch (IOException e) {
+            throw new RuntimeException("failed to create default script loaders", e);
+        }
+
         setupGlobals();
-        setupFileWatcher();
     }
 
     public @NotNull GuiManager guiManager() {
@@ -75,36 +94,30 @@ public class ScriptEngine {
     }
 
     public @NotNull Module load(@NotNull URI script, @NotNull Map<String, Object> globals, @NotNull Map<String, Object> extraModules, @NotNull Function<String, String> codeWrapper) {
-        //TODO: fix this, we should just support this resolution mechanism probably
-        if (script.equals(URI.create("internal:///third_party/react/react-refresh/runtime.js"))) {
-            script = URI.create("internal:///third_party/react/react-refresh-runtime.js");
-        }
         final Module existing = this.moduleCache.get(script);
         if (existing != null) return existing;
 
-        final String code = switch (script.getScheme()) {
-            case "internal" -> {
-                try (var is = getClass().getResourceAsStream(script.getPath())) {
-                    if (is == null) throw new IllegalArgumentException("resource not found: " + script);
-                    yield new String(is.readAllBytes(), StandardCharsets.UTF_8);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            case "guilib" -> {
-                try {
-                    final Path filePath = Path.of("./guilib/dist/" + script.getPath());
-                    yield Files.readString(filePath);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            case null, default ->
-                    throw new UnsupportedOperationException("unsupported uri scheme: " + script.getScheme());
-        };
-        // TODO: we do not handle circular references here it will be a stack overflow
-        final Module loaded = new Module(this, script, codeWrapper.apply(code), globals, extraModules);
+        final String code;
+        final ScriptLoader loader = this.loaders.get(script.getScheme());
+        if (loader == null) {
+            throw new UnsupportedOperationException("unsupported uri scheme: " + script.getScheme());
+        }
+
+        try {
+            code = Objects.requireNonNull(loader.load(script), () -> "module not found: " + script);
+        } catch (IOException e) {
+            throw new RuntimeException(e); //todo better handling
+        }
+
+        // Insert the module into the cache _before_ trying to evaluate it to handle circular references.
+        // This will result in circular references being resolved even if they resolve to partial exports.
+        // We are inheriting this behavior from nodejs.
+        final Module loaded = new Module(this, script, "", globals, extraModules);
         this.moduleCache.put(script, loaded);
+
+        // Evaluate the module now that it can be resolved circularly.
+        loaded.loadModuleText(codeWrapper.apply(code));
+
         return loaded;
     }
 
@@ -114,45 +127,14 @@ public class ScriptEngine {
         global.putMember("setTimeout", new SetTimeout());
     }
 
-    private void setupFileWatcher() {
-        try {
-            final Path basePath = Path.of("./guilib/dist");
-            var watchService = FileSystems.getDefault().newWatchService();
-            WatchKey uncancelledKey = basePath.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
-            //todo we need to cancel the key at some point :(
+    private void handleModuleHotSwap(@NotNull URI moduleUri, @Nullable String newCode) {
+        var removed = this.moduleCache.remove(moduleUri);
+        if (removed == null) return; // Not loaded currently, ignore.
+        if (newCode == null) return; // Unload, no need to reload.
 
-            Thread.startVirtualThread(() -> {
-                try {
-                    WatchKey key;
-                    while ((key = watchService.take()) != null) {
-                        for (WatchEvent<?> event : key.pollEvents()) {
-                            final Path changedFile = basePath.resolve((Path) event.context());
-
-                            final URI moduleUri = URI.create("guilib:///" + changedFile.toString().replace("./guilib/dist/", ""));
-                            System.out.println("FILE CHANGED " + changedFile + " " + moduleUri);
-
-                            var removed = this.moduleCache.remove(moduleUri);
-                            if (removed == null) {
-                                log.info("module did not exist previously, skipping: {}", moduleUri);
-                                continue;
-                            }
-
-                            load(moduleUri, removed.globals(), removed.extraModules(), (code) -> {
-                                return String.format(Garbage.REACT_REFRESH_MODULE_TEMPLATE, code);
-                            });
-                        }
-                        key.reset();
-                    }
-                } catch (Exception e) {
-                    log.error("an exception occurred in file watch thread", e);
-                }
-            });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        // TODO this entire file watcher API should be abstracted away to a development script loader or something
-        //  where we can load from jar which is where it will end up in prod.
+        load(moduleUri, removed.globals(), removed.extraModules(), (code) -> {
+            return String.format(Garbage.REACT_REFRESH_MODULE_TEMPLATE, code);
+        });
     }
 
 }

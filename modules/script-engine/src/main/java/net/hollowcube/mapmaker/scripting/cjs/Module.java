@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.scripting.util.Garbage;
 import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -24,8 +25,9 @@ public class Module {
     private final Map<String, Object> globals = new LinkedHashMap<>();
     private final Map<String, Object> extraModules;
 
-    private final Value exports;
+    private Value exports;
 
+    @ApiStatus.Internal
     public Module(@NotNull ScriptEngine engine, @NotNull URI uri, @NotNull String code, @NotNull Map<String, Object> globals, @NotNull Map<String, Object> extraModules) {
         this.engine = engine;
         this.uri = uri;
@@ -33,7 +35,7 @@ public class Module {
         this.globals.putAll(globals);
         this.extraModules = Map.copyOf(extraModules);
 
-        this.exports = loadJsModule(uri, code);
+        this.exports = engine.context().eval("js", "({})");
     }
 
     public @NotNull URI uri() {
@@ -68,7 +70,12 @@ public class Module {
         return this.extraModules;
     }
 
-    private @NotNull Value loadJsModule(@NotNull URI uri, @NotNull String code) {
+    @ApiStatus.Internal
+    public void loadModuleText(@NotNull String code) {
+        this.exports = loadJsModule(code); //todo support json
+    }
+
+    private @NotNull Value loadJsModule(@NotNull String code) {
         try (var ignored = engine.makeCurrent()) {
             // We wrap the evaluation in a function to ensure that modules are evaluated in different scopes.
             var wrappedCodeBuilder = new StringBuilder();
@@ -79,14 +86,10 @@ public class Module {
             var source = Source.newBuilder("js", wrappedCodeBuilder, this.name).build();
 
             var context = engine.context();
-            var exports = context.eval("js", "({})");
             var module = context.eval("js", "({})");
-            module.putMember("exports", exports);
+            module.putMember("exports", this.exports);
             module.putMember("filename", this.name);
             module.putMember("id", this.name);
-            module.putMember("loaded", false);
-            // There is also a concept of module hierarchy, we don't currently do anything with it so dont expose the key.
-            // Those keys would be parent & child
 
             // Args match wrapped function above.
             final String uriPath = this.uri.getPath();
@@ -129,7 +132,7 @@ public class Module {
             // TODO: appending .js might have to be part of engine.load resolution if it should support json also. not sure
             loadUri = uri.resolve(module + ".js");
         } else {
-            loadUri = URI.create("internal:///third_party/react/" + args[0].asString() + ".js");
+            loadUri = URI.create("internal:///react/" + args[0].asString() + ".js");
         }
 
         var globals = new HashMap<>(this.globals);

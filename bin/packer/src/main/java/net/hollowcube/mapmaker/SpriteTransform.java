@@ -42,12 +42,44 @@ public class SpriteTransform {
             for (Path imageFile : files) {
                 if (!imageFile.getFileName().toString().endsWith(".png")) continue;
                 Path configFile = imageFile.resolveSibling(imageFile.getFileName().toString().replace(".png", ".json5"));
-                if (!Files.exists(configFile)) continue;
+
+                var relative = guiBaseDir.relativize(imageFile);
+                boolean canSkipConfig = relative.toString().startsWith("store/") && !relative.toString().contains("checkout");
+
+                if (!canSkipConfig && !Files.exists(configFile)) continue;
 
                 String name = guiBaseDir.relativize(imageFile).toString()
                         .replace(".png", "")
                         .replace("\\", "/");
                 try {
+                    if (canSkipConfig) {
+
+                        Json5Object config = new Json5Object();
+                        int openIndex = name.indexOf("[");
+                        if (openIndex != -1) {
+                            if (name.charAt(name.length() - 1) != ']') {
+                                throw new RuntimeException("Invalid sprite name: " + name);
+                            }
+
+                            String params = name.substring(openIndex + 1, name.length() - 1);
+                            for (var pair : params.split(",")) {
+                                int eq = pair.indexOf("=");
+                                if (eq == -1) {
+                                    config.addProperty(pair, true);
+                                } else {
+                                    config.addProperty(pair.substring(0, eq), pair.substring(eq + 1));
+                                }
+                            }
+                            name = name.substring(0, openIndex);
+                        }
+
+                        JsonObject resultFontChar = new JsonObject();
+                        ServerSprite sprite = processImage(context, name, Files.readAllBytes(imageFile), config, resultFontChar);
+                        context.addFontCharacter(resultFontChar);
+                        context.addServerSprite(sprite);
+                        continue;
+                    }
+
                     Json5Object config = json5.parse(Files.readString(configFile)).getAsJson5Object();
 
                     if (config.get("type").getAsString().equals("sprite")) {
@@ -56,7 +88,6 @@ public class SpriteTransform {
                         ctx.addFontCharacter(resultFontChar);
                         ctx.addServerSprite(serverSprite);
                     } else if (config.get("type").getAsString().equals("item")) {
-
                         BufferedImage image = ImageIO.read(imageFile.toFile());
                         if (image.getWidth() != 16 || image.getHeight() != 16)
                             throw new RuntimeException("Item sprites must be 16x");

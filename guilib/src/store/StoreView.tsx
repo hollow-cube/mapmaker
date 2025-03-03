@@ -1,6 +1,6 @@
 import {useState, view} from "@mapmaker/gui";
 
-import BackButton from "./BackButton";
+import BackButton from "../lib/BackButton";
 import CubitsTab from "./CubitsTab";
 import HypercubeTab from "./HypercubeTab";
 import AddonsTab from "./AddonsTab";
@@ -57,7 +57,7 @@ function StoreView() {
                 </button>
                 <button onLeftClick={() => setTab('addons')}>
                     <tooltip translationKey='gui.store.addons' slotWidth={3} slotHeight={3}>
-                        <sprite src={tab === 'addons' ? 'store/add-ons_active' : 'store/add-ons_inactive'}/>
+                        <sprite src={tab === 'addons' ? 'store/addons_active' : 'store/addons_inactive'}/>
                     </tooltip>
                 </button>
             </group>

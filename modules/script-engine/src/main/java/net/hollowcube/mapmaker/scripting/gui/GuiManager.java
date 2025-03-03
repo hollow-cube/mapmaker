@@ -38,8 +38,8 @@ public class GuiManager {
         // todo should only run in a 'development' environment
         setupReactRefresh();
 
-        this.react = engine.load(URI.create("internal:///third_party/react/react.js"));
-        this.reactReconcilerInst = engine.load(URI.create("internal:///third_party/react/react-reconciler.js"))
+        this.react = engine.load(URI.create("internal:///react/react.js"));
+        this.reactReconcilerInst = engine.load(URI.create("internal:///react/react-reconciler.js"))
                 .exports().execute(new ReconcilerHostConfig());
         this.reactReconcilerInst.invokeMember("injectIntoDevTools");
 
@@ -131,7 +131,7 @@ public class GuiManager {
 
     private void setupReactRefresh() {
         // Load react-refresh runtime _before_ any other react imports. It must be done before for it to work.
-        var reactRefreshRuntime = engine.load(URI.create("internal:///third_party/react/react-refresh-runtime.js"));
+        var reactRefreshRuntime = engine.load(URI.create("internal:///react/react-refresh/runtime.js"));
         var globalThis = engine.context().getBindings("js");
 
         // Notably this injects into the global namespace which means we leak react details to other scripts. I think this is bad and we
