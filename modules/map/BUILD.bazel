@@ -10,6 +10,7 @@ java_library(
         "//modules/canvas:api",
         "//modules/command",
         "//modules/common",
+        "//modules/compat",
         "//modules/core",
         "//modules/map-core",
         "//modules/replay",
