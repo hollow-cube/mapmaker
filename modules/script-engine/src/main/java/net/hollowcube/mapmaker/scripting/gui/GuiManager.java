@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.scripting.gui;
 
+import net.hollowcube.mapmaker.scripting.Module;
 import net.hollowcube.mapmaker.scripting.ScriptEngine;
-import net.hollowcube.mapmaker.scripting.cjs.Module;
 import net.hollowcube.mapmaker.scripting.gui.react.AtMapmakerGuiModule;
 import net.hollowcube.mapmaker.scripting.gui.react.JSX;
+import net.hollowcube.mapmaker.scripting.gui.react.ReactRefresh;
 import net.hollowcube.mapmaker.scripting.gui.react.ReconcilerHostConfig;
-import net.hollowcube.mapmaker.scripting.util.Garbage;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.InventoryType;
 import org.graalvm.polyglot.Value;
@@ -13,7 +13,6 @@ import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -32,21 +31,23 @@ public class GuiManager {
     public GuiManager(@NotNull ScriptEngine engine) {
         this.engine = engine;
 
-        // todo yikes, find out why we suddenly need this (probably only during development)
-        engine.context().getBindings("js").putMember("window", engine.context().getBindings("js"));
-
-        // todo should only run in a 'development' environment
-        setupReactRefresh();
+        // React refresh _must_ be initialized before loading React or any of its components.
+        if (engine.env().isDevelopment()) {
+            ReactRefresh.setup(engine);
+        }
 
         this.react = engine.load(URI.create("internal:///react/react.js"));
         this.reactReconcilerInst = engine.load(URI.create("internal:///react/react-reconciler.js"))
                 .exports().execute(new ReconcilerHostConfig());
-        this.reactReconcilerInst.invokeMember("injectIntoDevTools");
+        if (engine.env().isDevelopment()) {
+            // Reconciler dev tools must be loaded for react-refresh to work properly
+            this.reactReconcilerInst.invokeMember("injectIntoDevTools");
+        }
 
         this.hostContext = this.react.exports().invokeMember("createContext");
         this.react.exports().putMember("__hollowcube_hostContext", this.hostContext);
 
-        this.viewSymbol = engine.context().eval("js", "Symbol.for('$$hcView')");
+        this.viewSymbol = engine.makeCurrent(ctx -> ctx.eval("Symbol.for('$$hcView')"));
 
         this.globals = Map.of("JSX", new JSX(this.react));
         this.extraModules = Map.of("@mapmaker/gui", new AtMapmakerGuiModule(this, this.react));
@@ -59,12 +60,7 @@ public class GuiManager {
      * @param modulePath The module to load
      */
     public void openGui(@NotNull Player player, @NotNull URI modulePath) {
-        // TODO: dont wildly duplicate this code for react refresh with Module
-        var globals = new HashMap<>(this.globals);
-        globals.put("__hollowcube_moduleId", modulePath.toString());
-        final Value componentModule = this.engine.load(modulePath, globals, this.extraModules, (code) -> {
-            return String.format(Garbage.REACT_REFRESH_MODULE_TEMPLATE, code);
-        }).exports();
+        final Value componentModule = this.engine.load(modulePath, this.globals, this.extraModules).exports();
         if (!componentModule.hasMember("default"))
             throw new IllegalArgumentException("Module must have a default export");
         final Value component = componentModule.getMember("default");
@@ -127,24 +123,6 @@ public class GuiManager {
         component.putMember("$$hcView", viewSymbol);
         component.putMember("inventoryType", inventoryType);
         return component;
-    }
-
-    private void setupReactRefresh() {
-        // Load react-refresh runtime _before_ any other react imports. It must be done before for it to work.
-        var reactRefreshRuntime = engine.load(URI.create("internal:///react/react-refresh/runtime.js"));
-        var globalThis = engine.context().getBindings("js");
-
-        // Notably this injects into the global namespace which means we leak react details to other scripts. I think this is bad and we
-        // instead should handle this with the Module implementation (ie call this with a new object and expose all the properties added
-        // to child modules so it never ends up in the context global scope).
-        // TODO: see above
-        reactRefreshRuntime.exports().invokeMember("injectIntoGlobalHook", globalThis);
-        globalThis.putMember("$RefreshReg$", engine.context().eval("js", "() => {}"));
-        globalThis.putMember("$RefreshSig$", engine.context().eval("js", "() => type => type"));
-        globalThis.putMember("enqueueUpdate", (ProxyExecutable) (args) -> {
-            reactRefreshRuntime.exports().invokeMember("performReactRefresh");
-            return null;
-        });
     }
 
     private @NotNull InventoryType getInventoryType(@NotNull Value view) {

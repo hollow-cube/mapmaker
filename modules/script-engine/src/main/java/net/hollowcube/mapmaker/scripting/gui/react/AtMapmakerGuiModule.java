@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.scripting.gui.react;
 
-import net.hollowcube.mapmaker.scripting.cjs.Module;
+import net.hollowcube.mapmaker.scripting.Module;
 import net.hollowcube.mapmaker.scripting.gui.GuiManager;
 import net.hollowcube.mapmaker.scripting.gui.InventoryHost;
 import net.minestom.server.entity.Player;

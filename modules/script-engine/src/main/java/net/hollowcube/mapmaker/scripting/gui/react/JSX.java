@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.scripting.gui.react;
 
-import net.hollowcube.mapmaker.scripting.cjs.Module;
+import net.hollowcube.mapmaker.scripting.Module;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
 import org.jetbrains.annotations.NotNull;

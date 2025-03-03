@@ -1,7 +1,6 @@
-package net.hollowcube.mapmaker.scripting.cjs;
+package net.hollowcube.mapmaker.scripting;
 
-import net.hollowcube.mapmaker.scripting.ScriptEngine;
-import net.hollowcube.mapmaker.scripting.util.Garbage;
+import net.hollowcube.mapmaker.scripting.util.ContextWrapper;
 import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
@@ -10,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,14 +26,14 @@ public class Module {
     private Value exports;
 
     @ApiStatus.Internal
-    public Module(@NotNull ScriptEngine engine, @NotNull URI uri, @NotNull String code, @NotNull Map<String, Object> globals, @NotNull Map<String, Object> extraModules) {
+    public Module(@NotNull ScriptEngine engine, @NotNull URI uri, @NotNull Map<String, Object> globals, @NotNull Map<String, Object> extraModules) {
         this.engine = engine;
         this.uri = uri;
         this.name = extractFileName(uri);
         this.globals.putAll(globals);
         this.extraModules = Map.copyOf(extraModules);
 
-        this.exports = engine.context().eval("js", "({})");
+        this.exports = engine.makeCurrent(ContextWrapper::newObject);
     }
 
     public @NotNull URI uri() {
@@ -44,18 +42,6 @@ public class Module {
 
     public @NotNull String filename() {
         return uri.getPath();
-    }
-
-    /**
-     * Returns whether this module is privileged. Privileged modules can only be directly imported from other
-     * privileged modules. This is a loose security feature as privileged modules can incorrectly declare
-     * globals accessible from other modules. However `require('some_privileged_module')` will not work from
-     * unprivileged modules.
-     *
-     * @return whether this module is privileged
-     */
-    public boolean privileged() {
-        throw new UnsupportedOperationException("todo");
     }
 
     public @NotNull Value exports() {
@@ -76,7 +62,7 @@ public class Module {
     }
 
     private @NotNull Value loadJsModule(@NotNull String code) {
-        try (var ignored = engine.makeCurrent()) {
+        try (var context = engine.makeCurrent()) {
             // We wrap the evaluation in a function to ensure that modules are evaluated in different scopes.
             var wrappedCodeBuilder = new StringBuilder();
             wrappedCodeBuilder.append("(function (exports, require, module, __filename, __dirname");
@@ -85,11 +71,10 @@ public class Module {
             wrappedCodeBuilder.append(") {").append(code).append("})");
             var source = Source.newBuilder("js", wrappedCodeBuilder, this.name).build();
 
-            var context = engine.context();
-            var module = context.eval("js", "({})");
+            var module = context.newObject();
             module.putMember("exports", this.exports);
             module.putMember("filename", this.name);
-            module.putMember("id", this.name);
+            module.putMember("id", this.uri.toString());
 
             // Args match wrapped function above.
             final String uriPath = this.uri.getPath();
@@ -130,18 +115,12 @@ public class Module {
         final URI loadUri;
         if (module.startsWith(".")) {
             // TODO: appending .js might have to be part of engine.load resolution if it should support json also. not sure
-            loadUri = uri.resolve(module + ".js");
+            loadUri = URI.create("%s://%s".formatted(uri.getScheme(), uri.resolve(module + ".js").getPath()));
         } else {
             loadUri = URI.create("internal:///react/" + args[0].asString() + ".js");
         }
 
-        var globals = new HashMap<>(this.globals);
-        globals.put("__hollowcube_moduleId", loadUri.toString());
-        return engine.load(loadUri, globals, this.extraModules, (code) -> {
-            if (loadUri.getScheme().equals("internal")) return code;
-            // language=JS
-            return String.format(Garbage.REACT_REFRESH_MODULE_TEMPLATE, code);
-        }).exports();
+        return engine.load(loadUri, this.globals, this.extraModules).exports();
     }
 
     private static @NotNull String extractFileName(@NotNull URI uri) {

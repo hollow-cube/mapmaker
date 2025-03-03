@@ -1,18 +1,16 @@
 package net.hollowcube.mapmaker.scripting;
 
-import net.hollowcube.mapmaker.scripting.cjs.Module;
 import net.hollowcube.mapmaker.scripting.gui.GuiManager;
+import net.hollowcube.mapmaker.scripting.instrumentation.ModuleInterceptor;
 import net.hollowcube.mapmaker.scripting.loader.FileSystemLoader;
 import net.hollowcube.mapmaker.scripting.loader.InternalScriptLoader;
 import net.hollowcube.mapmaker.scripting.loader.ScriptLoader;
 import net.hollowcube.mapmaker.scripting.node.Process;
 import net.hollowcube.mapmaker.scripting.node.SetTimeout;
-import net.hollowcube.mapmaker.scripting.util.Garbage;
+import net.hollowcube.mapmaker.scripting.util.ContextWrapper;
 import org.graalvm.polyglot.Context;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -39,16 +37,18 @@ import java.util.function.Function;
  * results).</p>
  */
 public class ScriptEngine {
-    private static final Logger log = LoggerFactory.getLogger(ScriptEngine.class);
+    private final Env env;
     private final Context context;
 
     private final Map<String, ScriptLoader> loaders = new HashMap<>();
     private final Map<URI, Module> moduleCache = new HashMap<>();
+    private ModuleInterceptor interceptor = null;
 
     // Sub handlers, created lazily when needed.
     private GuiManager guiManager = null; // Lazy
 
     public ScriptEngine() {
+        this.env = new Env(true); // todo not always dev :)
         this.context = Context.newBuilder().build();
 
         try {
@@ -64,18 +64,14 @@ public class ScriptEngine {
         setupGlobals();
     }
 
+    public @NotNull Env env() {
+        return this.env;
+    }
+
     public @NotNull GuiManager guiManager() {
         if (this.guiManager == null)
             this.guiManager = new GuiManager(this);
         return this.guiManager;
-    }
-
-    public interface ContextCloser extends AutoCloseable {
-        @Override void close();
-    }
-
-    public @NotNull Context context() {
-        return context;
     }
 
     /**
@@ -84,20 +80,25 @@ public class ScriptEngine {
      *
      * @return a closeable that will leave the context when closed
      */
-    public @NotNull ContextCloser makeCurrent() {
-        context.enter();
-        return context::leave;
+    public @NotNull ContextWrapper makeCurrent() {
+        return new ContextWrapper(context);
+    }
+
+    public <T> T makeCurrent(@NotNull Function<ContextWrapper, T> func) {
+        try (var ctx = makeCurrent()) {
+            return func.apply(ctx);
+        }
     }
 
     public @NotNull Module load(@NotNull URI script) {
-        return load(script, Map.of(), Map.of(), Function.identity());
+        return load(script, Map.of(), Map.of());
     }
 
-    public @NotNull Module load(@NotNull URI script, @NotNull Map<String, Object> globals, @NotNull Map<String, Object> extraModules, @NotNull Function<String, String> codeWrapper) {
+    public @NotNull Module load(@NotNull URI script, @NotNull Map<String, Object> globals, @NotNull Map<String, Object> extraModules) {
         final Module existing = this.moduleCache.get(script);
         if (existing != null) return existing;
 
-        final String code;
+        String code;
         final ScriptLoader loader = this.loaders.get(script.getScheme());
         if (loader == null) {
             throw new UnsupportedOperationException("unsupported uri scheme: " + script.getScheme());
@@ -109,16 +110,28 @@ public class ScriptEngine {
             throw new RuntimeException(e); //todo better handling
         }
 
+        // Apply any instrumentation logic to the module.
+        if (this.interceptor != null) {
+            code = this.interceptor.defineModule(script, code);
+        }
+
         // Insert the module into the cache _before_ trying to evaluate it to handle circular references.
         // This will result in circular references being resolved even if they resolve to partial exports.
         // We are inheriting this behavior from nodejs.
-        final Module loaded = new Module(this, script, "", globals, extraModules);
+        final Module loaded = new Module(this, script, globals, extraModules);
         this.moduleCache.put(script, loaded);
 
         // Evaluate the module now that it can be resolved circularly.
-        loaded.loadModuleText(codeWrapper.apply(code));
+        loaded.loadModuleText(code);
 
         return loaded;
+    }
+
+    public void instrument(@NotNull ModuleInterceptor interceptor) {
+        // In the future we probably need to support multiple instruments
+        // for now i (matt) will remain lazy and have one.
+        if (this.interceptor != null) throw new UnsupportedOperationException("only one interceptor supported");
+        this.interceptor = interceptor;
     }
 
     private void setupGlobals() {
@@ -132,9 +145,7 @@ public class ScriptEngine {
         if (removed == null) return; // Not loaded currently, ignore.
         if (newCode == null) return; // Unload, no need to reload.
 
-        load(moduleUri, removed.globals(), removed.extraModules(), (code) -> {
-            return String.format(Garbage.REACT_REFRESH_MODULE_TEMPLATE, code);
-        });
+        load(moduleUri, removed.globals(), removed.extraModules());
     }
 
 }
