@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,11 +36,18 @@ public class ChatCommand extends CommandDsl {
         playerData.setSetting(PlayerSettings.CHAT_CHANNEL, channel.name().toLowerCase(Locale.ROOT));
         playerData.writeUpdatesUpstream(playerService);
 
-        player.sendMessage("Switched to " + channel.name().toLowerCase(Locale.ROOT) + " chat");
+        player.sendMessage(Component.translatable(channel.translation));
     }
 
     private enum Channel {
-        GLOBAL,
-        LOCAL,
+        GLOBAL("commands.chat.switching.global"),
+        LOCAL("commands.chat.switching.local")
+        ;
+
+        public final String translation;
+
+        Channel(String translation) {
+            this.translation = translation;
+        }
     }
 }
