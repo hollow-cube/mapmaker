@@ -5,8 +5,6 @@ import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.entity.Player;
-import net.minestom.server.network.packet.server.play.CustomChatCompletionPacket;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,14 +41,6 @@ public record Emoji(
 
     public static @NotNull Collection<Emoji> values() {
         return EMOJI_MAP.sequencedValues();
-    }
-
-    public static void sendTabCompletions(@NotNull Player player) {
-        // TODO in the future may be can make it so that it only sends the emojis that the player has access to.
-        player.sendPacket(new CustomChatCompletionPacket(
-            CustomChatCompletionPacket.Action.ADD,
-            EMOJI_MAP.keySet().stream().map(name -> ":" + name + ":").toList()
-        ));
     }
 
     public static final Emoji SMILE = builder("smile").parent("face").build();

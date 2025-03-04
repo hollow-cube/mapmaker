@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.marhali.json5.Json5;
 import de.marhali.json5.Json5Object;
+import net.hollowcube.mapmaker.type.ServerSprite;
 import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
@@ -54,12 +55,7 @@ public class ItemModelTransform {
                 String model = ctx.writeModel(name, modelObj);
                 int cmd = ctx.addBasicItem(ModelType.DEFAULT, name, model);
 
-                JsonObject serverSpriteConf = new JsonObject();
-                serverSpriteConf.addProperty("name", name);
-                serverSpriteConf.addProperty("cmd", cmd);
-                serverSpriteConf.addProperty("width", 0);
-                serverSpriteConf.addProperty("offsetX", 0);
-                ctx.getServerSprites().add(serverSpriteConf);
+                ctx.addServerSprite(ServerSprite.customModelData(name, cmd));
             }
         }
     }

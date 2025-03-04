@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.util;
 
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.compat.axiom.AxiomPlayer;
 import net.hollowcube.mapmaker.map.LeaderboardData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -298,6 +299,20 @@ public class LeaderboardDisplay {
         @Override
         public @NotNull TextDisplayMeta getEntityMeta() {
             return (TextDisplayMeta) super.getEntityMeta();
+        }
+
+        @Override
+        public void updateNewViewer(@NotNull Player player) {
+            super.updateNewViewer(player);
+
+            AxiomPlayer.updateIgnoredEntities(player, it -> it.add(this.getUuid()));
+        }
+
+        @Override
+        public void updateOldViewer(@NotNull Player player) {
+            super.updateOldViewer(player);
+
+            AxiomPlayer.updateIgnoredEntities(player, it -> it.remove(this.getUuid()));
         }
     }
 }

@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import net.hollowcube.mapmaker.type.ServerSprite;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -41,12 +42,11 @@ public class Hub5x5Transform {
                     String model = ctx.writeModel(name, modelContent);
                     int cmd = ctx.addBasicItem(ModelType.COLORED, name, model);
 
-                    JsonObject serverSpriteConf = new JsonObject();
-                    serverSpriteConf.addProperty("name", "hub/" + typeName + "/" + name);
-                    serverSpriteConf.addProperty("cmd", cmd);
-                    serverSpriteConf.addProperty("width", longSize);
-                    serverSpriteConf.addProperty("offsetX", 0);
-                    ctx.getServerSprites().add(serverSpriteConf);
+                    ctx.addServerSprite(new ServerSprite(
+                            "hub/" + typeName + "/" + name,
+                            cmd, null, (char) 0, longSize,
+                            0, 0
+                    ));
                 }
             }
         }

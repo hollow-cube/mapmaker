@@ -13,6 +13,7 @@ java_library(
     deps = [
         "//modules/canvas:api",
         "//modules/command",
+        "//modules/compat",
         "//modules/common",
         "//third_party:minestom",
         "//third_party:otel",

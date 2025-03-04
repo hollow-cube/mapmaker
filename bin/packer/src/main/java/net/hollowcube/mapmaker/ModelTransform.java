@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.marhali.json5.Json5;
 import de.marhali.json5.Json5Object;
+import net.hollowcube.mapmaker.type.ServerSprite;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -48,14 +49,8 @@ public class ModelTransform {
                 String model = ctx.writeModel(name, modelObj);
                 int cmd = ctx.addBasicItem(ModelType.COLORED, name, model);
 
-                JsonObject serverSpriteConf = new JsonObject();
                 String fullName = "models/" + fontBaseDir.relativize(itemModelFile).toString().replace(".json5", "").replace("\\", "/");
-//                System.out.println("processing " + fullName);
-                serverSpriteConf.addProperty("name", fullName);
-                serverSpriteConf.addProperty("cmd", cmd);
-                serverSpriteConf.addProperty("width", 0);
-                serverSpriteConf.addProperty("offsetX", 0);
-                ctx.getServerSprites().add(serverSpriteConf);
+                ctx.addServerSprite(ServerSprite.customModelData(fullName, cmd));
             }
         }
     }

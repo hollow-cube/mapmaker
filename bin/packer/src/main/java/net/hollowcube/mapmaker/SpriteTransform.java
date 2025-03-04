@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker;
 
 import com.google.gson.*;
 import de.marhali.json5.*;
+import net.hollowcube.mapmaker.type.ServerSprite;
 import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
@@ -16,7 +17,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -45,36 +45,19 @@ public class SpriteTransform {
                 String name = guiBaseDir.relativize(imageFile).toString()
                         .replace(".png", "")
                         .replace("\\", "/");
-//                System.out.println("processing " + name);
                 try {
                     Json5Object config = json5.parse(Files.readString(configFile)).getAsJson5Object();
 
                     if (config.get("type").getAsString().equals("sprite")) {
                         JsonObject resultFontChar = new JsonObject();
-                        JsonObject serverSpriteConf = new JsonObject();
-                        processImage(context, name, Files.readAllBytes(imageFile), config, resultFontChar, serverSpriteConf);
+                        ServerSprite sprite = processImage(context, name, Files.readAllBytes(imageFile), config, resultFontChar);
                         context.addFontCharacter(resultFontChar);
-                        context.getServerSprites().add(serverSpriteConf);
+                        context.addServerSprite(sprite);
                     } else if (config.get("type").getAsString().equals("item")) {
 
                         BufferedImage image = ImageIO.read(imageFile.toFile());
                         if (image.getWidth() != 16 || image.getHeight() != 16)
                             throw new RuntimeException("Item sprites must be 16x");
-                        BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
-                        Graphics graphics = newImage.getGraphics();
-                        graphics.setColor(new Color(
-                                ThreadLocalRandom.current().nextInt(0, 255),
-                                ThreadLocalRandom.current().nextInt(0, 255),
-                                ThreadLocalRandom.current().nextInt(0, 255),
-                                255
-                        ));
-                        int ofwidth = image.getWidth() / 4;
-                        int ofheight = image.getHeight() / 4;
-                        graphics.fillRect(ofwidth, ofheight, ofwidth * 3, ofwidth * 3);
-                        image = newImage;
-
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        ImageIO.write(image, "png", baos);
 
                         Consumer<JsonObject> modelEditor = null;
                         if (config.get("no_head") != null) {
@@ -96,19 +79,9 @@ public class SpriteTransform {
                         ModelType modelType = config.get("colored") != null && config.get("colored").getAsBoolean() ?
                                 ModelType.COLORED : ModelType.DEFAULT;
 
-                        int cmd;
-                        if (debug) {
-                            cmd = context.addBasicItemTexture(modelType, name, baos.toByteArray(), modelEditor);
-                        } else {
-                            cmd = context.addBasicItemTexture(modelType, name, Files.readAllBytes(imageFile), modelEditor);
-                        }
-
-                        JsonObject serverSpriteConf = new JsonObject();
-                        serverSpriteConf.addProperty("name", name);
-                        serverSpriteConf.addProperty("cmd", cmd);
-                        serverSpriteConf.addProperty("width", 0);
-                        serverSpriteConf.addProperty("offsetX", 0);
-                        context.getServerSprites().add(serverSpriteConf);
+                        String modelId = context.writeBasicModel(name, Files.readAllBytes(imageFile), modelEditor);
+                        int cmd = context.addBasicItem(modelType, name, modelId);
+                        context.addServerSprite(ServerSprite.itemModel(name, modelId.replace("item/", ""), cmd));
                     } else if (config.get("type").getAsString().equals("numbered")) {
                         BufferedImage baseImage = ImageIO.read(imageFile.toFile());
                         if (baseImage.getWidth() != 16 || baseImage.getHeight() != 16)
@@ -138,12 +111,7 @@ public class SpriteTransform {
                             if (firstCmd == -1) firstCmd = cmd;
                         }
 
-                        JsonObject serverSpriteConf = new JsonObject();
-                        serverSpriteConf.addProperty("name", name);
-                        serverSpriteConf.addProperty("cmd", firstCmd);
-                        serverSpriteConf.addProperty("width", 0);
-                        serverSpriteConf.addProperty("offsetX", 0);
-                        context.getServerSprites().add(serverSpriteConf);
+                        context.addServerSprite(ServerSprite.customModelData(name, firstCmd));
                     }
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to process " + name, e);
@@ -152,29 +120,13 @@ public class SpriteTransform {
         }
     }
 
-    private void processImage(@NotNull PackContext ctx, @NotNull String name, byte[] data, @NotNull Json5Object conf, @NotNull JsonObject fontConf, @NotNull JsonObject serverSpriteConf) throws IOException {
+    private ServerSprite processImage(@NotNull PackContext ctx, @NotNull String name, byte[] data, @NotNull Json5Object conf, @NotNull JsonObject fontConf) throws IOException {
         BufferedImage image = ImageIO.read(new ByteArrayInputStream(data));
 
         int width = image.getWidth();
         int height = image.getHeight();
         int ascent = 0;
         int offX = 0;
-
-        if (debug) {
-            BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
-            Graphics graphics = newImage.getGraphics();
-            graphics.setColor(new Color(
-                    ThreadLocalRandom.current().nextInt(0, 255),
-                    ThreadLocalRandom.current().nextInt(0, 255),
-                    ThreadLocalRandom.current().nextInt(0, 255),
-                    255
-            ));
-            graphics.fillRect(0, 0, newImage.getWidth(), 2);
-            graphics.fillRect(newImage.getWidth() - 2, 0, newImage.getWidth(), newImage.getHeight());
-            graphics.fillRect(0, newImage.getHeight() - 2, newImage.getWidth(), newImage.getHeight());
-            graphics.fillRect(0, 0, 2, newImage.getHeight());
-            image = newImage;
-        }
 
         if (conf.has("size")) {
             Json5Array origin = conf.getAsJson5Array("size");
@@ -234,14 +186,8 @@ public class SpriteTransform {
         chars.add(fontChar);
         fontConf.add("chars", chars);
 
-        serverSpriteConf.addProperty("name", name);
-        serverSpriteConf.addProperty("fontChar", (char) rawFontChar);
-        serverSpriteConf.addProperty("width", width);
-        serverSpriteConf.addProperty("offsetX", offX);
-        if (right != 0)
-            serverSpriteConf.addProperty("rightOffset", right);
-
         entries.put(name, fontChar);
+        return ServerSprite.fontChar(name, (char) rawFontChar, width, offX, right);
     }
 
     private static JsonElement toGson(Json5Element element) {

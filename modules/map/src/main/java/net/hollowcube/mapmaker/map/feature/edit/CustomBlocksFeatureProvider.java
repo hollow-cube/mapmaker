@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.feature.edit;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.compat.axiom.events.AxiomMarkerDataRequestEvent;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.custom.BouncePadBlock;
@@ -27,7 +28,6 @@ import net.hollowcube.mapmaker.map.gui.effect.EditStatusView;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
-import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomRequestMarkerDataEvent;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -45,7 +45,7 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("custom-blocks-event-node", EventFilter.INSTANCE)
             .addListener(MapWorldPlayerStopPlayingEvent.class, this::cleanupPlayer)
-            .addListener(TerraformAxiomRequestMarkerDataEvent.class, this::handleMarkerClick);
+            .addListener(AxiomMarkerDataRequestEvent.class, this::handleMarkerClick);
     private final EventNode<InstanceEvent> playingNode = EventNode.type("custom-blocks-event-node", EventFilter.INSTANCE)
             .addListener(MarkerEntityEnteredEvent.class, this::handleEffectMarkerEnter)
             .addListener(MarkerEntityExitedEvent.class, this::handleEffectMarkerExit);
@@ -99,12 +99,11 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
         player.removeTag(BaseEffectData.TARGET_PLATE);
     }
 
-    private void handleMarkerClick(@NotNull TerraformAxiomRequestMarkerDataEvent event) {
+    private void handleMarkerClick(@NotNull AxiomMarkerDataRequestEvent event) {
         var player = event.getPlayer(); // If sneaking allow edit like normal
-        if (event.isCancelled() || event.getData() == null || player.isSneaking()) return;
+        if (event.getData() == null || player.isSneaking()) return;
 
-        var entity = player.getInstance().getEntityByUuid(event.getEntityUuid());
-        if (!(entity instanceof MarkerEntity marker)) return; // Sanity
+        if (!(event.marker() instanceof MarkerEntity marker)) return; // Sanity
         var world = MapWorld.forPlayerOptional(player);
         if (world == null || !world.canEdit(player)) return; // Sanity
 

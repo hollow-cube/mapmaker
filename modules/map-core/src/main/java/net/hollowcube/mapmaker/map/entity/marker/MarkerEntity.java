@@ -1,29 +1,33 @@
 package net.hollowcube.mapmaker.map.entity.marker;
 
 import net.hollowcube.common.util.ExtraTags;
+import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.compat.axiom.AxiomPlayer;
+import net.hollowcube.compat.axiom.events.AxiomMarkerDataRequestEvent;
+import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundMarkerDataPacket;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.event.entity.MarkerEntityEnteredEvent;
 import net.hollowcube.mapmaker.map.event.entity.MarkerEntityExitedEvent;
 import net.hollowcube.mapmaker.util.CoordinateUtil;
-import net.hollowcube.terraform.compat.axiom.Axiom;
-import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomRequestMarkerDataEvent;
 import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomUpdateMarkerDataEvent;
-import net.hollowcube.terraform.compat.axiom.packet.server.AxiomMarkerDataPacket;
 import net.kyori.adventure.nbt.BinaryTagTypes;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.ListBinaryTag;
 import net.kyori.adventure.nbt.StringBinaryTag;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
+import net.minestom.server.color.AlphaColor;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
+import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -69,7 +73,7 @@ public class MarkerEntity extends MapEntity {
         // - children third, ordered by priority
         // We need these to run first, so we directly register them on the root....
         var globalEventHandler = MinecraftServer.getGlobalEventHandler();
-        globalEventHandler.addListener(TerraformAxiomRequestMarkerDataEvent.class, MarkerEntity::handleAxiomRequestMarkerData);
+        globalEventHandler.addListener(AxiomMarkerDataRequestEvent.class, MarkerEntity::handleAxiomRequestMarkerData);
         globalEventHandler.addListener(TerraformAxiomUpdateMarkerDataEvent.class, MarkerEntity::handleAxiomUpdateMarkerData);
     }
 
@@ -160,8 +164,8 @@ public class MarkerEntity extends MapEntity {
         if (world == null) return;
 
         if (handler != null) handler.addViewer(player);
-        if (world.canEdit(player)) {
-            Axiom.sendPacket(player, createAxiomAddPacket());
+        if (world.canEdit(player) && AxiomPlayer.isEnabled(player)) {
+            createAxiomMarkerUpdatePacket().send(player);
         }
     }
 
@@ -175,7 +179,7 @@ public class MarkerEntity extends MapEntity {
         if (handler != null) handler.removeViewer(player);
         if (world.canEdit(player)) {
             // Destroy the axiom marker (if it is enabled/installed)
-            Axiom.sendPacket(player, new AxiomMarkerDataPacket(getUuid()));
+            createAxiomMarkerRemovePacket().send(player);
         }
     }
 
@@ -193,17 +197,16 @@ public class MarkerEntity extends MapEntity {
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> teleport(@NotNull Pos position, long @Nullable [] chunks, int flags) {
-        return super.teleport(position, chunks, flags).thenRun(() -> {
-
-            // Update position for axiom viewers
-            Axiom.sendPacket(getViewers(), createAxiomAddPacket());
-        });
+    public @NotNull CompletableFuture<Void> teleport(@NotNull Pos position, long @Nullable [] chunks, @MagicConstant(flagsFromClass = RelativeFlags.class) int flags) {
+        return super.teleport(position, chunks, flags)
+                .thenRun(() -> createAxiomMarkerUpdatePacket().sendToViewers(this));
     }
 
-    private static void handleAxiomRequestMarkerData(@NotNull TerraformAxiomRequestMarkerDataEvent event) {
-        var marker = assertEditableMarker(event.getEditor(), event.getEntityUuid());
-        if (marker == null) return;
+    private static void handleAxiomRequestMarkerData(@NotNull AxiomMarkerDataRequestEvent event) {
+        var world = MapWorld.forPlayerOptional(event.player());
+        if (!(event.marker() instanceof MarkerEntity marker)) return;
+        if (world == null || !world.canEdit(event.player())) return;
+        if (!world.instance().equals(marker.getInstance())) return;
 
         event.setData(marker.getTag(DATA_TAG)
                 .put("axiom:hide", AXIOM_HIDE_LIST)
@@ -211,10 +214,10 @@ public class MarkerEntity extends MapEntity {
     }
 
     private static void handleAxiomUpdateMarkerData(@NotNull TerraformAxiomUpdateMarkerDataEvent event) {
-        var marker = assertEditableMarker(event.getEditor(), event.getEntityUuid());
+        var marker = assertEditableMarker(event.editor(), event.entityUuid());
         if (marker == null) return;
 
-        var newData = event.getData().getCompound("data");
+        var newData = event.data().getCompound("data");
         var updating = !newData.getBoolean("axiom:modify", false);
         var minChanged = newData.get("min") != null;
         var maxChanged = newData.get("max") != null;
@@ -252,14 +255,12 @@ public class MarkerEntity extends MapEntity {
                 marker.handler = world.markerRegistry().create(newType, marker);
             } else marker.handler = null;
         }
-        if (marker.handler != null) marker.handler.onDataChange(event.getEditor());
+        if (marker.handler != null) marker.handler.onDataChange(event.editor());
     }
 
     private void updateForViewers() {
         if (isRemoved() || !visible) return;
-
-        var axiomAddPacket = createAxiomAddPacket();
-        Axiom.sendPacket(getInstance(), axiomAddPacket);
+        createAxiomMarkerUpdatePacket().sendToViewers(this);
     }
 
     private void updateBoundingBox() {
@@ -273,15 +274,17 @@ public class MarkerEntity extends MapEntity {
         setBoundingBox(new BoundingBox(size.x(), size.y(), size.z(), min));
     }
 
-    private @NotNull AxiomMarkerDataPacket createAxiomAddPacket() {
-        var regionMin = getTag(REGION_MIN_TAG);
-        if (regionMin != null) regionMin = regionMin.add(getPosition());
-        var regionMax = getTag(REGION_MAX_TAG);
-        if (regionMax != null) regionMax = regionMax.add(getPosition());
-        return new AxiomMarkerDataPacket(new AxiomMarkerDataPacket.Entry(
-                getUuid(), getPosition(), getDisplayName(),
-                regionMin, regionMax, 0, 0, 0
-        ));
+    private @NotNull AxiomClientboundMarkerDataPacket createAxiomMarkerUpdatePacket() {
+        var pos = this.getPosition();
+        return AxiomClientboundMarkerDataPacket.updateMarker(
+                this.getUuid(), pos, this.getDisplayName(),
+                OpUtils.map(this.getMin(), pos::add), OpUtils.map(this.getMax(), pos::add),
+                new AlphaColor(0), new AlphaColor(0), 0
+        );
+    }
+
+    private @NotNull AxiomClientboundMarkerDataPacket createAxiomMarkerRemovePacket() {
+        return AxiomClientboundMarkerDataPacket.removeMarker(this.getUuid());
     }
 
     private static @Nullable MarkerEntity assertEditableMarker(@NotNull Player editor, @NotNull UUID entityUuid) {

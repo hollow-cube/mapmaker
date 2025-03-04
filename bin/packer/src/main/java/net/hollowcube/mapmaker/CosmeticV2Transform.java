@@ -78,13 +78,13 @@ public class CosmeticV2Transform {
                             String model = ctx.writeModel(name, modelObj);
                             int cmd = ctx.addBasicItem(ModelType.COLORED, name, model);
 
-                            ctx.addServerSprite(new ServerSprite(path, cmd));
+                            ctx.addServerSprite(ServerSprite.customModelData(path, cmd));
                         }
 
                         {   // Add icon item texture
                             byte[] texture = Files.readAllBytes(cosmeticDir.resolve("icon.png"));
                             int cmd = ctx.addBasicItemTexture(ModelType.DEFAULT, path + "/icon", texture);
-                            ctx.addServerSprite(new ServerSprite(path + "/icon", cmd));
+                            ctx.addServerSprite(ServerSprite.customModelData(path + "/icon", cmd));
 
                             var tex = ImageIO.read(new ByteArrayInputStream(texture));
                             var g = tex.createGraphics();
@@ -94,7 +94,7 @@ public class CosmeticV2Transform {
                             ImageIO.write(tex, "png", baos);
 
                             int lockedCmd = ctx.addBasicItemTexture(ModelType.DEFAULT, path + "/icon_locked", baos.toByteArray());
-                            ctx.addServerSprite(new ServerSprite(path + "/icon_locked", lockedCmd));
+                            ctx.addServerSprite(ServerSprite.customModelData(path + "/icon_locked", lockedCmd));
                         }
                     } catch (Exception e) {
                         throw new RuntimeException("failed processing " + name, e);

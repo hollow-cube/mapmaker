@@ -135,5 +135,6 @@ public abstract class BaseEffectData {
         player.sendMessage("Potion effects: " + (potionEffects().isEmpty() ? "none" : potionEffects().toString()));
         player.sendMessage("Teleport: " + teleport().map(Point::toString).orElse("none"));
         player.sendMessage("Items: " + items());
+        player.sendMessage("Settings: " + settings());
     }
 }

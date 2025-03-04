@@ -26,6 +26,7 @@ import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
+import net.hollowcube.mapmaker.chat.ChatAutoCompleter;
 import net.hollowcube.mapmaker.chat.ChatChannelDisplay;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.chat.announcements.ChatAnnouncer;
@@ -66,7 +67,6 @@ import net.hollowcube.mapmaker.map.util.datafix.HCTypeRegistry;
 import net.hollowcube.mapmaker.metrics.MetricWriter;
 import net.hollowcube.mapmaker.metrics.MetricWriterNoop;
 import net.hollowcube.mapmaker.metrics.MetricWriterPosthog;
-import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.misc.ExpBarRenderer;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.misc.noop.*;
@@ -628,7 +628,7 @@ public abstract class AbstractMapServer implements MapServer {
         // Player init
         player.setDisplayName(playerData.displayName2().build(DisplayName.Context.DEFAULT));
         MiscFunctionality.assignTeam(player);
-        Emoji.sendTabCompletions(player);
+        ChatAutoCompleter.sendSuggestions(player);
 
         PlayerBackpack.fromPlayer(player).refresh();
 
