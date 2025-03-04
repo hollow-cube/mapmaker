@@ -51,11 +51,7 @@ public final class BiomeCommands {
                 );
             } else {
                 List<Component> lines = new ArrayList<>();
-                lines.add(ExtraComponents.translatable("commands.biome_list.header")
-                        .with(page + 1)
-                        .with(maxPage + 1)
-                        .build()
-                );
+                lines.add(ExtraComponents.translatable("commands.biome_list.header").build());
 
                 for (int i = 10 * page; i < Math.min(keys.size(), 10 * nextPage); i++) {
                     var key = keys.get(i);
@@ -70,6 +66,28 @@ public final class BiomeCommands {
                             .build()
                     );
                 }
+
+                if (page == 0) {
+                    lines.add(ExtraComponents.translatable("commands.biome_list.footer.no_left")
+                            .with(page + 1)
+                            .with(maxPage + 1)
+                            .with(nextPage + 1)
+                            .build());
+                } else if (page == maxPage) {
+                    lines.add(ExtraComponents.translatable("commands.biome_list.footer.no_right")
+                            .with(page - 1)
+                            .with(page + 1)
+                            .with(maxPage + 1)
+                            .build());
+                } else {
+                    lines.add(ExtraComponents.translatable("commands.biome_list.footer")
+                            .with(page - 1)
+                            .with(page + 1)
+                            .with(maxPage + 1)
+                            .with(nextPage + 1)
+                            .build());
+                }
+
 
                 player.sendMessage(ExtraComponents.multiline(lines));
             }

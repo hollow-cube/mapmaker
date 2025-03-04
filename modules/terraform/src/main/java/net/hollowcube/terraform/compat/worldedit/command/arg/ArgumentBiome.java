@@ -29,13 +29,17 @@ public class ArgumentBiome extends Argument<DynamicRegistry.Key<Biome>> {
 
         if (biomes == null || raw.isEmpty()) return partial();
 
+        boolean partial = false;
+
         for (DynamicRegistry.Key<Biome> key : biomes.keys()) {
-            var id = key.name().toLowerCase(Locale.ROOT);
-            if (id.equals(raw)) return success(key);
-            if (id.startsWith(raw)) return partial();
+            var miniId = key.key().asMinimalString().toLowerCase(Locale.ROOT);
+            var id = key.key().asString().toLowerCase(Locale.ROOT);
+
+            if (id.equals(raw) || miniId.equals(raw)) return new ParseResult.Success<>(key);
+            if (id.startsWith(raw) || miniId.startsWith(raw)) partial = true;
         }
 
-        return syntaxError();
+        return partial ? partial() : syntaxError();
     }
 
     @Override
@@ -48,9 +52,13 @@ public class ArgumentBiome extends Argument<DynamicRegistry.Key<Biome>> {
         if (biomes == null) return;
 
         for (DynamicRegistry.Key<Biome> key : biomes.keys()) {
-            var id = key.name().toLowerCase(Locale.ROOT);
-            if (id.startsWith(raw)) {
+            var miniId = key.key().asMinimalString().toLowerCase(Locale.ROOT);
+            var id = key.key().asString().toLowerCase(Locale.ROOT);
+
+            if (!raw.isEmpty() && miniId.startsWith(raw)) {
                 suggestion.add(id);
+            } else if (id.startsWith(raw)) {
+                suggestion.add(miniId);
             }
         }
     }
