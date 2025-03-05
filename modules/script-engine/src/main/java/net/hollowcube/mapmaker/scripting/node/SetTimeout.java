@@ -20,6 +20,7 @@ public final class SetTimeout implements ProxyExecutable {
         System.arraycopy(arguments, 2, args, 0, args.length);
 
         // TODO: actually sleep :D
+//        System.out.println("setTimeout: " + delay + "ms");
         function.executeVoid((Object[]) args);
 
         return null;

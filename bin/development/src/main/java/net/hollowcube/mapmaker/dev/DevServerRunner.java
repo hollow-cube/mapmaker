@@ -250,7 +250,11 @@ public class DevServerRunner extends AbstractMapServer {
 
         var guiManager = new ScriptEngine().guiManager();
         dbg.createPermissionlessSubcommand("gui", (player, ignored) -> {
-            guiManager.openGui(player, URI.create("guilib:///store/StoreView.js"));
+            guiManager.openGui(player, URI.create("guilib:///store/store-view.js"));
+
+        }, "");
+        dbg.createPermissionlessSubcommand("gui2", (player, ignored) -> {
+            guiManager.openGui(player, URI.create("guilib:///map_browser/map-browser-view.js"));
 
         }, "");
 

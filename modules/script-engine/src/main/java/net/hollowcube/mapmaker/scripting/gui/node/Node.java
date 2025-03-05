@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 public abstract class Node {
     private final String type; // Name of the node type, mostly used for debug purposes
 
+    private boolean hidden = false;
     private boolean background = false;
 
     protected int slotWidth = 0;
@@ -31,6 +32,14 @@ public abstract class Node {
 
     public int height() {
         return this.slotHeight;
+    }
+
+    public boolean isHidden() {
+        return this.hidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
     }
 
     public boolean updateFromProps(@NotNull Value props) {

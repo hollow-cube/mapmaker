@@ -7,13 +7,16 @@ declare namespace JSX {
 
     type Props = { [key: string]: any };
     type BaseProps = {
+        key?: string | null; // React key
+
         slotWidth?: number;
         slotHeight?: number;
 
-        position?: 'absolute'
+        position?: 'absolute';
     }
     type GroupProps = BaseProps & {
-        layout?: 'row' | 'column'
+        layout?: 'row' | 'column';
+        wrap?: boolean;
     }
     type Alignment = number | 'center' | 'start' | 'end';
     type PositionProps = BaseProps & {
@@ -42,6 +45,7 @@ declare namespace JSX {
     }
 
     export const Fragment: any;
+    export const Suspense: any;
 
     export function createElement(tag: string, props: any, ...children: any[]): any;
 }

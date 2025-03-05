@@ -1,9 +1,9 @@
 import {useState, view} from "@mapmaker/gui";
 
-import BackButton from "../lib/BackButton";
-import CubitsTab from "./CubitsTab";
-import HypercubeTab from "./HypercubeTab";
-import AddonsTab from "./AddonsTab";
+import BackButton from "../lib/back-button";
+import CubitsTab from "./cubits-tab";
+import HypercubeTab from "./hypercube-tab";
+import AddonsTab from "./addons-tab";
 
 const tabTitles = {
     cubits: 'Buy Cubits',

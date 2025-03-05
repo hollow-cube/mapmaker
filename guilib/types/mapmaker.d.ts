@@ -6,6 +6,30 @@ declare module "@mapmaker" {
     declare type Text = { readonly __typeof: unique symbol };
     declare function mm(strings: TemplateStringsArray, ...expr: string[]): Text;
 
+
+    // MAPS
+
+    declare type MapDifficulty = 'easy' | 'medium' | 'hard' | 'expert' | 'nightmare';
+    declare type MapQuality = 'unrated' | 'good' | 'great' | 'excellent' | 'outstanding' | 'masterpiece';
+
+    declare type Map = {
+        id: string;
+        owner: string;
+        name: string;
+    } & ({
+        isPublished: false,
+    } | {
+        isPublished: true,
+        publishedId: string;
+
+        difficulty: MapDifficulty;
+        quality: MapQuality;
+
+        likes: number;
+        uniquePlays: number;
+    });
+    declare type PublishedMap = Extract<Map, { isPublished: true }>;
+
 }
 
 declare module "@mapmaker/gui" {
@@ -21,6 +45,9 @@ declare module "@mapmaker/gui" {
 
     declare function useState<T>(initialValue: T | (() => T)): [T, (value: T | ((T) => T)) => void];
 
+    // TODO: usable should be Usable<T> = PromiseLike<T> | Context<T>. Need some more complete react types for what i want to expose.
+    export function use<T>(usable: PromiseLike<T>): T;
+
     declare type ViewStack = {
         pushView: <T>(view: JSX.Element, config?: {
             transient?: boolean,
@@ -31,5 +58,35 @@ declare module "@mapmaker/gui" {
         close: () => void;
     };
     declare function useViewStack(): ViewStack;
+
+}
+
+declare module "@mapmaker/internal/maps" {
+    import {MapDifficulty, MapQuality, PublishedMap} from "@mapmaker";
+
+    declare type Sort = 'best' | 'quality' | 'new';
+    declare type Order = 'asc' | 'desc';
+
+    declare type SearchMapsParams = {
+        page?: number;
+        pageSize?: number;
+
+        sort?: Sort;
+        sortOrder?: Order;
+
+        difficulty?: MapDifficulty[];
+        quality?: MapQuality[];
+
+        parkour?: boolean;
+        building?: boolean;
+    }
+
+    declare type SearchMapsResponse = {
+        page: number;
+        pageCount?: number; // Only present on first page.
+        results: PublishedMap[];
+    }
+
+    declare function searchMaps(params: SearchMapsParams): Promise<SearchMapsResponse>;
 
 }

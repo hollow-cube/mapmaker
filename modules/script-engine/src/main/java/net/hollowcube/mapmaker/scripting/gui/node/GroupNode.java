@@ -26,12 +26,15 @@ public class GroupNode extends Node {
 
     @Override
     public int width() {
+        if (this.isHidden()) return 0;
         if (this.slotWidth != 0) return this.slotWidth;
         if (this.children.isEmpty()) return 0;
         if (this.children.size() == 1) return this.children.getFirst().width();
 
         int width = 0;
         for (var child : children) {
+            if (child.isHidden()) continue;
+
             width = switch (this.layout) {
                 case ROW -> width + child.width();
                 case COLUMN -> Math.max(width, child.width());
@@ -42,12 +45,15 @@ public class GroupNode extends Node {
 
     @Override
     public int height() {
+        if (this.isHidden()) return 0;
         if (this.slotHeight != 0) return this.slotHeight;
         if (this.children.isEmpty()) return 0;
         if (this.children.size() == 1) return this.children.getFirst().height();
 
         int height = 0;
         for (var child : children) {
+            if (child.isHidden()) continue;
+
             height = switch (this.layout) {
                 case ROW -> Math.max(height, child.height());
                 case COLUMN -> height + child.height();
@@ -70,6 +76,7 @@ public class GroupNode extends Node {
 
     @Override
     public void build(@NotNull MenuBuilder builder) {
+        if (this.isHidden()) return;
         if (this.children.isEmpty()) return;
         if (this.children.size() == 1) {
             this.children.getFirst().build(builder);
@@ -81,6 +88,7 @@ public class GroupNode extends Node {
 
         int mark = builder.mark();
         for (var child : children) {
+            if (child.isHidden()) continue;
 
             int cWidth = child.width(), cHeight = child.height();
             int before = builder.mark();
@@ -105,6 +113,7 @@ public class GroupNode extends Node {
 
     @Override
     public boolean handleClick(@NotNull ClickType clickType, int x, int y) {
+        if (this.isHidden()) return false;
         if (this.children.isEmpty()) return false;
         if (this.children.size() == 1) {
             return this.children.getFirst().handleClick(clickType, x, y);
@@ -112,6 +121,8 @@ public class GroupNode extends Node {
 
         int currX = 0, currY = 0;
         for (var child : children) {
+            if (child.isHidden()) continue;
+
             int cWidth = child.width(), cHeight = child.height();
 
             if (x >= currX && x < currX + cWidth && y >= currY && y < currY + cHeight) {

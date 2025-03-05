@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.scripting.gui.react;
 import net.hollowcube.mapmaker.scripting.gui.InventoryHost;
 import net.hollowcube.mapmaker.scripting.gui.node.*;
 import net.hollowcube.mapmaker.scripting.util.Proxies;
-import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
@@ -112,13 +111,15 @@ public class ReconcilerHostConfig {
     }
 
     @HostAccess.Export
-    public void scheduleTimeout() {
-        System.out.println("scheduleTimeout"); // TODO
+    public int scheduleTimeout(@NotNull Value fn, int delay) {
+        System.out.println("scheduleTimeout(" + delay + "ms)"); // TODO
+        fn.executeVoid();
+        return 1; // TODO
     }
 
     @HostAccess.Export
-    public void cancelTimeout() {
-        System.out.println("cancelTimeout"); // TODO
+    public void cancelTimeout(int id) {
+        System.out.println("cancelTimeout(" + id + ")"); // TODO
     }
 
     @HostAccess.Export
@@ -127,6 +128,16 @@ public class ReconcilerHostConfig {
     @HostAccess.Export
     public boolean maySuspendCommit(@NotNull String type, @NotNull Value props) {
         return false; // Noop
+    }
+
+    @HostAccess.Export
+    public void startSuspendingCommit() {
+        // noop
+    }
+
+    @HostAccess.Export
+    public Value waitForCommitToBeReady() {
+        return null; // Commit immediately
     }
 
     @HostAccess.Export
@@ -260,8 +271,8 @@ public class ReconcilerHostConfig {
     }
 
     @HostAccess.Export
-    public void hideInstance() {
-        // Noop
+    public void hideInstance(@NotNull Node instance, @NotNull Value props, @NotNull Value unknown1, @NotNull Value unknown2, @NotNull Value unknown3) {
+        instance.setHidden(true);
     }
 
     @HostAccess.Export
@@ -270,8 +281,8 @@ public class ReconcilerHostConfig {
     }
 
     @HostAccess.Export
-    public void unhideInstance() {
-        // Noop
+    public void unhideInstance(@NotNull Node instance, @NotNull Value props, @NotNull Value unknown1, @NotNull Value unknown2, @NotNull Value unknown3) {
+        instance.setHidden(false);
     }
 
     @HostAccess.Export

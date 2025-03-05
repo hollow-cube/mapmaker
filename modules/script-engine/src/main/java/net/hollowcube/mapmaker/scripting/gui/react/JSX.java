@@ -16,7 +16,7 @@ import java.util.Set;
  * @param react The global react module. This is not a public module for scripts to use.
  */
 public record JSX(@NotNull Module react) implements ProxyObject {
-    private static final Set<String> ALLOWED_APIS = Set.of("createElement", "Fragment");
+    private static final Set<String> ALLOWED_APIS = Set.of("createElement", "Fragment", "Suspense");
 
     @Override
     public Object getMember(@NotNull String key) {

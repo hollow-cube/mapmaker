@@ -19,6 +19,7 @@ public class InternalScriptLoader implements ScriptLoader {
     @Override
     public @Nullable String load(@NotNull URI uri) throws IOException {
         final String path = STATIC_REMAPPINGS.getOrDefault(uri.getPath(), uri.getPath());
+
         try (var is = getClass().getResourceAsStream("/third_party" + path)) {
             if (is == null) return null;
             return new String(is.readAllBytes(), StandardCharsets.UTF_8);

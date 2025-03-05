@@ -44,7 +44,7 @@ public class SpriteTransform {
                 Path configFile = imageFile.resolveSibling(imageFile.getFileName().toString().replace(".png", ".json5"));
 
                 var relative = guiBaseDir.relativize(imageFile);
-                boolean canSkipConfig = relative.toString().startsWith("store/") && !relative.toString().contains("checkout");
+                boolean canSkipConfig = (relative.toString().startsWith("store/") || relative.toString().startsWith("map_browser/")) && !relative.toString().contains("checkout");
 
                 if (!canSkipConfig && !Files.exists(configFile)) continue;
 
