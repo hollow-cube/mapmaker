@@ -310,12 +310,14 @@ public class MarkerEntity extends MapEntity {
 
             insidePlayers.add(player); // Just entered
             world.callEvent(new MarkerEntityEnteredEvent(world, player, this));
+            if (this.handler != null) this.handler.onPlayerEnter(player);
         }
         for (var player : insidePlayers) {
             if (world.isPlaying(player) && CoordinateUtil.intersects(this, player)) continue;
 
             insidePlayers.remove(player); // Just exited
             world.callEvent(new MarkerEntityExitedEvent(world, player, this));
+            if (this.handler != null) this.handler.onPlayerExit(player);
         }
     }
 
