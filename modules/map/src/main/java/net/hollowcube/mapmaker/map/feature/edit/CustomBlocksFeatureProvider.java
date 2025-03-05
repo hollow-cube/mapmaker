@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.map.block.custom.BouncePadBlock;
 import net.hollowcube.mapmaker.map.block.custom.CheckpointPlateBlock;
 import net.hollowcube.mapmaker.map.block.custom.FinishPlateBlock;
 import net.hollowcube.mapmaker.map.block.custom.StatusPlateBlock;
+import net.hollowcube.mapmaker.map.block.custom.bouncepad.BouncePadMarkerHandler;
 import net.hollowcube.mapmaker.map.entity.marker.MapLeaderboardMarkerHandler;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
@@ -67,6 +68,7 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
             return;
 
         world.markerRegistry().register(MapLeaderboardMarkerHandler.ID, MapLeaderboardMarkerHandler::new);
+        world.markerRegistry().register(BouncePadMarkerHandler.ID, BouncePadMarkerHandler::new);
     }
 
     @Override
@@ -155,10 +157,6 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
             case "mapmaker:finish" -> {
                 var finishId = marker.getUuid().toString();
                 world.callEvent(new MapPlayerCompleteMapEvent(player, world, finishId));
-            }
-            case "mapmaker:bounce_pad" -> {
-                var data = marker.getTag(BouncePadBlock.ENTITY_DATA_TAG);
-                BouncePadBlock.applyVelocity(data, player);
             }
         }
     }
