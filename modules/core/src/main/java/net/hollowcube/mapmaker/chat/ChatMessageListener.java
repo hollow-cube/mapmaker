@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.gson.Gson;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.chat.components.MessageComponents;
@@ -19,6 +20,7 @@ import net.hollowcube.mapmaker.punishments.event.PunishmentCreatedEvent;
 import net.hollowcube.mapmaker.punishments.event.PunishmentRevokedEvent;
 import net.hollowcube.mapmaker.punishments.types.Punishment;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
+import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.temp.ChatMessageData;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
@@ -40,10 +42,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadLocalRandom;
@@ -237,15 +236,16 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
         logger.info("Received chat message: {}", message);
 
         try {
-            var sender = CONNECTION_MANAGER.getOnlinePlayerByUuid(UUID.fromString(message.sender()));
-            if (sender == null) return; // Not relevant to this server
+            var senderMap = OpUtils.map(sessionManager.getPresence(message.sender()), Presence::mapId);
+            if (senderMap == null) return; // Can't find the sender's map
 
             var senderDisplyName = playerService.getPlayerDisplayName2(message.sender());
             var senderName = senderDisplyName.build(DisplayName.Context.DEFAULT);
             var isColored = senderDisplyName.parts().size() > 1;
 
             for (var recipient : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-                if (!recipient.getInstance().equals(sender.getInstance())) continue;
+                var map = OpUtils.map(sessionManager.getPresence(recipient.getUuid().toString()), Presence::mapId);
+                if (!Objects.equals(senderMap, map)) continue;
 
                 var data = this.components.createGlobalMessage(recipient, message);
                 if (data.ping()) recipient.playSound(TAG_DING);
