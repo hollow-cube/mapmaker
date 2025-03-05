@@ -41,7 +41,11 @@ void main() {
 
     // Remove the color from the vertical shift color so it only reflects the underlying texture.
     if (Color == vec4(78/255., 90/255., Color.b, Color.a)) {
-        vertexColor = vec4(texelFetch(Sampler2, UV2 / 16, 0).xyz, vertexColor.a);
+        if (Color.a == (80./255.)) {
+            vertexColor = vec4(0, 0, 0, Color.a);
+        } else {
+            vertexColor = vec4(texelFetch(Sampler2, UV2 / 16, 0).xyz, vertexColor.a);
+        }
     } else if (false) {
         // TODO: we need to also handle the shadow color here.
         vertexColor = vec4(0);

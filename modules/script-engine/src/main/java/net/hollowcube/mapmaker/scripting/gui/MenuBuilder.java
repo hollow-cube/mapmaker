@@ -92,8 +92,6 @@ public class MenuBuilder {
     }
 
     public <T> void editSlots(int x, int y, int width, int height, @NotNull DataComponent<T> component, @NotNull T data) {
-//        final ItemStack item = baseItem.build();
-
         int startX = this.slotX + x;
         int startY = this.slotY + y;
         int endX = startX + width;
@@ -124,10 +122,12 @@ public class MenuBuilder {
         // Account for font height. Not sure this is the solution i want for that.
         startY += FontUtil.DEFAULT_HEIGHT - 1;
 
+        title.pushShadowColor(FontUtil.computeVerticalOffsetShadow(startY));
         title.pushColor(FontUtil.computeVerticalOffset(startY));
         title.pos(startX);
         title.append(text);
         title.popColor();
+        title.popShadowColor();
     }
 
     public Component getTitle() {

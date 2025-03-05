@@ -11,6 +11,8 @@ import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.format.ShadowColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -402,6 +404,10 @@ public final class FontUtil {
             throw new IllegalArgumentException("Offset out of range: " + offset);
 
         return TextColor.color(0x4E5A00 | ((offset + 50) & 0xFF));
+    }
+
+    public static @NotNull ShadowColor computeVerticalOffsetShadow(int offset) {
+        return ShadowColor.shadowColor(computeVerticalOffset(offset), 80);
     }
 
     /**

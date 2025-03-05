@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.scripting.gui.node;
 
 import net.hollowcube.mapmaker.scripting.gui.MenuBuilder;
-import net.minestom.server.inventory.click.ClickType;
+import net.hollowcube.mapmaker.scripting.gui.util.ClickType;
 import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
 

@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.scripting.gui;
 
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.scripting.gui.node.Node;
+import net.hollowcube.mapmaker.scripting.gui.util.ClickType;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -10,6 +11,7 @@ import net.minestom.server.event.player.PlayerAnvilInputEvent;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.PlayerInventory;
+import net.minestom.server.inventory.click.Click;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.server.play.WindowItemsPacket;
 import net.minestom.server.timer.Task;
@@ -111,16 +113,17 @@ public class InventoryHost {
     }
 
     private static void handleInventoryClick(@NotNull InventoryPreClickEvent event) {
-        final InventoryHost host;
         final int slot;
+        final InventoryHost host;
         if (event.getInventory() instanceof InventoryWrapper inventory) {
             host = inventory.owner; // Click in an inventory
-            slot = event.getSlot();
-        } else if (event.getInventory() == null && event.getPlayer().getOpenInventory() instanceof InventoryWrapper inventory) {
+            slot = event.getClick().slot();
+        } else if (event.getInventory() instanceof PlayerInventory &&
+                event.getPlayer().getOpenInventory() instanceof InventoryWrapper inventory) {
             host = inventory.owner; // Click in player inventory
 
             // Slot needs to be offset from the top of the main inventory
-            int offsetSlot = event.getSlot();
+            int offsetSlot = event.getClick().slot();
             int mainSize = getInterpretedSize(host.handle.getInventoryType());
 
             // We need to reorder the hotbar to come last
@@ -128,12 +131,24 @@ public class InventoryHost {
         } else return; // Don't care about this click.
         if (host.reactRoot == null) return; // Check for unmounted.
 
+        final ClickType clickType = switch (event.getClick()) {
+            case Click.Left ignored -> ClickType.LEFT;
+            case Click.Right ignored -> ClickType.RIGHT;
+            case Click.LeftShift ignored -> ClickType.LEFT_SHIFT;
+            case Click.RightShift ignored -> ClickType.RIGHT_SHIFT;
+            default -> null;
+        };
+        if (clickType == null) {
+            event.setCancelled(true);
+            return;
+        }
+
         // TODO: need to reintroduce the click locking mechanism.
         //  also probably handleClick should return a future that can complete later.
 
         try {
             event.setCancelled(true);
-            host.reactRoot.handleClick(event.getClickType(), slot % 9, slot / 9);
+            host.reactRoot.handleClick(clickType, slot % 9, slot / 9);
         } catch (Exception e) {
             logger.error("Failed to handle click", e);
             ExceptionReporter.reportException(e, host.player);

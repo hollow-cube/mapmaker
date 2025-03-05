@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.scripting.gui.node;
 
-import net.minestom.server.inventory.click.ClickType;
+import net.hollowcube.mapmaker.scripting.gui.util.ClickType;
 import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,7 +28,7 @@ public class ButtonNode extends GroupNode {
 
     @Override
     public boolean handleClick(@NotNull ClickType clickType, int x, int y) {
-        if (clickType == ClickType.LEFT_CLICK && this.onLeftClick != null) {
+        if (clickType == ClickType.LEFT && this.onLeftClick != null) {
             this.onLeftClick.run();
             return true;
         }

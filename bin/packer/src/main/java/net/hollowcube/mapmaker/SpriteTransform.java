@@ -74,9 +74,9 @@ public class SpriteTransform {
                         }
 
                         JsonObject resultFontChar = new JsonObject();
-                        ServerSprite sprite = processImage(context, name, Files.readAllBytes(imageFile), config, resultFontChar);
-                        context.addFontCharacter(resultFontChar);
-                        context.addServerSprite(sprite);
+                        ServerSprite sprite = processImage(ctx, name, Files.readAllBytes(imageFile), config, resultFontChar);
+                        ctx.addFontCharacter(resultFontChar);
+                        ctx.addServerSprite(sprite);
                         continue;
                     }
 
