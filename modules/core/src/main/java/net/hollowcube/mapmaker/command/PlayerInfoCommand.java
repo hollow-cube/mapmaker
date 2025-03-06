@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.util.CommandCategory;
+import net.hollowcube.compat.impl.PacketQueue;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.util.thesneaky.TheSneaky;
@@ -14,7 +15,6 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.entity.EntityFinder;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 public class PlayerInfoCommand extends CommandDsl {
 
-    private static final Tag<Set<String>> PLAYER_CHANNELS = Tag.Transient("packets:player/channels");
     private static final Tag<String> CLIENT_BRAND = Tag.Transient("packets:client/brand");
 
     private static final List<String> KNOWN_MODS = List.of(
@@ -67,12 +66,11 @@ public class PlayerInfoCommand extends CommandDsl {
     }
 
     private void sendChannels(@NotNull Player player, @NotNull Player target, boolean namespaces) {
-        Collection<String> channels = target.getTag(PLAYER_CHANNELS);
-        if (channels == null) {
+        PacketQueue queue = PacketQueue.get(player);
+        if (queue == null) {
             player.sendMessage("No channels found for %s".formatted(target.getUsername()));
         } else {
-
-            channels = channels.stream()
+            var channels = queue.channels().stream()
                     .map(s -> namespaces ? s.split(":")[0] : s)
                     .distinct()
                     .sorted()
@@ -85,7 +83,7 @@ public class PlayerInfoCommand extends CommandDsl {
     }
 
     private void sendGeneral(@NotNull Player player, @NotNull Player target) {
-        Set<String> channels = Objects.requireNonNullElse(target.getTag(PLAYER_CHANNELS), Set.of());
+        Set<String> channels = PacketQueue.get(player).channels();
         Set<String> namespaces = channels.stream().map(s -> s.split(":")[0]).collect(Collectors.toSet());
         String brand = Objects.requireNonNullElse(target.getTag(CLIENT_BRAND), "Unknown");
 

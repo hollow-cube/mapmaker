@@ -7,22 +7,18 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerPluginMessageEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.player.PlayerTickEndEvent;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 @ApiStatus.Internal
 public final class PacketRegistryImpl implements PacketRegistry {
 
-    private static final Tag<Set<String>> PLAYER_CHANNELS = Tag.Transient("packets:player/channels");
     private static final String REGISTER_CHANNEL = "minecraft:register";
     private static final String UNREGISTER_CHANNEL = "minecraft:unregister";
     private static PacketRegistryImpl INSTANCE;
@@ -40,16 +36,8 @@ public final class PacketRegistryImpl implements PacketRegistry {
             var player = event.getPlayer();
             var id = event.getIdentifier().intern();
             switch (id) {
-                case REGISTER_CHANNEL -> player.getAndUpdateTag(PLAYER_CHANNELS, channels -> {
-                    channels = Objects.requireNonNullElseGet(channels, ConcurrentHashMap::newKeySet);
-                    channels.addAll(List.of(event.getMessageString().split("\0")));
-                    return channels;
-                });
-                case UNREGISTER_CHANNEL -> player.getAndUpdateTag(PLAYER_CHANNELS, channels -> {
-                    channels = Objects.requireNonNullElseGet(channels, ConcurrentHashMap::newKeySet);
-                    List.of(event.getMessageString().split("\0")).forEach(channels::remove);
-                    return channels;
-                });
+                case REGISTER_CHANNEL -> PacketQueue.get(player).registerChannels(player, event.getMessageString().split("\0"));
+                case UNREGISTER_CHANNEL -> PacketQueue.get(player).unregisterChannels(event.getMessageString().split("\0"));
                 default -> {
                     ServerboundModPacket.Type<?> type = this.serverbound.get(id);
                     if (type == null) {
@@ -68,6 +56,7 @@ public final class PacketRegistryImpl implements PacketRegistry {
            if (!event.isFirstSpawn()) return;
            event.getPlayer().sendPluginMessage(REGISTER_CHANNEL, String.join("\0", this.serverbound.keySet()));
         });
+        events.addListener(PlayerTickEndEvent.class, event -> PacketQueue.get(event.getPlayer()).flush());
     }
 
     public static PacketRegistryImpl init(GlobalEventHandler events) {
@@ -124,11 +113,6 @@ public final class PacketRegistryImpl implements PacketRegistry {
 
     public static boolean isRegistered(ServerboundModPacket.Type<?> type) {
         return getInstance().serverbound.containsKey(type.id());
-    }
-
-    public static boolean canSend(Player player, ClientboundModPacket.Type<?> type) {
-        Set<String> channels = player.getTag(PLAYER_CHANNELS);
-        return channels != null && channels.contains(type.id());
     }
 
 }

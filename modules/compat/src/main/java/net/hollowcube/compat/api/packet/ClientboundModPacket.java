@@ -1,5 +1,6 @@
 package net.hollowcube.compat.api.packet;
 
+import net.hollowcube.compat.impl.PacketQueue;
 import net.hollowcube.compat.impl.PacketRegistryImpl;
 import net.minestom.server.Viewable;
 import net.minestom.server.entity.Player;
@@ -35,7 +36,7 @@ public interface ClientboundModPacket<T extends ClientboundModPacket<T>>  {
     default void send(Player player, boolean force) {
         var type = getType();
         Check.stateCondition(!PacketRegistryImpl.isRegistered(type), "Unregistered packet type: " + type.id());
-        if (!PacketRegistryImpl.canSend(player, type) && !force) return;
+        if (!force && !PacketQueue.get(player).send(this)) return;
         player.sendPluginMessage(type.id(), NetworkBuffer.makeArray(type.codec(), (T) this));
     }
 
