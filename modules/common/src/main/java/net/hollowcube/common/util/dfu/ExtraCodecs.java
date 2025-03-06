@@ -4,7 +4,11 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.hollowcube.common.util.BlockUtil;
+import net.hollowcube.common.util.ColorUtil;
+import net.hollowcube.common.util.OpUtils;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.color.Color;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -15,9 +19,12 @@ import net.minestom.server.particle.Particle;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class ExtraCodecs {
@@ -93,7 +100,16 @@ public final class ExtraCodecs {
         }
     });
 
+    public static final Codec<Color> COLOR = Codec.withAlternative(
+            Codec.STRING.comapFlatMap(
+                    text -> result(ColorUtil.fromHex(text), "Invalid color: " + text),
+                    ColorUtil::toHex
+            ),
+            Codec.INT.xmap(Color::new, Color::asRGB)
+    );
+
     // Enum as ordinal integer
+    @Deprecated
     public static <T extends Enum<T>> @NotNull Codec<T> EnumI(@NotNull Class<T> enumClass) {
         var values = enumClass.getEnumConstants();
         return Codec.INT.xmap(ord -> values[ord], Enum::ordinal);
@@ -101,9 +117,23 @@ public final class ExtraCodecs {
 
     // Enum as string
     public static <T extends Enum<T>> @NotNull Codec<T> Enum(@NotNull Class<T> enumClass) {
-        return Codec.STRING.xmap(
-                name -> Enum.valueOf(enumClass, name.toUpperCase(Locale.ROOT)),
-                value -> value.name().toLowerCase(Locale.ROOT));
+        var values = enumClass.getEnumConstants();
+        final Codec<T> stringCodec = Codec.STRING.comapFlatMap(
+                name -> {
+                    try {
+                        return DataResult.success(Enum.valueOf(enumClass, name.toUpperCase(Locale.ROOT)));
+                    } catch (IllegalArgumentException e) {
+                        return DataResult.error(() -> "Invalid enum name: " + name);
+                    }
+                },
+                value -> value.name().toLowerCase(Locale.ROOT)
+        );
+        final Codec<T> intCodec = Codec.INT.comapFlatMap(
+                ord -> ord < 0 || ord > values.length ? DataResult.error(() -> "Invalid ordinal: " + ord) : DataResult.success(values[ord]),
+                Enum::ordinal
+        );
+
+        return Codec.withAlternative(stringCodec, intCodec);
     }
 
     public static <T> @NotNull Codec<T> Lazy(Supplier<Codec<T>> supplier) {
@@ -122,5 +152,13 @@ public final class ExtraCodecs {
                 return codec.encode(input, ops, prefix);
             }
         };
+    }
+
+    public static <T> @NotNull DataResult<T> result(@Nullable T value, @NotNull String message) {
+        return value == null ? DataResult.error(() -> message) : DataResult.success(value);
+    }
+
+    public static <I, O> @NotNull Function<I, Optional<O>> optional(@NotNull Function<I, O> mapper) {
+        return input -> Optional.ofNullable(mapper.apply(input));
     }
 }

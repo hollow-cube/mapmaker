@@ -41,7 +41,7 @@ maven.install(
 
         # Minestom
         "net.minestom:minestom-snapshots:jar:96543a894f",
-        "dev.hollowcube:polar:1.12.2",
+        "dev.hollowcube:polar:1.13.0",
         "dev.hollowcube:dataconverter:1.21.3-rv1",
         "dev.hollowcube:mql:1.1.0",
         "dev.hollowcube:posthog-java:jar:0.1.3",

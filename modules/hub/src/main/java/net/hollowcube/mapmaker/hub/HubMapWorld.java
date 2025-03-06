@@ -12,6 +12,7 @@ import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.instance.EmptyChunk;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
+import net.hollowcube.mapmaker.map.polar.LoadingWorldAccess;
 import net.hollowcube.mapmaker.map.polar.PolarDataFixer;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.misc.BossBars;
@@ -133,7 +134,7 @@ public class HubMapWorld extends AbstractMapWorld {
                 mapWorldData.data(),
                 mapWorldData.length(),
                 PolarDataFixer.INSTANCE,
-                new ReadWorldAccess(this, new HubMarkerLoader()),
+                new LoadingWorldAccess(new ReadWorldAccess(this, new HubMarkerLoader()), this::onDataLoaded),
                 false
         ).join();
         instance().setChunkSupplier(EmptyChunk::new);

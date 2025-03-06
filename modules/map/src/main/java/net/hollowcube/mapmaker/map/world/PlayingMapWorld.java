@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.map.event.MapPlayerStartSpectatorEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
+import net.hollowcube.mapmaker.map.polar.LoadingWorldAccess;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.util.CustomizableHotbarManager;
 import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
@@ -103,7 +104,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
         // Load the map itself (eg blocks, if present)
         var mapData = server().mapService().getMapWorldAsStream(map().id(), true);
         if (mapData != null) {
-            instance.loadStream(mapData, new ReadWorldAccess(this));
+            instance.loadStream(mapData, new LoadingWorldAccess(new ReadWorldAccess(this), this::onDataLoaded));
         }
     }
 

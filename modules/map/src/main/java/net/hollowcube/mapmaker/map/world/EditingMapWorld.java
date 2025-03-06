@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.map.feature.edit.TeleportHistoryFeatureProvider;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.ItemTags;
 import net.hollowcube.mapmaker.map.item.vanilla.DebugStickItem;
+import net.hollowcube.mapmaker.map.polar.LoadingWorldAccess;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.polar.ReadWriteWorldAccess;
 import net.hollowcube.mapmaker.map.ram.RamUsageOverlay;
@@ -162,7 +163,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
         var mapData = server().mapService().getMapWorld(map().id(), true);
         if (mapData != null) {
-            instance.load(mapData, new ReadWorldAccess(this));
+            instance.load(mapData, new LoadingWorldAccess(new ReadWorldAccess(this), this::onDataLoaded));
         }
 
         super.load();
