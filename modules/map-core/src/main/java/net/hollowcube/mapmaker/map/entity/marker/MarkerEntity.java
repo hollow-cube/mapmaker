@@ -311,10 +311,12 @@ public class MarkerEntity extends MapEntity {
             insidePlayers.add(player); // Just entered
             world.callEvent(new MarkerEntityEnteredEvent(world, player, this));
         }
-        for (var player : insidePlayers) {
+        var iter = insidePlayers.iterator();
+        while (iter.hasNext()) {
+            var player = iter.next();
             if (world.isPlaying(player) && CoordinateUtil.intersects(this, player)) continue;
 
-            insidePlayers.remove(player); // Just exited
+            iter.remove(); // Just exited
             world.callEvent(new MarkerEntityExitedEvent(world, player, this));
         }
     }
