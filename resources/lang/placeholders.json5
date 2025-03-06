@@ -83,6 +83,13 @@
     "no_shadow": true,
     "trailing_space": 2
   },
+  "LOCAL_CHANNEL": {
+    "type": "sprite",
+    "ref": "icon/chat/local",
+    "no_shadow": true,
+    "trailing_space": 2
+  },
+
   "CT1": {
     "type": "sprite",
     "ref": "icon/staff/ct_1"

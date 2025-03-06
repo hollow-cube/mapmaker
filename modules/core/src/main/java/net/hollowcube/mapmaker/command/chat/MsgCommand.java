@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.command.util;
+package net.hollowcube.mapmaker.command.chat;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
@@ -18,22 +18,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class MsgCommand extends CommandDsl {
+public class MsgCommand extends AbstractChatCommand {
+
     private final Argument<String> targetArg;
     private final Argument<String> messageArg = CoreArgument.Message("message")
             .description("The message content to send");
 
-    private final SessionManager sessionManager;
-    private final MapService mapService;
-    private final ChatMessageListener messageListener;
+    public MsgCommand(@NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages) {
+        super(sessions, maps, messages, "msg");
 
-    public MsgCommand(@NotNull SessionManager sessionManager, @NotNull MapService mapService, @NotNull ChatMessageListener messageListener) {
-        super("msg");
-        this.sessionManager = sessionManager;
-        this.mapService = mapService;
-        this.messageListener = messageListener;
-
-        this.targetArg = CoreArgument.AnyOnlinePlayer("player", sessionManager)
+        this.targetArg = CoreArgument.AnyOnlinePlayer("player", sessions)
                 .description("The player to send the message to");
 
         this.description = "Send a direct message to a player";
@@ -50,30 +44,11 @@ public class MsgCommand extends CommandDsl {
             player.sendMessage(Component.translatable("generic.other_players_only"));
             return;
         }
-        var playerId = PlayerDataV2.fromPlayer(player).id();
-        if (playerId.equals(target)) {
+        if (PlayerDataV2.fromPlayer(player).id().equals(target)) {
             player.sendMessage(Component.translatable("chat.msg.cant_message_yourself"));
             return;
         }
 
-        message = FontUtil.stripInvalidChars(message).trim();
-        if (message.isEmpty()) return;
-
-        String currentMapId = null;
-        if (message.contains("[map]")) {
-            var currentMap = MiscFunctionality.getCurrentMap(sessionManager, mapService, player);
-            if (currentMap == null || !currentMap.isPublished()) {
-                player.sendMessage(Component.translatable("generic.map.chat.usage"));
-                return;
-            }
-            currentMapId = currentMap.id();
-        }
-
-        long messageSeed = ThreadLocalRandom.current().nextLong();
-        messageListener.trySendChatMessage(player, new ClientChatMessageData(
-                ClientChatMessageData.Type.CHAT_UNSIGNED,
-                playerId, message, target, // Target is the channel id
-                currentMapId, messageSeed
-        ));
+        this.handle(player, target, message);
     }
 }
