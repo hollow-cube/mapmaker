@@ -83,16 +83,18 @@ public class Cosmetic {
     private final CosmeticType type;
     private final String id;
     private final Rarity rarity;
+    private final boolean colorable;
 
     private final CosmeticImpl impl;
 
     private final ItemStack icon;
     private final ItemStack iconLocked;
 
-    private Cosmetic(CosmeticType type, String id, Rarity rarity, Function<Cosmetic, CosmeticImpl> implFunc) {
+    private Cosmetic(CosmeticType type, String id, Rarity rarity, boolean colorable, Function<Cosmetic, CosmeticImpl> implFunc) {
         this.type = type;
         this.id = id;
         this.rarity = rarity;
+        this.colorable = colorable;
 
         var displayName = displayName();
         var lore = lore();
@@ -126,6 +128,10 @@ public class Cosmetic {
         return rarity;
     }
 
+    public boolean isColorable() {
+        return colorable;
+    }
+
     public @NotNull ItemStack iconItem() {
         return icon;
     }
@@ -144,9 +150,13 @@ public class Cosmetic {
 
     public @NotNull List<Component> lore() {
         var itemLore = new ArrayList<Component>();
-        itemLore.add(rarity.asComponent());
+        itemLore.add(this.rarity().asComponent());
         itemLore.add(Component.empty());
         itemLore.addAll(LanguageProviderV2.translateMulti("cosmetic." + type.id() + "." + id + ".lore", List.of()));
+        if (this.isColorable()) {
+            itemLore.add(Component.empty());
+            itemLore.add(Component.translatable("cosmetic.color"));
+        }
         return itemLore;
     }
 
@@ -156,6 +166,7 @@ public class Cosmetic {
 
         private Function<Cosmetic, CosmeticImpl> implFunc = CosmeticImpl::new;
         private Rarity rarity = Rarity.COMMON;
+        private boolean colorable = false;
 
         Builder(CosmeticType type, String id) {
             this.type = type;
@@ -172,8 +183,13 @@ public class Cosmetic {
             return this;
         }
 
+        public @NotNull Builder colorable() {
+            this.colorable = true;
+            return this;
+        }
+
         public @NotNull Cosmetic build() {
-            var cosmetic = new Cosmetic(type, id, rarity, implFunc);
+            var cosmetic = new Cosmetic(type, id, rarity, colorable, implFunc);
             COSMETICS.computeIfAbsent(type, k -> new HashMap<>()).put(id, cosmetic);
             return cosmetic;
         }

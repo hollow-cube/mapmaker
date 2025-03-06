@@ -42,14 +42,14 @@ public enum CosmeticType {
     }
 
     private final String id;
-    private final PlayerSetting<String> setting;
+    private final PlayerSetting<CosmeticOptions> setting;
     private final Tag<CosmeticType> tag;
     private final int iconSlot;
     private final ItemStack blankIcon;
 
     CosmeticType(String id, int iconSlot, String emptyIcon, @Nullable EquipmentSlot equipmentSlot) {
         this.id = id;
-        this.setting = PlayerSetting.String("cosmetic." + id, "");
+        this.setting = PlayerSetting.create("cosmetic." + id, new CosmeticOptions("", 0xFFFFFFFF), CosmeticOptions.CODEC);
         this.tag = Tag.Transient("cosmetic." + id);
         this.iconSlot = iconSlot;
         var baseTranslation = "cosmetic.type." + id + ".blank";
@@ -74,7 +74,7 @@ public enum CosmeticType {
         return id;
     }
 
-    public @NotNull PlayerSetting<String> setting() {
+    public @NotNull PlayerSetting<CosmeticOptions> setting() {
         return setting;
     }
 

@@ -18,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Supplier;
 
 public final class ExtraCodecs {
 
@@ -101,26 +100,21 @@ public final class ExtraCodecs {
 
     // Enum as string
     public static <T extends Enum<T>> @NotNull Codec<T> Enum(@NotNull Class<T> enumClass) {
-        return Codec.STRING.xmap(
-                name -> Enum.valueOf(enumClass, name.toUpperCase(Locale.ROOT)),
+        return Codec.STRING.comapFlatMap(
+                name -> tryResult(() -> Enum.valueOf(enumClass, name.toUpperCase(Locale.ROOT))),
                 value -> value.name().toLowerCase(Locale.ROOT));
     }
 
-    public static <T> @NotNull Codec<T> Lazy(Supplier<Codec<T>> supplier) {
-        return new Codec<T>() {
-            private Codec<T> codec = null;
+    private static <T> DataResult<T> tryResult(ThrowingSupplier<T> getter) {
+        try {
+            return DataResult.success(getter.get());
+        } catch (Exception e) {
+            return DataResult.error(e::getMessage);
+        }
+    }
 
-            @Override
-            public <T1> DataResult<Pair<T, T1>> decode(DynamicOps<T1> ops, T1 input) {
-                if (codec == null) codec = supplier.get();
-                return codec.decode(ops, input);
-            }
-
-            @Override
-            public <T1> DataResult<T1> encode(T input, DynamicOps<T1> ops, T1 prefix) {
-                if (codec == null) codec = supplier.get();
-                return codec.encode(input, ops, prefix);
-            }
-        };
+    @FunctionalInterface
+    public interface ThrowingSupplier<T> {
+        T get() throws Exception;
     }
 }

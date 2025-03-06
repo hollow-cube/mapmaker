@@ -382,7 +382,7 @@ public abstract class AbstractMapServer implements MapServer {
 
         CompatProvider.load(globalEventHandler);
 
-        CosmeticInventoryHandler.init(guiController);
+        CosmeticInventoryHandler.init(guiController, playerService);
         AbstractAccessoryImpl.addListeners(globalEventHandler);
 
         var entityEvents = EventNode.type("mapmaker:map/entity", EventFilter.INSTANCE);

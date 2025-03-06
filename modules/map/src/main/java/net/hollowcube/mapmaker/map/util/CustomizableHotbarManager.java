@@ -1,9 +1,6 @@
 package net.hollowcube.mapmaker.map.util;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonPrimitive;
+import com.mojang.serialization.Codec;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.map.MapFeatureFlags;
 import net.hollowcube.mapmaker.map.MapWorld;
@@ -24,9 +21,7 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiPredicate;
 
 public class CustomizableHotbarManager {
@@ -47,13 +42,13 @@ public class CustomizableHotbarManager {
         player.removeTag(TAG);
     }
 
-    private final PlayerSetting<String[]> setting; // Empty string or null == not present.
-    private final String[] defaultPositions;
+    private final PlayerSetting<List<String>> setting; // Empty string or null == not present.
+    private final List<String> defaultPositions;
     private final Map<String, BiPredicate<Player, MapWorld>> conditions;
 
     private CustomizableHotbarManager(@NotNull String name, @Nullable String @NotNull [] defaultPositions, @NotNull Map<String, BiPredicate<Player, MapWorld>> conditions) {
-        setting = PlayerSetting.create(name, new String[0], this::writeHotbarSetting, this::readHotbarSetting);
-        this.defaultPositions = defaultPositions;
+        this.setting = PlayerSetting.create(name, List.of(), Codec.STRING.listOf());
+        this.defaultPositions = Arrays.asList(defaultPositions);
         this.conditions = conditions;
     }
 
@@ -69,7 +64,7 @@ public class CustomizableHotbarManager {
 
         var customPositions = PlayerDataV2.fromPlayer(player).getSetting(setting);
         for (int i = 0; i < 9; i++) {
-            var itemId = i < customPositions.length ? customPositions[i] : defaultPositions[i];
+            var itemId = i < customPositions.size() ? customPositions.get(i) : this.defaultPositions.get(i);
             if (itemId == null || itemId.isEmpty()) {
                 inventory.setItemStack(i, ItemStack.AIR);
                 continue;
@@ -87,27 +82,6 @@ public class CustomizableHotbarManager {
         inventory.setItemStack(35, itemRegistry.getItemStack(ResetToDefaultItem.ID, null));
 
         player.setTag(TAG, this);
-    }
-
-    private @NotNull JsonElement writeHotbarSetting(String[] hotbar) {
-        var array = new JsonArray();
-        for (int i = 0; i < N_ENTRIES; i++) {
-            // If the size is less than max, fill it in with the defaults. This should only
-            // happen when setting your inventory back to the default.
-            var item = i < hotbar.length ? hotbar[i] : defaultPositions[i];
-            array.add(item == null ? JsonNull.INSTANCE : new JsonPrimitive(item));
-        }
-        return array;
-    }
-
-    private String[] readHotbarSetting(@NotNull JsonElement elem) {
-        var array = elem.getAsJsonArray();
-        var hotbar = new String[N_ENTRIES];
-        for (int i = 0; i < Math.min(array.size(), N_ENTRIES); i++) {
-            var item = array.get(i);
-            if (!item.isJsonNull()) hotbar[i] = item.getAsString();
-        }
-        return hotbar;
     }
 
     private void handlePreClick(@NotNull InventoryPreClickEvent event) {
@@ -142,20 +116,18 @@ public class CustomizableHotbarManager {
         var itemRegistry = world.itemRegistry();
 
         // Save the changes
-        var newHotbar = new String[N_ENTRIES];
+        List<String> newHotbar = new ArrayList<>(N_ENTRIES);
         for (int i = 0; i < N_ENTRIES; i++) {
             var item = player.getInventory().getItemStack(i);
-            if (item.isAir()) continue;
-            newHotbar[i] = itemRegistry.getItemId(item);
+            newHotbar.set(i, item.isAir() ? "" : itemRegistry.getItemId(item));
         }
 
         var playerData = PlayerDataV2.fromPlayer(player);
         // If they set it equal to the default, wipe the saved data. This will allow future changes to the default
         // to be applied to this player, rather than being stuck with their current state.
-        if (Arrays.equals(defaultPositions, newHotbar))
-            newHotbar = new String[0];
-        if (Arrays.equals(playerData.getSetting(setting), newHotbar))
-            return; // No change
+        if (defaultPositions.equals(newHotbar)) newHotbar = List.of();
+        if (playerData.getSetting(setting).equals(newHotbar)) return; // No change
+
         playerData.setSetting(setting, newHotbar);
     }
 
@@ -231,7 +203,7 @@ public class CustomizableHotbarManager {
             if (world == null) return; // Sanity
 
             var playerData = PlayerDataV2.fromPlayer(click.player());
-            playerData.setSetting(hotbar.setting, new String[0]);
+            playerData.setSetting(hotbar.setting, List.of());
             hotbar.apply(click.player(), world);
 
             // Save the reset setting.

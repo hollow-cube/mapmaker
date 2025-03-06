@@ -19,7 +19,7 @@ public abstract class AbstractAccessoryImpl extends ModelCosmeticImpl {
                 return; // TODO: using air check here is bad, but oh well.
 
             var playerData = PlayerDataV2.fromPlayer(player);
-            var accessory = Cosmetic.byId(CosmeticType.ACCESSORY, playerData.getSetting(CosmeticType.ACCESSORY.setting()));
+            var accessory = Cosmetic.byId(CosmeticType.ACCESSORY, playerData.getSetting(CosmeticType.ACCESSORY.setting()).id());
             if (accessory != null && accessory.impl() instanceof AbstractAccessoryImpl impl) {
                 impl.useItem(player);
             }

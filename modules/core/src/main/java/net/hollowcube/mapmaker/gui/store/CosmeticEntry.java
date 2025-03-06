@@ -10,8 +10,10 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
+import net.hollowcube.mapmaker.cosmetic.CosmeticOptions;
 import net.hollowcube.mapmaker.cosmetic.impl.ModelCosmeticImpl;
 import net.hollowcube.mapmaker.gui.common.ConfirmAction;
 import net.hollowcube.mapmaker.hub.merchant.MerchantTrade;
@@ -206,7 +208,8 @@ public class CosmeticEntry extends View {
     }
 
     private boolean isSelected() {
-        return cosmetic.id().equals(playerData.getCosmetic(cosmetic.type()));
+        var id = OpUtils.map(playerData.getCosmetic(cosmetic.type()), CosmeticOptions::id);
+        return cosmetic.id().equals(id);
     }
 
     private boolean canAfford() {

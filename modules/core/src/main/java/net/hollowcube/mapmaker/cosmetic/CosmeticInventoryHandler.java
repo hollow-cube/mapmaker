@@ -2,11 +2,16 @@ package net.hollowcube.mapmaker.cosmetic;
 
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.common.events.PlayerGiveCreativeItemEvent;
+import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.gui.common.anvil.ColorPickerView;
 import net.hollowcube.mapmaker.gui.store.CosmeticView;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.color.AlphaColor;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
@@ -16,20 +21,23 @@ import java.util.Map;
 
 public class CosmeticInventoryHandler {
 
-    public static void init(@NotNull Controller guiController) {
+    public static void init(@NotNull Controller guiController, @NotNull PlayerService playerService) {
         var globalEventHandler = MinecraftServer.getGlobalEventHandler();
-        globalEventHandler.addListener(InventoryPreClickEvent.class, event -> handleInventoryCosmeticSelector(guiController, event));
+        globalEventHandler.addListener(InventoryPreClickEvent.class, event -> handleInventoryCosmeticSelector(guiController, playerService, event));
         globalEventHandler.addListener(PlayerGiveCreativeItemEvent.class, CosmeticInventoryHandler::creativeClickListener);
     }
 
-    private static void handleInventoryCosmeticSelector(@NotNull Controller guiController, @NotNull InventoryPreClickEvent event) {
+    private static void handleInventoryCosmeticSelector(@NotNull Controller guiController, @NotNull PlayerService playerService, @NotNull InventoryPreClickEvent event) {
         if (event.getInventory() != null) return; // Not the player inventory
 
         var cosmeticType = CosmeticType.byIconSlot(event.getSlot());
         if (cosmeticType == null) return;
         if (CosmeticView.DISABLED_TABS.contains(cosmeticType)) return;
 
-        guiController.show(event.getPlayer(), c -> new CosmeticView(c, cosmeticType));
+        switch (event.getClickType()) {
+            case RIGHT_CLICK -> openColorPicker(guiController, playerService, event.getPlayer(), cosmeticType);
+            case LEFT_CLICK -> guiController.show(event.getPlayer(), c -> new CosmeticView(c, cosmeticType));
+        }
 
 //        if (event.getInventory() != event.getPlayerInventory())
 //            return; // Not the player inventory (e one, not just lower section)
@@ -77,6 +85,27 @@ public class CosmeticInventoryHandler {
 //        guiController.show(player, c -> new CosmeticView(c, cosmeticType));
 
         event.setCancelled(true);
+    }
+
+    private static void openColorPicker(
+            @NotNull Controller guiController,
+            @NotNull PlayerService playerService,
+            @NotNull Player player,
+            @NotNull CosmeticType cosmeticType
+    ) {
+        var data = PlayerDataV2.fromPlayer(player);
+        var options = data.getSetting(cosmeticType.setting());
+
+        guiController.show(player, c -> ColorPickerView.builder()
+                .callback(newColor -> {
+                    var newOptions = options.withColor(newColor.asRGB());
+                    data.setSetting(cosmeticType.setting(), newOptions);
+                    MiscFunctionality.applyCosmetics(player, data);
+                    FutureUtil.submitVirtual(() -> data.writeUpdatesUpstream(playerService));
+                })
+                .title("Select Color")
+                .build(c, new AlphaColor(options.color()).withAlpha(0))
+        );
     }
 
 }

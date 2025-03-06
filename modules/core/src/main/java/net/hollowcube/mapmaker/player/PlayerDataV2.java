@@ -3,13 +3,14 @@ package net.hollowcube.mapmaker.player;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
+import com.mojang.serialization.JsonOps;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
+import net.hollowcube.mapmaker.cosmetic.CosmeticOptions;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -98,13 +99,19 @@ public class PlayerDataV2 {
     }
 
     public <T> @NotNull T getSetting(@NotNull PlayerSetting<T> setting) {
-        return setting.read(settings());
+        var data = settings().get(setting.key());
+        if (data == null) return setting.fallback();
+        return setting.codec()
+                .parse(JsonOps.INSTANCE, data)
+                .result()
+                .orElseGet(setting::fallback);
     }
 
     public <T> void setSetting(@NotNull PlayerSetting<T> setting, @NotNull T value) {
-        var raw = setting.write(value);
-        settings().add(setting.key(), raw);
-        updates.updateSetting(setting.key(), raw);
+        var raw = setting.codec().encodeStart(JsonOps.INSTANCE, value).result();
+        if (raw.isEmpty()) return;
+        settings().add(setting.key(), raw.get());
+        updates.updateSetting(setting.key(), raw.get());
     }
 
     public @NotNull Collection<Map.Entry<String, JsonElement>> settingsRawValues() {
@@ -167,14 +174,14 @@ public class PlayerDataV2 {
         this.cubits = cubits;
     }
 
-    public @Nullable String getCosmetic(@NotNull CosmeticType type) {
-        var cosmetic = getSetting(type.setting());
-        return cosmetic.isEmpty() ? null : cosmetic;
+    public @Nullable CosmeticOptions getCosmetic(@NotNull CosmeticType type) {
+        var options = getSetting(type.setting());
+        return options.isEmpty() ? null : options;
     }
 
     public void setCosmetic(@NotNull CosmeticType type, @Nullable Cosmetic cosmetic) {
         if (cosmetic != null && cosmetic.type() != type) throw new IllegalArgumentException("cosmetic type mismatch");
-        setSetting(type.setting(), cosmetic == null ? "" : cosmetic.id());
+        setSetting(type.setting(), new CosmeticOptions(cosmetic == null ? "" : cosmetic.id()));
     }
 
     static {

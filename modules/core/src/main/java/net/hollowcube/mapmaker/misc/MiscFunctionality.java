@@ -1,7 +1,9 @@
 package net.hollowcube.mapmaker.misc;
 
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
+import net.hollowcube.mapmaker.cosmetic.CosmeticOptions;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -19,7 +21,7 @@ import net.kyori.adventure.title.Title;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemComponent;
-import net.minestom.server.item.component.Equippable;
+import net.minestom.server.item.component.DyedItemColor;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -125,8 +127,14 @@ public final class MiscFunctionality {
 
     public static void applyCosmetics(@NotNull Player player, @NotNull PlayerDataV2 playerData) {
         for (var cosmeticType : CosmeticType.VALUES) {
-            var cosmetic = Cosmetic.byId(cosmeticType, playerData.getCosmetic(cosmeticType));
+            var options = playerData.getCosmetic(cosmeticType);
+            var cosmetic = Cosmetic.byId(cosmeticType, OpUtils.map(options, CosmeticOptions::id));
             var itemStack = cosmetic == null ? cosmeticType.blankIcon() : cosmetic.impl().iconItem();
+
+            if (options != null && cosmetic != null && cosmetic.isColorable()) {
+                itemStack = itemStack.with(ItemComponent.DYED_COLOR, new DyedItemColor(options.color(), false));
+            }
+
             // If the itemstack has a glider we need to preserve it.
             if (player.getInventory().getItemStack(cosmeticType.iconSlot()).has(ItemComponent.GLIDER)) {
                 itemStack = itemStack.with(ItemComponent.GLIDER);

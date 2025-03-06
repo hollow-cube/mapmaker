@@ -147,7 +147,8 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
 
             // Play the victory effect
             var playerData = PlayerDataV2.fromPlayer(player);
-            var victoryEffect = Cosmetic.byId(CosmeticType.VICTORY_EFFECT, playerData.getSetting(CosmeticType.VICTORY_EFFECT.setting()));
+            var options = playerData.getSetting(CosmeticType.VICTORY_EFFECT.setting());
+            var victoryEffect = Cosmetic.byId(CosmeticType.VICTORY_EFFECT, options.id());
             if (victoryEffect != null && victoryEffect.impl() instanceof AbstractVictoryEffectImpl impl) {
                 impl.trigger(player, player.getPosition());
             }
