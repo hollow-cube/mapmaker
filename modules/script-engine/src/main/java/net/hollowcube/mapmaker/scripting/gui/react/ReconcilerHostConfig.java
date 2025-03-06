@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.scripting.gui.react;
 
+import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.scripting.gui.InventoryHost;
 import net.hollowcube.mapmaker.scripting.gui.node.*;
 import net.hollowcube.mapmaker.scripting.util.Proxies;
@@ -20,6 +21,12 @@ import static net.hollowcube.mapmaker.scripting.util.Proxies.wrapException;
  */
 @SuppressWarnings("unused")
 public class ReconcilerHostConfig {
+    private final ScriptEngine engine;
+
+    public ReconcilerHostConfig(@NotNull ScriptEngine engine) {
+        this.engine = engine;
+    }
+
     // BASE
 
     @HostAccess.Export
@@ -111,15 +118,14 @@ public class ReconcilerHostConfig {
     }
 
     @HostAccess.Export
-    public int scheduleTimeout(@NotNull Value fn, int delay) {
-        System.out.println("scheduleTimeout(" + delay + "ms)"); // TODO
-        fn.executeVoid();
-        return 1; // TODO
+    public Object scheduleTimeout(@NotNull Value... arguments) {
+        return engine.globals.setTimeout(arguments);
     }
 
     @HostAccess.Export
-    public void cancelTimeout(int id) {
-        System.out.println("cancelTimeout(" + id + ")"); // TODO
+    public void cancelTimeout(@Nullable Integer taskId) {
+        if (taskId == null) return; // Skull emoji
+        engine.globals.clearTimeout(Value.asValue(taskId));
     }
 
     @HostAccess.Export

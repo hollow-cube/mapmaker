@@ -66,6 +66,8 @@ public class DevServerRunner extends AbstractMapServer {
     private final CommandManager hubCommandManager = new CommandManagerImpl(super.commandManager());
     private final CommandManager mapCommandManager = new CommandManagerImpl(super.commandManager());
 
+    private ScriptEngine scriptEngine;
+
     public DevServerRunner(@NotNull ConfigLoaderV3 config) {
         super(config);
 
@@ -111,6 +113,8 @@ public class DevServerRunner extends AbstractMapServer {
         var kafkaConfig = config.get(KafkaConfig.class);
         var mapMgmtConsumer = new MapMgmtConsumerImpl((LocalMapAllocator) allocator(), kafkaConfig.bootstrapServers());
         shutdowner().queue("map-mgmt-listener", mapMgmtConsumer::close);
+
+        scriptEngine = new ScriptEngine(hubWorld.instance());
     }
 
     private void performHubInit() {
@@ -247,15 +251,15 @@ public class DevServerRunner extends AbstractMapServer {
             });
         }, "");
 
-
-        var guiManager = new ScriptEngine().guiManager();
         dbg.createPermissionlessSubcommand("gui", (player, ignored) -> {
-            guiManager.openGui(player, URI.create("guilib:///store/store-view.js"));
-
+            player.getInstance().scheduleNextTick(ignored2 -> {
+                scriptEngine.guiManager().openGui(player, URI.create("guilib:///store/store-view.js"));
+            });
         }, "");
         dbg.createPermissionlessSubcommand("gui2", (player, ignored) -> {
-            guiManager.openGui(player, URI.create("guilib:///map_browser/map-browser-view.js"));
-
+            player.getInstance().scheduleNextTick(ignored2 -> {
+                scriptEngine.guiManager().openGui(player, URI.create("guilib:///map_browser/map-browser-view.js"));
+            });
         }, "");
 
         return dbg;

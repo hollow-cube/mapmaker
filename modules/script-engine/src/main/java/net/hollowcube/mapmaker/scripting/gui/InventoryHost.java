@@ -19,6 +19,7 @@ import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import net.minestom.server.utils.validate.Check;
 import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,9 +67,11 @@ public class InventoryHost {
     }
 
     public void addChild(@NotNull Node node) {
+        System.out.println("ADD CHILD TO ROOT " + node);
         if (this.reactRoot != null)
             throw new IllegalStateException("The root of a GUI must be a single element");
         this.reactRoot = node;
+        drawCurrentElement(InventoryType.CHEST_6_ROW); // todo
     }
 
     public void removeChild(@NotNull Node child) {
@@ -81,8 +84,8 @@ public class InventoryHost {
         this.reactRoot = null;
     }
 
-    public void drawCurrentElement(@NotNull InventoryType type) {
-        if (this.reactRoot == null) return; // Check if unmounted
+    public @Nullable Inventory drawCurrentElement(@NotNull InventoryType type) {
+        if (this.reactRoot == null) return null; // Check if unmounted
 
         // Currently we always consume the player inventory so add 4 rows.
         int containerSizeInRows = getInterpretedSize(type) / 9;
@@ -94,6 +97,13 @@ public class InventoryHost {
         } else {
             this.handle = new InventoryWrapper(this, type, menuBuilder.getItems(), menuBuilder.getTitle());
         }
+
+        if (!handle.isViewer(player)) {
+            player.openInventory(handle);
+        }
+
+        return this.handle;
+//        System.out.println("FINALLY DREW");
     }
 
     /**

@@ -5,10 +5,12 @@ import net.hollowcube.mapmaker.scripting.instrumentation.ModuleInterceptor;
 import net.hollowcube.mapmaker.scripting.loader.FileSystemLoader;
 import net.hollowcube.mapmaker.scripting.loader.InternalScriptLoader;
 import net.hollowcube.mapmaker.scripting.loader.ScriptLoader;
+import net.hollowcube.mapmaker.scripting.node.Globals;
 import net.hollowcube.mapmaker.scripting.node.Process;
-import net.hollowcube.mapmaker.scripting.node.SetTimeout;
 import net.hollowcube.mapmaker.scripting.util.ContextWrapper;
+import net.minestom.server.instance.Instance;
 import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +39,10 @@ import java.util.function.Function;
  * results).</p>
  */
 public class ScriptEngine {
-    private final Env env;
+    public final Env env;
+    public final Instance instance;
+    public final Globals globals = new Globals(this);
+
     private final Context context;
 
     private final Map<String, ScriptLoader> loaders = new HashMap<>();
@@ -47,8 +52,10 @@ public class ScriptEngine {
     // Sub handlers, created lazily when needed.
     private GuiManager guiManager = null; // Lazy
 
-    public ScriptEngine() {
+    public ScriptEngine(@NotNull Instance instance) {
         this.env = new Env(true); // todo not always dev :)
+        this.instance = instance;
+
         this.context = Context.newBuilder().build();
 
         try {
@@ -137,7 +144,8 @@ public class ScriptEngine {
     private void setupGlobals() {
         var global = context.getBindings("js");
         global.putMember("process", Process.sandboxedProcess());
-        global.putMember("setTimeout", new SetTimeout());
+        global.putMember("setTimeout", (ProxyExecutable) globals::setTimeout);
+        global.putMember("clearTimeout", (ProxyExecutable) globals::clearTimeout);
     }
 
     private void handleModuleHotSwap(@NotNull URI moduleUri, @Nullable String newCode) {

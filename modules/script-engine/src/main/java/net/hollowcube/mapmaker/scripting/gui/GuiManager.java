@@ -7,10 +7,12 @@ import net.hollowcube.mapmaker.scripting.gui.react.JSX;
 import net.hollowcube.mapmaker.scripting.gui.react.ReactRefresh;
 import net.hollowcube.mapmaker.scripting.gui.react.ReconcilerHostConfig;
 import net.minestom.server.entity.Player;
+import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
 import java.util.Map;
@@ -21,7 +23,7 @@ import static net.hollowcube.mapmaker.scripting.util.Proxies.proxyObject;
 public class GuiManager {
     private final ScriptEngine engine;
     private final Module react;
-    private final Value reactReconcilerInst;
+    public final Value reactReconcilerInst;
     private final Value hostContext;
     private final Value viewSymbol;
 
@@ -38,7 +40,7 @@ public class GuiManager {
 
         this.react = engine.load(URI.create("internal:///react/react.js"));
         this.reactReconcilerInst = engine.load(URI.create("internal:///react/react-reconciler.js"))
-                .exports().execute(new ReconcilerHostConfig());
+                .exports().execute(new ReconcilerHostConfig(engine));
         if (engine.env().isDevelopment()) {
             // Reconciler dev tools must be loaded for react-refresh to work properly
             this.reactReconcilerInst.invokeMember("injectIntoDevTools");
@@ -79,9 +81,20 @@ public class GuiManager {
 
         // Mount and do initial render immediately.
         host.reconcilerRoot = mount(host);
-        render(host, contextProviderElement, inventoryType);
+        final Inventory initialHandle = render(host, contextProviderElement, inventoryType);
 
-        player.openInventory(host.handle());
+
+//        if (initialHandle != null) {
+//            player.openInventory(initialHandle);
+//
+//        } else {
+//            player.scheduler().scheduleEndOfTick(() -> {
+//                host.drawCurrentElement(inventoryType);
+//                player.openInventory(host.handle());
+//            });
+//            System.out.println("NO HANDLE ON INITIAL RENDER, COMING BACK LATER");
+//        }
+
     }
 
     private @NotNull Value mount(@NotNull InventoryHost host) {
@@ -108,7 +121,7 @@ public class GuiManager {
                 /* callback */ null);
     }
 
-    public void render(@NotNull InventoryHost host, @NotNull Value reactElement, @NotNull InventoryType inventoryType) {
+    public @Nullable Inventory render(@NotNull InventoryHost host, @NotNull Value reactElement, @NotNull InventoryType inventoryType) {
         reactReconcilerInst.invokeMember("updateContainer",
                 /* element */ reactElement,
                 /* container */ Objects.requireNonNull(host.reconcilerRoot),
@@ -116,7 +129,7 @@ public class GuiManager {
                 /* callback */ null);
 
         // 'Render' the underlying Minestom inventory (items & title)
-        host.drawCurrentElement(inventoryType);
+        return host.drawCurrentElement(inventoryType);
     }
 
     public @NotNull Value wrapView(@NotNull Value component, @NotNull String inventoryType) {
