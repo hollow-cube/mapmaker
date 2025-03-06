@@ -15,6 +15,7 @@ public class BouncePadMarkerHandler extends MarkerHandler {
 
     public BouncePadMarkerHandler(@NotNull MarkerEntity entity) {
         super(ID, entity);
+        onDataChange(null);
     }
 
     @Override
