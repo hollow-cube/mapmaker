@@ -31,6 +31,7 @@ public final class MapEntities {
         MapEntityType.override(EntityType.FOX, FoxEntity::new);
         MapEntityType.override(EntityType.WOLF, WolfEntity::new);
         MapEntityType.override(EntityType.CHICKEN, ChickenEntity::new);
+        MapEntityType.override(EntityType.SHULKER, ShulkerEntity::new);
 
         MapEntityType.override(EntityType.BLOCK_DISPLAY, DisplayEntity.Block::new);
         MapEntityType.override(EntityType.ITEM_DISPLAY, DisplayEntity.Item::new);
