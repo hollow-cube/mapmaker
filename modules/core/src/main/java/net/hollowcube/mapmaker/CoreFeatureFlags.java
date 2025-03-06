@@ -11,4 +11,6 @@ public final class CoreFeatureFlags {
 
     public static FeatureFlag SERVER_STAT_OVERLAY = FeatureFlag.of("debug.server_stat_overlay");
 
+    public static FeatureFlag COLORABLE_COSMETICS = FeatureFlag.of("colorable_cosmetics");
+
 }

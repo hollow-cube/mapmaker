@@ -153,10 +153,10 @@ public class Cosmetic {
         itemLore.add(this.rarity().asComponent());
         itemLore.add(Component.empty());
         itemLore.addAll(LanguageProviderV2.translateMulti("cosmetic." + type.id() + "." + id + ".lore", List.of()));
-        if (this.isColorable()) {
-            itemLore.add(Component.empty());
-            itemLore.add(Component.translatable("cosmetic.color"));
-        }
+//        if (this.isColorable()) {
+//            itemLore.add(Component.empty());
+//            itemLore.add(Component.translatable("cosmetic.color"));
+//        }
         return itemLore;
     }
 

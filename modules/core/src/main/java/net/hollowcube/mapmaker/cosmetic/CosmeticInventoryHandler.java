@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.cosmetic;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.common.events.PlayerGiveCreativeItemEvent;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.gui.common.anvil.ColorPickerView;
 import net.hollowcube.mapmaker.gui.store.CosmeticView;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
@@ -93,6 +94,8 @@ public class CosmeticInventoryHandler {
             @NotNull Player player,
             @NotNull CosmeticType cosmeticType
     ) {
+        if (!CoreFeatureFlags.COLORABLE_COSMETICS.test(player)) return;
+
         var data = PlayerDataV2.fromPlayer(player);
         var options = data.getSetting(cosmeticType.setting());
 
