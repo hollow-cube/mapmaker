@@ -772,6 +772,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         } else {
             player.setChestplate(player.getChestplate().without(ItemComponent.GLIDER)
                     .with(ItemComponent.EQUIPPABLE, EMPTY_EQUIPPABLE));
+            if (player.isFlyingWithElytra()) player.setFlyingWithElytra(false);
         }
 
         world.callEvent(new MapPlayerUpdateStateEvent(world, player));
