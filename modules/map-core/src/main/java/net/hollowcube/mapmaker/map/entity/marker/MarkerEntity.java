@@ -310,6 +310,7 @@ public class MarkerEntity extends MapEntity {
 
             insidePlayers.add(player); // Just entered
             world.callEvent(new MarkerEntityEnteredEvent(world, player, this));
+            if (this.handler != null) this.handler.onPlayerEnter(player);
         }
         var iter = insidePlayers.iterator();
         while (iter.hasNext()) {
@@ -318,6 +319,7 @@ public class MarkerEntity extends MapEntity {
 
             iter.remove(); // Just exited
             world.callEvent(new MarkerEntityExitedEvent(world, player, this));
+            if (this.handler != null) this.handler.onPlayerExit(player);
         }
     }
 
