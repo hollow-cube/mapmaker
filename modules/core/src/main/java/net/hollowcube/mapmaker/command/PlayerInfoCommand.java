@@ -66,7 +66,7 @@ public class PlayerInfoCommand extends CommandDsl {
     }
 
     private void sendChannels(@NotNull Player player, @NotNull Player target, boolean namespaces) {
-        PacketQueue queue = PacketQueue.get(player);
+        PacketQueue queue = PacketQueue.get(target);
         if (queue == null) {
             player.sendMessage("No channels found for %s".formatted(target.getUsername()));
         } else {
@@ -83,7 +83,7 @@ public class PlayerInfoCommand extends CommandDsl {
     }
 
     private void sendGeneral(@NotNull Player player, @NotNull Player target) {
-        Set<String> channels = PacketQueue.get(player).channels();
+        Set<String> channels = PacketQueue.get(target).channels();
         Set<String> namespaces = channels.stream().map(s -> s.split(":")[0]).collect(Collectors.toSet());
         String brand = Objects.requireNonNullElse(target.getTag(CLIENT_BRAND), "Unknown");
 
