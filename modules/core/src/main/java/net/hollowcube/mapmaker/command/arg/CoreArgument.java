@@ -122,6 +122,14 @@ public final class CoreArgument {
         return new MessageArgument(id);
     }
 
+    public static MapSettingArgument MapSetting(@NotNull String id) {
+        return new MapSettingArgument(id);
+    }
+
+    public static JsonArgument Json(@NotNull String id) {
+        return new JsonArgument(id);
+    }
+
     private CoreArgument() {
     }
 }

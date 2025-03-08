@@ -5,9 +5,7 @@ import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.common.util.ColorUtil;
-import net.hollowcube.common.util.OpUtils;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
-import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.color.Color;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -21,11 +19,13 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public final class ExtraCodecs {
 
@@ -123,7 +123,8 @@ public final class ExtraCodecs {
                     try {
                         return DataResult.success(Enum.valueOf(enumClass, name.toUpperCase(Locale.ROOT)));
                     } catch (IllegalArgumentException e) {
-                        return DataResult.error(() -> "Invalid enum name: " + name);
+                        String expected = Arrays.stream(values).map(Enum::name).collect(Collectors.joining(", "));
+                        return DataResult.error(() -> "Invalid enum name: " + name + " (expected one of: " + expected + ")");
                     }
                 },
                 value -> value.name().toLowerCase(Locale.ROOT)

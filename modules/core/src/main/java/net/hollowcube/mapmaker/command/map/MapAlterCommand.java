@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.command.map;
 
+import com.google.gson.JsonElement;
+import com.mojang.serialization.JsonOps;
 import net.hollowcube.command.CommandBuilder;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
@@ -7,6 +9,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -39,6 +42,10 @@ public class MapAlterCommand {
             .description("The tag to modify");
     private final Argument<MapQuality> qualityArg = Argument.Enum("quality", MapQuality.class)
             .description("The new quality rating for the map");
+    private final Argument<MapSetting<?>> settingsArg = CoreArgument.MapSetting("setting")
+            .description("The setting to modify");
+    private final Argument<JsonElement> settingDataArg = CoreArgument.Json("data")
+            .description("The new data for the setting");
 
     private final MapService mapService;
     private final PermManager permManager;
@@ -64,41 +71,45 @@ public class MapAlterCommand {
                 .condition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN))
                 .description("Edit information related to a map")
                 .child(mapArg, alter -> alter
-                                .child("type", di -> di
-                                        .executes(playerOnly(this::handleSetType), typeArg)
-                                        .description("Change the type of a map")
-                                        .examples("/map alter 123-456-789 type parkour"))
-                                .child("name", name -> name
-                                        .executes(playerOnly(this::handleSetName), nameArg)
-                                        .description("Change the name of a map")
-                                        .examples("/map alter 123-456-789 name Floating Parkour"))
-                                .child("displayItem", di -> di
-                                        .executes(playerOnly(this::handleSetDisplayItem), displayItemArg)
-                                        .description("Change the display item of a map")
-                                        .examples("/map alter 123-456-789 displayItem book"))
-                                .child("variant", sv -> sv
-                                        .executes(playerOnly(this::handleSetSubVariant), subvariantArg)
-                                        .description("Change the variant of a map")
-                                        .examples("/map alter 123-456-789 variant speedrun"))
-                                .child("size", size -> size
-                                        .executes(playerOnly(this::handleSetSize), sizeArg)
-                                        .description("Change the world size of a map")
-                                        .examples("/map alter 123-456-789 size large"))
-                                .child("tag", tag -> tag
-                                        .description("Add or remove a tag from a map")
-                                        .examples("/map alter 123-456-789 tag add puzzle", "/map alter 123-456-789 tag remove story")
-                                        .child("add", add -> add
-                                                .executes(playerOnly(this::handleAddTag), tagArg)
-                                                .description("Add a tag to a map"))
-                                        .child("remove", rem -> rem
-                                                .executes(playerOnly(this::handleRemoveTag), tagArg)
-                                                .description("Remove a tag from a map")))
-                                .child("quality", quality -> quality
-                                        .executes(playerOnly(this::handleSetQuality), qualityArg)
-                                        .description("Change the rating of a map")
-                                        .examples("/map alter 123-456-789 quality unrated"))
-                        // todo toggle settings?
-                ));
+                        .child("type", di -> di
+                                .executes(playerOnly(this::handleSetType), typeArg)
+                                .description("Change the type of a map")
+                                .examples("/map alter 123-456-789 type parkour"))
+                        .child("name", name -> name
+                                .executes(playerOnly(this::handleSetName), nameArg)
+                                .description("Change the name of a map")
+                                .examples("/map alter 123-456-789 name Floating Parkour"))
+                        .child("displayItem", di -> di
+                                .executes(playerOnly(this::handleSetDisplayItem), displayItemArg)
+                                .description("Change the display item of a map")
+                                .examples("/map alter 123-456-789 displayItem book"))
+                        .child("variant", sv -> sv
+                                .executes(playerOnly(this::handleSetSubVariant), subvariantArg)
+                                .description("Change the variant of a map")
+                                .examples("/map alter 123-456-789 variant speedrun"))
+                        .child("size", size -> size
+                                .executes(playerOnly(this::handleSetSize), sizeArg)
+                                .description("Change the world size of a map")
+                                .examples("/map alter 123-456-789 size large"))
+                        .child("tag", tag -> tag
+                                .description("Add or remove a tag from a map")
+                                .examples("/map alter 123-456-789 tag add puzzle", "/map alter 123-456-789 tag remove story")
+                                .child("add", add -> add
+                                        .executes(playerOnly(this::handleAddTag), tagArg)
+                                        .description("Add a tag to a map"))
+                                .child("remove", rem -> rem
+                                        .executes(playerOnly(this::handleRemoveTag), tagArg)
+                                        .description("Remove a tag from a map")))
+                        .child("quality", quality -> quality
+                                .executes(playerOnly(this::handleSetQuality), qualityArg)
+                                .description("Change the rating of a map")
+                                .examples("/map alter 123-456-789 quality unrated"))
+                        .child("setting", setting -> setting
+                                .description("Change a setting of a map")
+                                .executes(playerOnly(this::handleSetSetting), settingsArg, settingDataArg)
+                                .examples("/map alter 123-456-789 setting reset_in_water false"))
+                )
+        );
     }
 
     private void handleSetType(@NotNull Player player, @NotNull CommandContext context) {
@@ -203,6 +214,29 @@ public class MapAlterCommand {
         if (doMapUpdate(player, map)) {
             player.sendMessage(Component.text("Set quality override to " + newQuality));
         }
+    }
+
+    private void handleSetSetting(@NotNull Player player, @NotNull CommandContext context) {
+        var map = context.get(mapArg);
+        var setting = context.get(settingsArg);
+        var json = context.get(settingDataArg);
+
+        setting.codec().parse(JsonOps.INSTANCE, json)
+                .ifError(error -> {
+                    player.sendMessage(Component.text("Invalid data for setting " + setting.key()));
+                    player.sendMessage(Component.text("Error: " + error.message()));
+                }).ifSuccess(data -> {
+                    writeSetting(map.settings(), setting, data);
+                    if (doMapUpdate(player, map)) {
+                        player.sendMessage(Component.text("Set setting " + setting.key() + " to " + data));
+                    }
+                });
+
+    }
+
+    private <T> void writeSetting(@NotNull MapSettings settings, @NotNull MapSetting<T> setting, @NotNull Object data) {
+        //noinspection unchecked
+        setting.write(settings, (T) data);
     }
 
     /**
