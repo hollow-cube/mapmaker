@@ -7,7 +7,8 @@ public record SessionCreateRequest(
         @NotNull String proxy,
         @NotNull String username,
         @NotNull String ip,
-        @NotNull Skin skin
+        @NotNull Skin skin,
+        @Nullable String connectedHost
 ) {
 
     public record Skin(

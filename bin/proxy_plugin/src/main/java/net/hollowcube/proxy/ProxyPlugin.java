@@ -113,7 +113,8 @@ public class ProxyPlugin {
                             ProxySessionService.hostname,
                             player.getUsername(),
                             player.getRemoteAddress().getAddress().getHostAddress(),
-                            new SessionCreateRequest.Skin(skinTexture, skinSignature)
+                            new SessionCreateRequest.Skin(skinTexture, skinSignature),
+                            player.getRawVirtualHost().orElse(null)
                     )
             );
             playersJustJoined.add(player.getUniqueId());
