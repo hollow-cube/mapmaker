@@ -633,7 +633,7 @@ public abstract class AbstractMapServer implements MapServer {
         PlayerBackpack.fromPlayer(player).refresh();
 
         var actionBar = ActionBar.forPlayer(player);
-        actionBar.addProvider(new ChatChannelDisplay());
+        actionBar.addProvider(ChatChannelDisplay.INSTANCE);
         actionBar.addProvider(MiscFunctionality::buildCurrencyDisplay);
         actionBar.addProvider(new ExpBarRenderer());
 

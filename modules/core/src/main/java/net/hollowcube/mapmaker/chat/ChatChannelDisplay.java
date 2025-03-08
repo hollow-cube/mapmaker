@@ -12,11 +12,16 @@ import org.jetbrains.annotations.NotNull;
 
 public class ChatChannelDisplay implements ActionBar.Provider  {
 
+    public static final ChatChannelDisplay INSTANCE = new ChatChannelDisplay();
+
     private static final int NORMAL_OFFSET = -96;
     private static final int OFF_HAND_OFFSET = -125;
 
     private static final BadSprite GLOBAL = BadSprite.require("hud/chat/global_channel");
     private static final BadSprite LOCAL = BadSprite.require("hud/chat/local_channel");
+
+    private ChatChannelDisplay() {
+    }
 
     @Override
     public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
