@@ -1,8 +1,7 @@
 fullnameOverride: mapmaker-map
 
 nodeSelector:
-  kubernetes.io/hostname: bloom-01.hollowcube.dev
-#  kubernetes.io/arch: arm64
+  kubernetes.io/hostname: ovh-02
 
 mapmaker:
   role: map

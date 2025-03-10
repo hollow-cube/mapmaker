@@ -1,7 +1,7 @@
 fullnameOverride: mapmaker-hub
 
 nodeSelector:
-  kubernetes.io/hostname: ovh-02.hollowcube.dev
+  kubernetes.io/hostname: ovh-02
 
 mapmaker:
   role: hub
