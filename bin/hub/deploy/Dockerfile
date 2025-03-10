@@ -13,4 +13,4 @@ RUN apk add --no-cache jattach --repository http://dl-cdn.alpinelinux.org/alpine
 COPY ./hub_deploy.jar /app/server.jar
 
 EXPOSE 25565
-CMD ["java", "--enable-preview", "-XX:+UseSerialGC", "-Xms500M", "-Xmx500M", "-XX:ActiveProcessorCount=4", "-jar", "server.jar"]
+CMD ["java", "--enable-preview", "-XX:+UseSerialGC", "-Xms1000M", "-Xmx1000M", "-XX:ActiveProcessorCount=4", "-jar", "server.jar"]

@@ -17,10 +17,10 @@ image:
 resources:
   limits:
     #    cpu: 1500m
-    memory: 4Gi
+    memory: 5Gi
   requests:
     #    cpu: 500m
-    memory: 4Gi
+    memory: 5Gi
 
 serviceMonitor:
   enabled: true

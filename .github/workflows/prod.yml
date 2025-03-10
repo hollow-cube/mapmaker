@@ -1,5 +1,5 @@
-name: Staging Build & Deploy
-concurrency: Staging
+name: Prod Build & Deploy
+concurrency: Prod
 
 on:
   push:
@@ -94,7 +94,7 @@ jobs:
         with:
           context: bazel-bin/bin/map
           file: "bin/map/deploy/Dockerfile"
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           tags: mworzala/mapmaker-map:${{ github.sha }}
   docker-build-hub:
@@ -133,7 +133,7 @@ jobs:
         with:
           context: bazel-bin/bin/hub
           file: "bin/hub/deploy/Dockerfile"
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           tags: mworzala/mapmaker-hub:${{ github.sha }}
 
@@ -184,7 +184,7 @@ jobs:
           RESOURCE_PACK_HASH: ${{ needs.resource-pack-build.outputs.resource_pack_sha }}
         run: |
           # Setup Kubernetes
-          tailscale configure kubeconfig prod
+          tailscale configure kubeconfig prod-v2
           kubectl cluster-info
 
           # Deploy the chart
@@ -238,7 +238,7 @@ jobs:
           RESOURCE_PACK_HASH: ${{ needs.resource-pack-build.outputs.resource_pack_sha }}
         run: |
           # Setup Kubernetes
-          tailscale configure kubeconfig prod
+          tailscale configure kubeconfig prod-v2
           kubectl cluster-info
 
           # Deploy the chart
