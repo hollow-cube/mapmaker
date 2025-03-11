@@ -38,13 +38,13 @@ public class SetSpectatorCheckpointItem extends ItemHandler {
     protected void rightClicked(@NotNull Click click) {
         Player player = click.player();
         ActionBar actionBar = ActionBar.forPlayer(player);
-        if (player.isSneaking()) {
-            SpectateHandler.setCheckpoint(player, null);
-            actionBar.addProvider(new GenericTempActionBarProvider("Cleared temporary checkpoint!", 1000));
-        } else {
+//        if (player.isSneaking()) {
+//            SpectateHandler.setCheckpoint(player, null);
+//            actionBar.addProvider(new GenericTempActionBarProvider("Cleared temporary checkpoint!", 1000));
+//        } else {
             SpectateHandler.setCheckpoint(player, player.getPosition());
             actionBar.addProvider(new GenericTempActionBarProvider("Added temporary checkpoint!", 1000));
-        }
+//        }
     }
 
 
