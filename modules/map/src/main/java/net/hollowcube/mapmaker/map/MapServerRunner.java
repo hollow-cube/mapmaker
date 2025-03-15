@@ -207,6 +207,7 @@ public class MapServerRunner extends AbstractMapServer {
         commandManager.register(new SetPreciseCoordsCommand());
         commandManager.register(new BuildCommand());
         commandManager.register(new SetSpawnCommand());
+        commandManager.register(new GameModeCommand());
 
         commandManager.register(new SpectateCommand());
 
