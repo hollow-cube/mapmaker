@@ -564,7 +564,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public @NotNull MapRating getMapRating(@NotNull String mapId, @NotNull String playerId) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/" + mapId + "/ratings/" + playerId))
+                .uri(URI.create(urlV3 + "/maps/" + mapId + "/ratings/" + playerId))
                 .header(AUTHORIZER_HEADER, playerId)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -580,7 +580,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         var reqBody = GSON.toJson(rating);
         var req = HttpRequest.newBuilder()
                 .method("PUT", HttpRequest.BodyPublishers.ofString(reqBody))
-                .uri(URI.create(url + "/" + mapId + "/ratings/" + playerId))
+                .uri(URI.create(urlV3 + "/maps/" + mapId + "/ratings/" + playerId))
                 .header(AUTHORIZER_HEADER, playerId)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
