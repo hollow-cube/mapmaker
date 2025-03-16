@@ -81,8 +81,7 @@ public class MapHistoryView extends View {
                 });
             });
 
-            pageNumber.setArgs(Component.text(page + 1).color(PAGE_COLOR));
-            pageNumber.setText(String.valueOf(page + 1), PAGE_COLOR);
+            updatePageNumber(page);
         } catch (Exception e) {
             ExceptionReporter.reportException(e, this.player);
         }
@@ -91,10 +90,17 @@ public class MapHistoryView extends View {
     @Action("back")
     private void back() {
         pagination.prevPage();
+        updatePageNumber(pagination.page());
     }
 
     @Action("next")
     private void next() {
         pagination.nextPage();
+        updatePageNumber(pagination.page());
+    }
+
+    private void updatePageNumber(int page) {
+        pageNumber.setArgs(Component.text(page + 1).color(PAGE_COLOR));
+        pageNumber.setText(String.valueOf(page + 1), PAGE_COLOR);
     }
 }
