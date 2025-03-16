@@ -80,6 +80,11 @@ public class NoopMapService implements MapService {
     }
 
     @Override
+    public @NotNull List<MapData> getMaps(@NotNull String authorizer, @NotNull List<String> mapIds) {
+        return mapIds.stream().map(staticMaps::get).toList();
+    }
+
+    @Override
     public @NotNull MapData getMapByPublishedId(@NotNull String authorizer, long publishedId) {
         throw new UnsupportedOperationException("not implemented");
     }
@@ -196,6 +201,11 @@ public class NoopMapService implements MapService {
                 new String[]{null, "62da0aaf-8cad-4c13-869c-02b07688988d", null, null},
                 null, null
         );
+    }
+
+    @Override
+    public @NotNull MapHistory getPlayerMapHistory(@NotNull String playerId, int page, int amount) {
+        return new MapHistory(page, false, List.of(new MapHistory.Entry("62da0aaf-8cad-4c13-869c-02b07688988d")));
     }
 
     @Override

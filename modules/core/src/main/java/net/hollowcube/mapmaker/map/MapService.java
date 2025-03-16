@@ -46,6 +46,8 @@ public interface MapService {
 
     @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id);
 
+    @NotNull List<MapData> getMaps(@NotNull String authorizer, @NotNull List<String> mapIds);
+
     @NotNull MapData getMapByPublishedId(@NotNull String authorizer, long publishedId);
 
     void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update);
@@ -101,6 +103,8 @@ public interface MapService {
     void setMapRating(@NotNull String mapId, @NotNull String playerId, @NotNull MapRating rating);
 
     @NotNull MapPlayerData getMapPlayerData(@NotNull String playerId);
+
+    @NotNull MapHistory getPlayerMapHistory(@NotNull String playerId, int page, int amount);
 
     // Legacy
 

@@ -3,8 +3,10 @@ package net.hollowcube.mapmaker.command.map;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandBuilder;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.command.dsl.SimpleCommand;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.map.legacy.MapLegacyCommand;
+import net.hollowcube.mapmaker.gui.play.history.MapHistoryView;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -41,6 +43,11 @@ public class MapCommand extends CommandDsl {
         addSubcommand(this.info = new MapInfoCommand(mapService, permManager));
 
         addSubcommand(new MapLegacyCommand(mapService, permManager));
+        addSubcommand(SimpleCommand.of("history")
+                .callback(player -> guiController.show(player, MapHistoryView::new))
+                .description("View the history of a map")
+                .build()
+        );
 
         // Permissioned commands
         addSubcommand(this.delete = new MapDeleteCommand(mapService, permManager));

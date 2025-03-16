@@ -36,12 +36,14 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     private final String url;
     private final String urlV2;
+    private final String urlV3;
     private final String legacyUrl;
     private final String perfdumpUrl;
 
     public MapServiceImpl(String url) {
         this.url = String.format("%s/v1/internal/maps", url);
         this.urlV2 = String.format("%s/v2/internal/maps", url);
+        this.urlV3 = String.format("%s/v3/internal", url);
         this.legacyUrl = String.format("%s/v1/internal/maps/legacy", url);
         this.perfdumpUrl = String.format("%s/v1/internal/perfdump", url);
     }
@@ -188,6 +190,19 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             case 200 -> GSON.fromJson(res.body(), MapData.class);
             case 404 -> throw new NotFoundError(id);
             default -> throw new InternalError("Failed to get map: " + res.body());
+        };
+    }
+
+    @Override
+    public @NotNull List<MapData> getMaps(@NotNull String authorizer, @NotNull List<String> mapIds) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(urlV3 + "/maps?mapIds=" + String.join(",", mapIds)))
+                .header(AUTHORIZER_HEADER, authorizer)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), MapDataResults.class).results();
+            default -> throw new InternalError("Failed to get maps: " + res.statusCode());
         };
     }
 
@@ -582,6 +597,21 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() == 200) return GSON.fromJson(res.body(), MapPlayerData.class); // Ok
         throw new InternalError("Failed to get map player data: " + res.body());
+    }
+
+    @Override
+    public @NotNull MapHistory getPlayerMapHistory(@NotNull String playerId, int page, int amount) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(urlV3 + "/map-players/" + playerId + "/history?page=" + page + "&pageSize=" + amount))
+                .header(AUTHORIZER_HEADER, playerId)
+                .build();
+
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), MapHistory.class);
+            case 404 -> new MapHistory(page, false, List.of());
+            default -> throw new InternalError("Failed to get player map history: " + res.body());
+        };
     }
 
     @Override
