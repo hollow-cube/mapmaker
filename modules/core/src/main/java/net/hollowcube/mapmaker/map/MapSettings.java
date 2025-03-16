@@ -31,6 +31,7 @@ public class MapSettings {
     public static final MapSetting<Boolean> NO_SPECTATOR = MapSetting.Bool("no_spectator", false);
     public static final MapSetting<Boolean> RESET_IN_WATER = MapSetting.Bool("reset_in_water", false);
     public static final MapSetting<Boolean> RESET_IN_LAVA = MapSetting.Bool("reset_in_lava", false);
+    public static final MapSetting<Boolean> NO_RELOG = MapSetting.Bool("no_relog", false);
 
     public static final MapSetting<TimeOfDay> TIME_OF_DAY = MapSetting.Enum("time_of_day", TimeOfDay.NOON);
     public static final MapSetting<WeatherType> WEATHER_TYPE = MapSetting.Enum("weather_type", WeatherType.CLEAR);
