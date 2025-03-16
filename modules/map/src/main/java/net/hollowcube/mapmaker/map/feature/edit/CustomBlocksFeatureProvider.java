@@ -4,10 +4,7 @@ import com.google.auto.service.AutoService;
 import net.hollowcube.compat.axiom.events.AxiomMarkerDataRequestEvent;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.block.custom.BouncePadBlock;
-import net.hollowcube.mapmaker.map.block.custom.CheckpointPlateBlock;
-import net.hollowcube.mapmaker.map.block.custom.FinishPlateBlock;
-import net.hollowcube.mapmaker.map.block.custom.StatusPlateBlock;
+import net.hollowcube.mapmaker.map.block.custom.*;
 import net.hollowcube.mapmaker.map.block.custom.bouncepad.BouncePadMarkerHandler;
 import net.hollowcube.mapmaker.map.entity.marker.MapLeaderboardMarkerHandler;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
@@ -69,6 +66,7 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
 
         world.markerRegistry().register(MapLeaderboardMarkerHandler.ID, MapLeaderboardMarkerHandler::new);
         world.markerRegistry().register(BouncePadMarkerHandler.ID, BouncePadMarkerHandler::new);
+        world.markerRegistry().register(ResetMarkerHandler.ID, ResetMarkerHandler::new);
     }
 
     @Override
