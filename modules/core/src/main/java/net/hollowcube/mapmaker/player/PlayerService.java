@@ -2,11 +2,13 @@ package net.hollowcube.mapmaker.player;
 
 import com.google.gson.JsonObject;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
+import net.hollowcube.mapmaker.player.responses.PlayerAlts;
 import net.hollowcube.mapmaker.player.responses.TotpSetupResponse;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Set;
 
 @Blocking
@@ -76,6 +78,8 @@ public interface PlayerService {
     @Nullable TotpSetupResponse beginTotpSetup(@NotNull String playerId);
 
     @NotNull TotpResult completeTotpSetup(@NotNull String playerId, @NotNull String code);
+
+    @NotNull List<PlayerAlts.Alt> getAlts(@NotNull String playerId);
 
     class NotFoundError extends RuntimeException {
 

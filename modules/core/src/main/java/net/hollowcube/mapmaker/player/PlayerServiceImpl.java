@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import io.opentelemetry.api.OpenTelemetry;
 import io.prometheus.client.Summary;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
+import net.hollowcube.mapmaker.player.responses.PlayerAlts;
 import net.hollowcube.mapmaker.player.responses.TotpSetupResponse;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.MinecraftServer;
@@ -279,5 +280,16 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         };
     }
 
+    @Override
+    public @NotNull List<PlayerAlts.Alt> getAlts(@NotNull String playerId) {
+        var req = HttpRequest.newBuilder().uri(URI.create(url + "/players/" + playerId + "/alts")).GET();
+        var res = doRequest("getAlts", req, HttpResponse.BodyHandlers.ofString());
 
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), PlayerAlts.class).results();
+            case 404 -> List.of();
+            default ->
+                    throw new SessionService.InternalError("Failed to get alts (" + res.statusCode() + "): " + res.body());
+        };
+    }
 }

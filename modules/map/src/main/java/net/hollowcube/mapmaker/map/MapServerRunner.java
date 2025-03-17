@@ -6,7 +6,7 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.command.CommandCategories;
-import net.hollowcube.mapmaker.command.PlayerInfoCommand;
+import net.hollowcube.mapmaker.command.playerinfo.PlayerInfoCommand;
 import net.hollowcube.mapmaker.command.TopTimesCommand;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.event.FeatureFlagReloadEvent;
@@ -198,7 +198,7 @@ public class MapServerRunner extends AbstractMapServer {
         ));
 
         commandManager.register(new HubCommand(server.bridge()));
-        commandManager.register(new PlayerInfoCommand(server.permManager()));
+        commandManager.register(new PlayerInfoCommand(server.permManager(), server.playerService()));
 
         commandManager.register(new TopTimesCommand(server.mapService(), server.playerService(), server.sessionManager()));
 

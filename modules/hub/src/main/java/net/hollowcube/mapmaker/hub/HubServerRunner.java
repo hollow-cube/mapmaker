@@ -6,7 +6,7 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.command.CommandCategories;
-import net.hollowcube.mapmaker.command.PlayerInfoCommand;
+import net.hollowcube.mapmaker.command.playerinfo.PlayerInfoCommand;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.hub.command.util.HubFlyCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubSpawnCommand;
@@ -96,7 +96,7 @@ public class HubServerRunner extends AbstractMapServer {
     // Static so it can be referenced from DevHubServer
     public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager, @NotNull HubMapWorld hubWorld, @NotNull Scheduler scheduler) {
         commandManager.register(new HelpCommand(commandManager, CommandCategories.GLOBAL));
-        commandManager.register(new PlayerInfoCommand(server.permManager()));
+        commandManager.register(new PlayerInfoCommand(server.permManager(), server.playerService()));
 
         commandManager.register(new HubFlyCommand(server.permManager()));
         commandManager.register(new HubSpawnCommand(hubWorld));
