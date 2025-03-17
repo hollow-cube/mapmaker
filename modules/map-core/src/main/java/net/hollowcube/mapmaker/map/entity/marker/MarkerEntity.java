@@ -92,6 +92,7 @@ public class MarkerEntity extends MapEntity {
         hasPhysics = false;
         setNoGravity(true);
         collidesWithEntities = false;
+        preventBlockPlacement = false;
     }
 
     public @NotNull String getDisplayName() {
