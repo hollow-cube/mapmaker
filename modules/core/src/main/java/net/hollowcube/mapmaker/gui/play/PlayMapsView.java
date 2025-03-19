@@ -40,7 +40,8 @@ public class PlayMapsView extends View {
             return switch (this) {
                 case BEST -> params
                         .ascending(false)
-                        .best(true);
+                        .best(true)
+                        .qualities(MapQuality.GOOD, MapQuality.GREAT, MapQuality.EXCELLENT, MapQuality.OUTSTANDING, MapQuality.MASTERPIECE);
                 case RECENT -> params
                         .ascending(false)
                         .best(false);
