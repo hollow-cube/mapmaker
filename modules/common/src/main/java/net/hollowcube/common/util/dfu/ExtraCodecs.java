@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public final class ExtraCodecs {
@@ -40,9 +39,9 @@ public final class ExtraCodecs {
     }, point -> List.of(point.x(), point.y(), point.z()));
 
     public static final Codec<Pos> POS = RecordCodecBuilder.create(i -> i.group(
-            Codec.DOUBLE.fieldOf("x").forGetter(Pos::x),
-            Codec.DOUBLE.fieldOf("y").forGetter(Pos::y),
-            Codec.DOUBLE.fieldOf("z").forGetter(Pos::z),
+            clamppedDouble(-30000000, 30000000).fieldOf("x").forGetter(Pos::x),
+            clamppedDouble(-30000000, 30000000).fieldOf("y").forGetter(Pos::y),
+            clamppedDouble(-30000000, 30000000).fieldOf("z").forGetter(Pos::z),
             Codec.FLOAT.optionalFieldOf("yaw", 0f).forGetter(Pos::yaw),
             Codec.FLOAT.optionalFieldOf("pitch", 0f).forGetter(Pos::pitch)
     ).apply(i, Pos::new));
@@ -137,22 +136,18 @@ public final class ExtraCodecs {
         return Codec.withAlternative(stringCodec, intCodec);
     }
 
-    public static <T> @NotNull Codec<T> Lazy(Supplier<Codec<T>> supplier) {
-        return new Codec<T>() {
-            private Codec<T> codec = null;
+    public static Codec<Double> clamppedDouble(double min, double max) {
+        return Codec.DOUBLE.xmap(
+                it -> Math.min(max, Math.max(min, it)),
+                it -> Math.min(max, Math.max(min, it))
+        );
+    }
 
-            @Override
-            public <T1> DataResult<Pair<T, T1>> decode(DynamicOps<T1> ops, T1 input) {
-                if (codec == null) codec = supplier.get();
-                return codec.decode(ops, input);
-            }
-
-            @Override
-            public <T1> DataResult<T1> encode(T input, DynamicOps<T1> ops, T1 prefix) {
-                if (codec == null) codec = supplier.get();
-                return codec.encode(input, ops, prefix);
-            }
-        };
+    public static Codec<Integer> clamppedInt(int min, int max) {
+        return Codec.INT.xmap(
+                it -> Math.min(max, Math.max(min, it)),
+                it -> Math.min(max, Math.max(min, it))
+        );
     }
 
     public static <T> @NotNull DataResult<T> result(@Nullable T value, @NotNull String message) {

@@ -66,7 +66,7 @@ public sealed interface HotbarItem {
 
         public static final String ID = "firework_rocket";
         public static final MapCodec<FireworkRocket> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-                Codec.INT.fieldOf("quantity").forGetter(FireworkRocket::quantity),
+                ExtraCodecs.clamppedInt(1, 99).fieldOf("quantity").orElse(1).forGetter(FireworkRocket::quantity),
                 Codec.INT.fieldOf("duration").forGetter(FireworkRocket::duration)
         ).apply(i, FireworkRocket::new));
 
@@ -107,7 +107,7 @@ public sealed interface HotbarItem {
 
         public static final String ID = "trident";
         public static final MapCodec<Trident> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-                Codec.INT.fieldOf("riptideLevel").forGetter(Trident::riptideLevel)
+                ExtraCodecs.clamppedInt(1, 3).fieldOf("riptideLevel").orElse(1).forGetter(Trident::riptideLevel)
         ).apply(i, Trident::new));
 
         private static final ItemStack DEFAULT_ITEM = ItemStack.of(Material.TRIDENT)
