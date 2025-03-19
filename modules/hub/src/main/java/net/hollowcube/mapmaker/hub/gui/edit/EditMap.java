@@ -444,10 +444,10 @@ public class EditMap extends View {
         map.settings().setParkourSubVariant(null);
         map.settings().setVariant(MapVariant.BUILDING);
         map.settings().removeGameplayTags();
-        map.settings().setOnlySprint(false);
-        map.settings().setNoSprint(false);
-        map.settings().setNoJump(false);
-        map.settings().setNoSneak(false);
+        var extra = map.settings().extra();
+        for (String key : extra.keySet().toArray(new String[0])) {
+            extra.remove(key);
+        }
         updateElementsFromMap();
         updateRequest();
     }
@@ -532,15 +532,15 @@ public class EditMap extends View {
         // TODO this is disgusting but I'm lazy, we should do this like tags as enum
         if (set) {
             if (setting.equals(MapSettings.Setting.NOSPRINT)) {
-                map.settings().setNoSprint(true);
-                map.settings().setOnlySprint(false);
+                map.setSetting(MapSettings.NO_SPRINT, true);
+                map.setSetting(MapSettings.ONLY_SPRINT, false);
             } else if (setting.equals(MapSettings.Setting.ONLYSPRINT)) {
-                map.settings().setOnlySprint(true);
-                map.settings().setNoSprint(false);
+                map.setSetting(MapSettings.NO_SPRINT, false);
+                map.setSetting(MapSettings.ONLY_SPRINT, true);
             } else if (setting.equals(MapSettings.Setting.NOJUMP)) {
-                map.settings().setNoJump(true);
+                map.setSetting(MapSettings.NO_JUMP, true);
             } else if (setting.equals(MapSettings.Setting.NOSNEAK)) {
-                map.settings().setNoSneak(true);
+                map.setSetting(MapSettings.NO_SNEAK, false);
             } else if (setting.equals(MapSettings.Setting.NOSPEC)) {
                 map.setSetting(MapSettings.NO_SPECTATOR, true);
             } else if (setting.equals(MapSettings.Setting.RESET_WATER)) {
@@ -554,13 +554,13 @@ public class EditMap extends View {
             }
         } else {
             if (setting.equals(MapSettings.Setting.NOSPRINT)) {
-                map.settings().setNoSprint(false);
+                map.setSetting(MapSettings.NO_SPRINT, false);
             } else if (setting.equals(MapSettings.Setting.ONLYSPRINT)) {
-                map.settings().setOnlySprint(false);
+                map.setSetting(MapSettings.ONLY_SPRINT, false);
             } else if (setting.equals(MapSettings.Setting.NOJUMP)) {
-                map.settings().setNoJump(false);
+                map.setSetting(MapSettings.NO_JUMP, false);
             } else if (setting.equals(MapSettings.Setting.NOSNEAK)) {
-                map.settings().setNoSneak(false);
+                map.setSetting(MapSettings.NO_SNEAK, false);
             } else if (setting.equals(MapSettings.Setting.NOSPEC)) {
                 map.setSetting(MapSettings.NO_SPECTATOR, false);
             } else if (setting.equals(MapSettings.Setting.RESET_WATER)) {
@@ -628,10 +628,10 @@ public class EditMap extends View {
         }
 
         // Settings
-        mapSettingsOnlySprint.setOption(map.settings().isOnlySprint() ? 1 : 0);
-        mapSettingsNoSprint.setOption(map.settings().isNoSprint() ? 1 : 0);
-        mapSettingsNoJump.setOption(map.settings().isNoJump() ? 1 : 0);
-        mapSettingsNoSneak.setOption(map.settings().isNoSneak() ? 1 : 0);
+        mapSettingsOnlySprint.setOption(map.getSetting(MapSettings.ONLY_SPRINT) ? 1 : 0);
+        mapSettingsNoSprint.setOption(map.getSetting(MapSettings.NO_SPRINT) ? 1 : 0);
+        mapSettingsNoJump.setOption(map.getSetting(MapSettings.NO_JUMP) ? 1 : 0);
+        mapSettingsNoSneak.setOption(map.getSetting(MapSettings.NO_SNEAK) ? 1 : 0);
         mapSettingsNoSpec.setOption(map.getSetting(MapSettings.NO_SPECTATOR) ? 1 : 0);
         mapSettingsResetWater.setOption(map.getSetting(MapSettings.RESET_IN_WATER) ? 1 : 0);
         mapSettingsResetLava.setOption(map.getSetting(MapSettings.RESET_IN_LAVA) ? 1 : 0);

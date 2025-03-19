@@ -273,7 +273,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             updatePlayerFromState(world, player, playState, isStarting);
 
             // If this is OS, reset the player as they are added
-            if (world.map().settings().isOnlySprint() && !player.getTag(RESET_TAG) && event.isFirstInit()) {
+            if (world.map().getSetting(MapSettings.NO_SPRINT) && !player.getTag(RESET_TAG) && event.isFirstInit()) {
                 player.setTag(RESET_TAG, true);
                 player.scheduleNextTick(ignored -> player.removeTag(RESET_TAG));
 //                player.sendMessage(Component.translatable("map.spectator_mode.only_sprint"));
