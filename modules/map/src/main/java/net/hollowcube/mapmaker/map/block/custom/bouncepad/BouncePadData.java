@@ -18,6 +18,7 @@ import java.util.function.Function;
 public sealed interface BouncePadData extends DebugCommand.BlockDebug {
 
     double DEFAULT_POWER = 25;
+    double MAX_VELOCITY = 4096;
 
     // Will try to parse the molang format first and then will go to legacy
     Codec<BouncePadData> LEGACY_CODEC = RecordCodecBuilder.create(instance -> instance.group(

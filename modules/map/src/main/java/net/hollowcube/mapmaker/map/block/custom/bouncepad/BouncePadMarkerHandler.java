@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.block.custom.bouncepad;
 import net.hollowcube.common.util.dfu.NbtOps;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerHandler;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,6 +31,10 @@ public class BouncePadMarkerHandler extends MarkerHandler {
         if (this.data == null) return;
         var newVelocity = this.data.getVelocity(player);
         if (newVelocity == null) return;
-        player.setVelocity(newVelocity);
+        player.setVelocity(new Vec(
+                Math.min(Math.max(newVelocity.x(), -BouncePadData.MAX_VELOCITY), BouncePadData.MAX_VELOCITY),
+                Math.min(Math.max(newVelocity.y(), -BouncePadData.MAX_VELOCITY), BouncePadData.MAX_VELOCITY),
+                Math.min(Math.max(newVelocity.z(), -BouncePadData.MAX_VELOCITY), BouncePadData.MAX_VELOCITY)
+        ));
     }
 }
