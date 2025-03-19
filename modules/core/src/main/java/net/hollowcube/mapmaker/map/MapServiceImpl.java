@@ -114,7 +114,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(urlV3 + "/maps/" + id))
+                .uri(URI.create(url + "/" + id))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -141,7 +141,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public @NotNull MapData getMapByPublishedId(@NotNull String authorizer, long publishedId) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(urlV3 + "/maps/" + publishedId))
+                .uri(URI.create(url + "/maps/" + publishedId))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
