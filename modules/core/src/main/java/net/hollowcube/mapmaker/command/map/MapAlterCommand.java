@@ -68,7 +68,7 @@ public class MapAlterCommand {
 
     public void build(@NotNull CommandBuilder builder) {
         builder.child("alter", root -> root
-                .condition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN))
+//                .condition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN))
                 .description("Edit information related to a map")
                 .child(mapArg, alter -> alter
                         .child("type", di -> di

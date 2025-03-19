@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.coordinate.Pos;
@@ -71,7 +72,7 @@ public class CyloneImport {
                     .findFirst()
                     .orElse(null);
             if (tMap == null) {
-                tMap = mapService.createOrgMap(AUTHORIZER, CYLONE_ORG_ID);
+                tMap = mapService.createMap(MapCreateRequest.forOrg(AUTHORIZER, CYLONE_ORG_ID, MapSize.LARGE));
                 existingMaps.add(tMap);
             }
             var map = tMap;

@@ -8,8 +8,8 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.map.MapSearchRequest;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +27,7 @@ public class ListMapsView extends View {
     private @Outlet("title") Text title;
 
     private final String targetId;
+    private int maxPages = 0;
 
     public ListMapsView(@NotNull Context context, @NotNull String targetId) {
         super(context);
@@ -52,16 +53,20 @@ public class ListMapsView extends View {
     @Action(value = "paging", async = true)
     private void fetchPage(@NotNull Pagination.PageRequest<MapEntry> request) {
         try {
-            var queryResult = mapService.searchMaps(MapSearchRequest.builder(player.getUuid().toString())
-                    .page(request.page(), request.pageSize())
-                    .owner(targetId)
+            var results = mapService.searchMaps(MapSearchParams.builder(player.getUuid().toString())
+                    .page(request.page())
+                    .pageSize(request.pageSize())
+                    .owner(this.targetId)
                     .build());
 
             var maps = new ArrayList<MapEntry>();
-            for (var map : queryResult.results()) {
+            for (var map : results.results()) {
                 maps.add(new MapEntry(request.context(), map));
             }
-            request.respond(maps, queryResult.nextPage());
+            if (this.maxPages == 0 && request.page() == 0) {
+                this.maxPages = results.pageCount();
+            }
+            request.respond(maps, (request.page() + 1) < this.maxPages);
         } catch (Exception e) {
             //todo feedback to user that it went wrong. Right now will load forever
             ExceptionReporter.reportException(e, player);

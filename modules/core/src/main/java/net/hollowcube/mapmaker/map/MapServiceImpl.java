@@ -6,6 +6,8 @@ import com.google.gson.reflect.TypeToken;
 import com.mojang.serialization.JsonOps;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
+import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -49,102 +51,37 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull MapData createMap(@NotNull MapPlayerData player, int slot, @NotNull MapSize size) {
+    public @NotNull MapData createMap(@NotNull MapCreateRequest request) {
         FutureUtil.assertThreadWarn();
-        logger.log(System.Logger.Level.INFO, "creating new map for " + player.id());
-        var reqBody = GSON.toJson(Map.of("owner", player.id(), "slot", slot, "size", size.id()));
+        logger.log(System.Logger.Level.INFO, "creating new map for " + request.owner() + ", is for org: " + request.isOrg());
+
         var req = HttpRequest.newBuilder()
-                .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
-                .uri(URI.create(url))
-                .header(AUTHORIZER_HEADER, player.id())
+                .POST(HttpRequest.BodyPublishers.ofString(GSON.toJson(request)))
+                .uri(URI.create(urlV3 + "/maps"))
+                .header(AUTHORIZER_HEADER, request.authorizer())
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
 
-        switch (res.statusCode()) {
-            case 201:
-                return GSON.fromJson(res.body(), MapData.class);
-            case 400:
+        return switch (res.statusCode()) {
+            case 201 -> GSON.fromJson(res.body(), MapData.class);
+            case 400 -> {
                 var err = GSON.fromJson(res.body(), ErrorRes.class);
-                if ("slot_in_use".equals(err.code))
-                    throw new SlotInUseError();
+                if ("slot_in_use".equals(err.code)) throw new SlotInUseError();
                 throw new InternalError("Failed to create map: " + err);
-            default:
-                throw new InternalError("Failed to create map: " + res.body());
-        }
-    }
-
-    @Override
-    public @NotNull MapData createOrgMap(@NotNull String authorizer, @NotNull String orgId) {
-        FutureUtil.assertThreadWarn();
-        logger.log(System.Logger.Level.INFO, "creating new org map for " + orgId);
-        var reqBody = GSON.toJson(Map.of("owner", orgId, "isOrg", true, "size", 2));
-        var req = HttpRequest.newBuilder()
-                .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
-                .uri(URI.create(url))
-                .header(AUTHORIZER_HEADER, authorizer)
-                .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        if (res.statusCode() != 201)
-            throw new InternalError("Failed to create map: " + res.body());
-
-        return GSON.fromJson(res.body(), MapData.class);
-    }
-
-    @Override
-    public @NotNull MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
-        FutureUtil.assertThreadWarn();
-        Check.argCondition(pageSize > 50, "pageSize must be less than or equal to 50");
-        logger.log(System.Logger.Level.INFO, "searching maps for " + query);
-        var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/search?sort=" + sort + "&page=" + page + "&pageSize=" + pageSize + "&query=" + URLEncoder.encode(query, StandardCharsets.UTF_8) + "&building=" + building + "&parkour=" + parkour))
-                .header(AUTHORIZER_HEADER, authorizer)
-                .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), new TypeToken<MapSearchResponse<PersonalizedMapData>>() {
-            });
-            default -> throw new InternalError("Failed to search maps: " + res.body());
+            }
+            default -> throw new InternalError("Failed to create map: " + res.body());
         };
     }
 
     @Override
-    public @NotNull MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull MapSearchRequest params) {
-        var endpoint = new StringBuilder(url + "/search?");
-        if (params.page() != -1) {
-            endpoint.append("page=").append(params.page()).append("&");
-            endpoint.append("pageSize=").append(params.pageSize()).append("&");
-        }
-        if (params.owner() != null) {
-            endpoint.append("owner=").append(params.owner()).append("&");
-        }
-        endpoint.append("isPublished=").append(params.isPublished());
-
+    public @NotNull net.hollowcube.mapmaker.map.responses.MapSearchResponse searchMaps(@NotNull MapSearchParams request) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(endpoint.toString()))
-                .header(AUTHORIZER_HEADER, params.authorizer())
+                .uri(URI.create(request.toUrl(urlV3 + "/maps/search")))
+                .header(AUTHORIZER_HEADER, request.authorizer())
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), new TypeToken<MapSearchResponse<PersonalizedMapData>>() {
-            });
-            default -> throw new InternalError("Failed to search maps: " + res.body());
-        };
-    }
-
-    @Override
-    public @NotNull MapSearchResponse<MapData> searchMapsV2(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
-        Check.argCondition(pageSize > 50, "pageSize must be less than or equal to 50");
-        logger.log(System.Logger.Level.INFO, "searching maps for " + query);
-        var req = HttpRequest.newBuilder()
-                .uri(URI.create(urlV2 + "/search?sort=" + sort + "&page=" + page + "&pageSize=" + pageSize + "&query=" + URLEncoder.encode(query, StandardCharsets.UTF_8) + "&building=" + building + "&parkour=" + parkour))
-                .header(AUTHORIZER_HEADER, authorizer)
-                .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), new TypeToken<MapSearchResponse<MapData>>() {
-            });
-            default -> throw new InternalError("Failed to search maps: " + res.body());
-        };
+        if (res.statusCode() != 200) throw new InternalError("Failed to search maps: " + res.body());
+        return GSON.fromJson(res.body(), net.hollowcube.mapmaker.map.responses.MapSearchResponse.class);
     }
 
     @Override
@@ -162,19 +99,14 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public @NotNull MapSearchResponse<MapData> searchOrgMaps(@NotNull String authorizer, int page, int pageSize, @NotNull String orgId) {
-        var endpoint = new StringBuilder(url + "/search_orgs?");
-        endpoint.append("page=").append(page).append("&");
-        endpoint.append("pageSize=").append(pageSize).append("&");
-        endpoint.append("orgId=").append(orgId).append("&");
-
+        String endpoint = url + "/search_orgs?" + "page=" + page + "&pageSize=" + pageSize + "&orgId=" + orgId;
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(endpoint.toString()))
+                .uri(URI.create(endpoint))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), new TypeToken<MapSearchResponse<MapData>>() {
-            });
+            case 200 -> GSON.fromJson(res.body(), new TypeToken<MapSearchResponse<MapData>>() {});
             default -> throw new InternalError("Failed to search maps: " + res.body());
         };
     }
@@ -182,7 +114,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/" + id))
+                .uri(URI.create(urlV3 + "/maps/" + id))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -209,7 +141,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public @NotNull MapData getMapByPublishedId(@NotNull String authorizer, long publishedId) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/" + publishedId))
+                .uri(URI.create(urlV3 + "/maps/" + publishedId))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -225,7 +157,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         var reqBody = GSON.toJson(update);
         var req = HttpRequest.newBuilder()
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(reqBody))
-                .uri(URI.create(url + "/" + id))
+                .uri(URI.create(urlV3 + "/maps/" + id))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -243,7 +175,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         var reqBody = GSON.toJson(body);
         var req = HttpRequest.newBuilder()
                 .method("DELETE", HttpRequest.BodyPublishers.ofString(reqBody))
-                .uri(URI.create(url + "/" + id))
+                .uri(URI.create(urlV3 + "/maps/" + id))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -257,8 +189,8 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public void beginVerification(@NotNull String authorizer, @NotNull String mapId) {
         var req = HttpRequest.newBuilder()
-                .method("POST", HttpRequest.BodyPublishers.noBody())
-                .uri(URI.create(url + "/" + mapId + "/verify"))
+                .POST(HttpRequest.BodyPublishers.noBody())
+                .uri(URI.create(urlV3 + "/maps/" + mapId + "/verify"))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -289,7 +221,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     public @NotNull MapData publishMap(@NotNull String authorizer, @NotNull String id) {
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.noBody())
-                .uri(URI.create(url + "/" + id + "/publish"))
+                .uri(URI.create(urlV3 + "/maps/" + id + "/publish"))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -352,7 +284,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     public void updateMapWorld(@NotNull String id, byte @NotNull [] worldData) {
         var req = HttpRequest.newBuilder()
                 .method("PUT", HttpRequest.BodyPublishers.ofByteArray(worldData))
-                .uri(URI.create(url + "/" + id + "/world"))
+                .uri(URI.create(urlV3 + "/maps/" + id + "/world"))
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .header(WORLD_SESSION_HEADER, "todo")
                 .header("content-type", POLAR_CONTENT_TYPE)
@@ -398,7 +330,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public @NotNull LeaderboardData getPlaytimeLeaderboard(@NotNull String mapId, @Nullable String playerId) {
-        var uri = url + "/" + mapId + "/leaderboard/playtime";
+        var uri = urlV3 + "/maps/" + mapId + "/leaderboard/playtime";
         if (playerId != null) uri += "?playerId=" + playerId;
         var req = HttpRequest.newBuilder()
                 .uri(URI.create(uri))
@@ -529,7 +461,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     public void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id) {
         var req = HttpRequest.newBuilder()
                 .method("DELETE", HttpRequest.BodyPublishers.noBody())
-                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + id))
+                .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId + "/" + id))
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -591,7 +523,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public @NotNull MapPlayerData getMapPlayerData(@NotNull String playerId) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/players/" + playerId))
+                .uri(URI.create(urlV3 + "/map-players/" + playerId))
                 .header(AUTHORIZER_HEADER, playerId)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());

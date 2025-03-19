@@ -13,13 +13,15 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.play.simple.*;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapQuality;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.hollowcube.mapmaker.util.StringComparison;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,12 +36,18 @@ public class PlayMapsView extends View {
     public enum SortPreset {
         APPROVED, BEST, BOOSTED, RECENT, TRENDING;
 
-        public @NotNull String getSortName() {
+        public MapSearchParams.Builder apply(MapSearchParams.Builder params) {
             return switch (this) {
-                case APPROVED -> "quality";
-                case BEST -> "best";
-                case RECENT -> "new";
-                case BOOSTED, TRENDING -> "__IDK__";
+                case BEST -> params
+                        .ascending(false)
+                        .best(true);
+                case RECENT -> params
+                        .ascending(false)
+                        .best(false);
+                case APPROVED -> params
+                        .ascending(false)
+                        .qualities(MapQuality.GOOD, MapQuality.GREAT, MapQuality.EXCELLENT, MapQuality.OUTSTANDING, MapQuality.MASTERPIECE);
+                default -> params;
             };
         }
     }
@@ -166,11 +174,20 @@ public class PlayMapsView extends View {
     private void fetchPage(@NotNull Pagination.PageRequest<MapEntry> request) {
         try {
             var sortPreset = playerData.getSetting(SORT_PRESET);
-            boolean parkour = playerData.getSetting(PARKOUR), building = playerData.getSetting(BUILDING);
-            var queryResult = mapService.searchMapsV2(player.getUuid().toString(), sortPreset.getSortName(), request.page(), request.pageSize(), building, parkour, query);
+            var variants = new ArrayList<MapVariant>();
+            if (playerData.getSetting(PARKOUR)) variants.add(MapVariant.PARKOUR);
+            if (playerData.getSetting(BUILDING)) variants.add(MapVariant.BUILDING);
+
+            var params = MapSearchParams.builder(player.getUuid().toString())
+                    .page(request.page())
+                    .pageSize(request.pageSize())
+                    .query(this.query)
+                    .variants(variants.toArray(new MapVariant[0]))
+                    .ascending(true);
+            var response = mapService.searchMaps(sortPreset.apply(params).build());
 
             // Sort the page of results using string similarity to the query
-            var results = queryResult.results();
+            var results = response.results();
             if (this.query != null && !this.query.isEmpty()) {
                 results = new ArrayList<>(results);
                 results.sort(StringComparison.jaroWinkler(query, MapData::name));
@@ -182,9 +199,13 @@ public class PlayMapsView extends View {
                 if (map.isCompletable()) mapIds.add(map.id());
                 maps.add(new MapEntry(request.context(), map));
             }
-            request.respond(maps, queryResult.nextPage());
 
-            maxPages = request.page() + 1;
+            if (this.maxPages == 0 && request.page() == 0) {
+                this.maxPages = response.pageCount();
+            }
+
+            request.respond(maps, (request.page() + 1) < this.maxPages);
+
             currentPage = request.page() + 1;
             updatePageText();
 
