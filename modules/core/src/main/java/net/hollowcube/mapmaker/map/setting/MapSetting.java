@@ -30,8 +30,8 @@ public interface MapSetting<T> {
         return new MapSettingImpl<>(key, defaultValue, JsonPrimitive::new, JsonElement::getAsBoolean, Codec.BOOL);
     }
 
-    static @NotNull MapSetting<Integer> Int(@NotNull String key, int defaultValue) {
-        return new MapSettingImpl<>(key, defaultValue, JsonPrimitive::new, JsonElement::getAsInt, Codec.INT);
+    static @NotNull MapSetting<Integer> Int(@NotNull String key, int defaultValue, int min, int max) {
+        return new MapSettingImpl<>(key, defaultValue, JsonPrimitive::new, JsonElement::getAsInt, ExtraCodecs.clamppedInt(min, max));
     }
 
     static <T extends Enum<T>> @NotNull MapSetting<T> Enum(@NotNull String key, T defaultValue) {
