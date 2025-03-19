@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.map.setting.TimeOfDay;
 import net.hollowcube.mapmaker.map.setting.WeatherType;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.ServerFlag;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.validate.Check;
@@ -32,6 +33,7 @@ public class MapSettings {
     public static final MapSetting<Boolean> RESET_IN_WATER = MapSetting.Bool("reset_in_water", false);
     public static final MapSetting<Boolean> RESET_IN_LAVA = MapSetting.Bool("reset_in_lava", false);
     public static final MapSetting<Boolean> NO_RELOG = MapSetting.Bool("no_relog", false);
+    public static final MapSetting<Integer> TICK_RATE = MapSetting.Int("tick_rate", ServerFlag.SERVER_TICKS_PER_SECOND);
 
     public static final MapSetting<TimeOfDay> TIME_OF_DAY = MapSetting.Enum("time_of_day", TimeOfDay.NOON);
     public static final MapSetting<WeatherType> WEATHER_TYPE = MapSetting.Enum("weather_type", WeatherType.CLEAR);
