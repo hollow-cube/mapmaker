@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker.map;
 
-import org.jetbrains.annotations.Nullable;
-
 public enum MapSize {
     NORMAL(0, 150),
     LARGE(1, 300),
@@ -24,14 +22,5 @@ public enum MapSize {
 
     public int size() {
         return size;
-    }
-
-    public static @Nullable MapSize fromIntegerSize(int size) {
-        for (MapSize mapSize : values()) {
-            if (mapSize.size == size) {
-                return mapSize;
-            }
-        }
-        return null;
     }
 }

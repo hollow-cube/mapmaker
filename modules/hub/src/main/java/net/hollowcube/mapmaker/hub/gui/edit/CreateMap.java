@@ -10,6 +10,7 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapSize;
@@ -17,7 +18,6 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -101,7 +101,7 @@ public class CreateMap extends View {
 
         // Dispatch request to create the map
         try {
-            var createdMap = mapService.createMap(playerData, slot, size);
+            var createdMap = mapService.createMap(MapCreateRequest.forPlayer(playerData.id(), size, slot));
             performSignal(SIG_MAP_CREATED, slot, createdMap);
             submitButton.setState(State.ACTIVE);
         } catch (Exception e) {

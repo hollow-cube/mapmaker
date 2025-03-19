@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
+import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,22 +24,11 @@ public interface MapService {
     @NotNull
     String LEADERBOARD_MAPS_BEATEN = "maps_beaten";
 
-    /**
-     * Creates a new map in the map service with the given owner.
-     *
-     * @return The created map
-     */
-    @NotNull MapData createMap(@NotNull MapPlayerData player, int slot, @NotNull MapSize size);
 
-    @NotNull MapData createOrgMap(@NotNull String authorizer, @NotNull String orgId);
+    @NotNull MapData createMap(@NotNull MapCreateRequest request);
 
     @NotNull
-    MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query);
-
-    @NotNull MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull MapSearchRequest request);
-
-    @NotNull
-    MapSearchResponse<MapData> searchMapsV2(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query);
+    net.hollowcube.mapmaker.map.responses.MapSearchResponse searchMaps(@NotNull MapSearchParams request);
 
     @NotNull MapProgressBatchResponse getMapProgress(@NotNull String playerId, @NotNull List<String> mapIds);
 

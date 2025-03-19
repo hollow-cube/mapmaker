@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.misc.noop;
 
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
+import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -18,46 +20,28 @@ public class NoopMapService implements MapService {
             "62da0aaf-8cad-4c13-869c-02b07688988d", new MapData("62da0aaf-8cad-4c13-869c-02b07688988d", UUID.randomUUID().toString(), new MapSettings(
                     "Test Map", Material.ACACIA_BOAT, MapSize.NORMAL, MapVariant.PARKOUR, new Pos(0.5, 40, 0.5), true, false, false, false, List.of(MapTags.Tag.STRUCTURE)
             ), 0, null),
-            "3b9540fb-9100-484d-8bc6-5c3d61eff3a1", new PersonalizedMapData(new MapData("3b9540fb-9100-484d-8bc6-5c3d61eff3a1", "597481a0-02fb-441c-9188-c407bec05084", new MapSettings(
+            "3b9540fb-9100-484d-8bc6-5c3d61eff3a1", new MapData("3b9540fb-9100-484d-8bc6-5c3d61eff3a1", "597481a0-02fb-441c-9188-c407bec05084", new MapSettings(
                     "Published 1", Material.DIAMOND, MapSize.NORMAL, MapVariant.PARKOUR, Pos.ZERO, true, false, false, false, List.of(MapTags.Tag.STRUCTURE)
-            ), 1, Instant.now()), PersonalizedMapData.Progress.COMPLETE),
-            "fd5771c0-c545-4d30-94fc-47e574e0fb64", new PersonalizedMapData(new MapData("fd5771c0-c545-4d30-94fc-47e574e0fb64", "597481a0-02fb-441c-9188-c407bec05084", new MapSettings(
+            ), 1, Instant.now()),
+            "fd5771c0-c545-4d30-94fc-47e574e0fb64", new MapData("fd5771c0-c545-4d30-94fc-47e574e0fb64", "597481a0-02fb-441c-9188-c407bec05084", new MapSettings(
                     "Published 2", Material.STICK, MapSize.NORMAL, MapVariant.PARKOUR, Pos.ZERO, true, false, false, false, List.of(MapTags.Tag.STRUCTURE)
-            ), 2, Instant.now()), PersonalizedMapData.Progress.STARTED),
-            "5b1e433c-7b98-4ff1-bab1-053e83eab939", new PersonalizedMapData(new MapData("5b1e433c-7b98-4ff1-bab1-053e83eab939", "597481a0-02fb-441c-9188-c407bec05084", new MapSettings(
+            ), 2, Instant.now()),
+            "5b1e433c-7b98-4ff1-bab1-053e83eab939", new MapData("5b1e433c-7b98-4ff1-bab1-053e83eab939", "597481a0-02fb-441c-9188-c407bec05084", new MapSettings(
                     "Published 3", Material.MAGENTA_DYE, MapSize.NORMAL, MapVariant.PARKOUR, Pos.ZERO, true, false, false, false, List.of(MapTags.Tag.STRUCTURE)
-            ), 3, Instant.now()), PersonalizedMapData.Progress.NONE)
+            ), 3, Instant.now())
     );
 
     @Override
-    public @NotNull MapData createMap(@NotNull MapPlayerData player, int slot, @NotNull MapSize size) {
+    public @NotNull MapData createMap(@NotNull MapCreateRequest request) {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public @NotNull MapData createOrgMap(@NotNull String authorizer, @NotNull String orgId) {
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
-    public @NotNull MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
-        return new MapSearchResponse<>(1, false, staticMaps.values().stream()
-                .filter(m -> m instanceof PersonalizedMapData && m.publishedAt() != null)
-                .map(m -> (PersonalizedMapData) m)
-                .toList());
-    }
-
-    @Override
-    public @NotNull MapSearchResponse<PersonalizedMapData> searchMaps(@NotNull MapSearchRequest request) {
-        return new MapSearchResponse<>(1, false, staticMaps.values().stream()
-                .filter(m -> m instanceof PersonalizedMapData && m.publishedAt() != null)
-                .map(m -> (PersonalizedMapData) m)
-                .toList());
-    }
-
-    @Override
-    public @NotNull MapSearchResponse<MapData> searchMapsV2(@NotNull String authorizer, @NotNull String sort, int page, int pageSize, boolean building, boolean parkour, @NotNull String query) {
-        throw new UnsupportedOperationException("not implemented");
+    public @NotNull net.hollowcube.mapmaker.map.responses.MapSearchResponse searchMaps(@NotNull MapSearchParams request) {
+        return new net.hollowcube.mapmaker.map.responses.MapSearchResponse(
+                0, 1,
+                staticMaps.values().stream().filter(m -> m instanceof PersonalizedMapData && m.publishedAt() != null).toList()
+        );
     }
 
     @Override
