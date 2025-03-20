@@ -143,7 +143,7 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
             var blockAbove = instance.getBlock(posMut.blockX(), posMut.blockY() + 1,
                     posMut.blockZ(), Block.Getter.Condition.TYPE);
             fluidHeight = block.id() == blockAbove.id() ? 1 : (fluidHeight / 9.0);
-            if (posMut.blockY() + fluidHeight < bb.minY()) continue; // Not in fluid
+            if (posMut.blockY() + fluidHeight < position.y()) continue; // Not in fluid
 
             if (block.id() == Block.WATER.id()) {
                 isInWater = true;
