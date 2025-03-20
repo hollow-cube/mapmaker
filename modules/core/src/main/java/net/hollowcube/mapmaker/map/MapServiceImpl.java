@@ -157,7 +157,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         var reqBody = GSON.toJson(update);
         var req = HttpRequest.newBuilder()
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(reqBody))
-                .uri(URI.create(url + "/" + id))
+                .uri(URI.create(urlV3 + "/maps/" + id))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
