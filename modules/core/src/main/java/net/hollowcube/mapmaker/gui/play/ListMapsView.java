@@ -63,7 +63,7 @@ public class ListMapsView extends View {
             for (var map : results.results()) {
                 maps.add(new MapEntry(request.context(), map));
             }
-            if (this.maxPages == 0 && request.page() == 0) {
+            if (request.page() == 0) {
                 this.maxPages = results.pageCount();
             }
             request.respond(maps, (request.page() + 1) < this.maxPages);

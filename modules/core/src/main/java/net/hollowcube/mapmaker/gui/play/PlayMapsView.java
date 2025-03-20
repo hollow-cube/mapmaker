@@ -201,7 +201,7 @@ public class PlayMapsView extends View {
                 maps.add(new MapEntry(request.context(), map));
             }
 
-            if (this.maxPages == 0 && request.page() == 0) {
+            if (request.page() == 0) {
                 this.maxPages = response.pageCount();
             }
 
