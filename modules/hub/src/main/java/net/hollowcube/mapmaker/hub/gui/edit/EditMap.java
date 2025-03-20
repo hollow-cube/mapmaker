@@ -444,10 +444,13 @@ public class EditMap extends View {
         map.settings().setParkourSubVariant(null);
         map.settings().setVariant(MapVariant.BUILDING);
         map.settings().removeGameplayTags();
-        var extra = map.settings().extra();
-        for (String key : extra.keySet().toArray(new String[0])) {
-            extra.remove(key);
-        }
+        map.setSetting(MapSettings.BOAT, false);
+        map.setSetting(MapSettings.NO_SPRINT, false);
+        map.setSetting(MapSettings.NO_SNEAK, false);
+        map.setSetting(MapSettings.NO_JUMP, false);
+        map.setSetting(MapSettings.ONLY_SPRINT, false);
+        map.setSetting(MapSettings.RESET_IN_WATER, false);
+        map.setSetting(MapSettings.RESET_IN_LAVA, false);
         updateElementsFromMap();
         updateRequest();
     }

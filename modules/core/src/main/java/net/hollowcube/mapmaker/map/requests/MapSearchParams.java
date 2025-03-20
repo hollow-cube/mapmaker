@@ -117,7 +117,7 @@ public record MapSearchParams(
 
         public Builder variants(@NotNull MapVariant... variants) {
             this.variants.clear();
-            this.variants.addAll(List.of(variants));
+            this.variants.addAll(variants.length == 0 ? EnumSet.allOf(MapVariant.class) : List.of(variants));
             return this;
         }
 
