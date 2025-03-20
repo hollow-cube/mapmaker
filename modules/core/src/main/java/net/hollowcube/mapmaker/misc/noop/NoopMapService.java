@@ -18,16 +18,16 @@ import java.util.UUID;
 public class NoopMapService implements MapService {
     private final Map<String, MapData> staticMaps = Map.of(
             "62da0aaf-8cad-4c13-869c-02b07688988d", new MapData("62da0aaf-8cad-4c13-869c-02b07688988d", UUID.randomUUID().toString(), new MapSettings(
-                    "Test Map", Material.ACACIA_BOAT, MapSize.NORMAL, MapVariant.PARKOUR, new Pos(0.5, 40, 0.5), true, false, false, false, List.of(MapTags.Tag.STRUCTURE)
+                    "Test Map", Material.ACACIA_BOAT, MapSize.NORMAL, MapVariant.PARKOUR, new Pos(0.5, 40, 0.5), List.of(MapTags.Tag.STRUCTURE)
             ), 0, null),
             "3b9540fb-9100-484d-8bc6-5c3d61eff3a1", new MapData("3b9540fb-9100-484d-8bc6-5c3d61eff3a1", "597481a0-02fb-441c-9188-c407bec05084", new MapSettings(
-                    "Published 1", Material.DIAMOND, MapSize.NORMAL, MapVariant.PARKOUR, Pos.ZERO, true, false, false, false, List.of(MapTags.Tag.STRUCTURE)
+                    "Published 1", Material.DIAMOND, MapSize.NORMAL, MapVariant.PARKOUR, Pos.ZERO, List.of(MapTags.Tag.STRUCTURE)
             ), 1, Instant.now()),
             "fd5771c0-c545-4d30-94fc-47e574e0fb64", new MapData("fd5771c0-c545-4d30-94fc-47e574e0fb64", "597481a0-02fb-441c-9188-c407bec05084", new MapSettings(
-                    "Published 2", Material.STICK, MapSize.NORMAL, MapVariant.PARKOUR, Pos.ZERO, true, false, false, false, List.of(MapTags.Tag.STRUCTURE)
+                    "Published 2", Material.STICK, MapSize.NORMAL, MapVariant.PARKOUR, Pos.ZERO, List.of(MapTags.Tag.STRUCTURE)
             ), 2, Instant.now()),
             "5b1e433c-7b98-4ff1-bab1-053e83eab939", new MapData("5b1e433c-7b98-4ff1-bab1-053e83eab939", "597481a0-02fb-441c-9188-c407bec05084", new MapSettings(
-                    "Published 3", Material.MAGENTA_DYE, MapSize.NORMAL, MapVariant.PARKOUR, Pos.ZERO, true, false, false, false, List.of(MapTags.Tag.STRUCTURE)
+                    "Published 3", Material.MAGENTA_DYE, MapSize.NORMAL, MapVariant.PARKOUR, Pos.ZERO, List.of(MapTags.Tag.STRUCTURE)
             ), 3, Instant.now())
     );
 

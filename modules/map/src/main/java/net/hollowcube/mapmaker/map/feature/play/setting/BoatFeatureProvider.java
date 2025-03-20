@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.feature.play.setting;
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.map.MapHooks;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
@@ -33,8 +34,7 @@ public class BoatFeatureProvider implements FeatureProvider {
         if (!(world instanceof PlayingMapWorld || world instanceof TestingMapWorld))
             return false;
 
-        var settings = world.map().settings();
-        if (settings.getVariant() != MapVariant.PARKOUR || !settings.isBoat())
+        if (world.map().settings().getVariant() != MapVariant.PARKOUR || !world.map().getSetting(MapSettings.BOAT))
             return false;
 
         world.eventNode().addChild(eventNode);

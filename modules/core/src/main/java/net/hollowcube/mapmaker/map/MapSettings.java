@@ -23,11 +23,11 @@ import java.util.stream.Collectors;
 
 @RuntimeGson
 public class MapSettings {
-    public static final MapSetting<Boolean> BOAT = MapSetting.Embedded("boat", MapSettings::isBoat, MapUpdateRequest::setBoat);
-    public static final MapSetting<Boolean> ONLY_SPRINT = MapSetting.Embedded("only_sprint", MapSettings::isOnlySprint, MapUpdateRequest::setOnlySprint);
-    public static final MapSetting<Boolean> NO_SPRINT = MapSetting.Embedded("no_sprint", MapSettings::isNoSprint, MapUpdateRequest::setNoSprint);
-    public static final MapSetting<Boolean> NO_JUMP = MapSetting.Embedded("no_jump", MapSettings::isNoJump, MapUpdateRequest::setNoJump);
-    public static final MapSetting<Boolean> NO_SNEAK = MapSetting.Embedded("no_sneak", MapSettings::isNoSneak, MapUpdateRequest::setNoSneak);
+    public static final MapSetting<Boolean> BOAT = MapSetting.Bool("boat", false);
+    public static final MapSetting<Boolean> ONLY_SPRINT = MapSetting.Bool("only_sprint", false);
+    public static final MapSetting<Boolean> NO_SPRINT = MapSetting.Bool("no_sprint", false);
+    public static final MapSetting<Boolean> NO_JUMP = MapSetting.Bool("no_jump", false);
+    public static final MapSetting<Boolean> NO_SNEAK = MapSetting.Bool("no_sneak", false);
 
     public static final MapSetting<Boolean> NO_SPECTATOR = MapSetting.Bool("no_spectator", false);
     public static final MapSetting<Boolean> RESET_IN_WATER = MapSetting.Bool("reset_in_water", false);
@@ -120,12 +120,6 @@ public class MapSettings {
         }
     }
 
-    private boolean onlySprint = false;
-    private boolean noSprint = false;
-    private boolean noJump = false;
-    private boolean noSneak = false;
-    private boolean boat = false;
-
     private List<MapTags.Tag> tags;
 
     public MapSettings() {
@@ -143,10 +137,6 @@ public class MapSettings {
             @Nullable MapSize size,
             @Nullable MapVariant variant,
             @Nullable Pos spawnPoint,
-            boolean onlySprint,
-            boolean noSprint,
-            boolean noJump,
-            boolean noSneak,
             @Nullable List<MapTags.Tag> tags
     ) {
         this.name = name;
@@ -154,10 +144,6 @@ public class MapSettings {
         this.size = size;
         this.variant = variant;
         this.spawnPoint = spawnPoint;
-        this.onlySprint = onlySprint;
-        this.noSprint = noSprint;
-        this.noJump = noJump;
-        this.noSneak = noSneak;
         this.tags = tags;
     }
 
@@ -273,19 +259,19 @@ public class MapSettings {
     public @Nullable String getSettingsString() {
         List<String> enabledSettings = new ArrayList<>();
 
-        if (isOnlySprint()) {
+        if (ONLY_SPRINT.read(this) == Boolean.TRUE) {
             enabledSettings.add("Only Sprint");
         }
-        if (isNoSprint()) {
+        if (NO_SPRINT.read(this) == Boolean.TRUE) {
             enabledSettings.add("No Sprint");
         }
-        if (isNoJump()) {
+        if (NO_JUMP.read(this) == Boolean.TRUE) {
             enabledSettings.add("No Jump");
         }
-        if (isNoSneak()) {
+        if (NO_SNEAK.read(this) == Boolean.TRUE) {
             enabledSettings.add("No Sneak");
         }
-        if (isBoat()) {
+        if (BOAT.read(this) == Boolean.TRUE) {
             enabledSettings.add("Boats");
         }
 
@@ -321,19 +307,19 @@ public class MapSettings {
     public String getSettingsFullString() {
         List<String> enabledSettings = new ArrayList<>();
 
-        if (isOnlySprint()) {
+        if (ONLY_SPRINT.read(this) == Boolean.TRUE) {
             enabledSettings.add("Only Sprint");
         }
-        if (isNoSprint()) {
+        if (NO_SPRINT.read(this) == Boolean.TRUE) {
             enabledSettings.add("No Sprint");
         }
-        if (isNoJump()) {
+        if (NO_JUMP.read(this) == Boolean.TRUE) {
             enabledSettings.add("No Jump");
         }
-        if (isNoSneak()) {
+        if (NO_SNEAK.read(this) == Boolean.TRUE) {
             enabledSettings.add("No Sneak");
         }
-        if (isBoat()) {
+        if (BOAT.read(this) == Boolean.TRUE) {
             enabledSettings.add("Boats");
         }
 
@@ -455,80 +441,6 @@ public class MapSettings {
         try {
             updates.setSpawnPoint(spawnPoint);
             this.spawnPoint = spawnPoint;
-        } finally {
-            updateLock.unlock();
-        }
-    }
-
-    public boolean isOnlySprint() {
-        return onlySprint;
-    }
-
-    public void setOnlySprint(boolean onlySprint) {
-        updateLock.lock();
-        try {
-            updates.setOnlySprint(onlySprint);
-            this.onlySprint = onlySprint;
-            if (onlySprint)
-                setNoSprint(false);
-        } finally {
-            updateLock.unlock();
-        }
-    }
-
-    public boolean isNoSprint() {
-        return noSprint;
-    }
-
-    public void setNoSprint(boolean noSprint) {
-        updateLock.lock();
-        try {
-            updates.setNoSprint(noSprint);
-            this.noSprint = noSprint;
-            if (noSprint)
-                setOnlySprint(false);
-        } finally {
-            updateLock.unlock();
-        }
-    }
-
-    public boolean isNoJump() {
-        return noJump;
-    }
-
-    public void setNoJump(boolean noJump) {
-        updateLock.lock();
-        try {
-            updates.setNoJump(noJump);
-            this.noJump = noJump;
-        } finally {
-            updateLock.unlock();
-        }
-    }
-
-    public boolean isNoSneak() {
-        return noSneak;
-    }
-
-    public void setNoSneak(boolean noSneak) {
-        updateLock.lock();
-        try {
-            updates.setNoSneak(noSneak);
-            this.noSneak = noSneak;
-        } finally {
-            updateLock.unlock();
-        }
-    }
-
-    public boolean isBoat() {
-        return boat;
-    }
-
-    public void setBoat(boolean boat) {
-        updateLock.lock();
-        try {
-            updates.setBoat(boat);
-            this.boat = boat;
         } finally {
             updateLock.unlock();
         }
