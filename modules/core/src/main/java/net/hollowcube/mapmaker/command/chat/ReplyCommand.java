@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.command.CommandCategories;
+import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
@@ -11,7 +12,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class ReplyCommand extends AbstractChatCommand {
-    private final Argument<String> messageArg = Argument.GreedyString("message")
+    private final Argument<String> messageArg = CoreArgument.Message("message")
             .description("The message content to send in your reply");
 
     public ReplyCommand(@NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages) {
