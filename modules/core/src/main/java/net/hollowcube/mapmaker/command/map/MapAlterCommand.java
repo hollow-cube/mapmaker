@@ -236,7 +236,7 @@ public class MapAlterCommand {
 
     private <T> void writeSetting(@NotNull MapSettings settings, @NotNull MapSetting<T> setting, @NotNull Object data) {
         //noinspection unchecked
-        setting.write(settings, (T) data);
+        settings.set(setting, (T) data);
     }
 
     /**

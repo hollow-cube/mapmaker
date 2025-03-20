@@ -110,11 +110,11 @@ public class MapData {
     }
 
     public <T> @NotNull T getSetting(@NotNull MapSetting<T> setting) {
-        return setting.read(settings);
+        return settings.get(setting);
     }
 
     public <T> void setSetting(@NotNull MapSetting<T> setting, @NotNull T value) {
-        setting.write(settings, value);
+        settings.set(setting, value);
     }
 
     public boolean needsVerification() {

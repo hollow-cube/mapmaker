@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
@@ -16,6 +17,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -57,6 +60,7 @@ public class MapSettings {
 
     private Pos spawnPoint;
 
+    private final Map<MapSetting<?>, Object> cache = new ConcurrentHashMap<>();
     private JsonObject extra;
 
     // Settings
@@ -259,21 +263,11 @@ public class MapSettings {
     public @Nullable String getSettingsString() {
         List<String> enabledSettings = new ArrayList<>();
 
-        if (ONLY_SPRINT.read(this) == Boolean.TRUE) {
-            enabledSettings.add("Only Sprint");
-        }
-        if (NO_SPRINT.read(this) == Boolean.TRUE) {
-            enabledSettings.add("No Sprint");
-        }
-        if (NO_JUMP.read(this) == Boolean.TRUE) {
-            enabledSettings.add("No Jump");
-        }
-        if (NO_SNEAK.read(this) == Boolean.TRUE) {
-            enabledSettings.add("No Sneak");
-        }
-        if (BOAT.read(this) == Boolean.TRUE) {
-            enabledSettings.add("Boats");
-        }
+        if (this.get(ONLY_SPRINT)) enabledSettings.add("Only Sprint");
+        if (this.get(NO_SPRINT)) enabledSettings.add("No Sprint");
+        if (this.get(NO_JUMP))enabledSettings.add("No Jump");
+        if (this.get(NO_SNEAK)) enabledSettings.add("No Sneak");
+        if (this.get(BOAT)) enabledSettings.add("Boats");
 
         if (enabledSettings.isEmpty()) {
             return null;
@@ -307,21 +301,12 @@ public class MapSettings {
     public String getSettingsFullString() {
         List<String> enabledSettings = new ArrayList<>();
 
-        if (ONLY_SPRINT.read(this) == Boolean.TRUE) {
-            enabledSettings.add("Only Sprint");
-        }
-        if (NO_SPRINT.read(this) == Boolean.TRUE) {
-            enabledSettings.add("No Sprint");
-        }
-        if (NO_JUMP.read(this) == Boolean.TRUE) {
-            enabledSettings.add("No Jump");
-        }
-        if (NO_SNEAK.read(this) == Boolean.TRUE) {
-            enabledSettings.add("No Sneak");
-        }
-        if (BOAT.read(this) == Boolean.TRUE) {
-            enabledSettings.add("Boats");
-        }
+
+        if (this.get(ONLY_SPRINT)) enabledSettings.add("Only Sprint");
+        if (this.get(NO_SPRINT)) enabledSettings.add("No Sprint");
+        if (this.get(NO_JUMP))enabledSettings.add("No Jump");
+        if (this.get(NO_SNEAK)) enabledSettings.add("No Sneak");
+        if (this.get(BOAT)) enabledSettings.add("Boats");
 
         if (enabledSettings.isEmpty()) {
             return null;
@@ -519,5 +504,31 @@ public class MapSettings {
     public @NotNull JsonObject extra() {
         if (this.extra == null) this.extra = new JsonObject();
         return this.extra;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> @NotNull T get(@NotNull MapSetting<T> setting) {
+        if (this.extra == null) return setting.defaultValue();
+        var data = this.extra.get(setting.key());
+        if (data == null) return setting.defaultValue();
+        return (T) this.cache.computeIfAbsent(
+                setting,
+                ($) -> setting.codec()
+                        .parse(JsonOps.INSTANCE, data)
+                        .result()
+                        .orElse(setting.defaultValue())
+        );
+    }
+
+    public <T> void set(@NotNull MapSetting<T> setting, @NotNull T value) {
+        updateLock.lock();
+        try {
+            var json = setting.codec().encodeStart(JsonOps.INSTANCE, value).result().orElseThrow();
+            this.extra.add(setting.key(), json);
+            this.cache.put(setting, value);
+            this.updates.setExtraUpdate(setting.key(), json);
+        } finally {
+            updateLock.unlock();
+        }
     }
 }

@@ -27,7 +27,7 @@ public class SavedMapSettings {
 
     @SuppressWarnings("unchecked")
     public <T> T get(MapSetting<T> setting, MapSettings settings) {
-        return (T) this.settings.getOrDefault(setting, setting.read(settings));
+        return (T) this.settings.getOrDefault(setting, settings.get(setting));
     }
 
     @SuppressWarnings("unchecked")
@@ -54,7 +54,7 @@ public class SavedMapSettings {
     public void update(MapSettings settings) {
         this.clear();
         for (MapSetting<?> value : MapSetting.ID_MAP.values()) {
-            this.settings.put(value, value.read(settings));
+            this.settings.put(value, settings.get(value));
         }
     }
 
