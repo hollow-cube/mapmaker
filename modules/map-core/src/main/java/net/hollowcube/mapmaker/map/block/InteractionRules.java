@@ -60,6 +60,7 @@ public class InteractionRules {
         item(Material.PAINTING, new PaintingInteractionRule());
         item(Material.ENDER_EYE, new EnderEyeInteractionRule());
         item(Material.END_CRYSTAL, new EndCrystalInteractionRule());
+        item(Material.ARMOR_STAND, new ArmorStandInteractionRule());
         item(Material.SCAFFOLDING, ScaffoldingInteractionRule.INSTANCE);
         item(Material.BONE_MEAL, new BonemealInteractionRule());
         item(Material.LILY_PAD, new LilyPadInteractionRule());

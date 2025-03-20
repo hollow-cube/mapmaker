@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.map.util;
+package net.hollowcube.mapmaker.util;
 
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;

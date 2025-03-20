@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.map.item.vanilla;
 import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.common.util.ExtraTags;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
-import net.hollowcube.mapmaker.map.util.GenericTempActionBarProvider;
+import net.hollowcube.mapmaker.util.GenericTempActionBarProvider;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;

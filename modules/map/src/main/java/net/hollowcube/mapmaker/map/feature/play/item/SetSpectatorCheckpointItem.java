@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.map.feature.play.item;
 
 import net.hollowcube.mapmaker.map.feature.play.handlers.SpectateHandler;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
-import net.hollowcube.mapmaker.map.util.GenericTempActionBarProvider;
+import net.hollowcube.mapmaker.util.GenericTempActionBarProvider;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.entity.Player;

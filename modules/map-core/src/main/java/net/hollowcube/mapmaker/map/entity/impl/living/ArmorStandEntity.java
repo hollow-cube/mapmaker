@@ -1,10 +1,20 @@
 package net.hollowcube.mapmaker.map.entity.impl.living;
 
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.util.GenericTempActionBarProvider;
+import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.entity.metadata.other.ArmorStandMeta;
+import net.minestom.server.item.ItemComponent;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
+import net.minestom.server.item.component.Equippable;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,14 +25,54 @@ import static net.hollowcube.mapmaker.map.util.NbtUtilV2.writeFloat3;
 
 public class ArmorStandEntity extends AbstractLivingEntity {
 
-    public ArmorStandEntity(@NotNull EntityType entityType, @NotNull UUID uuid) {
-        super(entityType, uuid);
+    public ArmorStandEntity(@NotNull UUID uuid) {
+        super(EntityType.ARMOR_STAND, uuid);
     }
 
     @Override
     public void onBuildLeftClick(@NotNull MapWorld world, @NotNull Player player) {
         playSound(SoundEvent.ENTITY_ARMOR_STAND_BREAK, 1, 1);
         remove();
+    }
+
+    @Override
+    public void onBuildRightClick(@NotNull MapWorld world, @NotNull Player player, @NotNull PlayerHand hand, @NotNull Point point) {
+        var item = player.getItemInHand(hand);
+        var meta = getEntityMeta();
+
+        if (item.material() == Material.DEBUG_STICK) {
+            if (point.y() < 0.4) {
+                meta.setHasNoBasePlate(!meta.isHasNoBasePlate());
+                sendActionBar(player, "ShowBasePlate", !meta.isHasNoBasePlate());
+            } else {
+                meta.setHasArms(!meta.isHasArms());
+                if (!meta.isHasArms()) {
+                    setEquipment(EquipmentSlot.MAIN_HAND, ItemStack.AIR);
+                    setEquipment(EquipmentSlot.OFF_HAND, ItemStack.AIR);
+                }
+
+                sendActionBar(player, "ShowArms", meta.isHasArms());
+            }
+        } else if (item.isAir()) {
+            var slot = EquipmentSlot.MAIN_HAND;
+            if (point.y() >= 0.1 && point.y() < 0.55 && !getEquipment(EquipmentSlot.BOOTS).isAir()) {
+                slot = EquipmentSlot.BOOTS;
+            } else if (point.y() >= 0.9 && point.y() < 1.6 && !getEquipment(EquipmentSlot.CHESTPLATE).isAir()) {
+                slot = EquipmentSlot.CHESTPLATE;
+            } else if (point.y() >= 0.4 && point.y() < 1.2 && !getEquipment(EquipmentSlot.LEGGINGS).isAir()) {
+                slot = EquipmentSlot.LEGGINGS;
+            } else if (point.y() >= 1.6 && !getEquipment(EquipmentSlot.HELMET).isAir()) {
+                slot = EquipmentSlot.HELMET;
+            } else if (getEquipment(EquipmentSlot.MAIN_HAND).isAir() && !getEquipment(EquipmentSlot.OFF_HAND).isAir()) {
+                slot = EquipmentSlot.OFF_HAND;
+            }
+            if (slot.isHand() && !meta.isHasArms()) return;
+            setEquipment(slot, ItemStack.AIR);
+        } else {
+            var slot = OpUtils.mapOr(item.get(ItemComponent.EQUIPPABLE), Equippable::slot, EquipmentSlot.MAIN_HAND);
+            if (slot.isHand() && !meta.isHasArms()) return;
+            setEquipment(slot, item.withAmount(1));
+        }
     }
 
     @Override
@@ -75,5 +125,10 @@ public class ArmorStandEntity extends AbstractLivingEntity {
         if (tag.getBoolean("ShowArms")) meta.setHasArms(true);
         if (tag.getBoolean("Small")) meta.setSmall(true);
 
+    }
+
+    private static void sendActionBar(@NotNull Player player, @NotNull String property, @NotNull Object value) {
+        var ab = ActionBar.forPlayer(player);
+        ab.addProvider(new GenericTempActionBarProvider(String.format("Set \"%s\" to %s", property, value), 1000L));
     }
 }
