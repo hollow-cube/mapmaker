@@ -92,6 +92,15 @@ public class MapEntity extends Entity implements TerraformEntity {
                 position.x(), position.y(), position.z());
     }
 
+    @Override
+    public void update(long time) {
+        super.update(time);
+
+        if (this.position.y() < -2032.0) {
+            this.remove();
+        }
+    }
+
     // Serialization
 
     @Override
