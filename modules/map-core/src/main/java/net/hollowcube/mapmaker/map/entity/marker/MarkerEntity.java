@@ -271,8 +271,17 @@ public class MarkerEntity extends MapEntity {
             return;
         }
 
-        var size = max.sub(min);
-        setBoundingBox(new BoundingBox(size.x(), size.y(), size.z(), min));
+        var minX = Math.min(min.x(), max.x());
+        var minY = Math.min(min.y(), max.y());
+        var minZ = Math.min(min.z(), max.z());
+        var maxX = Math.max(min.x(), max.x());
+        var maxY = Math.max(min.y(), max.y());
+        var maxZ = Math.max(min.z(), max.z());
+
+        setBoundingBox(new BoundingBox(
+                new Vec(maxX - minX, maxY - minY, maxZ - minZ),
+                new Vec(minX, minY, minZ)
+        ));
     }
 
     private @NotNull AxiomClientboundMarkerDataPacket createAxiomMarkerUpdatePacket() {
