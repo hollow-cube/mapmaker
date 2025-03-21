@@ -68,7 +68,7 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
     @Override
     public void onDataChange(@Nullable Player player) {
         try {
-            loadParticleData(entity.getMarkerData());
+            loadParticleData(entity.getData());
             this.age = -1; // Reset
             this.toSpawn = 0;
             this.isValid = true;

@@ -37,7 +37,7 @@ public class MapLeaderboardMarkerHandler extends ObjectEntityHandler {
         }
 
         // Create actual leaderboard
-        var data = entity.getMarkerData();
+        var data = entity.getData();
         var scale = data.getDouble("scale", 1) * 0.5;
         var facing = data.getString("facing", "follow");
         var hasBackground = data.getBoolean("background", true);

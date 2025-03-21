@@ -39,15 +39,15 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
     private static final BoundingBox NO_BB = new BoundingBox(0, 0, 0);
     private static final NamespaceID UNKNOWN_TYPE = NamespaceID.from("mapmaker:unknown");
 
-    private static final Tag<CompoundBinaryTag> DATA_TAG = Tag.NBT("data")
+    protected static final Tag<CompoundBinaryTag> DATA_TAG = Tag.NBT("data")
             .map(n -> (CompoundBinaryTag) n, n -> n)
             .defaultValue(CompoundBinaryTag.empty());
-    private static final Tag<NamespaceID> TYPE_TAG = Tag.String("type").path("data")
+    protected static final Tag<NamespaceID> TYPE_TAG = Tag.String("type").path("data")
             .map(NamespaceID::from, NamespaceID::asString)
             .defaultValue(UNKNOWN_TYPE);
-    private static final Tag<@Nullable String> NAME_TAG = Tag.String("name").path("data");
-    private static final Tag<@Nullable Vec> REGION_MIN_TAG = ExtraTags.VecAsList("min").path("data");
-    private static final Tag<@Nullable Vec> REGION_MAX_TAG = ExtraTags.VecAsList("max").path("data");
+    protected static final Tag<@Nullable String> NAME_TAG = Tag.String("name").path("data");
+    protected static final Tag<@Nullable Vec> REGION_MIN_TAG = ExtraTags.VecAsList("min").path("data");
+    protected static final Tag<@Nullable Vec> REGION_MAX_TAG = ExtraTags.VecAsList("max").path("data");
 
     static {
         var globalEventHandler = MinecraftServer.getGlobalEventHandler();
@@ -80,7 +80,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         return getTag(TYPE_TAG).asString();
     }
 
-    public @NotNull CompoundBinaryTag getMarkerData() {
+    public @NotNull CompoundBinaryTag getData() {
         return getTag(DATA_TAG);
     }
 
@@ -253,7 +253,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         var maxZ = Math.max(min.z(), max.z());
 
         setBoundingBox(new BoundingBox(
-                new Vec(maxX - minX, maxY - minY, maxZ - minZ),
+                maxX - minX, maxY - minY, maxZ - minZ,
                 new Vec(minX, minY, minZ)
         ));
     }

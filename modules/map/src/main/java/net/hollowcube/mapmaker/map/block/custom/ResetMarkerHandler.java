@@ -22,7 +22,7 @@ public class ResetMarkerHandler extends ObjectEntityHandler {
 
     @Override
     public void onDataChange(@Nullable Player player) {
-        this.fullReset = entity.getMarkerData().getBoolean("full_reset", false);
+        this.fullReset = entity.getData().getBoolean("full_reset", false);
     }
 
     @Override

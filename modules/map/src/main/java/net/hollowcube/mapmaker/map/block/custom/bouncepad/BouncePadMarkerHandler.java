@@ -21,7 +21,7 @@ public class BouncePadMarkerHandler extends ObjectEntityHandler {
 
     @Override
     public void onDataChange(@Nullable Player player) {
-        var bouncePadData = entity.getMarkerData().getCompound("bounce_pad");
+        var bouncePadData = entity.getData().getCompound("bounce_pad");
         this.data = BouncePadData.CODEC.parse(NbtOps.INSTANCE, bouncePadData).getOrThrow();
         this.data.onUpdate(player);
     }

@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.entity.object;
 import net.hollowcube.mapmaker.map.entity.interaction.InteractionEntity;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.entity.marker.builtin.ParticleEmitterMarkerHandler;
+import net.hollowcube.mapmaker.map.entity.object.builtin.TeleportObjectHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,6 +16,7 @@ public class ObjectEntityHandlerRegistry {
 
     public ObjectEntityHandlerRegistry() {
         registerForMarkers(ParticleEmitterMarkerHandler.ID, ParticleEmitterMarkerHandler::new);
+        registerForInteractions(TeleportObjectHandler.ID, TeleportObjectHandler::new);
     }
 
     public void registerForMarkers(String id, Function<MarkerEntity, ObjectEntityHandler> factory) {

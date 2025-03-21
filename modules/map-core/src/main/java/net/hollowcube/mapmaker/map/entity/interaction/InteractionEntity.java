@@ -2,10 +2,13 @@ package net.hollowcube.mapmaker.map.entity.interaction;
 
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntity;
+import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
+import net.minestom.server.entity.metadata.other.InteractionMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -16,6 +19,30 @@ public class InteractionEntity extends ObjectEntity {
         super(EntityType.INTERACTION, uuid);
 
         this.sendToClient = true;
+
+        this.getEntityMeta().setResponse(true);
+    }
+
+    public InteractionEntity() {
+        this(UUID.randomUUID());
+    }
+
+    @Override
+    public @NotNull InteractionMeta getEntityMeta() {
+        return (InteractionMeta) super.getEntityMeta();
+    }
+
+    @Override
+    public void setBoundingBox(BoundingBox boundingBox) {
+        super.setBoundingBox(boundingBox);
+
+        float width = (float) Math.max(boundingBox.width(), boundingBox.height());
+        float height = (float) boundingBox.height();
+
+        this.getEntityMeta().setWidth(width);
+        this.getEntityMeta().setHeight(height);
+        this.setTag(REGION_MIN_TAG, new Vec(-width / 2, 0, -width / 2));
+        this.setTag(REGION_MAX_TAG, new Vec(width / 2, height, width / 2));
     }
 
     @Override
