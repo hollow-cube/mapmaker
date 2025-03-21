@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 public final class SpectateHandler {
 
     public static Tag<Pos> SPECTATOR_CHECKPOINT = Tag.Transient("mapmaker:spectator_checkpoint");
+    public static Tag<Boolean> SPECTATOR_FLIGHT = Tag.<Boolean>Transient("mapmaker:spectator_flight").defaultValue(true);
 
     public static void setSpectating(@NotNull Player player, boolean spectating) {
         setSpectating(player, TriState.byBoolean(spectating));
@@ -47,6 +48,10 @@ public final class SpectateHandler {
                 playWorld.removeActivePlayer(player);
                 world.addSpectator(player);
 
+                if (!player.getTag(SPECTATOR_FLIGHT)) {
+                    toggleFlight(player);
+                }
+
                 player.setTag(SPECTATOR_CHECKPOINT, savePosition);
             });
         } else {
@@ -73,6 +78,7 @@ public final class SpectateHandler {
         boolean canFly = player.isAllowFlying();
         player.setAllowFlying(!canFly);
         player.setFlying(!canFly);
+        player.setTag(SPECTATOR_FLIGHT, !canFly);
 
         var world = MapWorld.forPlayerOptional(player);
         if (world == null || !world.isSpectating(player)) return !canFly;
