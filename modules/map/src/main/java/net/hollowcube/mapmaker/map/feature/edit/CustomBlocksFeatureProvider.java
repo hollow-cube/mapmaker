@@ -64,9 +64,9 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
         if (world.map().settings().getVariant() != MapVariant.PARKOUR)
             return;
 
-        world.markerRegistry().register(MapLeaderboardMarkerHandler.ID, MapLeaderboardMarkerHandler::new);
-        world.markerRegistry().register(BouncePadMarkerHandler.ID, BouncePadMarkerHandler::new);
-        world.markerRegistry().register(ResetMarkerHandler.ID, ResetMarkerHandler::new);
+        world.objectEntityHandlers().registerForMarkers(MapLeaderboardMarkerHandler.ID, MapLeaderboardMarkerHandler::new);
+        world.objectEntityHandlers().registerForMarkers(BouncePadMarkerHandler.ID, BouncePadMarkerHandler::new);
+        world.objectEntityHandlers().register(ResetMarkerHandler.ID, ResetMarkerHandler::new);
     }
 
     @Override

@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.map.entity.impl.living.*;
 import net.hollowcube.mapmaker.map.entity.impl.other.EndCrystalEntity;
 import net.hollowcube.mapmaker.map.entity.impl.other.ItemFrameEntity;
 import net.hollowcube.mapmaker.map.entity.impl.other.PaintingEntity;
+import net.hollowcube.mapmaker.map.entity.interaction.InteractionEntity;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
@@ -38,6 +39,7 @@ public final class MapEntities {
         MapEntityType.override(EntityType.TEXT_DISPLAY, DisplayEntity.Text::new);
 
         MapEntityType.override(EntityType.MARKER, MarkerEntity::new);
+        MapEntityType.override(EntityType.INTERACTION, InteractionEntity::new);
     }
 
     private static void handleEntityInteract(@NotNull PlayerEntityInteractEvent event) {

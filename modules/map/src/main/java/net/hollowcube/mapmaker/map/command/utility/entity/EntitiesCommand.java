@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.map.command.utility.entity;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategories;
-import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
+import net.hollowcube.mapmaker.map.entity.object.ObjectEntity;
 import net.kyori.adventure.nbt.TagStringIOExt;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -34,8 +34,8 @@ public class EntitiesCommand extends CommandDsl {
         player.sendMessage("Entities in the map:");
         entities.forEach(entity -> {
             player.sendMessage(" - " + entity.getEntityType() + " at " + entity.getPosition());
-            if (entity instanceof MarkerEntity marker) {
-                player.sendMessage("   " + TagStringIOExt.writeTag(marker.getMarkerData()));
+            if (entity instanceof ObjectEntity marker) {
+                player.sendMessage("   " + TagStringIOExt.writeTag(marker.getData()));
             }
         });
     }

@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.map.entity.marker.builtin;
 
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
-import net.hollowcube.mapmaker.map.entity.marker.MarkerHandler;
+import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
 import net.hollowcube.mql.jit.MqlCompiler;
 import net.hollowcube.mql.jit.ValueScript;
 import net.kyori.adventure.nbt.*;
@@ -23,7 +23,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
-public class ParticleEmitterMarkerHandler extends MarkerHandler {
+public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
     public static final String ID = "mapmaker:particle_emitter";
 
     private static final MqlCompiler<ValueScript> COMPILER;
@@ -66,9 +66,9 @@ public class ParticleEmitterMarkerHandler extends MarkerHandler {
     }
 
     @Override
-    protected void onDataChange(@Nullable Player player) {
+    public void onDataChange(@Nullable Player player) {
         try {
-            loadParticleData(entity.getMarkerData());
+            loadParticleData(entity.getData());
             this.age = -1; // Reset
             this.toSpawn = 0;
             this.isValid = true;
@@ -80,7 +80,7 @@ public class ParticleEmitterMarkerHandler extends MarkerHandler {
     }
 
     @Override
-    protected void onTick() {
+    public void onTick() {
         if (!isValid) return;
 
         // Reset state on start and when reaching lifetime

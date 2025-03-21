@@ -232,6 +232,7 @@ public class MapServerRunner extends AbstractMapServer {
 //        commandManager.register(new SetBiomeCommand());
 
         commandManager.register(new AddMarkerCommand());
+        commandManager.register(new AddInteractionCommand());
         commandManager.register(new EntitiesCommand());
 
         commandManager.register(new FixTheDripleafCommand(server.permManager()));

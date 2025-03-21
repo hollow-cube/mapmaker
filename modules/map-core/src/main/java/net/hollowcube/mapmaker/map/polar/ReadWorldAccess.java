@@ -198,7 +198,7 @@ public class ReadWorldAccess implements PolarWorldAccess {
 
     private boolean tryLoadMarker(@NotNull Entity entity, @NotNull Pos spawnPosition) {
         if (entity instanceof MarkerEntity marker && markerLoader != null) {
-            boolean shouldSpawn = markerLoader.loadMarker(mapWorld, marker.getType(), marker.getMarkerData(), spawnPosition);
+            boolean shouldSpawn = markerLoader.loadMarker(mapWorld, marker.getType(), marker.getData(), spawnPosition);
             if (!shouldSpawn) {
                 entity.remove();
                 return true;
@@ -221,7 +221,7 @@ public class ReadWorldAccess implements PolarWorldAccess {
 
         var spawnPosition = new Pos(pos, yaw, pitch);
         if (entity instanceof MarkerEntity marker && markerLoader != null) {
-            boolean shouldSpawn = markerLoader.loadMarker(mapWorld, marker.getType(), marker.getMarkerData(), spawnPosition);
+            boolean shouldSpawn = markerLoader.loadMarker(mapWorld, marker.getType(), marker.getData(), spawnPosition);
             if (!shouldSpawn) {
                 entity.remove();
                 return CompletableFuture.completedFuture(null);

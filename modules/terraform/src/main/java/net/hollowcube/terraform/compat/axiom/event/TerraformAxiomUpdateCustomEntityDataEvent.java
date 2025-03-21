@@ -7,10 +7,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public record TerraformAxiomUpdateMarkerDataEvent(
+public record TerraformAxiomUpdateCustomEntityDataEvent(
         @NotNull Player editor,
         @NotNull UUID entityUuid,
         @NotNull CompoundBinaryTag data
 ) implements Event {
 
+    /**
+     * A interface to mark that the entity being edited will have this event invoked instead of setting the data.
+     */
+    public interface Receiver {}
 }

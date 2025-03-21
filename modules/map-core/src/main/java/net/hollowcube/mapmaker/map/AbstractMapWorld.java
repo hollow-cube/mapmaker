@@ -5,7 +5,7 @@ import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
-import net.hollowcube.mapmaker.map.entity.marker.MarkerHandlerRegistry;
+import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandlerRegistry;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
@@ -67,7 +67,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
 
     private final ItemRegistry itemRegistry = new ItemRegistry();
     private final BiomeContainer biomeContainer = new BiomeContainer();
-    private final MarkerHandlerRegistry markerRegistry = new MarkerHandlerRegistry();
+    private final ObjectEntityHandlerRegistry markerRegistry = new ObjectEntityHandlerRegistry();
 
     private final Set<Player> players = new CopyOnWriteArraySet<>();
     private final Set<Player> playersUnmodifiable = Collections.unmodifiableSet(players);
@@ -123,7 +123,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
     }
 
     @Override
-    public @NotNull MarkerHandlerRegistry markerRegistry() {
+    public @NotNull ObjectEntityHandlerRegistry objectEntityHandlers() {
         return markerRegistry;
     }
 
