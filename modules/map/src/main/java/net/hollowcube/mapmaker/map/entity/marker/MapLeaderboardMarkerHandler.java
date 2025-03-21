@@ -89,7 +89,7 @@ public class MapLeaderboardMarkerHandler extends ObjectEntityHandler {
     }
 
     @Override
-    public void addViewer(@NotNull Player player) {
+    public void addViewer(@NotNull MapWorld world, @NotNull Player player) {
         if (leaderboard == null) return;
         FutureUtil.submitVirtual(() -> leaderboard.update(player));
     }

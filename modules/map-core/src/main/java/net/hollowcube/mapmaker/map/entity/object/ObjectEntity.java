@@ -141,7 +141,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         var world = MapWorld.forPlayerOptional(player);
         if (world == null) return;
 
-        if (handler != null) handler.addViewer(player);
+        if (handler != null) handler.addViewer(world, player);
         if (world.canEdit(player) && AxiomPlayer.isEnabled(player)) {
             createAxiomMarkerUpdatePacket().send(player);
         }
@@ -154,7 +154,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         var world = MapWorld.forPlayerOptional(player);
         if (world == null) return;
 
-        if (handler != null) handler.removeViewer(player);
+        if (handler != null) handler.removeViewer(world, player);
         if (world.canEdit(player)) {
             // Destroy the axiom marker (if it is enabled/installed)
             createAxiomMarkerRemovePacket().send(player);

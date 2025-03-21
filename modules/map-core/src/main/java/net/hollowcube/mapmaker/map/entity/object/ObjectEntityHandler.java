@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.entity.object;
 
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,11 +36,11 @@ public abstract class ObjectEntityHandler {
     public void onPlayerExit(@NotNull Player player) {
     }
 
-    public void addViewer(@NotNull Player player) {
+    public void addViewer(@NotNull MapWorld world, @NotNull Player player) {
 
     }
 
-    public void removeViewer(@NotNull Player player) {
+    public void removeViewer(@NotNull MapWorld world, @NotNull Player player) {
 
     }
 

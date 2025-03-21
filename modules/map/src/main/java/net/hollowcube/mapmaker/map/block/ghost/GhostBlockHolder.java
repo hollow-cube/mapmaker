@@ -29,7 +29,6 @@ import java.util.function.Supplier;
  *
  * <p>{@link GhostBlockHolder} is NOT thread-safe. It should be accessed from the player thread only.</p>
  */
-@SuppressWarnings("UnstableApiUsage")
 public class GhostBlockHolder implements Block.Getter, Block.Setter {
     private static final Tag<GhostBlockHolder> TAG = Tag.Transient("ghost_block_manager");
 
@@ -111,6 +110,8 @@ public class GhostBlockHolder implements Block.Getter, Block.Setter {
 
         for (var entry : blocks.long2ObjectEntrySet()) {
             var blockPosition = PositionUtil.unpackPosition(entry.getLongKey());
+            if (!instance.isChunkLoaded(blockPosition)) continue;
+
             var instanceBlock = instance.getBlock(blockPosition, Condition.TYPE);
             player.sendPacket(new BlockChangePacket(blockPosition, instanceBlock));
         }
