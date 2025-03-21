@@ -279,7 +279,7 @@ public class MarkerEntity extends MapEntity {
         var maxZ = Math.max(min.z(), max.z());
 
         setBoundingBox(new BoundingBox(
-                new Vec(maxX - minX, maxY - minY, maxZ - minZ),
+                maxX - minX, maxY - minY, maxZ - minZ,
                 new Vec(minX, minY, minZ)
         ));
     }
