@@ -13,7 +13,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.command.CommandCondition.and;
-import static net.hollowcube.mapmaker.map.util.MapCondition.mapFeature;
+import static net.hollowcube.mapmaker.command.arg.CoreCondition.feature;
 import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
 
 public class AddInteractionCommand extends CommandDsl {
@@ -23,7 +23,7 @@ public class AddInteractionCommand extends CommandDsl {
 
         setCondition(and(
                 mapFilter(false, true, false),
-                mapFeature(MapFeatureFlags.MARKER_TOOL)
+                feature(MapFeatureFlags.MARKER_TOOL)
         ));
 
         addSyntax(playerOnly(this::addInteractionEntity));
