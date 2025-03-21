@@ -2,13 +2,13 @@ package net.hollowcube.mapmaker.map.block.custom.bouncepad;
 
 import net.hollowcube.common.util.dfu.NbtOps;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
-import net.hollowcube.mapmaker.map.entity.marker.MarkerHandler;
+import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class BouncePadMarkerHandler extends MarkerHandler {
+public class BouncePadMarkerHandler extends ObjectEntityHandler {
 
     public static final String ID = "mapmaker:bounce_pad";
 
@@ -20,14 +20,14 @@ public class BouncePadMarkerHandler extends MarkerHandler {
     }
 
     @Override
-    protected void onDataChange(@Nullable Player player) {
+    public void onDataChange(@Nullable Player player) {
         var bouncePadData = entity.getMarkerData().getCompound("bounce_pad");
         this.data = BouncePadData.CODEC.parse(NbtOps.INSTANCE, bouncePadData).getOrThrow();
         this.data.onUpdate(player);
     }
 
     @Override
-    protected void onPlayerEnter(@NotNull Player player) {
+    public void onPlayerEnter(@NotNull Player player) {
         if (this.data == null) return;
         var newVelocity = this.data.getVelocity(player);
         if (newVelocity == null) return;

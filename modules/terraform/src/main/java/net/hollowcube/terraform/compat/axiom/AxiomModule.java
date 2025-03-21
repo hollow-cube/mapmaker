@@ -5,7 +5,7 @@ import net.hollowcube.compat.axiom.data.buffers.AxiomBlockBuffer;
 import net.hollowcube.compat.axiom.events.*;
 import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundAnnotationUpdatePacket;
 import net.hollowcube.terraform.TerraformModule;
-import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomUpdateMarkerDataEvent;
+import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomUpdateCustomEntityDataEvent;
 import net.hollowcube.terraform.compat.axiom.util.AxiomAnnotationStorage;
 import net.hollowcube.terraform.compat.axiom.util.AxiomTerraformBuffer;
 import net.hollowcube.terraform.compat.axiom.util.NbtUtil;
@@ -19,7 +19,6 @@ import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.ListBinaryTag;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.event.Event;
@@ -95,8 +94,8 @@ public class AxiomModule implements TerraformModule {
         }
 
         if (event.nbt() != null && event.nbt().size() > 0) {
-            if (entity.getEntityType().equals(EntityType.MARKER)) {
-                EventDispatcher.call(new TerraformAxiomUpdateMarkerDataEvent(event.player(), entity.getUuid(), event.nbt()));
+            if (entity instanceof TerraformAxiomUpdateCustomEntityDataEvent.Receiver) {
+                EventDispatcher.call(new TerraformAxiomUpdateCustomEntityDataEvent(event.player(), entity.getUuid(), event.nbt()));
             } else if (entity instanceof TerraformEntity tfEntity) {
                 entity.editEntityMeta(EntityMeta.class, ignored -> tfEntity.readData(event.nbt()));
             }

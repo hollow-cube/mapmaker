@@ -1,0 +1,39 @@
+package net.hollowcube.mapmaker.map.entity.object;
+
+import net.hollowcube.mapmaker.map.entity.interaction.InteractionEntity;
+import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
+import net.hollowcube.mapmaker.map.entity.marker.builtin.ParticleEmitterMarkerHandler;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
+public class ObjectEntityHandlerRegistry {
+    private final Map<String, Function<ObjectEntity, ObjectEntityHandler>> factories = new HashMap<>();
+
+    public ObjectEntityHandlerRegistry() {
+        registerForMarkers(ParticleEmitterMarkerHandler.ID, ParticleEmitterMarkerHandler::new);
+    }
+
+    public void registerForMarkers(String id, Function<MarkerEntity, ObjectEntityHandler> factory) {
+        factories.put(id, entity -> entity instanceof MarkerEntity marker ? factory.apply(marker) : null);
+    }
+
+    public void registerForInteractions(String id, Function<InteractionEntity, ObjectEntityHandler> factory) {
+        factories.put(id, entity -> entity instanceof InteractionEntity interaction ? factory.apply(interaction) : null);
+    }
+
+    public void register(String id, Function<ObjectEntity, ObjectEntityHandler> factory) {
+        factories.put(id, factory);
+    }
+
+    public @Nullable ObjectEntityHandler create(@Nullable String type, @NotNull ObjectEntity entity) {
+        if (type == null) return null;
+        var factory = factories.get(type);
+        if (factory == null) return null;
+        return factory.apply(entity);
+    }
+
+}

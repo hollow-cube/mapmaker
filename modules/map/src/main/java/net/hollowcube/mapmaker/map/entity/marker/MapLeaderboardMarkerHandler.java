@@ -6,6 +6,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.LeaderboardData;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.util.LeaderboardDisplay;
 import net.hollowcube.mapmaker.util.NumberUtil;
@@ -16,7 +17,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 import org.jetbrains.annotations.NotNull;
 
-public class MapLeaderboardMarkerHandler extends MarkerHandler {
+public class MapLeaderboardMarkerHandler extends ObjectEntityHandler {
     private static final int ONE_MINUTE_TICKS = 60 * 20;
 
     public static final String ID = "mapmaker:leaderboard";
@@ -74,7 +75,7 @@ public class MapLeaderboardMarkerHandler extends MarkerHandler {
     }
 
     @Override
-    protected void onTick() {
+    public void onTick() {
         super.onTick();
 
         ticksUntilUpdate--;
@@ -88,7 +89,7 @@ public class MapLeaderboardMarkerHandler extends MarkerHandler {
     }
 
     @Override
-    protected void addViewer(@NotNull Player player) {
+    public void addViewer(@NotNull Player player) {
         if (leaderboard == null) return;
         FutureUtil.submitVirtual(() -> leaderboard.update(player));
     }
