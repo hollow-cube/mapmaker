@@ -4,8 +4,10 @@ import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.common.util.dfu.NbtOps;
 import net.hollowcube.mapmaker.map.entity.interaction.InteractionEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
+import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,6 +32,7 @@ public class TeleportObjectHandler extends ObjectEntityHandler {
     public void onPlayerInteract(@NotNull Player player) {
         if (this.destination == null) return;
 
-        player.teleport(this.destination);
+        player.teleport(this.destination)
+                .thenRun(() -> player.playSound(Sound.sound(SoundEvent.ENTITY_PLAYER_TELEPORT, Sound.Source.PLAYER, 0.5f, 1f), player.getPosition()));
     }
 }
