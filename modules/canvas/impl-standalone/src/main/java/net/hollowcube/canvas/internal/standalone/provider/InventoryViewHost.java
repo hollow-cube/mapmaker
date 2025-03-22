@@ -6,6 +6,7 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.standalone.BaseElement;
 import net.hollowcube.canvas.internal.standalone.ViewContainer;
 import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
+import net.hollowcube.canvas.util.CursorRequest;
 import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -221,6 +222,9 @@ public class InventoryViewHost {
         var titleBuilder = new FontUIBuilder();
         element.buildTitle(titleBuilder, 0, 0);
 
+        this.inventory.cursor = ItemStack.AIR;
+        element.performSignal(Element.SIG_GET_CURSOR, (CursorRequest) stack -> this.inventory.cursor = stack);
+
         inventory.replaceInventories(top, bottom);
 //        if (inventory.getInventoryType() != InventoryType.ANVIL)
         inventory.setTitle(Component.text("", NamedTextColor.WHITE).append(titleBuilder.build()));
@@ -251,6 +255,7 @@ public class InventoryViewHost {
     private class InventoryWrapper extends Inventory {
 
         private final ItemStack[] playerInv = new ItemStack[9 * 4];
+        private ItemStack cursor = ItemStack.AIR;
 
         public InventoryWrapper(@NotNull InventoryType inventoryType, @NotNull Component title) {
             super(inventoryType, title);
@@ -308,7 +313,10 @@ public class InventoryViewHost {
         }
 
         public void updatePlayerInventory() {
-            getViewers().forEach(player -> player.sendPacket(createWindowItemsPacket(player)));
+            getViewers().forEach(player -> {
+                player.sendPacket(createWindowItemsPacket(player));
+                player.getInventory().setCursorItem(this.cursor);
+            });
         }
 
         private static void handleInventoryClick(@NotNull InventoryPreClickEvent event) {
@@ -399,7 +407,7 @@ public class InventoryViewHost {
                     convertedSlots[packetSlot] = player.getInventory().getItemStack(i);
                 }
             }
-            return new WindowItemsPacket((byte) 0, 0, List.of(convertedSlots), ItemStack.AIR); //todo air was cursor item, does it matter?
+            return new WindowItemsPacket((byte) 0, 0, List.of(convertedSlots), ItemStack.AIR);
         }
 
         private int convertPlayerSlotToChestSlot(int slot) {

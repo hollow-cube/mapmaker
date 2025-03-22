@@ -25,6 +25,9 @@ public interface Element extends ElementLike {
     // Sent when receiving anvil input from a player.
     String SIG_ANVIL_INPUT = "player_gui_anvil_input";
 
+    // Sent when we need the cursor to be updated.
+    String SIG_GET_CURSOR = "get_cursor";
+
     enum State {
         ACTIVE,
         LOADING,
