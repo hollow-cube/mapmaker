@@ -67,6 +67,7 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
         world.objectEntityHandlers().registerForMarkers(MapLeaderboardMarkerHandler.ID, MapLeaderboardMarkerHandler::new);
         world.objectEntityHandlers().registerForMarkers(BouncePadMarkerHandler.ID, BouncePadMarkerHandler::new);
         world.objectEntityHandlers().register(ResetMarkerHandler.ID, ResetMarkerHandler::new);
+        world.objectEntityHandlers().registerForMarkers(BlockAnimationHandler.ID, BlockAnimationHandler::new);
     }
 
     @Override
