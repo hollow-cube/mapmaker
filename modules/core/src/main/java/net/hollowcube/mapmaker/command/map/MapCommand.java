@@ -39,7 +39,7 @@ public class MapCommand extends CommandDsl {
         category = CommandCategories.GLOBAL;
 
         // Default commands
-        addSubcommand(this.list = new MapListCommand(guiController, playerService, mapService));
+        addSubcommand(this.list = new MapListCommand(guiController, playerService));
         addSubcommand(this.info = new MapInfoCommand(mapService, permManager));
 
         addSubcommand(new MapLegacyCommand(mapService, permManager));
