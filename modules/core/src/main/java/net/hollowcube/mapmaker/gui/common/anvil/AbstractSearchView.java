@@ -10,7 +10,6 @@ import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.timer.Task;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,7 +45,7 @@ public abstract class AbstractSearchView<T extends View> extends View {
         super(context);
 
         this.lastInput = input;
-        this.input.setItemSprite(this.input.getItemDirect().with(ItemComponent.HIDE_TOOLTIP));
+        this.input.setItemSprite(this.input.getItemDirect().withoutExtraTooltip());
         this.input.setArgs(Component.text(input));
     }
 

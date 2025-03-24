@@ -17,9 +17,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
-import net.minestom.server.item.ItemComponent;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -130,10 +130,10 @@ public final class MiscFunctionality {
             var cosmetic = Cosmetic.byId(cosmeticType, playerData.getCosmetic(cosmeticType));
             var itemStack = cosmetic == null ? cosmeticType.blankIcon() : cosmetic.impl().iconItem();
             // If the itemstack has a glider we need to preserve it.
-            if (player.getInventory().getItemStack(cosmeticType.iconSlot()).has(ItemComponent.GLIDER)) {
-                itemStack = itemStack.with(ItemComponent.GLIDER);
-                var equippable = itemStack.get(ItemComponent.EQUIPPABLE);
-                if (equippable != null) itemStack = itemStack.with(ItemComponent.EQUIPPABLE,
+            if (player.getInventory().getItemStack(cosmeticType.iconSlot()).has(DataComponents.GLIDER)) {
+                itemStack = itemStack.with(DataComponents.GLIDER);
+                var equippable = itemStack.get(DataComponents.EQUIPPABLE);
+                if (equippable != null) itemStack = itemStack.with(DataComponents.EQUIPPABLE,
                         equippable.withAssetId("minecraft:elytra"));
             }
             player.getInventory().setItemStack(cosmeticType.iconSlot(), itemStack);

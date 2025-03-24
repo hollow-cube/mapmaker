@@ -18,9 +18,8 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.MinecraftServer;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
-import net.minestom.server.item.ItemComponent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -79,11 +78,11 @@ public class BuyAddonsView extends View {
             var upgrade = ShopUpgrade.valueOf(entry.id().substring(4).toUpperCase(Locale.ROOT));
 
             var itemStack = entry.getItemDirect();
-            var lore = new ArrayList<>(itemStack.get(ItemComponent.LORE, List.of()));
+            var lore = new ArrayList<>(itemStack.get(DataComponents.LORE, List.of()));
             lore.add(Component.empty());
 
             upgrade.appendLore(PlayerDataV2.fromPlayer(player), PlayerBackpack.fromPlayer(player), lore);
-            entry.setItemDirect(itemStack.with(ItemComponent.LORE, lore));
+            entry.setItemDirect(itemStack.with(DataComponents.LORE, lore));
         }
     }
 

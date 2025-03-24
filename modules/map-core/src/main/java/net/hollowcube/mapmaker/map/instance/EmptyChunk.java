@@ -99,7 +99,7 @@ public class EmptyChunk extends Chunk {
         });
 
         return new ChunkDataPacket(chunkX, chunkZ,
-                new ChunkData(CompoundBinaryTag.empty(), data, Map.of()),
+                new ChunkData(Map.of(), data, Map.of()),
                 createLightData(true)
         );
     }

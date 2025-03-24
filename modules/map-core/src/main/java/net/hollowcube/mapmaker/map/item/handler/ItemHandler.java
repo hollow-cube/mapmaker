@@ -6,13 +6,13 @@ import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.TagHandler;
@@ -82,12 +82,12 @@ public abstract class ItemHandler {
     public @NotNull ItemStack buildItemStack(@Nullable CompoundBinaryTag nbt) {
         var builder = ItemStack.builder(Objects.requireNonNullElse(material(), Material.STICK));
         var baseTranslationKey = String.format("item.%s.%s", key().namespace(), key().value());
-        builder.set(ItemComponent.CUSTOM_NAME, LanguageProviderV2.translate(Component.translatable(baseTranslationKey + ".name")));
-        builder.set(ItemComponent.LORE, LanguageProviderV2.translateMulti(baseTranslationKey + ".lore", List.of()));
+        builder.set(DataComponents.CUSTOM_NAME, LanguageProviderV2.translate(Component.translatable(baseTranslationKey + ".name")));
+        builder.set(DataComponents.LORE, LanguageProviderV2.translateMulti(baseTranslationKey + ".lore", List.of()));
         updateItemStack(builder, nbt != null ? TagHandler.fromCompound(nbt) : TagHandler.newHandler());
 
         var sprite = sprite();
-        if (sprite != null) builder.set(ItemComponent.ITEM_MODEL, sprite.model());
+        if (sprite != null) builder.set(DataComponents.ITEM_MODEL, sprite.model());
 
         return builder.build();
     }
@@ -130,7 +130,7 @@ public abstract class ItemHandler {
                 func.accept(builder);
 
                 var sprite = handler.sprite();
-                if (sprite != null) builder.set(ItemComponent.ITEM_MODEL, sprite.model());
+                if (sprite != null) builder.set(DataComponents.ITEM_MODEL, sprite.model());
             });
             player.setItemInHand(hand, updatedItemStack);
         }

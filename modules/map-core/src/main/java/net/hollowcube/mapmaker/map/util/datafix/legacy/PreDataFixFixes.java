@@ -63,7 +63,7 @@ public final class PreDataFixFixes {
                 .putInt("Count", amount)
                 .build();
         CompoundBinaryTag updatedCompound = MCDataConverter.convertTag(MCTypeRegistry.ITEM_STACK, fullCompound, MCVersions.V1_20_4, MCVersions.V1_20_5_RC2);
-        return ItemStack.NBT_TYPE.read(updatedCompound);
+        return ItemStack.fromItemNBT(updatedCompound);
     }
 
     private PreDataFixFixes() {

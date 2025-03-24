@@ -2,10 +2,10 @@ package net.hollowcube.mapmaker.map.block.placement;
 
 
 import net.hollowcube.mapmaker.map.block.handler.BannerBlockHandler;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -52,7 +52,7 @@ public class BannerPlacementRule extends BaseBlockPlacementRule {
     }
 
     private Block withBannerData(Block block, @Nullable ItemStack stack) {
-        return block.withTag(BannerBlockHandler.PATTERNS, stack == null ? null : stack.get(ItemComponent.BANNER_PATTERNS));
+        return block.withTag(BannerBlockHandler.PATTERNS, stack == null ? null : stack.get(DataComponents.BANNER_PATTERNS));
     }
 
 }

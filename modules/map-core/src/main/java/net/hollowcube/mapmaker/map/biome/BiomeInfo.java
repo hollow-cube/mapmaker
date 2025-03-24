@@ -3,10 +3,9 @@ package net.hollowcube.mapmaker.map.biome;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
-import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.color.Color;
 import net.minestom.server.item.Material;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.biome.Biome;
 import net.minestom.server.world.biome.BiomeEffects;
 import org.jetbrains.annotations.ApiStatus;
@@ -25,7 +24,6 @@ public class BiomeInfo {
     public static final Codec<BiomeInfo> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.STRING.optionalFieldOf("name", "").forGetter(BiomeInfo::getName),
             ExtraCodecs.MATERIAL.lenientOptionalFieldOf("displayItem", Material.GRASS_BLOCK).forGetter(BiomeInfo::getDisplayItem),
-            ExtraCodecs.Enum(Biome.Precipitation.class).lenientOptionalFieldOf("precipitation", Biome.Precipitation.NONE).forGetter(BiomeInfo::getPrecipitation),
             ExtraCodecs.COLOR.lenientOptionalFieldOf("skyColor", DEFAULT_SKY_COLOR).forGetter(BiomeInfo::getSkyColor),
             ExtraCodecs.COLOR.lenientOptionalFieldOf("fogColor", DEFAULT_FOG_COLOR).forGetter(BiomeInfo::getFogColor),
             ExtraCodecs.COLOR.lenientOptionalFieldOf("waterColor", DEFAULT_WATER_COLOR).forGetter(BiomeInfo::getWaterColor),
@@ -37,7 +35,6 @@ public class BiomeInfo {
     private String name = "";
     private Material displayItem = Material.GRASS_BLOCK;
 
-    private Biome.Precipitation precipitation = Biome.Precipitation.NONE;
     private Object particle = null; //todo
 
     private Color skyColor = DEFAULT_SKY_COLOR;
@@ -58,14 +55,12 @@ public class BiomeInfo {
 
     public BiomeInfo(
             @NotNull String name, @NotNull Material displayItem,
-            @NotNull Biome.Precipitation precipitation,
             @NotNull Color skyColor, @NotNull Color fogColor,
             @NotNull Color waterColor, @NotNull Color waterFogColor,
             @NotNull Optional<Color> grassColor, @NotNull Optional<Color> foliageColor
     ) {
         this.name = name;
         this.displayItem = displayItem;
-        this.precipitation = precipitation;
         this.skyColor = skyColor;
         this.fogColor = fogColor;
         this.waterColor = waterColor;
@@ -82,9 +77,9 @@ public class BiomeInfo {
         this.name = name;
     }
 
-    public @Nullable NamespaceID namespace() {
+    public @Nullable Key key() {
         if (getName().isEmpty()) return null;
-        return NamespaceID.from("custom", getName());
+        return Key.key("custom", getName());
     }
 
     public @NotNull Material getDisplayItem() {
@@ -93,14 +88,6 @@ public class BiomeInfo {
 
     public void setDisplayItem(@NotNull Material displayItem) {
         this.displayItem = displayItem;
-    }
-
-    public @NotNull Biome.Precipitation getPrecipitation() {
-        return precipitation;
-    }
-
-    public void setPrecipitation(@NotNull Biome.Precipitation precipitation) {
-        this.precipitation = precipitation;
     }
 
     public @NotNull Color getSkyColor() {
@@ -153,25 +140,26 @@ public class BiomeInfo {
 
     @ApiStatus.Internal
     public @Nullable Biome build() {
-        var namespace = this.namespace();
-        if (namespace == null) return null;
+        var key = this.key();
+        if (key == null) return null;
 
         var effects = BiomeEffects.builder()
-                .skyColor(this.getSkyColor().asRGB())
-                .fogColor(this.getFogColor().asRGB())
-                .waterColor(this.getWaterColor().asRGB())
-                .waterFogColor(this.getWaterFogColor().asRGB());
-        if (this.getGrassColor() != null) effects.grassColor(this.getGrassColor().asRGB());
-        if (this.getFoliageColor() != null) effects.foliageColor(this.getFoliageColor().asRGB());
+                .skyColor(this.getSkyColor())
+                .fogColor(this.getFogColor())
+                .waterColor(this.getWaterColor())
+                .waterFogColor(this.getWaterFogColor());
+        if (this.getGrassColor() != null) effects.grassColor(this.getGrassColor());
+        if (this.getFoliageColor() != null) effects.foliageColor(this.getFoliageColor());
 
-        float temperature = switch (this.precipitation) {
-            case NONE -> 0.5f;
-            case RAIN -> 0.8f;
-            case SNOW -> 0.0f;
-        };
+        //TODO(1.21.5)
+//        float temperature = switch (this.precipitation) {
+//            case NONE -> 0.5f;
+//            case RAIN -> 0.8f;
+//            case SNOW -> 0.0f;
+//        };
 
         return Biome.builder()
-                .temperature(temperature)
+//                .temperature(temperature)
                 .downfall(1.0F)
                 .effects(effects.build())
                 .build();

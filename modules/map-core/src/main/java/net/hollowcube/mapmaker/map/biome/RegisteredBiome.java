@@ -1,14 +1,14 @@
 package net.hollowcube.mapmaker.map.biome;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.registry.DynamicRegistry;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 
 public record RegisteredBiome(
         int id,
-        @NotNull NamespaceID namespace,
+        @NotNull Key innerKey,
         @NotNull BiomeInfo info,
         @NotNull Biome biome
 ) {
@@ -18,6 +18,6 @@ public record RegisteredBiome(
     }
 
     public DynamicRegistry.Key<Biome> key() {
-        return DynamicRegistry.Key.of(this.namespace);
+        return DynamicRegistry.Key.of(this.innerKey);
     }
 }

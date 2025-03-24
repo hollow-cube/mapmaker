@@ -1,11 +1,10 @@
 package net.hollowcube.mapmaker.backpack;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.ShadowColor;
-import net.minestom.server.item.ItemComponent;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.RecipeBookAddPacket;
@@ -138,8 +137,8 @@ public enum BackpackItem {
         // TODO(1.21.4)
         return ItemStack.builder(Material.APPLE)
 //                .set(ItemComponent.CUSTOM_MODEL_DATA, sprite.cmd() + amount)
-                .set(ItemComponent.CUSTOM_NAME, displayName())
-                .set(ItemComponent.LORE, lore)
+                .set(DataComponents.CUSTOM_NAME, displayName())
+                .set(DataComponents.LORE, lore)
                 .build();
     }
 

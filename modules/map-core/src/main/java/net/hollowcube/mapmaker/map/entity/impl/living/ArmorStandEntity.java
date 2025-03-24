@@ -2,16 +2,16 @@ package net.hollowcube.mapmaker.map.entity.impl.living;
 
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.util.GenericTempActionBarProvider;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
+import net.hollowcube.mapmaker.util.GenericTempActionBarProvider;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.entity.metadata.other.ArmorStandMeta;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.Equippable;
@@ -69,7 +69,7 @@ public class ArmorStandEntity extends AbstractLivingEntity {
             if (slot.isHand() && !meta.isHasArms()) return;
             setEquipment(slot, ItemStack.AIR);
         } else {
-            var slot = OpUtils.mapOr(item.get(ItemComponent.EQUIPPABLE), Equippable::slot, EquipmentSlot.MAIN_HAND);
+            var slot = OpUtils.mapOr(item.get(DataComponents.EQUIPPABLE), Equippable::slot, EquipmentSlot.MAIN_HAND);
             if (slot.isHand() && !meta.isHasArms()) return;
             setEquipment(slot, item.withAmount(1));
         }

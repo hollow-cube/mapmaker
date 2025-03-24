@@ -11,10 +11,9 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.color.AlphaColor;
-import net.minestom.server.item.ItemComponent;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.component.DyedItemColor;
 import net.minestom.server.network.packet.server.play.SetSlotPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,16 +44,15 @@ public class ColorPickerView extends View {
 
         this.color = Objects.requireNonNullElse(input, BLACK);
 
-        this.input.setItemSprite(this.input.getItemDirect().with(ItemComponent.HIDE_TOOLTIP));
+        this.input.setItemSprite(this.input.getItemDirect().withoutExtraTooltip());
         this.preview.setItemSprite(
-                ItemStack.builder(Material.LEATHER_HORSE_ARMOR)
-                        .set(ItemComponent.DYED_COLOR, new DyedItemColor(this.color, true))
-                        .set(ItemComponent.HIDE_TOOLTIP)
+                ItemStack.of(Material.LEATHER_HORSE_ARMOR)
+                        .with(DataComponents.DYED_COLOR, this.color)
                         // TODO(1.21.4) item model
 //                        .customModelData(COLOR_PREVIEW.cmd())
-                        .build()
+                        .withoutExtraTooltip()
         );
-        this.output.setItemSprite(this.output.getItemDirect().with(ItemComponent.HIDE_TOOLTIP));
+        this.output.setItemSprite(this.output.getItemDirect().withoutExtraTooltip());
 
         this.title.setText(this.settings.title);
         String hex = this.color.alpha() == 0 ? String.format("#%02x%02x%02x", this.color.red(), this.color.green(), this.color.blue()) :
@@ -82,7 +80,7 @@ public class ColorPickerView extends View {
                 (short) 1,
                 this.preview
                         .getItemDirect()
-                        .with(ItemComponent.DYED_COLOR, new DyedItemColor(this.color, true))
+                        .with(DataComponents.DYED_COLOR, this.color)
         ));
     }
 
@@ -95,7 +93,7 @@ public class ColorPickerView extends View {
     public void handlePreview() {
         this.preview.setItemSprite(this.preview
                 .getItemDirect()
-                .with(ItemComponent.DYED_COLOR, new DyedItemColor(this.color, true))
+                .with(DataComponents.DYED_COLOR, this.color)
         );
     }
 

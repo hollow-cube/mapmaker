@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.map.util.InteractTarget;
 import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.event.EventFilter;
@@ -20,7 +21,6 @@ import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
@@ -375,7 +375,7 @@ public class ItemRegistry {
     private @Nullable ItemHandler getHandlerFromItemStack(@NotNull ItemStack itemStack) {
         var itemHandler = materialToItemHandler.get(itemStack.material().id());
         if (itemHandler != null) return itemHandler;
-        return modelToItemHandler.get(itemStack.get(ItemComponent.ITEM_MODEL, ""));
+        return modelToItemHandler.get(itemStack.get(DataComponents.ITEM_MODEL, ""));
     }
 
     public boolean isOnCooldown(@NotNull Player player) {

@@ -40,7 +40,7 @@ maven.install(
         "com.google.auto.service:auto-service-annotations:1.1.1",
 
         # Minestom
-        "net.minestom:minestom-snapshots:jar:96543a894f",
+        "net.minestom:minestom-snapshots:jar:dev",
         "dev.hollowcube:polar:1.13.0",
         "dev.hollowcube:dataconverter:1.21.3-rv1",
         "dev.hollowcube:mql:1.1.0",
@@ -85,7 +85,7 @@ maven.install(
         "io.opentelemetry.semconv:opentelemetry-semconv:1.28.0-alpha",
         "org.graalvm.sdk:nativeimage:24.1.1",
         "io.github.classgraph:classgraph:4.8.179",
-        "com.google.inject:guice:7.0.0", # For Velocity
+        "com.google.inject:guice:7.0.0",  # For Velocity
 
         # Testing
         "org.junit.jupiter:junit-jupiter-api:5.10.0",
@@ -107,7 +107,7 @@ maven.install(
     fetch_javadoc = True,
     fetch_sources = True,
     repositories = [
-        #         "m2Local",
+        "m2Local",
         "https://repo1.maven.org/maven2",
         "https://jitpack.io",
         "https://packages.confluent.io/maven/",  # For schema registry client

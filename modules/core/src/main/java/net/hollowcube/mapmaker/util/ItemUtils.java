@@ -3,15 +3,12 @@ package net.hollowcube.mapmaker.util;
 import net.hollowcube.common.util.OpUtils;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.item.ItemComponent;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.component.AttributeList;
-import net.minestom.server.utils.Unit;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public final class ItemUtils {
@@ -40,20 +37,11 @@ public final class ItemUtils {
     public static ItemStack asDisplay(@NotNull Material material) {
         var key = material.key();
         if (USE_MODEL_OVERRIDE.contains(key)) {
-            String model = material.prototype().get(ItemComponent.ITEM_MODEL);
+            String model = material.prototype().get(DataComponents.ITEM_MODEL);
             return ItemStack.builder(Material.STICK)
-                    .set(ItemComponent.ITEM_MODEL, model)
+                    .set(DataComponents.ITEM_MODEL, model)
                     .build();
         }
-        return ItemStack.builder(material)
-                .remove(ItemComponent.FIREWORKS) // Has flight duration lore
-                .remove(ItemComponent.ENCHANTMENTS)
-                .remove(ItemComponent.JUKEBOX_PLAYABLE)
-                .remove(ItemComponent.OMINOUS_BOTTLE_AMPLIFIER)
-                // Note: Just removing attribute modifiers does not remove the armor extras tooltip
-                // we actually have to set attributes with nothing for that to happen.
-                .set(ItemComponent.ATTRIBUTE_MODIFIERS, new AttributeList(List.of(), false))
-                .set(ItemComponent.HIDE_ADDITIONAL_TOOLTIP, Unit.INSTANCE)
-                .build();
+        return ItemStack.of(material).withoutExtraTooltip();
     }
 }

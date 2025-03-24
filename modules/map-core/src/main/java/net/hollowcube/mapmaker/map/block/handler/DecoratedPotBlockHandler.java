@@ -4,8 +4,8 @@ import net.hollowcube.common.util.ExtraTags;
 import net.hollowcube.mapmaker.map.item.ItemTags;
 import net.hollowcube.terraform.util.math.DirectionUtil;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.instance.block.BlockHandler;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.component.PotDecorations;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.Direction;
@@ -18,7 +18,7 @@ import java.util.Locale;
 public class DecoratedPotBlockHandler implements BlockHandler {
 
     private static final Key ID = Key.key("minecraft:decorated_pot");
-    public static final Tag<PotDecorations> SHERDS = ExtraTags.DataComponent("sherds", ItemComponent.POT_DECORATIONS)
+    public static final Tag<PotDecorations> SHERDS = ExtraTags.DataComponent("sherds", DataComponents.POT_DECORATIONS)
             .defaultValue(PotDecorations.EMPTY);
 
     DecoratedPotBlockHandler() {

@@ -1,12 +1,12 @@
 package net.hollowcube.mapmaker.map.block.placement;
 
 import net.hollowcube.mapmaker.map.block.handler.PlayerHeadBlockHandler;
+import net.minestom.server.codec.Transcoder;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,11 +64,10 @@ public class HeadPlacementRule extends BaseBlockPlacementRule {
     private @NotNull Block withSkin(@Nullable ItemStack itemStack, @NotNull Block block) {
         if (itemStack == null) return block;
 
-        var profile = itemStack.get(ItemComponent.PROFILE);
+        var profile = itemStack.get(DataComponents.PROFILE);
         if (profile == null) return block;
 
-        var context = BinaryTagSerializer.Context.EMPTY;
-        return block.withTag(PlayerHeadBlockHandler.PROFILE, ItemComponent.PROFILE.write(context, profile));
+        return block.withTag(PlayerHeadBlockHandler.PROFILE, DataComponents.PROFILE.encode(Transcoder.NBT, profile).orElseThrow());
     }
 
 }

@@ -6,7 +6,7 @@ import net.hollowcube.mapmaker.backpack.Rarity;
 import net.hollowcube.mapmaker.cosmetic.impl.CosmeticImpl;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.item.ItemComponent;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.CustomModelData;
@@ -99,11 +99,11 @@ public class Cosmetic {
         var displayName = displayName();
         var lore = lore();
         this.icon = ItemStack.builder(Material.DIAMOND)
-                .set(ItemComponent.CUSTOM_NAME, displayName)
-                .set(ItemComponent.LORE, lore)
-                .set(ItemComponent.ITEM_MODEL, BadSprite.require("cosmetic/" + type.id() + "/" + id).model())
+                .set(DataComponents.CUSTOM_NAME, displayName)
+                .set(DataComponents.LORE, lore)
+                .set(DataComponents.ITEM_MODEL, BadSprite.require("cosmetic/" + type.id() + "/" + id).model())
                 .build().withTag(COSMETIC_TAG, true);
-        this.iconLocked = icon.with(ItemComponent.CUSTOM_MODEL_DATA, LOCKED_CMD);
+        this.iconLocked = icon.with(DataComponents.CUSTOM_MODEL_DATA, LOCKED_CMD);
 
         this.impl = implFunc.apply(this);
     }

@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.map.item.handler;
 
 import net.hollowcube.mapmaker.map.event.BlockItemPlaceEvent;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.CustomData;
@@ -53,7 +53,7 @@ public class BlockItemHandler extends ItemHandler {
     protected void rightClicked(@NotNull Click click) {
         var instance = click.instance();
 
-        var blockData = click.itemStack().get(ItemComponent.BLOCK_ENTITY_DATA, CustomData.EMPTY);
+        var blockData = click.itemStack().get(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
         var block = this.block.withNbt(blockData.nbt());
         var event = new BlockItemPlaceEvent(click.player(), new BlockVec(click.placePosition()), block);
         EventDispatcher.callCancellable(event, () -> {

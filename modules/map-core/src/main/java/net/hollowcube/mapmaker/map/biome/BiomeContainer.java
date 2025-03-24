@@ -5,10 +5,9 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.dfu.DFU;
 import net.hollowcube.terraform.instance.TerraformInstanceBiomes;
-import net.kyori.adventure.nbt.CompoundBinaryTag;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.codec.Transcoder;
 import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
@@ -16,7 +15,6 @@ import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.tag.TagWritable;
-import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,25 +39,6 @@ import java.util.*;
 @SuppressWarnings("UnstableApiUsage")
 public class BiomeContainer implements TerraformInstanceBiomes {
     private static final Logger logger = LoggerFactory.getLogger(BiomeContainer.class);
-
-    // This is copied from BiomeImpl because Minestom does not expose this type. Probably Minestom should expose this.
-    private static final BinaryTagSerializer<Biome> REGISTRY_NBT_TYPE = BinaryTagSerializer.COMPOUND.map(
-            tag -> {
-                throw new UnsupportedOperationException("Biome is read-only");
-            },
-            biome -> {
-                CompoundBinaryTag.Builder builder = CompoundBinaryTag.builder()
-                        .putFloat("temperature", biome.temperature())
-                        .putFloat("downfall", biome.downfall())
-                        .putByte("has_precipitation", (byte) (biome.precipitation() == Biome.Precipitation.NONE ? 0 : 1))
-                        .putString("precipitation", biome.precipitation().name().toLowerCase(Locale.ROOT));
-                if (biome.temperatureModifier() != Biome.TemperatureModifier.NONE)
-                    builder.putString("temperature_modifier", biome.temperatureModifier().name().toLowerCase(Locale.ROOT));
-                return builder
-                        .put("effects", biome.effects().toNbt())
-                        .build();
-            }
-    );
 
     private static final Tag<List<BiomeInfo>> TAG = DFU.Tag(BiomeInfo.CODEC.listOf().optionalFieldOf("biomes", List.of()).codec(), "biomes");
     private static final DynamicRegistry.Key<Biome> DEFAULT_BIOME = Biome.PLAINS;
@@ -118,8 +97,8 @@ public class BiomeContainer implements TerraformInstanceBiomes {
     public @NotNull Component getName(@NotNull DynamicRegistry.Key<Biome> key) {
         var biome = keyToBiome.get(key);
         if (biome != null) return biome.name();
-        var translationKey = "biome.%s.%s".formatted(key.namespace().namespace(), key.namespace().path());
-        return Component.translatable(translationKey, key.namespace().asString());
+        var translationKey = "biome.%s.%s".formatted(key.key().namespace(), key.key().value());
+        return Component.translatable(translationKey, key.key().asString());
     }
 
     /**
@@ -133,7 +112,7 @@ public class BiomeContainer implements TerraformInstanceBiomes {
     public @NotNull String getLoadedBiomeName(int id) {
         // Try from local biomes first, then from parent
         var biome = idToBiome.get(id);
-        if (biome != null) return biome.namespace().asString();
+        if (biome != null) return biome.key().key().asString();
         return Objects.requireNonNullElse(parent.getKey(id), DEFAULT_BIOME).name();
     }
 
@@ -191,10 +170,10 @@ public class BiomeContainer implements TerraformInstanceBiomes {
             var minestomBiome = info.build();
             if (minestomBiome == null) continue;
 
-            var namespace = Objects.requireNonNull(info.namespace());
+            var namespace = Objects.requireNonNull(info.key());
             var key = DynamicRegistry.Key.<Biome>of(namespace);
 
-            var biome = new RegisteredBiome(nextId++, namespace, info, minestomBiome);
+            var biome = new RegisteredBiome(nextId++, namespace.key(), info, minestomBiome);
 
             idToBiome.put(biome.id(), biome);
             keyToBiome.put(key, biome);
@@ -219,13 +198,13 @@ public class BiomeContainer implements TerraformInstanceBiomes {
             if (excludeVanilla) {
                 entries.add(new RegistryDataPacket.Entry(name, null));
             } else {
-                entries.add(new RegistryDataPacket.Entry(name, REGISTRY_NBT_TYPE.write(biome)));
+                entries.add(new RegistryDataPacket.Entry(name, Biome.REGISTRY_CODEC.encode(Transcoder.NBT, biome).orElseThrow()));
             }
         }
 
         // Add overwrite biomes (never vanilla ones so always write entire value)
         for (RegisteredBiome value : this.keyToBiome.values()) {
-            entries.add(new RegistryDataPacket.Entry(value.namespace().asString(), REGISTRY_NBT_TYPE.write(value.biome())));
+            entries.add(new RegistryDataPacket.Entry(value.key().key().asString(), Biome.REGISTRY_CODEC.encode(Transcoder.NBT, value.biome()).orElseThrow()));
         }
 
         return new RegistryDataPacket("minecraft:worldgen/biome", entries);
