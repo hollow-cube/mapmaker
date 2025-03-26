@@ -400,7 +400,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
         // Prevent swords from breaking blocks
         ItemStack item = event.getPlayer().getItemInMainHand();
-        if (ItemTags.SWORDS.contains(item.material().namespace())) {
+        if (ItemTags.SWORDS.contains(item.material().key())) {
             event.setCancelled(true);
         }
     }

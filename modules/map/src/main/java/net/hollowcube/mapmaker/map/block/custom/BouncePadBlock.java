@@ -6,19 +6,19 @@ import net.hollowcube.mapmaker.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.item.handler.BlockItemHandler;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class BouncePadBlock implements BlockHandler, PressurePlateBlockMixin, DebugCommand.BlockDebug {
-    private static final NamespaceID ID = NamespaceID.from("mapmaker:bounce_pad");
+    private static final Key KEY = Key.key("mapmaker:bounce_pad");
     private static final Tag<BouncePadData> DATA_TAG = DFU.View(BouncePadData.CODEC);
 
     public static final ItemHandler ITEM = new BlockItemHandler(BouncePadBlock::new, Block.CHERRY_PRESSURE_PLATE);
@@ -26,8 +26,8 @@ public class BouncePadBlock implements BlockHandler, PressurePlateBlockMixin, De
     private final Set<Player> playersOnPlate = new HashSet<>();
 
     @Override
-    public @NotNull NamespaceID getNamespaceId() {
-        return ID;
+    public @NotNull Key getKey() {
+        return KEY;
     }
 
     @Override

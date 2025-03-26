@@ -15,8 +15,8 @@ import net.hollowcube.mapmaker.map.gui.displayentity.object.ComponentEntry;
 import net.hollowcube.mapmaker.map.gui.displayentity.search.SearchMaterialsView;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.component.DataComponent;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +30,7 @@ public class EditItemDisplayView extends AbstractEditDisplayView<DisplayEntity.I
 
     private static final Predicate<Material> FILTER = material -> !material.isBlock() || !material.block().isAir();
     private static final Map<DataComponent<?>, List<Pair<?, Component>>> DISPLAY_COMPONENTS = Map.of(
-            ItemComponent.ENCHANTMENT_GLINT_OVERRIDE, List.of(
+            DataComponents.ENCHANTMENT_GLINT_OVERRIDE, List.of(
                     Pair.of(null, Component.text("Default")),
                     Pair.of(Boolean.TRUE, Component.text("True")),
                     Pair.of(Boolean.FALSE, Component.text("False"))

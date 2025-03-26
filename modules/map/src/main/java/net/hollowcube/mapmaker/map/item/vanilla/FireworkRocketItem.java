@@ -8,11 +8,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.projectile.FireworkRocketMeta;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.BundlePacket;
@@ -29,8 +29,8 @@ public class FireworkRocketItem extends ItemHandler {
     public static final FireworkRocketItem INSTANCE = new FireworkRocketItem();
     public static final ItemStack DEFAULT = setDurationMillis(
             ItemStack.of(Material.FIREWORK_ROCKET)
-                    .without(ItemComponent.FIREWORKS)
-                    .with(ItemComponent.MAX_STACK_SIZE, 99),
+                    .without(DataComponents.FIREWORKS)
+                    .with(DataComponents.MAX_STACK_SIZE, 99),
             1000);
 
     public static void removeRocket(@NotNull Player player) {
@@ -44,7 +44,7 @@ public class FireworkRocketItem extends ItemHandler {
 
     public static @NotNull ItemStack setDurationMillis(@NotNull ItemStack itemStack, int durationMillis) {
         return itemStack.withTag(DURATION_TAG, durationMillis)
-                .with(ItemComponent.LORE, List.of(
+                .with(DataComponents.LORE, List.of(
                         Component.text("Duration: " + NumberUtil.formatDuration(durationMillis), TextColor.color(0xB0B0B0))
                                 .decoration(TextDecoration.ITALIC, false)));
     }
@@ -66,7 +66,7 @@ public class FireworkRocketItem extends ItemHandler {
 //                    .with(ItemComponent.CUSTOM_MODEL_DATA, INFINITE_CUSTOM_MODEL_DATA);
         } else {
             return itemStack.withAmount(count)
-                    .without(ItemComponent.CUSTOM_MODEL_DATA);
+                    .without(DataComponents.CUSTOM_MODEL_DATA);
         }
     }
 

@@ -6,9 +6,9 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.map.block.handler.PlayerHeadBlockHandler;
 import net.hollowcube.mapmaker.map.hdb.HdbMessages;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.HeadProfile;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +40,7 @@ public class HdbBase64Command extends CommandDsl {
                 return;
             }
 
-            var skin = itemStack.get(ItemComponent.PROFILE, HeadProfile.EMPTY).skin();
+            var skin = itemStack.get(DataComponents.PROFILE, HeadProfile.EMPTY).skin();
             if (skin == null || skin.textures() == null) {
                 player.sendMessage(HdbMessages.COMMAND_BASE64_NO_TEXTURE);
                 return;

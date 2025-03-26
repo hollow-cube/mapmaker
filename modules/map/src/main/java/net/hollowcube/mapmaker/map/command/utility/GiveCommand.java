@@ -3,12 +3,12 @@ package net.hollowcube.mapmaker.map.command.utility;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.util.ItemUtils;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.util.MapMessages;
+import net.hollowcube.mapmaker.util.ItemUtils;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.TransactionOption;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +47,7 @@ public class GiveCommand extends CommandDsl {
             return;
         }
 
-        var itemName = itemStack.get(ItemComponent.CUSTOM_NAME);
+        var itemName = itemStack.get(DataComponents.CUSTOM_NAME);
         if (itemName == null) itemName = ItemUtils.translation(itemStack.material());
         player.sendMessage(MapMessages.COMMAND_GIVE_SUCCESS.with(
                 itemName.hoverEvent(itemStack.asHoverEvent())

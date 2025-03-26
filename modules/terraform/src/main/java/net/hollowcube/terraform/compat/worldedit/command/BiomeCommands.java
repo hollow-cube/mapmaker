@@ -180,7 +180,7 @@ public final class BiomeCommands {
         return ExtraComponents.translatable(translation)
                 .with(biomes.getName(key))
                 .with(key.name())
-                .with(biome.precipitation().name())
+                .with(biome.hasPrecipitation() ? "true" : "false")
                 .with(String.format("#%06x", biome.effects().skyColor()))
                 .with(String.format("#%06x", biome.effects().fogColor()))
                 .with(String.format("#%06x", biome.effects().waterColor()))

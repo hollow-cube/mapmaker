@@ -7,8 +7,8 @@ import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.map.hdb.HdbMessages;
 import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
-import net.minestom.server.item.ItemComponent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -39,7 +39,7 @@ public class HdbGiveCommand extends CommandDsl {
         var itemStack = results.getFirst().createItemStack();
         PlayerUtil.giveItem(player, itemStack);
         player.sendMessage(HdbMessages.COMMAND_GIVE_RESULT.with(
-                Objects.requireNonNull(itemStack.get(ItemComponent.CUSTOM_NAME, Component.empty())).hoverEvent(itemStack.asHoverEvent())));
+                Objects.requireNonNull(itemStack.get(DataComponents.CUSTOM_NAME, Component.empty())).hoverEvent(itemStack.asHoverEvent())));
     }
 
 }

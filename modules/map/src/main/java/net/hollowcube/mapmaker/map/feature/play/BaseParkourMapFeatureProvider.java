@@ -27,6 +27,7 @@ import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EquipmentSlot;
@@ -44,7 +45,6 @@ import net.minestom.server.event.player.PlayerStopFlyingWithElytraEvent;
 import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.component.Equippable;
 import net.minestom.server.potion.Potion;
@@ -88,11 +88,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     private static final AttributeModifier NO_FALL_DAMAGE_MODIFIER = new AttributeModifier("mapmaker:play.no_fall_damage", 500, AttributeOperation.ADD_VALUE);
 
     private static final Equippable EMPTY_EQUIPPABLE = new Equippable(EquipmentSlot.CHESTPLATE, SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
-            null, null, null, false,
-            false, false);
+            null, null, null, false, false, false, false);
     private static final Equippable ELYTRA_EQUIPPABLE = new Equippable(EquipmentSlot.CHESTPLATE, SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
-            "minecraft:elytra", null, null,
-            false, false, false);
+            "minecraft:elytra", null, null, false, false, false, false);
 
     private static final CustomizableHotbarManager TESTING_HOTBAR = CustomizableHotbarManager.builder("hotbar/parkour/test")
             .defaultItem(0, MapDetailsItem.ID)
@@ -767,11 +765,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         player.getInventory().setItemStack(6, item3 == null || item3 instanceof HotbarItem.Remove
                 ? ItemStack.AIR : item3.toItemStack(false));
         if (Objects.requireNonNullElse(state.items().elytra(), false)) {
-            player.setChestplate(player.getChestplate().with(ItemComponent.GLIDER)
-                    .with(ItemComponent.EQUIPPABLE, ELYTRA_EQUIPPABLE));
+            player.setChestplate(player.getChestplate().with(DataComponents.GLIDER)
+                    .with(DataComponents.EQUIPPABLE, ELYTRA_EQUIPPABLE));
         } else {
-            player.setChestplate(player.getChestplate().without(ItemComponent.GLIDER)
-                    .with(ItemComponent.EQUIPPABLE, EMPTY_EQUIPPABLE));
+            player.setChestplate(player.getChestplate().without(DataComponents.GLIDER)
+                    .with(DataComponents.EQUIPPABLE, EMPTY_EQUIPPABLE));
             if (player.isFlyingWithElytra()) player.setFlyingWithElytra(false);
         }
 

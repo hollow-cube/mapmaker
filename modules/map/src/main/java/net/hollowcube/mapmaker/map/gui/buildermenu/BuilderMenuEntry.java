@@ -6,7 +6,7 @@ import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.item.ItemComponent;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +32,7 @@ public class BuilderMenuEntry extends View {
             if (sprite.fontChar() != 0) {
                 this.label.setSprite(sprite.fontChar(), sprite.model(), sprite.width(), sprite.offsetX(), sprite.rightOffset());
             } else {
-                this.label.setItemSprite(ItemStack.builder(Material.DIAMOND).set(ItemComponent.ITEM_MODEL, sprite.model()).build());
+                this.label.setItemSprite(ItemStack.builder(Material.DIAMOND).set(DataComponents.ITEM_MODEL, sprite.model()).build());
             }
         }
 

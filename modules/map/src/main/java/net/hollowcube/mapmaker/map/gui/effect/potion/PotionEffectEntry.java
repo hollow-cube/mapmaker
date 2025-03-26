@@ -10,8 +10,8 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
-import net.minestom.server.item.ItemComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +37,7 @@ public class PotionEffectEntry extends View {
         if (effect != null) {
             var newLore = LanguageProviderV2.translateMulti("gui.effect.potion.edit.lore", List.of(
                     Component.text(effect.level()), effect.durationComponent()));
-            editLabel.setItemDirect(effect.type().icon().with(ItemComponent.LORE, newLore));
+            editLabel.setItemDirect(effect.type().icon().with(DataComponents.LORE, newLore));
         }
     }
 

@@ -3,11 +3,11 @@ package net.hollowcube.mapmaker.map.item.vanilla;
 import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.common.util.ExtraTags;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
-import net.hollowcube.mapmaker.util.GenericTempActionBarProvider;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
+import net.hollowcube.mapmaker.util.GenericTempActionBarProvider;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.DebugStickState;
 import net.minestom.server.tag.Tag;
@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 public class DebugStickItem extends ItemHandler {
     public static final DebugStickItem INSTANCE = new DebugStickItem();
 
-    private static final Tag<DebugStickState> TAG_PROPERTY = ExtraTags.DataComponent("state", ItemComponent.DEBUG_STICK_STATE)
+    private static final Tag<DebugStickState> TAG_PROPERTY = ExtraTags.DataComponent("state", DataComponents.DEBUG_STICK_STATE)
             .defaultValue(DebugStickState.EMPTY);
 
     private DebugStickItem() {

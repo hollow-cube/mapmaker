@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.hub.entity;
 
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +51,7 @@ public class NpcItemModel extends BaseNpcEntity {
         var meta = getEntityMeta();
         meta.setDisplayContext(ItemDisplayMeta.DisplayContext.FIXED);
         var model = Objects.requireNonNull(sprite.model(), "sprite must have a model");
-        meta.setItemStack(ItemStack.builder(material).set(ItemComponent.ITEM_MODEL, model).build());
+        meta.setItemStack(ItemStack.builder(material).set(DataComponents.ITEM_MODEL, model).build());
     }
 
     @Override

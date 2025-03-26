@@ -9,11 +9,11 @@ import net.hollowcube.mapmaker.hub.entity.BaseNpcEntity;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.map.MapServer;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
@@ -43,7 +43,7 @@ public class StoreAdFeatureProvider implements HubFeature {
         viewStoreEntity.setInstance(world.instance(), STORE_AD_POS);
 
         goldBlockEntity.getEntityMeta().setItemStack(ItemStack.of(Material.GOLD_BLOCK)
-                .with(ItemComponent.ENCHANTMENT_GLINT_OVERRIDE, true));
+                .with(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
         goldBlockEntity.getEntityMeta().setScale(new Vec(1));
         goldBlockEntity.setInstance(world.instance(), GOLD_BLOCK_ENTITY_POS);
         server.scheduler().submitTask(this::mapEntityUpdate, ExecutionType.TICK_START);

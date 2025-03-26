@@ -46,7 +46,7 @@ public class LegacyCodecs {
                         // Convert the item version to the latest version
                         compound = MCDataConverter.convertTag(MCTypeRegistry.ITEM_STACK, compound, dataVersion, MapWorld.DATA_VERSION);
                     }
-                    entries.put(key, ItemStack.NBT_TYPE.read(compound));
+                    entries.put(key, ItemStack.fromItemNBT(compound));
                 }
                 return entries;
             },

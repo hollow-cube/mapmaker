@@ -5,6 +5,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.MojangUtil;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
@@ -33,7 +34,7 @@ public class PHeadCommand extends CommandDsl {
         FutureUtil.submitVirtual(() -> {
             var skin = MojangUtil.getSkinFromUsername(name); // Blocking call
             var builder = ItemStack.builder(Material.PLAYER_HEAD);
-            if (skin != null) builder.set(ItemComponent.PROFILE, new HeadProfile(skin));
+            if (skin != null) builder.set(DataComponents.PROFILE, new HeadProfile(skin));
             player.getInventory().addItemStack(builder.build());
         });
     }

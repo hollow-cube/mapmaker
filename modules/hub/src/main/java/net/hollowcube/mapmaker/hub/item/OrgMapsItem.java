@@ -5,7 +5,7 @@ import net.hollowcube.mapmaker.hub.gui.org.OrgMapsView;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
-import net.minestom.server.item.ItemComponent;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,7 +42,7 @@ public class OrgMapsItem extends ItemHandler {
     @Override
     public @NotNull ItemStack buildItemStack(@Nullable CompoundBinaryTag nbt) {
         return super.buildItemStack(nbt)
-                .with(ItemComponent.ENCHANTMENT_GLINT_OVERRIDE, true);
+                .with(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
     }
 
     private static final Map<String, String> USER_ORGS = Map.ofEntries(

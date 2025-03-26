@@ -3,10 +3,11 @@ package net.hollowcube.mapmaker.map.feature.play.effect;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.item.ItemComponent;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.EnchantmentList;
@@ -36,7 +37,7 @@ public sealed interface HotbarItem {
         public static final MapCodec<Remove> CODEC = MapCodec.unit(INSTANCE);
 
         private static final ItemStack ITEM_STACK = ItemStack.builder(Material.DIAMOND)
-                .set(ItemComponent.ITEM_MODEL, BadSprite.require("effect/item/air").model())
+                .set(DataComponents.ITEM_MODEL, BadSprite.require("effect/item/air").model())
                 .customName(Component.translatable("gui.effect.item.remove.name"))
                 .lore(Component.translatable("gui.effect.item.remove.lore"))
                 .build();
@@ -110,7 +111,7 @@ public sealed interface HotbarItem {
         ).apply(i, Trident::new));
 
         private static final ItemStack DEFAULT_ITEM = ItemStack.of(Material.TRIDENT)
-                .without(ItemComponent.ATTRIBUTE_MODIFIERS);
+                .without(DataComponents.ATTRIBUTE_MODIFIERS);
 
         public HotbarItem withRiptideLevel(int level) {
             return new Trident(level);
@@ -123,7 +124,7 @@ public sealed interface HotbarItem {
 
         @Override
         public @NotNull ItemStack toItemStack(boolean blank) {
-            return blank ? DEFAULT_ITEM : DEFAULT_ITEM.with(ItemComponent.ENCHANTMENTS,
+            return blank ? DEFAULT_ITEM : DEFAULT_ITEM.with(DataComponents.ENCHANTMENTS,
                     EnchantmentList.EMPTY.with(Enchantment.RIPTIDE, riptideLevel));
         }
 

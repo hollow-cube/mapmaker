@@ -14,8 +14,8 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.store.CostEntry;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
-import net.minestom.server.item.ItemComponent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -37,10 +37,10 @@ public class TradeEntry extends View {
         this.trade = trade;
 
         var icon = trade.result().iconItem();
-        var lore = new ArrayList<>(icon.get(ItemComponent.LORE, List.of()));
+        var lore = new ArrayList<>(icon.get(DataComponents.LORE, List.of()));
         lore.add(Component.empty());
         trade.appendLore(PlayerDataV2.fromPlayer(player), PlayerBackpack.fromPlayer(player), lore);
-        label.setItemDirect(icon.with(ItemComponent.LORE, lore));
+        label.setItemDirect(icon.with(DataComponents.LORE, lore));
     }
 
     @Action(value = "btn", async = true)
@@ -71,7 +71,7 @@ public class TradeEntry extends View {
         playerService.buyCosmetic(playerData.id(), trade.result(), coins, cubits, itemsObject);
 
         var icon = trade.result().iconItem();
-        player.sendMessage(Component.translatable("merchant.trade.success", icon.get(ItemComponent.CUSTOM_NAME, Component.empty()).hoverEvent(icon.asHoverEvent())));
+        player.sendMessage(Component.translatable("merchant.trade.success", icon.get(DataComponents.CUSTOM_NAME, Component.empty()).hoverEvent(icon.asHoverEvent())));
         player.closeInventory();
     }
 
