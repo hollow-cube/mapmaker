@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.gui.common.anvil;
+package net.hollowcube.mapmaker.gui.common.search;
 
 import net.hollowcube.canvas.Element;
 import net.hollowcube.canvas.Label;

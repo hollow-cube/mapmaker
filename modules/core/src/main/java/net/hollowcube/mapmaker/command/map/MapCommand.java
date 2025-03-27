@@ -6,6 +6,7 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.dsl.SimpleCommand;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.map.legacy.MapLegacyCommand;
+import net.hollowcube.mapmaker.gui.play.collection.list.MapCollectionListView;
 import net.hollowcube.mapmaker.gui.play.history.MapHistoryView;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
 import net.hollowcube.mapmaker.map.MapService;
@@ -46,6 +47,12 @@ public class MapCommand extends CommandDsl {
         addSubcommand(SimpleCommand.of("history")
                 .callback(player -> guiController.show(player, MapHistoryView::new))
                 .description("View the history of a map")
+                .build()
+        );
+
+        addSubcommand(SimpleCommand.of("collection")
+                .callback(player -> guiController.show(player, MapCollectionListView::new))
+                .description("View a collection of maps")
                 .build()
         );
 

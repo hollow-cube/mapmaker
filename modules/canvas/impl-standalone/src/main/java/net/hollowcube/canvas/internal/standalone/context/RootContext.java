@@ -46,4 +46,9 @@ public record RootContext(
     public void popView() {
         throw new UnsupportedOperationException("Cannot pop view on root context");
     }
+
+    @Override
+    public void markDirty() {
+        throw new UnsupportedOperationException("Cannot mark dirty on root context");
+    }
 }

@@ -4,7 +4,7 @@ import com.miguelfonseca.completely.AutocompleteEngine;
 import com.miguelfonseca.completely.data.Indexable;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.gui.common.anvil.AbstractSearchView;
+import net.hollowcube.mapmaker.gui.common.search.AbstractSearchView;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.gui.displayentity.object.DisplayEntityEntry;
 import net.hollowcube.mapmaker.util.Autocompletors;

@@ -7,5 +7,6 @@ public interface ElementContext extends Context {
     /**
      * Signals that this context has been modified and should be updated.
      */
+    @Override
     void markDirty();
 }

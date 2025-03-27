@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.gui.play;
+package net.hollowcube.mapmaker.gui.play.collection.edit;
 
 import net.hollowcube.canvas.ClickType;
 import net.hollowcube.canvas.Label;
@@ -7,8 +7,8 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.gui.play.ProgressMapEntry;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.PersonalizedMapData;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -24,7 +24,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Map;
 
-public class MapEntry extends View implements ProgressMapEntry {
+public class EditMapEntry extends View implements ProgressMapEntry {
+
+    public static final String SIGNAL_SELECT = "collection.edit.selected";
+    public static final String SIGNAL_REMOVE = "collection.edit.remove";
 
     private @ContextObject PlayerService playerService;
     private @ContextObject ServerBridge bridge;
@@ -32,11 +35,12 @@ public class MapEntry extends View implements ProgressMapEntry {
     private @Outlet("btn") Label label;
 
     private final MapData map;
+
     private PersonalizedMapData.Progress progress = null; // null is unknown
     private int playtime = 0;
     private DisplayName authorName = null;
 
-    public MapEntry(@NotNull Context context, @NotNull MapData map) {
+    public EditMapEntry(@NotNull Context context, @NotNull MapData map) {
         super(context);
         this.map = map;
 
@@ -57,17 +61,13 @@ public class MapEntry extends View implements ProgressMapEntry {
     }
 
     @Action("btn")
-    private void handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
+    protected void handleClick(@NotNull Player player, int slot, @NotNull ClickType clickType) {
         switch (clickType) {
-            case SHIFT_LEFT_CLICK ->
-                    bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.PLAYING, "play_maps_gui");
-            case LEFT_CLICK -> pushView(c -> new MapDetailsView(c, map, authorName));
+            case SHIFT_LEFT_CLICK -> performSignal(SIGNAL_REMOVE, this.map);
+            case LEFT_CLICK -> performSignal(SIGNAL_SELECT, this.map);
         }
     }
 
-    /**
-     * Builds and updates the arg list of the map icon.
-     */
     private @Blocking void updateIcon() {
         var icon = map.settings().getIcon();
         if (icon == null) {
@@ -76,7 +76,6 @@ public class MapEntry extends View implements ProgressMapEntry {
             label.setItemSprite(ItemUtils.asDisplay(icon));
         }
 
-        // todo we could update the icon + title immediately and only update the lore once we have the player name perhaps
         if (authorName == null) {
             try {
                 authorName = playerService.getPlayerDisplayName2(map.owner());
@@ -88,7 +87,7 @@ public class MapEntry extends View implements ProgressMapEntry {
 
         var entry = MapData.createHoverComponents(map, authorName.build(),
                 progress == null ? null : Map.entry(progress, playtime));
-        entry.getValue().addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display.footer", List.of()));
+        entry.getValue().addAll(List.of());
         label.setComponentsDirect(entry.getKey(), entry.getValue());
 
         label.setState(State.ACTIVE);
