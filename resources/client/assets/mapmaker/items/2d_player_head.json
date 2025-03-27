@@ -1,0 +1,10 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "mapmaker:item/2d_player_head",
+    "model": {
+      "type": "minecraft:head",
+      "kind": "player"
+    }
+  }
+}

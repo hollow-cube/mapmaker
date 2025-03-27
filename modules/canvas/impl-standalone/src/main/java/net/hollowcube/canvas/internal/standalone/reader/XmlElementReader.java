@@ -275,21 +275,16 @@ public class XmlElementReader {
                 }
 
             } else {
-                // Attempt to parse the sprite as an item/cmd in the form `minecraft:stick@1000`
-                var split = spriteName.split("@");
-                var material = Material.fromKey(split[0]);
+                if (spriteName.contains("@")) {
+                    throw new IllegalArgumentException("Found legacy @ for custom model data, this is no longer supported.");
+                }
+                var material = Material.fromKey(spriteName);
                 if (material == null) {
                     logger.log(System.Logger.Level.WARNING, "Missing sprite: " + spriteName);
                     throw new IllegalArgumentException("Unknown sprite: " + spriteName);
                 }
-                var builder = ItemStack.builder(material);
-                if (split.length > 1) {
-//                    builder.set(ItemComponent.CUSTOM_MODEL_DATA, Integer.parseInt(split[1]));
-                    // TODO(1.21.4)
-//                    throw new UnsupportedOperationException("TODO: remove support for custom model data in xml");
-                }
                 if (elem instanceof ItemSpriteHolder trait) {
-                    trait.setItemSprite(builder.build(), spritePos);
+                    trait.setItemSprite(ItemStack.of(material), spritePos);
                 } else {
                     throw new IllegalArgumentException("Element does not support item sprites: " + elem.getClass().getSimpleName());
                 }

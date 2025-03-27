@@ -21,7 +21,7 @@ public class PackContext {
 
     private Path resources;
     private Path out;
-    private boolean minify = false; //TODO(1.21.4) Reenable
+    private boolean minify = true;
     private int resourceId = 0;
 
     private Path rpMinecraftBase;

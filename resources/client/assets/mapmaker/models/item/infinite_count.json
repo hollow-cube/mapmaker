@@ -1,0 +1,11 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "mapmaker:item/infinite_count"
+  },
+  "display": {
+    "gui": {
+      "translation": [1, -1, 0]
+    }
+  }
+}

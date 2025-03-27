@@ -27,7 +27,6 @@ public abstract class BaseElement implements Element, Loadable {
     public static final ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
     public static final ItemStack LOADING_BROKEN_ITEM = ItemStack.of(Material.STICK)
-            // TODO(1.21.4) these should be processed by packer.
             .with(DataComponents.ITEM_MODEL, "mapmaker:canvas_broken")
             .withoutExtraTooltip();
     public static final ItemStack LOADING_SPINNER_ITEM = ItemStack.of(Material.STICK)

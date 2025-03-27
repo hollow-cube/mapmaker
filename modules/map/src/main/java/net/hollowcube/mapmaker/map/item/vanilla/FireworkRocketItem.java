@@ -24,7 +24,7 @@ import java.util.List;
 public class FireworkRocketItem extends ItemHandler {
     private static final Tag<Entity> FIREWORK_TAG = Tag.Transient("mapmaker:elytra_firework");
     private static final Tag<Integer> DURATION_TAG = Tag.Integer("firework_duration").defaultValue(0);
-    private static final int INFINITE_CUSTOM_MODEL_DATA = 1;
+    private static final String INFINITE_MODEL = "mapmaker:infinite_firework";
 
     public static final FireworkRocketItem INSTANCE = new FireworkRocketItem();
     public static final ItemStack DEFAULT = setDurationMillis(
@@ -50,9 +50,7 @@ public class FireworkRocketItem extends ItemHandler {
     }
 
     public static boolean isInfinite(@NotNull ItemStack itemStack) {
-        // TODO(1.21.4)
-        return false;
-//        return itemStack.get(ItemComponent.CUSTOM_MODEL_DATA, 0) == 1;
+        return INFINITE_MODEL.equals(itemStack.get(DataComponents.ITEM_MODEL));
     }
 
     public static int getCount(@NotNull ItemStack itemStack) {
@@ -61,12 +59,9 @@ public class FireworkRocketItem extends ItemHandler {
 
     public static @NotNull ItemStack withCount(@NotNull ItemStack itemStack, int count) {
         if (count <= 0) {
-            // TODO(1.21.4)
-            return itemStack.withAmount(1);
-//                    .with(ItemComponent.CUSTOM_MODEL_DATA, INFINITE_CUSTOM_MODEL_DATA);
+            return itemStack.withAmount(1).with(DataComponents.ITEM_MODEL, INFINITE_MODEL);
         } else {
-            return itemStack.withAmount(count)
-                    .without(DataComponents.CUSTOM_MODEL_DATA);
+            return itemStack.withAmount(count).without(DataComponents.ITEM_MODEL);
         }
     }
 

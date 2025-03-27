@@ -50,11 +50,6 @@ public class Packer {
         ItemModelTransform itemModelTransform = new ItemModelTransform();
         itemModelTransform.process(ctx);
 
-        //TODO(1.21.4) What did this do and why is it disabled
-//        ModelTransform modelTransform = new ModelTransform();
-//        modelTransform.init(ctx, fontTransform);
-//        modelTransform.process(ctx);
-
         CosmeticV2Transform cosmeticV2Transform = new CosmeticV2Transform();
         cosmeticV2Transform.init(ctx);
         cosmeticV2Transform.process(ctx);
@@ -64,7 +59,7 @@ public class Packer {
 
         Hub5x5Transform hub5x5Transform = new Hub5x5Transform();
         hub5x5Transform.init(ctx);
-//        hub5x5Transform.process(ctx);
+        hub5x5Transform.process(ctx);
 
         new LangCloner().process(ctx);
 
