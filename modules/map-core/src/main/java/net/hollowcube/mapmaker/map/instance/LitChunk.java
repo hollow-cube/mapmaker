@@ -11,6 +11,7 @@ import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
 import java.util.Objects;
 
 public class LitChunk extends LightingChunk implements ChunkExt {
@@ -56,7 +57,7 @@ public class LitChunk extends LightingChunk implements ChunkExt {
     }
 
     @Override
-    protected CompoundBinaryTag getHeightmapNBT() {
+    protected Map<net.minestom.server.instance.heightmap.Heightmap.Type, long[]> getHeightmaps() {
         return heightmaps.getProtocolData();
     }
 

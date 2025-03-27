@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.map.instance;
 
 import net.hollowcube.terraform.instance.TerraformBiomeChunk;
-import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -61,7 +60,7 @@ public class UnlitChunk extends DynamicChunk implements ChunkExt {
     }
 
     @Override
-    protected CompoundBinaryTag getHeightmapNBT() {
+    protected Map<net.minestom.server.instance.heightmap.Heightmap.Type, long[]> getHeightmaps() {
         return heightmaps.getProtocolData();
     }
 

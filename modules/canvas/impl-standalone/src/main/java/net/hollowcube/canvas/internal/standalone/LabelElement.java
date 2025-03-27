@@ -8,7 +8,7 @@ import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.compat.noxesium.NoxesiumAPI;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.item.ItemComponent;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.validate.Check;
@@ -20,7 +20,7 @@ import java.util.List;
 
 public class LabelElement extends BaseElement implements Label, SpriteHolder, ItemSpriteHolder {
     private static final ItemStack BLANK_ITEM = NoxesiumAPI.setImmovable(ItemStack.builder(Material.STICK))
-            .set(ItemComponent.ITEM_MODEL, "minecraft:air")
+            .set(DataComponents.ITEM_MODEL, "minecraft:air")
             .build();
 
     private final String translationKey;
@@ -84,14 +84,14 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
 
     protected void updateItem(@NotNull List<Component> args) {
         itemSprite = this.itemSprite.with(builder -> {
-            builder.set(ItemComponent.CUSTOM_NAME, Component.translatable(translationKey + ".name", args));
-            builder.set(ItemComponent.LORE, LanguageProviderV2.translateMulti(translationKey + ".lore", args));
+            builder.set(DataComponents.CUSTOM_NAME, Component.translatable(translationKey + ".name", args));
+            builder.set(DataComponents.LORE, LanguageProviderV2.translateMulti(translationKey + ".lore", args));
 
             NoxesiumAPI.setImmovable(builder);
         });
         itemBlank = BLANK_ITEM.with(builder -> {
-            builder.set(ItemComponent.CUSTOM_NAME, Component.translatable(translationKey + ".name", args));
-            builder.set(ItemComponent.LORE, LanguageProviderV2.translateMulti(translationKey + ".lore", args));
+            builder.set(DataComponents.CUSTOM_NAME, Component.translatable(translationKey + ".name", args));
+            builder.set(DataComponents.LORE, LanguageProviderV2.translateMulti(translationKey + ".lore", args));
 
             NoxesiumAPI.setImmovable(builder);
         });
@@ -101,14 +101,14 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
     @Override
     public void setComponentsDirect(@Nullable Component title, @Nullable List<Component> lore) {
         itemSprite = this.itemSprite.with(builder -> {
-            if (title != null) builder.set(ItemComponent.CUSTOM_NAME, title);
-            if (lore != null) builder.set(ItemComponent.LORE, lore);
+            if (title != null) builder.set(DataComponents.CUSTOM_NAME, title);
+            if (lore != null) builder.set(DataComponents.LORE, lore);
 
             NoxesiumAPI.setImmovable(builder);
         });
         itemBlank = BLANK_ITEM.with(builder -> {
-            if (title != null) builder.set(ItemComponent.CUSTOM_NAME, title);
-            if (lore != null) builder.set(ItemComponent.LORE, lore);
+            if (title != null) builder.set(DataComponents.CUSTOM_NAME, title);
+            if (lore != null) builder.set(DataComponents.LORE, lore);
 
             NoxesiumAPI.setImmovable(builder);
         });
@@ -119,8 +119,8 @@ public class LabelElement extends BaseElement implements Label, SpriteHolder, It
     public void setItemDirect(@NotNull ItemStack itemStack) {
         itemSprite = NoxesiumAPI.setImmovable(itemStack);
         itemBlank = BLANK_ITEM.with(builder -> {
-            builder.set(ItemComponent.CUSTOM_NAME, itemStack.get(ItemComponent.CUSTOM_NAME));
-            builder.set(ItemComponent.LORE, itemStack.get(ItemComponent.LORE, List.of()));
+            builder.set(DataComponents.CUSTOM_NAME, itemStack.get(DataComponents.CUSTOM_NAME));
+            builder.set(DataComponents.LORE, itemStack.get(DataComponents.LORE, List.of()));
 
             NoxesiumAPI.setImmovable(builder);
         });

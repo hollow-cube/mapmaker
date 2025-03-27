@@ -42,7 +42,7 @@ maven.install(
         # Minestom
         "net.minestom:minestom-snapshots:jar:dev",
         "dev.hollowcube:polar:1.13.0",
-        "dev.hollowcube:dataconverter:1.21.3-rv1",
+        "dev.hollowcube:dataconverter:jar:dev",
         "dev.hollowcube:mql:1.1.0",
         "dev.hollowcube:posthog-java:jar:0.1.3",
 
@@ -60,11 +60,11 @@ maven.install(
         "com.noxcrew.noxesium:api:2.5.0",
 
         # Adventure
-        "net.kyori:adventure-api:4.16.0",
-        "net.kyori:adventure-key:4.16.0",
-        "net.kyori:adventure-text-minimessage:4.16.0",
-        "net.kyori:adventure-text-serializer-plain:4.16.0",
-        "net.kyori:adventure-nbt:4.16.0",
+        "net.kyori:adventure-api:4.19.0",
+        "net.kyori:adventure-key:4.19.0",
+        "net.kyori:adventure-text-minimessage:4.19.0",
+        "net.kyori:adventure-text-serializer-plain:4.19.0",
+        "net.kyori:adventure-nbt:4.19.0",
 
         # Logging/Monitoring
         "org.slf4j:slf4j-api:2.0.9",

@@ -156,15 +156,23 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             var serverProcess = MinecraftServer.process();
             player.sendPacket(serverProcess.chatType().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.dimensionType().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(biomes().registryDataPacket(excludeVanilla));
+            player.sendPacket(serverProcess.biome().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.damageType().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.trimMaterial().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.trimPattern().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.bannerPattern().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.wolfVariant().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.enchantment().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.paintingVariant().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.jukeboxSong().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(serverProcess.instrument().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(serverProcess.wolfVariant().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(serverProcess.wolfSoundVariant().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(serverProcess.catVariant().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(serverProcess.chickenVariant().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(serverProcess.cowVariant().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(serverProcess.frogVariant().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(serverProcess.pigVariant().registryDataPacket(serverProcess, excludeVanilla));
+//            player.sendPacket(biomes().registryDataPacket(excludeVanilla));
 
             player.sendPacket(MinecraftServer.getTagManager().packet(serverProcess));
             event.setSendRegistryData(false);

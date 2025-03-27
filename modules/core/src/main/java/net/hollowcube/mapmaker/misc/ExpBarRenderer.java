@@ -163,7 +163,7 @@ public class ExpBarRenderer implements ActionBar.Provider {
             }
         }
 
-        builder.popColor();
+        builder.popShadowColor();
     }
 
 }
