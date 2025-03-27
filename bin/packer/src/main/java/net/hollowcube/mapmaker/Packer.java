@@ -56,7 +56,7 @@ public class Packer {
 //        modelTransform.process(ctx);
 
         CosmeticV2Transform cosmeticV2Transform = new CosmeticV2Transform();
-        cosmeticV2Transform.init(ctx, fontTransform);
+        cosmeticV2Transform.init(ctx);
         cosmeticV2Transform.process(ctx);
 
         DynamicDataTransform hubMerchantsTransform = new DynamicDataTransform("hub_merchants");

@@ -44,7 +44,7 @@ public final class Templates {
                     } else if (result instanceof Number n) {
                         yield new JsonPrimitive(n);
                     } else {
-                        throw new IllegalArgumentException("Invalid context value: " + value);
+                        throw new IllegalArgumentException("Invalid context value: " + value + " " + result.getClass());
                     }
                 } else {
                     yield prim;

@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.hub;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.Uuids;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
-import net.hollowcube.mapmaker.backpack.RecipeBookHack;
 import net.hollowcube.mapmaker.hub.entity.marker.HubMarkerLoader;
 import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
 import net.hollowcube.mapmaker.hub.item.*;
@@ -164,8 +163,6 @@ public class HubMapWorld extends AbstractMapWorld {
         player.setFlyingSpeed(player.getTag(DoubleJumpFeature.TAG) ? 0 : 0.05f);
         player.setHeldItemSlot(playerData.getSetting(SELECTED_SLOT).byteValue());
         player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE).addModifier(REACH_MOD);
-
-        player.getInventory().setItemStack(10, RecipeBookHack.BLANK_ITEM_CRAFTABLE);
 
         // Hotbar items
         var inventory = player.getInventory();

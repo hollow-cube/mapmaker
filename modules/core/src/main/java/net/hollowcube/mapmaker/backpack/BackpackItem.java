@@ -7,6 +7,7 @@ import net.kyori.adventure.text.format.ShadowColor;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.component.CustomModelData;
 import net.minestom.server.network.packet.server.play.RecipeBookAddPacket;
 import net.minestom.server.recipe.RecipeBookCategory;
 import net.minestom.server.recipe.display.RecipeDisplay;
@@ -72,9 +73,8 @@ public enum BackpackItem {
         this.category = category;
         this.rarity = rarity;
 
-//        var spriteName = String.format("cosmetic/%s/%s", category.name().toLowerCase(Locale.ROOT), name().toLowerCase(Locale.ROOT));
-//        this.sprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spriteName), spriteName);
-        this.sprite = BadSprite.require("hammer"); // TODO(1.21.4)
+        var spriteName = String.format("cosmetic/%s/%s", category.name().toLowerCase(Locale.ROOT), name().toLowerCase(Locale.ROOT));
+        this.sprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spriteName), spriteName);
     }
 
     public static @Nullable BackpackItem byId(@NotNull String item) {
@@ -134,9 +134,9 @@ public enum BackpackItem {
         lore.add(rarity.asComponent());
         lore.add(Component.empty());
         lore.addAll(LanguageProviderV2.translateMulti(translationKeyBase + ".lore", List.of()));
-        // TODO(1.21.4)
-        return ItemStack.builder(Material.APPLE)
-//                .set(ItemComponent.CUSTOM_MODEL_DATA, sprite.cmd() + amount)
+        return ItemStack.builder(Material.STICK)
+                .set(DataComponents.ITEM_MODEL, sprite.model())
+                .set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of((float) amount), List.of(), List.of(), List.of()))
                 .set(DataComponents.CUSTOM_NAME, displayName())
                 .set(DataComponents.LORE, lore)
                 .build();

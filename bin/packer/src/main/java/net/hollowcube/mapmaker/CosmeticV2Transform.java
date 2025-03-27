@@ -32,11 +32,7 @@ public class CosmeticV2Transform {
 
     private BufferedImage lockOverlay;
 
-    private int nextChar = 0;
-
-    public void init(@NotNull PackContext ctx, @NotNull FontTransform fontTransform) throws IOException {
-        nextChar = fontTransform.getNextChar();
-
+    public void init(@NotNull PackContext ctx) throws IOException {
         try (var lockOverlay = getClass().getResourceAsStream("/lock_overlay_16x.png")) {
             if (lockOverlay == null) throw new IllegalStateException("lock_overlay_16x.png not found");
             this.lockOverlay = ImageIO.read(lockOverlay);
