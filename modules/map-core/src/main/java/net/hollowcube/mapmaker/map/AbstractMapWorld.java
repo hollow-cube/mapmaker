@@ -178,7 +178,6 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             event.setSendRegistryData(false);
 
             // Send feature flag so that vanilla doesnt show disabled items tooltip
-            // event.addFeatureFlag(FeatureFlag.WINTER_DROP); // TODO remove in 1.21.5
 
             // Set the instance and spawn point of the player.
             event.setSpawningInstance(instance());

@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ItemModelTransform {
@@ -45,6 +46,37 @@ public class ItemModelTransform {
                 // Create the composite model
                 ctx.addItemModel(name, Templates.applyObject("2d_3d_composite",
                         Map.of("2d", model2d, "3d", model3d)));
+            }
+        }
+
+        fontBaseDir = ctx.resources().resolve("item_models_v2");
+        try (Stream<Path> fontFileSet = Files.walk(fontBaseDir)) {
+            List<Path> files = fontFileSet.sorted(Comparator.comparing(Path::toString)).toList();
+            for (Path itemModelFile : files) {
+                if (!Files.isDirectory(itemModelFile)) continue;
+                final Path modelPath = itemModelFile.resolve("model.json");
+                if (!Files.exists(modelPath)) continue;
+
+                String name = itemModelFile.getFileName().toString();
+                JsonObject model = new Gson().fromJson(Files.readString(modelPath), JsonObject.class);
+
+                var images = Files.walk(itemModelFile)
+                        .filter(path -> path.getFileName().endsWith(".png"))
+                        .collect(Collectors.toMap(path -> path.getFileName().toString().replace(".png", ""),
+                                path -> {
+                                    try {
+                                        return ctx.writeTexture("item", name + "/" + path.getFileName().toString().replace(".png", ""), Files.readAllBytes(path));
+                                    } catch (IOException e) {
+                                        throw new RuntimeException("Failed to read image: " + path, e);
+                                    }
+                                }));
+                var newTextures = new JsonObject();
+                for (var entry : model.get("textures").getAsJsonObject().entrySet()) {
+                    newTextures.addProperty(entry.getKey(), images.getOrDefault(entry.getValue().getAsString(), entry.getValue().getAsString()));
+                }
+
+                var itemModelName = ctx.writeModel(name, model);
+                ctx.addItemModel(name, ModelUtil.createBasicItem(itemModelName));
             }
         }
     }

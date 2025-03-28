@@ -35,6 +35,11 @@ public class NpcItemModel extends BaseNpcEntity {
     }
 
     @Override
+    public void tick(long time) {
+        // Intentionally do nothing
+    }
+
+    @Override
     protected void movementTick() {
         // Intentionally do nothing
     }
@@ -57,6 +62,10 @@ public class NpcItemModel extends BaseNpcEntity {
     @Override
     public @NotNull ItemDisplayMeta getEntityMeta() {
         return (ItemDisplayMeta) super.getEntityMeta();
+    }
+
+    public void editEntityMeta(Consumer<ItemDisplayMeta> editor) {
+        super.editEntityMeta(ItemDisplayMeta.class, editor);
     }
 
     public void setAddViewerHook(BiConsumer<Consumer<Player>, Player> addViewerHook) {

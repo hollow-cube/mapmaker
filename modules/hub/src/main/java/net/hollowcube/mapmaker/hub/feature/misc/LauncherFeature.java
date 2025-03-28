@@ -7,16 +7,15 @@ import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.map.MapServer;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.block.Block;
-import net.minestom.server.network.packet.server.play.ExplosionPacket;
-import net.minestom.server.particle.Particle;
+import net.minestom.server.item.Material;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -63,8 +62,7 @@ public class LauncherFeature implements HubFeature {
 
         public LauncherEntity() {
             setStatic(true);
-            // TODO(1.21.4)
-//            setModel(Material.STICK, 12);
+            setModel(Material.STICK, BadSprite.require("flipper"));
             getEntityMeta().setScale(new Vec(16));
         }
 
@@ -75,7 +73,7 @@ public class LauncherFeature implements HubFeature {
         }
 
         @Override
-        public void update(long time) {
+        public void tick(long time) {
             if (this.state == State.COOLDOWN) {
                 var sound = remaining % 2 == 0 ? SoundEvent.BLOCK_STONE_BUTTON_CLICK_OFF : SoundEvent.BLOCK_WOODEN_BUTTON_CLICK_OFF;
                 getViewersAsAudience().playSound(Sound.sound(sound, Sound.Source.BLOCK, 0.5f, 0.3f),
@@ -102,8 +100,7 @@ public class LauncherFeature implements HubFeature {
                         } else {
                             motion = new Vec(-16, 3, getPosition().x() < 0 ? 2f : -1f); // Send to edge
                         }
-                        player.setVelocity(Vec.ZERO);
-                        player.sendPacket(makeExplosion(player.getPosition(), motion));
+                        player.teleport(Pos.ZERO, motion, null, RelativeFlags.COORD | RelativeFlags.VIEW);
                         launched++;
                     }
 
@@ -143,10 +140,6 @@ public class LauncherFeature implements HubFeature {
 
         private void setState(@NotNull State state) {
             this.state = state;
-        }
-
-        private static @NotNull ExplosionPacket makeExplosion(@NotNull Point position, @NotNull Vec motion) {
-            return new ExplosionPacket(position, motion, Particle.BLOCK.withBlock(Block.AIR), EMPTY_SOUND);
         }
     }
 }
