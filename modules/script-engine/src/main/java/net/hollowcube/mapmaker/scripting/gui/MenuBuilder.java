@@ -5,14 +5,16 @@ import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.component.DataComponent;
-import net.minestom.server.item.ItemComponent;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.component.TooltipDisplay;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public class MenuBuilder {
     private final int absWidth, absHeight, containerSlotHeight;
@@ -29,8 +31,8 @@ public class MenuBuilder {
         this.containerSlotHeight = containerSlotHeight;
         this.items = new ItemStack[slotWidth * slotHeight];
         Arrays.fill(this.items, ItemStack.builder(Material.STICK)
-                .set(ItemComponent.ITEM_MODEL, "minecraft:air")
-                .set(ItemComponent.HIDE_TOOLTIP)
+                .set(DataComponents.ITEM_MODEL, "minecraft:air")
+                .set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, Set.of()))
                 .build());
     }
 
