@@ -8,8 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 import static net.kyori.adventure.nbt.FloatBinaryTag.floatBinaryTag;
 
@@ -37,21 +35,6 @@ public final class NbtUtilV2 {
 
     public static @NotNull BinaryTag writeItemStack(@NotNull ItemStack itemStack) {
         return itemStack.toItemNBT();
-    }
-
-    // Lists
-
-    public static <T> void readListIndexed(@Nullable BinaryTag tag, T[] indices, @NotNull BiConsumer<T, BinaryTag> applicator) {
-        if (!(tag instanceof ListBinaryTag list)) return;
-        for (int i = 0; i < Math.min(list.size(), indices.length); i++) {
-            applicator.accept(indices[i], list.get(i));
-        }
-    }
-
-    public static <T> @NotNull BinaryTag writeListIndexed(T[] indices, @NotNull Function<T, BinaryTag> builder) {
-        var list = ListBinaryTag.builder();
-        for (T index : indices) list.add(builder.apply(index));
-        return list.build();
     }
 
     private NbtUtilV2() {

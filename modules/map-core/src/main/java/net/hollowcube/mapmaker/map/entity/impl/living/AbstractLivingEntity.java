@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.entity.impl.living;
 
 import net.hollowcube.mapmaker.map.entity.MapEntity;
+import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.EquipmentSlot;
@@ -14,7 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.UUID;
 
-import static net.hollowcube.mapmaker.map.util.NbtUtilV2.*;
+import static net.hollowcube.mapmaker.map.util.NbtUtilV2.readItemStack;
+import static net.hollowcube.mapmaker.map.util.NbtUtilV2.writeItemStack;
 
 /**
  * Represents a LivingEntity in the game. This class basically reimplements the
@@ -23,14 +25,6 @@ import static net.hollowcube.mapmaker.map.util.NbtUtilV2.*;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class AbstractLivingEntity extends MapEntity implements EquipmentHandler {
-    private static final EquipmentSlot[] ARMOR_SLOTS = new EquipmentSlot[]{
-            EquipmentSlot.BOOTS, EquipmentSlot.LEGGINGS,
-            EquipmentSlot.CHESTPLATE, EquipmentSlot.HELMET
-    };
-    private static final EquipmentSlot[] HAND_SLOTS = new EquipmentSlot[]{
-            EquipmentSlot.MAIN_HAND, EquipmentSlot.OFF_HAND
-    };
-
     // Indices are the ordinal of the EquipmentSlot enum.
     private final ItemStack[] equipment = new ItemStack[EquipmentSlot.values().length];
 
@@ -55,9 +49,14 @@ public class AbstractLivingEntity extends MapEntity implements EquipmentHandler 
     public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
         super.writeData(tag);
 
-        final LivingEntityMeta meta = getEntityMeta();
-        tag.put("ArmorItems", writeListIndexed(ARMOR_SLOTS, slot -> writeItemStack(getEquipment(slot))));
-        tag.put("HandItems", writeListIndexed(HAND_SLOTS, slot -> writeItemStack(getEquipment(slot))));
+        final CompoundBinaryTag.Builder equipment = CompoundBinaryTag.builder();
+        for (final EquipmentSlot slot : EquipmentSlot.values()) {
+            final ItemStack itemStack = getEquipment(slot);
+            if (itemStack.isAir()) continue;
+            equipment.put(slot.nbtName(), writeItemStack(itemStack));
+        }
+        final CompoundBinaryTag equipmentTag = equipment.build();
+        if (!equipmentTag.isEmpty()) tag.put("equipment", equipmentTag);
 
     }
 
@@ -65,11 +64,12 @@ public class AbstractLivingEntity extends MapEntity implements EquipmentHandler 
     public void readData(@NotNull CompoundBinaryTag tag) {
         super.readData(tag);
 
-        final LivingEntityMeta meta = getEntityMeta();
-        readListIndexed(tag.get("ArmorItems"), ARMOR_SLOTS, (slot, itemTag) ->
-                setEquipment(slot, readItemStack(itemTag)));
-        readListIndexed(tag.get("HandItems"), HAND_SLOTS, (slot, itemTag) ->
-                setEquipment(slot, readItemStack(itemTag)));
+        final CompoundBinaryTag equipmentTag = tag.getCompound("equipment");
+        for (final EquipmentSlot slot : EquipmentSlot.values()) {
+            final BinaryTag itemTag = equipmentTag.get(slot.nbtName());
+            if (itemTag == null) continue;
+            setEquipment(slot, readItemStack(itemTag));
+        }
 
     }
 
