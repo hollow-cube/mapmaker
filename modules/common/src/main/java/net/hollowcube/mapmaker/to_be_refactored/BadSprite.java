@@ -31,6 +31,15 @@ public record BadSprite(char fontChar, @Nullable String model, int width, int of
         return MODEL_ID_MAP.get(model);
     }
 
+    public @Nullable String modelOrNull() {
+        return this.model;
+    }
+
+    @Override
+    public @NotNull String model() {
+        return Objects.requireNonNull(model);
+    }
+
     static {
         var sprites = new HashMap<String, BadSprite>();
         var modelIdMap = new HashMap<String, String>();

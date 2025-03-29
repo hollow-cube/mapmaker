@@ -11,12 +11,14 @@ import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Metadata;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.timer.ExecutionType;
@@ -58,10 +60,8 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
         appendInteractor(edgeEntities[3], 3, 5, this::handleBestMapsClick, false);
 
         edgeEntities[4] = new NpcItemModel();
-        // TODO(1.21.4)
-//        edgeEntities[4].getEntityMeta().setItemStack(ItemStack.of(Material.LEATHER_HORSE_ARMOR)
-//                .with(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("hub/5x5/blossom_itmg"))
-//                .with(ItemComponent.DYED_COLOR, new DyedItemColor(new Color(0xFF0000))));
+        edgeEntities[4].getEntityMeta().setItemStack(ItemStack.of(Material.STICK)
+                .with(DataComponents.ITEM_MODEL, BadSprite.require("hub/5x5/blossom_itmg").model()));
         edgeEntities[4].getEntityMeta().setScale(new Vec(5)); // 5x because its 5x5x5
         edgeEntities[4].getEntityMeta().setTranslation(new Vec(0, 1 + BASE_OFFSET, 0));
         edgeEntities[4].setInstance(world.instance(), MIDDLE.withView(90, 0));

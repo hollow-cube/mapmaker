@@ -5,6 +5,7 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.map.LeaderboardData;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.LeaderboardDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -12,6 +13,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,8 +48,7 @@ public class Leaderboard2 {
             @NotNull Function<String, Component> displayNameSupplier,
             double screenAngle
     ) {
-        // TODO(1.21.4)
-//        screenModel.setModel(Material.STICK, 4);
+        screenModel.setModel(Material.STICK, BadSprite.require("lb_screen"));
         screenModel.getEntityMeta().setScale(new Vec(MODEL_SCALE));
         screenModel.getEntityMeta().setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),
                 Math.toRadians(screenAngle)).into());

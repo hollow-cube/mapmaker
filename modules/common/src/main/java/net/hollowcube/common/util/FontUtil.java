@@ -288,7 +288,7 @@ public final class FontUtil {
         ));
         allWidths.put('\uF824', allWidths.get(' '));
         for (var sprite : BadSprite.SPRITE_MAP.values()) {
-            if (sprite.fontChar() == 0 || sprite.model() != null) continue;
+            if (sprite.fontChar() == 0 || sprite.modelOrNull() != null) continue;
             allWidths.put(sprite.fontChar(), sprite.width() + 1);
         }
         for (int i = 0; i < POSITIVE_SPACE.size(); i++)

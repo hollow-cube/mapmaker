@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import net.hollowcube.mapmaker.util.ModelUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -38,7 +39,8 @@ public class Hub5x5Transform {
                     var modelContent = new Gson().fromJson(Files.readString(modelJson), JsonObject.class);
                     modelContent.add("display", createTransform(name, size));
 
-                    ctx.addItemModel("hub/" + typeName + "/" + name, modelContent);
+                    var itemModelName = ctx.writeModel("hub/" + typeName + "/" + name, modelContent);
+                    ctx.addItemModel("hub/" + typeName + "/" + name, ModelUtil.createBasicItem(itemModelName));
                 }
             }
         }

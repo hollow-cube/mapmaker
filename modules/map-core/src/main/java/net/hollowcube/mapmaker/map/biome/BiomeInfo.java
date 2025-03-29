@@ -32,9 +32,16 @@ public class BiomeInfo {
             ExtraCodecs.COLOR.lenientOptionalFieldOf("foliageColor").forGetter(ExtraCodecs.optional(BiomeInfo::getFoliageColor))
     ).apply(i, BiomeInfo::new));
 
+    public enum Precipitation {
+        NONE,
+        RAIN,
+        SNOW
+    }
+
     private String name = "";
     private Material displayItem = Material.GRASS_BLOCK;
 
+    private Precipitation precipitation = Precipitation.NONE;
     private Object particle = null; //todo
 
     private Color skyColor = DEFAULT_SKY_COLOR;
@@ -151,15 +158,14 @@ public class BiomeInfo {
         if (this.getGrassColor() != null) effects.grassColor(this.getGrassColor());
         if (this.getFoliageColor() != null) effects.foliageColor(this.getFoliageColor());
 
-        //TODO(1.21.5)
-//        float temperature = switch (this.precipitation) {
-//            case NONE -> 0.5f;
-//            case RAIN -> 0.8f;
-//            case SNOW -> 0.0f;
-//        };
+        float temperature = switch (this.precipitation) {
+            case NONE -> 0.5f;
+            case RAIN -> 0.8f;
+            case SNOW -> 0.0f;
+        };
 
         return Biome.builder()
-//                .temperature(temperature)
+                .temperature(temperature)
                 .downfall(1.0F)
                 .effects(effects.build())
                 .build();
