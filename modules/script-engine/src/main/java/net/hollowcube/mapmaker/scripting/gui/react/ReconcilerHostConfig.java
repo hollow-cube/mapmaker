@@ -234,7 +234,7 @@ public class ReconcilerHostConfig {
     }
 
     @HostAccess.Export
-    public void removeChild(@NotNull Node parent, @NotNull Node child, @NotNull Value unknown1, @NotNull Value unknown2, @NotNull Value unknown3) {
+    public void removeChild(@NotNull Node parent, @NotNull Node child, @NotNull Value... unknowns) {
         try {
             if (!(parent instanceof GroupNode group)) {
                 throw new IllegalArgumentException(parent.type() + " may not have children");
@@ -246,12 +246,12 @@ public class ReconcilerHostConfig {
     }
 
     @HostAccess.Export
-    public void removeChildFromContainer(@NotNull InventoryHost container, @NotNull Node child, @NotNull Value unknown1, @NotNull Value unknown2, @NotNull Value unknown3) {
+    public void removeChildFromContainer(@NotNull InventoryHost container, @NotNull Node child, @NotNull Value... unknowns) {
         container.removeChild(child);
     }
 
     @HostAccess.Export
-    public void commitTextUpdate(@NotNull TextNode.Raw textInstance, @NotNull String oldText, @NotNull String newText, @NotNull Value unknown1, @NotNull Value unknown2) {
+    public void commitTextUpdate(@NotNull TextNode.Raw textInstance, @NotNull String oldText, @NotNull String newText, @NotNull Value... unknowns) {
         try {
             textInstance.setContent(newText);
         } catch (Exception e) {
