@@ -45,9 +45,35 @@ java_library(
 
 java_binary(
     name = "development",
-    data = ["//:.env"],
+    data = [
+        "//:.env",
+        "@maven//:org_graalvm_compiler_compiler",
+        "@maven//:org_graalvm_sdk_collections",
+        "@maven//:org_graalvm_sdk_word",
+        "@maven//:org_graalvm_truffle_truffle_compiler",
+        "@maven//:org_graalvm_truffle_truffle_api",
+        "@maven//:org_graalvm_sdk_nativeimage",
+        "@maven//:org_graalvm_polyglot_polyglot",
+    ],
     main_class = "net.hollowcube.mapmaker.dev.DevServer",
-    runtime_deps = [":development_lib"],
+    runtime_deps = [
+        ":development_lib",
+        "@maven//:org_graalvm_compiler_compiler",
+        "@maven//:org_graalvm_sdk_collections",
+        "@maven//:org_graalvm_sdk_word",
+        "@maven//:org_graalvm_truffle_truffle_compiler",
+        "@maven//:org_graalvm_truffle_truffle_api",
+        "@maven//:org_graalvm_sdk_nativeimage",
+        "@maven//:org_graalvm_polyglot_polyglot",
+    ],
+    jvm_flags = [
+        "-XX:+UnlockExperimentalVMOptions",
+        "-XX:+EnableJVMCI",
+        "--upgrade-module-path=$(location @maven//:org_graalvm_compiler_compiler):$(location @maven//:org_graalvm_sdk_collections):$(location @maven//:org_graalvm_sdk_word):$(location @maven//:org_graalvm_truffle_truffle_compiler):$(location @maven//:org_graalvm_truffle_truffle_api):$(location @maven//:org_graalvm_sdk_nativeimage):$(location @maven//:org_graalvm_polyglot_polyglot)",
+    ],
+    add_opens = [
+        "org.graalvm.truffle/com.oracle.truffle.polyglot",
+    ],
 )
 
 native_image(

@@ -4,10 +4,6 @@ import net.hollowcube.mapmaker.map.runtime.MapServerInitializer;
 
 public class DevServer {
 
-    static {
-        System.setProperty("polyglot.engine.WarnInterpreterOnly", "false");
-    }
-
     public static void main(String[] args) throws Exception {
 //        CyloneImport.tempConvert();
         MapServerInitializer.run(DevServerRunner::new, args);

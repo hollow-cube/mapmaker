@@ -89,13 +89,18 @@ maven.install(
         "io.opentelemetry:opentelemetry-exporter-otlp:1.45.0",
         "io.opentelemetry:opentelemetry-exporter-sender-jdk:1.45.0",
         "io.opentelemetry.semconv:opentelemetry-semconv:1.28.0-alpha",
-        "org.graalvm.sdk:nativeimage:24.1.1",
         "io.github.classgraph:classgraph:4.8.179",
         "com.google.inject:guice:7.0.0",  # For Velocity
 
         # Scripting
-        "org.graalvm.polyglot:polyglot:24.1.1",
-        "org.graalvm.polyglot:js:24.1.1",
+        "org.graalvm.polyglot:polyglot:jar:23.1.6",
+        "org.graalvm.polyglot:js:jar:23.1.6",
+        "org.graalvm.compiler:compiler:jar:23.1.6",
+        "org.graalvm.sdk:collections:jar:23.1.6",
+        "org.graalvm.sdk:word:jar:23.1.6",
+        "org.graalvm.sdk:nativeimage:jar:23.1.6",
+        "org.graalvm.truffle:truffle-api:23.1.6",
+        "org.graalvm.truffle:truffle-compiler:jar:23.1.6",
 
         # Testing
         "org.junit.jupiter:junit-jupiter-api:5.10.0",
