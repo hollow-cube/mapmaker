@@ -31,9 +31,7 @@ gvm.graalvm(
 use_repo(gvm, "graalvm")
 
 register_toolchains("@graalvm//:jvm")
-
 register_toolchains("@graalvm//:sdk")
-register_toolchains("@graalvm//:toolchain")
 
 # Maven Dependencies
 

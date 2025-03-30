@@ -23,7 +23,8 @@ public class Packer {
         System.setProperty("java.awt.headless", "true");
 
         try {
-            var outDir = Path.of(args.length > 0 && args[0].equals("out_here_hack") ? "." : "./build/packer");
+            var outDir = Path.of(args[0]);
+//            var outDir = Path.of(args.length > 0 && args[0].equals("out_here_hack") ? "." : "./build/packer");
             Files.createDirectories(outDir);
             OUT_DIR = outDir.toRealPath();
         } catch (Exception e) {

@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 public class LangCloner {
@@ -35,7 +36,7 @@ public class LangCloner {
 
         for (var locale : LOCALES) {
             var langFile = langDir.resolve(locale + ".json");
-            Files.copy(context.resources().resolve("translation_overrides.json"), langFile);
+            Files.copy(context.resources().resolve("translation_overrides.json"), langFile, StandardCopyOption.REPLACE_EXISTING);
         }
     }
 

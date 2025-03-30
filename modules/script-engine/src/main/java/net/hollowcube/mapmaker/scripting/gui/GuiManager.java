@@ -35,7 +35,7 @@ public class GuiManager {
 
         // React refresh _must_ be initialized before loading React or any of its components.
         if (engine.env().isDevelopment()) {
-            ReactRefresh.setup(engine);
+//            ReactRefresh.setup(engine);
         }
 
         this.react = engine.load(URI.create("internal:///react/react.js"));
@@ -43,7 +43,7 @@ public class GuiManager {
                 .exports().execute(new ReconcilerHostConfig(engine));
         if (engine.env().isDevelopment()) {
             // Reconciler dev tools must be loaded for react-refresh to work properly
-            this.reactReconcilerInst.invokeMember("injectIntoDevTools");
+//            this.reactReconcilerInst.invokeMember("injectIntoDevTools");
         }
 
         this.hostContext = this.react.exports().invokeMember("createContext");

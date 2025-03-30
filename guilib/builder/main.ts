@@ -38,7 +38,7 @@ function compile(changedFiles?: string[]) {
         undefined,
         undefined,
         undefined,
-        {before: [refresh()]}
+        {before: []} // refresh()
     );
 
     const allDiagnostics = ts.getPreEmitDiagnostics(program.getProgram()).concat(emitResult.diagnostics);
