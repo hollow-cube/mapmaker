@@ -2,17 +2,19 @@
 <?import net.hollowcube.mapmaker.gui.common ?>
 <?import net.hollowcube.mapmaker.gui.play ?>
 <?import net.hollowcube.mapmaker.gui.play.collection.list ?>
-<component width="9" height="10" align="ttb" sprite="play_maps/collection/list">
-    <text id="title" width="0" height="0" translationKey="" font="map_details_title2" shift="82" value="Map Collections" centered="true"/>
+<component width="9" height="10" align="ttb" sprite="play_maps/collection/add_list">
+    <text id="title" width="0" height="0" translationKey="" font="map_details_title2" shift="82" value="Map Collections"  centered="true"/>
 
     <!-- Top bar -->
     <box width="9" align="ltr">
         <BackButton2/>
+        <spacer width="7"/>
+        <button id="add" width="1" translationKey="gui.add_map_collection_list.add"/>
     </box>
 
     <box width="9" height="3" align="ltr">
         <spacer/>
-        <pagination id="paging" width="7" height="3" child="MapCollectionEntry" loader="centered"/>
+        <pagination id="paging" width="7" height="3" child="MapCollectionEntry" loader="centered" cached="false"/>
     </box>
 
     <box width="9" align="ltr">

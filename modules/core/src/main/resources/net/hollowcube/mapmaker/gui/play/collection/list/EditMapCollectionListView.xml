@@ -3,7 +3,7 @@
 <?import net.hollowcube.mapmaker.gui.play ?>
 <?import net.hollowcube.mapmaker.gui.play.collection.list ?>
 <component width="9" height="10" align="ttb" sprite="play_maps/collection/list">
-    <text id="title" width="0" height="0" translationKey="" font="map_details_title2" shift="82" value="Map Collections" centered="true"/>
+    <text id="title" width="0" height="0" translationKey="" font="map_details_title2" shift="82" value="Map Collections"  centered="true"/>
 
     <!-- Top bar -->
     <box width="9" align="ltr">
@@ -12,7 +12,7 @@
 
     <box width="9" height="3" align="ltr">
         <spacer/>
-        <pagination id="paging" width="7" height="3" child="MapCollectionEntry" loader="centered"/>
+        <pagination id="paging" width="7" height="3" child="MapCollectionEntry" loader="centered" cached="false"/>
     </box>
 
     <box width="9" align="ltr">

@@ -7,10 +7,10 @@
     <!-- Top bar -->
     <box width="9" align="ltr">
         <BackButton2/>
-        <label translationKey="gui.map_collection.information"/>
+        <button id="info" translationKey="gui.map_collection.information"/>
         <text id="name" width="5" font="line_0" translationKey="gui.edit_map_collection.name" centered="true"/>
         <button id="icon" translationKey="gui.edit_map_collection.icon"/>
-        <button id="search" translationKey="gui.edit_map_collection.search"/>
+        <button id="delete" translationKey="gui.edit_map_collection.delete"/>
     </box>
 
     <spacer/>

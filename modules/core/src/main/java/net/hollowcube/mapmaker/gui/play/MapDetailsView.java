@@ -12,6 +12,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.lang.TimeComponent;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.gui.play.collection.list.AddMapCollectionListView;
 import net.hollowcube.mapmaker.gui.play.details.DetailsTimesTabView;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -361,6 +362,11 @@ public class MapDetailsView extends View {
             logger.error("failed to join map {} for {}: {}", map.id(), PlayerDataV2.fromPlayer(player).id(), e.getMessage());
             player.sendMessage(Component.translatable("command.generic.unknown_error"));
         }
+    }
+
+    @Action("add_to_collection")
+    public void handleAddToCollection(@NotNull Player player) {
+        pushTransientView(context -> new AddMapCollectionListView(context, map.id()));
     }
 
     @Action(value = "leave_map", async = true)

@@ -7,6 +7,7 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.play.ProgressMapEntry;
 import net.hollowcube.mapmaker.map.MapData;
@@ -87,7 +88,7 @@ public class EditMapEntry extends View implements ProgressMapEntry {
 
         var entry = MapData.createHoverComponents(map, authorName.build(),
                 progress == null ? null : Map.entry(progress, playtime));
-        entry.getValue().addAll(List.of());
+        entry.getValue().addAll(LanguageProviderV2.translateMulti("gui.edit_map_collection.map_display.footer", List.of()));
         label.setComponentsDirect(entry.getKey(), entry.getValue());
 
         label.setState(State.ACTIVE);

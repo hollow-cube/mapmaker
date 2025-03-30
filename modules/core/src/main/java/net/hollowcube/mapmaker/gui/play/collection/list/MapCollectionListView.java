@@ -16,9 +16,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class MapCollectionListView extends View {
 
@@ -33,8 +35,9 @@ public class MapCollectionListView extends View {
     protected @Outlet("page_number") Text pageNumber;
 
     private final String target;
+    private DisplayName targetName;
 
-    private List<MapCollection> collections;
+    protected List<MapCollectionEntry> collections;
 
     public MapCollectionListView(@NotNull Context context) {
         this(context, context.player().getUuid().toString());
@@ -46,29 +49,39 @@ public class MapCollectionListView extends View {
         this.target = target;
     }
 
+    protected @Nullable MapCollectionEntry createEntry(@NotNull Context context, @NotNull MapCollection collection, @NotNull Component playername) {
+        return new MapCollectionEntry(context, collection, playername);
+    }
+
     @Action(value = "paging", async = true)
     private void fetchPage(@NotNull Pagination.PageRequest<MapCollectionEntry> request) {
         try {
             if (this.collections == null) {
-                this.collections = mapService.getMapCollections(this.target);
+                this.targetName = playerService.getPlayerDisplayName2(this.target);
+                this.collections = mapService.getMapCollections(this.target)
+                        .stream()
+                        .map(collection -> createEntry(request.context(), collection, this.targetName.asComponent()))
+                        .filter(Objects::nonNull)
+                        .toList();
+
                 if (this.target.equals(request.context().player().getUuid().toString())) {
                     this.title.setText("Your Collections");
                 } else {
-                    var targetName = playerService.getPlayerDisplayName2(this.target).build(DisplayName.Context.PLAIN);
                     var component = Component.text()
-                            .append(targetName)
-                            .append(Component.text(" Collections"))
+                            .append(targetName.build(DisplayName.Context.PLAIN))
+                            .append(Component.text("'s Collections"))
                             .build();
                     this.title.setText(component);
                 }
             }
 
             var entries = new ArrayList<MapCollectionEntry>();
-            for (var id : collections) {
-                entries.add(new MapCollectionEntry(request.context(), id));
+
+            for (int i = request.page() * request.pageSize(); i < Math.min((request.page() + 1) * request.pageSize(), this.collections.size()); i++) {
+                entries.add(this.collections.get(i));
             }
 
-            request.respond(entries, request.page() * request.pageSize() < this.collections.size());
+            request.respond(entries, (request.page() + 1) * request.pageSize() < this.collections.size());
 
             updatePageNumber(request.page());
         } catch (Exception e) {

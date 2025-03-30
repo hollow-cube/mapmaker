@@ -7,7 +7,7 @@
     <!-- Top bar -->
     <box width="9" align="ltr">
         <BackButton2/>
-        <label translationKey="gui.map_collection.information"/>
+        <button id="info" translationKey="gui.map_collection.information"/>
         <text id="name" width="5" font="line_0" translationKey="gui.map_collection.name" centered="true"/>
     </box>
 
@@ -21,7 +21,7 @@
     <box width="9" align="ltr">
         <spacer width="2"/>
         <button id="back" width="1" translationKey="gui.generic.previous_page"/>
-        <text id="page_number" width="3" height="1" translationKey="forced.input" font="map_history_page" centered="true"/>
+        <text id="page_number" width="3" height="1" translationKey="forced.input" font="line_5" centered="true"/>
         <button id="next" width="1" translationKey="gui.generic.next_page"/>
         <spacer width="2"/>
     </box>

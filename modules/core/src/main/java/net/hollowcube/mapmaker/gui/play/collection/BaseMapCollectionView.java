@@ -7,20 +7,25 @@ import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.play.ProgressMapEntry;
 import net.hollowcube.mapmaker.map.MapCollection;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapProgressBatchResponse;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -119,6 +124,27 @@ public abstract class BaseMapCollectionView<T extends View & ProgressMapEntry> e
     }
 
     protected abstract T createEntry(@NotNull Context context, @NotNull MapData data);
+
+    @Action("info")
+    private void info() {
+        if (this.collection == null) return;
+
+        player.closeInventory();
+
+        Component authorName;
+        try {
+            authorName = playerService.getPlayerDisplayName2(this.collection.owner()).build(DisplayName.Context.DEFAULT);
+        } catch (Throwable t) {
+            ExceptionReporter.reportException(t, player);
+            authorName = Component.text("Unknown", NamedTextColor.RED);
+        }
+
+        player.sendMessage(LanguageProviderV2.translateMultiMerged("chat.map_collection.info.id", List.of(
+                Component.text(collection.collectionId()),
+                OpUtils.mapOr(collection.name(), Component::text, Component.text("Unnamed")),
+                authorName
+        )));
+    }
 
     @Action("back")
     private void back() {
