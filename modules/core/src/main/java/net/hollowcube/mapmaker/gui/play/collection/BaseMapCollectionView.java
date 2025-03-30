@@ -67,13 +67,9 @@ public abstract class BaseMapCollectionView<T extends View & ProgressMapEntry> e
 
     @Action(value = "paging", async = true)
     private void fetchPage(@NotNull Pagination.PageRequest<T> request) {
-        try {
-            if (this.collection == null) {
-                this.collection = mapService.getMapCollection(this.player.getUuid().toString(), this.id);
-                this.ownerName = playerService.getPlayerDisplayName2(this.collection.owner()).asComponent();
-                this.onLoaded(this.collection);
-            }
+        if (this.collection == null) return;
 
+        try {
             var mapIds = this.collection.mapIds().subList(
                     Math.min(request.page() * request.pageSize(), this.collection.mapIds().size()),
                     Math.min(request.page() * request.pageSize() + request.pageSize(), this.collection.mapIds().size())

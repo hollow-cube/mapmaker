@@ -20,10 +20,6 @@ public class MapCollectionView extends BaseMapCollectionView<MapEntry> {
         super(context, collection);
     }
 
-    public MapCollectionView(@NotNull Context context, @NotNull String id) {
-        super(context, id);
-    }
-
     @Override
     protected void onLoaded(@NotNull MapCollection collection) {
         this.name.setText(Objects.requireNonNullElse(collection.name(), "Unnamed Collection"));
