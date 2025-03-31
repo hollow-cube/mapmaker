@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.hub.item;
 
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.scripting.ScriptEngine;
@@ -16,7 +15,7 @@ import java.util.Objects;
 
 public class OpenStoreItem extends ItemHandler {
     private static final Logger logger = LoggerFactory.getLogger(OpenStoreItem.class);
-    
+
     private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/store_menu"));
     public static final String ID = "mapmaker:store";
 
@@ -37,9 +36,6 @@ public class OpenStoreItem extends ItemHandler {
         try {
             final ScriptEngine scriptEngine = server.scriptEngine();
             scriptEngine.guiManager().openGui(click.player(), URI.create("guilib:///store/store-view.js"));
-        } catch (UnsupportedOperationException e) {
-            // Fall back to the normal store view just in case
-            server.guiController().show(click.player(), StoreView::new);
         } catch (Exception e) {
             logger.error("failed to open store view", e);
             ExceptionReporter.reportException(e, click.player());

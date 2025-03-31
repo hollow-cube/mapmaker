@@ -94,6 +94,11 @@ public class DevServerRunner extends AbstractMapServer {
     }
 
     @Override
+    public @NotNull ScriptEngine scriptEngine() {
+        return scriptEngine;
+    }
+
+    @Override
     protected void prepareStart() {
         super.prepareStart();
 
@@ -114,6 +119,7 @@ public class DevServerRunner extends AbstractMapServer {
         var mapMgmtConsumer = new MapMgmtConsumerImpl((LocalMapAllocator) allocator(), kafkaConfig.bootstrapServers());
         shutdowner().queue("map-mgmt-listener", mapMgmtConsumer::close);
 
+        // TODO: this doesnt work since we always return the same script engine instance even in a map
         scriptEngine = new ScriptEngine(hubWorld.instance());
     }
 
@@ -248,12 +254,7 @@ public class DevServerRunner extends AbstractMapServer {
                     .schedule();
         }, "");
 
-        dbg.createPermissionlessSubcommand("gui", (player, ignored) -> {
-            player.getInstance().scheduleNextTick(ignored2 -> {
-                scriptEngine.guiManager().openGui(player, URI.create("guilib:///store/store-view.js"));
-            });
-        }, "");
-        dbg.createPermissionlessSubcommand("gui2", (player, ignored) -> {
+        dbg.createPermissionedSubcommand("gui", (player, ignored) -> {
             player.getInstance().scheduleNextTick(ignored2 -> {
                 scriptEngine.guiManager().openGui(player, URI.create("guilib:///map_browser/map-browser-view.js"));
             });
