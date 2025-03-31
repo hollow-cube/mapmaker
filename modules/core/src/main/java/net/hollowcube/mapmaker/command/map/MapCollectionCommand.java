@@ -13,9 +13,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-/**
- * Notably not using {@link net.hollowcube.command.dsl.CommandDsl}, it doesn't support arguments followed by "subcommands" very well.
- */
 public class MapCollectionCommand extends CommandDsl {
 
     private final Argument<UUID> idArg = Argument.UUID("id")
