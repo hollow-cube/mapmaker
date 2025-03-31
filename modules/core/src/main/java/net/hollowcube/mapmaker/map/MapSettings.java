@@ -91,6 +91,7 @@ public class MapSettings {
         NOSPEC(SettingType.GAMEPLAY, "No Spectator", SettingValueType.BOOLEAN, null),
         RESET_WATER(SettingType.GAMEPLAY, "Reset in Water", SettingValueType.BOOLEAN, null),
         RESET_LAVA(SettingType.GAMEPLAY, "Reset in Lava", SettingValueType.BOOLEAN, null),
+        NOTURN(SettingType.GAMEPLAY, "No Turn", SettingValueType.BOOLEAN, null),
 
         TIME_OF_DAY(SettingType.VISUAL, "Time of Day", SettingValueType.ENUM, TimeOfDay.class),
         WEATHER_TYPE(SettingType.VISUAL, "Weather", SettingValueType.ENUM, WeatherType.class),
@@ -522,6 +523,7 @@ public class MapSettings {
     }
 
     public <T> void set(@NotNull MapSetting<T> setting, @NotNull T value) {
+        if (this.extra == null) this.extra = new JsonObject();
         updateLock.lock();
         try {
             var json = setting.codec().encodeStart(JsonOps.INSTANCE, value).result().orElseThrow();

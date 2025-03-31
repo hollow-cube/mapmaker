@@ -429,78 +429,94 @@
                     </switch>
                 </box>
                 <!-- GAMEPLAY TAB -->
-                <box width="9" height="3" sprite="create_maps/tab_settings/tab_gameplay/container" align="ltr">
-                    <spacer width="1"/>
-                    <switch id="map_settings_onlysprint_switch">
-                        <button id="map_settings_onlysprint_unset"
-                                translationKey="gui.create_maps.map_settings_tab.gameplay.only_sprint"
-                                sprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_icon"
-                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_bg"/>
-                        <button id="map_settings_onlysprint_set"
-                                translationKey="gui.create_maps.map_settings_tab.gameplay.only_sprint.selected"
-                                sprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_icon"
-                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_selected"/>
-                    </switch>
-                    <switch id="map_settings_nosprint_switch">
-                        <button id="map_settings_nosprint_unset"
-                                translationKey="gui.create_maps.map_settings_tab.gameplay.no_sprint"
-                                sprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_icon"
-                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_bg"/>
-                        <button id="map_settings_nosprint_set"
-                                translationKey="gui.create_maps.map_settings_tab.gameplay.no_sprint.selected"
-                                sprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_icon"
-                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_selected"/>
-                    </switch>
-                    <switch id="map_settings_nosneak_switch">
-                        <button id="map_settings_nosneak_unset"
-                                translationKey="gui.create_maps.map_settings_tab.gameplay.no_sneak"
-                                sprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_icon"
-                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_bg"/>
-                        <button id="map_settings_nosneak_set"
-                                translationKey="gui.create_maps.map_settings_tab.gameplay.no_sneak.selected"
-                                sprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_icon"
-                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_selected"/>
-                    </switch>
-                    <switch id="map_settings_nojump_switch">
-                        <button id="map_settings_nojump_unset"
-                                translationKey="gui.create_maps.map_settings_tab.gameplay.no_jump"
-                                sprite="create_maps/tab_settings/tab_gameplay/setting_nojump_icon"
-                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nojump_bg"/>
-                        <button id="map_settings_nojump_set"
-                                translationKey="gui.create_maps.map_settings_tab.gameplay.no_jump.selected"
-                                sprite="create_maps/tab_settings/tab_gameplay/setting_nojump_icon"
-                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nojump_selected"/>
-                    </switch>
-                    <switch id="map_settings_nospec_switch">
-                        <button id="map_settings_nospec_unset"
-                                translationKey="gui.create_maps.map_settings_tab.gameplay.no_spec"
-                                sprite="create_maps/tab_settings/tab_gameplay/setting_nospec_icon"
-                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nospec_bg"/>
-                        <button id="map_settings_nospec_set"
-                                translationKey="gui.create_maps.map_settings_tab.gameplay.no_spec.selected"
-                                sprite="create_maps/tab_settings/tab_gameplay/setting_nospec_icon"
-                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nospec_selected"/>
-                    </switch>
-                    <switch id="map_settings_reset_water_switch">
-                        <button id="map_settings_reset_water_unset"
-                                translationKey="gui.create_maps.map_settings_tab.gameplay.reset_water"
-                                sprite="create_maps/tab_settings/tab_gameplay/setting_reset_water_icon"
-                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_reset_water_bg"/>
-                        <button id="map_settings_reset_water_set"
-                                translationKey="gui.create_maps.map_settings_tab.gameplay.reset_water.selected"
-                                sprite="create_maps/tab_settings/tab_gameplay/setting_reset_water_icon"
-                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_reset_water_selected"/>
-                    </switch>
-                    <switch id="map_settings_reset_lava_switch">
-                        <button id="map_settings_reset_lava_unset"
-                                translationKey="gui.create_maps.map_settings_tab.gameplay.reset_lava"
-                                sprite="create_maps/tab_settings/tab_gameplay/setting_reset_lava_icon"
-                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_reset_lava_bg"/>
-                        <button id="map_settings_reset_lava_set"
-                                translationKey="gui.create_maps.map_settings_tab.gameplay.reset_lava.selected"
-                                sprite="create_maps/tab_settings/tab_gameplay/setting_reset_lava_icon"
-                                backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_reset_lava_selected"/>
-                    </switch>
+                <box width="9" height="3" sprite="create_maps/tab_settings/tab_gameplay/container" align="ttb">
+                    <box width="9" height="1" align="ltr">
+                        <spacer width="1"/>
+                        <switch id="map_settings_onlysprint_switch">
+                            <button id="map_settings_onlysprint_unset"
+                                    translationKey="gui.create_maps.map_settings_tab.gameplay.only_sprint"
+                                    sprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_icon"
+                                    backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_bg"/>
+                            <button id="map_settings_onlysprint_set"
+                                    translationKey="gui.create_maps.map_settings_tab.gameplay.only_sprint.selected"
+                                    sprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_icon"
+                                    backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_onlysprint_selected"/>
+                        </switch>
+                        <switch id="map_settings_nosprint_switch">
+                            <button id="map_settings_nosprint_unset"
+                                    translationKey="gui.create_maps.map_settings_tab.gameplay.no_sprint"
+                                    sprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_icon"
+                                    backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_bg"/>
+                            <button id="map_settings_nosprint_set"
+                                    translationKey="gui.create_maps.map_settings_tab.gameplay.no_sprint.selected"
+                                    sprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_icon"
+                                    backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosprint_selected"/>
+                        </switch>
+                        <switch id="map_settings_nosneak_switch">
+                            <button id="map_settings_nosneak_unset"
+                                    translationKey="gui.create_maps.map_settings_tab.gameplay.no_sneak"
+                                    sprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_icon"
+                                    backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_bg"/>
+                            <button id="map_settings_nosneak_set"
+                                    translationKey="gui.create_maps.map_settings_tab.gameplay.no_sneak.selected"
+                                    sprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_icon"
+                                    backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nosneak_selected"/>
+                        </switch>
+                        <switch id="map_settings_nojump_switch">
+                            <button id="map_settings_nojump_unset"
+                                    translationKey="gui.create_maps.map_settings_tab.gameplay.no_jump"
+                                    sprite="create_maps/tab_settings/tab_gameplay/setting_nojump_icon"
+                                    backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nojump_bg"/>
+                            <button id="map_settings_nojump_set"
+                                    translationKey="gui.create_maps.map_settings_tab.gameplay.no_jump.selected"
+                                    sprite="create_maps/tab_settings/tab_gameplay/setting_nojump_icon"
+                                    backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nojump_selected"/>
+                        </switch>
+                        <switch id="map_settings_nospec_switch">
+                            <button id="map_settings_nospec_unset"
+                                    translationKey="gui.create_maps.map_settings_tab.gameplay.no_spec"
+                                    sprite="create_maps/tab_settings/tab_gameplay/setting_nospec_icon"
+                                    backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nospec_bg"/>
+                            <button id="map_settings_nospec_set"
+                                    translationKey="gui.create_maps.map_settings_tab.gameplay.no_spec.selected"
+                                    sprite="create_maps/tab_settings/tab_gameplay/setting_nospec_icon"
+                                    backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nospec_selected"/>
+                        </switch>
+                        <switch id="map_settings_reset_water_switch">
+                            <button id="map_settings_reset_water_unset"
+                                    translationKey="gui.create_maps.map_settings_tab.gameplay.reset_water"
+                                    sprite="create_maps/tab_settings/tab_gameplay/setting_reset_water_icon"
+                                    backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_reset_water_bg"/>
+                            <button id="map_settings_reset_water_set"
+                                    translationKey="gui.create_maps.map_settings_tab.gameplay.reset_water.selected"
+                                    sprite="create_maps/tab_settings/tab_gameplay/setting_reset_water_icon"
+                                    backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_reset_water_selected"/>
+                        </switch>
+                        <switch id="map_settings_reset_lava_switch">
+                            <button id="map_settings_reset_lava_unset"
+                                    translationKey="gui.create_maps.map_settings_tab.gameplay.reset_lava"
+                                    sprite="create_maps/tab_settings/tab_gameplay/setting_reset_lava_icon"
+                                    backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_reset_lava_bg"/>
+                            <button id="map_settings_reset_lava_set"
+                                    translationKey="gui.create_maps.map_settings_tab.gameplay.reset_lava.selected"
+                                    sprite="create_maps/tab_settings/tab_gameplay/setting_reset_lava_icon"
+                                    backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_reset_lava_selected"/>
+                        </switch>
+                        <spacer width="1"/>
+                    </box>
+                    <box width="9" height="1" align="ltr">
+                        <spacer width="1"/>
+                        <switch id="map_settings_noturn_switch">
+                            <button id="map_settings_noturn_unset"
+                                    translationKey="gui.create_maps.map_settings_tab.gameplay.no_turn"
+                                    sprite="create_maps/tab_settings/tab_gameplay/setting_noturning_icon"
+                                    backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_noturning_bg"/>
+                            <button id="map_settings_noturn_set"
+                                    translationKey="gui.create_maps.map_settings_tab.gameplay.no_turn.selected"
+                                    sprite="create_maps/tab_settings/tab_gameplay/setting_noturning_icon"
+                                    backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_noturning_selected"/>
+                        </switch>
+                    </box>
                 </box>
             </switch>
         </box>

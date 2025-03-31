@@ -89,6 +89,7 @@ public class EditMap extends View {
     private @Outlet("map_settings_nospec_switch") Switch mapSettingsNoSpec;
     private @Outlet("map_settings_reset_water_switch") Switch mapSettingsResetWater;
     private @Outlet("map_settings_reset_lava_switch") Switch mapSettingsResetLava;
+    private @Outlet("map_settings_noturn_switch") Switch mapSettingsNoTurn;
 
     private MapData map;
     private int slot;
@@ -451,6 +452,7 @@ public class EditMap extends View {
         map.setSetting(MapSettings.ONLY_SPRINT, false);
         map.setSetting(MapSettings.RESET_IN_WATER, false);
         map.setSetting(MapSettings.RESET_IN_LAVA, false);
+        map.setSetting(MapSettings.NO_TURN, false);
         updateElementsFromMap();
         updateRequest();
     }
@@ -550,6 +552,8 @@ public class EditMap extends View {
                 map.setSetting(MapSettings.RESET_IN_WATER, true);
             } else if (setting.equals(MapSettings.Setting.RESET_LAVA)) {
                 map.setSetting(MapSettings.RESET_IN_LAVA, true);
+            } else if (setting.equals(MapSettings.Setting.NOTURN)) {
+                map.setSetting(MapSettings.NO_TURN, true);
             } else if (setting.equals(MapSettings.Setting.TIME_OF_DAY)) {
                 map.setSetting(MapSettings.TIME_OF_DAY, map.getSetting(MapSettings.TIME_OF_DAY).next());
             } else if (setting.equals(MapSettings.Setting.WEATHER_TYPE)) {
@@ -570,6 +574,8 @@ public class EditMap extends View {
                 map.setSetting(MapSettings.RESET_IN_WATER, false);
             } else if (setting.equals(MapSettings.Setting.RESET_LAVA)) {
                 map.setSetting(MapSettings.RESET_IN_LAVA, false);
+            } else if (setting.equals(MapSettings.Setting.NOTURN)) {
+                map.setSetting(MapSettings.NO_TURN, false);
             }
         }
         updateElementsFromMap();
@@ -638,6 +644,7 @@ public class EditMap extends View {
         mapSettingsNoSpec.setOption(map.getSetting(MapSettings.NO_SPECTATOR) ? 1 : 0);
         mapSettingsResetWater.setOption(map.getSetting(MapSettings.RESET_IN_WATER) ? 1 : 0);
         mapSettingsResetLava.setOption(map.getSetting(MapSettings.RESET_IN_LAVA) ? 1 : 0);
+        mapSettingsNoTurn.setOption(map.getSetting(MapSettings.NO_TURN) ? 1 : 0);
         mapSettingsTimeOfDay.setOption(map.getSetting(MapSettings.TIME_OF_DAY).ordinal());
         mapSettingsWeatherType.setOption(map.getSetting(MapSettings.WEATHER_TYPE).ordinal());
 
