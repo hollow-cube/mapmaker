@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsx builder/main.ts",
+    "build:release": "tsx builder/main.ts --release",
     "build:watch": "tsx builder/main.ts -w"
   },
   "keywords": [],

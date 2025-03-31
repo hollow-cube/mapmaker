@@ -22,6 +22,7 @@ import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.player.JoinHubRequest;
 import net.hollowcube.mapmaker.player.SessionService;
+import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.ServerBeginShutdownEvent;
@@ -44,6 +45,8 @@ public class HubServerRunner extends AbstractMapServer {
             "__hub_unused__", ServerRuntime.getRuntime().hostname(), "hub");
 
     private HubMapWorld world;
+
+    private ScriptEngine scriptEngine;
 
     HubServerRunner(@NotNull ConfigLoaderV3 config) {
         super(config);
@@ -91,6 +94,13 @@ public class HubServerRunner extends AbstractMapServer {
 
         registerCommands(this, commandManager(), world, world.instance().scheduler());
         loadHubFeatures(this, world);
+
+        this.scriptEngine = new ScriptEngine(world.instance());
+    }
+
+    @Override
+    public @NotNull ScriptEngine scriptEngine() {
+        return this.scriptEngine;
     }
 
     // Static so it can be referenced from DevHubServer

@@ -2,8 +2,6 @@ plugins {
     `java-library`
 }
 
-group = "net.hollowcube"
-
 repositories {
     if (libs.minestom.get().version == "dev")
         mavenLocal()

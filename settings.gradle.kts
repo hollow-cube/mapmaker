@@ -29,5 +29,6 @@ include(
 include(
     "bin:config",
     "bin:development",
+    "bin:hub",
     "bin:packer",
 )

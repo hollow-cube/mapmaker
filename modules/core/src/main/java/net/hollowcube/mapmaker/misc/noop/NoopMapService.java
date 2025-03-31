@@ -115,7 +115,7 @@ public class NoopMapService implements MapService {
 
     @Override
     public @NotNull LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId) {
-        return null;
+        return new LeaderboardData(List.of(), new LeaderboardData.Entry(UUID.randomUUID().toString(), 0, 1000));
     }
 
     @Override

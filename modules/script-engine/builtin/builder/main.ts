@@ -3,6 +3,7 @@ import path from "path";
 import chokidar from "chokidar";
 import refresh from "react-refresh-typescript";
 
+const isRelease = process.argv.includes("--release");
 const isWatchMode = process.argv.includes("-w");
 
 const configPath = path.resolve("tsconfig.json");
@@ -38,7 +39,7 @@ function compile(changedFiles?: string[]) {
         undefined,
         undefined,
         undefined,
-        {before: []} // refresh()
+        {before: isRelease ? [] : [refresh()]}
     );
 
     const allDiagnostics = ts.getPreEmitDiagnostics(program.getProgram()).concat(emitResult.diagnostics);

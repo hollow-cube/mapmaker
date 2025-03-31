@@ -97,7 +97,7 @@ public class HubMapWorld extends AbstractMapWorld {
         itemRegistry().register(new CreateMapsItem(server.guiController()));
         itemRegistry().register(new OrgMapsItem(server.guiController()));
         itemRegistry().register(new OpenCosmeticsMenuItem(server.guiController()));
-        itemRegistry().register(new OpenStoreItem(server.guiController()));
+        itemRegistry().register(new OpenStoreItem(server));
     }
 
     @Override
