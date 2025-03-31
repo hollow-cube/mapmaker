@@ -10,6 +10,7 @@ import net.hollowcube.compat.noxesium.packets.ClientboundChangeServerRulesPacket
 import net.hollowcube.compat.noxesium.packets.ClientboundServerInformationPacket;
 import net.hollowcube.compat.noxesium.packets.ServerboundClientInformationPacket;
 import net.hollowcube.compat.noxesium.qib.QibDefinitionManager;
+import net.hollowcube.compat.noxesium.rules.NoxesiumServerRules;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerGameModeChangeEvent;
@@ -43,6 +44,11 @@ public class NoxesiumCompatProvider implements CompatProvider {
             if (defs != null) {
                 ClientboundChangeServerRulesPacket.qibs(defs).send(event.getPlayer());
             }
+
+            ClientboundChangeServerRulesPacket.builder()
+                    .add(NoxesiumServerRules.DISABLE_SPIN_ATTACK_COLLISIONS, true)
+                    .build()
+                    .send(event.getPlayer());
         });
 
         events.addListener(PlayerGameModeChangeEvent.class, event -> {

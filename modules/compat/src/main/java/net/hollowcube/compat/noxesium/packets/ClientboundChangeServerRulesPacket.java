@@ -64,4 +64,24 @@ public record ClientboundChangeServerRulesPacket(
     public static ClientboundChangeServerRulesPacket qibs(Map<String, QibDefinition> qibs) {
         return new ClientboundChangeServerRulesPacket(Map.of(NoxesiumServerRules.QIBS, qibs));
     }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private final Map<NoxesiumServerRule<?>, Object> rules = new HashMap<>();
+
+        private Builder() {}
+
+        public <T> Builder add(NoxesiumServerRule<T> rule, T value) {
+            rules.put(rule, value);
+            return this;
+        }
+
+        public ClientboundChangeServerRulesPacket build() {
+            return new ClientboundChangeServerRulesPacket(rules);
+        }
+    }
 }
