@@ -16,11 +16,17 @@ public class InternalScriptLoader implements ScriptLoader {
             "/react/react-refresh/runtime.js", "/react/react-refresh-runtime.js"
     );
 
+    private final String prefix;
+
+    public InternalScriptLoader(@NotNull String prefix) {
+        this.prefix = prefix;
+    }
+
     @Override
     public @Nullable String load(@NotNull URI uri) throws IOException {
         final String path = STATIC_REMAPPINGS.getOrDefault(uri.getPath(), uri.getPath());
 
-        try (var is = getClass().getResourceAsStream("/third_party" + path)) {
+        try (var is = getClass().getResourceAsStream(prefix + path)) {
             if (is == null) return null;
             return new String(is.readAllBytes(), StandardCharsets.UTF_8);
         }

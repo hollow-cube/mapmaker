@@ -24,6 +24,7 @@ mql = "1.1.0"
 logback = "1.5.18"
 json5 = "2.0.0"
 graalvm = "24.1.2"
+blossom = "2.1.0"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
@@ -82,3 +83,4 @@ otel = ["otel-api", "otel-context", "otel-sdk", "otel-sdk-common", "otel-sdk-tra
 graalvm = ["graal-polyglot", "graal-js"]
 
 [plugins]
+blossom = { id = "net.kyori.blossom", version.ref = "blossom" }

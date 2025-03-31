@@ -25,15 +25,12 @@ import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.player.PlayerSkin;
 import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.session.Presence;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
-import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
@@ -74,10 +71,10 @@ public class DevServerRunner extends AbstractMapServer {
         super(config);
 
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("dev-init")
-                .addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin)
-                .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
-                .addListener(PlayerSpawnEvent.class, this::handleSpawn)
-                .addListener(PlayerDisconnectEvent.class, this::handleDisconnect))
+                        .addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin)
+                        .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
+                        .addListener(PlayerSpawnEvent.class, this::handleSpawn)
+                        .addListener(PlayerDisconnectEvent.class, this::handleDisconnect))
                 .addListener(ServerListPingEvent.class, this::handleServerListPing);
     }
 
@@ -249,16 +246,6 @@ public class DevServerRunner extends AbstractMapServer {
                     })
                     .repeat(TaskSchedule.tick(1))
                     .schedule();
-        }, "");
-
-        dbg.createPermissionlessSubcommand("a", (player, ignored) -> {
-            ActionBar.forPlayer(player).addProvider(new ActionBar.Provider() {
-                @Override public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
-                    builder.pushColor(FontUtil.computeVerticalOffset(-50));
-                    builder.append("Hello, world");
-                    builder.popColor();
-                }
-            });
         }, "");
 
         dbg.createPermissionlessSubcommand("gui", (player, ignored) -> {

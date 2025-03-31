@@ -1,7 +1,11 @@
 plugins {
     id("mapmaker.java-binary")
     id("mapmaker.packer-data")
+
+    alias(libs.plugins.blossom)
 }
+
+val isRelease = rootProject.properties.getOrDefault("isRelease", "false").toString().toBoolean()
 
 dependencies {
     implementation(project(":bin:config"))
@@ -23,6 +27,16 @@ dependencies {
     implementation(libs.bundles.prometheus)
     implementation(libs.fastutil)
     implementation(libs.kafka)
+}
+
+sourceSets {
+    main {
+        blossom {
+            javaSources {
+                property("isRelease", isRelease.toString())
+            }
+        }
+    }
 }
 
 application {

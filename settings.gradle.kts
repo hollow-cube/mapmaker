@@ -21,6 +21,7 @@ include(
     "modules:nbs",
     "modules:replay",
     "modules:script-engine",
+    "modules:script-engine:builtin",
     "modules:script-engine:npm",
     "modules:terraform",
 );

@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.scripting;
 
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.scripting.gui.GuiManager;
 import net.hollowcube.mapmaker.scripting.instrumentation.ModuleInterceptor;
 import net.hollowcube.mapmaker.scripting.loader.FileSystemLoader;
@@ -53,7 +54,7 @@ public class ScriptEngine {
     private GuiManager guiManager = null; // Lazy
 
     public ScriptEngine(@NotNull Instance instance) {
-        this.env = new Env(true); // todo not always dev :)
+        this.env = new Env(ServerRuntime.getRuntime().isDevelopment());
         this.instance = instance;
 
         this.context = Context.newBuilder().build();
@@ -61,9 +62,14 @@ public class ScriptEngine {
         try {
             // We always add the internal loader right now, but actually importing React is potentially a privileged action
             // and should be done through a different mechanism.
-            this.loaders.put("internal", new InternalScriptLoader());
+            this.loaders.put("internal", new InternalScriptLoader("/third_party"));
             // This is also of course temporary, need to figure out how this will be included in dev vs prod.
-            this.loaders.put("guilib", new FileSystemLoader("guilib", Path.of("./guilib/dist/"), this::handleModuleHotSwap));
+            if (env().isDevelopment()) {
+                this.loaders.put("guilib", new FileSystemLoader("guilib", Path.of("./modules/script-engine/builtin/dist/gui"), this::handleModuleHotSwap));
+            } else {
+                this.loaders.put("guilib", new InternalScriptLoader("/builtin/gui"));
+            }
+
         } catch (IOException e) {
             throw new RuntimeException("failed to create default script loaders", e);
         }

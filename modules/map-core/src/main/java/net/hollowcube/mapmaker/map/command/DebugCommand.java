@@ -124,6 +124,7 @@ public class DebugCommand extends CommandDsl {
 
     private void handleDebugServer(@NotNull Player player, @NotNull CommandContext context) {
         player.sendMessage("Host: " + AbstractHttpService.hostname);
+        player.sendMessage("Release: " + !ServerRuntime.getRuntime().isDevelopment());
     }
 
     private @NotNull CommandDsl createSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @Nullable CommandCondition condition, @NotNull String description) {
