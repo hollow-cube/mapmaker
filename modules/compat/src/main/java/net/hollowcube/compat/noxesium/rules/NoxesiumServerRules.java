@@ -18,6 +18,7 @@ public final class NoxesiumServerRules {
     public static final NoxesiumServerRule<List<ItemStack>> CREATIVE_TAB = register(NoxesiumServerRule.ItemStacks(ServerRuleIndices.CUSTOM_CREATIVE_ITEMS));
     public static final NoxesiumServerRule<Map<String, QibDefinition>> QIBS = register(NoxesiumServerRule.QibBehavior(ServerRuleIndices.QIB_BEHAVIORS));
     public static final NoxesiumServerRule<Boolean> DISABLE_SPIN_ATTACK_COLLISIONS = register(NoxesiumServerRule.Boolean(ServerRuleIndices.DISABLE_SPIN_ATTACK_COLLISIONS));
+    public static final NoxesiumServerRule<Boolean> CAMERA_LOCKED = register(NoxesiumServerRule.Boolean(ServerRuleIndices.CAMERA_LOCKED));
 
     @ApiStatus.Internal
     private static <T> NoxesiumServerRule<T> register(NoxesiumServerRule<T> rule) {
