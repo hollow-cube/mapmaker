@@ -43,7 +43,7 @@ public class MapData {
         };
 
         public @NotNull BadSprite tooltipIcon() {
-            return TOOLTIP_ICONS[ordinal()];
+            return TOOLTIP_ICONS[0];
         }
     }
 
