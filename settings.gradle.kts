@@ -30,5 +30,8 @@ include(
     "bin:config",
     "bin:development",
     "bin:hub",
+    "bin:local",
+    "bin:map",
     "bin:packer",
+    "bin:proxy-plugin",
 )

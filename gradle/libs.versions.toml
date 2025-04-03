@@ -23,8 +23,9 @@ prometheus = "0.16.0"
 mql = "1.1.0"
 logback = "1.5.18"
 json5 = "2.0.0"
-graalvm = "24.1.2"
+graalvm = "24.2.0"
 blossom = "2.1.0"
+velocity = "3.4.0-SNAPSHOT"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
@@ -48,8 +49,13 @@ jctools = { group = "org.jctools", name = "jctools-core", version.ref = "jctools
 caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
 mql = { group = "dev.hollowcube", name = "mql", version.ref = "mql" }
 json5 = { group = "de.marhali", name = "json5-java", version.ref = "json5" }
+velocity-api = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
+
 graal-polyglot = { group = "org.graalvm.polyglot", name = "polyglot", version.ref = "graalvm" }
-graal-js = { group = "org.graalvm.polyglot", name = "js", version.ref = "graalvm" }
+graal-js-language = { group = "org.graalvm.js", name = "js-language", version.ref = "graalvm" }
+graal-js-community = { group = "org.graalvm.js", name = "js-community", version.ref = "graalvm" }
+graal-truffle-runtime = { group = "org.graalvm.truffle", name = "truffle-runtime", version.ref = "graalvm" }
+graal-truffle-enterprise = { group = "org.graalvm.truffle", name = "truffle-enterprise", version.ref = "graalvm" }
 
 adventure-api = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }
 adventure-key = { group = "net.kyori", name = "adventure-key", version.ref = "adventure" }
@@ -80,7 +86,7 @@ junit-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", ver
 adventure = ["adventure-api", "adventure-key", "adventure-text-minimessage", "adventure-text-serializer-plain", "adventure-nbt"]
 prometheus = ["prometheus", "prometheus-hotspot", "prometheus-httpserver"]
 otel = ["otel-api", "otel-context", "otel-sdk", "otel-sdk-common", "otel-sdk-trace", "otel-extension-trace-propagators", "otel-exporter-logging", "otel-exporter-otlp", "otel-exporter-sender-jdk", "otel-semconv"]
-graalvm = ["graal-polyglot", "graal-js"]
+graalvm = ["graal-polyglot", "graal-js-language", "graal-js-community", "graal-truffle-runtime", "graal-truffle-enterprise"]
 
 [plugins]
 blossom = { id = "net.kyori.blossom", version.ref = "blossom" }

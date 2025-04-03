@@ -1,6 +1,7 @@
 plugins {
     java
     application
+    id("com.gradleup.shadow")
 }
 
 group = "net.hollowcube"
@@ -30,4 +31,8 @@ java {
         languageVersion = JavaLanguageVersion.of(23)
         vendor = JvmVendorSpec.GRAAL_VM
     }
+}
+
+tasks.shadowJar {
+    mergeServiceFiles()
 }

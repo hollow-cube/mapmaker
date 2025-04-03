@@ -1,5 +1,0 @@
-java_library(
-    name = "config",
-    resources = glob(["src/main/resources/**"]),
-    visibility = ["//visibility:public"],
-)

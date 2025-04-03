@@ -3,28 +3,27 @@ plugins {
     id("mapmaker.packer-data")
 }
 
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
 dependencies {
     implementation(project(":bin:config"))
 
     implementation(project(":modules:canvas:api"))
     implementation(project(":modules:canvas:impl-standalone"))
     implementation(project(":modules:core"))
-    implementation(project(":modules:hub"))
     implementation(project(":modules:map"))
     implementation(project(":modules:terraform"))
-    implementation(project(":modules:script-engine"))
 
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)
     implementation(libs.slf4j.jul)
     implementation(libs.logback)
-    implementation(libs.polar)
-    implementation(libs.bundles.otel)
     implementation(libs.bundles.prometheus)
-    implementation(libs.fastutil)
-    implementation(libs.kafka)
 }
 
 application {
-    mainClass = "net.hollowcube.mapmaker.dev.DevServer"
+    mainClass = "net.hollowcube.mapmaker.map.Main"
 }
