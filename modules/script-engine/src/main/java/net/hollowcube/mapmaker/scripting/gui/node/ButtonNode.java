@@ -1,11 +1,16 @@
 package net.hollowcube.mapmaker.scripting.gui.node;
 
 import net.hollowcube.mapmaker.scripting.gui.util.ClickType;
+import net.hollowcube.mapmaker.scripting.util.Proxies;
 import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 public class ButtonNode extends GroupNode {
-    private Runnable onLeftClick = null;
+    private Supplier<Value> onLeftClick = null;
 
     public ButtonNode() {
         super("button");
@@ -18,7 +23,7 @@ public class ButtonNode extends GroupNode {
         //todo on changed
         if (props.hasMember("onLeftClick")) {
             Value onLeftClick = props.getMember("onLeftClick");
-            this.onLeftClick = onLeftClick.canExecute() ? onLeftClick::executeVoid : null;
+            this.onLeftClick = onLeftClick.canExecute() ? onLeftClick::execute : null;
         } else {
             this.onLeftClick = null;
         }
@@ -27,12 +32,11 @@ public class ButtonNode extends GroupNode {
     }
 
     @Override
-    public boolean handleClick(@NotNull ClickType clickType, int x, int y) {
+    public @Nullable CompletableFuture<Void> handleClick(@NotNull ClickType clickType, int x, int y) {
         if (clickType == ClickType.LEFT && this.onLeftClick != null) {
-            this.onLeftClick.run();
-            return true;
+            return Proxies.wrapPromiseLike(this.onLeftClick.get());
         }
 
-        return false;
+        return null;
     }
 }

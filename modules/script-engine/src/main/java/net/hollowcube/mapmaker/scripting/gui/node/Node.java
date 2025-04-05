@@ -4,6 +4,9 @@ import net.hollowcube.mapmaker.scripting.gui.MenuBuilder;
 import net.hollowcube.mapmaker.scripting.gui.util.ClickType;
 import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.concurrent.CompletableFuture;
 
 public abstract class Node {
     private final String type; // Name of the node type, mostly used for debug purposes
@@ -59,8 +62,8 @@ public abstract class Node {
 
     public abstract void build(@NotNull MenuBuilder builder);
 
-    public boolean handleClick(@NotNull ClickType clickType, int x, int y) {
-        return false;
+    public @Nullable CompletableFuture<Void> handleClick(@NotNull ClickType clickType, int x, int y) {
+        return null;
     }
 
 }

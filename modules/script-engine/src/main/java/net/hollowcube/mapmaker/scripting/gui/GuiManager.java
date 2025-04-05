@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.scripting.gui.react.AtMapmakerGuiModule;
 import net.hollowcube.mapmaker.scripting.gui.react.JSX;
 import net.hollowcube.mapmaker.scripting.gui.react.ReactRefresh;
 import net.hollowcube.mapmaker.scripting.gui.react.ReconcilerHostConfig;
+import net.hollowcube.mapmaker.scripting.util.Proxies;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
@@ -62,7 +63,7 @@ public class GuiManager {
      * @param player The player to open the GUI for
      * @param modulePath The module to load
      */
-    public void openGui(@NotNull Player player, @NotNull URI modulePath, @NotNull Map<String, Object> extraModules) {
+    public void openGui(@NotNull Player player, @NotNull URI modulePath, @NotNull Map<String, Object> extraModules, @NotNull Map<String, Object> props) {
         FutureUtil.assertTickThread(player.acquirable());
 
         final Map<String, Object> modules = new HashMap<>(this.extraModules);
@@ -74,7 +75,8 @@ public class GuiManager {
         if (!component.canExecute())
             throw new IllegalArgumentException("Default export must be a functional component");
         final InventoryType inventoryType = getInventoryType(component);
-        final Value reactElement = this.react.exports().invokeMember("createElement", component, null);
+        final Value reactElement = this.react.exports().invokeMember("createElement",
+                component, Proxies.proxyObject(props));
 
         final InventoryHost host = new InventoryHost(this, player);
 
@@ -108,7 +110,6 @@ public class GuiManager {
 
     public void unmount(@NotNull InventoryHost host) {
         try {
-            System.out.println("UNMOUNTING");
             InventoryHost.CURRENT.set(host);
             reactReconcilerInst.invokeMember("updateContainer",
                     /* element */ null,
@@ -125,7 +126,6 @@ public class GuiManager {
         try {
             InventoryHost.CURRENT.set(host);
 
-            System.out.println(this.react.exports().getMember("Fragment"));
             var renderElement = this.react.exports().invokeMember("createElement",
                     this.react.exports().getMember("Fragment"),
                     proxyObject(Map.of()),

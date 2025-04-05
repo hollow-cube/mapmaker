@@ -27,7 +27,7 @@ declare namespace JSX {
     export interface IntrinsicElements {
         group: GroupProps;
         button: GroupProps & {
-            onLeftClick?: () => void;
+            onLeftClick?: () => (void | Promise<void>);
         };
         tooltip: GroupProps & {
             translationKey: string;

@@ -2,7 +2,7 @@ import {useViewStack, view} from "@mapmaker/gui";
 
 export interface ConfirmProps {
     translationKey?: string;
-    onConfirm: () => void;
+    onConfirm: () => (void | Promise<void>);
 }
 
 function Confirm({translationKey, onConfirm}: ConfirmProps) {

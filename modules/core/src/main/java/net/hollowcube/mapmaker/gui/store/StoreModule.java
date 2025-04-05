@@ -1,12 +1,20 @@
 package net.hollowcube.mapmaker.gui.store;
 
+import com.google.gson.JsonObject;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.backpack.PlayerBackpack;
+import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.scripting.ScriptEngine;
+import net.hollowcube.mapmaker.scripting.util.Proxies;
+import net.hollowcube.mapmaker.store.ShopUpgrade;
+import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
@@ -15,12 +23,36 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.Player;
 import org.graalvm.polyglot.HostAccess;
+import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public final class StoreModule {
+    private static final Logger logger = LoggerFactory.getLogger(StoreModule.class);
+
+    public static void openStoreView(
+            @NotNull ScriptEngine scriptEngine, @NotNull PlayerService playerService,
+            @NotNull PermManager permManager, @NotNull Player player, @Nullable String initialTab
+    ) {
+        try {
+            scriptEngine.guiManager().openGui(player, URI.create("guilib:///store/store-view.js"),
+                    Map.of("@mapmaker/internal/store", new StoreModule(playerService, permManager, player)),
+                    OpUtils.build(new HashMap<>(), m -> m.put("initialTab", initialTab)));
+        } catch (Exception e) {
+            logger.error("failed to open store view", e);
+            ExceptionReporter.reportException(e, player);
+        }
+    }
+
     private static final String PURCHASE_SOURCE = "ingame/store";
     private static final List<String> VALID_PACKAGES = List.of(
             "cubits_50", "cubits_105", "cubits_220",
@@ -36,10 +68,12 @@ public final class StoreModule {
     }
 
     private final PlayerService playerService;
+    private final PermManager permManager;
     private final Player player;
 
-    public StoreModule(@NotNull PlayerService playerService, @NotNull Player player) {
+    public StoreModule(@NotNull PlayerService playerService, @NotNull PermManager permManager, @NotNull Player player) {
         this.playerService = playerService;
+        this.permManager = permManager;
         this.player = player;
     }
 
@@ -50,13 +84,33 @@ public final class StoreModule {
 
     @HostAccess.Export
     public boolean isUpgradeOwned(@NotNull String upgradeId) {
-        System.out.println("isUpgradeUnlocked: " + upgradeId);
-        return false;
+        final ShopUpgrade upgrade = ShopUpgrade.BY_ID.get(upgradeId);
+        if (upgrade == null) return false;
+        return ShopUpgradeCache.has(player, upgrade, true);
     }
 
     @HostAccess.Export
-    public void buyUpgrade(@NotNull String upgradeId) {
-        System.out.println("buy upgrade: " + upgradeId);
+    public Value buyUpgrade(@NotNull String upgradeId) {
+        final ShopUpgrade upgrade = ShopUpgrade.BY_ID.get(upgradeId);
+        if (upgrade == null) return Proxies.resolved(null);
+        if (ShopUpgradeCache.has(player, upgrade, true))
+            return Proxies.resolved(null); // Sanity check
+
+        // Ensure the player has enough cubits to buy the upgrade.
+        var playerData = PlayerDataV2.fromPlayer(player);
+        var backpack = PlayerBackpack.fromPlayer(player);
+        if (!upgrade.canAfford(playerData, backpack)) {
+            // Cannot afford, prompt to buy more cubits
+
+            //todo
+            player.sendMessage(Component.translatable("currency.missing"));
+            return Proxies.resolved(null);
+        }
+
+        return Proxies.async(() -> {
+            buyUpgrade0(playerData, upgrade);
+            return null;
+        }, player.scheduler());
     }
 
     @Blocking
@@ -81,6 +135,27 @@ public final class StoreModule {
             ExceptionReporter.reportException(e, player);
             player.closeInventory();
             player.sendMessage(Component.text("An unknown error has occurred"));
+        }
+    }
+
+    @Blocking
+    private void buyUpgrade0(@NotNull PlayerDataV2 playerData, @NotNull ShopUpgrade upgrade) {
+        try {
+            var meta = new JsonObject();
+            meta.addProperty("source", "ingame/store");
+            playerService.buyUpgrade(playerData.id(), upgrade.name().toLowerCase(Locale.ROOT), upgrade.cubits(), meta);
+
+            // Success! Preempt the update message by updating locally
+            playerData.setCubits(playerData.cubits() - upgrade.cubits());
+            permManager.overwrite(upgrade.directPerm(), playerData.id(), true);
+            permManager.overwrite(upgrade.indirectPerm(), playerData.id(), true);
+
+            player.sendMessage(Component.translatable("store.add-ons.buy", Component.text(upgrade.name())));
+        } catch (PlayerService.NotFoundError e) {
+            player.sendMessage(Component.translatable("store.add-ons.buy.error"));
+        } catch (Exception e) {
+            player.sendMessage(Component.translatable("store.add-ons.buy.error"));
+            ExceptionReporter.reportException(e, player);
         }
     }
 

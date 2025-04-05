@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 @AutoService(ServerRuntime.class)
 public class ServerRuntimeImpl implements ServerRuntime {
-    private static final Logger logger = LoggerFactory.getLogger(DevRuntime.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServerRuntime.class);
 
     private String version = "3.0.0";
     private String commit = "dev";
@@ -17,7 +17,7 @@ public class ServerRuntimeImpl implements ServerRuntime {
     private String resourcePackHash = "dev";
     private boolean isRelease = {{ isRelease }};
 
-    public DevRuntime() {
+    public ServerRuntimeImpl() {
         var version = System.getenv("MAPMAKER_VERSION");
         if (version != null) this.version = version;
 

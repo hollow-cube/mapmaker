@@ -4,10 +4,12 @@ import net.hollowcube.mapmaker.scripting.gui.MenuBuilder;
 import net.hollowcube.mapmaker.scripting.gui.util.ClickType;
 import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 
 public class GroupNode extends Node {
     protected final List<Node> children = new ArrayList<>();
@@ -112,9 +114,9 @@ public class GroupNode extends Node {
     }
 
     @Override
-    public boolean handleClick(@NotNull ClickType clickType, int x, int y) {
-        if (this.isHidden()) return false;
-        if (this.children.isEmpty()) return false;
+    public @Nullable CompletableFuture<Void> handleClick(@NotNull ClickType clickType, int x, int y) {
+        if (this.isHidden()) return null;
+        if (this.children.isEmpty()) return null;
         if (this.children.size() == 1) {
             return this.children.getFirst().handleClick(clickType, x, y);
         }
@@ -135,7 +137,7 @@ public class GroupNode extends Node {
             }
         }
 
-        return false;
+        return null;
     }
 
     public void appendChild(@NotNull Node child) {

@@ -6,8 +6,12 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public enum ShopUpgrade {
     BUILD_TOOLS("build_tools", new CostList(CostEntry.Cubits.INSTANCE, 50)),
@@ -20,6 +24,9 @@ public enum ShopUpgrade {
     MAP_SIZE_3("map_size_3", new CostList(CostEntry.Cubits.INSTANCE, 100)),
     MAP_SIZE_4("map_size_4", new CostList(CostEntry.Cubits.INSTANCE, 150)),
     ;
+
+    public static final Map<String, ShopUpgrade> BY_ID = Arrays.stream(ShopUpgrade.values())
+            .collect(Collectors.toMap(value -> value.id, Function.identity()));
 
     private final String id;
     private final CostList cost;

@@ -41,7 +41,7 @@ declare module "@mapmaker/gui" {
     }
 
     declare type InventoryType = 'chest_3_row' | 'chest_6_row' | 'anvil'
-    declare function view<T>(component: (props: T) => JSX.Element, inventoryType: InventoryType): JSX.Element;
+    declare function view<T>(component: (props: T) => JSX.Element, inventoryType: InventoryType): (props: T) => JSX.Element;
 
     declare function useState<T>(initialValue: T | (() => T)): [T, (value: T | ((T) => T)) => void];
 
@@ -71,11 +71,11 @@ declare module "@mapmaker/internal/store" {
         | 'hypercube_1mo'
         | 'hypercube_1y'
 
-    declare function buyPackage(packageName: Package)
+    declare function buyPackage(packageName: Package): Promise<void>
 
     declare function isUpgradeOwned(upgradeId: string): boolean
 
-    declare function buyUpgrade(upgradeId: string)
+    declare function buyUpgrade(upgradeId: string): Promise<void>
 }
 
 declare module "@mapmaker/internal/maps" {

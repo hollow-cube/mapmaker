@@ -274,7 +274,7 @@ public abstract class AbstractMapServer implements MapServer {
         }
 
         // Create one producer to reuse.
-        producer = new FriendlyProducer(kafkaConfig.bootstrapServers());
+        producer = new FriendlyProducer(kafkaConfig.bootstrapServers(), globalConfig.noop());
         facets.put(FriendlyProducer.class, producer);
         shutdowner.queue("kafka-producer", producer::close);
 
@@ -415,8 +415,8 @@ public abstract class AbstractMapServer implements MapServer {
         if (fullInstance) commandManager.register(new CosmeticsCommand(guiController()));
         if (fullInstance) commandManager.register(new RulesCommand());
         commandManager.register(createDebugCommand());
-        commandManager.register(new StoreCommand(guiController()));
-        if (fullInstance) commandManager.register(new HypercubeCommand(playerService(), guiController()));
+        commandManager.register(new StoreCommand(this::scriptEngine, playerService(), permManager()));
+        commandManager.register(new HypercubeCommand(this::scriptEngine, playerService(), permManager()));
         commandManager.register(new DiscordCommand());
         if (fullInstance) commandManager.register(new LinkCommand(playerService()));
         if (fullInstance) commandManager.register(new TotpCommand(playerService(), guiController()));

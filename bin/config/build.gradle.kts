@@ -6,6 +6,13 @@ plugins {
 
 val isRelease = rootProject.properties.getOrDefault("isRelease", "false").toString().toBoolean()
 
+dependencies {
+    implementation(project(":modules:common"))
+    implementation(project(":modules:map-core"))
+
+    implementation(libs.minestom)
+}
+
 sourceSets {
     main {
         blossom {

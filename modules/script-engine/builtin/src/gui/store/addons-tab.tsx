@@ -14,6 +14,8 @@ interface AddonChainProps {
 }
 
 function AddonChain({chain, buyUpgrade}: AddonChainProps) {
+    // TODO: we need a fancier system for sharing state with Java. This will not change even if you unlock an upgrade
+    //  unless the GUI is reopend (which is what we do currently).
     const firstLocked = chain.find(addon => !isUpgradeOwned(addon?.id || ''));
     const addon = firstLocked || chain[chain.length - 1];
 
@@ -105,10 +107,13 @@ const buildTools: Addon[] = [{
 }] as const;
 
 export default function AddonsTab() {
-    const {pushView} = useViewStack();
+    const {pushView, close} = useViewStack();
 
     const buyUpgradeActual = (id: string) => {
-        pushView(<Confirm onConfirm={() => buyUpgrade(id)}/>)
+        pushView(<Confirm onConfirm={async () => {
+            await buyUpgrade(id);
+            close();
+        }}/>)
     }
 
     return (

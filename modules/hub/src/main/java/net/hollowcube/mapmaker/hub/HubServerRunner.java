@@ -36,6 +36,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.concurrent.CompletableFuture;
 
@@ -82,8 +83,6 @@ public class HubServerRunner extends AbstractMapServer {
     protected void prepareStart() {
         super.prepareStart();
 
-        BlockHandlers.init(); // No need for placement rules etc. Just these to avoid invisible blocks
-
         // Create the hub world once, which will never go away.
         var worldFuture = new CompletableFuture<HubMapWorld>();
         FutureUtil.submitVirtual(() -> worldFuture.complete(
@@ -92,15 +91,17 @@ public class HubServerRunner extends AbstractMapServer {
         addBinding(HubMapWorld.class, world, "world", "hubWorld", "hubMapWorld");
         addBinding(Scheduler.class, world.instance().scheduler());
 
+        this.scriptEngine = new ScriptEngine(world.instance());
+
+        BlockHandlers.init(); // No need for placement rules etc. Just these to avoid invisible blocks
+
         registerCommands(this, commandManager(), world, world.instance().scheduler());
         loadHubFeatures(this, world);
-
-        this.scriptEngine = new ScriptEngine(world.instance());
     }
 
     @Override
     public @NotNull ScriptEngine scriptEngine() {
-        return this.scriptEngine;
+        return Objects.requireNonNull(this.scriptEngine);
     }
 
     // Static so it can be referenced from DevHubServer

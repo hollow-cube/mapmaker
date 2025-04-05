@@ -11,8 +11,12 @@ const tabTitles = {
     addons: 'Buy Addons'
 }
 
-function StoreView() {
-    const [tab, setTab] = useState<'cubits' | 'hypercube' | 'addons'>('cubits');
+export interface StoreViewProps {
+    initialTab?: 'cubits' | 'hypercube' | 'addons';
+}
+
+function StoreView({initialTab}: StoreViewProps) {
+    const [tab, setTab] = useState<'cubits' | 'hypercube' | 'addons'>(initialTab || 'cubits');
 
     return (
         <group layout='column'>

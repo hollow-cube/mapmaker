@@ -1,12 +1,13 @@
 package net.hollowcube.mapmaker.command.store;
 
-import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.GenericMessages;
-import net.hollowcube.mapmaker.gui.store.StoreView;
+import net.hollowcube.mapmaker.gui.store.StoreModule;
+import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,18 +16,18 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.TextStyle;
 import java.util.Locale;
+import java.util.function.Supplier;
 
 public class HypercubeCommand extends CommandDsl {
-
-
+    private final Supplier<ScriptEngine> scriptEngine;
     private final PlayerService playerService;
-    private final Controller guiController;
+    private final PermManager permManager;
 
-    public HypercubeCommand(@NotNull PlayerService playerService, @NotNull Controller guiController) {
+    public HypercubeCommand(@NotNull Supplier<ScriptEngine> scriptEngine, @NotNull PlayerService playerService, @NotNull PermManager permManager) {
         super("hypercube");
-
+        this.scriptEngine = scriptEngine;
         this.playerService = playerService;
-        this.guiController = guiController;
+        this.permManager = permManager;
 
         addSyntax(playerOnly(this::handleHypercubeInfo));
     }
@@ -36,7 +37,7 @@ public class HypercubeCommand extends CommandDsl {
             var playerId = PlayerDataV2.fromPlayer(player).id();
             var status = playerService.getHypercubeStatus(playerId);
             if (status == null) {
-                guiController.show(player, c -> new StoreView(c, StoreView.TAB_HYPERCUBE));
+                StoreModule.openStoreView(scriptEngine.get(), playerService, permManager, player, "hypercube");
                 return;
             }
 

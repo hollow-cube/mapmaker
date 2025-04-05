@@ -1,14 +1,16 @@
 package net.hollowcube.mapmaker.hub.feature.misc;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.common.math.Quaternion;
-import net.hollowcube.mapmaker.gui.store.StoreView;
+import net.hollowcube.mapmaker.gui.store.StoreModule;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.BaseNpcEntity;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.map.MapServer;
+import net.hollowcube.mapmaker.perm.PermManager;
+import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -29,14 +31,18 @@ public class StoreAdFeatureProvider implements HubFeature {
     private static final Pos GOLD_BLOCK_ENTITY_POS = new Pos(-4.5, 45, -29.5, 0, -90);
     private static final int GOLD_BLOCK_ENTITY_UPDATE_INTERVAL = 5; // Seconds
 
-    private Controller guiController;
+    private ScriptEngine scriptEngine;
+    private PlayerService playerService;
+    private PermManager permManager;
 
     private final NpcItemModel goldBlockEntity = new NpcItemModel();
     private int goldBlockEntityRotationTarget = 0;
 
     @Override
     public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
-        this.guiController = server.guiController();
+        this.scriptEngine = server.scriptEngine();
+        this.playerService = server.playerService();
+        this.permManager = server.permManager();
 
         var viewStoreEntity = BaseNpcEntity.createInteractionEntity(
                 3, 4, this::handleStoreClick);
@@ -52,7 +58,7 @@ public class StoreAdFeatureProvider implements HubFeature {
     private void handleStoreClick(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {
         if (hand != PlayerHand.MAIN) return;
 
-        guiController.show(player, c -> new StoreView(c, StoreView.TAB_HYPERCUBE));
+        StoreModule.openStoreView(scriptEngine, playerService, permManager, player, "hypercube");
     }
 
     private @NotNull TaskSchedule mapEntityUpdate() {

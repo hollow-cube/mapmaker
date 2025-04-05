@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.hollowcube.mapmaker.scripting.util.Proxies.proxyObject;
@@ -64,10 +65,9 @@ public class InventoryHost {
     }
 
     public void pushView(@NotNull Value element) {
-        System.out.println("push view: " + element);
-
         var renderElement = owner.react.exports().invokeMember("createElement",
                 owner.react.exports().getMember("Fragment"),
+                // TODO: probably should generate a random key rather than using the size of elements.
                 proxyObject(Map.of("key", String.valueOf(elements.size()))),
                 element);
         elements.add(renderElement);
@@ -77,7 +77,6 @@ public class InventoryHost {
 
     public void popView() {
         elements.removeLast();
-        System.out.println("pop view, now at " + elements.getLast());
         owner.render(this, InventoryType.CHEST_6_ROW);
     }
 
@@ -152,6 +151,8 @@ public class InventoryHost {
         };
     }
 
+    private CompletableFuture<Void> pendingClick = null;
+
     private static void handleInventoryClick(@NotNull InventoryPreClickEvent event) {
         final int slot;
         final InventoryHost host;
@@ -173,6 +174,11 @@ public class InventoryHost {
         if (host.roots.isEmpty()) return; // Check for unmounted.
         final Node root = host.roots.getLast();
 
+        if (host.pendingClick != null && !host.pendingClick.isDone()) {
+            System.out.println("Click is pending, ignoring click " + host.pendingClick);
+            return;
+        }
+
         final ClickType clickType = switch (event.getClick()) {
             case Click.Left ignored -> ClickType.LEFT;
             case Click.Right ignored -> ClickType.RIGHT;
@@ -191,7 +197,7 @@ public class InventoryHost {
         try {
             CURRENT.set(host);
             event.setCancelled(true);
-            root.handleClick(clickType, slot % 9, slot / 9);
+            host.pendingClick = root.handleClick(clickType, slot % 9, slot / 9);
             host.jsExit();
         } catch (Exception e) {
             logger.error("Failed to handle click", e);
