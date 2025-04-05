@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.chat;
 
+import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;

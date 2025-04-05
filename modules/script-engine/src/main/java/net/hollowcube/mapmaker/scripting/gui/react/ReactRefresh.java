@@ -2,8 +2,10 @@ package net.hollowcube.mapmaker.scripting.gui.react;
 
 import net.hollowcube.mapmaker.scripting.Module;
 import net.hollowcube.mapmaker.scripting.ScriptEngine;
+import net.hollowcube.mapmaker.scripting.gui.InventoryHost;
 import net.hollowcube.mapmaker.scripting.instrumentation.ModuleInterceptor;
 import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
@@ -34,9 +36,39 @@ public class ReactRefresh {
             globalThis.putMember("$RefreshReg$", context.newObject());
             globalThis.putMember("$RefreshSig$", context.eval("() => type => type"));
 
+            wrapScheduleRefresh(globalThis);
+
             // Finally, we need to set up instrumentation in module loads for react-refresh to work.
             engine.instrument(new InstrumentationImpl());
         }
+    }
+
+    // This is not such a nice function, so here is the explanation:
+    // We use a ThreadLocal to store info about the current render context while we are rendering a react root, so we must
+    // have this thread local when rendering any component. That thread local is also the react fiber containerInfo.
+    //
+    // When react-refresh re-renders after refresh, we are not in control of the render call so cant set up the thread local.
+    // And we cant set it before reloading the module, because there could be multiple InventoryHosts for a single module.
+    // (ie multiple of the same GUI open)
+    //
+    // To resolve this, we hook into the `scheduleRefresh` call in react-reconciler which gives us the root fiber
+    // that is about to be rendered. This function handles that injection and sets up the appropriate thread local.
+    private static void wrapScheduleRefresh(@NotNull Value globalThis) {
+        var globalHook = globalThis.getMember("__REACT_DEVTOOLS_GLOBAL_HOOK__");
+        var injectFunc = globalHook.getMember("inject");
+        globalHook.putMember("inject", (ProxyExecutable) (injectArgs) -> {
+            var scheduleRefreshActual = injectArgs[0].getMember("scheduleRefresh");
+            injectArgs[0].putMember("scheduleRefresh", (ProxyExecutable) (scheduleRefreshArgs) -> {
+                var host = scheduleRefreshArgs[0].getMember("containerInfo").as(InventoryHost.class);
+                try {
+                    InventoryHost.CURRENT.set(host);
+                    return scheduleRefreshActual.execute((Object[]) scheduleRefreshArgs);
+                } finally {
+                    InventoryHost.CURRENT.remove();
+                }
+            });
+            return injectFunc.execute((Object[]) injectArgs);
+        });
     }
 
     private static class InstrumentationImpl implements ModuleInterceptor {

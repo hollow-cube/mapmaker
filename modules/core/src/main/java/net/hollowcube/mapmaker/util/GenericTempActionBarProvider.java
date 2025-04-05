@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.util;
 
+import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
-import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 

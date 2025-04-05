@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -256,7 +257,7 @@ public class DevServerRunner extends AbstractMapServer {
 
         dbg.createPermissionedSubcommand("gui", (player, ignored) -> {
             player.getInstance().scheduleNextTick(ignored2 -> {
-                scriptEngine.guiManager().openGui(player, URI.create("guilib:///map_browser/map-browser-view.js"));
+                scriptEngine.guiManager().openGui(player, URI.create("guilib:///map_browser/map-browser-view.js"), Map.of());
             });
         }, "");
 

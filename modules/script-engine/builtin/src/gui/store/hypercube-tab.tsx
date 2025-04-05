@@ -1,3 +1,5 @@
+import {buyPackage} from "@mapmaker/internal/store";
+
 export default function HypercubeTab() {
     return (
         <group layout='column'>
@@ -28,11 +30,11 @@ export default function HypercubeTab() {
 
             <group layout='row'>
                 <gap slotWidth={1}/>
-                <button>
+                <button onLeftClick={() => buyPackage('hypercube_1mo')}>
                     <tooltip translationKey="gui.store.hypercube.1month" slotWidth={3} slotHeight={2}/>
                 </button>
                 <gap slotWidth={1}/>
-                <button>
+                <button onLeftClick={() => buyPackage('hypercube_1y')}>
                     <tooltip translationKey="gui.store.hypercube.1year" slotWidth={3} slotHeight={2}/>
                 </button>
             </group>

@@ -17,7 +17,7 @@ function StoreView() {
     return (
         <group layout='column'>
             <sprite src='store/container' x={-10} y={-31} position='absolute'/>
-            <text x='center' y={-23} position='absolute'>Store</text>
+            <text x='center' y={-23} position='absolute'>Store2</text>
 
             {/* Title */}
             <group layout='row'>

@@ -9,13 +9,13 @@ val builtin by configurations.creating
 
 dependencies {
     implementation(project(":modules:common"))
-    implementation(project(":modules:core"))
 
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)
     implementation(libs.fastutil)
     implementation(libs.gson)
-    implementation(libs.bundles.graalvm)
+    implementation(libs.posthog)
+    api(libs.bundles.graalvm)
 
     react(project(":modules:script-engine:npm", "react"))
     builtin(project(":modules:script-engine:builtin", "builtin"))

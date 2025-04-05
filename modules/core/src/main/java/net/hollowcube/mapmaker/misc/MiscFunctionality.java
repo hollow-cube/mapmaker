@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.misc;
 
+import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
@@ -9,7 +10,6 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.session.MapPresence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.hollowcube.mapmaker.util.CoreTeams;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.audience.Audience;

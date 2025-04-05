@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.scripting.gui;
 
+import com.oracle.truffle.js.runtime.builtins.JSErrorObject;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.scripting.Module;
 import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.scripting.gui.react.AtMapmakerGuiModule;
@@ -10,21 +12,23 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.proxy.ProxyArray;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 import static net.hollowcube.mapmaker.scripting.util.Proxies.proxyObject;
 
+@SuppressWarnings("UnstableApiUsage")
 public class GuiManager {
     private final ScriptEngine engine;
-    private final Module react;
+    public final Module react;
     public final Value reactReconcilerInst;
-    private final Value hostContext;
     private final Value viewSymbol;
 
     private final Map<String, Object> globals;
@@ -46,9 +50,6 @@ public class GuiManager {
             this.reactReconcilerInst.invokeMember("injectIntoDevTools");
         }
 
-        this.hostContext = this.react.exports().invokeMember("createContext");
-        this.react.exports().putMember("__hollowcube_hostContext", this.hostContext);
-
         this.viewSymbol = engine.makeCurrent(ctx -> ctx.eval("Symbol.for('$$hcView')"));
 
         this.globals = Map.of("JSX", new JSX(this.react));
@@ -61,8 +62,12 @@ public class GuiManager {
      * @param player The player to open the GUI for
      * @param modulePath The module to load
      */
-    public void openGui(@NotNull Player player, @NotNull URI modulePath) {
-        final Value componentModule = this.engine.load(modulePath, this.globals, this.extraModules).exports();
+    public void openGui(@NotNull Player player, @NotNull URI modulePath, @NotNull Map<String, Object> extraModules) {
+        FutureUtil.assertTickThread(player.acquirable());
+
+        final Map<String, Object> modules = new HashMap<>(this.extraModules);
+        modules.putAll(extraModules);
+        final Value componentModule = this.engine.load(modulePath, this.globals, modules).exports();
         if (!componentModule.hasMember("default"))
             throw new IllegalArgumentException("Module must have a default export");
         final Value component = componentModule.getMember("default");
@@ -73,28 +78,16 @@ public class GuiManager {
 
         final InventoryHost host = new InventoryHost(this, player);
 
-        // Wrap the element in a context provider
-        final Value contextProviderElement = this.react.exports().invokeMember("createElement",
-                this.hostContext.getMember("Provider"),
-                proxyObject(Map.of("value", host)),
+        // todo this is the same as pushView, should just call that prob.
+        var renderElement = this.react.exports().invokeMember("createElement",
+                this.react.exports().getMember("Fragment"),
+                proxyObject(Map.of("key", "0")),
                 reactElement);
+        host.elements.add(renderElement);
 
         // Mount and do initial render immediately.
         host.reconcilerRoot = mount(host);
-        final Inventory initialHandle = render(host, contextProviderElement, inventoryType);
-
-
-//        if (initialHandle != null) {
-//            player.openInventory(initialHandle);
-//
-//        } else {
-//            player.scheduler().scheduleEndOfTick(() -> {
-//                host.drawCurrentElement(inventoryType);
-//                player.openInventory(host.handle());
-//            });
-//            System.out.println("NO HANDLE ON INITIAL RENDER, COMING BACK LATER");
-//        }
-
+        render(host, inventoryType);
     }
 
     private @NotNull Value mount(@NotNull InventoryHost host) {
@@ -106,7 +99,7 @@ public class GuiManager {
                 /* concurrentUpdatesByDefaultOverride */ null,
                 /* identifierPrefix */ "a",
                 /* onRecoverableError */ (ProxyExecutable) (args) -> {
-                    System.out.println("ERROR: " + args[0]);
+                    args[0].as(JSErrorObject.class).getException().printStackTrace();
                     return null;
                 },
                 /* transitionCallbacks */ null
@@ -114,19 +107,39 @@ public class GuiManager {
     }
 
     public void unmount(@NotNull InventoryHost host) {
-        reactReconcilerInst.invokeMember("updateContainer",
-                /* element */ null,
-                /* container */ Objects.requireNonNull(host.reconcilerRoot),
-                /* parentComponent */ null,
-                /* callback */ null);
+        try {
+            System.out.println("UNMOUNTING");
+            InventoryHost.CURRENT.set(host);
+            reactReconcilerInst.invokeMember("updateContainer",
+                    /* element */ null,
+                    /* container */ Objects.requireNonNull(host.reconcilerRoot),
+                    /* parentComponent */ null,
+                    /* callback */ null);
+            host.jsExit();
+        } finally {
+            InventoryHost.CURRENT.remove();
+        }
     }
 
-    public @Nullable Inventory render(@NotNull InventoryHost host, @NotNull Value reactElement, @NotNull InventoryType inventoryType) {
-        reactReconcilerInst.invokeMember("updateContainer",
-                /* element */ reactElement,
-                /* container */ Objects.requireNonNull(host.reconcilerRoot),
-                /* parentComponent */ null,
-                /* callback */ null);
+    public @Nullable Inventory render(@NotNull InventoryHost host, @NotNull InventoryType inventoryType) {
+        try {
+            InventoryHost.CURRENT.set(host);
+
+            System.out.println(this.react.exports().getMember("Fragment"));
+            var renderElement = this.react.exports().invokeMember("createElement",
+                    this.react.exports().getMember("Fragment"),
+                    proxyObject(Map.of()),
+                    ProxyArray.fromList(host.elements));
+
+            reactReconcilerInst.invokeMember("updateContainer",
+                    /* element */ renderElement,
+                    /* container */ Objects.requireNonNull(host.reconcilerRoot),
+                    /* parentComponent */ null,
+                    /* callback */ null);
+            host.jsExit();
+        } finally {
+            InventoryHost.CURRENT.remove();
+        }
 
         // 'Render' the underlying Minestom inventory (items & title)
         return host.drawCurrentElement(inventoryType);

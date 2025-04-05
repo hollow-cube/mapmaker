@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub.item;
 
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.gui.store.StoreModule;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.scripting.ScriptEngine;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.Objects;
 
 public class OpenStoreItem extends ItemHandler {
@@ -35,7 +37,9 @@ public class OpenStoreItem extends ItemHandler {
     protected void rightClicked(@NotNull Click click) {
         try {
             final ScriptEngine scriptEngine = server.scriptEngine();
-            scriptEngine.guiManager().openGui(click.player(), URI.create("guilib:///store/store-view.js"));
+            scriptEngine.guiManager().openGui(click.player(), URI.create("guilib:///store/store-view.js"), Map.of(
+                    "@mapmaker/internal/store", new StoreModule(server.playerService(), click.player())
+            ));
         } catch (Exception e) {
             logger.error("failed to open store view", e);
             ExceptionReporter.reportException(e, click.player());

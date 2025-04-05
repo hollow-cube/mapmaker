@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.feature.play;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
@@ -13,7 +14,6 @@ import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.misc.BackgroundSpriteSet;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;

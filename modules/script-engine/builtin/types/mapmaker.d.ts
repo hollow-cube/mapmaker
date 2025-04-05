@@ -40,7 +40,7 @@ declare module "@mapmaker/gui" {
         [P in keyof JSX.IntrinsicElements[T]]: JSX.IntrinsicElements[T][P];
     }
 
-    declare type InventoryType = 'chest_6_row' | 'anvil'
+    declare type InventoryType = 'chest_3_row' | 'chest_6_row' | 'anvil'
     declare function view<T>(component: (props: T) => JSX.Element, inventoryType: InventoryType): JSX.Element;
 
     declare function useState<T>(initialValue: T | (() => T)): [T, (value: T | ((T) => T)) => void];
@@ -59,6 +59,23 @@ declare module "@mapmaker/gui" {
     };
     declare function useViewStack(): ViewStack;
 
+}
+
+declare module "@mapmaker/internal/store" {
+    declare type Package =
+        'cubits_50'
+        | 'cubits_105'
+        | 'cubits_220'
+        | 'cubits_400'
+        | 'cubits_600'
+        | 'hypercube_1mo'
+        | 'hypercube_1y'
+
+    declare function buyPackage(packageName: Package)
+
+    declare function isUpgradeOwned(upgradeId: string): boolean
+
+    declare function buyUpgrade(upgradeId: string)
 }
 
 declare module "@mapmaker/internal/maps" {

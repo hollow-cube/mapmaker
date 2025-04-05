@@ -118,20 +118,6 @@ public class ReconcilerHostConfig {
     }
 
     @HostAccess.Export
-    public Object scheduleTimeout(@NotNull Value... arguments) {
-        return engine.globals.setTimeout(arguments);
-    }
-
-    @HostAccess.Export
-    public void cancelTimeout(@Nullable Integer taskId) {
-        if (taskId == null) return; // Skull emoji
-        engine.globals.clearTimeout(Value.asValue(taskId));
-    }
-
-    @HostAccess.Export
-    public int noTimeout = -1;
-
-    @HostAccess.Export
     public boolean maySuspendCommit(@NotNull String type, @NotNull Value props) {
         return false; // Noop
     }
@@ -187,6 +173,49 @@ public class ReconcilerHostConfig {
             return ReconcilerConstants.defaultEventPriority;
         return currentUpdatePriority;
     }
+
+    @HostAccess.Export
+    public final boolean supportsMicrotasks = true;
+
+    @HostAccess.Export
+    public void scheduleMicrotask(@NotNull Value callback) {
+        try {
+            final InventoryHost host = InventoryHost.CURRENT.get();
+            if (host == null) return;
+            host.pendingMicrotasks.add(callback);
+        } catch (Exception e) {
+            throw wrapException(e);
+        }
+
+//        engine.globals.setTimeout(callback, Value.asValue(0));
+    }
+
+    @HostAccess.Export
+    public Object scheduleTimeout(@NotNull Value... arguments) {
+        try {
+            // For some reason React sometimes calls:
+            // - setTimeout(_, 0); (the global setTimeout)
+            // - hostConfig.scheduleTimeout(_, 0); (the reconciler setTimeout)
+            // - hostConfig.scheduleMicrotask(_);
+            // which are all effectively the same thing :|
+            return engine.globals.setTimeout(arguments);
+        } catch (Exception e) {
+            throw wrapException(e);
+        }
+    }
+
+    @HostAccess.Export
+    public void cancelTimeout(@Nullable Integer taskId) {
+        try {
+            if (taskId == null) return; // Skull emoji
+            engine.globals.clearTimeout(Value.asValue(taskId));
+        } catch (Exception e) {
+            throw wrapException(e);
+        }
+    }
+
+    @HostAccess.Export
+    public int noTimeout = -1;
 
 
     // MUTATION
@@ -247,7 +276,11 @@ public class ReconcilerHostConfig {
 
     @HostAccess.Export
     public void removeChildFromContainer(@NotNull InventoryHost container, @NotNull Node child, @NotNull Value... unknowns) {
-        container.removeChild(child);
+        try {
+            container.removeChild(child);
+        } catch (Exception e) {
+            throw wrapException(e);
+        }
     }
 
     @HostAccess.Export
@@ -261,7 +294,11 @@ public class ReconcilerHostConfig {
 
     @HostAccess.Export
     public void clearContainer(@NotNull InventoryHost container) {
-        container.clear();
+        try {
+            container.clear();
+        } catch (Exception e) {
+            throw wrapException(e);
+        }
     }
 
     @HostAccess.Export
@@ -278,7 +315,11 @@ public class ReconcilerHostConfig {
 
     @HostAccess.Export
     public void hideInstance(@NotNull Node instance, @NotNull Value props, @NotNull Value unknown1, @NotNull Value unknown2, @NotNull Value unknown3) {
-        instance.setHidden(true);
+        try {
+            instance.setHidden(true);
+        } catch (Exception e) {
+            throw wrapException(e);
+        }
     }
 
     @HostAccess.Export
@@ -288,7 +329,11 @@ public class ReconcilerHostConfig {
 
     @HostAccess.Export
     public void unhideInstance(@NotNull Node instance, @NotNull Value props, @NotNull Value unknown1, @NotNull Value unknown2, @NotNull Value unknown3) {
-        instance.setHidden(false);
+        try {
+            instance.setHidden(false);
+        } catch (Exception e) {
+            throw wrapException(e);
+        }
     }
 
     @HostAccess.Export
@@ -296,11 +341,7 @@ public class ReconcilerHostConfig {
         // Noop
     }
 
-
     // VARIOUS UNSUPPORTED FEATURES
-
-    @HostAccess.Export
-    public final boolean supportsMicrotasks = false;
 
     @HostAccess.Export
     public final boolean supportsTestSelectors = false;

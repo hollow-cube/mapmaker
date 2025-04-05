@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.scripting.gui;
 
-import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.scripting.gui.node.Node;
 import net.hollowcube.mapmaker.scripting.gui.util.ClickType;
+import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -13,6 +13,7 @@ import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.inventory.click.Click;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.network.packet.server.play.OpenWindowPacket;
 import net.minestom.server.network.packet.server.play.WindowItemsPacket;
 import net.minestom.server.timer.Task;
 import net.minestom.server.utils.inventory.PlayerInventoryUtils;
@@ -24,10 +25,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static net.hollowcube.mapmaker.scripting.util.Proxies.proxyObject;
 
 public class InventoryHost {
     private static final Logger logger = LoggerFactory.getLogger(InventoryHost.class);
@@ -38,17 +39,20 @@ public class InventoryHost {
                 .addListener(PlayerAnvilInputEvent.class, InventoryHost::handleAnvilInput);
     }
 
+    public static final ThreadLocal<InventoryHost> CURRENT = new ThreadLocal<>();
+
     Value reconcilerRoot; // Cache for gui manager, should not be modified here.
-    private final GuiManager owner;
+    public final GuiManager owner;
     private final Player player;
+
+    public final Queue<Value> pendingMicrotasks = new ArrayDeque<>();
 
     private final AtomicReference<Task> redrawTask = new AtomicReference<>();
     private InventoryWrapper handle;
 
-    // We only allow a single root currently which means that you cannot for example
-    // have the root node be a Fragment. It might be a relevant limitation eventually
-    // but I (matt) don't think so.
-    public Node reactRoot;
+    // One root corresponds to one element. Only the top/last root is rendered.
+    public List<Object> elements = new ArrayList<>();
+    public List<Node> roots = new ArrayList<>();
 
     public InventoryHost(@NotNull GuiManager owner, @NotNull Player player) {
         this.owner = owner;
@@ -59,6 +63,37 @@ public class InventoryHost {
         return Objects.requireNonNull(handle);
     }
 
+    public void pushView(@NotNull Value element) {
+        System.out.println("push view: " + element);
+
+        var renderElement = owner.react.exports().invokeMember("createElement",
+                owner.react.exports().getMember("Fragment"),
+                proxyObject(Map.of("key", String.valueOf(elements.size()))),
+                element);
+        elements.add(renderElement);
+
+        owner.render(this, InventoryType.CHEST_3_ROW);
+    }
+
+    public void popView() {
+        elements.removeLast();
+        System.out.println("pop view, now at " + elements.getLast());
+        owner.render(this, InventoryType.CHEST_6_ROW);
+    }
+
+    public void jsExit() {
+        while (!pendingMicrotasks.isEmpty()) {
+            Value microtask = pendingMicrotasks.poll();
+            if (microtask == null) break;
+            try {
+                microtask.executeVoid();
+            } catch (Exception e) {
+                logger.error("Failed to execute microtask", e);
+                PostHog.captureException(e, player.getUuid().toString());
+            }
+        }
+    }
+
     public void queueRedraw() {
         if (this.handle == null) return;
         final Task oldTask = this.redrawTask.getAndSet(player.scheduler().scheduleEndOfTick(() ->
@@ -67,43 +102,38 @@ public class InventoryHost {
     }
 
     public void addChild(@NotNull Node node) {
-        System.out.println("ADD CHILD TO ROOT " + node);
-        if (this.reactRoot != null)
-            throw new IllegalStateException("The root of a GUI must be a single element");
-        this.reactRoot = node;
+        this.roots.add(node);
         drawCurrentElement(InventoryType.CHEST_6_ROW); // todo
     }
 
     public void removeChild(@NotNull Node child) {
-        if (this.reactRoot != child)
-            throw new IllegalStateException("Different element removed from root: " + reactRoot + " != " + child);
-        this.reactRoot = null;
+        var index = this.roots.indexOf(child);
+        if (index == -1) throw new IllegalStateException("Child not found: " + child);
+
+        this.roots.remove(index);
     }
 
     public void clear() {
-        this.reactRoot = null;
+        this.roots.clear();
     }
 
     public @Nullable Inventory drawCurrentElement(@NotNull InventoryType type) {
-        if (this.reactRoot == null) return null; // Check if unmounted
+        if (this.roots.isEmpty()) return null; // Check if unmounted
+        final Node root = this.roots.getLast();
 
         // Currently we always consume the player inventory so add 4 rows.
         int containerSizeInRows = getInterpretedSize(type) / 9;
         var menuBuilder = new MenuBuilder(9, containerSizeInRows + 4, containerSizeInRows);
-        this.reactRoot.build(menuBuilder);
+        root.build(menuBuilder);
 
-        if (this.handle != null && this.handle.getInventoryType() == type) {
-            this.handle.updateContents(menuBuilder.getItems(), menuBuilder.getTitle());
+        if (this.handle != null) {
+            this.handle.updateContents(type, menuBuilder.getItems(), menuBuilder.getTitle());
         } else {
             this.handle = new InventoryWrapper(this, type, menuBuilder.getItems(), menuBuilder.getTitle());
-        }
-
-        if (!handle.isViewer(player)) {
             player.openInventory(handle);
         }
 
         return this.handle;
-//        System.out.println("FINALLY DREW");
     }
 
     /**
@@ -139,7 +169,9 @@ public class InventoryHost {
             // We need to reorder the hotbar to come last
             slot = mainSize + offsetSlot + (offsetSlot < 9 ? 27 : -9);
         } else return; // Don't care about this click.
-        if (host.reactRoot == null) return; // Check for unmounted.
+
+        if (host.roots.isEmpty()) return; // Check for unmounted.
+        final Node root = host.roots.getLast();
 
         final ClickType clickType = switch (event.getClick()) {
             case Click.Left ignored -> ClickType.LEFT;
@@ -157,11 +189,15 @@ public class InventoryHost {
         //  also probably handleClick should return a future that can complete later.
 
         try {
+            CURRENT.set(host);
             event.setCancelled(true);
-            host.reactRoot.handleClick(clickType, slot % 9, slot / 9);
+            root.handleClick(clickType, slot % 9, slot / 9);
+            host.jsExit();
         } catch (Exception e) {
             logger.error("Failed to handle click", e);
-            ExceptionReporter.reportException(e, host.player);
+            PostHog.captureException(e, host.player.getUuid().toString());
+        } finally {
+            CURRENT.remove();
         }
     }
 
@@ -172,21 +208,40 @@ public class InventoryHost {
     private static final class InventoryWrapper extends Inventory {
         private final InventoryHost owner;
 
+        private InventoryType inventoryType;
+        private Component title;
+
         // Represents the player inventory slots which will be sent if present.
         // May be smaller than the player inventory (eg 9 items) and will show the player items for the rest.
         private ItemStack[] playerInventory = null;
 
         public InventoryWrapper(@NotNull InventoryHost owner, @NotNull InventoryType inventoryType, @NotNull ItemStack[] items, @NotNull Component title) {
-            super(inventoryType, title);
+            // We override handling of inventory type and title. If these values are ever observed, a mistake has been made
+            super(InventoryType.CHEST_6_ROW, Component.text("unreachable"));
+
             this.owner = owner;
+            this.inventoryType = inventoryType;
+            this.title = title;
 
             copyInventoryContents(items);
         }
 
-        public void updateContents(@NotNull ItemStack[] items, @NotNull Component title) {
-            copyInventoryContents(items);
-            setTitle(title);
+        @Override
+        public @NotNull InventoryType getInventoryType() {
+            return this.inventoryType;
+        }
 
+        @Override
+        public @NotNull Component getTitle() {
+            return this.title;
+        }
+
+        public void updateContents(@NotNull InventoryType type, @NotNull ItemStack[] items, @NotNull Component title) {
+            this.inventoryType = type;
+            this.title = title;
+            copyInventoryContents(items);
+
+            sendPacketToViewers(new OpenWindowPacket(getWindowId(), getInventoryType().getWindowType(), getTitle()));
             update();
             updatePlayerInventory();
         }
@@ -274,7 +329,7 @@ public class InventoryHost {
                 return true;
             } catch (Exception e) {
                 logger.error("failed to update player inventory to delegating inventory. this is required for extended inventory support. ", e);
-                ExceptionReporter.reportException(e, player);
+                PostHog.captureException(e, player.getUuid().toString());
                 return false;
             }
         }

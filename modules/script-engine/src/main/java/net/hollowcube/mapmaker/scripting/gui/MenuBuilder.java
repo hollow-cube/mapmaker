@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.scripting.gui;
 
+import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.component.DataComponent;
 import net.minestom.server.component.DataComponents;

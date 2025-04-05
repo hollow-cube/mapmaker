@@ -5,6 +5,8 @@ import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 import java.util.Map;
 
 public class Proxies {
@@ -39,10 +41,16 @@ public class Proxies {
     }
 
     public static @NotNull RuntimeException wrapException(@NotNull Throwable e) {
-        return wrapException(e.getClass().getSimpleName() + ": " + e.getMessage());
+        var sb = new ByteArrayOutputStream();
+        var pw = new PrintWriter(sb);
+        e.printStackTrace(pw);
+        pw.flush();
+        String stackTrace = new String(sb.toByteArray());
+        return wrapException(e.getClass().getSimpleName() + ": " + e.getMessage() + "\n" + stackTrace);
     }
 
     public static @NotNull RuntimeException wrapException(@NotNull String message) {
+
         Value jsBindings = Context.getCurrent().getBindings("js");
         Value errorConstructor = jsBindings.getMember("Error");
         Value errorObject = errorConstructor.newInstance(message);

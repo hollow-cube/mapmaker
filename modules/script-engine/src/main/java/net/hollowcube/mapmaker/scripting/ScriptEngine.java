@@ -155,11 +155,15 @@ public class ScriptEngine {
     }
 
     private void handleModuleHotSwap(@NotNull URI moduleUri, @Nullable String newCode) {
-        var removed = this.moduleCache.remove(moduleUri);
-        if (removed == null) return; // Not loaded currently, ignore.
-        if (newCode == null) return; // Unload, no need to reload.
+        instance.scheduler().scheduleEndOfTick(() -> {
+            var removed = this.moduleCache.remove(moduleUri);
+            if (removed == null) return; // Not loaded currently, ignore.
+            if (newCode == null) return; // Unload, no need to reload.
 
-        load(moduleUri, removed.globals(), removed.extraModules());
+            // TODO: This is a big problem for React. We need to have a ThreadLocal of the current inventory host
+            //  when rendering components, but we cant really because one module can correspond to many inventory hosts :|
+            load(moduleUri, removed.globals(), removed.extraModules());
+        });
     }
 
 }

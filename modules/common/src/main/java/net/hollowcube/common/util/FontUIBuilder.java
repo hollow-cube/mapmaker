@@ -1,6 +1,6 @@
-package net.hollowcube.mapmaker.to_be_refactored;
+package net.hollowcube.common.util;
 
-import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;

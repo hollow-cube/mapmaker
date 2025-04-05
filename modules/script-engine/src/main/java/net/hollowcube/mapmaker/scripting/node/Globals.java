@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.scripting.node;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.mapmaker.scripting.ScriptEngine;
+import net.hollowcube.mapmaker.scripting.gui.InventoryHost;
 import net.minestom.server.thread.TickThread;
 import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
@@ -33,6 +34,15 @@ public class Globals {
         final Value[] args = new Value[arguments.length - 2];
         System.arraycopy(arguments, 2, args, 0, args.length);
 
+        if (delay <= 0) {
+            final InventoryHost host = InventoryHost.CURRENT.get();
+            if (host == null) return -1;
+            host.pendingMicrotasks.add(arguments[0]);
+            return -1;
+        }
+
+        System.out.println("setTimeout for " + delay + "ms");
+
         // If zero call immediately and return empty timeout id
 //        if (delay <= 0) {
 //            function.executeVoid((Object[]) args);
@@ -46,9 +56,7 @@ public class Globals {
                 System.out.println("run thread t" + taskId + " " + Thread.currentThread().threadId() + " " + Thread.currentThread().getName() + " " + TickThread.current());
 
                 this.engine.instance.scheduleNextTick(ignored3 -> {
-                    System.out.println("about to flush sync");
                     this.engine.guiManager().reactReconcilerInst.invokeMember("flushSyncWork");
-                    System.out.println("done flushing sync");
                     function.executeVoid((Object[]) args);
                 });
             } finally {

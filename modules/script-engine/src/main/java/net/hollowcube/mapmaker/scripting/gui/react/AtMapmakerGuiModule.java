@@ -11,6 +11,7 @@ import org.graalvm.polyglot.proxy.ProxyObject;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import static net.hollowcube.mapmaker.scripting.util.Proxies.wrapException;
@@ -26,70 +27,100 @@ public final class AtMapmakerGuiModule implements ProxyObject {
         this.react = react;
     }
 
-    private @NotNull InventoryHost useInventoryHost() {
-        final Value hostContext = react.exports().getMember("__hollowcube_hostContext");
-        if (hostContext == null || hostContext.isNull()) {
-            throw wrapException("useInventoryHost must be called within a React component");
-        }
-
-        final Value hostValue = react.exports().invokeMember("useContext", hostContext);
-        if (!hostValue.isHostObject()) {
-            throw wrapException("useInventoryHost must be called within a React component");
-        }
-
-        return hostValue.as(InventoryHost.class);
-    }
-
     @HostAccess.Export
     public Value view(@NotNull Value component, @NotNull String inventoryType) {
-        return this.guiManager.wrapView(component, inventoryType);
+        try {
+            return this.guiManager.wrapView(component, inventoryType);
+        } catch (Exception e) {
+            throw wrapException(e);
+        }
     }
 
     @HostAccess.Export
     public Value useState(Value... args) {
-        return react.exports().getMember("useState").execute((Object[]) args);
+        try {
+            return react.exports().getMember("useState").execute((Object[]) args);
+        } catch (Exception e) {
+            throw wrapException(e);
+        }
     }
 
     @HostAccess.Export
     public Value use(Value... args) {
-        return react.exports().invokeMember("use", (Object[]) args);
+        try {
+            return react.exports().invokeMember("use", (Object[]) args);
+        } catch (Exception e) {
+            throw wrapException(e);
+        }
     }
 
     @HostAccess.Export
     public ViewStack useViewStack() {
-        return new ViewStack(useInventoryHost());
+        try {
+            return new ViewStack(Objects.requireNonNull(InventoryHost.CURRENT.get()));
+        } catch (Exception e) {
+            throw wrapException(e);
+        }
     }
 
     public record ViewStack(@NotNull InventoryHost host) {
 
         @HostAccess.Export
+        public void pushView(@NotNull Value element, Value... restTodo) {
+            try {
+                System.out.println("PUSH VIEW: " + element.getMember("type").getMember("$$hcView"));
+
+                host.pushView(element);
+            } catch (Exception e) {
+                throw wrapException(e);
+            }
+        }
+
+        @HostAccess.Export
+        public void popView() {
+            try {
+                host.popView();
+            } catch (Exception e) {
+                throw wrapException(e);
+            }
+        }
+
+        @HostAccess.Export
         public void close() {
-            final Set<Player> viewers = new HashSet<>(host.handle().getViewers());
-            viewers.forEach(Player::closeInventory);
+            try {
+                final Set<Player> viewers = new HashSet<>(host.handle().getViewers());
+                viewers.forEach(Player::closeInventory);
+            } catch (Exception e) {
+                throw wrapException(e);
+            }
         }
     }
 
     @Override
     public Object getMember(String key) {
-        return switch (key) {
-            case "view" -> (ProxyExecutable) (args) -> {
-                if (args.length != 2) {
-                    throw new IllegalArgumentException("view() expects 2 arguments");
-                }
+        try {
+            return switch (key) {
+                case "view" -> (ProxyExecutable) (args) -> {
+                    if (args.length != 2) {
+                        throw new IllegalArgumentException("view() expects 2 arguments");
+                    }
 
-                return view(args[0], args[1].asString());
-            };
-            case "useState" -> react.exports().getMember("useState");
-            case "use" -> react.exports().getMember("use");
-            case "useViewStack" -> (ProxyExecutable) (args) -> {
-                if (args.length != 0) {
-                    throw new IllegalArgumentException("useViewStack() expects 0 arguments");
-                }
+                    return view(args[0], args[1].asString());
+                };
+                case "useState" -> react.exports().getMember("useState");
+                case "use" -> react.exports().getMember("use");
+                case "useViewStack" -> (ProxyExecutable) (args) -> {
+                    if (args.length != 0) {
+                        throw new IllegalArgumentException("useViewStack() expects 0 arguments");
+                    }
 
-                return useViewStack();
+                    return useViewStack();
+                };
+                case null, default -> null;
             };
-            case null, default -> null;
-        };
+        } catch (Exception e) {
+            throw wrapException(e);
+        }
     }
 
     @Override
