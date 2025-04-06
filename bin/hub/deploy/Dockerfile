@@ -1,7 +1,6 @@
-FROM gvm-test:latest
+FROM mworzala/graalvm-jre:24
 
 WORKDIR /app
-
 COPY ./bin/hub/build/libs/hub-all.jar /app/server.jar
 
 EXPOSE 25565
