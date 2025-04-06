@@ -1,11 +1,11 @@
 package net.hollowcube.compat.axiom.data.buffers;
 
-import com.mojang.datafixers.util.Either;
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectArrayMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
+import net.hollowcube.common.util.Either;
 import net.hollowcube.compat.axiom.AxiomAPI;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.NetworkBuffer;
@@ -14,12 +14,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public record AxiomBlockBuffer(
-    @NotNull Long2ObjectMap<Either<Block, Block[]>> updates,
-    @NotNull Long2ObjectMap<Short2ObjectMap<AxiomBlockEntityData>> blockEntities
+        @NotNull Long2ObjectMap<Either<Block, Block[]>> updates,
+        @NotNull Long2ObjectMap<Short2ObjectMap<AxiomBlockEntityData>> blockEntities
 ) implements AxiomBuffer {
 
     private static final long EOD = 0b1000000000000000000000000010000000000000000000000000100000000000L;
     public static final int MAX_BITS_PER_ENTRY;
+
     static {
         int bpe = 0;
         for (short id = 24134; id < Short.MAX_VALUE; id++) {

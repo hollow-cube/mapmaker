@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.map.entity.potion;
 
-import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.ints.Int2DoubleFunction;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.codec.Codec;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.attribute.AttributeOperation;
@@ -57,7 +57,7 @@ public record PotionInfo(
 
     static final int MAX_POTION_LEVEL = 128;
 
-    public static final Codec<PotionInfo> CODEC = Codec.STRING.xmap(PotionInfo::getById, PotionInfo::id);
+    public static final Codec<PotionInfo> CODEC = Codec.STRING.transform(PotionInfo::getById, PotionInfo::id);
 
     public static final PotionInfo SPEED = builder("speed").maxLevel().setVanillaEffect(PotionEffect.SPEED).setIcon("effect/potion/icon/speed")
             .attribute(Attribute.MOVEMENT_SPEED, "minecraft:effect.speed", level -> 0.2 * (level + 1), AttributeOperation.ADD_MULTIPLIED_TOTAL).build();

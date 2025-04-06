@@ -18,6 +18,8 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
+import java.util.Objects;
+
 public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData> extends View {
     private static final Component TELEPORT_NONE = Component.translatable("gui.effect.actions.teleport.none");
 
@@ -91,7 +93,7 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
     @Action("teleport_inactive")
     public void handleTeleportInteractA(@NotNull Player player, int slot, @NotNull ClickType clickType) {
         if (clickType == ClickType.LEFT_CLICK || clickType == ClickType.RIGHT_CLICK) {
-            if (data.teleport().isEmpty()) {
+            if (data.teleport() == null) {
                 // Default to the player's current position
                 data.setTeleport(player.getPosition());
                 updateFromData();
@@ -101,7 +103,7 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
                 data.setTeleport(pos);
                 updateFromData();
                 save.run();
-            }, data.teleport().orElseThrow()));
+            }, Objects.requireNonNull(data.teleport())));
         } else if (clickType == ClickType.SHIFT_LEFT_CLICK) {
             data.setTeleport(null);
             updateFromData();
@@ -142,10 +144,11 @@ public abstract class AbstractEffectActionsTab<EffectData extends BaseEffectData
         clearEffectsOnLabel.setArgs(clearEffectsState);
         clearEffectsSwitch.setOption(data.clearPotionEffects() ? 1 : 0);
 
-        if (data.teleport().isPresent()) {
+        final var teleport = data.teleport();
+        if (teleport != null) {
             teleportSwitch.setOption(1);
             teleportOnLabel.setArgs(Component.translatable("gui.effect.actions.teleport.pos",
-                    CoordinateUtil.asTranslationArgs(data.teleport().get())));
+                    CoordinateUtil.asTranslationArgs(teleport)));
         } else {
             teleportSwitch.setOption(0);
             teleportOffLabel.setArgs(TELEPORT_NONE);

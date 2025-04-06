@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.map.gui.buildermenu;
 
-import com.mojang.datafixers.util.Either;
+import net.hollowcube.common.util.Either;
 import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.feature.FeatureFlag;
 import net.hollowcube.mapmaker.map.MapFeatureFlags;

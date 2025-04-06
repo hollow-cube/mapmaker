@@ -51,6 +51,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
@@ -273,7 +274,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
         // We must set the respawn point during config so that their spawn chunks are sent there.
         // This prevents falling through the floor when joining.
-        player.setRespawnPoint(saveState.state(EditState.class).pos().orElse(map().settings().getSpawnPoint()));
+        player.setRespawnPoint(Objects.requireNonNullElseGet(saveState.state(EditState.class).pos(), () -> map().settings().getSpawnPoint()));
     }
 
     @Override
@@ -286,7 +287,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
             // We need to handle missing save states here because they do not reenter configuration to go from test
             // mode back to editing. Thus the preAddPlayer would not trigger.
             saveState = getOrCreateSaveState(player);
-            player.teleport(saveState.state(EditState.class).pos().orElse(map().settings().getSpawnPoint()));
+            player.teleport(Objects.requireNonNullElseGet(saveState.state(EditState.class).pos(), () -> map().settings().getSpawnPoint()));
         }
 
         super.addPlayer(player);
@@ -306,8 +307,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         editState.inventory().forEach(player.getInventory()::setItemStack);
         player.setHeldItemSlot((byte) editState.selectedSlot());
         player.setFlying(editState.isFlying());
-        var storedPos = editState.pos();
-        if (storedPos.isEmpty()) {
+        if (editState.pos() == null) {
             // If there is no position stored then this is a fresh edit state so add the builder menu
             player.getInventory().addItemStack(itemRegistry().getItemStack("mapmaker:builder_menu", null));
         }

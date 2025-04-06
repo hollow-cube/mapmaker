@@ -1,16 +1,15 @@
 package net.hollowcube.mapmaker.store;
 
-
-import com.mojang.serialization.Codec;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.codec.Codec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public sealed interface CostEntry permits CostEntry.Cubits, CostEntry.Coins, CostEntry.BackpackItem {
-    Codec<CostEntry> CODEC = Codec.STRING.xmap(ti -> {
+    Codec<CostEntry> CODEC = Codec.STRING.transform(ti -> {
         if (ti.equals("cubits")) return CostEntry.Cubits.INSTANCE;
         if (ti.equals("coins")) return CostEntry.Coins.INSTANCE;
         return new CostEntry.BackpackItem(net.hollowcube.mapmaker.backpack.BackpackItem.byId(ti));

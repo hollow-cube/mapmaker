@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.feature.play;
 import com.google.auto.service.AutoService;
 import io.prometheus.client.Counter;
 import net.hollowcube.common.events.PlayerMoveVehicleEvent;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.dfu.DFU;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
@@ -61,7 +62,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -355,16 +355,16 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         if (!event.getMapWorld().isPlaying(event.player())) return;
         if (state.history().isEmpty()) return;
-        if (state.lastState().isEmpty()) return;
+        if (state.lastState() == null) return;
         if (!state.history().getLast().equals(event.checkpointId())) return;
-        if (data.teleport().isPresent()) return;
-        var pos = state.pos().orElse(null);
+        if (data.teleport() != null) return;
+        var pos = state.pos();
         if (pos == null) return;
         float yaw = player.getPosition().yaw();
         float pitch = player.getPosition().pitch();
 
         state.setPos(pos.withView(yaw, pitch));
-        state.lastState().ifPresent(s -> s.setPos(s.pos().map(p -> p.withView(yaw, pitch)).orElse(null)));
+        OpUtils.build(state.lastState(), s -> s.setPos(OpUtils.map(s.pos(), p -> p.withView(yaw, pitch))));
     }
 
     public void handleCheckpointChange(@NotNull MapPlayerCheckpointPreChangeEvent event) {
@@ -375,13 +375,13 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         // Ensure the event should trigger a checkpoint change for the current players state
         if (checkProgressIndex(player, world, state, data)) return;
-        if (state.lastState().isPresent() && state.lastState().get().hasStatus(event.checkpointId()))
+        if (state.lastState() != null && state.lastState().hasStatus(event.checkpointId()))
             return; // Player already has this checkpoint in their history (they are backtracking)
 
         // The checkpoint (reset) pos is set to the teleport if its present, or the first
         // position the player touched the checkpoint otherwise. todo probably need to do a gravity snap here
         // to bring it down to the ground.
-        var checkpointPos = data.teleport().orElse(player.getPosition());
+        var checkpointPos = Objects.requireNonNullElseGet(data.teleport(), player::getPosition);
 
         // Apply the checkpoint/effect changes
         state.setTimeLimit(-1); // Time always reset on checkpoint
@@ -402,13 +402,13 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         // Cache the last state so that we can reset back here.
         state.setLastState(new PlayState(
-                Optional.empty(),
+                null,
                 newHistory,
                 state.progressIndex(),
                 state.timeLimit(),
                 state.resetHeight(),
                 state.potionEffects().copy(),
-                Optional.of(checkpointPos),
+                checkpointPos,
                 state.maxLives(),
                 state.lives(),
                 Map.copyOf(state.ghostBlocks()),
@@ -437,8 +437,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // Apply the status changes
         updateStateFromPlayer(player, state);
         updateBaseEffectState(world, player, data, state);
-        if (data.extraTime() > 0 && state.timeLimit().isPresent()) {
-            state.setTimeLimit(state.timeLimit().get() + data.extraTime());
+        if (data.extraTime() > 0 && state.timeLimit() != null) {
+            state.setTimeLimit(state.timeLimit() + data.extraTime());
         }
         state.addStatus(event.statusId());
         state.settings().update(data.settings());
@@ -449,7 +449,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     private boolean checkProgressIndex(@NotNull Player player, @NotNull MapWorld world, @NotNull PlayState state, @NotNull BaseEffectData data) {
         if (data.progressIndex() > 0) {
-            int currentIndex = state.progressIndex().orElse(0);
+            int currentIndex = Objects.requireNonNullElse(state.progressIndex(), 0);
             boolean condition = world.map().getSetting(MapSettings.PROGRESS_INDEX_ADDITION)
                     // With additive index you can get anything <= current + 1
                     ? (data.progressIndex() > currentIndex + 1)
@@ -511,7 +511,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
             var playState = saveState.tryGetState(PlayState.class).orElse(null);
             if (playState == null) return;
-            var resetHeight = playState.resetHeight().orElse(world.instance().getTag(DEFAULT_RESET_HEIGHT));
+            var resetHeight = Objects.requireNonNullElseGet(playState.resetHeight(), () -> world.instance().getTag(DEFAULT_RESET_HEIGHT));
             if (player.getPosition().y() < resetHeight) {
                 softReset(player, saveState);
                 return;
@@ -583,7 +583,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             // If the checkpoint is below the reset height, teleport to the spawn instead to prevent getting stuck.
             // If they set the spawn below the world then its a joke map anyway and i don't care.
             var playState = saveState.state(PlayState.class);
-            var resetHeight = playState.resetHeight().orElse(world.instance().getTag(DEFAULT_RESET_HEIGHT));
+            var resetHeight = Objects.requireNonNullElseGet(playState.resetHeight(), () -> world.instance().getTag(DEFAULT_RESET_HEIGHT));
             if (checkpoint.y() < resetHeight) {
                 resetTeleport(player, world.spawnPoint(player)).thenRun(() -> {
                     EventDispatcher.call(new MapPlayerInitEvent(world, player, false, false));
@@ -598,8 +598,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         var playState = saveState.state(PlayState.class);
         // If they don't have a checkpoint or are on their last life, do a hard reset.
-        var isOutOfLives = playState.lives().orElse(0) == 1;
-        if (playState.lastState().isEmpty() || isOutOfLives) {
+        var isOutOfLives = Objects.requireNonNullElse(playState.lives(), 0) == 1;
+        if (playState.lastState() == null || isOutOfLives) {
             if (isOutOfLives) {
                 player.playSound(PLAYER_DEATH_SOUND);
             }
@@ -611,10 +611,10 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         abstractWorld.removePlayerImmediate(player);
 
         // "pop" the last state to the current
-        playState = playState.lastState().get();
-        if (playState.lives().isPresent()) {
+        playState = playState.lastState();
+        if (playState.lives() != null) {
             // This is definitely valid, we checked above to see if this was the last life.
-            playState.setLives(playState.lives().get() - 1);
+            playState.setLives(playState.lives() - 1);
             player.playSound(PLAYER_HURT_SOUND);
         }
         saveState.setState(playState);
@@ -624,7 +624,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         player.removeTag(COUNTDOWN_END); // Remove so it is reapplied by updatePlayerFromState
         // Apply the current state to the player and teleport them
         updatePlayerFromState(world, player, playState);
-        resetTeleport(player, playState.pos().orElseThrow()).thenRun(() -> {
+        resetTeleport(player, Objects.requireNonNull(playState.pos())).thenRun(() -> {
             abstractWorld.addPlayerImmediate(player);
 
             EventDispatcher.call(new MapPlayerInitEvent(world, player, false, false));
@@ -646,7 +646,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     private void updateBaseEffectState(@NotNull MapWorld world, @NotNull Player player, @NotNull BaseEffectData data, @NotNull PlayState state) {
         if (data.progressIndex() != -1) {
             boolean useProgressAddition = world.map().getSetting(MapSettings.PROGRESS_INDEX_ADDITION);
-            state.setProgressIndex(useProgressAddition ? (state.progressIndex().orElse(0) + data.progressIndex()) : data.progressIndex());
+            state.setProgressIndex(useProgressAddition ? (Objects.requireNonNullElse(state.progressIndex(), 0) + data.progressIndex()) : data.progressIndex());
         }
         if (data.timeLimit() > 0) {
             // Only update the time limit if it is assigned in this effect.
@@ -671,8 +671,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
                 existingEffect.setDuration(newEffect.duration());
             }
         }
-        if (data.teleport().isPresent()) {
-            resetTeleport(player, data.teleport().get()).thenRun(() -> {
+        final var teleport = data.teleport();
+        if (teleport != null) {
+            resetTeleport(player, teleport).thenRun(() -> {
                 player.playSound(Sound.sound(SoundEvent.ENTITY_PLAYER_TELEPORT, Sound.Source.PLAYER, 0.5f, 1f), player.getPosition());
             });
         }
@@ -734,17 +735,17 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     private void updatePlayerFromState(MapWorld world, @NotNull Player player, @NotNull PlayState state, boolean start) {
         // Set the player health to the number of lives they have (1 heart = 1 life)
-        if (state.maxLives().isPresent() && state.lives().isPresent()) {
-            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(2 * state.maxLives().get());
-            player.setHealth(2 * state.lives().get());
+        if (state.maxLives() != null && state.lives() != null) {
+            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(2 * state.maxLives());
+            player.setHealth(2 * state.lives());
         } else {
             player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(Attribute.MAX_HEALTH.defaultValue());
             player.setHealth((float) Attribute.MAX_HEALTH.defaultValue());
         }
 
         // Update the countdown timer (time may have been added
-        if (state.timeLimit().isPresent() && !start) {
-            player.setTag(COUNTDOWN_END, System.currentTimeMillis() + state.timeLimit().get());
+        if (state.timeLimit() != null && !start) {
+            player.setTag(COUNTDOWN_END, System.currentTimeMillis() + state.timeLimit());
         } else {
             player.removeTag(COUNTDOWN_END);
         }

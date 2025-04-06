@@ -3,13 +3,13 @@ package net.hollowcube.mapmaker.map.feature.play.effect;
 import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.map.feature.play.setting.SavedMapSettings;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public abstract class BaseEffectData {
@@ -25,18 +25,18 @@ public abstract class BaseEffectData {
     private int timeLimit;
     private int resetHeight;
     private boolean clearPotionEffects;
-    private PotionEffectList potionEffects;
-    private Optional<Pos> teleport;
+    private final PotionEffectList potionEffects;
+    private Pos teleport;
     //todo settings
     private HotbarItems items;
     private final SavedMapSettings settings;
 
     public BaseEffectData(
-            String name, int progressIndex, int timeLimit,
+            @NotNull String name, int progressIndex, int timeLimit,
             int resetHeight, boolean clearPotionEffects,
-            PotionEffectList potionEffects,
-            Optional<Pos> teleport,
-            HotbarItems items, SavedMapSettings settings
+            @NotNull PotionEffectList potionEffects,
+            @Nullable Pos teleport, @NotNull HotbarItems items,
+            @Nullable SavedMapSettings settings
     ) {
         this.name = name;
         this.progressIndex = progressIndex;
@@ -46,7 +46,7 @@ public abstract class BaseEffectData {
         this.potionEffects = potionEffects;
         this.teleport = teleport;
         this.items = items;
-        this.settings = settings;
+        this.settings = Objects.requireNonNullElseGet(settings, SavedMapSettings::new);
     }
 
     public @NotNull String displayName() {
@@ -86,7 +86,7 @@ public abstract class BaseEffectData {
         return Optional.of(potionEffects);
     }
 
-    public @NotNull Optional<Pos> teleport() {
+    public @Nullable Pos teleport() {
         return teleport;
     }
 
@@ -119,7 +119,7 @@ public abstract class BaseEffectData {
     }
 
     public void setTeleport(@Nullable Pos teleport) {
-        this.teleport = Optional.ofNullable(teleport);
+        this.teleport = teleport;
     }
 
     public void setItems(@NotNull HotbarItems items) {
@@ -133,7 +133,7 @@ public abstract class BaseEffectData {
         player.sendMessage("Reset height: " + (resetHeight() == NO_RESET_HEIGHT ? "inherited" : resetHeight()));
         player.sendMessage("Clear potion effects: " + clearPotionEffects());
         player.sendMessage("Potion effects: " + (potionEffects().isEmpty() ? "none" : potionEffects().toString()));
-        player.sendMessage("Teleport: " + teleport().map(Point::toString).orElse("none"));
+        player.sendMessage("Teleport: " + teleport());
         player.sendMessage("Items: " + items());
         player.sendMessage("Settings: " + settings());
     }

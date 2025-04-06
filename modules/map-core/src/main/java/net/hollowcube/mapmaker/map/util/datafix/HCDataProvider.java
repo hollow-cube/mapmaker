@@ -2,10 +2,7 @@ package net.hollowcube.mapmaker.map.util.datafix;
 
 import ca.spottedleaf.dataconverter.util.ExternalDataProvider;
 import com.google.auto.service.AutoService;
-import com.mojang.serialization.DynamicOps;
-import net.hollowcube.common.util.dfu.NbtOps;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.kyori.adventure.nbt.BinaryTag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -31,8 +28,4 @@ public class HCDataProvider implements ExternalDataProvider {
         return HCVersions.class;
     }
 
-    @Override
-    public @NotNull DynamicOps<BinaryTag> nbtOps() {
-        return NbtOps.INSTANCE;
-    }
 }

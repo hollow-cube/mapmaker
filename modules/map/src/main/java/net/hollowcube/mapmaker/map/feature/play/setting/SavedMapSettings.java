@@ -1,16 +1,19 @@
 package net.hollowcube.mapmaker.map.feature.play.setting;
 
-import com.mojang.serialization.Codec;
+import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
+import net.minestom.server.codec.Codec;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("UnstableApiUsage")
 public class SavedMapSettings {
 
-    public static final Codec<SavedMapSettings> CODEC = Codec.<MapSetting<?>, Object>dispatchedMap(MapSetting.CODEC, MapSetting::codec)
-            .xmap(SavedMapSettings::new, settings -> settings.settings);
+    @SuppressWarnings("unchecked")
+    public static final Codec<SavedMapSettings> CODEC = ExtraCodecs.dispatchedMap(MapSetting.CODEC, s -> (Codec<Object>) s.codec())
+            .transform(SavedMapSettings::new, settings -> settings.settings);
 
     private final Map<MapSetting<?>, Object> settings = new HashMap<>();
 

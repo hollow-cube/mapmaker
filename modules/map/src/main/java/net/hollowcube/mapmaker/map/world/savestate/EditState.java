@@ -1,12 +1,12 @@
 package net.hollowcube.mapmaker.map.world.savestate;
 
 import ca.spottedleaf.dataconverter.minecraft.datatypes.MCDataType;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.map.util.LegacyCodecs;
 import net.hollowcube.mapmaker.map.util.datafix.HCTypeRegistry;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.StructCodec;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -14,21 +14,19 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 
 import java.util.Map;
-import java.util.Optional;
 
+@SuppressWarnings("UnstableApiUsage")
 public final class EditState {
     @TestOnly
-    static final Codec<Map<Integer, ItemStack>> INVENTORY_CODEC = Codec.withAlternative(
-            Codec.unboundedMap(ExtraCodecs.INT_STRING, ExtraCodecs.ITEM_STACK),
-            LegacyCodecs.ITEM_STACK_MAP_AS_BASE64
-    );
+    static final Codec<Map<Integer, ItemStack>> INVENTORY_CODEC = ExtraCodecs.INT_STRING.mapValue(ItemStack.CODEC)
+            .orElse(LegacyCodecs.ITEM_STACK_MAP_AS_BASE64);
 
-    public static final Codec<EditState> CODEC = RecordCodecBuilder.create(i -> i.group(
-            ExtraCodecs.POS.optionalFieldOf("pos").forGetter(EditState::pos),
-            Codec.BOOL.optionalFieldOf("isFlying", false).forGetter(EditState::isFlying),
-            INVENTORY_CODEC.optionalFieldOf("inventory", Map.of()).forGetter(EditState::inventory),
-            Codec.INT.optionalFieldOf("selectedSlot", 0).forGetter(EditState::selectedSlot)
-    ).apply(i, EditState::new));
+    public static final StructCodec<EditState> CODEC = StructCodec.struct(
+            "pos", ExtraCodecs.POS.optional(), EditState::pos,
+            "isFlying", Codec.BOOLEAN.optional(false), EditState::isFlying,
+            "inventory", INVENTORY_CODEC.optional(Map.of()), EditState::inventory,
+            "selectedSlot", Codec.INT.optional(0), EditState::selectedSlot,
+            EditState::new);
 
     public static final SaveStateType.Serializer<EditState> SERIALIZER = new SaveStateType.Serializer<>() {
         @Override
@@ -47,23 +45,23 @@ public final class EditState {
         }
     };
 
-    private Optional<Pos> pos;
+    private Pos pos;
     private boolean isFlying;
     private Map<Integer, ItemStack> inventory;
     private int selectedSlot;
 
     public EditState() {
-        this(Optional.empty(), false, Map.of(), 0);
+        this(null, false, Map.of(), 0);
     }
 
-    public EditState(Optional<Pos> pos, boolean isFlying, Map<Integer, ItemStack> inventory, int selectedSlot) {
+    public EditState(@Nullable Pos pos, boolean isFlying, Map<Integer, ItemStack> inventory, int selectedSlot) {
         this.pos = pos;
         this.isFlying = isFlying;
         this.inventory = inventory;
         this.selectedSlot = selectedSlot;
     }
 
-    public @NotNull Optional<Pos> pos() {
+    public @Nullable Pos pos() {
         return pos;
     }
 
@@ -80,7 +78,7 @@ public final class EditState {
     }
 
     public void setPos(@Nullable Pos pos) {
-        this.pos = Optional.ofNullable(pos);
+        this.pos = pos;
     }
 
     public void setFlying(boolean flying) {

@@ -28,6 +28,7 @@ import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -115,14 +116,15 @@ public class PlayerVisibilityFeatureProvider implements FeatureProvider {
         }
     }
 
-    private record PlayerVisibilityRule(Player self, MapWorld world, PlayerDataV2 data) implements Function<Player, PlayerVisibilityExtension.Visibility> {
+    private record PlayerVisibilityRule(Player self, MapWorld world,
+                                        PlayerDataV2 data) implements Function<Player, PlayerVisibilityExtension.Visibility> {
 
         private static @Nullable Pos getCheckpoint(Player player) {
             return OpUtils.map(
                     SaveState.optionalFromPlayer(player),
                     state -> state
                             .tryGetState(PlayState.class)
-                            .flatMap(PlayState::pos)
+                            .flatMap(p -> Optional.ofNullable(p.pos()))
                             .orElse(null)
             );
         }

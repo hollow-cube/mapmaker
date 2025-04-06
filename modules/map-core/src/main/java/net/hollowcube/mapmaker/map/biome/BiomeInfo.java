@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.map.biome;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.util.RGBLike;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.StructCodec;
 import net.minestom.server.color.Color;
 import net.minestom.server.item.Material;
 import net.minestom.server.world.biome.Biome;
@@ -12,25 +12,24 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
-
+@SuppressWarnings("UnstableApiUsage")
 public class BiomeInfo {
 
-    private static final Color DEFAULT_SKY_COLOR = new Color(0x78A7FF);
-    private static final Color DEFAULT_FOG_COLOR = new Color(0xC0D8FF);
-    private static final Color DEFAULT_WATER_COLOR = new Color(0x3F76E4);
-    private static final Color DEFAULT_WATER_FOG_COLOR = new Color(0x050533);
+    private static final RGBLike DEFAULT_SKY_COLOR = new Color(0x78A7FF);
+    private static final RGBLike DEFAULT_FOG_COLOR = new Color(0xC0D8FF);
+    private static final RGBLike DEFAULT_WATER_COLOR = new Color(0x3F76E4);
+    private static final RGBLike DEFAULT_WATER_FOG_COLOR = new Color(0x050533);
 
-    public static final Codec<BiomeInfo> CODEC = RecordCodecBuilder.create(i -> i.group(
-            Codec.STRING.optionalFieldOf("name", "").forGetter(BiomeInfo::getName),
-            ExtraCodecs.MATERIAL.lenientOptionalFieldOf("displayItem", Material.GRASS_BLOCK).forGetter(BiomeInfo::getDisplayItem),
-            ExtraCodecs.COLOR.lenientOptionalFieldOf("skyColor", DEFAULT_SKY_COLOR).forGetter(BiomeInfo::getSkyColor),
-            ExtraCodecs.COLOR.lenientOptionalFieldOf("fogColor", DEFAULT_FOG_COLOR).forGetter(BiomeInfo::getFogColor),
-            ExtraCodecs.COLOR.lenientOptionalFieldOf("waterColor", DEFAULT_WATER_COLOR).forGetter(BiomeInfo::getWaterColor),
-            ExtraCodecs.COLOR.lenientOptionalFieldOf("waterFogColor", DEFAULT_WATER_FOG_COLOR).forGetter(BiomeInfo::getWaterFogColor),
-            ExtraCodecs.COLOR.lenientOptionalFieldOf("grassColor").forGetter(ExtraCodecs.optional(BiomeInfo::getGrassColor)),
-            ExtraCodecs.COLOR.lenientOptionalFieldOf("foliageColor").forGetter(ExtraCodecs.optional(BiomeInfo::getFoliageColor))
-    ).apply(i, BiomeInfo::new));
+    public static final Codec<BiomeInfo> CODEC = StructCodec.struct(
+            "name", Codec.STRING.optional(""), BiomeInfo::getName,
+            "displayItem", Material.CODEC.optional(Material.GRASS_BLOCK), BiomeInfo::getDisplayItem,
+            "skyColor", Color.CODEC.optional(DEFAULT_SKY_COLOR), BiomeInfo::getSkyColor,
+            "fogColor", Color.CODEC.optional(DEFAULT_FOG_COLOR), BiomeInfo::getFogColor,
+            "waterColor", Color.CODEC.optional(DEFAULT_WATER_COLOR), BiomeInfo::getWaterColor,
+            "waterFogColor", Color.CODEC.optional(DEFAULT_WATER_FOG_COLOR), BiomeInfo::getWaterFogColor,
+            "grassColor", Color.CODEC.optional(), BiomeInfo::getGrassColor,
+            "foliageColor", Color.CODEC.optional(), BiomeInfo::getFoliageColor,
+            BiomeInfo::new);
 
     public enum Precipitation {
         NONE,
@@ -44,12 +43,12 @@ public class BiomeInfo {
     private Precipitation precipitation = Precipitation.NONE;
     private Object particle = null; //todo
 
-    private Color skyColor = DEFAULT_SKY_COLOR;
-    private Color fogColor = DEFAULT_FOG_COLOR;
-    private Color waterColor = DEFAULT_WATER_COLOR;
-    private Color waterFogColor = DEFAULT_WATER_FOG_COLOR;
-    private Color grassColor = null;
-    private Color foliageColor = null;
+    private RGBLike skyColor = DEFAULT_SKY_COLOR;
+    private RGBLike fogColor = DEFAULT_FOG_COLOR;
+    private RGBLike waterColor = DEFAULT_WATER_COLOR;
+    private RGBLike waterFogColor = DEFAULT_WATER_FOG_COLOR;
+    private RGBLike grassColor = null;
+    private RGBLike foliageColor = null;
 
     private String music = null; //todo
     private String ambientSound = null; //todo
@@ -62,9 +61,9 @@ public class BiomeInfo {
 
     public BiomeInfo(
             @NotNull String name, @NotNull Material displayItem,
-            @NotNull Color skyColor, @NotNull Color fogColor,
-            @NotNull Color waterColor, @NotNull Color waterFogColor,
-            @NotNull Optional<Color> grassColor, @NotNull Optional<Color> foliageColor
+            @NotNull RGBLike skyColor, @NotNull RGBLike fogColor,
+            @NotNull RGBLike waterColor, @NotNull RGBLike waterFogColor,
+            @Nullable RGBLike grassColor, @Nullable RGBLike foliageColor
     ) {
         this.name = name;
         this.displayItem = displayItem;
@@ -72,8 +71,8 @@ public class BiomeInfo {
         this.fogColor = fogColor;
         this.waterColor = waterColor;
         this.waterFogColor = waterFogColor;
-        this.grassColor = grassColor.orElse(null);
-        this.foliageColor = foliageColor.orElse(null);
+        this.grassColor = grassColor;
+        this.foliageColor = foliageColor;
     }
 
     public @NotNull String getName() {
@@ -97,51 +96,51 @@ public class BiomeInfo {
         this.displayItem = displayItem;
     }
 
-    public @NotNull Color getSkyColor() {
+    public @NotNull RGBLike getSkyColor() {
         return skyColor;
     }
 
-    public void setSkyColor(@NotNull Color skyColor) {
+    public void setSkyColor(@NotNull RGBLike skyColor) {
         this.skyColor = skyColor;
     }
 
-    public Color getFogColor() {
+    public RGBLike getFogColor() {
         return fogColor;
     }
 
-    public void setFogColor(@NotNull Color fogColor) {
+    public void setFogColor(@NotNull RGBLike fogColor) {
         this.fogColor = fogColor;
     }
 
-    public @NotNull Color getWaterColor() {
+    public @NotNull RGBLike getWaterColor() {
         return waterColor;
     }
 
-    public void setWaterColor(@NotNull Color waterColor) {
+    public void setWaterColor(@NotNull RGBLike waterColor) {
         this.waterColor = waterColor;
     }
 
-    public @NotNull Color getWaterFogColor() {
+    public @NotNull RGBLike getWaterFogColor() {
         return waterFogColor;
     }
 
-    public void setWaterFogColor(@NotNull Color waterFogColor) {
+    public void setWaterFogColor(@NotNull RGBLike waterFogColor) {
         this.waterFogColor = waterFogColor;
     }
 
-    public @Nullable Color getGrassColor() {
+    public @Nullable RGBLike getGrassColor() {
         return grassColor;
     }
 
-    public void setGrassColor(@Nullable Color grassColor) {
+    public void setGrassColor(@Nullable RGBLike grassColor) {
         this.grassColor = grassColor;
     }
 
-    public @Nullable Color getFoliageColor() {
+    public @Nullable RGBLike getFoliageColor() {
         return foliageColor;
     }
 
-    public void setFoliageColor(@Nullable Color foliageColor) {
+    public void setFoliageColor(@Nullable RGBLike foliageColor) {
         this.foliageColor = foliageColor;
     }
 

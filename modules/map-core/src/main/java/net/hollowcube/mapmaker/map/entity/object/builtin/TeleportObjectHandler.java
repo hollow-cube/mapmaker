@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.map.entity.object.builtin;
 
 import net.hollowcube.common.util.dfu.ExtraCodecs;
-import net.hollowcube.common.util.dfu.NbtOps;
 import net.hollowcube.mapmaker.map.entity.interaction.InteractionEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
 import net.kyori.adventure.sound.Sound;
+import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.sound.SoundEvent;
@@ -25,7 +25,7 @@ public class TeleportObjectHandler extends ObjectEntityHandler {
 
     @Override
     public void onDataChange(@Nullable Player player) {
-        this.destination = ExtraCodecs.POS.parse(NbtOps.INSTANCE, entity.getData().get("destination")).result().orElse(null);
+        this.destination = ExtraCodecs.POS.decode(Transcoder.NBT, entity.getData().get("destination")).orElse(null);
     }
 
     @Override

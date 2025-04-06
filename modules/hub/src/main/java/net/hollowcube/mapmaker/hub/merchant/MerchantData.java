@@ -1,9 +1,8 @@
 package net.hollowcube.mapmaker.hub.merchant;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.hollowcube.mapmaker.map.util.DynamicRegistry;
 import net.hollowcube.mapmaker.player.PlayerSkin;
+import net.minestom.server.codec.StructCodec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,10 +15,10 @@ public record MerchantData(
         @NotNull List<MerchantTrade> trades
 ) {
 
-    public static final Codec<MerchantData> CODEC = RecordCodecBuilder.create(i -> i.group(
-            PlayerSkin.CODEC.optionalFieldOf("skin").forGetter(MerchantData::optSkin),
-            MerchantTrade.CODEC.listOf().fieldOf("trades").forGetter(MerchantData::trades)
-    ).apply(i, MerchantData::new));
+    public static final StructCodec<MerchantData> CODEC = StructCodec.struct(
+            "skin", PlayerSkin.CODEC.optional(), MerchantData::skin,
+            "trades", MerchantTrade.CODEC.list(), MerchantData::trades,
+            MerchantData::new);
 
     private static final Map<String, MerchantData> REGISTRY = DynamicRegistry.get("hub_merchants", MerchantData.CODEC);
 

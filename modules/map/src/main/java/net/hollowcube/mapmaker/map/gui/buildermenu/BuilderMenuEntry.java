@@ -23,8 +23,8 @@ public class BuilderMenuEntry extends View {
     ) {
         super(context);
 
-        var material = item.icon().right().orElse(null);
-        var sprite = item.icon().left().orElse(null);
+        var material = item.icon().rightOr(null);
+        var sprite = item.icon().leftOr(null);
 
         if (material != null) {
             this.label.setItemSprite(ItemStack.of(material));

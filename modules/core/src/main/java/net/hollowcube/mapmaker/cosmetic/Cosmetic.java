@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.cosmetic;
 
-import com.mojang.serialization.Codec;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.backpack.Rarity;
 import net.hollowcube.mapmaker.cosmetic.impl.CosmeticImpl;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.codec.Codec;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -21,7 +21,8 @@ public class Cosmetic {
     private static final CustomModelData LOCKED_CMD = new CustomModelData(List.of(), List.of(true), List.of(), List.of());
     private static final Map<CosmeticType, Map<String, Cosmetic>> COSMETICS = new HashMap<>();
 
-    public static final Codec<Cosmetic> CODEC = Codec.STRING.xmap(Cosmetic::byPathRequired, Cosmetic::path);
+    @SuppressWarnings("UnstableApiUsage")
+    public static final Codec<Cosmetic> CODEC = Codec.STRING.transform(Cosmetic::byPathRequired, Cosmetic::path);
     public static final Tag<Boolean> COSMETIC_TAG = Tag.Boolean("cosmetic");
 
     static {

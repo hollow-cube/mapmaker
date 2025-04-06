@@ -12,6 +12,7 @@ import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.biome.BiomeInfo;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.util.RGBLike;
 import net.minestom.server.color.Color;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -133,28 +134,28 @@ public class BiomeEditorView extends View {
         updateColorField(color, biomeInfo::setFoliageColor);
     }
 
-    private void updateColorField(@NotNull String newColor, @NotNull Consumer<Color> setter) {
+    private void updateColorField(@NotNull String newColor, @NotNull Consumer<RGBLike> setter) {
         var parsed = ColorUtil.fromHex(newColor);
         if (parsed == null) return;
         setter.accept(parsed);
         updateContents();
     }
 
-    private void updateColorText(@NotNull Text text, @Nullable Color color) {
+    private void updateColorText(@NotNull Text text, @Nullable RGBLike color) {
         if (color == null) {
             text.setSpriteColorModifier(COLOR_MISSING_BG);
             text.setText("None", COLOR_MISSING_FG);
         } else {
-            text.setSpriteColorModifier(TextColor.color(color.asRGB()));
+            text.setSpriteColorModifier(TextColor.color(color));
             text.setText(ColorUtil.toHex(color), getForegroundColor(color));
         }
     }
 
-    public static TextColor getForegroundColor(Color backgroundColor) {
+    public static TextColor getForegroundColor(RGBLike backgroundColor) {
         return isLight(backgroundColor) ? NamedTextColor.BLACK : NamedTextColor.WHITE;
     }
 
-    public static boolean isLight(Color color) {
+    public static boolean isLight(RGBLike color) {
         double luminance = (0.299 * color.red() + 0.587 * color.green() + 0.114 * color.blue()) / 255;
         return luminance > 0.5;
     }

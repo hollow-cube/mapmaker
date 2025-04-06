@@ -5,6 +5,7 @@ import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.MojangUtil;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServerRunner;
@@ -49,7 +50,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DevServerRunner extends AbstractMapServer {
@@ -157,8 +157,8 @@ public class DevServerRunner extends AbstractMapServer {
         net.minestom.server.entity.PlayerSkin skin = MojangUtil.getSkinFromUuid(playerId);
 
         sessionService().createSession(playerId, "devserver-integrated", profile.name(), "127.0.0.1",
-                new PlayerSkin(Optional.ofNullable(skin).map(net.minestom.server.entity.PlayerSkin::textures),
-                        Optional.ofNullable(skin).map(net.minestom.server.entity.PlayerSkin::signature))
+                new PlayerSkin(OpUtils.map(skin, net.minestom.server.entity.PlayerSkin::textures),
+                        OpUtils.map(skin, net.minestom.server.entity.PlayerSkin::signature))
         );
     }
 

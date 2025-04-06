@@ -1,36 +1,21 @@
 package net.hollowcube.mapmaker.player;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.StructCodec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Optional;
 
 public record PlayerSkin(
         @Nullable String texture,
         @Nullable String signature
 ) {
-
-    public static final Codec<PlayerSkin> CODEC = RecordCodecBuilder.create(i -> i.group(
-            Codec.STRING.optionalFieldOf("texture").forGetter(PlayerSkin::optTexture),
-            Codec.STRING.optionalFieldOf("signature").forGetter(PlayerSkin::optSignature)
-    ).apply(i, PlayerSkin::new));
-
-    public PlayerSkin(@NotNull Optional<String> texture, @NotNull Optional<String> signature) {
-        this(texture.orElse(null), signature.orElse(null));
-    }
+    public static final StructCodec<PlayerSkin> CODEC = StructCodec.struct(
+            "texture", Codec.STRING.optional(), PlayerSkin::texture,
+            "signature", Codec.STRING.optional(), PlayerSkin::signature,
+            PlayerSkin::new);
 
     public PlayerSkin(@NotNull net.minestom.server.entity.PlayerSkin skin) {
         this(skin.textures(), skin.signature());
-    }
-
-    public @NotNull Optional<String> optTexture() {
-        return Optional.ofNullable(texture);
-    }
-
-    public @NotNull Optional<String> optSignature() {
-        return Optional.ofNullable(signature);
     }
 
     public @NotNull net.minestom.server.entity.PlayerSkin into() {

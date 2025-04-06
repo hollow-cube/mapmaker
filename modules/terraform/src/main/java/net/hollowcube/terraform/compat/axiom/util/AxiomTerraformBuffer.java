@@ -1,10 +1,10 @@
 package net.hollowcube.terraform.compat.axiom.util;
 
-import com.mojang.datafixers.util.Either;
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
+import net.hollowcube.common.util.Either;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.compat.axiom.data.buffers.AxiomBlockBuffer;
 import net.hollowcube.compat.axiom.data.buffers.AxiomBlockEntityData;

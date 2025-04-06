@@ -1,12 +1,12 @@
 package net.hollowcube.compat.axiom.data.annotations.data;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.StructCodec;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("UnstableApiUsage")
 public record TextAnnotation(
         @NotNull String text,
 
@@ -42,25 +42,23 @@ public record TextAnnotation(
             NetworkBuffer.BYTE, TextAnnotation::billboard,
             NetworkBuffer.INT, TextAnnotation::color,
             NetworkBuffer.BOOLEAN, TextAnnotation::shadow,
-            TextAnnotation::new
-    );
-
-    public static final MapCodec<TextAnnotation> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Codec.STRING.fieldOf("text").forGetter(TextAnnotation::text),
-            Codec.FLOAT.fieldOf("x").forGetter(TextAnnotation::x),
-            Codec.FLOAT.fieldOf("y").forGetter(TextAnnotation::y),
-            Codec.FLOAT.fieldOf("z").forGetter(TextAnnotation::z),
-            Codec.FLOAT.fieldOf("rotX").forGetter(TextAnnotation::rotX),
-            Codec.FLOAT.fieldOf("rotY").forGetter(TextAnnotation::rotY),
-            Codec.FLOAT.fieldOf("rotZ").forGetter(TextAnnotation::rotZ),
-            Codec.FLOAT.fieldOf("rotW").forGetter(TextAnnotation::rotW),
-            Codec.BYTE.fieldOf("direction").forGetter(TextAnnotation::direction),
-            Codec.FLOAT.fieldOf("fallbackYaw").forGetter(TextAnnotation::fallbackYaw),
-            Codec.FLOAT.fieldOf("scale").forGetter(TextAnnotation::scale),
-            Codec.BYTE.fieldOf("billboard").forGetter(TextAnnotation::billboard),
-            Codec.INT.fieldOf("color").forGetter(TextAnnotation::color),
-            Codec.BOOL.fieldOf("shadow").forGetter(TextAnnotation::shadow)
-    ).apply(instance, TextAnnotation::new));
+            TextAnnotation::new);
+    public static final StructCodec<TextAnnotation> CODEC = StructCodec.struct(
+            "text", Codec.STRING, TextAnnotation::text,
+            "x", Codec.FLOAT, TextAnnotation::x,
+            "y", Codec.FLOAT, TextAnnotation::y,
+            "z", Codec.FLOAT, TextAnnotation::z,
+            "rotX", Codec.FLOAT, TextAnnotation::rotX,
+            "rotY", Codec.FLOAT, TextAnnotation::rotY,
+            "rotZ", Codec.FLOAT, TextAnnotation::rotZ,
+            "rotW", Codec.FLOAT, TextAnnotation::rotW,
+            "direction", Codec.BYTE, TextAnnotation::direction,
+            "fallbackYaw", Codec.FLOAT, TextAnnotation::fallbackYaw,
+            "scale", Codec.FLOAT, TextAnnotation::scale,
+            "billboard", Codec.BYTE, TextAnnotation::billboard,
+            "color", Codec.INT, TextAnnotation::color,
+            "shadow", Codec.BOOLEAN, TextAnnotation::shadow,
+            TextAnnotation::new);
 
     @Override
     public AnnotationData withPosition(float x, float y, float z) {

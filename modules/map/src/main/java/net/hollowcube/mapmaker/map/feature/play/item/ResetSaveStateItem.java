@@ -69,7 +69,7 @@ public class ResetSaveStateItem extends ItemHandler {
         if (saveState.getRealPlaytime() > MIN_RESET_TIME) return true;
         var playState = saveState.state(PlayState.class);
         // If you have a last state you have a checkpoint.
-        return playState.lastState().isPresent();
+        return playState.lastState() != null;
     }
 
 }

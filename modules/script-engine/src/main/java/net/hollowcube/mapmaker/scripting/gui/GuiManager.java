@@ -25,6 +25,9 @@ import java.util.Objects;
 
 import static net.hollowcube.mapmaker.scripting.util.Proxies.proxyObject;
 
+/**
+ * Manages calls into the react-reconciler runtime itself as well as initial creation of inventory hosts.
+ */
 @SuppressWarnings("UnstableApiUsage")
 public class GuiManager {
     private final ScriptEngine engine;

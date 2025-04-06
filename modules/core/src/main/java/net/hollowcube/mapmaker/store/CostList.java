@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.store;
 
-import com.mojang.serialization.Codec;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.codec.Codec;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.Map;
 public record CostList(
         @NotNull Map<CostEntry, Integer> entries
 ) {
-    public static final Codec<CostList> CODEC = Codec.unboundedMap(CostEntry.CODEC, Codec.INT).xmap(CostList::new, CostList::entries);
+    public static final Codec<CostList> CODEC = CostEntry.CODEC.mapValue(Codec.INT).transform(CostList::new, CostList::entries);
 
     private static final TextColor RED = TextColor.fromCSSHexString("#fa4141");
     private static final TextColor GREEN = TextColor.fromCSSHexString("#46FA32");

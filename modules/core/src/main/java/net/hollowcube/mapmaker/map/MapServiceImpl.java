@@ -3,12 +3,12 @@ package net.hollowcube.mapmaker.map;
 import ca.spottedleaf.dataconverter.minecraft.MCDataConverter;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import com.mojang.serialization.JsonOps;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.minestom.server.codec.Transcoder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -106,7 +106,8 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), new TypeToken<MapSearchResponse<MapData>>() {});
+            case 200 -> GSON.fromJson(res.body(), new TypeToken<MapSearchResponse<MapData>>() {
+            });
             default -> throw new InternalError("Failed to search maps: " + res.body());
         };
     }
@@ -419,7 +420,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             }
 
             saveState.serializer = serializer;
-            saveState.state = serializer.codec().parse(JsonOps.INSTANCE, stateObj).getOrThrow();
+            saveState.state = serializer.codec().decode(Transcoder.JSON, stateObj).orElseThrow();
         }
         return saveState;
     }

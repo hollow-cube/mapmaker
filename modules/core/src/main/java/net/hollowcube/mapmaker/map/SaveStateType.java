@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
 import ca.spottedleaf.dataconverter.minecraft.datatypes.MCDataType;
-import com.mojang.serialization.Codec;
+import net.minestom.server.codec.Codec;
 import org.jetbrains.annotations.NotNull;
 
 public enum SaveStateType {

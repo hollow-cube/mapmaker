@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.map;
 
 import com.google.gson.JsonObject;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.Transcoder;
 import org.jetbrains.annotations.NotNull;
 
 public class SaveStateUpdateRequest {
@@ -27,7 +27,7 @@ public class SaveStateUpdateRequest {
     }
 
     public @NotNull SaveStateUpdateRequest setState(@NotNull Object state, @NotNull SaveStateType.Serializer<?> serializer) {
-        updates.add(serializer.name(), ((Codec<Object>) serializer.codec()).encodeStart(JsonOps.INSTANCE, state).getOrThrow());
+        updates.add(serializer.name(), ((Codec<Object>) serializer.codec()).encode(Transcoder.JSON, state).orElseThrow());
         return this;
     }
 

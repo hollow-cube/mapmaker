@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
 import com.google.gson.JsonObject;
-import com.mojang.serialization.JsonOps;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
@@ -9,6 +8,7 @@ import net.hollowcube.mapmaker.map.setting.TimeOfDay;
 import net.hollowcube.mapmaker.map.setting.WeatherType;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.ServerFlag;
+import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.validate.Check;
@@ -265,7 +265,7 @@ public class MapSettings {
 
         if (this.get(ONLY_SPRINT)) enabledSettings.add("Only Sprint");
         if (this.get(NO_SPRINT)) enabledSettings.add("No Sprint");
-        if (this.get(NO_JUMP))enabledSettings.add("No Jump");
+        if (this.get(NO_JUMP)) enabledSettings.add("No Jump");
         if (this.get(NO_SNEAK)) enabledSettings.add("No Sneak");
         if (this.get(BOAT)) enabledSettings.add("Boats");
 
@@ -304,7 +304,7 @@ public class MapSettings {
 
         if (this.get(ONLY_SPRINT)) enabledSettings.add("Only Sprint");
         if (this.get(NO_SPRINT)) enabledSettings.add("No Sprint");
-        if (this.get(NO_JUMP))enabledSettings.add("No Jump");
+        if (this.get(NO_JUMP)) enabledSettings.add("No Jump");
         if (this.get(NO_SNEAK)) enabledSettings.add("No Sneak");
         if (this.get(BOAT)) enabledSettings.add("Boats");
 
@@ -514,8 +514,7 @@ public class MapSettings {
         return (T) this.cache.computeIfAbsent(
                 setting,
                 ($) -> setting.codec()
-                        .parse(JsonOps.INSTANCE, data)
-                        .result()
+                        .decode(Transcoder.JSON, data)
                         .orElse(setting.defaultValue())
         );
     }
@@ -523,7 +522,7 @@ public class MapSettings {
     public <T> void set(@NotNull MapSetting<T> setting, @NotNull T value) {
         updateLock.lock();
         try {
-            var json = setting.codec().encodeStart(JsonOps.INSTANCE, value).result().orElseThrow();
+            var json = setting.codec().encode(Transcoder.JSON, value).orElseThrow();
             this.extra.add(setting.key(), json);
             this.cache.put(setting, value);
             this.updates.setExtraUpdate(setting.key(), json);

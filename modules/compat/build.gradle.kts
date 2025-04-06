@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":modules:datafixerupper"))
+    implementation(project(":modules:common"))
 
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)

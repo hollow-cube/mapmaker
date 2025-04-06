@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.map.gui.displayentity;
 
-import com.mojang.datafixers.util.Pair;
+import it.unimi.dsi.fastutil.Pair;
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.Pagination;
 import net.hollowcube.canvas.Switch;

@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PlayingMapWorld extends AbstractMapMakerMapWorld {
@@ -120,7 +121,8 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
         // We must set the respawn point during config so that their spawn chunks are sent there.
         // This prevents falling through the floor when joining.
-        player.setRespawnPoint(saveState.state(PlayState.class).pos().orElse(map().settings().getSpawnPoint()));
+        player.setRespawnPoint(Objects.requireNonNullElseGet(saveState.state(PlayState.class).pos(),
+                () -> map().settings().getSpawnPoint()));
         player.setTag(FIRST_JOIN_TAG, true);
     }
 
@@ -138,7 +140,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
             final var finalSaveState = saveState;
             player.acquirable().sync(localPlayer -> {
                 localPlayer.sendPacket(new BundlePacket());
-                localPlayer.teleport(finalSaveState.state(PlayState.class).pos().orElse(map().settings().getSpawnPoint()),
+                localPlayer.teleport(Objects.requireNonNullElseGet(finalSaveState.state(PlayState.class).pos(), () -> map().settings().getSpawnPoint()),
                         Vec.ZERO, null, RelativeFlags.NONE);
                 ((MapPlayerImplImpl) player).updatePose();
                 localPlayer.sendPacket(new EntityMetaDataPacket(localPlayer.getEntityId(), Map.of(6, Metadata.Pose(localPlayer.getPose()))));

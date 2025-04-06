@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    api(project(":modules:datafixerupper"))
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)
     implementation(libs.gson)
