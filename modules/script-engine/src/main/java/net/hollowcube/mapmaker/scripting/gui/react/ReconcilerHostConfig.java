@@ -180,14 +180,10 @@ public class ReconcilerHostConfig {
     @HostAccess.Export
     public void scheduleMicrotask(@NotNull Value callback) {
         try {
-            final InventoryHost host = InventoryHost.CURRENT.get();
-            if (host == null) return;
-            host.pendingMicrotasks.add(callback);
+            InventoryHost.current().scheduleMicrotask(callback);
         } catch (Exception e) {
             throw wrapException(e);
         }
-
-//        engine.globals.setTimeout(callback, Value.asValue(0));
     }
 
     @HostAccess.Export

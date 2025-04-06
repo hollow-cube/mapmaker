@@ -42,7 +42,7 @@ import java.util.function.Function;
 public class ScriptEngine {
     public final Env env;
     public final Instance instance;
-    public final Globals globals = new Globals(this);
+    public final Globals globals = new Globals();
 
     private final Context context;
 

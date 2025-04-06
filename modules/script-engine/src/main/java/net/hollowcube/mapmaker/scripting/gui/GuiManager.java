@@ -4,26 +4,26 @@ import com.oracle.truffle.js.runtime.builtins.JSErrorObject;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.scripting.Module;
 import net.hollowcube.mapmaker.scripting.ScriptEngine;
+import net.hollowcube.mapmaker.scripting.annotation.ScriptSafe;
 import net.hollowcube.mapmaker.scripting.gui.react.AtMapmakerGuiModule;
 import net.hollowcube.mapmaker.scripting.gui.react.JSX;
 import net.hollowcube.mapmaker.scripting.gui.react.ReactRefresh;
 import net.hollowcube.mapmaker.scripting.gui.react.ReconcilerHostConfig;
 import net.hollowcube.mapmaker.scripting.util.Proxies;
 import net.minestom.server.entity.Player;
-import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
+import org.graalvm.polyglot.proxy.ProxyObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import static net.hollowcube.mapmaker.scripting.util.Proxies.proxyObject;
 
 /**
  * Manages calls into the react-reconciler runtime itself as well as initial creation of inventory hosts.
@@ -31,9 +31,11 @@ import static net.hollowcube.mapmaker.scripting.util.Proxies.proxyObject;
 @SuppressWarnings("UnstableApiUsage")
 public class GuiManager {
     private final ScriptEngine engine;
-    public final Module react;
-    public final Value reactReconcilerInst;
+    private final Module react;
+    private final Value reactReconcilerInst;
     private final Value viewSymbol;
+    private final Value elementSymbol;
+    private final Value fragmentSymbol;
 
     private final Map<String, Object> globals;
     private final Map<String, Object> extraModules;
@@ -54,7 +56,10 @@ public class GuiManager {
             this.reactReconcilerInst.invokeMember("injectIntoDevTools");
         }
 
+        // TODO: Why do we make a symbol? We can just use a java object which cant be created from JS.
         this.viewSymbol = engine.makeCurrent(ctx -> ctx.eval("Symbol.for('$$hcView')"));
+        this.elementSymbol = engine.makeCurrent(ctx -> ctx.eval("Symbol.for('react.transitional.element')"));
+        this.fragmentSymbol = react.exports().getMember("Fragment");
 
         this.globals = Map.of("JSX", new JSX(this.react));
         this.extraModules = Map.of("@mapmaker/gui", new AtMapmakerGuiModule(this, this.react));
@@ -71,32 +76,33 @@ public class GuiManager {
 
         final Map<String, Object> modules = new HashMap<>(this.extraModules);
         modules.putAll(extraModules);
+
+        // Since we are mounting a module we need to make a component out of it. This is equivalent to writing
+        // `<theModule.default {...props} />` in JSX, which is what you would do in a pushView call and what
+        // InventoryHost#pushView expects to receive. Note that the default export must be wrapped in a view() call.
         final Value componentModule = this.engine.load(modulePath, this.globals, modules).exports();
         if (!componentModule.hasMember("default"))
             throw new IllegalArgumentException("Module must have a default export");
         final Value component = componentModule.getMember("default");
         if (!component.canExecute())
             throw new IllegalArgumentException("Default export must be a functional component");
-        final InventoryType inventoryType = getInventoryType(component);
-        final Value reactElement = this.react.exports().invokeMember("createElement",
-                component, Proxies.proxyObject(props));
+        final Value reactElement = reactCreateElement(component, Proxies.proxyObject(props), null);
 
+        // Create and mount the new host as a react root
         final InventoryHost host = new InventoryHost(this, player);
+        createContainer(host);
 
-        // todo this is the same as pushView, should just call that prob.
-        var renderElement = this.react.exports().invokeMember("createElement",
-                this.react.exports().getMember("Fragment"),
-                proxyObject(Map.of("key", "0")),
-                reactElement);
-        host.elements.add(renderElement);
-
-        // Mount and do initial render immediately.
-        host.reconcilerRoot = mount(host);
-        render(host, inventoryType);
+        // Push the initial view and render it
+        host.pushView(reactElement);
     }
 
-    private @NotNull Value mount(@NotNull InventoryHost host) {
-        return reactReconcilerInst.invokeMember("createContainer",
+    /**
+     * Mounts the given host as a React root. This may not be called multiple times.
+     */
+    void createContainer(@NotNull InventoryHost host) {
+        if (host.reconcilerRoot != null)
+            throw new IllegalStateException("Host is already mounted");
+        host.reconcilerRoot = reactReconcilerInst.invokeMember("createContainer",
                 /* containerInfo */ host,
                 /* tag */ 0,
                 /* hydrationCallbacks */ null,
@@ -104,6 +110,7 @@ public class GuiManager {
                 /* concurrentUpdatesByDefaultOverride */ null,
                 /* identifierPrefix */ "a",
                 /* onRecoverableError */ (ProxyExecutable) (args) -> {
+                    // TODO: we should recover from this :)
                     args[0].as(JSErrorObject.class).getException().printStackTrace();
                     return null;
                 },
@@ -111,54 +118,59 @@ public class GuiManager {
         );
     }
 
-    public void unmount(@NotNull InventoryHost host) {
-        try {
-            InventoryHost.CURRENT.set(host);
-            reactReconcilerInst.invokeMember("updateContainer",
-                    /* element */ null,
-                    /* container */ Objects.requireNonNull(host.reconcilerRoot),
-                    /* parentComponent */ null,
-                    /* callback */ null);
-            host.jsExit();
-        } finally {
-            InventoryHost.CURRENT.remove();
-        }
+    /**
+     * Updates the root container with the given React element. This may only be called after {@link #createContainer(InventoryHost)}.
+     * @param host The host to update
+     * @param reactElement The new React element to render. This may be null to unmount the host.
+     */
+    void updateContainer(@NotNull InventoryHost host, @Nullable Object reactElement) {
+        reactReconcilerInst.invokeMember("updateContainer",
+                /* element */ reactElement,
+                /* container */ Objects.requireNonNull(host.reconcilerRoot),
+                /* parentComponent */ null,
+                /* callback */ null);
     }
 
-    public @Nullable Inventory render(@NotNull InventoryHost host, @NotNull InventoryType inventoryType) {
-        try {
-            InventoryHost.CURRENT.set(host);
-
-            var renderElement = this.react.exports().invokeMember("createElement",
-                    this.react.exports().getMember("Fragment"),
-                    proxyObject(Map.of()),
-                    ProxyArray.fromList(host.elements));
-
-            reactReconcilerInst.invokeMember("updateContainer",
-                    /* element */ renderElement,
-                    /* container */ Objects.requireNonNull(host.reconcilerRoot),
-                    /* parentComponent */ null,
-                    /* callback */ null);
-            host.jsExit();
-        } finally {
-            InventoryHost.CURRENT.remove();
-        }
-
-        // 'Render' the underlying Minestom inventory (items & title)
-        return host.drawCurrentElement(inventoryType);
+    @NotNull Value reactCreateElement(@NotNull Value component, @Nullable ProxyObject props, @Nullable List<Object> children) {
+        return this.react.exports().invokeMember("createElement", component, props,
+                ProxyArray.fromList(Objects.requireNonNullElse(children, List.of())));
     }
 
+    @NotNull Value reactCreateFragment(@Nullable ProxyObject props, @Nullable List<Object> children) {
+        return this.react.exports().invokeMember("createElement", this.fragmentSymbol, props,
+                ProxyArray.fromList(Objects.requireNonNullElse(children, List.of())));
+    }
+
+    @ScriptSafe
     public @NotNull Value wrapView(@NotNull Value component, @NotNull String inventoryType) {
         component.putMember("$$hcView", viewSymbol);
         component.putMember("inventoryType", inventoryType);
         return component;
     }
 
-    private @NotNull InventoryType getInventoryType(@NotNull Value view) {
+    /**
+     * Gets the Minestom {@link InventoryType} from the given view. May be called on a view or a react element that is a view.
+     *
+     * @param view A view function or react element where the type is a view
+     * @return The inventory type of the view
+     * @throws IllegalArgumentException If the view is not a valid view
+     */
+    @NotNull InventoryType getInventoryType(@NotNull Value view) {
+        // If this is a react element, we need to get the inner type
+        if (view.getMember("$$typeof").equals(elementSymbol))
+            view = view.getMember("type");
+
+        // Ensure this looks like a view
         if (!view.getMember("$$hcView").equals(viewSymbol))
-            throw new IllegalArgumentException("Views should be created with `view` from `@mapmake/gui`");
-        return switch (view.getMember("inventoryType").asString()) {
+            throw new IllegalArgumentException("Views should be created with `view` from `@mapmaker/gui`");
+
+        // Now get the inventory type
+        final Value inventoryType = view.getMember("inventoryType");
+        if (!inventoryType.isString())
+            throw new IllegalArgumentException("Illegal view");
+        return switch (inventoryType.asString()) {
             case "chest_6_row" -> InventoryType.CHEST_6_ROW;
+            case "chest_3_row" -> InventoryType.CHEST_3_ROW;
             case "anvil" -> InventoryType.ANVIL;
             case "cartography" -> InventoryType.CARTOGRAPHY;
             default -> throw new IllegalArgumentException("Unknown inventory type");

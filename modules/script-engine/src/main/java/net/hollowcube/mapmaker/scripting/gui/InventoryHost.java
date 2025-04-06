@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.scripting.gui;
 
+import net.hollowcube.mapmaker.scripting.annotation.ScriptSafe;
 import net.hollowcube.mapmaker.scripting.gui.node.Node;
 import net.hollowcube.mapmaker.scripting.gui.util.ClickType;
 import net.hollowcube.posthog.PostHog;
@@ -19,18 +20,21 @@ import net.minestom.server.timer.Task;
 import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import net.minestom.server.utils.validate.Check;
 import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.proxy.ProxyObject;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static net.hollowcube.mapmaker.scripting.util.Proxies.proxyObject;
 
+/**
+ * InventoryHost manages the view stack, 'rendering' of the current view, and user interactions for the
+ * single open GUI represented by this InventoryHost.
+ */
 public class InventoryHost {
     private static final Logger logger = LoggerFactory.getLogger(InventoryHost.class);
 
@@ -40,22 +44,34 @@ public class InventoryHost {
                 .addListener(PlayerAnvilInputEvent.class, InventoryHost::handleAnvilInput);
     }
 
-    public static final ThreadLocal<InventoryHost> CURRENT = new ThreadLocal<>();
+    private static final ThreadLocal<InventoryHost> CURRENT = new ThreadLocal<>();
+
+    public static @NotNull InventoryHost current() {
+        return Objects.requireNonNull(CURRENT.get(), "No current InventoryHost");
+    }
 
     Value reconcilerRoot; // Cache for gui manager, should not be modified here.
-    public final GuiManager owner;
+    private final GuiManager owner;
     private final Player player;
 
-    public final Queue<Value> pendingMicrotasks = new ArrayDeque<>();
-
-    private final AtomicReference<Task> redrawTask = new AtomicReference<>();
-    private InventoryWrapper handle;
+    private final InventoryWrapper handle = new InventoryWrapper();
 
     // One root corresponds to one element. Only the top/last root is rendered.
-    public List<Object> elements = new ArrayList<>();
-    public List<Node> roots = new ArrayList<>();
+    private final List<Object> elements = new ArrayList<>(); // React elements (wrapped with a keyed fragment)
+    private final List<InventoryType> inventoryTypes = new ArrayList<>(); // Inventory types (same as elements)
+    private final List<Node> roots = new ArrayList<>(); // Layout nodes
 
-    public InventoryHost(@NotNull GuiManager owner, @NotNull Player player) {
+    // Microtasks scheduled by react which will be executed when we exit the JS context.
+    // TODO: We could be fancy and choose to wait a tick to execute these if there is not enough time left in the tick.
+    private final Queue<Value> pendingMicrotasks = new ArrayDeque<>();
+    private Task redrawTask = null;
+    // If present, indicates a potentially pending click event. We should not respond to other clicks while this
+    // is both not null and not CompletableFuture#isDone.
+    private CompletableFuture<Void> pendingClick = null;
+
+    private boolean hasMounted = false;
+
+    InventoryHost(@NotNull GuiManager owner, @NotNull Player player) {
         this.owner = owner;
         this.player = player;
     }
@@ -64,45 +80,91 @@ public class InventoryHost {
         return Objects.requireNonNull(handle);
     }
 
-    public void pushView(@NotNull Value element) {
-        var renderElement = owner.react.exports().invokeMember("createElement",
-                owner.react.exports().getMember("Fragment"),
-                // TODO: probably should generate a random key rather than using the size of elements.
-                proxyObject(Map.of("key", String.valueOf(elements.size()))),
-                element);
-        elements.add(renderElement);
-
-        owner.render(this, InventoryType.CHEST_3_ROW);
+    public interface JsContext extends AutoCloseable {
+        @Override void close();
     }
 
-    public void popView() {
-        elements.removeLast();
-        owner.render(this, InventoryType.CHEST_6_ROW);
+    public @NotNull JsContext jsEnter() {
+        if (CURRENT.get() != null)
+            return () -> {
+            };
+        CURRENT.set(this);
+        return this::jsExit;
     }
 
-    public void jsExit() {
-        while (!pendingMicrotasks.isEmpty()) {
-            Value microtask = pendingMicrotasks.poll();
-            if (microtask == null) break;
-            try {
-                microtask.executeVoid();
-            } catch (Exception e) {
-                logger.error("Failed to execute microtask", e);
-                PostHog.captureException(e, player.getUuid().toString());
+    private void jsExit() {
+        try {
+            while (!pendingMicrotasks.isEmpty()) {
+                Value microtask = pendingMicrotasks.poll();
+                if (microtask == null) break;
+                try {
+                    microtask.executeVoid();
+                } catch (Exception e) {
+                    logger.error("Failed to execute microtask", e);
+                    PostHog.captureException(e, player.getUuid().toString());
+                }
             }
+        } finally {
+            CURRENT.remove();
         }
     }
 
-    public void queueRedraw() {
-        if (this.handle == null) return;
-        final Task oldTask = this.redrawTask.getAndSet(player.scheduler().scheduleEndOfTick(() ->
-                this.drawCurrentElement(handle.getInventoryType())));
-        if (oldTask != null) oldTask.cancel();
+    @ScriptSafe
+    public void scheduleMicrotask(@NotNull Value microtask) {
+        if (!microtask.canExecute()) throw new IllegalArgumentException("Microtask must be a function");
+        pendingMicrotasks.add(microtask);
     }
+
+    @ScriptSafe
+    public void pushView(@NotNull Value reactElement) {
+        final InventoryType inventoryType = owner.getInventoryType(reactElement);
+
+        // When adding a view we add it to our elements list wrapped in a fragment with a constant key.
+        // This is because we always keep the entire view stack mounted in the React root to preserve
+        // state when moving forward and backward.
+        // But when rerendering we don't want to remount the entire tree, so we set a constant
+        // key for each view in the tree.
+        final ProxyObject keyProps = proxyObject(Map.of("key", UUID.randomUUID().toString()));
+        var renderElement = owner.reactCreateFragment(keyProps, List.of(reactElement));
+        elements.add(renderElement);
+        inventoryTypes.add(inventoryType);
+
+        updateAndDraw();
+    }
+
+    @ScriptSafe
+    public void popView() {
+        if (elements.size() <= 1) return;
+
+        // Remove the react element
+        this.elements.removeLast();
+        this.inventoryTypes.removeLast();
+
+        updateAndDraw();
+    }
+
+    @ScriptSafe
+    private void updateAndDraw() {
+        // Perform a react update
+        try (var _ = jsEnter()) {
+            var rootElement = owner.reactCreateFragment(proxyObject(Map.of()), elements);
+            owner.updateContainer(this, rootElement);
+        }
+
+        // Queue a redraw (or initial draw) at the end of the tick
+        queueRedraw();
+    }
+
+    public void queueRedraw() {
+        if (this.redrawTask != null && this.redrawTask.isAlive()) return;
+        this.redrawTask = player.scheduler().scheduleEndOfTick(this::drawCurrentElement);
+    }
+
+    // React-reconciler interactions
 
     public void addChild(@NotNull Node node) {
         this.roots.add(node);
-        drawCurrentElement(InventoryType.CHEST_6_ROW); // todo
+        drawCurrentElement(); // todo do we need this call? it seems bad
     }
 
     public void removeChild(@NotNull Node child) {
@@ -116,52 +178,36 @@ public class InventoryHost {
         this.roots.clear();
     }
 
-    public @Nullable Inventory drawCurrentElement(@NotNull InventoryType type) {
-        if (this.roots.isEmpty()) return null; // Check if unmounted
+    // "rendering" implementation
+
+    private void drawCurrentElement() {
+        // Check if unmounted or closed
+        if (this.roots.isEmpty() || (hasMounted && !(player.getOpenInventory() instanceof InventoryWrapper))) return;
+
         final Node root = this.roots.getLast();
+        final InventoryType type = this.inventoryTypes.getLast();
 
         // Currently we always consume the player inventory so add 4 rows.
         int containerSizeInRows = getInterpretedSize(type) / 9;
         var menuBuilder = new MenuBuilder(9, containerSizeInRows + 4, containerSizeInRows);
         root.build(menuBuilder);
 
-        if (this.handle != null) {
-            this.handle.updateContents(type, menuBuilder.getItems(), menuBuilder.getTitle());
-        } else {
-            this.handle = new InventoryWrapper(this, type, menuBuilder.getItems(), menuBuilder.getTitle());
+        this.handle.updateContents(type, menuBuilder.getItems(), menuBuilder.getTitle());
+        if (!handle.isViewer(player)) {
             player.openInventory(handle);
+            hasMounted = true;
         }
-
-        return this.handle;
     }
-
-    /**
-     * We have special handling for inventories that don't exactly match the expected grid/column layout we use
-     * for inventories. For example an anvil has its 3 special slots but we pretend it has 9 slots for the sake
-     * of the layout system. Slots 3-8 are skipped in that case.
-     *
-     * @return The size of the inventory as interpreted by the layout system.
-     */
-    public static int getInterpretedSize(@NotNull InventoryType type) {
-        return switch (type) {
-            case CHEST_1_ROW, CHEST_2_ROW, CHEST_3_ROW,
-                 CHEST_4_ROW, CHEST_5_ROW, CHEST_6_ROW -> type.getSize();
-            case ANVIL, CARTOGRAPHY -> 9;
-            default -> throw new IllegalStateException("Unsupported inventory type: " + type);
-        };
-    }
-
-    private CompletableFuture<Void> pendingClick = null;
 
     private static void handleInventoryClick(@NotNull InventoryPreClickEvent event) {
         final int slot;
         final InventoryHost host;
         if (event.getInventory() instanceof InventoryWrapper inventory) {
-            host = inventory.owner; // Click in an inventory
+            host = inventory.owner(); // Click in an inventory
             slot = event.getClick().slot();
         } else if (event.getInventory() instanceof PlayerInventory &&
                 event.getPlayer().getOpenInventory() instanceof InventoryWrapper inventory) {
-            host = inventory.owner; // Click in player inventory
+            host = inventory.owner(); // Click in player inventory
 
             // Slot needs to be offset from the top of the main inventory
             int offsetSlot = event.getClick().slot();
@@ -174,11 +220,13 @@ public class InventoryHost {
         if (host.roots.isEmpty()) return; // Check for unmounted.
         final Node root = host.roots.getLast();
 
+        // In case we are already handling a click, we should not accept another one.
         if (host.pendingClick != null && !host.pendingClick.isDone()) {
-            System.out.println("Click is pending, ignoring click " + host.pendingClick);
             return;
         }
 
+        // At this point we always consume the click
+        event.setCancelled(true);
         final ClickType clickType = switch (event.getClick()) {
             case Click.Left ignored -> ClickType.LEFT;
             case Click.Right ignored -> ClickType.RIGHT;
@@ -186,55 +234,63 @@ public class InventoryHost {
             case Click.RightShift ignored -> ClickType.RIGHT_SHIFT;
             default -> null;
         };
-        if (clickType == null) {
-            event.setCancelled(true);
-            return;
-        }
+        if (clickType == null) return;
 
-        // TODO: need to reintroduce the click locking mechanism.
-        //  also probably handleClick should return a future that can complete later.
-
-        try {
-            CURRENT.set(host);
-            event.setCancelled(true);
+        try (var _ = host.jsEnter()) {
             host.pendingClick = root.handleClick(clickType, slot % 9, slot / 9);
-            host.jsExit();
         } catch (Exception e) {
             logger.error("Failed to handle click", e);
             PostHog.captureException(e, host.player.getUuid().toString());
-        } finally {
-            CURRENT.remove();
         }
+    }
+
+    /**
+     * We have special handling for inventories that don't exactly match the expected grid/column layout we use
+     * for inventories. For example an anvil has its 3 special slots but we pretend it has 9 slots for the sake
+     * of the layout system. Slots 3-8 are skipped in that case.
+     *
+     * @return The size of the inventory as interpreted by the layout system.
+     */
+    private static int getInterpretedSize(@NotNull InventoryType type) {
+        return switch (type) {
+            case CHEST_1_ROW, CHEST_2_ROW, CHEST_3_ROW,
+                 CHEST_4_ROW, CHEST_5_ROW, CHEST_6_ROW -> type.getSize();
+            case ANVIL, CARTOGRAPHY -> 9;
+            default -> throw new IllegalStateException("Unsupported inventory type: " + type);
+        };
     }
 
     private static void handleAnvilInput(@NotNull PlayerAnvilInputEvent event) {
         // TODO
     }
 
-    private static final class InventoryWrapper extends Inventory {
-        private final InventoryHost owner;
+    private final class InventoryWrapper extends Inventory {
+        private static final Component UNREACHABLE = Component.text("unreachable");
 
-        private InventoryType inventoryType;
-        private Component title;
+        private InventoryType inventoryType = InventoryType.CHEST_6_ROW;
+        private Component title = Component.empty();
 
         // Represents the player inventory slots which will be sent if present.
         // May be smaller than the player inventory (eg 9 items) and will show the player items for the rest.
         private ItemStack[] playerInventory = null;
 
-        public InventoryWrapper(@NotNull InventoryHost owner, @NotNull InventoryType inventoryType, @NotNull ItemStack[] items, @NotNull Component title) {
+        public InventoryWrapper() {
             // We override handling of inventory type and title. If these values are ever observed, a mistake has been made
-            super(InventoryType.CHEST_6_ROW, Component.text("unreachable"));
+            super(InventoryType.CHEST_6_ROW, UNREACHABLE);
+        }
 
-            this.owner = owner;
-            this.inventoryType = inventoryType;
-            this.title = title;
-
-            copyInventoryContents(items);
+        public @NotNull InventoryHost owner() {
+            return InventoryHost.this;
         }
 
         @Override
         public @NotNull InventoryType getInventoryType() {
             return this.inventoryType;
+        }
+
+        @Override
+        public int getSize() {
+            return Objects.requireNonNullElse(this.inventoryType, InventoryType.CHEST_6_ROW).getSize();
         }
 
         @Override
@@ -278,8 +334,9 @@ public class InventoryHost {
 
             // If there are zero viewers we assume the inventory was closed
             if (getViewers().isEmpty()) {
-                // Unmount and close
-                owner.owner.unmount(owner);
+                try (var _ = jsEnter()) {
+                    owner.updateContainer(InventoryHost.this, null); // Unmount
+                }
             }
 
             return result;
@@ -287,6 +344,13 @@ public class InventoryHost {
 
         private int playerInventorySlots() {
             return playerInventory == null ? 0 : playerInventory.length;
+        }
+
+        @Override
+        public void update(@NotNull Player player) {
+            var itemStacks = new ItemStack[getSize()];
+            System.arraycopy(this.itemStacks, 0, itemStacks, 0, getSize());
+            player.sendPacket(new WindowItemsPacket(getWindowId(), 0, List.of(itemStacks), player.getInventory().getCursorItem()));
         }
 
         public void updatePlayerInventory() {

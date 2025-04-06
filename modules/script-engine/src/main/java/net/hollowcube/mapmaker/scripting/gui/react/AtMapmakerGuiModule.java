@@ -11,7 +11,6 @@ import org.graalvm.polyglot.proxy.ProxyObject;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import static net.hollowcube.mapmaker.scripting.util.Proxies.wrapException;
@@ -56,44 +55,7 @@ public final class AtMapmakerGuiModule implements ProxyObject {
 
     @HostAccess.Export
     public ViewStack useViewStack() {
-        try {
-            return new ViewStack(Objects.requireNonNull(InventoryHost.CURRENT.get()));
-        } catch (Exception e) {
-            throw wrapException(e);
-        }
-    }
-
-    public record ViewStack(@NotNull InventoryHost host) {
-
-        @HostAccess.Export
-        public void pushView(@NotNull Value element, Value... restTodo) {
-            try {
-                System.out.println("PUSH VIEW: " + element.getMember("type").getMember("$$hcView"));
-
-                host.pushView(element);
-            } catch (Exception e) {
-                throw wrapException(e);
-            }
-        }
-
-        @HostAccess.Export
-        public void popView() {
-            try {
-                host.popView();
-            } catch (Exception e) {
-                throw wrapException(e);
-            }
-        }
-
-        @HostAccess.Export
-        public void close() {
-            try {
-                final Set<Player> viewers = new HashSet<>(host.handle().getViewers());
-                viewers.forEach(Player::closeInventory);
-            } catch (Exception e) {
-                throw wrapException(e);
-            }
-        }
+        return ViewStack.INSTANCE;
     }
 
     @Override
@@ -136,5 +98,40 @@ public final class AtMapmakerGuiModule implements ProxyObject {
     @Override
     public void putMember(String key, Value value) {
         throw new UnsupportedOperationException("putMember() not supported.");
+    }
+
+    public static final class ViewStack {
+        public static final ViewStack INSTANCE = new ViewStack();
+
+        @HostAccess.Export
+        public void pushView(@NotNull Value element, Value... restTodo) {
+            try {
+                InventoryHost.current().pushView(element);
+            } catch (Exception e) {
+                throw wrapException(e);
+            }
+        }
+
+        @HostAccess.Export
+        public void popView() {
+            try {
+                InventoryHost.current().popView();
+            } catch (Exception e) {
+                throw wrapException(e);
+            }
+        }
+
+        @HostAccess.Export
+        public void close() {
+            try {
+                final Set<Player> viewers = new HashSet<>(InventoryHost.current().handle().getViewers());
+                viewers.forEach(Player::closeInventory);
+            } catch (Exception e) {
+                throw wrapException(e);
+            }
+        }
+
+        private ViewStack() {
+        }
     }
 }

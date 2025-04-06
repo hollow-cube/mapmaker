@@ -60,11 +60,8 @@ public class ReactRefresh {
             var scheduleRefreshActual = injectArgs[0].getMember("scheduleRefresh");
             injectArgs[0].putMember("scheduleRefresh", (ProxyExecutable) (scheduleRefreshArgs) -> {
                 var host = scheduleRefreshArgs[0].getMember("containerInfo").as(InventoryHost.class);
-                try {
-                    InventoryHost.CURRENT.set(host);
+                try (var _ = host.jsEnter()) {
                     return scheduleRefreshActual.execute((Object[]) scheduleRefreshArgs);
-                } finally {
-                    InventoryHost.CURRENT.remove();
                 }
             });
             return injectFunc.execute((Object[]) injectArgs);
