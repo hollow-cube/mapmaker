@@ -257,7 +257,7 @@ public class DevServerRunner extends AbstractMapServer {
 
         dbg.createPermissionedSubcommand("gui", (player, ignored) -> {
             player.getInstance().scheduleNextTick(ignored2 -> {
-                scriptEngine.guiManager().openGui(player, URI.create("guilib:///map_browser/map-browser-view.js"), Map.of());
+                scriptEngine.guiManager().openGui(player, URI.create("guilib:///map_browser/map-browser-view.js"), Map.of(), Map.of());
             });
         }, "");
 
