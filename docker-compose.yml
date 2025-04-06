@@ -31,9 +31,11 @@ services:
       SPICEDB_DATASTORE_ENGINE: postgres
       SPICEDB_DATASTORE_CONN_URI: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
       SPICEDB_GRPC_PRESHARED_KEY: supersecretkey
+      SPICEDB_HTTP_ENABLED: "true"
     command: "serve"
     ports:
       - "50051:50051"
+      - "8443:8443"
   minio:
     image: minio/minio:latest
     restart: unless-stopped
