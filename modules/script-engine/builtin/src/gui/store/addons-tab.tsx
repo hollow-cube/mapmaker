@@ -27,7 +27,8 @@ function AddonChain({chain, buyUpgrade}: AddonChainProps) {
         <button onLeftClick={() => {
             if (firstLocked) buyUpgrade(firstLocked.id)
         }}>
-            <tooltip translationKey={addon.translationKey} slotWidth={1} slotHeight={1}>
+            <tooltip translationKey={`${addon.translationKey}${firstLocked ? '' : '.unlocked'}`} slotWidth={1}
+                     slotHeight={1}>
                 <sprite src={!firstLocked ? 'store/addons/slot_selected' : 'store/addons/slot_default'}/>
                 <sprite {...addon} />
 
@@ -46,7 +47,7 @@ const costs = {
 const mapSlots: Addon[] = [
     {
         id: 'map_slot_3',
-        translationKey: 'map_slot_3',
+        translationKey: 'gui.store.addons.map_slots_3',
         cost: 50,
         src: 'store/addons/map_slot',
         x: 4,
@@ -54,7 +55,7 @@ const mapSlots: Addon[] = [
     },
     {
         id: 'map_slot_4',
-        translationKey: 'map_slot_4',
+        translationKey: 'gui.store.addons.map_slots_4',
         cost: 100,
         src: 'store/addons/map_slot',
         x: 4,
@@ -62,7 +63,7 @@ const mapSlots: Addon[] = [
     },
     {
         id: 'map_slot_5',
-        translationKey: 'map_slot_5',
+        translationKey: 'gui.store.addons.map_slots_5',
         cost: 150,
         src: 'store/addons/map_slot',
         x: 4,
@@ -73,7 +74,7 @@ const mapSlots: Addon[] = [
 const mapSizes: Addon[] = [
     {
         id: 'map_size_2',
-        translationKey: 'map_size_2',
+        translationKey: 'gui.store.addons.map_size_large',
         cost: 50,
         src: 'store/addons/map_size_2',
         x: 3,
@@ -81,7 +82,7 @@ const mapSizes: Addon[] = [
     },
     {
         id: 'map_size_3',
-        translationKey: 'map_size_3',
+        translationKey: 'gui.store.addons.map_size_massive',
         cost: 100,
         src: 'store/addons/map_size_3',
         x: 3,
@@ -89,7 +90,7 @@ const mapSizes: Addon[] = [
     },
     {
         id: 'map_size_4',
-        translationKey: 'map_size_4',
+        translationKey: 'gui.store.addons.map_size_colossal',
         cost: 150,
         src: 'store/addons/map_size_4',
         x: 2,
@@ -99,7 +100,7 @@ const mapSizes: Addon[] = [
 
 const buildTools: Addon[] = [{
     id: 'build_tools',
-    translationKey: 'build_tools',
+    translationKey: 'gui.store.addons.terraform_advanced',
     cost: 50,
     src: 'store/addons/build_tools',
     x: 3,

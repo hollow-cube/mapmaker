@@ -53,8 +53,8 @@ declare module "@mapmaker/gui" {
             transient?: boolean,
             replace?: boolean
         }) => void;
+        canPopView: boolean;
         popView: () => void;
-        canPopView: () => boolean;
         close: () => void;
     };
     declare function useViewStack(): ViewStack;

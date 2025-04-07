@@ -65,6 +65,10 @@ public class GuiManager {
         this.extraModules = Map.of("@mapmaker/gui", new AtMapmakerGuiModule(this, this.react));
     }
 
+    public @NotNull ScriptEngine engine() {
+        return this.engine;
+    }
+
     /**
      * Opens the GUI at the given module. The module must have a default export of a React component with no props.
      *
@@ -86,7 +90,8 @@ public class GuiManager {
         final Value component = componentModule.getMember("default");
         if (!component.canExecute())
             throw new IllegalArgumentException("Default export must be a functional component");
-        final Value reactElement = reactCreateElement(component, Proxies.proxyObject(props), null);
+        // Small note: props must be backed by a mutable map because we insert into the props map in InventoryHost.
+        final Value reactElement = reactCreateElement(component, Proxies.proxyObject(new HashMap<>(props)), null);
 
         // Create and mount the new host as a react root
         final InventoryHost host = new InventoryHost(this, player);
@@ -132,13 +137,16 @@ public class GuiManager {
     }
 
     @NotNull Value reactCreateElement(@NotNull Value component, @Nullable ProxyObject props, @Nullable List<Object> children) {
-        return this.react.exports().invokeMember("createElement", component, props,
-                ProxyArray.fromList(Objects.requireNonNullElse(children, List.of())));
+        if (children != null) {
+            return this.react.exports().invokeMember("createElement", component,
+                    props, ProxyArray.fromList(children));
+        } else {
+            return this.react.exports().invokeMember("createElement", component, props);
+        }
     }
 
     @NotNull Value reactCreateFragment(@Nullable ProxyObject props, @Nullable List<Object> children) {
-        return this.react.exports().invokeMember("createElement", this.fragmentSymbol, props,
-                ProxyArray.fromList(Objects.requireNonNullElse(children, List.of())));
+        return reactCreateElement(fragmentSymbol, props, children);
     }
 
     @ScriptSafe

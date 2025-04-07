@@ -21,7 +21,7 @@ function StoreView({initialTab}: StoreViewProps) {
     return (
         <group layout='column'>
             <sprite src='store/container' x={-10} y={-31} position='absolute'/>
-            <text x='center' y={-23} position='absolute'>Store2</text>
+            <text x='center' y={-23} position='absolute'>Store</text>
 
             {/* Title */}
             <group layout='row'>
@@ -50,17 +50,20 @@ function StoreView({initialTab}: StoreViewProps) {
             {/* Tab Switcher */}
             <group layout='row'>
                 <button onLeftClick={() => setTab('cubits')}>
-                    <tooltip translationKey='gui.store.cubits' slotWidth={3} slotHeight={3}>
+                    <tooltip translationKey={`gui.store.tab_cubits.${tab === 'cubits' ? 'active' : 'inactive'}`}
+                             slotWidth={3} slotHeight={3}>
                         <sprite src={tab === 'cubits' ? 'store/cubits_active' : 'store/cubits_inactive'}/>
                     </tooltip>
                 </button>
                 <button onLeftClick={() => setTab('hypercube')}>
-                    <tooltip translationKey='gui.store.hypercube' slotWidth={3} slotHeight={3}>
+                    <tooltip translationKey={`gui.store.tab_hypercube.${tab === 'hypercube' ? 'active' : 'inactive'}`}
+                             slotWidth={3} slotHeight={3}>
                         <sprite src={tab === 'hypercube' ? 'store/ranks_active' : 'store/ranks_inactive'}/>
                     </tooltip>
                 </button>
                 <button onLeftClick={() => setTab('addons')}>
-                    <tooltip translationKey='gui.store.addons' slotWidth={3} slotHeight={3}>
+                    <tooltip translationKey={`gui.store.tab_addons.${tab === 'addons' ? 'active' : 'inactive'}`}
+                             slotWidth={3} slotHeight={3}>
                         <sprite src={tab === 'addons' ? 'store/addons_active' : 'store/addons_inactive'}/>
                     </tooltip>
                 </button>

@@ -20,7 +20,6 @@ import net.minestom.server.timer.Task;
 import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import net.minestom.server.utils.validate.Check;
 import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.ProxyObject;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,14 +118,28 @@ public class InventoryHost {
     public void pushView(@NotNull Value reactElement) {
         final InventoryType inventoryType = owner.getInventoryType(reactElement);
 
-        // When adding a view we add it to our elements list wrapped in a fragment with a constant key.
+        // We overwrite the key to always be a random UUID.
         // This is because we always keep the entire view stack mounted in the React root to preserve
         // state when moving forward and backward.
         // But when rerendering we don't want to remount the entire tree, so we set a constant
         // key for each view in the tree.
-        final ProxyObject keyProps = proxyObject(Map.of("key", UUID.randomUUID().toString()));
-        var renderElement = owner.reactCreateFragment(keyProps, List.of(reactElement));
-        elements.add(renderElement);
+        Object elem = reactElement;
+        if (owner.engine().env().isDevelopment()) {
+            // To add some extra trickery, react-development will freeze the result of createElement,
+            // so we copy it to change the key.
+            final Map<String, Object> elementCopy = new HashMap<>();
+            for (final String key : reactElement.getMemberKeys()) {
+                if ("key".equals(key)) continue;
+                elementCopy.put(key, reactElement.getMember(key));
+            }
+            elementCopy.put("key", UUID.randomUUID().toString());
+            elem = proxyObject(elementCopy);
+        } else {
+            // In production we can just set the key directly.
+            reactElement.putMember("key", UUID.randomUUID().toString());
+        }
+
+        elements.add(elem);
         inventoryTypes.add(inventoryType);
 
         updateAndDraw();
@@ -447,4 +460,5 @@ public class InventoryHost {
             super.update(player);
         }
     }
+
 }
