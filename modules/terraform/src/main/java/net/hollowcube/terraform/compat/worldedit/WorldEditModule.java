@@ -128,7 +128,7 @@ public class WorldEditModule implements TerraformModule {
             var itemStack = tf.toolHandler().createBuiltinTool("terraform:wand");
             int slot = PlayerInventoryUtils.convertWindow0SlotToMinestomSlot(event.slot());
             inventory.setItemStack(slot, itemStack);
-            inventory.sendSlotRefresh(slot, itemStack, itemStack);
+            inventory.sendSlotRefresh(slot, itemStack);
 
             event.setCancelled(true);
         }

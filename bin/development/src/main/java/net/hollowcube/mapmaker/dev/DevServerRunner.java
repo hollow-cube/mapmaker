@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.dev;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
-import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.MojangUtil;
 import net.hollowcube.common.util.OpUtils;
@@ -28,8 +27,6 @@ import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventNode;
@@ -38,19 +35,14 @@ import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
-import net.minestom.server.inventory.Inventory;
-import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.timer.Scheduler;
-import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class DevServerRunner extends AbstractMapServer {
     private static final Logger logger = LoggerFactory.getLogger(DevServerRunner.class);
@@ -234,26 +226,6 @@ public class DevServerRunner extends AbstractMapServer {
                 player.sendMessage("You are not in an editing world!");
             }
         }, "Enables progress index add mode for the current map");
-
-        dbg.createPermissionlessSubcommand("text", (player, context) -> {
-            var inv = new Inventory(InventoryType.CHEST_1_ROW, Component.empty());
-            player.openInventory(inv);
-
-            var c = new AtomicInteger();
-            player.scheduler()
-                    .buildTask(() -> {
-                        var children = new ArrayList<ComponentLike>();
-                        int start = c.incrementAndGet();
-                        for (int i = start; i < start + 255; i++) {
-                            children.add(Component.text("i", TextColor.color(0x4E5A00 | ((i) & 0xFF))));
-                            children.add(Component.text(FontUtil.computeOffset(-1)));
-                        }
-                        var t = Component.textOfChildren(children.toArray(new ComponentLike[0]));
-                        inv.setTitle(t);
-                    })
-                    .repeat(TaskSchedule.tick(1))
-                    .schedule();
-        }, "");
 
         dbg.createPermissionedSubcommand("gui", (player, ignored) -> {
             player.getInstance().scheduleNextTick(ignored2 -> {
