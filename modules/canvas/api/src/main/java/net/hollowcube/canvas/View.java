@@ -137,8 +137,6 @@ public abstract class View implements Element {
     }
 
     public interface AsyncRunnable {
-        @Async.Execute
-        @Blocking
         void run() throws Exception;
     }
 

@@ -57,16 +57,19 @@ public record AxiomBlockBuffer(
 
             if (type == 0) {
                 int id = buffer.read(NetworkBuffer.VAR_INT);
-                Check.stateCondition(buffer.read(NetworkBuffer.LONG_ARRAY).length != 0, "Expected empty data array");
-
                 blockBuffer.addBlocks(
                         index,
                         id == AxiomAPI.EMPTY_BLOCK_STATE ? null : Block.fromStateId(id)
                 );
             } else if (type > 0 && type < 9) {
                 int bits = Math.max(4, type);
+                int length = (4096 + (64 / bits) - 1) / (64 / bits);
+
                 int[] ids = buffer.read(NetworkBuffer.VAR_INT_ARRAY);
-                long[] data = buffer.read(NetworkBuffer.LONG_ARRAY);
+                long[] data = new long[length];
+                for (int i = 0; i < length; i++) {
+                    data[i] = buffer.read(NetworkBuffer.LONG);
+                }
 
                 blockBuffer.addBlocks(
                         index,
@@ -76,7 +79,11 @@ public record AxiomBlockBuffer(
                         })
                 );
             } else {
-                long[] data = buffer.read(NetworkBuffer.LONG_ARRAY);
+                int length = (4096 + (64 / MAX_BITS_PER_ENTRY) - 1) / (64 / MAX_BITS_PER_ENTRY);
+                long[] data = new long[length];
+                for (int i = 0; i < length; i++) {
+                    data[i] = buffer.read(NetworkBuffer.LONG);
+                }
                 blockBuffer.addBlocks(
                         index,
                         read(data, MAX_BITS_PER_ENTRY, id ->
