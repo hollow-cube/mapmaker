@@ -46,11 +46,7 @@ import net.minestom.server.event.player.PlayerStopFlyingWithElytraEvent;
 import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.predicate.BlockPredicate;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
-import net.minestom.server.item.component.BlockPredicates;
 import net.minestom.server.item.component.Equippable;
 import net.minestom.server.network.packet.client.play.ClientPlayerBlockPlacementPacket;
 import net.minestom.server.potion.Potion;
@@ -770,8 +766,6 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var item1 = state.items().item1();
         player.getInventory().setItemStack(3, item1 == null || item1 instanceof HotbarItem.Remove
                 ? ItemStack.AIR : item1.toItemStack(false));
-        player.getInventory().setItemStack(3, ItemStack.of(Material.STONE, 64)
-                .with(DataComponents.CAN_PLACE_ON, new BlockPredicates(new BlockPredicate(Block.MUD))));
         var item2 = state.items().item2();
         player.getInventory().setItemStack(5, item2 == null || item2 instanceof HotbarItem.Remove
                 ? ItemStack.AIR : item2.toItemStack(false));
