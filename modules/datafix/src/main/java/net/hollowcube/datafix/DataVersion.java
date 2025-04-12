@@ -1,5 +1,6 @@
 package net.hollowcube.datafix;
 
+import net.hollowcube.datafix.util.Value;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -93,11 +94,15 @@ public abstract class DataVersion {
 
     }
 
-    protected void addFix(@NotNull DataType.IdMapped type, @NotNull Function<Map<String, Object>, Map<String, Object>> fix) {
+    protected void addFix(@NotNull DataType type, @NotNull Function<Value, Value> fix) {
+        ((DataTypeImpl) type).fixes.computeIfAbsent(this.version, _ -> new ArrayList<>()).add(fix);
+    }
+
+    protected void addFix(@NotNull DataType.IdMapped type, @NotNull Function<Value, Value> fix) {
         ((DataTypeImpl.IdMapped) type).forEach(t -> t.fixes.computeIfAbsent(this.version, _ -> new ArrayList<>()).add(fix));
     }
 
-    protected void addFix(@NotNull DataType.IdMapped type, @NotNull String id, @NotNull Function<Map<String, Object>, Map<String, Object>> fix) {
+    protected void addFix(@NotNull DataType.IdMapped type, @NotNull String id, @NotNull Function<Value, Value> fix) {
         ((DataTypeImpl.IdMapped) type).named(id)
                 .fixes.computeIfAbsent(this.version, _ -> new ArrayList<>()).add(fix);
     }

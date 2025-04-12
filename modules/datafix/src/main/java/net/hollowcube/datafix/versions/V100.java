@@ -12,5 +12,7 @@ public class V100 extends DataVersion {
                 .list("HandItems", DataType.ITEM_STACK)
                 .single("body_armor_item", DataType.ITEM_STACK)
                 .single("saddle", DataType.ITEM_STACK));
+
+        // TODO entity equipment fixes
     }
 }
