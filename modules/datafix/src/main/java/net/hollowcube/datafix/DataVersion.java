@@ -56,6 +56,7 @@ public abstract class DataVersion {
     public interface Field {
         @NotNull Field single(@NotNull String path, @NotNull DataType type);
         @NotNull Field list(@NotNull String path, @NotNull DataType type);
+        @NotNull Field extend(@NotNull DataType type);
     }
 
     protected void addReference(DataType.IdMapped type, @NotNull String id) {
@@ -88,7 +89,7 @@ public abstract class DataVersion {
     }
 
 
-    protected void addReference(DataType type, @NotNull String path, @NotNull DataType other) {
+    protected void addReference(DataType type, @NotNull FieldEditor editor) {
 
     }
 

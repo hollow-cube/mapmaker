@@ -11,6 +11,19 @@ public class V99 extends DataVersion {
 
         registerEntities();
         registerBlockEntities();
+        addReference(DataType.ENTITY_TREE, field -> field.extend(DataType.ENTITY).single("Riding", DataType.ENTITY));
+        addReference(DataType.ENTITY, field -> field.extend(DataType.ENTITY_EQUIPMENT));
+        addReference(DataType.ITEM_STACK, field -> field.single("id", DataType.ITEM_NAME)
+                .single("EntityTag", DataType.ENTITY_TREE)
+                .single("BlockEntityTag", DataType.BLOCK_ENTITY)
+                .list("CanDestroy", DataType.BLOCK_NAME)
+                .list("CanPlaceOn", DataType.BLOCK_NAME)
+                .list("Items", DataType.ITEM_STACK)
+                .list("ChargedProjectiles", DataType.ITEM_STACK)
+                .list("pages", DataType.TEXT_COMPONENT)
+                .list("filtered_pages", DataType.TEXT_COMPONENT)
+                .single("display.Name", DataType.TEXT_COMPONENT)
+                .list("display.Lore", DataType.TEXT_COMPONENT));
     }
 
     private void registerEntities() {
@@ -20,14 +33,14 @@ public class V99 extends DataVersion {
     }
 
     private void registerBlockEntities() {
-        addReference(DataType.BLOCK_ENTITY, "components", DataType.DATA_COMPONENTS); // todo added way later?
+        addReference(DataType.BLOCK_ENTITY, field -> field.single("components", DataType.DATA_COMPONENTS)); // todo added way later?
         addInventoryBlock("Furnace");
         addInventoryBlock("Chest");
         addReference(DataType.BLOCK_ENTITY, "EnderChest");
         addReference(DataType.BLOCK_ENTITY, "RecordPlayer", field -> field.single("RecordItem", DataType.ITEM_STACK));
         addInventoryBlock("Trap");
         addInventoryBlock("Dropper");
-        addSignBlock("Sign");
+        addReference(DataType.BLOCK_ENTITY, "Sign", V99::signBlock);
         addReference(DataType.BLOCK_ENTITY, "MobSpawner");
         addReference(DataType.BLOCK_ENTITY, "Music");
         addReference(DataType.BLOCK_ENTITY, "Piston");
@@ -49,8 +62,8 @@ public class V99 extends DataVersion {
         addReference(DataType.BLOCK_ENTITY, id, field -> field.list("Items", DataType.ITEM_STACK));
     }
 
-    private void addSignBlock(@NotNull String id) {
-        addReference(DataType.BLOCK_ENTITY, id, field -> field
+    static @NotNull Field signBlock(@NotNull Field field) {
+        return field
                 .single("Text1", DataType.TEXT_COMPONENT)
                 .single("Text2", DataType.TEXT_COMPONENT)
                 .single("Text3", DataType.TEXT_COMPONENT)
@@ -58,7 +71,8 @@ public class V99 extends DataVersion {
                 .single("FilteredText1", DataType.TEXT_COMPONENT) // TODO: not added until later
                 .single("FilteredText2", DataType.TEXT_COMPONENT) // TODO: not added until later
                 .single("FilteredText3", DataType.TEXT_COMPONENT) // TODO: not added until later
-                .single("FilteredText4", DataType.TEXT_COMPONENT) // TODO: not added until later
-        );
+                .single("FilteredText4", DataType.TEXT_COMPONENT); // TODO: not added until later
     }
+
+    // TODO: What does V99.addNames accomplish?
 }

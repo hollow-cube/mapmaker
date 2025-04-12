@@ -40,10 +40,6 @@ public class V704 extends DataVersion {
         BLOCK_ENTITY_IDS.forEach((oldId, newId) ->
                 renameReference(DataType.BLOCK_ENTITY, oldId, newId));
 
-        addFix(DataType.ITEM_STACK, "minecraft:stone2", o -> {
-            o.put("id", "minecraft:stone3");
-            return o;
-        });
     }
 
     private @NotNull Map<String, Object> fixBlockEntityId(@NotNull Map<String, Object> blockEntity) {
