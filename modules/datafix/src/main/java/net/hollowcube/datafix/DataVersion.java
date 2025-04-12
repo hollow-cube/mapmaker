@@ -12,10 +12,30 @@ public abstract class DataVersion {
         final Object rawId = object.get("id");
         if (!(rawId instanceof String id)) return object;
 
-        final DataTypeImpl.IdMapped typeImpl = (DataTypeImpl.IdMapped) type;
+        DataTypeImpl typeImpl = ((DataTypeImpl.IdMapped) type).named(id);
         for (int i = fromVersion + 1; i <= toVersion; i++) {
             for (var fix : typeImpl.fixes.getOrDefault(i, List.of())) {
                 object = fix.apply(object);
+            }
+
+            typeImpl = ((DataTypeImpl.IdMapped) type).named((String) object.get("id"));
+            for (var field : typeImpl.fields) {
+                if (i < field.startVersion()) continue;
+
+                var a = object.get(field.path());
+                if (a == null) continue;
+                if (field.isList()) {
+                    if (!(a instanceof List<?> list)) continue;
+
+                    var newList = new ArrayList<>();
+                    for (var item : list) {
+                        if (!(item instanceof Map<?, ?> map)) continue;
+                        newList.add(convert((DataType.IdMapped) field.type(), (Map<String, Object>) map, fromVersion, toVersion));
+                    }
+                    object.put(field.path(), newList);
+                } else {
+                    // todo
+                }
             }
         }
 
@@ -59,13 +79,26 @@ public abstract class DataVersion {
         });
     }
 
+    protected void renameReference(DataType.IdMapped type, @NotNull String oldId, @NotNull String newId) {
+        var typeImpl = ((DataTypeImpl.IdMapped) type);
+        typeImpl.named(newId).fields.addAll(typeImpl.named(oldId).fields);
+    }
+
+    protected void removeReference(DataType.IdMapped type, @NotNull String id) {
+    }
+
 
     protected void addReference(DataType type, @NotNull String path, @NotNull DataType other) {
 
     }
 
+    protected void addFix(@NotNull DataType.IdMapped type, @NotNull Function<Map<String, Object>, Map<String, Object>> fix) {
+        ((DataTypeImpl.IdMapped) type).forEach(t -> t.fixes.computeIfAbsent(this.version, _ -> new ArrayList<>()).add(fix));
+    }
+
     protected void addFix(@NotNull DataType.IdMapped type, @NotNull String id, @NotNull Function<Map<String, Object>, Map<String, Object>> fix) {
-        ((DataTypeImpl.IdMapped) type).fixes.computeIfAbsent(this.version, _ -> new ArrayList<>()).add(fix);
+        ((DataTypeImpl.IdMapped) type).named(id)
+                .fixes.computeIfAbsent(this.version, _ -> new ArrayList<>()).add(fix);
     }
 
 }

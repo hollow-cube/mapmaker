@@ -1,16 +1,19 @@
 package net.hollowcube.datafix;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class DataTypeImpl implements DataType {
     private final String name;
     final List<FieldImpl> fields; //todo private
+    final Map<Integer, List<Function<Map<String, Object>, Map<String, Object>>>> fixes = new HashMap<>();
 
     public DataTypeImpl(@NotNull String name) {
         this.name = name;
@@ -33,7 +36,6 @@ public class DataTypeImpl implements DataType {
 
     public static class IdMapped extends DataTypeImpl implements DataType.IdMapped {
         private final Map<String, DataTypeImpl> idMap = new HashMap<>();
-        public final Map<Integer, List<Function<Map<String, Object>, Map<String, Object>>>> fixes = new HashMap<>();
 
         public IdMapped(@NotNull String name) {
             super(name);
@@ -41,6 +43,16 @@ public class DataTypeImpl implements DataType {
 
         public @NotNull DataTypeImpl named(@NotNull String id) {
             return idMap.computeIfAbsent(id, DataTypeImpl::new);
+        }
+
+        public @Nullable DataTypeImpl namedOrNull(@NotNull String id) {
+            return idMap.get(id);
+        }
+
+        public void forEach(@NotNull Consumer<DataTypeImpl> fn) {
+            for (var entry : idMap.values()) {
+                fn.accept(entry);
+            }
         }
 
         @Override
