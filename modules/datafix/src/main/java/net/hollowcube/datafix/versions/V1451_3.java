@@ -39,5 +39,7 @@ public class V1451_3 extends DataVersion {
                 .single("DisplayState", DataType.BLOCK_STATE));
         addReference(DataType.ENTITY, "minecraft:tnt_minecart", field -> field
                 .single("DisplayState", DataType.BLOCK_STATE));
+
+        // TODO: need to add two more fixes here for flattening
     }
 }

@@ -11,11 +11,25 @@ public interface Value {
 
     }
 
+    static Value emptyList() {
+
+    }
+
+    static Value wrap(Object object) {
+
+    }
+
     @Nullable Object value();
 
     <T> T as(@NotNull Class<T> type, T defaultValue);
 
+    // ListLike
+
+    void add(Object value);
+
     // MapLike
+
+    boolean isMapLike();
 
     @NotNull Value get(@NotNull String key);
 

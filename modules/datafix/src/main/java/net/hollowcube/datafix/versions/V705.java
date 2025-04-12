@@ -2,9 +2,15 @@ package net.hollowcube.datafix.versions;
 
 import net.hollowcube.datafix.DataType;
 import net.hollowcube.datafix.DataVersion;
+import net.hollowcube.datafix.fixes.entity.EntityRenameFix;
+import net.hollowcube.datafix.util.Value;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+
 public class V705 extends DataVersion {
+    private static final Map<String, String> ENTITY_ID_MAP;
+
     public V705() {
         super(705);
 
@@ -121,10 +127,96 @@ public class V705 extends DataVersion {
         addReference(DataType.ENTITY, "minecraft:llama_spit");
         addReference(DataType.ENTITY, "minecraft:vex");
         addReference(DataType.ENTITY, "minecraft:vindication_illager");
+
+        addFix(DataType.ENTITY, new EntityRenameFix(V705::fixEntityId));
     }
 
     private void addProjectileEntity(@NotNull String id) {
         addReference(DataType.ENTITY, id, field -> field
                 .single("inTile", DataType.BLOCK_NAME));
+    }
+
+    private static String fixEntityId(Value ignored, String id) {
+        return ENTITY_ID_MAP.getOrDefault(id, id);
+    }
+
+    static {
+        ENTITY_ID_MAP = Map.<String, String>ofEntries(
+                Map.entry("AreaEffectCloud", "minecraft:area_effect_cloud"),
+                Map.entry("ArmorStand", "minecraft:armor_stand"),
+                Map.entry("Arrow", "minecraft:arrow"),
+                Map.entry("Bat", "minecraft:bat"),
+                Map.entry("Blaze", "minecraft:blaze"),
+                Map.entry("Boat", "minecraft:boat"),
+                Map.entry("CaveSpider", "minecraft:cave_spider"),
+                Map.entry("Chicken", "minecraft:chicken"),
+                Map.entry("Cow", "minecraft:cow"),
+                Map.entry("Creeper", "minecraft:creeper"),
+                Map.entry("Donkey", "minecraft:donkey"),
+                Map.entry("DragonFireball", "minecraft:dragon_fireball"),
+                Map.entry("ElderGuardian", "minecraft:elder_guardian"),
+                Map.entry("EnderCrystal", "minecraft:ender_crystal"),
+                Map.entry("EnderDragon", "minecraft:ender_dragon"),
+                Map.entry("Enderman", "minecraft:enderman"),
+                Map.entry("Endermite", "minecraft:endermite"),
+                Map.entry("EyeOfEnderSignal", "minecraft:eye_of_ender_signal"),
+                Map.entry("FallingSand", "minecraft:falling_block"),
+                Map.entry("Fireball", "minecraft:fireball"),
+                Map.entry("FireworksRocketEntity", "minecraft:fireworks_rocket"),
+                Map.entry("Ghast", "minecraft:ghast"),
+                Map.entry("Giant", "minecraft:giant"),
+                Map.entry("Guardian", "minecraft:guardian"),
+                Map.entry("Horse", "minecraft:horse"),
+                Map.entry("Husk", "minecraft:husk"),
+                Map.entry("Item", "minecraft:item"),
+                Map.entry("ItemFrame", "minecraft:item_frame"),
+                Map.entry("LavaSlime", "minecraft:magma_cube"),
+                Map.entry("LeashKnot", "minecraft:leash_knot"),
+                Map.entry("MinecartChest", "minecraft:chest_minecart"),
+                Map.entry("MinecartCommandBlock", "minecraft:commandblock_minecart"),
+                Map.entry("MinecartFurnace", "minecraft:furnace_minecart"),
+                Map.entry("MinecartHopper", "minecraft:hopper_minecart"),
+                Map.entry("MinecartRideable", "minecraft:minecart"),
+                Map.entry("MinecartSpawner", "minecraft:spawner_minecart"),
+                Map.entry("MinecartTNT", "minecraft:tnt_minecart"),
+                Map.entry("Mule", "minecraft:mule"),
+                Map.entry("MushroomCow", "minecraft:mooshroom"),
+                Map.entry("Ozelot", "minecraft:ocelot"),
+                Map.entry("Painting", "minecraft:painting"),
+                Map.entry("Pig", "minecraft:pig"),
+                Map.entry("PigZombie", "minecraft:zombie_pigman"),
+                Map.entry("PolarBear", "minecraft:polar_bear"),
+                Map.entry("PrimedTnt", "minecraft:tnt"),
+                Map.entry("Rabbit", "minecraft:rabbit"),
+                Map.entry("Sheep", "minecraft:sheep"),
+                Map.entry("Shulker", "minecraft:shulker"),
+                Map.entry("ShulkerBullet", "minecraft:shulker_bullet"),
+                Map.entry("Silverfish", "minecraft:silverfish"),
+                Map.entry("Skeleton", "minecraft:skeleton"),
+                Map.entry("SkeletonHorse", "minecraft:skeleton_horse"),
+                Map.entry("Slime", "minecraft:slime"),
+                Map.entry("SmallFireball", "minecraft:small_fireball"),
+                Map.entry("SnowMan", "minecraft:snowman"),
+                Map.entry("Snowball", "minecraft:snowball"),
+                Map.entry("SpectralArrow", "minecraft:spectral_arrow"),
+                Map.entry("Spider", "minecraft:spider"),
+                Map.entry("Squid", "minecraft:squid"),
+                Map.entry("Stray", "minecraft:stray"),
+                Map.entry("ThrownEgg", "minecraft:egg"),
+                Map.entry("ThrownEnderpearl", "minecraft:ender_pearl"),
+                Map.entry("ThrownExpBottle", "minecraft:xp_bottle"),
+                Map.entry("ThrownPotion", "minecraft:potion"),
+                Map.entry("Villager", "minecraft:villager"),
+                Map.entry("VillagerGolem", "minecraft:villager_golem"),
+                Map.entry("Witch", "minecraft:witch"),
+                Map.entry("WitherBoss", "minecraft:wither"),
+                Map.entry("WitherSkeleton", "minecraft:wither_skeleton"),
+                Map.entry("WitherSkull", "minecraft:wither_skull"),
+                Map.entry("Wolf", "minecraft:wolf"),
+                Map.entry("XPOrb", "minecraft:xp_orb"),
+                Map.entry("Zombie", "minecraft:zombie"),
+                Map.entry("ZombieHorse", "minecraft:zombie_horse"),
+                Map.entry("ZombieVillager", "minecraft:zombie_villager")
+        );
     }
 }

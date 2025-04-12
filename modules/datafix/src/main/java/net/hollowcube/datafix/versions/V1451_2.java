@@ -9,5 +9,7 @@ public class V1451_2 extends DataVersion {
 
         addReference(DataType.BLOCK_ENTITY, "minecraft:piston", field -> field
                 .single("blockState", DataType.BLOCK_STATE));
+
+        // TODO: this also uses the gross massive block state upgrader
     }
 }

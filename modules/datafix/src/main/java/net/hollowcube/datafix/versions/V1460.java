@@ -2,13 +2,26 @@ package net.hollowcube.datafix.versions;
 
 import net.hollowcube.datafix.DataType;
 import net.hollowcube.datafix.DataVersion;
+import net.hollowcube.datafix.util.Value;
+
+import java.util.Map;
+
+import static net.hollowcube.datafix.util.DataFixUtils.namespaced;
 
 public class V1460 extends DataVersion {
+    private static final Map<String, String> PAINTING_MOTIVE_MAP = Map.of(
+            "donkeykong", "donkey_kong",
+            "burningskull", "burning_skull",
+            "skullandroses", "skull_and_roses"
+    );
+
     public V1460() {
         super(1460);
 
         registerEntities();
         registerBlockEntities();
+
+        addFix(DataType.ENTITY, "minecraft:painting", V1460::fixEntityPaintingMotive);
     }
 
     private void registerEntities() {
@@ -154,5 +167,13 @@ public class V1460 extends DataVersion {
         addReference(DataType.BLOCK_ENTITY, "minecraft:command_block", field -> field.single("LastOutput", DataType.TEXT_COMPONENT));
         addReference(DataType.BLOCK_ENTITY, "minecraft:shulker_box", V1458::nameableInventory);
         addReference(DataType.BLOCK_ENTITY, "minecraft:bed");
+    }
+
+    private static Value fixEntityPaintingMotive(Value value) {
+        if (!(value.getValue("Motive") instanceof String motive))
+            return null;
+
+        value.put("Motive", namespaced(PAINTING_MOTIVE_MAP.getOrDefault(motive, motive)));
+        return null;
     }
 }

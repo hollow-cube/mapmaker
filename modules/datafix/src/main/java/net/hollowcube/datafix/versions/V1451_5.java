@@ -9,5 +9,7 @@ public class V1451_5 extends DataVersion {
 
         removeReference(DataType.BLOCK_ENTITY, "minecraft:flower_pot");
         removeReference(DataType.BLOCK_ENTITY, "minecraft:noteblock");
+
+        // TODO: flattening
     }
 }
