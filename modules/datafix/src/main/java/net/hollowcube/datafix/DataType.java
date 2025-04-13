@@ -8,7 +8,7 @@ public interface DataType {
     @NotNull DataType.IdMapped ITEM_STACK = makeId("item_stack");
     @NotNull DataType BLOCK_STATE = make("block_state");
     @NotNull DataType FLAT_BLOCK_STATE = make("flat_block_state");
-    @NotNull DataType.IdMapped DATA_COMPONENTS = makeId("data_components");
+    @NotNull DataType DATA_COMPONENTS = make("data_components");
     @NotNull DataType TEXT_COMPONENT = make("text_component");
     @NotNull DataType ENTITY_EQUIPMENT = make("entity_equipment");
     @NotNull DataType ENTITY_NAME = make("entity_name");
@@ -16,6 +16,9 @@ public interface DataType {
     @NotNull DataType.IdMapped ENTITY = makeId("entity");
     @NotNull DataType BLOCK_NAME = make("block_name");
     @NotNull DataType ITEM_NAME = make("item_name");
+    @NotNull DataType BIOME_NAME = make("biome_name");
+
+    // TODO should go back and support GAME_EVENT since they exist inside of entities and block
 
     interface IdMapped extends DataType {
 

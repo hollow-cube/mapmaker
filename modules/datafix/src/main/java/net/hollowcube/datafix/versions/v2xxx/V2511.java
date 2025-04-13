@@ -2,6 +2,7 @@ package net.hollowcube.datafix.versions.v2xxx;
 
 import net.hollowcube.datafix.DataType;
 import net.hollowcube.datafix.DataVersion;
+import net.hollowcube.datafix.util.UUIDFixes;
 import net.hollowcube.datafix.util.Value;
 
 public class V2511 extends DataVersion {
@@ -34,19 +35,12 @@ public class V2511 extends DataVersion {
     }
 
     private static Value fixOwnerArrow(Value entity) {
-        var mostSignificantBits = entity.remove("OwnerUUIDMost").as(Number.class, 0L).longValue();
-        var leastSignificantBits = entity.remove("OwnerUUIDLeast").as(Number.class, 0L).longValue();
-        return setOwnerUuid(entity, mostSignificantBits, leastSignificantBits);
+        return UUIDFixes.replaceUuidFromLeastMost(entity, "OwnerUUID", "OwnerUUID");
     }
 
     private static Value setOwnerUuid(Value entity, long mostSignificantBits, long leastSignificantBits) {
         if (mostSignificantBits == 0L && leastSignificantBits == 0L) return null;
-        entity.put("OwnerUUID", new int[]{
-                (int) (leastSignificantBits >> 32),
-                (int) leastSignificantBits,
-                (int) (mostSignificantBits >> 32),
-                (int) mostSignificantBits
-        });
+        entity.put("OwnerUUID", UUIDFixes.createUuidArray(mostSignificantBits, leastSignificantBits));
         return null;
     }
 }

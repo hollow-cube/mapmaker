@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
+// todo must implement equals on all children to wrap the passed in value.
 public interface Value extends Iterable<Value> {
 
     static Value emptyMap() {
@@ -32,6 +33,9 @@ public interface Value extends Iterable<Value> {
     int size(int defaultValue);
 
     void add(Object value);
+    void add(int index, Object value);
+
+    Value get(int index);
 
     @Override
     @NotNull Iterator<Value> iterator();

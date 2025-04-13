@@ -10,6 +10,9 @@ public class V3808_2 extends DataVersion {
         addReference(DataType.ENTITY, "minecraft:trader_llama", field -> field
                 .list("Items", DataType.ITEM_STACK)
                 .single("SaddleItem", DataType.ITEM_STACK));
+
+        addFix(DataType.ENTITY, "minecraft:trader_llama", entity ->
+                V3808.fixHorseBodyArmorItem(entity, "DecorItem", false));
     }
 
 }

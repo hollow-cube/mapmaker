@@ -10,6 +10,8 @@ public class V3938 extends DataVersion {
 
         addReference(DataType.ENTITY, "minecraft:spectral_arrow", V3938::abstractArrow);
         addReference(DataType.ENTITY, "minecraft:arrow", V3938::abstractArrow);
+
+        // TODO there is one of those writeReadFix cases here, need to again figure out what that does...
     }
 
     static @NotNull Field abstractArrow(@NotNull Field field) {

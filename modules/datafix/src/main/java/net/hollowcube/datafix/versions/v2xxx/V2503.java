@@ -2,6 +2,7 @@ package net.hollowcube.datafix.versions.v2xxx;
 
 import net.hollowcube.datafix.DataType;
 import net.hollowcube.datafix.DataVersion;
+import net.hollowcube.datafix.fixes.BlockStatePropertiesFix;
 import net.hollowcube.datafix.util.Value;
 
 import java.util.Set;
@@ -12,22 +13,15 @@ public class V2503 extends DataVersion {
     public V2503() {
         super(2503);
 
-        addFix(DataType.BLOCK_STATE, V2503::fixWallBlockStates);
+        WALL_BLOCKS.forEach(id -> addFix(DataType.BLOCK_STATE,
+                new BlockStatePropertiesFix(id, V2503::fixWallBlockStates)));
     }
 
-    private static Value fixWallBlockStates(Value blockState) {
-        var isWallBlock = blockState.getValue("Name") instanceof String s && WALL_BLOCKS.contains(s);
-        if (!isWallBlock) return null;
-
-        var properties = blockState.get("Properties");
-        if (properties.isNull()) return null;
-
+    private static void fixWallBlockStates(Value properties) {
         fixWallProperty(properties, "east");
         fixWallProperty(properties, "west");
         fixWallProperty(properties, "north");
         fixWallProperty(properties, "south");
-
-        return null;
     }
 
     private static void fixWallProperty(Value properties, String property) {

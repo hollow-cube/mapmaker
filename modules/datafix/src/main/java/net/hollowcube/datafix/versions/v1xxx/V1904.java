@@ -2,7 +2,7 @@ package net.hollowcube.datafix.versions.v1xxx;
 
 import net.hollowcube.datafix.DataType;
 import net.hollowcube.datafix.DataVersion;
-import net.hollowcube.datafix.fixes.entity.EntityRenameFix;
+import net.hollowcube.datafix.fixes.EntityRenameFix;
 import net.hollowcube.datafix.util.Value;
 
 public class V1904 extends DataVersion {

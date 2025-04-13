@@ -1,4 +1,4 @@
-package net.hollowcube.datafix.fixes.entity;
+package net.hollowcube.datafix.fixes;
 
 import net.hollowcube.datafix.util.Value;
 import org.jetbrains.annotations.NotNull;

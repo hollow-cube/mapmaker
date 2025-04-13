@@ -1,0 +1,39 @@
+package net.hollowcube.datafix.versions.v3xxx;
+
+import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataVersion;
+import net.hollowcube.datafix.util.Value;
+
+public class V3097 extends DataVersion {
+    public V3097() {
+        super(3097);
+
+        addFix(DataType.ITEM_STACK, "minecraft:writable_book", V3097::fixRemoveFilteredTextFromBook);
+        addFix(DataType.ITEM_STACK, "minecraft:written_book", V3097::fixRemoveFilteredTextFromBook);
+
+        addFix(DataType.BLOCK_ENTITY, "minecraft:sign", V3097::fixRemoveFilteredTextFromSign);
+
+        addFix(DataType.ENTITY, "minecraft:cat", V3097::fixCatVariantBritish);
+    }
+
+    private static Value fixRemoveFilteredTextFromBook(Value itemStack) {
+        var tag = itemStack.get("tag");
+        tag.remove("filtered_title");
+        tag.remove("filtered_pages");
+        return null;
+    }
+
+    private static Value fixRemoveFilteredTextFromSign(Value blockEntity) {
+        blockEntity.remove("FilteredText1");
+        blockEntity.remove("FilteredText2");
+        blockEntity.remove("FilteredText3");
+        blockEntity.remove("FilteredText4");
+        return null;
+    }
+
+    private static Value fixCatVariantBritish(Value entity) {
+        if ("minecraft:british".equals(entity.getValue("variant")))
+            entity.put("variant", "minecraft:british_shorthair");
+        return null;
+    }
+}
