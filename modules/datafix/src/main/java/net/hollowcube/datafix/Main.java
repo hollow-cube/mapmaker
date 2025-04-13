@@ -1,8 +1,8 @@
 package net.hollowcube.datafix;
 
-import net.hollowcube.datafix.versions.V101;
-import net.hollowcube.datafix.versions.V704;
-import net.hollowcube.datafix.versions.V99;
+import net.hollowcube.datafix.versions.v0xxx.V101;
+import net.hollowcube.datafix.versions.v0xxx.V704;
+import net.hollowcube.datafix.versions.v0xxx.V99;
 
 import java.util.ArrayList;
 import java.util.HashMap;
