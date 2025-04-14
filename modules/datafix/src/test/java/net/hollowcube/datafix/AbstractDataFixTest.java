@@ -36,7 +36,6 @@ public abstract class AbstractDataFixTest {
              version = fixBits.nextSetBit(version + 1)
         ) {
             if (version == Integer.MAX_VALUE) break; // or (i+1) would overflow
-//            System.out.println(version + " " + oldId);
 
             for (var fix : type.fixes()) {
                 if (fix.first() != version) continue;

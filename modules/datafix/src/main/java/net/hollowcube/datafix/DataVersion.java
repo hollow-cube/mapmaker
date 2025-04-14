@@ -41,10 +41,15 @@ public abstract class DataVersion {
         return object;
     }
 
-    private final int version;
+    private final int version, subversion;
 
     protected DataVersion(int version) {
+        this(version, 0);
+    }
+
+    protected DataVersion(int version, int subversion) {
         this.version = version;
+        this.subversion = subversion;
     }
 
     protected void addReference(DataType.IdMapped type, @NotNull String id) {

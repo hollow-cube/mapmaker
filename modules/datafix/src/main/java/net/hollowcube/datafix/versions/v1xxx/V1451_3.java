@@ -5,7 +5,7 @@ import net.hollowcube.datafix.DataVersion;
 
 public class V1451_3 extends DataVersion {
     public V1451_3() {
-        super(1451); // todo what is this version?
+        super(1451, 3);
 
         addReference(DataTypes.ENTITY, "minecraft:egg");
         addReference(DataTypes.ENTITY, "minecraft:ender_pearl");

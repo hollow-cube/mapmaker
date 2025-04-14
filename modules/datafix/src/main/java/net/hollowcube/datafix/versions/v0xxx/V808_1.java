@@ -6,7 +6,7 @@ import net.hollowcube.datafix.util.Value;
 
 public class V808_1 extends DataVersion {
     public V808_1() {
-        super(808); // todo what is the ID here
+        super(808, 1);
 
         addFix(DataTypes.ENTITY, "minecraft:shulker", this::fixShulkerColor);
     }

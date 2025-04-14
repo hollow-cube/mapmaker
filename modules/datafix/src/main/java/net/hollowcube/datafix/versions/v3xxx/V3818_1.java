@@ -11,7 +11,7 @@ public class V3818_1 extends DataVersion {
     private static final Map<String, String> PATTERN_RENAMES;
 
     public V3818_1() {
-        super(3818); // todo subversions
+        super(3818, 1);
 
         addFix(DataTypes.BLOCK_ENTITY, "minecraft:banner", V3818_1::fixBannerPatternNames);
     }

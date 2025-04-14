@@ -1,6 +1,7 @@
 package net.hollowcube.datafix;
 
 import it.unimi.dsi.fastutil.Pair;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.hollowcube.datafix.util.Value;
 import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
@@ -26,6 +27,25 @@ sealed class DataTypeImpl implements DataType permits DataTypeIDMappedImpl {
     // Post build/cached state: todo i wonder if we just delete the building state and only keep the "optimized" state after?
     // like turn DataType into purely a reference ID.
     public BitSet relevantVersions;
+
+    record OptimizedSchema(
+            BitSet relevantVersions,
+            // data version -> (start << 16) | length
+            // where start and length correspond to entries in fixes.
+            Int2IntMap versionToFixIndexLength,
+            Object[] fixes
+            // TODO need to work out how the schema factors in here.
+            //  Certainly relevantVersions is set for any child schema fixes
+            //  but we also need to track them. probably just loop through
+
+            // Perhaps you just end up with like "singleVersionUpdate" which just applies fixes and walks for a single version
+            // that can be used for all the schemas and we just call it a day. Should be OK i guess.
+
+            // Subversions are kinda annoying for this whole system. can they just be dropped entirely
+            // by the time we get to optimization assuming we ensure those fixes are ordered after in `fixes`
+            // i think yes.
+    ) {
+    }
 
     private DataTypeImpl(@Nullable DataTypeIDMappedImpl parent, @NotNull Key key) {
         this.parent = parent;

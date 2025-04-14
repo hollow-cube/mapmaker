@@ -5,7 +5,7 @@ import net.hollowcube.datafix.DataVersion;
 
 public class V3818_3 extends DataVersion {
     public V3818_3() {
-        super(3818); // todo what is id
+        super(3818, 3);
 
         // todo these paths are quite gross, should refactor.
         addReference(DataTypes.DATA_COMPONENTS, field -> field
