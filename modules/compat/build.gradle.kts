@@ -11,4 +11,5 @@ dependencies {
     implementation(libs.posthog)
     implementation(libs.noxesium)
     implementation(libs.zstd)
+    implementation(libs.feather)
 }

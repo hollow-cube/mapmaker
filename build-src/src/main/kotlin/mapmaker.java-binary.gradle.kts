@@ -16,6 +16,12 @@ repositories {
             includeGroup("com.noxcrew.noxesium")
         }
     }
+
+    maven(url = "https://repo.feathermc.net/artifactory/maven-releases") {
+        content {
+            includeGroup("net.digitalingot.feather-server-api")
+        }
+    }
 }
 
 dependencies {
