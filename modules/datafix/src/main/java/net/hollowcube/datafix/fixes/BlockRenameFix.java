@@ -19,6 +19,15 @@ public class BlockRenameFix implements Function<Value, Value> {
 
     @Override
     public Value apply(Value value) {
-        throw new UnsupportedOperationException("todo");
+        if (value.value() instanceof String s) { // FLAT_BLOCK_STATE or BLOCK_NAME
+            int index = s.indexOf('[');
+            if (index == -1) return Value.wrap(nameMap.getOrDefault(s, s));
+            return Value.wrap(nameMap.getOrDefault(s, s) + s.substring(index));
+        } else if (value.isMapLike()) { // BLOCK_STATE
+            var oldName = value.get("Name").as(String.class, "");
+            value.put("Name", Value.wrap(nameMap.getOrDefault(oldName, oldName)));
+            return null;
+        }
+        return null;
     }
 }

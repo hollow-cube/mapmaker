@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v1xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -8,7 +8,7 @@ public class V1953 extends DataVersion {
     public V1953() {
         super(1953);
 
-        addFix(DataType.BLOCK_ENTITY, "minecraft:banner", V1953::fixOminousBannerBlockEntityName);
+        addFix(DataTypes.BLOCK_ENTITY, "minecraft:banner", V1953::fixOminousBannerBlockEntityName);
     }
 
     private static Value fixOminousBannerBlockEntityName(Value value) {

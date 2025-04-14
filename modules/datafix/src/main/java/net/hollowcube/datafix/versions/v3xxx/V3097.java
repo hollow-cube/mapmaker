@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v3xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -8,12 +8,12 @@ public class V3097 extends DataVersion {
     public V3097() {
         super(3097);
 
-        addFix(DataType.ITEM_STACK, "minecraft:writable_book", V3097::fixRemoveFilteredTextFromBook);
-        addFix(DataType.ITEM_STACK, "minecraft:written_book", V3097::fixRemoveFilteredTextFromBook);
+        addFix(DataTypes.ITEM_STACK, "minecraft:writable_book", V3097::fixRemoveFilteredTextFromBook);
+        addFix(DataTypes.ITEM_STACK, "minecraft:written_book", V3097::fixRemoveFilteredTextFromBook);
 
-        addFix(DataType.BLOCK_ENTITY, "minecraft:sign", V3097::fixRemoveFilteredTextFromSign);
+        addFix(DataTypes.BLOCK_ENTITY, "minecraft:sign", V3097::fixRemoveFilteredTextFromSign);
 
-        addFix(DataType.ENTITY, "minecraft:cat", V3097::fixCatVariantBritish);
+        addFix(DataTypes.ENTITY, "minecraft:cat", V3097::fixCatVariantBritish);
     }
 
     private static Value fixRemoveFilteredTextFromBook(Value itemStack) {

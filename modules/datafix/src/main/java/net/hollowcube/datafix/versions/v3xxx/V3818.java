@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v3xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -8,11 +8,11 @@ public class V3818 extends DataVersion {
     public V3818() {
         super(3818);
 
-        addReference(DataType.BLOCK_ENTITY, "minecraft:beehive", field -> field
+        addReference(DataTypes.BLOCK_ENTITY, "minecraft:beehive", field -> field
                 // todo
-                .list("bees.entity_data", DataType.ENTITY_TREE));
+                .list("bees.entity_data", DataTypes.ENTITY_TREE));
 
-        addFix(DataType.BLOCK_ENTITY, "minecraft:beehive", V3818::fixBeehiveBlockEntityNames);
+        addFix(DataTypes.BLOCK_ENTITY, "minecraft:beehive", V3818::fixBeehiveBlockEntityNames);
     }
 
     private static Value fixBeehiveBlockEntityNames(Value blockEntity) {

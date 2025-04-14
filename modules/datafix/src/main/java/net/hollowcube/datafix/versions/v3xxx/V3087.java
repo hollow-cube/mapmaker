@@ -2,7 +2,7 @@ package net.hollowcube.datafix.versions.v3xxx;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -12,7 +12,7 @@ public class V3087 extends DataVersion {
     public V3087() {
         super(3087);
 
-        addFix(DataType.ENTITY, "minecraft:frog", V3087::fixFrogVariant);
+        addFix(DataTypes.ENTITY, "minecraft:frog", V3087::fixFrogVariant);
     }
 
     private static Value fixFrogVariant(Value entity) {

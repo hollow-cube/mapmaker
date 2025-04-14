@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v1xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.BlockRenameFix;
 import net.hollowcube.datafix.fixes.ItemRenameFix;
@@ -17,18 +17,18 @@ public class V1488 extends DataVersion {
     public V1488() {
         super(1488);
 
-        addReference(DataType.BLOCK_ENTITY, "minecraft:command_block", field -> field
-                .single("CustomName", DataType.TEXT_COMPONENT)
-                .single("LastOutput", DataType.TEXT_COMPONENT));
+        addReference(DataTypes.BLOCK_ENTITY, "minecraft:command_block", field -> field
+                .single("CustomName", DataTypes.TEXT_COMPONENT)
+                .single("LastOutput", DataTypes.TEXT_COMPONENT));
 
         var blockFix = new BlockRenameFix(RENAMED_BLOCKS_IDS);
-        addFix(DataType.BLOCK_NAME, blockFix);
-        addFix(DataType.BLOCK_STATE, blockFix);
-        addFix(DataType.FLAT_BLOCK_STATE, blockFix);
-        addFix(DataType.ITEM_NAME, new ItemRenameFix("minecraft:kelp_top", "minecraft:kelp"));
+        addFix(DataTypes.BLOCK_NAME, blockFix);
+        addFix(DataTypes.BLOCK_STATE, blockFix);
+        addFix(DataTypes.FLAT_BLOCK_STATE, blockFix);
+        addFix(DataTypes.ITEM_NAME, new ItemRenameFix("minecraft:kelp_top", "minecraft:kelp"));
 
-        addFix(DataType.BLOCK_ENTITY, "minecraft:command_block", V1488::fixCommandBlockEntityCustomName);
-        addFix(DataType.ENTITY, "minecraft:commandblock_minecart", V1488::fixCommandBlockEntityCustomName);
+        addFix(DataTypes.BLOCK_ENTITY, "minecraft:command_block", V1488::fixCommandBlockEntityCustomName);
+        addFix(DataTypes.ENTITY, "minecraft:commandblock_minecart", V1488::fixCommandBlockEntityCustomName);
     }
 
     private static Value fixCommandBlockEntityCustomName(Value value) {

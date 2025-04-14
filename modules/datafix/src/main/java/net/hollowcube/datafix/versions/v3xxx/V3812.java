@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v3xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -8,7 +8,7 @@ public class V3812 extends DataVersion {
     public V3812() {
         super(3218);
 
-        addFix(DataType.ENTITY, "minecraft:wolf", V3812::fixWolfHealth);
+        addFix(DataTypes.ENTITY, "minecraft:wolf", V3812::fixWolfHealth);
     }
 
     private static Value fixWolfHealth(Value value) {

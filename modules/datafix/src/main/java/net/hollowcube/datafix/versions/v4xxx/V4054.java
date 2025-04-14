@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v4xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -11,8 +11,8 @@ public class V4054 extends DataVersion {
     public V4054() {
         super(4054);
 
-        addFix(DataType.BLOCK_ENTITY, "minecraft:banner", V4054::fixOminousBannerRarity);
-        addFix(DataType.ITEM_STACK, "minecraft:white_banner", V4054::fixOminousBannerRarity);
+        addFix(DataTypes.BLOCK_ENTITY, "minecraft:banner", V4054::fixOminousBannerRarity);
+        addFix(DataTypes.ITEM_STACK, "minecraft:white_banner", V4054::fixOminousBannerRarity);
     }
 
     private static Value fixOminousBannerRarity(Value value) {

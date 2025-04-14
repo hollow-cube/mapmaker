@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v2xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.UUIDFixes;
 import net.hollowcube.datafix.util.Value;
@@ -18,28 +18,28 @@ public class V2514 extends DataVersion {
     public V2514() {
         super(2514);
 
-        addFix(DataType.ENTITY, V2514::updateEntityUuid);
-        ABSTRACT_HORSES.forEach(id -> addFix(DataType.ENTITY, id, V2514::updateAnimalOwner));
-        TAMEABLE_ANIMALS.forEach(id -> addFix(DataType.ENTITY, id, V2514::updateAnimalOwner));
-        ANIMALS.forEach(id -> addFix(DataType.ENTITY, id, V2514::updateAnimal));
-        MOBS.forEach(id -> addFix(DataType.ENTITY, id, V2514::updateMob));
-        LIVING_ENTITIES.forEach(id -> addFix(DataType.ENTITY, id, V2514::updateLivingEntity));
-        PROJECTILES.forEach(id -> addFix(DataType.ENTITY, id, V2514::updateProjectile));
-        addFix(DataType.ENTITY, "minecraft:bee", V2514::updateHurtBy);
-        addFix(DataType.ENTITY, "minecraft:zombified_piglin", V2514::updateHurtBy);
-        addFix(DataType.ENTITY, "minecraft:fox", V2514::updateFox);
-        addFix(DataType.ENTITY, "minecraft:item", V2514::updateItem);
-        addFix(DataType.ENTITY, "minecraft:shulker_bullet", V2514::updateShulkerBullet);
-        addFix(DataType.ENTITY, "minecraft:area_effect_cloud", V2514::updateAreaEffectCloud);
-        addFix(DataType.ENTITY, "minecraft:zombie_villager", V2514::updateZombieVillager);
-        addFix(DataType.ENTITY, "minecraft:evoker_fangs", V2514::updateEvokerFangs);
-        addFix(DataType.ENTITY, "minecraft:piglin", V2514::updatePiglin);
+        addFix(DataTypes.ENTITY, V2514::updateEntityUuid);
+        ABSTRACT_HORSES.forEach(id -> addFix(DataTypes.ENTITY, id, V2514::updateAnimalOwner));
+        TAMEABLE_ANIMALS.forEach(id -> addFix(DataTypes.ENTITY, id, V2514::updateAnimalOwner));
+        ANIMALS.forEach(id -> addFix(DataTypes.ENTITY, id, V2514::updateAnimal));
+        MOBS.forEach(id -> addFix(DataTypes.ENTITY, id, V2514::updateMob));
+        LIVING_ENTITIES.forEach(id -> addFix(DataTypes.ENTITY, id, V2514::updateLivingEntity));
+        PROJECTILES.forEach(id -> addFix(DataTypes.ENTITY, id, V2514::updateProjectile));
+        addFix(DataTypes.ENTITY, "minecraft:bee", V2514::updateHurtBy);
+        addFix(DataTypes.ENTITY, "minecraft:zombified_piglin", V2514::updateHurtBy);
+        addFix(DataTypes.ENTITY, "minecraft:fox", V2514::updateFox);
+        addFix(DataTypes.ENTITY, "minecraft:item", V2514::updateItem);
+        addFix(DataTypes.ENTITY, "minecraft:shulker_bullet", V2514::updateShulkerBullet);
+        addFix(DataTypes.ENTITY, "minecraft:area_effect_cloud", V2514::updateAreaEffectCloud);
+        addFix(DataTypes.ENTITY, "minecraft:zombie_villager", V2514::updateZombieVillager);
+        addFix(DataTypes.ENTITY, "minecraft:evoker_fangs", V2514::updateEvokerFangs);
+        addFix(DataTypes.ENTITY, "minecraft:piglin", V2514::updatePiglin);
 
-        addFix(DataType.BLOCK_ENTITY, "minecraft:conduit", V2514::updateConduitBlockEntity);
-        addFix(DataType.BLOCK_ENTITY, "minecraft:skull", V2514::updateSkullBlockEntity);
+        addFix(DataTypes.BLOCK_ENTITY, "minecraft:conduit", V2514::updateConduitBlockEntity);
+        addFix(DataTypes.BLOCK_ENTITY, "minecraft:skull", V2514::updateSkullBlockEntity);
 
-        addFix(DataType.ITEM_STACK, V2514::updateItemAttributeModifiers);
-        addFix(DataType.ITEM_STACK, "minecraft:player_head", V2514::updateSkullItem);
+        addFix(DataTypes.ITEM_STACK, V2514::updateItemAttributeModifiers);
+        addFix(DataTypes.ITEM_STACK, "minecraft:player_head", V2514::updateSkullItem);
     }
 
     private static Value updateEntityUuid(Value entity) {

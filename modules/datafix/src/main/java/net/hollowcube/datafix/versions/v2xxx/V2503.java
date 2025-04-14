@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v2xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.BlockStatePropertiesFix;
 import net.hollowcube.datafix.util.Value;
@@ -13,7 +13,7 @@ public class V2503 extends DataVersion {
     public V2503() {
         super(2503);
 
-        WALL_BLOCKS.forEach(id -> addFix(DataType.BLOCK_STATE,
+        WALL_BLOCKS.forEach(id -> addFix(DataTypes.BLOCK_STATE,
                 new BlockStatePropertiesFix(id, V2503::fixWallBlockStates)));
     }
 

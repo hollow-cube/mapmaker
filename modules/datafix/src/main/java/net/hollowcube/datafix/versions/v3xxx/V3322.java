@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v3xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -15,8 +15,8 @@ public class V3322 extends DataVersion {
     public V3322() {
         super(3322);
 
-        addFix(DataType.ENTITY, V3322::fixEntityEffects);
-        POTION_ITEMS.forEach(id -> addFix(DataType.ITEM_STACK, id, V3322::fixItemEffects));
+        addFix(DataTypes.ENTITY, V3322::fixEntityEffects);
+        POTION_ITEMS.forEach(id -> addFix(DataTypes.ITEM_STACK, id, V3322::fixItemEffects));
     }
 
     private static Value fixEntityEffects(Value entity) {

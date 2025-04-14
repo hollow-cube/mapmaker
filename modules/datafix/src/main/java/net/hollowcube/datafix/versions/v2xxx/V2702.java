@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v2xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -8,9 +8,9 @@ public class V2702 extends DataVersion {
     public V2702() {
         super(2702);
 
-        addFix(DataType.ENTITY, "minecraft:arrow", V2702::updatePickup);
-        addFix(DataType.ENTITY, "minecraft:spectral_arrow", V2702::updatePickup);
-        addFix(DataType.ENTITY, "minecraft:trident", V2702::updatePickup);
+        addFix(DataTypes.ENTITY, "minecraft:arrow", V2702::updatePickup);
+        addFix(DataTypes.ENTITY, "minecraft:spectral_arrow", V2702::updatePickup);
+        addFix(DataTypes.ENTITY, "minecraft:trident", V2702::updatePickup);
     }
 
     private static Value updatePickup(Value entity) {

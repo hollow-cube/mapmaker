@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v1xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -8,7 +8,7 @@ public class V1948 extends DataVersion {
     public V1948() {
         super(1948);
 
-        addFix(DataType.ITEM_STACK, "minecraft:white_banner", V1948::fixOminousBannerName);
+        addFix(DataTypes.ITEM_STACK, "minecraft:white_banner", V1948::fixOminousBannerName);
     }
 
     private static Value fixOminousBannerName(Value value) {

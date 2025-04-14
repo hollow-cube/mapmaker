@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v2xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.UUIDFixes;
 import net.hollowcube.datafix.util.Value;
@@ -9,15 +9,15 @@ public class V2511 extends DataVersion {
     public V2511() {
         super(2511);
 
-        addFix(DataType.ENTITY, "minecraft:egg", V2511::fixOwnerThrowable);
-        addFix(DataType.ENTITY, "minecraft:ender_pearl", V2511::fixOwnerThrowable);
-        addFix(DataType.ENTITY, "minecraft:experience_bottle", V2511::fixOwnerThrowable);
-        addFix(DataType.ENTITY, "minecraft:snowball", V2511::fixOwnerThrowable);
-        addFix(DataType.ENTITY, "minecraft:potion", V2511::fixOwnerThrowable);
-        addFix(DataType.ENTITY, "minecraft:llama_spit", V2511::fixOwnerLlamaSpit);
-        addFix(DataType.ENTITY, "minecraft:arrow", V2511::fixOwnerArrow);
-        addFix(DataType.ENTITY, "minecraft:spectral_arrow", V2511::fixOwnerArrow);
-        addFix(DataType.ENTITY, "minecraft:trident", V2511::fixOwnerArrow);
+        addFix(DataTypes.ENTITY, "minecraft:egg", V2511::fixOwnerThrowable);
+        addFix(DataTypes.ENTITY, "minecraft:ender_pearl", V2511::fixOwnerThrowable);
+        addFix(DataTypes.ENTITY, "minecraft:experience_bottle", V2511::fixOwnerThrowable);
+        addFix(DataTypes.ENTITY, "minecraft:snowball", V2511::fixOwnerThrowable);
+        addFix(DataTypes.ENTITY, "minecraft:potion", V2511::fixOwnerThrowable);
+        addFix(DataTypes.ENTITY, "minecraft:llama_spit", V2511::fixOwnerLlamaSpit);
+        addFix(DataTypes.ENTITY, "minecraft:arrow", V2511::fixOwnerArrow);
+        addFix(DataTypes.ENTITY, "minecraft:spectral_arrow", V2511::fixOwnerArrow);
+        addFix(DataTypes.ENTITY, "minecraft:trident", V2511::fixOwnerArrow);
     }
 
     private static Value fixOwnerThrowable(Value entity) {

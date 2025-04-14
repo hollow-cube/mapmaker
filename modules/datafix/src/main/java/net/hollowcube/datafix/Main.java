@@ -1,29 +1,26 @@
 package net.hollowcube.datafix;
 
-import net.hollowcube.datafix.versions.v0xxx.V101;
-import net.hollowcube.datafix.versions.v0xxx.V704;
-import net.hollowcube.datafix.versions.v0xxx.V99;
+import it.unimi.dsi.fastutil.Pair;
+import net.hollowcube.datafix.util.Value;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Comparator;
 
 public class Main {
     public static void main(String[] args) {
 
-        new V99();
-        new V101();
-        new V704();
+        DataFixes.build();
 
-        System.out.println(((DataTypeImpl) DataType.BLOCK_ENTITY).stringify());
+        var type = (DataTypeImpl) DataTypes.BLOCK_NAME;
+        var value = Value.wrap("minecraft:grass");
 
-        var result = DataVersion.convert(DataType.BLOCK_ENTITY, new HashMap<>(Map.of(
-                "id", "Chest",
-                "Items", new ArrayList<>(List.of(
-                        new HashMap<String, Object>(Map.of("id", "minecraft:stone"))
-                ))
-        )), 99, 1000);
-        System.out.println(result);
+        var fixes = type.fixes().stream().sorted(Comparator.comparingInt(Pair::first)).toList();
+        for (var fix : fixes) {
+            System.out.println("at " + fix.key());
+            var result = fix.value().apply(value);
+            System.out.println("result: " + result);
+            if (result != null) value = result;
+        }
+
+        System.out.println("final result: " + value);
     }
 }

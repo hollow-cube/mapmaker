@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v4xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -17,8 +17,8 @@ public class V4055 extends DataVersion {
     public V4055() {
         super(4055);
 
-        addFix(DataType.DATA_COMPONENTS, V4055::fixAttributeIdsInDataComponents);
-        addFix(DataType.ENTITY, V4055::fixAttributeIdsInEntity);
+        addFix(DataTypes.DATA_COMPONENTS, V4055::fixAttributeIdsInDataComponents);
+        addFix(DataTypes.ENTITY, V4055::fixAttributeIdsInEntity);
     }
 
     public static Value fixAttributeIdsInDataComponents(Value dataComponents) {

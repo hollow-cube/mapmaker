@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v1xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -8,7 +8,7 @@ public class V1963 extends DataVersion {
     public V1963() {
         super(0);
 
-        addFix(DataType.ENTITY, "minecraft:villager", V1963::fixRemoveGolemGossip);
+        addFix(DataTypes.ENTITY, "minecraft:villager", V1963::fixRemoveGolemGossip);
     }
 
     private static Value fixRemoveGolemGossip(Value entity) {

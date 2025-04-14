@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v2xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -8,10 +8,10 @@ public class V2505 extends DataVersion {
     public V2505() {
         super(2505);
 
-        addReference(DataType.ENTITY, "minecraft:piglin", field -> field
-                .list("Inventory", DataType.ITEM_STACK));
+        addReference(DataTypes.ENTITY, "minecraft:piglin", field -> field
+                .list("Inventory", DataTypes.ITEM_STACK));
 
-        addFix(DataType.ENTITY, "minecraft:villager", V2505::fixMemoryExpiry);
+        addFix(DataTypes.ENTITY, "minecraft:villager", V2505::fixMemoryExpiry);
     }
 
     private static Value fixMemoryExpiry(Value entity) {

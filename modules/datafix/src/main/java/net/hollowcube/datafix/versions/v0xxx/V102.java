@@ -2,7 +2,7 @@ package net.hollowcube.datafix.versions.v0xxx;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -20,11 +20,11 @@ public class V102 extends DataVersion {
     public V102() {
         super(102);
 
-        addReference(DataType.ITEM_STACK, field -> field
-                .single("id", DataType.ITEM_NAME));
+        addReference(DataTypes.ITEM_STACK, field -> field
+                .single("id", DataTypes.ITEM_NAME));
 
-        addFix(DataType.ITEM_STACK, V102::fixItemIds);
-        addFix(DataType.ITEM_STACK, V102::fixPotionIds);
+        addFix(DataTypes.ITEM_STACK, V102::fixItemIds);
+        addFix(DataTypes.ITEM_STACK, V102::fixPotionIds);
     }
 
     private static Value fixItemIds(Value value) {

@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v1xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.ItemRenameFix;
 
@@ -16,10 +16,10 @@ public class V1800 extends DataVersion {
     public V1800() {
         super(1800);
 
-        addReference(DataType.ENTITY, "minecraft:panda");
-        addReference(DataType.ENTITY, "minecraft:pillager", field -> field
-                .list("Inventory", DataType.ITEM_STACK));
+        addReference(DataTypes.ENTITY, "minecraft:panda");
+        addReference(DataTypes.ENTITY, "minecraft:pillager", field -> field
+                .list("Inventory", DataTypes.ITEM_STACK));
 
-        addFix(DataType.ITEM_NAME, new ItemRenameFix(RENAMED_DYE_ITEMS));
+        addFix(DataTypes.ITEM_NAME, new ItemRenameFix(RENAMED_DYE_ITEMS));
     }
 }

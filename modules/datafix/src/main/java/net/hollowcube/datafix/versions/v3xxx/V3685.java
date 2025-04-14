@@ -1,6 +1,7 @@
 package net.hollowcube.datafix.versions.v3xxx;
 
 import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 import org.jetbrains.annotations.NotNull;
@@ -9,18 +10,18 @@ public class V3685 extends DataVersion {
     public V3685() {
         super(3685);
 
-        addReference(DataType.ENTITY, "minecraft:trident", V3685::abstractArrow);
-        addReference(DataType.ENTITY, "minecraft:spectral_arrow", V3685::abstractArrow);
-        addReference(DataType.ENTITY, "minecraft:arrow", V3685::abstractArrow);
+        addReference(DataTypes.ENTITY, "minecraft:trident", V3685::abstractArrow);
+        addReference(DataTypes.ENTITY, "minecraft:spectral_arrow", V3685::abstractArrow);
+        addReference(DataTypes.ENTITY, "minecraft:arrow", V3685::abstractArrow);
 
-        addFix(DataType.ENTITY, "minecraft:arrow", V3685::fixArrow);
-        addFix(DataType.ENTITY, "minecraft:spectral_arrow", V3685::fixSpectralArrow);
+        addFix(DataTypes.ENTITY, "minecraft:arrow", V3685::fixArrow);
+        addFix(DataTypes.ENTITY, "minecraft:spectral_arrow", V3685::fixSpectralArrow);
     }
 
-    static @NotNull Field abstractArrow(@NotNull Field field) {
+    static @NotNull DataType.Builder abstractArrow(@NotNull DataType.Builder field) {
         return field
-                .single("inBlockState", DataType.BLOCK_STATE)
-                .single("item", DataType.ITEM_STACK);
+                .single("inBlockState", DataTypes.BLOCK_STATE)
+                .single("item", DataTypes.ITEM_STACK);
     }
 
     private static Value fixArrow(Value value) {

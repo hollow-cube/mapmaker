@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v3xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 import org.jetbrains.annotations.NotNull;
@@ -22,19 +22,19 @@ public class V3813 extends DataVersion {
     public V3813() {
         super(3813);
 
-        addFix(DataType.ENTITY, posFieldFixAndRename(Map.of("Leash", "leash")));
-        addFix(DataType.ENTITY, "minecraft:bee", posFieldFixAndRename(
+        addFix(DataTypes.ENTITY, posFieldFixAndRename(Map.of("Leash", "leash")));
+        addFix(DataTypes.ENTITY, "minecraft:bee", posFieldFixAndRename(
                 Map.of("HivePos", "hive_pos", "FlowerPos", "flower_pos")));
-        addFix(DataType.ENTITY, "minecraft:end_crystal", posFieldFixAndRename(
+        addFix(DataTypes.ENTITY, "minecraft:end_crystal", posFieldFixAndRename(
                 Map.of("BeamTarget", "beam_target")));
-        addFix(DataType.ENTITY, "minecraft:wandering_trader", posFieldFixAndRename(
+        addFix(DataTypes.ENTITY, "minecraft:wandering_trader", posFieldFixAndRename(
                 Map.of("WanderTarget", "wander_target")));
-        PATROLLING_MOBS.forEach(id -> addFix(DataType.ENTITY, id, posFieldFixAndRename(PATROLLING_MOB_FIELDS)));
+        PATROLLING_MOBS.forEach(id -> addFix(DataTypes.ENTITY, id, posFieldFixAndRename(PATROLLING_MOB_FIELDS)));
 
-        addFix(DataType.BLOCK_ENTITY, "minecraft:beehive", posFieldFixAndRename(Map.of("FlowerPos", "flower_pos")));
-        addFix(DataType.BLOCK_ENTITY, "minecraft:end_gateway", posFieldFixAndRename(Map.of("ExitPortal", "exit_portal")));
+        addFix(DataTypes.BLOCK_ENTITY, "minecraft:beehive", posFieldFixAndRename(Map.of("FlowerPos", "flower_pos")));
+        addFix(DataTypes.BLOCK_ENTITY, "minecraft:end_gateway", posFieldFixAndRename(Map.of("ExitPortal", "exit_portal")));
 
-        addFix(DataType.ITEM_STACK, "minecraft:compass", V3813::fixCompassItemStack);
+        addFix(DataTypes.ITEM_STACK, "minecraft:compass", V3813::fixCompassItemStack);
     }
 
     private static Function<Value, Value> posFieldFixAndRename(@NotNull Map<String, String> fields) {

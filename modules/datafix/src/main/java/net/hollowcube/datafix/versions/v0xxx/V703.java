@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v0xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.EntityRenameFix;
 import net.hollowcube.datafix.util.Value;
@@ -9,22 +9,22 @@ public class V703 extends DataVersion {
     public V703() {
         super(703);
 
-        removeReference(DataType.ENTITY, "EntityHorse");
-        addReference(DataType.ENTITY, "Horse", field -> field
-                .single("ArmorItem", DataType.ITEM_STACK)
-                .single("SaddleItem", DataType.ITEM_STACK));
-        addReference(DataType.ENTITY, "Donkey", field -> field
-                .list("Items", DataType.ITEM_STACK)
-                .single("SaddleItem", DataType.ITEM_STACK));
-        addReference(DataType.ENTITY, "Mule", field -> field
-                .list("Items", DataType.ITEM_STACK)
-                .single("SaddleItem", DataType.ITEM_STACK));
-        addReference(DataType.ENTITY, "ZombieHorse", field -> field
-                .single("SaddleItem", DataType.ITEM_STACK));
-        addReference(DataType.ENTITY, "SkeletonHorse", field -> field
-                .single("SaddleItem", DataType.ITEM_STACK));
+        removeReference(DataTypes.ENTITY, "EntityHorse");
+        addReference(DataTypes.ENTITY, "Horse", field -> field
+                .single("ArmorItem", DataTypes.ITEM_STACK)
+                .single("SaddleItem", DataTypes.ITEM_STACK));
+        addReference(DataTypes.ENTITY, "Donkey", field -> field
+                .list("Items", DataTypes.ITEM_STACK)
+                .single("SaddleItem", DataTypes.ITEM_STACK));
+        addReference(DataTypes.ENTITY, "Mule", field -> field
+                .list("Items", DataTypes.ITEM_STACK)
+                .single("SaddleItem", DataTypes.ITEM_STACK));
+        addReference(DataTypes.ENTITY, "ZombieHorse", field -> field
+                .single("SaddleItem", DataTypes.ITEM_STACK));
+        addReference(DataTypes.ENTITY, "SkeletonHorse", field -> field
+                .single("SaddleItem", DataTypes.ITEM_STACK));
 
-        addFix(DataType.ENTITY, "EntityHorse", new EntityRenameFix(V703::fixEntityHorseSplit));
+        addFix(DataTypes.ENTITY, "EntityHorse", new EntityRenameFix(V703::fixEntityHorseSplit));
     }
 
     private static String fixEntityHorseSplit(Value value, String s) {

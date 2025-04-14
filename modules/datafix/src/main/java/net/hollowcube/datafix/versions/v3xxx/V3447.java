@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v3xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.ItemRenameFix;
 
@@ -12,7 +12,7 @@ public class V3447 extends DataVersion {
     public V3447() {
         super(3447);
 
-        addFix(DataType.ITEM_NAME, new ItemRenameFix(RENAMES));
+        addFix(DataTypes.ITEM_NAME, new ItemRenameFix(RENAMES));
     }
 
     static {

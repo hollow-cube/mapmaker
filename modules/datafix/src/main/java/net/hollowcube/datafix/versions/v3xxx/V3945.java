@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v3xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 import org.jetbrains.annotations.Nullable;
@@ -16,10 +16,10 @@ public class V3945 extends DataVersion {
     public V3945() {
         super(3945);
 
-        addFix(DataType.ENTITY, V3945::fixAttributesForEntity);
-        addFix(DataType.DATA_COMPONENTS, V3945::fixAttributesForComponents);
+        addFix(DataTypes.ENTITY, V3945::fixAttributesForEntity);
+        addFix(DataTypes.DATA_COMPONENTS, V3945::fixAttributesForComponents);
 
-        addFix(DataType.BLOCK_ENTITY, V3945::fixJukeboxTicksSinceStarted);
+        addFix(DataTypes.BLOCK_ENTITY, V3945::fixJukeboxTicksSinceStarted);
     }
 
     private static Value fixJukeboxTicksSinceStarted(Value blockEntity) {

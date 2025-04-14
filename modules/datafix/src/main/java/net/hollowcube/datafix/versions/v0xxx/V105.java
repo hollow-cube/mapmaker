@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v0xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -10,7 +10,7 @@ public class V105 extends DataVersion {
     public V105() {
         super(105);
 
-        addFix(DataType.ITEM_STACK, V105::fixSpawnEggEntityId);
+        addFix(DataTypes.ITEM_STACK, V105::fixSpawnEggEntityId);
     }
 
     private static Value fixSpawnEggEntityId(Value itemStack) {

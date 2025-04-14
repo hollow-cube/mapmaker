@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v0xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.EntityRenameFix;
 import net.hollowcube.datafix.util.Value;
@@ -9,9 +9,9 @@ public class V107 extends DataVersion {
     public V107() {
         super(107);
 
-        removeReference(DataType.ENTITY, "Minecart");
+        removeReference(DataTypes.ENTITY, "Minecart");
 
-        addFix(DataType.ENTITY, "Minecart", new EntityRenameFix(V107::fixMinecartId));
+        addFix(DataTypes.ENTITY, "Minecart", new EntityRenameFix(V107::fixMinecartId));
     }
 
     private static String fixMinecartId(Value value, String id) {

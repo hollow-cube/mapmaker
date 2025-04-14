@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v2xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -8,7 +8,7 @@ public class V2529 extends DataVersion {
     public V2529() {
         super(2529);
 
-        addFix(DataType.ENTITY, "minecraft:strider", V2529::fixStriderGravity);
+        addFix(DataTypes.ENTITY, "minecraft:strider", V2529::fixStriderGravity);
     }
 
     private static Value fixStriderGravity(Value entity) {

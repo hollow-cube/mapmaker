@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v0xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.EntityRenameFix;
 import net.hollowcube.datafix.util.Value;
@@ -9,10 +9,10 @@ public class V702 extends DataVersion {
     public V702() {
         super(702);
 
-        addReference(DataType.ENTITY, "ZombieVillager");
-        addReference(DataType.ENTITY, "Husk");
+        addReference(DataTypes.ENTITY, "ZombieVillager");
+        addReference(DataTypes.ENTITY, "Husk");
 
-        addFix(DataType.ENTITY, "Zombie", new EntityRenameFix(V702::fixZombieSplit));
+        addFix(DataTypes.ENTITY, "Zombie", new EntityRenameFix(V702::fixZombieSplit));
     }
 
     private static String fixZombieSplit(Value value, String s) {

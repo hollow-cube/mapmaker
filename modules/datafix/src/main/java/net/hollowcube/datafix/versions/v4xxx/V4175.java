@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v4xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -8,8 +8,8 @@ public class V4175 extends DataVersion {
     public V4175() {
         super(4175);
 
-        addFix(DataType.DATA_COMPONENTS, V4175::fixEquippableAssetRename);
-        addFix(DataType.DATA_COMPONENTS, V4175::fixCustomModelDataExpand);
+        addFix(DataTypes.DATA_COMPONENTS, V4175::fixEquippableAssetRename);
+        addFix(DataTypes.DATA_COMPONENTS, V4175::fixCustomModelDataExpand);
     }
 
     private static Value fixEquippableAssetRename(Value dataComponents) {

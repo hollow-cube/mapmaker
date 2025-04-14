@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v0xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -8,7 +8,7 @@ public class V113 extends DataVersion {
     public V113() {
         super(113);
 
-        addFix(DataType.ENTITY, V113::fixRedundantChanceTags);
+        addFix(DataTypes.ENTITY, V113::fixRedundantChanceTags);
     }
 
     private static Value fixRedundantChanceTags(Value entity) {

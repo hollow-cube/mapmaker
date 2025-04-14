@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v0xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.EntityRenameFix;
 import net.hollowcube.datafix.util.Value;
@@ -9,10 +9,10 @@ public class V701 extends DataVersion {
     public V701() {
         super(701);
 
-        addReference(DataType.ENTITY, "WitherSkeleton");
-        addReference(DataType.ENTITY, "Stray");
+        addReference(DataTypes.ENTITY, "WitherSkeleton");
+        addReference(DataTypes.ENTITY, "Stray");
 
-        addFix(DataType.ENTITY, "Skeleton", new EntityRenameFix(V701::fixSkeletonSplit));
+        addFix(DataTypes.ENTITY, "Skeleton", new EntityRenameFix(V701::fixSkeletonSplit));
     }
 
     private static String fixSkeletonSplit(Value value, String s) {

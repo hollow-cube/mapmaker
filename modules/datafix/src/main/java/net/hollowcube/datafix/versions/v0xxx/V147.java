@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v0xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -8,7 +8,7 @@ public class V147 extends DataVersion {
     public V147() {
         super(147);
 
-        addFix(DataType.ENTITY, "ArmorStand", V147::fixArmorStandSilent);
+        addFix(DataTypes.ENTITY, "ArmorStand", V147::fixArmorStandSilent);
     }
 
     private static Value fixArmorStandSilent(Value field) {

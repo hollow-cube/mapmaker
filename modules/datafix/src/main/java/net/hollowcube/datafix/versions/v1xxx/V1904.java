@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v1xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.EntityRenameFix;
 import net.hollowcube.datafix.util.Value;
@@ -9,9 +9,9 @@ public class V1904 extends DataVersion {
     public V1904() {
         super(1904);
 
-        addReference(DataType.ENTITY, "minecraft:cat");
+        addReference(DataTypes.ENTITY, "minecraft:cat");
 
-        addFix(DataType.ENTITY, "minecraft:ocelot", new EntityRenameFix(V1904::fixEntityCatName));
+        addFix(DataTypes.ENTITY, "minecraft:ocelot", new EntityRenameFix(V1904::fixEntityCatName));
     }
 
     private static String fixEntityCatName(Value entity, String id) {

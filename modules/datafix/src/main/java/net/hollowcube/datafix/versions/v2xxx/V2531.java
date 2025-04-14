@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v2xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.BlockStatePropertiesFix;
 import net.hollowcube.datafix.util.Value;
@@ -9,7 +9,7 @@ public class V2531 extends DataVersion {
     public V2531() {
         super(2531);
 
-        addFix(DataType.BLOCK_STATE, new BlockStatePropertiesFix(
+        addFix(DataTypes.BLOCK_STATE, new BlockStatePropertiesFix(
                 "minecraft:redstone_wire", V2531::fixRedstoneWireConnections));
     }
 

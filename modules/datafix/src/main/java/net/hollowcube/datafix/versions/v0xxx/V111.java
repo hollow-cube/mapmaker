@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v0xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -10,8 +10,8 @@ public class V111 extends DataVersion {
     public V111() {
         super(111);
 
-        addFix(DataType.ENTITY, "Painting", value -> fixPaintingOrItemFrameDirection(value, false));
-        addFix(DataType.ENTITY, "ItemFrame", value -> fixPaintingOrItemFrameDirection(value, true));
+        addFix(DataTypes.ENTITY, "Painting", value -> fixPaintingOrItemFrameDirection(value, false));
+        addFix(DataTypes.ENTITY, "ItemFrame", value -> fixPaintingOrItemFrameDirection(value, true));
     }
 
     private static Value fixPaintingOrItemFrameDirection(Value value, boolean isItemFrame) {

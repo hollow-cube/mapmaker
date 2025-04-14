@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v2xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.LegacyAttributeRenameFix;
 
@@ -13,8 +13,8 @@ public class V2523 extends DataVersion {
         super(2523);
 
         var fix = new LegacyAttributeRenameFix(ATTRIBUTE_IDS);
-        addFix(DataType.ITEM_STACK, fix::fixInItemStack);
-        addFix(DataType.ENTITY, fix::fixInEntity);
+        addFix(DataTypes.ITEM_STACK, fix::fixInItemStack);
+        addFix(DataTypes.ENTITY, fix::fixInEntity);
     }
 
     static {

@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v1xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.BlockRenameFix;
 import net.hollowcube.datafix.fixes.ItemRenameFix;
@@ -18,25 +18,25 @@ public class V1510 extends DataVersion {
     public V1510() {
         super(1510);
 
-        renameReference(DataType.ENTITY, "minecraft:commandblock_minecart", "minecraft:command_block_minecart");
-        renameReference(DataType.ENTITY, "minecraft:ender_crystal", "minecraft:end_crystal");
-        renameReference(DataType.ENTITY, "minecraft:snowman", "minecraft:snow_golem");
-        renameReference(DataType.ENTITY, "minecraft:evocation_illager", "minecraft:evoker");
-        renameReference(DataType.ENTITY, "minecraft:evocation_fangs", "minecraft:evoker_fangs");
-        renameReference(DataType.ENTITY, "minecraft:illusion_illager", "minecraft:illusioner");
-        renameReference(DataType.ENTITY, "minecraft:vindication_illager", "minecraft:vindicator");
-        renameReference(DataType.ENTITY, "minecraft:villager_golem", "minecraft:iron_golem");
-        renameReference(DataType.ENTITY, "minecraft:xp_orb", "minecraft:experience_orb");
-        renameReference(DataType.ENTITY, "minecraft:xp_bottle", "minecraft:experience_bottle");
-        renameReference(DataType.ENTITY, "minecraft:eye_of_ender_signal", "minecraft:eye_of_ender");
-        renameReference(DataType.ENTITY, "minecraft:fireworks_rocket", "minecraft:firework_rocket");
+        renameReference(DataTypes.ENTITY, "minecraft:commandblock_minecart", "minecraft:command_block_minecart");
+        renameReference(DataTypes.ENTITY, "minecraft:ender_crystal", "minecraft:end_crystal");
+        renameReference(DataTypes.ENTITY, "minecraft:snowman", "minecraft:snow_golem");
+        renameReference(DataTypes.ENTITY, "minecraft:evocation_illager", "minecraft:evoker");
+        renameReference(DataTypes.ENTITY, "minecraft:evocation_fangs", "minecraft:evoker_fangs");
+        renameReference(DataTypes.ENTITY, "minecraft:illusion_illager", "minecraft:illusioner");
+        renameReference(DataTypes.ENTITY, "minecraft:vindication_illager", "minecraft:vindicator");
+        renameReference(DataTypes.ENTITY, "minecraft:villager_golem", "minecraft:iron_golem");
+        renameReference(DataTypes.ENTITY, "minecraft:xp_orb", "minecraft:experience_orb");
+        renameReference(DataTypes.ENTITY, "minecraft:xp_bottle", "minecraft:experience_bottle");
+        renameReference(DataTypes.ENTITY, "minecraft:eye_of_ender_signal", "minecraft:eye_of_ender");
+        renameReference(DataTypes.ENTITY, "minecraft:fireworks_rocket", "minecraft:firework_rocket");
 
         var blockFix = new BlockRenameFix(RENAMED_BLOCKS);
-        addFix(DataType.BLOCK_NAME, blockFix);
-        addFix(DataType.BLOCK_STATE, blockFix);
-        addFix(DataType.FLAT_BLOCK_STATE, blockFix);
-        addFix(DataType.ITEM_NAME, new ItemRenameFix(RENAMED_ITEMS));
-        addFix(DataType.ENTITY_NAME, new SimpleEntityRenameFix(RENAMED_ENTITIES));
+        addFix(DataTypes.BLOCK_NAME, blockFix);
+        addFix(DataTypes.BLOCK_STATE, blockFix);
+        addFix(DataTypes.FLAT_BLOCK_STATE, blockFix);
+        addFix(DataTypes.ITEM_NAME, new ItemRenameFix(RENAMED_ITEMS));
+        addFix(DataTypes.ENTITY_NAME, new SimpleEntityRenameFix(RENAMED_ENTITIES));
     }
 
     static {

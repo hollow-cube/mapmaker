@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v2xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.BlockStatePropertiesFix;
 import net.hollowcube.datafix.util.Value;
@@ -20,8 +20,8 @@ public class V2518 extends DataVersion {
     public V2518() {
         super(2518);
 
-        addFix(DataType.BLOCK_ENTITY, "minecraft:jigsaw_block", V2518::fixJigsawBlockEntity);
-        addFix(DataType.BLOCK_STATE, new BlockStatePropertiesFix("minecraft:jigsaw", V2518::fixJigsawRotation));
+        addFix(DataTypes.BLOCK_ENTITY, "minecraft:jigsaw_block", V2518::fixJigsawBlockEntity);
+        addFix(DataTypes.BLOCK_STATE, new BlockStatePropertiesFix("minecraft:jigsaw", V2518::fixJigsawRotation));
     }
 
     private static Value fixJigsawBlockEntity(Value block) {

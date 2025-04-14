@@ -2,7 +2,7 @@ package net.hollowcube.datafix.versions.v3xxx;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -18,15 +18,15 @@ public class V3568 extends DataVersion {
     public V3568() {
         super(3568);
 
-        addFix(DataType.BLOCK_ENTITY, "minecraft:beacon", V3568::fixBeaconBlockEntity);
+        addFix(DataTypes.BLOCK_ENTITY, "minecraft:beacon", V3568::fixBeaconBlockEntity);
 
-        addFix(DataType.ITEM_STACK, "minecraft:suspicious_stew", V3568::fixSuspiciousStewItemStack);
-        POTION_ITEMS.forEach(id -> addFix(DataType.ITEM_STACK, id, V3568::fixPotionlikeItemStack));
+        addFix(DataTypes.ITEM_STACK, "minecraft:suspicious_stew", V3568::fixSuspiciousStewItemStack);
+        POTION_ITEMS.forEach(id -> addFix(DataTypes.ITEM_STACK, id, V3568::fixPotionlikeItemStack));
 
-        addFix(DataType.ENTITY, "minecraft:mooshroom", V3568::fixMooshroomEntity);
-        addFix(DataType.ENTITY, "minecraft:arrow", V3568::fixArrowEntity);
-        addFix(DataType.ENTITY, "minecraft:area_effect_cloud", V3568::fixAreaEffectCloudEntity);
-        addFix(DataType.ENTITY, V3568::fixLivingEntity);
+        addFix(DataTypes.ENTITY, "minecraft:mooshroom", V3568::fixMooshroomEntity);
+        addFix(DataTypes.ENTITY, "minecraft:arrow", V3568::fixArrowEntity);
+        addFix(DataTypes.ENTITY, "minecraft:area_effect_cloud", V3568::fixAreaEffectCloudEntity);
+        addFix(DataTypes.ENTITY, V3568::fixLivingEntity);
     }
 
     private static Value fixBeaconBlockEntity(Value value) {

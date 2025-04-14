@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v0xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.ItemRenameFix;
 import net.hollowcube.datafix.util.Value;
@@ -13,8 +13,8 @@ public class V502 extends DataVersion {
     public V502() {
         super(502);
 
-        addFix(DataType.ITEM_NAME, new ItemRenameFix("minecraft:cooked_fished", "minecraft:cooked_fish"));
-        addFix(DataType.ENTITY, "Zombie", V502::fixZombieVillagerType);
+        addFix(DataTypes.ITEM_NAME, new ItemRenameFix("minecraft:cooked_fished", "minecraft:cooked_fish"));
+        addFix(DataTypes.ENTITY, "Zombie", V502::fixZombieVillagerType);
     }
 
     private static Value fixZombieVillagerType(Value value) {

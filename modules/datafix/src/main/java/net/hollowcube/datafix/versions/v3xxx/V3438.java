@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v3xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.BlockEntityRenameFix;
 import net.hollowcube.datafix.fixes.ItemRenameFix;
@@ -19,13 +19,13 @@ public class V3438 extends DataVersion {
     public V3438() {
         super(3438);
 
-        renameReference(DataType.BLOCK_ENTITY, "minecraft:suspicious_sand", "minecraft:brushable_block");
-        addReference(DataType.BLOCK_ENTITY, "minecraft:calibrated_sculk_sensor");
+        renameReference(DataTypes.BLOCK_ENTITY, "minecraft:suspicious_sand", "minecraft:brushable_block");
+        addReference(DataTypes.BLOCK_ENTITY, "minecraft:calibrated_sculk_sensor");
 
-        addFix(DataType.BLOCK_ENTITY, "minecraft:suspicious_sand", new BlockEntityRenameFix(
+        addFix(DataTypes.BLOCK_ENTITY, "minecraft:suspicious_sand", new BlockEntityRenameFix(
                 "minecraft:suspicious_sand", "minecraft:brushable_block"));
-        addFix(DataType.ENTITY, "minecraft:brushable_block", V3438::fixBrushableBlockEntityLootTableFields);
-        addFix(DataType.ITEM_NAME, new ItemRenameFix(SHERD_RENAMES));
+        addFix(DataTypes.ENTITY, "minecraft:brushable_block", V3438::fixBrushableBlockEntityLootTableFields);
+        addFix(DataTypes.ITEM_NAME, new ItemRenameFix(SHERD_RENAMES));
     }
 
     private static Value fixBrushableBlockEntityLootTableFields(Value entity) {

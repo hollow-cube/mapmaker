@@ -1,20 +1,20 @@
 package net.hollowcube.datafix.versions.v3xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 
 public class V3689 extends DataVersion {
     public V3689() {
         super(3689);
 
-        addReference(DataType.ENTITY, "minecraft:breeze");
-        addReference(DataType.ENTITY, "minecraft:wind_charge");
-        addReference(DataType.ENTITY, "minecraft:breeze_wind_charge");
+        addReference(DataTypes.ENTITY, "minecraft:breeze");
+        addReference(DataTypes.ENTITY, "minecraft:wind_charge");
+        addReference(DataTypes.ENTITY, "minecraft:breeze_wind_charge");
 
-        addReference(DataType.BLOCK_ENTITY, "minecraft:trial_spawner", field -> field
+        addReference(DataTypes.BLOCK_ENTITY, "minecraft:trial_spawner", field -> field
                 // todo
-                .list("spawn_potentials.data.entity", DataType.ENTITY_TREE)
-                .single("spawn_data.entity", DataType.ENTITY_TREE));
+                .list("spawn_potentials.data.entity", DataTypes.ENTITY_TREE)
+                .single("spawn_data.entity", DataTypes.ENTITY_TREE));
     }
 
 }

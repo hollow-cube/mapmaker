@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v0xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -10,8 +10,8 @@ public class V813 extends DataVersion {
     public V813() {
         super(813);
 
-        addFix(DataType.ITEM_STACK, "minecraft:shulker_box", V813::fixItemShulkerBoxColor);
-        addFix(DataType.BLOCK_ENTITY, "minecraft:shulker_box", V813::fixBlockEntityShulkerColor);
+        addFix(DataTypes.ITEM_STACK, "minecraft:shulker_box", V813::fixItemShulkerBoxColor);
+        addFix(DataTypes.BLOCK_ENTITY, "minecraft:shulker_box", V813::fixBlockEntityShulkerColor);
     }
 
     private static Value fixItemShulkerBoxColor(Value value) {

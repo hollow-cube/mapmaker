@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v1xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -10,8 +10,8 @@ public class V1955 extends DataVersion {
     public V1955() {
         super(1955);
 
-        addFix(DataType.ENTITY, "minecraft:_villager", V1955::fixVillagerLevelAndXp);
-        addFix(DataType.ENTITY, "minecraft:zombie_villager", V1955::fixZombieVillagerXp);
+        addFix(DataTypes.ENTITY, "minecraft:_villager", V1955::fixVillagerLevelAndXp);
+        addFix(DataTypes.ENTITY, "minecraft:zombie_villager", V1955::fixZombieVillagerXp);
     }
 
     private static Value fixVillagerLevelAndXp(Value entity) {

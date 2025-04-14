@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v3xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -8,7 +8,7 @@ public class V3833 extends DataVersion {
     public V3833() {
         super(3833);
 
-        addFix(DataType.BLOCK_ENTITY, "minecraft:brushable_block", V3833::fixRemoveEmptyItemInBrushableBlock);
+        addFix(DataTypes.BLOCK_ENTITY, "minecraft:brushable_block", V3833::fixRemoveEmptyItemInBrushableBlock);
     }
 
     private static Value fixRemoveEmptyItemInBrushableBlock(Value blockEntity) {

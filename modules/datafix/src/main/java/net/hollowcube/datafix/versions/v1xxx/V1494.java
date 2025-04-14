@@ -2,7 +2,7 @@ package net.hollowcube.datafix.versions.v1xxx;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -12,7 +12,7 @@ public class V1494 extends DataVersion {
     public V1494() {
         super(1494);
 
-        addFix(DataType.ITEM_STACK, V1494::fixItemEnchantmentNames);
+        addFix(DataTypes.ITEM_STACK, V1494::fixItemEnchantmentNames);
     }
 
     private static Value fixItemEnchantmentNames(Value value) {

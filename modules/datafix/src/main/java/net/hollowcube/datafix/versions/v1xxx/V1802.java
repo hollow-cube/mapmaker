@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v1xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.BlockRenameFix;
 
@@ -19,9 +19,9 @@ public class V1802 extends DataVersion {
         super(1802);
 
         var blockFix = new BlockRenameFix(RENAMED_BLOCKS);
-        addFix(DataType.BLOCK_NAME, blockFix);
-        addFix(DataType.BLOCK_STATE, blockFix);
-        addFix(DataType.FLAT_BLOCK_STATE, blockFix);
-        addFix(DataType.ITEM_NAME, new BlockRenameFix(RENAMED_ITEMS));
+        addFix(DataTypes.BLOCK_NAME, blockFix);
+        addFix(DataTypes.BLOCK_STATE, blockFix);
+        addFix(DataTypes.FLAT_BLOCK_STATE, blockFix);
+        addFix(DataTypes.ITEM_NAME, new BlockRenameFix(RENAMED_ITEMS));
     }
 }

@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v0xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -8,7 +8,7 @@ public class V804 extends DataVersion {
     public V804() {
         super(804);
 
-        addFix(DataType.ITEM_STACK, "minecraft:banner", V804::fixBannerColor);
+        addFix(DataTypes.ITEM_STACK, "minecraft:banner", V804::fixBannerColor);
     }
 
     private static Value fixBannerColor(Value value) {

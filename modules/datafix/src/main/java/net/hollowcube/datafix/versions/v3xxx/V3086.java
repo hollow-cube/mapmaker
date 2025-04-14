@@ -2,7 +2,7 @@ package net.hollowcube.datafix.versions.v3xxx;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -13,7 +13,7 @@ public class V3086 extends DataVersion {
     public V3086() {
         super(3086);
 
-        addFix(DataType.ENTITY, "minecraft:cat", V3086::fixCatVariant);
+        addFix(DataTypes.ENTITY, "minecraft:cat", V3086::fixCatVariant);
     }
 
     private static Value fixCatVariant(Value entity) {

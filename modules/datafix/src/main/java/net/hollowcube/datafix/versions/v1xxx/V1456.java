@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v1xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -8,7 +8,7 @@ public class V1456 extends DataVersion {
     public V1456() {
         super(1456);
 
-        addFix(DataType.ENTITY, "minecraft:item_frame", V1456::fixItemFrameDirection);
+        addFix(DataTypes.ENTITY, "minecraft:item_frame", V1456::fixItemFrameDirection);
     }
 
     private static Value fixItemFrameDirection(Value value) {

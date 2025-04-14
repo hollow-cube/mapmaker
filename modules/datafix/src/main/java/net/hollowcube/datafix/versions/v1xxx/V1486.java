@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v1xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.ItemRenameFix;
 import net.hollowcube.datafix.fixes.SimpleEntityRenameFix;
@@ -20,10 +20,10 @@ public class V1486 extends DataVersion {
     public V1486() {
         super(1486);
 
-        renameReference(DataType.ENTITY, "minecraft:cod_mob", "minecraft:cod");
-        renameReference(DataType.ENTITY, "minecraft:salmon_mob", "minecraft:salmon");
+        renameReference(DataTypes.ENTITY, "minecraft:cod_mob", "minecraft:cod");
+        renameReference(DataTypes.ENTITY, "minecraft:salmon_mob", "minecraft:salmon");
 
-        addFix(DataType.ENTITY_NAME, new SimpleEntityRenameFix(RENAMED_ENTITY_IDS));
-        addFix(DataType.ITEM_NAME, new ItemRenameFix(RENAMED_EGG_IDS));
+        addFix(DataTypes.ENTITY_NAME, new SimpleEntityRenameFix(RENAMED_ENTITY_IDS));
+        addFix(DataTypes.ITEM_NAME, new ItemRenameFix(RENAMED_EGG_IDS));
     }
 }

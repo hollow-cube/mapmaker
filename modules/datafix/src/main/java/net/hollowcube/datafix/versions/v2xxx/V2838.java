@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v2xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.BiomeRenameFix;
 
@@ -12,7 +12,7 @@ public class V2838 extends DataVersion {
     public V2838() {
         super(2838);
 
-        addFix(DataType.BIOME_NAME, new BiomeRenameFix(RENAMES));
+        addFix(DataTypes.BIOME_NAME, new BiomeRenameFix(RENAMES));
     }
 
     static {

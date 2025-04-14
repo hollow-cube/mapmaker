@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v0xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 import org.jetbrains.annotations.NotNull;
@@ -14,9 +14,9 @@ public class V704 extends DataVersion {
         super(704);
 
         BLOCK_ENTITY_IDS.forEach((oldId, newId) ->
-                renameReference(DataType.BLOCK_ENTITY, oldId, newId));
+                renameReference(DataTypes.BLOCK_ENTITY, oldId, newId));
 
-        addFix(DataType.BLOCK_ENTITY, this::fixBlockEntityId);
+        addFix(DataTypes.BLOCK_ENTITY, this::fixBlockEntityId);
     }
 
     private Value fixBlockEntityId(@NotNull Value blockEntity) {

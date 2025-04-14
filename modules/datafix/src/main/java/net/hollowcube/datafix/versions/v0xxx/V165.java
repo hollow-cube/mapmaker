@@ -3,7 +3,7 @@ package net.hollowcube.datafix.versions.v0xxx;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -11,7 +11,7 @@ public class V165 extends DataVersion {
     public V165() {
         super(165);
 
-        addFix(DataType.TEXT_COMPONENT, V165::fixTextComponentStrictJson);
+        addFix(DataTypes.TEXT_COMPONENT, V165::fixTextComponentStrictJson);
     }
 
     private static Value fixTextComponentStrictJson(Value value) {

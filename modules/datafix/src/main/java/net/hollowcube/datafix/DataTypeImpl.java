@@ -1,73 +1,64 @@
 package net.hollowcube.datafix;
 
+import it.unimi.dsi.fastutil.Pair;
+import net.hollowcube.datafix.util.Value;
+import net.kyori.adventure.key.InvalidKeyException;
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Locale;
 import java.util.function.Function;
 
-public class DataTypeImpl implements DataType {
-    private final String name;
-    final List<FieldImpl> fields; //todo private
-    final Map<Integer, List<Function<Map<String, Object>, Map<String, Object>>>> fixes = new HashMap<>();
+sealed class DataTypeImpl implements DataType permits DataTypeIDMappedImpl {
+    private final Key key;
 
-    public DataTypeImpl(@NotNull String name) {
-        this.name = name;
-        this.fields = new ArrayList<>();
+    // Mapping of path string to property
+    private final List<Property> properties = new ArrayList<>();
+    // TODO: in the future the array should be dense and ordered by fix version
+    //  then separately maintain a mapping of fix version to index range perhaps, idk.
+    private final List<Pair<Integer, Function<Value, Value>>> fixes = new ArrayList<>();
+
+    public DataTypeImpl(@NotNull Key key) {
+        this.key = key;
+
+        DataFixes.addDataType(this);
     }
 
-    public @NotNull String stringify() {
-        return this + " {\n\t" +
-                fields.stream()
-                        .map(FieldImpl::toString)
-                        .reduce((a, b) -> a + "\n\t" + b)
-                        .orElse("") +
-                "\n}";
+    public DataTypeImpl(@NotNull DataTypeIDMappedImpl parent, @NotNull String id) {
+        this(computeKey(parent.key(), id));
     }
 
     @Override
-    public String toString() {
-        return "@" + name;
+    public @NotNull Key key() {
+        return this.key;
     }
 
-    public static class IdMapped extends DataTypeImpl implements DataType.IdMapped {
-        private final Map<String, DataTypeImpl> idMap = new HashMap<>();
-
-        public IdMapped(@NotNull String name) {
-            super(name);
-        }
-
-        public @NotNull DataTypeImpl named(@NotNull String id) {
-            return idMap.computeIfAbsent(id, DataTypeImpl::new);
-        }
-
-        public @Nullable DataTypeImpl namedOrNull(@NotNull String id) {
-            return idMap.get(id);
-        }
-
-        public void forEach(@NotNull Consumer<DataTypeImpl> fn) {
-            for (var entry : idMap.values()) {
-                fn.accept(entry);
-            }
-        }
-
-        @Override
-        public @NotNull String stringify() {
-            return idMap.entrySet().stream()
-                    .map(entry -> this + "/" + entry.getValue().stringify().substring(1))
-                    .reduce((a, b) -> a + "\n" + b)
-                    .orElse("");
-        }
+    public void addProperty(@NotNull Property property) {
+        properties.add(property);
     }
 
-    record FieldImpl(@NotNull String path, @NotNull DataType type, boolean isList, int startVersion) {
-        @Override
-        public String toString() {
-            return path + ": " + (isList ? "[]" : "") + type + " >" + startVersion;
+    public @NotNull List<Property> properties() {
+        return properties;
+    }
+
+    public void addFix(int version, @NotNull Function<Value, Value> fix) {
+        fixes.add(Pair.of(version, fix));
+    }
+
+    public List<Pair<Integer, Function<Value, Value>>> fixes() {
+        return fixes;
+    }
+
+    private static Key computeKey(@NotNull Key parent, @NotNull String id) {
+        try {
+            var childKey = Key.key(id);
+            return Key.key(parent.namespace(), parent.value() + "/" +
+                    (childKey.namespace().equals(parent.namespace()) ? "" : childKey.namespace() + "/") + childKey.value());
+        } catch (InvalidKeyException ignored) {
+            // Its a legacy one so prefix the path
+            return Key.key(parent.namespace(), parent.value() + "/legacy/" + id.toLowerCase(Locale.ROOT));
         }
     }
 }

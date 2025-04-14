@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v1xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -8,7 +8,7 @@ public class V1914 extends DataVersion {
     public V1914() {
         super(1914);
 
-        addFix(DataType.BLOCK_ENTITY, "minecraft:chest", V1914::fixWeaponSmithChestLootTable);
+        addFix(DataTypes.BLOCK_ENTITY, "minecraft:chest", V1914::fixWeaponSmithChestLootTable);
     }
 
     private static Value fixWeaponSmithChestLootTable(Value value) {

@@ -1,6 +1,6 @@
 package net.hollowcube.datafix.versions.v0xxx;
 
-import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
@@ -9,7 +9,7 @@ public class V110 extends DataVersion {
     public V110() {
         super(0);
 
-        addFix(DataType.ENTITY, "EntityHorse", V110::fixHorseSaddle);
+        addFix(DataTypes.ENTITY, "EntityHorse", V110::fixHorseSaddle);
     }
 
     private static Value fixHorseSaddle(Value horse) {
