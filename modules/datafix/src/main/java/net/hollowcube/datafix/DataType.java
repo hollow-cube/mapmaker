@@ -1,22 +1,19 @@
 package net.hollowcube.datafix;
 
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
-import net.minestom.server.codec.Transcoder;
 import org.jetbrains.annotations.NotNull;
 
-@SuppressWarnings("UnstableApiUsage")
-public sealed interface DataType extends Keyed permits DataType.IdMapped, DataTypeImpl {
+public sealed interface DataType permits DataType.IdMapped {
 
     static @NotNull DataType dataType(@NotNull Key key) {
-        return new DataTypeImpl(key);
+        return new DataTypeImpl(key.asString());
     }
 
     static @NotNull IdMapped idMappedDataType(@NotNull Key key) {
-        return new DataTypeIDMappedImpl(key);
+        return new DataTypeImpl(key.asString());
     }
 
-    sealed interface IdMapped extends DataType permits DataTypeIDMappedImpl {
+    sealed interface IdMapped extends DataType permits DataTypeImpl {
 
     }
 
@@ -33,18 +30,10 @@ public sealed interface DataType extends Keyed permits DataType.IdMapped, DataTy
     }
 
     /**
-     * <p>Upgrades the given object from one version to another.</p>
-     *
-     * <p>Passing the same or a prior version in toVersion is a noop.</p>
-     *
-     * @param coder The transcoder instance for the given data type.
-     * @param object The object to upgrade, for example
-     * @param fromVersion The current version of the data, or 0 to run all upgrades (can make sense if you don't have a better educated guess).
-     * @param toVersion The target version of the data.
-     * @return The upgraded object.
+     * Runtime only should never be stored or referenced across runtimes.
      */
-    default <T> T upgrade(@NotNull Transcoder<T> coder, @NotNull T object, int fromVersion, int toVersion) {
-        throw new UnsupportedOperationException("todo");
-    }
+    int id();
+
+    @NotNull String name();
 
 }

@@ -14,4 +14,17 @@ public class EntityUpgradeTest extends AbstractDataFixTest {
         )));
         assertEquals("minecraft:nonexistent", actual.getValue("id"));
     }
+
+    @Test
+    void testSchemaTransferUpgrade() {
+        var actual = upgradeFull(DataTypes.ENTITY, wrap(Map.of(
+                "id", "minecraft:enderman",
+                "carried", "minecraft:grass"
+        )));
+        assertEquals("minecraft:enderman", actual.getValue("id"));
+        assertEquals("minecraft:short_grass", actual.getValue("carried"));
+
+        // should be carriedBlockState but thats a flattening fix
+//        assertEquals("a", actual.getValue("carriedBlockState"));
+    }
 }

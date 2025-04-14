@@ -58,6 +58,10 @@ public interface Value extends Iterable<Value> {
 
     // ListLike
 
+    default boolean isListLike() {
+        return false;
+    }
+
     default int size(int defaultValue) {
         return defaultValue;
     }

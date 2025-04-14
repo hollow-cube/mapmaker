@@ -13,6 +13,11 @@ public record ListValue(List<Object> value) implements Value {
     }
 
     @Override
+    public boolean isListLike() {
+        return true;
+    }
+
+    @Override
     public int size(int defaultValue) {
         return value.size();
     }
