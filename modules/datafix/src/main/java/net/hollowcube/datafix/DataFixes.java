@@ -5,6 +5,7 @@ import net.hollowcube.datafix.versions.v1xxx.*;
 import net.hollowcube.datafix.versions.v2xxx.*;
 import net.hollowcube.datafix.versions.v3xxx.*;
 import net.hollowcube.datafix.versions.v4xxx.*;
+import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -18,8 +19,16 @@ public class DataFixes {
         for (var version : versions) version.get();
     }
 
-    public static void build() {
+    public static int minVersion() {
+        return 99;
+    }
 
+    public static int maxVersion() {
+        return MinecraftServer.DATA_VERSION;
+    }
+
+    public static void build() {
+        dataTypes.forEach(dt -> ((DataTypeImpl) dt).optimize());
     }
 
     static void addDataType(@NotNull DataType knownType) {
