@@ -70,22 +70,54 @@ public class V1451_3 extends DataVersion {
         addFix(DataTypes.ENTITY, "minecraft:tnt_minecart", V1451_3::updateDisplayTile);
         addFix(DataTypes.ENTITY, "minecraft:hopper_minecart", V1451_3::updateDisplayTile);
         addFix(DataTypes.ENTITY, "minecraft:spawner_minecart", V1451_3::updateDisplayTile);
+
+        addFix(DataTypes.ITEM_STACK, "minecraft:filled_map", V1451_3::fixMapItemStackMapId);
     }
 
     private static Value updateFallingBlock(Value entity) {
-
+        var id = switch (entity.remove("Block").value()) {
+            case String s -> BLOCK_TO_ID.getOrDefault(s, 0);
+            case Number n -> n.intValue();
+            case null, default -> {
+                var tileId = entity.remove("TileID").as(Number.class, null);
+                if (tileId != null) yield tileId.intValue();
+                yield entity.remove("Tile").as(Number.class, 0).byteValue() & 0xFF;
+            }
+        };
+        var data = entity.remove("Data").as(Number.class, 0).intValue();
+        entity.put("BlockState", V1450.getBlockState(id, data));
+        return null;
     }
 
     private static Value updateEnderman(Value entity) {
-
+        return updateBlockIdAndDataToState(entity, "carried",
+                "carriedData", "carriedBlockState");
     }
 
     private static Value updateDisplayTile(Value entity) {
-
+        return updateBlockIdAndDataToState(entity, "DisplayTile",
+                "DisplayData", "DisplayState");
     }
 
     private static Value updateInTile(Value entity) {
+        return updateBlockIdAndDataToState(entity, "inTile",
+                "inData", "inBlockState");
+    }
 
+    private static Value updateBlockIdAndDataToState(Value value, String blockIdField, String blockDataField, String blockStateField) {
+        var id = switch (value.remove(blockIdField).value()) {
+            case String s -> BLOCK_TO_ID.getOrDefault(s, 0);
+            case Number n -> n.intValue();
+            case null, default -> 0;
+        };
+        var data = value.remove(blockDataField).as(Number.class, 0).intValue();
+        value.put(blockStateField, V1450.getBlockState(id, data));
+        return null;
+    }
+
+    private static Value fixMapItemStackMapId(Value itemStack) {
+        itemStack.put("map", itemStack.get("Damage").as(Number.class, 0).intValue());
+        return null;
     }
 
     static {

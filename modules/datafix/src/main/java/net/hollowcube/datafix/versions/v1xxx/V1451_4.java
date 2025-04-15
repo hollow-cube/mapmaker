@@ -43,12 +43,12 @@ public class V1451_4 extends DataVersion {
         if (ITEMS_WITH_DURABILITY.contains(id)) {
             itemStack.get("tag", Value::emptyMap).put("Damage", damage);
         }
-        
+
         return null;
     }
 
-    private static String updateItemId(String id, int damage) {
-        if (!ITEM_IDS.contains(id)) return null;
+    static String updateItemId(String id, int damage) {
+        if (id == null || !ITEM_IDS.contains(id)) return null;
         var damageId = ITEM_WITH_DAMAGE_RENAMES.get(id + "." + damage);
         if (damageId != null) return damageId;
         return ITEM_WITH_DAMAGE_RENAMES.get(id + ".0");

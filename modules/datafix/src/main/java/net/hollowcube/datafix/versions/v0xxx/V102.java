@@ -11,7 +11,7 @@ import java.util.Objects;
 import static net.hollowcube.datafix.util.DataFixUtils.namespaced;
 
 public class V102 extends DataVersion {
-    private static final Int2ObjectMap<String> ITEM_NAMES = new Int2ObjectOpenHashMap<>();
+    public static final Int2ObjectMap<String> ITEM_NAMES = new Int2ObjectOpenHashMap<>();
 
     private static final String[] POTIONS = new String[128];
     public static final String DEFAULT_POTION = "minecraft:water";

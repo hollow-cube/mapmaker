@@ -220,6 +220,7 @@ public class DataFixer {
                 V1451_3::new,
                 V1451_4::new,
                 V1451_5::new,
+                V1451_6::new,
                 V1456::new,
                 V1458::new,
                 V1460::new,
