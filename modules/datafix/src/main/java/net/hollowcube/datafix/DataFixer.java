@@ -344,6 +344,7 @@ public class DataFixer {
                 V3816::new,
                 V3818::new,
                 V3818_1::new,
+                V3818_2::new,
                 V3818_3::new,
                 V3818_5::new,
                 V3825::new,
