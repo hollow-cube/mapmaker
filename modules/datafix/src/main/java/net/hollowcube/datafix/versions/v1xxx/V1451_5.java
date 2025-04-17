@@ -19,6 +19,7 @@ public class V1451_5 extends DataVersion {
 
         ITEMS.forEach(id -> addFix(DataTypes.ITEM_STACK, id, V1451_5::fixRemoveBlockEntityTag));
         addFix(DataTypes.ITEM_STACK, "minecraft:spawn_egg", V1451_5::fixSpawnEggItemId);
+        // TODO: This fix is disabled in paper, not sure if we want it or not.
         addFix(DataTypes.ENTITY, "minecraft:wolf", V1451_5::fixWolfEntityColor);
         addFix(DataTypes.BLOCK_ENTITY, "minecraft:banner", V1451_5::fixBannerBlockEntityColor);
     }

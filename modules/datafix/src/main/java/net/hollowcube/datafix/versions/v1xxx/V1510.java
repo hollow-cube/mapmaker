@@ -5,6 +5,7 @@ import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.BlockRenameFix;
 import net.hollowcube.datafix.fixes.ItemRenameFix;
 import net.hollowcube.datafix.fixes.SimpleEntityRenameFix;
+import net.hollowcube.datafix.util.Value;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +37,14 @@ public class V1510 extends DataVersion {
         addFix(DataTypes.BLOCK_STATE, blockFix);
         addFix(DataTypes.FLAT_BLOCK_STATE, blockFix);
         addFix(DataTypes.ITEM_NAME, new ItemRenameFix(RENAMED_ITEMS));
+        addFix(DataTypes.ENTITY_NAME, V1510::fixBredEntityId);
         addFix(DataTypes.ENTITY_NAME, new SimpleEntityRenameFix(RENAMED_ENTITIES));
+    }
+
+    private static Value fixBredEntityId(Value entityId) {
+        if (!(entityId.value() instanceof String id) || !id.startsWith(MINECRAFT_BRED))
+            return entityId;
+        return Value.wrap("minecraft:" + id.substring(MINECRAFT_BRED.length()));
     }
 
     static {

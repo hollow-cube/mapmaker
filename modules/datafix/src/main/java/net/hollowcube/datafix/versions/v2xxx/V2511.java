@@ -18,6 +18,8 @@ public class V2511 extends DataVersion {
         addFix(DataTypes.ENTITY, "minecraft:arrow", V2511::fixOwnerArrow);
         addFix(DataTypes.ENTITY, "minecraft:spectral_arrow", V2511::fixOwnerArrow);
         addFix(DataTypes.ENTITY, "minecraft:trident", V2511::fixOwnerArrow);
+
+        // TODO: paper moves the Potion key to Item for minecraft:potion. Does mojang? Where?
     }
 
     private static Value fixOwnerThrowable(Value entity) {

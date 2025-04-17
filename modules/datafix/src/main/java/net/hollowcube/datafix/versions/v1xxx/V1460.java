@@ -26,6 +26,7 @@ public class V1460 extends DataVersion {
     }
 
     private void registerEntities() {
+        // TODO: these seem like all reregistrations, probably can exclude.
         addReference(DataTypes.ENTITY, "minecraft:area_effect_cloud");
         addReference(DataTypes.ENTITY, "minecraft:armor_stand");
         addReference(DataTypes.ENTITY, "minecraft:arrow", field -> field
