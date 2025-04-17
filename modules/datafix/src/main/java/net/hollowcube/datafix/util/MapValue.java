@@ -42,7 +42,11 @@ public record MapValue(
     @Override
     public @NotNull Value get(@NotNull String key, Supplier<Value> defaultValue) {
         var result = value.get(key);
-        if (result == null) return defaultValue.get();
+        if (result == null) {
+            var newValue = defaultValue.get();
+            put(key, newValue);
+            return newValue;
+        }
         return Value.wrap(result);
     }
 

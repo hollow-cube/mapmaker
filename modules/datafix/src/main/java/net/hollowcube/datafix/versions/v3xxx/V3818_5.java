@@ -62,9 +62,9 @@ public class V3818_5 extends DataVersion {
             if ((hideFlags & 4) != 0) unbreakable.put("show_in_tooltip", false);
             components.put("minecraft:unbreakable", unbreakable);
         }
-        components.put("minecraft:enchantments", fixEnchantments(tag.remove("Enchantments"), (hideFlags & 1) != 0));
+        components.put("minecraft:enchantments", fixEnchantments(tag.remove("Enchantments"), components, (hideFlags & 1) != 0));
         if ("minecraft:enchanted_book".equals(id)) components.put("minecraft:stored_enchantments",
-                fixEnchantments(tag.remove("StoredEnchantments"), (hideFlags & 1) != 0));
+                fixEnchantments(tag.remove("StoredEnchantments"), components, (hideFlags & 1) != 0));
 
         var display = tag.remove("display");
         components.put("minecraft:custom_name", display.remove("Name"));
@@ -403,7 +403,7 @@ public class V3818_5 extends DataVersion {
         return mapDecorations;
     }
 
-    private static Value fixProfile(Value skullOwner) {
+    static Value fixProfile(Value skullOwner) {
         if (skullOwner.isNull()) return null;
         if (skullOwner.value() instanceof String name) {
             var result = Value.emptyMap();

@@ -1,5 +1,6 @@
 package net.hollowcube.datafix.util;
 
+import net.minestom.server.codec.Transcoder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,6 +9,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 public interface Value extends Iterable<Value> {
+    @NotNull Transcoder<Value> TRANSCODER = null; // todo
+
     Value NULL = new NullValue();
 
     static Value emptyMap() {
