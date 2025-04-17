@@ -33,6 +33,8 @@ public abstract class DataVersion {
 
     protected void renameReference(DataType.IdMapped type, @NotNull String oldId, @NotNull String newId) {
         // TODO
+
+        // But also can i just delete this perhaps? it seems kinda confusing.
     }
 
     protected void removeReference(DataType.IdMapped type, @NotNull String id) {

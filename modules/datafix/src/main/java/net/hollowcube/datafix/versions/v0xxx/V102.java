@@ -24,6 +24,8 @@ public class V102 extends DataVersion {
                 .single("id", DataTypes.ITEM_NAME));
 
         addFix(DataTypes.ITEM_STACK, V102::fixItemIds);
+        // We don't update ids between fixes inside the same version, so matching on "minecraft:potion" here would
+        // never actually hit since the ID is a string before the fixItemIds fix executes.
         addFix(DataTypes.ITEM_STACK, V102::fixPotionIds);
     }
 
@@ -38,6 +40,7 @@ public class V102 extends DataVersion {
     }
 
     private static Value fixPotionIds(Value value) {
+        // See note above on register why we match here.
         if (!"minecraft:potion".equals(value.get("id").value()))
             return null;
 

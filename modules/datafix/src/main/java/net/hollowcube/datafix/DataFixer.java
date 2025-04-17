@@ -208,7 +208,6 @@ public class DataFixer {
                 V804::new,
                 V806::new,
                 V808::new,
-                V808_1::new,
                 V813::new,
                 V820::new
         ));

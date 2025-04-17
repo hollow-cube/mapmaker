@@ -129,6 +129,8 @@ public class V705 extends DataVersion {
         addReference(DataTypes.ENTITY, "minecraft:vindication_illager");
 
         addFix(DataTypes.ENTITY, new EntityRenameFix(V705::fixEntityId));
+
+        // TODO: Now we need structure hooks here to ensure entity IDs are namespaced as well.
     }
 
     private void addProjectileEntity(@NotNull String id) {

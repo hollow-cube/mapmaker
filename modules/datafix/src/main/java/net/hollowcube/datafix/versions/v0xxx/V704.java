@@ -17,6 +17,8 @@ public class V704 extends DataVersion {
                 renameReference(DataTypes.BLOCK_ENTITY, oldId, newId));
 
         addFix(DataTypes.BLOCK_ENTITY, this::fixBlockEntityId);
+
+        // TODO: this also does itemstack renaming stuff like V99
     }
 
     private Value fixBlockEntityId(@NotNull Value blockEntity) {

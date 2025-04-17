@@ -10,13 +10,10 @@ public class V105 extends DataVersion {
     public V105() {
         super(105);
 
-        addFix(DataTypes.ITEM_STACK, V105::fixSpawnEggEntityId);
+        addFix(DataTypes.ITEM_STACK, "minecraft:spawn_egg", V105::fixSpawnEggEntityId);
     }
 
     private static Value fixSpawnEggEntityId(Value itemStack) {
-        if (!"minecraft:spawn_egg".equals(itemStack.get("id").value()))
-            return null;
-
         short damage = itemStack.get("Damage").as(Number.class, 0).shortValue();
         if (damage != 0) itemStack.put("Damage", (short) 0);
 

@@ -15,7 +15,7 @@ public class V700 extends DataVersion {
     }
 
     private static String fixElderGuardianSplit(Value value, String s) {
-        return "Guardian".equals(s) && value.get("Elder").as(Boolean.class, false)
+        return "Guardian".equals(s) && value.remove("Elder").as(Boolean.class, false)
                 ? "ElderGuardian" : s;
     }
 }
