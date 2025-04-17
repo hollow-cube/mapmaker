@@ -6,6 +6,7 @@ import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.DataFixUtils;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.Set;
@@ -79,8 +80,12 @@ public class V3818_5 extends DataVersion {
         if (locName != null) components.put("minecraft:item_name", "{\"translate\":\"" + locName + "\"}");
         if ("minecraft:filled_map".equals(id)) components.put("minecraft:map_color", display.remove("MapColor"));
 
-        components.put("minecraft:can_break", fixBlockStatePredicate(tag.remove("CanDestroy"), (hideFlags & 8) != 0));
-        components.put("minecraft:can_place_on", fixBlockStatePredicate(tag.remove("CanPlaceOn"), (hideFlags & 16) != 0));
+        components.put("minecraft:can_break", fixBlockStatePredicateList(tag.remove("CanDestroy"), (hideFlags & 8) != 0));
+        components.put("minecraft:can_place_on", fixBlockStatePredicateList(tag.remove("CanPlaceOn"), (hideFlags & 16) != 0));
+
+        var attributeModifiers = tag.remove("AttributeModifiers");
+        if (attributeModifiers.size(0) > 0) components.put("minecraft:attribute_modifiers",
+                fixAttributeModifierList(attributeModifiers, (hideFlags & 2) != 0));
 
         var trim = tag.remove("Trim");
         if (!trim.isNull()) {
@@ -104,22 +109,21 @@ public class V3818_5 extends DataVersion {
 
         if ("minecraft:filled_map".equals(id)) {
             components.put("minecraft:map_id", tag.remove("map"));
-            var decorations = tag.remove("Decorations");
-            // todo fixMapDecoration
+            var decorations = fixMapDecorations(tag.remove("Decorations"));
             if (decorations.size(0) > 0)
                 components.put("minecraft:map_decorations", decorations);
         }
 
         if (POTION_ITEMS.contains(id)) {
-            // TODO: fixPotionContents
+            components.put("minecraft:potion_contents", fixPotionContents(tag));
         }
 
         if ("minecraft:writable_book".equals(id)) {
-            // TODO: fixWritableBook
+            components.put("minecraft:writable_book_content", fixWritableBook(tag));
         }
 
         if ("minecraft:written_book".equals(id)) {
-            // TODO: fixWrittenBook
+            components.put("minecraft:written_book_content", fixWrittenBook(tag));
         }
 
         if ("minecraft:suspicious_stew".equals(id)) {
@@ -131,7 +135,7 @@ public class V3818_5 extends DataVersion {
         }
 
         if (BUCKETED_MOB_IDS.contains(id)) {
-            // TODO: fixBucketedMobData
+            fixBucketedMobData(tag, components);
         }
 
         if ("minecraft:goat_horn".equals(id)) {
@@ -143,21 +147,20 @@ public class V3818_5 extends DataVersion {
         }
 
         if ("minecraft:compass".equals(id)) {
-            // TODO: fix compass
+            components.put("minecraft:lodestone_tracker", fixLodestoneTracker(tag));
         }
 
         if ("minecraft:firework_rocket".equals(id)) {
-            // TODO: fix firework_rocket
+            components.put("minecraft:fireworks", fixFireworkRocket(tag.remove("Fireworks")));
         }
 
         if ("minecraft:firework_star".equals(id)) {
-            // TODO: fix firework_star
+            components.put("minecraft:firework_explosion", fixExplosion(tag.remove("Explosion")));
         }
 
         if ("minecraft:player_head".equals(id)) {
             var skullOwner = tag.remove("SkullOwner");
-            // TODO: fix skull owner
-//            components.put("minecraft:profile", );
+            components.put("minecraft:profile", fixProfile(skullOwner));
         }
 
         if (tag.size(0) > 0)
@@ -169,6 +172,15 @@ public class V3818_5 extends DataVersion {
 
     private static Value fixBlockStateTag(Value blockStateTag) {
         if (blockStateTag.isNull()) return null;
+        var newBlockState = Value.emptyMap();
+        blockStateTag.forEachEntry((key, value) -> {
+            if (BOOLEAN_BLOCK_STATE_PROPERTIES.contains(key) && value.value() instanceof Boolean b) {
+                newBlockState.put(key, String.valueOf(b));
+            } else if (value.value() instanceof Number n) {
+                newBlockState.put(key, String.valueOf(n));
+            } else newBlockState.put(key, value);
+        });
+        return newBlockState;
     }
 
     private static Value fixBlockEntityTag(String itemId, Value components, Value blockEntityTag) {
@@ -224,21 +236,243 @@ public class V3818_5 extends DataVersion {
         return blockEntityTag;
     }
 
-    private static Value fixEnchantments(Value enchantments, boolean isHidden) {
+    private static Value fixEnchantments(Value enchantments, Value components, boolean isHidden) {
         if (enchantments.isNull()) return null;
-
+        var newEnchantments = Value.emptyMap();
+        var levels = Value.emptyList();
+        for (var enchantment : enchantments) {
+            var id = enchantment.get("id").as(String.class, null);
+            if (id == null) continue;
+            var level = enchantment.get("lvl").as(Number.class, 0).intValue();
+            levels.put(id, Math.clamp(level, 0, 255));
+        }
+        newEnchantments.put("levels", levels);
+        if (isHidden)
+            newEnchantments.put("show_in_tooltip", false);
+        if (levels.size(0) == 0)
+            components.put("minecraft:enchantment_glint_override", true);
+        return levels.size(0) > 0 || isHidden ? newEnchantments : null;
     }
 
-    private static Value fixBlockStatePredicate(Value predicateList, boolean isHidden) {
+    private static Value fixBlockStatePredicateList(Value predicateList, boolean isHidden) {
         if (predicateList.isNull()) return null;
         var newPredicate = Value.emptyMap();
         var newPredicateList = Value.emptyList();
-        for (var predicate : predicateList) {
-            // TODO: fix individual predicates
+        for (var predicateValue : predicateList) {
+            newPredicateList.add(predicateValue.value() instanceof String predicate
+                    ? fixBlockStatePredicate(predicate) : predicateValue);
         }
         newPredicate.put("predicate", newPredicateList);
         if (isHidden) newPredicate.put("show_in_tooltip", false);
         return newPredicate;
+    }
+
+    private static Value fixBlockStatePredicate(@NotNull String predicate) {
+        int openBracket = predicate.indexOf('['), closeBracket = predicate.indexOf(']');
+        int openBrace = predicate.indexOf('{'), closeBrace = predicate.indexOf('}');
+        int nameLength = openBracket != -1 ? openBracket : predicate.length();
+        if (openBrace != -1) nameLength = Math.min(nameLength, openBrace);
+
+        Value result = Value.emptyMap();
+        result.put("blocks", predicate.substring(0, nameLength).trim());
+
+        if (openBracket != -1 && closeBracket != -1) {
+            var properties = Value.emptyMap();
+            for (String propertyKeyValue : predicate.substring(openBracket + 1, closeBracket).split(",")) {
+                int equals = propertyKeyValue.indexOf('=');
+                if (equals == -1) continue;
+                properties.put(
+                        propertyKeyValue.substring(0, equals).trim().intern(),
+                        propertyKeyValue.substring(equals + 1).trim().intern()
+                );
+            }
+            result.put("state", properties);
+        }
+
+        if (openBrace != -1 && closeBrace != -1) {
+            result.put("nbt", predicate.substring(openBrace, closeBrace + 1));
+        }
+
+        return result;
+    }
+
+    private static Value fixAttributeModifierList(@NotNull Value attributeModifiers, boolean isHidden) {
+        var newAttributeModifiers = Value.emptyMap();
+
+        var modifierList = Value.emptyList();
+        for (var modifier : attributeModifiers) {
+            modifierList.add(fixAttributeModifier(modifier));
+        }
+        newAttributeModifiers.put("modifiers", modifierList);
+
+        if (isHidden) newAttributeModifiers.put("show_in_tooltip", false);
+        return newAttributeModifiers;
+    }
+
+    private static Value fixAttributeModifier(@NotNull Value modifier) {
+        var newModifier = Value.emptyMap();
+        newModifier.put("type", modifier.get("AttributeName"));
+        newModifier.put("slot", modifier.get("Slot"));
+        newModifier.put("uuid", modifier.get("UUID"));
+        newModifier.put("name", modifier.get("Name", () -> Value.wrap("")));
+        newModifier.put("amount", modifier.get("Amount", () -> Value.wrap(0.0)));
+        newModifier.put("operation", switch (modifier.get("Operation").as(Number.class, 0).intValue()) {
+            case 0 -> "add_multiplied_base";
+            case 1 -> "add_multiplied_total";
+            default -> "add_value";
+        });
+        return newModifier;
+    }
+
+    private static void fixBucketedMobData(@NotNull Value tag, @NotNull Value components) {
+        var bucketEntityData = Value.emptyMap();
+        for (var key : BUCKETED_MOB_TAGS)
+            bucketEntityData.put(key, tag.remove(key));
+        if (bucketEntityData.size(0) > 0)
+            components.put("minecraft:bucket_entity_data", bucketEntityData);
+    }
+
+    private static Value fixLodestoneTracker(Value tag) {
+        var lodestonePos = tag.remove("LodestonePos");
+        var lodestoneDimension = tag.remove("LodestoneDimension");
+        if (lodestonePos.isNull() && lodestoneDimension.isNull()) return null;
+
+        var lodestoneTracker = Value.emptyMap();
+        if (!lodestonePos.isNull() && !lodestoneDimension.isNull()) {
+            var target = Value.emptyMap();
+            target.put("pos", lodestonePos);
+            target.put("dimension", lodestoneDimension);
+            lodestoneTracker.put("target", target);
+        }
+        if (!tag.remove("LodestoneTracked").as(Boolean.class, true)) {
+            lodestoneTracker.put("tracked", false);
+        }
+        return lodestoneTracker;
+    }
+
+    private static Value fixFireworkRocket(Value fireworks) {
+        if (fireworks.isNull()) return null;
+
+        var newFireworks = Value.emptyMap();
+        var newExplosions = Value.emptyList();
+        for (var explosion : fireworks.get("Explosions")) {
+            newExplosions.add(fixExplosion(explosion));
+        }
+        newFireworks.put("explosions", newExplosions);
+        int flightDuration = fireworks.remove("Flight").as(Number.class, 0).intValue();
+        newFireworks.put("flight_duration", flightDuration);
+        return newFireworks;
+    }
+
+    private static Value fixExplosion(@NotNull Value explosion) {
+        var type = explosion.remove("Type").as(Number.class, 0).intValue();
+        explosion.put("shape", switch (type) {
+            case 1 -> "large_ball";
+            case 2 -> "star";
+            case 3 -> "creeper";
+            case 4 -> "burst";
+            default -> "small_ball";
+        });
+        explosion.put("colors", explosion.remove("Colors"));
+        explosion.put("fade_colors", explosion.remove("FadeColors"));
+        explosion.put("has_trail", explosion.remove("Trail"));
+        explosion.put("has_twinkle", explosion.remove("Flicker"));
+        return explosion;
+    }
+
+    private static Value fixPotionContents(@NotNull Value tag) {
+        var potionContents = Value.emptyMap();
+        if (tag.remove("Potion").value() instanceof String s && !"minecraft:empty".equals(s))
+            potionContents.put("potion", s);
+        potionContents.put("custom_color", tag.remove("CustomPotionColor"));
+        potionContents.put("custom_effects", tag.remove("custom_potion_effects"));
+        return potionContents.size(0) > 0 ? potionContents : null;
+    }
+
+    private static Value fixMapDecorations(@NotNull Value decorationList) {
+        var mapDecorations = Value.emptyMap();
+        for (var mapDecoration : decorationList) {
+            var key = mapDecoration.get("id").as(String.class, "");
+            var value = Value.emptyMap();
+            value.put("type", MAP_DECORATION_IDS.get(mapDecoration.get("type").as(Number.class, 0).intValue()));
+            value.put("x", mapDecoration.get("x").as(Number.class, 0.0).doubleValue());
+            value.put("z", mapDecoration.get("z").as(Number.class, 0.0).doubleValue());
+            value.put("rotation", mapDecoration.get("rot").as(Number.class, 0f).floatValue());
+            mapDecorations.put(key, value);
+        }
+        return mapDecorations;
+    }
+
+    private static Value fixProfile(Value skullOwner) {
+        if (skullOwner.isNull()) return null;
+        if (skullOwner.value() instanceof String name) {
+            var result = Value.emptyMap();
+            if (isValidPlayerName(name)) result.put("name", name);
+            return result;
+        }
+        if (!skullOwner.isMapLike()) return null;
+
+        var result = Value.emptyMap();
+        var name = skullOwner.get("Name").as(String.class, null);
+        if (isValidPlayerName(name)) result.put("name", name);
+        result.put("id", skullOwner.get("Id"));
+        result.put("properties", fixProfileProperties(skullOwner.get("Properties")));
+        return result;
+    }
+
+    private static Value fixProfileProperties(Value properties) {
+        if (properties.isNull()) return null;
+        var result = Value.emptyList();
+        properties.forEachEntry((key, value) -> {
+            var entry = Value.emptyMap();
+            entry.put("name", key);
+            entry.put("value", value.get("Value"));
+            entry.put("signature", value.get("Signature"));
+            result.add(entry);
+        });
+        return result.size(0) > 0 ? result : null;
+    }
+
+    private static boolean isValidPlayerName(String string) {
+        return string != null && string.length() <= 16 && string.chars().filter(i -> i <= 32 || i >= 127).findAny().isEmpty();
+    }
+
+    private static Value fixWritableBook(Value tag) {
+        var pages = fixBookPages(tag);
+        if (pages.size(0) == 0) return null;
+        var result = Value.emptyMap();
+        result.put("pages", result);
+        return result;
+    }
+
+    private static Value fixWrittenBook(Value tag) {
+        var result = Value.emptyMap();
+        var pages = fixBookPages(tag);
+        if (pages.size(0) > 0) result.put("pages", pages);
+        result.put("title", createFilteredText(tag.remove("title"), tag.remove("filtered_title")));
+        result.put("author", tag.remove("author"));
+        result.put("resolved", tag.remove("resolved"));
+        result.put("generation", tag.remove("generation"));
+        return result;
+    }
+
+    private static Value fixBookPages(Value tag) {
+        var result = Value.emptyList();
+        var pages = tag.remove("pages");
+        var filteredPages = tag.remove("filtered_pages");
+        for (int i = 0; i < pages.size(0); i++) {
+            var page = pages.get(i);
+            if (page.isNull()) continue;
+            result.add(createFilteredText(page, filteredPages.get(String.valueOf(i))));
+        }
+        return result;
+    }
+
+    private static Value createFilteredText(Value raw, Value filtered) {
+        var result = Value.emptyMap();
+        result.put("raw", raw);
+        if (!filtered.isNull()) result.put("filtered", filtered);
+        return result;
     }
 
     static {
