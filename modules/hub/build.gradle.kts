@@ -7,6 +7,7 @@ dependencies {
     implementation(project(":modules:canvas:api"))
     implementation(project(":modules:terraform")) // Included for schematics, todo both terraform and this module should get schem from central
     implementation(project(":modules:script-engine"))
+    implementation(project(":modules:compat"))
 
     implementation(libs.minestom)
     implementation(libs.gson)

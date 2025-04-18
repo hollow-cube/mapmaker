@@ -92,6 +92,15 @@ public class LunarCompatProvider implements CompatProvider, DiscordRichPresenceP
     }
 
     @Override
+    public void clearRichPresence(Player player) {
+        new ClientboundLunarPacket(
+                Map.of(
+                        "@type", ClientboundLunarPacket.TYPE_PREFIX + "richpresence.v1.ResetServerRichPresenceMessage"
+                )
+        ).send(player);
+    }
+
+    @Override
     public boolean isRichPresenceSupportedFor(Player player) {
         // todo we probably don't need this tag, we can just check if the channel is registered
         return player.hasTag(LUNAR_SUPPORT_ENABLED);

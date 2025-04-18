@@ -5,8 +5,6 @@ import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.MojangUtil;
 import net.hollowcube.common.util.OpUtils;
-import net.hollowcube.compat.api.discord.DiscordRichPresenceManager;
-import net.hollowcube.compat.impl.DiscordRichPresenceManagerImpl;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServerRunner;
@@ -88,8 +86,6 @@ public class DevServerRunner extends AbstractMapServer {
     @Override
     protected void prepareStart() {
         super.prepareStart();
-
-        DiscordRichPresenceManager.load();
 
         MinecraftServer.getConnectionManager().setPlayerProvider((connection, gameProfile) -> new MapPlayerImplImpl(connection, gameProfile) {
             @Override
@@ -225,11 +221,6 @@ public class DevServerRunner extends AbstractMapServer {
                 scriptEngine().guiManager().openGui(player, URI.create("guilib:///map_browser/map-browser-view.js"), Map.of(), Map.of());
             });
         }, "");
-
-        dbg.createPermissionlessSubcommand("richpresence", (player, ignored) -> {
-            DiscordRichPresenceManagerImpl.getInstance().setRichPresence(player, "BLOSSOM", "/play 484-555-599", "Playing");
-        }, "");
-
         return dbg;
     }
 }

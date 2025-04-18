@@ -10,5 +10,7 @@ public interface DiscordRichPresenceProvider {
             final String playerState
     );
 
+    void clearRichPresence(final Player player);
+
     boolean isRichPresenceSupportedFor(final Player player);
 }

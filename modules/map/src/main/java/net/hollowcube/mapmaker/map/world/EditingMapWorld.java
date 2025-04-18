@@ -6,6 +6,7 @@ import net.hollowcube.compat.axiom.AxiomPlayer;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.feature.edit.TeleportHistoryFeatureProvider;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.ItemTags;
@@ -311,6 +312,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
             // If there is no position stored then this is a fresh edit state so add the builder menu
             player.getInventory().addItemStack(itemRegistry().getItemStack("mapmaker:builder_menu", null));
         }
+        // FIXME: i don't know if calling this here breaks something or if there is a specific reason it currently isn't
+        callEvent(new MapPlayerInitEvent(this, player, true, true));
     }
 
     private @NotNull SaveState getOrCreateSaveState(@NotNull Player player) {

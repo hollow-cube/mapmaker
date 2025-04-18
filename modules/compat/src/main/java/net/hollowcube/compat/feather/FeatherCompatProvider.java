@@ -2,6 +2,7 @@ package net.hollowcube.compat.feather;
 
 import com.google.auto.service.AutoService;
 import net.digitalingot.feather.serverapi.messaging.*;
+import net.digitalingot.feather.serverapi.messaging.messages.client.S2CClearDiscordActivity;
 import net.digitalingot.feather.serverapi.messaging.messages.client.S2CHandshake;
 import net.digitalingot.feather.serverapi.messaging.messages.client.S2CSetDiscordActivity;
 import net.digitalingot.feather.serverapi.messaging.messages.server.C2SClientHello;
@@ -65,6 +66,11 @@ public class FeatherCompatProvider implements CompatProvider, DiscordRichPresenc
         // this is probably turbo trash, but it creates consistency between Lunar and Feather
         final var details = playerState + " " + gameName + " on Hollow Cube";
         sendMessage(player, new S2CSetDiscordActivity(IMAGE_URL, "Hollow Cube", gameVariantName, details, null, null, null, null));
+    }
+
+    @Override
+    public void clearRichPresence(Player player) {
+        sendMessage(player, new S2CClearDiscordActivity());
     }
 
     @Override
