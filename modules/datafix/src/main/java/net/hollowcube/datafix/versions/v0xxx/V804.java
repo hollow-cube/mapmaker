@@ -25,7 +25,7 @@ public class V804 extends DataVersion {
         var display = tag.get("display");
         if (display.value() != null) {
             var lore = Value.emptyList();
-            lore.add("(+NBT)");
+            lore.put("(+NBT)");
             display.put("Lore", lore);
         }
 

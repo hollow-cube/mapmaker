@@ -1,0 +1,69 @@
+{
+    IsChickenJockey: 0b,
+    HurtByTimestamp: 0,
+    Attributes: [
+        {
+            Base: 4.0d,
+            Name: "generic.maxHealth"
+        },
+        {
+            Base: 0.0d,
+            Name: "generic.knockbackResistance"
+        },
+        {
+            Base: 0.25d,
+            Name: "generic.movementSpeed"
+        },
+        {
+            Base: 16.0d,
+            Modifiers: [
+                {
+                    Operation: 1,
+                    UUIDMost: 3809084956027863735L,
+                    UUIDLeast: -7880791242789364064L,
+                    Amount: -0.016318803203646825d,
+                    Name: "Random spawn bonus"
+                }
+            ],
+            Name: "generic.followRange"
+        }
+    ],
+    Invulnerable: 0b,
+    ForcedAge: 0,
+    PortalCooldown: 0,
+    AbsorptionAmount: 0.0f,
+    FallDistance: 0.0f,
+    InLove: 0,
+    DeathTime: 0s,
+    DropChances: [0.085f, 0.085f, 0.085f, 0.085f, 0.085f],
+    PersistenceRequired: 0b,
+    id: "Chicken",
+    HealF: 4.0f,
+    Age: 0,
+    Motion: [0.0d, -0.0784000015258789d, 0.0d],
+    Leashed: 0b,
+    UUIDLeast: -8445871628112248520L,
+    Health: 4s,
+    Air: 300s,
+    OnGround: 1b,
+    Dimension: 0,
+    Rotation: [120.82585f, 0.0f],
+    EggLayTime: 3666,
+    UUIDMost: 2397543745468449319L,
+    Equipment: [
+        {
+        },
+        {
+        },
+        {
+        },
+        {
+        },
+        {
+        }
+    ],
+    Pos: [1.6466738390586868d, 69.0d, 106.59090124169435d],
+    Fire: -1s,
+    CanPickUpLoot: 0b,
+    HurtTime: 0s
+}

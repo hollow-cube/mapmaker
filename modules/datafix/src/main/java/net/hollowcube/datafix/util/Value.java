@@ -28,15 +28,10 @@ public interface Value extends Iterable<Value> {
             return v;
         } else if (object.getClass().isArray()) {
             return switch (object) {
-                case int[] arr -> new ListValue(new ArrayList<>(List.of(arr)));
-                case byte[] arr -> new ListValue(new ArrayList<>(List.of(arr)));
-                case char[] arr -> new ListValue(new ArrayList<>(List.of(arr)));
-                case long[] arr -> new ListValue(new ArrayList<>(List.of(arr)));
-                case float[] arr -> new ListValue(new ArrayList<>(List.of(arr)));
-                case short[] arr -> new ListValue(new ArrayList<>(List.of(arr)));
-                case double[] arr -> new ListValue(new ArrayList<>(List.of(arr)));
-                case boolean[] arr -> new ListValue(new ArrayList<>(List.of(arr)));
-                default -> new ListValue(new ArrayList<>(Arrays.asList((Object[]) object)));
+                case byte[] arr -> new ByteArrayValue(arr);
+                case int[] arr -> new IntArrayValue(arr);
+                case long[] arr -> new LongArrayValue(arr);
+                default -> throw new UnsupportedOperationException("unsupported array type: " + object.getClass());
             };
         } else if (object instanceof Map) {
             if (!(object instanceof HashMap<?, ?>))
@@ -69,11 +64,11 @@ public interface Value extends Iterable<Value> {
         return defaultValue;
     }
 
-    default void add(Object value) {
+    default void put(Object value) {
         // noop
     }
 
-    default void add(int index, Object value) {
+    default void put(int index, Object value) {
         // noop
     }
 

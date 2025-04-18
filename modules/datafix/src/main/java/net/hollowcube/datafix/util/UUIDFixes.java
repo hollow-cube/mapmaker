@@ -6,9 +6,14 @@ public class UUIDFixes {
 
 
     public static Value replaceUuidFromLeastMost(Value value, String prefix, String key) {
+        // Funny story here. When doing fixes to Most/Least fields, Mojang accidentally inverts the mostSignificantBits
+        // and leastSignificantBits. So we are forced to do the same :sob:
+
         var mostSignificantBits = value.remove(prefix + "Most").as(Number.class, 0L).longValue();
         var leastSignificantBits = value.remove(prefix + "Least").as(Number.class, 0L).longValue();
-        value.put(key, createUuidArray(mostSignificantBits, leastSignificantBits));
+        if (mostSignificantBits == 0L && leastSignificantBits == 0L)
+            return null;
+        value.put(key, createUuidArray(leastSignificantBits, mostSignificantBits));
         return null;
     }
 

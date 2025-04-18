@@ -18,7 +18,7 @@ public class V2535 extends DataVersion {
 
         var newRotation = Value.emptyList();
         for (var rotationEntry : rotation)
-            newRotation.add(rotationEntry.as(Number.class, 180.0).doubleValue() - 180.0);
+            newRotation.put(rotationEntry.as(Number.class, 180.0).doubleValue() - 180.0);
         entity.put("Rotation", newRotation);
 
         return null;

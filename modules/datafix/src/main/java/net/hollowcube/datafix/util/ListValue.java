@@ -23,16 +23,17 @@ public record ListValue(List<Object> value) implements Value {
     }
 
     @Override
-    public void add(Object value) {
+    public void put(Object value) {
         this.value.add(value);
     }
 
     @Override
-    public void add(int index, Object value) {
+    public void put(int index, Object value) {
         if (index < 0) return;
         if (index >= this.value.size()) {
             this.value.add(value);
         } else {
+            this.value.remove(index);
             this.value.add(index, value);
         }
     }
@@ -46,7 +47,7 @@ public record ListValue(List<Object> value) implements Value {
     @Override
     public @NotNull Iterator<Value> iterator() {
         var delegate = this.value.iterator();
-        return new Iterator<Value>() {
+        return new Iterator<>() {
             @Override
             public boolean hasNext() {
                 return delegate.hasNext();
@@ -54,7 +55,8 @@ public record ListValue(List<Object> value) implements Value {
 
             @Override
             public Value next() {
-                return Value.wrap(delegate.next());
+                var next = delegate.next();
+                return next instanceof Value v ? v : Value.wrap(next);
             }
         };
     }

@@ -25,14 +25,13 @@ public class V100 extends DataVersion {
         if (dropChances.size(0) == 0) return null;
 
         var hand = entity.get("HandDropChances", Value::emptyList);
-        if (hand.size(0) < 1) hand.add(dropChances.get(0).as(Number.class, 0f).floatValue());
-        if (hand.size(0) < 2) hand.add(0f);
+        if (hand.size(0) < 1) hand.put(dropChances.get(0).as(Number.class, 0f).floatValue());
 
         var armor = entity.get("ArmorDropChances", Value::emptyList);
-        if (armor.size(0) < 1) armor.add(dropChances.get(1).as(Number.class, 0f).floatValue());
-        if (armor.size(0) < 1) armor.add(dropChances.get(2).as(Number.class, 0f).floatValue());
-        if (armor.size(0) < 1) armor.add(dropChances.get(3).as(Number.class, 0f).floatValue());
-        if (armor.size(0) < 1) armor.add(dropChances.get(4).as(Number.class, 0f).floatValue());
+        if (armor.size(0) < 1) armor.put(dropChances.get(1).as(Number.class, 0f).floatValue());
+        if (armor.size(0) < 1) armor.put(dropChances.get(2).as(Number.class, 0f).floatValue());
+        if (armor.size(0) < 1) armor.put(dropChances.get(3).as(Number.class, 0f).floatValue());
+        if (armor.size(0) < 1) armor.put(dropChances.get(4).as(Number.class, 0f).floatValue());
 
         return null;
     }
@@ -43,14 +42,14 @@ public class V100 extends DataVersion {
 
         // TODO: is an empty map actually correct for offhand item? TODO check vanilla for this
         var handItems = Value.emptyList();
-        handItems.add(equipment.get(0));
-        handItems.add(Value.emptyMap());
+        handItems.put(equipment.get(0));
+        handItems.put(Value.emptyMap());
         entity.put("HandItems", handItems);
 
         if (equipment.size(0) > 1) {
             var armorItems = Value.emptyList();
             for (int i = 1; i < Math.min(equipment.size(0), 5); i++) {
-                armorItems.add(equipment.get(i));
+                armorItems.put(equipment.get(i));
             }
             entity.put("ArmorItems", armorItems);
         }

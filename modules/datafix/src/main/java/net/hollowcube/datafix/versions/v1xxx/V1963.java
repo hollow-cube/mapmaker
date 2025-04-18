@@ -20,7 +20,7 @@ public class V1963 extends DataVersion {
         for (var gossip : gossips) {
             if ("golem".equals(gossip.get("Type").as(String.class, "")))
                 continue;
-            newGossips.add(gossip);
+            newGossips.put(gossip);
         }
 
         entity.put("Gossips", newGossips);

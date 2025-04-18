@@ -20,8 +20,8 @@ public class V3808 extends DataVersion {
         if (!oldArmorItem.isMapLike()) return null;
 
         if (clearArmorItems) {
-            entity.get("ArmorItems").add(2, Value.emptyMap());
-            entity.get("ArmorDropChances").add(2, 0.85F);
+            entity.get("ArmorItems").put(2, Value.emptyMap());
+            entity.get("ArmorDropChances").put(2, 0.85F);
         }
 
         oldArmorItem.put("body_armor_item", oldArmorItem);

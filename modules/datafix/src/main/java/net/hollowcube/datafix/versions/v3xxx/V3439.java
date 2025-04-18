@@ -48,7 +48,7 @@ public class V3439 extends DataVersion {
 
         var messages = Value.emptyList();
         for (int i = 0; i < 4; i++)
-            messages.add(messages.get("Text" + (i + 1)).as(String.class, EMPTY_TEXT));
+            messages.put(messages.get("Text" + (i + 1)).as(String.class, EMPTY_TEXT));
         frontText.put("messages", messages);
 
         frontText.put("color", blockEntity.get("Color").as(String.class, "black"));
@@ -59,10 +59,10 @@ public class V3439 extends DataVersion {
         for (int i = 0; i < 4; i++) {
             var filteredLine = blockEntity.get("FilteredText" + (i + 1));
             if (!filteredLine.isNull()) {
-                filteredMessages.add(filteredLine.as(String.class, EMPTY_TEXT));
+                filteredMessages.put(filteredLine.as(String.class, EMPTY_TEXT));
                 hasFilteredText = true;
             } else {
-                filteredMessages.add(messages.get("Text" + (i + 1)).as(String.class, EMPTY_TEXT));
+                filteredMessages.put(messages.get("Text" + (i + 1)).as(String.class, EMPTY_TEXT));
             }
         }
         if (hasFilteredText) {
@@ -75,7 +75,7 @@ public class V3439 extends DataVersion {
     private static Value createBackText() {
         var backText = Value.emptyMap();
         var backMessages = Value.emptyList();
-        for (int i = 0; i < 4; i++) backMessages.add(EMPTY_TEXT);
+        for (int i = 0; i < 4; i++) backMessages.put(EMPTY_TEXT);
         backText.put("messages", backMessages);
         backText.put("color", "black");
         backText.put("has_glowing_text", false);

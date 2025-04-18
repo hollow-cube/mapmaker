@@ -22,7 +22,7 @@ public class V135 extends DataVersion {
             field.put("Riding", null);
 
             Value passengers = Value.emptyList();
-            passengers.add(field);
+            passengers.put(field);
             riding.put("Passengers", passengers);
             field = riding;
         }

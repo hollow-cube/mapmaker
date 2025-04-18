@@ -46,7 +46,8 @@ public class V4301 extends DataVersion {
         if (isNotEmpty(offhand)) equipment.put("offhand", offhand);
         if (isNotEmpty(body)) equipment.put("body", body);
         if (isNotEmpty(saddle)) equipment.put("saddle", saddle);
-        entity.put("equipment", equipment);
+        if (equipment.size(0) > 0)
+            entity.put("equipment", equipment);
 
         return null;
     }

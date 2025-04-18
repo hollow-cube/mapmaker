@@ -206,7 +206,7 @@ public class V3818_5 extends DataVersion {
                     var containerItem = Value.emptyList();
                     containerItem.put("slot", 0);
                     containerItem.put("item", item);
-                    container.add(containerItem);
+                    container.put(containerItem);
                     components.put("minecraft:container", container);
                 }
             }
@@ -226,7 +226,7 @@ public class V3818_5 extends DataVersion {
                     var slot = item.remove("Slot").as(Number.class, 0).intValue() & 0xFF;
                     newItem.put("slot", slot);
                     newItem.put("item", item);
-                    newItems.add(newItem);
+                    newItems.put(newItem);
                 }
                 if (newItems.size(0) > 0)
                     components.put("minecraft:container", newItems);
@@ -259,7 +259,7 @@ public class V3818_5 extends DataVersion {
         var newPredicate = Value.emptyMap();
         var newPredicateList = Value.emptyList();
         for (var predicateValue : predicateList) {
-            newPredicateList.add(predicateValue.value() instanceof String predicate
+            newPredicateList.put(predicateValue.value() instanceof String predicate
                     ? fixBlockStatePredicate(predicate) : predicateValue);
         }
         newPredicate.put("predicate", newPredicateList);
@@ -301,7 +301,7 @@ public class V3818_5 extends DataVersion {
 
         var modifierList = Value.emptyList();
         for (var modifier : attributeModifiers) {
-            modifierList.add(fixAttributeModifier(modifier));
+            modifierList.put(fixAttributeModifier(modifier));
         }
         newAttributeModifiers.put("modifiers", modifierList);
 
@@ -356,7 +356,7 @@ public class V3818_5 extends DataVersion {
         var newFireworks = Value.emptyMap();
         var newExplosions = Value.emptyList();
         for (var explosion : fireworks.get("Explosions")) {
-            newExplosions.add(fixExplosion(explosion));
+            newExplosions.put(fixExplosion(explosion));
         }
         newFireworks.put("explosions", newExplosions);
         int flightDuration = fireworks.remove("Flight").as(Number.class, 0).intValue();
@@ -428,7 +428,7 @@ public class V3818_5 extends DataVersion {
             entry.put("name", key);
             entry.put("value", value.get("Value"));
             entry.put("signature", value.get("Signature"));
-            result.add(entry);
+            result.put(entry);
         });
         return result.size(0) > 0 ? result : null;
     }
@@ -463,7 +463,7 @@ public class V3818_5 extends DataVersion {
         for (int i = 0; i < pages.size(0); i++) {
             var page = pages.get(i);
             if (page.isNull()) continue;
-            result.add(createFilteredText(page, filteredPages.get(String.valueOf(i))));
+            result.put(createFilteredText(page, filteredPages.get(String.valueOf(i))));
         }
         return result;
     }

@@ -34,12 +34,12 @@ public class NullValue implements Value {
     }
 
     @Override
-    public void add(Object value) {
+    public void put(Object value) {
         // noop
     }
 
     @Override
-    public void add(int index, Object value) {
+    public void put(int index, Object value) {
         // noop
     }
 

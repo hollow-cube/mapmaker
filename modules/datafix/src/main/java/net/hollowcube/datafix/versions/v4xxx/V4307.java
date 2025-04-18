@@ -35,7 +35,7 @@ public class V4307 extends DataVersion {
         if (hideAdditionalTooltip) {
             for (var component : ADDITIONAL_TOOLTIP_COMPONENTS) {
                 if (dataComponents.getValue(component) != null) {
-                    hiddenComponents.add(component);
+                    hiddenComponents.put(component);
                 }
             }
         }
@@ -51,7 +51,7 @@ public class V4307 extends DataVersion {
         var component = dataComponents.get(name);
 
         var showInTooltip = component.remove("show_in_tooltip").as(Boolean.class, true);
-        if (!showInTooltip) hiddenComponents.add(name);
+        if (!showInTooltip) hiddenComponents.put(name);
         if (field == null) return;
 
         var flat = component.get(field);

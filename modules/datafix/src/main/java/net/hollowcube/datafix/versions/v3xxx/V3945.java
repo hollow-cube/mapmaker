@@ -81,11 +81,11 @@ public class V3945 extends DataVersion {
                 cached.put("amount", a + b);
             } else {
                 modifier.put("id", newId);
-                newModifiers.add(newId);
+                newModifiers.put(modifier);
                 cachedModifiers.put(newId, modifier);
             }
         }
-        return newModifiers;
+        return newModifiers.size(0) > 0 ? newModifiers : null;
     }
 
     public static @Nullable UUID uuidFromIntArray(int[] is) {

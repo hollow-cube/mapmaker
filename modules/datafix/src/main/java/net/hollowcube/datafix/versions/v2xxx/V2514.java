@@ -87,7 +87,7 @@ public class V2514 extends DataVersion {
         for (var trustedUuid : trustedUuids) {
             var mostSignificantBits = trustedUuid.remove("M").as(Number.class, 0L).longValue();
             var leastSignificantBits = trustedUuid.remove("L").as(Number.class, 0L).longValue();
-            newTrustedUuids.add(UUIDFixes.createUuidArray(mostSignificantBits, leastSignificantBits));
+            newTrustedUuids.put(UUIDFixes.createUuidArray(mostSignificantBits, leastSignificantBits));
         }
         entity.put("Trusted", newTrustedUuids);
         return null;

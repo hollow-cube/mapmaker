@@ -36,7 +36,7 @@ public class V3564 extends DataVersion {
         for (int i = 0; i < filteredMessagesCount; i++) {
             var messageIMaybe = filteredMessages.get(i);
             var messageI = messageIMaybe.isNull() ? V3439.EMPTY_TEXT : messageIMaybe;
-            newFilteredMessages.add(filteredMessages.get(i).equals(Value.wrap(V3439.EMPTY_TEXT))
+            newFilteredMessages.put(filteredMessages.get(i).equals(Value.wrap(V3439.EMPTY_TEXT))
                     ? messageI : filteredMessages.get(i));
         }
         if (newFilteredMessages.equals(messages)) {

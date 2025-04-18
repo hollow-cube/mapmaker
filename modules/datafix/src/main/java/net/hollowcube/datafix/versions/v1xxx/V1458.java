@@ -48,7 +48,7 @@ public class V1458 extends DataVersion {
             return null;
         // TODO: we should probably use adventure legacy parser here?
         String customName = value.get("CustomName").as(String.class, "");
-        value.put("CustomName", "{\"text\":\"" + customName + "\"}");
+        value.put("CustomName", customName.isEmpty() ? null : "{\"text\":\"" + customName + "\"}");
         return null;
     }
 

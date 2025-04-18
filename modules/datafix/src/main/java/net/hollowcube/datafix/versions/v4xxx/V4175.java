@@ -25,7 +25,7 @@ public class V4175 extends DataVersion {
         var float0 = cmd.as(Number.class, 0.0f).floatValue();
 
         var floats = Value.emptyList();
-        floats.add(float0);
+        floats.put(float0);
         var expandedCmd = Value.emptyMap();
         expandedCmd.put("floats", floats);
         dataComponents.put("minecraft:custom_model_data", expandedCmd);

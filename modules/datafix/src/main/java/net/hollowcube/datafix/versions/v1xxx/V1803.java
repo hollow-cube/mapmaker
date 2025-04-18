@@ -18,7 +18,7 @@ public class V1803 extends DataVersion {
 
         var newLore = Value.emptyList();
         for (Value loreEntry : lore) {
-            newLore.add(loreEntry.value() instanceof String s
+            newLore.put(loreEntry.value() instanceof String s
                     ? Value.wrap("{\"text\":\"" + s + "\"}")
                     : loreEntry);
         }

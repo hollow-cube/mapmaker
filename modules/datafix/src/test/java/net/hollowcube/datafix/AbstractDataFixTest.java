@@ -41,7 +41,7 @@ public abstract class AbstractDataFixTest {
         ) {
             if (version == Integer.MAX_VALUE) break; // or (i+1) would overflow
 
-            System.out.println(version);
+//            System.out.println(version);
 
             int fixSpan = schema.versionToFixSpan().get(version);
             if (fixSpan != -1) {
@@ -106,7 +106,7 @@ public abstract class AbstractDataFixTest {
         if (value.isListLike()) {
             for (int li = 0; li < value.size(0); li++) {
                 var result = forEachAtPath(value.get(li), path, i + 1, fix);
-                if (result != null) value.add(li, result);
+                if (result != null) value.put(li, result);
             }
             return null;
         }

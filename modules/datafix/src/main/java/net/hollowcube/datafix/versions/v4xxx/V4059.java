@@ -34,7 +34,7 @@ public class V4059 extends DataVersion {
             effectData.put("type", "minecraft:apply_effects");
             effectData.put("effects", effect.get("effect"));
             effectData.put("probability", effect.get("probability").as(Number.class, 1.0f).floatValue());
-            effects.add(effect);
+            effects.put(effect);
         }
         consumable.put("on_consume_effects", effects);
 

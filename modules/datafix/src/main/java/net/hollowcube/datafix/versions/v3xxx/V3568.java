@@ -59,7 +59,7 @@ public class V3568 extends DataVersion {
 
         if (effect.equals(Value.emptyMap())) return null;
         var stewEffects = Value.emptyList();
-        stewEffects.add(effect);
+        stewEffects.put(effect);
         entity.put("stew_effects", stewEffects);
 
         return null;
