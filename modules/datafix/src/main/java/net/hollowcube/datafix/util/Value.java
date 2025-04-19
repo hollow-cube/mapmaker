@@ -1,5 +1,6 @@
 package net.hollowcube.datafix.util;
 
+import com.google.gson.internal.LinkedTreeMap;
 import net.minestom.server.codec.Transcoder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +35,7 @@ public interface Value extends Iterable<Value> {
                 default -> throw new UnsupportedOperationException("unsupported array type: " + object.getClass());
             };
         } else if (object instanceof Map) {
-            if (!(object instanceof HashMap<?, ?>))
+            if (!(object instanceof HashMap<?, ?>) && !(object instanceof LinkedTreeMap<?, ?>))
                 throw new UnsupportedOperationException("unexpected map implementation, cannot guarantee mutability: " + object.getClass());
             return new MapValue((Map<String, Object>) object);
         } else if (object instanceof List) {

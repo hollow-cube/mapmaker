@@ -21,8 +21,9 @@ public class V4175 extends DataVersion {
     }
 
     private static Value fixCustomModelDataExpand(Value dataComponents) {
-        var cmd = dataComponents.get("minecraft:custom_model_data");
+        var cmd = dataComponents.remove("minecraft:custom_model_data");
         var float0 = cmd.as(Number.class, 0.0f).floatValue();
+        if (float0 == 0.0f) return null;
 
         var floats = Value.emptyList();
         floats.put(float0);

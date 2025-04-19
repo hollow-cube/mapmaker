@@ -1,0 +1,324 @@
+{
+    x: 84,
+    y: 65,
+    z: 142,
+    Items: [
+        {
+            Slot: 0b,
+            id: "minecraft:skull",
+            Count: 1b,
+            tag: {
+                SkullOwner: {
+                    Properties: {
+                        textures: [
+                            {
+                                Value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGQ0OGU3NWZmNTVjYjU3NTMzYzdiOTA0YmU4ODdhMzc0OTI1ZjkzODMyZjdhZTE2Yjc5MjM5ODdlOTcwIn19fQ=="
+                            }
+                        ]
+                    },
+                    Id: "0464c495-0291-440a-9c19-ba0ff1797561"
+                },
+                display: {
+                    Name: "Globe"
+                }
+            },
+            Damage: 3s
+        },
+        {
+            Slot: 1b,
+            id: "minecraft:skull",
+            Count: 1b,
+            tag: {
+                SkullOwner: {
+                    Properties: {
+                        textures: [
+                            {
+                                Value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOGYxYTI3N2JlYjllNGZhYTZlN2UzNTZjNzQ3ODZlOTY2MTU1NzM2YTY4NThiZjViYjVhZDI5ZGY1YmFiNjFhMSJ9fX0="
+                            }
+                        ]
+                    },
+                    Id: "363ab37e-373e-47a2-ad5d-e44d3803f853"
+                },
+                display: {
+                    Name: "Solved Rubik's Cube"
+                }
+            },
+            Damage: 3s
+        },
+        {
+            Slot: 2b,
+            id: "minecraft:skull",
+            Count: 1b,
+            tag: {
+                SkullOwner: {
+                    Properties: {
+                        textures: [
+                            {
+                                Value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmRlNGUyNzgzZjg1YTM5MTIyMWRkOTE2NTZiYTY4OGU3ZTQyZDE2ZjZhYmJmYmNmYWQ5Y2E1MzYxN2ZjYTYifX19"
+                            }
+                        ]
+                    },
+                    Id: "f952235c-44a2-4f91-a6aa-0fcf361507ac"
+                },
+                display: {
+                    Name: "Clock"
+                }
+            },
+            Damage: 3s
+        },
+        {
+            Slot: 3b,
+            id: "minecraft:skull",
+            Count: 1b,
+            tag: {
+                SkullOwner: {
+                    Properties: {
+                        textures: [
+                            {
+                                Value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmZlOGNmZjc1ZjdkNDMzMjYwYWYxZWNiMmY3NzNiNGJjMzgxZDk1MWRlNGUyZWI2NjE0MjM3NzlhNTkwZTcyYiJ9fX0="
+                            }
+                        ]
+                    },
+                    Id: "c0479b63-4eb6-4f07-a685-34e5df12feba"
+                },
+                display: {
+                    Name: "Golden Clock"
+                }
+            },
+            Damage: 3s
+        },
+        {
+            Slot: 4b,
+            id: "minecraft:skull",
+            Count: 1b,
+            tag: {
+                SkullOwner: {
+                    Properties: {
+                        textures: [
+                            {
+                                Value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmU5OWY2Njk3MjVkMjM1ODYzNmFlMmY1YmMzNDM5ZDY2Nzg0OWRhYTg0NjJhZjkzYTQyZTIxMmFmMTJiMmEifX19"
+                            }
+                        ]
+                    },
+                    Id: "6b87c6e1-3cb7-4f9c-a98d-346bd75a6b21"
+                },
+                display: {
+                    Name: "Speakers"
+                }
+            },
+            Damage: 3s
+        },
+        {
+            Slot: 5b,
+            id: "minecraft:skull",
+            Count: 1b,
+            tag: {
+                SkullOwner: {
+                    Properties: {
+                        textures: [
+                            {
+                                Value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTg2MzYxMjNiMWEzNzU1YWJkOGFlZjZkODViMmE4NWJmMTBmNDg2ZWRlZmRkMWEzY2VmNzY3OWQ4MjUifX19"
+                            }
+                        ]
+                    },
+                    Id: "fa1f6b6a-6e39-40b9-b0b4-1b734eb87284"
+                },
+                display: {
+                    Name: "Blender"
+                }
+            },
+            Damage: 3s
+        },
+        {
+            Slot: 6b,
+            id: "minecraft:skull",
+            Count: 1b,
+            tag: {
+                SkullOwner: {
+                    Properties: {
+                        textures: [
+                            {
+                                Value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjViM2YyY2ZhMDczOWM0ZTgyODMxNmYzOWY5MGIwNWJjMWY0ZWQyN2IxZTM1ODg4NTExZjU1OGQ0Njc1In19fQ=="
+                            }
+                        ]
+                    },
+                    Id: "5e469ecf-80a4-40ae-8d9d-7c12bd2d3a3f"
+                },
+                display: {
+                    Name: "Instagram"
+                }
+            },
+            Damage: 3s
+        },
+        {
+            Slot: 7b,
+            id: "minecraft:skull",
+            Count: 1b,
+            tag: {
+                SkullOwner: {
+                    Properties: {
+                        textures: [
+                            {
+                                Value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWFlMzg1NWY5NTJjZDRhMDNjMTQ4YTk0NmUzZjgxMmE1OTU1YWQzNWNiY2I1MjYyN2VhNGFjZDQ3ZDMwODEifX19"
+                            }
+                        ]
+                    },
+                    Id: "c659cdd4-e436-4977-a6a7-d5518ebecfbb"
+                },
+                display: {
+                    Name: "Skull"
+                }
+            },
+            Damage: 3s
+        },
+        {
+            Slot: 8b,
+            id: "minecraft:skull",
+            Count: 1b,
+            tag: {
+                SkullOwner: {
+                    Properties: {
+                        textures: [
+                            {
+                                Value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGNlOGZkYTEzMDNiNWIzMjM5Yjk2ZWZiYTM5NWY2MjcxN2NjODc4NWJlMzJlMWQ4ODlhZmU2Yjk3YmIxYzFhIn19fQ=="
+                            }
+                        ]
+                    },
+                    Id: "afcf2ba0-0405-428f-b727-c4acdda0dc75"
+                },
+                display: {
+                    Name: "Fish Tank"
+                }
+            },
+            Damage: 3s
+        },
+        {
+            Slot: 9b,
+            id: "minecraft:skull",
+            Count: 1b,
+            tag: {
+                SkullOwner: {
+                    Properties: {
+                        textures: [
+                            {
+                                Value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzM4MGM3ZTYyMWExZjRkYTU0M2U0YzdhYjE0OTRlZTE4NGI4N2JiMTMyNDE4NTEyYzllZWU4NThmOWRlMWRiIn19fQ=="
+                            }
+                        ]
+                    },
+                    Id: "5b6db080-2866-4aed-9ec0-f80e6040fce9"
+                },
+                display: {
+                    Name: "Toiletpaper"
+                }
+            },
+            Damage: 3s
+        },
+        {
+            Slot: 10b,
+            id: "minecraft:skull",
+            Count: 1b,
+            tag: {
+                SkullOwner: {
+                    Properties: {
+                        textures: [
+                            {
+                                Value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmJiYWU2ZGY5OWRjODJiZWFmNDlkMDY0ZGY3NGExYmJjMTVlOGUzNzY1MzMyNzY5MTJjOGM4ZmU1OWNiNGY0In19fQ=="
+                            }
+                        ]
+                    },
+                    Id: "92b6dbd7-11df-4702-b4d1-ec0dcc7ce114"
+                },
+                display: {
+                    Name: "Pepsi"
+                }
+            },
+            Damage: 3s
+        },
+        {
+            Slot: 11b,
+            id: "minecraft:skull",
+            Count: 1b,
+            tag: {
+                SkullOwner: {
+                    Properties: {
+                        textures: [
+                            {
+                                Value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTNiMDFmYjJmNmJhNDdjOWQ3NjM4NDkxZjM3Y2Q4NTgyYTkzNzczMTE4NmRmNGQxZWNjZDU5YjY1YmYzNyJ9fX0="
+                            }
+                        ]
+                    },
+                    Id: "8a145e5e-957d-418c-b000-511c971ae698"
+                },
+                display: {
+                    Name: "Coca Cola"
+                }
+            },
+            Damage: 3s
+        },
+        {
+            Slot: 12b,
+            id: "minecraft:skull",
+            Count: 1b,
+            tag: {
+                SkullOwner: {
+                    Properties: {
+                        textures: [
+                            {
+                                Value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmYxNTlhMWNiZTE3M2Q5MjczOTJmYTY1ZmNmZTc4NTUzZDgxYWE1ZGMyOTQ5NWI5ZmJiYWRlMzYyZjhiZjkifX19"
+                            }
+                        ]
+                    },
+                    Id: "c4a226e0-067b-4b6d-96b9-0f07f4b2e76e"
+                },
+                display: {
+                    Name: "Security Camera"
+                }
+            },
+            Damage: 3s
+        },
+        {
+            Slot: 13b,
+            id: "minecraft:skull",
+            Count: 1b,
+            tag: {
+                SkullOwner: {
+                    Properties: {
+                        textures: [
+                            {
+                                Value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTQ5N2IxNDdjZmFlNTIyMDU1OTdmNzJlM2M0ZWY1MjUxMmU5Njc3MDIwZTRiNGZhNzUxMmMzYzZhY2RkOGMxIn19fQ=="
+                            }
+                        ]
+                    },
+                    Id: "11ad1a4f-ddba-4550-abd7-14288f367d90"
+                },
+                display: {
+                    Name: "Popcorn"
+                }
+            },
+            Damage: 3s
+        },
+        {
+            Slot: 14b,
+            id: "minecraft:skull",
+            Count: 1b,
+            tag: {
+                SkullOwner: {
+                    Properties: {
+                        textures: [
+                            {
+                                Value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2NjMjE3YTliOWUzY2UzY2QwNDg0YzdlOGNlNDlkMWNmNzQxMjgxYmRkYTVhNGQ2Y2I4MjFmMzc4NzUyNzE4In19fQ=="
+                            }
+                        ]
+                    },
+                    Id: "8c0662db-972a-4039-a360-3dc1a938390d"
+                },
+                display: {
+                    Name: "Lantern"
+                }
+            },
+            Damage: 3s
+        }
+    ],
+    id: "Chest",
+    Lock: ""
+}

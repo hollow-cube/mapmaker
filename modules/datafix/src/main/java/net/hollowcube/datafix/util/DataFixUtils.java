@@ -1,9 +1,19 @@
 package net.hollowcube.datafix.util;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.serializer.json.JSONOptions;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 public final class DataFixUtils {
+    public static final Gson GSON = new Gson();
+
+    private static final GsonComponentSerializer GSON_SERIALIZER = GsonComponentSerializer.builder()
+            .editOptions(b -> b.value(JSONOptions.EMIT_COMPACT_TEXT_COMPONENT, false))
+            .build();
 
     public static String namespaced(String value) {
         if (value == null) return value;
@@ -34,4 +44,24 @@ public final class DataFixUtils {
             default -> "white";
         };
     }
+
+    public static Value ensureTextComponentString(Value value) {
+        String raw = value.as(String.class, null);
+        if (raw == null) return null;
+
+        try {
+            var object = GSON.fromJson(raw, JsonObject.class);
+            return Value.wrap(object.toString());
+        } catch (RuntimeException ignored) {
+            // Not valid json, continue
+        }
+        try {
+            var component = LegacyComponentSerializer.legacySection().deserialize(raw);
+            return Value.wrap(GSON_SERIALIZER.serialize(component));
+        } catch (RuntimeException ignored) {
+            // Not valid legacy component, continue
+        }
+        return Value.wrap("{\"text\":\"" + raw.replace("\"", "\\\"") + "\"}");
+    }
+
 }

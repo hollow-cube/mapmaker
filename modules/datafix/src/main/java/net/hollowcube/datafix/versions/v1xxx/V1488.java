@@ -4,6 +4,7 @@ import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.BlockRenameFix;
 import net.hollowcube.datafix.fixes.ItemRenameFix;
+import net.hollowcube.datafix.util.DataFixUtils;
 import net.hollowcube.datafix.util.Value;
 
 import java.util.Map;
@@ -32,8 +33,7 @@ public class V1488 extends DataVersion {
     }
 
     private static Value fixCommandBlockEntityCustomName(Value value) {
-        final String customName = value.get("CustomName").as(String.class, "");
-        value.put("CustomName", customName == null ? null : "{\"text\":\"" + customName + "\"}");
+        value.put("CustomName", DataFixUtils.ensureTextComponentString(value.get("CustomName")));
         return null;
     }
 }

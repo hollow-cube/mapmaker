@@ -40,10 +40,14 @@ public class V4307 extends DataVersion {
             }
         }
 
+
         var tooltipDisplay = Value.emptyMap();
-        tooltipDisplay.put("hide_tooltip", hideTooltip);
-        tooltipDisplay.put("hidden_components", hiddenComponents);
-        dataComponents.put("minecraft:tooltip_display", tooltipDisplay);
+        if (hideTooltip)
+            tooltipDisplay.put("hide_tooltip", hideTooltip);
+        if (hiddenComponents.size(0) > 0)
+            tooltipDisplay.put("hidden_components", hiddenComponents);
+        if (tooltipDisplay.size(0) > 0)
+            dataComponents.put("minecraft:tooltip_display", tooltipDisplay);
         return null;
     }
 

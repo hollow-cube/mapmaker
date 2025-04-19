@@ -16,10 +16,12 @@ public class V1494 extends DataVersion {
     }
 
     private static Value fixItemEnchantmentNames(Value value) {
-        Value ench = value.get("ench");
+        var tag = value.get("tag");
+        if (!tag.isMapLike()) return null;
+
+        Value ench = tag.remove("ench");
         if (!ench.isNull()) {
-            value.put("ench", null);
-            value.put("Enchantments", ench);
+            tag.put("Enchantments", ench);
 
             for (Value enchantment : ench) {
                 int id = enchantment.get("id").as(Number.class, 0).intValue();
@@ -27,7 +29,7 @@ public class V1494 extends DataVersion {
             }
         }
 
-        for (Value enchantment : value.get("StoredEnchantments")) {
+        for (Value enchantment : tag.get("StoredEnchantments")) {
             int id = enchantment.get("id").as(Number.class, 0).intValue();
             enchantment.put("id", ENCHANTMENT_IDS.getOrDefault(id, "null"));
         }

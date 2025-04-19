@@ -1,0 +1,8 @@
+{
+    x: 78,
+    y: 57,
+    z: 149,
+    id: "Skull",
+    SkullType: 4b,
+    Rot: 10b
+}

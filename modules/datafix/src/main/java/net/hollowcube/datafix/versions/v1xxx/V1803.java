@@ -2,7 +2,10 @@ package net.hollowcube.datafix.versions.v1xxx;
 
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
+import net.hollowcube.datafix.util.DataFixUtils;
 import net.hollowcube.datafix.util.Value;
+
+import java.util.Objects;
 
 public class V1803 extends DataVersion {
     public V1803() {
@@ -18,9 +21,8 @@ public class V1803 extends DataVersion {
 
         var newLore = Value.emptyList();
         for (Value loreEntry : lore) {
-            newLore.put(loreEntry.value() instanceof String s
-                    ? Value.wrap("{\"text\":\"" + s + "\"}")
-                    : loreEntry);
+            var line = DataFixUtils.ensureTextComponentString(loreEntry);
+            newLore.put(Objects.requireNonNullElse(line, loreEntry));
         }
         display.put("Lore", newLore);
 

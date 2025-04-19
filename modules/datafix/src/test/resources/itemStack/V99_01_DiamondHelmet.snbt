@@ -1,0 +1,17 @@
+{
+    id: "minecraft:diamond_helmet",
+    Count: 1b,
+    tag: {
+        ench: [
+            {
+                lvl: 1s,
+                id: 4s
+            },
+            {
+                lvl: 1s,
+                id: 6s
+            }
+        ]
+    },
+    Damage: 0s
+}

@@ -46,7 +46,7 @@ public class V3818_5 extends DataVersion {
         value.put("count", count);
 
         var components = Value.emptyMap();
-        var tag = value.get("tag");
+        var tag = value.remove("tag");
 
         int hideFlags = tag.remove("HideFlags").as(Number.class, 0).intValue();
         int damage = tag.remove("Damage").as(Integer.class, 0);
@@ -239,7 +239,7 @@ public class V3818_5 extends DataVersion {
     private static Value fixEnchantments(Value enchantments, Value components, boolean isHidden) {
         if (enchantments.isNull()) return null;
         var newEnchantments = Value.emptyMap();
-        var levels = Value.emptyList();
+        var levels = Value.emptyMap();
         for (var enchantment : enchantments) {
             var id = enchantment.get("id").as(String.class, null);
             if (id == null) continue;

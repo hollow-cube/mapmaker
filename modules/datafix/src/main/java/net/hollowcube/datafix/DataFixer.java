@@ -49,7 +49,7 @@ public class DataFixer {
         schemas = new OptimizedSchema[maxId + 1];
 
         // Create the initial schema for each data type and its children
-        for (int i = 0; i < maxId; i++) {
+        for (int i = 0; i <= maxId; i++) {
             var builder = builders.get(i);
             if (builder == null) continue;
 

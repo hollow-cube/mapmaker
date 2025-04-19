@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v1xxx;
 import net.hollowcube.datafix.DataType;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
+import net.hollowcube.datafix.util.DataFixUtils;
 import net.hollowcube.datafix.util.Value;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,19 +47,13 @@ public class V1458 extends DataVersion {
     private static Value fixEntityCustomName(Value value) {
         if ("minecraft:commandblock_minecart".equals(value.getValue("id")))
             return null;
-        // TODO: we should probably use adventure legacy parser here?
-        String customName = value.get("CustomName").as(String.class, "");
-        value.put("CustomName", customName.isEmpty() ? null : "{\"text\":\"" + customName + "\"}");
+        value.put("CustomName", DataFixUtils.ensureTextComponentString(value.get("CustomName")));
         return null;
     }
 
     private static Value fixItemCustomName(Value value) {
         var display = value.get("tag").get("display");
-        var customNameValue = display.get("Name");
-        if (customNameValue.value() == null) return null;
-
-        String customName = customNameValue.as(String.class, "");
-        display.put("Name", "{\"text\":\"" + customName + "\"}");
+        display.put("Name", DataFixUtils.ensureTextComponentString(display.get("Name")));
         return null;
     }
 
@@ -67,8 +62,7 @@ public class V1458 extends DataVersion {
         if (!id.isEmpty() && !NAMEABLE_BLOCK_ENTITIES.contains(id))
             return null;
 
-        var customName = value.get("CustomName").as(String.class, "");
-        value.put("CustomName", customName.isEmpty() ? null : "{\"text\":\"" + customName + "\"}");
+        value.put("CustomName", DataFixUtils.ensureTextComponentString(value.get("CustomName")));
         return null;
     }
 

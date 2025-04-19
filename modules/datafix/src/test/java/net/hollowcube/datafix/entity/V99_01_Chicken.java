@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class V99_Chicken_1 extends AbstractEntityUpgradeTest {
+class V99_01_Chicken extends AbstractEntityUpgradeTest {
     private static final int CURRENT = 4314;
 
     @Test

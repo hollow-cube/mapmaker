@@ -1,0 +1,11 @@
+{
+    x: 89,
+    y: 72,
+    z: 133,
+    id: "Banner",
+    Patterns: [
+        { Pattern: "ts", Color: 1 },
+        { Pattern: "bs", Color: 1 }
+    ],
+    Base: 9
+}

@@ -23,6 +23,8 @@ public record PrimitiveValue(
                 return type.cast(number.shortValue());
             } else if (type == byte.class || type == Byte.class) {
                 return type.cast(number.byteValue());
+            } else if (type == boolean.class || type == Boolean.class) {
+                return type.cast(number.intValue() != 0);
             }
         }
         return defaultValue;
