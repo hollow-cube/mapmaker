@@ -2,17 +2,24 @@ package net.hollowcube.datafix;
 
 import net.hollowcube.datafix.util.Value;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BlockNameUpgradeTest extends AbstractDataFixTest {
     private static final int SHORT_GRASS_VERSION = 3692;
 
-    @Test
-    void testGrassFullUpgrade() {
-        var actual = upgradeFull(DataTypes.BLOCK_NAME, Value.wrap("minecraft:grass"));
-        // Grass becomes the block during flattening, new grass is short_grass. but we never see that here.
-        assertEquals("minecraft:grass_block", actual.value());
+    @ValueSource(strings = {
+            // Grass becomes the block during flattening, new grass is short_grass. but we never see that here.
+            "minecraft:grass->minecraft:grass_block"
+    })
+    @ParameterizedTest
+    void testV99ToV4314(String input) {
+        var split = input.split("->");
+        assertEquals(2, split.length);
+        var result = upgrade(DataTypes.BLOCK_NAME, Value.wrap(split[0]), 0, 4314);
+        assertEquals(split[1], result.value());
     }
 
     @Test

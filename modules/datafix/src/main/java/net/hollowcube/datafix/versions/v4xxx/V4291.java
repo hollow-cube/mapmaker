@@ -20,7 +20,7 @@ public class V4291 extends DataVersion {
 
         var action = hoverEvent.get("action").as(String.class, "");
         if ("show_text".equals(action)) {
-            hoverEvent.put("contents", hoverEvent.remove("action"));
+            hoverEvent.put("value", hoverEvent.remove("contents"));
         } else {
             var placeholder = Value.emptyMap();
             placeholder.put("action", "show_text");

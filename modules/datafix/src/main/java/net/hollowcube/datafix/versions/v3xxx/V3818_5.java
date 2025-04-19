@@ -42,7 +42,7 @@ public class V3818_5 extends DataVersion {
     private static Value fixItemStack(Value value) {
         String id = namespaced(value.get("id").as(String.class, null));
         if (id == null) return null;
-        int count = value.remove("Count").as(Integer.class, 1);
+        int count = value.remove("Count").as(Number.class, 1).intValue();
         value.put("count", count);
 
         var components = Value.emptyMap();
@@ -424,11 +424,13 @@ public class V3818_5 extends DataVersion {
         if (properties.isNull()) return null;
         var result = Value.emptyList();
         properties.forEachEntry((key, value) -> {
-            var entry = Value.emptyMap();
-            entry.put("name", key);
-            entry.put("value", value.get("Value"));
-            entry.put("signature", value.get("Signature"));
-            result.put(entry);
+            for (var property : value) {
+                var entry = Value.emptyMap();
+                entry.put("name", key);
+                entry.put("value", property.get("Value"));
+                entry.put("signature", property.get("Signature"));
+                result.put(entry);
+            }
         });
         return result.size(0) > 0 ? result : null;
     }

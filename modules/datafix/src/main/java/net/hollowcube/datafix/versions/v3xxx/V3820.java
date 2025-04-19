@@ -8,7 +8,7 @@ public class V3820 extends DataVersion {
     public V3820() {
         super(3820);
 
-        addFix(DataTypes.ENTITY, "minecraft:skull", V3820::fixSkullBlockEntity);
+        addFix(DataTypes.BLOCK_ENTITY, "minecraft:skull", V3820::fixSkullBlockEntity);
         addFix(DataTypes.DATA_COMPONENTS, V3820::fixLodestoneTrackerCompass);
     }
 

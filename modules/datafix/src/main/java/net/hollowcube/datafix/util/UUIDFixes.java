@@ -38,7 +38,8 @@ public class UUIDFixes {
         if (value.remove(fromKey).value() instanceof String s) {
             try {
                 var uuid = UUID.fromString(s);
-                value.put(toKey, createUuidArray(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits()));
+                // Inverted... nice one mojang...
+                value.put(toKey, createUuidArray(uuid.getLeastSignificantBits(), uuid.getMostSignificantBits()));
             } catch (IllegalArgumentException ignored) {
                 // Do nothing
             }

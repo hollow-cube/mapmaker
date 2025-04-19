@@ -33,8 +33,6 @@ public class V4290 extends DataVersion {
             try {
                 return Value.wrap(DataFixUtils.GSON.fromJson(raw, Map.class));
             } catch (JsonSyntaxException | IllegalStateException | IllegalArgumentException e) {
-                System.out.println("MALFORMED JSON: " + raw);
-
                 throw e;
             }
         }

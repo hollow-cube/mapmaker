@@ -48,7 +48,7 @@ public class V3439 extends DataVersion {
 
         var messages = Value.emptyList();
         for (int i = 0; i < 4; i++)
-            messages.put(messages.get("Text" + (i + 1)).as(String.class, EMPTY_TEXT));
+            messages.put(blockEntity.get("Text" + (i + 1)).as(String.class, EMPTY_TEXT));
         frontText.put("messages", messages);
 
         frontText.put("color", blockEntity.get("Color").as(String.class, "black"));

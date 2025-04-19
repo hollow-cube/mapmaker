@@ -1,0 +1,24 @@
+{
+    CookTime: 148s,
+    x: 56,
+    BurnTime: 15853s,
+    y: 71,
+    z: 54,
+    Items: [
+        {
+            Slot: 0b,
+            id: "minecraft:fish",
+            Count: 64b,
+            Damage: 1s
+        },
+        {
+            Slot: 1b,
+            id: "minecraft:coal_block",
+            Count: 63b,
+            Damage: 0s
+        }
+    ],
+    id: "Furnace",
+    CookTimeTotal: 200s,
+    Lock: ""
+}

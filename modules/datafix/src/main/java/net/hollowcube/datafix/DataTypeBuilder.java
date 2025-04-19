@@ -5,10 +5,7 @@ import net.hollowcube.datafix.util.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 public final class DataTypeBuilder {
@@ -26,6 +23,12 @@ public final class DataTypeBuilder {
     }
 
     public void addProperty(@NotNull Property property) {
+        for (var existing : properties) {
+            if (Arrays.equals(property.path(), existing.path()) && property.getType().id() == existing.getType().id()) {
+                System.out.println("Skipping duplicate property " + property + " for " + id);
+                return;
+            }
+        }
         properties.add(property);
     }
 

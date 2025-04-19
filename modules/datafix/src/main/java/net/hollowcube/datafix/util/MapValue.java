@@ -52,7 +52,7 @@ public record MapValue(
 
     @Override
     public void put(@NotNull String key, Object value) {
-        if (value == null) {
+        if (value == null || (value instanceof Value v && v.isNull())) {
             this.value.remove(key);
         } else {
             this.value.put(key, Value.wrap(value));
