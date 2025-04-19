@@ -25,7 +25,7 @@ public final class DataTypeBuilder {
     public void addProperty(@NotNull Property property) {
         for (var existing : properties) {
             if (Arrays.equals(property.path(), existing.path()) && property.getType().id() == existing.getType().id()) {
-                System.out.println("Skipping duplicate property " + property + " for " + id);
+//                System.out.println("Skipping duplicate property " + property + " for " + id);
                 return;
             }
         }

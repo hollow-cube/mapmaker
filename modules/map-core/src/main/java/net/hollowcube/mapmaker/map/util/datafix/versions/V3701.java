@@ -1,34 +1,25 @@
 package net.hollowcube.mapmaker.map.util.datafix.versions;
 
-import ca.spottedleaf.dataconverter.minecraft.converters.tileentity.ConverterAbstractTileEntityRename;
-import ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry;
-import ca.spottedleaf.dataconverter.minecraft.walkers.generic.WalkerUtils;
-import com.google.auto.service.AutoService;
-import net.hollowcube.mapmaker.map.util.datafix.HCTypeRegistry;
-import net.hollowcube.mapmaker.map.util.datafix.HCVersions;
+import net.hollowcube.datafix.DataTypes;
+import net.hollowcube.datafix.DataVersion;
+import net.hollowcube.datafix.fixes.BlockEntityRenameFix;
+import net.hollowcube.mapmaker.map.util.datafix.HCDataTypes;
 
-import java.util.Map;
+public class V3701 extends DataVersion {
+    public V3701() {
+        super(3701);
 
-@AutoService(DataFix.class)
-public class V3701 implements DataFix {
-    private static final int VERSION = HCVersions.V1_20_4_HC1;
+        addReference(HCDataTypes.CHUNK, field -> field.list("entities", DataTypes.ENTITY));
 
-    @Override
-    public void register() {
+        addReference(DataTypes.BLOCK_ENTITY, "mapmaker:checkpoint_plate");
+        addReference(DataTypes.BLOCK_ENTITY, "mapmaker:status_plate");
+        addReference(DataTypes.BLOCK_ENTITY, "mapmaker:finish_plate");
+        addReference(DataTypes.BLOCK_ENTITY, "mapmaker:bounce_pad");
+
         // Honestly I have no idea why we ever had player_head and it worked. the game seems to think its skull
         // and I can't find a datafix which does this remapping (maybe i missed it).
         // In any case, convert now and the 1.20.5 snapshot fixes will remap `SkullOwner` to `profile`
-        ConverterAbstractTileEntityRename.register(VERSION, Map.of("minecraft:player_head", "minecraft:skull")::get);
-
-        HCTypeRegistry.CHUNK.addStructureWalker(VERSION, (data, fromVersion, toVersion) -> {
-            WalkerUtils.convertList(MCTypeRegistry.ENTITY, data, "entities", fromVersion, toVersion);
-
-            return null;
-        });
-
-        // mapmaker:checkpoint_plate is a simple block entity
-        // mapmaker:status_plate is a simple block entity
-        // mapmaker:finish_plate is a simple block entity
-        // mapmaker:bounce_pad is a simple block entity
+        addFix(DataTypes.BLOCK_ENTITY, new BlockEntityRenameFix("minecraft:player_head", "minecraft:skull"));
     }
+
 }

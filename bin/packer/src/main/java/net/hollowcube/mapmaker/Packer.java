@@ -28,7 +28,8 @@ public class Packer {
             Files.createDirectories(outDir);
             OUT_DIR = outDir.toRealPath();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            OUT_DIR = Files.createTempDirectory("packer");
+//            throw new RuntimeException(e);
         }
 
         logger.log(System.Logger.Level.INFO, "Hello, world!");

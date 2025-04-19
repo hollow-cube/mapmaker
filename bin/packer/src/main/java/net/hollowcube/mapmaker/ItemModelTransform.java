@@ -61,7 +61,7 @@ public class ItemModelTransform {
                 JsonObject model = new Gson().fromJson(Files.readString(modelPath), JsonObject.class);
 
                 var images = Files.walk(itemModelFile)
-                        .filter(path -> path.getFileName().endsWith(".png"))
+                        .filter(path -> path.getFileName().toString().endsWith(".png"))
                         .collect(Collectors.toMap(path -> path.getFileName().toString().replace(".png", ""),
                                 path -> {
                                     try {
@@ -71,9 +71,9 @@ public class ItemModelTransform {
                                     }
                                 }));
                 var newTextures = new JsonObject();
-                for (var entry : model.get("textures").getAsJsonObject().entrySet()) {
+                for (var entry : model.get("textures").getAsJsonObject().entrySet())
                     newTextures.addProperty(entry.getKey(), images.getOrDefault(entry.getValue().getAsString(), entry.getValue().getAsString()));
-                }
+                model.add("textures", newTextures);
 
                 var itemModelName = ctx.writeModel(name, model);
                 ctx.addItemModel(name, ModelUtil.createBasicItem(itemModelName));

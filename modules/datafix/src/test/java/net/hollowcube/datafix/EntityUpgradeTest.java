@@ -22,9 +22,6 @@ public class EntityUpgradeTest extends AbstractDataFixTest {
                 "carried", "minecraft:grass"
         )));
         assertEquals("minecraft:enderman", actual.getValue("id"));
-        assertEquals("minecraft:short_grass", actual.getValue("carried"));
-
-        // should be carriedBlockState but thats a flattening fix
-//        assertEquals("a", actual.getValue("carriedBlockState"));
+        assertEquals("minecraft:grass_block", actual.get("carriedBlockState").getValue("Name"));
     }
 }

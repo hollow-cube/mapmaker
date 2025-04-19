@@ -1,14 +1,16 @@
 package net.hollowcube.mapmaker.map.cylone;
 
-import ca.spottedleaf.dataconverter.minecraft.MCDataConverter;
-import ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.IntIntPair;
+import net.hollowcube.datafix.DataFixer;
+import net.hollowcube.datafix.DataTypes;
+import net.hollowcube.datafix.util.Value;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.custom.CheckpointPlateBlock;
 import net.hollowcube.polar.*;
 import net.kyori.adventure.nbt.*;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.codec.Transcoder;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
@@ -128,8 +130,9 @@ public class SlimeToPolar {
                     Palettes.unpack(blockData, rawBlockData, rawBlockData.length * 64 / blockData.length);
                 }
                 for (int idx = 0; idx < blockPalette.length; idx++) {
-                    blockPalette[idx] = (String) MCDataConverter.convert(MCTypeRegistry.FLAT_BLOCK_STATE,
-                            blockPalette[idx], slimeWorld.dataVersion(), MapWorld.DATA_VERSION);
+                    blockPalette[idx] = DataFixer.upgrade(DataTypes.FLAT_BLOCK_STATE,
+                                    Value.wrap(blockPalette[idx]), slimeWorld.dataVersion(), MapWorld.DATA_VERSION)
+                            .as(String.class, blockPalette[idx]);
                 }
 
                 String[] biomePalette;
@@ -142,8 +145,9 @@ public class SlimeToPolar {
                     throw new UnsupportedOperationException("todo");
                 }
                 for (int idx = 0; idx < biomePalette.length; idx++) {
-                    biomePalette[idx] = (String) MCDataConverter.convert(MCTypeRegistry.BIOME,
-                            biomePalette[idx], slimeWorld.dataVersion(), MapWorld.DATA_VERSION);
+                    biomePalette[idx] = (String) DataFixer.upgrade(DataTypes.BIOME_NAME,
+                            Value.wrap(biomePalette[idx]), slimeWorld.dataVersion(),
+                            MapWorld.DATA_VERSION).as(String.class, biomePalette[idx]);
                 }
 
                 PolarSection.LightContent blockLightContent = PolarSection.LightContent.MISSING;
@@ -164,7 +168,8 @@ public class SlimeToPolar {
 
             var blockEntities = new ArrayList<PolarChunk.BlockEntity>();
             for (var tileEntity : slimeWorld.blockEntities()) {
-                var upgradedTileEntity = MCDataConverter.convertTag(MCTypeRegistry.TILE_ENTITY, tileEntity, slimeWorld.dataVersion(), MapWorld.DATA_VERSION);
+                var upgradedTileEntity = (CompoundBinaryTag) DataFixer.upgrade(DataTypes.BLOCK_ENTITY,
+                        Transcoder.NBT, tileEntity, slimeWorld.dataVersion(), MapWorld.DATA_VERSION);
                 var x = upgradedTileEntity.getInt("x");
                 var y = upgradedTileEntity.getInt("y");
                 var z = upgradedTileEntity.getInt("z");
@@ -186,8 +191,8 @@ public class SlimeToPolar {
 
                 CompoundBinaryTag upgradedEntity;
                 try {
-                    upgradedEntity = MCDataConverter.convertTag(MCTypeRegistry.ENTITY,
-                            slimeEntity, slimeWorld.dataVersion(), MapWorld.DATA_VERSION);
+                    upgradedEntity = (CompoundBinaryTag) DataFixer.upgrade(DataTypes.ENTITY,
+                            Transcoder.NBT, slimeEntity, slimeWorld.dataVersion(), MapWorld.DATA_VERSION);
                 } catch (Exception e) {
                     System.out.println("ENTITY UPGRADE FAIL: " + TagStringIOExt.writeTag(slimeEntity));
                     e.printStackTrace();
@@ -279,7 +284,8 @@ public class SlimeToPolar {
         }
 
         for (var tileEntity : slimeWorld.blockEntities()) {
-            var upgradedTileEntity = MCDataConverter.convertTag(MCTypeRegistry.TILE_ENTITY, tileEntity, slimeWorld.dataVersion(), MapWorld.DATA_VERSION);
+            var upgradedTileEntity = (CompoundBinaryTag) DataFixer.upgrade(DataTypes.BLOCK_ENTITY, Transcoder.NBT,
+                    tileEntity, slimeWorld.dataVersion(), MapWorld.DATA_VERSION);
             var x = upgradedTileEntity.getInt("x");
             var y = upgradedTileEntity.getInt("y");
             var z = upgradedTileEntity.getInt("z");

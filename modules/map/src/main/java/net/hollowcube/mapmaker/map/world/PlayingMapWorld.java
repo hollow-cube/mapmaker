@@ -9,7 +9,6 @@ import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartFinishedEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartSpectatorEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
-import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.polar.LoadingWorldAccess;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
@@ -49,8 +48,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -65,8 +62,6 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
             .addListener(InventoryPreClickEvent.class, event -> event.setCancelled(!CustomizableHotbarManager.isActive(event.getPlayer())))
             .addListener(ItemDropEvent.class, event -> event.setCancelled(true))
             .addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true));
-
-    private final List<FeatureProvider> enabledFeatures = new ArrayList<>();
 
     private Component ownerBossBarName = Component.empty();
 

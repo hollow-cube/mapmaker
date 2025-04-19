@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.hollowcube.datafix.util.TranscoderValue;
 import net.hollowcube.datafix.util.Value;
 import net.hollowcube.datafix.versions.v0xxx.*;
 import net.hollowcube.datafix.versions.v1xxx.*;
@@ -12,6 +13,7 @@ import net.hollowcube.datafix.versions.v2xxx.*;
 import net.hollowcube.datafix.versions.v3xxx.*;
 import net.hollowcube.datafix.versions.v4xxx.*;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.codec.Transcoder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -19,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+@SuppressWarnings("UnstableApiUsage")
 public class DataFixer {
     private static final AtomicInteger state = new AtomicInteger(); // 0=not built, 1=building, 2=built
 
@@ -42,8 +45,7 @@ public class DataFixer {
 
     public static void buildModel() {
         int currentState = state.get();
-        if (currentState == 1) return;
-        if (currentState == 2) throw new IllegalArgumentException("DataFixer is already built.");
+        if (currentState != 0) return;
 
         int maxId = dataTypes.stream().mapToInt(DataType::id).max().orElse(0);
         schemas = new OptimizedSchema[maxId + 1];
@@ -84,7 +86,7 @@ public class DataFixer {
         do {
             changed = false;
             for (var schema : schemas) {
-                if (schema == null) return;
+                if (schema == null) continue;
 
                 // OR the children
                 for (var child : schema.idMap().values()) {
@@ -154,7 +156,107 @@ public class DataFixer {
 
     // Upgrade methods
 
-    // TODO
+    public static <T> T upgrade(@NotNull DataType dataType, @NotNull Transcoder<T> coder, T value, int fromVersion, int toVersion) {
+        var input = coder.convertTo(TranscoderValue.INSTANCE, value).orElseThrow();
+        var result = upgrade(dataType, input, fromVersion, toVersion);
+        return TranscoderValue.INSTANCE.convertTo(coder, result).orElseThrow();
+    }
+
+    public static Value upgrade(DataType dataType, Value value, int fromVersion, int toVersion) {
+        fromVersion = Math.clamp(fromVersion, DataFixer.minVersion(), DataFixer.maxVersion());
+        toVersion = Math.clamp(toVersion, DataFixer.minVersion(), DataFixer.maxVersion());
+        if (fromVersion >= toVersion) return value;
+
+        var typeSchema = DataFixer.schemas[dataType.id()];
+        if (typeSchema == null) return value;
+
+        // We can do a fancier fastpath for schemas with no children & no properties.
+        if (typeSchema.oneshot()) return oneshotFastpath(typeSchema, value, fromVersion, toVersion);
+
+        // Determine the initial schema to use, if this is an id mapped schema then the target may
+        // be different.
+        boolean isIdMapped = !typeSchema.idMap().isEmpty();
+        String lastId = isIdMapped ? value.get("id").as(String.class, "") : null;
+        var schema = isIdMapped ? typeSchema.idMap().getOrDefault(lastId, typeSchema) : typeSchema;
+
+        for (int version = schema.relevantVersions().nextSetBit(fromVersion + 1);
+             version >= 0 && version <= toVersion;
+             version = schema.relevantVersions().nextSetBit(version + 1)
+        ) {
+            if (version == Integer.MAX_VALUE) break; // or (i+1) would overflow
+
+            int fixSpan = schema.versionToFixSpan().get(version);
+            if (fixSpan != -1) {
+                int startIndex = fixSpan >> 16, count = fixSpan & 0xFF;
+                for (int i = 0; i < count; i++) {
+                    var result = schema.fixes()[startIndex + i].fix(value);
+                    if (result != null) value = result;
+                }
+            }
+
+            // If this is an id mapped schema its possible that a fix has changed the ID of the schema,
+            // in which case we need to find the current schema.
+            if (isIdMapped) {
+                var id = value.get("id").as(String.class, "");
+                if (!Objects.equals(lastId, id)) {
+                    lastId = id;
+                    schema = typeSchema.idMap().getOrDefault(lastId, typeSchema);
+                    if (schema == null) break; // no more fixes for this ID
+                }
+            }
+
+            if (!schema.properties().isEmpty()) {
+                int innerVersion = version - 1;
+                for (var property : schema.properties()) {
+                    forEachAtPath(value, property.path(), 0, v ->
+                            upgrade(property.getType(), v, innerVersion, innerVersion + 1));
+                }
+            }
+        }
+
+        return value;
+    }
+
+    private static Value oneshotFastpath(OptimizedSchema schema, Value value, int fromVersion, int toVersion) {
+        int firstRelevantVersion = schema.relevantVersions().nextSetBit(fromVersion + 1);
+        int lastRelevantVersion = schema.relevantVersions().previousSetBit(toVersion);
+        if (firstRelevantVersion == -1 || lastRelevantVersion == -1) return value;
+
+        int startIndex = schema.versionToFixSpan().get(firstRelevantVersion) >> 16;
+        int endIndex = schema.versionToFixSpan().get(lastRelevantVersion);
+        endIndex = (endIndex >> 16) + (endIndex & 0xFF);
+
+        var fixes = schema.fixes();
+        for (int i = startIndex; i < endIndex; i++) {
+            var result = fixes[i].fix(value);
+            if (result != null) value = result;
+        }
+
+        return value;
+    }
+
+    private static Value forEachAtPath(Value parent, @NotNull String[] path, int i, DataFix fix) {
+        if (i >= path.length) {
+            // A small caveat of "extend"/zero path to modify the root object is its invalid
+            // to replace the entire root object. For example a datafix for entity equipment may not
+            // replace the entire entity.
+            return fix.fix(parent);
+        }
+
+        var value = parent.get(path[i]);
+        if (value.isNull()) return null;
+        if (value.isListLike()) {
+            for (int li = 0; li < value.size(0); li++) {
+                var result = forEachAtPath(value.get(li), path, i + 1, fix);
+                if (result != null) value.put(li, result);
+            }
+            return null;
+        }
+
+        var result = forEachAtPath(value, path, i + 1, fix);
+        if (result != null) parent.put(path[i], result);
+        return null;
+    }
 
 
     // Internal stuff :)

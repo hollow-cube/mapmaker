@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.map.polar;
 
-import ca.spottedleaf.dataconverter.minecraft.MCDataConverter;
+import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.entity.MapEntityType;
@@ -9,12 +9,13 @@ import net.hollowcube.mapmaker.map.entity.marker.MarkerLoader;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.hollowcube.mapmaker.map.util.NbtUtil;
-import net.hollowcube.mapmaker.map.util.datafix.HCTypeRegistry;
+import net.hollowcube.mapmaker.map.util.datafix.HCDataTypes;
 import net.hollowcube.polar.PolarWorldAccess;
 import net.kyori.adventure.nbt.BinaryTagTypes;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.IntArrayBinaryTag;
 import net.kyori.adventure.nbt.ListBinaryTag;
+import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
@@ -88,8 +89,8 @@ public class ReadWorldAccess implements PolarWorldAccess {
 
             // Upgrade the world if needed
             if (dataVersion != -1 && dataVersion < MapWorld.DATA_VERSION) {
-                worldData = MCDataConverter.convertTag(HCTypeRegistry.WORLD, worldData,
-                        dataVersion, MapWorld.DATA_VERSION);
+                worldData = (CompoundBinaryTag) DataFixer.upgrade(HCDataTypes.WORLD, Transcoder.NBT,
+                        worldData, dataVersion, MapWorld.DATA_VERSION);
             }
 
             // Apply the tags to the world.
@@ -123,8 +124,8 @@ public class ReadWorldAccess implements PolarWorldAccess {
 
         // Upgrade the chunk if needed
         if (dataVersion < MapWorld.DATA_VERSION) {
-            chunkData = MCDataConverter.convertTag(HCTypeRegistry.CHUNK, chunkData,
-                    dataVersion, MapWorld.DATA_VERSION);
+            chunkData = (CompoundBinaryTag) DataFixer.upgrade(HCDataTypes.CHUNK, Transcoder.NBT,
+                    chunkData, dataVersion, MapWorld.DATA_VERSION);
         }
 
         // Load the chunk NBT

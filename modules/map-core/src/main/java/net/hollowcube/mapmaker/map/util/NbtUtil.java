@@ -93,17 +93,20 @@ public final class NbtUtil {
     }
 
     public static @NotNull BinaryTag writeItemStack(@NotNull ItemStack itemStack) {
-        var tag = itemStack.toItemNBT();
         var modelId = BadSprite.modelToId(itemStack.get(DataComponents.ITEM_MODEL));
-        if (modelId != null) tag = tag.putString("item_model", modelId);
-        return tag;
+        if (modelId != null) itemStack = itemStack.with(DataComponents.ITEM_MODEL, modelId);
+        return itemStack.toItemNBT();
     }
 
     public static @NotNull ItemStack readItemStack(@NotNull BinaryTag tag) {
         if (!(tag instanceof CompoundBinaryTag compound)) return ItemStack.AIR;
         var itemStack = ItemStack.fromItemNBT(compound);
 
-        if (compound.get("item_model") instanceof StringBinaryTag modelId) {
+        var itemModel = itemStack.get(DataComponents.ITEM_MODEL);
+        if (itemModel != null) {
+            var model = BadSprite.idToModel(itemModel);
+            if (model != null) itemStack = itemStack.with(DataComponents.ITEM_MODEL, model);
+        } else if (compound.get("item_model") instanceof StringBinaryTag modelId) {
             var model = BadSprite.idToModel(modelId.value());
             if (model != null) itemStack = itemStack.with(DataComponents.ITEM_MODEL, model);
         } else if (compound.get("custom_model_data") instanceof StringBinaryTag cmdId) {
