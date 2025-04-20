@@ -7,16 +7,27 @@
       {
         "when": ["gui"],
         "model": {
-          "type": "minecraft:condition",
+          "type": "minecraft:range_dispatch",
           "property": "minecraft:custom_model_data",
-          "index": 0,
-          "on_false": {
+          "entries": [
+            {
+              "threshold": 1,
+              "model": {
+                "type": "minecraft:model",
+                "model": "$icon_locked"
+              }
+            },
+            {
+              "threshold": 2,
+              "model": {
+                "type": "minecraft:model",
+                "model": "$model"
+              }
+            }
+          ],
+          "fallback": {
             "type": "minecraft:model",
             "model": "$icon"
-          },
-          "on_true": {
-            "type": "minecraft:model",
-            "model": "$icon_locked"
           }
         }
       }

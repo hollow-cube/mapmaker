@@ -184,10 +184,11 @@ public class CosmeticEntry extends View {
                     var previewItem = model.iconItem().builder()
                             .customName(offItemStack.get(DataComponents.CUSTOM_NAME))
                             .lore(offItemStack.get(DataComponents.LORE))
+                            .customModelData(List.of(2f), List.of(), List.of(), List.of())
+                            .hideExtraTooltip()
                             .build();
                     offIcon.setItemDirect(previewItem);
                 }
-
             }
         }
     }

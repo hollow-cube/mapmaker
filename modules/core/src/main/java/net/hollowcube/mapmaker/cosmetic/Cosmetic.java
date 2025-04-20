@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.function.Function;
 
 public class Cosmetic {
-    private static final CustomModelData LOCKED_CMD = new CustomModelData(List.of(), List.of(true), List.of(), List.of());
+    private static final CustomModelData LOCKED_CMD = new CustomModelData(List.of(1f), List.of(), List.of(), List.of());
     private static final Map<CosmeticType, Map<String, Cosmetic>> COSMETICS = new HashMap<>();
 
     @SuppressWarnings("UnstableApiUsage")
