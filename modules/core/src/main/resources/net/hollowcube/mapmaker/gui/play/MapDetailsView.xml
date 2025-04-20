@@ -18,7 +18,7 @@
         <button id="information" translationKey="gui.map_details.map_info_tab.information" sprite="generic/information"/>
         <text id="author" width="5" translationKey="gui.map_details.creator_profile"
               font="map_details_author" centered="true" sprite="generic/text_display_5"/>
-        <button translationKey="gui.map_details.map_info_tab.add_to_playlist"
+        <button id="add_to_collection" translationKey="gui.map_details.map_info_tab.add_to_playlist"
                 sprite="play_maps/details/add_to_playlist"/>
         <button id="report_button_info" translationKey="gui.map_details.map_info_tab.report_map"
                 sprite="play_maps/details/report"/>

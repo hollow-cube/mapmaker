@@ -2,7 +2,6 @@ package net.hollowcube.canvas;
 
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.posthog.PostHog;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.*;
 import org.slf4j.Logger;
@@ -121,6 +120,9 @@ public abstract class View implements Element {
         context.performSignal(signal, args);
     }
 
+    public final void setDirty() {
+        context.markDirty();
+    }
 
     /**
      * Called when this view is mounted (shown to a player).

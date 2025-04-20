@@ -97,6 +97,18 @@ public interface MapService {
 
     @NotNull MapHistory getPlayerMapHistory(@NotNull String playerId, int page, int amount);
 
+    // Map Collections
+
+    @NotNull List<MapCollection> getMapCollections(@NotNull String playerId);
+
+    void createMapCollection(@NotNull String playerId, @Nullable String name, @Nullable String icon, @NotNull List<String> mapIds);
+
+    @NotNull MapCollection getMapCollection(@NotNull String playerId, @NotNull String collectionId);
+
+    void updateMapCollection(@NotNull String playerId, @NotNull MapCollection collection);
+
+    void deleteMapCollection(@NotNull String playerId, @NotNull String collectionId);
+
     // Legacy
 
     @NotNull List<LegacyMapInfo> getLegacyMaps(@NotNull String authorizer, @NotNull String playerId);

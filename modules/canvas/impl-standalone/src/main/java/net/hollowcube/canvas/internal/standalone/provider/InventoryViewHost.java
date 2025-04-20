@@ -282,6 +282,8 @@ public class InventoryViewHost {
 
         @Override
         public boolean removeViewer(@NotNull Player player) {
+            player.getInventory().setCursorItem(ItemStack.AIR);
+
             var result = super.removeViewer(player);
             if (result) {
                 player.getInventory().update();

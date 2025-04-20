@@ -29,4 +29,5 @@ public interface Context {
 
     void popView();
 
+    void markDirty();
 }

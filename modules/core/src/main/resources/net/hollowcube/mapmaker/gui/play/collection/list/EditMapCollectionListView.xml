@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<?import net.hollowcube.mapmaker.gui.play ?>
+<?import net.hollowcube.mapmaker.gui.play.collection.list ?>
+<component width="9" height="10" align="ttb" sprite="play_maps/collection/list">
+    <text id="title" width="0" height="0" translationKey="" font="map_details_title2" shift="82" value="Map Collections"  centered="true"/>
+
+    <!-- Top bar -->
+    <box width="9" align="ltr">
+        <BackButton2/>
+    </box>
+
+    <box width="9" height="3" align="ltr">
+        <spacer/>
+        <pagination id="paging" width="7" height="3" child="MapCollectionEntry" loader="centered" cached="false"/>
+    </box>
+
+    <box width="9" align="ltr">
+        <spacer width="2"/>
+        <button id="back" width="1" translationKey="gui.generic.previous_page"/>
+        <text id="page_number" width="3" height="1" translationKey="forced.input" font="line_4" centered="true"/>
+        <button id="next" width="1" translationKey="gui.generic.next_page"/>
+        <spacer width="2"/>
+    </box>
+</component>

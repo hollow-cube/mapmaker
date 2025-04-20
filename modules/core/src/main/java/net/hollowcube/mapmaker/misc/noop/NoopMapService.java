@@ -193,6 +193,31 @@ public class NoopMapService implements MapService {
     }
 
     @Override
+    public void deleteMapCollection(@NotNull String playerId, @NotNull String collectionId) {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public void updateMapCollection(@NotNull String playerId, @NotNull MapCollection collection) {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public @NotNull MapCollection getMapCollection(@NotNull String playerId, @NotNull String collectionId) {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public void createMapCollection(@NotNull String playerId, @Nullable String name, @Nullable String icon, @NotNull List<String> mapIds) {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public @NotNull List<MapCollection> getMapCollections(@NotNull String playerId) {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
     public @NotNull List<LegacyMapInfo> getLegacyMaps(@NotNull String authorizer, @NotNull String playerId) {
         throw new UnsupportedOperationException("not implemented");
     }

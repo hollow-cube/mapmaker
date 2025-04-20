@@ -49,6 +49,8 @@ public class MapCommand extends CommandDsl {
                 .build()
         );
 
+        addSubcommand(new MapCollectionCommand(guiController, mapService));
+
         // Permissioned commands
         addSubcommand(this.delete = new MapDeleteCommand(mapService, permManager));
         addSubcommand(this.edit = new MapEditCommand(mapService, permManager, bridge));

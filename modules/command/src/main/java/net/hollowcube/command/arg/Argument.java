@@ -64,6 +64,10 @@ public abstract class Argument<T> {
         return new ArgumentItemStack(id);
     }
 
+    public static @NotNull ArgumentUUID UUID(@NotNull String id) {
+        return new ArgumentUUID(id);
+    }
+
 
     // Impl
 

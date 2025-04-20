@@ -6,9 +6,12 @@ import com.google.gson.reflect.TypeToken;
 import com.mojang.serialization.JsonOps;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
+import net.hollowcube.mapmaker.map.responses.MapCollectionsResponse;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -544,6 +547,81 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             case 404 -> new MapHistory(page, false, List.of());
             default -> throw new InternalError("Failed to get player map history: " + res.body());
         };
+    }
+
+    @Override
+    public @NotNull List<MapCollection> getMapCollections(@NotNull String playerId) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(urlV3 + "/map-players/" + playerId + "/collections"))
+                .header(AUTHORIZER_HEADER, playerId)
+                .build();
+
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), MapCollectionsResponse.class).results();
+            case 404 -> throw new NotFoundError(playerId);
+            default -> throw new InternalError("Failed to get map collections: " + res.body());
+        };
+    }
+
+    @Override
+    public void createMapCollection(@NotNull String playerId, @Nullable String name, @Nullable String icon, @NotNull List<String> mapIds) {
+        var body = new JsonObject();
+        body.addProperty("name", name);
+        body.addProperty("icon", icon);
+        body.add("mapIds", GSON.toJsonTree(mapIds));
+
+        var req = HttpRequest.newBuilder()
+                .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
+                .uri(URI.create(urlV3 + "/map-players/" + playerId + "/collections"))
+                .header(AUTHORIZER_HEADER, playerId)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() == 201) return; // Ok
+        throw new InternalError("Failed to create map collection: " + res.body());
+    }
+
+    @Override
+    public @NotNull MapCollection getMapCollection(@NotNull String playerId, @NotNull String collectionId) {
+        var req = HttpRequest.newBuilder()
+                .uri(URI.create(urlV3 + "/map-players/" + playerId + "/collections/" + collectionId))
+                .header(AUTHORIZER_HEADER, playerId)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), MapCollection.class);
+            case 404 -> throw new NotFoundError(collectionId);
+            default -> throw new InternalError("Failed to get map collection: " + res.body());
+        };
+    }
+
+    @Override
+    public void updateMapCollection(@NotNull String playerId, @NotNull MapCollection collection) {
+        var body = new JsonObject();
+        body.addProperty("name", collection.name());
+        body.addProperty("icon", OpUtils.map(collection.icon(), Material::name));
+        body.add("maps", GSON.toJsonTree(collection.mapIds()));
+
+        var req = HttpRequest.newBuilder()
+                .method("PATCH", HttpRequest.BodyPublishers.ofString(body.toString()))
+                .uri(URI.create(urlV3 + "/map-players/" + playerId + "/collections/" + collection.collectionId()))
+                .header(AUTHORIZER_HEADER, playerId)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() == 204) return; // Ok
+        throw new InternalError("Failed to update map collection: " + res.body());
+    }
+
+    @Override
+    public void deleteMapCollection(@NotNull String playerId, @NotNull String collectionId) {
+        var req = HttpRequest.newBuilder()
+                .method("DELETE", HttpRequest.BodyPublishers.noBody())
+                .uri(URI.create(urlV3 + "/map-players/" + playerId + "/collections/" + collectionId))
+                .header(AUTHORIZER_HEADER, playerId)
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() == 200) return; // Ok
+        throw new InternalError("Failed to delete map collection: " + res.body());
     }
 
     @Override

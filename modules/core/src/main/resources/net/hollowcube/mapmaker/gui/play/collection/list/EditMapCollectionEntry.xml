@@ -1,0 +1,4 @@
+<?xml version="1.0" ?>
+<component width="1" height="1" align="ltr">
+    <button id="label" translationKey="gui.edit_map_collection_list.entry" sprite="barrier"/>
+</component>
