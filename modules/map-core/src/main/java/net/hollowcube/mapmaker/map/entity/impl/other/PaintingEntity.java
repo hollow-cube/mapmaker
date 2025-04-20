@@ -3,12 +3,14 @@ package net.hollowcube.mapmaker.map.entity.impl.other;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.other.PaintingMeta;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.registry.RegistryTranscoder;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -70,8 +72,8 @@ public class PaintingEntity extends MapEntity {
 
         var variantTag = tag.get("variant");
         if (variantTag != null) {
-            set(DataComponents.PAINTING_VARIANT, DataComponents.PAINTING_VARIANT
-                    .decode(Transcoder.NBT, variantTag).orElseThrow());
+            var coder = new RegistryTranscoder<>(Transcoder.NBT, MinecraftServer.process());
+            set(DataComponents.PAINTING_VARIANT, DataComponents.PAINTING_VARIANT.decode(coder, variantTag).orElseThrow());
         }
 
         var meta = getEntityMeta();
