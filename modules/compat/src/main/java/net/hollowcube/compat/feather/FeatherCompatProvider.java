@@ -136,7 +136,9 @@ public class FeatherCompatProvider implements CompatProvider, DiscordRichPresenc
             }
             int protocolVersion = handshake.getProtocolVersion();
             if (protocolVersion > MessageConstants.VERSION) {
-                // todo this doesn't actually do anything
+                // TODO: In the official API Implementation, a mismatched API version just alerts players with a permission that it is out of date. It still processed packets fine.
+                //   There is no indication of what versioning compatibility we can expect since they've only released one version.
+                //   For now, we can probably just ignore this.
             }
             return true;
         }
