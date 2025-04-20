@@ -76,7 +76,7 @@ public class DemoServer {
                     if (!(event.getEntity() instanceof Player player)) return;
 
                     //todo this is not a safe call. it blocks the tick thread during instance change.
-                    terraform.saveLocalSession(player, true);
+                    terraform.saveLocalSession(player, null, true);
                 })
                 .addListener(PlayerDisconnectEvent.class, event -> {
                     //todo this is not a safe call. it blocks the tick thread during instance change.

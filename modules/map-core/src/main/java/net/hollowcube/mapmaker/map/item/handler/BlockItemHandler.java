@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.item.handler;
 
 import net.hollowcube.mapmaker.map.event.BlockItemPlaceEvent;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.event.EventDispatcher;
@@ -13,35 +14,37 @@ import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
 import java.util.function.Supplier;
 
 public class BlockItemHandler extends ItemHandler {
 
     private final Block block;
-    private final Material material;
+    private final BadSprite sprite;
     private final ItemUpdateFunc updateFunc;
 
-    public BlockItemHandler(@NotNull Supplier<BlockHandler> blockHandler, @NotNull Block block) {
-        this(blockHandler, block, null, null);
+    public BlockItemHandler(@NotNull Supplier<BlockHandler> blockHandler, @NotNull Block block, @NotNull String sprite) {
+        this(blockHandler, block, sprite, null);
     }
 
-
-    public BlockItemHandler(@NotNull Supplier<BlockHandler> blockHandler, @NotNull Block block, @NotNull ItemUpdateFunc updateFunc) {
-        this(blockHandler, block, null, updateFunc);
-    }
-
-    public BlockItemHandler(@NotNull Supplier<BlockHandler> blockHandler, @NotNull Block block, @Nullable Material material, @Nullable ItemUpdateFunc updateFunc) {
+    public BlockItemHandler(@NotNull Supplier<BlockHandler> blockHandler, @NotNull Block block, @NotNull String sprite, @Nullable ItemUpdateFunc updateFunc) {
         super(blockHandler.get().getKey().asString(), RIGHT_CLICK_BLOCK);
         this.block = block.withHandler(blockHandler.get());
-        this.material = material != null ? material :
-                Objects.requireNonNull(block.registry().material(), "Block has no material: " + block);
+        this.sprite = BadSprite.require(sprite);
         this.updateFunc = updateFunc;
     }
 
+    public @NotNull Block block() {
+        return block;
+    }
+
     @Override
-    public @NotNull Material material() {
-        return material;
+    public @Nullable BadSprite sprite() {
+        return this.sprite;
+    }
+
+    @Override
+    public @Nullable Material material() {
+        return block.registry().material();
     }
 
     @Override
@@ -57,13 +60,11 @@ public class BlockItemHandler extends ItemHandler {
         var block = this.block.withNbt(blockData.nbt());
         var event = new BlockItemPlaceEvent(click.player(), new BlockVec(click.placePosition()), block);
         EventDispatcher.callCancellable(event, () -> {
-
             instance.placeBlock(new BlockHandler.PlayerPlacement(
                     block, instance, click.placePosition(),
                     click.player(), click.hand(), click.face(),
                     0f, 0f, 0f
             ));
-
         });
     }
 }

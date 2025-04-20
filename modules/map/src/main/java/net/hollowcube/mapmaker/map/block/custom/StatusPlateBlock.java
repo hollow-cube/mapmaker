@@ -38,7 +38,8 @@ public class StatusPlateBlock implements ObjectBlockHandler, InteractTarget, Pre
             .requiredVariant(MapVariant.PARKOUR)
             .build();
 
-    public static final ItemHandler ITEM = new BlockItemHandler(StatusPlateBlock::new, Block.STONE_PRESSURE_PLATE);
+    public static final ItemHandler ITEM = new BlockItemHandler(StatusPlateBlock::new,
+            Block.STONE_PRESSURE_PLATE, "status_plate");
 
     private final Set<Player> playersOnPlate = new HashSet<>();
 

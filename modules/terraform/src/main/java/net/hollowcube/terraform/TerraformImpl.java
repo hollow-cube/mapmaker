@@ -24,6 +24,7 @@ import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.ChunkHack;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.play.BlockEntityDataPacket;
@@ -155,8 +156,8 @@ public final class TerraformImpl implements Terraform {
     }
 
     @Override
-    public void saveLocalSession(@NotNull Player player, boolean drop) {
-        var instance = Objects.requireNonNull(player.getInstance(), "Player must be in an instance");
+    public void saveLocalSession(@NotNull Player player, @Nullable Instance playerInstance, boolean drop) {
+        var instance = Objects.requireNonNullElseGet(playerInstance, player::getInstance);
         var tag = Tag.<LocalSession>Transient(String.format("terraform:session/%s", player.getUuid()));
 
         var session = Objects.requireNonNull(instance.getTag(tag), "Local session not initialized");

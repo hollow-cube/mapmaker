@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.item.handler;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.compat.noxesium.packets.ClientboundChangeServerRulesPacket;
@@ -21,8 +22,10 @@ import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.component.ItemBlockState;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -97,6 +100,7 @@ public class ItemRegistry {
     private final Map<String, ItemHandler> idToItemHandler = new HashMap<>();
     private final Map<String, ItemHandler> modelToItemHandler = new HashMap<>();
     private final Int2ObjectMap<ItemHandler> materialToItemHandler = new Int2ObjectArrayMap<>();
+    private final Int2ObjectMap<ItemHandler> blockToItemHandler = new Int2ObjectOpenHashMap<>();
 
     // Contains all the "public" item names known by this registry. Used for completions.
     private final Set<Key> allItemNames = new TreeSet<>((a, b) -> a.asString().compareToIgnoreCase(b.asString()));
@@ -121,11 +125,13 @@ public class ItemRegistry {
             var material = itemHandler.material();
             if (sprite != null) {
                 modelToItemHandler.put(sprite.model(), itemHandler);
-                Check.argCondition(material != null, "material must be null if sprite is not");
             } else if (material != null) {
                 materialToItemHandler.put(material.id(), itemHandler);
             } else {
                 throw new IllegalArgumentException("ItemHandler must provide either a sprite or material");
+            }
+            if (itemHandler instanceof BlockItemHandler blockItemHandler) {
+                blockToItemHandler.put(blockItemHandler.block().id(), itemHandler);
             }
 
             allItemNames.add(itemHandler.key());
@@ -173,6 +179,23 @@ public class ItemRegistry {
         if (material == null) return null;
         var builder = ItemStack.builder(material);
         return builder.build();
+    }
+
+    public @Nullable ItemStack getItemStack(@NotNull Block block, boolean includeData) {
+        if (block.handler() == null) return null;
+
+        var itemHandler = blockToItemHandler.get(block.id());
+        if (itemHandler == null) return null;
+        // Should ignore if this does not have the expected handler. For example a regular pressure plate.
+        if (!(itemHandler instanceof BlockItemHandler bih) || !Objects.equals(bih.block().handler().getKey(), block.handler().getKey()))
+            return null;
+
+        var itemStack = itemHandler.buildItemStack(includeData ? block.nbt() : null);
+        if (includeData && !block.properties().isEmpty()) {
+            itemStack = itemStack.with(DataComponents.BLOCK_STATE, new ItemBlockState(block.properties()));
+        }
+
+        return itemStack;
     }
 
     public @Nullable String getItemId(@NotNull ItemStack itemStack) {

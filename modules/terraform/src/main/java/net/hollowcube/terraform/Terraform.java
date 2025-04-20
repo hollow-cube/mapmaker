@@ -86,7 +86,7 @@ public sealed interface Terraform permits TerraformImpl {
     void initLocalSession(@NotNull Player player, @NotNull String sessionId);
 
     @Blocking
-    void saveLocalSession(@NotNull Player player, boolean drop);
+    void saveLocalSession(@NotNull Player player, @Nullable Instance instance, boolean drop);
 
     //todo rework how tools are handled completely
     @NotNull ToolHandler toolHandler();

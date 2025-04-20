@@ -60,6 +60,12 @@ public class ItemModelTransform {
                 String name = itemModelFile.getFileName().toString();
                 JsonObject model = new Gson().fromJson(Files.readString(modelPath), JsonObject.class);
 
+                var type = model.get("type");
+                if (type != null && type.getAsString().equals("vanilla/block")) {
+                    ctx.addItemModel(name, ModelUtil.createBasicItem("minecraft:block/" + model.get("id").getAsString()));
+                    continue;
+                }
+
                 var images = Files.walk(itemModelFile)
                         .filter(path -> path.getFileName().toString().endsWith(".png"))
                         .collect(Collectors.toMap(path -> path.getFileName().toString().replace(".png", ""),
