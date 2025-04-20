@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
 import net.hollowcube.mql.jit.MqlCompiler;
 import net.hollowcube.mql.jit.ValueScript;
 import net.kyori.adventure.nbt.*;
+import net.minestom.server.color.AlphaColor;
 import net.minestom.server.color.Color;
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
 import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
@@ -288,7 +289,7 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
                     blue = loadValueScript("color.b", colorTag.get(2));
                 } else red = green = blue = null;
                 ValueScript tRed, tGreen, tBlue;
-                if (data.keySet().contains("color")) {
+                if (data.keySet().contains("transition")) {
                     var transitionTag = assertVecTag("transition", data.get("transition"));
                     tRed = loadValueScript("transition.r", transitionTag.get(0));
                     tGreen = loadValueScript("transition.g", transitionTag.get(1));
@@ -333,6 +334,18 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
                 //todo should support custom model data and maybe other components.
             }
             // SculkCharge, Shriek, Vibration
+            case Particle.TintedLeaves itemParticle when data.get("color") instanceof ListBinaryTag colorTag -> {
+                var red = loadValueScript("color.r", colorTag.get(0));
+                var green = loadValueScript("color.g", colorTag.get(1));
+                var blue = loadValueScript("color.b", colorTag.get(2));
+                var alpha = loadValueScript("color.a", colorTag.get(3));
+                particle = variables -> itemParticle.withColor(new AlphaColor(
+                        (int) (alpha.eval(ValueScript.Queries.INSTANCE, variables) * 255.),
+                        (int) (red.eval(ValueScript.Queries.INSTANCE, variables) * 255.),
+                        (int) (green.eval(ValueScript.Queries.INSTANCE, variables) * 255.),
+                        (int) (blue.eval(ValueScript.Queries.INSTANCE, variables) * 255.)
+                ));
+            }
             default -> {
                 particle = ignored -> rawParticle;
             } // No data or unsupported
