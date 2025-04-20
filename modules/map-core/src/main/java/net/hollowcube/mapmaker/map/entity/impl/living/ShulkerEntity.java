@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.map.entity.impl.living;
 
 import net.kyori.adventure.nbt.CompoundBinaryTag;
-import net.minestom.server.color.DyeColor;
-import net.minestom.server.component.DataComponents;
+import net.minestom.server.entity.EntityMetadataStealer;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.MetadataDef;
 import net.minestom.server.entity.metadata.golem.ShulkerMeta;
 import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +25,8 @@ public class ShulkerEntity extends AbstractMobEntity {
     public void readData(@NotNull CompoundBinaryTag tag) {
         super.readData(tag);
 
-        set(DataComponents.SHULKER_COLOR, DyeColor.values()[tag.getByte("Color", (byte) 16)]);
+        var metadata = EntityMetadataStealer.steal(this);
+        metadata.set(MetadataDef.Shulker.COLOR, tag.getByte("Color", (byte) 16));
 
         final var meta = getEntityMeta();
         meta.setAttachFace(Direction.values()[tag.getByte("AttachFace")]);
@@ -36,7 +37,8 @@ public class ShulkerEntity extends AbstractMobEntity {
     public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
         super.writeData(tag);
 
-        tag.putByte("Color", (byte) get(DataComponents.SHULKER_COLOR, DyeColor.PURPLE).ordinal());
+        var metadata = EntityMetadataStealer.steal(this);
+        tag.putByte("Color", metadata.get(MetadataDef.Shulker.COLOR));
 
         final var meta = getEntityMeta();
         tag.putByte("AttachFace", (byte) meta.getAttachFace().ordinal());
