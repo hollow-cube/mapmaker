@@ -26,6 +26,8 @@ jobs:
           distribution: 'graalvm'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: true
 
       - name: Build resource pack
         run: ./gradlew :bin:packer:buildClient
@@ -68,6 +70,8 @@ jobs:
           distribution: 'graalvm'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: true
 
       # Build server
       - name: Build standalone binary
@@ -105,6 +109,8 @@ jobs:
           distribution: 'graalvm'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: true
 
       # Build server
       - name: Build standalone binary
