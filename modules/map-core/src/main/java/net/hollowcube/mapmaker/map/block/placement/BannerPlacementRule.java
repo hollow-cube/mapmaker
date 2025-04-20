@@ -2,10 +2,10 @@ package net.hollowcube.mapmaker.map.block.placement;
 
 
 import net.hollowcube.mapmaker.map.block.handler.BannerBlockHandler;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,17 +42,17 @@ public class BannerPlacementRule extends BaseBlockPlacementRule {
 
     private Block toWallBlock(Block block) {
         // Same as skulls, maybe there's a better way
-        String name = block.namespace().value();
+        String name = block.key().value();
 
         // white_banner -> white
         String rawName = name.substring(0, name.lastIndexOf("_"));
 
-        return Block.fromNamespaceId(rawName + "_wall_banner")
+        return Block.fromKey(rawName + "_wall_banner")
                 .withHandler(block.handler());
     }
 
     private Block withBannerData(Block block, @Nullable ItemStack stack) {
-        return block.withTag(BannerBlockHandler.PATTERNS, stack == null ? null : stack.get(ItemComponent.BANNER_PATTERNS));
+        return block.withTag(BannerBlockHandler.PATTERNS, stack == null ? null : stack.get(DataComponents.BANNER_PATTERNS));
     }
 
 }

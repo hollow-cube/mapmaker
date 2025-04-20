@@ -1,13 +1,14 @@
 package net.hollowcube.compat.axiom.data.annotations.data;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.StructCodec;
 import net.minestom.server.network.NetworkBuffer;
+import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("UnstableApiUsage")
 public interface AnnotationData {
-
-    NetworkBuffer.Type<AnnotationData> SERIALIZER = NetworkBuffer.BYTE.unionType(AnnotationData::getNetworkType, AnnotationData::getNetworkId);
-    Codec<AnnotationData> CODEC = Codec.STRING.dispatch("type", AnnotationData::getCodecId, AnnotationData::getCodecType);
+    @NotNull NetworkBuffer.Type<AnnotationData> SERIALIZER = NetworkBuffer.BYTE.unionType(AnnotationData::getNetworkType, AnnotationData::getNetworkId);
+    @NotNull Codec<AnnotationData> CODEC = Codec.STRING.unionType("type", AnnotationData::getCodecType, net.hollowcube.compat.axiom.data.annotations.data.AnnotationData::getCodecId);
 
     default AnnotationData withPosition(float x, float y, float z) {
         return this;
@@ -32,8 +33,9 @@ public interface AnnotationData {
         return (NetworkBuffer.Type<AnnotationData>) type;
     }
 
-    private static MapCodec<? extends AnnotationData> getCodecType(String type) {
-        return switch (type) {
+    @SuppressWarnings("unchecked")
+    private static StructCodec<AnnotationData> getCodecType(String type) {
+        var codec = (StructCodec<? extends AnnotationData>) switch (type) {
             case "line" -> LineAnnotation.CODEC;
             case "text" -> TextAnnotation.CODEC;
             case "image" -> ImageAnnotation.CODEC;
@@ -42,6 +44,7 @@ public interface AnnotationData {
             case "box_outline" -> BoxOutlineAnnotation.CODEC;
             default -> throw new IllegalArgumentException("Unknown annotation data type: " + type);
         };
+        return (StructCodec<AnnotationData>) codec;
     }
 
     private static byte getNetworkId(AnnotationData data) {

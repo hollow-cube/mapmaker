@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.map.gui.displayentity.object;
 
-import com.mojang.datafixers.util.Pair;
+import it.unimi.dsi.fastutil.Pair;
 import net.hollowcube.canvas.ClickType;
 import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.View;
@@ -46,10 +46,10 @@ public class ComponentEntry extends View {
 
     private void updateLore() {
         List<Component> lore = this.values.stream().<Component>map(entry -> {
-            String key = Objects.equals(entry.getFirst(), this.value) ?
+            String key = Objects.equals(entry.first(), this.value) ?
                     "gui.display_entity.properties.item_components.entry.selected" :
                     "gui.display_entity.properties.item_components.entry";
-            return Component.translatable(key, entry.getSecond());
+            return Component.translatable(key, entry.second());
         }).collect(Collectors.toList());
 
         lore.add(Component.empty());
@@ -60,8 +60,8 @@ public class ComponentEntry extends View {
 
         this.label.setComponentsDirect(
                 Component.translatable("gui.display_entity.properties.item_components.type.%s.%s.name".formatted(
-                        this.component.namespace().namespace(),
-                        this.component.namespace().path()
+                        this.component.key().namespace(),
+                        this.component.key().value()
                 )),
                 lore
         );
@@ -74,12 +74,12 @@ public class ComponentEntry extends View {
                 boolean found = false;
                 for (var entry : this.values) {
                     if (found) {
-                        yield entry.getFirst();
-                    } else if (Objects.equals(entry.getFirst(), this.value)) {
+                        yield entry.first();
+                    } else if (Objects.equals(entry.first(), this.value)) {
                         found = true;
                     }
                 }
-                yield found ? this.values.getFirst().getFirst() : null;
+                yield found ? this.values.getFirst().first() : null;
             }
             case SHIFT_LEFT_CLICK -> this.defaultValue;
             default -> null;

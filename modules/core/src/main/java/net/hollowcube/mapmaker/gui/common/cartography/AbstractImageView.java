@@ -5,7 +5,7 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Action;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
-import net.minestom.server.item.ItemComponent;
+import net.minestom.server.component.DataComponents;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -23,7 +23,7 @@ public abstract class AbstractImageView extends View {
 
         this.buffer = new ImageBuffer();
 
-        this.image.setItemSprite(this.image.getItemDirect().with(ItemComponent.MAP_ID, MAP_ID));
+        this.image.setItemSprite(this.image.getItemDirect().with(DataComponents.MAP_ID, MAP_ID));
     }
 
     protected void updateImage(Consumer<ImageBuffer> updater) {

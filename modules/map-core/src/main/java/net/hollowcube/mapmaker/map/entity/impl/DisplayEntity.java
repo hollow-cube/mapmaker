@@ -5,7 +5,9 @@ import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.kyori.adventure.nbt.*;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
@@ -19,7 +21,6 @@ import net.minestom.server.entity.metadata.display.TextDisplayMeta;
 import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -30,7 +31,7 @@ import static net.kyori.adventure.nbt.FloatBinaryTag.floatBinaryTag;
 
 @SuppressWarnings("UnstableApiUsage")
 public sealed abstract class DisplayEntity extends MapEntity permits DisplayEntity.Block, DisplayEntity.Item, DisplayEntity.Text {
-    private static final BinaryTagSerializer<AbstractDisplayMeta.BillboardConstraints> BILLBOARD_CONSTRAINTS = BinaryTagSerializer.fromEnumStringable(AbstractDisplayMeta.BillboardConstraints.class);
+    private static final Codec<AbstractDisplayMeta.BillboardConstraints> BILLBOARD_CONSTRAINTS = Codec.Enum(AbstractDisplayMeta.BillboardConstraints.class);
 
     public static final Tag<UUID> SELECTED_DISPLAY_ENTITY = Tag.Transient("mapmaker:selected_display_entity");
 
@@ -39,6 +40,8 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
 
         setNoGravity(true);
         hasPhysics = false;
+        collidesWithEntities = false;
+        preventBlockPlacement = false;
     }
 
     @Override
@@ -89,7 +92,7 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
         if (transformation.size() > 0) tag.put("transformation", transformation);
 
         if (meta.getBillboardRenderConstraints() != AbstractDisplayMeta.BillboardConstraints.FIXED)
-            tag.put("billboard", BILLBOARD_CONSTRAINTS.write(meta.getBillboardRenderConstraints()));
+            tag.put("billboard", BILLBOARD_CONSTRAINTS.encode(Transcoder.NBT, meta.getBillboardRenderConstraints()).orElseThrow());
         if (meta.getBrightnessOverride() >= 0) {
             tag.put("brightness", CompoundBinaryTag.builder()
                     .putInt("block", (meta.getBrightnessOverride() >> 4) & 0xF)
@@ -136,7 +139,7 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
             throw new UnsupportedOperationException("SVD is not supported yet.");
         }
         if (tag.get("billboard") instanceof StringBinaryTag billboardName)
-            meta.setBillboardRenderConstraints(BILLBOARD_CONSTRAINTS.read(billboardName));
+            meta.setBillboardRenderConstraints(BILLBOARD_CONSTRAINTS.decode(Transcoder.NBT, billboardName).orElseThrow());
         if (tag.get("brightness") instanceof CompoundBinaryTag brightnessTag) {
             int brightness = (brightnessTag.getInt("block") << 4)
                     | (brightnessTag.getInt("sky") << 20);
@@ -247,7 +250,7 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
             final BlockDisplayMeta meta = getEntityMeta();
             final net.minestom.server.instance.block.Block block = meta.getBlockStateId();
             if (!block.isAir())
-                tag.put("block_state", NbtUtil.BLOCK_COMPOUND.write(block));
+                tag.put("block_state", NbtUtil.writeBlock(block));
 
         }
 
@@ -257,7 +260,7 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
 
             final BlockDisplayMeta meta = getEntityMeta();
             if (tag.get("block_state") instanceof CompoundBinaryTag blockState) {
-                var block = NbtUtil.BLOCK_COMPOUND.read(blockState);
+                var block = NbtUtil.readBlock(blockState);
                 if (!block.isAir()) meta.setBlockState(block);
             }
         }
@@ -265,7 +268,7 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
     }
 
     public static final class Item extends DisplayEntity {
-        private static final BinaryTagSerializer<ItemDisplayMeta.DisplayContext> DISPLAY_CONTEXT = BinaryTagSerializer.fromEnumStringable(ItemDisplayMeta.DisplayContext.class);
+        private static final Codec<ItemDisplayMeta.DisplayContext> DISPLAY_CONTEXT = Codec.Enum(ItemDisplayMeta.DisplayContext.class);
 
         public Item(@NotNull UUID uuid) {
             super(EntityType.ITEM_DISPLAY, uuid);
@@ -285,7 +288,7 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
             if (!itemStack.isAir() && itemStack.amount() > 0)
                 tag.put("item", NbtUtil.writeItemStack(itemStack));
             if (meta.getDisplayContext() != ItemDisplayMeta.DisplayContext.NONE)
-                tag.put("item_display", DISPLAY_CONTEXT.write(meta.getDisplayContext()));
+                tag.put("item_display", DISPLAY_CONTEXT.encode(Transcoder.NBT, meta.getDisplayContext()).orElseThrow());
         }
 
         @Override
@@ -296,7 +299,7 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
             if (tag.get("item") instanceof CompoundBinaryTag item)
                 meta.setItemStack(NbtUtil.readItemStack(item));
             if (tag.get("item_display") instanceof StringBinaryTag itemDisplay)
-                meta.setDisplayContext(DISPLAY_CONTEXT.read(itemDisplay));
+                meta.setDisplayContext(DISPLAY_CONTEXT.decode(Transcoder.NBT, itemDisplay).orElseThrow());
 
         }
 
@@ -319,7 +322,7 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
             super.writeData(tag);
 
             final TextDisplayMeta meta = getEntityMeta();
-            tag.putString("text", GsonComponentSerializer.gson().serialize(meta.getText()));
+            tag.put("text", Codec.COMPONENT.encode(Transcoder.NBT, meta.getText()).orElseThrow());
             if (meta.getLineWidth() != 0)
                 tag.putInt("line_width", meta.getLineWidth());
             if (meta.getBackgroundColor() != DEFAULT_BACKGROUND)
@@ -342,8 +345,10 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
             super.readData(tag);
 
             final TextDisplayMeta meta = getEntityMeta();
-            if (tag.get("text") instanceof StringBinaryTag text)
-                meta.setText(GsonComponentSerializer.gson().deserialize(text.value()));
+
+            var text = tag.get("text");
+            if (text != null) meta.setText(Codec.COMPONENT
+                    .decode(Transcoder.NBT, text).orElse(Component.empty()));
             if (tag.get("line_width") instanceof NumberBinaryTag lineWidth)
                 meta.setLineWidth(lineWidth.intValue());
             if (tag.get("background") instanceof NumberBinaryTag background)

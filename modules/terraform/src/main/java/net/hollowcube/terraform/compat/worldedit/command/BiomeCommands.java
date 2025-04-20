@@ -11,6 +11,7 @@ import net.hollowcube.terraform.instance.TerraformInstanceBiomes;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.LocalSession;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.util.RGBLike;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Chunk;
@@ -20,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public final class BiomeCommands {
 
@@ -180,13 +182,13 @@ public final class BiomeCommands {
         return ExtraComponents.translatable(translation)
                 .with(biomes.getName(key))
                 .with(key.name())
-                .with(biome.precipitation().name())
-                .with(String.format("#%06x", biome.effects().skyColor()))
-                .with(String.format("#%06x", biome.effects().fogColor()))
-                .with(String.format("#%06x", biome.effects().waterColor()))
-                .with(String.format("#%06x", biome.effects().waterFogColor()))
-                .with(String.format("#%06x", biome.effects().grassColor()))
-                .with(String.format("#%06x", biome.effects().foliageColor()))
+                .with(biome.hasPrecipitation() ? "true" : "false")
+                .with(biome.effects().skyColor().toString())
+                .with(biome.effects().fogColor().toString())
+                .with(biome.effects().waterColor().toString())
+                .with(biome.effects().waterFogColor().toString())
+                .with(Objects.requireNonNullElse(OpUtils.map(biome.effects().grassColor(), RGBLike::toString), "null"))
+                .with(Objects.requireNonNullElse(OpUtils.map(biome.effects().foliageColor(), RGBLike::toString), "null"))
                 .build();
     }
 

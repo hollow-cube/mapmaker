@@ -1,0 +1,62 @@
+{
+    HurtByTimestamp: 0,
+    Attributes: [
+        {
+            Base: 80.0d,
+            Name: "generic.maxHealth"
+        },
+        {
+            Base: 0.0d,
+            Name: "generic.knockbackResistance"
+        },
+        {
+            Base: 0.30000001192092896d,
+            Name: "generic.movementSpeed"
+        },
+        {
+            Base: 16.0d,
+            Name: "generic.followRange"
+        },
+        {
+            Base: 8.0d,
+            Name: "generic.attackDamage"
+        }
+    ],
+    Invulnerable: 0b,
+    PortalCooldown: 0,
+    AbsorptionAmount: 0.0f,
+    FallDistance: 0.0f,
+    Elder: 1b,
+    DeathTime: 0s,
+    DropChances: [0.085f, 0.085f, 0.085f, 0.085f, 0.085f],
+    PersistenceRequired: 1b,
+    id: "Guardian",
+    HealF: 30.0f,
+    Motion: [0.0d, -0.005d, 0.0d],
+    Leashed: 0b,
+    UUIDLeast: -7274973720225179320L,
+    Health: 30s,
+    Air: 300s,
+    OnGround: 1b,
+    Dimension: 0,
+    Rotation: [272.00427f, 0.0f],
+    UUIDMost: -674491715516347421L,
+    CustomName: "DA PIG",
+    Equipment: [
+        {
+        },
+        {
+        },
+        {
+        },
+        {
+        },
+        {
+        }
+    ],
+    Pos: [52.07638505819814d, 73.0d, 55.37625002861023d],
+    Fire: -1s,
+    CanPickUpLoot: 0b,
+    HurtTime: 0s,
+    CustomNameVisible: 0b
+}

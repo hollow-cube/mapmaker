@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Hub Only" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="net.hollowcube.mapmaker.hub.Main" />
+    <module name="mapmaker.bin.hub.main" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.map.block.handler;
 
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.instance.block.BlockHandler;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.component.CustomData;
 import org.jetbrains.annotations.NotNull;
@@ -30,13 +30,13 @@ final class BlockHandlerHelpers {
      */
     public static void applyItemData(@NotNull BlockHandler.PlayerPlacement placement) {
         var itemStack = placement.getPlayer().getItemInHand(placement.getHand());
-        var blockData = itemStack.get(ItemComponent.BLOCK_ENTITY_DATA, CustomData.EMPTY).nbt();
+        var blockData = itemStack.get(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).nbt();
         if (blockData.size() == 0) return;
         updateBlock(placement, blockData);
     }
 
     public static @Nullable CompoundBinaryTag extractBlockData(@NotNull ItemStack itemStack) {
-        var blockData = itemStack.get(ItemComponent.BLOCK_ENTITY_DATA, CustomData.EMPTY).nbt();
+        var blockData = itemStack.get(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).nbt();
         if (blockData.size() == 0) return null;
         var builder = CompoundBinaryTag.builder();
         builder.put(blockData);

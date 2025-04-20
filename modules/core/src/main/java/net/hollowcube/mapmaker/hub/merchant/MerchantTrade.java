@@ -1,12 +1,11 @@
 package net.hollowcube.mapmaker.hub.merchant;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.store.CostList;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.codec.StructCodec;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -16,10 +15,10 @@ public record MerchantTrade(
         @NotNull Cosmetic result,
         @NotNull CostList inputs
 ) {
-    public static final Codec<MerchantTrade> CODEC = RecordCodecBuilder.create(i -> i.group(
-            Cosmetic.CODEC.fieldOf("result").forGetter(MerchantTrade::result),
-            CostList.CODEC.fieldOf("inputs").forGetter(MerchantTrade::inputs)
-    ).apply(i, MerchantTrade::new));
+    public static final StructCodec<MerchantTrade> CODEC = StructCodec.struct(
+            "result", Cosmetic.CODEC, MerchantTrade::result,
+            "inputs", CostList.CODEC, MerchantTrade::inputs,
+            MerchantTrade::new);
 
     public void appendLore(@NotNull PlayerDataV2 playerData, @NotNull PlayerBackpack backpack, @NotNull List<Component> lore) {
         var canAfford = inputs.appendLore(playerData, backpack, lore);

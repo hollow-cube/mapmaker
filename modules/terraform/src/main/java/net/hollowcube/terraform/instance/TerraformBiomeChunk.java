@@ -70,7 +70,7 @@ public final class TerraformBiomeChunk {
 
         var biomes = TerraformInstanceBiomes.forInstance(chunk.getInstance());
         int id = biomes != null ? biomes.getId(biome) : -1;
-        if (id == -1) throw new IllegalStateException("Biome has not been registered: " + biome.namespace());
+        if (id == -1) throw new IllegalStateException("Biome has not been registered: " + biome.key());
 
         for (Section section : chunk.getSections()) {
             section.biomePalette().fill(id);
@@ -87,7 +87,7 @@ public final class TerraformBiomeChunk {
 
         var biomes = TerraformInstanceBiomes.forInstance(chunk.getInstance());
         int id = biomes != null ? biomes.getId(biome) : -1;
-        if (id == -1) throw new IllegalStateException("Biome has not been registered: " + biome.namespace());
+        if (id == -1) throw new IllegalStateException("Biome has not been registered: " + biome.key());
 
         int xOffset = chunk.getChunkX() * 16;
         int yOffset = chunk.getMinSection();

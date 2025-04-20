@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.block.handler;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.StringBinaryTag;
@@ -11,7 +12,6 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.tag.TagSerializer;
 import net.minestom.server.tag.TagWritable;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,10 +21,10 @@ import java.util.Map;
 
 public class MobSpawnerBlockHandler implements BlockHandler {
 
-    public static final NamespaceID ID = NamespaceID.from("minecraft:mob_spawner");
+    public static final Key ID = Key.key("minecraft:mob_spawner");
 
     @Override
-    public @NotNull NamespaceID getNamespaceId() {
+    public @NotNull Key getKey() {
         return ID;
     }
 
@@ -34,7 +34,7 @@ public class MobSpawnerBlockHandler implements BlockHandler {
         EntityType entityType = itemStack.material().registry().spawnEntityType();
         if (entityType == null) return true;
 
-        String entityId = entityType.namespace().asString();
+        String entityId = entityType.key().asString();
 
         Block newBlock = interaction.getBlock().withTag(SPAWN_DATA, new EntityData(entityId))
                 .withTag(DELAY, (short) 100).withTag(MAX_NEARBY_ENTITIES, (short) 6).withTag(MAX_SPAWN_DELAY, (short) 800).withTag(MIN_SPAWN_DELAY, (short) 200)

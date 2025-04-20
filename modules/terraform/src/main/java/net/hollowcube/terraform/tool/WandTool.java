@@ -3,17 +3,17 @@ package net.hollowcube.terraform.tool;
 import com.google.auto.service.AutoService;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.LocalSession;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.Material;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 @AutoService(BuiltinTool.class)
 public class WandTool implements BuiltinTool {
-    private static final NamespaceID TYPE = NamespaceID.from("terraform:wand");
+    private static final Key TYPE = Key.key("terraform:wand");
 
     @Override
-    public @NotNull NamespaceID namespace() {
+    public @NotNull Key key() {
         return TYPE;
     }
 

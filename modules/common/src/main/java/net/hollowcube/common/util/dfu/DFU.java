@@ -1,7 +1,8 @@
 package net.hollowcube.common.util.dfu;
 
-import com.mojang.serialization.Codec;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.Transcoder;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagSerializer;
 import org.jetbrains.annotations.NotNull;
@@ -31,18 +32,22 @@ public final class DFU {
         return Tag.View(codecTagSerializer(codec)).defaultValue(codecEmptySupplier(codec));
     }
 
-    private static <T> @NotNull TagSerializer<T> codecTagSerializer(@NotNull Codec<T> codec) {
+    public static <T> @NotNull TagSerializer<T> codecTagSerializer(@NotNull Codec<T> codec) {
         return TagSerializer.fromCompound(
-                compound -> codec.parse(NbtOps.INSTANCE, compound).getOrThrow(),
-                value -> (CompoundBinaryTag) codec.encode(value, NbtOps.INSTANCE, null).getOrThrow()
+                compound -> codec.decode(Transcoder.NBT, compound).orElseThrow(),
+                value -> {
+                    var tag = codec.encode(Transcoder.NBT, value).orElseThrow();
+                    if (tag instanceof CompoundBinaryTag compound) return compound;
+                    return CompoundBinaryTag.empty();
+                }
         );
     }
 
     public static <T> @NotNull CompoundBinaryTag encodeNbt(@NotNull Codec<T> codec, @NotNull T value) {
-        return (CompoundBinaryTag) codec.encode(value, NbtOps.INSTANCE, null).getOrThrow();
+        return (CompoundBinaryTag) codec.encode(Transcoder.NBT, value).orElseThrow();
     }
 
     private static <T> @NotNull Supplier<T> codecEmptySupplier(@NotNull Codec<T> codec) {
-        return () -> codec.parse(NbtOps.INSTANCE, CompoundBinaryTag.empty()).getOrThrow();
+        return () -> codec.decode(Transcoder.NBT, CompoundBinaryTag.empty()).orElseThrow();
     }
 }

@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Objects;
 
-@SuppressWarnings("UnstableApiUsage")
 public record TagPattern(
         @NotNull List<Block> blocks,
         boolean randomState
@@ -40,7 +39,7 @@ public record TagPattern(
         Check.notNull(tag, "no such tag: " + nsid);
 
         return tag.getValues().stream()
-                .map(Block::fromNamespaceId)
+                .map(Block::fromKey)
                 .filter(Objects::nonNull) // This is a sanity check
                 .toList();
     }

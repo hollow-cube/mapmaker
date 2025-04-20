@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.map.block.custom.bouncepad;
 
-import net.hollowcube.common.util.dfu.NbtOps;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
+import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +22,7 @@ public class BouncePadMarkerHandler extends ObjectEntityHandler {
     @Override
     public void onDataChange(@Nullable Player player) {
         var bouncePadData = entity.getData().getCompound("bounce_pad");
-        this.data = BouncePadData.CODEC.parse(NbtOps.INSTANCE, bouncePadData).getOrThrow();
+        this.data = BouncePadData.CODEC.decode(Transcoder.NBT, bouncePadData).orElseThrow();
         this.data.onUpdate(player);
     }
 

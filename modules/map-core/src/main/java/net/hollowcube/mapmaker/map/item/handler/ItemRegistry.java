@@ -2,13 +2,16 @@ package net.hollowcube.mapmaker.map.item.handler;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.compat.noxesium.packets.ClientboundChangeServerRulesPacket;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.util.InteractTarget;
 import net.hollowcube.mapmaker.util.TagCooldown;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.event.EventFilter;
@@ -19,12 +22,12 @@ import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
-import net.minestom.server.inventory.click.ClickType;
-import net.minestom.server.item.ItemComponent;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.component.ItemBlockState;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -95,17 +98,18 @@ public class ItemRegistry {
 
     private final ReentrantLock lock = new ReentrantLock();
     private final Map<String, ItemHandler> idToItemHandler = new HashMap<>();
-    private final Int2ObjectMap<ItemHandler> customModelDataToItemHandler = new Int2ObjectArrayMap<>();
+    private final Map<String, ItemHandler> modelToItemHandler = new HashMap<>();
     private final Int2ObjectMap<ItemHandler> materialToItemHandler = new Int2ObjectArrayMap<>();
+    private final Int2ObjectMap<ItemHandler> blockToItemHandler = new Int2ObjectOpenHashMap<>();
 
     // Contains all the "public" item names known by this registry. Used for completions.
-    private final Set<NamespaceID> allItemNames = new TreeSet<>((a, b) -> a.asString().compareToIgnoreCase(b.asString()));
+    private final Set<Key> allItemNames = new TreeSet<>((a, b) -> a.asString().compareToIgnoreCase(b.asString()));
 
     private final TagCooldown useCooldown = new TagCooldown("mapmaker:hotbar_cooldown", 250);
 
     public ItemRegistry() {
         for (var item : Material.values()) {
-            allItemNames.add(item.namespace());
+            allItemNames.add(item.key());
         }
     }
 
@@ -116,14 +120,21 @@ public class ItemRegistry {
     public void register(@NotNull ItemHandler itemHandler) {
         try {
             lock.lock();
-            idToItemHandler.put(itemHandler.id().asString().toLowerCase(Locale.ROOT), itemHandler);
-            if (itemHandler.customModelData() != -1) {
-                customModelDataToItemHandler.put(itemHandler.customModelData(), itemHandler);
+            idToItemHandler.put(itemHandler.key().asString().toLowerCase(Locale.ROOT), itemHandler);
+            var sprite = itemHandler.sprite();
+            var material = itemHandler.material();
+            if (sprite != null) {
+                modelToItemHandler.put(sprite.model(), itemHandler);
+            } else if (material != null) {
+                materialToItemHandler.put(material.id(), itemHandler);
             } else {
-                materialToItemHandler.put(itemHandler.material().id(), itemHandler);
+                throw new IllegalArgumentException("ItemHandler must provide either a sprite or material");
+            }
+            if (itemHandler instanceof BlockItemHandler blockItemHandler) {
+                blockToItemHandler.put(blockItemHandler.block().id(), itemHandler);
             }
 
-            allItemNames.add(itemHandler.id());
+            allItemNames.add(itemHandler.key());
         } finally {
             lock.unlock();
         }
@@ -136,18 +147,23 @@ public class ItemRegistry {
         //todo this is still allowing /give to work, need to fix.
         try {
             lock.lock();
-            idToItemHandler.put(itemHandler.id().asString().toLowerCase(Locale.ROOT), itemHandler);
-            if (itemHandler.customModelData() != -1) {
-                customModelDataToItemHandler.put(itemHandler.customModelData(), itemHandler);
+            idToItemHandler.put(itemHandler.key().asString().toLowerCase(Locale.ROOT), itemHandler);
+            var sprite = itemHandler.sprite();
+            var material = itemHandler.material();
+            if (sprite != null) {
+                modelToItemHandler.put(sprite.model(), itemHandler);
+                Check.argCondition(material != null, "material must be null if sprite is not");
+            } else if (material != null) {
+                materialToItemHandler.put(material.id(), itemHandler);
             } else {
-                materialToItemHandler.put(itemHandler.material().id(), itemHandler);
+                throw new IllegalArgumentException("ItemHandler must provide either a sprite or material");
             }
         } finally {
             lock.unlock();
         }
     }
 
-    public @UnknownNullability ItemStack getItemStack(@NotNull NamespaceID id, @Nullable CompoundBinaryTag nbt) {
+    public @UnknownNullability ItemStack getItemStack(@NotNull Key id, @Nullable CompoundBinaryTag nbt) {
         return getItemStack(id.asString(), nbt);
     }
 
@@ -159,24 +175,41 @@ public class ItemRegistry {
             return itemHandler.buildItemStack(nbt);
         }
 
-        var material = Material.fromNamespaceId(namespace);
+        var material = Material.fromKey(namespace);
         if (material == null) return null;
         var builder = ItemStack.builder(material);
         return builder.build();
     }
 
+    public @Nullable ItemStack getItemStack(@NotNull Block block, boolean includeData) {
+        if (block.handler() == null) return null;
+
+        var itemHandler = blockToItemHandler.get(block.id());
+        if (itemHandler == null) return null;
+        // Should ignore if this does not have the expected handler. For example a regular pressure plate.
+        if (!(itemHandler instanceof BlockItemHandler bih) || !Objects.equals(bih.block().handler().getKey(), block.handler().getKey()))
+            return null;
+
+        var itemStack = itemHandler.buildItemStack(includeData ? block.nbt() : null);
+        if (includeData && !block.properties().isEmpty()) {
+            itemStack = itemStack.with(DataComponents.BLOCK_STATE, new ItemBlockState(block.properties()));
+        }
+
+        return itemStack;
+    }
+
     public @Nullable String getItemId(@NotNull ItemStack itemStack) {
         var itemHandler = getHandlerFromItemStack(itemStack);
-        return itemHandler == null ? null : itemHandler.id().asString();
+        return itemHandler == null ? null : itemHandler.key().asString();
     }
 
     private @NotNull List<String> suggestItems(@Nullable String filter) {
         var normalFilter = filter == null ? "" : filter.toLowerCase(Locale.ROOT);
         return allItemNames.stream()
                 .filter(name -> name.asString().startsWith(normalFilter)
-                        || name.path().startsWith(normalFilter))
+                        || name.value().startsWith(normalFilter))
                 .limit(20)
-                .map(NamespaceID::asString)
+                .map(Key::asString)
                 .toList();
     }
 
@@ -339,18 +372,21 @@ public class ItemRegistry {
     private void handleLeftClickGui(@NotNull InventoryPreClickEvent event) {
         var player = event.getPlayer();
         if (player.getTag(TRIGGER_TAG) != null) return;
+
+        // TODO(1.21.4)
+
         //todo support other gui actions here
-        if (event.getInventory() != null || event.getClickType() != ClickType.LEFT_CLICK) return;
-
-        var itemStack = event.getClickedItem();
-        var itemHandler = getHandlerFromItemStack(itemStack);
-        if (itemHandler == null || !itemHandler.allows(ItemHandler.LEFT_CLICK_GUI)) return;
-
-        player.setTag(TRIGGER_TAG, true);
-        itemHandler.leftClicked(new ItemHandler.Click(
-                itemHandler, player, itemStack, PlayerHand.MAIN,
-                null, null, null, null
-        ));
+//        if (event.getInventory() != null || event.getClickType() != ClickType.LEFT_CLICK) return;
+//
+//        var itemStack = event.getClickedItem();
+//        var itemHandler = getHandlerFromItemStack(itemStack);
+//        if (itemHandler == null || !itemHandler.allows(ItemHandler.LEFT_CLICK_GUI)) return;
+//
+//        player.setTag(TRIGGER_TAG, true);
+//        itemHandler.leftClicked(new ItemHandler.Click(
+//                itemHandler, player, itemStack, PlayerHand.MAIN,
+//                null, null, null, null
+//        ));
     }
 
     private void handlePlayerSpawn(PlayerSpawnEvent event) {
@@ -362,7 +398,7 @@ public class ItemRegistry {
     private @Nullable ItemHandler getHandlerFromItemStack(@NotNull ItemStack itemStack) {
         var itemHandler = materialToItemHandler.get(itemStack.material().id());
         if (itemHandler != null) return itemHandler;
-        return customModelDataToItemHandler.get(itemStack.get(ItemComponent.CUSTOM_MODEL_DATA, -1));
+        return modelToItemHandler.get(itemStack.get(DataComponents.ITEM_MODEL, ""));
     }
 
     public boolean isOnCooldown(@NotNull Player player) {

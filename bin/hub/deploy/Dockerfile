@@ -1,16 +1,7 @@
-FROM azul/zulu-openjdk-alpine:21-jre-headless
+FROM mworzala/graalvm-jre:24
 
 WORKDIR /app
-
-# Install async-profiler
-ADD https://github.com/async-profiler/async-profiler/releases/download/v2.9/async-profiler-2.9-linux-x64.tar.gz /app/async-profiler.tar.gz
-RUN tar -xzf async-profiler.tar.gz && rm async-profiler.tar.gz && mv async-profiler-2.9-linux-x64 async-profiler
-RUN chmod +x async-profiler/profiler.sh
-
-# Install jattach
-RUN apk add --no-cache jattach --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/
-
-COPY ./hub_deploy.jar /app/server.jar
+COPY ./bin/hub/build/libs/hub-all.jar /app/server.jar
 
 EXPOSE 25565
-CMD ["java", "--enable-preview", "-XX:+UseSerialGC", "-Xms1000M", "-Xmx1000M", "-XX:ActiveProcessorCount=4", "-jar", "server.jar"]
+CMD ["-XX:+UseSerialGC", "-Xms1000M", "-Xmx1000M", "-XX:ActiveProcessorCount=4", "-jar", "server.jar"]

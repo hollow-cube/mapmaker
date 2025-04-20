@@ -10,15 +10,14 @@ import java.util.Objects;
 
 import static net.hollowcube.mapmaker.map.block.placement.FacingClickHorizontalPlacementRule.getImplicitFace;
 
-@SuppressWarnings("UnstableApiUsage")
 public class CoralFanPlacementRule extends BlockPlacementRule {
     private final Block wallBlock;
 
     public CoralFanPlacementRule(@NotNull Block block) {
         super(block);
 
-        var wallBlockId = block.namespace().asString().replace("fan", "wall_fan");
-        this.wallBlock = Objects.requireNonNull(Block.fromNamespaceId(wallBlockId));
+        var wallBlockId = block.key().asString().replace("fan", "wall_fan");
+        this.wallBlock = Objects.requireNonNull(Block.fromKey(wallBlockId));
     }
 
     @Override

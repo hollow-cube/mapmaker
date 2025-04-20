@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.map.entity.potion;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.StructCodec;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,25 +15,24 @@ import java.util.concurrent.TimeUnit;
 public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
     public static final DecimalFormat DURATION_NUM_FORMAT = new DecimalFormat("#.###");
 
-    public static final Codec<PotionEffectList> CODEC = Entry.CODEC.listOf()
-            .xmap(PotionEffectList::new, PotionEffectList::entries);
-    public static final MapCodec<PotionEffectList> NULL_MAPPED_CODEC = CODEC.lenientOptionalFieldOf("potionEffects")
-            .xmap(o -> o.orElseGet(PotionEffectList::new), Optional::ofNullable);
+    public static final StructCodec<PotionEffectList> CODEC = StructCodec.struct(
+            "potionEffects", Entry.CODEC.list().optional(List.of()), PotionEffectList::entries,
+            PotionEffectList::new);
 
     public static final int MIN_DURATION_MS = 0;
     public static final int MAX_DURATION_MS = 1000 * 60 * 60 * 24; // 24h
 
     private final List<Entry> entries;
 
-    public PotionEffectList(@NotNull List<Entry> entries) {
-        this.entries = new ArrayList<>(entries);
+    public PotionEffectList(@Nullable List<Entry> entries) {
+        this.entries = new ArrayList<>(Objects.requireNonNullElse(entries, List.of()));
     }
 
     public PotionEffectList() {
         this(List.of());
     }
 
-    public List<Entry> entries() {
+    public @NotNull List<Entry> entries() {
         return entries;
     }
 
@@ -108,16 +107,16 @@ public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
         return new PotionEffectList(entries);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static class Entry implements Comparable<Entry> {
         private static final Comparator<Entry> COMPARATOR = Comparator.comparing(Entry::type);
 
-        public static final Codec<Entry> CODEC = RecordCodecBuilder.create(i -> i.group(
-                PotionInfo.CODEC.fieldOf("type").forGetter(Entry::type),
+        public static final StructCodec<Entry> CODEC = StructCodec.struct(
+                "type", PotionInfo.CODEC, Entry::type,
                 // Historically people were allowed to have effects > 128, need to clamp it so that you dont crash.
-                Codec.INT.xmap(num -> Math.min(num, 128), num -> Math.min(num, 128))
-                        .optionalFieldOf("level", 0).forGetter(Entry::level),
-                Codec.INT.optionalFieldOf("duration", 0).forGetter(Entry::duration)
-        ).apply(i, Entry::new));
+                "level", ExtraCodecs.clamppedInt(0, 128).optional(0), Entry::level,
+                "duration", Codec.INT.optional(0), Entry::duration,
+                Entry::new);
 
         private final PotionInfo type;
         private int level;

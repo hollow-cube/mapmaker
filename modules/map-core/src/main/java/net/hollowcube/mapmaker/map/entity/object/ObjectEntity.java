@@ -9,6 +9,7 @@ import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundMarkerDat
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomUpdateCustomEntityDataEvent;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
@@ -21,7 +22,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.NamespaceID;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,13 +37,13 @@ import java.util.concurrent.CompletableFuture;
 public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUpdateCustomEntityDataEvent.Receiver {
 
     private static final BoundingBox NO_BB = new BoundingBox(0, 0, 0);
-    private static final NamespaceID UNKNOWN_TYPE = NamespaceID.from("mapmaker:unknown");
+    private static final Key UNKNOWN_TYPE = Key.key("mapmaker:unknown");
 
     protected static final Tag<CompoundBinaryTag> DATA_TAG = Tag.NBT("data")
             .map(n -> (CompoundBinaryTag) n, n -> n)
             .defaultValue(CompoundBinaryTag.empty());
-    protected static final Tag<NamespaceID> TYPE_TAG = Tag.String("type").path("data")
-            .map(NamespaceID::from, NamespaceID::asString)
+    protected static final Tag<Key> TYPE_TAG = Tag.String("type").path("data")
+            .map(Key::key, Key::asString)
             .defaultValue(UNKNOWN_TYPE);
     protected static final Tag<@Nullable String> NAME_TAG = Tag.String("name").path("data");
     protected static final Tag<@Nullable Vec> REGION_MIN_TAG = ExtraTags.VecAsList("min").path("data");
@@ -98,7 +98,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         updateBoundingBox();
     }
 
-    public void setType(@NotNull NamespaceID type) {
+    public void setType(@NotNull Key type) {
         setTag(TYPE_TAG, type);
         updateForViewers();
     }

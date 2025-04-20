@@ -13,8 +13,8 @@ public class FlowerPotPlacementRule extends BaseBlockPlacementRule {
     @Override
     public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
         var block = placementState.block();
-        if (BlockTags.POTTABLE_FLOWERS.contains(block.namespace())) {
-            return Block.fromNamespaceId("minecraft:potted_" + block.namespace().path());
+        if (BlockTags.POTTABLE_FLOWERS.contains(block.key())) {
+            return Block.fromKey("minecraft:potted_" + block.key().value());
         }
 
         return placementState.block();
@@ -23,6 +23,6 @@ public class FlowerPotPlacementRule extends BaseBlockPlacementRule {
     @Override
     public boolean isSelfReplaceable(@NotNull Replacement replacement) {
         var block = replacement.material().block();
-        return BlockTags.POTTABLE_FLOWERS.contains(block.namespace());
+        return BlockTags.POTTABLE_FLOWERS.contains(block.key());
     }
 }

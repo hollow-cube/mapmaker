@@ -4,8 +4,8 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.feature.play.handlers.SpectateHandler;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -27,8 +27,8 @@ public class ToggleFlightItem extends ItemHandler {
     }
 
     @Override
-    public @NotNull Material material() {
-        return Material.DIAMOND;
+    public @Nullable BadSprite sprite() {
+        return activeFlight ? SPRITE_ON : SPRITE_OFF;
     }
 
     @Override
@@ -40,8 +40,4 @@ public class ToggleFlightItem extends ItemHandler {
         SpectateHandler.toggleFlight(player);
     }
 
-    @Override
-    public int customModelData() {
-        return activeFlight ? SPRITE_ON.cmd() : SPRITE_OFF.cmd();
-    }
 }

@@ -28,7 +28,7 @@ public class WaterBucketInteractionRule implements BlockInteractionRule {
             interaction.setBlock(blockPosition, block.withProperty("moisture", newValue));
             return true;
         }
-        if (BlockTags.CAULDRONS.contains(block.namespace()) && !interaction.player().isSneaking()) {
+        if (BlockTags.CAULDRONS.contains(block.key()) && !interaction.player().isSneaking()) {
             interaction.setBlock(blockPosition, Block.WATER_CAULDRON.withProperty("level", "3"));
             return true;
         }

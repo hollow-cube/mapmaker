@@ -27,8 +27,8 @@ public class FriendlyProducer implements AutoCloseable {
 
     private final KafkaProducer<String, String> producer;
 
-    public FriendlyProducer(@NotNull String bootstrapServers) {
-        if (bootstrapServers.isEmpty()) {
+    public FriendlyProducer(@NotNull String bootstrapServers, boolean isNoop) {
+        if (bootstrapServers.isEmpty() || isNoop) {
             producer = null;
             return;
         }

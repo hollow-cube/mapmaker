@@ -130,6 +130,15 @@ public final class FutureUtil {
         logger.error("Unsafe blocking call on '{}'", Thread.currentThread().getName(), new RuntimeException("dummy exception for stacktrace"));
     }
 
+    public static void assertTickThread() {
+        assertTickThread(null);
+    }
+
+    public static void assertTickThread(@Nullable Acquirable<?> acquirable) {
+        if (isUnsafeThread(acquirable)) return;
+        throw new IllegalStateException("Unsafe tick thread only call on '" + Thread.currentThread().getName() + "'");
+    }
+
     public static void assertTickThreadWarn() {
         assertTickThreadWarn(null);
     }

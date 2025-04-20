@@ -3,6 +3,7 @@ package net.hollowcube.common.util;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMaps;
@@ -10,6 +11,7 @@ import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -26,8 +28,6 @@ public final class FontUtil {
 
     private FontUtil() {
     }
-
-    public static final TextColor NO_SHADOW = TextColor.color(78, 92, 36);
 
     public static final Map<Integer, Integer> GLYPH_WIDTHS = Map.<Integer, Integer>ofEntries(
             Map.entry(65, 6), Map.entry(196, 6), Map.entry(197, 6), Map.entry(198, 6),
@@ -250,9 +250,9 @@ public final class FontUtil {
                 for (var entry : allSprites) {
                     var obj = entry.getAsJsonObject();
                     if (!obj.has("fontChar")) continue;
-                    int width = 0;
-                    if (obj.has("width")) width = obj.get("width").getAsInt() + 1;
-                    ALL_GLYPH_WIDTHS.put(obj.get("fontChar").getAsString().charAt(0), width);
+                    var width = obj.get("width");
+                    ALL_GLYPH_WIDTHS.put(obj.get("fontChar").getAsInt(),
+                            (width instanceof JsonPrimitive prim ? prim.getAsInt() : 0) + 1);
                 }
             }
         } catch (IOException e) {
@@ -290,7 +290,7 @@ public final class FontUtil {
         ));
         allWidths.put('\uF824', allWidths.get(' '));
         for (var sprite : BadSprite.SPRITE_MAP.values()) {
-            if (sprite.fontChar() == 0 || sprite.cmd() != 0) continue;
+            if (sprite.fontChar() == 0 || sprite.modelOrNull() != null) continue;
             allWidths.put(sprite.fontChar(), sprite.width() + 1);
         }
         for (int i = 0; i < POSITIVE_SPACE.size(); i++)
@@ -299,6 +299,8 @@ public final class FontUtil {
             allWidths.put(NEGATIVE_SPACE.get(i).charAt(0), -(1 << i));
         ALL_GLYPH_WIDTHS_V2 = Int2IntMaps.unmodifiable(allWidths);
     }
+
+    public static final int DEFAULT_HEIGHT = 9;
 
     public static int measureText(@NotNull String text) {
         int width = 0;
@@ -395,6 +397,17 @@ public final class FontUtil {
         }
 
         return sb.toString();
+    }
+
+    public static @NotNull TextColor computeVerticalOffset(int offset) {
+        if (offset < -50 || offset > 205)
+            throw new IllegalArgumentException("Offset out of range: " + offset);
+
+        return TextColor.color(0x4E5A00 | ((offset + 50) & 0xFF));
+    }
+
+    public static @NotNull ShadowColor computeVerticalOffsetShadow(int offset) {
+        return ShadowColor.shadowColor(computeVerticalOffset(offset), 80);
     }
 
     /**

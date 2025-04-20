@@ -24,7 +24,6 @@ import net.hollowcube.mapmaker.util.ComponentUtil;
 import net.kyori.adventure.nbt.TagStringIOExt;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Chunk;
@@ -125,6 +124,7 @@ public class DebugCommand extends CommandDsl {
 
     private void handleDebugServer(@NotNull Player player, @NotNull CommandContext context) {
         player.sendMessage("Host: " + AbstractHttpService.hostname);
+        player.sendMessage("Release: " + !ServerRuntime.getRuntime().isDevelopment());
     }
 
     private @NotNull CommandDsl createSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @Nullable CommandCondition condition, @NotNull String description) {
@@ -154,11 +154,11 @@ public class DebugCommand extends CommandDsl {
 
         var block = player.getInstance().getBlock(blockPosition);
         if (block.handler() != null && block.handler() instanceof BlockDebug bd) {
-            player.sendMessage("Block: " + block.handler().getNamespaceId());
+            player.sendMessage("Block: " + block.handler().getKey());
             bd.sendDebugInfo(player, block);
         } else {
             if (block.handler() != null) {
-                player.sendMessage("Block: " + block.handler().getNamespaceId() + "@" + block.handler().getClass().getSimpleName());
+                player.sendMessage("Block: " + block.handler().getKey() + "@" + block.handler().getClass().getSimpleName());
             } else {
                 player.sendMessage("Block: " + "no handler");
             }
@@ -296,12 +296,12 @@ public class DebugCommand extends CommandDsl {
                         mapService.uploadPerfdump(filename, PERF_DUMP_PATH.resolve(filename));
                         sender.sendMessage(Component.text("heap dump uploaded: " + filename).color(NamedTextColor.GREEN));
                     } catch (Exception e) {
-                        ExceptionReporter.reportException(e, sender.asPlayer());
+                        ExceptionReporter.reportException(e, (Player) sender);
                         sender.sendMessage("failed to upload heap dump");
                     }
                 });
             } catch (IOException e) {
-                ExceptionReporter.reportException(e, sender.asPlayer());
+                ExceptionReporter.reportException(e, (Player) sender);
                 sender.sendMessage("failed to create heap dump");
             }
         }
@@ -344,7 +344,7 @@ public class DebugCommand extends CommandDsl {
 
                     sender.sendMessage(Component.text("cpu profile created: " + filename).color(NamedTextColor.GREEN));
                 } catch (IOException | InterruptedException e) {
-                    ExceptionReporter.reportException(e, sender.asPlayer());
+                    ExceptionReporter.reportException(e, (Player) sender);
                     sender.sendMessage("failed to create cpu profile");
                 }
             });

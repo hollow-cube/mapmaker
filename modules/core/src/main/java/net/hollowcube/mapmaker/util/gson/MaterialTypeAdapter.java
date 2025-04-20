@@ -15,6 +15,6 @@ public class MaterialTypeAdapter extends TypeAdapter<Material> {
 
     @Override
     public Material read(JsonReader in) throws IOException {
-        return Material.fromNamespaceId(in.nextString());
+        return Material.fromKey(in.nextString());
     }
 }

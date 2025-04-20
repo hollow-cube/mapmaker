@@ -3,8 +3,8 @@ package net.hollowcube.terraform.mask.script;
 import net.hollowcube.terraform.mask.BlockMask;
 import net.hollowcube.terraform.mask.Mask;
 import net.hollowcube.terraform.mask.RandomNoiseMask;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -41,7 +41,7 @@ public interface Tree {
 
         @Override
         public @NotNull Mask toMask() throws MaskParseException {
-            var block = Block.fromNamespaceId(NamespaceID.from(block()));
+            var block = Block.fromKey(Key.key(block()));
             if (block == null) {
                 throw new MaskParseException(start, start + block().length(),
                         String.format("No such block: %s", block()));

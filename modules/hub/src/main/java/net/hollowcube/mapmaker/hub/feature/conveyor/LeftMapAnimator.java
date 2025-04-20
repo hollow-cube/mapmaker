@@ -7,7 +7,6 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
 public class LeftMapAnimator extends AbstractAnimator {
@@ -38,11 +37,13 @@ public class LeftMapAnimator extends AbstractAnimator {
     public LeftMapAnimator(@NotNull Instance instance) {
         this.instance = instance;
 
-        clawPillar.setModel(Material.STICK, 9);
+        // TODO(1.21.4)
+//        clawPillar.setModel(Material.STICK, 9);
         clawPillar.getEntityMeta().setScale(new Vec(16));
         FutureUtil.getUnchecked(clawPillar.setInstance(instance, new Pos(CLAW_PIVOT, 180, 0)));
 
-        clawClaw.setModel(Material.STICK, 10);
+        // TODO(1.21.4)
+//        clawClaw.setModel(Material.STICK, 10);
         clawClaw.getEntityMeta().setScale(new Vec(16));
         FutureUtil.getUnchecked(clawClaw.setInstance(instance, new Pos(CLAW_PIVOT.withY(y -> y + 5), 180, 0)));
     }
@@ -52,7 +53,8 @@ public class LeftMapAnimator extends AbstractAnimator {
         int i = 0;
         while (true) {
             NpcItemModel mapModel = new NpcItemModel();
-            mapModel.setModel(Material.STICK, 5);
+            // TODO(1.21.4)
+//            mapModel.setModel(Material.STICK, 5);
             mapModel.getEntityMeta().setScale(new Vec(3.5));
             FutureUtil.getUnchecked(mapModel.setInstance(instance, POS1));
             mapModel.getEntityMeta().setLeftRotation(new Quaternion(new Vec(1, 0, 0), Math.toRadians(-90)).into());

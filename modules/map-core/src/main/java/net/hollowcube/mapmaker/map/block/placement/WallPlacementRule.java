@@ -126,6 +126,6 @@ public class WallPlacementRule extends WaterloggedPlacementRule {
     }
 
     private boolean isConnectable(@NotNull Block block) {
-        return BlockTags.WALLS.contains(block.namespace()) || BlockTags.GLASS_PANES.contains(block.namespace()) || block.id() == Block.IRON_BARS.id();
+        return BlockTags.WALLS.contains(block.key()) || BlockTags.GLASS_PANES.contains(block.key()) || block.id() == Block.IRON_BARS.id();
     }
 }

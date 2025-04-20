@@ -11,6 +11,7 @@ import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
+import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.minestom.server.entity.Player;
 import net.minestom.server.timer.Scheduler;
@@ -35,6 +36,13 @@ public interface MapServer {
     @NotNull ServerBridge bridge();
 
     @NotNull Controller guiController();
+
+    /**
+     * @throws UnsupportedOperationException if this server does not support scripting
+     */
+    default @NotNull ScriptEngine scriptEngine() {
+        throw new UnsupportedOperationException("Scripting is not supported on this server");
+    }
 
     @NotNull Scheduler scheduler();
 

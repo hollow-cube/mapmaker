@@ -1,11 +1,11 @@
 package net.hollowcube.compat.axiom.data.buffers;
 
-import com.mojang.datafixers.util.Either;
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectArrayMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
+import net.hollowcube.common.util.Either;
 import net.hollowcube.compat.axiom.AxiomAPI;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.NetworkBuffer;
@@ -14,12 +14,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public record AxiomBlockBuffer(
-    @NotNull Long2ObjectMap<Either<Block, Block[]>> updates,
-    @NotNull Long2ObjectMap<Short2ObjectMap<AxiomBlockEntityData>> blockEntities
+        @NotNull Long2ObjectMap<Either<Block, Block[]>> updates,
+        @NotNull Long2ObjectMap<Short2ObjectMap<AxiomBlockEntityData>> blockEntities
 ) implements AxiomBuffer {
 
     private static final long EOD = 0b1000000000000000000000000010000000000000000000000000100000000000L;
     public static final int MAX_BITS_PER_ENTRY;
+
     static {
         int bpe = 0;
         for (short id = 24134; id < Short.MAX_VALUE; id++) {
@@ -56,16 +57,19 @@ public record AxiomBlockBuffer(
 
             if (type == 0) {
                 int id = buffer.read(NetworkBuffer.VAR_INT);
-                Check.stateCondition(buffer.read(NetworkBuffer.LONG_ARRAY).length != 0, "Expected empty data array");
-
                 blockBuffer.addBlocks(
                         index,
                         id == AxiomAPI.EMPTY_BLOCK_STATE ? null : Block.fromStateId(id)
                 );
             } else if (type > 0 && type < 9) {
                 int bits = Math.max(4, type);
+                int length = (4096 + (64 / bits) - 1) / (64 / bits);
+
                 int[] ids = buffer.read(NetworkBuffer.VAR_INT_ARRAY);
-                long[] data = buffer.read(NetworkBuffer.LONG_ARRAY);
+                long[] data = new long[length];
+                for (int i = 0; i < length; i++) {
+                    data[i] = buffer.read(NetworkBuffer.LONG);
+                }
 
                 blockBuffer.addBlocks(
                         index,
@@ -75,7 +79,11 @@ public record AxiomBlockBuffer(
                         })
                 );
             } else {
-                long[] data = buffer.read(NetworkBuffer.LONG_ARRAY);
+                int length = (4096 + (64 / MAX_BITS_PER_ENTRY) - 1) / (64 / MAX_BITS_PER_ENTRY);
+                long[] data = new long[length];
+                for (int i = 0; i < length; i++) {
+                    data[i] = buffer.read(NetworkBuffer.LONG);
+                }
                 blockBuffer.addBlocks(
                         index,
                         read(data, MAX_BITS_PER_ENTRY, id ->

@@ -168,8 +168,8 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
     }
 
     static int adjustedMaxResetHeight(@NotNull BaseEffectData data, int maxResetHeight) {
-        if (data.teleport().isPresent())
-            return (int) Math.max(maxResetHeight, data.teleport().get().y());
+        final var teleport = data.teleport();
+        if (teleport != null) return (int) Math.max(maxResetHeight, teleport.y());
         return maxResetHeight;
     }
 

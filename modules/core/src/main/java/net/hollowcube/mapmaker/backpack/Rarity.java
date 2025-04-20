@@ -1,9 +1,10 @@
 package net.hollowcube.mapmaker.backpack;
 
-import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,7 +25,8 @@ public enum Rarity implements ComponentLike {
 
     @Override
     public @NotNull Component asComponent() {
-        return Component.text(iconSprite.fontChar(), FontUtil.NO_SHADOW)
-                .decoration(TextDecoration.ITALIC, false);
+        return Component.text(iconSprite.fontChar(), NamedTextColor.WHITE)
+                .decoration(TextDecoration.ITALIC, false)
+                .shadowColor(ShadowColor.none());
     }
 }

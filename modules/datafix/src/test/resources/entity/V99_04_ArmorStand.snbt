@@ -1,0 +1,73 @@
+{
+    NoGravity: 0b,
+    HurtByTimestamp: 0,
+    Attributes: [
+        {
+            Base: 20.0d,
+            Name: "generic.maxHealth"
+        },
+        {
+            Base: 0.0d,
+            Name: "generic.knockbackResistance"
+        },
+        {
+            Base: 0.699999988079071d,
+            Name: "generic.movementSpeed"
+        }
+    ],
+    Invulnerable: 0b,
+    ShowArms: 0b,
+    PortalCooldown: 0,
+    AbsorptionAmount: 0.0f,
+    FallDistance: 0.0f,
+    DisabledSlots: 0,
+    DeathTime: 0s,
+    Pose: {
+        Body: [0.0f, -2.4834995f, 0.0f],
+        Head: [3.1798198f, -0.73090553f, 0.0f]
+    },
+    id: "ArmorStand",
+    HealF: 20.0f,
+    Invisible: 0b,
+    Motion: [0.0d, -0.0784000015258789d, 0.0d],
+    Small: 0b,
+    UUIDLeast: -7226318509095142785L,
+    Health: 20s,
+    Silent: 1b,
+    Air: 300s,
+    OnGround: 1b,
+    Dimension: 0,
+    Rotation: [0.0f, 0.0f],
+    UUIDMost: -5789618958026325642L,
+    Equipment: [
+        {
+        },
+        {
+        },
+        {
+        },
+        {
+        },
+        {
+            id: "minecraft:diamond_helmet",
+            Count: 1b,
+            tag: {
+                ench: [
+                    {
+                        lvl: 1s,
+                        id: 4s
+                    },
+                    {
+                        lvl: 1s,
+                        id: 6s
+                    }
+                ]
+            },
+            Damage: 0s
+        }
+    ],
+    Pos: [54.990220880964735d, 68.0d, 50.31206571504425d],
+    Fire: -1s,
+    NoBasePlate: 0b,
+    HurtTime: 0s
+}

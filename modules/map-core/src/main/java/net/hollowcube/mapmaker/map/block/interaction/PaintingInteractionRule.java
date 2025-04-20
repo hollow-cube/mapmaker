@@ -1,14 +1,11 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
 import net.hollowcube.mapmaker.map.entity.impl.other.PaintingEntity;
-import net.minestom.server.MinecraftServer;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.metadata.other.PaintingMeta;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.item.ItemComponent;
-import net.minestom.server.item.component.CustomData;
-import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,20 +14,17 @@ import java.util.UUID;
 import static net.hollowcube.mapmaker.map.block.interaction.ItemFrameInteractionRule.getDegreesForHorizontalDirection;
 
 public class PaintingInteractionRule implements BlockInteractionRule {
-    private static final DynamicRegistry<PaintingMeta.Variant> PAINTING_REGISTRY = MinecraftServer.getPaintingVariantRegistry();
-
     @Override
     public boolean handleInteraction(@NotNull Interaction interaction) {
         var blockFace = interaction.blockFace();
         if (blockFace == BlockFace.TOP || blockFace == BlockFace.BOTTOM) return false;
 
-        var entityTag = interaction.item().get(ItemComponent.ENTITY_DATA, CustomData.EMPTY).nbt();
-        var variant = DynamicRegistry.Key.<PaintingMeta.Variant>of(entityTag.getString("variant"));
-        if (PAINTING_REGISTRY.get(variant) == null) variant = PaintingMeta.Variant.KEBAB;
-
         var entity = new PaintingEntity(UUID.randomUUID());
+
+        var variant = interaction.item().get(DataComponents.PAINTING_VARIANT);
+        if (variant != null) entity.set(DataComponents.PAINTING_VARIANT, variant);
+
         var meta = entity.getEntityMeta();
-        meta.setVariant(variant);
         meta.setOrientation(switch (blockFace) {
             case NORTH -> PaintingMeta.Orientation.NORTH;
             case SOUTH -> PaintingMeta.Orientation.SOUTH;

@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.hollowcube.mapmaker.map.block.handler.sign.SignData;
 import net.hollowcube.mapmaker.map.util.InteractTarget;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
@@ -20,7 +21,6 @@ import net.minestom.server.network.packet.server.play.BlockEntityDataPacket;
 import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.network.packet.server.play.OpenSignEditorPacket;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -41,14 +41,14 @@ public class SignBlockHandler implements BlockHandler, InteractTarget {
                 .addListener(UpdateSignTextEvent.class, SignBlockHandler::handleUpdateSignPacket);
     }
 
-    private final NamespaceID id;
+    private final Key id;
 
     SignBlockHandler(@NotNull String id) {
-        this.id = NamespaceID.from(id);
+        this.id = Key.key(id);
     }
 
     @Override
-    public @NotNull NamespaceID getNamespaceId() {
+    public @NotNull Key getKey() {
         return id;
     }
 
@@ -147,9 +147,9 @@ public class SignBlockHandler implements BlockHandler, InteractTarget {
     }
 
     private Point getBlockCenter(@NotNull Block block) {
-        if (BlockTags.STANDING_SIGNS.contains(block.namespace())) {
+        if (BlockTags.STANDING_SIGNS.contains(block.key())) {
             return new Vec(0.5);
-        } else if (BlockTags.WALL_SIGNS.contains(block.namespace()) || BlockTags.ALL_HANGING_SIGNS.contains(block.namespace())) {
+        } else if (BlockTags.WALL_SIGNS.contains(block.key()) || BlockTags.ALL_HANGING_SIGNS.contains(block.key())) {
             var shape = block.registry().collisionShape();
             return shape.relativeStart().add(shape.relativeEnd()).div(2); // TODO THIS IS NOT PERFECT
         } else {
@@ -158,9 +158,9 @@ public class SignBlockHandler implements BlockHandler, InteractTarget {
     }
 
     private double getBlockAngle(@NotNull Block block) {
-        if (BlockTags.STANDING_SIGNS.contains(block.namespace()) || BlockTags.CEILING_HANGING_SIGNS.contains(block.namespace())) {
+        if (BlockTags.STANDING_SIGNS.contains(block.key()) || BlockTags.CEILING_HANGING_SIGNS.contains(block.key())) {
             return Integer.parseInt(block.getProperty("rotation")) * 22.5;
-        } else if (BlockTags.WALL_SIGNS.contains(block.namespace()) || BlockTags.WALL_HANGING_SIGNS.contains(block.namespace())) {
+        } else if (BlockTags.WALL_SIGNS.contains(block.key()) || BlockTags.WALL_HANGING_SIGNS.contains(block.key())) {
             // TODO: move this block face to direction to some common util
             return switch (block.getProperty("facing")) {
                 case "south" -> 0;

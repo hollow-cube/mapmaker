@@ -11,7 +11,7 @@ public class PowderSnowBucketInteractionRule implements BlockInteractionRule {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition);
 
-        if (BlockTags.CAULDRONS.contains(block.namespace()) && !interaction.player().isSneaking()) {
+        if (BlockTags.CAULDRONS.contains(block.key()) && !interaction.player().isSneaking()) {
             interaction.setBlock(blockPosition, Block.POWDER_SNOW_CAULDRON.withProperty("level", "3"));
             return true;
         }

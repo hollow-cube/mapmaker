@@ -25,7 +25,7 @@ public class FeatureList {
             for (var feature : ServiceLoader.load(FeatureProvider.class)) {
                 features.add(feature);
                 for (var blockHandler : feature.blockHandlers()) {
-                    blockManager.registerHandler(blockHandler.get().getNamespaceId(), blockHandler);
+                    blockManager.registerHandler(blockHandler.get().getKey(), blockHandler);
                 }
                 futures.add(FutureUtil.fork(() -> feature.init(config)));
             }

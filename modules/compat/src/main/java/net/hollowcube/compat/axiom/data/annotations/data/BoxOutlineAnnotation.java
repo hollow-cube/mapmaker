@@ -1,11 +1,11 @@
 package net.hollowcube.compat.axiom.data.annotations.data;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.StructCodec;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
 
+@SuppressWarnings("UnstableApiUsage")
 public record BoxOutlineAnnotation(
         int minX,
         int minY,
@@ -26,16 +26,14 @@ public record BoxOutlineAnnotation(
             NetworkBuffer.VAR_INT, BoxOutlineAnnotation::maxY,
             NetworkBuffer.VAR_INT, BoxOutlineAnnotation::maxZ,
             NetworkBuffer.INT, BoxOutlineAnnotation::color,
-            BoxOutlineAnnotation::new
-    );
-
-    public static final MapCodec<BoxOutlineAnnotation> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Codec.INT.fieldOf("minX").forGetter(BoxOutlineAnnotation::minX),
-            Codec.INT.fieldOf("minY").forGetter(BoxOutlineAnnotation::minY),
-            Codec.INT.fieldOf("minZ").forGetter(BoxOutlineAnnotation::minZ),
-            Codec.INT.fieldOf("maxX").forGetter(BoxOutlineAnnotation::maxX),
-            Codec.INT.fieldOf("maxY").forGetter(BoxOutlineAnnotation::maxY),
-            Codec.INT.fieldOf("maxZ").forGetter(BoxOutlineAnnotation::maxZ),
-            Codec.INT.fieldOf("color").forGetter(BoxOutlineAnnotation::color)
-    ).apply(instance, BoxOutlineAnnotation::new));
+            BoxOutlineAnnotation::new);
+    public static final StructCodec<BoxOutlineAnnotation> CODEC = StructCodec.struct(
+            "minX", Codec.INT, BoxOutlineAnnotation::minX,
+            "minY", Codec.INT, BoxOutlineAnnotation::minY,
+            "minZ", Codec.INT, BoxOutlineAnnotation::minZ,
+            "maxX", Codec.INT, BoxOutlineAnnotation::maxX,
+            "maxY", Codec.INT, BoxOutlineAnnotation::maxY,
+            "maxZ", Codec.INT, BoxOutlineAnnotation::maxZ,
+            "color", Codec.INT, BoxOutlineAnnotation::color,
+            BoxOutlineAnnotation::new);
 }

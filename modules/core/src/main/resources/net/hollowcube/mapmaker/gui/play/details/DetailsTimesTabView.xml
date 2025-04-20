@@ -13,12 +13,14 @@
         <spacer/>
         <switch id="top_times_switch" width="1">
             <button id="toggle_top_ten_btn" width="1" translationKey="gui.map_details.top_times_tab.other_top_times"
-                    sprite="play_maps/details/tab_times/notepad" backgroundSprite="play_maps/details/tab_times/notepad_bg"/>
+                    sprite="play_maps/details/tab_times/notepad"
+                    backgroundSprite="play_maps/details/tab_times/notepad_bg"/>
             <button id="toggle_wr_btn" width="1" translationKey="gui.map_details.top_times_tab.wr_top_times"
-                    sprite="play_maps/details/tab_times/notepad" backgroundSprite="play_maps/details/tab_times/notepad_selected_bg"/>
+                    sprite="play_maps/details/tab_times/notepad"
+                    backgroundSprite="play_maps/details/tab_times/notepad_selected_bg"/>
         </switch>
         <text id="viewer_entry" width="5" translationKey="gui.map_details.top_times_tab.personal_best"
-              sprite="minecraft:player_head@1" spritePos="0"
+              sprite="minecraft:player_head" spritePos="0"
               font="line_5" centered="true"/>
         <label translationKey="gui.map_details.top_times_tab.toggle_first_completions"
                sprite="play_maps/details/tab_times/flag"/>

@@ -32,7 +32,7 @@ public final class ShopUpgradeCache {
      */
     public static boolean has(@NotNull Player player, @NotNull ShopUpgrade upgrade, boolean direct) {
         EnumMap<ShopUpgrade, Predicate<String>> entries = direct ? directEntries : indirectEntries;
-        return entries.getOrDefault(upgrade, $ -> false).test(PlayerDataV2.fromPlayer(player).id());
+        return entries.getOrDefault(upgrade, _ -> false).test(PlayerDataV2.fromPlayer(player).id());
     }
 
     /**

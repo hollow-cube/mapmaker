@@ -4,8 +4,8 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.EquipmentSlot;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.Equippable;
@@ -58,13 +58,13 @@ public enum CosmeticType {
         if (emptyIcon == null) {
             this.blankIcon = ItemStack.AIR;
         } else {
-            var builder = ItemStack.builder(Material.DIAMOND)
-                    .set(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("icon/inventory/" + emptyIcon).cmd())
-                    .set(ItemComponent.CUSTOM_NAME, Component.translatable(baseTranslation + ".name"))
-                    .set(ItemComponent.LORE, LanguageProviderV2.translateMulti(baseTranslation + ".lore", List.of()));
+            var builder = ItemStack.builder(Material.STICK)
+                    .set(DataComponents.ITEM_MODEL, BadSprite.require("icon/inventory/" + emptyIcon).model())
+                    .set(DataComponents.CUSTOM_NAME, Component.translatable(baseTranslation + ".name"))
+                    .set(DataComponents.LORE, LanguageProviderV2.translateMulti(baseTranslation + ".lore", List.of()));
             if (equipmentSlot != null) {
-                builder.set(ItemComponent.EQUIPPABLE, new Equippable(equipmentSlot, SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
-                        null, null, null, false, false, false));
+                builder.set(DataComponents.EQUIPPABLE, new Equippable(equipmentSlot, SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
+                        null, null, null, false, false, false, false));
             }
             this.blankIcon = builder.build().withTag(COSMETIC_TAG, true);
         }

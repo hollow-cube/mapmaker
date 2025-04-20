@@ -12,14 +12,13 @@ import net.hollowcube.mapmaker.map.util.PlayerRiptideExtension;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.kyori.adventure.sound.Sound;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.item.PlayerBeginItemUseEvent;
 import net.minestom.server.event.item.PlayerCancelItemUseEvent;
-import net.minestom.server.event.player.PlayerTickEndEvent;
 import net.minestom.server.event.trait.InstanceEvent;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.EnchantmentList;
 import net.minestom.server.item.enchant.Enchantment;
@@ -69,7 +68,7 @@ public class TridentFeatureProvider implements FeatureProvider {
         if (itemStack.material().id() != Material.TRIDENT.id() || event.getUseDuration() < 10)
             return;
 
-        var riptideLevel = itemStack.get(ItemComponent.ENCHANTMENTS, EnchantmentList.EMPTY)
+        var riptideLevel = itemStack.get(DataComponents.ENCHANTMENTS, EnchantmentList.EMPTY)
                 .enchantments().getOrDefault(Enchantment.RIPTIDE, 0);
         if (riptideLevel > 1) {
             beginRiptideAttack(event, riptideLevel);

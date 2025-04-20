@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -42,7 +43,7 @@ public class MapOfTheWeekFeature implements HubFeature {
 
         // Spinning map
         mapEntity.setHandler(this::handleMapInteract);
-        mapEntity.setModel(Material.STICK, 5);
+        mapEntity.setModel(Material.STICK, BadSprite.require("sm_house"));
         mapEntity.getEntityMeta().setScale(new Vec(4));
         mapEntity.setInstance(world.instance(), MAP_ENTITY_POS);
         mapEntity.setInteractionBox(6, 6, new Pos(0, -0.5, 0));
@@ -53,15 +54,6 @@ public class MapOfTheWeekFeature implements HubFeature {
         if (isLeftClick) return;
 
         player.sendMessage(Component.translatable("motw.coming_soon"));
-//        try {
-        //todo in vthread
-//            player.sendMessage(Component.translatable("motw.joining"));
-//            bridge.joinMap(player, "14b8a361-7cba-49ec-933c-14faad11f385", ServerBridge.JoinMapState.PLAYING);
-//        } catch (Exception e) {
-//             If an error occurs here the player is still here, it is our responsibility to handle this (with an error)
-//            logger.error("failed to join motw for {}: {}", PlayerDataV2.fromPlayer(player).id(), e.getMessage());
-//            player.sendMessage(Component.translatable("command.generic.unknown_error"));
-//        }
     }
 
     private @NotNull TaskSchedule mapEntityUpdate() {

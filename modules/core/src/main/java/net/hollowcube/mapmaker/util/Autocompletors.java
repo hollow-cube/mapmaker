@@ -69,7 +69,7 @@ public final class Autocompletors {
     private record IndexableMaterial(@NotNull Material material) implements Indexable {
         @Override
         public List<String> getFields() {
-            return List.of(material.name(), material.namespace().path(), material.namespace().path().replace("_", " "));
+            return List.of(material.name(), material.key().value(), material.key().value().replace("_", " "));
         }
     }
 

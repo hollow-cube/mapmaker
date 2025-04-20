@@ -4,6 +4,7 @@ import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.color.Color;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
@@ -11,7 +12,6 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.projectile.FireworkRocketMeta;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.FireworkExplosion;
@@ -46,7 +46,7 @@ public class FireworkVictoryEffectImpl extends AbstractVictoryEffectImpl {
     public static void showFirework(PacketGroupingAudience audience, Instance instance, Point point, int ticks, List<FireworkExplosion> effects) {
         var fireworks = new FireworkList((byte) 0, effects);
         var fireworkItem = ItemStack.builder(Material.FIREWORK_ROCKET)
-                .set(ItemComponent.FIREWORKS, fireworks)
+                .set(DataComponents.FIREWORKS, fireworks)
                 .build();
         var fireworkEntity = new Entity(EntityType.FIREWORK_ROCKET);
         var meta = (FireworkRocketMeta) fireworkEntity.getEntityMeta();

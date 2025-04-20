@@ -25,7 +25,7 @@ public class NoopPlayerService implements PlayerService {
         if (id.equals("597481a0-02fb-441c-9188-c407bec05084"))
             return new DisplayName(List.of(new DisplayName.Part("username", "TestPlayer", null)));
 
-        throw new NotFoundError();
+        return new DisplayName(List.of(new DisplayName.Part("username", "Unknown", null)));
     }
 
     @Override

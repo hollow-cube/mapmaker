@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.to_be_refactored;
 
+import net.hollowcube.common.util.FontUIBuilder;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.TaskSchedule;

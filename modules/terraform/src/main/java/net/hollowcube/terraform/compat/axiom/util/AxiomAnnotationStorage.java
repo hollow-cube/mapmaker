@@ -1,12 +1,12 @@
 package net.hollowcube.terraform.compat.axiom.util;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.hollowcube.common.util.dfu.DFU;
 import net.hollowcube.compat.axiom.data.annotations.actions.*;
 import net.hollowcube.compat.axiom.data.annotations.data.AnnotationData;
 import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundAnnotationUpdatePacket;
 import net.hollowcube.terraform.storage.TerraformInstanceStorage;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.StructCodec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -22,8 +22,8 @@ import java.util.function.UnaryOperator;
 public class AxiomAnnotationStorage {
 
     private static final Tag<AxiomAnnotationStorage> TAG = DFU.Tag(
-            Codec.unboundedMap(Codec.STRING.xmap(UUID::fromString, UUID::toString), Entry.CODEC)
-                    .xmap(AxiomAnnotationStorage::new, it -> it.data),
+            Codec.STRING.transform(UUID::fromString, UUID::toString).mapValue(Entry.CODEC)
+                    .transform(AxiomAnnotationStorage::new, it -> it.data),
             "axiom:annotation_storage"
     );
 
@@ -80,10 +80,9 @@ public class AxiomAnnotationStorage {
             @NotNull UUID creator,
             @NotNull AnnotationData data
     ) {
-
-        public static final Codec<Entry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                Codec.STRING.xmap(UUID::fromString, UUID::toString).fieldOf("creator").forGetter(Entry::creator),
-                AnnotationData.CODEC.fieldOf("data").forGetter(Entry::data)
-        ).apply(instance, Entry::new));
+        public static final StructCodec<Entry> CODEC = StructCodec.struct(
+                "creator", Codec.STRING.transform(UUID::fromString, UUID::toString), Entry::creator,
+                "data", AnnotationData.CODEC, Entry::data,
+                Entry::new);
     }
 }

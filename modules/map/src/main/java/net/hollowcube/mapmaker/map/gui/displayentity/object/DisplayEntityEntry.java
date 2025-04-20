@@ -37,7 +37,7 @@ public class DisplayEntityEntry extends View {
         };
 
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.translatable("gui.display_entity.search.entry.type", Component.text(entity.getEntityType().namespace().toString())));
+        lore.add(Component.translatable("gui.display_entity.search.entry.type", Component.text(entity.getEntityType().key().toString())));
         lore.add(Component.empty());
         switch (entity) {
             case DisplayEntity.Item item -> lore.add(Component.translatable(
@@ -52,10 +52,10 @@ public class DisplayEntityEntry extends View {
                 lore.add(Component.translatable("gui.display_entity.search.entry.current", Component.empty()));
 
                 MiniMessage.miniMessage().serialize(text.getEntityMeta().getText()).lines().forEach(line ->
-                    lore.add(Component.translatable(
-                            "gui.display_entity.search.entry.current.entry",
-                            Component.text('"').append(Component.text(line)).append(Component.text('"'))
-                    ))
+                        lore.add(Component.translatable(
+                                "gui.display_entity.search.entry.current.entry",
+                                Component.text('"').append(Component.text(line)).append(Component.text('"'))
+                        ))
                 );
             }
         }

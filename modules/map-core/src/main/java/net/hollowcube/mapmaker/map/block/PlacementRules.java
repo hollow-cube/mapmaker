@@ -5,11 +5,11 @@ import net.hollowcube.mapmaker.map.block.placement.vanilla.RailPlacementRule;
 import net.hollowcube.mapmaker.map.block.placement.vanilla.VinePlacementRule;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.TerraformRegistry;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
@@ -207,7 +207,7 @@ public final class PlacementRules {
 
     }
 
-    private static void register(@NotNull Collection<NamespaceID> tag, Function<Block, BlockPlacementRule> constructor) {
+    private static void register(@NotNull Collection<Key> tag, Function<Block, BlockPlacementRule> constructor) {
         for (var blockId : tag) {
             var ruleInstance = Objects.requireNonNull(constructor.apply(blockFromId(blockId)));
             BLOCK_MANAGER.registerBlockPlacementRule(ruleInstance);
@@ -215,13 +215,13 @@ public final class PlacementRules {
     }
 
     private static void register(@NotNull Block block, Function<Block, BlockPlacementRule> constructor) {
-        var ruleInstance = Objects.requireNonNull(constructor.apply(blockFromId(block.namespace())));
+        var ruleInstance = Objects.requireNonNull(constructor.apply(blockFromId(block.key())));
         Check.argCondition(BLOCK_MANAGER.getBlockPlacementRule(ruleInstance.getBlock()) != null, "double registration for: " + ruleInstance.getBlock().name());
         BLOCK_MANAGER.registerBlockPlacementRule(ruleInstance);
     }
 
-    private static @NotNull Block blockFromId(@NotNull NamespaceID id) {
+    private static @NotNull Block blockFromId(@NotNull Key key) {
         // Convert block to block state using terraforms registry of handlers.
-        return Objects.requireNonNull(REGISTRY.blockState(Objects.requireNonNull(Block.fromNamespaceId(id)).stateId()));
+        return Objects.requireNonNull(REGISTRY.blockState(Objects.requireNonNull(Block.fromKey(key)).stateId()));
     }
 }

@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.map.block.handler;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -47,7 +47,7 @@ public class StructureBlockHandler implements BlockHandler {
         COUNTERCLOCKWISE_90
     }
 
-    private static final NamespaceID ID = NamespaceID.from("minecraft:structure_block");
+    private static final Key ID = Key.key("minecraft:structure_block");
     public static final StructureBlockHandler INSTANCE = new StructureBlockHandler();
 
     public static final Tag<String> AUTHOR = Tag.String("author").defaultValue("?");
@@ -69,7 +69,7 @@ public class StructureBlockHandler implements BlockHandler {
     public static final Tag<Integer> SIZE_Z = Tag.Integer("sizeZ");
 
     @Override
-    public @NotNull NamespaceID getNamespaceId() {
+    public @NotNull Key getKey() {
         return ID;
     }
 

@@ -2,7 +2,6 @@ package net.hollowcube.canvas;
 
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.posthog.PostHog;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.*;
 import org.slf4j.Logger;
@@ -19,7 +18,6 @@ public abstract class View implements Element {
 
     private final Context context;
     private final ViewElement delegate;
-
 
     protected View(@NotNull Context context) {
         this.context = context;
@@ -139,8 +137,6 @@ public abstract class View implements Element {
     }
 
     public interface AsyncRunnable {
-        @Async.Execute
-        @Blocking
         void run() throws Exception;
     }
 

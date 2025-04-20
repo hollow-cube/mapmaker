@@ -3,10 +3,10 @@ package net.hollowcube.mapmaker.map;
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandlerRegistry;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
-import net.hollowcube.mapmaker.map.util.datafix.HCVersions;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
@@ -23,7 +23,7 @@ import java.util.Objects;
 import java.util.function.UnaryOperator;
 
 public sealed interface MapWorld extends TagReadable, TagWritable permits AbstractMapWorld {
-    int DATA_VERSION = HCVersions.V1_21_3_HC1;
+    int DATA_VERSION = MinecraftServer.DATA_VERSION;
 
     interface Constructor<T extends AbstractMapWorld> {
         @NotNull T create(@NotNull MapServer server, @NotNull MapData map);

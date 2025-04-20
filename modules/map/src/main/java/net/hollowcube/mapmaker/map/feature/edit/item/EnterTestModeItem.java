@@ -8,30 +8,23 @@ import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
 public class EnterTestModeItem extends ItemHandler {
-
+    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/enter_test_mode"));
     public static final String ID = "mapmaker:enter_test_mode";
     public static final EnterTestModeItem INSTANCE = new EnterTestModeItem();
-
-    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/enter_test_mode"));
 
     private EnterTestModeItem() {
         super(ID, RIGHT_CLICK_ANY);
     }
 
     @Override
-    public @NotNull Material material() {
-        return Material.DIAMOND;
-    }
-
-    @Override
-    public int customModelData() {
-        return SPRITE.cmd();
+    public @Nullable BadSprite sprite() {
+        return SPRITE;
     }
 
     @Override

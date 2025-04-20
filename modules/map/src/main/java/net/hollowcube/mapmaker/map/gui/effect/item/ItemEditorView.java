@@ -9,7 +9,7 @@ import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItem;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.item.ItemComponent;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class ItemEditorView extends View {
     private static final ItemStack PLUS_ITEM = ItemStack.builder(Material.DIAMOND)
-            .set(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("effect/item/plus").cmd())
+            .set(DataComponents.ITEM_MODEL, BadSprite.require("effect/item/plus").model())
             .build();
 
     private @Outlet("slots_used") Text slotsUsedText;
@@ -95,7 +95,7 @@ public class ItemEditorView extends View {
                 } else if (item instanceof HotbarItem.Trident rocket) {
                     var baseTridentItem = item.toItemStack(false)
                             .withCustomName(Component.translatable("gui.effect.item.trident.name"));
-                    var tridentLore = new ArrayList<>(baseTridentItem.get(ItemComponent.LORE, List.of()));
+                    var tridentLore = new ArrayList<>(baseTridentItem.get(DataComponents.LORE, List.of()));
                     tridentLore.addAll(List.of(Component.text(""),
                             Component.translatable("gui.generic.click_to_change.lore"),
                             Component.translatable("gui.generic.shift_click_to_remove.lore")));
@@ -103,7 +103,7 @@ public class ItemEditorView extends View {
                 } else if (item instanceof HotbarItem.FireworkRocket rocket) {
                     var baseFireworkItem = item.toItemStack(false)
                             .withCustomName(Component.translatable("gui.effect.item.firework_rocket.name"));
-                    var fireworkLore = new ArrayList<>(baseFireworkItem.get(ItemComponent.LORE, List.of()));
+                    var fireworkLore = new ArrayList<>(baseFireworkItem.get(DataComponents.LORE, List.of()));
                     fireworkLore.addAll(List.of(Component.text(""),
                             Component.translatable("gui.generic.click_to_change.lore"),
                             Component.translatable("gui.generic.shift_click_to_remove.lore")));

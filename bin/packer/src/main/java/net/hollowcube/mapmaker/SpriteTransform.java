@@ -3,6 +3,8 @@ package net.hollowcube.mapmaker;
 import com.google.gson.*;
 import de.marhali.json5.*;
 import net.hollowcube.mapmaker.type.ServerSprite;
+import net.hollowcube.mapmaker.util.ModelUtil;
+import net.hollowcube.mapmaker.util.Templates;
 import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
@@ -10,13 +12,12 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -33,28 +34,62 @@ public class SpriteTransform {
         return nextChar;
     }
 
-    public void process(@NotNull PackContext context) throws IOException {
-        Path guiBaseDir = context.resources().resolve("gui");
+    public void process(@NotNull PackContext ctx) throws IOException {
+        final String[] numberModels = setupNumberModels(ctx);
+
+        Path guiBaseDir = ctx.resources().resolve("gui");
         try (Stream<Path> guiFile = Files.walk(guiBaseDir)) {
             List<Path> files = guiFile.sorted(Comparator.comparing(Path::toString)).toList();
             for (Path imageFile : files) {
                 if (!imageFile.getFileName().toString().endsWith(".png")) continue;
                 Path configFile = imageFile.resolveSibling(imageFile.getFileName().toString().replace(".png", ".json5"));
-                if (!Files.exists(configFile)) continue;
+
+                var relative = guiBaseDir.relativize(imageFile);
+                boolean canSkipConfig = (relative.toString().startsWith("store" + File.separatorChar)
+                        || relative.toString().startsWith("map_browser" + File.separatorChar))
+                        && !relative.toString().contains("checkout");
+                if (!canSkipConfig && !Files.exists(configFile)) continue;
 
                 String name = guiBaseDir.relativize(imageFile).toString()
                         .replace(".png", "")
                         .replace("\\", "/");
                 try {
+                    if (canSkipConfig) {
+
+                        Json5Object config = new Json5Object();
+                        int openIndex = name.indexOf("[");
+                        if (openIndex != -1) {
+                            if (name.charAt(name.length() - 1) != ']') {
+                                throw new RuntimeException("Invalid sprite name: " + name);
+                            }
+
+                            String params = name.substring(openIndex + 1, name.length() - 1);
+                            for (var pair : params.split(",")) {
+                                int eq = pair.indexOf("=");
+                                if (eq == -1) {
+                                    config.addProperty(pair, true);
+                                } else {
+                                    config.addProperty(pair.substring(0, eq), pair.substring(eq + 1));
+                                }
+                            }
+                            name = name.substring(0, openIndex);
+                        }
+
+                        JsonObject resultFontChar = new JsonObject();
+                        ServerSprite sprite = processImage(ctx, name, Files.readAllBytes(imageFile), config, resultFontChar);
+                        ctx.addFontCharacter(resultFontChar);
+                        ctx.addServerSprite(sprite);
+                        continue;
+                    }
+
                     Json5Object config = json5.parse(Files.readString(configFile)).getAsJson5Object();
 
                     if (config.get("type").getAsString().equals("sprite")) {
                         JsonObject resultFontChar = new JsonObject();
-                        ServerSprite sprite = processImage(context, name, Files.readAllBytes(imageFile), config, resultFontChar);
-                        context.addFontCharacter(resultFontChar);
-                        context.addServerSprite(sprite);
+                        var serverSprite = processImage(ctx, name, Files.readAllBytes(imageFile), config, resultFontChar);
+                        ctx.addFontCharacter(resultFontChar);
+                        ctx.addServerSprite(serverSprite);
                     } else if (config.get("type").getAsString().equals("item")) {
-
                         BufferedImage image = ImageIO.read(imageFile.toFile());
                         if (image.getWidth() != 16 || image.getHeight() != 16)
                             throw new RuntimeException("Item sprites must be 16x");
@@ -76,42 +111,28 @@ public class SpriteTransform {
                             modelEditor = obj -> obj.add("display", toGson(config.getAsJson5Object("display")));
                         }
 
-                        ModelType modelType = config.get("colored") != null && config.get("colored").getAsBoolean() ?
-                                ModelType.COLORED : ModelType.DEFAULT;
-
-                        String modelId = context.writeBasicModel(name, Files.readAllBytes(imageFile), modelEditor);
-                        int cmd = context.addBasicItem(modelType, name, modelId);
-                        context.addServerSprite(ServerSprite.itemModel(name, modelId.replace("item/", ""), cmd));
+                        var itemTexture = ctx.writeTexture("item", name, Files.readAllBytes(imageFile));
+                        var itemModel = ctx.writeModel(name, ModelUtil.createItemGenerated(itemTexture, modelEditor));
+                        ctx.addItemModel(name, ModelUtil.createBasicItem(itemModel));
                     } else if (config.get("type").getAsString().equals("numbered")) {
                         BufferedImage baseImage = ImageIO.read(imageFile.toFile());
                         if (baseImage.getWidth() != 16 || baseImage.getHeight() != 16)
                             throw new RuntimeException("Numbered sprites must be 16x");
 
-                        BufferedImage rescaledImage = new BufferedImage(32, 32, baseImage.getType());
-                        Graphics2D g = rescaledImage.createGraphics();
-                        g.drawImage(baseImage, 1, 1, 16, 16, null);
+                        String texId = ctx.writeTexture("item", name, Files.readAllBytes(imageFile));
+                        String baseItemModel = ctx.writeModel(name, ModelUtil.createItemGenerated(texId));
 
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        ImageIO.write(rescaledImage, "png", baos);
-
-                        String texId = context.writeTexture("item", name, baos.toByteArray());
-
-                        int firstCmd = -1;
-                        for (int i = 0; i <= config.get("max_stack").getAsInt(); i++) {
-                            String numberedName = name + "_" + i;
-                            JsonObject modelObj = new JsonObject();
-                            modelObj.addProperty("parent", "item/numbered_recipe_base");
-                            JsonObject textures = new JsonObject();
-                            textures.addProperty("0", texId);
-                            textures.addProperty("1", "item/numbers_32x/" + i);
-                            modelObj.add("textures", textures);
-                            String modelId = context.writeModel(numberedName, modelObj);
-
-                            int cmd = context.addBasicItem(ModelType.DEFAULT, numberedName, modelId);
-                            if (firstCmd == -1) firstCmd = cmd;
+                        var entries = new JsonArray();
+                        for (int i = 0; i < config.get("max_stack").getAsInt(); i++) {
+                            var entry = ModelUtil.createBasicItem(numberModels[i]);
+                            entry.addProperty("threshold", i + 1);
+                            entries.add(entry);
                         }
 
-                        context.addServerSprite(ServerSprite.customModelData(name, firstCmd));
+                        var args = new HashMap<String, Object>();
+                        args.put("base", baseItemModel);
+                        args.put("entries", entries);
+                        ctx.addItemModel(name, Templates.applyObject("number_model", args));
                     }
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to process " + name, e);
@@ -120,7 +141,7 @@ public class SpriteTransform {
         }
     }
 
-    private ServerSprite processImage(@NotNull PackContext ctx, @NotNull String name, byte[] data, @NotNull Json5Object conf, @NotNull JsonObject fontConf) throws IOException {
+    private @NotNull ServerSprite processImage(@NotNull PackContext ctx, @NotNull String name, byte[] data, @NotNull Json5Object conf, @NotNull JsonObject fontConf) throws IOException {
         BufferedImage image = ImageIO.read(new ByteArrayInputStream(data));
 
         int width = image.getWidth();
@@ -187,7 +208,8 @@ public class SpriteTransform {
         fontConf.add("chars", chars);
 
         entries.put(name, fontChar);
-        return ServerSprite.fontChar(name, (char) rawFontChar, width, offX, right);
+
+        return new ServerSprite(name, rawFontChar, width, offX, right);
     }
 
     private static JsonElement toGson(Json5Element element) {
@@ -212,5 +234,37 @@ public class SpriteTransform {
             case Json5Null ignored -> JsonNull.INSTANCE;
             default -> throw new IllegalStateException("Unexpected value: " + element);
         };
+    }
+
+    private static String[] setupNumberModels(@NotNull PackContext ctx) throws IOException {
+        String[] numberModels = new String[32];
+        for (int i = 0; i < numberModels.length; i++) {
+            try (var img = SpriteTransform.class.getResourceAsStream("/numbers/" + (i + 1) + ".png")) {
+                Objects.requireNonNull(img);
+
+                var numberImage = ImageIO.read(img);
+                var image = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+                var g = image.createGraphics();
+                int x = 16 - numberImage.getWidth(), y = 16 - numberImage.getHeight();
+                g.drawImage(numberImage, x, y, numberImage.getWidth(), numberImage.getHeight(), null);
+                g.dispose();
+                var baos = new ByteArrayOutputStream();
+                ImageIO.write(image, "png", baos);
+
+                var textureId = ctx.writeTexture("item", "number_" + (i + 1), baos.toByteArray());
+                numberModels[i] = ctx.writeModel("number_" + (i + 1), ModelUtil.createItemGenerated(textureId, m -> {
+                    var display = new JsonObject();
+                    var gui = new JsonObject();
+                    var translation = new JsonArray();
+                    translation.add(1);
+                    translation.add(-1);
+                    translation.add(0);
+                    gui.add("translation", translation);
+                    display.add("gui", gui);
+                    m.add("display", display);
+                }));
+            }
+        }
+        return numberModels;
     }
 }

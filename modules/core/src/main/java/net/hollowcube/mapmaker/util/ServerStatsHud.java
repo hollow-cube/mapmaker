@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.util;
 
+import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
-import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.server.ServerTickMonitorEvent;

@@ -1,0 +1,73 @@
+{
+    HurtByTimestamp: 0,
+    Tame: 0b,
+    HasReproduced: 0b,
+    Attributes: [
+        {
+            Base: 53.0d,
+            Name: "generic.maxHealth"
+        },
+        {
+            Base: 0.0d,
+            Name: "generic.knockbackResistance"
+        },
+        {
+            Base: 0.22499999403953552d,
+            Name: "generic.movementSpeed"
+        },
+        {
+            Base: 16.0d,
+            Name: "generic.followRange"
+        },
+        {
+            Base: 0.7d,
+            Name: "horse.jumpStrength"
+        }
+    ],
+    Invulnerable: 0b,
+    ForcedAge: 0,
+    PortalCooldown: 0,
+    AbsorptionAmount: 0.0f,
+    Bred: 0b,
+    FallDistance: 0.0f,
+    InLove: 0,
+    EatingHaystack: 0b,
+    DeathTime: 0s,
+    DropChances: [0.085f, 0.085f, 0.085f, 0.085f, 0.085f],
+    PersistenceRequired: 1b,
+    id: "EntityHorse",
+    HealF: 53.0f,
+    Age: 0,
+    Motion: [0.0d, -0.0784000015258789d, 0.0d],
+    Leashed: 0b,
+    UUIDLeast: -8944669556155921917L,
+    Health: 53s,
+    Air: 300s,
+    OnGround: 1b,
+    Dimension: 0,
+    Rotation: [348.98404f, 0.0f],
+    Variant: 0,
+    OwnerUUID: "",
+    Type: 3,
+    UUIDMost: 3557447232903860124L,
+    CustomName: "Beacon",
+    Equipment: [
+        {
+        },
+        {
+        },
+        {
+        },
+        {
+        },
+        {
+        }
+    ],
+    Pos: [54.7381473280772d, 68.0d, 53.67899740895819d],
+    ChestedHorse: 0b,
+    Fire: -1s,
+    Temper: 0,
+    CanPickUpLoot: 0b,
+    HurtTime: 0s,
+    CustomNameVisible: 0b
+}

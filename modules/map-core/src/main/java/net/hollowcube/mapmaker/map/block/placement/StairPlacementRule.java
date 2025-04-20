@@ -63,7 +63,7 @@ public class StairPlacementRule extends WaterloggedPlacementRule {
         for (int i = 0; i < 4; i++) {
             var blockFace = orderedFaces[i];
             var relativeBlock = instance.getBlock(blockPos.relative(blockFace), Block.Getter.Condition.TYPE);
-            if (!BlockTags.STAIRS.contains(relativeBlock.namespace())) continue; // Non-stairs never connect
+            if (!BlockTags.STAIRS.contains(relativeBlock.key())) continue; // Non-stairs never connect
             if (!block.getProperty(PROP_HALF).equals(relativeBlock.getProperty(PROP_HALF))) {
                 // Top and bottom stairs never connect
                 continue;

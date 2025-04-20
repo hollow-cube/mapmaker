@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.command.map;
 
 import com.google.gson.JsonElement;
-import com.mojang.serialization.JsonOps;
 import net.hollowcube.command.CommandBuilder;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
@@ -14,6 +13,8 @@ import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.codec.Result;
+import net.minestom.server.codec.Transcoder;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
@@ -26,6 +27,7 @@ import static net.hollowcube.command.dsl.CommandDsl.playerOnly;
 /**
  * Notably not using {@link net.hollowcube.command.dsl.CommandDsl}, it doesn't support arguments followed by "subcommands" very well.
  */
+@SuppressWarnings("UnstableApiUsage")
 public class MapAlterCommand {
 
     private final Argument<MapData> mapArg;
@@ -221,17 +223,19 @@ public class MapAlterCommand {
         var setting = context.get(settingsArg);
         var json = context.get(settingDataArg);
 
-        setting.codec().parse(JsonOps.INSTANCE, json)
-                .ifError(error -> {
-                    player.sendMessage(Component.text("Invalid data for setting " + setting.key()));
-                    player.sendMessage(Component.text("Error: " + error.message()));
-                }).ifSuccess(data -> {
-                    writeSetting(map.settings(), setting, data);
-                    if (doMapUpdate(player, map)) {
-                        player.sendMessage(Component.text("Set setting " + setting.key() + " to " + data));
-                    }
-                });
-
+        var result = setting.codec().decode(Transcoder.JSON, json);
+        switch (result) {
+            case Result.Ok(Object data) -> {
+                writeSetting(map.settings(), setting, data);
+                if (doMapUpdate(player, map)) {
+                    player.sendMessage(Component.text("Set setting " + setting.key() + " to " + data));
+                }
+            }
+            case Result.Error(String message) -> {
+                player.sendMessage(Component.text("Invalid data for setting " + setting.key()));
+                player.sendMessage(Component.text("Error: " + message));
+            }
+        }
     }
 
     private <T> void writeSetting(@NotNull MapSettings settings, @NotNull MapSetting<T> setting, @NotNull Object data) {

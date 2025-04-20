@@ -67,11 +67,11 @@ public class SearchDisplaysView extends AbstractSearchView<DisplayEntityEntry> {
             return switch (this.display) {
                 case DisplayEntity.Item item -> {
                     var material = item.getEntityMeta().getItemStack().material();
-                    yield List.of(material.name(), material.namespace().path(), material.namespace().path().replace("_", " "));
+                    yield List.of(material.name(), material.key().value(), material.key().value().replace("_", " "));
                 }
                 case DisplayEntity.Block block -> {
                     var material = block.getEntityMeta().getBlockStateId();
-                    yield List.of(material.name(), material.namespace().path(), material.namespace().path().replace("_", " "));
+                    yield List.of(material.name(), material.key().value(), material.key().value().replace("_", " "));
                 }
                 case DisplayEntity.Text entity ->
                         List.of(MiniMessage.miniMessage().serialize(entity.getEntityMeta().getText()));

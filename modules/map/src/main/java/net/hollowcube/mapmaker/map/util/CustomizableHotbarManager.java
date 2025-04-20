@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerSetting;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryClickEvent;
@@ -18,7 +19,6 @@ import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -115,10 +115,12 @@ public class CustomizableHotbarManager {
         if (!MapFeatureFlags.CUSTOMIZABLE_HOTBAR.test(player)) return; // Not enabled for this player
         if (this != player.getTag(TAG) || event.getInventory() != null || player.getOpenInventory() != null)
             return; // Not active on this hotbar or not the player inventory
-        if (event.getSlot() < 0 || event.getSlot() > 8 || event.getClickType() != ClickType.LEFT_CLICK) {
-            event.setCancelled(true);
-            return; // Not the hotbar or not a left click
-        }
+
+        // TODO(1.21.4)
+//        if (event.getSlot() < 0 || event.getSlot() > 8 || event.getClickType() != ClickType.LEFT_CLICK) {
+//            event.setCancelled(true);
+//            return; // Not the hotbar or not a left click
+//        }
 
         // Otherwise we allow the change, and will save the hotbar on the post event.
         // Do it during post so that any other cancellation will be respected
@@ -206,6 +208,7 @@ public class CustomizableHotbarManager {
     }
 
     private static class ResetToDefaultItem extends ItemHandler {
+        private static final BadSprite SPRITE = BadSprite.require("hammer"); // TODO(1.21.4)
         public static final String ID = "mapmaker:reset_hotbar";
 
         public ResetToDefaultItem() {
@@ -213,13 +216,8 @@ public class CustomizableHotbarManager {
         }
 
         @Override
-        public @NotNull Material material() {
-            return Material.BARRIER;
-        }
-
-        @Override
-        public int customModelData() {
-            return 420;
+        public @Nullable BadSprite sprite() {
+            return SPRITE;
         }
 
         @Override

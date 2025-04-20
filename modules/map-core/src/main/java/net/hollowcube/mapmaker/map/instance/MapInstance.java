@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.map.ReadableMapData;
 import net.hollowcube.mapmaker.map.polar.PolarDataFixer;
 import net.hollowcube.mapmaker.util.NoopChunkLoader;
 import net.hollowcube.polar.*;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
@@ -15,7 +16,6 @@ import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.registry.DynamicRegistry;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +36,7 @@ public class MapInstance extends InstanceContainer {
     }
 
     public MapInstance(@NotNull String dimensionName, @NotNull DynamicRegistry.Key<DimensionType> dimensionType, boolean hasLighting) {
-        super(UUID.randomUUID(), dimensionType, null, NamespaceID.from(dimensionName));
+        super(UUID.randomUUID(), dimensionType, null, Key.key(dimensionName));
         this.hasLighting = hasLighting;
 
         setTimeRate(0); //todo eventually this should be a map setting

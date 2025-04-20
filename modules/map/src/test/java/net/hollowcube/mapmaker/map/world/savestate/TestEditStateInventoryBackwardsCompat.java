@@ -6,7 +6,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.item.ItemComponent;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +45,7 @@ class TestEditStateInventoryBackwardsCompat {
     @Test
     void testReadModernComponent() {
         var expectedItem = ItemStack.builder(Material.STONE)
-                .set(ItemComponent.CUSTOM_NAME, Component.text("test"))
+                .set(DataComponents.CUSTOM_NAME, Component.text("test"))
                 .amount(44)
                 .build();
         var result = decodeJson(MODERN_CODEC, """

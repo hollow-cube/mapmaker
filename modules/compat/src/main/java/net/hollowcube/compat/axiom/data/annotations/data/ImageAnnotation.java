@@ -1,12 +1,12 @@
 package net.hollowcube.compat.axiom.data.annotations.data;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.StructCodec;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("UnstableApiUsage")
 public record ImageAnnotation(
         @NotNull String url,
 
@@ -40,24 +40,22 @@ public record ImageAnnotation(
             NetworkBuffer.FLOAT, ImageAnnotation::width,
             NetworkBuffer.FLOAT, ImageAnnotation::opacity,
             NetworkBuffer.BYTE, ImageAnnotation::billboard,
-            ImageAnnotation::new
-    );
-
-    public static final MapCodec<ImageAnnotation> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Codec.STRING.fieldOf("url").forGetter(ImageAnnotation::url),
-            Codec.FLOAT.fieldOf("x").forGetter(ImageAnnotation::x),
-            Codec.FLOAT.fieldOf("y").forGetter(ImageAnnotation::y),
-            Codec.FLOAT.fieldOf("z").forGetter(ImageAnnotation::z),
-            Codec.FLOAT.fieldOf("rotX").forGetter(ImageAnnotation::rotX),
-            Codec.FLOAT.fieldOf("rotY").forGetter(ImageAnnotation::rotY),
-            Codec.FLOAT.fieldOf("rotZ").forGetter(ImageAnnotation::rotZ),
-            Codec.FLOAT.fieldOf("rotW").forGetter(ImageAnnotation::rotW),
-            Codec.BYTE.fieldOf("direction").forGetter(ImageAnnotation::direction),
-            Codec.FLOAT.fieldOf("fallbackYaw").forGetter(ImageAnnotation::fallbackYaw),
-            Codec.FLOAT.fieldOf("width").forGetter(ImageAnnotation::width),
-            Codec.FLOAT.fieldOf("opacity").forGetter(ImageAnnotation::opacity),
-            Codec.BYTE.fieldOf("billboard").forGetter(ImageAnnotation::billboard)
-    ).apply(instance, ImageAnnotation::new));
+            ImageAnnotation::new);
+    public static final StructCodec<ImageAnnotation> CODEC = StructCodec.struct(
+            "url", Codec.STRING, ImageAnnotation::url,
+            "x", Codec.FLOAT, ImageAnnotation::x,
+            "y", Codec.FLOAT, ImageAnnotation::y,
+            "z", Codec.FLOAT, ImageAnnotation::z,
+            "rotX", Codec.FLOAT, ImageAnnotation::rotX,
+            "rotY", Codec.FLOAT, ImageAnnotation::rotY,
+            "rotZ", Codec.FLOAT, ImageAnnotation::rotZ,
+            "rotW", Codec.FLOAT, ImageAnnotation::rotW,
+            "direction", Codec.BYTE, ImageAnnotation::direction,
+            "fallbackYaw", Codec.FLOAT, ImageAnnotation::fallbackYaw,
+            "width", Codec.FLOAT, ImageAnnotation::width,
+            "opacity", Codec.FLOAT, ImageAnnotation::opacity,
+            "billboard", Codec.BYTE, ImageAnnotation::billboard,
+            ImageAnnotation::new);
 
     @Override
     public AnnotationData withPosition(float x, float y, float z) {

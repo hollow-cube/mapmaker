@@ -10,6 +10,7 @@ import net.hollowcube.compat.axiom.properties.registry.PropertyRegistry;
 import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.nbt.*;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -18,7 +19,6 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.instance.block.BlockHandler;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.network.packet.server.play.AcknowledgeBlockChangePacket;
 import net.minestom.server.network.packet.server.play.ChangeGameStatePacket;
 import org.jetbrains.annotations.ApiStatus;
@@ -151,7 +151,7 @@ final class AxiomPacketHandler {
                     var event = new PlayerBlockBreakEvent(player, existingBlock, block, new BlockVec(pos), packet.face());
                     EventDispatcher.call(event);
                     if (event.isCancelled()) continue;
-                } else if (heldItem.has(ItemComponent.CUSTOM_MODEL_DATA)) {
+                } else if (heldItem.has(DataComponents.CUSTOM_MODEL_DATA)) {
                     // Items with custom model data need to trigger interact event
                     // We need to offset as if we are placing on the block next to it, which is not what axiom sends.
                     var relBlockPosition = new BlockVec(pos.relative(packet.face().getOppositeFace()));

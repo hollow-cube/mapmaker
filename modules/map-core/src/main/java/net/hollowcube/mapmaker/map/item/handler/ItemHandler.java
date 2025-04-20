@@ -2,24 +2,26 @@ package net.hollowcube.mapmaker.map.item.handler;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.TagHandler;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -27,7 +29,7 @@ import java.util.function.Consumer;
  * implementations should be implemented as singletons, and registered to the appropriate {@link ItemRegistry} for
  * use within a {@link MapWorld}.
  * <p>
- * Items are identified by their {@link #id()}, which is hashed to set the custom model data of the item stack.
+ * Items are identified by their {@link #key()}, which is hashed to set the custom model data of the item stack.
  */
 public abstract class ItemHandler {
 
@@ -44,36 +46,49 @@ public abstract class ItemHandler {
     public static final int RIGHT_CLICK_ANY = RIGHT_CLICK_AIR | RIGHT_CLICK_BLOCK | RIGHT_CLICK_ENTITY;
     public static final int LEFT_CLICK_ANY = LEFT_CLICK_AIR | LEFT_CLICK_BLOCK | LEFT_CLICK_ENTITY;
 
-    private final NamespaceID id;
+    private final Key key;
     private final int flags;
 
-    protected ItemHandler(@NotNull String id, int... flags) {
-        this.id = NamespaceID.from(id);
+    protected ItemHandler(@NotNull String key, int... flags) {
+        this.key = Key.key(key);
 
         int flag = 0;
         for (int f : flags) flag |= f;
         this.flags = flag;
     }
 
-    public @NotNull NamespaceID id() {
-        return id;
+    public @NotNull Key key() {
+        return key;
     }
 
-    public int customModelData() {
-        return id.hashCode();
+    /**
+     * The material to represent this item.
+     *
+     * <p>Mutually exclusive with {@link #sprite()}, which must be provided if this is not.</p>
+     */
+    public @Nullable Material material() {
+        return null;
     }
 
-    public @NotNull Material material() {
-        return Material.STICK;
+    /**
+     * The sprite to represent this item.
+     *
+     * <p>Mutually exclusive with {@link #material()}, which must be provided if this is not.</p>
+     */
+    public @Nullable BadSprite sprite() {
+        return null;
     }
 
     public @NotNull ItemStack buildItemStack(@Nullable CompoundBinaryTag nbt) {
-        var builder = ItemStack.builder(material());
-        var baseTranslationKey = String.format("item.%s.%s", id().namespace(), id().path());
-        builder.set(ItemComponent.CUSTOM_NAME, LanguageProviderV2.translate(Component.translatable(baseTranslationKey + ".name")));
-        builder.set(ItemComponent.LORE, LanguageProviderV2.translateMulti(baseTranslationKey + ".lore", List.of()));
+        var builder = ItemStack.builder(Objects.requireNonNullElse(material(), Material.STICK));
+        var baseTranslationKey = String.format("item.%s.%s", key().namespace(), key().value());
+        builder.set(DataComponents.CUSTOM_NAME, LanguageProviderV2.translate(Component.translatable(baseTranslationKey + ".name")));
+        builder.set(DataComponents.LORE, LanguageProviderV2.translateMulti(baseTranslationKey + ".lore", List.of()));
         updateItemStack(builder, nbt != null ? TagHandler.fromCompound(nbt) : TagHandler.newHandler());
-        builder.set(ItemComponent.CUSTOM_MODEL_DATA, customModelData());
+
+        var sprite = sprite();
+        if (sprite != null) builder.set(DataComponents.ITEM_MODEL, sprite.model());
+
         return builder.build();
     }
 
@@ -113,7 +128,9 @@ public abstract class ItemHandler {
         public void updateItemStack(@NotNull Consumer<ItemStack.Builder> func) {
             var updatedItemStack = itemStack.with(builder -> {
                 func.accept(builder);
-                builder.set(ItemComponent.CUSTOM_MODEL_DATA, handler.customModelData());
+
+                var sprite = handler.sprite();
+                if (sprite != null) builder.set(DataComponents.ITEM_MODEL, sprite.model());
             });
             player.setItemInHand(hand, updatedItemStack);
         }

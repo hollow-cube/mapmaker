@@ -1,10 +1,11 @@
 package net.hollowcube.mapmaker.map.util.datafix.legacy;
 
-import ca.spottedleaf.dataconverter.minecraft.MCDataConverter;
-import ca.spottedleaf.dataconverter.minecraft.MCVersions;
-import ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry;
+import net.hollowcube.datafix.DataFixer;
+import net.hollowcube.datafix.DataTypes;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.codec.Transcoder;
 import net.minestom.server.entity.EntityMetadataStealer;
 import net.minestom.server.entity.Metadata;
 import net.minestom.server.item.ItemStack;
@@ -62,8 +63,9 @@ public final class PreDataFixFixes {
                 .putString("id", material.name())
                 .putInt("Count", amount)
                 .build();
-        CompoundBinaryTag updatedCompound = MCDataConverter.convertTag(MCTypeRegistry.ITEM_STACK, fullCompound, MCVersions.V1_20_4, MCVersions.V1_20_5_RC2);
-        return ItemStack.NBT_TYPE.read(updatedCompound);
+        CompoundBinaryTag updatedCompound = (CompoundBinaryTag) DataFixer.upgrade(DataTypes.ITEM_STACK,
+                Transcoder.NBT, fullCompound, 4189, MinecraftServer.DATA_VERSION);
+        return ItemStack.fromItemNBT(updatedCompound);
     }
 
     private PreDataFixFixes() {

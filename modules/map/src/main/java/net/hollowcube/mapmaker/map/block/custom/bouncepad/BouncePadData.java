@@ -1,11 +1,12 @@
 package net.hollowcube.mapmaker.map.block.custom.bouncepad;
 
-import com.mojang.datafixers.util.Either;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.hollowcube.common.util.Either;
+import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mql.jit.BouncePadScript;
 import net.hollowcube.mql.jit.MqlCompiler;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.StructCodec;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
@@ -13,22 +14,21 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandles;
-import java.util.function.Function;
 
+@SuppressWarnings("UnstableApiUsage")
 public sealed interface BouncePadData extends DebugCommand.BlockDebug {
 
     double DEFAULT_POWER = 25;
     double MAX_VELOCITY = 4096;
 
     // Will try to parse the molang format first and then will go to legacy
-    Codec<BouncePadData> LEGACY_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.DOUBLE.lenientOptionalFieldOf("power", DEFAULT_POWER).forGetter(data -> data instanceof Simple(double power) ? power : DEFAULT_POWER),
-            Codec.BOOL.lenientOptionalFieldOf("legacy_cylone_mode", false).forGetter(data -> data instanceof Cylone)
-    ).apply(instance, (power, legacyCylone) -> legacyCylone ? new Cylone() : new Simple(power)));
-    Codec<BouncePadData> CODEC = Codec.either(Molang.CODEC, LEGACY_CODEC).xmap(
-            either -> either.map(Function.identity(), Function.identity()),
-            data -> data instanceof Molang molang ? Either.left(molang) : Either.right(data)
-    );
+    StructCodec<BouncePadData> LEGACY_CODEC = StructCodec.struct(
+            "power", Codec.DOUBLE.optional(DEFAULT_POWER), data -> data instanceof Simple simple ? simple.power : DEFAULT_POWER,
+            "legacy_cylone_mode", Codec.BOOLEAN.optional(false), data -> data instanceof Cylone,
+            (power, legacyCylone) -> legacyCylone ? new Cylone() : new Simple(power));
+    Codec<BouncePadData> CODEC = ExtraCodecs.either(Molang.CODEC, LEGACY_CODEC).transform(
+            either -> either.map(it -> it, it -> it),
+            data -> data instanceof Molang molang ? Either.left(molang) : Either.right(data));
 
     @Nullable Vec getVelocity(@NotNull Player player);
 
@@ -63,14 +63,14 @@ public sealed interface BouncePadData extends DebugCommand.BlockDebug {
     }
 
     final class Molang implements BouncePadData {
-
-        private static final Codec<Molang> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                Codec.STRING.fieldOf("dx").forGetter(data -> data.dxScript),
-                Codec.STRING.fieldOf("dy").forGetter(data -> data.dyScript),
-                Codec.STRING.fieldOf("dz").forGetter(data -> data.dzScript)
-        ).apply(instance, Molang::new));
+        private static final Codec<Molang> CODEC = StructCodec.struct(
+                "dx", Codec.STRING, data -> data.dxScript,
+                "dy", Codec.STRING, data -> data.dyScript,
+                "dz", Codec.STRING, data -> data.dzScript,
+                Molang::new);
 
         private static final MqlCompiler<BouncePadScript> COMPILER;
+
         static {
             try {
                 COMPILER = new MqlCompiler<>(MethodHandles.privateLookupIn(BouncePadScript.class, MethodHandles.lookup()), BouncePadScript.class);

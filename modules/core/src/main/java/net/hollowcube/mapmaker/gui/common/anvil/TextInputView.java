@@ -10,7 +10,6 @@ import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.util.FontUtil;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.item.ItemComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,14 +31,14 @@ public final class TextInputView extends View {
         this.settings = settings;
         this.lastInput = Objects.requireNonNullElse(input, "");
 
-        this.input.setItemSprite(this.input.getItemDirect().with(ItemComponent.HIDE_TOOLTIP));
-        this.output.setItemSprite(this.output.getItemDirect().with(ItemComponent.HIDE_TOOLTIP));
+        this.input.setItemSprite(this.input.getItemDirect().withoutExtraTooltip());
+        this.output.setItemSprite(this.output.getItemDirect().withoutExtraTooltip());
 
         this.title.setText(this.settings.title);
         this.input.setArgs(Component.text(this.lastInput));
         this.icon.setSprite(
                 this.settings.icon.fontChar(),
-                0,
+                null,
                 this.settings.icon.width(),
                 this.settings.icon.offsetX(),
                 this.settings.icon.rightOffset()

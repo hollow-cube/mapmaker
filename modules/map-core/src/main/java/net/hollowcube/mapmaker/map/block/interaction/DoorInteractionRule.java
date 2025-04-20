@@ -17,7 +17,7 @@ public class DoorInteractionRule implements BlockInteractionRule {
         var isTopHalf = block.getProperty("half").equalsIgnoreCase("upper");
         var otherPosition = blockPosition.add(0, isTopHalf ? -1 : 1, 0);
         var otherBlock = interaction.getBlock(otherPosition);
-        if (BlockTags.DOORS.contains(otherBlock.namespace())) {
+        if (BlockTags.DOORS.contains(otherBlock.key())) {
             interaction.setBlock(otherPosition, otherBlock.withProperty("open", newValue));
         }
 

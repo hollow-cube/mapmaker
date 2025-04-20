@@ -29,7 +29,7 @@ public final class BlockHandlers {
 
     public static void init() {
         Consumer<BlockHandler> register = handler -> MinecraftServer.getBlockManager()
-                .registerHandler(handler.getNamespaceId(), () -> handler);
+                .registerHandler(handler.getKey(), () -> handler);
 
         register.accept(SIGN);
         register.accept(HANGING_SIGN);

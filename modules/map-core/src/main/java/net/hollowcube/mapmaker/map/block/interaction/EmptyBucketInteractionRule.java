@@ -16,7 +16,7 @@ public class EmptyBucketInteractionRule implements BlockInteractionRule, BlockIn
     public boolean handleInteraction(@NotNull Interaction interaction) {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition);
-        if (BlockTags.CAULDRONS.contains(block.namespace()) && !interaction.player().isSneaking()) {
+        if (BlockTags.CAULDRONS.contains(block.key()) && !interaction.player().isSneaking()) {
             interaction.setBlock(blockPosition, Block.CAULDRON);
             return true;
         }

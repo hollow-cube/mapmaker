@@ -1,0 +1,11 @@
+{
+    CustomName: "@",
+    Command: "/time set 1000",
+    x: 36,
+    y: 65,
+    z: 218,
+    id: "Control",
+    SuccessCount: 1,
+    LastOutput: "{\"extra\":[{\"translate\":\"commands.time.set\",\"with\":[\"1000\"]}],\"text\":\"[20:53:42] \"}",
+    TrackOutput: 1b
+}

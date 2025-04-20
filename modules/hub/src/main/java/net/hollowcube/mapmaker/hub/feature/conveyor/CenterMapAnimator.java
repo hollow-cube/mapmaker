@@ -7,7 +7,6 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -31,7 +30,8 @@ public class CenterMapAnimator extends AbstractAnimator {
     void loop() {
         while (true) {
             NpcItemModel mapModel = new NpcItemModel();
-            mapModel.setModel(Material.STICK, 5);
+            // TODO(1.21.4)
+//            mapModel.setModel(Material.STICK, 5);
             mapModel.getEntityMeta().setScale(new Vec(3.5));
             mapModel.getEntityMeta().setLeftRotation(new Quaternion(new Vec(1, 0, 0), Math.toRadians(-90)).into());
 

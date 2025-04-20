@@ -1,16 +1,16 @@
 package net.hollowcube.mapmaker.map.entity.potion;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.attribute.AttributeInstance;
 import net.minestom.server.entity.attribute.AttributeModifier;
 import net.minestom.server.entity.attribute.AttributeOperation;
 import net.minestom.server.item.enchant.LevelBasedValue;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 public class DepthStriderPotionHandler implements PotionHandler {
-    private static final NamespaceID MODIFIER_ID = NamespaceID.from("mapmaker:effect.depth_strider");
+    private static final Key MODIFIER_ID = Key.key("mapmaker:effect.depth_strider");
     private static final LevelBasedValue VALUE = new LevelBasedValue.Linear(0.33333334f, 0.33333334f);
 
     @Override

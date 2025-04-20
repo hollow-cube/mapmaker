@@ -1,5 +1,6 @@
 package net.hollowcube.terraform.tool;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
@@ -9,7 +10,6 @@ import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -27,10 +27,10 @@ public interface BuiltinTool {
     int LEFT_CLICK_BLOCK = 1 << 5;
     int LEFT_CLICK_ENTITY = 1 << 6;
 
-    @NotNull NamespaceID namespace();
+    @NotNull Key key();
 
     default @NotNull String name() {
-        return namespace().asString();
+        return key().asString();
     }
 
     int flags();

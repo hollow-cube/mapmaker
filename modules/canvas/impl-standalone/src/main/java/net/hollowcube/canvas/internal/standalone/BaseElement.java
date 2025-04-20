@@ -9,8 +9,8 @@ import net.hollowcube.canvas.internal.standalone.sprite.FontUIBuilder;
 import net.hollowcube.canvas.internal.standalone.sprite.Sprite;
 import net.hollowcube.canvas.internal.standalone.trait.Loadable;
 import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -26,14 +26,12 @@ import java.util.function.Predicate;
 public abstract class BaseElement implements Element, Loadable {
     public static final ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
-    public static final ItemStack LOADING_BROKEN_ITEM = ItemStack.builder(Material.STICK)
-            .set(ItemComponent.HIDE_TOOLTIP, null)
-            .set(ItemComponent.CUSTOM_MODEL_DATA, 2)
-            .build();
-    public static final ItemStack LOADING_SPINNER_ITEM = ItemStack.builder(Material.STICK)
-            .set(ItemComponent.HIDE_TOOLTIP, null)
-            .set(ItemComponent.CUSTOM_MODEL_DATA, 3)
-            .build();
+    public static final ItemStack LOADING_BROKEN_ITEM = ItemStack.of(Material.STICK)
+            .with(DataComponents.ITEM_MODEL, "mapmaker:canvas_broken")
+            .withoutExtraTooltip();
+    public static final ItemStack LOADING_SPINNER_ITEM = ItemStack.of(Material.STICK)
+            .with(DataComponents.ITEM_MODEL, "mapmaker:canvas_loader_1")
+            .withoutExtraTooltip();
 
 
     protected final ElementContext context;

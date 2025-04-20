@@ -1,16 +1,16 @@
 package net.hollowcube.mapmaker.map.entity.potion;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleFunction;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.attribute.AttributeModifier;
 import net.minestom.server.entity.attribute.AttributeOperation;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 public record GenericModifierPotionHandler(
         @NotNull Attribute attribute,
-        @NotNull NamespaceID modifierId,
+        @NotNull Key modifierId,
         @NotNull Int2DoubleFunction formula,
         @NotNull AttributeOperation operation
 ) implements PotionHandler {

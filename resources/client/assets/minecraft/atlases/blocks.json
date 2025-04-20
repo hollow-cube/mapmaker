@@ -1,9 +1,0 @@
-{
-  "sources": [
-    {
-      "type": "directory",
-      "source": "item/numbers_18x",
-      "prefix": "item/numbers_18x"
-    }
-  ]
-}

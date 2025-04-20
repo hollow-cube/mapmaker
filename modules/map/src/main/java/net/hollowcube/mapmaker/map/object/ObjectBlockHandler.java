@@ -4,11 +4,11 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.object.ObjectData;
 import net.hollowcube.mapmaker.object.ObjectType;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -27,8 +27,8 @@ public interface ObjectBlockHandler extends BlockHandler {
     }
 
     @Override
-    default @NotNull NamespaceID getNamespaceId() {
-        return objectType().namespaceId();
+    default @NotNull Key getKey() {
+        return objectType().key();
     }
 
     @Override

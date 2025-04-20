@@ -2,12 +2,6 @@ package net.hollowcube.mapmaker.to_be_refactored;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,30 +12,39 @@ import java.util.Map;
 import java.util.Objects;
 
 //todo do not duplicate this :(
-public record BadSprite(char fontChar, int cmd, String model, int width, int offsetX, int rightOffset) {
+public record BadSprite(char fontChar, @Nullable String model, int width, int offsetX, int rightOffset) {
     private static final System.Logger logger = System.getLogger(BadSprite.class.getName());
 
     public static final Map<String, BadSprite> SPRITE_MAP;
-    public static final Int2ObjectMap<String> CMD_ID_MAP;
-    public static final Object2IntMap<String> ID_CMD_MAP;
+    private static final Map<String, String> MODEL_ID_MAP;
+    private static final Map<String, String> ID_MODEL_MAP;
 
     public static @NotNull BadSprite require(@NotNull String path) {
         return Objects.requireNonNull(SPRITE_MAP.get(path), path);
     }
 
-    public static @Nullable String getCmdId(@Nullable Integer cmd) {
-        if (cmd == null) return null;
-        return CMD_ID_MAP.get((int) cmd);
+    public static @Nullable String idToModel(@NotNull String id) {
+        return ID_MODEL_MAP.get(id);
     }
 
-    public static int getIdCmd(@NotNull String id) {
-        return ID_CMD_MAP.getInt(id);
+    public static @Nullable String modelToId(@Nullable String model) {
+        if (model == null) return null;
+        return MODEL_ID_MAP.get(model);
+    }
+
+    public @Nullable String modelOrNull() {
+        return this.model;
+    }
+
+    @Override
+    public @NotNull String model() {
+        return Objects.requireNonNull(model);
     }
 
     static {
         var sprites = new HashMap<String, BadSprite>();
-        var cmdIdMap = new Int2ObjectArrayMap<String>();
-        var idCmdMap = new Object2IntArrayMap<String>();
+        var modelIdMap = new HashMap<String, String>();
+        var idModelMap = new HashMap<String, String>();
         try (var is = BadSprite.class.getResourceAsStream("/sprites.json")) {
             if (is != null) {
                 var entries = new Gson().fromJson(new String(is.readAllBytes(), StandardCharsets.UTF_8), JsonArray.class);
@@ -49,24 +52,18 @@ public record BadSprite(char fontChar, int cmd, String model, int width, int off
                     var obj = entry.getAsJsonObject();
                     var key = obj.get("name").getAsString();
                     char fontChar = 0;
-                    int cmd = 0;
-                    if (obj.has("fontChar"))
-                        fontChar = obj.get("fontChar").getAsString().charAt(0);
-                    else if (obj.has("cmd")) {
-                        cmd = obj.get("cmd").getAsInt();
-                        cmdIdMap.put(cmd, key);
-                        idCmdMap.put(key, cmd);
-                    } else {
-                        throw new UnsupportedOperationException("Sprite must have either fontChar or cmd: " + obj);
-                    }
                     String model = null;
-                    if (obj.has("model")) {
+                    if (obj.has("fontChar"))
+                        fontChar = (char) obj.get("fontChar").getAsInt();
+                    else {
                         model = obj.get("model").getAsString();
+                        modelIdMap.put(model, key);
+                        idModelMap.put(key, model);
                     }
                     var width = obj.get("width");
                     var offsetX = obj.get("offsetX");
                     var rightOffset = obj.get("rightOffset");
-                    sprites.put(key, new BadSprite(fontChar, cmd, model,
+                    sprites.put(key, new BadSprite(fontChar, model,
                             width == null ? 0 : width.getAsInt(),
                             offsetX == null ? 0 : offsetX.getAsInt(),
                             rightOffset == null ? 0 : rightOffset.getAsInt()));
@@ -78,8 +75,8 @@ public record BadSprite(char fontChar, int cmd, String model, int width, int off
             logger.log(System.Logger.Level.ERROR, "Failed to load sprites.json", e);
         } finally {
             SPRITE_MAP = Map.copyOf(sprites);
-            CMD_ID_MAP = Int2ObjectMaps.unmodifiable(cmdIdMap);
-            ID_CMD_MAP = Object2IntMaps.unmodifiable(idCmdMap);
+            MODEL_ID_MAP = Map.copyOf(modelIdMap);
+            ID_MODEL_MAP = Map.copyOf(idModelMap);
         }
     }
 

@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.hub;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.Uuids;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
-import net.hollowcube.mapmaker.backpack.RecipeBookHack;
 import net.hollowcube.mapmaker.hub.entity.marker.HubMarkerLoader;
 import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
 import net.hollowcube.mapmaker.hub.item.*;
@@ -98,12 +97,11 @@ public class HubMapWorld extends AbstractMapWorld {
         itemRegistry().register(new CreateMapsItem(server.guiController()));
         itemRegistry().register(new OrgMapsItem(server.guiController()));
         itemRegistry().register(new OpenCosmeticsMenuItem(server.guiController()));
-        itemRegistry().register(new OpenStoreItem(server.guiController()));
+        itemRegistry().register(new OpenStoreItem(server));
     }
 
     @Override
     public @NotNull Pos spawnPoint(@NotNull Player player) {
-//        return new Pos(-62.025, 40, -89.329, -65.4f, 5.5f);
         var seeded = new Random(player.getUuid().getLeastSignificantBits());
         return MIN_SPAWN_POINT.add(
                 (seeded.nextDouble() * 10) % 3,
@@ -165,8 +163,6 @@ public class HubMapWorld extends AbstractMapWorld {
         player.setHeldItemSlot(playerData.getSetting(SELECTED_SLOT).byteValue());
         player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE).addModifier(REACH_MOD);
 
-        player.getInventory().setItemStack(10, RecipeBookHack.BLANK_ITEM_CRAFTABLE);
-
         // Hotbar items
         var inventory = player.getInventory();
         inventory.setItemStack(0, itemRegistry().getItemStack(PlayMapsItem.ID, null));
@@ -196,7 +192,7 @@ public class HubMapWorld extends AbstractMapWorld {
 
     private void handleSwitchSlot(@NotNull PlayerChangeHeldSlotEvent event) {
         var playerData = PlayerDataV2.fromPlayer(event.getPlayer());
-        playerData.setSetting(SELECTED_SLOT, (int) event.getSlot());
+        playerData.setSetting(SELECTED_SLOT, (int) event.getNewSlot());
     }
 
     private void handlePlayerMove(@NotNull PlayerMoveEvent event) {

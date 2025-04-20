@@ -7,6 +7,12 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Called when a player steps off a checkpoint
+ *
+ * Note that this is also called when entering spectator mode while standing on a checkpoint. Callers should check for
+ * the presence of a save state if they care.
+ */
 public record MapPlayerCheckpointPostChangeEvent(
         @NotNull Player player,
         @NotNull MapWorld mapWorld,

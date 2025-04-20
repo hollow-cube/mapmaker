@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:composite",
+    "models": [
+      {
+        "type": "minecraft:model",
+        "model": "$base"
+      },
+      {
+        "type": "minecraft:range_dispatch",
+        "property": "minecraft:custom_model_data",
+        "fallback": {
+          "type": "minecraft:empty"
+        },
+        "entries": "$entries"
+      }
+    ]
+  }
+}

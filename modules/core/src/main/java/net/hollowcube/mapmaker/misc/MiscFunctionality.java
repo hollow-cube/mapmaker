@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.misc;
 
+import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
@@ -9,17 +10,16 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.session.MapPresence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.hollowcube.mapmaker.util.CoreTeams;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
-import net.minestom.server.item.ItemComponent;
-import net.minestom.server.item.component.Equippable;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -62,7 +62,9 @@ public final class MiscFunctionality {
                 .appendNewline()
                 .appendNewline()
                 .appendNewline()
-                .append(Component.text(FontUtil.computeOffset(-15) + tabLogoSprite.fontChar(), FontUtil.NO_SHADOW).append(Component.text(" Hollow Cube", blueColor))).appendNewline()
+                .append(Component.empty()
+                        .append(Component.text(FontUtil.computeOffset(-15) + tabLogoSprite.fontChar()).shadowColor(ShadowColor.none()))
+                        .append(Component.text(" Hollow Cube", blueColor))).appendNewline()
                 .append(Component.text(cubeOffset + "ᴇᴀʀʟʏ ᴀᴄᴄᴇѕѕ", darkGrayColor))
                 .appendNewline()
                 .build();
@@ -85,7 +87,7 @@ public final class MiscFunctionality {
 
         var playerData = PlayerDataV2.fromPlayer(p);
 
-        builder.pushColor(FontUtil.NO_SHADOW);
+        builder.pushShadowColor(ShadowColor.none());
         builder.pos(11).drawInPlace(CURRENCY_DISPLAY);
 
         int MAX_TEXT_WIDTH = 22;
@@ -106,7 +108,7 @@ public final class MiscFunctionality {
         var hasExperienceBar = p.getGameMode() == GameMode.SURVIVAL || p.getGameMode() == GameMode.ADVENTURE;
         if (hasExperienceBar) return; // Use the builtin one for these.
 
-        builder.pushColor(FontUtil.NO_SHADOW);
+        builder.pushShadowColor(ShadowColor.none());
         builder.pos(-(XP_BAR_BACKGROUND.width() / 2)).drawInPlace(XP_BAR_BACKGROUND);
     }
 
@@ -128,11 +130,11 @@ public final class MiscFunctionality {
             var cosmetic = Cosmetic.byId(cosmeticType, playerData.getCosmetic(cosmeticType));
             var itemStack = cosmetic == null ? cosmeticType.blankIcon() : cosmetic.impl().iconItem();
             // If the itemstack has a glider we need to preserve it.
-            if (player.getInventory().getItemStack(cosmeticType.iconSlot()).has(ItemComponent.GLIDER)) {
-                itemStack = itemStack.with(ItemComponent.GLIDER);
-                var equippable = itemStack.get(ItemComponent.EQUIPPABLE);
-                if (equippable != null) itemStack = itemStack.with(ItemComponent.EQUIPPABLE,
-                        equippable.withModel("minecraft:elytra"));
+            if (player.getInventory().getItemStack(cosmeticType.iconSlot()).has(DataComponents.GLIDER)) {
+                itemStack = itemStack.with(DataComponents.GLIDER);
+                var equippable = itemStack.get(DataComponents.EQUIPPABLE);
+                if (equippable != null) itemStack = itemStack.with(DataComponents.EQUIPPABLE,
+                        equippable.withAssetId("minecraft:elytra"));
             }
             player.getInventory().setItemStack(cosmeticType.iconSlot(), itemStack);
         }

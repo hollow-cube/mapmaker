@@ -1,12 +1,10 @@
 package net.hollowcube.mapmaker.map.feature.play.effect;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minestom.server.item.ItemStack;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.StructCodec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
 import java.util.function.Consumer;
 
 // Can store up to 3 items. If present, it will be merged (if similar) or  overwrite the existing item otherwise.
@@ -19,19 +17,12 @@ public record HotbarItems(
 ) {
     public static final HotbarItems EMPTY = new HotbarItems(null, null, null, null);
 
-    public static final Codec<HotbarItems> CODEC = RecordCodecBuilder.create(i -> i.group(
-            HotbarItem.CODEC.optionalFieldOf("item1").forGetter(v -> Optional.ofNullable(v.item1())),
-            HotbarItem.CODEC.optionalFieldOf("item2").forGetter(v -> Optional.ofNullable(v.item2())),
-            HotbarItem.CODEC.optionalFieldOf("item3").forGetter(v -> Optional.ofNullable(v.item3())),
-            Codec.BOOL.optionalFieldOf("elytra").forGetter(v -> Optional.ofNullable(v.elytra()))
-    ).apply(i, HotbarItems::fromOptionals));
-
-    private static @NotNull HotbarItems fromOptionals(
-            @NotNull Optional<HotbarItem> item1, @NotNull Optional<HotbarItem> item2,
-            @NotNull Optional<HotbarItem> item3, @NotNull Optional<Boolean> elytra
-    ) {
-        return new HotbarItems(item1.orElse(null), item2.orElse(null), item3.orElse(null), elytra.orElse(null));
-    }
+    public static final StructCodec<HotbarItems> CODEC = StructCodec.struct(
+            "item1", HotbarItem.CODEC.optional(), HotbarItems::item1,
+            "item2", HotbarItem.CODEC.optional(), HotbarItems::item2,
+            "item3", HotbarItem.CODEC.optional(), HotbarItems::item3,
+            "elytra", Codec.BOOLEAN.optional(), HotbarItems::elytra,
+            HotbarItems::new);
 
     public @NotNull HotbarItems withItem(int index, @Nullable HotbarItem item) {
         if (index == 0) {

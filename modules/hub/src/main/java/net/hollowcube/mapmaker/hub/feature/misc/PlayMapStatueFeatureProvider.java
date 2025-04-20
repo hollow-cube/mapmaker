@@ -11,17 +11,15 @@ import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.minestom.server.color.Color;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Metadata;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.component.DyedItemColor;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.TaskSchedule;
@@ -52,31 +50,30 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
         this.guiController = server.guiController();
 
         edgeEntities[0] = new NpcItemModel();
-        edgeEntities[0].setModel(Material.DIAMOND, BadSprite.require("icon/map/create_map").cmd());
+        edgeEntities[0].setModel(Material.DIAMOND, BadSprite.require("icon/map/create_map"));
         edgeEntities[0].setInstance(world.instance(), LEFT);
         appendInteractor(edgeEntities[0], 3, 5, this::handleCreateMapsClick, false);
 
         edgeEntities[3] = new NpcItemModel();
-        edgeEntities[3].setModel(Material.DIAMOND, BadSprite.require("icon/map/best").cmd());
+        edgeEntities[3].setModel(Material.DIAMOND, BadSprite.require("icon/map/best"));
         edgeEntities[3].setInstance(world.instance(), LEFT_MIDDLE);
         appendInteractor(edgeEntities[3], 3, 5, this::handleBestMapsClick, false);
 
         edgeEntities[4] = new NpcItemModel();
-        edgeEntities[4].getEntityMeta().setItemStack(ItemStack.of(Material.LEATHER_HORSE_ARMOR)
-                .with(ItemComponent.CUSTOM_MODEL_DATA, BadSprite.require("hub/5x5/blossom_itmg").cmd())
-                .with(ItemComponent.DYED_COLOR, new DyedItemColor(new Color(0xFF0000))));
+        edgeEntities[4].getEntityMeta().setItemStack(ItemStack.of(Material.STICK)
+                .with(DataComponents.ITEM_MODEL, BadSprite.require("hub/5x5/blossom_itmg").model()));
         edgeEntities[4].getEntityMeta().setScale(new Vec(5)); // 5x because its 5x5x5
         edgeEntities[4].getEntityMeta().setTranslation(new Vec(0, 1 + BASE_OFFSET, 0));
         edgeEntities[4].setInstance(world.instance(), MIDDLE.withView(90, 0));
         appendInteractor(edgeEntities[4], 6, 6, this::handleQualityClick, true);
 
         edgeEntities[1] = new NpcItemModel();
-        edgeEntities[1].setModel(Material.DIAMOND, BadSprite.require("icon/map/new").cmd());
+        edgeEntities[1].setModel(Material.DIAMOND, BadSprite.require("icon/map/new"));
         edgeEntities[1].setInstance(world.instance(), RIGHT_MIDDLE);
         appendInteractor(edgeEntities[1], 3, 5, this::handleNewMapsClick, false);
 
         edgeEntities[2] = new NpcItemModel();
-        edgeEntities[2].setModel(Material.DIAMOND, BadSprite.require("icon/map/search").cmd());
+        edgeEntities[2].setModel(Material.DIAMOND, BadSprite.require("icon/map/search"));
         edgeEntities[2].setInstance(world.instance(), RIGHT);
         appendInteractor(edgeEntities[2], 3, 5, this::handleSearchMapsClick, false);
 

@@ -61,7 +61,7 @@ final class SizedSchematicBuilder implements SchematicBuilder {
 
         var blockHandler = block.handler();
         if (blockHandler != null) {
-            var blockEntityId = blockHandler.getNamespaceId().asString();
+            var blockEntityId = blockHandler.getKey().asString();
             var blockEntityData = Objects.requireNonNullElse(block.nbt(), CompoundBinaryTag.empty());
             blockEntities.put(blockIndex, new BlockEntityData(blockEntityId, relPos, blockEntityData));
         }

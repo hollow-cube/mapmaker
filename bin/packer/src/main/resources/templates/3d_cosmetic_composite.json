@@ -1,0 +1,40 @@
+{
+  "type": "minecraft:model",
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:display_context",
+    "cases": [
+      {
+        "when": ["gui"],
+        "model": {
+          "type": "minecraft:range_dispatch",
+          "property": "minecraft:custom_model_data",
+          "entries": [
+            {
+              "threshold": 1,
+              "model": {
+                "type": "minecraft:model",
+                "model": "$icon_locked"
+              }
+            },
+            {
+              "threshold": 2,
+              "model": {
+                "type": "minecraft:model",
+                "model": "$model"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "$icon"
+          }
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "$model"
+    }
+  }
+}

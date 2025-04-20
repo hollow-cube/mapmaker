@@ -2,8 +2,8 @@ package net.hollowcube.mapmaker.map.block.placement;
 
 
 import net.hollowcube.mapmaker.map.block.handler.DecoratedPotBlockHandler;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.item.ItemComponent;
 import org.jetbrains.annotations.NotNull;
 
 public class DecoratedPotPlacementRule extends FacingHorizontalPlacementRule {
@@ -14,7 +14,7 @@ public class DecoratedPotPlacementRule extends FacingHorizontalPlacementRule {
 
     @Override
     public Block blockPlace(@NotNull PlacementState placementState) {
-        var sherds = placementState.usedItemStack() == null ? null : placementState.usedItemStack().get(ItemComponent.POT_DECORATIONS);
+        var sherds = placementState.usedItemStack() == null ? null : placementState.usedItemStack().get(DataComponents.POT_DECORATIONS);
         return super.blockPlace(placementState).withTag(DecoratedPotBlockHandler.SHERDS, sherds);
     }
 

@@ -15,7 +15,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class PackContext {
@@ -32,11 +31,6 @@ public class PackContext {
     private final Map<String, String> remapping = new HashMap<>();
 
     private final JsonObject fontFile;
-
-    private final JsonObject leatherArmorFile;
-    private final JsonObject diamondFile;
-    private int leatherArmorCMD = 1;
-    private int diamondCMD = 1;
 
     private JsonArray serverSprites = new JsonArray();
 
@@ -62,20 +56,6 @@ public class PackContext {
         }
 
         fontFile = new Gson().fromJson(Files.readString(rpMinecraftBase.resolve("font").resolve("default.json")), JsonObject.class);
-
-        leatherArmorFile = new JsonObject();
-        leatherArmorFile.addProperty("parent", "item/generated");
-        JsonObject leatherTextures = new JsonObject();
-        leatherTextures.addProperty("layer0", "item/leather_horse_armor");
-        leatherArmorFile.add("textures", leatherTextures);
-        leatherArmorFile.add("overrides", new JsonArray());
-
-        diamondFile = new JsonObject();
-        diamondFile.addProperty("parent", "item/generated");
-        JsonObject diamondTextures = new JsonObject();
-        diamondTextures.addProperty("layer0", "item/diamond");
-        diamondFile.add("textures", diamondTextures);
-        diamondFile.add("overrides", new JsonArray());
     }
 
     public @NotNull Path resources() {
@@ -116,28 +96,6 @@ public class PackContext {
         return writeTexture(type, name, data, null);
     }
 
-    public @NotNull String writeBasicModel(@NotNull String name, byte[] data) throws IOException {
-        return writeBasicModel(name, data, null);
-    }
-
-    public @NotNull String writeBasicModel(@NotNull String name, byte[] data, @Nullable Consumer<JsonObject> editor) throws IOException {
-        name = minifyId(name);
-
-        JsonObject obj = new JsonObject();
-        obj.addProperty("parent", "item/generated");
-        JsonObject textures = new JsonObject();
-        textures.addProperty("layer0", writeTexture("item", name, data));
-        obj.add("textures", textures);
-
-        if (editor != null) editor.accept(obj);
-
-        Path path = rpMapmakerBase.resolve("models").resolve("item").resolve(name + ".json");
-        Files.createDirectories(path.getParent());
-        Files.writeString(path, new Gson().toJson(obj));
-
-        return mapmakerRefBase + "item/" + name;
-    }
-
     public @NotNull String writeModel(@NotNull String name, @NotNull JsonObject model) throws IOException {
         name = minifyId(name);
 
@@ -152,31 +110,15 @@ public class PackContext {
         fontFile.getAsJsonArray("providers").add(definition);
     }
 
-    public int addBasicItemTexture(@NotNull ModelType modelType, @NotNull String name, byte[] texture) throws IOException {
-        return addBasicItemTexture(modelType, name, texture, null);
-    }
+    public void addItemModel(@NotNull String name, @NotNull JsonObject model) throws IOException {
+        var minName = minifyId(name);
 
-    public int addBasicItemTexture(@NotNull ModelType modelType, @NotNull String name, byte[] texture, @Nullable Consumer<JsonObject> modelEditor) throws IOException {
-        int cmd = modelType == ModelType.COLORED ? leatherArmorCMD++ : diamondCMD++;
-        JsonObject override = new JsonObject();
-        JsonObject predicate = new JsonObject();
-        predicate.addProperty("custom_model_data", cmd);
-        override.add("predicate", predicate);
-        override.addProperty("model", writeBasicModel(name, texture, modelEditor));
-        override.addProperty("axiom:hide", true);
-        (modelType == ModelType.COLORED ? leatherArmorFile : diamondFile).getAsJsonArray("overrides").add(override);
-        return cmd;
-    }
+        Path path = rpMapmakerBase.resolve("items").resolve(minName + ".json");
+        Files.createDirectories(path.getParent());
+        Files.writeString(path, new Gson().toJson(model));
 
-    public int addBasicItem(@NotNull ModelType modelType, @NotNull String name, String model) throws IOException {
-        int cmd = modelType == ModelType.COLORED ? leatherArmorCMD++ : diamondCMD++;
-        JsonObject override = new JsonObject();
-        JsonObject predicate = new JsonObject();
-        predicate.addProperty("custom_model_data", cmd);
-        override.add("predicate", predicate);
-        override.addProperty("model", model);
-        (modelType == ModelType.COLORED ? leatherArmorFile : diamondFile).getAsJsonArray("overrides").add(override);
-        return cmd;
+        var clientPath = mapmakerRefBase + minName;
+        addServerSprite(new ServerSprite(name, clientPath));
     }
 
     public void addServerSprite(@NotNull ServerSprite sprite) {
@@ -184,7 +126,6 @@ public class PackContext {
     }
 
     public void cleanup() throws IOException {
-        System.out.println("Cleanup");
         Gson gson = new GsonBuilder().create();
 
         Files.writeString(out.resolve("mapping.json"), gson.toJson(remapping));
@@ -197,12 +138,6 @@ public class PackContext {
         }
         Files.writeString(fontFile, fontDefinition);
 
-        Path leatherArmorFile = rpMinecraftBase.resolve("models").resolve("item").resolve("leather_horse_armor.json");
-        Files.writeString(leatherArmorFile, gson.toJson(this.leatherArmorFile));
-
-        Path diamondFile = rpMinecraftBase.resolve("models").resolve("item").resolve("diamond.json");
-        Files.writeString(diamondFile, gson.toJson(this.diamondFile));
-
         Path serverSpritesPath = out().resolve("server").resolve("sprites.json");
         Files.createDirectories(serverSpritesPath.getParent());
         String sprites = gson.toJson(serverSprites);
@@ -213,8 +148,6 @@ public class PackContext {
         Files.writeString(serverSpritesPath, sprites);
 
         Files.writeString(out().resolve("server").resolve("dynamic.json"), gson.toJson(dynamicData));
-
-
     }
 
     public Path rpMinecraftBase() {
@@ -236,6 +169,7 @@ public class PackContext {
         try (Stream<Path> files = Files.walk(resources.resolve("client"))) {
             for (Path file : files.toList()) {
                 try {
+                    if (file.getFileName().toString().contains(".DS_Store")) continue;
                     Files.copy(file, out.resolve(resources.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
                 } catch (DirectoryNotEmptyException ignored) {
 //                    System.out.println(e.getMessage());

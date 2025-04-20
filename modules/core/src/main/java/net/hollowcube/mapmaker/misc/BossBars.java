@@ -4,6 +4,7 @@ import net.hollowcube.common.util.FontUtil;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.ShadowColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +33,7 @@ public class BossBars {
     private static @NotNull BossBar build(@NotNull Component text, @NotNull BackgroundSpriteSet bg) {
         int contentWidth = FontUtil.measureTextV2(text);
         return bossBar(Component.text()
-                .append(Component.text(bg.build(contentWidth + (2 * BORDER_WIDTH)), FontUtil.NO_SHADOW))
+                .append(Component.text(bg.build(contentWidth + (2 * BORDER_WIDTH))).shadowColor(ShadowColor.none()))
                 .append(Component.text(FontUtil.computeOffset(-(contentWidth + BORDER_WIDTH + 2))))
                 .append(text)
                 .build());

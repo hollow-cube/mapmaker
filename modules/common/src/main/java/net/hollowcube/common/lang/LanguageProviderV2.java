@@ -147,11 +147,11 @@ public class LanguageProviderV2 {
 
     public static @NotNull Component getVanillaTranslation(@NotNull Material material) {
         if (material.isBlock()) return getVanillaTranslation(material.registry().block());
-        return Component.translatable("item." + material.namespace().namespace() + "." + material.namespace().path());
+        return Component.translatable("item." + material.key().namespace() + "." + material.key().value());
     }
 
     public static @NotNull Component getVanillaTranslation(@NotNull Block block) {
-        return Component.translatable("block." + block.namespace().namespace() + "." + block.namespace().path());
+        return Component.translatable("block." + block.key().namespace() + "." + block.key().value());
     }
 
     // Use of a lot of internal Minimessage APIs below. May break in the future and need to write this ourselves.

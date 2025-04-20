@@ -71,8 +71,6 @@ public class PlayerBackpack {
 //                false, false,
 //                Arrays.stream(BackpackItem.values()).map(BackpackItem::recipeBookId).toList(), List.of());
 //        player.sendPacket(unlockRecipesPacket);
-
-        player.getInventory().setItemStack(9, RecipeBookHack.BLANK_ITEM_CRAFTABLE);
     }
 
     private static void handleRecipeBookClick(@NotNull ClientPlaceRecipePacket packet, @NotNull Player player) {

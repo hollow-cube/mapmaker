@@ -5,7 +5,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.marhali.json5.Json5;
-import net.hollowcube.mapmaker.type.ServerSprite;
+import net.hollowcube.mapmaker.util.ModelUtil;
+import net.hollowcube.mapmaker.util.Templates;
 import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
@@ -31,11 +32,7 @@ public class CosmeticV2Transform {
 
     private BufferedImage lockOverlay;
 
-    private int nextChar = 0;
-
-    public void init(@NotNull PackContext ctx, @NotNull FontTransform fontTransform) throws IOException {
-        nextChar = fontTransform.getNextChar();
-
+    public void init(@NotNull PackContext ctx) throws IOException {
         try (var lockOverlay = getClass().getResourceAsStream("/lock_overlay_16x.png")) {
             if (lockOverlay == null) throw new IllegalStateException("lock_overlay_16x.png not found");
             this.lockOverlay = ImageIO.read(lockOverlay);
@@ -66,35 +63,36 @@ public class CosmeticV2Transform {
                     }
 
                     try {
-                        if (Files.exists(cosmeticDir.resolve("model.png"))) {   // Add resources for the 3d model
-                            byte[] texture = Files.readAllBytes(cosmeticDir.resolve("model.png"));
+                        var templateVars = new HashMap<String, Object>();
+
+                        var texIcon = Files.readAllBytes(cosmeticDir.resolve("icon.png"));
+                        var icon = ctx.writeTexture("item", name + "_icon", texIcon);
+                        templateVars.put("icon", ctx.writeModel(name + "_icon", ModelUtil.createItemGenerated(icon)));
+
+                        var texLocked = ImageIO.read(new ByteArrayInputStream(texIcon));
+                        var g = texLocked.createGraphics();
+                        g.drawImage(lockOverlay, 0, 0, null);
+                        g.dispose();
+                        var baos = new ByteArrayOutputStream();
+                        ImageIO.write(texLocked, "png", baos);
+                        var locked = ctx.writeTexture("item", name + "_locked", baos.toByteArray());
+                        templateVars.put("icon_locked", ctx.writeModel(name + "_locked", ModelUtil.createItemGenerated(locked)));
+
+                        // Use different template depending on whether the cosmetic has a 3d model or not.
+                        if (Files.exists(cosmeticDir.resolve("model.png"))) {
+                            var texModel = Files.readAllBytes(cosmeticDir.resolve("model.png"));
                             byte[] textureMeta = null;
                             if (Files.exists(cosmeticDir.resolve("model.png.mcmeta")))
                                 textureMeta = Files.readAllBytes(cosmeticDir.resolve("model.png.mcmeta"));
-                            String texId = ctx.writeTexture("item", name, texture, textureMeta);
+                            var texId = ctx.writeTexture("item", name, texModel, textureMeta);
 
                             JsonObject modelObj = GSON.fromJson(Files.readString(cosmeticDir.resolve("model.json")), JsonObject.class);
                             fixModelTextures(modelObj, texId);
-                            String model = ctx.writeModel(name, modelObj);
-                            int cmd = ctx.addBasicItem(ModelType.COLORED, name, model);
+                            templateVars.put("model", ctx.writeModel(name, modelObj));
 
-                            ctx.addServerSprite(ServerSprite.customModelData(path, cmd));
-                        }
-
-                        {   // Add icon item texture
-                            byte[] texture = Files.readAllBytes(cosmeticDir.resolve("icon.png"));
-                            int cmd = ctx.addBasicItemTexture(ModelType.DEFAULT, path + "/icon", texture);
-                            ctx.addServerSprite(ServerSprite.customModelData(path + "/icon", cmd));
-
-                            var tex = ImageIO.read(new ByteArrayInputStream(texture));
-                            var g = tex.createGraphics();
-                            g.drawImage(lockOverlay, 0, 0, null);
-                            g.dispose();
-                            var baos = new ByteArrayOutputStream();
-                            ImageIO.write(tex, "png", baos);
-
-                            int lockedCmd = ctx.addBasicItemTexture(ModelType.DEFAULT, path + "/icon_locked", baos.toByteArray());
-                            ctx.addServerSprite(ServerSprite.customModelData(path + "/icon_locked", lockedCmd));
+                            ctx.addItemModel(path.toLowerCase(Locale.ROOT), Templates.applyObject("3d_cosmetic_composite", templateVars));
+                        } else {
+                            ctx.addItemModel(path.toLowerCase(Locale.ROOT), Templates.applyObject("2d_cosmetic_composite", templateVars));
                         }
                     } catch (Exception e) {
                         throw new RuntimeException("failed processing " + name, e);

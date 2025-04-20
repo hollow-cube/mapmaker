@@ -1,0 +1,90 @@
+[versions]
+annotations = "26.0.2"
+fastutil = "8.5.15"
+gson = "2.12.1"
+adventure = "4.20.0"
+minestom = "dev" # "1_21_5-504b138aa3"
+posthog = "0.1.3"
+slf4j = "2.0.9"
+kafka = "3.9.0"
+junit = "5.11.4"
+autoservice = "1.1.1"
+noxesium = "2.5.0"
+zstd = "1.5.7-2"
+otel = "1.45.0"
+otel-semconv = "1.28.0-alpha"
+polar = "1.14.0"
+similarity = "2.0.0"
+completely = "0.9.0"
+jctools = "4.0.5"
+caffeine = "3.1.8"
+prometheus = "0.16.0"
+mql = "1.1.0"
+logback = "1.5.18"
+json5 = "2.0.0"
+graalvm = "24.2.0"
+blossom = "2.1.0"
+velocity = "3.4.0-SNAPSHOT"
+
+[libraries]
+annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
+autoservice = { group = "com.google.auto.service", name = "auto-service", version.ref = "autoservice" }
+autoservice-annotations = { group = "com.google.auto.service", name = "auto-service-annotations", version.ref = "autoservice" }
+fastutil = { group = "it.unimi.dsi", name = "fastutil", version.ref = "fastutil" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+minestom = { group = "net.minestom", name = "minestom-snapshots", version.ref = "minestom" }
+posthog = { group = "dev.hollowcube", name = "posthog-java", version.ref = "posthog" }
+slf4j = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
+slf4j-jul = { group = "org.slf4j", name = "jul-to-slf4j", version.ref = "slf4j" }
+logback = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
+kafka = { group = "org.apache.kafka", name = "kafka-clients", version.ref = "kafka" }
+noxesium = { group = "com.noxcrew.noxesium", name = "api", version.ref = "noxesium" }
+zstd = { group = "com.github.luben", name = "zstd-jni", version.ref = "zstd" }
+polar = { group = "dev.hollowcube", name = "polar", version.ref = "polar" }
+similarity = { group = "info.debatty", name = "java-string-similarity", version.ref = "similarity" }
+completely = { group = "com.miguelfonseca.completely", name = "completely-core", version.ref = "completely" }
+jctools = { group = "org.jctools", name = "jctools-core", version.ref = "jctools" }
+caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
+mql = { group = "dev.hollowcube", name = "mql", version.ref = "mql" }
+json5 = { group = "de.marhali", name = "json5-java", version.ref = "json5" }
+velocity-api = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
+
+graal-polyglot = { group = "org.graalvm.polyglot", name = "polyglot", version.ref = "graalvm" }
+graal-js-language = { group = "org.graalvm.js", name = "js-language", version.ref = "graalvm" }
+graal-js-community = { group = "org.graalvm.js", name = "js-community", version.ref = "graalvm" }
+graal-truffle-runtime = { group = "org.graalvm.truffle", name = "truffle-runtime", version.ref = "graalvm" }
+graal-truffle-enterprise = { group = "org.graalvm.truffle", name = "truffle-enterprise", version.ref = "graalvm" }
+
+adventure-api = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }
+adventure-key = { group = "net.kyori", name = "adventure-key", version.ref = "adventure" }
+adventure-text-minimessage = { group = "net.kyori", name = "adventure-text-minimessage", version.ref = "adventure" }
+adventure-text-serializer-plain = { group = "net.kyori", name = "adventure-text-serializer-plain", version.ref = "adventure" }
+adventure-nbt = { group = "net.kyori", name = "adventure-nbt", version.ref = "adventure" }
+
+prometheus = { group = "io.prometheus", name = "simpleclient", version.ref = "prometheus" }
+prometheus-hotspot = { group = "io.prometheus", name = "simpleclient_hotspot", version.ref = "prometheus" }
+prometheus-httpserver = { group = "io.prometheus", name = "simpleclient_httpserver", version.ref = "prometheus" }
+
+otel-api = { group = "io.opentelemetry", name = "opentelemetry-api", version.ref = "otel" }
+otel-context = { group = "io.opentelemetry", name = "opentelemetry-context", version.ref = "otel" }
+otel-sdk = { group = "io.opentelemetry", name = "opentelemetry-sdk", version.ref = "otel" }
+otel-sdk-common = { group = "io.opentelemetry", name = "opentelemetry-sdk-common", version.ref = "otel" }
+otel-sdk-trace = { group = "io.opentelemetry", name = "opentelemetry-sdk-trace", version.ref = "otel" }
+otel-extension-trace-propagators = { group = "io.opentelemetry", name = "opentelemetry-extension-trace-propagators", version.ref = "otel" }
+otel-exporter-logging = { group = "io.opentelemetry", name = "opentelemetry-exporter-logging", version.ref = "otel" }
+otel-exporter-otlp = { group = "io.opentelemetry", name = "opentelemetry-exporter-otlp", version.ref = "otel" }
+otel-exporter-sender-jdk = { group = "io.opentelemetry", name = "opentelemetry-exporter-sender-jdk", version.ref = "otel" }
+otel-semconv = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv", version.ref = "otel-semconv" }
+
+junit-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit" }
+junit-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit" }
+junit-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit" }
+
+[bundles]
+adventure = ["adventure-api", "adventure-key", "adventure-text-minimessage", "adventure-text-serializer-plain", "adventure-nbt"]
+prometheus = ["prometheus", "prometheus-hotspot", "prometheus-httpserver"]
+otel = ["otel-api", "otel-context", "otel-sdk", "otel-sdk-common", "otel-sdk-trace", "otel-extension-trace-propagators", "otel-exporter-logging", "otel-exporter-otlp", "otel-exporter-sender-jdk", "otel-semconv"]
+graalvm = ["graal-polyglot", "graal-js-language", "graal-js-community", "graal-truffle-runtime", "graal-truffle-enterprise"]
+
+[plugins]
+blossom = { id = "net.kyori.blossom", version.ref = "blossom" }

@@ -2,8 +2,8 @@ package net.hollowcube.mapmaker.map.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.Transcoder;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("UnstableApiUsage")
 public final class DynamicRegistry {
     private static final Logger logger = LoggerFactory.getLogger(DynamicRegistry.class);
 
@@ -25,7 +26,7 @@ public final class DynamicRegistry {
         var obj = REGISTRY.get(name);
         var map = new HashMap<String, T>();
         for (var entry : obj.entrySet()) {
-            var result = codec.parse(JsonOps.INSTANCE, entry.getValue()).getOrThrow();
+            var result = codec.decode(Transcoder.JSON, entry.getValue()).orElseThrow();
             map.put(entry.getKey(), result);
         }
         return Map.copyOf(map);

@@ -8,11 +8,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.projectile.FireworkRocketMeta;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.BundlePacket;
@@ -24,13 +24,14 @@ import java.util.List;
 public class FireworkRocketItem extends ItemHandler {
     private static final Tag<Entity> FIREWORK_TAG = Tag.Transient("mapmaker:elytra_firework");
     private static final Tag<Integer> DURATION_TAG = Tag.Integer("firework_duration").defaultValue(0);
-    private static final int INFINITE_CUSTOM_MODEL_DATA = 1;
+    private static final String DEFAULT_MODEL = Material.FIREWORK_ROCKET.prototype().get(DataComponents.ITEM_MODEL);
+    private static final String INFINITE_MODEL = "mapmaker:infinite_firework";
 
     public static final FireworkRocketItem INSTANCE = new FireworkRocketItem();
     public static final ItemStack DEFAULT = setDurationMillis(
             ItemStack.of(Material.FIREWORK_ROCKET)
-                    .without(ItemComponent.FIREWORKS)
-                    .with(ItemComponent.MAX_STACK_SIZE, 99),
+                    .without(DataComponents.FIREWORKS)
+                    .with(DataComponents.MAX_STACK_SIZE, 99),
             1000);
 
     public static void removeRocket(@NotNull Player player) {
@@ -44,13 +45,13 @@ public class FireworkRocketItem extends ItemHandler {
 
     public static @NotNull ItemStack setDurationMillis(@NotNull ItemStack itemStack, int durationMillis) {
         return itemStack.withTag(DURATION_TAG, durationMillis)
-                .with(ItemComponent.LORE, List.of(
+                .with(DataComponents.LORE, List.of(
                         Component.text("Duration: " + NumberUtil.formatDuration(durationMillis), TextColor.color(0xB0B0B0))
                                 .decoration(TextDecoration.ITALIC, false)));
     }
 
     public static boolean isInfinite(@NotNull ItemStack itemStack) {
-        return itemStack.get(ItemComponent.CUSTOM_MODEL_DATA, 0) == 1;
+        return INFINITE_MODEL.equals(itemStack.get(DataComponents.ITEM_MODEL));
     }
 
     public static int getCount(@NotNull ItemStack itemStack) {
@@ -59,11 +60,9 @@ public class FireworkRocketItem extends ItemHandler {
 
     public static @NotNull ItemStack withCount(@NotNull ItemStack itemStack, int count) {
         if (count <= 0) {
-            return itemStack.withAmount(1)
-                    .with(ItemComponent.CUSTOM_MODEL_DATA, INFINITE_CUSTOM_MODEL_DATA);
+            return itemStack.withAmount(1).with(DataComponents.ITEM_MODEL, INFINITE_MODEL);
         } else {
-            return itemStack.withAmount(count)
-                    .without(ItemComponent.CUSTOM_MODEL_DATA);
+            return itemStack.withAmount(count).with(DataComponents.ITEM_MODEL, DEFAULT_MODEL);
         }
     }
 
@@ -75,12 +74,6 @@ public class FireworkRocketItem extends ItemHandler {
     public @NotNull Material material() {
         return Material.FIREWORK_ROCKET;
     }
-
-    @Override
-    public int customModelData() {
-        return -1; // Match based on material not custom model data.
-    }
-
 
     @Override
     protected void rightClicked(@NotNull Click click) {

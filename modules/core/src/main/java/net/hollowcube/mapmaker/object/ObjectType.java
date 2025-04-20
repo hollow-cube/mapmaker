@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.object;
 
 import net.hollowcube.mapmaker.map.MapVariant;
-import net.minestom.server.utils.NamespaceID;
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -17,7 +17,7 @@ public sealed interface ObjectType permits ObjectTypeImpl {
     }
 
     @NotNull String id();
-    @NotNull NamespaceID namespaceId();
+    @NotNull Key key();
 
     int cost();
 
@@ -50,7 +50,7 @@ public sealed interface ObjectType permits ObjectTypeImpl {
         }
 
         public @NotNull ObjectType build() {
-            var type = new ObjectTypeImpl(NamespaceID.from(id), cost, requiredVariant, requiredSubVariant);
+            var type = new ObjectTypeImpl(Key.key(id), cost, requiredVariant, requiredSubVariant);
             ObjectTypeImpl.REGISTRY.put(id, type);
             return type;
         }

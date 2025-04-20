@@ -1,16 +1,16 @@
 package net.hollowcube.mapmaker.chat;
 
-import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
+import net.kyori.adventure.text.format.ShadowColor;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class ChatChannelDisplay implements ActionBar.Provider  {
+public class ChatChannelDisplay implements ActionBar.Provider {
 
     public static final ChatChannelDisplay INSTANCE = new ChatChannelDisplay();
 
@@ -31,8 +31,8 @@ public class ChatChannelDisplay implements ActionBar.Provider  {
 
         builder.pos(offset);
         builder.offset(-sprite.width());
-        builder.pushColor(FontUtil.NO_SHADOW);
+        builder.pushShadowColor(ShadowColor.none());
         builder.append(Character.toString(sprite.fontChar()));
-        builder.popColor();
+        builder.popShadowColor();
     }
 }

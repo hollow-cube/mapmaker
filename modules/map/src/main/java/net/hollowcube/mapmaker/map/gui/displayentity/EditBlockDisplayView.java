@@ -26,7 +26,7 @@ public class EditBlockDisplayView extends AbstractEditDisplayView<DisplayEntity.
 
     private static final Predicate<Material> FILTER = material -> material.isBlock() &&
             !material.block().isAir() &&
-            !BlockTags.UNRENDERABLE_DISPLAY_ENTITY_BLOCKS.contains(material.block().namespace());
+            !BlockTags.UNRENDERABLE_DISPLAY_ENTITY_BLOCKS.contains(material.block().key());
     private static final Set<String> IGNORED_PROPERTIES = Set.of("waterlogged");
 
     private @Outlet("block") Label block;

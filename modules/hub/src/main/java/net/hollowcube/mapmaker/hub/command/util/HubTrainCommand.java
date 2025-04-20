@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Pos;
@@ -71,9 +72,9 @@ public class HubTrainCommand extends CommandDsl {
             NpcItemModel trainFront = new NpcItemModel();
             NpcItemModel trainMiddle = new NpcItemModel();
             NpcItemModel trainBack = new NpcItemModel();
-            trainFront.setModel(Material.STICK, 7);
-            trainMiddle.setModel(Material.STICK, 6);
-            trainBack.setModel(Material.STICK, 7);
+            trainFront.setModel(Material.STICK, BadSprite.require("train_front"));
+            trainMiddle.setModel(Material.STICK, BadSprite.require("train_middle"));
+            trainBack.setModel(Material.STICK, BadSprite.require("train_front"));
             train = List.of(trainFront, trainMiddle, trainBack);
         }
 

@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.block.handler;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Point;
@@ -12,7 +13,6 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.tag.TagSerializer;
 import net.minestom.server.tag.TagWritable;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,13 +22,13 @@ import java.util.List;
 import java.util.Locale;
 
 public class CampfireBlockHandler implements BlockHandler {
-    public static final NamespaceID ID = NamespaceID.from("minecraft:campfire");
+    public static final Key ID = Key.key("minecraft:campfire");
 
     private static final List<ItemStack> DEFAULT_ITEMS = List.of(ItemStack.AIR, ItemStack.AIR, ItemStack.AIR, ItemStack.AIR);
     private static final Tag<List<ItemStack>> ITEMS_TAG = Tag.View(new ItemListSerializer()).defaultValue(DEFAULT_ITEMS);
 
     @Override
-    public @NotNull NamespaceID getNamespaceId() {
+    public @NotNull Key getKey() {
         return ID;
     }
 

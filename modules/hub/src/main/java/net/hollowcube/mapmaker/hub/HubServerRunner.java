@@ -22,6 +22,7 @@ import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.player.JoinHubRequest;
 import net.hollowcube.mapmaker.player.SessionService;
+import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.ServerBeginShutdownEvent;
@@ -35,6 +36,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.concurrent.CompletableFuture;
 
@@ -44,6 +46,8 @@ public class HubServerRunner extends AbstractMapServer {
             "__hub_unused__", ServerRuntime.getRuntime().hostname(), "hub");
 
     private HubMapWorld world;
+
+    private ScriptEngine scriptEngine;
 
     HubServerRunner(@NotNull ConfigLoaderV3 config) {
         super(config);
@@ -79,8 +83,6 @@ public class HubServerRunner extends AbstractMapServer {
     protected void prepareStart() {
         super.prepareStart();
 
-        BlockHandlers.init(); // No need for placement rules etc. Just these to avoid invisible blocks
-
         // Create the hub world once, which will never go away.
         var worldFuture = new CompletableFuture<HubMapWorld>();
         FutureUtil.submitVirtual(() -> worldFuture.complete(
@@ -89,8 +91,17 @@ public class HubServerRunner extends AbstractMapServer {
         addBinding(HubMapWorld.class, world, "world", "hubWorld", "hubMapWorld");
         addBinding(Scheduler.class, world.instance().scheduler());
 
+        this.scriptEngine = new ScriptEngine(world.instance());
+
+        BlockHandlers.init(); // No need for placement rules etc. Just these to avoid invisible blocks
+
         registerCommands(this, commandManager(), world, world.instance().scheduler());
         loadHubFeatures(this, world);
+    }
+
+    @Override
+    public @NotNull ScriptEngine scriptEngine() {
+        return Objects.requireNonNull(this.scriptEngine);
     }
 
     // Static so it can be referenced from DevHubServer
@@ -107,7 +118,7 @@ public class HubServerRunner extends AbstractMapServer {
     public static void loadHubFeatures(@NotNull AbstractMapServer server, @NotNull HubMapWorld world) {
         for (var feature : ServiceLoader.load(HubFeature.class)) {
             try {
-                logger.info("Loading feature {}", feature.getClass().getName());
+                logger.debug("Loading feature {}", feature.getClass().getName());
                 feature.load(server, world);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to load feature " + feature.getClass().getName(), e);

@@ -4,12 +4,12 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.command.CommandCondition.and;
@@ -32,7 +32,7 @@ public class AddMarkerCommand extends CommandDsl {
         var world = MapWorld.forPlayer(player);
 
         var entity = new MarkerEntity();
-        entity.setType(NamespaceID.from("mapmaker:test"));
+        entity.setType(Key.key("mapmaker:test"));
         entity.setInstance(world.instance(), player.getPosition().withView(Pos.ZERO));
         player.sendMessage(Component.text("Marker added.")
                 .hoverEvent(HoverEvent.showText(Component.text("Click to copy ID")))

@@ -11,4 +11,8 @@ public record UnleashConfig(
         @NotNull String posthogPersonalApiKey,
         @NotNull String posthogProjectApiKey
 ) {
+
+    public boolean hasPosthogCredentials() {
+        return posthogPersonalApiKey != null && posthogProjectApiKey != null && !posthogPersonalApiKey.isEmpty() && !posthogProjectApiKey.isEmpty();
+    }
 }

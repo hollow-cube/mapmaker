@@ -2,13 +2,14 @@ package net.hollowcube.canvas.internal.standalone.sprite;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public record Sprite(char fontChar, int cmd, String model, int width, int offsetX, int rightOffset) {
+public record Sprite(char fontChar, @Nullable String model, int width, int offsetX, int rightOffset) {
     private static final System.Logger logger = System.getLogger(Sprite.class.getName());
 
     public static final Map<String, Sprite> SPRITE_MAP;
@@ -22,16 +23,14 @@ public record Sprite(char fontChar, int cmd, String model, int width, int offset
                     var obj = entry.getAsJsonObject();
                     var key = obj.get("name").getAsString();
                     char fontChar = 0;
-                    int cmd = 0;
+                    String model = null;
                     if (obj.has("fontChar"))
-                        fontChar = obj.get("fontChar").getAsString().charAt(0);
-                    else cmd = obj.get("cmd").getAsInt();
+                        fontChar = (char) obj.get("fontChar").getAsInt();
+                    else model = obj.get("model").getAsString();
                     var width = obj.get("width");
                     var offsetX = obj.get("offsetX");
                     var rightOffset = obj.get("rightOffset");
-                    String model = null;
-                    if (obj.has("model")) model = obj.get("model").getAsString();
-                    sprites.put(key, new Sprite(fontChar, cmd, model,
+                    sprites.put(key, new Sprite(fontChar, model,
                             width == null ? 0 : width.getAsInt(),
                             offsetX == null ? 0 : offsetX.getAsInt(),
                             rightOffset == null ? 0 : rightOffset.getAsInt()));
@@ -45,14 +44,4 @@ public record Sprite(char fontChar, int cmd, String model, int width, int offset
             SPRITE_MAP = Map.copyOf(sprites);
         }
     }
-
-//    public static Map<String, Sprite> SPRITE_MAP = Map.of(
-//            "gui/play_maps/container", new Sprite('\uEff8', 182, -11),
-//            "gui/play_maps/parkour_active", new Sprite('\uEff9', 54, -2),
-//            "gui/build_maps/container", new Sprite('\uEffa', 256, -8),
-//            "gui/build_maps/empty", new Sprite('\uEffb', 256, 71),
-//            "gui/build_maps/create", new Sprite('\uEffc', 256, 71),
-//            "gui/build_maps/edit", new Sprite('\uEffd', 256, 71),
-//            "gui/build_maps/details", new Sprite('\uEffe', 256, -8)
-//    );
 }

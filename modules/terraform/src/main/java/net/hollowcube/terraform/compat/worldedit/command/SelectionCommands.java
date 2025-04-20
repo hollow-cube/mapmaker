@@ -1,6 +1,5 @@
 package net.hollowcube.terraform.compat.worldedit.command;
 
-import com.mojang.datafixers.util.Function3;
 import it.unimi.dsi.fastutil.ints.Int2IntSortedMap;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
@@ -21,6 +20,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.network.NetworkBufferTemplate.F3;
 import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,9 +34,9 @@ public final class SelectionCommands {
         private final Argument<Point> positionArg = Argument.RelativeVec3("position");
 
         private final Messages alreadySetMessage;
-        private final Function3<Selection, Point, Boolean, Boolean> setter;
+        private final F3<Selection, Point, Boolean, Boolean> setter;
 
-        private Pos(@NotNull String command, @NotNull Messages alreadySetMessage, Function3<Selection, Point, Boolean, Boolean> setter) {
+        private Pos(@NotNull String command, @NotNull Messages alreadySetMessage, F3<Selection, Point, Boolean, Boolean> setter) {
             super(command);
 
             this.alreadySetMessage = alreadySetMessage;

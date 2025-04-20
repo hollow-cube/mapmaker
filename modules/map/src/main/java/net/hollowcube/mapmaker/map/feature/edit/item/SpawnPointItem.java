@@ -10,34 +10,24 @@ import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
-import net.minestom.server.entity.RelativeFlags;
-import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import net.minestom.server.entity.RelativeFlags;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
 public class SpawnPointItem extends ItemHandler {
-    private static final Logger logger = LoggerFactory.getLogger(SpawnPointItem.class);
-
+    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/spawn_point"));
     public static final String ID = "mapmaker:spawn_point";
     public static final SpawnPointItem INSTANCE = new SpawnPointItem();
-
-    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/spawn_point"));
 
     private SpawnPointItem() {
         super(ID, RIGHT_CLICK_ANY);
     }
 
     @Override
-    public @NotNull Material material() {
-        return Material.DIAMOND;
-    }
-
-    @Override
-    public int customModelData() {
-        return SPRITE.cmd();
+    public @Nullable BadSprite sprite() {
+        return SPRITE;
     }
 
     @Override

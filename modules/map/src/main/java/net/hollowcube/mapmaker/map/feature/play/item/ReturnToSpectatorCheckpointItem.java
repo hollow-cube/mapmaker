@@ -22,13 +22,8 @@ public class ReturnToSpectatorCheckpointItem extends ItemHandler {
     }
 
     @Override
-    public @NotNull Material material() {
-        return Material.DIAMOND;
-    }
-
-    @Override
-    public int customModelData() {
-        return SPRITE.cmd();
+    public @NotNull BadSprite sprite() {
+        return SPRITE;
     }
 
     @Override

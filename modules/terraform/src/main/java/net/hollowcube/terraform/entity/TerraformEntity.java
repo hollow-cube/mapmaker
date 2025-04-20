@@ -77,7 +77,7 @@ public interface TerraformEntity {
     @SuppressWarnings("UnstableApiUsage")
     private static @Nullable Entity createEntityUnspawned(@Nullable Player source, @NotNull Instance instance, @NotNull CompoundBinaryTag tag) {
         var entityTypeName = tag.getString("id");
-        var entityType = EntityType.fromNamespaceId(entityTypeName);
+        var entityType = EntityType.fromKey(entityTypeName);
         if (entityType == null) return null;
 
         var preEvent = new TerraformPreSpawnEntityEvent(source, instance);

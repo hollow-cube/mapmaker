@@ -4,13 +4,12 @@ import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.nbt.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,42 +17,37 @@ import java.util.List;
 
 import static net.kyori.adventure.text.Component.text;
 
-@SuppressWarnings("UnstableApiUsage")
 public final class NbtUtil {
 
-    public static final BinaryTagSerializer<Block> BLOCK_COMPOUND = new BinaryTagSerializer<>() {
-        @Override
-        public @NotNull BinaryTag write(@NotNull Block value) {
-            var defaultProps = Block.fromBlockId(value.id()).properties(); // Get the props of the default state to compare
+    public static @NotNull BinaryTag writeBlock(@NotNull Block value) {
+        var defaultProps = Block.fromBlockId(value.id()).properties(); // Get the props of the default state to compare
 
-            var props = CompoundBinaryTag.builder();
-            for (var entry : value.properties().entrySet()) {
-                if (entry.getValue().equals(defaultProps.get(entry.getKey()))) continue; // Skip default values
-                props.put(entry.getKey(), StringBinaryTag.stringBinaryTag(entry.getValue()));
-            }
-            var propsCompound = props.build();
+        var props = CompoundBinaryTag.builder();
+        for (var entry : value.properties().entrySet()) {
+            if (entry.getValue().equals(defaultProps.get(entry.getKey()))) continue; // Skip default values
+            props.put(entry.getKey(), StringBinaryTag.stringBinaryTag(entry.getValue()));
+        }
+        var propsCompound = props.build();
 
-            var builder = CompoundBinaryTag.builder()
-                    .putString("Name", value.name());
-            if (propsCompound.size() > 0) builder.put("Properties", propsCompound);
-            return builder.build();
+        var builder = CompoundBinaryTag.builder()
+                .putString("Name", value.name());
+        if (propsCompound.size() > 0) builder.put("Properties", propsCompound);
+        return builder.build();
+    }
+
+    public static @NotNull Block readBlock(@NotNull BinaryTag tag) {
+        if (!(tag instanceof CompoundBinaryTag compound)) return Block.AIR;
+
+        var block = Block.fromKey(compound.getString("Name"));
+        if (block == null) return Block.AIR;
+
+        for (var entry : compound.getCompound("Properties")) {
+            if (!(entry.getValue() instanceof StringBinaryTag string)) continue;
+            block = block.withProperty(entry.getKey(), string.value());
         }
 
-        @Override
-        public @NotNull Block read(@NotNull BinaryTag tag) {
-            if (!(tag instanceof CompoundBinaryTag compound)) return Block.AIR;
-
-            var block = Block.fromNamespaceId(compound.getString("Name"));
-            if (block == null) return Block.AIR;
-
-            for (var entry : compound.getCompound("Properties")) {
-                if (!(entry.getValue() instanceof StringBinaryTag string)) continue;
-                block = block.withProperty(entry.getKey(), string.value());
-            }
-
-            return block;
-        }
-    };
+        return block;
+    }
 
     public static @NotNull BinaryTag into(@NotNull Point vec) {
         return ListBinaryTag.listBinaryTag(BinaryTagTypes.DOUBLE, List.of(
@@ -99,18 +93,28 @@ public final class NbtUtil {
     }
 
     public static @NotNull BinaryTag writeItemStack(@NotNull ItemStack itemStack) {
-        var tag = (CompoundBinaryTag) ItemStack.NBT_TYPE.write(itemStack);
-        var cmdId = BadSprite.getCmdId(itemStack.get(ItemComponent.CUSTOM_MODEL_DATA));
-        if (cmdId != null) tag = tag.putString("custom_model_data", cmdId);
-        return tag;
+        var modelId = BadSprite.modelToId(itemStack.get(DataComponents.ITEM_MODEL));
+        if (modelId != null) itemStack = itemStack.with(DataComponents.ITEM_MODEL, modelId);
+        return itemStack.toItemNBT();
     }
 
     public static @NotNull ItemStack readItemStack(@NotNull BinaryTag tag) {
         if (!(tag instanceof CompoundBinaryTag compound)) return ItemStack.AIR;
-        var itemStack = ItemStack.NBT_TYPE.read(compound);
-        if (compound.get("custom_model_data") instanceof StringBinaryTag cmdId) {
-            int cmd = BadSprite.getIdCmd(cmdId.value());
-            if (cmd > 0) itemStack = itemStack.with(ItemComponent.CUSTOM_MODEL_DATA, cmd);
+        var itemStack = ItemStack.fromItemNBT(compound);
+
+        var itemModel = itemStack.get(DataComponents.ITEM_MODEL);
+        if (itemModel != null) {
+            var model = BadSprite.idToModel(itemModel);
+            if (model != null) itemStack = itemStack.with(DataComponents.ITEM_MODEL, model);
+        } else if (compound.get("item_model") instanceof StringBinaryTag modelId) {
+            var model = BadSprite.idToModel(modelId.value());
+            if (model != null) itemStack = itemStack.with(DataComponents.ITEM_MODEL, model);
+        } else if (compound.get("custom_model_data") instanceof StringBinaryTag cmdId) {
+            // We used to replace custom model data with the string id to handle the resource pack changing
+            // We now do the same with model, however we need to handle the legacy custom model data option too.
+            // todo ideally this would be done with a DFU migration but i am lazy at the moment.
+            var model = BadSprite.idToModel(cmdId.value());
+            if (model != null) itemStack = itemStack.with(DataComponents.ITEM_MODEL, model);
         }
         return itemStack;
     }

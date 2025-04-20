@@ -22,8 +22,8 @@ import net.hollowcube.mapmaker.store.CostList;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -126,17 +126,17 @@ public class CosmeticEntry extends View {
         onIcon.setItemSprite(itemIcon);
 
         var sprite = SELECTED_SPRITES[row];
-        onIcon.setSprite(sprite.fontChar(), sprite.cmd(), sprite.width(), sprite.offsetX(), sprite.rightOffset());
+        onIcon.setSprite(sprite.fontChar(), sprite.modelOrNull(), sprite.width(), sprite.offsetX(), sprite.rightOffset());
 
         {
-            var lore = new ArrayList<>(itemIcon.get(ItemComponent.LORE, List.of()));
+            var lore = new ArrayList<>(itemIcon.get(DataComponents.LORE, List.of()));
             lore.add(Component.text(""));
             lore.add(Component.translatable("cosmetic.deselect"));
-            onIcon.setComponentsDirect(itemIcon.get(ItemComponent.CUSTOM_NAME), lore);
+            onIcon.setComponentsDirect(itemIcon.get(DataComponents.CUSTOM_NAME), lore);
         }
 
         {
-            var lore = new ArrayList<>(itemIcon.get(ItemComponent.LORE, List.of()));
+            var lore = new ArrayList<>(itemIcon.get(DataComponents.LORE, List.of()));
             var trade = TEMP_COSMETIC_TRADES.get(cosmetic.path());
             lore.add(Component.empty());
             if (isLocked && trade != null) {
@@ -182,12 +182,13 @@ public class CosmeticEntry extends View {
                 } else if (isLocked && cosmetic.impl() instanceof ModelCosmeticImpl model) {
                     isPreviewing = true;
                     var previewItem = model.iconItem().builder()
-                            .customName(offItemStack.get(ItemComponent.CUSTOM_NAME))
-                            .lore(offItemStack.get(ItemComponent.LORE))
+                            .customName(offItemStack.get(DataComponents.CUSTOM_NAME))
+                            .lore(offItemStack.get(DataComponents.LORE))
+                            .customModelData(List.of(2f), List.of(), List.of(), List.of())
+                            .hideExtraTooltip()
                             .build();
                     offIcon.setItemDirect(previewItem);
                 }
-
             }
         }
     }
@@ -230,7 +231,7 @@ public class CosmeticEntry extends View {
         playerService.buyCosmetic(playerData.id(), trade.result(), null, cubits, new JsonObject());
 
         var icon = trade.result().iconItem();
-        player.sendMessage(Component.translatable("merchant.trade.success", icon.get(ItemComponent.CUSTOM_NAME, Component.empty()).hoverEvent(icon.asHoverEvent())));
+        player.sendMessage(Component.translatable("merchant.trade.success", icon.get(DataComponents.CUSTOM_NAME, Component.empty()).hoverEvent(icon.asHoverEvent())));
         player.closeInventory();
     }
 }

@@ -17,8 +17,8 @@ public class MapEntityType {
     private static final Logger logger = LoggerFactory.getLogger(MapEntityType.class);
     private static final Map<EntityType, @NotNull BiFunction<EntityType, UUID, ? extends Entity>> constructorMap = new ConcurrentHashMap<>();
 
-    public static @NotNull Entity create(@NotNull String id, @NotNull UUID uuid) {
-        var entityType = Objects.requireNonNull(EntityType.fromNamespaceId(id));
+    public static @NotNull Entity create(@NotNull String key, @NotNull UUID uuid) {
+        var entityType = Objects.requireNonNull(EntityType.fromKey(key));
         return create(entityType, uuid);
     }
 

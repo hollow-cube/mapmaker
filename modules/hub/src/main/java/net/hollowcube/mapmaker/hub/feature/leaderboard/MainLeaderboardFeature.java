@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.hub.feature.leaderboard;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
@@ -26,8 +25,6 @@ public class MainLeaderboardFeature implements HubFeature {
 
     @Override
     public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
-        if (ServerRuntime.getRuntime().isDevelopment()) return;
-
         var mapService = server.mapService();
         var playerService = server.playerService();
         parkourLeaderboard = new Leaderboard2(

@@ -18,13 +18,13 @@ public abstract class BaseBlockPlacementRule extends BlockPlacementRule {
     }
 
     protected boolean canConnect(@NotNull Block block) {
-        return !(BlockTags.LEAVES.contains(block.namespace()) ||
+        return !(BlockTags.LEAVES.contains(block.key()) ||
                 block.id() == Block.BARRIER.id() ||
                 block.id() == Block.CARVED_PUMPKIN.id() ||
                 block.id() == Block.JACK_O_LANTERN.id() ||
                 block.id() == Block.MELON.id() ||
                 block.id() == Block.PUMPKIN.id() ||
-                BlockTags.SHULKER_BOXES.contains(block.namespace()));
+                BlockTags.SHULKER_BOXES.contains(block.key()));
     }
 
     @Override

@@ -10,7 +10,7 @@ import net.hollowcube.canvas.internal.standalone.trait.ItemSpriteHolder;
 import net.hollowcube.canvas.internal.standalone.trait.Loadable;
 import net.hollowcube.canvas.internal.standalone.trait.SpriteHolder;
 import net.hollowcube.canvas.internal.standalone.util.Debugger;
-import net.minestom.server.item.ItemComponent;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.validate.Check;
@@ -266,34 +266,25 @@ public class XmlElementReader {
                     }
                 } else {
                     if (elem instanceof ItemSpriteHolder trait) {
-                        if (sprite.model() != null) {
-                            trait.setItemSprite(ItemStack.builder(Material.STICK)
-                                    .set(ItemComponent.ITEM_MODEL, sprite.model())
-                                    .build(), spritePos);
-                        } else {
-                            trait.setItemSprite(ItemStack.builder(Material.DIAMOND)
-                                    .set(ItemComponent.CUSTOM_MODEL_DATA, sprite.cmd())
-                                    .build(), spritePos);
-                        }
+                        trait.setItemSprite(ItemStack.builder(Material.DIAMOND)
+                                .set(DataComponents.ITEM_MODEL, Objects.requireNonNull(sprite.model(), "Sprite must have a model"))
+                                .build(), spritePos);
                     } else {
                         throw new IllegalArgumentException("Element does not support item sprites: " + elem.getClass().getSimpleName());
                     }
                 }
 
             } else {
-                // Attempt to parse the sprite as an item/cmd in the form `minecraft:stick@1000`
-                var split = spriteName.split("@");
-                var material = Material.fromNamespaceId(split[0]);
+                if (spriteName.contains("@")) {
+                    throw new IllegalArgumentException("Found legacy @ for custom model data, this is no longer supported.");
+                }
+                var material = Material.fromKey(spriteName);
                 if (material == null) {
                     logger.log(System.Logger.Level.WARNING, "Missing sprite: " + spriteName);
                     throw new IllegalArgumentException("Unknown sprite: " + spriteName);
                 }
-                var builder = ItemStack.builder(material);
-                if (split.length > 1) {
-                    builder.set(ItemComponent.CUSTOM_MODEL_DATA, Integer.parseInt(split[1]));
-                }
                 if (elem instanceof ItemSpriteHolder trait) {
-                    trait.setItemSprite(builder.build(), spritePos);
+                    trait.setItemSprite(ItemStack.of(material), spritePos);
                 } else {
                     throw new IllegalArgumentException("Element does not support item sprites: " + elem.getClass().getSimpleName());
                 }

@@ -1,45 +1,46 @@
 package net.hollowcube.mapmaker.map.feature.play.effect;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.map.feature.play.setting.SavedMapSettings;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.StructCodec;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
+@SuppressWarnings("UnstableApiUsage")
 public class StatusEffectData extends BaseEffectData {
-    public static final Codec<StatusEffectData> CODEC = RecordCodecBuilder.create(i -> i.group(
+    public static final StructCodec<StatusEffectData> CODEC = StructCodec.struct(
             // BaseEffectData
-            Codec.STRING.lenientOptionalFieldOf("name", "").forGetter(StatusEffectData::name),
-            Codec.INT.lenientOptionalFieldOf("progressIndex", -1).forGetter(StatusEffectData::progressIndex),
-            Codec.INT.lenientOptionalFieldOf("timeLimit", 0).forGetter(StatusEffectData::timeLimit),
-            Codec.INT.lenientOptionalFieldOf("resetHeight", NO_RESET_HEIGHT).forGetter(StatusEffectData::resetHeight),
-            Codec.BOOL.lenientOptionalFieldOf("clearPotionEffects", false).forGetter(StatusEffectData::clearPotionEffects),
-            PotionEffectList.NULL_MAPPED_CODEC.forGetter(StatusEffectData::potionEffects),
-            ExtraCodecs.POS.lenientOptionalFieldOf("teleport").forGetter(StatusEffectData::teleport),
-            HotbarItems.CODEC.lenientOptionalFieldOf("items", HotbarItems.EMPTY).forGetter(StatusEffectData::items),
+            "name", Codec.STRING.optional(""), StatusEffectData::name,
+            "progressIndex", Codec.INT.optional(-1), StatusEffectData::progressIndex,
+            "timeLimit", Codec.INT.optional(0), StatusEffectData::timeLimit,
+            "resetHeight", Codec.INT.optional(NO_RESET_HEIGHT), StatusEffectData::resetHeight,
+            "clearPotionEffects", Codec.BOOLEAN.optional(false), StatusEffectData::clearPotionEffects,
+            StructCodec.INLINE, PotionEffectList.CODEC, StatusEffectData::potionEffects,
+            "teleport", ExtraCodecs.POS.optional(), StatusEffectData::teleport,
+            "items", HotbarItems.CODEC.optional(HotbarItems.EMPTY), StatusEffectData::items,
             // StatusEffectData
-            Codec.BOOL.lenientOptionalFieldOf("repeatable", false).forGetter(StatusEffectData::repeatable),
-            Codec.INT.lenientOptionalFieldOf("extraTime", 0).forGetter(StatusEffectData::extraTime),
-            SavedMapSettings.CODEC.fieldOf("settings").orElseGet(s -> {}, SavedMapSettings::new).forGetter(StatusEffectData::settings)
-    ).apply(i, StatusEffectData::new));
+            "repeatable", Codec.BOOLEAN.optional(false), StatusEffectData::repeatable,
+            "extraTime", Codec.INT.optional(0), StatusEffectData::extraTime,
+            "settings", SavedMapSettings.CODEC.optional(), StatusEffectData::settings,
+            StatusEffectData::new
+    );
 
     private boolean repeatable;
     private int extraTime;
 
     public StatusEffectData(
-            String name, int progressIndex, int timeLimit,
+            @NotNull String name, int progressIndex, int timeLimit,
             int resetHeight, boolean clearPotionEffects,
-            PotionEffectList potionEffects,
-            Optional<Pos> teleport,
-            HotbarItems items,
-            boolean repeatable,
-            int extraTime,
-            SavedMapSettings settings
+            @NotNull PotionEffectList potionEffects,
+            @Nullable Pos teleport, @NotNull HotbarItems items,
+            boolean repeatable, int extraTime,
+            @Nullable SavedMapSettings settings
     ) {
         super(name, progressIndex, timeLimit, resetHeight, clearPotionEffects, potionEffects, teleport, items, settings);
         this.repeatable = repeatable;

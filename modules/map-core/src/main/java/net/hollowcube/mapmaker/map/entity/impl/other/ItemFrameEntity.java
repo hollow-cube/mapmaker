@@ -116,7 +116,7 @@ public class ItemFrameEntity extends MapEntity {
         var meta = getEntityMeta();
         tag.putByte("Facing", (byte) meta.getOrientation().ordinal());
         if (meta.isInvisible()) tag.putBoolean("Invisible", true);
-        if (!meta.getItem().isAir()) tag.put("Item", ItemStack.NBT_TYPE.write(meta.getItem()));
+        if (!meta.getItem().isAir()) tag.put("Item", meta.getItem().toItemNBT());
 
         if (meta.getRotation() != Rotation.NONE) tag.putByte("ItemRotation", (byte) meta.getRotation().ordinal());
     }
@@ -129,7 +129,7 @@ public class ItemFrameEntity extends MapEntity {
         meta.setOrientation(readOrientation(tag));
         meta.setInvisible(tag.getBoolean("Invisible", false));
         if (tag.get("Item") instanceof CompoundBinaryTag itemTag)
-            meta.setItem(ItemStack.NBT_TYPE.read(itemTag));
+            meta.setItem(ItemStack.fromItemNBT(itemTag));
 
         meta.setRotation(Rotation.values()[tag.getByte("ItemRotation")]);
     }

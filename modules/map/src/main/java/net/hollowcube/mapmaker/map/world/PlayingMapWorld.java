@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.world;
 
+import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
@@ -8,7 +9,6 @@ import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartFinishedEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartSpectatorEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
-import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.polar.LoadingWorldAccess;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
@@ -21,12 +21,11 @@ import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.hollowcube.mapmaker.to_be_refactored.FontUIBuilder;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Metadata;
@@ -49,9 +48,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PlayingMapWorld extends AbstractMapMakerMapWorld {
@@ -64,8 +62,6 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
             .addListener(InventoryPreClickEvent.class, event -> event.setCancelled(!CustomizableHotbarManager.isActive(event.getPlayer())))
             .addListener(ItemDropEvent.class, event -> event.setCancelled(true))
             .addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true));
-
-    private final List<FeatureProvider> enabledFeatures = new ArrayList<>();
 
     private Component ownerBossBarName = Component.empty();
 
@@ -120,7 +116,8 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
         // We must set the respawn point during config so that their spawn chunks are sent there.
         // This prevents falling through the floor when joining.
-        player.setRespawnPoint(saveState.state(PlayState.class).pos().orElse(map().settings().getSpawnPoint()));
+        player.setRespawnPoint(Objects.requireNonNullElseGet(saveState.state(PlayState.class).pos(),
+                () -> map().settings().getSpawnPoint()));
         player.setTag(FIRST_JOIN_TAG, true);
     }
 
@@ -138,7 +135,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
             final var finalSaveState = saveState;
             player.acquirable().sync(localPlayer -> {
                 localPlayer.sendPacket(new BundlePacket());
-                localPlayer.teleport(finalSaveState.state(PlayState.class).pos().orElse(map().settings().getSpawnPoint()),
+                localPlayer.teleport(Objects.requireNonNullElseGet(finalSaveState.state(PlayState.class).pos(), () -> map().settings().getSpawnPoint()),
                         Vec.ZERO, null, RelativeFlags.NONE);
                 ((MapPlayerImplImpl) player).updatePose();
                 localPlayer.sendPacket(new EntityMetaDataPacket(localPlayer.getEntityId(), Map.of(6, Metadata.Pose(localPlayer.getPose()))));
@@ -265,12 +262,12 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
     }
 
     private void buildSpectatorWidget(@NotNull Player player, @NotNull FontUIBuilder builder) {
-        builder.pushColor(FontUtil.NO_SHADOW);
+        builder.pushShadowColor(ShadowColor.none());
         builder.pos(-SPECTATOR_SPRITE.width() / 2).drawInPlace(SPECTATOR_SPRITE);
     }
 
     private void buildFinishedWidget(@NotNull Player player, @NotNull FontUIBuilder builder) {
-        builder.pushColor(FontUtil.NO_SHADOW);
+        builder.pushShadowColor(ShadowColor.none());
         builder.pos(-FINISHED_SPRITE.width() / 2).drawInPlace(FINISHED_SPRITE);
     }
 

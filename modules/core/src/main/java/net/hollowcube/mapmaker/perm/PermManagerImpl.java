@@ -151,7 +151,7 @@ public class PermManagerImpl extends AbstractHttpService implements PermManager 
                     // Conditional is allowed here because of audit log hack.
                     permissionship == Permissionship.PERMISSIONSHIP_CONDITIONAL_PERMISSION;
 
-            if (perm instanceof PlatformPerm) logger.info("platform perm check: {} {} -> {}", playerId, perm, state);
+            if (perm instanceof PlatformPerm) logger.debug("platform perm check: {} {} -> {}", playerId, perm, state);
             return state;
         }
 

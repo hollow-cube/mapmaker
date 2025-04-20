@@ -200,7 +200,7 @@ class WEPatternBuildTest {
         @Test
         void testValidNoStar(Env env) {
             var expected = MinecraftServer.getTagManager().getTag(Tag.BasicType.BLOCKS, "minecraft:stairs")
-                    .getValues().stream().map(Block::fromNamespaceId).toList();
+                    .getValues().stream().map(Block::fromKey).toList();
             var pattern = assertBuilds(TagPattern.class, "##stairs");
             assertEquals(expected, pattern.blocks());
             assertFalse(pattern.randomState());

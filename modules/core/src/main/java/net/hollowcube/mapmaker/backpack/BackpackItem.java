@@ -1,12 +1,13 @@
 package net.hollowcube.mapmaker.backpack;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.item.ItemComponent;
+import net.kyori.adventure.text.format.ShadowColor;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.component.CustomModelData;
 import net.minestom.server.network.packet.server.play.RecipeBookAddPacket;
 import net.minestom.server.recipe.RecipeBookCategory;
 import net.minestom.server.recipe.display.RecipeDisplay;
@@ -123,7 +124,7 @@ public enum BackpackItem {
     public @NotNull Component iconComponent() {
         //todo the base sprite should also contain this sprite
         var iconSprite = "icon/material/" + name().toLowerCase();
-        return Component.text(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(iconSprite), iconSprite).fontChar(), FontUtil.NO_SHADOW);
+        return Component.text(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(iconSprite), iconSprite).fontChar()).shadowColor(ShadowColor.none());
     }
 
     public @NotNull ItemStack getItemStack(int amount) {
@@ -133,10 +134,11 @@ public enum BackpackItem {
         lore.add(rarity.asComponent());
         lore.add(Component.empty());
         lore.addAll(LanguageProviderV2.translateMulti(translationKeyBase + ".lore", List.of()));
-        return ItemStack.builder(Material.DIAMOND)
-                .set(ItemComponent.CUSTOM_MODEL_DATA, sprite.cmd() + amount)
-                .set(ItemComponent.CUSTOM_NAME, displayName())
-                .set(ItemComponent.LORE, lore)
+        return ItemStack.builder(Material.STICK)
+                .set(DataComponents.ITEM_MODEL, sprite.model())
+                .set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of((float) amount), List.of(), List.of(), List.of()))
+                .set(DataComponents.CUSTOM_NAME, displayName())
+                .set(DataComponents.LORE, lore)
                 .build();
     }
 

@@ -4,20 +4,19 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.codec.Transcoder;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.other.PaintingMeta;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryTranscoder;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Locale;
 import java.util.UUID;
 
 public class PaintingEntity extends MapEntity {
-    private static final DynamicRegistry<PaintingMeta.Variant> PAINTING_REGISTRY = MinecraftServer.getPaintingVariantRegistry();
-
     protected SoundEvent placeSound = SoundEvent.ENTITY_PAINTING_PLACE;
     protected SoundEvent breakSound = SoundEvent.ENTITY_PAINTING_BREAK;
 
@@ -55,8 +54,10 @@ public class PaintingEntity extends MapEntity {
     public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
         super.writeData(tag);
 
+        tag.put("variant", DataComponents.PAINTING_VARIANT.encode(Transcoder.NBT,
+                get(DataComponents.PAINTING_VARIANT)).orElseThrow());
+
         var meta = getEntityMeta();
-        tag.putString("variant", meta.getVariant().name().toLowerCase(Locale.ROOT));
         tag.putByte("facing", (byte) switch (meta.getOrientation()) {
             case SOUTH -> 0;
             case WEST -> 1;
@@ -69,10 +70,13 @@ public class PaintingEntity extends MapEntity {
     public void readData(@NotNull CompoundBinaryTag tag) {
         super.readData(tag);
 
+        var variantTag = tag.get("variant");
+        if (variantTag != null) {
+            var coder = new RegistryTranscoder<>(Transcoder.NBT, MinecraftServer.process());
+            set(DataComponents.PAINTING_VARIANT, DataComponents.PAINTING_VARIANT.decode(coder, variantTag).orElseThrow());
+        }
+
         var meta = getEntityMeta();
-        var variant = DynamicRegistry.Key.<PaintingMeta.Variant>of(tag.getString("variant", "minecraft:kebab"));
-        if (PAINTING_REGISTRY.get(variant) == null) variant = PaintingMeta.Variant.KEBAB;
-        meta.setVariant(variant);
         meta.setOrientation(readOrientation(tag));
     }
 

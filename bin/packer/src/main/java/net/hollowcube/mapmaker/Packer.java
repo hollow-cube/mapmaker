@@ -23,11 +23,13 @@ public class Packer {
         System.setProperty("java.awt.headless", "true");
 
         try {
-            var outDir = Path.of(args.length > 0 && args[0].equals("out_here_hack") ? "." : "./build/packer");
+            var outDir = Path.of(args[0]);
+//            var outDir = Path.of(args.length > 0 && args[0].equals("out_here_hack") ? "." : "./build/packer");
             Files.createDirectories(outDir);
             OUT_DIR = outDir.toRealPath();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            OUT_DIR = Files.createTempDirectory("packer");
+//            throw new RuntimeException(e);
         }
 
         logger.log(System.Logger.Level.INFO, "Hello, world!");
@@ -48,15 +50,10 @@ public class Packer {
         fontTransform.process(ctx);
 
         ItemModelTransform itemModelTransform = new ItemModelTransform();
-        itemModelTransform.init(ctx, fontTransform);
         itemModelTransform.process(ctx);
 
-//        ModelTransform modelTransform = new ModelTransform();
-//        modelTransform.init(ctx, fontTransform);
-//        modelTransform.process(ctx);
-
         CosmeticV2Transform cosmeticV2Transform = new CosmeticV2Transform();
-        cosmeticV2Transform.init(ctx, fontTransform);
+        cosmeticV2Transform.init(ctx);
         cosmeticV2Transform.process(ctx);
 
         DynamicDataTransform hubMerchantsTransform = new DynamicDataTransform("hub_merchants");

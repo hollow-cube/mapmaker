@@ -19,9 +19,9 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerSkin;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.HeadProfile;
@@ -108,25 +108,23 @@ public class DetailsTimesTabView extends View {
     }
 
     static final String MISSING_TIME = "--:--:---";
-    static final ItemStack MISSING_ITEM = ItemStack.builder(Material.PLAYER_HEAD)
-            .set(ItemComponent.PROFILE, new HeadProfile(new PlayerSkin("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGE5OWIwNWI5YTFkYjRkMjliNWU2NzNkNzdhZTU0YTc3ZWFiNjY4MTg1ODYwMzVjOGEyMDA1YWViODEwNjAyYSJ9fX0=", null)))
-            .build();
-    static final int MODEL_8X = 1;
-    static final int MODEL_8X_OFFSET_1 = 3;
-    static final int MODEL_8X_OFFSET_2 = 4;
-    private static final Cache<String, ItemStack> HEAD_CACHE = Caffeine.newBuilder()
+    static final HeadProfile MISSING_TEXTURE = new HeadProfile(new PlayerSkin("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGE5OWIwNWI5YTFkYjRkMjliNWU2NzNkNzdhZTU0YTc3ZWFiNjY4MTg1ODYwMzVjOGEyMDA1YWViODEwNjAyYSJ9fX0=", null));
+    static final String MODEL_8X = "mapmaker:2d_player_head";
+    static final String MODEL_8X_OFFSET_1 = "mapmaker:2d_player_head_offset1";
+    static final String MODEL_8X_OFFSET_2 = "mapmaker:2d_player_head_offset2";
+    private static final Cache<String, HeadProfile> HEAD_CACHE = Caffeine.newBuilder()
             .expireAfterWrite(60, TimeUnit.MINUTES)
             .maximumSize(1000)
             .build();
 
-    static @NotNull ItemStack getPlayerHead2d(@Nullable String uuid, int model) {
-        if (uuid == null) return MISSING_ITEM.with(ItemComponent.CUSTOM_MODEL_DATA, model);
-        return HEAD_CACHE.get(uuid, key -> {
+    static @NotNull ItemStack getPlayerHead2d(@Nullable String uuid, @NotNull String model) {
+        var builder = ItemStack.builder(Material.STICK)
+                .set(DataComponents.ITEM_MODEL, model);
+        if (uuid == null) return builder.set(DataComponents.PROFILE, MISSING_TEXTURE).build();
+        return builder.set(DataComponents.PROFILE, HEAD_CACHE.get(uuid, key -> {
             var profile = OpUtils.map(PlayerSkin.fromUuid(key), HeadProfile::new);
-            return ItemStack.builder(Material.PLAYER_HEAD)
-                    .set(ItemComponent.PROFILE, Objects.requireNonNullElse(profile, HeadProfile.EMPTY))
-                    .build();
-        }).with(ItemComponent.CUSTOM_MODEL_DATA, model);
+            return Objects.requireNonNullElse(profile, HeadProfile.EMPTY);
+        })).build();
     }
 
 }

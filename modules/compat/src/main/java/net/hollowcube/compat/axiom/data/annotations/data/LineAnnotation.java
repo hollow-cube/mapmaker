@@ -1,17 +1,17 @@
 package net.hollowcube.compat.axiom.data.annotations.data;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.bytes.ByteArrayList;
 import it.unimi.dsi.fastutil.bytes.ByteCollection;
 import it.unimi.dsi.fastutil.bytes.ByteList;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.StructCodec;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("UnstableApiUsage")
 public record LineAnnotation(
         int x,
         int y,
@@ -28,16 +28,15 @@ public record LineAnnotation(
             NetworkBuffer.FLOAT, LineAnnotation::width,
             NetworkBuffer.INT, LineAnnotation::color,
             NetworkBuffer.BYTE_ARRAY.transform(ByteArrayList::new, ByteCollection::toByteArray), LineAnnotation::offsets,
-            LineAnnotation::new
-    );
+            LineAnnotation::new);
+    private static final Codec<ByteList> BYTE_LIST_CODEC = Codec.BYTE.list().transform(ByteArrayList::new, ArrayList::new);
+    public static final StructCodec<LineAnnotation> CODEC = StructCodec.struct(
+            "x", Codec.INT, LineAnnotation::x,
+            "y", Codec.INT, LineAnnotation::y,
+            "z", Codec.INT, LineAnnotation::z,
+            "width", Codec.FLOAT, LineAnnotation::width,
+            "color", Codec.INT, LineAnnotation::color,
+            "offsets", BYTE_LIST_CODEC, LineAnnotation::offsets,
+            LineAnnotation::new);
 
-    private static final Codec<ByteList> BYTE_LIST_CODEC = Codec.BYTE.listOf().xmap(ByteArrayList::new, ArrayList::new);
-    public static final MapCodec<LineAnnotation> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Codec.INT.fieldOf("x").forGetter(LineAnnotation::x),
-            Codec.INT.fieldOf("y").forGetter(LineAnnotation::y),
-            Codec.INT.fieldOf("z").forGetter(LineAnnotation::z),
-            Codec.FLOAT.fieldOf("width").forGetter(LineAnnotation::width),
-            Codec.INT.fieldOf("color").forGetter(LineAnnotation::color),
-            BYTE_LIST_CODEC.fieldOf("offsets").forGetter(LineAnnotation::offsets)
-    ).apply(instance, LineAnnotation::new));
 }

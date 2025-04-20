@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:model",
+  "model": {
+    "type": "minecraft:condition",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "on_false": {
+      "type": "minecraft:model",
+      "model": "$icon"
+    },
+    "on_true": {
+      "type": "minecraft:model",
+      "model": "$icon_locked"
+    }
+  }
+}

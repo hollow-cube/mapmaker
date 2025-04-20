@@ -14,8 +14,8 @@ import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
-import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -23,23 +23,17 @@ public class ResetSaveStateItem extends ItemHandler {
     private static final TagCooldown CONFIRM_COOLDOWN = new TagCooldown("mapmaker:play/reset_item_confirm", 2000);
     private static final int MIN_RESET_TIME = 1 * 60 * 1000; // 1 minute
 
+    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/reset"));
     public static final String ID = "mapmaker:reset_savestate";
     public static final ResetSaveStateItem INSTANCE = new ResetSaveStateItem();
-
-    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/reset"));
 
     private ResetSaveStateItem() {
         super(ID, RIGHT_CLICK_ANY);
     }
 
     @Override
-    public @NotNull Material material() {
-        return Material.DIAMOND;
-    }
-
-    @Override
-    public int customModelData() {
-        return SPRITE.cmd();
+    public @Nullable BadSprite sprite() {
+        return SPRITE;
     }
 
     @Override
@@ -75,7 +69,7 @@ public class ResetSaveStateItem extends ItemHandler {
         if (saveState.getRealPlaytime() > MIN_RESET_TIME) return true;
         var playState = saveState.state(PlayState.class);
         // If you have a last state you have a checkpoint.
-        return playState.lastState().isPresent();
+        return playState.lastState() != null;
     }
 
 }
