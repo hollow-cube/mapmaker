@@ -6,9 +6,10 @@ import net.digitalingot.feather.serverapi.messaging.MessageEncoder;
 import net.digitalingot.feather.serverapi.messaging.ServerMessageHandler;
 import net.hollowcube.compat.api.packet.ServerboundModPacket;
 import net.minestom.server.network.NetworkBuffer;
+import org.jetbrains.annotations.NotNull;
 
 public record ServerboundFeatherPacket(
-        Message<ServerMessageHandler> message
+        @NotNull Message<ServerMessageHandler> message
 ) implements ServerboundModPacket<ServerboundFeatherPacket> {
     public static final Type<ServerboundFeatherPacket> TYPE = Type.of(
             "feather",
