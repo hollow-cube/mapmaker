@@ -227,11 +227,16 @@ public class InventoryViewHost {
         element.performSignal(Element.SIG_GET_CURSOR, (CursorRequest) stack -> this.inventory.cursor = stack);
 
         inventory.replaceInventories(top, bottom);
-//        if (inventory.getInventoryType() != InventoryType.ANVIL)
-        inventory.setTitle(Component.text("", NamedTextColor.WHITE).append(titleBuilder.build()));
+
+        var newTitle = Component.text("", NamedTextColor.WHITE).append(titleBuilder.build());
+        int titleHash = newTitle.hashCode();
+        if (lastTitle != titleHash) inventory.setTitle(newTitle);
+        lastTitle = titleHash;
         dirty = false;
         redrawTask = null;
     }
+
+    int lastTitle;
 
     static {
         MinecraftServer.getGlobalEventHandler().addListener(PlayerAnvilInputEvent.class, InventoryViewHost::handleAnvilInput);

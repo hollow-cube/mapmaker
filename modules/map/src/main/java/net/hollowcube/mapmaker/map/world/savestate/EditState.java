@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.map.world.savestate;
 
-import ca.spottedleaf.dataconverter.minecraft.datatypes.MCDataType;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
+import net.hollowcube.datafix.DataType;
 import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.map.util.LegacyCodecs;
-import net.hollowcube.mapmaker.map.util.datafix.HCTypeRegistry;
+import net.hollowcube.mapmaker.map.util.datafix.HCDataTypes;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.coordinate.Pos;
@@ -40,8 +40,8 @@ public final class EditState {
         }
 
         @Override
-        public @NotNull MCDataType dataType() {
-            return HCTypeRegistry.EDIT_STATE;
+        public @NotNull DataType dataType() {
+            return HCDataTypes.EDIT_STATE;
         }
     };
 

@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.map;
 
-import ca.spottedleaf.dataconverter.minecraft.MCDataConverter;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
@@ -415,7 +415,10 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             // read this state. For now, we will likely ignore this, however in the future joining a map will require checking
             // the state and finding a compatible server (server data version > state data version).
             if (!stateObj.isEmpty() && saveState.dataVersion > 0 && saveState.dataVersion < latestDataVersion) {
-                stateObj = MCDataConverter.convertJson(serializer.dataType(), stateObj, false, saveState.dataVersion, latestDataVersion);
+                var upgraded = DataFixer.upgrade(serializer.dataType(), Transcoder.JSON, stateObj, saveState.dataVersion, latestDataVersion);
+                if (!(upgraded instanceof JsonObject upgradedObject))
+                    throw new IllegalStateException("invalid save state upgrade: " + upgraded);
+                stateObj = upgradedObject;
                 saveState.dataVersion = latestDataVersion;
             }
 

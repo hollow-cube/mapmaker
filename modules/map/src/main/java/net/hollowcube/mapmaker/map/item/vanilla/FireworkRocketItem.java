@@ -24,6 +24,7 @@ import java.util.List;
 public class FireworkRocketItem extends ItemHandler {
     private static final Tag<Entity> FIREWORK_TAG = Tag.Transient("mapmaker:elytra_firework");
     private static final Tag<Integer> DURATION_TAG = Tag.Integer("firework_duration").defaultValue(0);
+    private static final String DEFAULT_MODEL = Material.FIREWORK_ROCKET.prototype().get(DataComponents.ITEM_MODEL);
     private static final String INFINITE_MODEL = "mapmaker:infinite_firework";
 
     public static final FireworkRocketItem INSTANCE = new FireworkRocketItem();
@@ -61,7 +62,7 @@ public class FireworkRocketItem extends ItemHandler {
         if (count <= 0) {
             return itemStack.withAmount(1).with(DataComponents.ITEM_MODEL, INFINITE_MODEL);
         } else {
-            return itemStack.withAmount(count).without(DataComponents.ITEM_MODEL);
+            return itemStack.withAmount(count).with(DataComponents.ITEM_MODEL, DEFAULT_MODEL);
         }
     }
 

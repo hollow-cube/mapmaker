@@ -250,7 +250,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
                 //todo handle errors
 
                 // Save terraform state
-                terraform.saveLocalSession(player, false);
+                terraform.saveLocalSession(player, instance, false);
                 terraform.savePlayerSession(player, false);
                 //todo handle errors here too
             }
@@ -338,7 +338,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
                 // Save terraform state
                 AxiomPlayer.setEnabled(player, false);
-                terraform.saveLocalSession(player, true);
+                terraform.saveLocalSession(player, instance, true);
                 terraform.savePlayerSession(player, true);
 
                 //todo

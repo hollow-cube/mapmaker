@@ -1,0 +1,9 @@
+{
+    x: 56,
+    y: 70,
+    z: 52,
+    Items: [],
+    id: "Cauldron",
+    BrewTime: 0s,
+    Lock: ""
+}

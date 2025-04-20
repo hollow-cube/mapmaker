@@ -1,29 +1,16 @@
 package net.hollowcube.mapmaker.map;
 
-import ca.spottedleaf.dataconverter.minecraft.datatypes.MCDataType;
+import net.hollowcube.datafix.DataType;
 import net.minestom.server.codec.Codec;
 import org.jetbrains.annotations.NotNull;
 
 public enum SaveStateType {
     EDITING, PLAYING, VERIFYING;
 
-    public static <T> Serializer<T> serializer(String name, Codec<T> codec, MCDataType dataType) {
-        return new Serializer<>() {
-            @Override
-            public @NotNull String name() {
-                return name;
-            }
-
-            @Override
-            public @NotNull Codec<T> codec() {
-                return codec;
-            }
-
-            @Override
-            public @NotNull MCDataType dataType() {
-                return dataType;
-            }
-        };
+    public static <T> Serializer<T> serializer(String name, Codec<T> codec, DataType dataType) {
+        record SerializerImpl<T>(String name, Codec<T> codec, DataType dataType) implements Serializer<T> {
+        }
+        return new SerializerImpl<>(name, codec, dataType);
     }
 
     public interface Serializer<T> {
@@ -31,6 +18,6 @@ public enum SaveStateType {
 
         @NotNull Codec<T> codec();
 
-        @NotNull MCDataType dataType();
+        @NotNull DataType dataType();
     }
 }

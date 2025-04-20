@@ -23,6 +23,7 @@ import net.hollowcube.common.events.EventExtensions;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.compat.api.CompatProvider;
+import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
@@ -63,7 +64,9 @@ import net.hollowcube.mapmaker.map.object.ObjectTypes;
 import net.hollowcube.mapmaker.map.util.AnonHealthCheck;
 import net.hollowcube.mapmaker.map.util.DynamicController;
 import net.hollowcube.mapmaker.map.util.MapPlayerImpl;
-import net.hollowcube.mapmaker.map.util.datafix.HCTypeRegistry;
+import net.hollowcube.mapmaker.map.util.datafix.versions.V3701;
+import net.hollowcube.mapmaker.map.util.datafix.versions.V3838;
+import net.hollowcube.mapmaker.map.util.datafix.versions.V4325_1;
 import net.hollowcube.mapmaker.metrics.MetricWriter;
 import net.hollowcube.mapmaker.metrics.MetricWriterNoop;
 import net.hollowcube.mapmaker.metrics.MetricWriterPosthog;
@@ -115,10 +118,6 @@ import java.util.function.Function;
 
 public abstract class AbstractMapServer implements MapServer {
     private final Logger logger = LoggerFactory.getLogger(MapServer.class);
-
-    static {
-        var a = HCTypeRegistry.class; // Force init
-    }
 
     protected final ConfigLoaderV3 config;
     protected final GlobalConfig globalConfig;
@@ -461,6 +460,9 @@ public abstract class AbstractMapServer implements MapServer {
             commandManager.register(new UnmuteCommand(punishmentService(), playerService(), permManager()));
             commandManager.register(new KickCommand(punishmentService(), sessionManager(), permManager()));
         }
+
+        DataFixer.addFixVersions(List.of(V3701::new, V3838::new, V4325_1::new));
+        DataFixer.buildModel();
     }
 
     public @NotNull List<HttpServerWrapper.HealthCheck> healthChecks() {

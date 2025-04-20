@@ -1,24 +1,28 @@
 package net.hollowcube.mapmaker.map.util.datafix.versions;
 
-import ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry;
-import ca.spottedleaf.dataconverter.minecraft.walkers.itemstack.DataWalkerItems;
-import com.google.auto.service.AutoService;
-import net.hollowcube.mapmaker.map.util.datafix.HCTypeRegistry;
-import net.hollowcube.mapmaker.map.util.datafix.HCVersions;
-import net.hollowcube.mapmaker.map.util.datafix.walkers.DataWalkerMapPaths;
-import net.hollowcube.mapmaker.map.util.datafix.walkers.MapPathWalker;
+import net.hollowcube.datafix.DataType;
+import net.hollowcube.datafix.DataTypes;
+import net.hollowcube.datafix.DataVersion;
+import net.hollowcube.mapmaker.map.util.datafix.HCDataTypes;
+import org.jetbrains.annotations.NotNull;
 
-@AutoService(DataFix.class)
-public class V3838 implements DataFix {
-    private static final int VERSION = HCVersions.V1_20_5_HC1;
+public class V3838 extends DataVersion {
 
-    @Override
-    public void register() {
-        HCTypeRegistry.BLOCK_ENTITY.addWalker(VERSION, "minecraft:checkpoint_plate", new MapPathWalker("items", new DataWalkerItems("item1", "item2", "item3")));
-        HCTypeRegistry.BLOCK_ENTITY.addWalker(VERSION, "minecraft:status_plate", new MapPathWalker("items", new DataWalkerItems("item1", "item2", "item3")));
+    public V3838() {
+        super(3838);
+
+        addReference(DataTypes.BLOCK_ENTITY, "minecraft:checkpoint_plate", V3838::itemHolder);
+        addReference(DataTypes.BLOCK_ENTITY, "minecraft:checkpoint_plate", V3838::itemHolder);
 
         // Both states 'added' in this version
-        HCTypeRegistry.EDIT_STATE.addStructureWalker(VERSION, new DataWalkerMapPaths<>(MCTypeRegistry.ITEM_STACK, "inventory"));
-        HCTypeRegistry.PLAY_STATE.addStructureWalker(VERSION, new DataWalkerMapPaths<>(MCTypeRegistry.FLAT_BLOCK_STATE, "ghostBlocks"));
+        addReference(HCDataTypes.EDIT_STATE, field -> field.list("inventory", DataTypes.ITEM_STACK));
+        addReference(HCDataTypes.PLAY_STATE, field -> field.list("ghostBlocks", DataTypes.FLAT_BLOCK_STATE));
+    }
+
+    static @NotNull DataType.Builder itemHolder(@NotNull DataType.Builder field) {
+        return field
+                .single("items.item1", DataTypes.ITEM_STACK)
+                .single("items.item2", DataTypes.ITEM_STACK)
+                .single("items.item3", DataTypes.ITEM_STACK);
     }
 }

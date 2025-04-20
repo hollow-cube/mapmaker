@@ -4,7 +4,9 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
@@ -27,6 +29,7 @@ public final class BlockUtil {
         }
     };
     private static final Int2ObjectMap<Map<String, String[]>> BLOCK_PROPERTIES;
+    private static final Int2ObjectMap<Material> BLOCK_TO_ITEM;
 
     static {
         var blockmap = new Int2ObjectOpenHashMap<Map<String, String[]>>();
@@ -44,6 +47,14 @@ public final class BlockUtil {
             blockmap.put(block.id(), Collections.unmodifiableMap(blockprops));
         }
         BLOCK_PROPERTIES = blockmap;
+
+        var blockToItem = new Int2ObjectOpenHashMap<Material>();
+        for (var material : Material.values()) {
+            var block = material.registry().block();
+            if (block == null) continue;
+            blockToItem.put(block.id(), material);
+        }
+        BLOCK_TO_ITEM = blockToItem;
     }
 
     /**
@@ -53,6 +64,10 @@ public final class BlockUtil {
      */
     public static @NotNull @Unmodifiable Map<String, String[]> getBlockProperties(@NotNull Block block) {
         return Objects.requireNonNull(BLOCK_PROPERTIES.get(block.id()), "Block was not found in the valid properties map");
+    }
+
+    public static @Nullable Material getItem(@NotNull Block block) {
+        return BLOCK_TO_ITEM.get(block.id());
     }
 
     public static @NotNull Block fromString(@NotNull String blockState) {

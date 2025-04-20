@@ -27,7 +27,8 @@ public record BadSprite(char fontChar, @Nullable String model, int width, int of
         return ID_MODEL_MAP.get(id);
     }
 
-    public static @Nullable String modelToId(@NotNull String model) {
+    public static @Nullable String modelToId(@Nullable String model) {
+        if (model == null) return null;
         return MODEL_ID_MAP.get(model);
     }
 

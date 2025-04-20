@@ -126,7 +126,6 @@ public class PackContext {
     }
 
     public void cleanup() throws IOException {
-        System.out.println("Cleanup");
         Gson gson = new GsonBuilder().create();
 
         Files.writeString(out.resolve("mapping.json"), gson.toJson(remapping));

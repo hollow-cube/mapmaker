@@ -5,7 +5,7 @@ import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.kyori.adventure.nbt.*;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Point;
@@ -40,6 +40,8 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
 
         setNoGravity(true);
         hasPhysics = false;
+        collidesWithEntities = false;
+        preventBlockPlacement = false;
     }
 
     @Override
@@ -320,7 +322,7 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
             super.writeData(tag);
 
             final TextDisplayMeta meta = getEntityMeta();
-            tag.putString("text", GsonComponentSerializer.gson().serialize(meta.getText()));
+            tag.put("text", Codec.COMPONENT.encode(Transcoder.NBT, meta.getText()).orElseThrow());
             if (meta.getLineWidth() != 0)
                 tag.putInt("line_width", meta.getLineWidth());
             if (meta.getBackgroundColor() != DEFAULT_BACKGROUND)
@@ -343,8 +345,10 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
             super.readData(tag);
 
             final TextDisplayMeta meta = getEntityMeta();
-            if (tag.get("text") instanceof StringBinaryTag text)
-                meta.setText(GsonComponentSerializer.gson().deserialize(text.value()));
+
+            var text = tag.get("text");
+            if (text != null) meta.setText(Codec.COMPONENT
+                    .decode(Transcoder.NBT, text).orElse(Component.empty()));
             if (tag.get("line_width") instanceof NumberBinaryTag lineWidth)
                 meta.setLineWidth(lineWidth.intValue());
             if (tag.get("background") instanceof NumberBinaryTag background)

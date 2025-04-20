@@ -5,7 +5,7 @@ import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.map.feature.play.setting.SavedMapSettings;
-import net.hollowcube.mapmaker.map.util.datafix.HCTypeRegistry;
+import net.hollowcube.mapmaker.map.util.datafix.HCDataTypes;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.coordinate.Pos;
@@ -38,7 +38,7 @@ public final class PlayState {
             "settings", SavedMapSettings.CODEC.optional(), PlayState::settings,
             PlayState::new));
 
-    public static final SaveStateType.Serializer<PlayState> SERIALIZER = SaveStateType.serializer("playState", CODEC, HCTypeRegistry.PLAY_STATE);
+    public static final SaveStateType.Serializer<PlayState> SERIALIZER = SaveStateType.serializer("playState", CODEC, HCDataTypes.PLAY_STATE);
 
     private PlayState lastState; // The previous state of the player (ie at the last checkpoint)
 
@@ -115,6 +115,7 @@ public final class PlayState {
     }
 
     public @NotNull PotionEffectList potionEffects() {
+        if (potionEffects == null) potionEffects = new PotionEffectList();
         return potionEffects;
     }
 

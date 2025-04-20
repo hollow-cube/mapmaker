@@ -21,7 +21,8 @@ public class BouncePadBlock implements BlockHandler, PressurePlateBlockMixin, De
     private static final Key KEY = Key.key("mapmaker:bounce_pad");
     private static final Tag<BouncePadData> DATA_TAG = DFU.View(BouncePadData.CODEC);
 
-    public static final ItemHandler ITEM = new BlockItemHandler(BouncePadBlock::new, Block.CHERRY_PRESSURE_PLATE);
+    public static final ItemHandler ITEM = new BlockItemHandler(BouncePadBlock::new,
+            Block.CHERRY_PRESSURE_PLATE, "bounce_pad");
 
     private final Set<Player> playersOnPlate = new HashSet<>();
 

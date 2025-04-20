@@ -5,6 +5,7 @@ import io.prometheus.client.Counter;
 import net.hollowcube.common.events.PlayerMoveVehicleEvent;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.dfu.DFU;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.event.*;
@@ -346,10 +347,15 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     public void handleCheckpointPostChange(@NotNull MapPlayerCheckpointPostChangeEvent event) {
         var player = event.getPlayer();
-        var state = SaveState.fromPlayer(player).state(PlayState.class);
+
+        // Save state can be missing when the player enters spectator mode while standing on a checkpoint.
+        var saveState = SaveState.optionalFromPlayer(player);
+        if (saveState == null) return;
+
+        var state = saveState.state(PlayState.class);
         var data = event.effectData();
 
-        if (!event.getMapWorld().isPlaying(event.player())) return;
+        if (!event.getMapWorld().isPlaying(player)) return;
         if (state.history().isEmpty()) return;
         if (state.lastState() == null) return;
         if (!state.history().getLast().equals(event.checkpointId())) return;
@@ -556,10 +562,14 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         player.removeTag(COUNTDOWN_END);
 
         resetTeleport(player, world.map().settings().getSpawnPoint()).thenRun(() -> {
-            updatePlayerFromState(world, player, newPlayState, true);
-            abstractWorld.addPlayerImmediate(player);
+            try {
+                updatePlayerFromState(world, player, newPlayState, true);
+                abstractWorld.addPlayerImmediate(player);
 
-            EventDispatcher.call(new MapPlayerInitEvent(world, player, true, false));
+                EventDispatcher.call(new MapPlayerInitEvent(world, player, true, false));
+            } catch (Exception e) {
+                ExceptionReporter.reportException(e, player);
+            }
         });
     }
 

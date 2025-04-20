@@ -10,13 +10,11 @@ dependencies {
     implementation(project(":modules:compat"))
     implementation(project(":modules:terraform"))
     implementation(project(":modules:script-engine"))
+    implementation(project(":modules:datafix"))
 
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)
     implementation(libs.gson)
-    implementation(libs.dataconverter) {
-        exclude(group = "com.github.hollow-cube")
-    }
     implementation(libs.mql)
     implementation(libs.polar)
     implementation(libs.posthog)

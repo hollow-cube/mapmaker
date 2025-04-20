@@ -16,7 +16,8 @@ import java.util.Set;
 
 public class FinishPlateBlock implements ObjectBlockHandler, PressurePlateBlockMixin {
 
-    public static final BlockItemHandler ITEM = new BlockItemHandler(FinishPlateBlock::new, Block.LIGHT_WEIGHTED_PRESSURE_PLATE);
+    public static final BlockItemHandler ITEM = new BlockItemHandler(FinishPlateBlock::new,
+            Block.LIGHT_WEIGHTED_PRESSURE_PLATE, "finish_plate");
 
     private final Set<Player> playersOnPlate = new HashSet<>();
 

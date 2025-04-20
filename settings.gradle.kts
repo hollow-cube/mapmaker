@@ -14,6 +14,7 @@ include(
     "modules:common",
     "modules:compat",
     "modules:core",
+    "modules:datafix",
     "modules:hub",
     "modules:map",
     "modules:map-core",

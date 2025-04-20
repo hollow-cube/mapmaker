@@ -35,7 +35,7 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget,
     public static final Tag<CheckpointEffectData> ENTITY_DATA_TAG = DFU.Tag(CheckpointEffectData.CODEC, "checkpoint").path("data");
 
     public static final BlockItemHandler ITEM = new BlockItemHandler(CheckpointPlateBlock::new,
-            Block.HEAVY_WEIGHTED_PRESSURE_PLATE, CheckpointPlateBlock::updateItemStack);
+            Block.HEAVY_WEIGHTED_PRESSURE_PLATE, "checkpoint_plate", CheckpointPlateBlock::updateItemStack);
 
     private final Set<Player> playersOnPlate = new HashSet<>();
 

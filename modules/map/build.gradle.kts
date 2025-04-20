@@ -8,6 +8,7 @@ dependencies {
     implementation(project(":modules:compat"))
     implementation(project(":modules:terraform"))
     implementation(project(":modules:replay"))
+    implementation(project(":modules:datafix"))
 
     implementation(libs.minestom)
     implementation(libs.bundles.otel)
@@ -16,9 +17,6 @@ dependencies {
     implementation(libs.zstd)
     implementation(libs.gson)
     implementation(libs.completely)
-    implementation(libs.dataconverter) {
-        exclude(group = "com.github.hollow-cube")
-    }
     implementation(libs.mql)
     implementation(libs.polar)
     implementation(libs.fastutil)

@@ -126,7 +126,7 @@ public class CosmeticEntry extends View {
         onIcon.setItemSprite(itemIcon);
 
         var sprite = SELECTED_SPRITES[row];
-        onIcon.setSprite(sprite.fontChar(), sprite.model(), sprite.width(), sprite.offsetX(), sprite.rightOffset());
+        onIcon.setSprite(sprite.fontChar(), sprite.modelOrNull(), sprite.width(), sprite.offsetX(), sprite.rightOffset());
 
         {
             var lore = new ArrayList<>(itemIcon.get(DataComponents.LORE, List.of()));
@@ -184,10 +184,11 @@ public class CosmeticEntry extends View {
                     var previewItem = model.iconItem().builder()
                             .customName(offItemStack.get(DataComponents.CUSTOM_NAME))
                             .lore(offItemStack.get(DataComponents.LORE))
+                            .customModelData(List.of(2f), List.of(), List.of(), List.of())
+                            .hideExtraTooltip()
                             .build();
                     offIcon.setItemDirect(previewItem);
                 }
-
             }
         }
     }

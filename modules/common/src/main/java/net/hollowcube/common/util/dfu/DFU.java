@@ -32,7 +32,7 @@ public final class DFU {
         return Tag.View(codecTagSerializer(codec)).defaultValue(codecEmptySupplier(codec));
     }
 
-    private static <T> @NotNull TagSerializer<T> codecTagSerializer(@NotNull Codec<T> codec) {
+    public static <T> @NotNull TagSerializer<T> codecTagSerializer(@NotNull Codec<T> codec) {
         return TagSerializer.fromCompound(
                 compound -> codec.decode(Transcoder.NBT, compound).orElseThrow(),
                 value -> {
