@@ -8,8 +8,12 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.velocity.api)
+    implementation(libs.velocity.api) {
+        exclude(group = "net.kyori")
+    }
     implementation(libs.kafka)
+
+    implementation(libs.bundles.adventure)
 }
 
 application {
