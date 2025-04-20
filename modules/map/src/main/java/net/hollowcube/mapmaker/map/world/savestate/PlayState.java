@@ -115,6 +115,7 @@ public final class PlayState {
     }
 
     public @NotNull PotionEffectList potionEffects() {
+        if (potionEffects == null) potionEffects = new PotionEffectList();
         return potionEffects;
     }
 
