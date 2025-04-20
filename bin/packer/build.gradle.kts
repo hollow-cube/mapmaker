@@ -19,6 +19,7 @@ tasks.register<JavaExec>("runPacker") {
     workingDir = rootProject.layout.projectDirectory.asFile
     args = listOf(file(packerOut).absolutePath)
 
+    inputs.dir(file(rootProject.layout.projectDirectory.dir("resources")))
     outputs.dir(packerOut)
 
     javaLauncher = javaToolchains.launcherFor {
@@ -28,6 +29,7 @@ tasks.register<JavaExec>("runPacker") {
 }
 
 tasks.register<Zip>("buildClient") {
+    dependsOn("runPacker")
     from(packerOut.get().dir("client"))
 
     destinationDirectory = rootProject.layout.buildDirectory

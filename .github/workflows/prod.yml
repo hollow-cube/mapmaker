@@ -84,7 +84,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: bazel-bin/bin/map
+          context: .
           file: "bin/map/deploy/Dockerfile"
           platforms: linux/amd64
           push: true
@@ -121,7 +121,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: bazel-bin/bin/hub
+          context: .
           file: "bin/hub/deploy/Dockerfile"
           platforms: linux/amd64
           push: true
