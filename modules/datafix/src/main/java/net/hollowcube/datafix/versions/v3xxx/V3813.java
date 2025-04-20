@@ -1,5 +1,6 @@
 package net.hollowcube.datafix.versions.v3xxx;
 
+import net.hollowcube.datafix.DataFix;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
@@ -7,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 public class V3813 extends DataVersion {
     private static final Set<String> PATROLLING_MOBS = Set.of(
@@ -37,7 +37,7 @@ public class V3813 extends DataVersion {
         addFix(DataTypes.ITEM_STACK, "minecraft:compass", V3813::fixCompassItemStack);
     }
 
-    private static Function<Value, Value> posFieldFixAndRename(@NotNull Map<String, String> fields) {
+    private static DataFix posFieldFixAndRename(@NotNull Map<String, String> fields) {
         return value -> {
             fields.forEach((oldField, newField) ->
                     value.put(newField, fixBlockPos(value.remove(oldField))));

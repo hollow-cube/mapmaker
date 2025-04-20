@@ -1,12 +1,12 @@
 package net.hollowcube.datafix.fixes;
 
+import net.hollowcube.datafix.DataFix;
 import net.hollowcube.datafix.util.Value;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
-public class EntityRenameFix implements Function<Value, Value> {
+public class EntityRenameFix implements DataFix {
     private final BiFunction<Value, String, String> mapper;
 
     public EntityRenameFix(@NotNull BiFunction<Value, String, String> mapper) {
@@ -14,7 +14,7 @@ public class EntityRenameFix implements Function<Value, Value> {
     }
 
     @Override
-    public Value apply(Value value) {
+    public Value fix(Value value) {
         if (!(value.get("id").value() instanceof String id))
             return null;
 

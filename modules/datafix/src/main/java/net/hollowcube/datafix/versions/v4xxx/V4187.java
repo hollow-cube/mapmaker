@@ -1,11 +1,9 @@
 package net.hollowcube.datafix.versions.v4xxx;
 
 import it.unimi.dsi.fastutil.doubles.Double2DoubleFunction;
+import net.hollowcube.datafix.DataFix;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
-import net.hollowcube.datafix.util.Value;
-
-import java.util.function.Function;
 
 public class V4187 extends DataVersion {
     private static final String FOLLOW_RANGE = "minecraft:follow_range";
@@ -21,7 +19,7 @@ public class V4187 extends DataVersion {
         addFix(DataTypes.ENTITY, "minecraft:warden", fixFollowRangeAttributeBaseValue(d -> d == 16.0 ? 24.0 : d));
     }
 
-    private static Function<Value, Value> fixFollowRangeAttributeBaseValue(Double2DoubleFunction operator) {
+    private static DataFix fixFollowRangeAttributeBaseValue(Double2DoubleFunction operator) {
         return entity -> {
             for (var attribute : entity.get("attributes")) {
                 if (!FOLLOW_RANGE.equals(attribute.getValue("id")))

@@ -1,19 +1,17 @@
 package net.hollowcube.datafix;
 
 import it.unimi.dsi.fastutil.Pair;
-import net.hollowcube.datafix.util.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Function;
 
 public final class DataTypeBuilder {
     final String id;
 
     final List<Property> properties = new ArrayList<>();
     // Keys here are is the encoded version (ie including subversion)
-    final List<Pair<Integer, Function<Value, Value>>> fixes = new ArrayList<>();
+    final List<Pair<Integer, DataFix>> fixes = new ArrayList<>();
 
     // ID mapped only
     final Map<String, DataTypeBuilder> idMap = new HashMap<>();
@@ -32,7 +30,7 @@ public final class DataTypeBuilder {
         properties.add(property);
     }
 
-    public void addFix(int encodedVersion, @NotNull Function<Value, Value> fix) {
+    public void addFix(int encodedVersion, @NotNull DataFix fix) {
         fixes.add(Pair.of(encodedVersion, fix));
     }
 

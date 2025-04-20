@@ -18,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -119,7 +118,7 @@ public class DataFixer {
         return relevantVersions;
     }
 
-    private static @NotNull Pair<Int2IntMap, DataFix[]> createFixSpans(List<Pair<Integer, Function<Value, Value>>> allFixes) {
+    private static @NotNull Pair<Int2IntMap, DataFix[]> createFixSpans(List<Pair<Integer, DataFix>> allFixes) {
         var sortedFixes = new ArrayList<>(allFixes);
         sortedFixes.sort(Comparator.comparingInt(Pair::first)); // Handles subversions by int natural order
 
@@ -130,7 +129,7 @@ public class DataFixer {
         int version = -1, start = 0;
         for (int i = 0; i < fixes.length; i++) {
             var fix = sortedFixes.get(i);
-            fixes[i] = fix.second()::apply;
+            fixes[i] = fix.second();
 
             int fixVersion = fix.first() >> 8; // drop subversion
             if (version != fixVersion) {

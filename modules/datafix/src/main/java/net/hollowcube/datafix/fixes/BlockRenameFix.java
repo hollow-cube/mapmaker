@@ -1,12 +1,12 @@
 package net.hollowcube.datafix.fixes;
 
+import net.hollowcube.datafix.DataFix;
 import net.hollowcube.datafix.util.Value;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
-import java.util.function.Function;
 
-public class BlockRenameFix implements Function<Value, Value> {
+public class BlockRenameFix implements DataFix {
     private final Map<String, String> nameMap;
 
     public BlockRenameFix(@NotNull String oldName, @NotNull String newName) {
@@ -18,7 +18,7 @@ public class BlockRenameFix implements Function<Value, Value> {
     }
 
     @Override
-    public Value apply(Value value) {
+    public Value fix(Value value) {
         if (value.value() instanceof String s) { // FLAT_BLOCK_STATE or BLOCK_NAME
             int index = s.indexOf('[');
             if (index == -1) return Value.wrap(nameMap.getOrDefault(s, s));

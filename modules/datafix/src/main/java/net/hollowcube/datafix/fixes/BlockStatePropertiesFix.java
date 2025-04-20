@@ -1,12 +1,12 @@
 package net.hollowcube.datafix.fixes;
 
+import net.hollowcube.datafix.DataFix;
 import net.hollowcube.datafix.util.Value;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
-import java.util.function.Function;
 
-public class BlockStatePropertiesFix implements Function<Value, Value> {
+public class BlockStatePropertiesFix implements DataFix {
     private final String id;
     private final Consumer<Value> function;
 
@@ -16,7 +16,7 @@ public class BlockStatePropertiesFix implements Function<Value, Value> {
     }
 
     @Override
-    public Value apply(Value blockState) {
+    public Value fix(Value blockState) {
         if (blockState.getValue("Name") instanceof String s && this.id.equals(s)) {
             var properties = blockState.get("Properties");
             if (!properties.isMapLike() || properties.size(0) == 0) return null;

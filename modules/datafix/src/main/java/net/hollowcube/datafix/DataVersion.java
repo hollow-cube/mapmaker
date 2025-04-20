@@ -1,9 +1,6 @@
 package net.hollowcube.datafix;
 
-import net.hollowcube.datafix.util.Value;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.function.Function;
 
 // basically dsl for writing fixes, nothing else.
 public abstract class DataVersion {
@@ -32,9 +29,13 @@ public abstract class DataVersion {
     }
 
     protected void renameReference(DataType.IdMapped type, @NotNull String oldId, @NotNull String newId) {
-        // TODO
+        var oldBuilder = DataFixer.builderFor(type, oldId);
+        var newBuilder = DataFixer.builderFor(type, newId);
 
-        // But also can i just delete this perhaps? it seems kinda confusing.
+        oldBuilder.properties.forEach(newBuilder::addProperty);
+        oldBuilder.fixes.forEach(pair -> newBuilder.addFix(pair.first(), pair.second()));
+
+        removeReference(type, oldId);
     }
 
     protected void removeReference(DataType.IdMapped type, @NotNull String id) {
@@ -44,11 +45,11 @@ public abstract class DataVersion {
 
     // FIXES
 
-    protected void addFix(@NotNull DataType type, @NotNull Function<Value, Value> fix) {
+    protected void addFix(@NotNull DataType type, @NotNull DataFix fix) {
         DataFixer.builderFor(type).addFix(encodedVersion, fix);
     }
 
-    protected void addFix(@NotNull DataType.IdMapped type, @NotNull String id, @NotNull Function<Value, Value> fix) {
+    protected void addFix(@NotNull DataType.IdMapped type, @NotNull String id, @NotNull DataFix fix) {
         DataFixer.builderFor(type, id).addFix(encodedVersion, fix);
     }
 

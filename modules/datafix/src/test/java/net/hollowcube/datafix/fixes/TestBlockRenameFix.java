@@ -10,7 +10,7 @@ class TestBlockRenameFix {
     @Test
     void blockName() {
         var fix = new BlockRenameFix("minecraft:grass", "minecraft:short_grass");
-        var result = fix.apply(Value.wrap("minecraft:grass"));
+        var result = fix.fix(Value.wrap("minecraft:grass"));
         assertEquals("minecraft:short_grass", result.value());
     }
 

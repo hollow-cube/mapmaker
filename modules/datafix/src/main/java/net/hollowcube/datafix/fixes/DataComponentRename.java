@@ -1,5 +1,6 @@
 package net.hollowcube.datafix.fixes;
 
+import net.hollowcube.datafix.DataFix;
 import net.hollowcube.datafix.util.Value;
 
 import java.util.function.Function;
@@ -8,10 +9,10 @@ public record DataComponentRename(
         String oldName,
         String newName,
         Function<Value, Value> transformer
-) implements Function<Value, Value> {
+) implements DataFix {
 
     @Override
-    public Value apply(Value dataComponents) {
+    public Value fix(Value dataComponents) {
         var oldComponent = dataComponents.remove(oldName);
         if (oldComponent.isNull()) return null;
 

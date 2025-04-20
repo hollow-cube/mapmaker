@@ -1,14 +1,14 @@
 package net.hollowcube.datafix.fixes;
 
+import net.hollowcube.datafix.DataFix;
 import net.hollowcube.datafix.util.Value;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
-import java.util.function.Function;
 
 import static net.hollowcube.datafix.util.DataFixUtils.namespaced;
 
-public class ItemRenameFix implements Function<Value, Value> {
+public class ItemRenameFix implements DataFix {
     private final Map<String, String> nameMap;
 
     public ItemRenameFix(@NotNull String oldName, @NotNull String newName) {
@@ -20,7 +20,7 @@ public class ItemRenameFix implements Function<Value, Value> {
     }
 
     @Override
-    public Value apply(Value value) {
+    public Value fix(Value value) {
         if (!(value.value() instanceof String s)) return value;
         s = namespaced(s);
         return Value.wrap(nameMap.getOrDefault(s, s));
