@@ -37,12 +37,7 @@ public interface MapServer {
 
     @NotNull Controller guiController();
 
-    /**
-     * @throws UnsupportedOperationException if this server does not support scripting
-     */
-    default @NotNull ScriptEngine scriptEngine() {
-        throw new UnsupportedOperationException("Scripting is not supported on this server");
-    }
+    @NotNull ScriptEngine scriptEngine();
 
     @NotNull Scheduler scheduler();
 

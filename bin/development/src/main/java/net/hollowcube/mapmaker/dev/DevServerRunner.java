@@ -23,7 +23,6 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.player.PlayerSkin;
-import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.Component;
@@ -58,8 +57,6 @@ public class DevServerRunner extends AbstractMapServer {
     private final CommandManager hubCommandManager = new CommandManagerImpl(super.commandManager());
     private final CommandManager mapCommandManager = new CommandManagerImpl(super.commandManager());
 
-    private ScriptEngine scriptEngine;
-
     public DevServerRunner(@NotNull ConfigLoaderV3 config) {
         super(config);
 
@@ -87,11 +84,6 @@ public class DevServerRunner extends AbstractMapServer {
     }
 
     @Override
-    public @NotNull ScriptEngine scriptEngine() {
-        return scriptEngine;
-    }
-
-    @Override
     protected void prepareStart() {
         super.prepareStart();
 
@@ -111,9 +103,6 @@ public class DevServerRunner extends AbstractMapServer {
         var kafkaConfig = config.get(KafkaConfig.class);
         var mapMgmtConsumer = new MapMgmtConsumerImpl((LocalMapAllocator) allocator(), kafkaConfig.bootstrapServers());
         shutdowner().queue("map-mgmt-listener", mapMgmtConsumer::close);
-
-        // TODO: this doesnt work since we always return the same script engine instance even in a map
-        scriptEngine = new ScriptEngine(hubWorld.instance());
     }
 
     private void performHubInit() {
@@ -229,7 +218,7 @@ public class DevServerRunner extends AbstractMapServer {
 
         dbg.createPermissionedSubcommand("gui", (player, ignored) -> {
             player.getInstance().scheduleNextTick(ignored2 -> {
-                scriptEngine.guiManager().openGui(player, URI.create("guilib:///map_browser/map-browser-view.js"), Map.of(), Map.of());
+                scriptEngine().guiManager().openGui(player, URI.create("guilib:///map_browser/map-browser-view.js"), Map.of(), Map.of());
             });
         }, "");
 

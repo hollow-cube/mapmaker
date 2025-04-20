@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":modules:terraform"))
     implementation(project(":modules:replay"))
     implementation(project(":modules:datafix"))
+    implementation(project(":modules:script-engine"))
 
     implementation(libs.minestom)
     implementation(libs.bundles.otel)

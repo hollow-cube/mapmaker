@@ -81,6 +81,7 @@ import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.punishments.PunishmentManagementListener;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.PunishmentServiceImpl;
+import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
@@ -101,6 +102,7 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.server.common.ServerLinksPacket;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -119,6 +121,8 @@ import java.util.function.Function;
 public abstract class AbstractMapServer implements MapServer {
     private final Logger logger = LoggerFactory.getLogger(MapServer.class);
 
+    private static final Tag<ScriptEngine> SCRIPT_ENGINE_TAG = Tag.Transient("instance_script_engine");
+
     protected final ConfigLoaderV3 config;
     protected final GlobalConfig globalConfig;
 
@@ -130,6 +134,8 @@ public abstract class AbstractMapServer implements MapServer {
     private final PermManager permManager;
     private final PunishmentService punishmentService;
     private PlayerInviteService inviteService; // So many dependencies very yikes
+
+    private ScriptEngine scriptEngine;
 
     // Listeners for other features
     private MapAllocator allocator;
@@ -376,6 +382,12 @@ public abstract class AbstractMapServer implements MapServer {
 
     protected abstract @NotNull MapAllocator createAllocator();
     protected abstract @NotNull ServerBridge createBridge();
+
+    @Override
+    public @NotNull ScriptEngine scriptEngine() {
+        if (this.scriptEngine == null) this.scriptEngine = new ScriptEngine(scheduler());
+        return this.scriptEngine;
+    }
 
     /**
      * Called just before the server starts, but after all services have been initialized.

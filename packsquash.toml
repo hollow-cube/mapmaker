@@ -1,4 +1,4 @@
-pack_directory = 'temp'
+pack_directory = 'bin/packer/build/packer-out/client'
 output_file_path = 'squashed.zip'
 
 ['**/*.png']

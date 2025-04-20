@@ -9,7 +9,7 @@ import net.hollowcube.mapmaker.scripting.loader.ScriptLoader;
 import net.hollowcube.mapmaker.scripting.node.Globals;
 import net.hollowcube.mapmaker.scripting.node.Process;
 import net.hollowcube.mapmaker.scripting.util.ContextWrapper;
-import net.minestom.server.instance.Instance;
+import net.minestom.server.timer.Scheduler;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +41,7 @@ import java.util.function.Function;
  */
 public class ScriptEngine {
     public final Env env;
-    public final Instance instance;
+    public final Scheduler scheduler;
     public final Globals globals = new Globals();
 
     private final Context context;
@@ -53,9 +53,9 @@ public class ScriptEngine {
     // Sub handlers, created lazily when needed.
     private GuiManager guiManager = null; // Lazy
 
-    public ScriptEngine(@NotNull Instance instance) {
+    public ScriptEngine(@NotNull Scheduler scheduler) {
         this.env = new Env(ServerRuntime.getRuntime().isDevelopment());
-        this.instance = instance;
+        this.scheduler = scheduler;
 
         this.context = Context.newBuilder().build();
 
@@ -155,7 +155,7 @@ public class ScriptEngine {
     }
 
     private void handleModuleHotSwap(@NotNull URI moduleUri, @Nullable String newCode) {
-        instance.scheduler().scheduleEndOfTick(() -> {
+        scheduler.scheduleEndOfTick(() -> {
             var removed = this.moduleCache.remove(moduleUri);
             if (removed == null) return; // Not loaded currently, ignore.
             if (newCode == null) return; // Unload, no need to reload.
