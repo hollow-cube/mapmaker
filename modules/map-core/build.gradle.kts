@@ -24,4 +24,6 @@ dependencies {
     implementation(libs.kafka)
     implementation(libs.slf4j.jul)
     implementation(libs.logback)
+
+    testImplementation(project(":modules:test"))
 }

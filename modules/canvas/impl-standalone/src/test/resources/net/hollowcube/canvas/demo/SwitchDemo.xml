@@ -1,8 +1,0 @@
-<?xml version="1.0" ?>
-<component width="9" height="1" align="ltr">
-    <switch id="switch">
-        <button id="red" translationKey="red" sprite="red_stained_glass_pane"/>
-        <button id="green" translationKey="green" sprite="green_stained_glass_pane"/>
-        <button id="blue" translationKey="blue" sprite="blue_stained_glass_pane"/>
-    </switch>
-</component>

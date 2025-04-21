@@ -1,8 +1,0 @@
-<component id="anvil" width="9" height="1" align="ltr">
-    <label id="placeholder" width="1" translationKey="todo" sprite="diamond_pickaxe"/>
-    <switch id="switch">
-        <button id="author_to_map" translationKey="author.todo" sprite="diamond_pickaxe"/>
-        <button id="map_to_author" translationKey="map.todo" sprite="diamond_pickaxe"/>
-    </switch>
-    <button id="confirmation" width="1" translationKey="confirm.todo" sprite="diamond_pickaxe"/>
-</component>

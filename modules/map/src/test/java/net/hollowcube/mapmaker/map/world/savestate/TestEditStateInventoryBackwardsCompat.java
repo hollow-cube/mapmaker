@@ -2,10 +2,10 @@ package net.hollowcube.mapmaker.map.world.savestate;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.StructCodec;
+import net.minestom.server.codec.Transcoder;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -28,9 +28,9 @@ class TestEditStateInventoryBackwardsCompat {
     void testMissing() {
         record Parent(Map<Integer, ItemStack> inventory) {
         }
-        Codec<Parent> parentCodec = RecordCodecBuilder.create(i -> i.group(
-                MODERN_CODEC.optionalFieldOf("inventory", Map.of()).forGetter(Parent::inventory)
-        ).apply(i, Parent::new));
+        Codec<Parent> parentCodec = StructCodec.struct(
+                "inventory", MODERN_CODEC.optional(Map.of()), Parent::inventory,
+                Parent::new);
         assertEquals(Map.of(), decodeJson(parentCodec, "{}").inventory);
     }
 
@@ -64,6 +64,6 @@ class TestEditStateInventoryBackwardsCompat {
         class Holder {
             static final Gson gson = new Gson();
         }
-        return codec.parse(JsonOps.INSTANCE, Holder.gson.fromJson(json, JsonElement.class)).getOrThrow();
+        return codec.decode(Transcoder.JSON, Holder.gson.fromJson(json, JsonElement.class)).orElseThrow();
     }
 }

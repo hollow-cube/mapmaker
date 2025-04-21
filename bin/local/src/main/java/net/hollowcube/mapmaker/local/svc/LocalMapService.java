@@ -2,11 +2,11 @@ package net.hollowcube.mapmaker.local.svc;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.mojang.serialization.JsonOps;
 import net.hollowcube.mapmaker.local.LocalServerRunner;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.world.savestate.EditState;
 import net.hollowcube.mapmaker.misc.noop.NoopMapService;
+import net.minestom.server.codec.Transcoder;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -71,7 +71,7 @@ public class LocalMapService extends NoopMapService {
             var saveStatePath = savestatePath.resolve(playerId);
             if (Files.exists(saveStatePath)) {
                 JsonObject object = new Gson().fromJson(Files.readString(saveStatePath), JsonObject.class);
-                editState = (EditState) serializer.codec().parse(JsonOps.INSTANCE, object).getOrThrow();
+                editState = (EditState) serializer.codec().decode(Transcoder.JSON, object).orElseThrow();
             } else editState = new EditState();
 
             return new SaveState(

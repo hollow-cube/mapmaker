@@ -1,4 +1,0 @@
-<?xml version="1.0" ?>
-<component width="9" height="1" align="ttb">
-    <button id="btn" translationKey="button"/>
-</component>

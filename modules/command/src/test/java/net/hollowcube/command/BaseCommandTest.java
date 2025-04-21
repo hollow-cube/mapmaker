@@ -28,6 +28,11 @@ public class BaseCommandTest {
         return assertInstanceOf(CommandResult.SyntaxError.class, result);
     }
 
+    protected void assertNotFound(@NotNull String input) {
+        var result = manager.execute(sender, input);
+        assertInstanceOf(CommandResult.NotFound.class, result);
+    }
+
     protected @NotNull CommandResult.Denied assertDenied(@NotNull String input) {
         var result = manager.execute(sender, input);
         return assertInstanceOf(CommandResult.Denied.class, result);

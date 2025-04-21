@@ -24,6 +24,7 @@ include(
     "modules:script-engine:builtin",
     "modules:script-engine:npm",
     "modules:terraform",
+    "modules:test",
 );
 
 include(

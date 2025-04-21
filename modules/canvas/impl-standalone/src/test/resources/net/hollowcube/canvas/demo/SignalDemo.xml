@@ -1,5 +1,0 @@
-<?xml version="1.0" ?>
-<?import net.hollowcube.canvas.demo ?>
-<component width="9" height="1" align="ttb">
-    <SignalDemoInner/>
-</component>

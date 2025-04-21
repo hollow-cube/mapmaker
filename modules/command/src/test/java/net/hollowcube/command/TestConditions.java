@@ -58,7 +58,7 @@ class TestConditions extends BaseCommandTest {
                 .condition(condHide)
                 .executes(mockExecutor()));
 
-        assertSyntaxError("test");
+        assertNotFound("test");
     }
 
     @Test
