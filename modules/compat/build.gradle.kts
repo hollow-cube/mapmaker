@@ -12,4 +12,5 @@ dependencies {
     implementation(libs.noxesium)
     implementation(libs.zstd)
     implementation(libs.feather)
+    implementation(libs.labymod)
 }

@@ -22,6 +22,12 @@ repositories {
             includeGroup("net.digitalingot.feather-server-api")
         }
     }
+    maven(url = "https://dist.labymod.net/api/v1/maven/release/") {
+        content {
+            includeGroup("net.labymod.serverapi")
+            includeGroup("net.labymod.serverapi.integration")
+        }
+    }
 }
 
 dependencies {
