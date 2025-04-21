@@ -5,20 +5,21 @@ import net.minestom.server.ServerProcess;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.ConnectionState;
+import net.minestom.server.network.PlayerProvider;
 import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.ServerPacket;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 final class TestConnectionImpl implements TestConnection {
@@ -34,19 +35,18 @@ final class TestConnectionImpl implements TestConnection {
     }
 
     @Override
-    public @NotNull CompletableFuture<Player> connect(@NotNull Instance instance, @NotNull Pos pos) {
-        Player player = new Player(playerConnection, new GameProfile(UUID.randomUUID(), "RandName"));
-        player.eventNode().addListener(AsyncPlayerConfigurationEvent.class, event -> {
-            event.setSpawningInstance(instance);
-            event.getPlayer().setRespawnPoint(pos);
-        });
+    public @NotNull Player connect(@Nullable PlayerProvider provider, @NotNull Instance instance, @NotNull Pos pos) {
+        var playerProvider = Objects.requireNonNullElse(provider, Player::new);
+        Player player = playerProvider.createPlayer(playerConnection, new GameProfile(UUID.randomUUID(), "RandName"));
 
-        throw new UnsupportedOperationException("TODO");
-//        return process.connection().transitionConfigToPlay(player, true)
-//                .thenApply(unused -> {
-//                    process.connection().updateWaitingPlayers();
-//                    return player;
-//                });
+        player.setPendingOptions(instance, false);
+        player.setRespawnPoint(pos);
+        playerConnection.setConnectionState(ConnectionState.PLAY);
+        player.UNSAFE_init().join();
+
+//        process.connection().transitionConfigToPlay(player);
+//        process.connection().updateWaitingPlayers();
+        return player;
     }
 
     @Override

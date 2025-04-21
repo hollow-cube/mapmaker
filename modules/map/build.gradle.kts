@@ -22,4 +22,6 @@ dependencies {
     implementation(libs.polar)
     implementation(libs.fastutil)
     implementation(libs.kafka)
+
+    testImplementation(project(":modules:map-core-test"))
 }

@@ -4,6 +4,7 @@ import net.minestom.server.ServerProcess;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventListener;
+import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -39,11 +40,10 @@ final class EnvImpl implements Env {
     }
 
     @Override
-    public @NotNull <E extends Event> FlexibleListener<E> listen(@NotNull Class<E> eventType) {
-        var handler = process.eventHandler();
+    public @NotNull <E extends Event> FlexibleListener<E> listen(EventNode<?> eventNode, @NotNull Class<E> eventType) {
         var flexible = new FlexibleListenerImpl<>(eventType);
         var listener = EventListener.of(eventType, e -> flexible.handler.accept(e));
-        handler.addListener(listener);
+        ((EventNode<Event>) eventNode).addListener(listener);
         this.listeners.add(flexible);
         return flexible;
     }

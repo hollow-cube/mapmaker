@@ -5,9 +5,11 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.IChunkLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.network.PlayerProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -20,7 +22,11 @@ public interface Env {
 
     <E extends Event, H> @NotNull Collector<E> trackEvent(@NotNull Class<E> eventType, @NotNull EventFilter<? super E, H> filter, @NotNull H actor);
 
-    <E extends Event> @NotNull FlexibleListener<E> listen(@NotNull Class<E> eventType);
+    default <E extends Event> @NotNull FlexibleListener<E> listen(@NotNull Class<E> eventType) {
+        return listen(process().eventHandler(), eventType);
+    }
+
+    <E extends Event> @NotNull FlexibleListener<E> listen(@NotNull EventNode<?> node, @NotNull Class<E> eventType);
 
     default void tick() {
         process().ticker().tick(System.nanoTime());
@@ -40,7 +46,11 @@ public interface Env {
     }
 
     default @NotNull Player createPlayer(@NotNull Instance instance, @NotNull Pos pos) {
-        return createConnection().connect(instance, pos).join();
+        return createConnection().connect(null, instance, pos);
+    }
+
+    default @NotNull Player createPlayer(@NotNull PlayerProvider playerProvider, @NotNull Instance instance, @NotNull Pos pos) {
+        return createConnection().connect(playerProvider, instance, pos);
     }
 
     default @NotNull Instance createFlatInstance() {

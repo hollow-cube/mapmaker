@@ -1,5 +1,6 @@
 plugins {
     id("mapmaker.java-library")
+    id("mapmaker.packer-data")
 }
 
 dependencies {

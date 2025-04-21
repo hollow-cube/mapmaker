@@ -113,7 +113,7 @@ record ConfigLoaderV3Impl(@NotNull JsonObject root) implements ConfigLoaderV3 {
                 if (value == null) yield JsonNull.INSTANCE;
                 yield new JsonPrimitive(value);
             }
-            default -> element;
+            case null, default -> element;
         };
     }
 }

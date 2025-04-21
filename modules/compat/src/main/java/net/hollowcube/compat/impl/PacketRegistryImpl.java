@@ -11,6 +11,7 @@ import net.minestom.server.event.player.PlayerTickEndEvent;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.TestOnly;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,8 +37,10 @@ public final class PacketRegistryImpl implements PacketRegistry {
             var player = event.getPlayer();
             var id = event.getIdentifier().intern();
             switch (id) {
-                case REGISTER_CHANNEL -> PacketQueue.get(player).registerChannels(player, event.getMessageString().split("\0"));
-                case UNREGISTER_CHANNEL -> PacketQueue.get(player).unregisterChannels(event.getMessageString().split("\0"));
+                case REGISTER_CHANNEL ->
+                        PacketQueue.get(player).registerChannels(player, event.getMessageString().split("\0"));
+                case UNREGISTER_CHANNEL ->
+                        PacketQueue.get(player).unregisterChannels(event.getMessageString().split("\0"));
                 default -> {
                     ServerboundModPacket.Type<?> type = this.serverbound.get(id);
                     if (type == null) {
@@ -53,8 +56,8 @@ public final class PacketRegistryImpl implements PacketRegistry {
             }
         });
         events.addListener(PlayerSpawnEvent.class, event -> {
-           if (!event.isFirstSpawn()) return;
-           event.getPlayer().sendPluginMessage(REGISTER_CHANNEL, String.join("\0", this.serverbound.keySet()));
+            if (!event.isFirstSpawn()) return;
+            event.getPlayer().sendPluginMessage(REGISTER_CHANNEL, String.join("\0", this.serverbound.keySet()));
         });
         events.addListener(PlayerTickEndEvent.class, event -> PacketQueue.get(event.getPlayer()).flush());
     }
@@ -63,6 +66,11 @@ public final class PacketRegistryImpl implements PacketRegistry {
         if (INSTANCE != null) return INSTANCE;
         INSTANCE = new PacketRegistryImpl(events);
         return INSTANCE;
+    }
+
+    @TestOnly
+    public static void unsafeReset() {
+        INSTANCE = null;
     }
 
     public void freeze() {

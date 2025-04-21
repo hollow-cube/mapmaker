@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget, PressurePlateBlockMixin, DebugCommand.BlockDebug {
-    private static final Tag<CheckpointEffectData> DATA_TAG = DFU.View(CheckpointEffectData.CODEC);
+    public static final Tag<CheckpointEffectData> DATA_TAG = DFU.View(CheckpointEffectData.CODEC);
     public static final Tag<CheckpointEffectData> ENTITY_DATA_TAG = DFU.Tag(CheckpointEffectData.CODEC, "checkpoint").path("data");
 
     public static final BlockItemHandler ITEM = new BlockItemHandler(CheckpointPlateBlock::new,

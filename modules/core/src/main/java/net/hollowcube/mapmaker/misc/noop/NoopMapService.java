@@ -1,8 +1,10 @@
 package net.hollowcube.mapmaker.misc.noop;
 
+import com.google.gson.JsonObject;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
+import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -135,12 +137,13 @@ public class NoopMapService implements MapService {
 
     @Override
     public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType.Serializer<?> serializer) {
-        throw new UnsupportedOperationException("not implemented");
+        var obj = serializer.codec().decode(Transcoder.JSON, new JsonObject()).orElseThrow();
+        return new SaveState(UUID.randomUUID().toString(), playerId, mapId, SaveStateType.PLAYING, serializer, obj);
     }
 
     @Override
     public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
-        throw new UnsupportedOperationException("not implemented");
+        throw new NotFoundError(mapId);
     }
 
     @Override
@@ -170,7 +173,7 @@ public class NoopMapService implements MapService {
 
     @Override
     public @NotNull MapRating getMapRating(@NotNull String mapId, @NotNull String playerId) {
-        throw new UnsupportedOperationException("not implemented");
+        return new MapRating(MapRating.State.UNRATED, null);
     }
 
     @Override

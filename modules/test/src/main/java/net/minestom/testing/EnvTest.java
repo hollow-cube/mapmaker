@@ -1,6 +1,7 @@
 package net.minestom.testing;
 
 import net.minestom.server.MinecraftServer;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.*;
 import org.junit.jupiter.api.extension.support.TypeBasedParameterResolver;
 
@@ -28,16 +29,22 @@ public @interface EnvTest {
         @Override
         public void interceptTestMethod(Invocation<Void> invocation, ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable {
             invocation.proceed();
-            EnvImpl env = (EnvImpl) invocationContext.getArguments().get(0);
-            env.cleanup();
+            ((EnvImpl) EnvParameterResolver.get(extensionContext)).cleanup();
         }
     }
 
     final class EnvParameterResolver extends TypeBasedParameterResolver<Env> {
+        public static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace.create(EnvParameterResolver.class);
+
         @Override
         public Env resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
                 throws ParameterResolutionException {
-            return new EnvImpl(MinecraftServer.updateProcess());
+            return get(extensionContext);
+        }
+
+        public static @NotNull Env get(ExtensionContext context) {
+            return (Env) context.getStore(NAMESPACE).getOrComputeIfAbsent(Env.class,
+                    _ -> new EnvImpl(MinecraftServer.updateProcess()));
         }
     }
 }
