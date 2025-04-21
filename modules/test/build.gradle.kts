@@ -6,4 +6,5 @@ plugins {
 dependencies {
     implementation(libs.minestom)
     implementation(libs.junit.api)
+    implementation(libs.logback)
 }

@@ -34,6 +34,8 @@ tasks.register<Copy>("copyReactLibs") {
     }
 }
 
+// TODO: Below is entirely duplicated from script-engine, would be nice to extract it.
+//  or just figure out bundling system sooner than later.
 tasks.register<Copy>("copyBuiltinModule") {
     from(builtin)
     into(layout.buildDirectory.dir("builtin"))

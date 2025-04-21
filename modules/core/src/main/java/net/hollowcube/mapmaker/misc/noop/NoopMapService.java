@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
-import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -205,8 +204,4 @@ public class NoopMapService implements MapService {
         throw new UnsupportedOperationException("not implemented");
     }
 
-    @Override
-    public void uploadPerfdump(@NotNull String name, @NotNull Path data) {
-        throw new UnsupportedOperationException("not implemented");
-    }
 }

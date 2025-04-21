@@ -9,7 +9,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.channels.Channels;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -103,10 +102,6 @@ public interface MapService {
 
     @NotNull
     MapData.WithSlot importLegacyMap(@NotNull String authorizer, @NotNull String playerId, @NotNull String legacyMapId);
-
-    // Ignore this stuff :|
-
-    void uploadPerfdump(@NotNull String name, @NotNull Path data);
 
     class NotFoundError extends RuntimeException {
         public NotFoundError(@NotNull String id) {

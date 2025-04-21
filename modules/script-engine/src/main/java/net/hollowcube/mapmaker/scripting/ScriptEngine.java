@@ -54,7 +54,11 @@ public class ScriptEngine {
     private GuiManager guiManager = null; // Lazy
 
     public ScriptEngine(@NotNull Scheduler scheduler) {
-        this.env = new Env(ServerRuntime.getRuntime().isDevelopment());
+        this(scheduler, null);
+    }
+
+    public ScriptEngine(@NotNull Scheduler scheduler, @Nullable Env env) {
+        this.env = Objects.requireNonNullElseGet(env, () -> new Env(ServerRuntime.getRuntime().isDevelopment()));
         this.scheduler = scheduler;
 
         this.context = Context.newBuilder().build();

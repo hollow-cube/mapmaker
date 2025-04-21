@@ -12,12 +12,10 @@ import net.minestom.server.codec.Transcoder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -585,21 +583,5 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             }
             default -> throw new InternalError("Failed to import legacy map: " + res.body());
         };
-    }
-
-    @Override
-    public void uploadPerfdump(@NotNull String name, @NotNull Path file) {
-        try {
-            var req = HttpRequest.newBuilder()
-                    .method("PUT", HttpRequest.BodyPublishers.ofFile(file))
-                    .uri(URI.create(perfdumpUrl + "/" + name))
-                    .header(AUTHORIZER_HEADER, UUID.randomUUID().toString())
-                    .build();
-            var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-            if (res.statusCode() == 200) return; // Ok
-            throw new InternalError("Failed to upload perfdump: " + res.body());
-        } catch (FileNotFoundException e) {
-            throw new InternalError(e);
-        }
     }
 }
