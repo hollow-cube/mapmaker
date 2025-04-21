@@ -68,7 +68,6 @@ public final class PlacementRules {
         register(Block.BIG_DRIPLEAF, BigDripleafPlacementRule::new);
         register(Block.SMALL_DRIPLEAF, SmallDripleafPlacementRule::new);
         register(Block.KELP, KelpPlacementRule::new);
-        register(Block.PINK_PETALS, PinkPetalPlacementRule::new);
         register(Block.MELON_STEM, MelonStemPlacementRule::new);
         register(Block.ATTACHED_MELON_STEM, MelonStemPlacementRule::new);
 
@@ -91,6 +90,7 @@ public final class PlacementRules {
         register(Block.DEEPSLATE, AxisPlacementRule::new);
         register(Block.INFESTED_DEEPSLATE, AxisPlacementRule::new);
         register(Block.CHAIN, AxisPlacementRule::new);
+        register(Block.CREAKING_HEART, AxisPlacementRule::new);
 
         register(Block.FURNACE, b -> new FacingHorizontalPlacementRule(b, true));
         register(Block.LECTERN, b -> new FacingHorizontalPlacementRule(b, true));
@@ -187,6 +187,10 @@ public final class PlacementRules {
         register(Block.FIRE_CORAL_WALL_FAN, WaterloggedPlacementRule::new);
         register(Block.HORN_CORAL_WALL_FAN, WaterloggedPlacementRule::new);
         register(Block.TUBE_CORAL_WALL_FAN, WaterloggedPlacementRule::new);
+
+        register(Block.PINK_PETALS, b -> new QuadSegmentPlacementRule(b, "flower_amount"));
+        register(Block.WILDFLOWERS, b -> new QuadSegmentPlacementRule(b, "flower_amount"));
+        register(Block.LEAF_LITTER, b -> new QuadSegmentPlacementRule(b, "segment_amount"));
 
         // Annoying single use wall of shame >:(
 
