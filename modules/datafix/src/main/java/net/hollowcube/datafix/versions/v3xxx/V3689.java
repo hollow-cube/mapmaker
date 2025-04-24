@@ -13,8 +13,8 @@ public class V3689 extends DataVersion {
 
         addReference(DataTypes.BLOCK_ENTITY, "minecraft:trial_spawner", field -> field
                 // todo
-                .list("spawn_potentials.data.entity", DataTypes.ENTITY_TREE)
-                .single("spawn_data.entity", DataTypes.ENTITY_TREE));
+                .list("spawn_potentials.data.entity", DataTypes.ENTITY)
+                .single("spawn_data.entity", DataTypes.ENTITY));
     }
 
 }

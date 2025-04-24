@@ -18,7 +18,6 @@ public interface DataTypes {
     @NotNull DataType.IdMapped ITEM_STACK = idMappedDataType(Key.key("item_stack"));
 
     @NotNull DataType ENTITY_NAME = dataType(Key.key("entity_name"));
-    @NotNull DataType ENTITY_TREE = dataType(Key.key("entity_tree"));
     @NotNull DataType ENTITY_EQUIPMENT = dataType(Key.key("entity_equipment"));
     @NotNull DataType.IdMapped ENTITY = idMappedDataType(Key.key("entity"));
 

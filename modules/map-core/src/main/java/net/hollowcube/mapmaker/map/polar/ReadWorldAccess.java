@@ -11,10 +11,7 @@ import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.hollowcube.mapmaker.map.util.datafix.HCDataTypes;
 import net.hollowcube.polar.PolarWorldAccess;
-import net.kyori.adventure.nbt.BinaryTagTypes;
-import net.kyori.adventure.nbt.CompoundBinaryTag;
-import net.kyori.adventure.nbt.IntArrayBinaryTag;
-import net.kyori.adventure.nbt.ListBinaryTag;
+import net.kyori.adventure.nbt.*;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
@@ -79,6 +76,7 @@ public class ReadWorldAccess implements PolarWorldAccess {
 
         if (version > VERSION_PRE_CHUNK_NBT) {
             dataVersion = buffer.read(NetworkBuffer.VAR_INT);
+            System.out.println("DATA VERSION: " + dataVersion);
         }
 
         // There is an issue here. I cannot call TagHandler#updateContent because it will wipe any existing tags.
@@ -157,6 +155,7 @@ public class ReadWorldAccess implements PolarWorldAccess {
     }
 
     private void loadEntityWithPassengers(@NotNull Chunk chunk, @NotNull CompoundBinaryTag tag) {
+        System.out.println(TagStringIOExt.writeTag(tag));
         var entity = createEntityUnspawned(tag);
         if (entity == null) return;
 

@@ -12,12 +12,12 @@ public class V99 extends DataVersion {
 
         registerEntities();
         registerBlockEntities();
-        // TODO: why does entity tree even exist? It can just be a field on entity surely.
-        addReference(DataTypes.ENTITY_TREE, field -> field.extend(DataTypes.ENTITY).single("Riding", DataTypes.ENTITY));
-        addReference(DataTypes.ENTITY, field -> field.extend(DataTypes.ENTITY_EQUIPMENT));
+        addReference(DataTypes.ENTITY, field -> field
+                .extend(DataTypes.ENTITY_EQUIPMENT)
+                .single("Riding", DataTypes.ENTITY));
         addReference(DataTypes.ITEM_STACK, field -> field
                 .single("id", DataTypes.ITEM_NAME)
-                .single("tag.EntityTag", DataTypes.ENTITY_TREE)
+                .single("tag.EntityTag", DataTypes.ENTITY)
                 .single("tag.BlockEntityTag", DataTypes.BLOCK_ENTITY)
                 .list("tag.CanDestroy", DataTypes.BLOCK_NAME)
                 .list("tag.CanPlaceOn", DataTypes.BLOCK_NAME)

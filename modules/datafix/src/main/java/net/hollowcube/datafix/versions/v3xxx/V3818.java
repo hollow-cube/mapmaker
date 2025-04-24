@@ -10,7 +10,7 @@ public class V3818 extends DataVersion {
 
         addReference(DataTypes.BLOCK_ENTITY, "minecraft:beehive", field -> field
                 // todo
-                .list("bees.entity_data", DataTypes.ENTITY_TREE));
+                .list("bees.entity_data", DataTypes.ENTITY));
 
         addFix(DataTypes.BLOCK_ENTITY, "minecraft:beehive", V3818::fixBeehiveBlockEntityNames);
     }

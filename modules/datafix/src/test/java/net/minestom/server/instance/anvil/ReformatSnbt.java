@@ -6,18 +6,11 @@ public class ReformatSnbt {
     public static void main(String[] args) throws Exception {
         var snbt = """
                 
-                {Pos:[0.5d,58.0625d,197.5d],Rotation:[0.0f,0.0f],alignment:"center",background:1610612736,billboard:"vertical",glow_color_override:-1,id:"minecraft:text_display",line_width:300,shadow:1b,shadow_strength:1.0f,text:{extra:[{color:"gray",text:"ʙᴜʏɪɴɢ ᴛʜᴇ "},{translate:"icon.hypercube"},{color:"#FFDD4E",text:"ʜʏᴘᴇʀᴄᴜʙᴇ "},{color:"gray",text:"ʀᴀɴᴋ ᴡɪʟʟ ɢɪᴠᴇ ʏᴏᴜ:\\n\\n- "},{color:"#FFDD4E",text:"ɢᴏʟᴅ "},{color:"white",text:"ɴᴀᴍᴇ ᴀɴᴅ ʙᴀᴅɢᴇ"},"\\n",{color:"gray",text:"- "},{color:"white",text:"ᴜᴘ ᴛᴏ "},{color:"gold",text:"600x600"},{color:"white",text:" ᴍᴀᴘ ѕɪᴢᴇ"},"\\n",{color:"gray",text:"- "},{color:"green",text:"3"},{color:"white",text:" ᴇxᴛʀᴀ ᴍᴀᴘ ѕʟᴏᴛѕ"},"\\n",{color:"gray",text:"- "},{color:"aqua",text:"ᴀʟʟ "},{color:"white",text:"ᴄᴜʀʀᴇɴᴛ ᴄᴏѕᴍᴇᴛɪᴄѕ"},"\\n",{color:"gray",text:"- "},{color:"white",text:"ᴇxᴛʀᴀ "},{color:"light_purple",text:"ᴇᴍᴏᴊɪѕ"},"\\n",{color:"gray",text:"-"}," ᴀᴄᴄᴇѕѕ ᴛᴏ ʙᴇᴛᴀ ᴛᴇѕᴛɪɴɢ\\n",{color:"gray",text:"& ᴍᴏʀᴇ!"}],text:""},text_opacity:-1b,transformation:{left_rotation:[0.0f,0.0f,0.0f,1.0f],right_rotation:[0.0f,0.0f,0.0f,1.0f],scale:[1.5f,1.5f,1.5f]},uuid:[I;532693828,1763135243,-1388559618,-1204342505],view_range:1.0f}
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
+                {glow_color_override:-1,shadow:1b,line_width:200,text_opacity:-1b,fall_distance:0.0d,transformation:{right_rotation:[0.0f,0.0f,0.0f,1.0f],scale:[1.5f,1.5f,1.5f],left_rotation:[0.0f,0.0f,0.0f,1.0f]},shadow_strength:1.0f,uuid:[I;91210556,-1435808818,-1687633064,611866562],Rotation:[0.0f,0.0f],Pos:[107.5d,278.375d,55.5d],id:"minecraft:text_display",view_range:1.0f,text:{extra:[{text:" ᴀᴅᴅɪᴛɪᴏɴᴀʟ ʙᴜɪʟᴅᴇʀѕ
+                "},{strikethrough:1b,text:"      "},{:"✦"},{strikethrough:1b,text:"      "},{text:"
+                "},{color:"#FFFEC2",text:"ᴄʜᴇᴇѕɪᴇʀᴘᴀѕᴛᴀ"},{text:"
+                "},{color:"#FFBBAE",text:"ѕʏɴᴛʜ_ʟᴇᴍᴍᴏɴ"},{text:"
+                "},{color:"#FFA3F6",text:"ʟᴏᴇꜰᴀʀѕ"}],text:""},alignment:"center"}
                 
                 """;
 

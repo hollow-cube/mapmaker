@@ -37,6 +37,11 @@ public class V4290 extends DataVersion {
                 text.put("text", raw);
                 return text;
             }
+        } else if (value.isMapLike()) {
+            var wrappedValue = value.remove("");
+            if (!wrappedValue.isNull()) {
+                value.put("text", wrappedValue);
+            }
         }
         return null;
     }

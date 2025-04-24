@@ -1,0 +1,141 @@
+{
+    glow_color_override: -1,
+    shadow: 1b,
+    line_width: 200,
+    text_opacity: -1b,
+    fall_distance: 0.0d,
+    transformation: {
+        right_rotation: [0.0f, 0.0f, 0.0f, 1.0f],
+        scale: [4.0625f, 3.5625f, 0.99999976f],
+        left_rotation: [0.0f, 0.0f, 0.0f, 1.0f]
+    },
+    shadow_strength: 2.0f,
+    uuid: [I; 1090847239, -598849691, -2089073615, -1924907270],
+    Rotation: [0.0f, 0.0f],
+    Passengers: [
+        {
+            glow_color_override: -1,
+            shadow: 1b,
+            line_width: 200,
+            text_opacity: -1b,
+            transformation: {
+                translation: [-1.375f, 1.125f, -0.125f],
+                right_rotation: [0.0f, 0.0f, 0.0f, 1.0f],
+                scale: [2.8387098f, 2.7083333f, 0.99999994f],
+                left_rotation: [0.0f, 0.0f, 0.0f, 1.0f]
+            },
+            shadow_strength: 1.0f,
+            uuid: [I; 1056360853, -247314832, -1806471903, 2042838245],
+            Rotation: [0.0f, 0.0f],
+            Pos: [-2.3125d, -10.5625d, 11.4375d],
+            background: 0,
+            id: "minecraft:text_display",
+            view_range: 1.0f,
+            text: "\"Welcome to\"",
+            alignment: "center"
+        },
+        {
+            glow_color_override: -1,
+            shadow: 1b,
+            line_width: 200,
+            text_opacity: -1b,
+            transformation: {
+                translation: [-1.5f, -1.4375f, -0.125f],
+                right_rotation: [0.0f, 0.0f, 0.0f, 1.0f],
+                scale: [5.375f, 4.875f, 0.99999976f],
+                left_rotation: [0.0f, 0.0f, 0.0f, 1.0f]
+            },
+            shadow_strength: 2.0f,
+            uuid: [I; 1989966978, -627159217, -1984660343, 1701282552],
+            Rotation: [0.0f, 0.0f],
+            Pos: [-2.3125d, -10.5625d, 11.4375d],
+            background: 0,
+            id: "minecraft:text_display",
+            view_range: 1.0f,
+            text: "{\"extra\":[{\"bold\":true,\"color\":\"#BF6DEE\",\"text\":\"C\"},{\"bold\":true,\"color\":\"#A361FF\",\"text\":\"O\"},{\"bold\":true,\"color\":\"#50ABF5\",\"text\":\"R\"},{\"bold\":true,\"color\":\"#54EAF5\",\"text\":\"A\"},{\"bold\":true,\"color\":\"#3DF5A8\",\"text\":\"L\"}],\"text\":\"\"}",
+            alignment: "center"
+        },
+        {
+            glow_color_override: -1,
+            shadow: 1b,
+            line_width: 200,
+            text_opacity: -1b,
+            transformation: {
+                translation: [4.375f, -2.1875f, -0.125f],
+                right_rotation: [0.0f, 0.0f, 0.0f, 1.0f],
+                scale: [2.8387098f, 2.7083333f, 0.99999994f],
+                left_rotation: [0.0f, 0.0f, 0.0f, 1.0f]
+            },
+            shadow_strength: 1.0f,
+            uuid: [I; 967909162, -2091105814, -1228137378, -512556446],
+            Rotation: [0.0f, 0.0f],
+            Pos: [-2.3125d, -10.5625d, 11.4375d],
+            background: 0,
+            id: "minecraft:text_display",
+            view_range: 1.0f,
+            text: "\"by zphr\"",
+            alignment: "center"
+        },
+        {
+            glow_color_override: -1,
+            shadow: 1b,
+            line_width: 200,
+            text_opacity: -1b,
+            transformation: {
+                translation: [3.125f, -1.4375f, -0.125f],
+                right_rotation: [0.0f, 0.0f, 0.0f, 1.0f],
+                scale: [5.375f, 4.875f, 0.99999976f],
+                left_rotation: [0.0f, 0.0f, 0.0f, 1.0f]
+            },
+            shadow_strength: 2.0f,
+            uuid: [I; -1406430658, -670088442, -1710481482, 1108563203],
+            Rotation: [0.0f, 0.0f],
+            Pos: [-2.3125d, -10.5625d, 11.4375d],
+            background: 0,
+            id: "minecraft:text_display",
+            view_range: 1.0f,
+            text: "{\"extra\":[{\"bold\":true,\"color\":\"#9AFF60\",\"text\":\"C\"},{\"bold\":true,\"color\":\"#FAEF45\",\"text\":\"O\"},{\"bold\":true,\"color\":\"#FAAC4D\",\"text\":\"V\"},{\"bold\":true,\"color\":\"#FF4B49\",\"text\":\"E\"}],\"text\":\"\"}",
+            alignment: "center"
+        }
+    ],
+    Pos: [-2.3125d, -10.5625d, 11.4375d],
+    background: 0,
+    id: "minecraft:text_display",
+    view_range: 1.0f,
+    text: {
+        extra: [
+            {
+                color: "#FF8E90",
+                bold: 1b,
+                text: "Z"
+            },
+            {
+                color: "#FF87AA",
+                bold: 1b,
+                text: "E"
+            },
+            {
+                color: "#FF7FC5",
+                bold: 1b,
+                text: "P"
+            },
+            {
+                color: "#FF73DC",
+                bold: 1b,
+                text: "H"
+            },
+            {
+                color: "#FF6DF5",
+                bold: 1b,
+                text: "Y"
+            },
+            {
+                color: "#ED65FF",
+                bold: 1b,
+                text: "R'S"
+            }
+        ],
+        text: ""
+    },
+    alignment: "center"
+}
