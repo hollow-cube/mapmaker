@@ -29,21 +29,15 @@ public class V4290 extends DataVersion {
     }
 
     private static Value fixParseJsonComponents(Value value) {
-        if (value.value() instanceof String raw) {
-            try {
-                return fixTextComponent(raw, DataFixUtils.GSON.fromJson(raw, JsonElement.class));
-            } catch (JsonSyntaxException | IllegalStateException | IllegalArgumentException ignored) {
-                var text = Value.emptyMap();
-                text.put("text", raw);
-                return text;
-            }
-        } else if (value.isMapLike()) {
-            var wrappedValue = value.remove("");
-            if (!wrappedValue.isNull()) {
-                value.put("text", wrappedValue);
-            }
+        if (!(value.value() instanceof String raw))
+            return null;
+        try {
+            return fixTextComponent(raw, DataFixUtils.GSON.fromJson(raw, JsonElement.class));
+        } catch (JsonSyntaxException | IllegalStateException | IllegalArgumentException ignored) {
+            var text = Value.emptyMap();
+            text.put("text", raw);
+            return text;
         }
-        return null;
     }
 
     private static Value fixTextComponent(String raw, JsonElement elem) {
@@ -56,7 +50,11 @@ public class V4290 extends DataVersion {
                 }
                 yield list;
             }
-            case JsonPrimitive prim -> Value.wrap(prim.getAsString());
+            case JsonPrimitive prim -> {
+                var wrapper = Value.emptyMap();
+                wrapper.put("text", prim.getAsString());
+                yield wrapper;
+            }
             case null, default -> {
                 var text = Value.emptyMap();
                 text.put("text", raw);

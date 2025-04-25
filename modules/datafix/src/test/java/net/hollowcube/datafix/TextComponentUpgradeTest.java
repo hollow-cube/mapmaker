@@ -1,5 +1,6 @@
 package net.hollowcube.datafix;
 
+import net.hollowcube.datafix.util.Value;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.TagStringIOExt;
 import org.junit.jupiter.api.Test;
@@ -26,5 +27,14 @@ public class TextComponentUpgradeTest extends AbstractDataFixTest {
 
         assertEquals("show_text", hoverEvent.getString("action"));
         assertEquals("I am hover", hoverEvent.getCompound("value").getString("text"));
+    }
+
+    @Test
+    void v3900StringToComponentWithHeterogeneousList() {
+        var raw = "{\"extra\":[\" ᴀᴅᴅɪᴛɪᴏɴᴀʟ ʙᴜɪʟᴅᴇʀѕ \\n\",{\"strikethrough\":true,\"text\":\"      \"},\" ✦ \",{\"strikethrough\":true,\"text\":\"      \"},\"\\n\",{\"color\":\"#FFFEC2\",\"text\":\"ᴄʜᴇᴇѕɪᴇʀᴘᴀѕᴛᴀ\"},\"\\n\",{\"color\":\"#FFBBAE\",\"text\":\"ѕʏɴᴛʜ_ʟᴇᴍᴍᴏɴ\"},\"\\n\",{\"color\":\"#FFA3F6\",\"text\":\"ʟᴏᴇꜰᴀʀѕ\"}],\"text\":\"\"}";
+        var result = upgrade(DataTypes.TEXT_COMPONENT, Value.wrap(raw), 3900, 4325);
+        var compound = assertInstanceOf(CompoundBinaryTag.class, tagFromValue(result));
+        // This entry used to be a raw string in json, but should be wrapped in a compound now.
+        assertEquals("✦", compound.getList("extra").getCompound(2).getString("text"));
     }
 }

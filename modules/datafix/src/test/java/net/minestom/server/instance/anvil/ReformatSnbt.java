@@ -6,14 +6,49 @@ public class ReformatSnbt {
     public static void main(String[] args) throws Exception {
         var snbt = """
                 
-                {glow_color_override:-1,shadow:1b,line_width:200,text_opacity:-1b,fall_distance:0.0d,transformation:{right_rotation:[0.0f,0.0f,0.0f,1.0f],scale:[1.5f,1.5f,1.5f],left_rotation:[0.0f,0.0f,0.0f,1.0f]},shadow_strength:1.0f,uuid:[I;91210556,-1435808818,-1687633064,611866562],Rotation:[0.0f,0.0f],Pos:[107.5d,278.375d,55.5d],id:"minecraft:text_display",view_range:1.0f,text:{extra:[{text:" ᴀᴅᴅɪᴛɪᴏɴᴀʟ ʙᴜɪʟᴅᴇʀѕ
-                "},{strikethrough:1b,text:"      "},{:"✦"},{strikethrough:1b,text:"      "},{text:"
-                "},{color:"#FFFEC2",text:"ᴄʜᴇᴇѕɪᴇʀᴘᴀѕᴛᴀ"},{text:"
-                "},{color:"#FFBBAE",text:"ѕʏɴᴛʜ_ʟᴇᴍᴍᴏɴ"},{text:"
-                "},{color:"#FFA3F6",text:"ʟᴏᴇꜰᴀʀѕ"}],text:""},alignment:"center"}
+                {
+                        extra: [
+                            {
+                                text: " ᴀᴅᴅɪᴛɪᴏɴᴀʟ ʙᴜɪʟᴅᴇʀѕ"
+                            },
+                            {
+                                strikethrough: 1b,
+                                text: "      "
+                            },
+                            {
+                                : "✦"
+                            },
+                            {
+                                strikethrough: 1b,
+                                text: "      "
+                            },
+                            {
+                                text: ""
+                            },
+                            {
+                                color: "#FFFEC2",
+                                text: "ᴄʜᴇᴇѕɪᴇʀᴘᴀѕᴛᴀ"
+                            },
+                            {
+                                text: ""
+                            },
+                            {
+                                color: "#FFBBAE",
+                                text: "ѕʏɴᴛʜ_ʟᴇᴍᴍᴏɴ"
+                            },
+                            {
+                                text: ""
+                            },
+                            {
+                                color: "#FFA3F6",
+                                text: "ʟᴏᴇꜰᴀʀѕ"
+                            }
+                        ],
+                        text: ""
+                    }
                 
                 """;
 
-        System.out.println(TagStringIOExt.writeTag(TagStringIOExt.readTag(snbt), "    "));
+        System.out.println(TagStringIOExt.writeTag(TagStringIOExt.readTag(snbt), ""));
     }
 }
