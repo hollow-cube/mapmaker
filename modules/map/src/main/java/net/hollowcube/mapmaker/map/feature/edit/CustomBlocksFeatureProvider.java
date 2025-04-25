@@ -207,6 +207,7 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
                                 .append(Component.text(entry.getValue(), NamedTextColor.WHITE))
                                 .build())
                         .toList());
+                builder.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
             }
             itemStack = builder.build();
         }
