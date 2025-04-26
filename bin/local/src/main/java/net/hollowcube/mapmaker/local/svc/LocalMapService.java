@@ -101,13 +101,4 @@ public class LocalMapService extends NoopMapService {
         }
     }
 
-    @Override
-    public void uploadPerfdump(@NotNull String name, @NotNull Path data) {
-        try {
-            Files.createDirectories(perfdumpPath);
-            Files.write(perfdumpPath.resolve(name), Files.readAllBytes(data));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
