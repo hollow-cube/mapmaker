@@ -41,6 +41,8 @@ public class ArgumentPattern extends Argument<Pattern> {
             return success(tree.into(ParseContext.of(session.terraform().registry(), player)));
         } catch (TokenizerException | ParseException e) {
             return partial(e.getMessage());
+        } catch (UnsupportedOperationException ignored) {
+            return partial();
         }
     }
 

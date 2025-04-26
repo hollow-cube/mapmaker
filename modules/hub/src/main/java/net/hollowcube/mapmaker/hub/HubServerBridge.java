@@ -42,7 +42,8 @@ public class HubServerBridge implements ServerBridge {
             logger.info("join map result: {}", res);
             ProxySupport.transfer(player, res.serverClusterIp());
         } catch (Exception e) {
-            ExceptionReporter.reportException(e, player);
+            if (!(e instanceof SessionService.NoAvailableServerException))
+                ExceptionReporter.reportException(e, player);
             player.sendMessage(Component.translatable("map.join.fail"));
             player.clearTitle();
         }
