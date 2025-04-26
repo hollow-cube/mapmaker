@@ -15,11 +15,15 @@ import java.util.Objects;
 
 public interface ObjectBlockHandler extends BlockHandler {
 
+    static @NotNull String createObjectId(@NotNull ObjectType objectType, @NotNull Point blockPosition) {
+        return String.format("%s/%d_%d_%d", objectType.id(), blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ());
+    }
+
     @NotNull
     ObjectType objectType();
 
     default @NotNull String createObjectId(@NotNull Point blockPosition) {
-        return String.format("%s/%d_%d_%d", objectType().id(), blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ());
+        return createObjectId(objectType(), blockPosition);
     }
 
     default @NotNull ObjectData createObjectData(@NotNull Point blockPosition) {

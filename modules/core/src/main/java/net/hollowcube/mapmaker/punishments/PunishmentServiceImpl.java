@@ -21,7 +21,7 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
     private final String url;
 
     public PunishmentServiceImpl(@NotNull String url) {
-        this.url = String.format("%s/v1/internal", url);
+        this.url = String.format("%s/v2/internal", url);
     }
 
     @Override
