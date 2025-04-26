@@ -88,7 +88,11 @@ public class BiomeContainer implements TerraformInstanceBiomes {
     @Override
     public @NotNull Collection<DynamicRegistry.Key<Biome>> keys() {
         List<DynamicRegistry.Key<Biome>> keys = new ArrayList<>();
-        parent.values().forEach(biome -> keys.add(parent.getKey(biome)));
+        for (int i = 0; i < 1000; i++) {
+            var key = this.parent.getKey(i);
+            if (key == null) break;
+            keys.add(key);
+        }
         keys.addAll(keyToBiome.keySet());
         return keys;
     }
