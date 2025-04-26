@@ -131,4 +131,12 @@ public class CuboidRegionSelector implements RegionSelector {
 
         return point.withX(newX).withZ(newZ);
     }
+
+    public Point getPos1() {
+        return pos1;
+    }
+
+    public Point getPos2() {
+        return pos2;
+    }
 }

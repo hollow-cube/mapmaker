@@ -48,7 +48,7 @@ public class WorldEditModule implements TerraformModule {
 
                 // Region
                 new RegionCommands.Set(),
-//                new RegionCommands.Line(), //todo
+                new RegionCommands.Line(),
 //                new RegionCommands.Curve(), //todo
                 new RegionCommands.Replace(),
                 new RegionCommands.Overlay(),
@@ -100,7 +100,7 @@ public class WorldEditModule implements TerraformModule {
 //                new ChunkCommands.DelChunks(), //todo
 
                 // Utility
-//                new UtilityCommands.Fill(), //todo
+                new UtilityCommands.Fill(),
 //                new UtilityCommands.Fillr(), //todo
 //                new UtilityCommands.Drain(), //todo
 //                new UtilityCommands.FixLava(), //todo
