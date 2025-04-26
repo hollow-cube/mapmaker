@@ -202,6 +202,8 @@ public final class PlacementRules {
         register(Block.JIGSAW, JigsawPlacementRule::new);
         register(Block.FIRE, FirePlacementRule::new);
         register(Block.REDSTONE_WIRE, RedstoneWirePlacementRule::new);
+        register(Block.PALE_HANGING_MOSS, PaleHangingMossPlacementRule::new);
+        register(Block.PALE_MOSS_CARPET, PaleMossCarpetPlacementRule::new);
 
         //
         // ==== WARNING ====
