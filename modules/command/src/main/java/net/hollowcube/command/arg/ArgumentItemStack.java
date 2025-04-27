@@ -4,8 +4,10 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.ints.IntSets;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
+import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 
 public class ArgumentItemStack extends Argument<ItemStack> {
@@ -23,5 +25,12 @@ public class ArgumentItemStack extends Argument<ItemStack> {
     @Override
     public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
         super.suggest(sender, raw, suggestion);
+    }
+
+    @Override
+    public void properties(NetworkBuffer buffer) {}
+    @Override
+    public ArgumentParserType argumentType() {
+        return ArgumentParserType.ITEM_STACK;
     }
 }

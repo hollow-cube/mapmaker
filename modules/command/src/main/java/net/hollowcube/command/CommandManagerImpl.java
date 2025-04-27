@@ -1,24 +1,25 @@
 package net.hollowcube.command;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.builder.CommandEvaluationContext;
+import net.hollowcube.command.builder.CommandNodeBuilder;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.CommandReflection;
 import net.hollowcube.command.util.StringReader;
-import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
-import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-
-import static net.minestom.server.network.NetworkBuffer.VAR_INT;
 
 public class CommandManagerImpl implements CommandManager {
     private final CommandManagerImpl parent;
@@ -92,37 +93,32 @@ public class CommandManagerImpl implements CommandManager {
         var root = new DeclareCommandsPacket.Node();
         nodes.add(root);
 
-        // Note about redirects:
-        // Currently we just tell brigadier that they are a new root literal node which works fine since we never
-        // actually send real arguments to the client. However, once we do, they will need to be handled better.
+        Object2IntMap<CommandNode> commandMap = new Object2IntOpenHashMap<>();
+        AtomicInteger id = new AtomicInteger(1);
+        var context = new CommandEvaluationContext(
+                player,
+                commandMap::getInt,
+                commandMap::containsKey,
+                node -> commandMap.put(node, id.getAndIncrement())
+        );
 
         var rootNodes = new IntArrayList();
-        for (var entry : reflect().commands(player, true)) {
-            var node = entry.getValue();
-            if (node.condition != null) {
-                var result = node.condition.test(player, new CommandNode.ConditionContext(player, CommandContext.Pass.BUILD));
-                if (result == CommandCondition.HIDE) continue;
-            }
-            if (node.redirect != null && node.redirect.condition != null) {
-                var result = node.redirect.condition.test(player, new CommandNode.ConditionContext(player, CommandContext.Pass.BUILD));
-                if (result == CommandCondition.HIDE) continue;
-            }
+        for (var command : reflect().commands(player, true)) {
+            var name = command.getKey();
+            var node = command.getValue();
 
-            var args = new DeclareCommandsPacket.Node();
-            args.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.ARGUMENT, true, false, true);
-            args.name = "args";
-            args.parser = ArgumentParserType.STRING;
-            args.properties = NetworkBuffer.makeArray(buffer -> buffer.write(VAR_INT, 2));
-            args.suggestionsType = "minecraft:ask_server";
-            nodes.add(args);
-
-            var packetNode = new DeclareCommandsPacket.Node();
-            packetNode.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.LITERAL, true, false, false);
-            packetNode.name = entry.getKey().toLowerCase(Locale.ROOT);
-            packetNode.children = new int[]{nodes.size() - 1};
-            rootNodes.add(nodes.size());
-            nodes.add(packetNode);
+            var builder = new CommandNodeBuilder(name, node);
+            context.register(node);
+            Set<CommandNode.ArgumentPair> children = new HashSet<>();
+            node.visitChildren(children::add);
+            children.forEach(pair -> context.register(pair.node()));
+            rootNodes.add(context.getId(node));
+            nodes.add(builder.toNode(context));
+            nodes.addAll(children.stream()
+                        .map(CommandNodeBuilder::new)
+                        .map(builders -> builders.toNode(context)).toList());
         }
+
         root.children = rootNodes.toIntArray();
 
         return new DeclareCommandsPacket(nodes, 0);

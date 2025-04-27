@@ -14,5 +14,4 @@ public class ArgumentGreedyString extends Argument<String> {
     public @NotNull ParseResult<String> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
         return success(reader.readRemaining());
     }
-
 }

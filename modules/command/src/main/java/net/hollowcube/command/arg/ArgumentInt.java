@@ -2,7 +2,9 @@ package net.hollowcube.command.arg;
 
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
+import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 
 public class ArgumentInt extends Argument<Integer> {
@@ -55,5 +57,22 @@ public class ArgumentInt extends Argument<Integer> {
         } catch (NumberFormatException e) {
             return syntaxError();
         }
+    }
+
+    @Override
+    public void properties(NetworkBuffer buffer) {
+        boolean hasMax = this.max != Integer.MAX_VALUE, hasMin = this.min != Integer.MIN_VALUE;
+        buffer.write(NetworkBuffer.BYTE, ArgumentUtils.createNumberFlags(hasMin, hasMax));
+        if (hasMin) {
+            buffer.write(NetworkBuffer.INT, this.min);
+        }
+        if (hasMax) {
+            buffer.write(NetworkBuffer.INT, this.max);
+        }
+    }
+
+    @Override
+    public ArgumentParserType argumentType() {
+        return ArgumentParserType.INTEGER;
     }
 }

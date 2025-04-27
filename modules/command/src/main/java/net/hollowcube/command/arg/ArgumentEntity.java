@@ -64,4 +64,8 @@ public class ArgumentEntity extends Argument<EntityFinder> {
             }
         }
     }
+//    @Override
+//    public ArgumentParserType argumentType() {
+//        return ArgumentParserType.ENTITY;
+//    }
 }

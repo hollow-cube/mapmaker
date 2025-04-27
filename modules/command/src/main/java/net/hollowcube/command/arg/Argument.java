@@ -2,7 +2,10 @@ package net.hollowcube.command.arg;
 
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
+import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -113,6 +116,17 @@ public abstract class Argument<T> {
         return this;
     }
 
+    public ArgumentParserType argumentType() {
+        return ArgumentParserType.SCORE_HOLDER;
+    }
+
+    public void properties(NetworkBuffer buffer) {
+        buffer.write(NetworkBuffer.BYTE, (byte) 1);
+    }
+
+    public DeclareCommandsPacket.NodeType getType() {
+        return DeclareCommandsPacket.NodeType.ARGUMENT;
+    }
 
     // Transforms
 
@@ -123,7 +137,6 @@ public abstract class Argument<T> {
     public <R> @NotNull Argument<R> map(@NotNull ArgumentMap.ParseFunc<T, R> mapFunc, @NotNull ArgumentMap.SuggestFunc suggestFunc) {
         return new ArgumentMap<>(id, this, mapFunc, suggestFunc);
     }
-
 
     // Logic
 
@@ -168,5 +181,7 @@ public abstract class Argument<T> {
         return new ParseResult.Failure<>(start, message);
     }
 
-
+    public boolean isGreedyString() {
+        return false;
+    }
 }

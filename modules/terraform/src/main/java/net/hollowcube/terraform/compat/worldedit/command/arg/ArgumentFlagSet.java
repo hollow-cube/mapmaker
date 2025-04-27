@@ -7,7 +7,9 @@ import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
+import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
@@ -47,16 +49,23 @@ public class ArgumentFlagSet<E extends Enum<E>> extends Argument<EnumSet<E>> {
 
     @Override
     public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
-        if (raw.isEmpty() || raw.charAt(0) != '-') return;
-        suggestion.clear();
-        suggestion.setStart(suggestion.getStart() + raw.length());
-        suggestion.setLength(1);
-
-        var word = raw.substring(1).toLowerCase(Locale.ROOT);
-        for (var value : flagMap.keySet()) {
-            if (!word.contains(String.valueOf(value))) {
-                suggestion.add(String.valueOf(value));
+        if (raw.isEmpty()) {
+            suggestion.add("-");
+        } else if (raw.charAt(0) == '-') {
+            var word = raw.substring(1).toLowerCase(Locale.ROOT);
+            for (var value : flagMap.keySet()) {
+                if (!word.contains(String.valueOf(value))) {
+                    suggestion.add(String.valueOf(value));
+                }
             }
         }
+    }
+
+    public ArgumentParserType argumentType() {
+        return ArgumentParserType.STRING;
+    }
+
+    public void properties(NetworkBuffer buffer) {
+        buffer.write(NetworkBuffer.VAR_INT, 0);
     }
 }

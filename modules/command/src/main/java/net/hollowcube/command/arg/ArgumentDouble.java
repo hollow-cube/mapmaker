@@ -2,7 +2,9 @@ package net.hollowcube.command.arg;
 
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
+import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 
 public class ArgumentDouble extends Argument<Double> {
@@ -41,5 +43,22 @@ public class ArgumentDouble extends Argument<Double> {
         } catch (NumberFormatException e) {
             return syntaxError();
         }
+    }
+
+    @Override
+    public void properties(NetworkBuffer buffer) {
+        boolean hasMax = this.max != Double.MAX_VALUE, hasMin = this.min != -Double.MAX_VALUE;
+        buffer.write(NetworkBuffer.BYTE, ArgumentUtils.createNumberFlags(hasMin, hasMax));
+        if (hasMin) {
+            buffer.write(NetworkBuffer.DOUBLE, this.min);
+        }
+        if (hasMax) {
+            buffer.write(NetworkBuffer.DOUBLE, this.max);
+        }
+    }
+
+    @Override
+    public ArgumentParserType argumentType() {
+        return ArgumentParserType.DOUBLE;
     }
 }

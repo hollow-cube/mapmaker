@@ -2,7 +2,9 @@ package net.hollowcube.command.arg;
 
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
+import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -53,5 +55,14 @@ public class ArgumentMap<S, T> extends Argument<T> {
         }
 
         suggestFunc.suggest(sender, raw, suggestion);
+    }
+
+    @Override
+    public void properties(NetworkBuffer buffer) {
+        source.properties(buffer);
+    }
+    @Override
+    public ArgumentParserType argumentType() {
+        return source.argumentType();
     }
 }

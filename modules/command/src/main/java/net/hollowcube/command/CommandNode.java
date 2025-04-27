@@ -7,6 +7,7 @@ import net.hollowcube.command.util.CommandCategory;
 import net.hollowcube.command.util.StringReader;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.utils.validate.Check;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -14,6 +15,7 @@ import org.jetbrains.annotations.UnknownNullability;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -53,6 +55,15 @@ public class CommandNode {
 
     public @Nullable List<String> examples() {
         return examples;
+    }
+
+    @Contract(pure = true)
+    public @Nullable List<ArgumentPair> children() {
+        return children;
+    }
+
+    public @Nullable CommandCondition condition() {
+        return condition;
     }
 
     public @UnknownNullability CommandNode xpath(@NotNull String path, boolean followRedirects) {
@@ -223,6 +234,7 @@ public class CommandNode {
         return this.executor != null;
     }
 
+    // todo BUT GIANT (gravy said it should be giant :3)
     public boolean isConditional() {
         return this.condition != null;
     }
@@ -274,7 +286,17 @@ public class CommandNode {
         return node;
     }
 
-    protected record ArgumentPair(Argument<?> argument, CommandNode node) {
+    public void visitChildren(Consumer<ArgumentPair> visitor) {
+        if (this.children != null) {
+            this.children.forEach(argumentPair -> {
+                visitor.accept(argumentPair);
+                if (argumentPair.argument.isGreedyString()) return;
+                argumentPair.node.visitChildren(visitor);
+            });
+        }
+    }
+
+    public record ArgumentPair(Argument<?> argument, CommandNode node) {
     }
 
     protected record ConditionContext(@NotNull CommandSender sender, @NotNull Pass pass) implements CommandContext {

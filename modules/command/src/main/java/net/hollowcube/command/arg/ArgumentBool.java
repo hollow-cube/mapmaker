@@ -3,7 +3,9 @@ package net.hollowcube.command.arg;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
+import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 
 public class ArgumentBool extends Argument<Boolean> {
@@ -34,5 +36,13 @@ public class ArgumentBool extends Argument<Boolean> {
     @Override
     public String toString() {
         return "bool@" + id();
+    }
+
+    @Override
+    public void properties(NetworkBuffer buffer) {} // boolean is boring :3
+
+    @Override
+    public ArgumentParserType argumentType() {
+        return ArgumentParserType.BOOL;
     }
 }

@@ -34,6 +34,10 @@ public abstract class CommandHandlingPlayer extends Player {
         packetListenerManager.setPlayListener(ClientTabCompletePacket.class, CommandHandlingPlayer::tabCommand);
     }
 
+    public CommandHandlingPlayer(@NotNull PlayerConnection connection, @NotNull GameProfile gameProfile) {
+        super(connection, gameProfile);
+    }
+
     public static @NotNull PlayerProvider createDefaultProvider(@NotNull CommandManager commandManager) {
         return (connection, gameProfile) -> new CommandHandlingPlayer(connection, gameProfile) {
             @Override
@@ -42,17 +46,6 @@ public abstract class CommandHandlingPlayer extends Player {
             }
         };
     }
-
-    public CommandHandlingPlayer(@NotNull PlayerConnection connection, @NotNull GameProfile gameProfile) {
-        super(connection, gameProfile);
-    }
-
-    @Override
-    public void refreshCommands() {
-        sendPacket(getCommandManager().createCommandPacket(this));
-    }
-
-    public abstract @NotNull CommandManager getCommandManager();
 
     private static void execCommand(@NotNull ClientCommandChatPacket packet, @NotNull Player player) {
         final String command = packet.message();
@@ -139,5 +132,12 @@ public abstract class CommandHandlingPlayer extends Player {
         }
         throw new IllegalArgumentException("Player is not a CommandHandlingPlayer");
     }
+
+    @Override
+    public void refreshCommands() {
+        sendPacket(getCommandManager().createCommandPacket(this));
+    }
+
+    public abstract @NotNull CommandManager getCommandManager();
 
 }
