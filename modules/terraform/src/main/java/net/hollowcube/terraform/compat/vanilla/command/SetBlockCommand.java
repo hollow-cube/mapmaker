@@ -14,22 +14,32 @@ public class SetBlockCommand extends CommandDsl {
 
     private final Argument<Point> posArg = Argument.RelativeVec3("pos");
     private final Argument<Block> blockArg = Argument.Block("block");
+    private final Argument<Mode> modeArg = Argument.Enum("mode", Mode.class).defaultValue(Mode.DESTROY);
 
     public SetBlockCommand() {
         super("setblock");
 
         addSyntax(playerOnly(this::execute), posArg, blockArg);
+        addSyntax(playerOnly(this::execute), posArg, blockArg, modeArg);
     }
 
     private void execute(@NotNull Player player, @NotNull CommandContext context) {
         var point = context.get(posArg);
         var block = context.get(blockArg);
+        var mode = context.get(modeArg);
 
         var session = LocalSession.forPlayer(player);
         session.buildTask("vanilla-setblock")
                 .metadata()
                 .compute((task, world) -> {
                     var buffer = BlockBuffer.builder(world, point, point);
+                    var worldBlock = world.getBlock(point);
+                    var canPlace = switch (mode) {
+                        case KEEP -> worldBlock.isAir();
+                        case REPLACE -> !worldBlock.compare(block);
+                        case null, default -> true;
+                    };
+                    if (!canPlace) return buffer.build();
 
                     buffer.set(point, block);
 
@@ -37,5 +47,12 @@ public class SetBlockCommand extends CommandDsl {
                 })
                 .ephemeral()
                 .submit();
+    }
+
+    private enum Mode {
+        DESTROY, // default
+        KEEP,
+        REPLACE,
+        STRICT // also default, (doesnt propagate block updates)
     }
 }
