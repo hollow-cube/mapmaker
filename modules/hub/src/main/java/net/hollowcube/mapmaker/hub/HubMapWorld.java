@@ -180,11 +180,9 @@ public class HubMapWorld extends AbstractMapWorld {
         BossBars.clear(player);
         BOSS_BARS.forEach(player::showBossBar);
 
-        // todo does this need to be a feature?
-        logger.info("setting discord presence");
         // we have to delay this by a little bit otherwise the presence will try to be set before the module enable message is sent to the client,
         // which causes the client to just ignore the presence update.
-        player.scheduler().buildTask(() -> DiscordRichPresenceManager.setRichPresence(player, "the lobby", "", "In")).delay(Duration.ofSeconds(2)).schedule();
+        player.scheduler().buildTask(() -> DiscordRichPresenceManager.setRichPresence(player, "In", "the lobby", "")).delay(Duration.ofSeconds(2)).schedule();
 
     }
 

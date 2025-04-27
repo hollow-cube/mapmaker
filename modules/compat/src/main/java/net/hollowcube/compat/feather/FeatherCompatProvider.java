@@ -24,21 +24,8 @@ import java.util.UUID;
 @AutoService({CompatProvider.class, DiscordRichPresenceProvider.class})
 public class FeatherCompatProvider implements CompatProvider, DiscordRichPresenceProvider {
     private static final String IMAGE_URL = "https://servermappings.lunarclientcdn.com/logos/hollowcube.png";
-    private static final String FEATHER_CHANNEL = "feather:client";
-    private static final String FEATHER_CHANNEL_FRAGMENTED = FEATHER_CHANNEL + "/frag";
     private static final Tag<Boolean> FEATHER_SUPPORT_ENABLED = Tag.Transient("mapmaker:feather/enabled");
     private static final Handshaking HANDSHAKING = new Handshaking();
-
-    public static void sendMessage(final Player player, final Message<ClientMessageHandler> message) {
-        final var bytes = MessageEncoder.CLIENT_BOUND.encode(message);
-        if (bytes.length > 1048576 /* 1MiB */) {
-            for (byte[] data : MessageFragmenter.CLIENT_BOUND.fragment(message)) {
-                player.sendPluginMessage(FEATHER_CHANNEL_FRAGMENTED, data);
-            }
-        } else {
-            player.sendPluginMessage(FEATHER_CHANNEL, bytes);
-        }
-    }
 
     @Override
     public void registerListeners(GlobalEventHandler events) {
@@ -62,15 +49,24 @@ public class FeatherCompatProvider implements CompatProvider, DiscordRichPresenc
     }
 
     @Override
-    public void setRichPresence(Player player, String gameName, String gameVariantName, String playerState) {
-        // this is probably turbo trash, but it creates consistency between Lunar and Feather
-        final var details = playerState + " " + gameName + " on Hollow Cube";
-        sendMessage(player, new S2CSetDiscordActivity(IMAGE_URL, "Hollow Cube", gameVariantName, details, null, null, null, null));
+    public void setRichPresence(Player player, String playerState, String gameName, String gameVariantName) {
+        new ClientboundFeatherPacket(
+                new S2CSetDiscordActivity(
+                        IMAGE_URL,
+                        "Hollow Cube",
+                        gameVariantName,
+                        playerState + " " + gameName + " on Hollow Cube",
+                        null,
+                        null,
+                        null,
+                        null
+                )
+        ).send(player);
     }
 
     @Override
     public void clearRichPresence(Player player) {
-        sendMessage(player, new S2CClearDiscordActivity());
+        new ClientboundFeatherPacket(new S2CClearDiscordActivity()).send(player);
     }
 
     @Override
@@ -94,7 +90,7 @@ public class FeatherCompatProvider implements CompatProvider, DiscordRichPresenc
 
         private void accept(Player player) {
             setState(player.getUuid(), HandshakeState.EXPECTING_HELLO);
-            sendMessage(player, new S2CHandshake());
+            new ClientboundFeatherPacket(new S2CHandshake()).send(player);
         }
 
         private void reject(Player player) {
@@ -136,9 +132,10 @@ public class FeatherCompatProvider implements CompatProvider, DiscordRichPresenc
             }
             int protocolVersion = handshake.getProtocolVersion();
             if (protocolVersion > MessageConstants.VERSION) {
-                // TODO: In the official API Implementation, a mismatched API version just alerts players with a permission that it is out of date. It still processed packets fine.
-                //   There is no indication of what versioning compatibility we can expect since they've only released one version.
-                //   For now, we can probably just ignore this.
+                // In the official API Implementation, a mismatched API version just alerts players with a permission that it is out of date.
+                // It still processes packets fine.
+                // There is no indication of what versioning compatibility we can expect since they've only released one version.
+                // For now, we can probably just ignore this.
             }
             return true;
         }

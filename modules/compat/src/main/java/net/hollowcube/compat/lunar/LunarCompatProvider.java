@@ -31,6 +31,13 @@ public class LunarCompatProvider implements CompatProvider, DiscordRichPresenceP
                             "title.enabled", false
                     )
             ));
+    private static final ClientboundLunarPacket ENABLE_RICH_PRESENCE = new ClientboundLunarPacket(
+            Map.of(
+                    "@type", ClientboundLunarPacket.TYPE_PREFIX + "configurable.v1.ConfigurableSettings",
+                    "apollo_module", "rich_presence",
+                    "enable", true
+            )
+    );
 
     @Override
     public void registerListeners(GlobalEventHandler events) {
@@ -47,19 +54,7 @@ public class LunarCompatProvider implements CompatProvider, DiscordRichPresenceP
 
     }
 
-    public static void sendRichPresencePacket(final Player player) {
-        // todo combine this with the other enable packet
-        new ClientboundLunarPacket(
-                Map.of(
-                        "@type", ClientboundLunarPacket.TYPE_PREFIX + "configurable.v1.ConfigurableSettings",
-                        "apollo_module", "rich_presence",
-                        "enable", true
-                )
-        ).send(player);
-    }
-
-    private void handleLunarPacket(final PlayerPluginMessageEvent event) {
-        // todo this probably isn't needed anymore, although the tag is probably still useful
+    private void handleLunarPacket(PlayerPluginMessageEvent event) {
         if (event.getPlayer().hasTag(LUNAR_SUPPORT_ENABLED)) {
             return;
         }
@@ -68,18 +63,13 @@ public class LunarCompatProvider implements CompatProvider, DiscordRichPresenceP
             if (event.getMessageString().contains("lunar:apollo") || event.getMessageString().contains("apollo:json")) {
                 event.getPlayer().setTag(LUNAR_SUPPORT_ENABLED, true);
                 MOD_SETTINGS.send(event.getPlayer());
-                sendRichPresencePacket(event.getPlayer());
+                ENABLE_RICH_PRESENCE.send(event.getPlayer());
             }
         }
     }
 
     @Override
-    public void setRichPresence(
-            Player player,
-            String gameName,
-            String gameVariantName,
-            String playerState
-    ) {
+    public void setRichPresence(Player player, String playerState, String gameName, String gameVariantName) {
         new ClientboundLunarPacket(
                 Map.of(
                         "@type", ClientboundLunarPacket.TYPE_PREFIX + "richpresence.v1.OverrideServerRichPresenceMessage",
@@ -102,7 +92,6 @@ public class LunarCompatProvider implements CompatProvider, DiscordRichPresenceP
 
     @Override
     public boolean isRichPresenceSupportedFor(Player player) {
-        // todo we probably don't need this tag, we can just check if the channel is registered
         return player.hasTag(LUNAR_SUPPORT_ENABLED);
     }
 }

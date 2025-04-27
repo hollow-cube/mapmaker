@@ -312,7 +312,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
             // If there is no position stored then this is a fresh edit state so add the builder menu
             player.getInventory().addItemStack(itemRegistry().getItemStack("mapmaker:builder_menu", null));
         }
-        // FIXME: i don't know if calling this here breaks something or if there is a specific reason it currently isn't
+
         callEvent(new MapPlayerInitEvent(this, player, true, true));
     }
 

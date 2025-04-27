@@ -19,7 +19,7 @@ public class LabyCompatProvider implements CompatProvider, DiscordRichPresencePr
     }
 
     @Override
-    public void setRichPresence(Player player, String gameName, String gameVariantName, String playerState) {
+    public void setRichPresence(Player player, String playerState, String gameName, String gameVariantName) {
         var labyModPlayer = LabyModProtocolService.get().getPlayer(player.getUuid());
         if (labyModPlayer == null) {
             return;

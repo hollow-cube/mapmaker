@@ -15,10 +15,10 @@ public class DiscordRichPresenceManager {
     }
 
 
-    public static void setRichPresence(final Player player, final String gameName, final String gameVariantName, final String playerState) {
+    public static void setRichPresence(Player player, String playerState, String gameName, String gameVariantName) {
         for (DiscordRichPresenceProvider provider : PROVIDERS) {
             if (provider.isRichPresenceSupportedFor(player)) {
-                provider.setRichPresence(player, gameName, gameVariantName, playerState);
+                provider.setRichPresence(player, playerState, gameName, gameVariantName);
                 return;
             }
         }

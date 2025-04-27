@@ -17,7 +17,7 @@ public record ServerboundFeatherPacket(
             NetworkBuffer.RAW_BYTES.transform(ServerboundFeatherPacket::new, ServerboundFeatherPacket::toBytes)
     );
 
-    public ServerboundFeatherPacket(byte[] bytes) {
+    private ServerboundFeatherPacket(byte[] bytes) {
         this(MessageDecoder.SERVER_BOUND.decode(bytes));
     }
 

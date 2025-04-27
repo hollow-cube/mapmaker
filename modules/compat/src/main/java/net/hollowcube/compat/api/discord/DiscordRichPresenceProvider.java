@@ -3,14 +3,9 @@ package net.hollowcube.compat.api.discord;
 import net.minestom.server.entity.Player;
 
 public interface DiscordRichPresenceProvider {
-    void setRichPresence(
-            final Player player,
-            final String gameName,
-            final String gameVariantName,
-            final String playerState
-    );
+    void setRichPresence(Player player, String playerState, String gameName, String gameVariantName);
 
-    void clearRichPresence(final Player player);
+    void clearRichPresence(Player player);
 
-    boolean isRichPresenceSupportedFor(final Player player);
+    boolean isRichPresenceSupportedFor(Player player);
 }
