@@ -36,7 +36,7 @@ public final class ExtraCodecs {
             Pos::new);
 
     public static final Codec<Block> BLOCK_STATE_STRING = Codec.STRING
-            .transform(BlockUtil::fromString, BlockUtil::toString);
+            .transform(BlockUtil::fromStringOld, BlockUtil::toString);
 
     public static <L, R> @NotNull Codec<Either<L, R>> either(@NotNull Codec<L> leftCodec, @NotNull Codec<R> rightCodec) {
         return new Codec<>() {

@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
+import net.minestom.server.utils.block.BlockUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -59,6 +60,7 @@ public final class BlockUtil {
 
     /**
      * Get the possible properties for a block.
+     *
      * @param block The block to get the properties of.
      * @return Returns a map with the key being the property and the value being a list of possible values.
      */
@@ -70,8 +72,40 @@ public final class BlockUtil {
         return BLOCK_TO_ITEM.get(block.id());
     }
 
-    public static @NotNull Block fromString(@NotNull String blockState) {
+    public static @NotNull Block fromStringOld(@NotNull String blockState) {
         return ArgumentBlockState.staticParse(blockState);
+    }
+
+    public static @NotNull Either<Block, BlockParseResult> fromString(@NotNull String input) {
+        final int nbtIndex = input.indexOf("[");
+        if (nbtIndex == 0) {
+            return Either.right(BlockParseResult.NO_BLOCK_TYPE);
+        }
+
+        if (nbtIndex == -1) {
+            // Only block name
+            final Block block = Block.fromKey(input);
+            if (block == null)
+                return Either.right(BlockParseResult.BLOCK_NOT_FOUND);
+            return Either.left(block);
+        } else {
+            if (!input.endsWith("]"))
+                return Either.right(BlockParseResult.INVALID_PROPERTIES);
+            // Block state
+            final String blockName = input.substring(0, nbtIndex);
+            Block block = Block.fromKey(blockName);
+            if (block == null)
+                return Either.right(BlockParseResult.BLOCK_NOT_FOUND);
+
+            // Compute properties
+            final String query = input.substring(nbtIndex);
+            final var propertyMap = BlockUtils.parseProperties(query);
+            try {
+                return Either.left(block.withProperties(propertyMap));
+            } catch (IllegalArgumentException e) {
+                return Either.right(BlockParseResult.INVALID_PROPERTY_VALUE);
+            }
+        }
     }
 
     public static @NotNull String toString(@NotNull Block block) {
@@ -89,6 +123,10 @@ public final class BlockUtil {
         builder.append(']');
 
         return builder.toString();
+    }
+
+    public enum BlockParseResult {
+        NO_BLOCK_TYPE, BLOCK_NOT_FOUND, INVALID_PROPERTIES, INVALID_PROPERTY_VALUE
     }
 
 }

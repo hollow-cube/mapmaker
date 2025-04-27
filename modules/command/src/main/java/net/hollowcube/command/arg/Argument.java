@@ -64,6 +64,9 @@ public abstract class Argument<T> {
         return new ArgumentItemStack(id);
     }
 
+    public static @NotNull ArgumentBlock Block(@NotNull String id) {
+        return new ArgumentBlock(id);
+    }
 
     // Impl
 

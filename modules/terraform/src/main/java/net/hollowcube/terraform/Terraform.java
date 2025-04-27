@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.terraform.compat.axiom.AxiomModule;
+import net.hollowcube.terraform.compat.vanilla.VanillaModule;
 import net.hollowcube.terraform.compat.worldedit.WorldEditModule;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
@@ -18,9 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -35,6 +34,8 @@ public sealed interface Terraform permits TerraformImpl {
     Supplier<TerraformModule> WORLDEDIT_MODULE = WorldEditModule::new;
     @NotNull
     Supplier<TerraformModule> AXIOM_MODULE = AxiomModule::new;
+    @NotNull
+    Supplier<TerraformModule> VANILLA_MODULE = VanillaModule::new;
 
     interface Provider {
         @NotNull Terraform terraform();
