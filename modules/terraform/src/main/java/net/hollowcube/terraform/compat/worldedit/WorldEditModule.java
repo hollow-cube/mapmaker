@@ -100,8 +100,7 @@ public class WorldEditModule implements TerraformModule {
 //                new ChunkCommands.DelChunks(), //todo
 
                 // Utility
-//                new UtilityCommands.Fill(), // todo
-//                new UtilityCommands.Fillr(), //todo
+                new UtilityCommands.Fill(),
 //                new UtilityCommands.Drain(), //todo
 //                new UtilityCommands.FixLava(), //todo
 //                new UtilityCommands.FixWater(), //todo

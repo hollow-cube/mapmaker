@@ -14,13 +14,19 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class RegionFunctions {
+
+    private RegionFunctions() {
+    }
 
     public static @NotNull ComputeFunc replace(@NotNull Region region, @NotNull Mask mask, @NotNull Pattern pattern) {
         return (task, world) -> {
@@ -167,11 +173,44 @@ public final class RegionFunctions {
         };
     }
 
-    static void setBlock(@NotNull BlockBuffer.Builder target, @NotNull WorldView source, @NotNull Point pos, @NotNull Pattern pattern) throws InterruptedException {
-        target.set(pos, pattern.blockAt(source, pos));
+    public static ComputeFunc floodFill(@NotNull Point center, @Range(from = 1, to = Integer.MAX_VALUE) int radius, @NotNull Pattern pattern) {
+        return floodFill(center, radius, pattern, Mask.always());
     }
 
-    private RegionFunctions() {
+    public static ComputeFunc floodFill(@NotNull Point center, @Range(from = 1, to = Integer.MAX_VALUE) int radius, @NotNull Pattern pattern, @NotNull Mask mask) {
+        return (task, world) -> {
+            var vec = new Vec(radius);
+            var min = center.sub(vec);
+            var max = center.add(vec);
+            var builder = BlockBuffer.builder(world, min, max);
+
+            var queue = new LinkedList<Point>();
+
+            queue.add(new BlockVec(center));
+            var positions = new HashSet<>(queue);
+
+            final Direction[] values = Direction.values();
+            while (!queue.isEmpty()) {
+                var current = queue.pop();
+                for (Direction value : values) {
+                    final Point add = new BlockVec(current.add(value.vec()));
+                    if (!positions.contains(add) && add.distance(center) < radius && mask.test(world, add, world.getBlock(add))) {
+                        queue.add(add);
+                        positions.add(add);
+                    }
+                }
+            }
+
+            for (Point position : positions) {
+                setBlock(builder, world, position, pattern);
+            }
+
+            return builder.build();
+        };
+    }
+
+    static void setBlock(@NotNull BlockBuffer.Builder target, @NotNull WorldView source, @NotNull Point pos, @NotNull Pattern pattern) throws InterruptedException {
+        target.set(pos, pattern.blockAt(source, pos));
     }
 
 }

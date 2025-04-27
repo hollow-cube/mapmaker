@@ -16,14 +16,42 @@ import org.jetbrains.annotations.NotNull;
 public final class UtilityCommands {
 
     public static class Fill extends WECommand {
-        public Fill() {
-            super("/fill");
-        }
-    }
+        private final Argument<Pattern> patternArg = WEArgument.Pattern("pattern");
+        private final Argument<Integer> radiusArg = Argument.Int("radius").min(1).max(300);
+        private final Argument<Integer> depthArg = Argument.Int("depth").min(1).max(300).defaultValue(300);
 
-    public static class Fillr extends WECommand {
-        public Fillr() {
-            super("/fillr");
+        public Fill() {
+            super("/fill", "/fillr");
+
+            addSyntax(playerOnly(this::execute), patternArg, radiusArg);
+            addSyntax(playerOnly(this::execute), patternArg, radiusArg, depthArg);
+        }
+
+        private void execute(@NotNull Player player, @NotNull CommandContext context) {
+            var pattern = context.get(patternArg);
+            var radius = context.get(radiusArg);
+            var depth = context.get(depthArg);
+
+            var center = player.getPosition();
+            @SuppressWarnings("UnstableApiUsage")
+            var minWorldY = player.getInstance().getCachedDimensionType().minY();
+            var minY = Math.max(center.y() - depth, minWorldY);
+
+
+            var computeFunc = RegionFunctions.floodFill(center, radius, pattern, (_, point, block) -> {
+                if (!block.isAir()) {
+                    return false;
+                }
+
+                return point.blockY() <= center.blockY() && point.blockY() > minY;
+            });
+
+            var session = LocalSession.forPlayer(player);
+            session.buildTask("we-fill")
+                    .metadata() //todo
+                    .compute(computeFunc)
+                    .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
+                    .submit();
         }
     }
 
