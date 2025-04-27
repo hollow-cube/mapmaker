@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.hub;
 
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.Uuids;
-import net.hollowcube.compat.api.discord.DiscordRichPresenceManager;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.hub.entity.marker.HubMarkerLoader;
 import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
@@ -45,7 +44,6 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.channels.Channels;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
@@ -179,11 +177,6 @@ public class HubMapWorld extends AbstractMapWorld {
 
         BossBars.clear(player);
         BOSS_BARS.forEach(player::showBossBar);
-
-        // we have to delay this by a little bit otherwise the presence will try to be set before the module enable message is sent to the client,
-        // which causes the client to just ignore the presence update.
-        player.scheduler().buildTask(() -> DiscordRichPresenceManager.setRichPresence(player, "In", "the lobby", "")).delay(Duration.ofSeconds(2)).schedule();
-
     }
 
     @Override
