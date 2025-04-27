@@ -31,7 +31,7 @@ public class SetBlockCommand extends CommandDsl {
         var session = LocalSession.forPlayer(player);
         session.buildTask("vanilla-setblock")
                 .metadata()
-                .compute((task, world) -> {
+                .compute((_, world) -> {
                     var buffer = BlockBuffer.builder(world, point, point);
                     var worldBlock = world.getBlock(point);
                     var canPlace = switch (mode) {
