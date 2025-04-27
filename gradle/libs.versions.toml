@@ -26,7 +26,6 @@ graalvm = "24.2.0"
 blossom = "2.1.0"
 velocity = "3.4.0-SNAPSHOT"
 feather = "0.0.5"
-labymod = "1.0.6"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
@@ -51,7 +50,6 @@ mql = { group = "dev.hollowcube", name = "mql", version.ref = "mql" }
 json5 = { group = "de.marhali", name = "json5-java", version.ref = "json5" }
 velocity-api = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
 feather = { group = "net.digitalingot.feather-server-api", name = "messaging", version.ref = "feather" }
-labymod = { group = "net.labymod.serverapi", name = "server-minestom", version.ref="labymod"}
 
 graal-polyglot = { group = "org.graalvm.polyglot", name = "polyglot", version.ref = "graalvm" }
 graal-js-language = { group = "org.graalvm.js", name = "js-language", version.ref = "graalvm" }
