@@ -13,6 +13,8 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 public record AxiomBlockBuffer(
         @NotNull Long2ObjectMap<Either<Block, Block[]>> updates,
         @NotNull Long2ObjectMap<Short2ObjectMap<AxiomBlockEntityData>> blockEntities
@@ -39,7 +41,7 @@ public record AxiomBlockBuffer(
     }
 
     private void addBlocks(long index, Block[] blocks) {
-        this.updates.put(index, Either.right(blocks));
+        this.updates.put(index, Either.right(Objects.requireNonNull(blocks)));
     }
 
     private void addBlockEntityData(long index, int size, short offset, AxiomBlockEntityData data) {

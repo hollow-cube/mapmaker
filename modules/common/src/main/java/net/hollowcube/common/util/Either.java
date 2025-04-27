@@ -1,59 +1,77 @@
 package net.hollowcube.common.util;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
 import java.util.function.Function;
 
-public class Either<L, R> {
-    public static <L, R> Either<L, R> left(L left) {
-        return new Either<>(left, null);
+public sealed interface Either<L, R> {
+    static <L, R> Either<L, R> left(L left) {
+        return new Either.Left<>(left);
     }
 
-    public static <L, R> Either<L, R> right(R right) {
-        return new Either<>(null, right);
+    static <L, R> Either<L, R> right(R right) {
+        return new Either.Right<>(right);
     }
 
-    private final L left;
-    private final R right;
-
-    private Either(L left, R right) {
-        this.left = left;
-        this.right = right;
+    default boolean isLeft() {
+        return false;
     }
 
-    public <T> T map(@NotNull Function<L, T> leftMapper, @NotNull Function<R, T> rightMapper) {
-        if (left != null) {
+    default boolean isRight() {
+        return false;
+    }
+
+    default L left() {
+        throw new IllegalStateException("Either is not left");
+    }
+
+    default R right() {
+        throw new IllegalStateException("Either is not right");
+    }
+
+    default L leftOr(L defaultValue) {
+        return defaultValue;
+    }
+
+    default R rightOr(R defaultValue) {
+        return defaultValue;
+    }
+
+    <T> T map(@NotNull Function<L, T> leftMapper, @NotNull Function<R, T> rightMapper);
+
+    record Left<L, R>(@Nullable L left) implements Either<L, R> {
+        @Override
+        public boolean isLeft() {
+            return true;
+        }
+
+        @Override
+        public L leftOr(L defaultValue) {
+            return left;
+        }
+
+        @Override
+        public <T> T map(@NotNull Function<L, T> leftMapper, @NotNull Function<R, T> rightMapper) {
             return leftMapper.apply(left);
-        } else if (right != null) {
-            return rightMapper.apply(right);
-        } else {
-            throw new IllegalStateException("Either is empty");
         }
     }
 
-    public boolean isLeft() {
-        return left != null;
-    }
+    record Right<L, R>(@Nullable R right) implements Either<L, R> {
+        @Override
+        public boolean isRight() {
+            return true;
+        }
 
-    public boolean isRight() {
-        return right != null;
-    }
+        @Override
+        public R rightOr(R defaultValue) {
+            return right;
+        }
 
-    public L left() {
-        return Objects.requireNonNull(left, "Either is not left");
-    }
-
-    public R right() {
-        return Objects.requireNonNull(right, "Either is not right");
-    }
-
-    public L leftOr(L defaultValue) {
-        return left != null ? left : defaultValue;
-    }
-
-    public R rightOr(R defaultValue) {
-        return right != null ? right : defaultValue;
+        @Override
+        public <T> T map(@NotNull Function<L, T> leftMapper, @NotNull Function<R, T> rightMapper) {
+            return rightMapper.apply(right);
+        }
     }
 
 }
