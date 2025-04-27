@@ -10,6 +10,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerPluginMessageEvent;
 import net.minestom.server.tag.Tag;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -69,7 +70,7 @@ public class LunarCompatProvider implements CompatProvider, DiscordRichPresenceP
     }
 
     @Override
-    public void setRichPresence(Player player, String playerState, String gameName, String gameVariantName) {
+    public void setRichPresence(@NotNull Player player, @NotNull String playerState, @NotNull String gameName, @NotNull String gameVariantName) {
         new ClientboundLunarPacket(
                 Map.of(
                         "@type", ClientboundLunarPacket.TYPE_PREFIX + "richpresence.v1.OverrideServerRichPresenceMessage",
@@ -82,7 +83,7 @@ public class LunarCompatProvider implements CompatProvider, DiscordRichPresenceP
     }
 
     @Override
-    public void clearRichPresence(Player player) {
+    public void clearRichPresence(@NotNull Player player) {
         new ClientboundLunarPacket(
                 Map.of(
                         "@type", ClientboundLunarPacket.TYPE_PREFIX + "richpresence.v1.ResetServerRichPresenceMessage"
@@ -91,7 +92,7 @@ public class LunarCompatProvider implements CompatProvider, DiscordRichPresenceP
     }
 
     @Override
-    public boolean isRichPresenceSupportedFor(Player player) {
+    public boolean isRichPresenceSupportedFor(@NotNull Player player) {
         return player.hasTag(LUNAR_SUPPORT_ENABLED);
     }
 }

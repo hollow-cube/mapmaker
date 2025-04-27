@@ -16,6 +16,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.tag.Tag;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +50,7 @@ public class FeatherCompatProvider implements CompatProvider, DiscordRichPresenc
     }
 
     @Override
-    public void setRichPresence(Player player, String playerState, String gameName, String gameVariantName) {
+    public void setRichPresence(@NotNull Player player, @NotNull String playerState, @NotNull String gameName, @NotNull String gameVariantName) {
         new ClientboundFeatherPacket(
                 new S2CSetDiscordActivity(
                         IMAGE_URL,
@@ -65,12 +66,12 @@ public class FeatherCompatProvider implements CompatProvider, DiscordRichPresenc
     }
 
     @Override
-    public void clearRichPresence(Player player) {
+    public void clearRichPresence(@NotNull Player player) {
         new ClientboundFeatherPacket(new S2CClearDiscordActivity()).send(player);
     }
 
     @Override
-    public boolean isRichPresenceSupportedFor(Player player) {
+    public boolean isRichPresenceSupportedFor(@NotNull Player player) {
         return player.hasTag(FEATHER_SUPPORT_ENABLED);
     }
 
