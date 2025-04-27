@@ -12,6 +12,8 @@ import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extends View {
 
     private @Outlet("name_text") Text nameText;
@@ -33,7 +35,7 @@ public class AbstractEffectSettingsTab<EffectData extends BaseEffectData> extend
     }
 
     public void setData(@NotNull EffectData data, int maxResetHeight) {
-        this.data = data;
+        this.data = Objects.requireNonNull(data);
         this.maxResetHeight = maxResetHeight;
 
         updateFromData();

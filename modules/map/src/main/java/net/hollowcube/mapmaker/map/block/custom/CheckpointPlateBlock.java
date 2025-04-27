@@ -24,10 +24,7 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget, PressurePlateBlockMixin, DebugCommand.BlockDebug {
@@ -69,7 +66,7 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget,
         if (interaction.getHand() != PlayerHand.MAIN || player.isSneaking()) return true;
 
         // Open checkpoint settings GUI
-        var data = interaction.getBlock().getTag(DATA_TAG);
+        var data = Objects.requireNonNullElseGet(interaction.getBlock().getTag(DATA_TAG), CheckpointEffectData::empty);
         var maxResetHeight = interaction.getBlockPosition().blockY();
         world.server().showView(player, c -> new EditCheckpointView(c.with(Map.of("updateTarget", interaction.getBlockPosition())), data, maxResetHeight, () -> {
             var instance = interaction.getInstance();

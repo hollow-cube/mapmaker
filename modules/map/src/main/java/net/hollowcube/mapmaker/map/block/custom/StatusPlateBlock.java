@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -72,7 +73,7 @@ public class StatusPlateBlock implements ObjectBlockHandler, InteractTarget, Pre
         if (interaction.getHand() != PlayerHand.MAIN || player.isSneaking()) return true;
 
         // Open checkpoint settings GUI
-        var data = interaction.getBlock().getTag(DATA_TAG);
+        var data = Objects.requireNonNullElseGet(interaction.getBlock().getTag(DATA_TAG), StatusEffectData::empty);
         var maxResetHeight = interaction.getBlockPosition().blockY();
         world.server().showView(player, c -> new EditStatusView(c.with(Map.of("updateTarget", interaction.getBlockPosition())), data, maxResetHeight, () -> {
             var instance = interaction.getInstance();

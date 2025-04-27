@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.runtime;
 
+import com.google.gson.JsonObject;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
@@ -251,7 +252,8 @@ public abstract class AbstractMapServer implements MapServer {
             PostHog.init("phc_mK0jji1aC3hvMBGLOLjuVARqolDGPS9AiuNUOhMwVyA", config -> config
                     .personalApiKey(unleashConfig.posthogPersonalApiKey())
                     .endpoint("https://us.i.posthog.com")
-                    .featureFlagsPollingInterval(Duration.ofMinutes(10)));
+                    .featureFlagsPollingInterval(Duration.ofMinutes(10))
+                    .exceptionMiddleware(AbstractMapServer::posthogExceptionMiddleware));
             shutdowner.queue("posthog", PostHog::shutdown);
 
             FeatureFlagProvider.replaceGlobals(new PostHogFeatureFlagProvider());
@@ -683,5 +685,11 @@ public abstract class AbstractMapServer implements MapServer {
         logger.info("disconnect - {}", player.getUsername());
     }
 
+    private static boolean posthogExceptionMiddleware(Throwable t, JsonObject message) {
+        if (t instanceof OutOfMemoryError) return false;
+
+        // todo fancier exception grouping
+        return true;
+    }
 
 }

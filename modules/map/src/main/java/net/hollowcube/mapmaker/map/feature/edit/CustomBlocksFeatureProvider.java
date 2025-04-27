@@ -22,6 +22,8 @@ import net.hollowcube.mapmaker.map.feature.edit.item.DisplayEntityItem;
 import net.hollowcube.mapmaker.map.feature.edit.item.EnterTestModeItem;
 import net.hollowcube.mapmaker.map.feature.edit.item.SpawnPointItem;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
+import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
+import net.hollowcube.mapmaker.map.feature.play.effect.StatusEffectData;
 import net.hollowcube.mapmaker.map.gui.effect.EditCheckpointView;
 import net.hollowcube.mapmaker.map.gui.effect.EditStatusView;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
@@ -121,7 +123,7 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
             case "mapmaker:checkpoint" -> {
                 // Block the edit and open the checkpoint editor gui
                 event.setCancelled(true);
-                var checkpointData = marker.getTag(CheckpointPlateBlock.ENTITY_DATA_TAG);
+                var checkpointData = Objects.requireNonNullElseGet(marker.getTag(CheckpointPlateBlock.ENTITY_DATA_TAG), CheckpointEffectData::empty);
                 var maxResetHeight = (int) (Objects.requireNonNullElse(marker.getMin(), Pos.ZERO).y() + marker.getPosition().y());
                 world.server().guiController().show(player, c -> new EditCheckpointView(c.with(Map.of("updateTarget", marker)),
                         checkpointData, maxResetHeight, () -> marker.setTag(CheckpointPlateBlock.ENTITY_DATA_TAG, checkpointData)));
@@ -129,7 +131,7 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
             case "mapmaker:status" -> {
                 // Block the edit and open the status plate editor gui
                 event.setCancelled(true);
-                var statusData = marker.getTag(StatusPlateBlock.ENTITY_DATA_TAG);
+                var statusData = Objects.requireNonNullElseGet(marker.getTag(StatusPlateBlock.ENTITY_DATA_TAG), StatusEffectData::empty);
                 var maxResetHeight = (int) (Objects.requireNonNullElse(marker.getMin(), Pos.ZERO).y() + marker.getPosition().y());
                 world.server().guiController().show(player, c -> new EditStatusView(c.with(Map.of("updateTarget", marker)),
                         statusData, maxResetHeight, () -> marker.setTag(StatusPlateBlock.ENTITY_DATA_TAG, statusData)));

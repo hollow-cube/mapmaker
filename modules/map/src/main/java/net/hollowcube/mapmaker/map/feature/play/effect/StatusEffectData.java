@@ -3,14 +3,14 @@ package net.hollowcube.mapmaker.map.feature.play.effect;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.map.feature.play.setting.SavedMapSettings;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.StructCodec;
+import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Optional;
 
 @SuppressWarnings("UnstableApiUsage")
 public class StatusEffectData extends BaseEffectData {
@@ -28,8 +28,11 @@ public class StatusEffectData extends BaseEffectData {
             "repeatable", Codec.BOOLEAN.optional(false), StatusEffectData::repeatable,
             "extraTime", Codec.INT.optional(0), StatusEffectData::extraTime,
             "settings", SavedMapSettings.CODEC.optional(), StatusEffectData::settings,
-            StatusEffectData::new
-    );
+            StatusEffectData::new);
+
+    public static @NotNull StatusEffectData empty() {
+        return CODEC.decode(Transcoder.NBT, CompoundBinaryTag.empty()).orElseThrow();
+    }
 
     private boolean repeatable;
     private int extraTime;

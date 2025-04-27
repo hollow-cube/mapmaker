@@ -3,8 +3,10 @@ package net.hollowcube.mapmaker.map.feature.play.effect;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.map.feature.play.setting.SavedMapSettings;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.StructCodec;
+import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +30,10 @@ public class CheckpointEffectData extends BaseEffectData {
             "lives", Codec.INT.optional(NO_LIVES), CheckpointEffectData::lives,
             "settings", SavedMapSettings.CODEC.optional(), CheckpointEffectData::settings,
             CheckpointEffectData::new);
+
+    public static CheckpointEffectData empty() {
+        return CODEC.decode(Transcoder.NBT, CompoundBinaryTag.empty()).orElseThrow();
+    }
 
     private int lives;
 

@@ -33,7 +33,7 @@ public final class BlockTags {
             Block.TUFF_BRICK_SLAB
     );
     public static final Collection<Key> BUTTONS = builtin("minecraft:buttons");
-    public static final Collection<Key> WOODEN_BUTTONS = create(Block.BIRCH_BUTTON, Block.ACACIA_BUTTON, Block.DARK_OAK_BUTTON, Block.JUNGLE_BUTTON, Block.MANGROVE_BUTTON, Block.OAK_BUTTON, Block.SPRUCE_BUTTON);
+    public static final Collection<Key> WOODEN_BUTTONS = create(Block.BIRCH_BUTTON, Block.ACACIA_BUTTON, Block.DARK_OAK_BUTTON, Block.JUNGLE_BUTTON, Block.MANGROVE_BUTTON, Block.OAK_BUTTON, Block.SPRUCE_BUTTON, Block.PALE_OAK_BUTTON);
     public static final Collection<Key> STONE_BUTTONS = create(Block.POLISHED_BLACKSTONE_BUTTON, Block.STONE_BUTTON);
     public static final Collection<Key> NETHER_WOOD_BUTTONS = create(Block.WARPED_BUTTON, Block.CRIMSON_BUTTON);
     public static final Collection<Key> FENCES = builtin("minecraft:fences");
