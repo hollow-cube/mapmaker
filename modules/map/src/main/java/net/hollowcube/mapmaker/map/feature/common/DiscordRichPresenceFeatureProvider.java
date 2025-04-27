@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.map.feature.common;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.common.util.WordUtil;
+import net.hollowcube.common.util.StringUtil;
 import net.hollowcube.compat.api.discord.DiscordRichPresenceManager;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
@@ -32,7 +32,7 @@ public class DiscordRichPresenceFeatureProvider implements FeatureProvider {
                 DiscordRichPresenceManager.setRichPresence(event.player(), "Playing", event.mapWorld().map().name(), "/play " + event.mapWorld().map().publishedIdString());
             } else if (event.mapWorld() instanceof EditingMapWorld) {
                 final var variant = event.mapWorld().map().settings().getVariant().name().toLowerCase();
-                DiscordRichPresenceManager.setRichPresence(event.getPlayer(), "Building", "a map", "Building " + WordUtil.indefiniteArticle(variant) + " map");
+                DiscordRichPresenceManager.setRichPresence(event.getPlayer(), "Building", "a map", "Building " + StringUtil.indefiniteArticle(variant) + " map");
             }
         }
     }
