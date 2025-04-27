@@ -66,24 +66,28 @@ public class Clipboard {
     }
 
     public @NotNull Schematic getTransformedSchematic() {
-        var builder = SchematicBuilder.builder();
+        if (this.transformations.isEmpty()) {
+            return schematic;
+        } else {
+            var builder = SchematicBuilder.builder();
 
-        schematic.forEachBlock((pos, block) -> {
+            schematic.forEachBlock((pos, block) -> {
+                for (SchematicTransformation transformation : transformations) {
+                    pos = transformation.apply(pos, schematic.size(), schematic.offset());
+                    block = transformation.apply(block);
+                }
+                // Check why this needs its offset subtracted
+                builder.block(pos.sub(schematic.offset()), block);
+            });
+
+            var offset = schematic.offset();
             for (SchematicTransformation transformation : transformations) {
-                pos = transformation.apply(pos, schematic.size(), schematic.offset());
-                block = transformation.apply(block);
+                offset = transformation.apply(offset, schematic.size());
             }
-            // Check why this needs its offset subtracted
-            builder.block(pos.sub(schematic.offset()), block);
-        });
+            builder.offset(offset);
 
-        var offset = schematic.offset();
-        for (SchematicTransformation transformation : transformations) {
-            offset = transformation.apply(offset, schematic.size());
+            return builder.build();
         }
-        builder.offset(offset);
-
-        return builder.build();
     }
 
     public void transform(@NotNull SchematicTransformation transformation) {
