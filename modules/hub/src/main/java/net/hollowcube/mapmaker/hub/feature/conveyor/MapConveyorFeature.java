@@ -376,7 +376,7 @@ public class MapConveyorFeature implements HubFeature {
         // TODO(1.21.4)
 //        ((ItemDisplayMeta) sealPiston.getEntityMeta()).setItemStack(ItemStack.of(Material.STICK).with(ItemComponent.CUSTOM_MODEL_DATA, 16));
         var sealMeta = (ItemDisplayMeta) sealPiston.getEntityMeta();
-        sealMeta.setDisplayContext(ItemDisplayMeta.DisplayContext.THIRD_PERSON_RIGHT_HAND);
+        sealMeta.setDisplayContext(ItemDisplayMeta.DisplayContext.THIRDPERSON_RIGHT_HAND);
         sealMeta.setItemStack(makeItemStack(PISTON_SPRITE));
         sealMeta.setScale(new Vec(10)); // 10 is the biggest dimension
         sealMeta.setLeftRotation(new Quaternion(new Vec(1, 0, 0), Math.toRadians(90)).into());
@@ -405,7 +405,7 @@ public class MapConveyorFeature implements HubFeature {
 
         // Set the sprite
         var itemMeta = (ItemDisplayMeta) entity.getEntityMeta();
-        itemMeta.setDisplayContext(ItemDisplayMeta.DisplayContext.THIRD_PERSON_RIGHT_HAND);
+        itemMeta.setDisplayContext(ItemDisplayMeta.DisplayContext.THIRDPERSON_RIGHT_HAND);
         itemMeta.setItemStack(makeItemStack(sprite));
         itemMeta.setScale(new Vec(sprite.width() * 0.9)); // Would turn 5x5x5 into 4.5 scale for example
 
