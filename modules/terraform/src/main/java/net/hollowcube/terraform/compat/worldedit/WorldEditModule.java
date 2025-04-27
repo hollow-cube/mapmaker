@@ -101,7 +101,7 @@ public class WorldEditModule implements TerraformModule {
 
                 // Utility
                 new UtilityCommands.Fill(),
-//                new UtilityCommands.Drain(), //todo
+                new UtilityCommands.Drain(),
 //                new UtilityCommands.FixLava(), //todo
 //                new UtilityCommands.FixWater(), //todo
                 new UtilityCommands.RemoveAbove(),

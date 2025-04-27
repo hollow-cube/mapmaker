@@ -16,11 +16,7 @@ import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class RegionFunctions {
@@ -173,36 +169,78 @@ public final class RegionFunctions {
         };
     }
 
-    public static ComputeFunc floodFill(@NotNull Point center, @Range(from = 1, to = Integer.MAX_VALUE) int radius, @NotNull Pattern pattern) {
+    public static @NotNull ComputeFunc floodFill(
+            @NotNull Point center,
+            @Range(from = 1, to = Integer.MAX_VALUE) int radius,
+            @NotNull Pattern pattern
+    ) {
         return floodFill(center, radius, pattern, Mask.always());
     }
 
-    public static ComputeFunc floodFill(@NotNull Point center, @Range(from = 1, to = Integer.MAX_VALUE) int radius, @NotNull Pattern pattern, @NotNull Mask mask) {
+    private static Set<Point> floodFill(
+            @NotNull Point center,
+            @Range(from = 1, to = Integer.MAX_VALUE) int radius,
+            @NotNull Mask mask,
+            @NotNull WorldView world
+    ) {
+        var queue = new LinkedList<Point>();
+
+        queue.add(new BlockVec(center));
+        var positions = new HashSet<>(queue);
+
+        final Direction[] values = Direction.values();
+        while (!queue.isEmpty()) {
+            var current = queue.pop();
+            for (Direction value : values) {
+                final Point add = new BlockVec(current.add(value.vec()));
+                if (!positions.contains(add) && add.distance(center) < radius && mask.test(world, add, world.getBlock(add))) {
+                    queue.add(add);
+                    positions.add(add);
+                }
+            }
+        }
+
+        return positions;
+    }
+
+    public static ComputeFunc floodFill(
+            @NotNull Point center,
+            @Range(from = 1, to = Integer.MAX_VALUE) int radius,
+            @NotNull Pattern pattern,
+            @NotNull Mask mask
+    ) {
         return (task, world) -> {
             var vec = new Vec(radius);
             var min = center.sub(vec);
             var max = center.add(vec);
             var builder = BlockBuffer.builder(world, min, max);
 
-            var queue = new LinkedList<Point>();
-
-            queue.add(new BlockVec(center));
-            var positions = new HashSet<>(queue);
-
-            final Direction[] values = Direction.values();
-            while (!queue.isEmpty()) {
-                var current = queue.pop();
-                for (Direction value : values) {
-                    final Point add = new BlockVec(current.add(value.vec()));
-                    if (!positions.contains(add) && add.distance(center) < radius && mask.test(world, add, world.getBlock(add))) {
-                        queue.add(add);
-                        positions.add(add);
-                    }
-                }
+            for (Point position : floodFill(center, radius, mask, world)) {
+                setBlock(builder, world, position, pattern);
             }
 
-            for (Point position : positions) {
-                setBlock(builder, world, position, pattern);
+            return builder.build();
+        };
+    }
+
+    public static ComputeFunc drain(
+            @NotNull Point center,
+            @Range(from = 1, to = Integer.MAX_VALUE) int radius,
+            @NotNull Mask mask
+    ) {
+        return (task, world) -> {
+            var vec = new Vec(radius);
+            var min = center.sub(vec);
+            var max = center.add(vec);
+            var builder = BlockBuffer.builder(world, min, max);
+
+            for (Point position : floodFill(center, radius, mask, world)) {
+                final Block block = world.getBlock(position);
+                if (block.isLiquid()) {
+                    builder.set(position, Block.AIR);
+                } else if ("true".equals(block.getProperty("waterlogged"))) {
+                    builder.set(position, block.withProperty("waterlogged", "false"));
+                }
             }
 
             return builder.build();
