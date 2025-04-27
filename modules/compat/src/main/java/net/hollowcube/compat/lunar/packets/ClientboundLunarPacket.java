@@ -11,15 +11,14 @@ import java.util.Map;
 public record ClientboundLunarPacket(
         @NotNull Map<String, ?> data
 ) implements ClientboundModPacket<ClientboundLunarPacket> {
+    private static final Gson GSON = new Gson();
     public static final String TYPE_PREFIX = "type.googleapis.com/lunarclient.apollo.";
+
 
     public static final Type<ClientboundLunarPacket> TYPE = Type.of(
             "apollo",
             "json",
-            (buffer, packet) -> {
-                final var json = new Gson().toJson(packet.data);
-                buffer.write(NetworkBuffer.RAW_BYTES, json.getBytes(StandardCharsets.UTF_8));
-            }
+            (buffer, packet) -> buffer.write(NetworkBuffer.RAW_BYTES, GSON.toJson(packet.data).getBytes(StandardCharsets.UTF_8))
     );
 
     @Override
