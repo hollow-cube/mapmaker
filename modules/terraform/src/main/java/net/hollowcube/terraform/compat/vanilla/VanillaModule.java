@@ -2,6 +2,7 @@ package net.hollowcube.terraform.compat.vanilla;
 
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.TerraformModule;
+import net.hollowcube.terraform.compat.vanilla.command.CloneCommand;
 import net.hollowcube.terraform.compat.vanilla.command.FillCommand;
 import net.hollowcube.terraform.compat.vanilla.command.SetBlockCommand;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +15,8 @@ public class VanillaModule implements TerraformModule {
     public @NotNull Set<CommandDsl> commands() {
         return Set.of(
                 new SetBlockCommand(),
-                new FillCommand()
+                new FillCommand(),
+                new CloneCommand()
         );
     }
 }

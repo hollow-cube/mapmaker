@@ -195,7 +195,7 @@ public final class RegionFunctions {
     public static @NotNull ComputeFunc outline(@NotNull CuboidRegion region, @NotNull Pattern pattern, @NotNull Mask mask) {
         return (_, world) -> {
             var builder = BlockBuffer.builder(world, region.min(), region.max());
-            Point max = region.max().sub(1,1,1), min = region.min();
+            Point max = region.max().sub(1, 1, 1), min = region.min();
 
             line(builder, world, min, min.withX(max.x() + 1), pattern, mask, 1);
             line(builder, world, min, min.withY(max.y() + 1), pattern, mask, 1);
@@ -286,6 +286,29 @@ public final class RegionFunctions {
                 } else if ("true".equals(block.getProperty("waterlogged"))) {
                     builder.set(position, block.withProperty("waterlogged", "false"));
                 }
+            }
+
+            return builder.build();
+        };
+    }
+
+    /**
+     * Min inclusive, max exclusive
+     */
+    public static @NotNull ComputeFunc clone(
+            @NotNull Point min,
+            @NotNull Point max,
+            @NotNull Point destination,
+            @NotNull Mask sourceMask
+    ) {
+        return (_, world) -> {
+            var relativized = max.sub(min);
+            var builder = BlockBuffer.builder(world, destination, destination.add(relativized));
+
+            for (Point point : new CuboidRegion(min, max)) {
+                final Point toPoint = point.sub(min).add(destination);
+                if (!sourceMask.test(world, point, world.getBlock(point))) continue;
+                builder.set(toPoint, world.getBlock(point));
             }
 
             return builder.build();

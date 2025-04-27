@@ -12,11 +12,11 @@ public interface Mask {
     // Constants
 
     static @NotNull Mask always() {
-        return (world, point, block) -> true;
+        return (_, _, _) -> true;
     }
 
     static @NotNull Mask never() {
-        return (world, point, block) -> false;
+        return (_, _, _) -> false;
     }
 
     static @NotNull Mask air() {
