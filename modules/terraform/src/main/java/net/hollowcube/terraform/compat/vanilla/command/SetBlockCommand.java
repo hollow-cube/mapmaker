@@ -5,6 +5,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.session.LocalSession;
+import net.hollowcube.terraform.util.Messages;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
@@ -46,6 +47,7 @@ public class SetBlockCommand extends CommandDsl {
                     return buffer.build();
                 })
                 .ephemeral()
+                .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
                 .submit();
     }
 

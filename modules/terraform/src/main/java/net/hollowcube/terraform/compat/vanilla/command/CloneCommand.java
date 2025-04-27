@@ -10,6 +10,7 @@ import net.hollowcube.terraform.mask.Mask;
 import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.selection.region.CuboidRegion;
 import net.hollowcube.terraform.session.LocalSession;
+import net.hollowcube.terraform.util.Messages;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
@@ -84,7 +85,7 @@ public class CloneCommand extends CommandDsl {
             sourceMask = Mask.and(sourceMask, new BlockMask(filter.id(), filter.properties()));
         }
         if (CoordinateUtil.isBetween(CoordinateUtil.min(start, end), CoordinateUtil.max(start, end), destination) && mode != Mode.FORCE) {
-            player.sendMessage(Component.text(":c"));
+            player.sendMessage(Component.translatable("terraform.command.vanilla.clone.intersets"));
             return;
         }
         Point min = CoordinateUtil.min(start, end), max = CoordinateUtil.max(start, end).add(1, 1, 1);
@@ -95,6 +96,7 @@ public class CloneCommand extends CommandDsl {
                 .metadata() // todo
                 .compute(RegionFunctions.clone(min, max, destination, sourceMask))
                 .ephemeral()
+                .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
                 .submit();
         if (mode == Mode.MOVE) {
             session.buildTask("vanilla-clone-move")

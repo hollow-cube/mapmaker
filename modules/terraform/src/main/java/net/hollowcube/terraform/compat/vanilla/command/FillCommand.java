@@ -9,6 +9,7 @@ import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.selection.region.CuboidRegion;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.task.ComputeFunc;
+import net.hollowcube.terraform.util.Messages;
 import net.hollowcube.terraform.util.math.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
@@ -62,6 +63,7 @@ public class FillCommand extends CommandDsl {
                 .metadata()
                 .compute(func)
                 .ephemeral()
+                .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
                 .submit();
 
     }
