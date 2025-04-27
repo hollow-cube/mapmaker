@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.block.handler;
 
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
@@ -41,8 +42,9 @@ public class CampfireBlockHandler implements BlockHandler {
     @Override
     public boolean onInteract(@NotNull BlockHandler.Interaction interaction) {
         var player = interaction.getPlayer();
-        if (interaction.getHand() != PlayerHand.MAIN) return true;
-        if (player.isSneaking()) return true;
+        if (interaction.getHand() != PlayerHand.MAIN || player.isSneaking()) return true;
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null || !world.canEdit(player)) return true;
 
         var handItemStack = player.getItemInHand(interaction.getHand());
 
