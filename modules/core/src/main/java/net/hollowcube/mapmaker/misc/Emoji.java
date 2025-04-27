@@ -5,8 +5,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.ShadowColor;
-import net.minestom.server.entity.Player;
-import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -133,7 +131,7 @@ public record Emoji(
 
         public Builder path(@NotNull String fullPath) {
             var sprite = BadSprite.require("icon/emoji/" + fullPath);
-            var component = Component.text(sprite.fontChar())
+            var component = Component.text(sprite.fontChar(), NamedTextColor.WHITE)
                     .shadowColor(ShadowColor.none())
                     .hoverEvent(HoverEvent.showText(Component.text(":" + id + ":", NamedTextColor.WHITE)));
             supplier = $ -> component;
