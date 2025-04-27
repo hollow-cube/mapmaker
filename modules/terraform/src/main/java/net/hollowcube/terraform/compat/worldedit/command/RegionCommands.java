@@ -11,6 +11,7 @@ import net.hollowcube.terraform.mask.OffsetMask;
 import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.selection.region.CuboidRegion;
+import net.hollowcube.terraform.selection.region.CuboidRegionSelector;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.task.ComputeFunc;
 import net.hollowcube.terraform.util.Messages;
@@ -60,8 +61,37 @@ public final class RegionCommands {
     }
 
     public static class Line extends WECommand {
+        private final Argument<Pattern> patternArg = WEArgument.Pattern("pattern");
+        // todo thickness, -h (hollow)
+
         public Line() {
             super("/line");
+
+            addSyntax(playerOnly(this::execute), patternArg);
+        }
+
+        private void execute(@NotNull Player player, @NotNull CommandContext context) {
+            final Pattern pattern = context.get(patternArg);
+
+            var session = LocalSession.forPlayer(player);
+            var selection = session.selection(Selection.DEFAULT);
+            if (selection.region() == null) {
+                player.sendMessage(Messages.GENERIC_NO_SELECTION);
+                return;
+            }
+
+            if (selection.selector() instanceof CuboidRegionSelector regionSelector) { // todo add line selection once selection switching is added
+                var generator = RegionFunctions.line(regionSelector.getPos1(), regionSelector.getPos2(), pattern);
+
+                session.buildTask("we-line")
+                        .metadata() //todo
+                        .compute(generator)
+                        .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
+                        .submit();
+                return;
+            }
+
+            player.sendMessage(Messages.REGION_NOT_CUBOID);
         }
     }
 

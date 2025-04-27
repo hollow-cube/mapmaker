@@ -8,6 +8,7 @@ import net.hollowcube.terraform.selection.region.Region;
 import net.hollowcube.terraform.task.ComputeFunc;
 import net.hollowcube.terraform.task.edit.WorldView;
 import net.hollowcube.terraform.util.math.DirectionUtil;
+import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
@@ -15,6 +16,7 @@ import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -133,6 +135,35 @@ public final class RegionFunctions {
             }
 
             return buffer.build();
+        };
+    }
+
+    public static @NotNull ComputeFunc line(@NotNull Point p1, @NotNull Point p2, @NotNull Pattern pattern) {
+        return line(p1, p2, pattern, Mask.always());
+    }
+
+    public static @NotNull ComputeFunc line(@NotNull Point pos1, @NotNull Point pos2, @NotNull Pattern pattern, @NotNull Mask mask) {
+        return (task, world) -> {
+            var builder = BlockBuffer.builder(world, pos1, pos2);
+
+            var line = Vec.fromPoint(pos2.sub(pos1));
+
+            var step = line.normalize().div(5);
+            var current = Vec.ZERO;
+
+            var points = new HashSet<Point>();
+
+            while (current.length() < line.length()) {
+                points.add(new BlockVec(pos1.add(current)));
+                current = current.add(step);
+            }
+
+            for (var point : points) {
+                if (!mask.test(world, point, world.getBlock(point))) continue;
+                setBlock(builder, world, point, pattern);
+            }
+
+            return builder.build();
         };
     }
 
