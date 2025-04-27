@@ -38,7 +38,9 @@ public class NoTurnFeatureProvider extends AbstractSettingFeatureProvider {
     private static boolean canTurn(@NotNull Player player, MapWorld world) {
         if (!world.isPlaying(player)) return true;
 
-        var state = SaveState.fromPlayer(player);
+        var state = SaveState.optionalFromPlayer(player);
+        if (state == null) return true;
+        
         var playstate = state.state(PlayState.class);
         return !playstate.settings().get(MapSettings.NO_TURN, world.map().settings());
     }
