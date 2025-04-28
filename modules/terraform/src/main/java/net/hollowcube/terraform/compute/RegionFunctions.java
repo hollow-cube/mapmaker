@@ -238,7 +238,7 @@ public final class RegionFunctions {
             var current = queue.pop();
             for (Direction value : values) {
                 final Point add = new BlockVec(current.add(value.vec()));
-                if (!positions.contains(add) && add.distance(center) < radius && mask.test(world, add, world.getBlock(add))) {
+                if (!positions.contains(add) && add.distance(center) <= radius && mask.test(world, add, world.getBlock(add))) {
                     queue.add(add);
                     positions.add(add);
                 }

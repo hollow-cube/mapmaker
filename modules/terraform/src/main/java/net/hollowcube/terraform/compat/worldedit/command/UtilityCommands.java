@@ -10,6 +10,7 @@ import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.selection.region.CuboidRegion;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.util.Messages;
+import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,7 +44,7 @@ public final class UtilityCommands {
             var minY = Math.max(center.y() - depth, minWorldY);
 
 
-            var computeFunc = RegionFunctions.floodFill(center, radius, pattern, (_, point, block) -> {
+            var computeFunc = RegionFunctions.floodFill(new BlockVec(center), radius, pattern, (_, point, block) -> {
                 if (!block.isAir()) {
                     return false;
                 }
@@ -77,7 +78,7 @@ public final class UtilityCommands {
 
             var center = player.getPosition();
 
-            var computeFunc = RegionFunctions.drain(center, radius, (_, _, block) -> !flags.contains(Flags.KEEP_WATERLOGGED) || !"true".equals(block.getProperty("waterlogged")));
+            var computeFunc = RegionFunctions.drain(new BlockVec(center), radius, (_, _, block) -> !flags.contains(Flags.KEEP_WATERLOGGED) || !"true".equals(block.getProperty("waterlogged")));
 
             var session = LocalSession.forPlayer(player);
             session.buildTask("we-drain")
