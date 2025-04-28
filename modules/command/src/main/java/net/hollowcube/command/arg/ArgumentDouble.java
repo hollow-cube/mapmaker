@@ -61,4 +61,9 @@ public class ArgumentDouble extends Argument<Double> {
     public ArgumentParserType argumentType() {
         return ArgumentParserType.DOUBLE;
     }
+
+    @Override
+    public boolean shouldSuggest() {
+        return false;
+    }
 }

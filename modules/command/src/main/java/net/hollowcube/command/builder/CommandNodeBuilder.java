@@ -4,12 +4,16 @@ import net.hollowcube.command.CommandNode;
 import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class CommandNodeBuilder {
+    private static final Logger log = LoggerFactory.getLogger(CommandNodeBuilder.class);
     public byte flags;
     public List<CommandNode> children = new ArrayList<>();
     public CommandNode redirectedNode; // Only if flags & 0x08
@@ -25,6 +29,11 @@ public class CommandNodeBuilder {
             this.redirectedNode = node.redirect();
         }
         if (node.children() != null) {
+            final long count = node.children().stream().filter(node1 -> node1.argument().getType() == DeclareCommandsPacket.NodeType.ARGUMENT).count();
+            if (count > 1) {
+                log.debug("More then two argument children for {}: [{}]", name, node.children().stream().filter(node1 -> node1.argument().getType() == DeclareCommandsPacket.NodeType.ARGUMENT).map(argumentPair -> argumentPair.argument().id()).collect(Collectors.joining(", ")));
+                node.children().stream().skip(1).forEach(argumentPair -> argumentPair.node().cancelSuggestions());
+            }
             this.children.addAll(node.children().stream().map(CommandNode.ArgumentPair::node).toList());
         }
     }
@@ -32,7 +41,7 @@ public class CommandNodeBuilder {
     public CommandNodeBuilder(CommandNode.ArgumentPair argumentPair) {
         var argument = argumentPair.argument();
         var node = argumentPair.node();
-        this.flags = DeclareCommandsPacket.getFlag(argumentPair.argument().getType(), node.isExecutable(), node.redirect() != null, argumentPair.argument().getType() == DeclareCommandsPacket.NodeType.ARGUMENT);
+        this.flags = DeclareCommandsPacket.getFlag(argumentPair.argument().getType(), node.isExecutable(), node.redirect() != null, argumentPair.argument().getType() == DeclareCommandsPacket.NodeType.ARGUMENT && node.shouldSuggest() && argumentPair.argument().shouldSuggest());
 
         this.name = argument.id();
 
@@ -42,12 +51,21 @@ public class CommandNodeBuilder {
         }
 
         if (argument.getType() == DeclareCommandsPacket.NodeType.ARGUMENT) {
-            this.suggestionsType = "minecraft:ask_server";
+            if (node.shouldSuggest()) {
+                this.suggestionsType = "minecraft:ask_server";
+            }
             this.parser = argument.argumentType();
             this.properties = NetworkBuffer.makeArray(argument::properties);
         }
         var children = node.children();
         if (children != null) {
+            final long count = node.children().stream().filter(node1 -> node1.argument().getType() == DeclareCommandsPacket.NodeType.ARGUMENT).count();
+            if (count > 1) {
+                log.debug("More then two argument children for node {}: [{}]", name, node.children().stream().filter(node1 -> node1.argument().getType() == DeclareCommandsPacket.NodeType.ARGUMENT).map(pair -> pair.argument().id()).collect(Collectors.joining(", ")));
+                node.children().stream().skip(1).forEach(pair -> {
+                    pair.node().cancelSuggestions();
+                });
+            }
             this.children.addAll(children.stream().map(CommandNode.ArgumentPair::node).toList());
         }
     }

@@ -27,6 +27,7 @@ import java.util.function.Supplier;
 public class CommandNode {
 
     protected CommandNode redirect = null; // May not be used with executor, children, condition.
+    protected boolean shouldSuggest = true;
 
     protected CommandExecutor executor = null; // May not be used with redirect
     protected List<ArgumentPair> children = null; // May not be used with redirect
@@ -55,6 +56,14 @@ public class CommandNode {
 
     public @Nullable List<String> examples() {
         return examples;
+    }
+
+    public boolean shouldSuggest() {
+        return shouldSuggest;
+    }
+
+    public void cancelSuggestions() {
+        shouldSuggest = false;
     }
 
     @Contract(pure = true)
@@ -290,7 +299,6 @@ public class CommandNode {
         if (this.children != null) {
             this.children.forEach(argumentPair -> {
                 visitor.accept(argumentPair);
-                if (argumentPair.argument.isGreedyString()) return;
                 argumentPair.node.visitChildren(visitor);
             });
         }

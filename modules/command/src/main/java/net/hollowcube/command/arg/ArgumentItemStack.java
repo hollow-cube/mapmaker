@@ -29,6 +29,7 @@ public class ArgumentItemStack extends Argument<ItemStack> {
 
     @Override
     public void properties(NetworkBuffer buffer) {}
+
     @Override
     public ArgumentParserType argumentType() {
         return ArgumentParserType.ITEM_STACK;

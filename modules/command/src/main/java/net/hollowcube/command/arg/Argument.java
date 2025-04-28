@@ -88,8 +88,8 @@ public abstract class Argument<T> {
     }
 
 
-    // Properties
 
+    // Properties
     public boolean isOptional() {
         return defaultProvider != null;
     }
@@ -126,6 +126,10 @@ public abstract class Argument<T> {
 
     public DeclareCommandsPacket.NodeType getType() {
         return DeclareCommandsPacket.NodeType.ARGUMENT;
+    }
+
+    public boolean shouldSuggest() {
+        return true;
     }
 
     // Transforms
@@ -179,9 +183,5 @@ public abstract class Argument<T> {
 
     public @NotNull ParseResult<T> syntaxError(int start, @Nullable String message) {
         return new ParseResult.Failure<>(start, message);
-    }
-
-    public boolean isGreedyString() {
-        return false;
     }
 }

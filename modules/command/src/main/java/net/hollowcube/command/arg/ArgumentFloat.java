@@ -61,4 +61,9 @@ public class ArgumentFloat extends Argument<Float> {
    public ArgumentParserType argumentType() {
        return ArgumentParserType.FLOAT;
    }
+
+    @Override
+    public boolean shouldSuggest() {
+        return false;
+    }
 }

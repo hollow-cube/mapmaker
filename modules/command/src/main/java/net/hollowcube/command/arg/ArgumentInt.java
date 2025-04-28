@@ -75,4 +75,9 @@ public class ArgumentInt extends Argument<Integer> {
     public ArgumentParserType argumentType() {
         return ArgumentParserType.INTEGER;
     }
+
+    @Override
+    public boolean shouldSuggest() {
+        return false;
+    }
 }
