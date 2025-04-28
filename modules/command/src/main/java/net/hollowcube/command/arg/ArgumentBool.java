@@ -45,9 +45,4 @@ public class ArgumentBool extends Argument<Boolean> {
     public ArgumentParserType argumentType() {
         return ArgumentParserType.BOOL;
     }
-
-    @Override
-    public boolean shouldSuggest() {
-        return false;
-    }
 }

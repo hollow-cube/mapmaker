@@ -24,7 +24,6 @@ public class ArgumentItemStack extends Argument<ItemStack> {
 
     @Override
     public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
-        super.suggest(sender, raw, suggestion);
     }
 
     @Override
@@ -32,6 +31,11 @@ public class ArgumentItemStack extends Argument<ItemStack> {
 
     @Override
     public ArgumentParserType argumentType() {
-        return ArgumentParserType.ITEM_STACK;
+        return ArgumentParserType.ITEM_STACK; // probably doesn't work, has to be checked
+    }
+
+    @Override
+    public boolean shouldSuggest() {
+        return false;
     }
 }

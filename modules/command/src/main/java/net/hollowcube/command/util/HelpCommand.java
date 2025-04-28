@@ -13,7 +13,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -246,6 +248,17 @@ public class HelpCommand extends CommandDsl {
 
         private ArgumentCommand() {
             super("command");
+        }
+
+        @Override
+        public void properties(NetworkBuffer buffer) {
+            // should probably be changed to be literals and not just greedy string but im too lazy to change the whole command
+            buffer.write(NetworkBuffer.VAR_INT, 2);
+        }
+
+        @Override
+        public ArgumentParserType argumentType() {
+            return ArgumentParserType.STRING;
         }
 
         @Override

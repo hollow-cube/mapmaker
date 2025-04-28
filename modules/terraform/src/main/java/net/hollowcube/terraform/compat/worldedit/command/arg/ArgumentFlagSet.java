@@ -56,6 +56,7 @@ public class ArgumentFlagSet<E extends Enum<E>> extends Argument<EnumSet<E>> {
             var word = raw.substring(1).toLowerCase(Locale.ROOT);
             for (var value : flagMap.keySet()) {
                 if (!word.contains(String.valueOf(value))) {
+                    suggestion.setStart(suggestion.getStart() + word.length());
                     suggestion.add(String.valueOf(value));
                 }
             }
