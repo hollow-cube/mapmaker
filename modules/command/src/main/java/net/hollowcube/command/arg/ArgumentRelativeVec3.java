@@ -4,10 +4,12 @@ import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
 import net.hollowcube.common.util.PlayerUtil;
+import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -66,5 +68,12 @@ public class ArgumentRelativeVec3 extends Argument<Point> {
         } else if (coordinateIndex == 2) {
             suggestion.add("%s %s".formatted(raw, third));
         }
+    }
+    @Override
+    public void properties(@NotNull NetworkBuffer buffer) {}
+
+    @Override
+    public @NotNull ArgumentParserType argumentType() {
+        return ArgumentParserType.VEC3;
     }
 }

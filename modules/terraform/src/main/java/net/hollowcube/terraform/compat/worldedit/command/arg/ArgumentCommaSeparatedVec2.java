@@ -33,4 +33,9 @@ public class ArgumentCommaSeparatedVec2 extends Argument<Vec> {
             return syntaxError();
         }
     }
+
+    @Override
+    public boolean shouldSuggest() {
+        return false;
+    }
 }

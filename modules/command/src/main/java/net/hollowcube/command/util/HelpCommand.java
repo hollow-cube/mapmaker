@@ -13,7 +13,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,16 +33,9 @@ public class HelpCommand extends CommandDsl {
     private final Predicate<Map.Entry<String, CommandNode>> filter;
 
     public HelpCommand(@NotNull CommandManager commandManager, @Nullable CommandCategory category) {
-        this("help", new String[]{"h"}, commandManager, category, $ -> true);
+        this("help", new String[]{"h"}, commandManager, category, _ -> true);
     }
 
-    /**
-     * @param name
-     * @param aliases
-     * @param commandManager
-     * @param category
-     * @param filter         A filter to test top level commands (it will never run on subcommands)
-     */
     public HelpCommand(
             @NotNull String name, @NotNull String[] aliases,
             @NotNull CommandManager commandManager,
@@ -77,7 +72,7 @@ public class HelpCommand extends CommandDsl {
 
             var commandName = entry.getKey();
             maxCommandLength = Math.max(maxCommandLength, FontUtil.measureText("/" + commandName));
-            byCategory.computeIfAbsent(entry.getValue().category(), $ -> new ArrayList<>()).add(entry);
+            byCategory.computeIfAbsent(entry.getValue().category(), _ -> new ArrayList<>()).add(entry);
         }
 
         // Create the message
@@ -246,6 +241,17 @@ public class HelpCommand extends CommandDsl {
 
         private ArgumentCommand() {
             super("command");
+        }
+
+        @Override
+        public void properties(@NotNull NetworkBuffer buffer) {
+            // should probably be changed to be literals and not just greedy string but im too lazy to change the whole command
+            buffer.write(NetworkBuffer.VAR_INT, 2);
+        }
+
+        @Override
+        public @NotNull ArgumentParserType argumentType() {
+            return ArgumentParserType.STRING;
         }
 
         @Override

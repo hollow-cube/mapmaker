@@ -47,15 +47,18 @@ public class ArgumentFlagSet<E extends Enum<E>> extends Argument<EnumSet<E>> {
 
     @Override
     public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
-        if (raw.isEmpty() || raw.charAt(0) != '-') return;
-        suggestion.clear();
-        suggestion.setStart(suggestion.getStart() + raw.length());
-        suggestion.setLength(1);
-
-        var word = raw.substring(1).toLowerCase(Locale.ROOT);
-        for (var value : flagMap.keySet()) {
-            if (!word.contains(String.valueOf(value))) {
-                suggestion.add(String.valueOf(value));
+        if (raw.isEmpty()) {
+            for (var value : flagMap.keySet()) {
+                suggestion.add("-" + value);
+            }
+        } else if (raw.charAt(0) == '-') {
+            suggestion.setStart(suggestion.getStart() + 1);
+            var word = raw.substring(1).toLowerCase(Locale.ROOT);
+            for (var value : flagMap.keySet()) {
+                if (!word.contains(String.valueOf(value))) {
+                    suggestion.setStart(suggestion.getStart() + word.length());
+                    suggestion.add(String.valueOf(value));
+                }
             }
         }
     }

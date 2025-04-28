@@ -59,4 +59,9 @@ public class MapArgument extends Argument<Optional<MapData>> {
             }
         });
     }
+
+    @Override
+    public boolean shouldSuggest() {
+        return false;
+    }
 }

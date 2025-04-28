@@ -7,6 +7,7 @@ import net.hollowcube.command.util.CommandCategory;
 import net.hollowcube.command.util.StringReader;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.utils.validate.Check;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -14,6 +15,7 @@ import org.jetbrains.annotations.UnknownNullability;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -25,6 +27,7 @@ import java.util.function.Supplier;
 public class CommandNode {
 
     protected CommandNode redirect = null; // May not be used with executor, children, condition.
+    protected boolean shouldSuggest = true;
 
     protected CommandExecutor executor = null; // May not be used with redirect
     protected List<ArgumentPair> children = null; // May not be used with redirect
@@ -53,6 +56,23 @@ public class CommandNode {
 
     public @Nullable List<String> examples() {
         return examples;
+    }
+
+    public boolean shouldSuggest() {
+        return shouldSuggest;
+    }
+
+    public void cancelSuggestions() {
+        shouldSuggest = false;
+    }
+
+    @Contract(pure = true)
+    public @Nullable List<ArgumentPair> children() {
+        return children;
+    }
+
+    public @Nullable CommandCondition condition() {
+        return condition;
     }
 
     public @UnknownNullability CommandNode xpath(@NotNull String path, boolean followRedirects) {
@@ -274,7 +294,16 @@ public class CommandNode {
         return node;
     }
 
-    protected record ArgumentPair(Argument<?> argument, CommandNode node) {
+    public void visitChildren(@NotNull Consumer<@NotNull ArgumentPair> visitor) {
+        if (this.children != null) {
+            this.children.forEach(argumentPair -> {
+                visitor.accept(argumentPair);
+                argumentPair.node.visitChildren(visitor);
+            });
+        }
+    }
+
+    public record ArgumentPair(@NotNull Argument<?> argument, @NotNull CommandNode node) {
     }
 
     protected record ConditionContext(@NotNull CommandSender sender, @NotNull Pass pass) implements CommandContext {

@@ -4,6 +4,7 @@ import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -49,5 +50,10 @@ public class ArgumentLiteral extends Argument<String> {
     @Override
     public int hashCode() {
         return Objects.hash(literal);
+    }
+
+    @Override
+    public DeclareCommandsPacket.@NotNull NodeType getType() {
+        return DeclareCommandsPacket.NodeType.LITERAL;
     }
 }

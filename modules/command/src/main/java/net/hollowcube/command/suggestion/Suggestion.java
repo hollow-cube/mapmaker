@@ -13,9 +13,9 @@ public final class Suggestion {
     public static final Suggestion EMPTY = new Suggestion(0, 0);
 
     private final int zero;
+    private final List<SuggestionEntry> entries = new ArrayList<>();
     private int start;
     private int length;
-    private final List<SuggestionEntry> entries = new ArrayList<>();
 
     public Suggestion(int start, int length) {
         this.zero = start;
