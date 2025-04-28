@@ -80,6 +80,8 @@ public class CheckpointSignFeatureProvider implements FeatureProvider {
     }
 
     private void handlePlayingSignClick(@NotNull PlayerBlockInteractEvent event) {
+        if (true) return;
+
         var player = event.getPlayer();
         var world = MapWorld.forPlayerOptional(player);
         if (world == null || !world.isPlaying(player)) return; // Sanity
