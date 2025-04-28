@@ -66,4 +66,9 @@ public class ArgumentMap<S, T> extends Argument<T> {
     public ArgumentParserType argumentType() {
         return source.argumentType();
     }
+
+    @Override
+    public boolean shouldSuggest() {
+        return source.shouldSuggest();
+    }
 }
