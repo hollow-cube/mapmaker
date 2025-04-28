@@ -46,7 +46,6 @@ public class SetBlockCommand extends CommandDsl {
 
                     return buffer.build();
                 })
-                .ephemeral()
                 .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
                 .submit();
     }

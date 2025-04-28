@@ -299,16 +299,19 @@ public final class RegionFunctions {
             @NotNull Point min,
             @NotNull Point max,
             @NotNull Point destination,
-            @NotNull Mask sourceMask
+            @NotNull Mask sourceMask,
+            boolean move
     ) {
         return (_, world) -> {
-            var relativized = max.sub(min);
-            var builder = BlockBuffer.builder(world, destination, destination.add(relativized));
+            var builder = BlockBuffer.builder(world);
 
             for (Point point : new CuboidRegion(min, max)) {
                 final Point toPoint = point.sub(min).add(destination);
                 if (!sourceMask.test(world, point, world.getBlock(point))) continue;
                 builder.set(toPoint, world.getBlock(point));
+                if (move) {
+                    builder.set(point, Block.AIR);
+                }
             }
 
             return builder.build();

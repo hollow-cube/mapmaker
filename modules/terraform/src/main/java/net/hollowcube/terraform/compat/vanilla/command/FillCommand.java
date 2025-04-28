@@ -62,7 +62,6 @@ public class FillCommand extends CommandDsl {
         session.buildTask("vanilla-fill")
                 .metadata()
                 .compute(func)
-                .ephemeral()
                 .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
                 .submit();
 

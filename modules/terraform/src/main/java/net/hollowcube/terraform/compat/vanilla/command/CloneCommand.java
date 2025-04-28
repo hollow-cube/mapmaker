@@ -7,8 +7,6 @@ import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.hollowcube.terraform.compute.RegionFunctions;
 import net.hollowcube.terraform.mask.BlockMask;
 import net.hollowcube.terraform.mask.Mask;
-import net.hollowcube.terraform.pattern.Pattern;
-import net.hollowcube.terraform.selection.region.CuboidRegion;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.util.Messages;
 import net.kyori.adventure.text.Component;
@@ -94,17 +92,9 @@ public class CloneCommand extends CommandDsl {
         var session = LocalSession.forPlayer(player);
         session.buildTask("vanilla-clone")
                 .metadata() // todo
-                .compute(RegionFunctions.clone(min, max, destination, sourceMask))
-                .ephemeral()
+                .compute(RegionFunctions.clone(min, max, destination, sourceMask, mode == Mode.MOVE))
                 .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
                 .submit();
-        if (mode == Mode.MOVE) {
-            session.buildTask("vanilla-clone-move")
-                    .metadata() // todo
-                    .compute(RegionFunctions.replace(new CuboidRegion(min, max), sourceMask, Pattern.air()))
-                    .ephemeral()
-                    .submit();
-        }
     }
 
     private enum CopyMode {
