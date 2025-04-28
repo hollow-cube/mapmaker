@@ -80,7 +80,7 @@ public final class UtilityCommands {
             var computeFunc = RegionFunctions.drain(center, radius, (_, _, block) -> !flags.contains(Flags.KEEP_WATERLOGGED) || !"true".equals(block.getProperty("waterlogged")));
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-fill")
+            session.buildTask("we-drain")
                     .metadata() //todo
                     .compute(computeFunc)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
