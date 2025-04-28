@@ -48,4 +48,9 @@ final class NoopClientRenderer implements ClientRenderer {
 
     }
 
+    @Override
+    public void clearAll() {
+
+    }
+
 }

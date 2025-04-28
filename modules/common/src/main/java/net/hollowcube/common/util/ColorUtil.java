@@ -14,4 +14,8 @@ public class ColorUtil {
     public static String toHex(RGBLike color) {
         return String.format("#%02x%02x%02x", color.red(), color.green(), color.blue());
     }
+
+    public static int toRgb(RGBLike color){
+        return ((color.red() & 0xFF) << 16) | ((color.green() & 0xFF) << 8) | (color.blue() & 0xFF);
+    }
 }

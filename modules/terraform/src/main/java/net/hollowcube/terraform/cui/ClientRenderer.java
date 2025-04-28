@@ -76,4 +76,6 @@ public interface ClientRenderer {
 
     void line(@NotNull Point p1, @NotNull Point p2);
 
+    void clearAll();
+
 }

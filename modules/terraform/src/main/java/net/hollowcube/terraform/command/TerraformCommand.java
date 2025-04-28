@@ -6,6 +6,7 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.terraform.command.terraform.TerraformCancelCommand;
 import net.hollowcube.terraform.command.terraform.TerraformDebugCommand;
 import net.hollowcube.terraform.command.terraform.TerraformQueueCommand;
+import net.hollowcube.terraform.command.terraform.TerraformToggleCuiCommand;
 import net.hollowcube.terraform.util.Messages;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +23,7 @@ public class TerraformCommand extends CommandDsl {
         addSubcommand(new TerraformDebugCommand());
         addSubcommand(new TerraformQueueCommand());
         addSubcommand(new TerraformCancelCommand());
+        addSubcommand(new TerraformToggleCuiCommand());
     }
 
     private void showVersion(@NotNull Player player, @NotNull CommandContext context) {
