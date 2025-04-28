@@ -243,7 +243,6 @@ public class CommandNode {
         return this.executor != null;
     }
 
-    // todo BUT GIANT (gravy said it should be giant :3)
     public boolean isConditional() {
         return this.condition != null;
     }

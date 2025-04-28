@@ -87,6 +87,12 @@ public class CommandManagerImpl implements CommandManager {
         return result;
     }
 
+    private boolean shouldHide(@NotNull CommandNode node, @NotNull Player player) {
+        if (!node.isConditional()) return false;
+
+        return CommandCondition.HIDE == node.condition.test(player, new CommandNode.ConditionContext(player, CommandContext.Pass.BUILD));
+    }
+
     @Override
     public @NotNull DeclareCommandsPacket createCommandPacket(@NotNull Player player) {
         var nodes = new ArrayList<DeclareCommandsPacket.Node>();
@@ -95,6 +101,7 @@ public class CommandManagerImpl implements CommandManager {
 
         Object2IntMap<CommandNode> commandMap = new Object2IntOpenHashMap<>();
         AtomicInteger id = new AtomicInteger(1);
+        @SuppressWarnings("SuspiciousMethodCalls") // intellij dumb
         var context = new CommandEvaluationContext(
                 player,
                 commandMap::getInt,
@@ -106,17 +113,23 @@ public class CommandManagerImpl implements CommandManager {
         for (var command : reflect().commands(player, true)) {
             var name = command.getKey();
             var node = command.getValue();
+            if (shouldHide(node, player)) {
+                continue;
+            }
+
 
             var builder = new CommandNodeBuilder(name, node);
             context.register(node);
             Set<CommandNode.ArgumentPair> children = new HashSet<>();
             node.visitChildren(children::add);
+            children.removeIf(child -> shouldHide(child.node(), player));
             children.forEach(pair -> context.register(pair.node()));
-            rootNodes.add(context.getId(node));
+            //noinspection DataFlowIssue - should never occure since we register it 5 lines above
+            rootNodes.add(context.getId(node).intValue());
             nodes.add(builder.toNode(context));
             nodes.addAll(children.stream()
-                        .map(CommandNodeBuilder::new)
-                        .map(builders -> builders.toNode(context)).toList());
+                    .map(CommandNodeBuilder::new)
+                    .map(builders -> builders.toNode(context)).toList());
         }
 
         root.children = rootNodes.toIntArray();

@@ -17,7 +17,7 @@ public class CommandNodeBuilder {
     public byte flags;
     public List<CommandNode> children = new ArrayList<>();
     public CommandNode redirectedNode; // Only if flags & 0x08
-    public String name = ""; // Only for literal and argument
+    public String name; // Only for literal and argument
     public ArgumentParserType parser; // Only for argument
     public byte[] properties; // Only for argument
     public String suggestionsType = ""; // Only if flags 0x10
@@ -29,11 +29,7 @@ public class CommandNodeBuilder {
             this.redirectedNode = node.redirect();
         }
         if (node.children() != null) {
-            final long count = node.children().stream().filter(node1 -> node1.argument().getType() == DeclareCommandsPacket.NodeType.ARGUMENT).count();
-            if (count > 1) {
-                log.debug("More then two argument children for {}: [{}]", name, node.children().stream().filter(node1 -> node1.argument().getType() == DeclareCommandsPacket.NodeType.ARGUMENT).map(argumentPair -> argumentPair.argument().id()).collect(Collectors.joining(", ")));
-                node.children().stream().skip(1).forEach(argumentPair -> argumentPair.node().cancelSuggestions());
-            }
+            ensureOneSuggestion(node.children(), name);
             this.children.addAll(node.children().stream().map(CommandNode.ArgumentPair::node).toList());
         }
     }
@@ -59,14 +55,17 @@ public class CommandNodeBuilder {
         }
         var children = node.children();
         if (children != null) {
-            final long count = node.children().stream().filter(node1 -> node1.argument().getType() == DeclareCommandsPacket.NodeType.ARGUMENT).count();
-            if (count > 1) {
-                log.debug("More then two argument children for node {}: [{}]", name, node.children().stream().filter(node1 -> node1.argument().getType() == DeclareCommandsPacket.NodeType.ARGUMENT).map(pair -> pair.argument().id()).collect(Collectors.joining(", ")));
-                node.children().stream().skip(1).forEach(pair -> {
-                    pair.node().cancelSuggestions();
-                });
-            }
+            ensureOneSuggestion(children, argument.id());
             this.children.addAll(children.stream().map(CommandNode.ArgumentPair::node).toList());
+        }
+    }
+
+    private static void ensureOneSuggestion(List<CommandNode.ArgumentPair> children, String name) {
+        var suggestingArgumentChildren = children.stream().filter(node -> node.argument().getType() == DeclareCommandsPacket.NodeType.ARGUMENT && node.argument().shouldSuggest()).toList();
+        final long count = suggestingArgumentChildren.size();
+        if (count > 1) {
+            log.debug("More then two argument children for node {}: [{}]", name, suggestingArgumentChildren.stream().map(pair -> pair.argument().id()).collect(Collectors.joining(", ")));
+            suggestingArgumentChildren.stream().skip(1).forEach(pair -> pair.node().cancelSuggestions());
         }
     }
 
