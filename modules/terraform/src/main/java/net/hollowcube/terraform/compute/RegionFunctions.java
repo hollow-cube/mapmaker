@@ -14,16 +14,17 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public final class RegionFunctions {
 
+    private RegionFunctions() {
+    }
+
     public static @NotNull ComputeFunc replace(@NotNull Region region, @NotNull Mask mask, @NotNull Pattern pattern) {
-        return (task, world) -> {
+        return (_, world) -> {
             var buffer = BlockBuffer.builder(world, region.min(), region.max());
             for (var pos : region) {
                 var block = world.getBlock(pos);
@@ -36,17 +37,25 @@ public final class RegionFunctions {
     }
 
     public static @NotNull ComputeFunc cuboid(@NotNull CuboidRegion region, @NotNull Pattern pattern, boolean hollow, Direction... faces) {
+        return cuboid(region, pattern, hollow, Mask.always(), faces);
+    }
+
+    public static @NotNull ComputeFunc cuboid(@NotNull CuboidRegion region, @NotNull Pattern pattern, boolean hollow, @NotNull Mask mask, Direction... faces) {
         var faceSet = faces.length > 0 ? EnumSet.copyOf(List.of(faces)) : EnumSet.allOf(Direction.class);
 
-        return (task, world) -> {
+        return (_, world) -> {
             var buffer = BlockBuffer.builder(world, region.min(), region.max());
 
             for (int x = region.min().blockX(); x < region.max().blockX(); x++) {
                 for (int y = region.min().blockY(); y < region.max().blockY(); y++) {
                     for (int z = region.min().blockZ(); z < region.max().blockZ(); z++) {
+                        var pos = new Vec(x, y, z);
+
+                        if (!mask.test(world, pos, world.getBlock(pos))) {
+                            continue;
+                        }
 
                         // If not hollow always set the block
-                        var pos = new Vec(x, y, z);
                         if (!hollow) {
                             setBlock(buffer, world, pos, pattern);
                             continue;
@@ -84,7 +93,7 @@ public final class RegionFunctions {
                 // Works because direction will be (0 1 0), so only the height is affected
                 .mul(region.max().sub(region.min()));
 
-        return (task, world) -> {
+        return (_, world) -> {
             var min = DirectionUtil.isPositive(direction) ? region.min() : region.min().add(offset.mul(count));
             var max = DirectionUtil.isPositive(direction) ? region.max().add(offset.mul(count)) : region.max();
             var buffer = BlockBuffer.builder(world, min, max);
@@ -112,7 +121,7 @@ public final class RegionFunctions {
 
         //todo: this can be turned into a single pass if the iteration direction is changed based on what direction
         // the move is happening. Not sure its worth doing, but might be a good optimization.
-        return (task, world) -> {
+        return (_, world) -> {
             var min = DirectionUtil.isPositive(direction) ? region.min() : region.min().add(offset);
             var max = DirectionUtil.isPositive(direction) ? region.max().add(offset) : region.max();
             var buffer = BlockBuffer.builder(world, min, max);
@@ -143,24 +152,166 @@ public final class RegionFunctions {
     }
 
     public static @NotNull ComputeFunc line(@NotNull Point pos1, @NotNull Point pos2, @NotNull Pattern pattern, @NotNull Mask mask) {
-        return (task, world) -> {
+        return (_, world) -> {
             var builder = BlockBuffer.builder(world, pos1, pos2);
 
-            var line = Vec.fromPoint(pos2.sub(pos1));
+            line(builder, world, pos1, pos2, pattern, mask, 5);
 
-            var step = line.normalize().div(5);
-            var current = Vec.ZERO;
+            return builder.build();
+        };
+    }
 
-            var points = new HashSet<Point>();
+    private static void line(
+            @NotNull BlockBuffer.Builder builder,
+            @NotNull WorldView world,
+            @NotNull Point pos1,
+            @NotNull Point pos2,
+            @NotNull Pattern pattern,
+            @NotNull Mask mask,
+            @Range(from = 1, to = 10) int steps
+    ) throws InterruptedException {
+        var line = Vec.fromPoint(pos2.sub(pos1));
 
-            while (current.length() < line.length()) {
-                points.add(new BlockVec(pos1.add(current)));
-                current = current.add(step);
+        var step = line.normalize().div(steps);
+        var current = Vec.ZERO;
+
+        var points = new HashSet<Point>();
+
+        while (current.length() < line.length()) {
+            points.add(new BlockVec(pos1.add(current)));
+            current = current.add(step);
+        }
+
+        for (var point : points) {
+            if (!mask.test(world, point, world.getBlock(point))) continue;
+            setBlock(builder, world, point, pattern);
+        }
+    }
+
+    public static @NotNull ComputeFunc outline(@NotNull CuboidRegion region, @NotNull Pattern pattern) {
+        return outline(region, pattern, Mask.always());
+    }
+
+    public static @NotNull ComputeFunc outline(@NotNull CuboidRegion region, @NotNull Pattern pattern, @NotNull Mask mask) {
+        return (_, world) -> {
+            var builder = BlockBuffer.builder(world, region.min(), region.max());
+            Point max = region.max().sub(1, 1, 1), min = region.min();
+
+            line(builder, world, min, min.withX(max.x() + 1), pattern, mask, 1);
+            line(builder, world, min, min.withY(max.y() + 1), pattern, mask, 1);
+            line(builder, world, min, min.withZ(max.z() + 1), pattern, mask, 1);
+            line(builder, world, max, max.withX(min.x() - 1), pattern, mask, 1);
+            line(builder, world, max, max.withY(min.y() - 1), pattern, mask, 1);
+            line(builder, world, max, max.withZ(min.z() - 1), pattern, mask, 1);
+            line(builder, world, max.withX(min.x()), max.withX(min.x()).withY(min.y()), pattern, mask, 1);
+            line(builder, world, max.withZ(min.z()), max.withZ(min.z()).withY(min.y()), pattern, mask, 1);
+            line(builder, world, max.withY(min.y()), max.withY(min.y()).withX(min.x()), pattern, mask, 1);
+            line(builder, world, max.withY(min.y()), max.withY(min.y()).withZ(min.z()), pattern, mask, 1);
+            line(builder, world, min.withY(max.y()), min.withY(max.y()).withX(max.x()), pattern, mask, 1);
+            line(builder, world, min.withY(max.y()), min.withY(max.y()).withZ(max.z()), pattern, mask, 1);
+
+            return builder.build();
+        };
+    }
+
+    public static @NotNull ComputeFunc floodFill(
+            @NotNull Point center,
+            @Range(from = 1, to = Integer.MAX_VALUE) int radius,
+            @NotNull Pattern pattern
+    ) {
+        return floodFill(center, radius, pattern, Mask.always());
+    }
+
+    private static Set<Point> floodFill(
+            @NotNull Point center,
+            @Range(from = 1, to = Integer.MAX_VALUE) int radius,
+            @NotNull Mask mask,
+            @NotNull WorldView world
+    ) {
+        var queue = new LinkedList<Point>();
+
+        queue.add(new BlockVec(center));
+        var positions = new HashSet<>(queue);
+
+        final Direction[] values = Direction.values();
+        while (!queue.isEmpty()) {
+            var current = queue.pop();
+            for (Direction value : values) {
+                final Point add = new BlockVec(current.add(value.vec()));
+                if (!positions.contains(add) && add.distance(center) <= radius && mask.test(world, add, world.getBlock(add))) {
+                    queue.add(add);
+                    positions.add(add);
+                }
+            }
+        }
+
+        return positions;
+    }
+
+    public static @NotNull ComputeFunc floodFill(
+            @NotNull Point center,
+            @Range(from = 1, to = Integer.MAX_VALUE) int radius,
+            @NotNull Pattern pattern,
+            @NotNull Mask mask
+    ) {
+        return (_, world) -> {
+            var vec = new Vec(radius);
+            var min = center.sub(vec);
+            var max = center.add(vec);
+            var builder = BlockBuffer.builder(world, min, max);
+
+            for (Point position : floodFill(center, radius, mask, world)) {
+                setBlock(builder, world, position, pattern);
             }
 
-            for (var point : points) {
-                if (!mask.test(world, point, world.getBlock(point))) continue;
-                setBlock(builder, world, point, pattern);
+            return builder.build();
+        };
+    }
+
+    public static @NotNull ComputeFunc drain(
+            @NotNull Point center,
+            @Range(from = 1, to = Integer.MAX_VALUE) int radius,
+            @NotNull Mask mask
+    ) {
+        return (_, world) -> {
+            var vec = new Vec(radius);
+            var min = center.sub(vec);
+            var max = center.add(vec);
+            var builder = BlockBuffer.builder(world, min, max);
+
+            for (Point position : floodFill(center, radius, mask, world)) {
+                final Block block = world.getBlock(position);
+                if (block.isLiquid()) {
+                    builder.set(position, Block.AIR);
+                } else if ("true".equals(block.getProperty("waterlogged"))) {
+                    builder.set(position, block.withProperty("waterlogged", "false"));
+                }
+            }
+
+            return builder.build();
+        };
+    }
+
+    /**
+     * Min inclusive, max exclusive
+     */
+    public static @NotNull ComputeFunc clone(
+            @NotNull Point min,
+            @NotNull Point max,
+            @NotNull Point destination,
+            @NotNull Mask sourceMask,
+            boolean move
+    ) {
+        return (_, world) -> {
+            var builder = BlockBuffer.builder(world);
+
+            for (Point point : new CuboidRegion(min, max)) {
+                final Point toPoint = point.sub(min).add(destination);
+                if (!sourceMask.test(world, point, world.getBlock(point))) continue;
+                builder.set(toPoint, world.getBlock(point));
+                if (move) {
+                    builder.set(point, Block.AIR);
+                }
             }
 
             return builder.build();
@@ -170,8 +321,4 @@ public final class RegionFunctions {
     static void setBlock(@NotNull BlockBuffer.Builder target, @NotNull WorldView source, @NotNull Point pos, @NotNull Pattern pattern) throws InterruptedException {
         target.set(pos, pattern.blockAt(source, pos));
     }
-
-    private RegionFunctions() {
-    }
-
 }

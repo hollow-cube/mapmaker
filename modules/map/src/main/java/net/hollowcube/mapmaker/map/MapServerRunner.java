@@ -157,6 +157,7 @@ public class MapServerRunner extends AbstractMapServer {
                 .module(Terraform.BASE_MODULE)
                 .module(Terraform.AXIOM_MODULE)
                 .module(Terraform.WORLDEDIT_MODULE)
+                .module(Terraform.VANILLA_MODULE)
                 .module(MapServerModule::new)
                 .storage(mapService instanceof NoopMapService ? "TerraformStorageMemory" : "TerraformStorageHttp")
                 .build();
