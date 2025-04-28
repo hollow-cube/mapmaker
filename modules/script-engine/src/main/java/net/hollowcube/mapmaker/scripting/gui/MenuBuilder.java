@@ -9,20 +9,26 @@ import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.TooltipDisplay;
+import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.TestOnly;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
 public class MenuBuilder {
+    @TestOnly
+    public static final ItemStack EMPTY_ITEM = ItemStack.builder(Material.STICK)
+            .set(DataComponents.ITEM_MODEL, "minecraft:air")
+            .set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, Set.of()))
+            // Need to remove the name because the item can appear on the hotbar.
+            .set(DataComponents.CUSTOM_NAME, Component.empty())
+            .build();
+
     private final int absWidth, absHeight, containerSlotHeight;
     private int slotX, slotY, slotWidth, slotHeight;
     private final FontUIBuilder title = new FontUIBuilder();
     private final ItemStack[] items;
-
-    private final List<Bounds> slotBounds = new ArrayList<>();
 
     public MenuBuilder(int slotWidth, int slotHeight, int containerSlotHeight) {
         this.slotX = this.slotY = 0;
@@ -30,10 +36,7 @@ public class MenuBuilder {
         this.slotHeight = this.absHeight = slotHeight;
         this.containerSlotHeight = containerSlotHeight;
         this.items = new ItemStack[slotWidth * slotHeight];
-        Arrays.fill(this.items, ItemStack.builder(Material.STICK)
-                .set(DataComponents.ITEM_MODEL, "minecraft:air")
-                .set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, Set.of()))
-                .build());
+        Arrays.fill(this.items, EMPTY_ITEM);
     }
 
     public int availWidth() {
@@ -45,18 +48,29 @@ public class MenuBuilder {
     }
 
     public record Bounds(int x, int y, int width, int height) {
+
+        public Bounds {
+            Check.argCondition(x > 255, "x must be less than 255");
+            Check.argCondition(y > 255, "x must be less than 255");
+            Check.argCondition(width > 255, "x must be less than 255");
+            Check.argCondition(height > 255, "x must be less than 255");
+        }
+
+        public Bounds(int value) {
+            this(value & 0xFF, (value >> 8) & 0xFF, (value >> 16) & 0xFF, (value >> 24) & 0xFF);
+        }
+
+        public int value() {
+            return this.x | (this.y << 8) | (this.width << 16) | (this.height << 24);
+        }
     }
 
     public int mark() {
-        return this.slotBounds.size();
+        return new Bounds(slotX, slotY, slotWidth, slotHeight).value();
     }
 
     public void restore(int bounds) {
-        Bounds last = this.slotBounds.get(bounds);
-        while (this.slotBounds.size() > bounds) {
-            this.slotBounds.removeLast();
-        }
-
+        var last = new Bounds(bounds);
         this.slotX = last.x();
         this.slotY = last.y();
         this.slotWidth = last.width();
@@ -64,13 +78,11 @@ public class MenuBuilder {
     }
 
     public void boundsRect(int x, int y) {
-        this.slotBounds.add(new Bounds(this.slotX, this.slotY, this.slotWidth, this.slotHeight));
         this.slotX += x;
         this.slotY += y;
     }
 
     public void boundsRect(int x, int y, int width, int height) {
-        this.slotBounds.add(new Bounds(this.slotX, this.slotY, this.slotWidth, this.slotHeight));
         this.slotX += x;
         this.slotY += y;
         this.slotWidth = this.slotX + width;
@@ -99,7 +111,7 @@ public class MenuBuilder {
         int endX = startX + width;
         int endY = startY + height;
         if (startX < 0 || startY < 0 || endX > this.absWidth || endY > this.absHeight) {
-            throw new IllegalArgumentException("Out of bounds");
+            throw new IllegalArgumentException("Out of bounds " + startX + " " + startY + " " + endX + " " + endY);
         }
 
         for (int i = startY; i < endY; i++) {

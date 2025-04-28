@@ -1,18 +1,10 @@
 package net.hollowcube.mapmaker.scripting.node;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.scripting.gui.InventoryHost;
-import net.minestom.server.thread.TickThread;
-import net.minestom.server.timer.Task;
-import net.minestom.server.timer.TaskSchedule;
 import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Globals {
 
@@ -31,46 +23,13 @@ public class Globals {
         final Value[] args = new Value[arguments.length - 2];
         System.arraycopy(arguments, 2, args, 0, args.length);
 
+        // If zero treat as microtask and return empty timeout id
         if (args.length == 0 && delay <= 0) {
             InventoryHost.current().scheduleMicrotask(function);
             return -1;
         }
 
-        log.error("unsupported long timeout: {}ms", delay);
-
-        // If zero call immediately and return empty timeout id
-//        if (delay <= 0) {
-//            function.executeVoid((Object[]) args);
-//            return -1;
-//        }
-
-//        final int taskId = nextTaskId.getAndIncrement();
-//        Runnable taskImpl = () -> {
-//            try {
-//
-//                System.out.println("run thread t" + taskId + " " + Thread.currentThread().threadId() + " " + Thread.currentThread().getName() + " " + TickThread.current());
-//
-//                this.engine.instance.scheduleNextTick(ignored3 -> {
-//                    this.engine.guiManager().reactReconcilerInst.invokeMember("flushSyncWork");
-//                    function.executeVoid((Object[]) args);
-//                });
-//            } finally {
-//                this.pendingTasks.remove(taskId);
-//            }
-//        };
-//
-//        if (delay <= 0) {
-//            this.engine.instance.scheduler().scheduleEndOfTick(taskImpl);
-//        } else {
-//            System.out.println("schedule thread t" + taskId + " " + Thread.currentThread().threadId() + " " + Thread.currentThread().getName() + " " + TickThread.current());
-//            this.pendingTasks.put(taskId, this.engine.instance.scheduler()
-//                    .buildTask(taskImpl)
-//                    .delay(TaskSchedule.millis(delay))
-//                    .schedule());
-//        }
-
-
-        return -1;
+        return InventoryHost.current().scheduleTask(function, (int) delay, args);
     }
 
     public Object clearTimeout(@NotNull Value... arguments) {
@@ -83,10 +42,7 @@ public class Globals {
         if (!idArg.isNumber()) return null;
         final int id = idArg.asInt();
 
-        System.out.println("trying to clear " + id);
-//        final Task task = this.pendingTasks.remove(id);
-//        if (task != null) task.cancel();
-
+        InventoryHost.current().cancelTask(id);
         return null;
     }
 }

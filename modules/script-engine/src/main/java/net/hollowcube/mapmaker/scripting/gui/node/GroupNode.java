@@ -17,6 +17,7 @@ public class GroupNode extends Node {
     private enum Layout {ROW, COLUMN}
 
     private Layout layout = Layout.COLUMN;
+    private boolean wrap = false;
 
     public GroupNode() {
         this("group");
@@ -72,6 +73,10 @@ public class GroupNode extends Node {
             this.layout = Layout.valueOf(props.getMember("layout").asString().toUpperCase(Locale.ROOT));
             changed = true;
         }
+        if (props.hasMember("wrap")) {
+            this.wrap = props.getMember("wrap").asBoolean();
+            changed = true;
+        }
 
         return changed;
     }
@@ -88,7 +93,7 @@ public class GroupNode extends Node {
         // todo it would be nice to be able to make errors like
         //  group.group.button.tooltip > "tooltip" is not valid for XYZ
 
-        int mark = builder.mark();
+        int mark = builder.mark(), rowMark = mark;
         for (var child : children) {
             if (child.isHidden()) continue;
 
@@ -100,7 +105,11 @@ public class GroupNode extends Node {
 
             switch (this.layout) {
                 case ROW -> {
-                    builder.boundsRect(cWidth, 0);
+                    if (builder.availWidth() - cWidth <= 0 && this.wrap) {
+                        builder.restore(rowMark);
+                        builder.boundsRect(0, cHeight);
+                        rowMark = builder.mark();
+                    } else builder.boundsRect(cWidth, 0);
                 }
                 case COLUMN -> {
                     builder.boundsRect(0, cHeight);

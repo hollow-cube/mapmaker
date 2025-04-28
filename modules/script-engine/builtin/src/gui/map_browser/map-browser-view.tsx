@@ -12,10 +12,9 @@ function SearchResults({resultPromise}: SearchResultsProps) {
     return (
         <group layout='column'>
 
-            {/* TODO: need to support wrapping. */}
             <group layout='row' slotWidth={7} slotHeight={4} wrap>
                 {/* The first row is unused in the simple layout */}
-                {/*<gap slotWidth={7} slotHeight={1}/>*/}
+                <gap slotWidth={7} slotHeight={1}/>
 
                 {response.results.map(result => (
                     <item key={result.id} model='minecraft:diamond'/>
@@ -41,7 +40,7 @@ function MapBrowser() {
     const res = Promise.resolve({
         page: 1,
         pageCount: 10,
-        results: Array.from({length: 6}, (_, i) => ({id: `${i}`})),
+        results: Array.from({length: 10}, (_, i) => ({id: `${i}`})),
     } as unknown as SearchMapsResponse)
 
     return (

@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.scripting.gui;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.mapmaker.scripting.annotation.ScriptSafe;
 import net.hollowcube.mapmaker.scripting.gui.node.Node;
 import net.hollowcube.mapmaker.scripting.gui.util.ClickType;
@@ -17,6 +19,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.server.play.OpenWindowPacket;
 import net.minestom.server.network.packet.server.play.WindowItemsPacket;
 import net.minestom.server.timer.Task;
+import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import net.minestom.server.utils.validate.Check;
 import org.graalvm.polyglot.Value;
@@ -63,6 +66,8 @@ public class InventoryHost {
     // Microtasks scheduled by react which will be executed when we exit the JS context.
     // TODO: We could be fancy and choose to wait a tick to execute these if there is not enough time left in the tick.
     private final Queue<Value> pendingMicrotasks = new ArrayDeque<>();
+    private final Int2ObjectMap<Task> pendingTasks = new Int2ObjectArrayMap<>();
+    private int nextTaskId = 1;
     private Task redrawTask = null;
     // If present, indicates a potentially pending click event. We should not respond to other clicks while this
     // is both not null and not CompletableFuture#isDone.
@@ -112,6 +117,35 @@ public class InventoryHost {
     public void scheduleMicrotask(@NotNull Value microtask) {
         if (!microtask.canExecute()) throw new IllegalArgumentException("Microtask must be a function");
         pendingMicrotasks.add(microtask);
+    }
+
+    @ScriptSafe
+    public int scheduleTask(@NotNull Value task, int delayMillis, @NotNull Value[] args) {
+        if (!task.canExecute()) throw new IllegalArgumentException("Task must be a function");
+
+        final int taskId = nextTaskId++;
+        Runnable taskImpl = () -> {
+            if (!pendingTasks.containsKey(taskId)) return; // Task was cancelled
+            try (var _ = jsEnter()) {
+                task.executeVoid((Object[]) args);
+            } catch (Exception e) {
+                logger.error("Failed to execute task", e);
+                PostHog.captureException(e, player.getUuid().toString());
+            } finally {
+                // Remove the task from the pending tasks map
+                this.pendingTasks.remove(taskId);
+            }
+        };
+
+        this.pendingTasks.put(taskId, player.scheduler().buildTask(taskImpl)
+                .delay(TaskSchedule.millis(delayMillis)).schedule());
+        return taskId;
+    }
+
+    @ScriptSafe
+    public void cancelTask(int taskId) {
+        final Task task = this.pendingTasks.remove(taskId);
+        if (task != null) task.cancel();
     }
 
     @ScriptSafe
