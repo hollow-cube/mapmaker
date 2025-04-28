@@ -16,7 +16,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class UnvanishCommand extends CommandDsl {
-    private Argument<String> silentArg = Argument.Word("silent").with("silent")
+    private final Argument<String> silentArg = Argument.Literal("silent")
             .description("Do not send a join message");
 
     private final SessionManager sessionManager;
