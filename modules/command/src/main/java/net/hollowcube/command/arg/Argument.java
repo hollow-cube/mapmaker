@@ -63,10 +63,6 @@ public abstract class Argument<T> {
         return new ArgumentMaterial(id);
     }
 
-    public static @NotNull ArgumentItemStack ItemStack(@NotNull String id) {
-        return new ArgumentItemStack(id);
-    }
-
     public static @NotNull ArgumentBlock Block(@NotNull String id) {
         return new ArgumentBlock(id);
     }
@@ -95,7 +91,7 @@ public abstract class Argument<T> {
     }
 
     public @NotNull Argument<T> defaultValue(@Nullable T value) {
-        return defaultValue(sender -> value);
+        return defaultValue(_ -> value);
     }
 
     public @NotNull Argument<T> defaultValue(@NotNull Function<CommandSender, T> provider) {
@@ -117,6 +113,8 @@ public abstract class Argument<T> {
     }
 
     public ArgumentParserType argumentType() {
+        // score holder just reads every character until a whitespace,
+        // only drawback is that we can't have any strings that start with @
         return ArgumentParserType.SCORE_HOLDER;
     }
 

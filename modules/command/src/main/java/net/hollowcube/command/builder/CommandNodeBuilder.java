@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -65,8 +66,18 @@ public class CommandNodeBuilder {
         final long count = suggestingArgumentChildren.size();
         if (count > 1) {
             log.debug("More then two argument children for node {}: [{}]", name, suggestingArgumentChildren.stream().map(pair -> pair.argument().id()).collect(Collectors.joining(", ")));
-            suggestingArgumentChildren.stream().skip(1).forEach(pair -> pair.node().cancelSuggestions());
+            suggestingArgumentChildren.stream()
+                    // always gives the suggestion to a score holder if one is present
+                    .sorted(Comparator.<CommandNode.ArgumentPair>comparingInt(pair -> priority(pair.argument().argumentType())).reversed())
+                    .skip(1).forEach(pair -> pair.node().cancelSuggestions());
         }
+    }
+
+    private static int priority(ArgumentParserType type) {
+        if (type == ArgumentParserType.SCORE_HOLDER) {
+            return 10;
+        }
+        return 0;
     }
 
     public DeclareCommandsPacket.Node toNode(CommandEvaluationContext context) {
