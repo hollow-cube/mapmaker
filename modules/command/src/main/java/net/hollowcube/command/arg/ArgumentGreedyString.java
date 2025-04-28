@@ -18,12 +18,12 @@ public class ArgumentGreedyString extends Argument<String> {
     }
 
     @Override
-    public void properties(NetworkBuffer buffer) {
+    public void properties(@NotNull NetworkBuffer buffer) {
         buffer.write(NetworkBuffer.VAR_INT, 2);
     }
 
     @Override
-    public ArgumentParserType argumentType() {
+    public @NotNull ArgumentParserType argumentType() {
         return ArgumentParserType.STRING;
     }
 }

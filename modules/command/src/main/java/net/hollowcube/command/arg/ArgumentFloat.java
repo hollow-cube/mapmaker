@@ -46,7 +46,7 @@ public class ArgumentFloat extends Argument<Float> {
     }
 
    @Override
-   public void properties(NetworkBuffer buffer) {
+   public void properties(@NotNull NetworkBuffer buffer) {
        boolean hasMax = this.max != Float.MAX_VALUE, hasMin = this.min != -Float.MAX_VALUE;
        buffer.write(NetworkBuffer.BYTE, ArgumentUtils.createNumberFlags(hasMin, hasMax));
        if (hasMin) {
@@ -58,7 +58,7 @@ public class ArgumentFloat extends Argument<Float> {
    }
 
    @Override
-   public ArgumentParserType argumentType() {
+   public @NotNull ArgumentParserType argumentType() {
        return ArgumentParserType.FLOAT;
    }
 

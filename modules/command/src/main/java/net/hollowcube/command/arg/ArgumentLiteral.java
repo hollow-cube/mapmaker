@@ -53,7 +53,7 @@ public class ArgumentLiteral extends Argument<String> {
     }
 
     @Override
-    public DeclareCommandsPacket.NodeType getType() {
+    public DeclareCommandsPacket.@NotNull NodeType getType() {
         return DeclareCommandsPacket.NodeType.LITERAL;
     }
 }

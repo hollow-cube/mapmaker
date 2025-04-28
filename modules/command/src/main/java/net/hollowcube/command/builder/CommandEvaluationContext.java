@@ -10,10 +10,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Consumer;
 
 public record CommandEvaluationContext(
-        CommandSender commandSender,
-        Object2IntFunction<CommandNode> idMap,
-        Object2BooleanFunction<CommandNode> hasBeenRegistered,
-        Consumer<CommandNode> register
+        @NotNull CommandSender commandSender,
+        @NotNull Object2IntFunction<CommandNode> idMap,
+        @NotNull Object2BooleanFunction<CommandNode> hasBeenRegistered,
+        @NotNull Consumer<CommandNode> register
 ) {
 
     public @Nullable Integer getId(@NotNull CommandNode node) {

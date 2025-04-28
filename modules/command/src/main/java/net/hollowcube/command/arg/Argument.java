@@ -112,17 +112,17 @@ public abstract class Argument<T> {
         return this;
     }
 
-    public ArgumentParserType argumentType() {
+    public @NotNull ArgumentParserType argumentType() {
         // score holder just reads every character until a whitespace,
         // only drawback is that we can't have any strings that start with @
         return ArgumentParserType.SCORE_HOLDER;
     }
 
-    public void properties(NetworkBuffer buffer) {
+    public void properties(@NotNull NetworkBuffer buffer) {
         buffer.write(NetworkBuffer.BYTE, (byte) 1);
     }
 
-    public DeclareCommandsPacket.NodeType getType() {
+    public @NotNull DeclareCommandsPacket.NodeType getType() {
         return DeclareCommandsPacket.NodeType.ARGUMENT;
     }
 

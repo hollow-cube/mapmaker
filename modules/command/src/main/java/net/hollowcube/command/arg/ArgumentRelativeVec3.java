@@ -70,10 +70,10 @@ public class ArgumentRelativeVec3 extends Argument<Point> {
         }
     }
     @Override
-    public void properties(NetworkBuffer buffer) {}
+    public void properties(@NotNull NetworkBuffer buffer) {}
 
     @Override
-    public ArgumentParserType argumentType() {
+    public @NotNull ArgumentParserType argumentType() {
         return ArgumentParserType.VEC3;
     }
 }

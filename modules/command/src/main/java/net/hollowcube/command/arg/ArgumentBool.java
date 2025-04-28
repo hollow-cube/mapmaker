@@ -39,10 +39,10 @@ public class ArgumentBool extends Argument<Boolean> {
     }
 
     @Override
-    public void properties(NetworkBuffer buffer) {} // boolean is boring :3
+    public void properties(@NotNull NetworkBuffer buffer) {} // boolean is boring :3
 
     @Override
-    public ArgumentParserType argumentType() {
+    public @NotNull ArgumentParserType argumentType() {
         return ArgumentParserType.BOOL;
     }
 }

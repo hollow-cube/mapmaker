@@ -58,12 +58,12 @@ public class ArgumentMap<S, T> extends Argument<T> {
     }
 
     @Override
-    public void properties(NetworkBuffer buffer) {
+    public void properties(@NotNull NetworkBuffer buffer) {
         source.properties(buffer);
     }
 
     @Override
-    public ArgumentParserType argumentType() {
+    public @NotNull ArgumentParserType argumentType() {
         return source.argumentType();
     }
 

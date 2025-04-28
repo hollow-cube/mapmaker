@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandNode;
 import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +24,7 @@ public class CommandNodeBuilder {
     public byte[] properties; // Only for argument
     public String suggestionsType = ""; // Only if flags 0x10
 
-    public CommandNodeBuilder(String name, CommandNode node) {
+    public CommandNodeBuilder(@NotNull String name, @NotNull CommandNode node) {
         this.name = name;
         this.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.LITERAL, node.isExecutable(), node.redirect() != null, false);
         if (node.redirect() != null) {
@@ -35,7 +36,7 @@ public class CommandNodeBuilder {
         }
     }
 
-    public CommandNodeBuilder(CommandNode.ArgumentPair argumentPair) {
+    public CommandNodeBuilder(@NotNull CommandNode.ArgumentPair argumentPair) {
         var argument = argumentPair.argument();
         var node = argumentPair.node();
         this.flags = DeclareCommandsPacket.getFlag(argumentPair.argument().getType(), node.isExecutable(), node.redirect() != null, argumentPair.argument().getType() == DeclareCommandsPacket.NodeType.ARGUMENT && node.shouldSuggest() && argumentPair.argument().shouldSuggest());
@@ -61,7 +62,7 @@ public class CommandNodeBuilder {
         }
     }
 
-    private static void ensureOneSuggestion(List<CommandNode.ArgumentPair> children, String name) {
+    private static void ensureOneSuggestion(@NotNull List<CommandNode.ArgumentPair> children, @NotNull  String name) {
         var suggestingArgumentChildren = children.stream().filter(node -> node.argument().getType() == DeclareCommandsPacket.NodeType.ARGUMENT && node.argument().shouldSuggest()).toList();
         final long count = suggestingArgumentChildren.size();
         if (count > 1) {
@@ -73,14 +74,14 @@ public class CommandNodeBuilder {
         }
     }
 
-    private static int priority(ArgumentParserType type) {
+    private static int priority(@NotNull ArgumentParserType type) {
         if (type == ArgumentParserType.SCORE_HOLDER) {
             return 10;
         }
         return 0;
     }
 
-    public DeclareCommandsPacket.Node toNode(CommandEvaluationContext context) {
+    public @NotNull  DeclareCommandsPacket.Node toNode(@NotNull CommandEvaluationContext context) {
         var packetNode = new DeclareCommandsPacket.Node();
 
         packetNode.flags = this.flags;

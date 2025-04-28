@@ -33,12 +33,12 @@ public class MessageArgument extends Argument<String> {
     }
 
     @Override
-    public ArgumentParserType argumentType() {
+    public @NotNull ArgumentParserType argumentType() {
         return ArgumentParserType.STRING;
     }
 
     @Override
-    public void properties(NetworkBuffer buffer) {
+    public void properties(@NotNull NetworkBuffer buffer) {
         buffer.write(NetworkBuffer.VAR_INT, 2);
     }
 

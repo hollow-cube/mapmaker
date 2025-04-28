@@ -294,7 +294,7 @@ public class CommandNode {
         return node;
     }
 
-    public void visitChildren(Consumer<ArgumentPair> visitor) {
+    public void visitChildren(@NotNull Consumer<@NotNull ArgumentPair> visitor) {
         if (this.children != null) {
             this.children.forEach(argumentPair -> {
                 visitor.accept(argumentPair);
@@ -303,7 +303,7 @@ public class CommandNode {
         }
     }
 
-    public record ArgumentPair(Argument<?> argument, CommandNode node) {
+    public record ArgumentPair(@NotNull Argument<?> argument, @NotNull CommandNode node) {
     }
 
     protected record ConditionContext(@NotNull CommandSender sender, @NotNull Pass pass) implements CommandContext {
