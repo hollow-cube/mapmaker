@@ -69,6 +69,6 @@ public class ArgumentMap<S, T> extends Argument<T> {
 
     @Override
     public boolean shouldSuggest() {
-        return source.shouldSuggest();
+        return suggestFunc != null || source.shouldSuggest();
     }
 }
