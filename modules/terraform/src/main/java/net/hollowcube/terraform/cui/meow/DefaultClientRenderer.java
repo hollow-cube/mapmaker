@@ -7,7 +7,6 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
-import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -27,13 +26,14 @@ public class DefaultClientRenderer implements ClientRenderer {
         return true;
     }
 
+    private void drawAxis(Point pos1, Point pos2, RGBLike color) {
+        final DisplayLine displayLine = DisplayLine.axisAligned(player, pos1, pos2, color);
+        entities.add(displayLine);
+    }
+
     private void drawLine(Point pos1, Point pos2, RGBLike color) {
-        final Instance instance = player.getInstance();
         final DisplayLine displayLine = new DisplayLine(player, pos1, pos2, color);
         entities.add(displayLine);
-        displayLine.setInstance(instance);
-        displayLine.addViewer(player);
-        displayLine.updateViewableRule();
     }
 
     @Override
@@ -46,19 +46,18 @@ public class DefaultClientRenderer implements ClientRenderer {
 
     @Override
     public void cuboid(@NotNull Point point1, @NotNull Point point2) {
-        var tempPos1 = point1.sub(DisplayLine.THICKNESS);
-        drawLine(tempPos1.withY(point2.y()).withZ(point2.z()), point2, NamedTextColor.DARK_GRAY);
-        drawLine(tempPos1.withX(point2.x()).withZ(point2.z()), point2, NamedTextColor.DARK_GRAY);
-        drawLine(tempPos1.withY(point2.y()).withX(point2.x()), point2, NamedTextColor.DARK_GRAY);
-        drawLine(tempPos1, tempPos1.withX(point2.x()).sub(DisplayLine.THICKNESS), NamedTextColor.RED);
-        drawLine(tempPos1.add(0, DisplayLine.THICKNESS, 0), tempPos1.withY(point2.y()).sub(DisplayLine.THICKNESS), NamedTextColor.GREEN);
-        drawLine(tempPos1.add(0, 0, DisplayLine.THICKNESS), tempPos1.withZ(point2.z()).sub(DisplayLine.THICKNESS), NamedTextColor.BLUE);
-        drawLine(tempPos1.withX(point2.x()), tempPos1.withX(point2.x()).withY(point2.y()), NamedTextColor.DARK_GRAY);
-        drawLine(tempPos1.withZ(point2.z()), tempPos1.withZ(point2.z()).withY(point2.y()), NamedTextColor.DARK_GRAY);
-        drawLine(tempPos1.withY(point2.y()), tempPos1.withY(point2.y()).withX(point2.x()), NamedTextColor.DARK_GRAY);
-        drawLine(tempPos1.withY(point2.y()), tempPos1.withY(point2.y()).withZ(point2.z()), NamedTextColor.DARK_GRAY);
-        drawLine(tempPos1.withZ(point2.z()), tempPos1.withZ(point2.z()).withX(point2.x()), NamedTextColor.DARK_GRAY);
-        drawLine(tempPos1.withX(point2.x()), tempPos1.withX(point2.x()).withZ(point2.z()), NamedTextColor.DARK_GRAY);
+        drawAxis(point1.withY(point2.y()).withZ(point2.z()), point2, NamedTextColor.DARK_GRAY);
+        drawAxis(point1.withX(point2.x()).withZ(point2.z()), point2, NamedTextColor.DARK_GRAY);
+        drawAxis(point1.withY(point2.y()).withX(point2.x()), point2, NamedTextColor.DARK_GRAY);
+        drawAxis(point1, point1.withX(point2.x()).sub(DisplayLine.THICKNESS), NamedTextColor.RED);
+        drawAxis(point1.add(0, DisplayLine.THICKNESS, 0), point1.withY(point2.y()).sub(DisplayLine.THICKNESS), NamedTextColor.GREEN);
+        drawAxis(point1.add(0, 0, DisplayLine.THICKNESS), point1.withZ(point2.z()).sub(DisplayLine.THICKNESS), NamedTextColor.BLUE);
+        drawAxis(point1.withX(point2.x()), point1.withX(point2.x()).withY(point2.y()), NamedTextColor.DARK_GRAY);
+        drawAxis(point1.withZ(point2.z()), point1.withZ(point2.z()).withY(point2.y()), NamedTextColor.DARK_GRAY);
+        drawAxis(point1.withY(point2.y()), point1.withY(point2.y()).withX(point2.x()), NamedTextColor.DARK_GRAY);
+        drawAxis(point1.withY(point2.y()), point1.withY(point2.y()).withZ(point2.z()), NamedTextColor.DARK_GRAY);
+        drawAxis(point1.withZ(point2.z()), point1.withZ(point2.z()).withX(point2.x()), NamedTextColor.DARK_GRAY);
+        drawAxis(point1.withX(point2.x()), point1.withX(point2.x()).withZ(point2.z()), NamedTextColor.DARK_GRAY);
     }
 
     @Override
@@ -84,7 +83,7 @@ public class DefaultClientRenderer implements ClientRenderer {
 
     @Override
     public void line(@NotNull Point p1, @NotNull Point p2) {
-        //drawLine(p1, p2, NamedTextColor.BLACK);
+        drawLine(p1, p2, NamedTextColor.BLACK);
     }
 
     @Override
