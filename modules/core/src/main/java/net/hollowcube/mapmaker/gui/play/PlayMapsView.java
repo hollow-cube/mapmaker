@@ -47,7 +47,7 @@ public class PlayMapsView extends View {
                         .best(false);
                 case APPROVED -> params
                         .ascending(false)
-                        .qualities(MapQuality.GOOD, MapQuality.GREAT, MapQuality.EXCELLENT, MapQuality.OUTSTANDING, MapQuality.MASTERPIECE);
+                        .qualities(MapQuality.GREAT, MapQuality.EXCELLENT, MapQuality.OUTSTANDING, MapQuality.MASTERPIECE);
                 default -> params;
             };
         }
