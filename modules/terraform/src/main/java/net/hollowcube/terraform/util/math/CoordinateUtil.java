@@ -73,16 +73,12 @@ public final class CoordinateUtil {
         return Component.text(String.format("%d, %d, %d", point.blockX(), point.blockY(), point.blockZ()));
     }
 
-    public static double toDegrees(double radions) {
-        return Math.toDegrees(radions);
-    }
-
     public static Vec getAnglesFromPoints(Point first, Point second) {
         final Point sub = Vec.fromPoint(second.sub(first)).normalize();
         return new Vec(
                 0,
-                toDegrees(Math.atan2(sub.z(), sub.x())),
-                toDegrees(Math.atan2(sub.y(), Math.sqrt(sub.z() * sub.z() + sub.x() * sub.x())))
+                Math.toDegrees(Math.atan2(sub.z(), sub.x())),
+                Math.toDegrees(Math.atan2(sub.y(), Math.sqrt(sub.z() * sub.z() + sub.x() * sub.x())))
         );
     }
 
