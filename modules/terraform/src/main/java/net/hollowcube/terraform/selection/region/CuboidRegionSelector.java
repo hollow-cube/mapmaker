@@ -10,7 +10,6 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@SuppressWarnings("UnstableApiUsage")
 public class CuboidRegionSelector implements RegionSelector {
     public static final Factory FACTORY = new Factory("cuboid", CuboidRegionSelector::new);
     private static final byte DATA_VERSION = 1;
@@ -94,7 +93,7 @@ public class CuboidRegionSelector implements RegionSelector {
         var region = region();
         if (region == null) return;
 
-        pos1 = region.min().add(low);
+        pos1 = region.min().sub(low);
         pos2 = region.max().add(high).sub(1);
         updateRender();
     }
