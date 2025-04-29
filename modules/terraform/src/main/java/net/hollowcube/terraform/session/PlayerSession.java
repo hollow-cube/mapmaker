@@ -1,8 +1,12 @@
 package net.hollowcube.terraform.session;
 
+import net.hollowcube.mapmaker.PlayerSettings;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.cui.ClientInterface;
 import net.hollowcube.terraform.cui.ClientRenderer;
+import net.hollowcube.terraform.cui.meow.DefaultClientRenderer;
+import net.hollowcube.terraform.selection.Selection;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.NetworkBuffer;
@@ -11,8 +15,6 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -30,9 +32,26 @@ import static net.minestom.server.network.NetworkBuffer.SHORT;
  * todo are clipboards really going to be global?
  */
 public class PlayerSession {
-    private static final Logger logger = LoggerFactory.getLogger(PlayerSession.class);
-
+    @ApiStatus.Internal
+    public static final Tag<PlayerSession> TAG = Tag.Transient("terraform:player_session");
     private static final int ABSOLUTE_MAX_CLIPBOARDS = 1024;
+    private static final int STATE_VERSION = 1;
+    private final Terraform terraform;
+    private final String id;
+    private final Player player;
+    private final ClientInterface cui;
+    private final Map<String, Clipboard> clipboards = new HashMap<>();
+    private PlayerCapabilities capabilities;
+    private @NotNull ClientRenderer renderer = ClientRenderer.noop();
+
+    @ApiStatus.Internal
+    public PlayerSession(@NotNull Terraform terraform, @NotNull String id, @NotNull Player player, byte @Nullable [] data) {
+        this.terraform = terraform;
+        this.id = id;
+        this.player = player;
+        this.cui = new DefaultClientInterface();
+        if (data != null && data.length > 0) read(data);
+    }
 
     /**
      * Returns the {@link PlayerSession} for the given player.
@@ -41,26 +60,6 @@ public class PlayerSession {
      */
     public static @NotNull PlayerSession forPlayer(@NotNull Player player) {
         return Objects.requireNonNull(player.getTag(TAG), "Player session not initialized");
-    }
-
-    @ApiStatus.Internal
-    public static final Tag<PlayerSession> TAG = Tag.Transient("terraform:player_session");
-    private static final int STATE_VERSION = 1;
-
-    private final Terraform terraform;
-    private final String id;
-    private final Player player;
-    private PlayerCapabilities capabilities;
-
-    private final Map<String, Clipboard> clipboards = new HashMap<>();
-
-    @ApiStatus.Internal
-    public PlayerSession(@NotNull Terraform terraform, @NotNull String id, @NotNull Player player, byte @Nullable [] data) {
-        this.terraform = terraform;
-        this.id = id;
-        this.player = player;
-
-        if (data != null && data.length > 0) read(data);
     }
 
     public @NotNull Terraform terraform() {
@@ -76,25 +75,7 @@ public class PlayerSession {
     }
 
     public @NotNull ClientInterface cui() {
-        return new ClientInterface() {
-            @Override
-            public void sendMessage(@NotNull String key, @NotNull Object... args) {
-                var componentArgs = new Component[args.length];
-                for (int i = 0; i < args.length; i++) {
-                    Object arg = args[i];
-                    if (arg instanceof Component c)
-                        componentArgs[i] = c;
-                    else componentArgs[i] = Component.text(args[i].toString());
-                }
-
-                player.sendMessage(Component.translatable(key, componentArgs));
-            }
-
-            @Override
-            public @NotNull ClientRenderer renderer() {
-                return ClientRenderer.noop();
-            }
-        };
+        return cui;
     }
 
     // Clipboard
@@ -163,6 +144,44 @@ public class PlayerSession {
         assertMarker(buffer, "clipboards");
 
         assert buffer.readableBytes() == 0 : "Buffer not fully read";
+    }
+
+    public void updateRenderer() {
+        var isDefaultRenderer = this.renderer instanceof DefaultClientRenderer;
+        if (PlayerDataV2.fromPlayer(player).getSetting(PlayerSettings.ENABLE_WE_CUI)) {
+            if (!isDefaultRenderer) {
+                this.renderer = new DefaultClientRenderer(player);
+
+                var selection = LocalSession.forPlayer(player).selection(Selection.DEFAULT).region();
+                if (selection != null) {
+                    this.renderer.cuboid(selection.min(), selection.max());
+                }
+            }
+        } else if (isDefaultRenderer) {
+            this.renderer.clearAll();
+            this.renderer = ClientRenderer.noop();
+        }
+    }
+
+    private class DefaultClientInterface implements ClientInterface {
+        @Override
+        public void sendMessage(@NotNull String key, @NotNull Object... args) {
+            var componentArgs = new Component[args.length];
+            for (int i = 0; i < args.length; i++) {
+                Object arg = args[i];
+                if (arg instanceof Component c)
+                    componentArgs[i] = c;
+                else componentArgs[i] = Component.text(args[i].toString());
+            }
+
+            player.sendMessage(Component.translatable(key, componentArgs));
+        }
+
+        @Override
+        public @NotNull ClientRenderer renderer() {
+            updateRenderer();
+            return renderer;
+        }
     }
 
 }
