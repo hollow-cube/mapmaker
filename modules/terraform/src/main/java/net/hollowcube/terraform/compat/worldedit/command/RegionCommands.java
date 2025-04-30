@@ -102,7 +102,7 @@ public final class RegionCommands {
 
             if (selection.selector() instanceof CuboidRegionSelector regionSelector) { // todo add line selection once selection switching is added
                 var generator = RegionFunctions.line(regionSelector.getPos1().add(0.5, 0.5, 0.5), regionSelector.getPos2().add(0.5, 0.5, 0.5), pattern);
-
+                session.cui().renderer().switchTo(ClientRenderer.RenderContext.NORMAL, false);
                 session.buildTask("we-line")
                         .metadata() //todo
                         .compute(generator)
