@@ -2,6 +2,7 @@ package net.hollowcube.terraform.selection.region;
 
 import net.hollowcube.common.util.NetworkBufferTypes;
 import net.hollowcube.terraform.cui.ClientInterface;
+import net.hollowcube.terraform.cui.ClientRenderer;
 import net.hollowcube.terraform.util.math.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
@@ -82,8 +83,8 @@ public class CuboidRegionSelector implements RegionSelector {
         if (pos1 != null && pos2 != null) {
             renderer.cuboid(
                     CoordinateUtil.min(pos1, pos2),
-                    CoordinateUtil.max(pos1, pos2).add(1, 1, 1)
-            );
+                    CoordinateUtil.max(pos1, pos2).add(1, 1, 1),
+                    ClientRenderer.RenderType.PRIMARY);
         }
         renderer.end("cuboid");
     }

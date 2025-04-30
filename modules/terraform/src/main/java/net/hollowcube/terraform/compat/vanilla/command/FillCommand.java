@@ -58,8 +58,8 @@ public class FillCommand extends CommandDsl {
         renderer.begin("fill");
         session.cui().renderer().cuboid(
                 CoordinateUtil.min(p1, p2),
-                CoordinateUtil.max(p1, p2).add(1, 1, 1)
-        );
+                CoordinateUtil.max(p1, p2).add(1, 1, 1),
+                ClientRenderer.RenderType.PRIMARY);
         renderer.end("fill");
     }
 

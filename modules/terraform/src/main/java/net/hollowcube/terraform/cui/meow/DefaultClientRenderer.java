@@ -40,7 +40,7 @@ public class DefaultClientRenderer implements ClientRenderer {
     }
 
     @Override
-    public void cuboid(@NotNull Point point1, @NotNull Point point2) {
+    public void cuboid(@NotNull Point point1, @NotNull Point point2, @NotNull ClientRenderer.RenderType type) {
         var currentDisplay = displays.get(current);
         if (currentDisplay instanceof AabbDisplay aabbDisplay) {
             aabbDisplay.rescale(point1, point2);
@@ -49,13 +49,13 @@ public class DefaultClientRenderer implements ClientRenderer {
             currentDisplay.remove();
         }
 
-        displays.put(current, new AabbDisplay(player, point1, point2));
+        displays.put(current, new AabbDisplay(player, point1, point2, this.context.getColors(), type));
     }
 
     @Override
     public void point(@NotNull Point point, double radius) {
         var mul = new Vec(1, 1, 1).normalize().mul(radius);
-        cuboid(point.add(mul), point.sub(mul));
+        cuboid(point.add(mul), point.sub(mul), RenderType.PRIMARY);
     }
 
     @Override

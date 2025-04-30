@@ -24,7 +24,7 @@ final class NoopClientRenderer implements ClientRenderer {
     }
 
     @Override
-    public void cuboid(@NotNull Point point1, @NotNull Point point2) {
+    public void cuboid(@NotNull Point point1, @NotNull Point point2, @NotNull ClientRenderer.RenderType type) {
 
     }
 

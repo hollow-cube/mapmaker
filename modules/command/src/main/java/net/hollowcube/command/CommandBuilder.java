@@ -57,6 +57,7 @@ public class CommandBuilder {
     public @NotNull CommandBuilder suggestion(@NotNull CommandExecutor onSuggestion, @NotNull Argument<?>... args) {
         var node = this.node;
         for (var arg : args) {
+            node.setOnSuggestion(onSuggestion);
             node = node.nodeFor(arg);
         }
 

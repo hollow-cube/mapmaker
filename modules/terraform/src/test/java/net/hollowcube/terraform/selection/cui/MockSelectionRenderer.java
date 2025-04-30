@@ -46,7 +46,7 @@ public class MockSelectionRenderer implements ClientRenderer {
     //todo not sure its worth testing this
 
     @Override
-    public void cuboid(@NotNull Point point1, @NotNull Point point2) {
+    public void cuboid(@NotNull Point point1, @NotNull Point point2, @NotNull ClientRenderer.RenderType type) {
 
     }
 

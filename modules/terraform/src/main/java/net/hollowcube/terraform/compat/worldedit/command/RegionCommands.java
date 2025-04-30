@@ -6,6 +6,7 @@ import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.compat.worldedit.command.arg.WEArgument;
 import net.hollowcube.terraform.compat.worldedit.util.WECommand;
 import net.hollowcube.terraform.compute.RegionFunctions;
+import net.hollowcube.terraform.cui.ClientRenderer;
 import net.hollowcube.terraform.mask.Mask;
 import net.hollowcube.terraform.mask.OffsetMask;
 import net.hollowcube.terraform.pattern.Pattern;
@@ -83,8 +84,8 @@ public final class RegionCommands {
                 session.cui().renderer().clearAll();
                 session.cui().renderer().cuboid(
                         CoordinateUtil.min(region.getPos1(), region.getPos2()),
-                        CoordinateUtil.max(region.getPos2(), region.getPos1()).add(1, 1, 1)
-                );
+                        CoordinateUtil.max(region.getPos2(), region.getPos1()).add(1, 1, 1),
+                        ClientRenderer.RenderType.PRIMARY);
                 session.cui().renderer().line(region.getPos1().add(0.5,0.5,0.5), region.getPos2().add(0.5,0.5,0.5));
             }
         }

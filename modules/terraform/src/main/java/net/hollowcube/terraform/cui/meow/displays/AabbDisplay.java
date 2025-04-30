@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.cui.meow.displays;
 
+import net.hollowcube.terraform.cui.ClientRenderer;
 import net.hollowcube.terraform.cui.meow.lines.AbstractLine;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -16,24 +16,25 @@ public class AabbDisplay implements DefaultClientRenderDisplay {
     private final Player player;
 
     public AabbDisplay(Player player, Point point, int expand) {
-        this(player, point.sub(expand, expand, expand), point.add(expand, expand, expand));
+        this(player, point.sub(expand, expand, expand), point.add(expand, expand, expand), ClientRenderer.RenderColors.DEFAULT, ClientRenderer.RenderType.PRIMARY);
     }
 
-    public AabbDisplay(Player player, Point from, Point to) {
-        x = drawAxis(player, from, from.withX(to.x()).sub(AbstractLine.THICKNESS), NamedTextColor.RED);
-        xy = drawAxis(player, from.withX(to.x()), to.withZ(from.z()), NamedTextColor.DARK_GRAY);
-        xyz = drawAxis(player, to.withZ(from.z()), to, NamedTextColor.DARK_GRAY);
-        xz = drawAxis(player, from.withX(to.x()), to.withY(from.y()), NamedTextColor.DARK_GRAY);
-        xzy = drawAxis(player, to.withY(from.y()), to, NamedTextColor.DARK_GRAY);
+    public AabbDisplay(Player player, Point from, Point to, ClientRenderer.RenderColors colors, ClientRenderer.RenderType type) {
+        var color = type.apply(colors);
+        x = drawAxis(player, from, from.withX(to.x()).sub(AbstractLine.THICKNESS), colors.x());
+        xy = drawAxis(player, from.withX(to.x()), to.withZ(from.z()), color);
+        xyz = drawAxis(player, to.withZ(from.z()), to, color);
+        xz = drawAxis(player, from.withX(to.x()), to.withY(from.y()), color);
+        xzy = drawAxis(player, to.withY(from.y()), to, color);
 
-        y = drawAxis(player, from.add(0, AbstractLine.THICKNESS, 0), from.withY(to.y()).sub(AbstractLine.THICKNESS), NamedTextColor.GREEN);
-        yx = drawAxis(player, from.withY(to.y()), to.withZ(from.z()), NamedTextColor.DARK_GRAY);
-        yz = drawAxis(player, from.withY(to.y()), to.withX(from.x()), NamedTextColor.DARK_GRAY);
-        yzx = drawAxis(player, to.withX(from.x()), to, NamedTextColor.DARK_GRAY);
+        y = drawAxis(player, from.add(0, AbstractLine.THICKNESS, 0), from.withY(to.y()).sub(AbstractLine.THICKNESS), colors.y());
+        yx = drawAxis(player, from.withY(to.y()), to.withZ(from.z()), color);
+        yz = drawAxis(player, from.withY(to.y()), to.withX(from.x()), color);
+        yzx = drawAxis(player, to.withX(from.x()), to, color);
 
-        z = drawAxis(player, from.add(0, 0, AbstractLine.THICKNESS), from.withZ(to.z()).sub(AbstractLine.THICKNESS), NamedTextColor.BLUE);
-        zx = drawAxis(player, from.withZ(to.z()), to.withY(from.y()), NamedTextColor.DARK_GRAY);
-        zy = drawAxis(player, from.withZ(to.z()), to.withX(from.x()), NamedTextColor.DARK_GRAY);
+        z = drawAxis(player, from.add(0, 0, AbstractLine.THICKNESS), from.withZ(to.z()).sub(AbstractLine.THICKNESS), colors.z());
+        zx = drawAxis(player, from.withZ(to.z()), to.withY(from.y()), color);
+        zy = drawAxis(player, from.withZ(to.z()), to.withX(from.x()), color);
 
         this.player = player;
     }

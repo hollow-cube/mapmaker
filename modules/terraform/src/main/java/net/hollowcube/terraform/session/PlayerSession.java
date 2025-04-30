@@ -155,7 +155,7 @@ public class PlayerSession {
                 var selection = LocalSession.forPlayer(player).selection(Selection.DEFAULT).region();
                 if (selection != null) {
                     this.renderer.begin("cuboid");
-                    this.renderer.cuboid(selection.min(), selection.max());
+                    this.renderer.cuboid(selection.min(), selection.max(), ClientRenderer.RenderType.PRIMARY);
                 }
             }
         } else if (isDefaultRenderer) {
