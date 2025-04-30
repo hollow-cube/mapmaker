@@ -159,6 +159,13 @@ public abstract class Argument<T> {
         return new ParseResult.Partial<>(message);
     }
 
+    public @NotNull ParseResult<T> partial(@Nullable String message, T value) {
+        return new ParseResult.Partial<>(message, () -> value);
+    }
+    public @NotNull ParseResult<T> partialWithValue(T value) {
+        return new ParseResult.Partial<>(null, () -> value);
+    }
+
     public @NotNull ParseResult<T> success(@NotNull Supplier<@UnknownNullability T> valueFunc) {
         return new ParseResult.Success<>(valueFunc);
     }

@@ -53,4 +53,20 @@ final class NoopClientRenderer implements ClientRenderer {
 
     }
 
+    @Override
+    public void remove(String id) {
+
+    }
+
+    @Override
+    public void switchTo(@NotNull RenderContext context, boolean store) {
+
+    }
+
+
+    @Override
+    public @NotNull RenderContext getContext() {
+        return RenderContext.NORMAL;
+    }
+
 }

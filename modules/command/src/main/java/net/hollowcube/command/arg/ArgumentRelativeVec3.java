@@ -26,9 +26,9 @@ public class ArgumentRelativeVec3 extends Argument<Point> {
         var x = readCoordinate(origin.x(), reader);
         if (x == null) return partial();
         var y = readCoordinate(origin.y(), reader);
-        if (y == null) return partial();
+        if (y == null) return partialWithValue(new Vec(x, origin.y(), origin.z()));
         var z = readCoordinate(origin.z(), reader);
-        if (z == null) return partial();
+        if (z == null) return partialWithValue(new Vec(x, y, origin.z()));
         return new ParseResult.Success<>(new Vec(x, y, z));
     }
 

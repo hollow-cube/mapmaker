@@ -15,6 +15,7 @@ import net.hollowcube.terraform.selection.region.CuboidRegionSelector;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.task.ComputeFunc;
 import net.hollowcube.terraform.util.Messages;
+import net.hollowcube.terraform.util.math.CoordinateUtil;
 import net.hollowcube.terraform.util.math.DirectionUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Vec;
@@ -67,7 +68,25 @@ public final class RegionCommands {
         public Line() {
             super("/line");
 
+            addSuggestionSyntax(playerOnly(this::onSuggest));
             addSyntax(playerOnly(this::execute), patternArg);
+        }
+
+        private void onSuggest(@NotNull Player player, @NotNull CommandContext context) {
+            var session = LocalSession.forPlayer(player);
+            var selection = session.selection(Selection.DEFAULT);
+            if (selection.region() == null) {
+                return;
+            }
+
+            if (selection.selector() instanceof CuboidRegionSelector region) {
+                session.cui().renderer().clearAll();
+                session.cui().renderer().cuboid(
+                        CoordinateUtil.min(region.getPos1(), region.getPos2()),
+                        CoordinateUtil.max(region.getPos2(), region.getPos1()).add(1, 1, 1)
+                );
+                session.cui().renderer().line(region.getPos1().add(0.5,0.5,0.5), region.getPos2().add(0.5,0.5,0.5));
+            }
         }
 
         private void execute(@NotNull Player player, @NotNull CommandContext context) {
@@ -293,14 +312,6 @@ public final class RegionCommands {
         private final Argument<Pattern> replaceArg = WEArgument.Pattern("replace").defaultValue(Pattern.air());
         private final Argument<Mask> maskArg = WEArgument.Mask("mask");
 
-        private enum Flags {
-            SHIFT_SELECTION,
-            AIR_SKIP,
-            ENTITIES,
-            BIOMES,
-            MASK,
-        }
-
         public Move() {
             super("/move");
 
@@ -364,13 +375,6 @@ public final class RegionCommands {
                     })
                     .submit();
         }
-    }
-
-    public static class Stack extends WECommand {
-        private final Argument<EnumSet<Flags>> flagsArg = WEArgument.FlagSet(Flags.class);
-        private final Argument<Integer> countArg = Argument.Int("count").min(1).defaultValue(1);
-        private final Argument<Direction> directionArg = WEArgument.Direction("direction");
-        private final Argument<Mask> maskArg = WEArgument.Mask("mask");
 
         private enum Flags {
             SHIFT_SELECTION,
@@ -379,6 +383,13 @@ public final class RegionCommands {
             BIOMES,
             MASK,
         }
+    }
+
+    public static class Stack extends WECommand {
+        private final Argument<EnumSet<Flags>> flagsArg = WEArgument.FlagSet(Flags.class);
+        private final Argument<Integer> countArg = Argument.Int("count").min(1).defaultValue(1);
+        private final Argument<Direction> directionArg = WEArgument.Direction("direction");
+        private final Argument<Mask> maskArg = WEArgument.Mask("mask");
 
         public Stack() {
             super("/stack");
@@ -439,6 +450,14 @@ public final class RegionCommands {
                         player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged()));
                     })
                     .submit();
+        }
+
+        private enum Flags {
+            SHIFT_SELECTION,
+            AIR_SKIP,
+            ENTITIES,
+            BIOMES,
+            MASK,
         }
     }
 

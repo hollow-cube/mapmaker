@@ -1,21 +1,24 @@
 package net.hollowcube.terraform.cui.meow;
 
 import net.hollowcube.terraform.cui.ClientRenderer;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.util.RGBLike;
+import net.hollowcube.terraform.cui.meow.displays.AabbDisplay;
+import net.hollowcube.terraform.cui.meow.displays.DefaultClientRenderDisplay;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultClientRenderer implements ClientRenderer {
 
     private final @NotNull Player player;
-    List<Entity> entities = new ArrayList<>();
+    private final ConcurrentHashMap<RenderContext, ConcurrentHashMap<String, DefaultClientRenderDisplay>> contexts = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, DefaultClientRenderDisplay> displays = new ConcurrentHashMap<>();
+    private RenderContext context = RenderContext.NORMAL;
+    private String current;
 
     public DefaultClientRenderer(@NotNull Player player) {
         this.player = player;
@@ -26,43 +29,32 @@ public class DefaultClientRenderer implements ClientRenderer {
         return true;
     }
 
-    private void drawAxis(Point pos1, Point pos2, RGBLike color) {
-        final DisplayLine displayLine = DisplayLine.axisAligned(player, pos1, pos2, color);
-        entities.add(displayLine);
-    }
-
-    private void drawLine(Point pos1, Point pos2, RGBLike color) {
-        final DisplayLine displayLine = new DisplayLine(player, pos1, pos2, color);
-        entities.add(displayLine);
-    }
-
     @Override
     public void begin(@NotNull String id) {
-        clearAll();
+        current = id;
     }
 
     @Override
-    public void end(@NotNull String id) {}
+    public void end(@NotNull String id) {
+        current = null;
+    }
 
     @Override
     public void cuboid(@NotNull Point point1, @NotNull Point point2) {
-        drawAxis(point1.withY(point2.y()).withZ(point2.z()), point2, NamedTextColor.DARK_GRAY);
-        drawAxis(point1.withX(point2.x()).withZ(point2.z()), point2, NamedTextColor.DARK_GRAY);
-        drawAxis(point1.withY(point2.y()).withX(point2.x()), point2, NamedTextColor.DARK_GRAY);
-        drawAxis(point1, point1.withX(point2.x()).sub(DisplayLine.THICKNESS), NamedTextColor.RED);
-        drawAxis(point1.add(0, DisplayLine.THICKNESS, 0), point1.withY(point2.y()).sub(DisplayLine.THICKNESS), NamedTextColor.GREEN);
-        drawAxis(point1.add(0, 0, DisplayLine.THICKNESS), point1.withZ(point2.z()).sub(DisplayLine.THICKNESS), NamedTextColor.BLUE);
-        drawAxis(point1.withX(point2.x()), point1.withX(point2.x()).withY(point2.y()), NamedTextColor.DARK_GRAY);
-        drawAxis(point1.withZ(point2.z()), point1.withZ(point2.z()).withY(point2.y()), NamedTextColor.DARK_GRAY);
-        drawAxis(point1.withY(point2.y()), point1.withY(point2.y()).withX(point2.x()), NamedTextColor.DARK_GRAY);
-        drawAxis(point1.withY(point2.y()), point1.withY(point2.y()).withZ(point2.z()), NamedTextColor.DARK_GRAY);
-        drawAxis(point1.withZ(point2.z()), point1.withZ(point2.z()).withX(point2.x()), NamedTextColor.DARK_GRAY);
-        drawAxis(point1.withX(point2.x()), point1.withX(point2.x()).withZ(point2.z()), NamedTextColor.DARK_GRAY);
+        var currentDisplay = displays.get(current);
+        if (currentDisplay instanceof AabbDisplay aabbDisplay) {
+            aabbDisplay.rescale(point1, point2);
+            return;
+        } else if (currentDisplay != null) {
+            currentDisplay.remove();
+        }
+
+        displays.put(current, new AabbDisplay(player, point1, point2));
     }
 
     @Override
     public void point(@NotNull Point point, double radius) {
-        final Vec mul = new Vec(1, 1, 1).normalize().mul(radius);
+        var mul = new Vec(1, 1, 1).normalize().mul(radius);
         cuboid(point.add(mul), point.sub(mul));
     }
 
@@ -73,7 +65,7 @@ public class DefaultClientRenderer implements ClientRenderer {
 
     @Override
     public void lineChain(@NotNull List<Point> points) {
-        for (int i = 0; i < points.size(); i++) {
+        for (var i = 0; i < points.size(); i++) {
             if (i + 1 >= points.size()) {
                 continue;
             }
@@ -83,14 +75,48 @@ public class DefaultClientRenderer implements ClientRenderer {
 
     @Override
     public void line(@NotNull Point p1, @NotNull Point p2) {
-        drawLine(p1, p2, NamedTextColor.BLACK);
+        // drawLine(p2, p1, NamedTextColor.GOLD);
     }
 
     @Override
     public void clearAll() {
-        for (Entity entity : entities) {
-            entity.remove();
+        for (var entry : this.displays.values()) {
+            entry.remove();
         }
-        entities.clear();
+        this.displays.clear();
+    }
+
+    @Override
+    public void remove(String id) {
+        var remove = this.displays.remove(id);
+        if (remove != null) {
+            remove.remove();
+        }
+    }
+
+    @Override
+    public void switchTo(@NotNull RenderContext context, boolean store) {
+        if (this.context == context) {
+            return;
+        }
+
+        if (store) {
+            for (var value : this.displays.values()) {
+                value.hide();
+            }
+            this.contexts.put(this.context, this.displays);
+        } else {
+            clearAll();
+        }
+        this.displays = Objects.requireNonNullElseGet(this.contexts.get(context), ConcurrentHashMap::new);
+        this.context = context;
+        for (var value : this.displays.values()) {
+            value.show();
+        }
+    }
+
+    @Override
+    public @NotNull RenderContext getContext() {
+        return this.context;
     }
 }

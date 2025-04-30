@@ -52,6 +52,18 @@ public class CommandBuilder {
         return this;
     }
 
+    // Suggestions
+
+    public @NotNull CommandBuilder suggestion(@NotNull CommandExecutor onSuggestion, @NotNull Argument<?>... args) {
+        var node = this.node;
+        for (var arg : args) {
+            node = node.nodeFor(arg);
+        }
+
+        node.setOnSuggestion(onSuggestion);
+        return this;
+    }
+
     // Condition
 
     public @NotNull CommandBuilder condition(@NotNull CommandCondition condition) {

@@ -154,6 +154,7 @@ public class PlayerSession {
 
                 var selection = LocalSession.forPlayer(player).selection(Selection.DEFAULT).region();
                 if (selection != null) {
+                    this.renderer.begin("cuboid");
                     this.renderer.cuboid(selection.min(), selection.max());
                 }
             }
@@ -167,8 +168,8 @@ public class PlayerSession {
         @Override
         public void sendMessage(@NotNull String key, @NotNull Object... args) {
             var componentArgs = new Component[args.length];
-            for (int i = 0; i < args.length; i++) {
-                Object arg = args[i];
+            for (var i = 0; i < args.length; i++) {
+                var arg = args[i];
                 if (arg instanceof Component c)
                     componentArgs[i] = c;
                 else componentArgs[i] = Component.text(args[i].toString());

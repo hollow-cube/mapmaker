@@ -77,8 +77,8 @@ public final class CoordinateUtil {
         final Point sub = Vec.fromPoint(second.sub(first)).normalize();
         return new Vec(
                 0,
-                Math.toDegrees(Math.atan2(sub.z(), sub.x())),
-                Math.toDegrees(Math.atan2(sub.y(), Math.sqrt(sub.z() * sub.z() + sub.x() * sub.x())))
+                180 - Math.toDegrees(Math.atan2(sub.z(), sub.x())),
+                180 - Math.toDegrees(Math.atan2(sub.y(), Math.sqrt(sub.z() * sub.z() + sub.x() * sub.x())))
         );
     }
 

@@ -8,9 +8,9 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class MockSelectionRenderer implements ClientRenderer {
     private final EnumSet<Feature> features;
@@ -68,6 +68,26 @@ public class MockSelectionRenderer implements ClientRenderer {
     @Override
     public void line(@NotNull Point p1, @NotNull Point p2) {
 
+    }
+
+    @Override
+    public void clearAll() {
+
+    }
+
+    @Override
+    public void remove(String id) {
+
+    }
+
+    @Override
+    public void switchTo(@NotNull RenderContext context, boolean store) {
+
+    }
+
+    @Override
+    public @NotNull RenderContext getContext() {
+        return RenderContext.NORMAL;
     }
 
 }

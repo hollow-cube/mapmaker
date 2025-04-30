@@ -23,12 +23,6 @@ public interface ClientRenderer {
         return NoopClientRenderer.INSTANCE;
     }
 
-    enum Feature {
-        CUBE,
-        POINT,
-        BEZIER,
-    }
-
     /**
      * Can be used to check if a feature is available, and use a different rendering technique if not.
      *
@@ -63,6 +57,8 @@ public interface ClientRenderer {
      */
     void point(@NotNull Point point, double radius);
 
+    void bezierCurve(@NotNull Point p1, @NotNull Point p2, @NotNull Point p3, @NotNull Point p4);
+
 //    /**
 //     * Renders a chain of bezier curves between the given points.
 //     * <p>
@@ -70,12 +66,26 @@ public interface ClientRenderer {
 //     */
 //    void bezierChain(@NotNull List<Point> points);
 
-    void bezierCurve(@NotNull Point p1, @NotNull Point p2, @NotNull Point p3, @NotNull Point p4);
-
     void lineChain(@NotNull List<Point> points);
 
     void line(@NotNull Point p1, @NotNull Point p2);
 
     void clearAll();
+
+    void remove(String id);
+
+    void switchTo(@NotNull RenderContext context, boolean store);
+    @NotNull RenderContext getContext();
+
+    enum Feature {
+        CUBE,
+        POINT,
+        BEZIER,
+    }
+
+    enum RenderContext {
+        COMMAND,
+        NORMAL
+    }
 
 }

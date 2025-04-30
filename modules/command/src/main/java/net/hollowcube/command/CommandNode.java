@@ -3,6 +3,7 @@ package net.hollowcube.command;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.suggestion.Suggestion;
+import net.hollowcube.command.suggestion.SuggestionContext;
 import net.hollowcube.command.util.CommandCategory;
 import net.hollowcube.command.util.StringReader;
 import net.minestom.server.command.CommandSender;
@@ -16,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * A command node represents a single node of a command syntax tree.
@@ -30,6 +30,7 @@ public class CommandNode {
     protected boolean shouldSuggest = true;
 
     protected CommandExecutor executor = null; // May not be used with redirect
+    protected CommandExecutor onSuggestion = null; // May not be used with redirect
     protected List<ArgumentPair> children = null; // May not be used with redirect
     protected CommandCondition condition = null; // May not be used with redirect
 
@@ -104,7 +105,7 @@ public class CommandNode {
         return null;
     }
 
-    public @NotNull Suggestion suggest(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public @NotNull Suggestion suggest(@NotNull CommandSender sender, @NotNull StringReader reader, @NotNull SuggestionContext context) {
         // If this is a redirect, completely defer handling
         if (redirect != null) {
             if (redirect.condition != null) {
@@ -112,7 +113,7 @@ public class CommandNode {
                 if (result != CommandCondition.ALLOW) return Suggestion.EMPTY;
             }
 
-            return redirect.suggest(sender, reader);
+            return redirect.suggest(sender, reader, context);
         }
 
         // It is worth noting that we do not execute the condition of this command right here. During suggestion,
@@ -136,8 +137,20 @@ public class CommandNode {
             var result = pair.argument().parse(sender, reader);
 
             // If we have more space to read and get an exact match we can suggest the child
+            if (result instanceof  ParseResult.Success<?>(var valueFunc)) {
+                context.setArgValue(pair.argument.id(), reader.rawSince(mark).trim(), valueFunc.get());
+                if (node.onSuggestion != null) {
+                    node.onSuggestion.execute(sender, context);
+                }
+            }
             if (reader.canRead() && result instanceof ParseResult.Success<?>) {
-                return node.suggest(sender, reader);
+                return node.suggest(sender, reader, context);
+            }
+            if (result instanceof ParseResult.Partial<?>(var _, var valueFunc) && valueFunc != null) {
+                context.setArgValue(pair.argument.id(), reader.rawSince(mark).trim(), valueFunc.get());
+                if (node.onSuggestion != null) {
+                    node.onSuggestion.execute(sender, context);
+                }
             }
 
             // If we consumed the entire remainder and have a partial match we can suggest the child.
@@ -201,7 +214,7 @@ public class CommandNode {
                 // Try to parse the childs argument
                 var mark = reader.mark();
                 var result = argument.parse(sender, reader);
-                if (result instanceof ParseResult.Success<?>(Supplier<?> valueFunc)) {
+                if (result instanceof ParseResult.Success<?>(var valueFunc)) {
                     // If it succeeds we have matched and can execute the child
                     context.setArgValue(argument.id(), reader.rawSince(mark).trim(), valueFunc.get());
                     return node.execute(sender, reader, context);
@@ -209,10 +222,10 @@ public class CommandNode {
 
                 // Otherwise store the error and try the next argument.
                 if (pendingError == null) {
-                    if (result instanceof ParseResult.Failure<?>(int start, String message)) {
-                        int errorStart = start == -1 ? reader.pos(mark) : start;
+                    if (result instanceof ParseResult.Failure<?>(var start, var message)) {
+                        var errorStart = start == -1 ? reader.pos(mark) : start;
                         pendingError = CommandResult.syntaxError(errorStart, argument, message);
-                    } else if (result instanceof ParseResult.Partial<?>(String message)) {
+                    } else if (result instanceof ParseResult.Partial<?>(var message, var _)) {
                         pendingError = CommandResult.syntaxError(reader.pos(), argument, message);
                     } else {
                         pendingError = CommandResult.syntaxError(reader.pos(), argument);
@@ -267,6 +280,10 @@ public class CommandNode {
         Check.stateCondition(this.redirect != null, "Cannot add condition to a redirect node!");
         Check.stateCondition(this.condition != null, "Command node already has a condition!");
         this.condition = Objects.requireNonNull(condition);
+    }
+
+    void setOnSuggestion(@NotNull CommandExecutor onSuggestion) {
+        this.onSuggestion = onSuggestion;
     }
 
     /**
