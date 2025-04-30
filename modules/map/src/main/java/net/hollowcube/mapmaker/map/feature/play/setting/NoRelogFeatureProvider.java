@@ -30,7 +30,8 @@ public class NoRelogFeatureProvider extends AbstractSettingFeatureProvider {
     private static boolean canRelog(@NotNull Player player, @NotNull MapWorld world) {
         if (!world.isPlaying(player)) return true;
 
-        var state = SaveState.fromPlayer(player);
+        var state = SaveState.optionalFromPlayer(player);
+        if (state == null) return true; // Sanity
         var playstate = state.state(PlayState.class);
         return !playstate.settings().get(MapSettings.NO_RELOG, world.map().settings());
     }

@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -103,6 +104,10 @@ public class MapInstance extends InstanceContainer {
     }
 
     public void unload() {
+        if (!getPlayers().isEmpty()) {
+            // Something went wrong removing people, but to not unregister would be worse so kick the players.
+            Set.copyOf(getPlayers()).forEach(player -> player.kick("Map unloaded"));
+        }
         INSTANCE_MANAGER.unregisterInstance(this);
     }
 

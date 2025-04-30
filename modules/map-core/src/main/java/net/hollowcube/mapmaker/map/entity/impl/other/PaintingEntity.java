@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
+@SuppressWarnings("UnstableApiUsage")
 public class PaintingEntity extends MapEntity {
     protected SoundEvent placeSound = SoundEvent.ENTITY_PAINTING_PLACE;
     protected SoundEvent breakSound = SoundEvent.ENTITY_PAINTING_BREAK;
@@ -54,7 +55,8 @@ public class PaintingEntity extends MapEntity {
     public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
         super.writeData(tag);
 
-        tag.put("variant", DataComponents.PAINTING_VARIANT.encode(Transcoder.NBT,
+        var coder = new RegistryTranscoder<>(Transcoder.NBT, MinecraftServer.process());
+        tag.put("variant", DataComponents.PAINTING_VARIANT.encode(coder,
                 get(DataComponents.PAINTING_VARIANT)).orElseThrow());
 
         var meta = getEntityMeta();
