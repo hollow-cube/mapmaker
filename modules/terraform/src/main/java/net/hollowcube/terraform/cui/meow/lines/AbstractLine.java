@@ -3,6 +3,7 @@ package net.hollowcube.terraform.cui.meow.lines;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.ColorUtil;
 import net.hollowcube.compat.axiom.AxiomPlayer;
+import net.hollowcube.terraform.cui.meow.displays.DefaultClientRenderDisplay;
 import net.hollowcube.terraform.util.math.CoordinateUtil;
 import net.kyori.adventure.util.RGBLike;
 import net.minestom.server.component.DataComponents;
@@ -22,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.UUID;
 
-public abstract class AbstractLine extends Entity {
+public abstract class AbstractLine extends Entity implements DefaultClientRenderDisplay {
     public static final double THICKNESS = 0.025;
     @NotNull
     private final Player player;
@@ -112,5 +113,15 @@ public abstract class AbstractLine extends Entity {
         removeViewer(player);
         this.updateViewableRule();
         super.remove();
+    }
+
+    @Override
+    public void hide() {
+        this.removeViewer(player);
+    }
+
+    @Override
+    public void show() {
+        this.addViewer(player);
     }
 }

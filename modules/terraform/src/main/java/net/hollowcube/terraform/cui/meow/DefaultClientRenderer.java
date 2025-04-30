@@ -3,6 +3,8 @@ package net.hollowcube.terraform.cui.meow;
 import net.hollowcube.terraform.cui.ClientRenderer;
 import net.hollowcube.terraform.cui.meow.displays.AabbDisplay;
 import net.hollowcube.terraform.cui.meow.displays.DefaultClientRenderDisplay;
+import net.hollowcube.terraform.cui.meow.lines.AbstractLine;
+import net.hollowcube.terraform.cui.meow.lines.DefaultLine;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
@@ -69,13 +71,21 @@ public class DefaultClientRenderer implements ClientRenderer {
             if (i + 1 >= points.size()) {
                 continue;
             }
-            line(points.get(i), points.get(i + 1));
+            line(points.get(i), points.get(i + 1), RenderType.PRIMARY);
         }
     }
 
     @Override
-    public void line(@NotNull Point p1, @NotNull Point p2) {
-        // drawLine(p2, p1, NamedTextColor.GOLD);
+    public void line(@NotNull Point p1, @NotNull Point p2, RenderType primary) {
+        var currentDisplay = displays.get(current);
+        if (currentDisplay instanceof AbstractLine line) {
+            line.reshape(p1, p2);
+            return;
+        } else if (currentDisplay != null) {
+            currentDisplay.remove();
+        }
+
+        displays.put(this.current, new DefaultLine(player, p1, p2, primary.apply(context.getColors())));
     }
 
     @Override

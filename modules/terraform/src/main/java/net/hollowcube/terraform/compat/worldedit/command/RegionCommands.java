@@ -3,6 +3,7 @@ package net.hollowcube.terraform.compat.worldedit.command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.terraform.buffer.BlockBuffer;
+import net.hollowcube.terraform.command.util.CommandPreviewHelper;
 import net.hollowcube.terraform.compat.worldedit.command.arg.WEArgument;
 import net.hollowcube.terraform.compat.worldedit.util.WECommand;
 import net.hollowcube.terraform.compute.RegionFunctions;
@@ -16,7 +17,6 @@ import net.hollowcube.terraform.selection.region.CuboidRegionSelector;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.task.ComputeFunc;
 import net.hollowcube.terraform.util.Messages;
-import net.hollowcube.terraform.util.math.CoordinateUtil;
 import net.hollowcube.terraform.util.math.DirectionUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Vec;
@@ -75,18 +75,18 @@ public final class RegionCommands {
 
         private void onSuggest(@NotNull Player player, @NotNull CommandContext context) {
             var session = LocalSession.forPlayer(player);
+            var renderer = session.cui().renderer();
             var selection = session.selection(Selection.DEFAULT);
             if (selection.region() == null) {
                 return;
             }
 
             if (selection.selector() instanceof CuboidRegionSelector region) {
-                session.cui().renderer().clearAll();
-                session.cui().renderer().cuboid(
-                        CoordinateUtil.min(region.getPos1(), region.getPos2()),
-                        CoordinateUtil.max(region.getPos2(), region.getPos1()).add(1, 1, 1),
-                        ClientRenderer.RenderType.PRIMARY);
-                session.cui().renderer().line(region.getPos1().add(0.5,0.5,0.5), region.getPos2().add(0.5,0.5,0.5));
+                renderer.switchTo(ClientRenderer.RenderContext.COMMAND, true);
+                CommandPreviewHelper.debounceContext(player, renderer);
+                renderer.begin("line");
+                renderer.line(region.getPos1().add(0.5, 0.5, 0.5), region.getPos2().add(0.5, 0.5, 0.5), ClientRenderer.RenderType.PRIMARY);
+                renderer.begin("line");
             }
         }
 
@@ -101,7 +101,7 @@ public final class RegionCommands {
             }
 
             if (selection.selector() instanceof CuboidRegionSelector regionSelector) { // todo add line selection once selection switching is added
-                var generator = RegionFunctions.line(regionSelector.getPos1(), regionSelector.getPos2(), pattern);
+                var generator = RegionFunctions.line(regionSelector.getPos1().add(0.5, 0.5, 0.5), regionSelector.getPos2().add(0.5, 0.5, 0.5), pattern);
 
                 session.buildTask("we-line")
                         .metadata() //todo

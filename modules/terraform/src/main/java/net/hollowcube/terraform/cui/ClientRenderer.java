@@ -71,7 +71,7 @@ public interface ClientRenderer {
 
     void lineChain(@NotNull List<Point> points);
 
-    void line(@NotNull Point p1, @NotNull Point p2);
+    void line(@NotNull Point p1, @NotNull Point p2, RenderType primary);
 
     void clearAll();
 

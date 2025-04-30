@@ -44,7 +44,7 @@ final class NoopClientRenderer implements ClientRenderer {
     }
 
     @Override
-    public void line(@NotNull Point p1, @NotNull Point p2) {
+    public void line(@NotNull Point p1, @NotNull Point p2, RenderType primary) {
 
     }
 

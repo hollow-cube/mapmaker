@@ -79,6 +79,7 @@ public class CuboidRegionSelector implements RegionSelector {
     private void updateRender() {
         var renderer = cui.renderer();
 
+        renderer.switchTo(ClientRenderer.RenderContext.NORMAL, false);
         renderer.begin("cuboid"); //todo the ClientInterface should hide this detail. One should be created per selector
         if (pos1 != null && pos2 != null) {
             renderer.cuboid(

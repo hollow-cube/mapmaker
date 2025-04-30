@@ -2,6 +2,7 @@ package net.hollowcube.terraform.selection.region;
 
 import net.hollowcube.common.util.NetworkBufferTypes;
 import net.hollowcube.terraform.cui.ClientInterface;
+import net.hollowcube.terraform.cui.ClientRenderer;
 import net.hollowcube.terraform.util.math.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.network.NetworkBuffer;
@@ -73,7 +74,7 @@ public class LineRegionSelector implements RegionSelector {
         if (pos1 != null) renderer.point(pos1.add(0.5), 0.55);
         if (pos2 != null) renderer.point(pos2.add(0.5), 0.55);
         if (pos1 != null && pos2 != null) {
-            renderer.line(pos1.add(0.5), pos2.add(0.5));
+            renderer.line(pos1.add(0.5), pos2.add(0.5), ClientRenderer.RenderType.PRIMARY);
         }
         renderer.end(selectionId);
     }
