@@ -118,6 +118,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public abstract class AbstractMapServer implements MapServer {
     private final Logger logger = LoggerFactory.getLogger(MapServer.class);
@@ -685,8 +687,25 @@ public abstract class AbstractMapServer implements MapServer {
         logger.info("disconnect - {}", player.getUsername());
     }
 
-    private static boolean posthogExceptionMiddleware(Throwable t, JsonObject message) {
-        if (t instanceof OutOfMemoryError) return false;
+    private static final Pattern MINESTOM_PACKET_EXCEPTION;
+
+    static {
+        try {
+            MINESTOM_PACKET_EXCEPTION = Pattern.compile("Packet id .+ isn't registered!");
+        } catch (PatternSyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static boolean posthogExceptionMiddleware(@NotNull Throwable t, JsonObject message) {
+        var oom = t;
+        while (oom != null) {
+            if (oom instanceof OutOfMemoryError) return false;
+            else oom = oom.getCause();
+        }
+
+        if (MINESTOM_PACKET_EXCEPTION.matcher(t.toString()).find())
+            return false;
 
         // todo fancier exception grouping
         return true;
