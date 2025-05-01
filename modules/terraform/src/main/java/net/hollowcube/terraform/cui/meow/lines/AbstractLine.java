@@ -32,9 +32,9 @@ public abstract class AbstractLine extends Entity implements DefaultClientRender
         super(EntityType.ITEM_DISPLAY, UUID.randomUUID());
         this.player = player;
 
+        this.updateViewableRule(_ -> false);
         this.setInstance(player.getInstance());
         this.addViewer(player);
-        this.updateViewableRule();
 
         this.hasPhysics = false;
         this.setNoGravity(true);
@@ -110,8 +110,6 @@ public abstract class AbstractLine extends Entity implements DefaultClientRender
 
     @Override
     public void remove() {
-        removeViewer(player);
-        this.updateViewableRule();
         super.remove();
     }
 
@@ -123,5 +121,11 @@ public abstract class AbstractLine extends Entity implements DefaultClientRender
     @Override
     public void show() {
         this.addViewer(player);
+    }
+
+    @Override
+    public void removeDisplay() {
+        setInvisible(true);
+        this.remove();
     }
 }

@@ -16,7 +16,7 @@ public interface DefaultClientRenderDisplay {
         return new DefaultLine(player, pos1, pos2, color);
     }
 
-    void remove();
+    void removeDisplay();
 
     void hide();
     void show();

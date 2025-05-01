@@ -48,7 +48,7 @@ public class DefaultClientRenderer implements ClientRenderer {
             aabbDisplay.rescale(point1, point2);
             return;
         } else if (currentDisplay != null) {
-            currentDisplay.remove();
+            currentDisplay.removeDisplay();
         }
 
         displays.put(current, new AabbDisplay(player, point1, point2, this.context.getColors(), type));
@@ -82,7 +82,7 @@ public class DefaultClientRenderer implements ClientRenderer {
             line.reshape(p1, p2);
             return;
         } else if (currentDisplay != null) {
-            currentDisplay.remove();
+            currentDisplay.removeDisplay();
         }
 
         displays.put(this.current, new DefaultLine(player, p1, p2, primary.apply(context.getColors())));
@@ -91,7 +91,7 @@ public class DefaultClientRenderer implements ClientRenderer {
     @Override
     public void clearAll() {
         for (var entry : this.displays.values()) {
-            entry.remove();
+            entry.removeDisplay();
         }
         this.displays.clear();
     }
@@ -100,12 +100,12 @@ public class DefaultClientRenderer implements ClientRenderer {
     public void remove(String id) {
         var remove = this.displays.remove(id);
         if (remove != null) {
-            remove.remove();
+            remove.removeDisplay();
         }
     }
 
     @Override
-    public void switchTo(@NotNull RenderContext context, boolean store) {
+    public synchronized void switchTo(@NotNull RenderContext context, boolean store) {
         if (this.context == context) {
             return;
         }

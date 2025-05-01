@@ -57,8 +57,8 @@ public class AabbDisplay implements DefaultClientRenderDisplay {
     }
 
     @Override
-    public void remove() {
-        executeForAll(AbstractLine::remove);
+    public void removeDisplay() {
+        executeForAll(AbstractLine::removeDisplay);
     }
 
     @Override

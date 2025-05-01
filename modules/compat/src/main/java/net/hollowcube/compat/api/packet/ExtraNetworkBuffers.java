@@ -27,9 +27,11 @@ public final class ExtraNetworkBuffers {
                 if (value == null) {
                     buffer.write(NetworkBuffer.VAR_INT, 0);
                 } else {
-                    buffer.write(NetworkBuffer.VAR_INT, value.size());
-                    for (T element : value) {
-                        elementType.write(buffer, element);
+                    var array = value.toArray();
+                    buffer.write(NetworkBuffer.VAR_INT, array.length);
+                    for (var element : array) {
+                        //noinspection unchecked
+                        elementType.write(buffer, (T) element);
                     }
                 }
             }
