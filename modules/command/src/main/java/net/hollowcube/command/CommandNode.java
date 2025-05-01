@@ -140,7 +140,7 @@ public class CommandNode {
             if (result instanceof  ParseResult.Success<?>(var valueFunc)) {
                 context.setArgValue(pair.argument.id(), reader.rawSince(mark).trim(), valueFunc.get());
                 if (node.onSuggestion != null) {
-                    node.onSuggestion.execute(sender, context);
+                    node.onSuggestion.executeNextTick(sender, context);
                 }
             }
             if (reader.canRead() && result instanceof ParseResult.Success<?>) {
@@ -149,7 +149,7 @@ public class CommandNode {
             if (result instanceof ParseResult.Partial<?>(var _, var valueFunc) && valueFunc != null) {
                 context.setArgValue(pair.argument.id(), reader.rawSince(mark).trim(), valueFunc.get());
                 if (node.onSuggestion != null) {
-                    node.onSuggestion.execute(sender, context);
+                    node.onSuggestion.executeNextTick(sender, context);
                 }
             }
 
