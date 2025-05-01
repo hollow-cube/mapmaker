@@ -98,7 +98,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
     protected void loadWorld() {
         // Load the map itself (eg blocks, if present)
-        var mapData = server().mapService().getMapWorldAsStream(map().id(), true);
+        var mapData = server().mapService().getMapWorldAsStream(map().id(), false);
         if (mapData != null) {
             instance.loadStream(mapData, new LoadingWorldAccess(new ReadWorldAccess(this), this::onDataLoaded));
         }
@@ -186,25 +186,6 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 //        if (teleport) player.teleport(map.settings().getSpawnPoint()).join();
     }
 
-//    public @Blocking void startFinished(@NotNull Player player, boolean teleport) {
-//
-//        player.setTag(TAG_PLAYING, false); // Sanity
-//        player.setTag(MapHooks.PLAYING, false); // Sanity
-//
-//        spectatingPlayers.add(player);
-//
-//        net.hollowcube.mapmaker.map.world.MapWorldHelpers.resetPlayer(player);
-//        player.setGameMode(GameMode.ADVENTURE);
-//        player.setAllowFlying(true);
-//        player.setInvisible(true);
-//        ActionBar.forPlayer(player).addProvider(finishedActionBarProvider);
-//
-//        instance.eventNode().call(new MapPlayerStartFinishedEvent(this, player));
-//
-//        if (teleport) player.teleport(map.settings().getSpawnPoint()).join();
-
-    /// /        player.sendMessage("Now spectating " + map.settings().getName());
-//    }
     @Override
     public void removePlayer(@NotNull Player player) {
         if (isPlaying(player)) {

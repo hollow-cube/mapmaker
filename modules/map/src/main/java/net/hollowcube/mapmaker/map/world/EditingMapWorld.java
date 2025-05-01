@@ -140,6 +140,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         FutureUtil.submitVirtual(() -> enterTestModeInternal(player));
     }
 
+    @Blocking
     private void enterTestModeInternal(@NotNull Player player) {
         if (!isPlaying(player) && !isSpectating(player)) {
             logger.error("Player {} tried to enter test mode for {} without being in the map. Currently in {}",

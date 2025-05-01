@@ -6,6 +6,7 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -114,7 +115,17 @@ public class SaveState {
         if (state == null)
             throw new IllegalStateException("State not loaded");
         if (!stateType.isAssignableFrom(state.getClass()))
-            throw new IllegalArgumentException("State type mismatch. had " + state.getClass() + ", expected " + stateType);
+            throw new IllegalArgumentException("State type mismatch. had " + state.getClass() + ", expected " + stateType + " details: " + Map.of(
+                    "id", id,
+                    "playerId", playerId,
+                    "mapId", mapId,
+                    "state", state,
+                    "stateType", stateType,
+                    "serializer", serializer,
+                    "dataVersion", dataVersion,
+                    "playtime", playtime,
+                    "completed", completed
+            ));
         return stateType.cast(state);
     }
 
