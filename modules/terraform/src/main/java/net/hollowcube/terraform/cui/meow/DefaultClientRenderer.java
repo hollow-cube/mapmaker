@@ -1,8 +1,10 @@
 package net.hollowcube.terraform.cui.meow;
 
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.terraform.cui.ClientRenderer;
 import net.hollowcube.terraform.cui.meow.displays.AabbDisplay;
 import net.hollowcube.terraform.cui.meow.displays.DefaultClientRenderDisplay;
+import net.hollowcube.terraform.cui.meow.displays.PyramidDisplay;
 import net.hollowcube.terraform.cui.meow.lines.AbstractLine;
 import net.hollowcube.terraform.cui.meow.lines.DefaultLine;
 import net.minestom.server.coordinate.Point;
@@ -13,6 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class DefaultClientRenderer implements ClientRenderer {
 
@@ -43,15 +47,12 @@ public class DefaultClientRenderer implements ClientRenderer {
 
     @Override
     public void cuboid(@NotNull Point point1, @NotNull Point point2, @NotNull ClientRenderer.RenderType type) {
-        var currentDisplay = displays.get(current);
-        if (currentDisplay instanceof AabbDisplay aabbDisplay) {
-            aabbDisplay.rescale(point1, point2);
-            return;
-        } else if (currentDisplay != null) {
-            currentDisplay.removeDisplay();
-        }
+        modifyOrCreate(
+                AabbDisplay.class,
+                display -> display.rescale(point1, point2),
+                () -> new AabbDisplay(player, point1, point2, this.context.getColors(), type)
+        );
 
-        displays.put(current, new AabbDisplay(player, point1, point2, this.context.getColors(), type));
     }
 
     @Override
@@ -77,15 +78,11 @@ public class DefaultClientRenderer implements ClientRenderer {
 
     @Override
     public void line(@NotNull Point p1, @NotNull Point p2, RenderType primary) {
-        var currentDisplay = displays.get(current);
-        if (currentDisplay instanceof AbstractLine line) {
-            line.reshape(p1, p2);
-            return;
-        } else if (currentDisplay != null) {
-            currentDisplay.removeDisplay();
-        }
-
-        displays.put(this.current, new DefaultLine(player, p1, p2, primary.apply(context.getColors())));
+        modifyOrCreate(
+                AbstractLine.class,
+                display -> display.reshape(p1, p2),
+                () -> new DefaultLine(player, p1, p2, primary.apply(context.getColors()))
+        );
     }
 
     @Override
@@ -128,5 +125,26 @@ public class DefaultClientRenderer implements ClientRenderer {
     @Override
     public @NotNull RenderContext getContext() {
         return this.context;
+    }
+
+    @Override
+    public void pyramid(@NotNull Point center, int height, @NotNull RenderType renderType) {
+        modifyOrCreate(
+                PyramidDisplay.class,
+                display -> display.reshape(center, height),
+                () -> new PyramidDisplay(player, center, height, context.getColors(), renderType)
+        );
+    }
+
+    private <T extends DefaultClientRenderDisplay> void modifyOrCreate(Class<T> clazz, Consumer<T> modifier, Supplier<T> constructor) {
+        var currentDisplay = displays.get(current);
+        var display = OpUtils.safeCast(currentDisplay, clazz);
+        if (currentDisplay != null && display == null) {
+            currentDisplay.removeDisplay();
+        } else if (display != null) {
+            modifier.accept(display);
+        } else {
+            displays.put(current, constructor.get());
+        }
     }
 }

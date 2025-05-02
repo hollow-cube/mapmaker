@@ -90,4 +90,9 @@ public class MockSelectionRenderer implements ClientRenderer {
         return RenderContext.NORMAL;
     }
 
+    @Override
+    public void pyramid(@NotNull Point center, int height, @NotNull RenderType renderType) {
+
+    }
+
 }

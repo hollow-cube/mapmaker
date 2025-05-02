@@ -81,6 +81,8 @@ public interface ClientRenderer {
 
     @NotNull RenderContext getContext();
 
+    void pyramid(@NotNull Point center, int height, @NotNull RenderType renderType);
+
     enum Feature {
         CUBE,
         POINT,
