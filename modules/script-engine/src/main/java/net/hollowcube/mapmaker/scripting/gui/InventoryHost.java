@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.scripting.annotation.ScriptSafe;
 import net.hollowcube.mapmaker.scripting.gui.node.Node;
 import net.hollowcube.mapmaker.scripting.gui.util.ClickType;
 import net.hollowcube.posthog.PostHog;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -18,6 +19,7 @@ import net.minestom.server.inventory.click.Click;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.server.play.OpenWindowPacket;
 import net.minestom.server.network.packet.server.play.WindowItemsPacket;
+import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.inventory.PlayerInventoryUtils;
@@ -39,17 +41,17 @@ import static net.hollowcube.mapmaker.scripting.util.Proxies.proxyObject;
  */
 public class InventoryHost {
     private static final Logger logger = LoggerFactory.getLogger(InventoryHost.class);
+    private static final Sound CLICK_SOUND = Sound.sound(SoundEvent.UI_BUTTON_CLICK, Sound.Source.PLAYER, 0.2f, 1f);
+    private static final ThreadLocal<InventoryHost> CURRENT = new ThreadLocal<>();
+
+    public static @NotNull InventoryHost current() {
+        return Objects.requireNonNull(CURRENT.get(), "No current InventoryHost");
+    }
 
     static {
         MinecraftServer.getGlobalEventHandler()
                 .addListener(InventoryPreClickEvent.class, InventoryHost::handleInventoryClick)
                 .addListener(PlayerAnvilInputEvent.class, InventoryHost::handleAnvilInput);
-    }
-
-    private static final ThreadLocal<InventoryHost> CURRENT = new ThreadLocal<>();
-
-    public static @NotNull InventoryHost current() {
-        return Objects.requireNonNull(CURRENT.get(), "No current InventoryHost");
     }
 
     Value reconcilerRoot; // Cache for gui manager, should not be modified here.
@@ -285,6 +287,9 @@ public class InventoryHost {
 
         try (var _ = host.jsEnter()) {
             host.pendingClick = root.handleClick(clickType, slot % 9, slot / 9);
+            if (host.pendingClick != null) {
+                host.player.playSound(CLICK_SOUND);
+            }
         } catch (Exception e) {
             logger.error("Failed to handle click", e);
             PostHog.captureException(e, host.player.getUuid().toString());
