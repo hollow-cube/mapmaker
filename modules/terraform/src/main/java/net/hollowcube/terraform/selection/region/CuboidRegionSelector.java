@@ -95,7 +95,7 @@ public class CuboidRegionSelector implements RegionSelector {
         var region = region();
         if (region == null) return;
 
-        pos1 = region.min().sub(low);
+        pos1 = region.min().add(low);
         pos2 = region.max().add(high).sub(1);
         updateRender();
     }
