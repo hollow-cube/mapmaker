@@ -104,7 +104,7 @@ public class CloneCommand extends CommandDsl {
         }
 
         var vec = max.sub(min);
-        var point = context.get(destinationArg);
+        var point = new BlockVec(context.get(destinationArg));
         renderer.begin("clone_dest");
         session.cui().renderer().cuboid(
                 point,
