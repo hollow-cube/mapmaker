@@ -82,6 +82,10 @@ public class InventoryHost {
         this.player = player;
     }
 
+    public @NotNull Player player() {
+        return player;
+    }
+
     public @NotNull Inventory handle() {
         return Objects.requireNonNull(handle);
     }

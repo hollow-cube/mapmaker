@@ -12,6 +12,7 @@ import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.scripting.ScriptEngine;
+import net.hollowcube.mapmaker.scripting.gui.InventoryHost;
 import net.hollowcube.mapmaker.scripting.util.Proxies;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.store.ShopUpgradeCache;
@@ -45,7 +46,7 @@ public final class StoreModule {
     ) {
         try {
             scriptEngine.guiManager().openGui(player, URI.create("guilib:///store/store-view.js"),
-                    Map.of("@mapmaker/internal/store", new StoreModule(playerService, permManager, player)),
+                    Map.of("@mapmaker/internal/store", new StoreModule(playerService, permManager)),
                     OpUtils.build(new HashMap<>(), m -> m.put("initialTab", initialTab)));
         } catch (Exception e) {
             logger.error("failed to open store view", e);
@@ -69,21 +70,21 @@ public final class StoreModule {
 
     private final PlayerService playerService;
     private final PermManager permManager;
-    private final Player player;
 
-    public StoreModule(@NotNull PlayerService playerService, @NotNull PermManager permManager, @NotNull Player player) {
+    public StoreModule(@NotNull PlayerService playerService, @NotNull PermManager permManager) {
         this.playerService = playerService;
         this.permManager = permManager;
-        this.player = player;
     }
 
     @HostAccess.Export
     public void buyPackage(@NotNull String packageName) {
-        FutureUtil.submitVirtual(() -> buyPackage0(packageName));
+        final Player player = InventoryHost.current().player();
+        FutureUtil.submitVirtual(() -> buyPackage0(player, packageName));
     }
 
     @HostAccess.Export
     public boolean isUpgradeOwned(@NotNull String upgradeId) {
+        final Player player = InventoryHost.current().player();
         final ShopUpgrade upgrade = ShopUpgrade.BY_ID.get(upgradeId);
         if (upgrade == null) return false;
         return ShopUpgradeCache.has(player, upgrade, true);
@@ -91,6 +92,7 @@ public final class StoreModule {
 
     @HostAccess.Export
     public Value buyUpgrade(@NotNull String upgradeId) {
+        final Player player = InventoryHost.current().player();
         final ShopUpgrade upgrade = ShopUpgrade.BY_ID.get(upgradeId);
         if (upgrade == null) return Proxies.resolved(null);
         if (ShopUpgradeCache.has(player, upgrade, true))
@@ -108,13 +110,13 @@ public final class StoreModule {
         }
 
         return Proxies.async(() -> {
-            buyUpgrade0(playerData, upgrade);
+            buyUpgrade0(player, playerData, upgrade);
             return null;
         }, player.scheduler());
     }
 
     @Blocking
-    private void buyPackage0(@NotNull String packageName) {
+    private void buyPackage0(@NotNull Player player, @NotNull String packageName) {
         try {
             var packageIndex = VALID_PACKAGES.indexOf(packageName);
             if (packageIndex == -1) {
@@ -139,7 +141,7 @@ public final class StoreModule {
     }
 
     @Blocking
-    private void buyUpgrade0(@NotNull PlayerDataV2 playerData, @NotNull ShopUpgrade upgrade) {
+    private void buyUpgrade0(@NotNull Player player, @NotNull PlayerDataV2 playerData, @NotNull ShopUpgrade upgrade) {
         try {
             var meta = new JsonObject();
             meta.addProperty("source", "ingame/store");
