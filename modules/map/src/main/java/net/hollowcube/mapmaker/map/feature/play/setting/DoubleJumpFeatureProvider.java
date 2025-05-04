@@ -77,6 +77,8 @@ public class DoubleJumpFeatureProvider extends AbstractSettingFeatureProvider {
 
     public void handleStartFlying(@NotNull PlayerStartFlyingEvent event) {
         var player = event.getPlayer();
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null || !world.isPlaying(player)) return;
         if (player.getGameMode() != GameMode.SURVIVAL && player.getGameMode() != GameMode.ADVENTURE) return;
         player.setFlying(false);
         if (player.getTag(DOUBLE_JUMP_COUNT) <= 0) return;
@@ -89,8 +91,6 @@ public class DoubleJumpFeatureProvider extends AbstractSettingFeatureProvider {
 
         var randomPitch = ThreadLocalRandom.current().nextFloat(0.9f, 1f);
         player.playSound(Sound.sound(SoundEvent.ENTITY_BAT_TAKEOFF, Sound.Source.PLAYER, 0.4f, randomPitch), Sound.Emitter.self());
-
-        player.lookAt(player.getPosition().withView(player.getPosition().yaw() + 180, player.getPosition().pitch()).direction());
     }
 
     public void playerUpdated(@NotNull MapPlayerUpdateStateEvent event) {
