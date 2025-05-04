@@ -21,6 +21,7 @@ public class TerraformToggleCuiCommand extends CommandDsl {
         var playerData = PlayerDataV2.fromPlayer(player);
         boolean setting = playerData.getSetting(PlayerSettings.ENABLE_WE_CUI);
         playerData.setSetting(PlayerSettings.ENABLE_WE_CUI, !setting);
+        //todo save
 
         if (!setting) {
             player.sendMessage(Component.translatable("terraform.command.tf.cui.on"));

@@ -4,12 +4,15 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.util.CoordinateUtil;
+import net.hollowcube.terraform.command.util.CommandPreviewHelper;
 import net.hollowcube.terraform.compute.RegionFunctions;
+import net.hollowcube.terraform.cui.ClientRenderer;
 import net.hollowcube.terraform.mask.BlockMask;
 import net.hollowcube.terraform.mask.Mask;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.util.Messages;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
@@ -46,6 +49,10 @@ public class CloneCommand extends CommandDsl {
         defaults.add(List.of(fromLiteral, fromArgId, fromArg, toArg, destinationArg));
         defaults.add(List.of(fromLiteral, fromArgId, fromArg, toArg, toLiteral, toArgId, destinationArg));
 
+        addSuggestionSyntax(playerOnly(this::suggest));
+        addSuggestionSyntax(playerOnly(this::suggest), fromArg);
+        addSuggestionSyntax(playerOnly(this::suggest), fromArg, toArg);
+        addSuggestionSyntax(playerOnly(this::suggest), fromArg, toArg, destinationArg);
         addWithStrict();
         addWithStrict(copyModeArg);
         addWithStrict(copyModeArg, modeArg);
@@ -61,11 +68,52 @@ public class CloneCommand extends CommandDsl {
     }
 
     private void addWithBase(@NotNull Argument<?>... args) {
-        for (List<Argument<?>> aDefault : defaults) {
-            addSyntax(playerOnly(this::execute), Stream.of(aDefault, Arrays.asList(args))
+        for (var aDefault : defaults) {
+            addSyntax(playerOnly(this::execute), playerOnly(this::suggest), Stream.of(aDefault, Arrays.asList(args))
                     .flatMap(List::stream).toArray(Argument[]::new));
         }
-     }
+    }
+
+    private void suggest(@NotNull Player player, @NotNull CommandContext context) {
+        if (!context.has(fromArg)) {
+            return;
+        }
+
+        Point p1 = new BlockVec(context.get(fromArg)), p2;
+        if (context.has(toArg)) {
+            p2 = new BlockVec(context.get(toArg));
+        } else {
+            p2 = p1;
+        }
+
+        var session = LocalSession.forPlayer(player);
+        var renderer = session.cui().renderer();
+        renderer.switchTo(ClientRenderer.RenderContext.COMMAND, true);
+        CommandPreviewHelper.debounceContext(player, renderer);
+        renderer.begin("clone_from");
+        var min = CoordinateUtil.min(p1, p2);
+        var max = CoordinateUtil.max(p1, p2).add(1, 1, 1);
+        session.cui().renderer().cuboid(
+                min,
+                max,
+                ClientRenderer.RenderType.PRIMARY);
+        renderer.end("clone_from");
+
+        if (!context.has(destinationArg)) {
+            return;
+        }
+
+        var vec = max.sub(min);
+        var point = new BlockVec(context.get(destinationArg));
+        renderer.begin("clone_dest");
+        session.cui().renderer().cuboid(
+                point,
+                point.add(vec),
+                ClientRenderer.RenderType.SECONDARY
+        );
+        renderer.end("clone_dest");
+
+    }
 
     private void execute(@NotNull Player player, @NotNull CommandContext context) {
         var start = context.get(fromArg);
@@ -90,6 +138,7 @@ public class CloneCommand extends CommandDsl {
 
 
         var session = LocalSession.forPlayer(player);
+        session.cui().renderer().switchTo(ClientRenderer.RenderContext.NORMAL, false);
         session.buildTask("vanilla-clone")
                 .metadata() // todo
                 .compute(RegionFunctions.clone(min, max, destination, sourceMask, mode == Mode.MOVE))

@@ -26,4 +26,9 @@ public class ArgumentGreedyString extends Argument<String> {
     public @NotNull ArgumentParserType argumentType() {
         return ArgumentParserType.STRING;
     }
+
+    @Override
+    public boolean shouldSuggest() {
+        return false;
+    }
 }

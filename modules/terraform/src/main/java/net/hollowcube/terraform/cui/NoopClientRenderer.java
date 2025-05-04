@@ -24,7 +24,7 @@ final class NoopClientRenderer implements ClientRenderer {
     }
 
     @Override
-    public void cuboid(@NotNull Point point1, @NotNull Point point2) {
+    public void cuboid(@NotNull Point point1, @NotNull Point point2, @NotNull ClientRenderer.RenderType type) {
 
     }
 
@@ -44,12 +44,33 @@ final class NoopClientRenderer implements ClientRenderer {
     }
 
     @Override
-    public void line(@NotNull Point p1, @NotNull Point p2) {
+    public void line(@NotNull Point p1, @NotNull Point p2, RenderType primary) {
 
     }
 
     @Override
     public void clearAll() {
+
+    }
+
+    @Override
+    public void remove(String id) {
+
+    }
+
+    @Override
+    public void switchTo(@NotNull RenderContext context, boolean store) {
+
+    }
+
+
+    @Override
+    public @NotNull RenderContext getContext() {
+        return RenderContext.NORMAL;
+    }
+
+    @Override
+    public void pyramid(@NotNull Point center, int height, @NotNull RenderType renderType) {
 
     }
 

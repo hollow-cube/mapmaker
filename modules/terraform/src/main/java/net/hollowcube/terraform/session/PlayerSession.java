@@ -5,7 +5,7 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.cui.ClientInterface;
 import net.hollowcube.terraform.cui.ClientRenderer;
-import net.hollowcube.terraform.cui.meow.DefaultClientRenderer;
+import net.hollowcube.terraform.cui.vanilla.DefaultClientRenderer;
 import net.hollowcube.terraform.selection.Selection;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -154,7 +154,9 @@ public class PlayerSession {
 
                 var selection = LocalSession.forPlayer(player).selection(Selection.DEFAULT).region();
                 if (selection != null) {
-                    this.renderer.cuboid(selection.min(), selection.max());
+                    this.renderer.switchTo(ClientRenderer.RenderContext.NORMAL, false);
+                    this.renderer.begin("cuboid");
+                    this.renderer.cuboid(selection.min(), selection.max(), ClientRenderer.RenderType.PRIMARY);
                 }
             }
         } else if (isDefaultRenderer) {
@@ -167,8 +169,8 @@ public class PlayerSession {
         @Override
         public void sendMessage(@NotNull String key, @NotNull Object... args) {
             var componentArgs = new Component[args.length];
-            for (int i = 0; i < args.length; i++) {
-                Object arg = args[i];
+            for (var i = 0; i < args.length; i++) {
+                var arg = args[i];
                 if (arg instanceof Component c)
                     componentArgs[i] = c;
                 else componentArgs[i] = Component.text(args[i].toString());

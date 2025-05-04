@@ -14,13 +14,14 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public final class AxiomPlayer {
 
     static final Tag<Boolean> AXIOM_ENABLED = Tag.<Boolean>Transient("axiom:enabled").defaultValue(false);
     static final Tag<Integer> AXIOM_VERSION = Tag.<Integer>Transient("axiom:version").defaultValue(-1);
-    static final Tag<Set<UUID>> AXIOM_IGNORED_ENTITIES = Tag.<Set<UUID>>Transient("axiom:ignored_entities").defaultValue(HashSet::new);
+    static final Tag<Set<UUID>> AXIOM_IGNORED_ENTITIES = Tag.<Set<UUID>>Transient("axiom:ignored_entities").defaultValue(ConcurrentHashMap::newKeySet);
 
     private static final AxiomClientboundEnablePacket.ServerConfig SERVER_CONFIG = new AxiomClientboundEnablePacket.ServerConfig(
             0x100000, // 1mb,

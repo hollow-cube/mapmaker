@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.command.utility.entity;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategories;
+import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntity;
 import net.kyori.adventure.nbt.TagStringIOExt;
 import net.minestom.server.entity.Player;
@@ -23,7 +24,7 @@ public class EntitiesCommand extends CommandDsl {
 
     private void handleQueryAll(@NotNull Player player, @NotNull CommandContext context) {
         var entities = player.getInstance().getEntities().stream()
-                .filter(e -> !(e instanceof Player))
+                .filter(e -> e instanceof MapEntity)
                 .toList();
 
         if (entities.isEmpty()) {

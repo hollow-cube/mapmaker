@@ -8,6 +8,7 @@ import net.hollowcube.command.builder.CommandEvaluationContext;
 import net.hollowcube.command.builder.CommandNodeBuilder;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.suggestion.Suggestion;
+import net.hollowcube.command.suggestion.SuggestionContext;
 import net.hollowcube.command.util.CommandReflection;
 import net.hollowcube.command.util.StringReader;
 import net.minestom.server.command.CommandSender;
@@ -68,7 +69,8 @@ public class CommandManagerImpl implements CommandManager {
     @Override
     public @NotNull Suggestion suggest(@NotNull CommandSender sender, @NotNull String input) {
         var reader = new StringReader(input);
-        var result = root.suggest(sender, reader);
+        var context = new SuggestionContext(sender);
+        var result = root.suggest(sender, reader, context);
         if (result.isEmpty() && parent != null) {
             return parent.suggest(sender, input);
 //            var parentResult = parent.suggest(sender, input);

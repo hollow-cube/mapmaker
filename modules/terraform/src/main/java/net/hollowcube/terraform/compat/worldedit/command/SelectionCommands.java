@@ -255,14 +255,14 @@ public final class SelectionCommands {
             Point low, high;
             if (isVertical) {
                 low = new Vec(0, -(region.min().blockY() - dimensionMin), 0);
-                high = new Vec(0, region.max().blockY() - dimensionMin, 0);
+                high = new Vec(0, dimensionMax - region.max().blockY(), 0);
             } else {
                 var normal = new Vec(direction.normalX(), direction.normalY(), direction.normalZ());
                 if (normal.x() > 0 || normal.y() > 0 || normal.z() > 0) {
-                    low = normal.mul(-reverseAmount);
+                    low = normal.mul(reverseAmount);
                     high = normal.mul(amount);
                 } else {
-                    low = normal.mul(-amount);
+                    low = normal.mul(amount);
                     high = normal.mul(reverseAmount);
                 }
             }
