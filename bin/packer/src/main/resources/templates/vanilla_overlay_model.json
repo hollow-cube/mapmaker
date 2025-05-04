@@ -1,0 +1,25 @@
+{
+  "model": {
+    "type": "minecraft:composite",
+    "models": [
+      {
+        "type": "minecraft:select",
+        "property": "minecraft:custom_model_data",
+        "index": 0,
+        "fallback": {
+          "type": "minecraft:empty"
+        },
+        "cases": "$cases"
+      },
+      {
+        "type": "minecraft:select",
+        "property": "minecraft:custom_model_data",
+        "index": 1,
+        "fallback": {
+          "type": "minecraft:empty"
+        },
+        "cases": "$overlays"
+      }
+    ]
+  }
+}

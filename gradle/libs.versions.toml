@@ -1,4 +1,5 @@
 [versions]
+minecraft = "1.21.5"
 annotations = "26.0.2"
 fastutil = "8.5.15"
 gson = "2.12.1"

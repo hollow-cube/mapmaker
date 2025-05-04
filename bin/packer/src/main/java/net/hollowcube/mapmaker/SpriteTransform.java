@@ -1,8 +1,15 @@
 package net.hollowcube.mapmaker;
 
-import com.google.gson.*;
-import de.marhali.json5.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import de.marhali.json5.Json5;
+import de.marhali.json5.Json5Array;
+import de.marhali.json5.Json5Element;
+import de.marhali.json5.Json5Object;
 import net.hollowcube.mapmaker.type.ServerSprite;
+import net.hollowcube.mapmaker.util.FileUtil;
+import net.hollowcube.mapmaker.util.JsonUtil;
 import net.hollowcube.mapmaker.util.ModelUtil;
 import net.hollowcube.mapmaker.util.Templates;
 import org.jetbrains.annotations.NotNull;
@@ -16,10 +23,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class SpriteTransform {
     private static final Json5 json5 = new Json5();
@@ -35,7 +43,8 @@ public class SpriteTransform {
     }
 
     public void process(@NotNull PackContext ctx) throws IOException {
-        final String[] numberModels = setupNumberModels(ctx);
+        final var numberModels = setupNumberModels(ctx);
+        final var overlayEntries = createOverlayEntries(ctx);
 
         Path guiBaseDir = ctx.resources().resolve("gui");
         try (Stream<Path> guiFile = Files.walk(guiBaseDir)) {
@@ -95,25 +104,30 @@ public class SpriteTransform {
                             throw new RuntimeException("Item sprites must be 16x");
 
                         Consumer<JsonObject> modelEditor = null;
-                        if (config.get("no_head") != null) {
-                            modelEditor = obj -> {
-                                var display = new JsonObject();
-                                var head = new JsonObject();
-                                var scale = new JsonArray();
-                                scale.add(0);
-                                scale.add(0);
-                                scale.add(0);
-                                head.add("scale", scale);
-                                display.add("head", head);
-                                obj.add("display", display);
-                            };
-                        } else if (config.has("display")) {
-                            modelEditor = obj -> obj.add("display", toGson(config.getAsJson5Object("display")));
+                        if (config.has("display")) {
+                            modelEditor = obj -> obj.add("display", JsonUtil.toGson(config.getAsJson5Object("display")));
                         }
 
                         var itemTexture = ctx.writeTexture("item", name, Files.readAllBytes(imageFile));
                         var itemModel = ctx.writeModel(name, ModelUtil.createItemGenerated(itemTexture, modelEditor));
-                        ctx.addItemModel(name, ModelUtil.createBasicItem(itemModel));
+
+                        if (config.get("overlays") instanceof Json5Array array) {
+                            var cases = StreamSupport.stream(array.spliterator(), false)
+                                    .map(Json5Element::getAsString)
+                                    .map(overlayEntries::get)
+                                    .filter(Objects::nonNull)
+                                    .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+
+                            ctx.addItemModel(
+                                    name,
+                                    Templates.applyObject("overlay_model", Map.of(
+                                            "base", itemModel,
+                                            "overlays", cases
+                                    ))
+                            );
+                        } else {
+                            ctx.addItemModel(name, ModelUtil.createBasicItem(itemModel));
+                        }
                     } else if (config.get("type").getAsString().equals("numbered")) {
                         BufferedImage baseImage = ImageIO.read(imageFile.toFile());
                         if (baseImage.getWidth() != 16 || baseImage.getHeight() != 16)
@@ -129,10 +143,13 @@ public class SpriteTransform {
                             entries.add(entry);
                         }
 
-                        var args = new HashMap<String, Object>();
-                        args.put("base", baseItemModel);
-                        args.put("entries", entries);
-                        ctx.addItemModel(name, Templates.applyObject("number_model", args));
+                        ctx.addItemModel(
+                                name,
+                                Templates.applyObject("number_model", Map.of(
+                                        "base", baseItemModel,
+                                        "entries", entries
+                                ))
+                        );
                     }
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to process " + name, e);
@@ -212,30 +229,6 @@ public class SpriteTransform {
         return new ServerSprite(name, rawFontChar, width, offX, right);
     }
 
-    private static JsonElement toGson(Json5Element element) {
-        return switch (element) {
-            case Json5Object obj -> {
-                JsonObject ret = new JsonObject();
-                for (var entry : obj.entrySet()) {
-                    ret.add(entry.getKey(), toGson(entry.getValue()));
-                }
-                yield ret;
-            }
-            case Json5Array arr -> {
-                JsonArray ret = new JsonArray();
-                for (var value : arr) {
-                    ret.add(toGson(value));
-                }
-                yield ret;
-            }
-            case Json5String str -> new JsonPrimitive(str.getAsString());
-            case Json5Number num -> new JsonPrimitive(num.getAsNumber());
-            case Json5Boolean bool -> new JsonPrimitive(bool.getAsBoolean());
-            case Json5Null ignored -> JsonNull.INSTANCE;
-            default -> throw new IllegalStateException("Unexpected value: " + element);
-        };
-    }
-
     private static String[] setupNumberModels(@NotNull PackContext ctx) throws IOException {
         String[] numberModels = new String[32];
         for (int i = 0; i < numberModels.length; i++) {
@@ -266,5 +259,39 @@ public class SpriteTransform {
             }
         }
         return numberModels;
+    }
+
+    private static Map<String, JsonElement> createOverlayEntries(@NotNull PackContext ctx) throws IOException {
+        var cases = new HashMap<String, JsonElement>();
+        FileUtil.walkResourcesDirectory("/overlays/", (file, stream) -> {
+            var name = file.substring(file.lastIndexOf('/') + 1, file.lastIndexOf('.'));
+            var id = ctx.writeTexture("item", "overlay_" + name, stream.readAllBytes());
+            var entry = ModelUtil.createBasicItem(ctx.writeModel("overlay_" + name, ModelUtil.createItemGenerated(id)));
+            entry.addProperty("when", name);
+            cases.put(name, entry);
+        });
+
+        var mcPath = ctx.vanilla().resolve("assets/minecraft/items/");
+        try (var model = Files.walk(mcPath)) {
+            var vanillaModels = new JsonArray();
+            for (var path : model.toList()) {
+                var filename = path.getFileName().toString();
+                if (!filename.endsWith(".json")) continue;
+                var name = filename.replace(".json", "");
+                var json = FileUtil.getJson(path).getAsJsonObject();
+                json.addProperty("when", name);
+                vanillaModels.add(JsonUtil.stripMinecraftNamespace(json));
+            }
+
+            ctx.addItemModel(
+                    "vanilla_item",
+                    Templates.applyObject("vanilla_overlay_model", Map.of(
+                            "cases", vanillaModels,
+                            "overlays", cases.values().stream().collect(JsonArray::new, JsonArray::add, JsonArray::addAll)
+                    ))
+            );
+        }
+
+        return cases;
     }
 }

@@ -1,3 +1,4 @@
 {
-  "type": "item"
+  "type": "item",
+  "overlays": ["lock"]
 }
