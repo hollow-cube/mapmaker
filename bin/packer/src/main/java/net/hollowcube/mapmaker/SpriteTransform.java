@@ -1,21 +1,30 @@
 package net.hollowcube.mapmaker;
 
-import com.google.gson.*;
-import de.marhali.json5.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import de.marhali.json5.Json5;
+import de.marhali.json5.Json5Array;
+import de.marhali.json5.Json5Element;
+import de.marhali.json5.Json5Object;
 import net.hollowcube.mapmaker.type.ServerSprite;
+import net.hollowcube.mapmaker.util.FileUtil;
+import net.hollowcube.mapmaker.util.JsonUtil;
 import net.hollowcube.mapmaker.util.ModelUtil;
 import net.hollowcube.mapmaker.util.Templates;
-import net.hollowcube.mapmaker.util.ThrowingLambdas;
 import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -96,7 +105,7 @@ public class SpriteTransform {
 
                         Consumer<JsonObject> modelEditor = null;
                         if (config.has("display")) {
-                            modelEditor = obj -> obj.add("display", toGson(config.getAsJson5Object("display")));
+                            modelEditor = obj -> obj.add("display", JsonUtil.toGson(config.getAsJson5Object("display")));
                         }
 
                         var itemTexture = ctx.writeTexture("item", name, Files.readAllBytes(imageFile));
@@ -113,7 +122,7 @@ public class SpriteTransform {
                                     name,
                                     Templates.applyObject("overlay_model", Map.of(
                                             "base", itemModel,
-                                            "cases", cases
+                                            "overlays", cases
                                     ))
                             );
                         } else {
@@ -220,30 +229,6 @@ public class SpriteTransform {
         return new ServerSprite(name, rawFontChar, width, offX, right);
     }
 
-    private static JsonElement toGson(Json5Element element) {
-        return switch (element) {
-            case Json5Object obj -> {
-                JsonObject ret = new JsonObject();
-                for (var entry : obj.entrySet()) {
-                    ret.add(entry.getKey(), toGson(entry.getValue()));
-                }
-                yield ret;
-            }
-            case Json5Array arr -> {
-                JsonArray ret = new JsonArray();
-                for (var value : arr) {
-                    ret.add(toGson(value));
-                }
-                yield ret;
-            }
-            case Json5String str -> new JsonPrimitive(str.getAsString());
-            case Json5Number num -> new JsonPrimitive(num.getAsNumber());
-            case Json5Boolean bool -> new JsonPrimitive(bool.getAsBoolean());
-            case Json5Null ignored -> JsonNull.INSTANCE;
-            default -> throw new IllegalStateException("Unexpected value: " + element);
-        };
-    }
-
     private static String[] setupNumberModels(@NotNull PackContext ctx) throws IOException {
         String[] numberModels = new String[32];
         for (int i = 0; i < numberModels.length; i++) {
@@ -276,9 +261,9 @@ public class SpriteTransform {
         return numberModels;
     }
 
-    private static Map<String, JsonElement> createOverlayEntries(@NotNull PackContext ctx) {
+    private static Map<String, JsonElement> createOverlayEntries(@NotNull PackContext ctx) throws IOException {
         var cases = new HashMap<String, JsonElement>();
-        shallowWalkDirectory("/overlays/", (file, stream) -> {
+        FileUtil.walkResourcesDirectory("/overlays/", (file, stream) -> {
             var name = file.substring(file.lastIndexOf('/') + 1, file.lastIndexOf('.'));
             var id = ctx.writeTexture("item", "overlay_" + name, stream.readAllBytes());
             var entry = ModelUtil.createBasicItem(ctx.writeModel("overlay_" + name, ModelUtil.createItemGenerated(id)));
@@ -286,24 +271,27 @@ public class SpriteTransform {
             cases.put(name, entry);
         });
 
-        return cases;
-    }
-
-    private static void shallowWalkDirectory(@NotNull String directory, @NotNull ThrowingLambdas.BiConsumer<@NotNull String, @NotNull InputStream> consumer) {
-        try (var stream = SpriteTransform.class.getResourceAsStream(directory)) {
-            Objects.requireNonNull(stream);
-
-            var reader = new BufferedReader(new InputStreamReader(stream));
-            String file;
-            while ((file = reader.readLine()) != null) {
-                try (var fileStream = SpriteTransform.class.getResourceAsStream(directory + file)) {
-                    consumer.accept(file, Objects.requireNonNull(fileStream));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+        var mcPath = ctx.vanilla().resolve("assets/minecraft/items/");
+        try (var model = Files.walk(mcPath)) {
+            var vanillaModels = new JsonArray();
+            for (var path : model.toList()) {
+                var filename = path.getFileName().toString();
+                if (!filename.endsWith(".json")) continue;
+                var name = filename.replace(".json", "");
+                var json = FileUtil.getJson(path).getAsJsonObject();
+                json.addProperty("when", name);
+                vanillaModels.add(JsonUtil.stripMinecraftNamespace(json));
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+
+            ctx.addItemModel(
+                    "vanilla_item",
+                    Templates.applyObject("vanilla_overlay_model", Map.of(
+                            "cases", vanillaModels,
+                            "overlays", cases.values().stream().collect(JsonArray::new, JsonArray::add, JsonArray::addAll)
+                    ))
+            );
         }
+
+        return cases;
     }
 }

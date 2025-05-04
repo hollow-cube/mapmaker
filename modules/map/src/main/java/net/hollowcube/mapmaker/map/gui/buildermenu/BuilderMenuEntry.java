@@ -5,6 +5,7 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.mapmaker.util.ItemUtils;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
@@ -27,19 +28,20 @@ public class BuilderMenuEntry extends View {
         var material = item.icon().rightOr(null);
         var sprite = item.icon().leftOr(null);
 
-        if (material != null) {
-            this.label.setItemSprite(ItemStack.of(material));
-        } else if (sprite != null) {
-            if (sprite.fontChar() != 0) {
-                this.label.setSprite(sprite.fontChar(), sprite.model(), sprite.width(), sprite.offsetX(), sprite.rightOffset());
-            } else {
+        if (sprite != null && sprite.fontChar() != 0) {
+            this.label.setSprite(sprite.fontChar(), sprite.model(), sprite.width(), sprite.offsetX(), sprite.rightOffset());
+        } else {
+            var locked = !item.canGive(context.player());
+            if (material != null) {
+                this.label.setItemSprite(ItemUtils.asDisplay(material, locked ? "lock" : null));
+            } else if (sprite != null) {
                 this.label.setItemSprite(ItemStack
                         .builder(Material.DIAMOND)
                         .set(DataComponents.ITEM_MODEL, sprite.model())
                         .set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(
                                 List.of(),
                                 List.of(),
-                                !item.canGive(player()) ? List.of("lock") : List.of(),
+                                locked ? List.of("lock") : List.of(),
                                 List.of()
                         ))
                         .build()

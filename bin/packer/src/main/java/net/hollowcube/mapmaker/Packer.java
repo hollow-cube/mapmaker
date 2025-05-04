@@ -22,6 +22,8 @@ public class Packer {
     public static void main(String[] args) throws Exception {
         System.setProperty("java.awt.headless", "true");
 
+        var minecraftPath = Path.of(args[1]).toRealPath();
+
         try {
             var outDir = Path.of(args[0]);
 //            var outDir = Path.of(args.length > 0 && args[0].equals("out_here_hack") ? "." : "./build/packer");
@@ -34,10 +36,11 @@ public class Packer {
 
         logger.log(System.Logger.Level.INFO, "Hello, world!");
         logger.log(System.Logger.Level.INFO, "RESOURCE_DIR: {0}", RESOURCE_DIR);
+        logger.log(System.Logger.Level.INFO, "MINECRAFT: {0}", minecraftPath);
 
         Files.createDirectories(OUT_DIR);
 
-        PackContext ctx = new PackContext(RESOURCE_DIR, OUT_DIR);
+        PackContext ctx = new PackContext(RESOURCE_DIR, OUT_DIR, minecraftPath);
         SpriteTransform spriteTransform = new SpriteTransform();
         spriteTransform.process(ctx);
 

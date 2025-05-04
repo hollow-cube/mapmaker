@@ -19,27 +19,29 @@ import java.util.stream.Stream;
 
 public class PackContext {
 
-    private Path resources;
-    private Path out;
+    private final Path resources;
+    private final Path out;
+    private final Path minecraft;
     private boolean minify = true;
     private int resourceId = 0;
 
-    private Path rpMinecraftBase;
-    private Path rpMapmakerBase;
-    private String mapmakerRefBase;
+    private final Path rpMinecraftBase;
+    private final Path rpMapmakerBase;
+    private final String mapmakerRefBase;
 
     private final Map<String, String> remapping = new HashMap<>();
 
     private final JsonObject fontFile;
 
-    private JsonArray serverSprites = new JsonArray();
+    private final JsonArray serverSprites = new JsonArray();
 
     public final JsonObject dynamicData = new JsonObject();
 
 
-    public PackContext(Path resources, Path out) throws IOException {
+    public PackContext(Path resources, Path out, Path minecraft) throws IOException {
         this.resources = resources;
         this.out = out;
+        this.minecraft = minecraft;
 
         copyStaticFiles();
 
@@ -64,6 +66,10 @@ public class PackContext {
 
     public @NotNull Path out() {
         return out;
+    }
+
+    public @NotNull Path vanilla() {
+        return minecraft;
     }
 
     // Resource pack methods
