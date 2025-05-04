@@ -5,21 +5,20 @@ import de.marhali.json5.*;
 import net.hollowcube.mapmaker.type.ServerSprite;
 import net.hollowcube.mapmaker.util.ModelUtil;
 import net.hollowcube.mapmaker.util.Templates;
+import net.hollowcube.mapmaker.util.ThrowingLambdas;
 import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class SpriteTransform {
     private static final Json5 json5 = new Json5();
@@ -35,7 +34,8 @@ public class SpriteTransform {
     }
 
     public void process(@NotNull PackContext ctx) throws IOException {
-        final String[] numberModels = setupNumberModels(ctx);
+        final var numberModels = setupNumberModels(ctx);
+        final var overlayEntries = createOverlayEntries(ctx);
 
         Path guiBaseDir = ctx.resources().resolve("gui");
         try (Stream<Path> guiFile = Files.walk(guiBaseDir)) {
@@ -95,25 +95,30 @@ public class SpriteTransform {
                             throw new RuntimeException("Item sprites must be 16x");
 
                         Consumer<JsonObject> modelEditor = null;
-                        if (config.get("no_head") != null) {
-                            modelEditor = obj -> {
-                                var display = new JsonObject();
-                                var head = new JsonObject();
-                                var scale = new JsonArray();
-                                scale.add(0);
-                                scale.add(0);
-                                scale.add(0);
-                                head.add("scale", scale);
-                                display.add("head", head);
-                                obj.add("display", display);
-                            };
-                        } else if (config.has("display")) {
+                        if (config.has("display")) {
                             modelEditor = obj -> obj.add("display", toGson(config.getAsJson5Object("display")));
                         }
 
                         var itemTexture = ctx.writeTexture("item", name, Files.readAllBytes(imageFile));
                         var itemModel = ctx.writeModel(name, ModelUtil.createItemGenerated(itemTexture, modelEditor));
-                        ctx.addItemModel(name, ModelUtil.createBasicItem(itemModel));
+
+                        if (config.get("overlays") instanceof Json5Array array) {
+                            var cases = StreamSupport.stream(array.spliterator(), false)
+                                    .map(Json5Element::getAsString)
+                                    .map(overlayEntries::get)
+                                    .filter(Objects::nonNull)
+                                    .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+
+                            ctx.addItemModel(
+                                    name,
+                                    Templates.applyObject("overlay_model", Map.of(
+                                            "base", itemModel,
+                                            "cases", cases
+                                    ))
+                            );
+                        } else {
+                            ctx.addItemModel(name, ModelUtil.createBasicItem(itemModel));
+                        }
                     } else if (config.get("type").getAsString().equals("numbered")) {
                         BufferedImage baseImage = ImageIO.read(imageFile.toFile());
                         if (baseImage.getWidth() != 16 || baseImage.getHeight() != 16)
@@ -129,10 +134,13 @@ public class SpriteTransform {
                             entries.add(entry);
                         }
 
-                        var args = new HashMap<String, Object>();
-                        args.put("base", baseItemModel);
-                        args.put("entries", entries);
-                        ctx.addItemModel(name, Templates.applyObject("number_model", args));
+                        ctx.addItemModel(
+                                name,
+                                Templates.applyObject("number_model", Map.of(
+                                        "base", baseItemModel,
+                                        "entries", entries
+                                ))
+                        );
                     }
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to process " + name, e);
@@ -266,5 +274,36 @@ public class SpriteTransform {
             }
         }
         return numberModels;
+    }
+
+    private static Map<String, JsonElement> createOverlayEntries(@NotNull PackContext ctx) {
+        var cases = new HashMap<String, JsonElement>();
+        shallowWalkDirectory("/overlays/", (file, stream) -> {
+            var name = file.substring(file.lastIndexOf('/') + 1, file.lastIndexOf('.'));
+            var id = ctx.writeTexture("item", "overlay_" + name, stream.readAllBytes());
+            var entry = ModelUtil.createBasicItem(ctx.writeModel("overlay_" + name, ModelUtil.createItemGenerated(id)));
+            entry.addProperty("when", name);
+            cases.put(name, entry);
+        });
+
+        return cases;
+    }
+
+    private static void shallowWalkDirectory(@NotNull String directory, @NotNull ThrowingLambdas.BiConsumer<@NotNull String, @NotNull InputStream> consumer) {
+        try (var stream = SpriteTransform.class.getResourceAsStream(directory)) {
+            Objects.requireNonNull(stream);
+
+            var reader = new BufferedReader(new InputStreamReader(stream));
+            String file;
+            while ((file = reader.readLine()) != null) {
+                try (var fileStream = SpriteTransform.class.getResourceAsStream(directory + file)) {
+                    consumer.accept(file, Objects.requireNonNull(fileStream));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

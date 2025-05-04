@@ -16,7 +16,6 @@ import net.hollowcube.mapmaker.map.feature.play.item.MapDetailsItem;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.terraform.session.LocalSession;
-import net.kyori.adventure.util.TriState;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -26,8 +25,8 @@ import java.util.function.Consumer;
 
 public class BuilderMenuTabItems {
 
-    private static final ItemCondition ALWAYS = (world, player) -> TriState.TRUE;
-    private static final ItemCondition DISABLED = (world, player) -> TriState.NOT_SET;
+    private static final ItemCondition ALWAYS = (_, _) -> ItemVisibility.AVAILABLE;
+    private static final ItemCondition DISABLED = (_, _) -> ItemVisibility.DISABLED;
 
     public static final Item[] CUSTOM_BLOCKS = new Item[]{
             Item.of(
@@ -99,11 +98,11 @@ public class BuilderMenuTabItems {
     };
 
     private static ItemCondition featureFlag(@NotNull FeatureFlag flag) {
-        return ($, player) -> TriState.byBoolean(flag.test(player));
+        return (_, player) -> flag.test(player) ? ItemVisibility.AVAILABLE : ItemVisibility.HIDDEN;
     }
 
     private static ItemCondition variant(@NotNull MapVariant variant) {
-        return (world, player) -> TriState.byBoolean(world.map().settings().getVariant() == variant);
+        return (world, _) -> world.map().settings().getVariant() == variant ? ItemVisibility.AVAILABLE : ItemVisibility.DISABLED;
     }
 
     public record Item(
@@ -122,13 +121,16 @@ public class BuilderMenuTabItems {
         }
 
         public void give(@NotNull Player player) {
-            if (this.condition.check(MapWorld.forPlayer(player), player) == TriState.TRUE) {
-                this.giver.accept(player);
-            }
+            if (!canGive(player)) return;
+            this.giver.accept(player);
+        }
+
+        public boolean canGive(@NotNull Player player) {
+            return condition.check(MapWorld.forPlayer(player), player) == ItemVisibility.AVAILABLE;
         }
 
         public boolean isVisible(@NotNull MapWorld world, @NotNull Player player) {
-            return condition.check(world, player) != TriState.FALSE;
+            return condition.check(world, player) != ItemVisibility.HIDDEN;
         }
     }
 
@@ -144,6 +146,12 @@ public class BuilderMenuTabItems {
     @FunctionalInterface
     private interface ItemCondition {
 
-        @NotNull TriState check(@NotNull MapWorld world, @NotNull Player player);
+        @NotNull ItemVisibility check(@NotNull MapWorld world, @NotNull Player player);
+    }
+
+    private enum ItemVisibility {
+        AVAILABLE,
+        HIDDEN,
+        DISABLED,
     }
 }
