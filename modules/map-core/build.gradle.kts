@@ -9,7 +9,6 @@ dependencies {
     implementation(project(":modules:canvas:api"))
     implementation(project(":modules:compat"))
     implementation(project(":modules:terraform"))
-    implementation(project(":modules:script-engine"))
     implementation(project(":modules:datafix"))
 
     implementation(libs.minestom)

@@ -13,7 +13,6 @@ dependencies {
     implementation(project(":modules:command"))
     implementation(project(":modules:compat"))
     implementation(project(":modules:common"))
-    implementation(project(":modules:script-engine"))
     implementation(project(":modules:datafix"))
 
     implementation(libs.minestom)

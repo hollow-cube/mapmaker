@@ -82,7 +82,6 @@ import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.punishments.PunishmentManagementListener;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.PunishmentServiceImpl;
-import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
@@ -99,11 +98,9 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
-import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.server.common.ServerLinksPacket;
-import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -124,8 +121,6 @@ import java.util.regex.PatternSyntaxException;
 public abstract class AbstractMapServer implements MapServer {
     private final Logger logger = LoggerFactory.getLogger(MapServer.class);
 
-    private static final Tag<ScriptEngine> SCRIPT_ENGINE_TAG = Tag.Transient("instance_script_engine");
-
     protected final ConfigLoaderV3 config;
     protected final GlobalConfig globalConfig;
 
@@ -137,8 +132,6 @@ public abstract class AbstractMapServer implements MapServer {
     private final PermManager permManager;
     private final PunishmentService punishmentService;
     private PlayerInviteService inviteService; // So many dependencies very yikes
-
-    private ScriptEngine scriptEngine;
 
     // Listeners for other features
     private MapAllocator allocator;
@@ -231,7 +224,7 @@ public abstract class AbstractMapServer implements MapServer {
             VelocityProxy.enable(velocityConfig.secret());
         } else {
             logger.info("Velocity not configured, using online mode...");
-            MojangAuth.init();
+//            MojangAuth.init();
         }
 
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
@@ -387,12 +380,6 @@ public abstract class AbstractMapServer implements MapServer {
     protected abstract @NotNull MapAllocator createAllocator();
     protected abstract @NotNull ServerBridge createBridge();
 
-    @Override
-    public @NotNull ScriptEngine scriptEngine() {
-        if (this.scriptEngine == null) this.scriptEngine = new ScriptEngine(scheduler());
-        return this.scriptEngine;
-    }
-
     /**
      * Called just before the server starts, but after all services have been initialized.
      */
@@ -430,8 +417,8 @@ public abstract class AbstractMapServer implements MapServer {
         if (fullInstance) commandManager.register(new CosmeticsCommand(guiController()));
         if (fullInstance) commandManager.register(new RulesCommand());
         commandManager.register(createDebugCommand());
-        commandManager.register(new StoreCommand(this::scriptEngine, playerService(), permManager()));
-        commandManager.register(new HypercubeCommand(this::scriptEngine, playerService(), permManager()));
+        commandManager.register(new StoreCommand(playerService(), permManager()));
+        commandManager.register(new HypercubeCommand(playerService(), permManager()));
         commandManager.register(new DiscordCommand());
         if (fullInstance) commandManager.register(new LinkCommand(playerService()));
         if (fullInstance) commandManager.register(new TotpCommand(playerService(), guiController()));

@@ -1,6 +1,7 @@
 plugins {
     id("mapmaker.java-binary")
     id("mapmaker.packer-data")
+    id("org.graalvm.buildtools.native") version "0.10.6"
 }
 
 repositories {
@@ -27,4 +28,23 @@ dependencies {
 
 application {
     mainClass = "net.hollowcube.mapmaker.map.IsolateMain"
+}
+
+graalvmNative {
+    binaries {
+        named("main") {
+            fallback.set(false)
+            buildArgs(listOf("--static-nolibc"))
+        }
+    }
+
+    agent {
+        enabled.set(true)
+
+        metadataCopy {
+            inputTaskNames.add("run")
+            outputDirectories.add("resources/META-INF/native-image/net.hollowcube")
+            mergeWithExisting.set(true)
+        }
+    }
 }

@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.hub.feature.misc;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.math.Quaternion;
-import net.hollowcube.mapmaker.gui.store.StoreModule;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.BaseNpcEntity;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
@@ -42,7 +41,6 @@ public class StoreAdFeatureProvider implements HubFeature {
 
     @Override
     public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
-        this.scriptEngine = server::scriptEngine;
         this.playerService = server.playerService();
         this.permManager = server.permManager();
 
@@ -60,7 +58,6 @@ public class StoreAdFeatureProvider implements HubFeature {
     private void handleStoreClick(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {
         if (hand != PlayerHand.MAIN) return;
 
-        StoreModule.openStoreView(scriptEngine.get(), playerService, permManager, player, "hypercube");
     }
 
     private @NotNull TaskSchedule mapEntityUpdate() {

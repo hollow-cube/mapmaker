@@ -32,7 +32,9 @@ public class HubServerBridge implements ServerBridge {
 
         if (mapId.equals("f363bbd3-db9d-4957-bcc6-11b0ffa3a456") && joinMapState == JoinMapState.PLAYING) {
             System.out.println("stubbed transfer");
-            ProxySupport.transfer(player, "10.244.0.60");
+            var server = sessionService.findMapServer(mapId);
+            System.out.println("found server: " + server);
+            ProxySupport.transfer(player, server.serverClusterIp());
             return;
         }
 

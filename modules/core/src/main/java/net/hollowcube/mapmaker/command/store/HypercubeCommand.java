@@ -2,12 +2,8 @@ package net.hollowcube.mapmaker.command.store;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.common.lang.GenericMessages;
-import net.hollowcube.mapmaker.gui.store.StoreModule;
 import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
-import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,16 +12,13 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.TextStyle;
 import java.util.Locale;
-import java.util.function.Supplier;
 
 public class HypercubeCommand extends CommandDsl {
-    private final Supplier<ScriptEngine> scriptEngine;
     private final PlayerService playerService;
     private final PermManager permManager;
 
-    public HypercubeCommand(@NotNull Supplier<ScriptEngine> scriptEngine, @NotNull PlayerService playerService, @NotNull PermManager permManager) {
+    public HypercubeCommand(@NotNull PlayerService playerService, @NotNull PermManager permManager) {
         super("hypercube");
-        this.scriptEngine = scriptEngine;
         this.playerService = playerService;
         this.permManager = permManager;
 
@@ -33,20 +26,7 @@ public class HypercubeCommand extends CommandDsl {
     }
 
     private void handleHypercubeInfo(@NotNull Player player, @NotNull CommandContext context) {
-        try {
-            var playerId = PlayerDataV2.fromPlayer(player).id();
-            var status = playerService.getHypercubeStatus(playerId);
-            if (status == null) {
-                StoreModule.openStoreView(scriptEngine.get(), playerService, permManager, player, "hypercube");
-                return;
-            }
 
-            player.sendMessage(GenericMessages.COMMAND_HYPERCUBE_SUBSCRIPTION_INFO.with(
-                    formatInstant(status.since()), formatInstant(status.until())
-            ));
-        } catch (Exception e) {
-            player.sendMessage(GenericMessages.COMMAND_UNKNOWN_ERROR);
-        }
     }
 
     public static String formatInstant(Instant instant) {

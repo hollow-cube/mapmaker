@@ -1,0 +1,2269 @@
+{
+  "reflection": [
+    {
+      "type": "[B"
+    },
+    {
+      "type": "[C"
+    },
+    {
+      "type": "[D"
+    },
+    {
+      "type": "[F"
+    },
+    {
+      "type": "[I"
+    },
+    {
+      "type": "[J"
+    },
+    {
+      "type": "[Ljava.lang.String;"
+    },
+    {
+      "type": "[Ljavax.management.openmbean.CompositeData;"
+    },
+    {
+      "type": "[S"
+    },
+    {
+      "type": "[Z"
+    },
+    {
+      "type": "apple.security.AppleProvider",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "ch.qos.logback.classic.encoder.PatternLayoutEncoder",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "ch.qos.logback.classic.joran.SerializedModelConfigurator",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "ch.qos.logback.classic.spi.LogbackServiceProvider"
+    },
+    {
+      "type": "ch.qos.logback.classic.util.DefaultJoranConfigurator",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "ch.qos.logback.core.ConsoleAppender",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "ch.qos.logback.core.OutputStreamAppender",
+      "methods": [
+        {
+          "name": "setEncoder",
+          "parameterTypes": [
+            "ch.qos.logback.core.encoder.Encoder"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ch.qos.logback.core.encoder.Encoder"
+    },
+    {
+      "type": "ch.qos.logback.core.encoder.LayoutWrappingEncoder",
+      "methods": [
+        {
+          "name": "setParent",
+          "parameterTypes": [
+            "ch.qos.logback.core.spi.ContextAware"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ch.qos.logback.core.pattern.PatternLayoutEncoderBase",
+      "methods": [
+        {
+          "name": "setPattern",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ch.qos.logback.core.spi.ContextAware"
+    },
+    {
+      "type": "com.github.benmanes.caffeine.cache.AsyncCacheLoader"
+    },
+    {
+      "type": "com.github.benmanes.caffeine.cache.BLCHeader$DrainStatusRef",
+      "fields": [
+        {
+          "name": "drainStatus"
+        }
+      ]
+    },
+    {
+      "type": "com.github.benmanes.caffeine.cache.BaseMpscLinkedArrayQueueColdProducerFields",
+      "fields": [
+        {
+          "name": "producerLimit"
+        }
+      ]
+    },
+    {
+      "type": "com.github.benmanes.caffeine.cache.BaseMpscLinkedArrayQueueConsumerFields",
+      "fields": [
+        {
+          "name": "consumerIndex"
+        }
+      ]
+    },
+    {
+      "type": "com.github.benmanes.caffeine.cache.BaseMpscLinkedArrayQueueProducerFields",
+      "fields": [
+        {
+          "name": "producerIndex"
+        }
+      ]
+    },
+    {
+      "type": "com.github.benmanes.caffeine.cache.BoundedLocalCache",
+      "fields": [
+        {
+          "name": "refreshes"
+        }
+      ]
+    },
+    {
+      "type": "com.github.benmanes.caffeine.cache.PS",
+      "fields": [
+        {
+          "name": "key"
+        },
+        {
+          "name": "value"
+        }
+      ]
+    },
+    {
+      "type": "com.github.benmanes.caffeine.cache.PSW",
+      "fields": [
+        {
+          "name": "writeTime"
+        }
+      ],
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.github.benmanes.caffeine.cache.PSWMS",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.github.benmanes.caffeine.cache.SSMSW",
+      "fields": [
+        {
+          "name": "FACTORY"
+        }
+      ]
+    },
+    {
+      "type": "com.github.benmanes.caffeine.cache.SSW",
+      "fields": [
+        {
+          "name": "FACTORY"
+        }
+      ]
+    },
+    {
+      "type": "com.github.benmanes.caffeine.cache.StripedBuffer",
+      "fields": [
+        {
+          "name": "tableBusy"
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.AESCipher$General",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.ARCFOURCipher",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.ChaCha20Cipher$ChaCha20Poly1305",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.DESCipher",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.DESedeCipher",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.DHParameters",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.GaloisCounterMode$AESGCM",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.HmacCore$HmacSHA384",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.RSACipher",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.TlsMasterSecretGenerator",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.management.GarbageCollectorMXBean"
+    },
+    {
+      "type": "com.sun.management.GcInfo",
+      "fields": [
+        {
+          "name": "builder"
+        },
+        {
+          "name": "extAttributes"
+        }
+      ]
+    },
+    {
+      "type": "com.sun.management.HotSpotDiagnosticMXBean"
+    },
+    {
+      "type": "com.sun.management.OperatingSystemMXBean",
+      "methods": [
+        {
+          "name": "getProcessCpuTime",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.management.ThreadMXBean"
+    },
+    {
+      "type": "com.sun.management.UnixOperatingSystemMXBean",
+      "methods": [
+        {
+          "name": "getMaxFileDescriptorCount",
+          "parameterTypes": []
+        },
+        {
+          "name": "getOpenFileDescriptorCount",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.management.VMOption"
+    },
+    {
+      "type": "com.sun.management.internal.GarbageCollectorExtImpl"
+    },
+    {
+      "type": "com.sun.management.internal.HotSpotDiagnostic"
+    },
+    {
+      "type": "com.sun.management.internal.HotSpotThreadImpl"
+    },
+    {
+      "type": "com.sun.management.internal.OperatingSystemImpl",
+      "methods": [
+        {
+          "name": "getMaxFileDescriptorCount",
+          "parameterTypes": []
+        },
+        {
+          "name": "getOpenFileDescriptorCount",
+          "parameterTypes": []
+        },
+        {
+          "name": "getProcessCpuTime",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.opentelemetry.api.incubator.trace.ExtendedDefaultTracerProvider",
+      "methods": [
+        {
+          "name": "getNoop",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.prometheus.client.Striped64",
+      "fields": [
+        {
+          "name": "base"
+        },
+        {
+          "name": "busy"
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Boolean",
+      "fields": [
+        {
+          "name": "TYPE"
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Byte",
+      "fields": [
+        {
+          "name": "TYPE"
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Character",
+      "fields": [
+        {
+          "name": "TYPE"
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Class",
+      "methods": [
+        {
+          "name": "getRecordComponents",
+          "parameterTypes": []
+        },
+        {
+          "name": "isRecord",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Deprecated"
+    },
+    {
+      "type": "java.lang.Double",
+      "fields": [
+        {
+          "name": "TYPE"
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Float",
+      "fields": [
+        {
+          "name": "TYPE"
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Integer",
+      "fields": [
+        {
+          "name": "TYPE"
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Long",
+      "fields": [
+        {
+          "name": "TYPE"
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Record",
+      "allDeclaredFields": true
+    },
+    {
+      "type": "java.lang.Short",
+      "fields": [
+        {
+          "name": "TYPE"
+        }
+      ]
+    },
+    {
+      "type": "java.lang.StackTraceElement"
+    },
+    {
+      "type": "java.lang.String",
+      "fields": [
+        {
+          "name": "TYPE"
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Thread",
+      "fields": [
+        {
+          "name": "threadLocalRandomProbe"
+        }
+      ],
+      "methods": [
+        {
+          "name": "isVirtual",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Void",
+      "fields": [
+        {
+          "name": "TYPE"
+        }
+      ]
+    },
+    {
+      "type": "java.lang.management.BufferPoolMXBean",
+      "methods": [
+        {
+          "name": "getCount",
+          "parameterTypes": []
+        },
+        {
+          "name": "getMemoryUsed",
+          "parameterTypes": []
+        },
+        {
+          "name": "getName",
+          "parameterTypes": []
+        },
+        {
+          "name": "getTotalCapacity",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "java.lang.management.ClassLoadingMXBean"
+    },
+    {
+      "type": "java.lang.management.CompilationMXBean"
+    },
+    {
+      "type": "java.lang.management.LockInfo"
+    },
+    {
+      "type": "java.lang.management.ManagementFactory",
+      "methods": [
+        {
+          "name": "getPlatformMXBeans",
+          "parameterTypes": [
+            "java.lang.Class"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.lang.management.ManagementPermission",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.lang.management.MemoryMXBean"
+    },
+    {
+      "type": "java.lang.management.MemoryManagerMXBean"
+    },
+    {
+      "type": "java.lang.management.MemoryPoolMXBean"
+    },
+    {
+      "type": "java.lang.management.MemoryUsage",
+      "methods": [
+        {
+          "name": "from",
+          "parameterTypes": [
+            "javax.management.openmbean.CompositeData"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.lang.management.MonitorInfo"
+    },
+    {
+      "type": "java.lang.management.PlatformLoggingMXBean"
+    },
+    {
+      "type": "java.lang.management.RuntimeMXBean"
+    },
+    {
+      "type": "java.lang.management.ThreadInfo"
+    },
+    {
+      "type": "java.lang.reflect.RecordComponent",
+      "methods": [
+        {
+          "name": "getName",
+          "parameterTypes": []
+        },
+        {
+          "name": "getType",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "java.math.BigDecimal"
+    },
+    {
+      "type": "java.math.BigInteger"
+    },
+    {
+      "type": "java.nio.Buffer",
+      "fields": [
+        {
+          "name": "address"
+        },
+        {
+          "name": "capacity"
+        }
+      ]
+    },
+    {
+      "type": "java.security.AlgorithmParametersSpi"
+    },
+    {
+      "type": "java.security.KeyStoreSpi"
+    },
+    {
+      "type": "java.security.interfaces.ECPrivateKey"
+    },
+    {
+      "type": "java.security.interfaces.ECPublicKey"
+    },
+    {
+      "type": "java.security.interfaces.RSAPrivateKey"
+    },
+    {
+      "type": "java.security.interfaces.RSAPublicKey"
+    },
+    {
+      "type": "java.sql.Date"
+    },
+    {
+      "type": "java.util.ArrayList",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "java.util.Date"
+    },
+    {
+      "type": "java.util.PropertyPermission",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.util.concurrent.ForkJoinTask",
+      "fields": [
+        {
+          "name": "aux"
+        },
+        {
+          "name": "status"
+        }
+      ]
+    },
+    {
+      "type": "java.util.concurrent.atomic.AtomicBoolean",
+      "fields": [
+        {
+          "name": "value"
+        }
+      ]
+    },
+    {
+      "type": "java.util.concurrent.atomic.Striped64",
+      "fields": [
+        {
+          "name": "base"
+        },
+        {
+          "name": "cellsBusy"
+        }
+      ]
+    },
+    {
+      "type": "java.util.logging.LogManager",
+      "methods": [
+        {
+          "name": "getLoggingMXBean",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "java.util.logging.LoggingMXBean"
+    },
+    {
+      "type": "java.util.zip.CRC32C",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "java.util.zip.Checksum",
+      "methods": [
+        {
+          "name": "update",
+          "parameterTypes": [
+            "java.nio.ByteBuffer"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "javax.management.MBeanOperationInfo"
+    },
+    {
+      "type": "javax.management.MBeanServerBuilder",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "javax.management.ObjectName"
+    },
+    {
+      "type": "javax.management.StandardEmitterMBean"
+    },
+    {
+      "type": "javax.management.openmbean.CompositeData"
+    },
+    {
+      "type": "javax.management.openmbean.OpenMBeanOperationInfoSupport"
+    },
+    {
+      "type": "javax.management.openmbean.TabularData"
+    },
+    {
+      "type": "jdk.internal.misc.Unsafe"
+    },
+    {
+      "type": "jdk.management.jfr.ConfigurationInfo"
+    },
+    {
+      "type": "jdk.management.jfr.EventTypeInfo"
+    },
+    {
+      "type": "jdk.management.jfr.FlightRecorderMXBean"
+    },
+    {
+      "type": "jdk.management.jfr.FlightRecorderMXBeanImpl"
+    },
+    {
+      "type": "jdk.management.jfr.RecordingInfo"
+    },
+    {
+      "type": "jdk.management.jfr.SettingDescriptorInfo"
+    },
+    {
+      "type": "net.hollowcube.compat.axiom.AxiomCompatProvider"
+    },
+    {
+      "type": "net.hollowcube.compat.noxesium.NoxesiumCompatProvider"
+    },
+    {
+      "type": "net.hollowcube.compat.vanilla.VanillaCompatProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.chat.announcements.Announcement",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "net.hollowcube.mapmaker.chat.announcements.AnnouncementFilters"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.chat.announcements.AnnouncementFilters",
+      "allDeclaredFields": true
+    },
+    {
+      "type": "net.hollowcube.mapmaker.chat.announcements.AnnouncementsConfig",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "int",
+            "java.util.List"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.config.GlobalConfig",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.config.HttpConfig",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "int"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.config.MetricsConfig",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.config.MinestomConfig",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "int"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.config.TracingConfig",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.config.VelocityConfig",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.cosmetic.Accessories"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.cosmetic.Hats"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.cosmetic.Particles"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.cosmetic.VictoryEffects"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.feature.unleash.UnleashConfig",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "boolean",
+            "boolean",
+            "java.lang.String",
+            "java.lang.String",
+            "boolean",
+            "java.lang.String",
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.kafka.KafkaConfig",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.MapData",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.MapPlayerData",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.MapRating",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "net.hollowcube.mapmaker.map.MapRating$State",
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.MapSettings",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.SaveState",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.common.CheckpointSignFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.common.DebugOverlayFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.common.WorldBorderFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.common.WorldEffectFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.edit.CustomBlocksFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.edit.DisplayEntityEditingFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.edit.MapSpawnIndicatorFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.edit.SchematicUploadFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.edit.TeleportHistoryFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.edit.VanillaBlocksFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.experimental.MarkerFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.experimental.pathtool.PathToolFeatureHandler"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.BaseBuildMapFeatureProvide"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.BaseParkourMapFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.GhostFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.MapRatingFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.PlayCompletionFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.PlayerVisibilityFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.RecordingFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.TimerFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.setting.BoatFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.setting.NoJumpFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.setting.NoRelogFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.setting.NoSneakFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.setting.NoSprintFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.setting.NoTurnFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.setting.OnlySprintFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.setting.ResetLiquidFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.setting.TickRateFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.vanilla.ElytraFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.play.vanilla.TridentFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.feature.test.TestCompletionFeatureProvider"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.map.setting.MapSetting",
+      "allDeclaredFields": true
+    },
+    {
+      "type": "net.hollowcube.mapmaker.object.ObjectData",
+      "allDeclaredFields": true
+    },
+    {
+      "type": "net.hollowcube.mapmaker.player.DisplayName$Part",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.player.PlayerDataV2",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.player.PlayerSkin",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.player.SessionTransferRequest",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "map",
+          "parameterTypes": []
+        },
+        {
+          "name": "server",
+          "parameterTypes": []
+        },
+        {
+          "name": "state",
+          "parameterTypes": []
+        },
+        {
+          "name": "type",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.player.TransferSessionResponse",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "net.hollowcube.mapmaker.player.PlayerDataV2",
+            "net.hollowcube.mapmaker.session.PlayerSession",
+            "boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.punishments.types.PunishmentLadder",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String",
+            "net.hollowcube.mapmaker.punishments.types.PunishmentType",
+            "java.util.List",
+            "java.util.List"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.punishments.types.PunishmentLadder$Entry",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "long"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.punishments.types.PunishmentLadder$Reason",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.util.List"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.runtime.ServerRuntimeImpl"
+    },
+    {
+      "type": "net.hollowcube.mapmaker.session.PlayerSession",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.time.Instant",
+            "java.lang.String",
+            "java.lang.String",
+            "boolean",
+            "java.lang.String",
+            "net.hollowcube.mapmaker.player.PlayerSkin",
+            "net.hollowcube.mapmaker.session.Presence"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.session.Presence",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.session.SessionStateUpdateRequest$Metadata",
+      "allDeclaredFields": true
+    },
+    {
+      "type": "net.hollowcube.mapmaker.session.SessionUpdateMessage",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "net.hollowcube.mapmaker.session.SessionUpdateMessage$Action",
+            "java.lang.String",
+            "net.hollowcube.mapmaker.session.PlayerSession",
+            "net.hollowcube.mapmaker.session.SessionStateUpdateRequest$Metadata"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mql.jit.BouncePadScript"
+    },
+    {
+      "type": "net.hollowcube.mql.jit.BouncePadScript$Queries"
+    },
+    {
+      "type": "net.hollowcube.mql.jit.BouncePadScript$Variables"
+    },
+    {
+      "type": "net.hollowcube.mql.runtime.MqlMath"
+    },
+    {
+      "type": "net.minestom.server.adventure.provider.MinestomComponentLoggerProvider"
+    },
+    {
+      "type": "net.minestom.server.adventure.provider.MinestomGsonComponentSerializerProvider"
+    },
+    {
+      "type": "net.minestom.server.adventure.provider.MinestomLegacyComponentSerializerProvider"
+    },
+    {
+      "type": "net.minestom.server.adventure.provider.MinestomPlainTextComponentSerializerProvider"
+    },
+    {
+      "type": "net.minestom.server.coordinate.Pos",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "double",
+            "double",
+            "double",
+            "float",
+            "float"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.minestom.server.entity.EntityView$Option",
+      "fields": [
+        {
+          "name": "auto"
+        }
+      ]
+    },
+    {
+      "type": "net.minestom.server.entity.MetadataDef"
+    },
+    {
+      "type": "net.minestom.server.entity.MetadataDef$LivingEntity"
+    },
+    {
+      "type": "net.minestom.server.entity.MetadataDef$Player"
+    },
+    {
+      "type": "net.minestom.server.entity.MetadataHolder",
+      "fields": [
+        {
+          "name": "notifyAboutChanges"
+        }
+      ]
+    },
+    {
+      "type": "net.minestom.server.event.EventNodeLazyImpl",
+      "fields": [
+        {
+          "name": "mapped"
+        }
+      ]
+    },
+    {
+      "type": "net.minestom.server.instance.DynamicChunk",
+      "fields": [
+        {
+          "name": "entries"
+        },
+        {
+          "name": "needsCompleteHeightmapRefresh"
+        },
+        {
+          "name": "tickableMap"
+        }
+      ]
+    },
+    {
+      "type": "net.minestom.server.instance.InstanceContainer",
+      "methods": [
+        {
+          "name": "cacheChunk",
+          "parameterTypes": [
+            "net.minestom.server.instance.Chunk"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.minestom.server.network.NetworkBufferImpl",
+      "fields": [
+        {
+          "name": "address"
+        }
+      ]
+    },
+    {
+      "type": "net.minestom.server.network.player.PlayerConnection",
+      "fields": [
+        {
+          "name": "knownPacksFuture"
+        }
+      ]
+    },
+    {
+      "type": "net.minestom.server.timer.TaskImpl",
+      "fields": [
+        {
+          "name": "parked"
+        }
+      ]
+    },
+    {
+      "type": "org.apache.kafka.clients.consumer.CooperativeStickyAssignor",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.apache.kafka.clients.consumer.RangeAssignor",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.apache.kafka.common.utils.AppInfoParser$AppInfo"
+    },
+    {
+      "type": "org.apache.kafka.common.utils.AppInfoParser$AppInfoMBean"
+    },
+    {
+      "type": "org.apache.kafka.shaded.com.google.protobuf.ExtensionRegistry",
+      "methods": [
+        {
+          "name": "getEmptyRegistry",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.jctools.queues.BaseMpscLinkedArrayQueueColdProducerFields",
+      "fields": [
+        {
+          "name": "producerLimit"
+        }
+      ]
+    },
+    {
+      "type": "org.jctools.queues.BaseMpscLinkedArrayQueueConsumerFields",
+      "fields": [
+        {
+          "name": "consumerIndex"
+        }
+      ]
+    },
+    {
+      "type": "org.jctools.queues.BaseMpscLinkedArrayQueueProducerFields",
+      "fields": [
+        {
+          "name": "producerIndex"
+        }
+      ]
+    },
+    {
+      "type": "org.jctools.queues.MpUnboundedXaddArrayQueueConsumerFields",
+      "fields": [
+        {
+          "name": "consumerChunk"
+        },
+        {
+          "name": "consumerIndex"
+        }
+      ]
+    },
+    {
+      "type": "org.jctools.queues.MpUnboundedXaddArrayQueueProducerChunk",
+      "fields": [
+        {
+          "name": "producerChunk"
+        },
+        {
+          "name": "producerChunkIndex"
+        }
+      ]
+    },
+    {
+      "type": "org.jctools.queues.MpUnboundedXaddArrayQueueProducerFields",
+      "fields": [
+        {
+          "name": "producerIndex"
+        }
+      ]
+    },
+    {
+      "type": "org.jctools.queues.MpUnboundedXaddChunk",
+      "fields": [
+        {
+          "name": "index"
+        },
+        {
+          "name": "next"
+        },
+        {
+          "name": "prev"
+        }
+      ]
+    },
+    {
+      "type": "org.jctools.queues.MpscArrayQueueConsumerIndexField",
+      "fields": [
+        {
+          "name": "consumerIndex"
+        }
+      ]
+    },
+    {
+      "type": "org.jctools.queues.MpscArrayQueueProducerIndexField",
+      "fields": [
+        {
+          "name": "producerIndex"
+        }
+      ]
+    },
+    {
+      "type": "org.jctools.queues.MpscArrayQueueProducerLimitField",
+      "fields": [
+        {
+          "name": "producerLimit"
+        }
+      ]
+    },
+    {
+      "type": "org.jctools.queues.SpscArrayQueueConsumerIndexField",
+      "fields": [
+        {
+          "name": "consumerIndex"
+        }
+      ]
+    },
+    {
+      "type": "org.jctools.queues.SpscArrayQueueProducerIndexFields",
+      "fields": [
+        {
+          "name": "producerIndex"
+        }
+      ]
+    },
+    {
+      "type": "org.osgi.framework.BundleEvent"
+    },
+    {
+      "type": "space.vectrix.flare.fastutil.Int2ObjectSyncMapImpl$ExpungingEntryImpl",
+      "fields": [
+        {
+          "name": "value"
+        }
+      ]
+    },
+    {
+      "type": "space.vectrix.flare.fastutil.Long2ObjectSyncMapImpl$ExpungingEntryImpl",
+      "fields": [
+        {
+          "name": "value"
+        }
+      ]
+    },
+    {
+      "type": "sun.management.ClassLoadingImpl"
+    },
+    {
+      "type": "sun.management.CompilationImpl"
+    },
+    {
+      "type": "sun.management.ManagementFactoryHelper$1"
+    },
+    {
+      "type": "sun.management.ManagementFactoryHelper$PlatformLoggingImpl"
+    },
+    {
+      "type": "sun.management.MemoryImpl"
+    },
+    {
+      "type": "sun.management.MemoryManagerImpl"
+    },
+    {
+      "type": "sun.management.MemoryPoolImpl"
+    },
+    {
+      "type": "sun.management.RuntimeImpl"
+    },
+    {
+      "type": "sun.misc.Unsafe",
+      "fields": [
+        {
+          "name": "theUnsafe"
+        }
+      ]
+    },
+    {
+      "type": "sun.security.pkcs12.PKCS12KeyStore",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.pkcs12.PKCS12KeyStore$DualFormatPKCS12",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.DSA$SHA224withDSA",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.DSA$SHA256withDSA",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.JavaKeyStore$DualFormatJKS",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.JavaKeyStore$JKS",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.NativePRNG",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.security.SecureRandomParameters"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.SHA",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.SHA2$SHA224",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.SHA2$SHA256",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.SHA5$SHA384",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.SHA5$SHA512",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.X509Factory",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.certpath.PKIXCertPathValidator",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.rsa.PSSParameters",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.rsa.RSAKeyFactory$Legacy",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.rsa.RSAKeyPairGenerator$Legacy",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.rsa.RSAPSSSignature",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.rsa.RSASignature$SHA224withRSA",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.rsa.RSASignature$SHA256withRSA",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.ssl.KeyManagerFactoryImpl$SunX509",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.ssl.SSLContextImpl$DefaultSSLContext",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.ssl.TrustManagerFactoryImpl$PKIXFactory",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.AuthorityInfoAccessExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.AuthorityKeyIdentifierExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.BasicConstraintsExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.CRLDistributionPointsExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.CertificatePoliciesExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.ExtendedKeyUsageExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.IssuerAlternativeNameExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.KeyUsageExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.NetscapeCertTypeExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.PrivateKeyUsageExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.SubjectAlternativeNameExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.SubjectKeyIdentifierExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "glob": "META-INF/services/ch.qos.logback.classic.spi.Configurator"
+    },
+    {
+      "glob": "META-INF/services/com.sun.net.httpserver.spi.HttpServerProvider"
+    },
+    {
+      "glob": "META-INF/services/io.opentelemetry.context.ContextStorageProvider"
+    },
+    {
+      "glob": "META-INF/services/java.lang.System$LoggerFinder"
+    },
+    {
+      "glob": "META-INF/services/java.net.spi.InetAddressResolverProvider"
+    },
+    {
+      "glob": "META-INF/services/java.net.spi.URLStreamHandlerProvider"
+    },
+    {
+      "glob": "META-INF/services/java.nio.channels.spi.SelectorProvider"
+    },
+    {
+      "glob": "META-INF/services/java.time.zone.ZoneRulesProvider"
+    },
+    {
+      "glob": "META-INF/services/javax.xml.parsers.SAXParserFactory"
+    },
+    {
+      "glob": "META-INF/services/net.hollowcube.common.ServerRuntime"
+    },
+    {
+      "glob": "META-INF/services/net.hollowcube.compat.api.CompatProvider"
+    },
+    {
+      "glob": "META-INF/services/net.hollowcube.mapmaker.map.feature.FeatureProvider"
+    },
+    {
+      "glob": "META-INF/services/net.kyori.adventure.text.logger.slf4j.ComponentLoggerProvider"
+    },
+    {
+      "glob": "META-INF/services/net.kyori.adventure.text.minimessage.MiniMessage$Provider"
+    },
+    {
+      "glob": "META-INF/services/net.kyori.adventure.text.serializer.gson.GsonComponentSerializer$Provider"
+    },
+    {
+      "glob": "META-INF/services/net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer$Provider"
+    },
+    {
+      "glob": "META-INF/services/net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer$Provider"
+    },
+    {
+      "glob": "META-INF/services/org.slf4j.spi.SLF4JServiceProvider"
+    },
+    {
+      "glob": "attributes.json"
+    },
+    {
+      "glob": "banner_patterns.json"
+    },
+    {
+      "glob": "biomes.json"
+    },
+    {
+      "glob": "block_sound_types.json"
+    },
+    {
+      "glob": "blocks.json"
+    },
+    {
+      "glob": "cat_variants.json"
+    },
+    {
+      "glob": "chat_types.json"
+    },
+    {
+      "glob": "chicken_variants.json"
+    },
+    {
+      "glob": "cow_variants.json"
+    },
+    {
+      "glob": "damage_types.json"
+    },
+    {
+      "glob": "darwin/aarch64/libzstd-jni-1.5.7-2.dylib"
+    },
+    {
+      "glob": "default_config.json"
+    },
+    {
+      "glob": "dimension_types.json"
+    },
+    {
+      "glob": "en_US.json"
+    },
+    {
+      "glob": "enchantments.json"
+    },
+    {
+      "glob": "entities.json"
+    },
+    {
+      "glob": "feature_flags.json"
+    },
+    {
+      "glob": "fonts.json"
+    },
+    {
+      "glob": "frog_variants.json"
+    },
+    {
+      "glob": "game_events.json"
+    },
+    {
+      "glob": "instruments.json"
+    },
+    {
+      "glob": "items.json"
+    },
+    {
+      "glob": "jukebox_songs.json"
+    },
+    {
+      "glob": "kafka/kafka-version.properties"
+    },
+    {
+      "glob": "logback-test.scmo"
+    },
+    {
+      "glob": "logback-test.xml"
+    },
+    {
+      "glob": "logback.scmo"
+    },
+    {
+      "glob": "logback.xml"
+    },
+    {
+      "glob": "net/hollowcube/datafix/v1450/block_state_by_legacy_id.json"
+    },
+    {
+      "glob": "net/hollowcube/datafix/v1450/legacy_id_by_legacy_block_state.json"
+    },
+    {
+      "glob": "net/hollowcube/datafix/v1450/legacy_id_by_name.json"
+    },
+    {
+      "glob": "painting_variants.json"
+    },
+    {
+      "glob": "pig_variants.json"
+    },
+    {
+      "glob": "potion_effects.json"
+    },
+    {
+      "glob": "sounds.json"
+    },
+    {
+      "glob": "sprites.json"
+    },
+    {
+      "glob": "tags/biome.json"
+    },
+    {
+      "glob": "tags/block.json"
+    },
+    {
+      "glob": "tags/enchantment.json"
+    },
+    {
+      "glob": "tags/entity_type.json"
+    },
+    {
+      "glob": "tags/fluid.json"
+    },
+    {
+      "glob": "tags/game_event.json"
+    },
+    {
+      "glob": "tags/instrument.json"
+    },
+    {
+      "glob": "tags/item.json"
+    },
+    {
+      "glob": "trim_materials.json"
+    },
+    {
+      "glob": "trim_patterns.json"
+    },
+    {
+      "glob": "wolf_sound_variants.json"
+    },
+    {
+      "glob": "wolf_variants.json"
+    },
+    {
+      "module": "java.base",
+      "glob": "jdk/internal/icu/impl/data/icudt74b/nfc.nrm"
+    },
+    {
+      "module": "java.base",
+      "glob": "jdk/internal/icu/impl/data/icudt74b/nfkc.nrm"
+    },
+    {
+      "module": "java.base",
+      "glob": "jdk/internal/icu/impl/data/icudt74b/uprops.icu"
+    },
+    {
+      "module": "java.base",
+      "glob": "sun/net/idn/uidna.spp"
+    },
+    {
+      "module": "java.xml",
+      "glob": "jdk/xml/internal/jdkcatalog/JDKCatalog.xml"
+    },
+    {
+      "module": "jdk.jfr",
+      "glob": "jdk/jfr/internal/query/view.ini"
+    }
+  ],
+  "bundles": [],
+  "jni": [
+    {
+      "type": "[Lcom.sun.management.internal.DiagnosticCommandArgumentInfo;"
+    },
+    {
+      "type": "[Lcom.sun.management.internal.DiagnosticCommandInfo;"
+    },
+    {
+      "type": "com.sun.management.internal.DiagnosticCommandArgumentInfo",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "boolean",
+            "boolean",
+            "boolean",
+            "int"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.sun.management.internal.DiagnosticCommandInfo",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "boolean",
+            "java.util.List"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Boolean",
+      "methods": [
+        {
+          "name": "getBoolean",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.util.Arrays",
+      "methods": [
+        {
+          "name": "asList",
+          "parameterTypes": [
+            "java.lang.Object[]"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.management.VMManagementImpl",
+      "fields": [
+        {
+          "name": "compTimeMonitoringSupport"
+        },
+        {
+          "name": "currentThreadCpuTimeSupport"
+        },
+        {
+          "name": "objectMonitorUsageSupport"
+        },
+        {
+          "name": "otherThreadCpuTimeSupport"
+        },
+        {
+          "name": "remoteDiagnosticCommandsSupport"
+        },
+        {
+          "name": "synchronizerUsageSupport"
+        },
+        {
+          "name": "threadAllocatedMemorySupport"
+        },
+        {
+          "name": "threadContentionMonitoringSupport"
+        }
+      ]
+    }
+  ]
+}

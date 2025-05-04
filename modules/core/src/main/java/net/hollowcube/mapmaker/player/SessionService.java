@@ -25,6 +25,10 @@ public interface SessionService {
 
     @NotNull JoinMapResponse joinHubV2(@NotNull JoinHubRequest req);
 
+    default @NotNull JoinMapResponse findMapServer(@NotNull String mapId) {
+        throw new UnsupportedOperationException("todo");
+    }
+
     class InternalError extends RuntimeException {
         public InternalError(@NotNull String message) {
             super(message);
@@ -50,7 +54,7 @@ public interface SessionService {
     }
 
     class NoAvailableServerException extends RuntimeException {
-        
+
     }
 
 }

@@ -1,7 +1,7 @@
-FROM mworzala/graalvm-jre:24
+FROM gcr.io/distroless/base
 
 WORKDIR /app
-COPY ./bin/map-isolate/build/libs/map-isolate-all.jar /app/server.jar
+COPY ./bin/map-isolate/build/native/nativeCompile /app
 
 EXPOSE 25565
-CMD ["-XX:+UseG1GC", "-Xms3000M", "-Xmx3000M", "-XX:ActiveProcessorCount=4", "-jar", "server.jar"]
+CMD ["./map-isolate"]

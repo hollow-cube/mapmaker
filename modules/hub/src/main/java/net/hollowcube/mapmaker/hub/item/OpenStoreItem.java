@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub.item;
 
-import net.hollowcube.mapmaker.gui.store.StoreModule;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -27,8 +26,6 @@ public class OpenStoreItem extends ItemHandler {
 
     @Override
     protected void rightClicked(@NotNull Click click) {
-        StoreModule.openStoreView(server.scriptEngine(), server.playerService(),
-                server.permManager(), click.player(), null);
     }
 
 }
