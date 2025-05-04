@@ -83,6 +83,7 @@ public class MapInstance extends InstanceContainer {
     public void loadStream(@NotNull ReadableMapData data, @Nullable PolarWorldAccess worldAccess) {
         FutureUtil.getUnchecked(PolarLoader.streamLoad(this, data.data(), data.length(),
                 PolarDataFixer.INSTANCE, worldAccess, hasLighting));
+        setChunkSupplier(EmptyChunk::new);
     }
 
     @Blocking

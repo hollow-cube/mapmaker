@@ -34,6 +34,7 @@ include(
     "bin:hub",
     "bin:local",
     "bin:map",
+    "bin:map-isolate",
     "bin:packer",
     "bin:proxy-plugin",
 )

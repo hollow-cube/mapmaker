@@ -30,6 +30,12 @@ public class HubServerBridge implements ServerBridge {
             return;
         }
 
+        if (mapId.equals("f363bbd3-db9d-4957-bcc6-11b0ffa3a456") && joinMapState == JoinMapState.PLAYING) {
+            System.out.println("stubbed transfer");
+            ProxySupport.transfer(player, "10.244.0.60");
+            return;
+        }
+
         MiscFunctionality.sendFadeout(player);
         try {
             var playerId = player.getUuid().toString();
