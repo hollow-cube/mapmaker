@@ -10,7 +10,11 @@ public interface CommandExecutor {
     void execute(@NotNull CommandSender sender, @NotNull CommandContext context);
 
     default void executeNextTick(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        MinecraftServer.getSchedulerManager().scheduleNextTick(() -> execute(sender, context));
+        if (sender instanceof Player player) {
+            player.scheduleNextTick(_ -> execute(sender, context));
+        } else {
+            MinecraftServer.getSchedulerManager().scheduleNextTick(() -> execute(sender, context));
+        }
     }
 
     @FunctionalInterface

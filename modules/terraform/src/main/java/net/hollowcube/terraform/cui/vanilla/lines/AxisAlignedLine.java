@@ -1,4 +1,4 @@
-package net.hollowcube.terraform.cui.meow.lines;
+package net.hollowcube.terraform.cui.vanilla.lines;
 
 import net.hollowcube.common.types.Axis;
 import net.kyori.adventure.util.RGBLike;

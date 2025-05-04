@@ -1,4 +1,4 @@
-package net.hollowcube.terraform.cui.meow.lines;
+package net.hollowcube.terraform.cui.vanilla.lines;
 
 import net.kyori.adventure.util.RGBLike;
 import net.minestom.server.coordinate.Point;

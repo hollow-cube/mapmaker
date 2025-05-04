@@ -1,7 +1,6 @@
 package net.hollowcube.terraform.command.util;
 
 import net.hollowcube.terraform.cui.ClientRenderer;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.Task;
@@ -20,7 +19,7 @@ public class CommandPreviewHelper {
                 task.cancel();
             }
 
-            return MinecraftServer.getSchedulerManager()
+            return player.scheduler()
                     .buildTask(() -> renderer.switchTo(ClientRenderer.RenderContext.NORMAL, false))
                     .delay(5, ChronoUnit.SECONDS)
                     .schedule();

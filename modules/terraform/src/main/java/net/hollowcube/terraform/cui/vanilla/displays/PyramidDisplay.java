@@ -1,7 +1,7 @@
-package net.hollowcube.terraform.cui.meow.displays;
+package net.hollowcube.terraform.cui.vanilla.displays;
 
 import net.hollowcube.terraform.cui.ClientRenderer;
-import net.hollowcube.terraform.cui.meow.lines.AbstractLine;
+import net.hollowcube.terraform.cui.vanilla.lines.AbstractLine;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;

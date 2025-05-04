@@ -1,12 +1,12 @@
-package net.hollowcube.terraform.cui.meow;
+package net.hollowcube.terraform.cui.vanilla;
 
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.terraform.cui.ClientRenderer;
-import net.hollowcube.terraform.cui.meow.displays.AabbDisplay;
-import net.hollowcube.terraform.cui.meow.displays.DefaultClientRenderDisplay;
-import net.hollowcube.terraform.cui.meow.displays.PyramidDisplay;
-import net.hollowcube.terraform.cui.meow.lines.AbstractLine;
-import net.hollowcube.terraform.cui.meow.lines.DefaultLine;
+import net.hollowcube.terraform.cui.vanilla.displays.AabbDisplay;
+import net.hollowcube.terraform.cui.vanilla.displays.DefaultClientRenderDisplay;
+import net.hollowcube.terraform.cui.vanilla.displays.PyramidDisplay;
+import net.hollowcube.terraform.cui.vanilla.lines.AbstractLine;
+import net.hollowcube.terraform.cui.vanilla.lines.DefaultLine;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;

@@ -5,7 +5,7 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.cui.ClientInterface;
 import net.hollowcube.terraform.cui.ClientRenderer;
-import net.hollowcube.terraform.cui.meow.DefaultClientRenderer;
+import net.hollowcube.terraform.cui.vanilla.DefaultClientRenderer;
 import net.hollowcube.terraform.selection.Selection;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;

@@ -1,14 +1,13 @@
-package net.hollowcube.terraform.cui.meow.lines;
+package net.hollowcube.terraform.cui.vanilla.lines;
 
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.ColorUtil;
 import net.hollowcube.compat.axiom.AxiomPlayer;
-import net.hollowcube.terraform.cui.meow.displays.DefaultClientRenderDisplay;
+import net.hollowcube.terraform.cui.vanilla.displays.DefaultClientRenderDisplay;
 import net.hollowcube.terraform.util.math.CoordinateUtil;
 import net.kyori.adventure.util.RGBLike;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
@@ -74,7 +73,7 @@ public abstract class AbstractLine extends Entity implements DefaultClientRender
     }
 
     public void recolor(RGBLike color) {
-        final ItemDisplayMeta meta = this.getEntityMeta();
+        var meta = this.getEntityMeta();
 
         meta.setGlowColorOverride(ColorUtil.toRgb(color));
         meta.setItemStack(ItemStack.builder(Material.DIAMOND)
@@ -86,12 +85,12 @@ public abstract class AbstractLine extends Entity implements DefaultClientRender
     public void reshape(Point from, Point to) {
         player.sendPacket(new BundlePacket());
 
-        final ItemDisplayMeta meta = this.getEntityMeta();
+        var meta = this.getEntityMeta();
         var vec = Vec.fromPoint(to.sub(from));
         var length = vec.length();
 
         var scale = new Vec(length + THICKNESS, THICKNESS, THICKNESS);
-        setPositionInternal(Pos.fromPoint(from));
+        setPositionInternal(player.getPosition().withView(0, 0));
 
         //setPositionInternal(player.getPreviousPosition().withView(0,0).sub(player.getVelocity()));
         meta.setPosRotInterpolationDuration(2);
@@ -99,7 +98,7 @@ public abstract class AbstractLine extends Entity implements DefaultClientRender
         meta.setTransformationInterpolationStartDelta(0);
         //player.sendPacket(new EntityTeleportPacket(this.getEntityId(), player.getPosition().withView(0,0), Vec.ZERO, RelativeFlags.DELTA_COORD, true));
         this.synchronizePosition();
-        meta.setTranslation(vec.div(2));
+        meta.setTranslation(from.sub(player.getPosition().withView(0, 0)).add(vec.div(2)));
 
         meta.setInvisible(true);
         meta.setLeftRotation(Quaternion.fromEulerAngles(CoordinateUtil.getAnglesFromPoints(from, to)).normalizeThis().into());

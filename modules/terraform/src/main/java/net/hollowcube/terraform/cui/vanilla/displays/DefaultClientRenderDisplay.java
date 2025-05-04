@@ -1,8 +1,8 @@
-package net.hollowcube.terraform.cui.meow.displays;
+package net.hollowcube.terraform.cui.vanilla.displays;
 
-import net.hollowcube.terraform.cui.meow.lines.AbstractLine;
-import net.hollowcube.terraform.cui.meow.lines.AxisAlignedLine;
-import net.hollowcube.terraform.cui.meow.lines.DefaultLine;
+import net.hollowcube.terraform.cui.vanilla.lines.AbstractLine;
+import net.hollowcube.terraform.cui.vanilla.lines.AxisAlignedLine;
+import net.hollowcube.terraform.cui.vanilla.lines.DefaultLine;
 import net.kyori.adventure.util.RGBLike;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
