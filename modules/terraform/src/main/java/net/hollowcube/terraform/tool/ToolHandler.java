@@ -67,8 +67,9 @@ public class ToolHandler {
     public @NotNull ItemStack createBuiltinTool(@NotNull Key key) {
         var tool = tools.get(key.asString());
         Check.notNull(tool, "missing tool: " + key.asString());
-        return ItemStack.of(tool.material())
-                .withTag(BuiltinTool.TYPE, key.asString());
+        return tool.createItemStack()
+                .set(BuiltinTool.TYPE, key.asString())
+                .build();
     }
 
     private void handleBreakBlock(@NotNull PlayerBlockBreakEvent event) {

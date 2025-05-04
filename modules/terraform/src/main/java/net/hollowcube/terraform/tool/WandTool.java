@@ -5,8 +5,13 @@ import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.LocalSession;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.component.DataComponents;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.component.Tool;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 @AutoService(BuiltinTool.class)
 public class WandTool implements BuiltinTool {
@@ -25,6 +30,12 @@ public class WandTool implements BuiltinTool {
     @Override
     public @NotNull Material material() {
         return Material.WOODEN_AXE;
+    }
+
+    @Override
+    public @NotNull ItemStack.Builder createItemStack() {
+        return BuiltinTool.super.createItemStack()
+                .set(DataComponents.TOOL, new Tool(List.of(), 0f, 0, false));
     }
 
     @Override
