@@ -17,8 +17,8 @@ out float vertexDistance;
 out vec4 vertexColor;
 out vec2 texCoord0;
 
-vec2[4] corners = vec2[](vec2(0, -1), vec2(0, 0), vec2(1, 0), vec2(1, -1));
-vec2[8] sizes = vec2[](vec2(1, 1), vec2(2, 1), vec2(2, 3), vec2(3, 3), vec2(4, 3), vec2(1, 1), vec2(1, 1), vec2(1, 1));
+vec2[4] corners = vec2[](vec2(0, 0), vec2(0, 1), vec2(1, 1), vec2(1, 0));
+vec2[8] sizes = vec2[](vec2(1, 21./18.), vec2(2, 1), vec2(3, 21./18.), vec2(3, 2), vec2(3, 3), vec2(4, 3), vec2(1, 1), vec2(1, 1));
 
 void main() {
     vec4 color = Color;
@@ -38,20 +38,20 @@ void main() {
         color = vec4(1);// Remove our marker color
 
         vec2 center = (inverse(ProjMat) * inverse(ModelViewMat) * vec4(0, 0, 0, 1)).xy;//why cant i multiply from other side instead of using inverse?
+        center -= vec2(81, 94);
 
         int sizeIndex = ((icol.y & 3) << 1) | ((icol.z >> 7) & 1);
-        vec2 offset = corners[gl_VertexID % 4] * 18 * sizes[3];
+        vec2 offset = (corners[gl_VertexID % 4] * sizes[sizeIndex]) * 18;
 
         int slotIndex = icol.z & 0x7F;
         vec2 slotPos = vec2(slotIndex % 9, slotIndex / 9) * 18;
         if (slotPos.y > 5 * 18) {
             // offset between main and player slots
-            slotPos += vec2(0, 14);
+            slotPos += vec2(0, 13);
         }
         // TODO: offset between player and hotbar slots.
 
-        offset += slotPos - vec2(81, 40);
-        pos = vec3(floor(center + offset), pos.z - 1);
+        pos = vec3(floor(center + offset + slotPos), pos.z - 1);
     }
 
     gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);

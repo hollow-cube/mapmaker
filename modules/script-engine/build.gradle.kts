@@ -17,8 +17,8 @@ dependencies {
     implementation(libs.posthog)
     api(libs.bundles.graalvm)
 
-    react(project(":modules:script-engine:npm", "react"))
-    builtin(project(":modules:script-engine:builtin", "builtin"))
+//    react(project(":modules:script-engine:npm", "react"))
+//    builtin(project(":modules:script-engine:builtin", "builtin"))
 }
 
 tasks.register<Copy>("copyReactLibs") {

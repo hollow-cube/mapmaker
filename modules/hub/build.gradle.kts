@@ -6,7 +6,7 @@ dependencies {
     api(project(":modules:map-core"))
     implementation(project(":modules:canvas:api"))
     implementation(project(":modules:terraform")) // Included for schematics, todo both terraform and this module should get schem from central
-    implementation(project(":modules:script-engine"))
+//    implementation(project(":modules:script-engine"))
 
     implementation(libs.minestom)
     implementation(libs.gson)

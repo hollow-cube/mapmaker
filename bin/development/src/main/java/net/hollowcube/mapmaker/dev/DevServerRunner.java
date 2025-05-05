@@ -6,6 +6,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.MojangUtil;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.gui.map.browser.MapBrowserView;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServerRunner;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
@@ -22,6 +23,7 @@ import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
+import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerSkin;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.terraform.Terraform;
@@ -39,8 +41,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
-import java.util.Map;
 import java.util.Objects;
 
 public class DevServerRunner extends AbstractMapServer {
@@ -218,7 +218,7 @@ public class DevServerRunner extends AbstractMapServer {
 
         dbg.createPermissionedSubcommand("gui", (player, ignored) -> {
             player.getInstance().scheduleNextTick(ignored2 -> {
-                scriptEngine().guiManager().openGui(player, URI.create("guilib:///map_browser/map-browser-view.js"), Map.of(), Map.of());
+                Panel.open(player, new MapBrowserView(playerService(), mapService()));
             });
         }, "");
 
