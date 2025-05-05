@@ -266,7 +266,20 @@ public class SpriteTransform {
         FileUtil.walkResourcesDirectory("/overlays/", (file, stream) -> {
             var name = file.substring(file.lastIndexOf('/') + 1, file.lastIndexOf('.'));
             var id = ctx.writeTexture("item", "overlay_" + name, stream.readAllBytes());
-            var entry = ModelUtil.createBasicItem(ctx.writeModel("overlay_" + name, ModelUtil.createItemGenerated(id)));
+            var entry = ModelUtil.createBasicItem(ctx.writeModel(
+                    "overlay_" + name,
+                    ModelUtil.createItemGenerated(id, model -> {
+                        var display = new JsonObject();
+                        var gui = new JsonObject();
+                        var translation = new JsonArray();
+                        translation.add(0);
+                        translation.add(0);
+                        translation.add(100);
+                        gui.add("translation", translation);
+                        display.add("gui", gui);
+                        model.add("display", display);
+                    })
+            ));
             entry.addProperty("when", name);
             cases.put(name, entry);
         });

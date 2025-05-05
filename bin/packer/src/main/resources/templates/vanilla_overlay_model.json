@@ -3,6 +3,10 @@
     "type": "minecraft:composite",
     "models": [
       {
+        "type": "minecraft:model",
+        "model": "mapmaker:item/empty"
+      },
+      {
         "type": "minecraft:select",
         "property": "minecraft:custom_model_data",
         "index": 0,
