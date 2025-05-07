@@ -34,7 +34,7 @@ graalvmNative {
     binaries {
         named("main") {
             fallback.set(false)
-            buildArgs(listOf("--static-nolibc"))
+            buildArgs(listOf("--static-nolibc", "--no-fallback"))
         }
     }
 

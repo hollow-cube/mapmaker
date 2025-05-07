@@ -41,11 +41,11 @@ public class Pagination extends Element {
     // DSL/builder
 
     public @NotNull Pagination fetch(@NotNull PageFetcher fetcher) {
-
+        return this;
     }
 
     public @NotNull Pagination fetchAsync(@NotNull PageFetcher fetcher) {
-
+        return this;
     }
 
     public @NotNull Element prevButton() {

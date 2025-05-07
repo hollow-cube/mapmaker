@@ -1,0 +1,88 @@
+package net.hollowcube.mapmaker.panels;
+
+import net.hollowcube.canvas.ClickType;
+import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+public abstract class Panel extends Element {
+    public static final Panel EMPTY = new Panel(0, 0) {
+    };
+
+    public static void open(@NotNull Player player, @NotNull Panel panel) {
+        var host = new InventoryHost(player, panel);
+        player.openInventory(host.handle());
+        host.drawCurrentElement();
+    }
+
+    record PosChild(int x, int y, Element child) {
+    }
+
+    private final List<PosChild> children = new ArrayList<>();
+
+    protected Panel(int slotWidth, int slotHeight) {
+        super(slotWidth, slotHeight);
+    }
+
+    public <E extends Element> @NotNull E add(int x, int y, @NotNull E element) {
+        this.children.add(new PosChild(x, y, element));
+        return element;
+    }
+
+    // Impl
+
+    @Override
+    public void build(@NotNull MenuBuilder builder) {
+        super.build(builder);
+
+        for (var child : children) {
+            var mark = builder.mark();
+
+            builder.boundsRect(child.x, child.y, child.child.slotWidth, child.child.slotHeight);
+            child.child.build(builder);
+
+            builder.restore(mark);
+        }
+    }
+
+    @Override
+    public @Nullable CompletableFuture<Void> handleClick(@NotNull Player player, @NotNull ClickType clickType, int x, int y) {
+        for (var child : children) {
+            if (x >= child.x && x < child.x + child.child.slotWidth
+                    && y >= child.y && y < child.y + child.child.slotHeight) {
+                return child.child.handleClick(player, clickType, x - child.x, y - child.y);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    protected void mount(@NotNull InventoryHost host) {
+        super.mount(host);
+        for (var child : children) {
+            child.child.mount(host);
+        }
+    }
+
+    @Override
+    protected void unmount() {
+        super.unmount();
+        for (var child : children) {
+            child.child.unmount();
+        }
+    }
+
+    // DSL
+
+    protected static @NotNull Button button(@NotNull String translationKey) {
+        return button(translationKey, 1, 1);
+    }
+
+    protected static @NotNull Button button(@NotNull String translationKey, int width, int height) {
+        return new Button(translationKey, width, height);
+    }
+}
