@@ -197,12 +197,15 @@ public class BiomeContainer implements TerraformInstanceBiomes {
         List<RegistryDataPacket.Entry> entries = new ArrayList<>();
 
         // Add parent biomes
-        for (var biome : parent.values()) {
-            String name = parent.getKey(biome).name();
+        for (int i = 0; i < 1000; i++) {
+            var key = this.parent.getKey(i);
+            if (key == null) break;
             if (excludeVanilla) {
-                entries.add(new RegistryDataPacket.Entry(name, null));
+                entries.add(new RegistryDataPacket.Entry(key.key().asString(), null));
             } else {
-                entries.add(new RegistryDataPacket.Entry(name, Biome.REGISTRY_CODEC.encode(Transcoder.NBT, biome).orElseThrow()));
+                var biome = this.parent.get(i);
+                entries.add(new RegistryDataPacket.Entry(key.key().asString(),
+                        Biome.REGISTRY_CODEC.encode(Transcoder.NBT, biome).orElseThrow()));
             }
         }
 

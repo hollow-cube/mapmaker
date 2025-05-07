@@ -156,7 +156,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             var serverProcess = MinecraftServer.process();
             player.sendPacket(serverProcess.chatType().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.dimensionType().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.biome().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(biomes().registryDataPacket(excludeVanilla));
             player.sendPacket(serverProcess.damageType().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.trimMaterial().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.trimPattern().registryDataPacket(serverProcess, excludeVanilla));
@@ -172,7 +172,6 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             player.sendPacket(serverProcess.cowVariant().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.frogVariant().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.pigVariant().registryDataPacket(serverProcess, excludeVanilla));
-//            player.sendPacket(biomes().registryDataPacket(excludeVanilla));
 
             player.sendPacket(MinecraftServer.getTagManager().packet(serverProcess));
             event.setSendRegistryData(false);
