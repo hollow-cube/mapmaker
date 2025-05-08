@@ -1,10 +1,13 @@
 package net.hollowcube.mapmaker.util;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.config.HttpConfig;
+import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -12,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -93,6 +97,25 @@ public class HttpServerWrapper {
             } finally {
                 exchange.close();
             }
+        }
+    }
+
+    public record PlayerStatusHandler() implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            var players = new JsonArray();
+            for (var player : MinecraftServer.getConnectionManager().getOnlinePlayers())
+                players.add(player.getUuid().toString());
+            for (var player : MinecraftServer.getConnectionManager().getConfigPlayers())
+                players.add(player.getUuid().toString());
+
+            var response = new JsonObject();
+            response.add("players", players);
+            var responseBytes = response.toString().getBytes(StandardCharsets.UTF_8);
+
+            exchange.sendResponseHeaders(200, responseBytes.length);
+            exchange.getResponseBody().write(responseBytes);
+            exchange.close();
         }
     }
 }

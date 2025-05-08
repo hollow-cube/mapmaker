@@ -28,7 +28,7 @@ public class ProxySessionService {
         this.url = String.format("%s/v3/internal/session", url);
     }
 
-    public @NotNull JsonObject createSessionV2(@NotNull String id, @NotNull SessionCreateRequest body) throws BannedException, MaintenanceException {
+    public @NotNull JsonObject createSession(@NotNull String id, @NotNull SessionCreateRequest body) throws BannedException, MaintenanceException {
         logger.info("creating new session for {} ({}) from {}", id, body.username(), body.ip());
         var reqBody = GSON.toJson(body);
         var req = HttpRequest.newBuilder()
@@ -49,7 +49,7 @@ public class ProxySessionService {
         }
     }
 
-    public void deleteSessionV2(@NotNull String id) {
+    public void deleteSession(@NotNull String id) {
         logger.info("deleting session for {}", id);
         var req = HttpRequest.newBuilder()
                 .method("DELETE", HttpRequest.BodyPublishers.noBody())
@@ -57,6 +57,10 @@ public class ProxySessionService {
                 .build();
         try {
             var res = CLIENT.send(req, HttpResponse.BodyHandlers.ofString());
+            if (res.statusCode() == 404) {
+                // Its fine if not found. Means the player was removed externally.
+                return;
+            }
             if (res.statusCode() != 200)
                 throw new RuntimeException("Failed to delete session(" + res.statusCode() + "): " + res.body());
         } catch (InterruptedException | IOException e) {

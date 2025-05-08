@@ -64,6 +64,7 @@ public class ProxyPlugin {
     private final Map<UUID, byte[]> transferData = new ConcurrentHashMap<>();
 
     private final Set<UUID> playersJustJoined = new CopyOnWriteArraySet<>();
+    private final Map<UUID, Integer> playerConnectAttempts = new ConcurrentHashMap<>();
 
     @Inject
     public ProxyPlugin(@NotNull Logger logger, @NotNull ProxyServer proxy) {
@@ -107,7 +108,7 @@ public class ProxyPlugin {
                 skinSignature = texProp.getSignature();
             }
 
-            var pd = sessionService.createSessionV2(
+            var pd = sessionService.createSession(
                     player.getUniqueId().toString(),
                     new SessionCreateRequest(
                             ProxySessionService.hostname,
@@ -213,18 +214,21 @@ public class ProxyPlugin {
         if (!playersJustJoined.contains(playerId)) return;
 
         playersJustJoined.remove(playerId);
+        playerConnectAttempts.remove(playerId);
+        System.out.println(event.getPlayer().getUniqueId() + " POST JOIN");
     }
 
     @Subscribe
     public void handleDisconnect(@NotNull DisconnectEvent event) {
-        var playerId = event.getPlayer().getUniqueId().toString();
+        var playerId = event.getPlayer().getUniqueId();
         try {
-            sessionService.deleteSessionV2(playerId);
+            sessionService.deleteSession(playerId.toString());
         } catch (Exception e) {
             logger.error("failed to delete session (v2) for {}", playerId, e);
         } finally {
-            resourcePacks.remove(event.getPlayer().getUniqueId());
-            playersJustJoined.remove(event.getPlayer().getUniqueId());
+            resourcePacks.remove(playerId);
+            playersJustJoined.remove(playerId);
+            playerConnectAttempts.remove(playerId);
         }
     }
 
@@ -249,23 +253,17 @@ public class ProxyPlugin {
         // velocity assumes it cannot immediately reconnect to it. In reality, reconnecting will point to another
         // ready instance, so it is totally safe to do so.
         if ("anyhub".equals(serverName)) {
+            int attempts = playerConnectAttempts.merge(event.getPlayer().getUniqueId(), 1, Integer::sum);
+            if (attempts > 5) {
+                event.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text("Unable to recover. Please try again")));
+                return;
+            }
+
             logger.info("reconnecting {} to hub", event.getPlayer().getUsername());
             event.setResult(KickedFromServerEvent.RedirectPlayer.create(anyhubServer, Component.empty()));
             return;
         }
 
-//        if (event.getServer().getServerInfo().getName().equals("hub-minecraft")) return;
-//
-//        var playerId = event.getPlayer().getUniqueId().toString();
-//        logger.info("kicked from server, joining a new hub: {}", playerId);
-
-//        var res = sessionService.joinHubV2(new JoinHubRequest(playerId));
-//        logger.info("join hub result: {}", res);
-//        var rs = proxy.createRawRegisteredServer(new ServerInfo("hub", new InetSocketAddress(res.serverClusterIp(), 25565)));
-        //todo in the future we will need to let ss choose a hub to match you with friends, but for now it seems fine to just direct to any hub server?
-
-//        var rs = proxy.createRawRegisteredServer(new ServerInfo("hub-minecraft", new InetSocketAddress("hub-minecraft", 25565)));
-//        event.setResult(KickedFromServerEvent.RedirectPlayer.create(rs));
     }
 
     private @Nullable GameProfile.Property getGPProperty(@NotNull GameProfile gp, @NotNull String name) {

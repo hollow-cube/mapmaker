@@ -8,6 +8,7 @@ repositories {
 }
 
 dependencies {
+    annotationProcessor(libs.velocity.api)
     implementation(libs.velocity.api) {
         exclude(group = "net.kyori")
     }
@@ -21,7 +22,7 @@ application {
 }
 
 tasks.shadowJar {
-    dependencies {
-        include("org.apache.kafka:kafka-clients")
-    }
+//    dependencies {
+//        include("org.apache.kafka:kafka-clients")
+//    }
 }
