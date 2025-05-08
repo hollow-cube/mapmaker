@@ -108,6 +108,7 @@ public class ProxyPlugin {
         // Disconnect if not on a supported version
         if (event.getPlayer().getProtocolVersion() != SUPPORTED_VERSION) {
             event.getPlayer().disconnect(WRONG_PROTOCOL);
+            return;
         }
 
         try {
