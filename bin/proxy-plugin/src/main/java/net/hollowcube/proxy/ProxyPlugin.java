@@ -8,7 +8,10 @@ import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.event.permission.PermissionsSetupEvent;
-import com.velocitypowered.api.event.player.*;
+import com.velocitypowered.api.event.player.CookieReceiveEvent;
+import com.velocitypowered.api.event.player.CookieStoreEvent;
+import com.velocitypowered.api.event.player.KickedFromServerEvent;
+import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.event.player.configuration.PlayerFinishedConfigurationEvent;
 import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.api.permission.Tristate;
@@ -99,15 +102,14 @@ public class ProxyPlugin {
     }
 
     @Subscribe
-    public void handleChooseInitialServer(@NotNull PlayerChooseInitialServerEvent event) {
+    public void handleLogin(@NotNull LoginEvent event) {
+        var player = event.getPlayer();
+
+        // Disconnect if not on a supported version
         if (event.getPlayer().getProtocolVersion() != SUPPORTED_VERSION) {
             event.getPlayer().disconnect(WRONG_PROTOCOL);
         }
-    }
 
-    @Subscribe
-    public void handleLogin(@NotNull LoginEvent event) {
-        var player = event.getPlayer();
         try {
             String skinTexture = null, skinSignature = null;
             var texProp = getGPProperty(player.getGameProfile(), "textures");
