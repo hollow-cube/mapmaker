@@ -100,7 +100,7 @@ public class ProxyPlugin {
 
     @Subscribe
     public void handleChooseInitialServer(@NotNull PlayerChooseInitialServerEvent event) {
-        if (event.getPlayer().getProtocolVersion() != ProtocolVersion.MINECRAFT_1_21_5) {
+        if (event.getPlayer().getProtocolVersion() != SUPPORTED_VERSION) {
             event.getPlayer().disconnect(WRONG_PROTOCOL);
         }
     }
