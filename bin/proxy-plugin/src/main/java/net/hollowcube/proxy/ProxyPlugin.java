@@ -10,6 +10,7 @@ import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.event.permission.PermissionsSetupEvent;
 import com.velocitypowered.api.event.player.*;
 import com.velocitypowered.api.event.player.configuration.PlayerFinishedConfigurationEvent;
+import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -43,6 +44,8 @@ public class ProxyPlugin {
     private static final ChannelIdentifier RESOURCE_PACK_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "resource_pack");
     private static final Key TRANSFER_DATA_COOKIE = Key.key("mapmaker", "transfer_data");
 
+    private static final ProtocolVersion SUPPORTED_VERSION = ProtocolVersion.MINECRAFT_1_21_5;
+
     public static final TextColor RED = TextColor.color(0xFA4141);
     public static final Component MAINTENANCE = Component.text()
             .append(Component.text("The server is currently in maintenance!", RED, TextDecoration.BOLD))
@@ -50,6 +53,11 @@ public class ProxyPlugin {
             .append(Component.text("Join the discord for updates!"))
             .appendNewline()
             .append(Component.text("discord.hollowcube.net", TextColor.color(0x3895FF)))
+            .build();
+    private static final Component WRONG_PROTOCOL = Component.text()
+            .append(Component.text("You are using an unsupported version of Minecraft!", RED))
+            .appendNewline().appendNewline()
+            .append(Component.text("Please try again on " + String.join(", ", SUPPORTED_VERSION.getVersionsSupportedBy()), RED))
             .build();
 
     private final Logger logger;
@@ -92,9 +100,9 @@ public class ProxyPlugin {
 
     @Subscribe
     public void handleChooseInitialServer(@NotNull PlayerChooseInitialServerEvent event) {
-//        if (!playersWithSession.contains(event.getPlayer().getUniqueId())) {
-//            event.getPlayer().disconnect(Component.text("something went wrong"));
-//        }
+        if (event.getPlayer().getProtocolVersion() != ProtocolVersion.MINECRAFT_1_21_5) {
+            event.getPlayer().disconnect(WRONG_PROTOCOL);
+        }
     }
 
     @Subscribe
