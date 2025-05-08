@@ -49,7 +49,7 @@ public class MapIsolateServerRunner extends AbstractMapServer {
             throw new IllegalArgumentException("Map ID must be provided as the last argument");
         this.mapId = UUID.fromString(IsolateMain.args[IsolateMain.args.length - 1]).toString();
         System.out.println("Map ID: " + this.mapId);
-        System.out.println(Arrays.toString(IsolateMain.args));
+        System.out.println("Args: " + Arrays.toString(IsolateMain.args));
 
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("map-init")
                 .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
