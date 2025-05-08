@@ -98,6 +98,7 @@ public final class MapServerInitializer {
         httpServer.addRoute("/metrics", new HTTPServer.HTTPMetricHandler(CollectorRegistry.defaultRegistry));
         httpServer.addRoute("/alive", new HttpServerWrapper.AliveHttpHandler());
         httpServer.addRoute("/ready", new HttpServerWrapper.ReadyHttpHandler(server.healthChecks()));
+        httpServer.addRoute("/players", new HttpServerWrapper.PlayerStatusHandler());
         httpServer.start();
 
         logger.info("Web server is running at {}:{}", httpConfig.host(), httpServer.port());

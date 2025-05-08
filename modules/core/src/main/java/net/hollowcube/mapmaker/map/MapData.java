@@ -50,7 +50,7 @@ public class MapData {
 
     public static final int MIN_PLAYS_FOR_DIFFICULTY = 10;
 
-    public static final String SPAWN_MAP_ID = System.getenv("MAPMAKER_SPAWN_MAP_ID");
+    public static final String SPAWN_MAP_ID = "b210fa07-d64c-4100-a2db-1426c35b7533";
 
     private String id;
     private String owner;
