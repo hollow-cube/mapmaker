@@ -223,7 +223,6 @@ public class ProxyPlugin {
 
         playersJustJoined.remove(playerId);
         playerConnectAttempts.remove(playerId);
-        System.out.println(event.getPlayer().getUniqueId() + " POST JOIN");
     }
 
     @Subscribe

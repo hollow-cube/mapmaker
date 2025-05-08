@@ -153,7 +153,7 @@ public class SessionManager {
         var removed = sessions.remove(message.playerId());
         if (removed == null) return;
 
-        // Only send a leave message if the player is hidden
+        // Only send a leave message if the player is not hidden
         if (!removed.hidden()) {
             broadcastLeaveMessage(message.playerId());
             syntheticTab.removeSession(message.playerId());
