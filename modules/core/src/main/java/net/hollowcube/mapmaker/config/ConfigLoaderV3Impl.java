@@ -35,10 +35,13 @@ record ConfigLoaderV3Impl(@NotNull JsonObject root) implements ConfigLoaderV3 {
                 if (split.length != 2) continue;
                 envmap.put(split[0], split[1]);
             }
-            // Load env overrides from .env
-            Path dotEnvPath = Path.of(".env");
-            if (Files.exists(dotEnvPath)) {
-                for (var line : Files.readAllLines(dotEnvPath)) {
+            // Load env overrides from .env and vault injector
+            var extraPaths = List.of(".env", "/vault/secrets/service");
+            for (var pathString : extraPaths) {
+                var path = Path.of(pathString);
+                if (!Files.exists(path)) continue;
+
+                for (var line : Files.readAllLines(path)) {
                     if (line.isBlank() || line.startsWith("#")) continue;
                     var split = line.split("=");
                     if (split.length != 2) continue;

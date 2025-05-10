@@ -4,7 +4,6 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.Uuids;
-import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
@@ -14,14 +13,10 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
 import net.hollowcube.mapmaker.map.world.AbstractMapMakerMapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
-import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
-import net.hollowcube.mapmaker.player.JoinHubRequest;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.session.Presence;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
@@ -69,26 +64,7 @@ public class MapIsolateServerRunner extends AbstractMapServer {
 
     @Override
     protected @NotNull ServerBridge createBridge() {
-        return new ServerBridge() {
-            @Override
-            public void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState, @NotNull String source) {
-                player.sendMessage("todo");
-                return;
-            }
-
-            @Override
-            public void joinHub(@NotNull Player player) {
-                try {
-                    var playerData = PlayerDataV2.fromPlayer(player);
-                    var res = sessionService().joinHubV2(new JoinHubRequest(playerData.id()));
-                    logger.info("join hub result: {}", res);
-                    ProxySupport.transfer(player, res.serverClusterIp());
-                } catch (Exception e) {
-                    ExceptionReporter.reportException(e, player);
-                    player.sendMessage(Component.text("An error occurred while trying to return to the hub. Please try again later."));
-                }
-            }
-        };
+        return new MapIsolateBridge(sessionService());
     }
 
     @Override
@@ -114,7 +90,6 @@ public class MapIsolateServerRunner extends AbstractMapServer {
             var map = mapService().getMap(Uuids.ZERO, this.mapId);
             world = allocator().allocateDirect(map, PlayingMapWorld.CTOR);
             shutdowner().queue("world", () -> world.close(null));
-
         } catch (Exception e) {
             logger.error("Error allocating map", e);
             throw new RuntimeException(e);
@@ -126,7 +101,6 @@ public class MapIsolateServerRunner extends AbstractMapServer {
     protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
         try {
             var player = event.getPlayer();
-            var playerId = player.getUuid().toString();
 
             // Queue resource pack download/apply while we do other things
             var resourcePackFuture = ResourcePackManager.sendResourcePack(player);

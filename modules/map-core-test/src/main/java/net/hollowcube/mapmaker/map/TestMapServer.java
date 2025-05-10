@@ -15,7 +15,6 @@ import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
-import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.minestom.server.entity.Player;
 import net.minestom.server.timer.Scheduler;
@@ -82,11 +81,6 @@ final class TestMapServer implements MapServer {
 
     @Override
     public @NotNull Controller guiController() {
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
-    public @NotNull ScriptEngine scriptEngine() {
         throw new UnsupportedOperationException("not implemented");
     }
 
