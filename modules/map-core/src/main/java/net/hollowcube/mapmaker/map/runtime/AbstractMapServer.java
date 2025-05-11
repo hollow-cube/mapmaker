@@ -161,7 +161,7 @@ public abstract class AbstractMapServer implements MapServer {
         this.metrics = createMetricWriter(config);
         shutdowner.queue("metric-writer", metrics::close);
 
-        var playerServiceUrl = System.getenv("MAPMAKER_PLAYER_SERVICE_URL");
+        var playerServiceUrl = config.get(PlayerServiceConfig.class).url();
         if (playerServiceUrl != null) {
             playerService = new PlayerServiceImpl(otel, playerServiceUrl);
             punishmentService = new PunishmentServiceImpl(playerServiceUrl);
@@ -174,12 +174,12 @@ public abstract class AbstractMapServer implements MapServer {
             punishmentService = new PunishmentServiceImpl(localUrl);
         }
 
-        var sessionServiceUrl = System.getenv("MAPMAKER_SESSION_SERVICE_URL");
+        var sessionServiceUrl = config.get(SessionServiceConfig.class).url();
         if (sessionServiceUrl != null) sessionService = new SessionServiceImpl(otel, sessionServiceUrl);
         else if (globalConfig.noop()) sessionService = new NoopSessionService();
         else sessionService = new SessionServiceImpl(otel, "http://localhost:9127"); // tilt
 
-        var mapServiceUrl = System.getenv("MAPMAKER_MAP_SERVICE_URL");
+        var mapServiceUrl = config.get(MapServiceConfig.class).url();
         if (mapServiceUrl != null) mapService = new MapServiceImpl(mapServiceUrl);
         else if (globalConfig.noop()) mapService = new NoopMapService();
         else mapService = new MapServiceImpl("http://localhost:9125"); // tilt
@@ -187,9 +187,10 @@ public abstract class AbstractMapServer implements MapServer {
         if (globalConfig.noop()) {
             permManager = new NoopPermManager();
         } else {
-            var spicedbUrl = System.getenv("MAPMAKER_SPICEDB_URL");
+            var spicedbConfig = config.get(SpiceDBConfig.class);
+            var spicedbUrl = spicedbConfig.url();
             if (spicedbUrl == null) spicedbUrl = "http://localhost:8443";
-            var spicedbToken = System.getenv("MAPMAKER_SPICEDB_TOKEN");
+            var spicedbToken = spicedbConfig.token();
             if (spicedbToken == null) spicedbToken = "supersecretkey";
             permManager = new PermManagerImpl(otel, spicedbUrl, spicedbToken);
         }
