@@ -30,7 +30,7 @@ class SimpleSortPanel extends Panel {
         BEST, QUALITY, NEW
     }
 
-    private final Consumer<MapSearchParams> onSearch;
+    private final Consumer<MapSearchParams.Builder> onSearch;
 
     private final Set<MapData.Difficulty> difficulties = new HashSet<>();
     private SortPreset sort = SortPreset.BEST;
@@ -38,7 +38,7 @@ class SimpleSortPanel extends Panel {
     private final Switch sortSwitch;
     private final DifficultyToggleButton easy, medium, hard, expert, nightmare;
 
-    public SimpleSortPanel(@NotNull Consumer<MapSearchParams> onSearch) {
+    public SimpleSortPanel(@NotNull Consumer<MapSearchParams.Builder> onSearch) {
         super(9, 4);
         this.onSearch = onSearch;
 
@@ -86,6 +86,8 @@ class SimpleSortPanel extends Panel {
         nightmare.setSelected(this.difficulties.contains(MapData.Difficulty.NIGHTMARE));
 
         super.mount(host);
+
+        onSearchChange();
     }
 
     private void selectSort(@NotNull SortPreset sort) {
@@ -127,7 +129,7 @@ class SimpleSortPanel extends Panel {
                     .ascending(false)
                     .best(false);
         }
-        this.onSearch.accept(params.build());
+        this.onSearch.accept(params);
     }
 
     private static List<MapData.Difficulty> readDifficultyList(JsonElement elem) {

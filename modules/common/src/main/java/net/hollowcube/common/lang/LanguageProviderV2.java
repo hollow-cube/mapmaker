@@ -1,10 +1,10 @@
 package net.hollowcube.common.lang;
 
-import com.google.gson.*;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.TranslatableComponent;
-import net.kyori.adventure.text.TranslationArgument;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import net.kyori.adventure.text.*;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.Context;
@@ -120,12 +120,13 @@ public class LanguageProviderV2 {
         return result;
     }
 
-    public static @NotNull List<Component> translateMulti(@NotNull String key, @NotNull List<Component> args) {
+    public static @NotNull List<Component> translateMulti(@NotNull String key, @NotNull List<? extends ComponentLike> args) {
         var partials = multiComponentCache.computeIfAbsent(key, LanguageProviderV2::parseMultiComponent);
         if (partials == null) return List.of(); // Must return empty because we use it for lore which is not required.
 
         // Apply the args to the partials (after translating the args)
         var translatedArgs = args.stream()
+                .map(ComponentLike::asComponent)
                 .map(LanguageProviderV2::translate)
                 .toList();
         return partials.stream()
@@ -133,7 +134,7 @@ public class LanguageProviderV2 {
                 .toList();
     }
 
-    public static @NotNull Component translateMultiMerged(@NotNull String key, @NotNull List<Component> args) {
+    public static @NotNull Component translateMultiMerged(@NotNull String key, @NotNull List<? extends ComponentLike> args) {
         var partials = translateMulti(key, args);
         if (partials.isEmpty()) return Component.empty();
         if (partials.size() == 1) return partials.get(0);
@@ -227,7 +228,7 @@ public class LanguageProviderV2 {
                         var component = args.get(index);
                         var format = match.group("format");
                         var formatter = format == null ? null : NUMBER_FORMATTERS.get(format);
-                        if (formatter != null && component instanceof TranslationArgument argument && argument.value() instanceof Number number){
+                        if (formatter != null && component instanceof TranslationArgument argument && argument.value() instanceof Number number) {
                             return formatter.format(number);
                         }
                         return PLAIN_TEXT.serialize(component);

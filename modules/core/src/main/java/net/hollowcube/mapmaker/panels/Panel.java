@@ -1,7 +1,11 @@
 package net.hollowcube.mapmaker.panels;
 
 import net.hollowcube.canvas.ClickType;
+import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.ExceptionReporter;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
+import net.minestom.server.thread.TickThread;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,7 +34,37 @@ public abstract class Panel extends Element {
 
     public <E extends Element> @NotNull E add(int x, int y, @NotNull E element) {
         this.children.add(new PosChild(x, y, element));
+        if (host != null) {
+            host.queueRedraw();
+            element.mount(host);
+        }
         return element;
+    }
+
+    public void clear() {
+        children.forEach(child -> child.child.unmount());
+        this.children.clear();
+        if (host != null) host.queueRedraw();
+    }
+
+    protected void async(@NotNull Runnable runnable) {
+        if (host == null) throw new IllegalStateException("Async before mount");
+        FutureUtil.submitVirtual(() -> {
+            try {
+                runnable.run();
+            } catch (Exception e) {
+                // TODO: exception should include page name for posthog.
+                host.player().closeInventory();
+                host.player().sendMessage(Component.translatable("generic.unknown_error"));
+                ExceptionReporter.reportException(e, host.player());
+            }
+        });
+    }
+
+    protected void sync(@NotNull Runnable runnable) {
+        if (host == null) throw new IllegalStateException("Sync before mount");
+        if (TickThread.current() != null) runnable.run();
+        else host.player().scheduleNextTick(_ -> runnable.run());
     }
 
     // Impl

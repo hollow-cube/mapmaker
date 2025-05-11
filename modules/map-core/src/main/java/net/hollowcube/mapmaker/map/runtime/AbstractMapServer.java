@@ -98,6 +98,7 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
+import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.server.common.ServerLinksPacket;
@@ -162,7 +163,7 @@ public abstract class AbstractMapServer implements MapServer {
         shutdowner.queue("metric-writer", metrics::close);
 
         var playerServiceUrl = config.get(PlayerServiceConfig.class).url();
-        if (playerServiceUrl != null) {
+        if (!playerServiceUrl.isEmpty()) {
             playerService = new PlayerServiceImpl(otel, playerServiceUrl);
             punishmentService = new PunishmentServiceImpl(playerServiceUrl);
         } else if (globalConfig.noop()) {
@@ -175,12 +176,12 @@ public abstract class AbstractMapServer implements MapServer {
         }
 
         var sessionServiceUrl = config.get(SessionServiceConfig.class).url();
-        if (sessionServiceUrl != null) sessionService = new SessionServiceImpl(otel, sessionServiceUrl);
+        if (!sessionServiceUrl.isEmpty()) sessionService = new SessionServiceImpl(otel, sessionServiceUrl);
         else if (globalConfig.noop()) sessionService = new NoopSessionService();
         else sessionService = new SessionServiceImpl(otel, "http://localhost:9127"); // tilt
 
         var mapServiceUrl = config.get(MapServiceConfig.class).url();
-        if (mapServiceUrl != null) mapService = new MapServiceImpl(mapServiceUrl);
+        if (!mapServiceUrl.isEmpty()) mapService = new MapServiceImpl(mapServiceUrl);
         else if (globalConfig.noop()) mapService = new NoopMapService();
         else mapService = new MapServiceImpl("http://localhost:9125"); // tilt
 
@@ -189,9 +190,9 @@ public abstract class AbstractMapServer implements MapServer {
         } else {
             var spicedbConfig = config.get(SpiceDBConfig.class);
             var spicedbUrl = spicedbConfig.url();
-            if (spicedbUrl == null) spicedbUrl = "http://localhost:8443";
+            if (spicedbUrl.isEmpty()) spicedbUrl = "http://localhost:8443";
             var spicedbToken = spicedbConfig.token();
-            if (spicedbToken == null) spicedbToken = "supersecretkey";
+            if (spicedbToken.isEmpty()) spicedbToken = "supersecretkey";
             permManager = new PermManagerImpl(otel, spicedbUrl, spicedbToken);
         }
 
@@ -225,7 +226,7 @@ public abstract class AbstractMapServer implements MapServer {
             VelocityProxy.enable(velocityConfig.secret());
         } else {
             logger.info("Velocity not configured, using online mode...");
-//            MojangAuth.init();
+            MojangAuth.init();
         }
 
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;

@@ -13,6 +13,7 @@ import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.inventory.click.Click;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.network.packet.server.play.OpenWindowPacket;
 import net.minestom.server.network.packet.server.play.WindowItemsPacket;
 import net.minestom.server.sound.SoundEvent;
@@ -238,9 +239,14 @@ public class InventoryHost {
             this.title = title;
             copyInventoryContents(items);
 
-            sendPacketToViewers(new OpenWindowPacket(getWindowId(), getInventoryType().getWindowType(), getTitle()));
-            update();
-            updatePlayerInventory();
+            try {
+                sendPacketToViewers(new BundlePacket());
+                sendPacketToViewers(new OpenWindowPacket(getWindowId(), getInventoryType().getWindowType(), getTitle()));
+                update();
+                updatePlayerInventory();
+            } finally {
+                sendPacketToViewers(new BundlePacket());
+            }
         }
 
         private void copyInventoryContents(@NotNull ItemStack[] items) {

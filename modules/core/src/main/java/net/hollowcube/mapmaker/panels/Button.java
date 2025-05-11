@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.panels;
 
 import net.hollowcube.canvas.ClickType;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.lang.MessagesBase;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -10,27 +11,55 @@ import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
+import net.minestom.server.item.component.CustomModelData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 public class Button extends Element {
-    protected String translationKey;
+    protected Component itemTitle;
+    protected List<Component> itemLore;
+    protected String itemModel = "minecraft:stick";
+    protected String itemOverlay = null;
     protected Sprite sprite;
     protected boolean disableHoverSprite = false;
 
     private OnClickPlayerClickTypeSlot onLeftClick;
     private OnClickPlayerClickTypeSlot onLeftClickAsync;
 
-    public Button(@NotNull String translationKey, int width, int height) {
+    public Button(@Nullable String translationKey, int width, int height) {
         super(width, height);
-        this.translationKey = translationKey;
+        if (translationKey != null) translationKey(translationKey);
     }
 
     public @NotNull Button translationKey(@NotNull String translationKey) {
-        this.translationKey = translationKey;
+        return translationKey(translationKey, new Object[0]);
+    }
+
+    public @NotNull Button translationKey(@NotNull String translationKey, @NotNull Object... args) {
+        var translationArgs = MessagesBase.asArgs(args);
+        this.itemTitle = LanguageProviderV2.translate(Component.translatable(translationKey + ".name", translationArgs));
+        this.itemLore = LanguageProviderV2.translateMulti(translationKey + ".lore", translationArgs);
+
+        if (host != null) host.queueRedraw();
+        return this;
+    }
+
+    public @NotNull Button text(@NotNull Component title, @NotNull List<Component> lore) {
+        this.itemTitle = title;
+        this.itemLore = lore;
+
+        if (host != null) host.queueRedraw();
+        return this;
+    }
+
+    public @NotNull Button model(@NotNull String model, @Nullable String overlay) {
+        if (Objects.equals(this.itemModel, model) && Objects.equals(this.itemOverlay, overlay)) return this;
+        this.itemModel = model;
+
         if (host != null) host.queueRedraw();
         return this;
     }
@@ -114,7 +143,7 @@ public class Button extends Element {
     public void build(@NotNull MenuBuilder builder) {
         super.build(builder);
 
-        Component title = Component.translatable(this.translationKey + ".name");
+        Component title = Objects.requireNonNullElse(this.itemTitle, Component.empty());
         if (sprite != null) {
             builder.draw(sprite.x(), sprite.y(), sprite.sprite());
 
@@ -128,10 +157,15 @@ public class Button extends Element {
             }
         }
 
-        if (this.translationKey.isEmpty()) return;
+        if (this.itemModel == null || this.itemLore == null) return;
         builder.editSlotsWithout(0, 0, slotWidth, slotHeight, DataComponents.TOOLTIP_DISPLAY);
+        if (!"minecraft:stick".equals(itemModel))
+            builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.ITEM_MODEL, itemModel);
+        builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(
+                List.of(), List.of(), itemOverlay == null ? List.of(itemModel) : List.of(itemModel, itemOverlay), List.of()
+        ));
         builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.CUSTOM_NAME, title);
-        builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.LORE, LanguageProviderV2.translateMulti(this.translationKey + ".lore", List.of()));
+        builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.LORE, itemLore);
     }
 
     @Override

@@ -11,10 +11,10 @@ import org.slf4j.LoggerFactory;
 public class ServerRuntimeImpl implements ServerRuntime {
     private static final Logger logger = LoggerFactory.getLogger(ServerRuntime.class);
 
-    private String version = {{ version }};
-    private String commit = {{ commitHash }};
-    private String minestom = {{ minestomVersion }};
-    private String resourcePackHash = {{ resourcePackHash }};
+    private String version = "{{ version }}";
+    private String commit = "{{ commitHash }}";
+    private String minestom = "{{ minestomVersion }}";
+    private String resourcePackHash = "{{ resourcePackHash }}";
     private boolean isRelease = {{ isRelease }};
 
     public ServerRuntimeImpl() {

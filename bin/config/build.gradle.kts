@@ -18,8 +18,8 @@ sourceSets {
         blossom {
             javaSources {
                 property("version", "dev") // todo
-                property("commit", "dev") // todo
-                property("minestom", libs.minestom.get().version)
+                property("commitHash", "dev") // todo
+                property("minestomVersion", libs.minestom.get().version)
                 property("resourcePackHash", "todo") // todo
                 property("isRelease", isRelease.toString())
             }

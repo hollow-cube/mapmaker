@@ -93,7 +93,7 @@ public class HubMapWorld extends AbstractMapWorld {
 
         instance().eventNode().addChild(eventNode); // Needs spectators, so register on instance.
 
-        itemRegistry().register(new PlayMapsItem(server.guiController()));
+        itemRegistry().register(new PlayMapsItem(server.playerService(), server.mapService()));
         itemRegistry().register(new CreateMapsItem(server.guiController()));
         itemRegistry().register(new OrgMapsItem(server.guiController()));
         itemRegistry().register(new OpenCosmeticsMenuItem(server.guiController()));
