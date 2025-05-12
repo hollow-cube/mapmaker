@@ -118,10 +118,9 @@ public class InventoryHost {
         var menuBuilder = new MenuBuilder(9, containerSizeInRows + 4, containerSizeInRows);
         root.build(menuBuilder);
 
-        this.handle.updateContents(type, menuBuilder.getItems(), menuBuilder.getTitle());
-        if (!handle.isViewer(player)) {
+        if (!handle.isViewer(player))
             player.openInventory(handle);
-        }
+        this.handle.updateContents(type, menuBuilder.getItems(), menuBuilder.getTitle());
     }
 
     private static void handleInventoryClick(@NotNull InventoryPreClickEvent event) {

@@ -51,6 +51,17 @@ public class Switch extends Element {
         return button;
     }
 
+    public @NotNull Element toggleButton(int width, int height, @NotNull String translationKey, @NotNull String sprite) {
+        var button = new Button(translationKey + ".off", width, height);
+        button.sprite(sprite + "_off");
+        button.onLeftClick(_ -> select(selectedIndex == 0 ? 1 : 0));
+        onSelect.add(i -> {
+            button.translationKey(translationKey + (i == 1 ? ".on" : ".off"));
+            button.sprite(sprite + (i == 1 ? "_on" : "_off"));
+        });
+        return button;
+    }
+
     @Override
     public void build(@NotNull MenuBuilder builder) {
         super.build(builder);

@@ -23,8 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -55,7 +55,8 @@ public class SpriteTransform {
 
                 var relative = guiBaseDir.relativize(imageFile);
                 boolean canSkipConfig = (relative.toString().startsWith("store" + File.separatorChar)
-                        || relative.toString().startsWith("map_browser" + File.separatorChar))
+                        || relative.toString().startsWith("map_browser" + File.separatorChar)
+                        || relative.toString().startsWith("map_details" + File.separatorChar))
                         && !relative.toString().contains("checkout");
                 if (!canSkipConfig && !Files.exists(configFile)) continue;
 
