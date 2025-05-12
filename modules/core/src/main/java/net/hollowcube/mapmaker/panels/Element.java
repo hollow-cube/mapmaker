@@ -7,7 +7,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.component.DataComponents;
-import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,11 +76,11 @@ public class Element {
         }
     }
 
-    public @Nullable CompletableFuture<Void> handleClick(@NotNull Player player, @NotNull ClickType clickType, int x, int y) {
+    public @Nullable CompletableFuture<Void> handleClick(@NotNull ClickType clickType, int x, int y) {
         return null;
     }
 
-    protected void mount(@NotNull InventoryHost host) {
+    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
         if (this.host != null) throw new IllegalStateException("Element already mounted");
         this.host = host;
     }

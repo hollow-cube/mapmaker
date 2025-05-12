@@ -82,8 +82,8 @@ class AddonsPanel extends Panel {
         }
 
         @Override
-        protected void mount(@NotNull InventoryHost host) {
-            super.mount(host);
+        protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+            super.mount(host, isInitial);
             updateDisplay(host.player());
         }
 
@@ -102,12 +102,12 @@ class AddonsPanel extends Panel {
             }
         }
 
-        private void handleBuyUpgrade(@NotNull Player player) {
-            var firstLocked = firstLocked(player);
+        private void handleBuyUpgrade() {
+            var firstLocked = firstLocked(host.player());
             if (firstLocked == null) return;
 
-            buyUpgrade(playerService, permManager, player, firstLocked.id);
-            updateDisplay(player);
+            buyUpgrade(playerService, permManager, host.player(), firstLocked.id);
+            updateDisplay(host.player());
         }
 
         private @Nullable Addon firstLocked(@NotNull Player player) {

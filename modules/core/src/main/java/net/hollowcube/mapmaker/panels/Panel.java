@@ -5,6 +5,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
+import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.thread.TickThread;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,25 +19,30 @@ public abstract class Panel extends Element {
     };
 
     public static void open(@NotNull Player player, @NotNull Panel panel) {
-        var host = new InventoryHost(player, panel);
-        player.openInventory(host.handle());
-        host.drawCurrentElement();
+        final InventoryHost host = new InventoryHost(player);
+        host.pushView(panel);
     }
 
     record PosChild(int x, int y, Element child) {
     }
 
+    private final InventoryType inventoryType;
     private final List<PosChild> children = new ArrayList<>();
 
     protected Panel(int slotWidth, int slotHeight) {
+        this(InventoryType.CHEST_6_ROW, slotWidth, slotHeight);
+    }
+
+    protected Panel(@NotNull InventoryType inventoryType, int slotWidth, int slotHeight) {
         super(slotWidth, slotHeight);
+        this.inventoryType = inventoryType;
     }
 
     public <E extends Element> @NotNull E add(int x, int y, @NotNull E element) {
         this.children.add(new PosChild(x, y, element));
         if (host != null) {
             host.queueRedraw();
-            element.mount(host);
+            element.mount(host, true);
         }
         return element;
     }
@@ -48,7 +54,8 @@ public abstract class Panel extends Element {
     }
 
     protected void async(@NotNull Runnable runnable) {
-        if (host == null) throw new IllegalStateException("Async before mount");
+        final InventoryHost host = this.host;
+        if (host == null) return;
         FutureUtil.submitVirtual(() -> {
             try {
                 runnable.run();
@@ -62,12 +69,17 @@ public abstract class Panel extends Element {
     }
 
     protected void sync(@NotNull Runnable runnable) {
-        if (host == null) throw new IllegalStateException("Sync before mount");
+        final InventoryHost host = this.host;
+        if (host == null) return;
         if (TickThread.current() != null) runnable.run();
         else host.player().scheduleNextTick(_ -> runnable.run());
     }
 
     // Impl
+
+    @NotNull InventoryType inventoryType() {
+        return this.inventoryType;
+    }
 
     @Override
     public void build(@NotNull MenuBuilder builder) {
@@ -84,21 +96,21 @@ public abstract class Panel extends Element {
     }
 
     @Override
-    public @Nullable CompletableFuture<Void> handleClick(@NotNull Player player, @NotNull ClickType clickType, int x, int y) {
+    public @Nullable CompletableFuture<Void> handleClick(@NotNull ClickType clickType, int x, int y) {
         for (var child : children) {
             if (x >= child.x && x < child.x + child.child.slotWidth
                     && y >= child.y && y < child.y + child.child.slotHeight) {
-                return child.child.handleClick(player, clickType, x - child.x, y - child.y);
+                return child.child.handleClick(clickType, x - child.x, y - child.y);
             }
         }
         return null;
     }
 
     @Override
-    protected void mount(@NotNull InventoryHost host) {
-        super.mount(host);
+    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+        super.mount(host, isInitial);
         for (var child : children) {
-            child.child.mount(host);
+            child.child.mount(host, isInitial);
         }
     }
 

@@ -10,7 +10,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.component.DataComponents;
-import net.minestom.server.entity.Player;
 import net.minestom.server.item.component.CustomModelData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,7 +18,23 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-public class Button extends Element {
+public class Button extends Element implements ButtonClickAliases {
+
+    @FunctionalInterface
+    public interface OnClick {
+        void onClick();
+    }
+
+    @FunctionalInterface
+    public interface OnClickType {
+        void onClick(ClickType clickType);
+    }
+
+    @FunctionalInterface
+    public interface OnClickTypeSlot {
+        void onClick(ClickType clickType, int slot);
+    }
+
     protected Component itemTitle;
     protected List<Component> itemLore;
     protected String itemModel = "minecraft:stick";
@@ -27,8 +42,12 @@ public class Button extends Element {
     protected Sprite sprite;
     protected boolean disableHoverSprite = false;
 
-    private OnClickPlayerClickTypeSlot onLeftClick;
-    private OnClickPlayerClickTypeSlot onLeftClickAsync;
+    private OnClickTypeSlot onLeftClick;
+    private OnClickTypeSlot onLeftClickAsync;
+    private OnClickTypeSlot onRightClick;
+    private OnClickTypeSlot onRightClickAsync;
+    private OnClickTypeSlot onShiftLeftClick;
+    private OnClickTypeSlot onShiftLeftClickAsync;
 
     public Button(@Nullable String translationKey, int width, int height) {
         super(width, height);
@@ -66,44 +85,39 @@ public class Button extends Element {
 
     // Click handling
 
-    @FunctionalInterface
-    public interface OnClickPlayer {
-        void onClick(Player player);
-    }
-
-    @FunctionalInterface
-    public interface OnClickPlayerClickType {
-        void onClick(Player player, ClickType clickType);
-    }
-
-    @FunctionalInterface
-    public interface OnClickPlayerClickTypeSlot {
-        void onClick(Player player, ClickType clickType, int slot);
-    }
-
-    public @NotNull Button onLeftClick(OnClickPlayer onClick) {
-        return onLeftClick((player, _, _) -> onClick.onClick(player));
-    }
-
-    public @NotNull Button onLeftClickAsync(OnClickPlayer onClick) {
-        return onLeftClickAsync((player, _, _) -> onClick.onClick(player));
-    }
-
-    public @NotNull Button onLeftClick(OnClickPlayerClickType onClick) {
-        return onLeftClick((player, clickType, _) -> onClick.onClick(player, clickType));
-    }
-
-    public @NotNull Button onLeftClickAsync(OnClickPlayerClickType onClick) {
-        return onLeftClickAsync((player, clickType, _) -> onClick.onClick(player, clickType));
-    }
-
-    public @NotNull Button onLeftClick(OnClickPlayerClickTypeSlot onClick) {
+    @Override
+    public @NotNull Button onLeftClick(OnClickTypeSlot onClick) {
         this.onLeftClick = onClick;
         return this;
     }
 
-    public @NotNull Button onLeftClickAsync(OnClickPlayerClickTypeSlot onClick) {
+    @Override
+    public @NotNull Button onLeftClickAsync(OnClickTypeSlot onClick) {
         this.onLeftClickAsync = onClick;
+        return this;
+    }
+
+    @Override
+    public @NotNull Button onRightClick(OnClickTypeSlot onClick) {
+        this.onRightClick = onClick;
+        return this;
+    }
+
+    @Override
+    public @NotNull Button onRightClickAsync(OnClickTypeSlot onClick) {
+        this.onRightClickAsync = onClick;
+        return this;
+    }
+
+    @Override
+    public @NotNull Button onShiftLeftClick(OnClickTypeSlot onClick) {
+        this.onShiftLeftClick = onClick;
+        return this;
+    }
+
+    @Override
+    public @NotNull Button onShiftLeftClickAsync(OnClickTypeSlot onClick) {
+        this.onShiftLeftClickAsync = onClick;
         return this;
     }
 
@@ -169,15 +183,23 @@ public class Button extends Element {
     }
 
     @Override
-    public @Nullable CompletableFuture<Void> handleClick(@NotNull Player player, @NotNull ClickType clickType, int x, int y) {
-        if (this.onLeftClick != null) {
-            this.onLeftClick.onClick(player, clickType, y * this.slotWidth + x);
+    public @Nullable CompletableFuture<Void> handleClick(@NotNull ClickType clickType, int x, int y) {
+        int slot = y * this.slotWidth + x;
+        return switch (clickType) {
+            case LEFT_CLICK -> callClickFunc(onLeftClick, onLeftClickAsync, clickType, slot);
+            case SHIFT_LEFT_CLICK -> callClickFunc(onShiftLeftClick, onShiftLeftClickAsync, clickType, slot);
+            case RIGHT_CLICK -> callClickFunc(onRightClick, onRightClickAsync, clickType, slot);
+            default -> null;
+        };
+    }
+
+    private static @Nullable CompletableFuture<Void> callClickFunc(OnClickTypeSlot func, OnClickTypeSlot asyncFunc, ClickType clickType, int slot) {
+        if (func != null) {
+            func.onClick(clickType, slot);
             return CompletableFuture.completedFuture(null);
         }
-        if (this.onLeftClickAsync != null) {
-            return FutureUtil.fork(() -> onLeftClickAsync.onClick(player, clickType, y * this.slotWidth + x));
-        }
-        return super.handleClick(player, clickType, x, y);
+        if (asyncFunc != null) return FutureUtil.fork(() -> asyncFunc.onClick(clickType, slot));
+        return null;
     }
 
 }

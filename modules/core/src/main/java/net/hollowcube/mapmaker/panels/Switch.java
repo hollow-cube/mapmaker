@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.panels;
 
 import net.hollowcube.canvas.ClickType;
-import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,13 +58,13 @@ public class Switch extends Element {
     }
 
     @Override
-    public @Nullable CompletableFuture<Void> handleClick(@NotNull Player player, @NotNull ClickType clickType, int x, int y) {
-        return children.get(selectedIndex).handleClick(player, clickType, x, y);
+    public @Nullable CompletableFuture<Void> handleClick(@NotNull ClickType clickType, int x, int y) {
+        return children.get(selectedIndex).handleClick(clickType, x, y);
     }
 
     @Override
-    protected void mount(@NotNull InventoryHost host) {
-        super.mount(host);
-        children.forEach(child -> child.mount(host));
+    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+        super.mount(host, isInitial);
+        children.forEach(child -> child.mount(host, isInitial));
     }
 }

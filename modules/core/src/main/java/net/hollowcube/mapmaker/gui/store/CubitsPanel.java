@@ -14,16 +14,16 @@ class CubitsPanel extends Panel {
         background("store/cubits", 0, 1);
 
         add(0, 0, button("gui.store.cubits.1", 3, 2)
-                .onLeftClickAsync(player -> buyPackage(playerService, player, CUBITS_50)));
+                .onLeftClickAsync(() -> buyPackage(playerService, host.player(), CUBITS_50)));
         add(3, 0, button("gui.store.cubits.2", 3, 2)
-                .onLeftClickAsync(player -> buyPackage(playerService, player, CUBITS_105)));
+                .onLeftClickAsync(() -> buyPackage(playerService, host.player(), CUBITS_105)));
         add(6, 0, button("gui.store.cubits.3", 3, 2)
-                .onLeftClickAsync(player -> buyPackage(playerService, player, CUBITS_220)));
+                .onLeftClickAsync(() -> buyPackage(playerService, host.player(), CUBITS_220)));
 
         add(0, 2, button("gui.store.cubits.4", 4, 3)
-                .onLeftClickAsync(player -> buyPackage(playerService, player, CUBITS_400)));
+                .onLeftClickAsync(() -> buyPackage(playerService, host.player(), CUBITS_400)));
         add(5, 2, button("gui.store.cubits.5", 4, 3)
-                .onLeftClickAsync(player -> buyPackage(playerService, player, CUBITS_600)));
+                .onLeftClickAsync(() -> buyPackage(playerService, host.player(), CUBITS_600)));
     }
 
 }

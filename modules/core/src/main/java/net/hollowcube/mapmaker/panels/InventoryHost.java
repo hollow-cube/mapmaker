@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -57,13 +58,11 @@ public class InventoryHost {
     // is both not null and not CompletableFuture#isDone.
     private CompletableFuture<Void> pendingClick = null;
 
-    private Panel root;
+    private final List<Panel> panels = new ArrayList<>();
+    private final List<InventoryType> inventoryTypes = new ArrayList<>();
 
-    public InventoryHost(@NotNull Player player, Panel root) {
+    public InventoryHost(@NotNull Player player) {
         this.player = player;
-        this.root = root;
-
-        this.root.mount(this);
     }
 
     public @NotNull Player player() {
@@ -74,45 +73,30 @@ public class InventoryHost {
         return Objects.requireNonNull(handle);
     }
 
-//    public void pushView(@NotNull Value reactElement) {
-//        final InventoryType inventoryType = owner.getInventoryType(reactElement);
-//
-//        // We overwrite the key to always be a random UUID.
-//        // This is because we always keep the entire view stack mounted in the React root to preserve
-//        // state when moving forward and backward.
-//        // But when rerendering we don't want to remount the entire tree, so we set a constant
-//        // key for each view in the tree.
-//        Object elem = reactElement;
-//        if (owner.engine().env().isDevelopment()) {
-//            // To add some extra trickery, react-development will freeze the result of createElement,
-//            // so we copy it to change the key.
-//            final Map<String, Object> elementCopy = new HashMap<>();
-//            for (final String key : reactElement.getMemberKeys()) {
-//                if ("key".equals(key)) continue;
-//                elementCopy.put(key, reactElement.getMember(key));
-//            }
-//            elementCopy.put("key", UUID.randomUUID().toString());
-//            elem = proxyObject(elementCopy);
-//        } else {
-//            // In production we can just set the key directly.
-//            reactElement.putMember("key", UUID.randomUUID().toString());
-//        }
-//
-//        elements.add(elem);
-//        inventoryTypes.add(inventoryType);
-//
-//        updateAndDraw();
-//    }
+    public void pushView(@NotNull Panel panel) {
+        if (!panels.isEmpty()) {
+            var last = panels.getLast();
+            if (last != null) last.unmount();
+        }
 
-//    public void popView() {
-//        if (elements.size() <= 1) return;
-//
-//        // Remove the react element
-//        this.elements.removeLast();
-//        this.inventoryTypes.removeLast();
-//
-//        updateAndDraw();
-//    }
+        this.panels.add(panel);
+        panel.mount(this, true);
+        inventoryTypes.add(panel.inventoryType());
+
+        drawCurrentElement();
+    }
+
+    public void popView() {
+        if (panels.size() <= 1) return;
+
+        var removed = this.panels.removeLast();
+        if (removed != null) removed.unmount();
+        this.inventoryTypes.removeLast();
+
+        panels.getLast().mount(this, false);
+
+        drawCurrentElement();
+    }
 
     public void queueRedraw() {
         if (this.redrawTask != null && this.redrawTask.isAlive()) return;
@@ -121,15 +105,15 @@ public class InventoryHost {
 
     // "rendering" implementation
 
-    public void drawCurrentElement() {
+    private void drawCurrentElement() {
         // Check if unmounted or closed
-//        if (this.roots.isEmpty() || (hasMounted && !(player.getOpenInventory() instanceof InventoryWrapper))) return;
+        if (this.panels.isEmpty()) return;
+        final Panel root = this.panels.getLast();
 
-//        final InventoryType type = this.inventoryTypes.getLast();
         System.out.println("draw");
-        var type = InventoryType.CHEST_6_ROW;
 
         // Currently we always consume the player inventory so add 4 rows.
+        final InventoryType type = this.inventoryTypes.getLast();
         int containerSizeInRows = getInterpretedSize(type) / 9;
         var menuBuilder = new MenuBuilder(9, containerSizeInRows + 4, containerSizeInRows);
         root.build(menuBuilder);
@@ -174,7 +158,9 @@ public class InventoryHost {
         };
         if (clickType == null) return;
 
-        host.pendingClick = host.root.handleClick(event.getPlayer(), clickType, slot % 9, slot / 9);
+        if (host.panels.isEmpty()) return;
+        var root = host.panels.getLast();
+        host.pendingClick = root.handleClick(clickType, slot % 9, slot / 9);
         if (host.pendingClick != null) {
             host.player.playSound(CLICK_SOUND);
         }
@@ -197,7 +183,12 @@ public class InventoryHost {
     }
 
     private static void handleAnvilInput(@NotNull PlayerAnvilInputEvent event) {
-        // TODO
+        if (!(event.getInventory() instanceof InventoryWrapper inventory)) return;
+        var host = inventory.owner();
+        if (host.panels.isEmpty()) return;
+        if (!(host.panels.getLast() instanceof AbstractAnvilView anvil)) return;
+
+        anvil.handleAnvilInput(event.getInput());
     }
 
     private final class InventoryWrapper extends Inventory {
@@ -273,7 +264,10 @@ public class InventoryHost {
                 player.getInventory().update();
             }
 
-            root.unmount();
+            if (result && !panels.isEmpty()) {
+                panels.getLast().unmount();
+                panels.clear();
+            }
 
             return result;
         }

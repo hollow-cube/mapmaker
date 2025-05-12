@@ -71,7 +71,7 @@ class SimpleSortPanel extends Panel {
     }
 
     @Override
-    protected void mount(@NotNull InventoryHost host) {
+    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
         var playerData = PlayerDataV2.fromPlayer(host.player());
 
         this.sort = playerData.getSetting(SORT_PRESET);
@@ -85,9 +85,9 @@ class SimpleSortPanel extends Panel {
         expert.setSelected(this.difficulties.contains(MapData.Difficulty.EXPERT));
         nightmare.setSelected(this.difficulties.contains(MapData.Difficulty.NIGHTMARE));
 
-        super.mount(host);
+        super.mount(host, isInitial);
 
-        onSearchChange();
+        if (isInitial) onSearchChange();
     }
 
     private void selectSort(@NotNull SortPreset sort) {

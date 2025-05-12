@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.IntConsumer;
 
 public class Pagination<S> extends Panel {
 
@@ -13,7 +12,12 @@ public class Pagination<S> extends Panel {
         @NotNull List<? extends Panel> fetch(S search, int page, int pageSize);
     }
 
-    private final List<IntConsumer> onPageChange = new ArrayList<>();
+    @FunctionalInterface
+    public interface PageListener {
+        void onPageChange(int page, int totalPages);
+    }
+
+    private final List<PageListener> onPageChange = new ArrayList<>();
     private PageFetcher<S> pageFetcher;
     private PageFetcher<S> pageFetcherAsync;
 
@@ -33,13 +37,10 @@ public class Pagination<S> extends Panel {
 
     public void totalPages(int totalPages) {
         this.totalPages = totalPages;
-        onPageChange.forEach(c -> c.accept(this.page));
+        onPageChange.forEach(c -> c.onPageChange(this.page, this.totalPages));
     }
 
     public void reset() {
-        // if on page 0 and not changing the query dont do anything.
-        if (page == 0) return;
-
         resetSearch();
     }
 
@@ -90,7 +91,7 @@ public class Pagination<S> extends Panel {
         var button = new Text("", width, height, "")
                 .align(Text.CENTER, 5);
         button.onLeftClick(_ -> reset());
-        onPageChange.add(page -> {
+        onPageChange.add((page, totalPages) -> {
             button.text((page + 1) + "/" + (totalPages == 0 ? "-" : totalPages));
             button.translationKey(totalPages == 0 ? "gui.generic.page" : "gui.generic.page_and_max", page + 1, totalPages);
         });
@@ -114,13 +115,14 @@ public class Pagination<S> extends Panel {
         if (this.query == null) return;
         var results = fetcher.fetch(query, this.page, this.slotWidth * this.slotHeight);
 
+        System.out.println("DO FETCH INTERNAL " + results.size());
         sync(() -> {
             clear();
             for (int i = 0; i < results.size(); i++) {
                 var child = results.get(i);
                 add(i % this.slotWidth, i / this.slotWidth, child);
             }
-            onPageChange.forEach(c -> c.accept(this.page));
+            onPageChange.forEach(c -> c.onPageChange(this.page, this.totalPages));
         });
     }
 }

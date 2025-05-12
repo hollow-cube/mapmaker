@@ -31,7 +31,7 @@ public final class ExtraPanels {
             add(0, 0, new Button("gui.generic.close_menu", 1, 1)
                     .background("generic2/btn/danger/1_1")
                     .sprite("generic2/btn/common/close", 4, 4)
-                    .onLeftClick(player -> player.closeInventory()));
+                    .onLeftClick(() -> host.player().closeInventory()));
         }
 
     }

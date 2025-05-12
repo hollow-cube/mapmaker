@@ -23,9 +23,9 @@ class HypercubePanel extends Panel {
 
         // Purchase buttons
         add(1, 3, button("gui.store.hypercube.1month", 3, 2)
-                .onLeftClickAsync(player -> buyPackage(playerService, player, HYPERCUBE_1MO)));
+                .onLeftClickAsync(() -> buyPackage(playerService, host.player(), HYPERCUBE_1MO)));
         add(5, 3, button("gui.store.hypercube.1year", 3, 2)
-                .onLeftClickAsync(player -> buyPackage(playerService, player, HYPERCUBE_1Y)));
+                .onLeftClickAsync(() -> buyPackage(playerService, host.player(), HYPERCUBE_1Y)));
     }
 
 }
