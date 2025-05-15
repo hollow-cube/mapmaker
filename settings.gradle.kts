@@ -35,6 +35,7 @@ include(
     "bin:local",
     "bin:map",
     "bin:map-isolate",
+    "bin:new-mode",
     "bin:packer",
     "bin:proxy-plugin",
 )

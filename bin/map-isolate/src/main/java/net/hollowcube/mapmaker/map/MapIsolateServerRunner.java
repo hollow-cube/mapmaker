@@ -59,7 +59,7 @@ public class MapIsolateServerRunner extends AbstractMapServer {
 
     @Override
     protected @NotNull MapAllocator createAllocator() {
-        return MapAllocator.direct(this);
+        return MapAllocator.directAllocator(this);
     }
 
     @Override
