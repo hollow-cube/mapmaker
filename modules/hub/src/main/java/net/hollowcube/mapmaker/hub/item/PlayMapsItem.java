@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.hub.item;
 import net.hollowcube.mapmaker.gui.map.browser.MapBrowserView;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -17,11 +18,13 @@ public class PlayMapsItem extends ItemHandler {
 
     private final PlayerService playerService;
     private final MapService mapService;
+    private final ServerBridge bridge;
 
-    public PlayMapsItem(@NotNull PlayerService playerService, @NotNull MapService mapService) {
+    public PlayMapsItem(@NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
         super(ID, RIGHT_CLICK_ANY);
         this.playerService = playerService;
         this.mapService = mapService;
+        this.bridge = bridge;
     }
 
     @Override
@@ -32,7 +35,7 @@ public class PlayMapsItem extends ItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
-        Panel.open(player, new MapBrowserView(playerService, mapService));
+        Panel.open(player, new MapBrowserView(playerService, mapService, bridge));
     }
 
 }

@@ -6,13 +6,14 @@ import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.cosmetic.impl.victory.AbstractVictoryEffectImpl;
+import net.hollowcube.mapmaker.gui.map.RateMapView;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCompleteMapEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
-import net.hollowcube.mapmaker.map.gui.RateMapView;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
+import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.AppliedRewards;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
@@ -24,6 +25,7 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
@@ -112,7 +114,8 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
                 if (MapRatingFeatureProvider.isMapRatable(world) && lastRatingFuture.isDone()) {
                     final MapRating lastRating = lastRatingFuture.resultNow();
                     if (lastRating == null || lastRating.state() == MapRating.State.UNRATED) {
-                        world.server().showView(player, c -> new RateMapView(c, world.map()));
+                        Panel.open(player, new RateMapView(world.server().mapService(), world.map(), MapRating.State.UNRATED, newState ->
+                                player.setTag(MapRatingFeatureProvider.LAST_RATING_TAG, CompletableFuture.completedFuture(new MapRating(newState, null)))));
                     }
                 }
             };

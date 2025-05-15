@@ -98,6 +98,10 @@ public class InventoryHost {
         drawCurrentElement();
     }
 
+    public boolean canPopView() {
+        return panels.size() > 1;
+    }
+
     public void queueRedraw() {
         if (this.redrawTask != null && this.redrawTask.isAlive()) return;
         this.redrawTask = player.scheduler().scheduleEndOfTick(this::drawCurrentElement);
@@ -109,8 +113,6 @@ public class InventoryHost {
         // Check if unmounted or closed
         if (this.panels.isEmpty()) return;
         final Panel root = this.panels.getLast();
-
-        System.out.println("draw");
 
         // Currently we always consume the player inventory so add 4 rows.
         final InventoryType type = this.inventoryTypes.getLast();

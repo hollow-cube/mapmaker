@@ -115,7 +115,6 @@ public class Pagination<S> extends Panel {
         if (this.query == null) return;
         var results = fetcher.fetch(query, this.page, this.slotWidth * this.slotHeight);
 
-        System.out.println("DO FETCH INTERNAL " + results.size());
         sync(() -> {
             clear();
             for (int i = 0; i < results.size(); i++) {

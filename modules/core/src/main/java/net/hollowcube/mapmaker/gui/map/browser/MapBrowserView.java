@@ -1,26 +1,22 @@
 package net.hollowcube.mapmaker.gui.map.browser;
 
-import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.mapmaker.gui.map.MapIconPanel;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.map.PersonalizedMapData;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
-import net.hollowcube.mapmaker.panels.*;
-import net.hollowcube.mapmaker.player.DisplayName;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.panels.Pagination;
+import net.hollowcube.mapmaker.panels.Panel;
+import net.hollowcube.mapmaker.panels.Text;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.StringComparison;
-import net.kyori.adventure.text.Component;
-import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
@@ -28,18 +24,25 @@ import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
 
 public class MapBrowserView extends Panel {
 
+    public enum SortPreset {
+        BEST, QUALITY, NEW
+    }
+
     private final PlayerService playerService;
     private final MapService mapService;
+    private final ServerBridge bridge;
 
     private final Pagination<MapSearchParams.Builder> pagination;
     private final Text searchTextElement;
+    private final SimpleSortPanel simpleSortPanel;
 
     private volatile String searchText = "";
 
-    public MapBrowserView(@NotNull PlayerService playerService, @NotNull MapService mapService) {
+    public MapBrowserView(@NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
         super(9, 10);
         this.playerService = playerService;
         this.mapService = mapService;
+        this.bridge = bridge;
 
         background("map_browser/container", -10, -31);
         add(0, 0, title("Play Maps"));
@@ -47,7 +50,7 @@ public class MapBrowserView extends Panel {
         add(0, 0, backOrClose());
         this.searchTextElement = add(1, 0, new Text("gui.map_browser.search_maps.empty", 8, 1, "Search...")
                 .align(8, 5));
-        this.searchTextElement.onLeftClick(this::handleSearchBegin);
+        this.searchTextElement.onLeftClick(this::openSearchInput);
         this.searchTextElement.onShiftLeftClick(this::handleSearchClear);
 
         this.pagination = add(1, 2, new Pagination<MapSearchParams.Builder>(7, 3)
@@ -56,7 +59,23 @@ public class MapBrowserView extends Panel {
         add(3, 5, pagination.pageText(3, 1));
         add(6, 5, pagination.nextButton());
 
-        add(0, 6, new SimpleSortPanel(this::handleSortChange));
+        // !!! WARNING !!!
+        // Once we support advanced search, the simpleSort function needs to force the ui into simple mode.
+        this.simpleSortPanel = add(0, 6, new SimpleSortPanel(this::handleSortChange));
+    }
+
+    // This is a pretty gross inflexible method, but its fine for now
+    public void simpleSort(@NotNull SortPreset preset) {
+        this.simpleSortPanel.setSync(false);
+        this.simpleSortPanel.selectSort(preset);
+    }
+
+    public void openSearchInput() {
+        host.pushView(simpleAnvil(
+                "generic2/anvil/field_container",
+                "map_browser/search_anvil_icon",
+                this::handleSearchTextChange
+        ));
     }
 
     @Blocking
@@ -78,10 +97,10 @@ public class MapBrowserView extends Panel {
         }
 
         var mapIds = new ArrayList<String>();
-        var entries = new ArrayList<MapEntry>();
+        var entries = new ArrayList<MapIconPanel>();
         for (var map : results) {
             if (map.isCompletable()) mapIds.add(map.id());
-            entries.add(new MapEntry(map));
+            entries.add(new MapIconPanel(playerService, mapService, bridge, map));
         }
 
         // Fetch the player's current progress on the maps
@@ -89,7 +108,7 @@ public class MapBrowserView extends Panel {
             var resp = mapService.getMapProgress(host.player().getUuid().toString(), mapIds);
             sync(() -> {
                 for (var map : entries) {
-                    var progress = resp.getProgress(map.map.id());
+                    var progress = resp.getProgress(map.map().id());
                     if (progress != null) map.updateProgress(progress);
                 }
             });
@@ -112,14 +131,6 @@ public class MapBrowserView extends Panel {
         this.pagination.reset(params);
     }
 
-    private void handleSearchBegin() {
-        host.pushView(simpleAnvil(
-                "generic2/anvil/field_container",
-                "map_browser/search_anvil_icon",
-                this::handleSearchTextChange
-        ));
-    }
-
     private void handleSearchClear() {
         handleSearchTextChange("");
     }
@@ -135,50 +146,4 @@ public class MapBrowserView extends Panel {
         this.pagination.reset();
     }
 
-    private class MapEntry extends Panel {
-        private final MapData map;
-        private DisplayName authorName = null; // Filled async
-        private Map.Entry<PersonalizedMapData.Progress, Integer> progress = null; // Filled async
-
-        private final Button button;
-
-        public MapEntry(@NotNull MapData map) {
-            super(1, 1);
-            this.map = map;
-
-            this.button = add(0, 0, new Button(null, 1, 1));
-        }
-
-        @Override
-        protected void mount(@NotNull InventoryHost host, boolean isInitial) {
-            super.mount(host, isInitial);
-
-            if (this.authorName != null) return;
-            async(() -> updateAuthor(playerService.getPlayerDisplayName2(map.owner())));
-        }
-
-        private void updateAuthor(@NotNull DisplayName displayName) {
-            sync(() -> {
-                authorName = displayName;
-                updateIcon();
-            });
-        }
-
-        private void updateProgress(@NotNull Map.Entry<PersonalizedMapData.Progress, Integer> progress) {
-            sync(() -> {
-                this.progress = progress;
-                updateIcon();
-            });
-        }
-
-        private void updateIcon() {
-            var icon = Objects.requireNonNullElse(map.settings().getIcon(), Material.PAPER);
-            button.model(icon.name(), null);
-
-            var authorName = OpUtils.mapOr(this.authorName, DisplayName::build, Component.text("loading"));
-            var entry = MapData.createHoverComponents(map, authorName, progress);
-            entry.getValue().addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display.footer", List.of()));
-            button.text(entry.getKey(), entry.getValue());
-        }
-    }
 }

@@ -2,13 +2,12 @@ package net.hollowcube.mapmaker.map.feature.play.item;
 
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.gui.play.MapDetailsView;
+import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
+import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,7 +43,9 @@ public class MapDetailsItem extends ItemHandler {
                 authorName = new DisplayName(List.of(new DisplayName.Part("username", "!error!", null)));
             }
             DisplayName finalAuthorName = authorName;
-            world.server().showView(player, c -> new MapDetailsView(c, world.map(), finalAuthorName));
+
+            Panel.open(player, new MapDetailsView(world.server().playerService(), world.server().mapService(),
+                    world.server().bridge(), world.map(), finalAuthorName, false));
         });
     }
 

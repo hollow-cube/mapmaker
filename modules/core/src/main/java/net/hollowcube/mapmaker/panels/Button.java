@@ -11,6 +11,7 @@ import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.component.CustomModelData;
+import net.minestom.server.item.component.HeadProfile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,6 +40,7 @@ public class Button extends Element implements ButtonClickAliases {
     protected List<Component> itemLore;
     protected String itemModel = "minecraft:stick";
     protected String itemOverlay = null;
+    protected HeadProfile itemProfile = null;
     protected Sprite sprite;
     protected boolean disableHoverSprite = false;
 
@@ -78,6 +80,14 @@ public class Button extends Element implements ButtonClickAliases {
     public @NotNull Button model(@NotNull String model, @Nullable String overlay) {
         if (Objects.equals(this.itemModel, model) && Objects.equals(this.itemOverlay, overlay)) return this;
         this.itemModel = model;
+
+        if (host != null) host.queueRedraw();
+        return this;
+    }
+
+    public @NotNull Button profile(@NotNull HeadProfile profile) {
+        if (Objects.equals(this.itemProfile, profile)) return this;
+        this.itemProfile = profile;
 
         if (host != null) host.queueRedraw();
         return this;
@@ -175,6 +185,8 @@ public class Button extends Element implements ButtonClickAliases {
         builder.editSlotsWithout(0, 0, slotWidth, slotHeight, DataComponents.TOOLTIP_DISPLAY);
         if (!"minecraft:stick".equals(itemModel))
             builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.ITEM_MODEL, itemModel);
+        if (itemProfile != null)
+            builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.PROFILE, itemProfile);
         builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(
                 List.of(), List.of(), itemOverlay == null ? List.of(itemModel) : List.of(itemModel, itemOverlay), List.of()
         ));

@@ -56,7 +56,10 @@ public class SpriteTransform {
                 var relative = guiBaseDir.relativize(imageFile);
                 boolean canSkipConfig = (relative.toString().startsWith("store" + File.separatorChar)
                         || relative.toString().startsWith("map_browser" + File.separatorChar)
-                        || relative.toString().startsWith("map_details" + File.separatorChar))
+                        || relative.toString().startsWith("map_details" + File.separatorChar)
+                        || relative.toString().startsWith("report_map" + File.separatorChar)
+                        || relative.toString().startsWith("map_list" + File.separatorChar)
+                        || relative.toString().startsWith("rate_map" + File.separatorChar))
                         && !relative.toString().contains("checkout");
                 if (!canSkipConfig && !Files.exists(configFile)) continue;
 

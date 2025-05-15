@@ -6,7 +6,6 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.MojangUtil;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
-import net.hollowcube.mapmaker.gui.play.MapDetailsView;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServerRunner;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
@@ -23,7 +22,6 @@ import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
-import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerSkin;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.terraform.Terraform;
@@ -215,15 +213,6 @@ public class DevServerRunner extends AbstractMapServer {
                 player.sendMessage("You are not in an editing world!");
             }
         }, "Enables progress index add mode for the current map");
-
-        dbg.createPermissionedSubcommand("d", (player, ignored) -> {
-            Panel.open(player, new net.hollowcube.mapmaker.gui.map.details.MapDetailsView(mapService().getMap(player.getUuid().toString(), "cc98ee61-15d9-448d-876f-f3205a219a4f"), playerService().getPlayerDisplayName2(player.getUuid().toString())));
-        }, "");
-        dbg.createPermissionedSubcommand("gui", (player, ignored) -> {
-            player.getInstance().scheduleNextTick(ignored2 -> {
-                guiController().show(player, c -> new MapDetailsView(c, mapService().getMap(player.getUuid().toString(), "cc98ee61-15d9-448d-876f-f3205a219a4f"), playerService().getPlayerDisplayName2(player.getUuid().toString())));
-            });
-        }, "");
 
         return dbg;
     }

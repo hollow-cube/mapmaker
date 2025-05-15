@@ -5,13 +5,17 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.IntConsumer;
 
 public class Switch extends Element {
+    private static final int MAX_CHILDREN = 20;
+
     private final List<Element> children;
     private int selectedIndex = 0;
+    private BitSet mountMask = new BitSet(MAX_CHILDREN);
 
     private final List<IntConsumer> onSelect = new ArrayList<>();
 
@@ -29,10 +33,17 @@ public class Switch extends Element {
         if (index < 0 || index >= children.size()) {
             throw new IndexOutOfBoundsException("Index out of bounds: " + index);
         }
+        if (selectedIndex >= 0 && selectedIndex < children.size())
+            children.get(selectedIndex).unmount();
         selectedIndex = index;
+        boolean isInitial = !mountMask.get(index);
+        mountMask.set(index);
+        children.get(index).mount(host, isInitial);
+
         for (var consumer : onSelect) {
             consumer.accept(index);
         }
+
         if (host != null) host.queueRedraw();
     }
 
@@ -51,13 +62,13 @@ public class Switch extends Element {
         return button;
     }
 
-    public @NotNull Element toggleButton(int width, int height, @NotNull String translationKey, @NotNull String sprite) {
+    public @NotNull Element toggleButton(int width, int height, @NotNull String translationKey, @NotNull String sprite, int spriteX, int spriteY) {
         var button = new Button(translationKey + ".off", width, height);
-        button.sprite(sprite + "_off");
+        button.sprite(sprite + "_off", spriteX, spriteY);
         button.onLeftClick(_ -> select(selectedIndex == 0 ? 1 : 0));
         onSelect.add(i -> {
             button.translationKey(translationKey + (i == 1 ? ".on" : ".off"));
-            button.sprite(sprite + (i == 1 ? "_on" : "_off"));
+            button.sprite(sprite + (i == 1 ? "_on" : "_off"), spriteX, spriteY);
         });
         return button;
     }
@@ -76,6 +87,13 @@ public class Switch extends Element {
     @Override
     protected void mount(@NotNull InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
-        children.forEach(child -> child.mount(host, isInitial));
+        children.get(selectedIndex).mount(host, isInitial);
+        if (isInitial) mountMask.clear();
+    }
+
+    @Override
+    protected void unmount() {
+        super.unmount();
+        children.get(selectedIndex).unmount();
     }
 }

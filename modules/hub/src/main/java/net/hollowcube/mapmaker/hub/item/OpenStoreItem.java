@@ -1,7 +1,10 @@
 package net.hollowcube.mapmaker.hub.item;
 
+import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.map.MapServer;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
+import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,6 +29,10 @@ public class OpenStoreItem extends ItemHandler {
 
     @Override
     protected void rightClicked(@NotNull Click click) {
+        var world = MapWorld.forPlayerOptional(click.player());
+        if (world == null) return; // Sanity
+
+        Panel.open(click.player(), new StoreView(world.server().playerService(), world.server().permManager()));
     }
 
 }

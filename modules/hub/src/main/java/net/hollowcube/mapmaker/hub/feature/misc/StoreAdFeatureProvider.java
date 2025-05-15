@@ -2,11 +2,13 @@ package net.hollowcube.mapmaker.hub.feature.misc;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.math.Quaternion;
+import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.BaseNpcEntity;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.map.MapServer;
+import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.component.DataComponents;
@@ -54,6 +56,7 @@ public class StoreAdFeatureProvider implements HubFeature {
     private void handleStoreClick(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {
         if (hand != PlayerHand.MAIN) return;
 
+        Panel.open(player, new StoreView(playerService, permManager, StoreView.TAB_HYPERCUBE));
     }
 
     private @NotNull TaskSchedule mapEntityUpdate() {

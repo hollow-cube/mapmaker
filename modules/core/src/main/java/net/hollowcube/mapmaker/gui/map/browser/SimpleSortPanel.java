@@ -22,21 +22,19 @@ import java.util.function.Consumer;
 class SimpleSortPanel extends Panel {
     private static final List<MapData.Difficulty> DEFAULT_DIFFICULTIES = List.of(MapData.Difficulty.EASY, MapData.Difficulty.MEDIUM, MapData.Difficulty.HARD);
 
-    private static final PlayerSetting<SortPreset> SORT_PRESET = PlayerSetting.Enum("map_browser.sort_preset", SortPreset.BEST);
+    private static final PlayerSetting<MapBrowserView.SortPreset> SORT_PRESET = PlayerSetting.Enum("map_browser.sort_preset", MapBrowserView.SortPreset.BEST);
     private static final PlayerSetting<List<MapData.Difficulty>> DIFFICULTIES = PlayerSetting.create("map_browser.difficulties",
             DEFAULT_DIFFICULTIES, SimpleSortPanel::writeDifficultyList, SimpleSortPanel::readDifficultyList);
-
-    public enum SortPreset {
-        BEST, QUALITY, NEW
-    }
 
     private final Consumer<MapSearchParams.Builder> onSearch;
 
     private final Set<MapData.Difficulty> difficulties = new HashSet<>();
-    private SortPreset sort = SortPreset.BEST;
+    private MapBrowserView.SortPreset sort = MapBrowserView.SortPreset.BEST;
 
     private final Switch sortSwitch;
     private final DifficultyToggleButton easy, medium, hard, expert, nightmare;
+
+    private boolean sync = true;
 
     public SimpleSortPanel(@NotNull Consumer<MapSearchParams.Builder> onSearch) {
         super(9, 4);
@@ -47,7 +45,7 @@ class SimpleSortPanel extends Panel {
         add(0, 0, sortSwitch.button(0, 3, 1, "gui.map_browser.sort_best", "map_browser/tabs/best"));
         add(3, 0, sortSwitch.button(1, 3, 1, "gui.map_browser.sort_quality", "map_browser/tabs/quality"));
         add(6, 0, sortSwitch.button(2, 3, 1, "gui.map_browser.sort_new", "map_browser/tabs/new"));
-        sortSwitch.onSelect(index -> selectSort(SortPreset.values()[index]));
+        sortSwitch.onSelect(index -> selectSort(MapBrowserView.SortPreset.values()[index]));
 
         // Difficulty
         easy = add(2, 2, new DifficultyToggleButton("gui.map_browser.difficulty_easy",
@@ -73,7 +71,6 @@ class SimpleSortPanel extends Panel {
     @Override
     protected void mount(@NotNull InventoryHost host, boolean isInitial) {
         var playerData = PlayerDataV2.fromPlayer(host.player());
-
         this.sort = playerData.getSetting(SORT_PRESET);
         sortSwitch.select(sort.ordinal());
 
@@ -90,28 +87,31 @@ class SimpleSortPanel extends Panel {
         if (isInitial) onSearchChange();
     }
 
-    private void selectSort(@NotNull SortPreset sort) {
+    public void setSync(boolean sync) {
+        this.sync = sync;
+    }
+
+    public void selectSort(@NotNull MapBrowserView.SortPreset sort) {
         if (this.sort == sort) return;
         this.sort = sort;
         onSearchChange();
 
-        if (host == null) return;
+        if (host == null || !sync) return;
         var playerData = PlayerDataV2.fromPlayer(host.player());
         playerData.setSetting(SORT_PRESET, sort);
     }
 
-    private void selectDifficulty(@NotNull MapData.Difficulty difficulty, boolean selected) {
+    public void selectDifficulty(@NotNull MapData.Difficulty difficulty, boolean selected) {
         var changed = selected ? difficulties.add(difficulty) : difficulties.remove(difficulty);
         if (!changed) return;
         onSearchChange();
 
-        if (host == null) return;
+        if (host == null || !sync) return;
         var playerData = PlayerDataV2.fromPlayer(host.player());
         playerData.setSetting(DIFFICULTIES, new ArrayList<>(difficulties));
     }
 
     private void onSearchChange() {
-        if (host == null) return;
         var params = MapSearchParams.builder(host.player().getUuid().toString());
         if (!difficulties.isEmpty() && difficulties.size() != 5) {
             // Only set if not 0 or all. In those cases we also want to include unknown so can use default.
