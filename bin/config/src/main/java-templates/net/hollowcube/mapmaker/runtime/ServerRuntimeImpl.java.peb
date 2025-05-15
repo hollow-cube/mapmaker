@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.Objects;
 
 @AutoService(ServerRuntime.class)
 public class ServerRuntimeImpl implements ServerRuntime {
@@ -14,7 +15,7 @@ public class ServerRuntimeImpl implements ServerRuntime {
     private String version = "{{ version }}";
     private String commit = "{{ commitHash }}";
     private String minestom = "{{ minestomVersion }}";
-    private String resourcePackHash = "{{ resourcePackHash }}";
+    private String resourcePackHash = null;
     private boolean isRelease = {{ isRelease }};
 
     public ServerRuntimeImpl() {
@@ -44,7 +45,7 @@ public class ServerRuntimeImpl implements ServerRuntime {
     }
 
     public @NotNull String resourcePackSha1() {
-        return resourcePackHash;
+        return Objects.requireNonNull(resourcePackHash);
     }
 
     @Override

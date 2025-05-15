@@ -75,6 +75,9 @@ jobs:
 
       # Build server
       - name: Build standalone binary
+        env:
+          MAPMAKER_VERSION: ${{ github.ref_name }}
+          MAPMAKER_COMMIT_HASH: ${{ github.sha }}
         run: ./gradlew :bin:map:shadowJar -PisRelease=true
 
       # Build and push docker image
@@ -114,6 +117,9 @@ jobs:
 
       # Build server
       - name: Build standalone binary
+        env:
+          MAPMAKER_VERSION: ${{ github.ref_name }}
+          MAPMAKER_COMMIT_HASH: ${{ github.sha }}
         run: ./gradlew :bin:hub:shadowJar -PisRelease=true
 
       # Build and push docker image

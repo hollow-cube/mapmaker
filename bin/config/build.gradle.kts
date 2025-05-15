@@ -17,10 +17,9 @@ sourceSets {
     main {
         blossom {
             javaSources {
-                property("version", "dev") // todo
-                property("commitHash", "dev") // todo
+                property("version", System.getenv("MAPMAKER_VERSION") ?: "dev")
+                property("commitHash", System.getenv("MAPMAKER_COMMIT_HASH") ?: "dev")
                 property("minestomVersion", libs.minestom.get().version)
-                property("resourcePackHash", "todo") // todo
                 property("isRelease", isRelease.toString())
             }
         }
