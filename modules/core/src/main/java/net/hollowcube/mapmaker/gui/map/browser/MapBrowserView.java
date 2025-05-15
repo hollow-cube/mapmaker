@@ -39,6 +39,10 @@ public class MapBrowserView extends Panel {
     private volatile String searchText = "";
 
     public MapBrowserView(@NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
+        this(playerService, mapService, bridge, true);
+    }
+
+    public MapBrowserView(@NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull ServerBridge bridge, boolean fetchOnMount) {
         super(9, 10);
         this.playerService = playerService;
         this.mapService = mapService;
@@ -61,13 +65,13 @@ public class MapBrowserView extends Panel {
 
         // !!! WARNING !!!
         // Once we support advanced search, the simpleSort function needs to force the ui into simple mode.
-        this.simpleSortPanel = add(0, 6, new SimpleSortPanel(this::handleSortChange));
+        this.simpleSortPanel = add(0, 6, new SimpleSortPanel(this::handleSortChange, fetchOnMount));
     }
 
     // This is a pretty gross inflexible method, but its fine for now
     public void simpleSort(@NotNull SortPreset preset) {
         this.simpleSortPanel.setSync(false);
-        this.simpleSortPanel.selectSort(preset);
+        this.simpleSortPanel.setSort(preset);
     }
 
     public void openSearchInput() {
@@ -85,6 +89,8 @@ public class MapBrowserView extends Panel {
             params = MapSearchParams.builder(host.player().getUuid().toString())
                     .query(searchText);
         }
+
+        System.out.println(params.build());
 
         var response = mapService.searchMaps(params.page(page).pageSize(pageSize).build());
         if (page == 0) pagination.totalPages(response.pageCount());

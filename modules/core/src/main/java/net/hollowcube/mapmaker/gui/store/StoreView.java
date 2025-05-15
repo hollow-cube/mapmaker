@@ -41,7 +41,6 @@ public class StoreView extends Panel {
                 new HypercubePanel(playerService),
                 new AddonsPanel(playerService, permManager)
         )));
-        tabs.select(defaultTab);
         tabs.onSelect(index -> title.text(TITLES.get(index)));
 
         add(0, 6, tabs.button(TAB_CUBITS, 3, 3,
@@ -50,6 +49,8 @@ public class StoreView extends Panel {
                 "gui.store.tab_hypercube", "store/ranks"));
         add(6, 6, tabs.button(TAB_ADDONS, 3, 3,
                 "gui.store.tab_addons", "store/addons"));
+
+        tabs.select(defaultTab);
     }
 
 }

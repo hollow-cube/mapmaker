@@ -92,25 +92,25 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
     }
 
     private void handleBestMapsClick(@NotNull Player player) {
-        var browser = new MapBrowserView(server.playerService(), server.mapService(), server.bridge());
+        var browser = new MapBrowserView(server.playerService(), server.mapService(), server.bridge(), false);
         Panel.open(player, browser);
         browser.simpleSort(MapBrowserView.SortPreset.BEST);
     }
 
     private void handleQualityClick(@NotNull Player player) {
-        var browser = new MapBrowserView(server.playerService(), server.mapService(), server.bridge());
+        var browser = new MapBrowserView(server.playerService(), server.mapService(), server.bridge(), false);
         Panel.open(player, browser);
         browser.simpleSort(MapBrowserView.SortPreset.QUALITY);
     }
 
     private void handleNewMapsClick(@NotNull Player player) {
-        var browser = new MapBrowserView(server.playerService(), server.mapService(), server.bridge());
+        var browser = new MapBrowserView(server.playerService(), server.mapService(), server.bridge(), false);
         Panel.open(player, browser);
         browser.simpleSort(MapBrowserView.SortPreset.NEW);
     }
 
     private void handleSearchMapsClick(@NotNull Player player) {
-        var browser = new MapBrowserView(server.playerService(), server.mapService(), server.bridge());
+        var browser = new MapBrowserView(server.playerService(), server.mapService(), server.bridge(), false);
         Panel.open(player, browser);
         browser.openSearchInput();
     }

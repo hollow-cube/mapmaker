@@ -27,6 +27,7 @@ class SimpleSortPanel extends Panel {
             DEFAULT_DIFFICULTIES, SimpleSortPanel::writeDifficultyList, SimpleSortPanel::readDifficultyList);
 
     private final Consumer<MapSearchParams.Builder> onSearch;
+    private final boolean fetchOnMount;
 
     private final Set<MapData.Difficulty> difficulties = new HashSet<>();
     private MapBrowserView.SortPreset sort = MapBrowserView.SortPreset.BEST;
@@ -36,9 +37,10 @@ class SimpleSortPanel extends Panel {
 
     private boolean sync = true;
 
-    public SimpleSortPanel(@NotNull Consumer<MapSearchParams.Builder> onSearch) {
+    public SimpleSortPanel(@NotNull Consumer<MapSearchParams.Builder> onSearch, boolean fetchOnMount) {
         super(9, 4);
         this.onSearch = onSearch;
+        this.fetchOnMount = fetchOnMount;
 
         // Tabs (we abuse a switch that never gets added to the panel for its single select buttons)
         sortSwitch = new Switch(0, 0, List.of(Panel.EMPTY, Panel.EMPTY, Panel.EMPTY));
@@ -84,14 +86,19 @@ class SimpleSortPanel extends Panel {
 
         super.mount(host, isInitial);
 
-        if (isInitial) onSearchChange();
+        if (isInitial && fetchOnMount) onSearchChange();
     }
 
     public void setSync(boolean sync) {
         this.sync = sync;
     }
 
-    public void selectSort(@NotNull MapBrowserView.SortPreset sort) {
+    public void setSort(@NotNull MapBrowserView.SortPreset sort) {
+        if (this.sort == sort) onSearchChange();
+        else this.sortSwitch.select(sort.ordinal());
+    }
+
+    private void selectSort(@NotNull MapBrowserView.SortPreset sort) {
         if (this.sort == sort) return;
         this.sort = sort;
         onSearchChange();
@@ -101,7 +108,7 @@ class SimpleSortPanel extends Panel {
         playerData.setSetting(SORT_PRESET, sort);
     }
 
-    public void selectDifficulty(@NotNull MapData.Difficulty difficulty, boolean selected) {
+    private void selectDifficulty(@NotNull MapData.Difficulty difficulty, boolean selected) {
         var changed = selected ? difficulties.add(difficulty) : difficulties.remove(difficulty);
         if (!changed) return;
         onSearchChange();

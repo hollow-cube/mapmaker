@@ -79,9 +79,9 @@ public class InventoryHost {
             if (last != null) last.unmount();
         }
 
+        this.inventoryTypes.add(panel.inventoryType());
         this.panels.add(panel);
         panel.mount(this, true);
-        inventoryTypes.add(panel.inventoryType());
 
         drawCurrentElement();
     }
