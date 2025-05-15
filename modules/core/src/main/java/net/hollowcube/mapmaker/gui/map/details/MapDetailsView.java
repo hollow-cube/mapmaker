@@ -1,0 +1,104 @@
+package net.hollowcube.mapmaker.gui.map.details;
+
+import net.hollowcube.mapmaker.gui.map.MapReportView;
+import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.SaveStateType;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.panels.*;
+import net.hollowcube.mapmaker.player.DisplayName;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerService;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+
+import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
+import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
+
+public class MapDetailsView extends Panel {
+    private final MapService mapService;
+    private final ServerBridge bridge;
+    private final MapData map;
+    private final boolean showJoinButton;
+
+    private final Button playButton;
+
+    public MapDetailsView(
+            @NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull ServerBridge bridge,
+            @NotNull MapData mapData, @NotNull DisplayName authorName, boolean showJoinButton
+    ) {
+        super(9, 10);
+        this.mapService = mapService;
+        this.bridge = bridge;
+        this.map = mapData;
+        this.showJoinButton = showJoinButton;
+
+        background("map_details/container", -10, -32);
+        add(0, 0, new Text("", 9, 0, mapData.name())
+                .align(30, -23));
+        var lowerVariant = mapData.settings().getVariant().toString().toLowerCase(Locale.ROOT);
+        add(0, 0, new Button("", 0, 0)
+                .sprite("map_details/variant_" + lowerVariant, -5, -27));
+
+        add(0, 0, backOrClose());
+        var authorUsername = Objects.requireNonNullElse(authorName.getUsername(), "Unknown");
+        add(1, 0, new Text("", 7, 1, "by " + authorUsername)
+                .align(Text.CENTER, Text.CENTER)
+                .background("generic2/btn/default/7_1")
+                .translationKey("gui.map_details.creator_profile", authorName.build()));
+        add(8, 0, new Button("gui.map_details.map_info_tab.report_map", 1, 1)
+                .background("generic2/btn/default/1_1")
+                .sprite("map_details/action/report", 6, 3)
+                .onLeftClick(() -> host.pushView(new MapReportView(mapService, map))));
+
+        var tabs = add(0, 2, new Switch(9, 4, List.of(
+                new MapDetailsInfoPanel(mapData),
+                new MapDetailsTimesPanel(playerService, mapService, mapData.id()),
+                new MapDetailsRatePanel(mapService, mapData.id())
+        )));
+        tabs.select(0);
+        add(0, 1, tabs.button(0, 3, 1,
+                "gui.map_details.info.tab", "map_details/info/tab"));
+        add(3, 1, tabs.button(1, 3, 1,
+                "gui.map_details.times.tab", "map_details/times/tab"));
+        add(6, 1, tabs.button(2, 3, 1,
+                "gui.map_details.rate.tab", "map_details/rate/tab"));
+
+        add(0, 6, new Button("gui.map_details.map_info.boost_map", 3, 3)
+                .sprite("map_details/action/boost"));
+        this.playButton = add(3, 6, new Button("gui.map_details." + (showJoinButton ? "play_map" : "leave_map"), 3, 3)
+                .sprite("map_details/action/" + (showJoinButton ? "play" : "leave"))
+                .onLeftClick(showJoinButton ? this::handleJoinMap : this::handleLeaveMap));
+        add(6, 6, new Button("gui.map_details.suggest_similar_maps", 3, 3)
+                .sprite("map_details/action/similar"));
+    }
+
+    private void handleJoinMap() {
+        this.bridge.joinMap(host.player(), map.id(), ServerBridge.JoinMapState.PLAYING, "map_details_gui");
+    }
+
+    private void handleLeaveMap() {
+        this.bridge.joinHub(host.player());
+    }
+
+    @Override
+    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+        super.mount(host, isInitial);
+        if (!isInitial || !showJoinButton) return;
+
+        // Fetch the latest save state to show in play button
+        async(() -> {
+            try {
+                var playerId = PlayerDataV2.fromPlayer(host.player()).id();
+                var saveState = mapService.getLatestSaveState(map.id(), playerId, SaveStateType.PLAYING, null);
+
+                playButton.translationKey("gui.map_details.continue_map", formatMapPlaytime(saveState.getPlaytime(), true));
+            } catch (MapService.NotFoundError ignored) {
+                // Its ok, leave as default key
+            }
+        });
+    }
+}

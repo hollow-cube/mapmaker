@@ -1,15 +1,14 @@
 package net.hollowcube.mapmaker.hub.feature.misc;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.canvas.internal.Controller;
-import net.hollowcube.mapmaker.gui.play.PlayMapsView;
-import net.hollowcube.mapmaker.gui.play.QueryMapsView;
+import net.hollowcube.mapmaker.gui.map.browser.MapBrowserView;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.entity.util.InteractionEntity;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
 import net.hollowcube.mapmaker.map.MapServer;
+import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Pos;
@@ -40,14 +39,14 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
     private static final double BASE_OFFSET = 1.8;
     private static final int ENTITY_UPDATE_INTERVAL = 5; // Seconds
 
-    private Controller guiController;
+    private MapServer server;
 
     private final NpcItemModel[] edgeEntities = new NpcItemModel[5];
     private int entityHeightTarget = 0;
 
     @Override
     public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
-        this.guiController = server.guiController();
+        this.server = server;
 
         edgeEntities[0] = new NpcItemModel();
         edgeEntities[0].setModel(Material.DIAMOND, BadSprite.require("icon/map/create_map"));
@@ -89,23 +88,31 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
     }
 
     private void handleCreateMapsClick(@NotNull Player player) {
-        guiController.show(player, CreateMaps::new);
+        server.guiController().show(player, CreateMaps::new);
     }
 
     private void handleBestMapsClick(@NotNull Player player) {
-        guiController.show(player, c -> new PlayMapsView(c.with(Map.of("query", "")), PlayMapsView.SortPreset.BEST));
+        var browser = new MapBrowserView(server.playerService(), server.mapService(), server.bridge(), false);
+        Panel.open(player, browser);
+        browser.simpleSort(MapBrowserView.SortPreset.BEST);
     }
 
     private void handleQualityClick(@NotNull Player player) {
-        guiController.show(player, c -> new PlayMapsView(c.with(Map.of("query", "")), PlayMapsView.SortPreset.APPROVED));
+        var browser = new MapBrowserView(server.playerService(), server.mapService(), server.bridge(), false);
+        Panel.open(player, browser);
+        browser.simpleSort(MapBrowserView.SortPreset.QUALITY);
     }
 
     private void handleNewMapsClick(@NotNull Player player) {
-        guiController.show(player, c -> new PlayMapsView(c.with(Map.of("query", "")), PlayMapsView.SortPreset.RECENT));
+        var browser = new MapBrowserView(server.playerService(), server.mapService(), server.bridge(), false);
+        Panel.open(player, browser);
+        browser.simpleSort(MapBrowserView.SortPreset.NEW);
     }
 
     private void handleSearchMapsClick(@NotNull Player player) {
-        guiController.show(player, QueryMapsView::new);
+        var browser = new MapBrowserView(server.playerService(), server.mapService(), server.bridge(), false);
+        Panel.open(player, browser);
+        browser.openSearchInput();
     }
 
     private void appendInteractor(@NotNull Entity entity, int width, int height, @NotNull Consumer<Player> onClick, boolean isCenter) {

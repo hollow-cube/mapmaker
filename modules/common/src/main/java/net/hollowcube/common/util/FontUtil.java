@@ -415,12 +415,22 @@ public final class FontUtil {
     public enum Size {
         S1X1,
         S2X1,
+        S3X1,
         S3X2,
         S3X3,
         S4X3,
         UNUSED1,
-        UNUSED2,
-        UNUSED3,
+        UNUSED2;
+
+        public static Size fromSize(int width, int height) {
+            if (width == 1 && height == 1) return S1X1;
+            if (width == 2 && height == 1) return S2X1;
+            if (width == 3 && height == 1) return S3X1;
+            if (width == 3 && height == 2) return S3X2;
+            if (width == 3 && height == 3) return S3X3;
+            if (width == 4 && height == 3) return S4X3;
+            throw new IllegalArgumentException("Invalid size: " + width + "x" + height);
+        }
     }
 
     public static @NotNull TextColor computeShadowPos(@NotNull Size size, int slotX, int slotY) {

@@ -196,7 +196,11 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         }
     }
 
-    public abstract void preAddPlayer(@NotNull AsyncPlayerConfigurationEvent event);
+    public void preAddPlayer(@NotNull AsyncPlayerConfigurationEvent event) {
+        final var player = event.getPlayer();
+
+        player.setRespawnPoint(spawnPoint(player));
+    }
 
     @Override
     public void addPlayer(@NotNull Player player) {

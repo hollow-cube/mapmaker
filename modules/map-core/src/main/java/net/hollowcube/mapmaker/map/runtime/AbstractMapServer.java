@@ -82,7 +82,6 @@ import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.punishments.PunishmentManagementListener;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.PunishmentServiceImpl;
-import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
@@ -103,7 +102,6 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.server.common.ServerLinksPacket;
-import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -124,8 +122,6 @@ import java.util.regex.PatternSyntaxException;
 public abstract class AbstractMapServer implements MapServer {
     private final Logger logger = LoggerFactory.getLogger(MapServer.class);
 
-    private static final Tag<ScriptEngine> SCRIPT_ENGINE_TAG = Tag.Transient("instance_script_engine");
-
     protected final ConfigLoaderV3 config;
     protected final GlobalConfig globalConfig;
 
@@ -137,8 +133,6 @@ public abstract class AbstractMapServer implements MapServer {
     private final PermManager permManager;
     private final PunishmentService punishmentService;
     private PlayerInviteService inviteService; // So many dependencies very yikes
-
-    private ScriptEngine scriptEngine;
 
     // Listeners for other features
     private MapAllocator allocator;
@@ -168,8 +162,8 @@ public abstract class AbstractMapServer implements MapServer {
         this.metrics = createMetricWriter(config);
         shutdowner.queue("metric-writer", metrics::close);
 
-        var playerServiceUrl = System.getenv("MAPMAKER_PLAYER_SERVICE_URL");
-        if (playerServiceUrl != null) {
+        var playerServiceUrl = config.get(PlayerServiceConfig.class).url();
+        if (!playerServiceUrl.isEmpty()) {
             playerService = new PlayerServiceImpl(otel, playerServiceUrl);
             punishmentService = new PunishmentServiceImpl(playerServiceUrl);
         } else if (globalConfig.noop()) {
@@ -181,23 +175,24 @@ public abstract class AbstractMapServer implements MapServer {
             punishmentService = new PunishmentServiceImpl(localUrl);
         }
 
-        var sessionServiceUrl = System.getenv("MAPMAKER_SESSION_SERVICE_URL");
-        if (sessionServiceUrl != null) sessionService = new SessionServiceImpl(otel, sessionServiceUrl);
+        var sessionServiceUrl = config.get(SessionServiceConfig.class).url();
+        if (!sessionServiceUrl.isEmpty()) sessionService = new SessionServiceImpl(otel, sessionServiceUrl);
         else if (globalConfig.noop()) sessionService = new NoopSessionService();
         else sessionService = new SessionServiceImpl(otel, "http://localhost:9127"); // tilt
 
-        var mapServiceUrl = System.getenv("MAPMAKER_MAP_SERVICE_URL");
-        if (mapServiceUrl != null) mapService = new MapServiceImpl(mapServiceUrl);
+        var mapServiceUrl = config.get(MapServiceConfig.class).url();
+        if (!mapServiceUrl.isEmpty()) mapService = new MapServiceImpl(mapServiceUrl);
         else if (globalConfig.noop()) mapService = new NoopMapService();
         else mapService = new MapServiceImpl("http://localhost:9125"); // tilt
 
         if (globalConfig.noop()) {
             permManager = new NoopPermManager();
         } else {
-            var spicedbUrl = System.getenv("MAPMAKER_SPICEDB_URL");
-            if (spicedbUrl == null) spicedbUrl = "http://localhost:8443";
-            var spicedbToken = System.getenv("MAPMAKER_SPICEDB_TOKEN");
-            if (spicedbToken == null) spicedbToken = "supersecretkey";
+            var spicedbConfig = config.get(SpiceDBConfig.class);
+            var spicedbUrl = spicedbConfig.url();
+            if (spicedbUrl.isEmpty()) spicedbUrl = "http://localhost:8443";
+            var spicedbToken = spicedbConfig.token();
+            if (spicedbToken.isEmpty()) spicedbToken = "supersecretkey";
             permManager = new PermManagerImpl(otel, spicedbUrl, spicedbToken);
         }
 
@@ -387,12 +382,6 @@ public abstract class AbstractMapServer implements MapServer {
     protected abstract @NotNull MapAllocator createAllocator();
     protected abstract @NotNull ServerBridge createBridge();
 
-    @Override
-    public @NotNull ScriptEngine scriptEngine() {
-        if (this.scriptEngine == null) this.scriptEngine = new ScriptEngine(scheduler());
-        return this.scriptEngine;
-    }
-
     /**
      * Called just before the server starts, but after all services have been initialized.
      */
@@ -430,8 +419,8 @@ public abstract class AbstractMapServer implements MapServer {
         if (fullInstance) commandManager.register(new CosmeticsCommand(guiController()));
         if (fullInstance) commandManager.register(new RulesCommand());
         commandManager.register(createDebugCommand());
-        commandManager.register(new StoreCommand(this::scriptEngine, playerService(), permManager()));
-        commandManager.register(new HypercubeCommand(this::scriptEngine, playerService(), permManager()));
+        commandManager.register(new StoreCommand(playerService(), permManager()));
+        commandManager.register(new HypercubeCommand(playerService(), permManager()));
         commandManager.register(new DiscordCommand());
         if (fullInstance) commandManager.register(new LinkCommand(playerService()));
         if (fullInstance) commandManager.register(new TotpCommand(playerService(), guiController()));

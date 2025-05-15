@@ -39,8 +39,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
-import java.util.Map;
 import java.util.Objects;
 
 public class DevServerRunner extends AbstractMapServer {
@@ -215,12 +213,6 @@ public class DevServerRunner extends AbstractMapServer {
                 player.sendMessage("You are not in an editing world!");
             }
         }, "Enables progress index add mode for the current map");
-
-        dbg.createPermissionedSubcommand("gui", (player, ignored) -> {
-            player.getInstance().scheduleNextTick(ignored2 -> {
-                scriptEngine().guiManager().openGui(player, URI.create("guilib:///map_browser/map-browser-view.js"), Map.of(), Map.of());
-            });
-        }, "");
 
         return dbg;
     }

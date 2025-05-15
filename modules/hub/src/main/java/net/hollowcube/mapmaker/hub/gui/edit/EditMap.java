@@ -11,9 +11,10 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.common.ConfirmAction;
-import net.hollowcube.mapmaker.gui.play.MapDetailsView;
+import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -305,7 +306,7 @@ public class EditMap extends View {
 
             // Open the map details view for the newly published map
             var authorName = playerService.getPlayerDisplayName2(publishedMap.owner());
-            pushView(c -> new MapDetailsView(c, map, authorName));
+            Panel.open(player, new MapDetailsView(playerService, mapService, bridge, map, authorName, true));
         });
     }
 

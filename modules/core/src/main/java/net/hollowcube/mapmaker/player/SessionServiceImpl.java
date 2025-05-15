@@ -136,6 +136,21 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
         };
     }
 
+    @Override
+    public @NotNull JoinMapResponse findMapServer(@NotNull String mapId) {
+        var req = HttpRequest.newBuilder()
+                .GET()
+                .uri(url("%s/maps/%s/server", baseUrl, mapId))
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), JoinMapResponse.class);
+            case 401 -> throw createUnauthorizedError(res);
+            case 503 -> throw new NoAvailableServerException();
+            default -> throw new InternalError("Failed to findMapServer (" + res.statusCode() + "): " + res.body());
+        };
+    }
+
     private static @NotNull UnauthorizedError createUnauthorizedError(@NotNull HttpResponse<String> response) {
         var error = GSON.fromJson(response.body(), GenericServiceError.class);
         return new UnauthorizedError(error);

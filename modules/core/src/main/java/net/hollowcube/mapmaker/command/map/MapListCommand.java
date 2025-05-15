@@ -1,29 +1,34 @@
 package net.hollowcube.mapmaker.command.map;
 
-import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.gui.play.list.MapListView;
+import net.hollowcube.mapmaker.gui.map.MapListView;
 import net.hollowcube.mapmaker.map.MapPlayerData;
+import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class MapListCommand extends CommandDsl {
+    private final PlayerService playerService;
+    private final MapService mapService;
+    private final ServerBridge bridge;
 
     private final Argument<String> targetArg;
 
-    private final Controller guis;
-
-    public MapListCommand(@NotNull Controller guis, @NotNull PlayerService players) {
+    public MapListCommand(@NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
         super("list");
-        this.guis = guis;
+        this.playerService = playerService;
+        this.mapService = mapService;
+        this.bridge = bridge;
 
         description = "Show all the maps published by a player";
 
-        this.targetArg = CoreArgument.AnyPlayerId("target", players)
+        this.targetArg = CoreArgument.AnyPlayerId("target", playerService)
                 .description("The player you want to see the maps of");
 
         addSyntax(playerOnly(this::execute));
@@ -46,7 +51,7 @@ public class MapListCommand extends CommandDsl {
             }
         }
 
-        guis.show(player, c -> new MapListView(c, targetId));
+        Panel.open(player, new MapListView.Player(playerService, mapService, bridge, targetId));
     }
 
 }

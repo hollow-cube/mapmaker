@@ -38,7 +38,6 @@ public final class ItemUtils {
             model = model.substring("minecraft:".length());
         }
 
-
         return ItemStack.builder(Material.STICK)
                 .set(DataComponents.ITEM_MODEL, VANILLA_ITEM.model())
                 .set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(

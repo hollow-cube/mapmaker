@@ -16,7 +16,7 @@ import java.util.concurrent.Future;
 
 public interface MapAllocator {
 
-    static @NotNull MapAllocator direct(@NotNull MapServer server) {
+    static @NotNull MapAllocator directAllocator(@NotNull MapServer server) {
         return new DirectMapAllocator(server);
     }
 

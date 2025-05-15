@@ -73,6 +73,10 @@ public class MapData {
     public MapData() {
     }
 
+    public MapData(@NotNull String id, @NotNull String owner) {
+        this(id, owner, new MapSettings(), 0, null);
+    }
+
     public MapData(
             @NotNull String id,
             @NotNull String owner,

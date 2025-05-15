@@ -54,7 +54,7 @@ public class LocalMapAllocator implements MapAllocator {
 
     public LocalMapAllocator(@NotNull MapServer server) {
         this.metrics = server.metrics();
-        this.direct = MapAllocator.direct(server);
+        this.direct = MapAllocator.directAllocator(server);
     }
 
     @SuppressWarnings("unchecked")

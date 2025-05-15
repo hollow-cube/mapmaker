@@ -20,9 +20,6 @@ include(
     "modules:map-core",
     "modules:nbs",
     "modules:replay",
-    "modules:script-engine",
-    "modules:script-engine:builtin",
-    "modules:script-engine:npm",
     "modules:terraform",
     "modules:map-core-test",
     "modules:test",
@@ -34,6 +31,8 @@ include(
     "bin:hub",
     "bin:local",
     "bin:map",
+    "bin:map-isolate",
+    "bin:new-mode",
     "bin:packer",
     "bin:proxy-plugin",
 )

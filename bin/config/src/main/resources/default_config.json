@@ -34,6 +34,19 @@
     "posthog_project_api_key": "",
     "posthog_personal_api_key": ""
   },
+  "mapservice": {
+    "url": ""
+  },
+  "playerservice": {
+    "url": ""
+  },
+  "sessionservice": {
+    "url": ""
+  },
+  "spicedb": {
+    "url": "",
+    "token": ""
+  },
   "announcements": {
     "interval": 1800,
     "messages": [

@@ -5,7 +5,6 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.gui.play.PlayMapsView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -16,7 +15,6 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class PlayCommand extends CommandDsl {

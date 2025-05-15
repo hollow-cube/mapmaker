@@ -38,14 +38,12 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     private final String urlV2;
     private final String urlV3;
     private final String legacyUrl;
-    private final String perfdumpUrl;
 
     public MapServiceImpl(String url) {
         this.url = String.format("%s/v1/internal/maps", url);
         this.urlV2 = String.format("%s/v2/internal/maps", url);
         this.urlV3 = String.format("%s/v3/internal", url);
         this.legacyUrl = String.format("%s/v1/internal/maps/legacy", url);
-        this.perfdumpUrl = String.format("%s/v1/internal/perfdump", url);
     }
 
     @Override

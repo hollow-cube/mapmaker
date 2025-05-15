@@ -1,4 +1,0 @@
-<?xml version="1.0" ?>
-<component align="ltr">
-    <button id="btn" translationKey="gui.play_maps.map_display.map_name" sprite="paper"/>
-</component>
