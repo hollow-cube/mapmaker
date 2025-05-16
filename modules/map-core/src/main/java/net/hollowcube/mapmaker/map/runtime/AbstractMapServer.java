@@ -162,7 +162,7 @@ public abstract class AbstractMapServer implements MapServer {
         this.metrics = createMetricWriter(config);
         shutdowner.queue("metric-writer", metrics::close);
 
-        var playerServiceUrl = config.get(PlayerServiceConfig.class).url();
+        var playerServiceUrl = config.get(Player_ServiceConfig.class).url();
         if (!playerServiceUrl.isEmpty()) {
             playerService = new PlayerServiceImpl(otel, playerServiceUrl);
             punishmentService = new PunishmentServiceImpl(playerServiceUrl);
@@ -175,12 +175,13 @@ public abstract class AbstractMapServer implements MapServer {
             punishmentService = new PunishmentServiceImpl(localUrl);
         }
 
-        var sessionServiceUrl = config.get(SessionServiceConfig.class).url();
+        var sessionServiceUrl = config.get(Session_ServiceConfig.class).url();
+        System.out.println("session service url: " + sessionServiceUrl);
         if (!sessionServiceUrl.isEmpty()) sessionService = new SessionServiceImpl(otel, sessionServiceUrl);
         else if (globalConfig.noop()) sessionService = new NoopSessionService();
         else sessionService = new SessionServiceImpl(otel, "http://localhost:9127"); // tilt
 
-        var mapServiceUrl = config.get(MapServiceConfig.class).url();
+        var mapServiceUrl = config.get(Map_ServiceConfig.class).url();
         if (!mapServiceUrl.isEmpty()) mapService = new MapServiceImpl(mapServiceUrl);
         else if (globalConfig.noop()) mapService = new NoopMapService();
         else mapService = new MapServiceImpl("http://localhost:9125"); // tilt

@@ -34,13 +34,13 @@
     "posthog_project_api_key": "",
     "posthog_personal_api_key": ""
   },
-  "mapservice": {
+  "map_service": {
     "url": ""
   },
-  "playerservice": {
+  "player_service": {
     "url": ""
   },
-  "sessionservice": {
+  "session_service": {
     "url": ""
   },
   "spicedb": {
