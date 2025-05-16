@@ -211,10 +211,15 @@ public class LocalMapAllocator implements MapAllocator {
                 builder.append(Component.text(" (" + key.worldType().getSimpleName() + ")"));
 
                 if (entry.getValue().isDone()) {
-                    var world = FutureUtil.getUnchecked(entry.getValue());
-                    var shortWorldId = world.worldId().substring(0, Math.min(8, world.worldId().length()));
-                    builder.append(Component.text(": ").append(ComponentUtil.createBasicCopy(shortWorldId, world.worldId())));
-                    world.appendDebugInfo(builder);
+                    try {
+                        var world = FutureUtil.getUnchecked(entry.getValue());
+                        var shortWorldId = world.worldId().substring(0, Math.min(8, world.worldId().length()));
+                        builder.append(Component.text(": ").append(ComponentUtil.createBasicCopy(shortWorldId, world.worldId())));
+                        world.appendDebugInfo(builder);
+                    } catch (Throwable e) {
+                        builder.append(Component.text(": (failed to allocate)"));
+                        builder.append(Component.text("  ᴇʀʀᴏʀ: " + e.getMessage()));
+                    }
                 } else {
                     builder.append(Component.text(": (loading)"));
                 }
