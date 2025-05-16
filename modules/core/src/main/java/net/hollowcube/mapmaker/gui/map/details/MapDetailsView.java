@@ -1,5 +1,8 @@
 package net.hollowcube.mapmaker.gui.map.details;
 
+import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.lang.TimeComponent;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.map.MapReportView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -9,6 +12,8 @@ import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -16,9 +21,11 @@ import java.util.Locale;
 import java.util.Objects;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
+import static net.hollowcube.mapmaker.gui.common.ExtraPanels.info;
 import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
 public class MapDetailsView extends Panel {
+    private final PlayerService playerService;
     private final MapService mapService;
     private final ServerBridge bridge;
     private final MapData map;
@@ -31,6 +38,7 @@ public class MapDetailsView extends Panel {
             @NotNull MapData mapData, @NotNull DisplayName authorName, boolean showJoinButton
     ) {
         super(9, 10);
+        this.playerService = playerService;
         this.mapService = mapService;
         this.bridge = bridge;
         this.map = mapData;
@@ -44,14 +52,15 @@ public class MapDetailsView extends Panel {
                 .sprite("map_details/variant_" + lowerVariant, -5, -27));
 
         add(0, 0, backOrClose());
+        add(1, 0, info("map_browser").onLeftClickAsync(this::showMapInformation));
         var authorUsername = Objects.requireNonNullElse(authorName.getUsername(), "Unknown");
-        add(1, 0, new Text("", 7, 1, "by " + authorUsername)
+        add(2, 0, new Text("", 5, 1, authorUsername)
                 .align(Text.CENTER, Text.CENTER)
-                .background("generic2/btn/default/7_1")
+                .background("generic2/btn/default/5_1")
                 .translationKey("gui.map_details.creator_profile", authorName.build()));
-        add(8, 0, new Button("gui.map_details.map_info_tab.report_map", 1, 1)
-                .background("generic2/btn/default/1_1")
-                .sprite("map_details/action/report", 6, 3)
+        add(7, 0, new Button("gui.map_rating.report_map", 2, 1)
+                .background("generic2/btn/default/2_1")
+                .sprite("map_details/action/report", 15, 3)
                 .onLeftClick(() -> host.pushView(new MapReportView(mapService, map))));
 
         var tabs = add(0, 2, new Switch(9, 4, List.of(
@@ -100,5 +109,25 @@ public class MapDetailsView extends Panel {
                 // Its ok, leave as default key
             }
         });
+    }
+
+    private void showMapInformation() {
+        var player = host.player();
+        player.closeInventory();
+
+        Component authorName;
+        try {
+            authorName = playerService.getPlayerDisplayName2(map.owner()).build(DisplayName.Context.DEFAULT);
+        } catch (Throwable t) {
+            ExceptionReporter.reportException(t, player);
+            authorName = Component.text("Unknown", NamedTextColor.RED);
+        }
+        player.sendMessage(LanguageProviderV2.translateMultiMerged("gui.map_details.map_info_tab.published_id", List.of(
+                Component.text(map.id()),
+                Component.text(Objects.requireNonNullElse(map.publishedIdString(), "None/Not Published")),
+                Component.text(map.name()),
+                authorName,
+                TimeComponent.of(map.publishedAt())
+        )));
     }
 }

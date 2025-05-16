@@ -13,7 +13,7 @@ public final class ExtraPanels {
         return new BackOrClosePanel();
     }
 
-    public static Element info(@NotNull String name) {
+    public static Button info(@NotNull String name) {
         return new Button("gui." + name + ".information", 1, 1)
                 .background("generic2/btn/default/1_1")
                 .sprite("generic2/btn/common/info", 4, 2);
