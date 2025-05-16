@@ -60,6 +60,6 @@ class MapDetailsRatePanel extends Panel {
         this.likeButton.sprite("rate_map/like_" + (newState == MapRating.State.LIKED ? "on" : "off"));
 
         this.dislikeButton.translationKey("gui.map_rating.dislike_" + (newState == MapRating.State.DISLIKED ? "on" : "off"));
-        this.dislikeButton.sprite("rate_map/like_" + (newState == MapRating.State.DISLIKED ? "on" : "off"));
+        this.dislikeButton.sprite("rate_map/dislike_" + (newState == MapRating.State.DISLIKED ? "on" : "off"));
     }
 }

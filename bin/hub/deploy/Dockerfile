@@ -1,4 +1,4 @@
-FROM mworzala/graalvm-jre:24
+FROM eclipse-temurin:24-alpine
 
 WORKDIR /app
 COPY ./bin/hub/build/libs/hub-all.jar /app/server.jar

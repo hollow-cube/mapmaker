@@ -27,7 +27,7 @@ public class DifficultyToggleButton extends Button {
         if (this.selected == selected) return;
         this.selected = selected;
         translationKey(translation + (selected ? ".on" : ".off"));
-        sprite(sprite, spriteX, spriteY + (selected ? 3 : 0));
+        sprite(sprite, spriteX, spriteY + (selected ? 2 : 0));
         background("generic2/btn/" + (selected ? "selected" : "default") + "/1_1ex");
         disableHoverSprite = selected;
         if (onChange != null) onChange.accept(selected);
