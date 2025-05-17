@@ -1,5 +1,5 @@
 apiVersion: v2
-name: map-isolate
+name: mapmaker-map-isolate
 description: Chart for map-isolate base requirements & configmap for session service
 
 type: application

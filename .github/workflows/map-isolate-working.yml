@@ -42,7 +42,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: "bin/map/deploy/Dockerfile-native"
+          file: "bin/map-isolate/deploy/Dockerfile-native"
           platforms: linux/amd64
           push: true
           tags: mworzala/mapmaker-map-isolate:${{ github.sha }}
