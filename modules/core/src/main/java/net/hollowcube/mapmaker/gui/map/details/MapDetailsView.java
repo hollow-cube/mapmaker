@@ -80,7 +80,7 @@ public class MapDetailsView extends Panel {
                 .sprite("map_details/action/boost"));
         this.playButton = add(3, 6, new Button("gui.map_details." + (showJoinButton ? "play_map" : "leave_map"), 3, 3)
                 .sprite("map_details/action/" + (showJoinButton ? "play" : "leave"))
-                .onLeftClick(showJoinButton ? this::handleJoinMap : this::handleLeaveMap));
+                .onLeftClickAsync(showJoinButton ? this::handleJoinMap : this::handleLeaveMap));
         add(6, 6, new Button("gui.map_details.suggest_similar_maps", 3, 3)
                 .sprite("map_details/action/similar"));
     }
