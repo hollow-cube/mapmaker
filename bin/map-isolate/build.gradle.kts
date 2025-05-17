@@ -31,6 +31,22 @@ dependencies {
     }
 }
 
+val extractMinestomData by tasks.registering(Copy::class) {
+    val jarFile = configurations.runtimeClasspath.get()
+        .resolvedConfiguration
+        .resolvedArtifacts
+        .find {
+            it.moduleVersion.id.group == "net.minestom" && it.name == "data"
+        }?.file ?: throw GradleException("net.minestom:data not found in runtimeClasspath")
+
+    from(zipTree(jarFile))
+    into(layout.buildDirectory.dir("minestom-data"))
+}
+
+tasks.nativeBuild {
+    dependsOn(extractMinestomData)
+}
+
 application {
     mainClass = "net.hollowcube.mapmaker.map.IsolateMain"
 }
@@ -49,14 +65,4 @@ graalvmNative {
             )
         }
     }
-
-//    agent {
-//        enabled.set(true)
-//
-//        metadataCopy {
-//            inputTaskNames.add("run")
-//            outputDirectories.add("resources/META-INF/native-image/net.hollowcube")
-//            mergeWithExisting.set(true)
-//        }
-//    }
 }
