@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.runtime;
 
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapData;
@@ -90,22 +91,28 @@ public class LocalMapAllocator implements MapAllocator {
     @Override
     public @NotNull Future<Boolean> destroy(@NotNull String worldId, @NotNull Component reason) {
         Callable<Boolean> task = () -> {
-            for (var map : List.copyOf(maps.entrySet())) {
-                var key = map.getKey();
-                var world = FutureUtil.getUnchecked(map.getValue());
-                if (!world.worldId().equals(worldId)) continue;
+            try {
+                for (var map : List.copyOf(maps.entrySet())) {
+                    var key = map.getKey();
+                    var world = FutureUtil.getUnchecked(map.getValue());
+                    if (!world.worldId().equals(worldId)) continue;
 
-                lock.lock();
-                try {
-                    maps.remove(key);
-                } finally {
-                    lock.unlock();
+                    lock.lock();
+                    try {
+                        maps.remove(key);
+                    } finally {
+                        lock.unlock();
+                    }
+                    direct.free(world, reason);
+                    return true;
                 }
-                direct.free(world, reason);
-                return true;
-            }
 
-            return false;
+                return false;
+            } catch (Exception e) {
+                logger.error("failed to destroy world " + worldId, e);
+                ExceptionReporter.reportException(e);
+                return false;
+            }
         };
         return isClosing ? FutureUtil.callNow(task) : VIRTUAL_EXECUTOR.submit(task);
     }
