@@ -113,8 +113,6 @@ class MapDetailsTimesPanel extends Panel {
     }
 
     private static class TopThreePanel extends Panel {
-        private static final int[] indices = {1, 0, 2}; // Gold in center
-
         private final Entry[] entries = new Entry[3];
 
         public TopThreePanel() {
@@ -128,11 +126,10 @@ class MapDetailsTimesPanel extends Panel {
 
         public void update(@NotNull List<LeaderboardData.Entry> entries, @NotNull List<DisplayName> displayNames) {
             for (int i = 0; i < 3; i++) {
-                var index = indices[i];
-                if (index >= entries.size()) continue;
+                if (i >= entries.size()) continue;
 
-                var entry = entries.get(index);
-                var displayName = displayNames.get(index).build(DisplayName.Context.DEFAULT);
+                var entry = entries.get(i);
+                var displayName = displayNames.get(i).build(DisplayName.Context.DEFAULT);
                 this.entries[i].update(entry, displayName);
             }
         }
