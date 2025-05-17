@@ -104,7 +104,7 @@ jobs:
           cat bin/map-isolate/deploy/values-prod.yaml | envsubst > ./values-override-map.yaml
           # </ALERT>
           
-          helm upgrade mapmaker-map-isolate mapmaker-node-1.0.0-${{ github.sha }}.tgz \
+          helm upgrade mapmaker-map-isolate mapmaker-map-isolate-1.0.0-${{ github.sha }}.tgz \
                --install --create-namespace --namespace mapmaker \
                --reset-values -f ./values-override-map.yaml \
                --set image.tag="${{ github.sha }}" 
