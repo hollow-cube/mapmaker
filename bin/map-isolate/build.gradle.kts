@@ -43,7 +43,7 @@ val extractMinestomData by tasks.registering(Copy::class) {
     into(layout.buildDirectory.dir("minestom-data"))
 }
 
-tasks.nativeBuild {
+tasks.nativeCompile {
     dependsOn(extractMinestomData)
 }
 
