@@ -22,5 +22,5 @@ dependencies {
 }
 
 application {
-    mainClass = "net.hollowcube.mode.Main"
+    mainClass = "net.hollowcube.example.Main"
 }

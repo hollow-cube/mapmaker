@@ -1,4 +1,4 @@
-package net.hollowcube.mode;
+package net.hollowcube.example;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.common.util.MojangUtil;
@@ -20,7 +20,7 @@ import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import org.jetbrains.annotations.NotNull;
 
-public class NewModeServerRunner extends AbstractMapServer {
+public class ExampleServerRunner extends AbstractMapServer {
     public static final String THE_MODE_ID = "924e5b96-c3dd-4615-b5a3-ca462d72c0d5";
     public static final String THE_MODE_ORG = "00efda58-6dd3-4401-9c28-d6b2bd507928";
 
@@ -29,9 +29,9 @@ public class NewModeServerRunner extends AbstractMapServer {
             //       service and not in kubernetes we need devserver
             "__game_unused__", "devserver", "game");
 
-    private NewModeWorld world;
+    private ExampleWorld world;
 
-    public NewModeServerRunner(@NotNull ConfigLoaderV3 config) {
+    public ExampleServerRunner(@NotNull ConfigLoaderV3 config) {
         super(config);
 
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("the-game-init")
@@ -53,7 +53,7 @@ public class NewModeServerRunner extends AbstractMapServer {
         });
 
         var map = new MapData(THE_MODE_ID, THE_MODE_ORG);
-        this.world = allocator().allocateDirect(map, NewModeWorld.CTOR);
+        this.world = allocator().allocateDirect(map, ExampleWorld.CTOR);
     }
 
     @Override

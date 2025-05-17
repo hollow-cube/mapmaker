@@ -28,11 +28,11 @@ include(
 include(
     "bin:config",
     "bin:development",
+    "bin:example",
     "bin:hub",
     "bin:local",
     "bin:map",
     "bin:map-isolate",
-    "bin:new-mode",
     "bin:packer",
     "bin:proxy-plugin",
 )
