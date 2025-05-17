@@ -1,0 +1,16 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "pattern": "\\Qnet/hollowcube/datafix/v1450/block_state_by_legacy_id.json\\E"
+      },
+      {
+        "pattern": "\\Qnet/hollowcube/datafix/v1450/legacy_id_by_legacy_block_state.json\\E"
+      },
+      {
+        "pattern": "\\Qnet/hollowcube/datafix/v1450/legacy_id_by_name.json\\E"
+      }
+    ]
+  },
+  "bundles": []
+}

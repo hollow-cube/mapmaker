@@ -1,0 +1,18 @@
+[
+  {
+    "name": "space.vectrix.flare.fastutil.Int2ObjectSyncMapImpl$ExpungingEntryImpl",
+    "fields": [
+      {
+        "name": "value"
+      }
+    ]
+  },
+  {
+    "name": "space.vectrix.flare.fastutil.Long2ObjectSyncMapImpl$ExpungingEntryImpl",
+    "fields": [
+      {
+        "name": "value"
+      }
+    ]
+  }
+]

@@ -1,0 +1,31 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "module": "java.base",
+        "pattern": "\\Qjdk/internal/icu/impl/data/icudt74b/nfc.nrm\\E"
+      },
+      {
+        "module": "java.base",
+        "pattern": "\\Qjdk/internal/icu/impl/data/icudt74b/nfkc.nrm\\E"
+      },
+      {
+        "module": "java.base",
+        "pattern": "\\Qjdk/internal/icu/impl/data/icudt74b/uprops.icu\\E"
+      },
+      {
+        "module": "java.base",
+        "pattern": "\\Qsun/net/idn/uidna.spp\\E"
+      },
+      {
+        "module": "java.xml",
+        "pattern": "\\Qjdk/xml/internal/jdkcatalog/JDKCatalog.xml\\E"
+      },
+      {
+        "module": "jdk.jfr",
+        "pattern": "\\Qjdk/jfr/internal/query/view.ini\\E"
+      }
+    ]
+  },
+  "bundles": []
+}

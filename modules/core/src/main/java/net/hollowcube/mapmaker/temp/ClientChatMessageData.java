@@ -1,8 +1,10 @@
 package net.hollowcube.mapmaker.temp;
 
+import net.hollowcube.common.util.RuntimeGson;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@RuntimeGson
 public record ClientChatMessageData(
         @NotNull Type type,
 

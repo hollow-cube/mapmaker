@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.requests;
 
+import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapQuality;
 import net.hollowcube.mapmaker.map.MapVariant;
@@ -11,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@RuntimeGson
 public record MapSearchParams(
         @NotNull String authorizer,
         int page,

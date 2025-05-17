@@ -1,9 +1,11 @@
 package net.hollowcube.mapmaker.player;
 
 import com.google.gson.JsonObject;
+import net.hollowcube.common.util.RuntimeGson;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@RuntimeGson
 public record PlayerDataUpdateMessage(
         @NotNull Action action,
         @NotNull String id,
@@ -28,6 +30,7 @@ public record PlayerDataUpdateMessage(
         VOTE
     }
 
+    @RuntimeGson
     public record Reason(
             @NotNull ReasonType type,
             Integer quantity, // Present for hypercube and cubits

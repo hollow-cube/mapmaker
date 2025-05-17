@@ -27,7 +27,7 @@ public class CyloneImport {
     public static void tempConvert() throws Exception {
         var json = Files.readString(Path.of("/Users/matt/Downloads/Export to Hollow Cube/cylone_v2.parkour_map_definitions.json"));
         var array = new Gson().fromJson(json, JsonArray.class);
-        FutureUtil.markShutdown();
+        FutureUtil.markShutdown(true);
 
         var mapService = new MapServiceImpl("http://localhost:9125");
         var existingMaps = getExistingMaps(mapService);

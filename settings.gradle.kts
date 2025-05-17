@@ -23,7 +23,11 @@ include(
     "modules:terraform",
     "modules:map-core-test",
     "modules:test",
-);
+)
+
+include(
+    "tools:native-image-helper",
+)
 
 include(
     "bin:config",

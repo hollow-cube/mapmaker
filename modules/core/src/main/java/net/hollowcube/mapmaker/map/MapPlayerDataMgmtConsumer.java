@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.MinecraftServer;
@@ -15,6 +16,7 @@ import java.util.UUID;
 public class MapPlayerDataMgmtConsumer extends BaseConsumer<MapPlayerDataMgmtConsumer.MapPlayerDataUpdateMessage> {
     private static final Logger logger = LoggerFactory.getLogger(MapPlayerDataMgmtConsumer.class);
 
+    @RuntimeGson
     public record MapPlayerDataUpdateMessage(
             @MagicConstant(valuesFromClass = MapPlayerDataUpdateMessage.class) int action,
             @NotNull MapPlayerData data

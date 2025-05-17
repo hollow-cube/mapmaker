@@ -1,11 +1,13 @@
 package net.hollowcube.mapmaker.chat.announcements;
 
+import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.session.PlayerSession;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@RuntimeGson
 public record AnnouncementFilters(
         @Nullable String sessionType,
         @Nullable String sessionState

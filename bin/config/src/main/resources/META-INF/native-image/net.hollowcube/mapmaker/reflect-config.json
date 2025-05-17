@@ -1,0 +1,135 @@
+[
+  {
+    "name": "net.hollowcube.compat.axiom.AxiomCompatProvider"
+  },
+  {
+    "name": "net.hollowcube.compat.noxesium.NoxesiumCompatProvider"
+  },
+  {
+    "name": "net.hollowcube.compat.vanilla.VanillaCompatProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.cosmetic.Accessories"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.cosmetic.Hats"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.cosmetic.Particles"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.cosmetic.VictoryEffects"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.common.CheckpointSignFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.common.DebugOverlayFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.common.WorldBorderFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.common.WorldEffectFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.edit.CustomBlocksFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.edit.DisplayEntityEditingFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.edit.MapSpawnIndicatorFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.edit.SchematicUploadFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.edit.TeleportHistoryFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.edit.VanillaBlocksFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.experimental.MarkerFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.experimental.pathtool.PathToolFeatureHandler"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.BaseBuildMapFeatureProvide"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.BaseParkourMapFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.GhostFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.MapRatingFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.PlayCompletionFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.PlayerVisibilityFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.RecordingFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.TimerFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.setting.BoatFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.setting.NoJumpFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.setting.NoRelogFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.setting.NoSneakFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.setting.NoSprintFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.setting.NoTurnFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.setting.OnlySprintFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.setting.ResetLiquidFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.setting.TickRateFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.vanilla.ElytraFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.play.vanilla.TridentFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.feature.test.TestCompletionFeatureProvider"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.map.setting.MapSetting",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "net.hollowcube.mapmaker.runtime.ServerRuntimeImpl"
+  },
+  {
+    "name": "net.hollowcube.mql.jit.BouncePadScript"
+  },
+  {
+    "name": "net.hollowcube.mql.jit.BouncePadScript$Queries"
+  },
+  {
+    "name": "net.hollowcube.mql.jit.BouncePadScript$Variables"
+  }
+]

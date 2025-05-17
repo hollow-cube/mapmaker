@@ -1,9 +1,11 @@
 package net.hollowcube.mapmaker.map.requests;
 
+import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.MapSize;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@RuntimeGson
 public record MapCreateRequest(
         @NotNull String authorizer,
         boolean isOrg,

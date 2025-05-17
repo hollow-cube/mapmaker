@@ -98,7 +98,6 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
-import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.server.common.ServerLinksPacket;
@@ -154,6 +153,8 @@ public abstract class AbstractMapServer implements MapServer {
     private final Shutdowner shutdowner = new Shutdowner(this::awaitQuiescence);
 
     protected AbstractMapServer(@NotNull ConfigLoaderV3 config) {
+        config.dump();
+
         this.config = config;
         this.globalConfig = config.get(GlobalConfig.class);
 
@@ -176,7 +177,6 @@ public abstract class AbstractMapServer implements MapServer {
         }
 
         var sessionServiceUrl = config.get(Session_ServiceConfig.class).url();
-        System.out.println("session service url: " + sessionServiceUrl);
         if (!sessionServiceUrl.isEmpty()) sessionService = new SessionServiceImpl(otel, sessionServiceUrl);
         else if (globalConfig.noop()) sessionService = new NoopSessionService();
         else sessionService = new SessionServiceImpl(otel, "http://localhost:9127"); // tilt
@@ -227,7 +227,7 @@ public abstract class AbstractMapServer implements MapServer {
             VelocityProxy.enable(velocityConfig.secret());
         } else {
             logger.info("Velocity not configured, using online mode...");
-            MojangAuth.init();
+//            MojangAuth.init();
         }
 
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;

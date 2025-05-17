@@ -18,6 +18,7 @@ record ConfigLoaderV3Impl(@NotNull JsonObject root) implements ConfigLoaderV3 {
     private static final Logger logger = LoggerFactory.getLogger(ConfigLoaderV3Impl.class);
     private static final Gson GSON = new GsonBuilder()
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .setPrettyPrinting()
             .disableJdkUnsafe()
             .create();
 
@@ -82,6 +83,11 @@ record ConfigLoaderV3Impl(@NotNull JsonObject root) implements ConfigLoaderV3 {
         var element = GSON.fromJson(root.get(path), clazz);
         Check.notNull(element, "Config path " + path + " not found. Add entry in default_config.json.");
         return element;
+    }
+
+    @Override
+    public void dump() {
+        System.out.println(GSON.toJson(root));
     }
 
     private static JsonElement replaceEnvVarOverrides(@NotNull Map<String, String> env, List<String> path, JsonElement element) {

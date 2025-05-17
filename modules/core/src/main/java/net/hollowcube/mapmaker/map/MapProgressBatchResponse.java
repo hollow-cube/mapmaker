@@ -34,6 +34,7 @@ public final class MapProgressBatchResponse {
         return progressByMap.get(mapId);
     }
 
+    @RuntimeGson
     public record Entry(@NotNull String mapId, @NotNull PersonalizedMapData.Progress progress, int playtime) {
 
     }

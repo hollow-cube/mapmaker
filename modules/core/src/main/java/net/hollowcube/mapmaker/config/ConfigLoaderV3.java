@@ -14,4 +14,6 @@ public interface ConfigLoaderV3 {
     }
 
     <C> @NotNull C get(@NotNull Class<C> clazz);
+
+    void dump();
 }

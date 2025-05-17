@@ -75,7 +75,7 @@ public class Shutdowner implements HttpServerWrapper.HealthCheck {
             }
 
             logger.info("Players have drained successfully, running shutdown hooks.");
-            FutureUtil.markShutdown();
+            FutureUtil.markShutdown(true);
             for (var hook : shutdownHooks) {
                 try {
                     hook.run();

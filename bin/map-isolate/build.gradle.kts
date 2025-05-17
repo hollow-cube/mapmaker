@@ -24,6 +24,11 @@ dependencies {
     implementation(libs.logback)
     implementation(libs.bundles.prometheus)
     implementation(libs.bundles.otel)
+
+    nativeImageCompileOnly(project(":tools:native-image-helper"))
+    configurations.named("nativeImageClasspath") {
+        exclude(group = "net.minestom", module = "data")
+    }
 }
 
 application {
@@ -34,17 +39,24 @@ graalvmNative {
     binaries {
         named("main") {
             fallback.set(false)
-            buildArgs(listOf("--static-nolibc", "--no-fallback"))
+            buildArgs(
+                listOf(
+                    "--enable-native-access=ALL-UNNAMED",
+                    "--features=net.hollowcube.nativeimage.HCNativeImageFeature",
+                    "--static-nolibc", "--no-fallback",
+                    "--emit build-report",
+                )
+            )
         }
     }
 
-    agent {
-        enabled.set(true)
-
-        metadataCopy {
-            inputTaskNames.add("run")
-            outputDirectories.add("resources/META-INF/native-image/net.hollowcube")
-            mergeWithExisting.set(true)
-        }
-    }
+//    agent {
+//        enabled.set(true)
+//
+//        metadataCopy {
+//            inputTaskNames.add("run")
+//            outputDirectories.add("resources/META-INF/native-image/net.hollowcube")
+//            mergeWithExisting.set(true)
+//        }
+//    }
 }

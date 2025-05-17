@@ -69,14 +69,18 @@ public sealed interface BouncePadData extends DebugCommand.BlockDebug {
                 "dz", Codec.STRING, data -> data.dzScript,
                 Molang::new);
 
-        private static final MqlCompiler<BouncePadScript> COMPILER;
+        // TODO: replace with stable value when that exists. dont currently support mql with native image
+        private static MqlCompiler<BouncePadScript> COMPILER;
 
-        static {
-            try {
-                COMPILER = new MqlCompiler<>(MethodHandles.privateLookupIn(BouncePadScript.class, MethodHandles.lookup()), BouncePadScript.class);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
+        private static @NotNull MqlCompiler<BouncePadScript> compiler() {
+            if (COMPILER == null) {
+                try {
+                    COMPILER = new MqlCompiler<>(MethodHandles.privateLookupIn(BouncePadScript.class, MethodHandles.lookup()), BouncePadScript.class);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
             }
+            return COMPILER;
         }
 
         private final String dxScript;
@@ -100,9 +104,10 @@ public sealed interface BouncePadData extends DebugCommand.BlockDebug {
         @Override
         public void onUpdate(@Nullable Player player) {
             try {
-                this.dx = COMPILER.compile(this.dxScript).newInstance();
-                this.dy = COMPILER.compile(this.dyScript).newInstance();
-                this.dz = COMPILER.compile(this.dzScript).newInstance();
+                var compiler = compiler();
+                this.dx = compiler.compile(this.dxScript).newInstance();
+                this.dy = compiler.compile(this.dyScript).newInstance();
+                this.dz = compiler.compile(this.dzScript).newInstance();
             } catch (Exception e) {
                 this.failedCompilation = true;
                 if (player != null) {

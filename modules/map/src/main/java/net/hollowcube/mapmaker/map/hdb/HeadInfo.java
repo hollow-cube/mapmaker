@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.hdb;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.util.RuntimeGson;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.PlayerSkin;
@@ -13,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
+@RuntimeGson
 public record HeadInfo(
         @NotNull String id,
         @NotNull String name,

@@ -1,8 +1,10 @@
 package net.hollowcube.mapmaker.chat.components;
 
+import net.hollowcube.common.util.RuntimeGson;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
+@RuntimeGson
 public record MessageComponent(
         @NotNull Component text,
         boolean ping

@@ -18,8 +18,9 @@ public final class FutureUtil {
     private FutureUtil() {
     }
 
-    public static void markShutdown() {
-        isShuttingDown = true;
+    // todo refactor this its cursed.
+    public static void markShutdown(boolean value) {
+        isShuttingDown = value;
     }
 
     public static final Executor VIRTUAL = Executors.newVirtualThreadPerTaskExecutor();

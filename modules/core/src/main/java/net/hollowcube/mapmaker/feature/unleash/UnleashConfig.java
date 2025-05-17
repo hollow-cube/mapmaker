@@ -1,7 +1,9 @@
 package net.hollowcube.mapmaker.feature.unleash;
 
+import net.hollowcube.common.util.RuntimeGson;
 import org.jetbrains.annotations.NotNull;
 
+@RuntimeGson
 public record UnleashConfig(
         boolean enabled,
         boolean usePosthog,

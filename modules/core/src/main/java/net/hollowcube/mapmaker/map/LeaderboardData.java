@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map;
 
 
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -15,6 +16,7 @@ import java.util.List;
 
 import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
+@RuntimeGson
 public record LeaderboardData(
         @NotNull List<Entry> top,
         @Nullable Entry player
@@ -24,6 +26,7 @@ public record LeaderboardData(
     private static final TextColor COLOR_BRONZE = TextColor.color(0xCD7F32);
     private static final TextColor COLOR_DEFAULT = TextColor.color(0x696969);
 
+    @RuntimeGson
     public record Entry(@NotNull String player, long score, int rank) {
     }
 
