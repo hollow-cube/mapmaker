@@ -151,7 +151,9 @@ public sealed interface MapWorld extends TagReadable, TagWritable permits Abstra
 
     default void appendDebugInfo(TextComponent.@NotNull Builder builder) {
         builder.appendNewline().append(Component.text("  ᴀɢᴇ: " + NumberUtil.formatDuration(instance().getWorldAge() * 50)));
-        builder.appendNewline().append(Component.text("  ᴘʟᴀʏᴇʀѕ: " + players().size()))
-                .append(Component.text(" ꜱᴘᴇᴄᴛᴀᴛᴏʀѕ: " + spectators().size()));
+        builder.appendNewline()
+                .append(Component.text("  ᴘʟᴀʏᴇʀѕ: " + players().size()))
+                .append(Component.text(" ꜱᴘᴇᴄᴛᴀᴛᴏʀѕ: " + spectators().size()))
+                .append(Component.text(" ɪɴꜱᴛᴀɴᴄᴇ: " + instance().getPlayers().size()));
     }
 }
