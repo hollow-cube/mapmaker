@@ -1,2 +1,5 @@
+image:
+  repository: mworzala/mapmaker-map-isolate
+
 mapmaker:
   resourcePackHash: ${RESOURCE_PACK_HASH}
