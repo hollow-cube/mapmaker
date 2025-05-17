@@ -885,6 +885,55 @@
       ]
     },
     {
+      "type": "net.hollowcube.mapmaker.config.Map_ServiceConfig",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.config.Player_ServiceConfig",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.config.Session_ServiceConfig",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.hollowcube.mapmaker.config.SpiceDBConfig",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
       "type": "net.hollowcube.mapmaker.config.TracingConfig",
       "allDeclaredFields": true,
       "methods": [
@@ -2033,6 +2082,9 @@
     },
     {
       "glob": "darwin/aarch64/libzstd-jni-1.5.7-2.dylib"
+    },
+    {
+      "glob": "linux/amd64/libzstd-jni-1.5.7-2.so"
     },
     {
       "glob": "default_config.json"
