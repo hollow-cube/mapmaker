@@ -84,6 +84,12 @@ public class LanguageProviderV2 {
 
     private static final LRUCache<TranslatableComponent, Component> expandedComponentCache = new LRUCache<>(1000);
 
+    public static @NotNull String translateToPlain(@NotNull Component component) {
+        if (!(component instanceof TranslatableComponent translatable))
+            return PLAIN_TEXT.serialize(Objects.requireNonNull(component));
+        return PLAIN_TEXT.serialize(translate(translatable));
+    }
+
     @Contract("!null -> !null")
     public static @Nullable Component translate(@Nullable Component component) {
         if (component == null) return null;
