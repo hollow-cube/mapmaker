@@ -25,6 +25,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.datafix.DataFixer;
+import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
@@ -115,6 +116,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -467,7 +469,7 @@ public abstract class AbstractMapServer implements MapServer {
             commandManager.register(new KickCommand(punishmentService(), sessionManager(), permManager()));
         }
 
-        DataFixer.addFixVersions(List.of(V3701::new, V3838::new, V4325_1::new));
+        DataFixer.addFixVersions(extraDataVersions());
         DataFixer.buildModel();
     }
 
@@ -566,6 +568,10 @@ public abstract class AbstractMapServer implements MapServer {
                 .setPropagators(ContextPropagators.create(TextMapPropagator
                         .composite(W3CTraceContextPropagator.getInstance(), W3CBaggagePropagator.getInstance())))
                 .buildAndRegisterGlobal();
+    }
+
+    protected @NotNull List<Supplier<DataVersion>> extraDataVersions() {
+        return List.of(V3701::new, V3838::new, V4325_1::new);
     }
 
     protected @NotNull DebugCommand createDebugCommand() {

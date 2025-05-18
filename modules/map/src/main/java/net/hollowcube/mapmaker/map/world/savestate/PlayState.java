@@ -20,6 +20,18 @@ import java.util.function.Function;
 public final class PlayState {
     public static final int NO_RESET_HEIGHT = Integer.MIN_VALUE;
 
+    /*
+
+    {
+        lastState,
+        history,
+        ghostBlocks,
+        [action id]: action data
+    }
+
+
+     */
+
     private static final StructCodec<Map<Long, Block>> GHOST_BLOCKS_CODEC = StructCodec.struct(
             "ghostBlocks", ExtraCodecs.LONG_STRING.mapValue(ExtraCodecs.BLOCK_STATE_STRING).optional(Map.of()), Function.identity(),
             it -> it);
