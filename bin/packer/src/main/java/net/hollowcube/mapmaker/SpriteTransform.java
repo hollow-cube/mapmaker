@@ -59,6 +59,7 @@ public class SpriteTransform {
                         || relative.toString().startsWith("map_details" + File.separatorChar)
                         || relative.toString().startsWith("report_map" + File.separatorChar)
                         || relative.toString().startsWith("map_list" + File.separatorChar)
+                        || relative.toString().startsWith("action" + File.separatorChar)
                         || relative.toString().startsWith("rate_map" + File.separatorChar))
                         && !relative.toString().contains("checkout");
                 if (!canSkipConfig && !Files.exists(configFile)) continue;

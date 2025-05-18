@@ -19,6 +19,6 @@ public class AddPotionAction extends AbstractAction<AddPotionAction.EffectData> 
     }
 
     public AddPotionAction() {
-        super("mapmaker:add_potion", EffectData.CODEC);
+        super("mapmaker:add_potion", EffectData.CODEC, null); //todo
     }
 }

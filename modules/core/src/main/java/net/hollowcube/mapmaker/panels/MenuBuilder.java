@@ -144,7 +144,7 @@ public class MenuBuilder {
         title.popColor();
     }
 
-    public void drawText(int x, int y, @NotNull String text) {
+    public void drawText(int x, int y, @NotNull String text, int width) {
         int startX = computeAbsoluteX(x), startY = computeAbsoluteY(y);
 
         // Account for font height. Not sure this is the solution i want for that.
@@ -153,7 +153,7 @@ public class MenuBuilder {
         title.pushShadowColor(FontUtil.computeVerticalOffsetShadow(startY));
         title.pushColor(FontUtil.computeVerticalOffset(startY));
         title.pos(startX);
-        title.append(text);
+        title.append(text, width);
         title.popColor();
         title.popShadowColor();
     }
