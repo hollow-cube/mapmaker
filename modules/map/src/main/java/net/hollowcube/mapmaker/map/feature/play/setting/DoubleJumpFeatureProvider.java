@@ -103,7 +103,8 @@ public class DoubleJumpFeatureProvider extends AbstractSettingFeatureProvider {
     }
 
     private void updatePlayer(@NotNull Player player) {
-        var world = MapWorld.forPlayer(player);
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null) return;
         var doubleJumpCount = getDoubleJumpCount(player, world);
         player.setAllowFlying(doubleJumpCount > 0);
         player.setFlyingSpeed(doubleJumpCount > 0 ? 0f : 0.05f);
