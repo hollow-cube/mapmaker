@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.map.action.ActionList;
 import net.hollowcube.mapmaker.map.action.gui.ControlledNumberInput;
 import net.hollowcube.mapmaker.map.action.gui.ControlledTriStateInput;
 import net.hollowcube.mapmaker.panels.Sprite;
+import net.hollowcube.mapmaker.util.NumberUtil;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.StructCodec;
 import org.jetbrains.annotations.NotNull;
@@ -14,15 +15,18 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 
-public class EditLivesAction extends AbstractAction<EditLivesAction.Data> {
-    public static final EditLivesAction INSTANCE = new EditLivesAction();
+/// Action for the timer feature
+/// The time value is always tracked in ticks, not wall clock time.
+public class EditTimerAction extends AbstractAction<EditTimerAction.Data> {
+    public static final EditTimerAction INSTANCE = new EditTimerAction();
 
-    private static final int DEFAULT_LIVES = 0; // Disables the lives mechanic.
+    private static final int NO_TIMER = 0; // Disables the timer mechanic.
+    private static final int MAX_TIMER = 24 * 60 * 60 * 20; // 24 hours in ticks.
 
-    private static final Sprite SPRITE_DEFAULT = new Sprite("action/icon/lives", 3, 3);
-    private static final Sprite SPRITE_SET = new Sprite("action/icon/lives_set", 3, 3);
-    private static final Sprite SPRITE_ADD = new Sprite("action/icon/lives_add", 3, 3);
-    private static final Sprite SPRITE_SUBTRACT = new Sprite("action/icon/lives_subtract", 3, 3);
+    private static final Sprite SPRITE_DEFAULT = new Sprite("action/icon/timer", 4, 3);
+    private static final Sprite SPRITE_SET = new Sprite("action/icon/timer_set", 4, 3);
+    private static final Sprite SPRITE_ADD = new Sprite("action/icon/timer_add", 4, 3);
+    private static final Sprite SPRITE_SUBTRACT = new Sprite("action/icon/timer_subtract", 4, 3);
 
     public enum Operation {
         SET, ADD, SUBTRACT;
@@ -30,10 +34,10 @@ public class EditLivesAction extends AbstractAction<EditLivesAction.Data> {
         public static final Codec<Operation> CODEC = Codec.Enum(Operation.class);
     }
 
-    public record Data(@NotNull EditLivesAction.Operation operation, int lives) {
+    public record Data(@NotNull EditTimerAction.Operation operation, int lives) {
         public static final StructCodec<Data> CODEC = StructCodec.struct(
                 "operation", Operation.CODEC.optional(Operation.SET), Data::operation,
-                "value", ExtraCodecs.clamppedInt(0, 10).optional(DEFAULT_LIVES), Data::lives,
+                "value", ExtraCodecs.clamppedInt(0, 10).optional(NO_TIMER), Data::lives,
                 Data::new);
 
         public @NotNull Data withOperation(@NotNull Operation operation) {
@@ -45,8 +49,8 @@ public class EditLivesAction extends AbstractAction<EditLivesAction.Data> {
         }
     }
 
-    public EditLivesAction() {
-        super("mapmaker:lives", Data.CODEC, new Data(Operation.SET, DEFAULT_LIVES));
+    public EditTimerAction() {
+        super("mapmaker:timer", Data.CODEC, new Data(Operation.SET, NO_TIMER));
     }
 
     @Override
@@ -74,11 +78,12 @@ public class EditLivesAction extends AbstractAction<EditLivesAction.Data> {
 
             this.operationInput = add(1, 1, new ControlledTriStateInput<>(Operation.class, update(Data::withOperation))
                     .labels("Set", "Add", "Sub.")
-                    .sprites(SPRITE_SET.withOffset(1, 3),
-                            SPRITE_ADD.withOffset(1, 3),
-                            SPRITE_SUBTRACT.withOffset(1, 3)));
+                    .sprites(SPRITE_SET.withOffset(2, 3),
+                            SPRITE_ADD.withOffset(2, 3),
+                            SPRITE_SUBTRACT.withOffset(2, 3)));
             this.valueInput = add(1, 3, new ControlledNumberInput(update(Data::withLives))
-                    .range(0, 20).formatted(i -> i == 0 ? "Disable" : String.valueOf(i)));
+                    .formatted(i -> i == 0 ? "Disable Timer" : NumberUtil.formatDuration(i * 50L))
+                    .range(NO_TIMER, MAX_TIMER));
         }
 
         @Override
@@ -87,7 +92,7 @@ public class EditLivesAction extends AbstractAction<EditLivesAction.Data> {
 
             this.subtitleText.text(translate("subtitle." + operationName));
             this.operationInput.update(data.operation());
-            this.valueInput.label("amount to " + operationName).update(data.lives);
+            this.valueInput.label("time to " + operationName).update(data.lives);
         }
     }
 }

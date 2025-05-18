@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.action.gui;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
+import net.hollowcube.mapmaker.map.action.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
@@ -26,8 +27,7 @@ public class ControlledNumberInput extends Panel {
         super(7, 2);
         this.onChange = onChange;
 
-        this.labelText = add(0, 0, new Text("abc", 7, 1, "")
-                .font("small").align(1, 6));
+        this.labelText = add(0, 0, AbstractActionEditorPanel.groupText(7, ""));
 
         this.inputText = add(0, 1, new Text("aaa", 5, 1, "")
                 .align(6, 5)

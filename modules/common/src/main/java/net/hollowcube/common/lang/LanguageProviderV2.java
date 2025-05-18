@@ -191,7 +191,6 @@ public class LanguageProviderV2 {
                 }
             }
         };
-
     }
 
     static @Nullable ElementNode parseComponent(@NotNull String id) {

@@ -5,7 +5,6 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.lang.MessagesBase;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -136,7 +135,11 @@ public class Button extends Element implements ButtonClickAliases {
     }
 
     public @NotNull Button sprite(@Nullable String sprite, int x, int y) {
-        this.sprite = sprite == null ? null : new Sprite(sprite, BadSprite.require(sprite), BadSprite.SPRITE_MAP.get(sprite + "_hover"), x, y);
+        return sprite(sprite == null ? null : new Sprite(sprite, x, y));
+    }
+
+    public @NotNull Button sprite(@Nullable Sprite sprite) {
+        this.sprite = sprite;
         if (host != null) host.queueRedraw();
         return this;
     }
@@ -169,7 +172,7 @@ public class Button extends Element implements ButtonClickAliases {
 
         Component title = Objects.requireNonNullElse(this.itemTitle, Component.empty());
         if (sprite != null) {
-            builder.draw(sprite.x(), sprite.y(), sprite.sprite());
+            builder.draw(sprite.offsetX(), sprite.offsetY(), sprite.sprite());
 
             if (!disableHoverSprite && sprite.hoverSprite() != null) {
                 var withHoverIcon = Component.text(sprite.hoverSprite().fontChar())

@@ -15,10 +15,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class Element {
-    public record Sprite(@NotNull String name, @NotNull BadSprite sprite, @Nullable BadSprite hoverSprite, int x,
-                         int y) {
-    }
-
     protected InventoryHost host; // Set after construction, should be careful with use.
 
     protected int slotWidth = 0, slotHeight = 0;
@@ -62,14 +58,14 @@ public class Element {
     public void build(@NotNull MenuBuilder builder) {
         for (var sprite : sprites) {
             if (sprite == null) continue;
-            builder.draw(sprite.x, sprite.y, sprite.sprite);
+            builder.draw(sprite.offsetX(), sprite.offsetY(), sprite.sprite());
 
-            if (sprite.hoverSprite != null) {
-                var withHoverIcon = Component.text(sprite.hoverSprite.fontChar())
+            if (sprite.hoverSprite() != null) {
+                var withHoverIcon = Component.text(sprite.hoverSprite().fontChar())
                         .color(FontUtil.computeShadowPos(FontUtil.Size.S3X3, builder.absoluteX(), builder.absoluteY()))
                         .shadowColor(ShadowColor.none())
                         .decoration(TextDecoration.ITALIC, false)
-                        .append(Component.text(FontUtil.computeOffset(-sprite.hoverSprite.width() - 1)));
+                        .append(Component.text(FontUtil.computeOffset(-sprite.hoverSprite().width() - 1)));
                 builder.editSlots(0, 0, builder.availWidth(), builder.availHeight(), DataComponents.CUSTOM_NAME, (Function<Component, Component>)
                         old -> withHoverIcon.append(Objects.requireNonNullElse(old, Component.empty())));
             }

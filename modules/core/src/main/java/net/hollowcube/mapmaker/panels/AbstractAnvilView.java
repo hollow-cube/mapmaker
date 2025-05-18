@@ -1,8 +1,10 @@
 package net.hollowcube.mapmaker.panels;
 
+import net.kyori.adventure.text.Component;
 import net.minestom.server.inventory.InventoryType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 public abstract class AbstractAnvilView extends Panel {
@@ -11,7 +13,11 @@ public abstract class AbstractAnvilView extends Panel {
      * Simple anvil view with an input and submit. The callback is called _after_ popping the view.
      */
     public static @NotNull Panel simpleAnvil(@NotNull String container, @NotNull String icon, @NotNull Consumer<String> onSubmit) {
-        return new AbstractAnvilView(container, icon) {
+        return simpleAnvil(container, icon, onSubmit, "");
+    }
+
+    public static @NotNull Panel simpleAnvil(@NotNull String container, @NotNull String icon, @NotNull Consumer<String> onSubmit, @NotNull String initialValue) {
+        return new AbstractAnvilView(container, icon, initialValue) {
             @Override
             protected void onSubmit(@NotNull String text) {
                 super.onSubmit(text);
@@ -20,21 +26,23 @@ public abstract class AbstractAnvilView extends Panel {
         };
     }
 
-    private String input = ""; // todo support initial input (not used for search maps)
+    private String input;
 
-    public AbstractAnvilView(@NotNull String container, @NotNull String icon) {
+    public AbstractAnvilView(@NotNull String container, @NotNull String icon, @NotNull String initialInput) {
         super(InventoryType.ANVIL, 9, 5);
+        this.input = initialInput;
+
         background(container, -66, -40);
         add(0, 0, new Button("", 0, 0)
                 .background(icon, -46, -1)); // kinda gross
 
-        add(0, 0, new Button("gui.generic.empty", 1, 1)
+        add(0, 0, new Button("", 1, 1)
                 .sprite("generic2/anvil/back", -33, 29)
-                .onLeftClick(() -> host.popView()));
+                .onLeftClick(() -> host.popView())
+                .text(Component.text(this.input), List.of()));
         add(2, 0, new Button("gui.generic.empty", 1, 1)
                 .sprite("generic2/anvil/checkmark", 34, 28)
                 .onLeftClick(() -> onSubmit(this.input)));
-
     }
 
     protected void onInputChange(@NotNull String text) {

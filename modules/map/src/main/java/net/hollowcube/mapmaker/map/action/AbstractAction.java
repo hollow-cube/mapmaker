@@ -1,10 +1,14 @@
 package net.hollowcube.mapmaker.map.action;
 
+import net.hollowcube.mapmaker.panels.Sprite;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.codec.StructCodec;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class AbstractAction<T> {
+public abstract class AbstractAction<T> {
+    private static final Sprite DEFAULT_SPRITE = new Sprite("map_details/action/report", 6, 3);
+
     private final Key key;
     private final StructCodec<T> codec;
     private final T defaultData;
@@ -27,8 +31,10 @@ public class AbstractAction<T> {
         return defaultData;
     }
 
-    public @NotNull AbstractActionEditorPanel<T> createEditor() {
-        return null;
+    public @NotNull Sprite sprite(@Nullable T data) {
+        return DEFAULT_SPRITE;
     }
+
+    public abstract @NotNull AbstractActionEditorPanel<T> createEditor(@NotNull ActionList.ActionData<T> actionData);
 
 }
