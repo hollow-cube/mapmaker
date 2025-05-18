@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.action.gui;
 
 import net.hollowcube.mapmaker.map.action.AbstractAction;
+import net.hollowcube.mapmaker.map.action.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.map.action.ActionList;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
@@ -61,14 +62,18 @@ public class ActionEditorView extends Panel {
                 if (actionData == null) break;
 
                 //noinspection unchecked
-                add(x, y, new Button("todo", 1, 1)
+                var translation = ((AbstractAction<Object>) actionData.action()).thumbnail(actionData.getData());
+                //noinspection unchecked
+                add(x, y, new Button(null, 1, 1)
                         .sprite(((AbstractAction<Object>) actionData.action()).sprite(actionData.getData()))
+                        .translationKey(translation.key(), translation.arguments())
+                        .lorePostfix(AbstractActionEditorPanel.LORE_POSTFIX_CLICKEDITORREMOVE)
                         .onLeftClick(() -> editExistingAction(actionData))
                         .onRightClick(() -> removeExistingAction(y * 7 + x)));
             }
             if (i < MAX_ACTIONS) {
                 int x = i % 7, y = i / 7;
-                add(x, y, new Button("todo", 1, 1)
+                add(x, y, new Button("gui.action.add", 1, 1)
                         .sprite("generic2/icon/add", 3, 3)
                         .onLeftClick(() -> host.pushTransientView(new ActionPickerView(actionList))));
             }

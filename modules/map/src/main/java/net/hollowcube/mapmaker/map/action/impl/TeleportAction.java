@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.action.impl;
 
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.map.action.AbstractAction;
 import net.hollowcube.mapmaker.map.action.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.map.action.ActionList;
@@ -8,9 +9,12 @@ import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.panels.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -30,6 +34,19 @@ public class TeleportAction extends AbstractAction<RelativePos> {
     @Override
     public @NotNull Sprite sprite(@Nullable RelativePos ignored) {
         return SPRITE_DEFAULT;
+    }
+
+    @Override
+    public @NotNull TranslatableComponent thumbnail(@Nullable RelativePos data) {
+        if (data == null) return Component.translatable("gui.action.teleport.thumbnail.empty");
+        return Component.translatable("gui.action.teleport.thumbnail", List.of(
+                tildeOnly(data.strX()), tildeOnly(data.strY()), tildeOnly(data.strZ()),
+                tildeOnly(data.strYaw()), tildeOnly(data.strPitch())
+        ));
+    }
+
+    private static @NotNull Component tildeOnly(@NotNull String value) {
+        return Component.text(RELATIVE_ZERO.equals(value) ? "~" : value);
     }
 
     @Override
@@ -55,7 +72,8 @@ public class TeleportAction extends AbstractAction<RelativePos> {
 
             this.yawInput = add(1, 3, new TexturelessNumberInput(2, 0, "yaw", update(RelativePos::withStrYaw)));
             this.pitchInput = add(3, 3, new TexturelessNumberInput(2, 6, "pitch", update(RelativePos::withStrPitch)));
-            add(5, 4, new Button("todo spc", 3, 1));
+            add(5, 4, new Button("gui.action.teleport.command", 3, 1));
+            // TODO add functionality to command button
         }
 
         @Override
@@ -90,9 +108,10 @@ public class TeleportAction extends AbstractAction<RelativePos> {
             super(width, 2);
             this.onChange = onChange;
 
-            add(0, 0, new Text("todo", width, 1, label)
+            var translationKey = "gui.action.teleport." + label;
+            add(0, 0, new Text(translationKey, width, 1, LanguageProviderV2.translateToPlain(translationKey))
                     .font("small").align(1 + xOffset, 6));
-            this.inputText = add(0, 1, new Text("todo", width, 1, "")
+            this.inputText = add(0, 1, new Text(translationKey, width, 1, "")
                     .align(xOffset + 6, 5));
             this.inputText.onLeftClick(this::handleEditValue);
         }

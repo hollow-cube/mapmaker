@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,6 +16,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+
+import static net.kyori.adventure.text.Component.translatable;
 
 // Only supports boolean settings for now, should revisit later.
 public class EnableSettingAction extends AbstractAction<EnableSettingAction.Data> {
@@ -60,6 +63,15 @@ public class EnableSettingAction extends AbstractAction<EnableSettingAction.Data
     @Override
     public @NotNull Sprite sprite(@Nullable Data data) {
         return SPRITE;
+    }
+
+    @Override
+    public @NotNull TranslatableComponent thumbnail(@Nullable Data data) {
+        if (data == null || data.setting == null)
+            return translatable("gui.action.enable_setting.thumbnail.empty");
+        return translatable("gui.action.enable_setting.thumbnail", List.of(
+                translatable(SETTINGS_TRANSLATION_KEYS.get(data.setting) + ".name")
+        ));
     }
 
     @Override

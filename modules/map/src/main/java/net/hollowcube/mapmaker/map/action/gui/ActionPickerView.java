@@ -1,11 +1,16 @@
 package net.hollowcube.mapmaker.map.action.gui;
 
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.map.action.AbstractAction;
+import net.hollowcube.mapmaker.map.action.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.map.action.ActionList;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
 
@@ -17,15 +22,13 @@ public class ActionPickerView extends Panel {
         this.actionList = actionList;
 
         background("action/list/container", -10, -31);
-        add(0, 0, title("Choose Action"));
+        add(0, 0, title("Add Action"));
+        add(1, 1, AbstractActionEditorPanel.groupText(7, "choose action"));
 
         add(0, 0, backOrClose());
-        add(1, 0, info("action.picker"));
-        add(2, 0, new Text("todo", 5, 1, "todo")
-                .align(Text.CENTER, Text.CENTER)
-                .background("generic2/btn/default/5_1"));
-        add(7, 0, new Button("todo", 2, 1)
-                .background("generic2/btn/default/2_1"));
+        add(1, 0, info("action"));
+        add(2, 0, new Text("gui.action.search.empty", 7, 1, "Search...")
+                .align(8, 5).background("action/editor/search_bar")); // TODO: search support
 
         int i = 0;
         for (var action : ActionList.ACTIONS) {
@@ -33,6 +36,9 @@ public class ActionPickerView extends Panel {
             i++;
 
             add(x + 1, y + 2, new Button(action.key().value(), 1, 1)
+                    .text(Component.translatable("gui.action." + action.key().value() + ".title"),
+                            LanguageProviderV2.translateMulti("gui.action." + action.key().value() + ".info.lore", List.of()))
+                    .lorePostfix(AbstractActionEditorPanel.LORE_POSTFIX_CLICKSELECT)
                     .sprite(action.sprite(null))
                     .onLeftClick(() -> this.handleAddAction(action)));
         }

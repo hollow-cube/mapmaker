@@ -7,11 +7,14 @@ import net.hollowcube.mapmaker.map.action.ActionList;
 import net.hollowcube.mapmaker.map.action.gui.ControlledNumberInput;
 import net.hollowcube.mapmaker.map.action.gui.ControlledTriStateInput;
 import net.hollowcube.mapmaker.panels.Sprite;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.StructCodec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Locale;
 
 public class EditLivesAction extends AbstractAction<EditLivesAction.Data> {
@@ -60,6 +63,15 @@ public class EditLivesAction extends AbstractAction<EditLivesAction.Data> {
     }
 
     @Override
+    public @NotNull TranslatableComponent thumbnail(@Nullable Data data) {
+        if (data == null) return Component.translatable("gui.action.lives.thumbnail.empty");
+        return Component.translatable("gui.action.lives.thumbnail", List.of(
+                Component.translatable("gui.action.lives." + data.operation().name().toLowerCase(Locale.ROOT) + ".label"),
+                Component.text(data.lives() == 0 ? "Disable" : String.valueOf(data.lives()))
+        ));
+    }
+
+    @Override
     public @NotNull AbstractActionEditorPanel<Data> createEditor(@NotNull ActionList.ActionData<Data> actionData) {
         return new Editor(actionData);
     }
@@ -72,12 +84,12 @@ public class EditLivesAction extends AbstractAction<EditLivesAction.Data> {
         public Editor(@NotNull ActionList.ActionData<Data> actionData) {
             super(actionData);
 
-            this.operationInput = add(1, 1, new ControlledTriStateInput<>(Operation.class, update(Data::withOperation))
-                    .labels("Set", "Add", "Sub.")
+            this.operationInput = add(1, 1, new ControlledTriStateInput<>("lives", Operation.class, update(Data::withOperation))
+                    .label("operation").labels("set", "add", "subtract")
                     .sprites(SPRITE_SET.withOffset(1, 3),
                             SPRITE_ADD.withOffset(1, 3),
                             SPRITE_SUBTRACT.withOffset(1, 3)));
-            this.valueInput = add(1, 3, new ControlledNumberInput(update(Data::withLives))
+            this.valueInput = add(1, 3, new ControlledNumberInput("lives.value", update(Data::withLives))
                     .range(0, 20).formatted(i -> i == 0 ? "Disable" : String.valueOf(i)));
         }
 
@@ -87,7 +99,7 @@ public class EditLivesAction extends AbstractAction<EditLivesAction.Data> {
 
             this.subtitleText.text(translate("subtitle." + operationName));
             this.operationInput.update(data.operation());
-            this.valueInput.label("amount to " + operationName).update(data.lives);
+            this.valueInput.label(operationName).update(data.lives);
         }
     }
 }

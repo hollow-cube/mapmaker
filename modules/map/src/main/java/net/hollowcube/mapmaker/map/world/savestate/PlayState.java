@@ -32,7 +32,7 @@ public final class PlayState {
             StructCodec.INLINE, PotionEffectList.CODEC, PlayState::potionEffects,
             "pos", ExtraCodecs.POS.optional(), PlayState::pos,
             "maxLives", Codec.INT.optional(), PlayState::maxLives,
-            "lives", Codec.INT.optional(), PlayState::lives,
+            "time", Codec.INT.optional(), PlayState::lives,
             StructCodec.INLINE, GHOST_BLOCKS_CODEC.optional(), PlayState::ghostBlocks,
             "items", HotbarItems.CODEC.optional(HotbarItems.EMPTY), PlayState::items,
             "settings", SavedMapSettings.CODEC.optional(), PlayState::settings,
@@ -51,8 +51,8 @@ public final class PlayState {
     private Integer resetHeight;
     private PotionEffectList potionEffects;
     private Pos pos;
-    private Integer maxLives; // Maximum number of lives for the current state
-    private Integer lives; // Number of lives remaining for the current state
+    private Integer maxLives; // Maximum number of time for the current state
+    private Integer lives; // Number of time remaining for the current state
     private Map<Long, Block> ghostBlocks;
     private HotbarItems items;
     private final SavedMapSettings overridenSettings;
@@ -218,7 +218,7 @@ public final class PlayState {
                 ", potionEffects=" + potionEffects +
                 ", pos=" + pretty(pos) +
                 ", maxLives=" + pretty(maxLives) +
-                ", lives=" + pretty(lives) +
+                ", time=" + pretty(lives) +
                 '}';
     }
 

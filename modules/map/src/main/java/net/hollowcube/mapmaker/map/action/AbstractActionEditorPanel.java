@@ -6,9 +6,11 @@ import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -16,6 +18,10 @@ import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
 import static net.kyori.adventure.text.Component.translatable;
 
 public abstract class AbstractActionEditorPanel<T> extends Panel {
+    public static final List<Component> LORE_POSTFIX_CLICKSELECT = LanguageProviderV2.translateMulti("gui.action.clickselect", List.of());
+    public static final List<Component> LORE_POSTFIX_CLICKEDIT = LanguageProviderV2.translateMulti("gui.action.clickedit", List.of());
+    public static final List<Component> LORE_POSTFIX_CLICKEDITORREMOVE = LanguageProviderV2.translateMulti("gui.action.clickeditorremove", List.of());
+
     protected final ActionList.ActionData<T> actionData;
     public boolean isTransient = false; // todo handle this better
 
@@ -68,7 +74,7 @@ public abstract class AbstractActionEditorPanel<T> extends Panel {
     }
 
     public static @NotNull Text groupText(int width, @NotNull String text) {
-        return new Text("todo", width, 1, text)
+        return new Text(null, width, 1, text)
                 .font("small").align(1, 6);
     }
 }

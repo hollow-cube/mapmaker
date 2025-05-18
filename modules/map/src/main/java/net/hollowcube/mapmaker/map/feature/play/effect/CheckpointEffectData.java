@@ -27,7 +27,7 @@ public class CheckpointEffectData extends BaseEffectData {
             "teleport", ExtraCodecs.POS.optional(), CheckpointEffectData::teleport,
             "items", HotbarItems.CODEC.optional(HotbarItems.EMPTY), CheckpointEffectData::items,
             // CheckpointEffectData
-            "lives", Codec.INT.optional(NO_LIVES), CheckpointEffectData::lives,
+            "time", Codec.INT.optional(NO_LIVES), CheckpointEffectData::lives,
             "settings", SavedMapSettings.CODEC.optional(), CheckpointEffectData::settings,
             CheckpointEffectData::new);
 

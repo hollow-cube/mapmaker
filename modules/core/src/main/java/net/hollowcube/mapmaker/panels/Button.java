@@ -6,6 +6,7 @@ import net.hollowcube.common.lang.MessagesBase;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.component.DataComponents;
@@ -14,6 +15,7 @@ import net.minestom.server.item.component.HeadProfile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -37,6 +39,7 @@ public class Button extends Element implements ButtonClickAliases {
 
     protected Component itemTitle;
     protected List<Component> itemLore;
+    protected List<Component> itemLorePostfix;
     protected String itemModel = "minecraft:stick";
     protected String itemOverlay = null;
     protected HeadProfile itemProfile = null;
@@ -60,7 +63,9 @@ public class Button extends Element implements ButtonClickAliases {
     }
 
     public @NotNull Button translationKey(@NotNull String translationKey, @NotNull Object... args) {
-        var translationArgs = MessagesBase.asArgs(args);
+        var translationArgs = args.length == 1 && args[0] instanceof List
+                ? (List<? extends ComponentLike>) args[0]
+                : MessagesBase.asArgs(args);
         this.itemTitle = LanguageProviderV2.translate(Component.translatable(translationKey + ".name", translationArgs));
         this.itemLore = LanguageProviderV2.translateMulti(translationKey + ".lore", translationArgs);
 
@@ -71,6 +76,13 @@ public class Button extends Element implements ButtonClickAliases {
     public @NotNull Button text(@NotNull Component title, @NotNull List<Component> lore) {
         this.itemTitle = title;
         this.itemLore = lore;
+
+        if (host != null) host.queueRedraw();
+        return this;
+    }
+
+    public @NotNull Button lorePostfix(@Nullable List<Component> lorePostfix) {
+        this.itemLorePostfix = lorePostfix;
 
         if (host != null) host.queueRedraw();
         return this;
@@ -194,7 +206,12 @@ public class Button extends Element implements ButtonClickAliases {
                 List.of(), List.of(), itemOverlay == null ? List.of(itemModel) : List.of(itemModel, itemOverlay), List.of()
         ));
         builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.CUSTOM_NAME, title);
-        builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.LORE, itemLore);
+        var lore = itemLore;
+        if (itemLorePostfix != null) {
+            lore = new ArrayList<>(itemLore);
+            lore.addAll(itemLorePostfix);
+        }
+        builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.LORE, lore);
     }
 
     @Override

@@ -740,7 +740,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     }
 
     private void updatePlayerFromState(MapWorld world, @NotNull Player player, @NotNull PlayState state, boolean start) {
-        // Set the player health to the number of lives they have (1 heart = 1 life)
+        // Set the player health to the number of time they have (1 heart = 1 life)
         if (state.maxLives() != null && state.lives() != null) {
             player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(2 * state.maxLives());
             player.setHealth(2 * state.lives());

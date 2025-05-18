@@ -10,10 +10,13 @@ import net.hollowcube.mapmaker.map.entity.potion.PotionInfo;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.util.NumberUtil;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Objects;
 
 import static net.kyori.adventure.text.Component.translatable;
@@ -53,6 +56,17 @@ public class AddPotionAction extends AbstractAction<AddPotionAction.Data> {
     @Override
     public @NotNull Sprite sprite(@Nullable Data data) {
         return SPRITE_ADD;
+    }
+
+    @Override
+    public @NotNull TranslatableComponent thumbnail(@Nullable Data data) {
+        if (data == null || data.effect() == null)
+            return Component.translatable("gui.action.add_potion.thumbnail.empty");
+        return Component.translatable("gui.action.add_potion.thumbnail", List.of(
+                Component.translatable(data.effect().translationKey() + ".name"),
+                Component.text(data.level()),
+                Component.text(data.duration() == 0 ? "Infinite" : NumberUtil.formatDuration(data.duration() * 50L))
+        ));
     }
 
     @Override
@@ -100,11 +114,11 @@ public class AddPotionAction extends AbstractAction<AddPotionAction.Data> {
             // Should be non-null now because we otherwise open the picker
             var effect = Objects.requireNonNull(actionData.getData().effect());
             subtitleText.text(LanguageProviderV2.translateToPlain(translatable(effect.translationKey() + ".name")));
-            this.levelInput = add(1, 1, new ControlledNumberInput(update(Data::withLevel))
-                    .label("potion level").range(1, effect.maxLevel()));
-            this.durationInput = add(1, 3, new ControlledNumberInput(update(Data::withDuration))
+            this.levelInput = add(1, 1, new ControlledNumberInput("add_potion.level", update(Data::withLevel))
+                    .range(1, effect.maxLevel()));
+            this.durationInput = add(1, 3, new ControlledNumberInput("add_potion.duration", update(Data::withDuration))
                     .formatted(i -> i == 0 ? "Infinite" : NumberUtil.formatDuration(i * 50L))
-                    .label("potion duration").range(INFINITE_DURATION, MAX_DURATION));
+                    .range(INFINITE_DURATION, MAX_DURATION));
         }
 
         @Override

@@ -6,10 +6,13 @@ import net.hollowcube.mapmaker.map.action.ActionList;
 import net.hollowcube.mapmaker.map.entity.potion.PotionInfo;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Sprite;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 public class RemovePotionAction extends AbstractAction<RemovePotionAction.Data> {
@@ -37,6 +40,15 @@ public class RemovePotionAction extends AbstractAction<RemovePotionAction.Data> 
     public @NotNull Sprite sprite(@Nullable Data data) {
         return data == null || data.effect() != null
                 ? SPRITE_SUBTRACT : SPRITE_CLEAR;
+    }
+
+    @Override
+    public @NotNull TranslatableComponent thumbnail(@Nullable Data data) {
+        return data == null || data.effect() == null
+                ? Component.translatable("gui.action.remove_potion.thumbnail.clear")
+                : Component.translatable("gui.action.remove_potion.thumbnail", List.of(
+                Component.translatable(data.effect().translationKey() + ".name")
+        ));
     }
 
     @Override
@@ -69,7 +81,7 @@ public class RemovePotionAction extends AbstractAction<RemovePotionAction.Data> 
             }
 
             // Add the remove button at the end
-            add(7, 3, new Button("remove_all", 1, 1)
+            add(7, 3, new Button("gui.action.remove_potion.clear", 1, 1)
                     .sprite("action/icon/milk_bucket", 3, 2)
                     .onLeftClick(() -> updateFunc.accept(null)));
         }
