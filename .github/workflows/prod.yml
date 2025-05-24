@@ -360,4 +360,3 @@ jobs:
                --install --create-namespace --namespace mapmaker \
                --reset-values -f ./values-override-map.yaml \
                --set image.tag="${{ github.sha }}" 
-
