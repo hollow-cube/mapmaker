@@ -2,12 +2,15 @@ package net.hollowcube.common.util.dfu;
 
 import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.common.util.Either;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.KeyPattern;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.Result;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.registry.DynamicRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -184,6 +187,37 @@ public final class ExtraCodecs {
                 }
 
                 return new Result.Ok<>(map.build());
+            }
+        };
+    }
+
+    /// Behaves like Minestom RegistryTaggedUnion, but does not require registries to be present in the codec.
+    public static <T> @NotNull StructCodec<T> ExtRegistryCodec(
+            @NotNull DynamicRegistry<StructCodec<? extends T>> registry,
+            @NotNull Function<T, StructCodec<? extends T>> serializerGetter,
+            @NotNull String key
+    ) {
+        return new StructCodec<T>() {
+            @Override
+            public @NotNull <D> Result<T> decodeFromMap(@NotNull Transcoder<D> coder, Transcoder.@NotNull MapLike<D> map) {
+                final Result<String> type = map.getValue(key).map(coder::getString);
+                if (!(type instanceof Result.Ok(@KeyPattern String tag)))
+                    return type.mapError(e -> key + ": " + e).cast();
+                final StructCodec<T> innerCodec = (StructCodec<T>) registry.get(Key.key(tag));
+                if (innerCodec == null) return new Result.Error<>("No such key: " + tag);
+
+                return innerCodec.decodeFromMap(coder, map);
+            }
+
+            @Override
+            public @NotNull <D> Result<D> encodeToMap(@NotNull Transcoder<D> coder, @NotNull T value, Transcoder.@NotNull MapBuilder<D> map) {
+                //noinspection unchecked
+                final StructCodec<T> innerCodec = (StructCodec<T>) serializerGetter.apply(value);
+                final DynamicRegistry.Key<StructCodec<? extends T>> type = registry.getKey(innerCodec);
+                if (type == null) return new Result.Error<>("Unregistered serializer for: " + value);
+
+                map.put(key, coder.createString(type.name()));
+                return innerCodec.encodeToMap(coder, value, map);
             }
         };
     }

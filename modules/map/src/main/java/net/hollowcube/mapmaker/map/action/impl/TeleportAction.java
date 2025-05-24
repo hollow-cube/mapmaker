@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.map.action.impl;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.mapmaker.map.action.AbstractAction;
-import net.hollowcube.mapmaker.map.action.AbstractActionEditorPanel;
+import net.hollowcube.mapmaker.map.action.Action;
 import net.hollowcube.mapmaker.map.action.ActionList;
+import net.hollowcube.mapmaker.map.action.gui.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.map.util.RelativePos;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
@@ -11,6 +11,7 @@ import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.panels.Text;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
+import net.minestom.server.codec.StructCodec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,28 +21,28 @@ import java.util.function.Consumer;
 
 import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
 
-public class TeleportAction extends AbstractAction<RelativePos> {
-    public static final TeleportAction INSTANCE = new TeleportAction();
-
+public record TeleportAction(
+        @NotNull RelativePos target
+) implements Action {
+    private static final Sprite SPRITE_DEFAULT = new Sprite("action/icon/teleport", 3, 3);
     private static final String RELATIVE_ZERO = "~0.0";
 
-    private static final Sprite SPRITE_DEFAULT = new Sprite("action/icon/teleport", 3, 3);
-
-    public TeleportAction() {
-        super("mapmaker:teleport", RelativePos.CODEC, RelativePos.REL_ZERO);
-    }
-
-    @Override
-    public @NotNull Sprite sprite(@Nullable RelativePos ignored) {
-        return SPRITE_DEFAULT;
-    }
+    public static final StructCodec<TeleportAction> CODEC = StructCodec.struct(
+            StructCodec.INLINE, RelativePos.CODEC.optional(RelativePos.REL_ZERO), TeleportAction::target,
+            TeleportAction::new);
+    public static final Action.Editor<TeleportAction> EDITOR = new Action.Editor<>(
+            TeleportAction.Editor::new, SPRITE_DEFAULT, TeleportAction::makeThumbnail);
 
     @Override
-    public @NotNull TranslatableComponent thumbnail(@Nullable RelativePos data) {
-        if (data == null) return Component.translatable("gui.action.teleport.thumbnail.empty");
+    public @NotNull StructCodec<? extends Action> codec() {
+        return CODEC;
+    }
+
+    private static @NotNull TranslatableComponent makeThumbnail(@Nullable TeleportAction action) {
+        if (action == null) return Component.translatable("gui.action.teleport.thumbnail.empty");
         return Component.translatable("gui.action.teleport.thumbnail", List.of(
-                tildeOnly(data.strX()), tildeOnly(data.strY()), tildeOnly(data.strZ()),
-                tildeOnly(data.strYaw()), tildeOnly(data.strPitch())
+                tildeOnly(action.target.strX()), tildeOnly(action.target.strY()), tildeOnly(action.target.strZ()),
+                tildeOnly(action.target.strYaw()), tildeOnly(action.target.strPitch())
         ));
     }
 
@@ -49,20 +50,15 @@ public class TeleportAction extends AbstractAction<RelativePos> {
         return Component.text(RELATIVE_ZERO.equals(value) ? "~" : value);
     }
 
-    @Override
-    public @NotNull AbstractActionEditorPanel<RelativePos> createEditor(@NotNull ActionList.ActionData<RelativePos> actionData) {
-        return new Editor(actionData);
-    }
-
-    private static class Editor extends AbstractActionEditorPanel<RelativePos> {
+    private static class Editor extends AbstractActionEditorPanel<TeleportAction> {
         private final TexturelessNumberInput xInput;
         private final TexturelessNumberInput yInput;
         private final TexturelessNumberInput zInput;
         private final TexturelessNumberInput yawInput;
         private final TexturelessNumberInput pitchInput;
 
-        public Editor(@NotNull ActionList.ActionData<RelativePos> actionData) {
-            super(actionData);
+        public Editor(@NotNull ActionList.Ref ref) {
+            super(ref);
 
             background("action/editor/teleport_container", -10, -31);
 
@@ -70,25 +66,25 @@ public class TeleportAction extends AbstractAction<RelativePos> {
             this.yInput = add(3, 1, new TexturelessNumberInput(2, 6, "y", safeUpdate(RelativePos::withStrY)));
             this.zInput = add(5, 1, new TexturelessNumberInput(3, 12, "z", safeUpdate(RelativePos::withStrZ)));
 
-            this.yawInput = add(1, 3, new TexturelessNumberInput(2, 0, "yaw", update(RelativePos::withStrYaw)));
-            this.pitchInput = add(3, 3, new TexturelessNumberInput(2, 6, "pitch", update(RelativePos::withStrPitch)));
+            this.yawInput = add(1, 3, new TexturelessNumberInput(2, 0, "yaw", safeUpdate(RelativePos::withStrYaw)));
+            this.pitchInput = add(3, 3, new TexturelessNumberInput(2, 6, "pitch", safeUpdate(RelativePos::withStrPitch)));
             add(5, 4, new Button("gui.action.teleport.command", 3, 1));
             // TODO add functionality to command button
         }
 
         @Override
-        protected void update(@NotNull RelativePos data) {
-            this.xInput.update(data.strX());
-            this.yInput.update(data.strY());
-            this.zInput.update(data.strZ());
-            this.yawInput.update(data.strYaw());
-            this.pitchInput.update(data.strPitch());
+        protected void update(@NotNull TeleportAction action) {
+            this.xInput.update(action.target.strX());
+            this.yInput.update(action.target.strY());
+            this.zInput.update(action.target.strZ());
+            this.yawInput.update(action.target.strYaw());
+            this.pitchInput.update(action.target.strPitch());
         }
 
         private @NotNull Consumer<String> safeUpdate(@NotNull BiFunction<RelativePos, String, RelativePos> updateFunc) {
             return update((data, value) -> {
                 try {
-                    return updateFunc.apply(data, value);
+                    return new TeleportAction(updateFunc.apply(data.target, value));
                 } catch (NumberFormatException ignored) {
                     return data; // Do nothing
                 }

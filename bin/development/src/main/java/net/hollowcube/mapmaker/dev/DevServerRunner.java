@@ -14,6 +14,7 @@ import net.hollowcube.mapmaker.map.MapMgmtConsumerImpl;
 import net.hollowcube.mapmaker.map.MapServerRunner;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.action.ActionList;
 import net.hollowcube.mapmaker.map.action.gui.ActionEditorView;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
@@ -213,7 +214,7 @@ public class DevServerRunner extends AbstractMapServer {
         DebugCommand dbg = super.createDebugCommand();
 
         dbg.createPermissionedSubcommand("act", (player, _) -> {
-            Panel.open(player, new ActionEditorView());
+            Panel.open(player, new ActionEditorView(new ActionList()));
         }, "aaa");
 
         dbg.createPermissionedSubcommand("enableprogressaddition", (player, context) -> {

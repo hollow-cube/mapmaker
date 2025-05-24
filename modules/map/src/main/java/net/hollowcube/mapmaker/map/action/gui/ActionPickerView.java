@@ -1,12 +1,13 @@
 package net.hollowcube.mapmaker.map.action.gui;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.mapmaker.map.action.AbstractAction;
-import net.hollowcube.mapmaker.map.action.AbstractActionEditorPanel;
+import net.hollowcube.mapmaker.map.action.Action;
 import net.hollowcube.mapmaker.map.action.ActionList;
+import net.hollowcube.mapmaker.map.action.ActionRegistry;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,26 +32,22 @@ public class ActionPickerView extends Panel {
                 .align(8, 5).background("action/editor/search_bar")); // TODO: search support
 
         int i = 0;
-        for (var action : ActionList.ACTIONS) {
+        for (var actionKey : ActionRegistry.keys()) {
             int x = i % 7, y = i / 7;
             i++;
 
-            add(x + 1, y + 2, new Button(action.key().value(), 1, 1)
-                    .text(Component.translatable("gui.action." + action.key().value() + ".title"),
-                            LanguageProviderV2.translateMulti("gui.action." + action.key().value() + ".info.lore", List.of()))
+            var editor = ActionRegistry.getEditor(actionKey);
+            add(x + 1, y + 2, new Button(null, 1, 1)
+                    .text(Component.translatable("gui.action." + actionKey.value() + ".title"),
+                            LanguageProviderV2.translateMulti("gui.action." + actionKey.value() + ".info.lore", List.of()))
                     .lorePostfix(AbstractActionEditorPanel.LORE_POSTFIX_CLICKSELECT)
-                    .sprite(action.sprite(null))
-                    .onLeftClick(() -> this.handleAddAction(action)));
+                    .sprite(editor.sprite().apply(null))
+                    .onLeftClick(() -> this.handleAddAction(actionKey, editor)));
         }
     }
 
-    private void handleAddAction(@NotNull AbstractAction<?> action) {
-        var actionData = this.actionList.addAction(action);
-
-        //noinspection unchecked Generic Hell :)
-        var editor = ((AbstractAction<Object>) actionData.action())
-                .createEditor((ActionList.ActionData<Object>) actionData);
-        if (editor.isTransient) host.pushTransientView(editor);
-        else host.pushView(editor);
+    private void handleAddAction(@NotNull Key actionKey, @NotNull Action.Editor<?> editor) {
+        var ref = this.actionList.addAction(actionKey);
+        host.pushView(editor.editor().apply(ref));
     }
 }

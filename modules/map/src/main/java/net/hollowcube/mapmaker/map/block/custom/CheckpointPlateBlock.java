@@ -2,17 +2,17 @@ package net.hollowcube.mapmaker.map.block.custom;
 
 import net.hollowcube.common.util.dfu.DFU;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.action.gui.ActionEditorView;
 import net.hollowcube.mapmaker.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
-import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointPostChangeEvent;
-import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointPreChangeEvent;
 import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
-import net.hollowcube.mapmaker.map.gui.effect.EditCheckpointView;
+import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectDataV2;
 import net.hollowcube.mapmaker.map.item.handler.BlockItemHandler;
 import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
 import net.hollowcube.mapmaker.map.object.ObjectTypes;
 import net.hollowcube.mapmaker.map.util.InteractTarget;
 import net.hollowcube.mapmaker.object.ObjectType;
+import net.hollowcube.mapmaker.panels.Panel;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
@@ -24,11 +24,14 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget, PressurePlateBlockMixin, DebugCommand.BlockDebug {
-    public static final Tag<CheckpointEffectData> DATA_TAG = DFU.View(CheckpointEffectData.CODEC);
+    public static final Tag<CheckpointEffectDataV2> DATA_TAG = DFU.View(CheckpointEffectDataV2.CODEC);
     public static final Tag<CheckpointEffectData> SIGN_DATA_TAG = DFU.Tag(CheckpointEffectData.CODEC, "checkpoint");
     public static final Tag<CheckpointEffectData> ENTITY_DATA_TAG = DFU.Tag(CheckpointEffectData.CODEC, "checkpoint").path("data");
 
@@ -49,7 +52,7 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget,
 
     public void editData(@NotNull Instance instance, @NotNull Point blockPosition, @NotNull Block block, @NotNull Consumer<CheckpointEffectData> func) {
         var data = block.getTag(DATA_TAG);
-        func.accept(data);
+//        func.accept(data);
 
         var newTag = TagHandler.newHandler();
         newTag.setTag(DATA_TAG, data);
@@ -66,15 +69,17 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget,
         if (interaction.getHand() != PlayerHand.MAIN || player.isSneaking()) return true;
 
         // Open checkpoint settings GUI
-        var data = Objects.requireNonNullElseGet(interaction.getBlock().getTag(DATA_TAG), CheckpointEffectData::empty);
+        var data = Objects.requireNonNullElseGet(interaction.getBlock().getTag(DATA_TAG), CheckpointEffectDataV2::new);
         var maxResetHeight = interaction.getBlockPosition().blockY();
-        world.server().showView(player, c -> new EditCheckpointView(c.with(Map.of("updateTarget", interaction.getBlockPosition())), data, maxResetHeight, () -> {
+        // todo need to somehow pass in interaction.getBlockPosition() for reset height & teleport callback;
+        var host = Panel.open(player, new ActionEditorView(data.actions()));
+        host.onClose(() -> {
             var instance = interaction.getInstance();
             var blockPosition = interaction.getBlockPosition();
 
-            var newNbt = DFU.encodeNbt(CheckpointEffectData.CODEC, data);
+            var newNbt = DFU.encodeNbt(CheckpointEffectDataV2.CODEC, data);
             instance.setBlock(blockPosition, interaction.getBlock().withNbt(newNbt));
-        }));
+        });
 
         return false;
     }
@@ -85,7 +90,7 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget,
         if (world == null) return;
         var data = tick.getBlock().getTag(DATA_TAG);
         var checkpointId = createObjectId(tick.getBlockPosition());
-        world.callEvent(new MapPlayerCheckpointPreChangeEvent(player, world, checkpointId, data));
+//        world.callEvent(new MapPlayerCheckpointPreChangeEvent(player, world, checkpointId, data));
     }
 
     @Override
@@ -94,12 +99,12 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget,
         if (world == null) return;
         var data = tick.getBlock().getTag(DATA_TAG);
         var checkpointId = createObjectId(tick.getBlockPosition());
-        world.callEvent(new MapPlayerCheckpointPostChangeEvent(player, world, checkpointId, data));
+//        world.callEvent(new MapPlayerCheckpointPostChangeEvent(player, world, checkpointId, data));
     }
 
     @Override
     public void sendDebugInfo(@NotNull Player player, @NotNull Block block) {
-        block.getTag(DATA_TAG).sendDebugInfo(player);
+//        block.getTag(DATA_TAG).sendDebugInfo(player);
     }
 
     public static void updateItemStack(ItemStack.@NotNull Builder builder, @NotNull TagHandler tag) {

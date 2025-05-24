@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.map.action.impl;
 
-import net.hollowcube.mapmaker.map.action.AbstractAction;
-import net.hollowcube.mapmaker.map.action.AbstractActionEditorPanel;
+import net.hollowcube.mapmaker.map.action.Action;
 import net.hollowcube.mapmaker.map.action.ActionList;
+import net.hollowcube.mapmaker.map.action.gui.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.map.entity.potion.PotionInfo;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Sprite;
@@ -15,56 +15,49 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class RemovePotionAction extends AbstractAction<RemovePotionAction.Data> {
-    public static final RemovePotionAction INSTANCE = new RemovePotionAction();
-
+public record RemovePotionAction(
+        // Null means to remove all effects
+        @Nullable PotionInfo effect
+) implements Action {
     private static final Sprite SPRITE_SUBTRACT = new Sprite("action/icon/potion_subtract", 2, 2);
     private static final Sprite SPRITE_CLEAR = new Sprite("action/icon/potion_clear", 2, 2);
 
-    public record Data(@Nullable PotionInfo effect) {
-        // Null means to remove all effects
-        public static final StructCodec<Data> CODEC = StructCodec.struct(
-                "effect", PotionInfo.CODEC.optional(), Data::effect,
-                Data::new);
+    public static final StructCodec<RemovePotionAction> CODEC = StructCodec.struct(
+            "effect", PotionInfo.CODEC.optional(), RemovePotionAction::effect,
+            RemovePotionAction::new);
+    public static final Action.Editor<RemovePotionAction> EDITOR = new Action.Editor<>(
+            RemovePotionAction.Editor::new, RemovePotionAction::makeSprite, RemovePotionAction::makeThumbnail);
 
-        public @NotNull Data withEffect(@Nullable PotionInfo effect) {
-            return new Data(effect);
-        }
-    }
-
-    public RemovePotionAction() {
-        super("mapmaker:remove_potion", Data.CODEC, new Data(null));
+    public @NotNull RemovePotionAction withEffect(@Nullable PotionInfo effect) {
+        return new RemovePotionAction(effect);
     }
 
     @Override
-    public @NotNull Sprite sprite(@Nullable Data data) {
-        return data == null || data.effect() != null
+    public @NotNull StructCodec<? extends Action> codec() {
+        return CODEC;
+    }
+
+    private static @NotNull Sprite makeSprite(@Nullable RemovePotionAction action) {
+        return action == null || action.effect != null
                 ? SPRITE_SUBTRACT : SPRITE_CLEAR;
     }
 
-    @Override
-    public @NotNull TranslatableComponent thumbnail(@Nullable Data data) {
-        return data == null || data.effect() == null
+    private static @NotNull TranslatableComponent makeThumbnail(@Nullable RemovePotionAction action) {
+        return action == null || action.effect == null
                 ? Component.translatable("gui.action.remove_potion.thumbnail.clear")
                 : Component.translatable("gui.action.remove_potion.thumbnail", List.of(
-                Component.translatable(data.effect().translationKey() + ".name")
+                Component.translatable(action.effect.translationKey() + ".name")
         ));
     }
 
-    @Override
-    public @NotNull AbstractActionEditorPanel<Data> createEditor(@NotNull ActionList.ActionData<Data> actionData) {
-        return new PotionEffectPickerView(actionData);
-    }
-
-    private static class PotionEffectPickerView extends AbstractActionEditorPanel<Data> {
-        public PotionEffectPickerView(@NotNull ActionList.ActionData<Data> actionData) {
-            super(actionData);
-            this.isTransient = true;
+    private static class Editor extends AbstractActionEditorPanel<RemovePotionAction> {
+        public Editor(@NotNull ActionList.Ref ref) {
+            super(ref);
 
             background("action/editor/list_container", -10, -31);
             add(1, 1, AbstractActionEditorPanel.groupText(7, "choose effect"));
 
-            Consumer<PotionInfo> innerUpdateFunc = update(Data::withEffect);
+            Consumer<PotionInfo> innerUpdateFunc = update(RemovePotionAction::withEffect);
             Consumer<PotionInfo> updateFunc = potionInfo -> {
                 innerUpdateFunc.accept(potionInfo);
                 host.popView();
@@ -87,7 +80,7 @@ public class RemovePotionAction extends AbstractAction<RemovePotionAction.Data> 
         }
 
         @Override
-        protected void update(@NotNull Data data) {
+        protected void update(@NotNull RemovePotionAction data) {
             // Noop, we just pop the view when updating
         }
     }

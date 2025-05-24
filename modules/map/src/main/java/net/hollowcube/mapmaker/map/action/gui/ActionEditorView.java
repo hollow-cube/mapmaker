@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.map.action.gui;
 
-import net.hollowcube.mapmaker.map.action.AbstractAction;
-import net.hollowcube.mapmaker.map.action.AbstractActionEditorPanel;
+import net.hollowcube.mapmaker.map.action.Action;
 import net.hollowcube.mapmaker.map.action.ActionList;
+import net.hollowcube.mapmaker.map.action.ActionRegistry;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
@@ -14,10 +14,11 @@ import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
 public class ActionEditorView extends Panel {
     private static final int MAX_ACTIONS = 7 * 3;
 
-    private final ActionList actionList = new ActionList();
+    private final ActionList actionList;
 
-    public ActionEditorView() {
+    public ActionEditorView(@NotNull ActionList actions) {
         super(9, 10);
+        this.actionList = actions;
 
         background("action/list/container", -10, -31);
         add(0, 0, title("Checkpoint Actions"));
@@ -58,17 +59,17 @@ public class ActionEditorView extends Panel {
             for (; i < MAX_ACTIONS; i++) {
                 int x = i % 7, y = i / 7;
 
-                var actionData = actionList.get(i);
-                if (actionData == null) break;
+                var ref = actionList.get(i);
+                if (ref == null) break;
 
-                //noinspection unchecked
-                var translation = ((AbstractAction<Object>) actionData.action()).thumbnail(actionData.getData());
-                //noinspection unchecked
+                var editor = (Action.Editor<Action>) ActionRegistry.getEditor(ref.key());
+
+                var translation = editor.thumbnail().apply(ref.action());
                 add(x, y, new Button(null, 1, 1)
-                        .sprite(((AbstractAction<Object>) actionData.action()).sprite(actionData.getData()))
+                        .sprite(editor.sprite().apply(ref.action()))
                         .translationKey(translation.key(), translation.arguments())
                         .lorePostfix(AbstractActionEditorPanel.LORE_POSTFIX_CLICKEDITORREMOVE)
-                        .onLeftClick(() -> editExistingAction(actionData))
+                        .onLeftClick(() -> editExistingAction(ref))
                         .onRightClick(() -> removeExistingAction(y * 7 + x)));
             }
             if (i < MAX_ACTIONS) {
@@ -79,12 +80,9 @@ public class ActionEditorView extends Panel {
             }
         }
 
-        private void editExistingAction(@NotNull ActionList.ActionData<?> actionData) {
-            //noinspection unchecked Generic Hell :)
-            var editor = ((AbstractAction<Object>) actionData.action())
-                    .createEditor((ActionList.ActionData<Object>) actionData);
-            if (editor.isTransient) host.pushTransientView(editor);
-            else host.pushView(editor);
+        private void editExistingAction(@NotNull ActionList.Ref ref) {
+            var editor = ActionRegistry.getEditor(ref.key()).editor().apply(ref);
+            host.pushView(editor);
         }
 
         private void removeExistingAction(int index) {

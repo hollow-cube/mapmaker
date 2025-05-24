@@ -1,36 +1,50 @@
 package net.hollowcube.mapmaker.map.action;
 
-import net.hollowcube.mapmaker.map.action.impl.*;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 // TODO ANVILS NEED TITLEs
 public class ActionList {
-    public static final List<AbstractAction<?>> ACTIONS = List.of(
-            EditLivesAction.INSTANCE, EditTimerAction.INSTANCE,
-            AddPotionAction.INSTANCE, RemovePotionAction.INSTANCE,
-            TeleportAction.INSTANCE,
-            EnableSettingAction.INSTANCE, DisableSettingAction.INSTANCE
-    );
+    private final List<Ref> actions = new ArrayList<>();
 
-    private final List<ActionData<?>> actions = new ArrayList<>();
+    public ActionList() {
+    }
+
+    public ActionList(@NotNull List<Action> actions) {
+        for (var action : actions) {
+            this.actions.add(new Ref(ActionRegistry.getKey(action), action));
+        }
+    }
+
+    public ActionList(@NotNull ActionList actions) {
+        for (var action : actions.actions) {
+            this.actions.add(new Ref(action.key(), action.action()));
+        }
+    }
+
+    public @NotNull List<Action> actions() {
+        return actions.stream().map(Ref::action).toList();
+    }
 
     public int size() {
         return actions.size();
     }
 
-    public @Nullable ActionData<?> get(int index) {
+    public @Nullable Ref get(int index) {
         if (index < 0 || index >= actions.size()) return null;
         return actions.get(index);
     }
 
-    public <T> @NotNull ActionData<T> addAction(AbstractAction<T> action) {
-        var actionData = new ActionData<>(action);
-        actions.add(actionData);
-        return actionData;
+    public @NotNull Ref addAction(@NotNull Key action) {
+        var ref = new Ref(action, ActionRegistry.createDefault(action));
+        actions.add(ref);
+        return ref;
     }
 
     public void remove(int index) {
@@ -38,25 +52,34 @@ public class ActionList {
         actions.remove(index);
     }
 
-    public static class ActionData<T> {
-        private final AbstractAction<T> action;
-        private T data;
+    /// Ref implements a mutable reference to an action/data.
+    public static class Ref implements Keyed {
+        private final Key key;
+        private Action data;
 
-        public ActionData(@NotNull AbstractAction<T> action) {
-            this.action = action;
-            this.data = action.defaultData();
+        Ref(@NotNull Key key, @NotNull Action data) {
+            this.key = key;
+            this.data = data;
         }
 
-        public @NotNull AbstractAction<T> action() {
-            return action;
+        @Override
+        public @NotNull Key key() {
+            return this.key;
         }
 
-        public T getData() {
+        public @NotNull Action action() {
             return data;
         }
 
-        public void setData(T data) {
-            this.data = data;
+        public <T extends Action> @NotNull T cast() {
+            //noinspection unchecked
+            return (T) data;
+        }
+
+        public <T extends Action> @NotNull T update(@NotNull Function<T, T> updater) {
+            var newValue = updater.apply(cast());
+            this.data = newValue;
+            return newValue;
         }
     }
 }

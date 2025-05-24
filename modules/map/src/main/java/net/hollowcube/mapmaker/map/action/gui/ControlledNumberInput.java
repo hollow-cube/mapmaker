@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map.action.gui;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.mapmaker.map.action.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;

@@ -52,6 +52,7 @@ public class InventoryHost {
 
     private final Player player;
     private final InventoryWrapper handle = new InventoryWrapper();
+    private Runnable closeCallback = null;
 
     private Task redrawTask = null;
     // If present, indicates a potentially pending click event. We should not respond to other clicks while this
@@ -77,6 +78,13 @@ public class InventoryHost {
 
     public void pushTransientView(@NotNull Panel panel) {
         pushView(panel, true);
+    }
+
+    /// Replaces the current view with a new one. This works similarly to what would happen
+    /// if the parent view was transient.
+    public void replaceView(@NotNull Panel panel) {
+        popView();
+        pushView(panel);
     }
 
     public void pushView(@NotNull Panel panel) {
@@ -114,6 +122,10 @@ public class InventoryHost {
 
     public boolean canPopView() {
         return viewStack.size() > 1;
+    }
+
+    public void onClose(@NotNull Runnable callback) {
+        this.closeCallback = callback;
     }
 
     public void queueRedraw() {
@@ -281,6 +293,7 @@ public class InventoryHost {
             if (result && !viewStack.isEmpty()) {
                 viewStack.getLast().panel.unmount();
                 viewStack.clear();
+                if (closeCallback != null) closeCallback.run();
             }
 
             return result;

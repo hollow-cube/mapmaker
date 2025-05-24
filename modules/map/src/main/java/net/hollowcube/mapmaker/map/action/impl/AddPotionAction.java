@@ -2,9 +2,9 @@ package net.hollowcube.mapmaker.map.action.impl;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
-import net.hollowcube.mapmaker.map.action.AbstractAction;
-import net.hollowcube.mapmaker.map.action.AbstractActionEditorPanel;
+import net.hollowcube.mapmaker.map.action.Action;
 import net.hollowcube.mapmaker.map.action.ActionList;
+import net.hollowcube.mapmaker.map.action.gui.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.map.action.gui.ControlledNumberInput;
 import net.hollowcube.mapmaker.map.entity.potion.PotionInfo;
 import net.hollowcube.mapmaker.panels.Button;
@@ -21,71 +21,64 @@ import java.util.Objects;
 
 import static net.kyori.adventure.text.Component.translatable;
 
-public class AddPotionAction extends AbstractAction<AddPotionAction.Data> {
-    public static final AddPotionAction INSTANCE = new AddPotionAction();
-
+public record AddPotionAction(
+        @Nullable PotionInfo effect, int level, int duration
+) implements Action {
     private static final int INFINITE_DURATION = 0;
     private static final int MAX_DURATION = 24 * 60 * 60 * 20; // 24 hours in ticks.
 
     private static final Sprite SPRITE_ADD = new Sprite("action/icon/potion_add", 2, 2);
 
-    public record Data(@Nullable PotionInfo effect, int level, int duration) {
-        public static final StructCodec<Data> CODEC = StructCodec.struct(
-                "effect", PotionInfo.CODEC.optional(), Data::effect,
-                "level", ExtraCodecs.clamppedInt(0, 128).optional(0), Data::level,
-                "duration", ExtraCodecs.clamppedInt(INFINITE_DURATION, MAX_DURATION), Data::duration,
-                Data::new);
+    public static final StructCodec<AddPotionAction> CODEC = StructCodec.struct(
+            "effect", PotionInfo.CODEC.optional(), AddPotionAction::effect,
+            "level", ExtraCodecs.clamppedInt(0, 128).optional(1), AddPotionAction::level,
+            "duration", ExtraCodecs.clamppedInt(INFINITE_DURATION, MAX_DURATION).optional(INFINITE_DURATION), AddPotionAction::duration,
+            AddPotionAction::new);
+    public static final Action.Editor<AddPotionAction> EDITOR = new Action.Editor<>(
+            AddPotionAction::createEditor, SPRITE_ADD, AddPotionAction::thumbnail);
 
-        public @NotNull Data withEffect(@Nullable PotionInfo effect) {
-            return new Data(effect, this.level, this.duration);
-        }
-
-        public @NotNull Data withLevel(int level) {
-            return new Data(this.effect, level, this.duration);
-        }
-
-        public @NotNull Data withDuration(int duration) {
-            return new Data(this.effect, this.level, duration);
-        }
+    public @NotNull AddPotionAction withEffect(@Nullable PotionInfo effect) {
+        return new AddPotionAction(effect, this.level, this.duration);
     }
 
-    public AddPotionAction() {
-        super("mapmaker:add_potion", Data.CODEC, new Data(null, 1, INFINITE_DURATION));
+    public @NotNull AddPotionAction withLevel(int level) {
+        return new AddPotionAction(this.effect, level, this.duration);
+    }
+
+    public @NotNull AddPotionAction withDuration(int duration) {
+        return new AddPotionAction(this.effect, this.level, duration);
     }
 
     @Override
-    public @NotNull Sprite sprite(@Nullable Data data) {
-        return SPRITE_ADD;
+    public @NotNull StructCodec<? extends Action> codec() {
+        return CODEC;
     }
 
-    @Override
-    public @NotNull TranslatableComponent thumbnail(@Nullable Data data) {
-        if (data == null || data.effect() == null)
+    private static @NotNull TranslatableComponent thumbnail(@Nullable AddPotionAction action) {
+        if (action == null || action.effect == null)
             return Component.translatable("gui.action.add_potion.thumbnail.empty");
         return Component.translatable("gui.action.add_potion.thumbnail", List.of(
-                Component.translatable(data.effect().translationKey() + ".name"),
-                Component.text(data.level()),
-                Component.text(data.duration() == 0 ? "Infinite" : NumberUtil.formatDuration(data.duration() * 50L))
+                Component.translatable(action.effect.translationKey() + ".name"),
+                Component.text(action.level),
+                Component.text(action.duration == 0 ? "Infinite" : NumberUtil.formatDuration(action.duration * 50L))
         ));
     }
 
-    @Override
-    public @NotNull AbstractActionEditorPanel<Data> createEditor(@NotNull ActionList.ActionData<Data> actionData) {
-        return actionData.getData().effect() == null
-                ? new PotionEffectPickerView(actionData)
-                : new PotionEffectEditorView(actionData);
+    private static @NotNull AbstractActionEditorPanel<AddPotionAction> createEditor(@NotNull ActionList.Ref ref) {
+        return ref.<AddPotionAction>cast().effect == null
+                ? new PotionEffectPickerView(ref)
+                : new PotionEffectEditorView(ref);
     }
 
-    private static class PotionEffectPickerView extends AbstractActionEditorPanel<Data> {
-        public PotionEffectPickerView(@NotNull ActionList.ActionData<Data> actionData) {
-            super(actionData);
-            this.isTransient = true;
+    private static class PotionEffectPickerView extends AbstractActionEditorPanel<AddPotionAction> {
+        public PotionEffectPickerView(@NotNull ActionList.Ref ref) {
+            super(ref);
 
             background("action/editor/list_container", -10, -31);
 
-            add(1, 1, AbstractActionEditorPanel.groupText(7, "choose effect"));
+            add(1, 1, net.hollowcube.mapmaker.map.action.gui.AbstractActionEditorPanel.groupText(7, "choose effect"));
 
-            var updateFunc = update(Data::withEffect);
+            var updateFunc = update(AddPotionAction::withEffect);
             var potionTypes = PotionInfo.sortedValues();
             for (int i = 0; i < potionTypes.size(); i++) {
                 var potionInfo = potionTypes.get(i);
@@ -98,31 +91,31 @@ public class AddPotionAction extends AbstractAction<AddPotionAction.Data> {
         }
 
         @Override
-        protected void update(@NotNull Data data) {
+        protected void update(@NotNull AddPotionAction data) {
             if (data.effect == null) return;
-            host.pushView(new PotionEffectEditorView(actionData));
+            host.replaceView(new PotionEffectEditorView(ref));
         }
     }
 
-    private static class PotionEffectEditorView extends AbstractActionEditorPanel<Data> {
+    private static class PotionEffectEditorView extends AbstractActionEditorPanel<AddPotionAction> {
         private final ControlledNumberInput levelInput;
         private final ControlledNumberInput durationInput;
 
-        public PotionEffectEditorView(@NotNull ActionList.ActionData<Data> actionData) {
-            super(actionData);
+        public PotionEffectEditorView(@NotNull ActionList.Ref ref) {
+            super(ref);
 
             // Should be non-null now because we otherwise open the picker
-            var effect = Objects.requireNonNull(actionData.getData().effect());
+            var effect = Objects.requireNonNull(ref.<AddPotionAction>cast().effect());
             subtitleText.text(LanguageProviderV2.translateToPlain(translatable(effect.translationKey() + ".name")));
-            this.levelInput = add(1, 1, new ControlledNumberInput("add_potion.level", update(Data::withLevel))
+            this.levelInput = add(1, 1, new ControlledNumberInput("add_potion.level", update(AddPotionAction::withLevel))
                     .range(1, effect.maxLevel()));
-            this.durationInput = add(1, 3, new ControlledNumberInput("add_potion.duration", update(Data::withDuration))
+            this.durationInput = add(1, 3, new ControlledNumberInput("add_potion.duration", update(AddPotionAction::withDuration))
                     .formatted(i -> i == 0 ? "Infinite" : NumberUtil.formatDuration(i * 50L))
                     .range(INFINITE_DURATION, MAX_DURATION));
         }
 
         @Override
-        protected void update(@NotNull Data data) {
+        protected void update(@NotNull AddPotionAction data) {
             levelInput.update(data.level);
             durationInput.update(data.duration);
         }

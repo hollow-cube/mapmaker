@@ -18,9 +18,10 @@ public abstract class Panel extends Element {
     public static final Panel EMPTY = new Panel(0, 0) {
     };
 
-    public static void open(@NotNull Player player, @NotNull Panel panel) {
+    public static @NotNull InventoryHost open(@NotNull Player player, @NotNull Panel panel) {
         final InventoryHost host = new InventoryHost(player);
         host.pushView(panel);
+        return host;
     }
 
     record PosChild(int x, int y, Element child) {

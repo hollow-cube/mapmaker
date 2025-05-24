@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.map.action.impl;
 
 import net.hollowcube.mapmaker.map.MapSettings;
-import net.hollowcube.mapmaker.map.action.AbstractAction;
-import net.hollowcube.mapmaker.map.action.AbstractActionEditorPanel;
+import net.hollowcube.mapmaker.map.action.Action;
 import net.hollowcube.mapmaker.map.action.ActionList;
+import net.hollowcube.mapmaker.map.action.gui.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Sprite;
@@ -20,9 +20,10 @@ import java.util.function.Consumer;
 import static net.kyori.adventure.text.Component.translatable;
 
 // Only supports boolean settings for now, should revisit later.
-public class EnableSettingAction extends AbstractAction<EnableSettingAction.Data> {
-    public static final EnableSettingAction INSTANCE = new EnableSettingAction();
-
+public record EnableSettingAction(
+        // Null has no effect when executed.
+        @Nullable MapSetting<?> setting
+) implements Action {
     static final List<MapSetting<Boolean>> BOOL_SETTINGS = List.of(
             MapSettings.ONLY_SPRINT, MapSettings.NO_SPRINT,
             MapSettings.NO_JUMP, MapSettings.NO_SNEAK,
@@ -45,48 +46,37 @@ public class EnableSettingAction extends AbstractAction<EnableSettingAction.Data
 
     private static final Sprite SPRITE = new Sprite("action/icon/setting_add", 2, 3);
 
-    public record Data(@Nullable MapSetting<?> setting) {
-        // Null has no effect when executed.
-        public static final StructCodec<Data> CODEC = StructCodec.struct(
-                "setting", MapSetting.CODEC.optional(), Data::setting,
-                Data::new);
+    public static final StructCodec<EnableSettingAction> CODEC = StructCodec.struct(
+            "setting", MapSetting.CODEC.optional(), EnableSettingAction::setting,
+            EnableSettingAction::new);
+    public static final Action.Editor<EnableSettingAction> EDITOR = new Action.Editor<>(
+            EditorPanel::new, SPRITE, EnableSettingAction::makeThumbnail);
 
-        public @NotNull Data withSetting(@Nullable MapSetting<?> setting) {
-            return new Data(setting);
-        }
-    }
-
-    public EnableSettingAction() {
-        super("mapmaker:enable_setting", Data.CODEC, new Data(null));
+    public @NotNull EnableSettingAction withSetting(@Nullable MapSetting<?> setting) {
+        return new EnableSettingAction(setting);
     }
 
     @Override
-    public @NotNull Sprite sprite(@Nullable Data data) {
-        return SPRITE;
+    public @NotNull StructCodec<? extends Action> codec() {
+        return CODEC;
     }
 
-    @Override
-    public @NotNull TranslatableComponent thumbnail(@Nullable Data data) {
-        if (data == null || data.setting == null)
+    private static @NotNull TranslatableComponent makeThumbnail(@Nullable EnableSettingAction action) {
+        if (action == null || action.setting == null)
             return translatable("gui.action.enable_setting.thumbnail.empty");
         return translatable("gui.action.enable_setting.thumbnail", List.of(
-                translatable(SETTINGS_TRANSLATION_KEYS.get(data.setting) + ".name")
+                translatable(SETTINGS_TRANSLATION_KEYS.get(action.setting) + ".name")
         ));
     }
 
-    @Override
-    public @NotNull AbstractActionEditorPanel<Data> createEditor(@NotNull ActionList.ActionData<Data> actionData) {
-        return new Editor(actionData);
-    }
-
-    static class Editor extends AbstractActionEditorPanel<Data> {
-        public Editor(@NotNull ActionList.ActionData<Data> actionData) {
-            super(actionData);
+    private static class EditorPanel extends AbstractActionEditorPanel<EnableSettingAction> {
+        public EditorPanel(@NotNull ActionList.Ref ref) {
+            super(ref);
 
             background("action/editor/list_container", -10, -31);
             add(1, 1, AbstractActionEditorPanel.groupText(7, "choose setting"));
 
-            Consumer<MapSetting<?>> innerUpdateFunc = update(Data::withSetting);
+            Consumer<MapSetting<?>> innerUpdateFunc = update(EnableSettingAction::withSetting);
             Consumer<MapSetting<?>> updateFunc = setting -> {
                 innerUpdateFunc.accept(setting);
                 host.popView();
@@ -103,7 +93,7 @@ public class EnableSettingAction extends AbstractAction<EnableSettingAction.Data
         }
 
         @Override
-        protected void update(@NotNull Data data) {
+        protected void update(@NotNull EnableSettingAction data) {
             // Noop, we just pop the view when updating
         }
     }
