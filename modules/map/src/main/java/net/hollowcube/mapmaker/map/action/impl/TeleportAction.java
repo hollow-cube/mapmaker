@@ -5,13 +5,19 @@ import net.hollowcube.mapmaker.map.action.Action;
 import net.hollowcube.mapmaker.map.action.ActionList;
 import net.hollowcube.mapmaker.map.action.gui.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.map.util.RelativePos;
+import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.panels.Text;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
+import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Player;
+import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,7 +32,9 @@ public record TeleportAction(
 ) implements Action {
     private static final Sprite SPRITE_DEFAULT = new Sprite("action/icon/teleport", 3, 3);
     private static final String RELATIVE_ZERO = "~0.0";
+    private static final Sound TELEPORT_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_TELEPORT, Sound.Source.PLAYER, 0.5f, 1f);
 
+    public static final Key KEY = Key.key("mapmaker:teleport");
     public static final StructCodec<TeleportAction> CODEC = StructCodec.struct(
             StructCodec.INLINE, RelativePos.CODEC.optional(RelativePos.REL_ZERO), TeleportAction::target,
             TeleportAction::new);
@@ -36,6 +44,12 @@ public record TeleportAction(
     @Override
     public @NotNull StructCodec<? extends Action> codec() {
         return CODEC;
+    }
+
+    @Override
+    public void applyTo(@NotNull Player player, @NotNull PlayState state) {
+        player.teleport(target.inner(), Vec.ZERO, null, target.relativeFlags());
+        player.playSound(TELEPORT_SOUND, target.resolve(player.getPosition()));
     }
 
     private static @NotNull TranslatableComponent makeThumbnail(@Nullable TeleportAction action) {

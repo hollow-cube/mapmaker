@@ -5,6 +5,8 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.action.gui.ActionEditorView;
 import net.hollowcube.mapmaker.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
+import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointPostChangeEvent;
+import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointPreChangeEvent;
 import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
 import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectDataV2;
 import net.hollowcube.mapmaker.map.item.handler.BlockItemHandler;
@@ -90,7 +92,7 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget,
         if (world == null) return;
         var data = tick.getBlock().getTag(DATA_TAG);
         var checkpointId = createObjectId(tick.getBlockPosition());
-//        world.callEvent(new MapPlayerCheckpointPreChangeEvent(player, world, checkpointId, data));
+        world.callEvent(new MapPlayerCheckpointPreChangeEvent(player, world, checkpointId, data));
     }
 
     @Override
@@ -99,7 +101,7 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget,
         if (world == null) return;
         var data = tick.getBlock().getTag(DATA_TAG);
         var checkpointId = createObjectId(tick.getBlockPosition());
-//        world.callEvent(new MapPlayerCheckpointPostChangeEvent(player, world, checkpointId, data));
+        world.callEvent(new MapPlayerCheckpointPostChangeEvent(player, world, checkpointId, data));
     }
 
     @Override

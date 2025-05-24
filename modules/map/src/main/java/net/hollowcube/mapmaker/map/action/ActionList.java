@@ -28,6 +28,21 @@ public class ActionList {
         }
     }
 
+    public boolean has(@NotNull Key actionKey) {
+        return actions.stream().anyMatch(ref -> ref.key().equals(actionKey));
+    }
+
+    public <T extends Action> @Nullable T findLast(@NotNull Class<T> actionType) {
+        for (int i = actions.size() - 1; i >= 0; i--) {
+            var action = actions.get(i);
+            if (action.action().getClass() == actionType) {
+                //noinspection unchecked
+                return (T) action.action();
+            }
+        }
+        return null;
+    }
+
     public @NotNull List<Action> actions() {
         return actions.stream().map(Ref::action).toList();
     }

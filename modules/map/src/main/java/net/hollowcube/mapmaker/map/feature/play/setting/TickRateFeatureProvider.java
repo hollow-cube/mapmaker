@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
@@ -16,8 +15,6 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.network.packet.server.play.SetTickStatePacket;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Objects;
 
 @AutoService(FeatureProvider.class)
 public class TickRateFeatureProvider extends AbstractSettingFeatureProvider {
@@ -37,7 +34,8 @@ public class TickRateFeatureProvider extends AbstractSettingFeatureProvider {
 
         var state = SaveState.fromPlayer(player);
         var playstate = state.state(PlayState.class);
-        return Objects.requireNonNullElse(playstate.settings().get(MapSettings.TICK_RATE, world.map().settings()), ServerFlag.SERVER_TICKS_PER_SECOND);
+//        return Objects.requireNonNullElse(playstate.settings().get(MapSettings.TICK_RATE, world.map().settings()), ServerFlag.SERVER_TICKS_PER_SECOND);
+        return 20; // todo
     }
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {

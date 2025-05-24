@@ -2,13 +2,18 @@ package net.hollowcube.mapmaker.map.action.impl;
 
 import net.hollowcube.mapmaker.map.action.Action;
 import net.hollowcube.mapmaker.map.action.ActionList;
+import net.hollowcube.mapmaker.map.action.Attachments;
 import net.hollowcube.mapmaker.map.action.gui.AbstractActionEditorPanel;
+import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.map.entity.potion.PotionInfo;
+import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Sprite;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,6 +27,7 @@ public record RemovePotionAction(
     private static final Sprite SPRITE_SUBTRACT = new Sprite("action/icon/potion_subtract", 2, 2);
     private static final Sprite SPRITE_CLEAR = new Sprite("action/icon/potion_clear", 2, 2);
 
+    public static final Key KEY = Key.key("mapmaker:remove_potion");
     public static final StructCodec<RemovePotionAction> CODEC = StructCodec.struct(
             "effect", PotionInfo.CODEC.optional(), RemovePotionAction::effect,
             RemovePotionAction::new);
@@ -35,6 +41,17 @@ public record RemovePotionAction(
     @Override
     public @NotNull StructCodec<? extends Action> codec() {
         return CODEC;
+    }
+
+    @Override
+    public void applyTo(@NotNull Player player, @NotNull PlayState state) {
+        // todo sound effects only if 1+ effects were actually removed AND an effect was not added.
+        var potionEffects = state.get(Attachments.POTION_EFFECTS, new PotionEffectList());
+        if (effect == null) {
+            potionEffects.clear();
+        } else {
+            potionEffects.remove(effect);
+        }
     }
 
     private static @NotNull Sprite makeSprite(@Nullable RemovePotionAction action) {

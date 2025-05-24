@@ -14,6 +14,10 @@ public abstract class DataVersion {
         this.encodedVersion = (version << 8) | (subversion & 0xFF);
     }
 
+    public int version() {
+        return encodedVersion >> 8;
+    }
+
     // REFERENCES
 
     protected void addReference(DataType.IdMapped type, @NotNull String id) {

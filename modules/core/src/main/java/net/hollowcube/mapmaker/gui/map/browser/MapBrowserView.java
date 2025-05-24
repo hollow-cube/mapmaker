@@ -90,8 +90,6 @@ public class MapBrowserView extends Panel {
                     .query(searchText);
         }
 
-        System.out.println(params.build());
-
         var response = mapService.searchMaps(params.page(page).pageSize(pageSize).build());
         if (page == 0) pagination.totalPages(response.pageCount());
 

@@ -4,7 +4,6 @@ import com.google.auto.service.AutoService;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.custom.CheckpointPlateBlock;
 import net.hollowcube.mapmaker.map.block.handler.SignBlockHandler;
-import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointPreChangeEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.gui.effect.EditCheckpointView;
 import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
@@ -95,6 +94,6 @@ public class CheckpointSignFeatureProvider implements FeatureProvider {
 
         event.setCancelled(true);
         var checkpointId = ObjectBlockHandler.createObjectId(ObjectTypes.CHECKPOINT_PLATE, event.getBlockPosition());
-        world.callEvent(new MapPlayerCheckpointPreChangeEvent(player, world, checkpointId, checkpoint));
+//        world.callEvent(new MapPlayerCheckpointPreChangeEvent(player, world, checkpointId, checkpoint));
     }
 }

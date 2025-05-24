@@ -1,14 +1,11 @@
 package net.hollowcube.mapmaker.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.util.PlayerLiquidExtension;
-import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
-import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
@@ -31,13 +28,15 @@ public class ResetLiquidFeatureProvider extends AbstractSettingFeatureProvider {
     private static boolean canGoInWater(@NotNull Player player, @NotNull MapWorld world) {
         var state = SaveState.fromPlayer(player);
         var playstate = state.state(PlayState.class);
-        return !playstate.settings().get(MapSettings.RESET_IN_WATER, world.map().settings());
+//        return !playstate.settings().get(MapSettings.RESET_IN_WATER, world.map().settings());
+        return true; // todo
     }
 
     private static boolean canGoInLava(@NotNull Player player, @NotNull MapWorld world) {
         var state = SaveState.fromPlayer(player);
         var playstate = state.state(PlayState.class);
-        return !playstate.settings().get(MapSettings.RESET_IN_LAVA, world.map().settings());
+//        return !playstate.settings().get(MapSettings.RESET_IN_LAVA, world.map().settings());
+        return true; // todo
     }
 
     private void handlePlayerTick(@NotNull PlayerTickEvent event) {

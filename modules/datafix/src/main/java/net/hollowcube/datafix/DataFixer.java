@@ -29,6 +29,7 @@ public class DataFixer {
     private static final Int2ObjectMap<DataTypeBuilder> builders = new Int2ObjectOpenHashMap<>();
 
     // Built state
+    private static int minVersion = 99, maxVersion = MinecraftServer.DATA_VERSION;
     public static OptimizedSchema[] schemas; // DataTypeV2 -> Schema
 
     // Builder Methods
@@ -39,7 +40,10 @@ public class DataFixer {
 
     public static void addFixVersions(@NotNull List<Supplier<DataVersion>> versions) {
         if (state.get() != 0) throw new IllegalArgumentException("DataFixer is already built.");
-        for (var version : versions) version.get();
+        for (var version : versions) {
+            var built = version.get();
+            maxVersion = Math.max(maxVersion, built.version());
+        }
     }
 
     public static void buildModel() {
@@ -274,11 +278,11 @@ public class DataFixer {
 
 
     public static int minVersion() {
-        return 99;
+        return minVersion;
     }
 
     public static int maxVersion() {
-        return MinecraftServer.DATA_VERSION;
+        return maxVersion;
     }
 
     static {

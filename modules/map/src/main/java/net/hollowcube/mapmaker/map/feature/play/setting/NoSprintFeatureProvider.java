@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
@@ -34,7 +33,8 @@ public class NoSprintFeatureProvider extends AbstractSettingFeatureProvider {
 
         var state = SaveState.fromPlayer(player);
         var playstate = state.state(PlayState.class);
-        return !playstate.settings().get(MapSettings.NO_SPRINT, world.map().settings());
+//        return !playstate.settings().get(MapSettings.NO_SPRINT, world.map().settings());
+        return true; // todo
     }
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {

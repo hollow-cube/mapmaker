@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.components.TranslatableBuilder;
-import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
@@ -47,7 +46,8 @@ public class DoubleJumpFeatureProvider extends AbstractSettingFeatureProvider {
         if (state == null) return 0;
 
         var playstate = state.state(PlayState.class);
-        return playstate.settings().get(MapSettings.DOUBLE_JUMP, world.map().settings());
+//        return playstate.settings().get(MapSettings.DOUBLE_JUMP, world.map().settings());
+        return 0; // todo
     }
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {

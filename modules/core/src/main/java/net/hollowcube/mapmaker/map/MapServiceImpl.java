@@ -410,7 +410,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             // Note that this is a non-backwards compatible change, so once we write a new state an old server cannot necessarily
             // read this state. For now, we will likely ignore this, however in the future joining a map will require checking
             // the state and finding a compatible server (server data version > state data version).
-            if (!stateObj.isEmpty() && saveState.dataVersion > 0 && saveState.dataVersion < latestDataVersion) {
+            if (!stateObj.isEmpty() && saveState.dataVersion < latestDataVersion) {
                 var upgraded = DataFixer.upgrade(serializer.dataType(), Transcoder.JSON, stateObj, saveState.dataVersion, latestDataVersion);
                 if (!(upgraded instanceof JsonObject upgradedObject))
                     throw new IllegalStateException("invalid save state upgrade: " + upgraded);

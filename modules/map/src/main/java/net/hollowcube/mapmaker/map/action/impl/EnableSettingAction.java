@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
 import org.jetbrains.annotations.NotNull;
@@ -46,6 +47,7 @@ public record EnableSettingAction(
 
     private static final Sprite SPRITE = new Sprite("action/icon/setting_add", 2, 3);
 
+    public static final Key KEY = Key.key("mapmaker:enable_setting");
     public static final StructCodec<EnableSettingAction> CODEC = StructCodec.struct(
             "setting", MapSetting.CODEC.optional(), EnableSettingAction::setting,
             EnableSettingAction::new);

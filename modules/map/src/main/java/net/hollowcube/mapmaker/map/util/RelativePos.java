@@ -104,15 +104,15 @@ public record RelativePos(
 
         @Override
         public @NotNull <D> Result<RelativePos> decodeFromMap(@NotNull Transcoder<D> coder, Transcoder.@NotNull MapLike<D> map) {
-            var xResult = parseNumberOrString(coder, map.getValue("x"));
+            var xResult = parseNumberOrString(coder, map, "x");
             if (!(xResult instanceof Result.Ok(var x))) return xResult.cast();
-            var yResult = parseNumberOrString(coder, map.getValue("y"));
+            var yResult = parseNumberOrString(coder, map, "y");
             if (!(yResult instanceof Result.Ok(var y))) return yResult.cast();
-            var zResult = parseNumberOrString(coder, map.getValue("z"));
+            var zResult = parseNumberOrString(coder, map, "z");
             if (!(zResult instanceof Result.Ok(var z))) return zResult.cast();
-            var yawResult = parseNumberOrString(coder, map.getValue("yaw"));
+            var yawResult = parseNumberOrString(coder, map, "yaw");
             if (!(yawResult instanceof Result.Ok(var yaw))) return yawResult.cast();
-            var pitchResult = parseNumberOrString(coder, map.getValue("pitch"));
+            var pitchResult = parseNumberOrString(coder, map, "pitch");
             if (!(pitchResult instanceof Result.Ok(var pitch))) return pitchResult.cast();
 
             int flags = 0;
@@ -151,7 +151,9 @@ public record RelativePos(
         }
 
         // Right either means its relative
-        private <D> Result<Either<Double, Double>> parseNumberOrString(@NotNull Transcoder<D> coder, @NotNull Result<D> result) {
+        private <D> Result<Either<Double, Double>> parseNumberOrString(@NotNull Transcoder<D> coder, Transcoder.@NotNull MapLike<D> map, String key) {
+            if (!map.hasValue(key)) return new Result.Ok<>(Either.right(0.0));
+            var result = map.getValue(key);
             if (!(result instanceof Result.Ok(D raw))) return result.cast();
             if (coder.getDouble(raw) instanceof Result.Ok(Double number))
                 return new Result.Ok<>(Either.left(number));

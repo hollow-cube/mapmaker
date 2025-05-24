@@ -4,15 +4,20 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.action.Action;
 import net.hollowcube.mapmaker.map.action.ActionList;
+import net.hollowcube.mapmaker.map.action.Attachments;
 import net.hollowcube.mapmaker.map.action.gui.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.map.action.gui.ControlledNumberInput;
+import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.map.entity.potion.PotionInfo;
+import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.util.NumberUtil;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,6 +34,7 @@ public record AddPotionAction(
 
     private static final Sprite SPRITE_ADD = new Sprite("action/icon/potion_add", 2, 2);
 
+    public static final Key KEY = Key.key("mapmaker:add_potion");
     public static final StructCodec<AddPotionAction> CODEC = StructCodec.struct(
             "effect", PotionInfo.CODEC.optional(), AddPotionAction::effect,
             "level", ExtraCodecs.clamppedInt(0, 128).optional(1), AddPotionAction::level,
@@ -52,6 +58,21 @@ public record AddPotionAction(
     @Override
     public @NotNull StructCodec<? extends Action> codec() {
         return CODEC;
+    }
+
+    @Override
+    public void applyTo(@NotNull Player player, @NotNull PlayState state) {
+        if (effect == null) return;
+
+        // TODO: sound effects
+        var potionEffects = state.get(Attachments.POTION_EFFECTS);
+        if (potionEffects == null) {
+            potionEffects = new PotionEffectList();
+            state.set(Attachments.POTION_EFFECTS, potionEffects);
+        }
+        var existingEffect = potionEffects.getOrCreate(effect);
+        existingEffect.setLevel(level);
+        existingEffect.setDuration(duration);
     }
 
     private static @NotNull TranslatableComponent thumbnail(@Nullable AddPotionAction action) {

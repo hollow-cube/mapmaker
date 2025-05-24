@@ -19,6 +19,7 @@ public final class ActionRegistry {
     private static final DynamicRegistry<Action.Editor<? extends Action>> EDITOR_REGISTRY = DynamicRegistry.create("mapmaker:action_editor");
     private static final List<Key> KEYS = new ArrayList<>();
 
+    public static final Codec<DynamicRegistry.Key<StructCodec<? extends Action>>> KEY_CODEC = Codec.RegistryKey(_ -> REGISTRY);
     public static final Codec<Action> CODEC = Codec.RegistryTaggedUnion(_ -> REGISTRY, Action::codec, "type");
 
     public static @NotNull Codec<ActionList> listCodec(int maxSize) {
@@ -48,20 +49,23 @@ public final class ActionRegistry {
         return KEYS;
     }
 
-    static {
-        register("mapmaker:lives", EditLivesAction.CODEC, EditLivesAction.EDITOR);
-        register("mapmaker:timer", EditTimerAction.CODEC, EditTimerAction.EDITOR);
-        register("mapmaker:add_potion", AddPotionAction.CODEC, AddPotionAction.EDITOR);
-        register("mapmaker:remove_potion", RemovePotionAction.CODEC, RemovePotionAction.EDITOR);
-        register("mapmaker:teleport", TeleportAction.CODEC, TeleportAction.EDITOR);
-        register("mapmaker:enable_setting", EnableSettingAction.CODEC, EnableSettingAction.EDITOR);
-        register("mapmaker:disable_setting", DisableSettingAction.CODEC, DisableSettingAction.EDITOR);
-    }
+    public static final DynamicRegistry.Key<StructCodec<? extends Action>> LIVES = register(EditLivesAction.KEY, EditLivesAction.CODEC, EditLivesAction.EDITOR);
+    public static final DynamicRegistry.Key<StructCodec<? extends Action>> TIMER = register(EditTimerAction.KEY, EditTimerAction.CODEC, EditTimerAction.EDITOR);
+    public static final DynamicRegistry.Key<StructCodec<? extends Action>> ADD_POTION = register(AddPotionAction.KEY, AddPotionAction.CODEC, AddPotionAction.EDITOR);
+    public static final DynamicRegistry.Key<StructCodec<? extends Action>> REMOVE_POTION = register(RemovePotionAction.KEY, RemovePotionAction.CODEC, RemovePotionAction.EDITOR);
+    public static final DynamicRegistry.Key<StructCodec<? extends Action>> TELEPORT = register(TeleportAction.KEY, TeleportAction.CODEC, TeleportAction.EDITOR);
+    public static final DynamicRegistry.Key<StructCodec<? extends Action>> ENABLE_SETTING = register(EnableSettingAction.KEY, EnableSettingAction.CODEC, EnableSettingAction.EDITOR);
+    public static final DynamicRegistry.Key<StructCodec<? extends Action>> DISABLE_SETTING = register(DisableSettingAction.KEY, DisableSettingAction.CODEC, DisableSettingAction.EDITOR);
+    public static final DynamicRegistry.Key<StructCodec<? extends Action>> PROGRESS_INDEX = register(SetProgressIndexAction.KEY, SetProgressIndexAction.CODEC, SetProgressIndexAction.EDITOR);
+    public static final DynamicRegistry.Key<StructCodec<? extends Action>> RESET_HEIGHT = register(ResetHeightAction.KEY, ResetHeightAction.CODEC, ResetHeightAction.EDITOR);
+    public static final DynamicRegistry.Key<StructCodec<? extends Action>> GIVE_ELYTRA = register(GiveElytraAction.KEY, GiveElytraAction.CODEC, GiveElytraAction.EDITOR);
+    public static final DynamicRegistry.Key<StructCodec<? extends Action>> TAKE_ELYTRA = register(TakeElytraAction.KEY, TakeElytraAction.CODEC, TakeElytraAction.EDITOR);
 
-    private static <T extends Action> void register(String name, StructCodec<T> codec, Action.Editor<T> editor) {
-        REGISTRY.register(name, codec);
+    private static <T extends Action> DynamicRegistry.Key<StructCodec<? extends Action>> register(Key name, StructCodec<T> codec, Action.Editor<T> editor) {
+        var key = REGISTRY.register(name, codec);
         EDITOR_REGISTRY.register(name, editor);
-        KEYS.add(Key.key(name));
+        KEYS.add(name);
+        return key;
     }
 
 }

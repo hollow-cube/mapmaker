@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.map.action.gui.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Sprite;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +24,7 @@ public record DisableSettingAction(
 ) implements Action {
     private static final Sprite SPRITE = new Sprite("action/icon/setting_subtract", 2, 3);
 
+    public static final Key KEY = Key.key("mapmaker:disable_setting");
     public static final StructCodec<DisableSettingAction> CODEC = StructCodec.struct(
             "setting", MapSetting.CODEC.optional(), DisableSettingAction::setting,
             DisableSettingAction::new);

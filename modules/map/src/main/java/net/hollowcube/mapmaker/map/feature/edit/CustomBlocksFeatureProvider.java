@@ -12,8 +12,6 @@ import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.event.entity.MarkerEntityEnteredEvent;
 import net.hollowcube.mapmaker.map.event.entity.MarkerEntityExitedEvent;
-import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointPostChangeEvent;
-import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointPreChangeEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCompleteMapEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerStatusChangeEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
@@ -153,7 +151,7 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
                 if (checkpoint == null) return;
 
                 var checkpointId = marker.getUuid().toString();
-                world.callEvent(new MapPlayerCheckpointPreChangeEvent(player, world, checkpointId, checkpoint));
+//                world.callEvent(new MapPlayerCheckpointPreChangeEvent(player, world, checkpointId, checkpoint));
             }
             case "mapmaker:status" -> {
                 if (StatusPlateBlock.APPLY_COOLDOWN.test(player)) {
@@ -180,7 +178,7 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
             if (checkpoint == null) return;
 
             var checkpointId = marker.getUuid().toString();
-            world.callEvent(new MapPlayerCheckpointPostChangeEvent(player, world, checkpointId, checkpoint));
+//            world.callEvent(new MapPlayerCheckpointPostChangeEvent(player, world, checkpointId, checkpoint));
         }
     }
 

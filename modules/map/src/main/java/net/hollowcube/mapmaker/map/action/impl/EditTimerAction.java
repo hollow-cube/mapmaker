@@ -7,11 +7,14 @@ import net.hollowcube.mapmaker.map.action.gui.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.map.action.gui.ControlledNumberInput;
 import net.hollowcube.mapmaker.map.action.gui.ControlledTriStateInput;
 import net.hollowcube.mapmaker.map.action.util.Operation;
+import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.util.NumberUtil;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,6 +22,7 @@ import java.util.List;
 import java.util.Locale;
 
 /// Action for the timer feature
+///
 /// The time value is always tracked in ticks, not wall clock time.
 public record EditTimerAction(
         @NotNull Operation operation,
@@ -32,12 +36,14 @@ public record EditTimerAction(
     private static final Sprite SPRITE_ADD = new Sprite("action/icon/timer_add", 4, 3);
     private static final Sprite SPRITE_SUBTRACT = new Sprite("action/icon/timer_subtract", 4, 3);
 
+    public static final Key KEY = Key.key("mapmaker:timer");
     public static final StructCodec<EditTimerAction> CODEC = StructCodec.struct(
             "operation", Operation.CODEC.optional(Operation.SET), EditTimerAction::operation,
-            "value", ExtraCodecs.clamppedInt(0, 10).optional(NO_TIMER), EditTimerAction::time,
+            "value", ExtraCodecs.clamppedInt(0, MAX_TIMER).optional(NO_TIMER), EditTimerAction::time,
             EditTimerAction::new);
     public static final Action.Editor<EditTimerAction> EDITOR = new Action.Editor<>(
             EditTimerAction.Editor::new, EditTimerAction::makeSprite, EditTimerAction::makeThumbnail);
+    public static final PlayState.Attachment<Integer> SAVE_DATA = PlayState.attachment(KEY, ExtraCodecs.clamppedInt(NO_TIMER, MAX_TIMER));
 
     public @NotNull EditTimerAction withOperation(@NotNull Operation operation) {
         return new EditTimerAction(operation, this.time);
@@ -50,6 +56,16 @@ public record EditTimerAction(
     @Override
     public @NotNull StructCodec<? extends Action> codec() {
         return CODEC;
+    }
+
+    @Override
+    public void applyTo(@NotNull Player player, @NotNull PlayState state) {
+        // todo support other operations
+        if (time > NO_TIMER) {
+            // Only update the time limit if it is assigned in this effect.
+            // In a checkpoint it will have been reset prior to calling this function.
+            state.set(EditTimerAction.SAVE_DATA, time);
+        }
     }
 
     private static @NotNull Sprite makeSprite(@Nullable EditTimerAction action) {

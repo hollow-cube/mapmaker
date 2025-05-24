@@ -7,10 +7,14 @@ import net.hollowcube.mapmaker.map.action.gui.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.map.action.gui.ControlledNumberInput;
 import net.hollowcube.mapmaker.map.action.gui.ControlledTriStateInput;
 import net.hollowcube.mapmaker.map.action.util.Operation;
+import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.panels.Sprite;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
+import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.StructCodec;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,12 +32,30 @@ public record EditLivesAction(
     private static final Sprite SPRITE_ADD = new Sprite("action/icon/lives_add", 3, 3);
     private static final Sprite SPRITE_SUBTRACT = new Sprite("action/icon/lives_subtract", 3, 3);
 
+    public static final Key KEY = Key.key("mapmaker:lives");
     public static final StructCodec<EditLivesAction> CODEC = StructCodec.struct(
             "operation", Operation.CODEC.optional(Operation.SET), EditLivesAction::operation,
             "value", ExtraCodecs.clamppedInt(0, 10).optional(DEFAULT_LIVES), EditLivesAction::lives,
             EditLivesAction::new);
     public static final Action.Editor<EditLivesAction> EDITOR = new Action.Editor<>(
             Editor::new, EditLivesAction::makeSprite, EditLivesAction::makeThumbnail);
+    public static final PlayState.Attachment<Data> SAVE_DATA = PlayState.attachment(KEY, Data.CODEC);
+
+    public record Data(int value, int max) {
+        public static final Data DEFAULT = new Data(0, 10);
+        public static final Codec<Data> CODEC = StructCodec.struct(
+                "value", ExtraCodecs.clamppedInt(0, 20), Data::value,
+                "max", ExtraCodecs.clamppedInt(0, 20), Data::max,
+                Data::new);
+
+        public @NotNull Data withValue(int value) {
+            return new Data(value, this.max);
+        }
+
+        public @NotNull Data withMax(int max) {
+            return new Data(this.value, max);
+        }
+    }
 
     public @NotNull EditLivesAction withOperation(@NotNull Operation operation) {
         return new EditLivesAction(operation, this.lives);
@@ -46,6 +68,16 @@ public record EditLivesAction(
     @Override
     public @NotNull StructCodec<? extends Action> codec() {
         return CODEC;
+    }
+
+    @Override
+    public void applyTo(@NotNull Player player, @NotNull PlayState state) {
+        // todo support all the options
+        if (lives > 0) {
+            state.set(EditLivesAction.SAVE_DATA, new EditLivesAction.Data(lives, lives));
+        } else {
+            state.set(EditLivesAction.SAVE_DATA, null);
+        }
     }
 
     private static @NotNull Sprite makeSprite(@Nullable EditLivesAction action) {
