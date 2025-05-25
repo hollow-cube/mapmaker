@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.inventory.InventoryType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -30,7 +31,11 @@ public abstract class AbstractActionEditorPanel<T extends Action> extends Panel 
     protected final Text subtitleText;
 
     protected AbstractActionEditorPanel(@NotNull ActionList.Ref ref) {
-        super(9, 10);
+        this(ref, false);
+    }
+
+    protected AbstractActionEditorPanel(@NotNull ActionList.Ref ref, boolean oneSlotLessHack) {
+        super(oneSlotLessHack ? InventoryType.CHEST_5_ROW : InventoryType.CHEST_6_ROW, 9, oneSlotLessHack ? 9 : 10);
         this.ref = Objects.requireNonNull(ref, "ref");
 
         background("action/editor/container", -10, -31);

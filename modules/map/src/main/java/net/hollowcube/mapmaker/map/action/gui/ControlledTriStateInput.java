@@ -69,10 +69,14 @@ public class ControlledTriStateInput<E extends Enum<E>> extends Panel {
         return this;
     }
 
+    public @NotNull Button iconButton() {
+        return this.iconButton;
+    }
+
     public void update(@NotNull E newValue) {
         this.value = newValue;
         var sprite = this.sprites[newValue.ordinal()];
-        this.iconButton.sprite(sprite);
+        if (sprite != null) this.iconButton.sprite(sprite);
 
         for (int i = 0; i < 3; i++) {
             var button = this.buttons[i];

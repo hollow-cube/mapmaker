@@ -9,6 +9,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.minestom.server.component.DataComponent;
+import net.minestom.server.component.DataComponentMap;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.component.CustomModelData;
 import net.minestom.server.item.component.HeadProfile;
@@ -43,6 +45,7 @@ public class Button extends Element implements ButtonClickAliases {
     protected String itemModel = "minecraft:stick";
     protected String itemOverlay = null;
     protected HeadProfile itemProfile = null;
+    protected DataComponentMap extraComponents = null;
     protected Sprite sprite;
     protected boolean disableHoverSprite = false;
 
@@ -99,6 +102,14 @@ public class Button extends Element implements ButtonClickAliases {
     public @NotNull Button profile(@NotNull HeadProfile profile) {
         if (Objects.equals(this.itemProfile, profile)) return this;
         this.itemProfile = profile;
+
+        if (host != null) host.queueRedraw();
+        return this;
+    }
+
+    public @NotNull Button extraComponents(@NotNull DataComponentMap extraComponents) {
+        if (Objects.equals(this.extraComponents, extraComponents)) return this;
+        this.extraComponents = extraComponents;
 
         if (host != null) host.queueRedraw();
         return this;
@@ -202,6 +213,11 @@ public class Button extends Element implements ButtonClickAliases {
             builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.ITEM_MODEL, itemModel);
         if (itemProfile != null)
             builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.PROFILE, itemProfile);
+        if (extraComponents != null) {
+            for (var entry : extraComponents.entrySet()) {
+                builder.editSlots(0, 0, slotWidth, slotHeight, (DataComponent<Object>) entry.component(), entry.value());
+            }
+        }
         builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(
                 List.of(), List.of(), itemOverlay == null ? List.of(itemModel) : List.of(itemModel, itemOverlay), List.of()
         ));

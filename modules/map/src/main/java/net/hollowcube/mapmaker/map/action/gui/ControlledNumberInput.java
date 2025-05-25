@@ -31,26 +31,36 @@ public class ControlledNumberInput extends Panel {
     private int value = 0;
 
     public ControlledNumberInput(@NotNull String key, @NotNull Consumer<Integer> onChange) {
-        super(7, 2);
+        this(key, onChange, false);
+    }
+
+    public ControlledNumberInput(@NotNull String key, @NotNull Consumer<Integer> onChange, boolean oneSlotHack) {
+        super(7, oneSlotHack ? 1 : 2);
         this.key = key;
         this.onChange = onChange;
 
-        this.labelText = add(0, 0, AbstractActionEditorPanel.groupText(7,
-                LanguageProviderV2.translateToPlain("gui.action." + key)));
-        this.labelText.translationKey("gui.action." + key);
+        if (oneSlotHack) {
+            this.labelText = add(0, 0, new Text(null, 7, 0,
+                    LanguageProviderV2.translateToPlain("gui.action." + key))
+                    .font("small").align(1, -11));
+        } else {
+            this.labelText = add(0, 0, AbstractActionEditorPanel.groupText(7,
+                    LanguageProviderV2.translateToPlain("gui.action." + key)));
+            this.labelText.translationKey("gui.action." + key);
+        }
 
-        this.inputText = add(0, 1, new Text("gui.action." + key, 5, 1, "")
+        this.inputText = add(0, oneSlotHack ? 0 : 1, new Text("gui.action." + key, 5, 1, "")
                 .align(6, 5).background("generic2/input/5_1_shadow"));
         this.inputText
                 .lorePostfix(AbstractActionEditorPanel.LORE_POSTFIX_CLICKEDIT)
                 .onLeftClick(this::beginAnvilEdit);
 
-        this.minusButton = add(5, 1, new Button("gui.action." + key + ".minus", 1, 1)
+        this.minusButton = add(5, oneSlotHack ? 0 : 1, new Button("gui.action." + key + ".minus", 1, 1)
                 .background("generic2/btn/default/1_1_shadow")
                 .sprite("generic2/icon/minus", 4, 8)
                 .onLeftClick(() -> handleNewValue(value - smallStep))
                 .onShiftLeftClick(() -> handleNewValue(value - bigStep)));
-        this.plusButton = add(6, 1, new Button("gui.action." + key + ".plus", 1, 1)
+        this.plusButton = add(6, oneSlotHack ? 0 : 1, new Button("gui.action." + key + ".plus", 1, 1)
                 .background("generic2/btn/default/1_1_shadow")
                 .sprite("generic2/icon/plus", 4, 4)
                 .onLeftClick(() -> handleNewValue(value + smallStep))

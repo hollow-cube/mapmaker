@@ -60,6 +60,8 @@ public final class ActionRegistry {
     public static final DynamicRegistry.Key<StructCodec<? extends Action>> RESET_HEIGHT = register(ResetHeightAction.KEY, ResetHeightAction.CODEC, ResetHeightAction.EDITOR);
     public static final DynamicRegistry.Key<StructCodec<? extends Action>> GIVE_ELYTRA = register(GiveElytraAction.KEY, GiveElytraAction.CODEC, GiveElytraAction.EDITOR);
     public static final DynamicRegistry.Key<StructCodec<? extends Action>> TAKE_ELYTRA = register(TakeElytraAction.KEY, TakeElytraAction.CODEC, TakeElytraAction.EDITOR);
+    public static final DynamicRegistry.Key<StructCodec<? extends Action>> GIVE_ITEM = register(GiveItemAction.KEY, GiveItemAction.CODEC, GiveItemAction.EDITOR);
+    public static final DynamicRegistry.Key<StructCodec<? extends Action>> TAKE_ITEM = register(TakeItemAction.KEY, TakeItemAction.CODEC, TakeItemAction.EDITOR);
 
     private static <T extends Action> DynamicRegistry.Key<StructCodec<? extends Action>> register(Key name, StructCodec<T> codec, Action.Editor<T> editor) {
         var key = REGISTRY.register(name, codec);
