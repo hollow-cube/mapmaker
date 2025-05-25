@@ -45,6 +45,11 @@ public record EnderPearlCheckpointItem(int amount, int cooldown) implements Chec
     }
 
     @Override
+    public @NotNull CheckpointItem updateFromItemStack(@NotNull ItemStack itemStack) {
+        return withAmount(itemStack.amount()); // todo support infinite
+    }
+
+    @Override
     public @NotNull GiveItemAction.AbstractItemEditor<?> createEditor(ActionList.@NotNull Ref ref) {
         return new Editor(ref);
     }

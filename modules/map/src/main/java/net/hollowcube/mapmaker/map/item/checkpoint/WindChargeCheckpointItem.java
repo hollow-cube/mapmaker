@@ -40,6 +40,11 @@ public record WindChargeCheckpointItem(int amount, int cooldown) implements Chec
     }
 
     @Override
+    public @NotNull CheckpointItem updateFromItemStack(@NotNull ItemStack itemStack) {
+        return withAmount(itemStack.amount()); // todo support infinite
+    }
+
+    @Override
     public @NotNull StructCodec<? extends CheckpointItem> codec() {
         return CODEC;
     }

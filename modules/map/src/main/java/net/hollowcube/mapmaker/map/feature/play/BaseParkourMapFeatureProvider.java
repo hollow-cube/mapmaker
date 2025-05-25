@@ -18,6 +18,7 @@ import net.hollowcube.mapmaker.map.event.*;
 import net.hollowcube.mapmaker.map.event.vnext.*;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectDataV2;
+import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.map.feature.play.handlers.SpectateHandler;
 import net.hollowcube.mapmaker.map.feature.play.item.*;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
@@ -50,6 +51,7 @@ import net.minestom.server.event.player.PlayerStopFlyingWithElytraEvent;
 import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.component.Equippable;
 import net.minestom.server.network.packet.client.play.ClientPlayerBlockPlacementPacket;
 import net.minestom.server.potion.Potion;
@@ -627,17 +629,6 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         for (var action : actions.actions()) {
             action.applyTo(player, state);
         }
-
-//        var newItem1 = state.items().item1();
-//        if (data.items().item1() != null) newItem1 = data.items().item1();
-//        var newItem2 = state.items().item2();
-//        if (data.items().item2() != null) newItem2 = data.items().item2();
-//        var newItem3 = state.items().item3();
-//        if (data.items().item3() != null) newItem3 = data.items().item3();
-//        var newElytra = state.items().elytra();
-//        if (data.items().elytra() != null) newElytra = data.items().elytra();
-//
-//        state.setItems(new HotbarItems(newItem1, newItem2, newItem3, newElytra));
     }
 
     private void updateStateFromPlayer(@NotNull Player player, @NotNull PlayState state) {
@@ -671,13 +662,12 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var ghostBlocks = GhostBlockHolder.forPlayerOptional(player);
         state.setGhostBlocks(ghostBlocks == null ? Map.of() : ghostBlocks.save());
 
-//        var items = state.items();
-//        state.setItems(new HotbarItems(
-//                items.item1() == null ? HotbarItem.Remove.INSTANCE : items.item1().fromItemStack(player.getInventory().getItemStack(3)),
-//                items.item2() == null ? HotbarItem.Remove.INSTANCE : items.item2().fromItemStack(player.getInventory().getItemStack(5)),
-//                items.item3() == null ? HotbarItem.Remove.INSTANCE : items.item3().fromItemStack(player.getInventory().getItemStack(6)),
-//                items.elytra()
-//        ));
+        var items = state.get(Attachments.HOTBAR_ITEMS, HotbarItems.EMPTY);
+        state.set(Attachments.HOTBAR_ITEMS, new HotbarItems(
+                OpUtils.map(items.item0(), item -> item.updateFromItemStack(player.getInventory().getItemStack(3))),
+                OpUtils.map(items.item1(), item -> item.updateFromItemStack(player.getInventory().getItemStack(5))),
+                OpUtils.map(items.item2(), item -> item.updateFromItemStack(player.getInventory().getItemStack(6)))
+        ));
     }
 
     private void updatePlayerFromState(MapWorld world, @NotNull Player player, @NotNull PlayState state) {
@@ -720,16 +710,12 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         }
 
         // Apply items to current state.
-//        var item1 = state.items().item1();
-//        player.getInventory().setItemStack(3, item1 == null || item1 instanceof HotbarItem.Remove
-//                ? ItemStack.AIR : item1.toItemStack(false));
-//        var item2 = state.items().item2();
-//        player.getInventory().setItemStack(5, item2 == null || item2 instanceof HotbarItem.Remove
-//                ? ItemStack.AIR : item2.toItemStack(false));
-//        var item3 = state.items().item3();
-//        player.getInventory().setItemStack(6, item3 == null || item3 instanceof HotbarItem.Remove
-//                ? ItemStack.AIR : item3.toItemStack(false));
+        var items = state.get(Attachments.HOTBAR_ITEMS, HotbarItems.EMPTY);
+        player.getInventory().setItemStack(3, items.item0() == null ? ItemStack.AIR : items.item0().createItemStack());
+        player.getInventory().setItemStack(5, items.item1() == null ? ItemStack.AIR : items.item1().createItemStack());
+        player.getInventory().setItemStack(6, items.item2() == null ? ItemStack.AIR : items.item2().createItemStack());
 
+        // Apply elytra or remove it if not relevant
         if (state.get(Attachments.ELYTRA, false)) {
             player.setChestplate(player.getChestplate().with(DataComponents.GLIDER)
                     .with(DataComponents.EQUIPPABLE, ELYTRA_EQUIPPABLE));

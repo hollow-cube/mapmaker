@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.action;
 
 import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
+import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.codec.Codec;
@@ -15,5 +16,7 @@ public class Attachments {
             Key.key("mapmaker:potion_effects"), PotionEffectList.CODEC);
     public static final PlayState.Attachment<Boolean> ELYTRA = PlayState.attachment(
             Key.key("mapmaker:elytra"), Codec.BOOLEAN);
+    public static final PlayState.Attachment<HotbarItems> HOTBAR_ITEMS = PlayState.attachment(
+            Key.key("mapmaker:hotbar_items"), HotbarItems.CODEC);
 
 }

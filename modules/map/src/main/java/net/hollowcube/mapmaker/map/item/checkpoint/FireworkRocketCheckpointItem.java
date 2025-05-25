@@ -47,6 +47,11 @@ public record FireworkRocketCheckpointItem(int amount, int duration) implements 
     }
 
     @Override
+    public @NotNull CheckpointItem updateFromItemStack(@NotNull ItemStack itemStack) {
+        return withAmount(itemStack.amount()); // todo support infinite
+    }
+
+    @Override
     public @NotNull GiveItemAction.AbstractItemEditor<?> createEditor(ActionList.@NotNull Ref ref) {
         return new Editor(ref);
     }

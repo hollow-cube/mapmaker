@@ -13,8 +13,10 @@ public interface CheckpointItem {
 
     @NotNull StructCodec<? extends CheckpointItem> codec();
 
-    default @NotNull ItemStack createItemStack() {
-        throw new UnsupportedOperationException("todo");
+    @NotNull ItemStack createItemStack();
+
+    default @NotNull CheckpointItem updateFromItemStack(@NotNull ItemStack itemStack) {
+        return this;
     }
 
     default @NotNull GiveItemAction.AbstractItemEditor<?> createEditor(@NotNull ActionList.Ref ref) {

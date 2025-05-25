@@ -4,9 +4,11 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.action.Action;
 import net.hollowcube.mapmaker.map.action.ActionList;
+import net.hollowcube.mapmaker.map.action.Attachments;
 import net.hollowcube.mapmaker.map.action.gui.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.map.action.gui.ControlledNumberInput;
 import net.hollowcube.mapmaker.map.action.gui.ControlledTriStateInput;
+import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.map.item.checkpoint.CheckpointItem;
 import net.hollowcube.mapmaker.map.item.checkpoint.CheckpointItems;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
@@ -57,7 +59,9 @@ public record GiveItemAction(
 
     @Override
     public void applyTo(@NotNull Player player, @NotNull PlayState state) {
-        // todo
+        if (this.item == null) return;
+        var items = state.get(Attachments.HOTBAR_ITEMS, HotbarItems.EMPTY);
+        state.set(Attachments.HOTBAR_ITEMS, items.withItem(this.slot, this.item));
     }
 
     private static @NotNull TranslatableComponent thumbnail(@Nullable GiveItemAction action) {
