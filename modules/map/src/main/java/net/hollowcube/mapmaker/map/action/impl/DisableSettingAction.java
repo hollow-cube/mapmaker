@@ -2,13 +2,17 @@ package net.hollowcube.mapmaker.map.action.impl;
 
 import net.hollowcube.mapmaker.map.action.Action;
 import net.hollowcube.mapmaker.map.action.ActionList;
+import net.hollowcube.mapmaker.map.action.Attachments;
 import net.hollowcube.mapmaker.map.action.gui.AbstractActionEditorPanel;
+import net.hollowcube.mapmaker.map.feature.play.setting.SavedMapSettings;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
+import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,6 +42,13 @@ public record DisableSettingAction(
     @Override
     public @NotNull StructCodec<? extends Action> codec() {
         return CODEC;
+    }
+
+    @Override
+    public void applyTo(@NotNull Player player, @NotNull PlayState state) {
+        var settings = state.get(Attachments.SETTINGS);
+        if (settings == null) state.set(Attachments.SETTINGS, settings = new SavedMapSettings());
+        settings.set((MapSetting<Boolean>) setting, false);
     }
 
     private static @NotNull TranslatableComponent makeThumbnail(@Nullable DisableSettingAction action) {

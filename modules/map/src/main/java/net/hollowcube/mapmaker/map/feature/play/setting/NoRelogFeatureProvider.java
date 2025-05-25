@@ -1,8 +1,10 @@
 package net.hollowcube.mapmaker.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.action.Attachments;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
@@ -32,8 +34,8 @@ public class NoRelogFeatureProvider extends AbstractSettingFeatureProvider {
         var state = SaveState.optionalFromPlayer(player);
         if (state == null) return true; // Sanity
         var playstate = state.state(PlayState.class);
-//        return !playstate.settings().get(MapSettings.NO_RELOG, world.map().settings());
-        return true; // todo
+        return !playstate.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
+                .get(MapSettings.NO_RELOG, world.map().settings());
     }
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {

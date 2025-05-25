@@ -4,10 +4,13 @@ import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.action.ActionList;
 import net.hollowcube.mapmaker.map.action.gui.ControlledNumberInput;
 import net.hollowcube.mapmaker.map.action.impl.GiveItemAction;
+import net.hollowcube.mapmaker.map.item.vanilla.WindChargeItem;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.codec.StructCodec;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.component.UseCooldown;
 import org.jetbrains.annotations.NotNull;
 
 public record WindChargeCheckpointItem(int amount, int cooldown) implements CheckpointItem {
@@ -23,7 +26,7 @@ public record WindChargeCheckpointItem(int amount, int cooldown) implements Chec
             "cooldown", ExtraCodecs.clamppedInt(MIN_COOLDOWN, MAX_COOLDOWN).optional(DEFAULT_COOLDOWN), WindChargeCheckpointItem::cooldown,
             WindChargeCheckpointItem::new);
 
-    private static final ItemStack DEFAULT_ITEM = ItemStack.of(Material.WIND_CHARGE);
+    private static final ItemStack DEFAULT_ITEM = ItemStack.of(Material.STICK);
 
     public @NotNull WindChargeCheckpointItem withAmount(int amount) {
         return new WindChargeCheckpointItem(amount, this.cooldown);
@@ -35,13 +38,16 @@ public record WindChargeCheckpointItem(int amount, int cooldown) implements Chec
 
     @Override
     public @NotNull ItemStack createItemStack() {
-        // todo support infinite amount
-        return DEFAULT_ITEM.withAmount(Math.max(1, this.amount));
+        var itemStack = this.cooldown > 0
+                ? DEFAULT_ITEM.with(DataComponents.USE_COOLDOWN, new UseCooldown(this.cooldown / 20f, ID.asString()))
+                : DEFAULT_ITEM.without(DataComponents.USE_COOLDOWN);
+        return WindChargeItem.withCount(itemStack, this.amount);
     }
 
     @Override
     public @NotNull CheckpointItem updateFromItemStack(@NotNull ItemStack itemStack) {
-        return withAmount(itemStack.amount()); // todo support infinite
+        if (this.amount == INFINITE_AMOUNT) return this;
+        return withAmount(itemStack.amount());
     }
 
     @Override

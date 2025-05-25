@@ -110,9 +110,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     private static final CustomizableHotbarManager PLAYING_HOTBAR = CustomizableHotbarManager.builder("hotbar/parkour")
             .defaultItem(0, MapDetailsItem.ID)
             .defaultItem(1, ReturnToCheckpointItem.ID)
-            .defaultItem(2, RateMapItem.ID, (player, world) -> MapRatingFeatureProvider.isMapRatable(world))
+            .defaultItem(2, RateMapItem.ID, (_, world) -> MapRatingFeatureProvider.isMapRatable(world))
 
-            .defaultItem(4, EnterSpectatorModeItem.ID, (player, world) -> !world.map().getSetting(MapSettings.NO_SPECTATOR))
+            .defaultItem(4, EnterSpectatorModeItem.ID, (_, world) -> !world.map().getSetting(MapSettings.NO_SPECTATOR))
 
             .defaultItem(7, ResetSaveStateItem.ID)
             .defaultItem(8, ReturnToHubItem.ID)
@@ -432,7 +432,6 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         updateStateFromPlayer(player, state);
         updateBaseEffectState(world, player, data.actions(), state);
         state.addStatus(event.statusId());
-//        state.settings().update(data.settings());
 
         // Update the player based on the new state
         updatePlayerFromState(world, player, state);

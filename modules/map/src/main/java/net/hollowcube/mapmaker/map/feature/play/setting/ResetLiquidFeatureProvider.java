@@ -1,8 +1,10 @@
 package net.hollowcube.mapmaker.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.action.Attachments;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.util.PlayerLiquidExtension;
@@ -28,15 +30,15 @@ public class ResetLiquidFeatureProvider extends AbstractSettingFeatureProvider {
     private static boolean canGoInWater(@NotNull Player player, @NotNull MapWorld world) {
         var state = SaveState.fromPlayer(player);
         var playstate = state.state(PlayState.class);
-//        return !playstate.settings().get(MapSettings.RESET_IN_WATER, world.map().settings());
-        return true; // todo
+        return !playstate.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
+                .get(MapSettings.RESET_IN_WATER, world.map().settings());
     }
 
     private static boolean canGoInLava(@NotNull Player player, @NotNull MapWorld world) {
         var state = SaveState.fromPlayer(player);
         var playstate = state.state(PlayState.class);
-//        return !playstate.settings().get(MapSettings.RESET_IN_LAVA, world.map().settings());
-        return true; // todo
+        return !playstate.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
+                .get(MapSettings.RESET_IN_LAVA, world.map().settings());
     }
 
     private void handlePlayerTick(@NotNull PlayerTickEvent event) {

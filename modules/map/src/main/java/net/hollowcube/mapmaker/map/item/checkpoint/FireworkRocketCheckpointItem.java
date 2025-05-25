@@ -4,6 +4,7 @@ import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.action.ActionList;
 import net.hollowcube.mapmaker.map.action.gui.ControlledNumberInput;
 import net.hollowcube.mapmaker.map.action.impl.GiveItemAction;
+import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.codec.StructCodec;
@@ -25,7 +26,7 @@ public record FireworkRocketCheckpointItem(int amount, int duration) implements 
             "duration", ExtraCodecs.clamppedInt(INFINITE_DURATION, MAX_DURATION).optional(INFINITE_DURATION), FireworkRocketCheckpointItem::duration,
             FireworkRocketCheckpointItem::new);
 
-    private static final ItemStack DEFAULT_ITEM = ItemStack.of(Material.FIREWORK_ROCKET);
+    private static final ItemStack DEFAULT_ITEM = ItemStack.of(Material.STICK);
 
     public @NotNull FireworkRocketCheckpointItem withAmount(int amount) {
         return new FireworkRocketCheckpointItem(amount, this.duration);
@@ -42,13 +43,15 @@ public record FireworkRocketCheckpointItem(int amount, int duration) implements 
 
     @Override
     public @NotNull ItemStack createItemStack() {
-        // todo support infinite amount
-        return DEFAULT_ITEM.withAmount(Math.max(1, this.amount));
+        return FireworkRocketItem.setDurationMillis(
+                FireworkRocketItem.withCount(DEFAULT_ITEM, this.amount),
+                this.duration * 50);
     }
 
     @Override
     public @NotNull CheckpointItem updateFromItemStack(@NotNull ItemStack itemStack) {
-        return withAmount(itemStack.amount()); // todo support infinite
+        if (this.amount == INFINITE_AMOUNT) return this;
+        return withAmount(itemStack.amount());
     }
 
     @Override

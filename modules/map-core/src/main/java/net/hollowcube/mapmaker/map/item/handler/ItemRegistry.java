@@ -100,6 +100,7 @@ public class ItemRegistry {
     private final Map<String, ItemHandler> idToItemHandler = new HashMap<>();
     private final Map<String, ItemHandler> modelToItemHandler = new HashMap<>();
     private final Int2ObjectMap<ItemHandler> materialToItemHandler = new Int2ObjectArrayMap<>();
+    private final Int2ObjectMap<ItemHandler> itemModelToItemHandler = new Int2ObjectArrayMap<>();
     private final Int2ObjectMap<ItemHandler> blockToItemHandler = new Int2ObjectOpenHashMap<>();
 
     // Contains all the "public" item names known by this registry. Used for completions.
@@ -123,10 +124,15 @@ public class ItemRegistry {
             idToItemHandler.put(itemHandler.key().asString().toLowerCase(Locale.ROOT), itemHandler);
             var sprite = itemHandler.sprite();
             var material = itemHandler.material();
+            var models = itemHandler.models();
             if (sprite != null) {
                 modelToItemHandler.put(sprite.model(), itemHandler);
             } else if (material != null) {
                 materialToItemHandler.put(material.id(), itemHandler);
+            } else if (models != null) {
+                for (var model : models) {
+                    itemModelToItemHandler.put(model.hashCode(), itemHandler);
+                }
             } else {
                 throw new IllegalArgumentException("ItemHandler must provide either a sprite or material");
             }
@@ -150,11 +156,16 @@ public class ItemRegistry {
             idToItemHandler.put(itemHandler.key().asString().toLowerCase(Locale.ROOT), itemHandler);
             var sprite = itemHandler.sprite();
             var material = itemHandler.material();
+            var models = itemHandler.models();
             if (sprite != null) {
                 modelToItemHandler.put(sprite.model(), itemHandler);
                 Check.argCondition(material != null, "material must be null if sprite is not");
             } else if (material != null) {
                 materialToItemHandler.put(material.id(), itemHandler);
+            } else if (models != null) {
+                for (var model : models) {
+                    itemModelToItemHandler.put(model.hashCode(), itemHandler);
+                }
             } else {
                 throw new IllegalArgumentException("ItemHandler must provide either a sprite or material");
             }
@@ -398,7 +409,10 @@ public class ItemRegistry {
     private @Nullable ItemHandler getHandlerFromItemStack(@NotNull ItemStack itemStack) {
         var itemHandler = materialToItemHandler.get(itemStack.material().id());
         if (itemHandler != null) return itemHandler;
-        return modelToItemHandler.get(itemStack.get(DataComponents.ITEM_MODEL, ""));
+        var itemModel = itemStack.get(DataComponents.ITEM_MODEL, "");
+        itemHandler = modelToItemHandler.get(itemModel);
+        if (itemHandler != null) return itemHandler;
+        return itemModelToItemHandler.get(itemModel.hashCode());
     }
 
     public boolean isOnCooldown(@NotNull Player player) {

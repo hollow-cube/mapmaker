@@ -17,6 +17,8 @@ public class SavedMapSettings {
 
     private final Map<MapSetting<?>, Object> settings = new HashMap<>();
 
+    public static final SavedMapSettings EMPTY = new SavedMapSettings();
+
     public SavedMapSettings() {
     }
 
