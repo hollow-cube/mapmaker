@@ -12,12 +12,15 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Set;
+
 public record GiveElytraAction() implements Action {
-    private static final Sprite SPRITE = new Sprite("action/icon/elytra_add", 2, 2);
+    private static final Sprite SPRITE = new Sprite("action/icon/elytra_add", 2, 3);
 
     public static final Key KEY = Key.key("mapmaker:give_elytra");
     public static final StructCodec<GiveElytraAction> CODEC = StructCodec.struct(GiveElytraAction::new);
-    public static final Editor<GiveElytraAction> EDITOR = new Editor<>(null, SPRITE, GiveElytraAction::makeThumbnail);
+    public static final Editor<GiveElytraAction> EDITOR = new Editor<>(null, _ -> SPRITE,
+            GiveElytraAction::makeThumbnail, Set.of(GiveElytraAction.KEY, TakeElytraAction.KEY));
 
     @Override
     public @NotNull StructCodec<? extends Action> codec() {

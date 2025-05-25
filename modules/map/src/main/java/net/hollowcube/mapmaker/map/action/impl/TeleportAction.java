@@ -18,10 +18,12 @@ import net.minestom.server.codec.StructCodec;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.sound.SoundEvent;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -34,12 +36,15 @@ public record TeleportAction(
     private static final String RELATIVE_ZERO = "~0.0";
     private static final Sound TELEPORT_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_TELEPORT, Sound.Source.PLAYER, 0.5f, 1f);
 
+    public static final Tag<Object> SPC_TAG = Tag.Transient("mapmaker:spc/tag");
+
     public static final Key KEY = Key.key("mapmaker:teleport");
     public static final StructCodec<TeleportAction> CODEC = StructCodec.struct(
             StructCodec.INLINE, RelativePos.CODEC.optional(RelativePos.REL_ZERO), TeleportAction::target,
             TeleportAction::new);
     public static final Action.Editor<TeleportAction> EDITOR = new Action.Editor<>(
-            TeleportAction.Editor::new, SPRITE_DEFAULT, TeleportAction::makeThumbnail);
+            TeleportAction.Editor::new, _ -> SPRITE_DEFAULT,
+            TeleportAction::makeThumbnail, Set.of(KEY));
 
     @Override
     public @NotNull StructCodec<? extends Action> codec() {
@@ -70,11 +75,14 @@ public record TeleportAction(
         private final TexturelessNumberInput zInput;
         private final TexturelessNumberInput yawInput;
         private final TexturelessNumberInput pitchInput;
+        private final Button commandButton;
 
         public Editor(@NotNull ActionList.Ref ref) {
             super(ref);
 
             background("action/editor/teleport_container", -10, -31);
+
+            subtitleText.text("Set Coords");
 
             this.xInput = add(1, 1, new TexturelessNumberInput(2, 0, "x", safeUpdate(RelativePos::withStrX)));
             this.yInput = add(3, 1, new TexturelessNumberInput(2, 6, "y", safeUpdate(RelativePos::withStrY)));
@@ -82,8 +90,8 @@ public record TeleportAction(
 
             this.yawInput = add(1, 3, new TexturelessNumberInput(2, 0, "yaw", safeUpdate(RelativePos::withStrYaw)));
             this.pitchInput = add(3, 3, new TexturelessNumberInput(2, 6, "pitch", safeUpdate(RelativePos::withStrPitch)));
-            add(5, 4, new Button("gui.action.teleport.command", 3, 1));
-            // TODO add functionality to command button
+            this.commandButton = add(5, 4, new Button("gui.action.teleport.command", 3, 1)
+                    .onLeftClick(this::beginCommandUpdate));
         }
 
         @Override
@@ -93,6 +101,18 @@ public record TeleportAction(
             this.zInput.update(action.target.strZ());
             this.yawInput.update(action.target.strYaw());
             this.pitchInput.update(action.target.strPitch());
+
+            commandButton.lorePostfix(host.hasTag(TeleportAction.SPC_TAG)
+                    ? LORE_POSTFIX_CLICKEDIT : LORE_POSTFIX_NOT_AVAILABLE);
+        }
+
+        private void beginCommandUpdate() {
+            var spcTarget = host.getTag(TeleportAction.SPC_TAG);
+            if (spcTarget == null) return;
+
+            host.player().sendMessage(Component.translatable("command.set_precise_coords.begin"));
+            host.player().setTag(TeleportAction.SPC_TAG, spcTarget);
+            host.player().closeInventory();
         }
 
         private @NotNull Consumer<String> safeUpdate(@NotNull BiFunction<RelativePos, String, RelativePos> updateFunc) {
@@ -111,6 +131,7 @@ public record TeleportAction(
         private final Consumer<String> onChange;
 
         private final Text inputText;
+        private final String anvilTitle;
 
         private String value = "";
 
@@ -119,7 +140,8 @@ public record TeleportAction(
             this.onChange = onChange;
 
             var translationKey = "gui.action.teleport." + label;
-            add(0, 0, new Text(translationKey, width, 1, LanguageProviderV2.translateToPlain(translationKey))
+            this.anvilTitle = LanguageProviderV2.translateToPlain(translationKey);
+            add(0, 0, new Text(translationKey, width, 1, anvilTitle)
                     .font("small").align(1 + xOffset, 6));
             this.inputText = add(0, 1, new Text(translationKey, width, 1, "")
                     .align(xOffset + 6, 5));
@@ -138,7 +160,7 @@ public record TeleportAction(
             host.pushView(simpleAnvil(
                     "generic2/anvil/field_container",
                     "action/anvil/teleport_icon",
-                    onChange, value
+                    anvilTitle, onChange, value
             ));
         }
 

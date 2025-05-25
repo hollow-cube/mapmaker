@@ -3,16 +3,18 @@ package net.hollowcube.mapmaker.map.block.custom;
 import net.hollowcube.common.util.dfu.DFU;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.action.gui.ActionEditorView;
+import net.hollowcube.mapmaker.map.action.impl.TeleportAction;
 import net.hollowcube.mapmaker.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerStatusChangeEvent;
 import net.hollowcube.mapmaker.map.feature.play.effect.StatusEffectData;
-import net.hollowcube.mapmaker.map.gui.effect.EditStatusView;
 import net.hollowcube.mapmaker.map.item.handler.BlockItemHandler;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
 import net.hollowcube.mapmaker.map.util.InteractTarget;
 import net.hollowcube.mapmaker.object.ObjectType;
+import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.util.TagCooldown;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
@@ -24,7 +26,6 @@ import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -73,15 +74,17 @@ public class StatusPlateBlock implements ObjectBlockHandler, InteractTarget, Pre
         if (interaction.getHand() != PlayerHand.MAIN || player.isSneaking()) return true;
 
         // Open checkpoint settings GUI
-        var data = Objects.requireNonNullElseGet(interaction.getBlock().getTag(DATA_TAG), StatusEffectData::empty);
-        var maxResetHeight = interaction.getBlockPosition().blockY();
-        world.server().showView(player, c -> new EditStatusView(c.with(Map.of("updateTarget", interaction.getBlockPosition())), data, maxResetHeight, () -> {
+        var data = Objects.requireNonNullElseGet(interaction.getBlock().getTag(DATA_TAG), StatusEffectData::new);
+        var host = Panel.open(player, new ActionEditorView(data.actions(), "Status"));
+        host.setTag(ActionEditorView.ACTION_LOCATION, interaction.getBlockPosition());
+        host.setTag(TeleportAction.SPC_TAG, interaction.getBlockPosition());
+        host.onClose(() -> {
             var instance = interaction.getInstance();
             var blockPosition = interaction.getBlockPosition();
 
             var newNbt = DFU.encodeNbt(StatusEffectData.CODEC, data);
             instance.setBlock(blockPosition, interaction.getBlock().withNbt(newNbt));
-        }));
+        });
 
         return false;
     }
@@ -100,6 +103,6 @@ public class StatusPlateBlock implements ObjectBlockHandler, InteractTarget, Pre
 
     @Override
     public void sendDebugInfo(@NotNull Player player, @NotNull Block block) {
-        block.getTag(DATA_TAG).sendDebugInfo(player);
+        // todo bring me back
     }
 }

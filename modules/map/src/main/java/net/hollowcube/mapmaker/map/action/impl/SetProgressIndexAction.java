@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public record SetProgressIndexAction(
         int value
@@ -30,7 +31,8 @@ public record SetProgressIndexAction(
             "value", Codec.INT.optional(0), SetProgressIndexAction::value,
             SetProgressIndexAction::new);
     public static final Action.Editor<SetProgressIndexAction> EDITOR = new Action.Editor<>(
-            SetProgressIndexAction::makeEditor, SPRITE, SetProgressIndexAction::makeThumbnail);
+            SetProgressIndexAction::makeEditor, _ -> SPRITE,
+            SetProgressIndexAction::makeThumbnail, Set.of(SetProgressIndexAction.KEY));
 
     public @NotNull SetProgressIndexAction withValue(int value) {
         return new SetProgressIndexAction(value);
@@ -48,7 +50,7 @@ public record SetProgressIndexAction(
     }
 
     private static @NotNull TranslatableComponent makeThumbnail(@Nullable SetProgressIndexAction action) {
-        return action == null
+        return action == null || action.value == 0
                 ? Component.translatable("gui.action.progress_index.thumbnail.clear")
                 : Component.translatable("gui.action.progress_index.thumbnail", List.of(
                 Component.text(action.value)
@@ -60,7 +62,7 @@ public record SetProgressIndexAction(
     }
 
     private static @NotNull String valueToString(@NotNull SetProgressIndexAction action) {
-        return String.valueOf(action.value);
+        return action.value == 0 ? "" : String.valueOf(action.value);
     }
 
     private static @NotNull SetProgressIndexAction stringToValue(@NotNull SetProgressIndexAction action, @NotNull String value) {

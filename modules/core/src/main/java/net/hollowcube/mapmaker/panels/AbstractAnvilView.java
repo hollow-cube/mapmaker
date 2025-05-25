@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.panels;
 
+import net.hollowcube.common.util.FontUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.inventory.InventoryType;
 import org.jetbrains.annotations.NotNull;
@@ -12,12 +13,12 @@ public abstract class AbstractAnvilView extends Panel {
     /**
      * Simple anvil view with an input and submit. The callback is called _after_ popping the view.
      */
-    public static @NotNull Panel simpleAnvil(@NotNull String container, @NotNull String icon, @NotNull Consumer<String> onSubmit) {
-        return simpleAnvil(container, icon, onSubmit, "");
+    public static @NotNull Panel simpleAnvil(@NotNull String container, @NotNull String icon, @NotNull String title, @NotNull Consumer<String> onSubmit) {
+        return simpleAnvil(container, icon, title, onSubmit, "");
     }
 
-    public static @NotNull Panel simpleAnvil(@NotNull String container, @NotNull String icon, @NotNull Consumer<String> onSubmit, @NotNull String initialValue) {
-        return new AbstractAnvilView(container, icon, initialValue) {
+    public static @NotNull Panel simpleAnvil(@NotNull String container, @NotNull String icon, @NotNull String title, @NotNull Consumer<String> onSubmit, @NotNull String initialValue) {
+        return new AbstractAnvilView(container, icon, title, initialValue) {
             @Override
             protected void onSubmit(@NotNull String text) {
                 super.onSubmit(text);
@@ -28,13 +29,17 @@ public abstract class AbstractAnvilView extends Panel {
 
     private String input;
 
-    public AbstractAnvilView(@NotNull String container, @NotNull String icon, @NotNull String initialInput) {
+    public AbstractAnvilView(@NotNull String container, @NotNull String icon, @NotNull String title, @NotNull String initialInput) {
         super(InventoryType.ANVIL, 9, 5);
         this.input = initialInput;
 
         background(container, -66, -40);
         add(0, 0, new Button("", 0, 0)
                 .background(icon, -46, -1)); // kinda gross
+
+        int titleWidth = FontUtil.measureTextV2(title);
+        add(0, 0, new Text(null, 0, 0, title)
+                .align(-(titleWidth / 2) + 30, -31));
 
         add(0, 0, new Button("", 1, 1)
                 .sprite("generic2/anvil/back", -33, 29)
@@ -50,7 +55,7 @@ public abstract class AbstractAnvilView extends Panel {
     }
 
     protected void onSubmit(@NotNull String text) {
-        this.host.popView();
+        if (this.host != null) this.host.popView();
     }
 
     // This is a special case called by InventoryHost if this is the active view.

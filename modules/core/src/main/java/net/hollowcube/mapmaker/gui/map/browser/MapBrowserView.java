@@ -78,6 +78,7 @@ public class MapBrowserView extends Panel {
         host.pushView(simpleAnvil(
                 "generic2/anvil/field_container",
                 "map_browser/search_anvil_icon",
+                "Search Maps by Name",
                 this::handleSearchTextChange
         ));
     }

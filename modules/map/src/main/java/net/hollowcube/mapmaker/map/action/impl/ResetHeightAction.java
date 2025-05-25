@@ -4,6 +4,7 @@ import net.hollowcube.mapmaker.map.action.Action;
 import net.hollowcube.mapmaker.map.action.ActionList;
 import net.hollowcube.mapmaker.map.action.Attachments;
 import net.hollowcube.mapmaker.map.action.gui.ActionEditorAnvil;
+import net.hollowcube.mapmaker.map.action.gui.ActionEditorView;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Sprite;
@@ -12,25 +13,28 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.StructCodec;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public record ResetHeightAction(
         int value
 ) implements Action {
     private static final int NO_RESET_HEIGHT = Integer.MIN_VALUE;
 
-    private static final Sprite SPRITE = new Sprite("action/icon/reset_height", 2, 2);
+    private static final Sprite SPRITE = new Sprite("action/icon/reset_height", 3, 3);
 
     public static final Key KEY = Key.key("mapmaker:reset_height");
     public static final StructCodec<ResetHeightAction> CODEC = StructCodec.struct(
             "value", Codec.INT.optional(NO_RESET_HEIGHT), ResetHeightAction::value,
             ResetHeightAction::new);
     public static final Editor<ResetHeightAction> EDITOR = new Editor<>(
-            ResetHeightAction::makeEditor, SPRITE, ResetHeightAction::makeThumbnail);
+            ResetHeightAction::makeEditor, _ -> SPRITE,
+            ResetHeightAction::makeThumbnail, Set.of(ResetHeightAction.KEY));
 
     public @NotNull ResetHeightAction withValue(int value) {
         return new ResetHeightAction(value);
@@ -47,7 +51,7 @@ public record ResetHeightAction(
     }
 
     private static @NotNull TranslatableComponent makeThumbnail(@Nullable ResetHeightAction action) {
-        return action == null
+        return action == null || action.value == NO_RESET_HEIGHT
                 ? Component.translatable("gui.action.reset_height.thumbnail.clear")
                 : Component.translatable("gui.action.reset_height.thumbnail", List.of(
                 Component.text(action.value)
@@ -55,14 +59,35 @@ public record ResetHeightAction(
     }
 
     private static @NotNull Panel makeEditor(@NotNull ActionList.Ref ref) {
-        return new ActionEditorAnvil<>(ref, ResetHeightAction::valueToString, ResetHeightAction::stringToValue);
+        return new ActionEditorAnvil<>(ref, ResetHeightAction::valueToString, ResetHeightAction::stringToValue) {
+            @Override
+            protected boolean validateResult(@NotNull ResetHeightAction result) {
+                var actionLocation = host.getTag(ActionEditorView.ACTION_LOCATION);
+                int maxResetHeight = actionLocation.blockY();
+                var teleport = ref.parent().findLast(TeleportAction.class);
+                if (teleport != null) maxResetHeight = Math.max(maxResetHeight,
+                        teleport.target().resolve(Pos.fromPoint(actionLocation)).blockY());
+
+                if (result.value < -64) {
+                    host.player().sendMessage(Component.translatable("create_maps.checkpoint.reset_height.too_low"));
+                    host.player().closeInventory();
+                    return false;
+                } else if (result.value > maxResetHeight) {
+                    host.player().sendMessage(Component.translatable("create_maps.checkpoint.reset_height.too_high",
+                            Component.text(result.value), Component.text(maxResetHeight)));
+                    host.player().closeInventory();
+                    return false;
+                } else return true;
+            }
+        };
     }
 
     private static @NotNull String valueToString(@NotNull ResetHeightAction action) {
-        return String.valueOf(action.value);
+        return action.value == NO_RESET_HEIGHT ? "" : String.valueOf(action.value);
     }
 
     private static @NotNull ResetHeightAction stringToValue(@NotNull ResetHeightAction action, @NotNull String value) {
+        if (value.isEmpty()) return action.withValue(NO_RESET_HEIGHT);
         return action.withValue(Integer.parseInt(value));
     }
 

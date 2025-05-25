@@ -6,9 +6,13 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 public final class NumberUtil {
+    private static final Pattern PARSE_PATTERN = Pattern.compile("([0-9]*\\.?[0-9]+)(ms|h|m|s|t)?");
+
 
     public static @NotNull String format(double number, int maxDecimalPlaces) {
         BigDecimal bigDecimal = new BigDecimal(Double.toString(number));
@@ -123,6 +127,27 @@ public final class NumberUtil {
         if (hours < 24) return hours + "h ";
         long days = hours / 24;
         return days + "d ";
+    }
+
+    public static int parseDurationToTicks(@NotNull String duration) {
+        duration = duration.trim().toLowerCase(Locale.ROOT).replace(" ", "");
+        if (duration.isEmpty()) return 0;
+        var matcher = PARSE_PATTERN.matcher(duration);
+
+        double totalMillis = 0;
+        while (matcher.find()) {
+            var value = Double.parseDouble(matcher.group(1));
+            switch (matcher.group(2)) {
+                case "h" -> totalMillis += value * 3600_000;
+                case "m" -> totalMillis += value * 60_000;
+                case "s" -> totalMillis += value * 1000;
+                case null -> totalMillis += value * 1000;
+                case "ms" -> totalMillis += value;
+                case "t" -> totalMillis += value * 50;
+                default -> throw new NumberFormatException("Unknown time unit: " + matcher.group(2));
+            }
+        }
+        return (int) (totalMillis / 50); // convert to ticks
     }
 
     private NumberUtil() {

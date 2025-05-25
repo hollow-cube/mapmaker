@@ -3,11 +3,11 @@ package net.hollowcube.mapmaker.map.block.custom;
 import net.hollowcube.common.util.dfu.DFU;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.action.gui.ActionEditorView;
+import net.hollowcube.mapmaker.map.action.impl.TeleportAction;
 import net.hollowcube.mapmaker.map.block.handler.PressurePlateBlockMixin;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointPostChangeEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointPreChangeEvent;
-import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
 import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectDataV2;
 import net.hollowcube.mapmaker.map.item.handler.BlockItemHandler;
 import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
@@ -34,8 +34,8 @@ import java.util.function.Consumer;
 
 public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget, PressurePlateBlockMixin, DebugCommand.BlockDebug {
     public static final Tag<CheckpointEffectDataV2> DATA_TAG = DFU.View(CheckpointEffectDataV2.CODEC);
-    public static final Tag<CheckpointEffectData> SIGN_DATA_TAG = DFU.Tag(CheckpointEffectData.CODEC, "checkpoint");
-    public static final Tag<CheckpointEffectData> ENTITY_DATA_TAG = DFU.Tag(CheckpointEffectData.CODEC, "checkpoint").path("data");
+    public static final Tag<CheckpointEffectDataV2> SIGN_DATA_TAG = DFU.Tag(CheckpointEffectDataV2.CODEC, "checkpoint");
+    public static final Tag<CheckpointEffectDataV2> ENTITY_DATA_TAG = DFU.Tag(CheckpointEffectDataV2.CODEC, "checkpoint").path("data");
 
     public static final BlockItemHandler ITEM = new BlockItemHandler(CheckpointPlateBlock::new,
             Block.HEAVY_WEIGHTED_PRESSURE_PLATE, "checkpoint_plate", CheckpointPlateBlock::updateItemStack);
@@ -52,9 +52,9 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget,
         return playersOnPlate;
     }
 
-    public void editData(@NotNull Instance instance, @NotNull Point blockPosition, @NotNull Block block, @NotNull Consumer<CheckpointEffectData> func) {
+    public void editData(@NotNull Instance instance, @NotNull Point blockPosition, @NotNull Block block, @NotNull Consumer<CheckpointEffectDataV2> func) {
         var data = block.getTag(DATA_TAG);
-//        func.accept(data);
+        func.accept(data);
 
         var newTag = TagHandler.newHandler();
         newTag.setTag(DATA_TAG, data);
@@ -72,9 +72,9 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget,
 
         // Open checkpoint settings GUI
         var data = Objects.requireNonNullElseGet(interaction.getBlock().getTag(DATA_TAG), CheckpointEffectDataV2::new);
-        var maxResetHeight = interaction.getBlockPosition().blockY();
-        // todo need to somehow pass in interaction.getBlockPosition() for reset height & teleport callback;
-        var host = Panel.open(player, new ActionEditorView(data.actions()));
+        var host = Panel.open(player, new ActionEditorView(data.actions(), "Checkpoint"));
+        host.setTag(ActionEditorView.ACTION_LOCATION, interaction.getBlockPosition());
+        host.setTag(TeleportAction.SPC_TAG, interaction.getBlockPosition());
         host.onClose(() -> {
             var instance = interaction.getInstance();
             var blockPosition = interaction.getBlockPosition();
@@ -106,7 +106,7 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget,
 
     @Override
     public void sendDebugInfo(@NotNull Player player, @NotNull Block block) {
-//        block.getTag(DATA_TAG).sendDebugInfo(player);
+        // todo bring me back
     }
 
     public static void updateItemStack(ItemStack.@NotNull Builder builder, @NotNull TagHandler tag) {

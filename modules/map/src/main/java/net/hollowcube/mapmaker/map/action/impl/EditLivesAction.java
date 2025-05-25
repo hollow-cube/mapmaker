@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 public record EditLivesAction(
         @NotNull Operation operation,
@@ -38,11 +39,10 @@ public record EditLivesAction(
             "value", ExtraCodecs.clamppedInt(0, 10).optional(DEFAULT_LIVES), EditLivesAction::lives,
             EditLivesAction::new);
     public static final Action.Editor<EditLivesAction> EDITOR = new Action.Editor<>(
-            Editor::new, EditLivesAction::makeSprite, EditLivesAction::makeThumbnail);
+            Editor::new, EditLivesAction::makeSprite, EditLivesAction::makeThumbnail, Set.of());
     public static final PlayState.Attachment<Data> SAVE_DATA = PlayState.attachment(KEY, Data.CODEC);
 
     public record Data(int value, int max) {
-        public static final Data DEFAULT = new Data(0, 10);
         public static final Codec<Data> CODEC = StructCodec.struct(
                 "value", ExtraCodecs.clamppedInt(0, 20), Data::value,
                 "max", ExtraCodecs.clamppedInt(0, 20), Data::max,
@@ -72,11 +72,18 @@ public record EditLivesAction(
 
     @Override
     public void applyTo(@NotNull Player player, @NotNull PlayState state) {
-        // todo support all the options
-        if (lives > 0) {
-            state.set(EditLivesAction.SAVE_DATA, new EditLivesAction.Data(lives, lives));
-        } else {
-            state.set(EditLivesAction.SAVE_DATA, null);
+        switch (this.operation) {
+            case SET -> state.set(EditLivesAction.SAVE_DATA, this.lives == 0
+                    ? null : new EditLivesAction.Data(lives, lives));
+            case ADD -> {
+                var data = state.get(SAVE_DATA);
+                if (data == null) state.set(SAVE_DATA, new EditLivesAction.Data(lives, lives));
+                else state.set(SAVE_DATA, data.withValue(Math.min(data.value() + lives, data.max)));
+            }
+            case SUBTRACT -> {
+                var data = state.get(SAVE_DATA);
+                if (data != null) state.set(SAVE_DATA, data.withValue(Math.max(data.value() - lives, 0)));
+            }
         }
     }
 
@@ -93,7 +100,7 @@ public record EditLivesAction(
         if (action == null) return Component.translatable("gui.action.lives.thumbnail.empty");
         return Component.translatable("gui.action.lives.thumbnail", List.of(
                 Component.translatable("gui.action.lives." + action.operation.name().toLowerCase(Locale.ROOT) + ".label"),
-                Component.text(action.lives == 0 ? "Disable" : String.valueOf(action.lives))
+                Component.text(action.lives == 0 ? (action.operation == Operation.SET ? "Disable" : "-") : String.valueOf(action.lives))
         ));
     }
 

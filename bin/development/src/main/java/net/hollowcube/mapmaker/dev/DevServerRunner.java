@@ -214,7 +214,8 @@ public class DevServerRunner extends AbstractMapServer {
         DebugCommand dbg = super.createDebugCommand();
 
         dbg.createPermissionedSubcommand("act", (player, _) -> {
-            Panel.open(player, new ActionEditorView(new ActionList()));
+            var host = Panel.open(player, new ActionEditorView(new ActionList(), "Debug"));
+            host.setTag(ActionEditorView.ACTION_LOCATION, player.getPosition());
         }, "aaa");
 
         dbg.createPermissionedSubcommand("enableprogressaddition", (player, context) -> {

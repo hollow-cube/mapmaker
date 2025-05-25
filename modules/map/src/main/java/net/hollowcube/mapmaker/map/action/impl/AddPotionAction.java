@@ -72,7 +72,7 @@ public record AddPotionAction(
         }
         var existingEffect = potionEffects.getOrCreate(effect);
         existingEffect.setLevel(level);
-        existingEffect.setDuration(duration);
+        existingEffect.setDuration(duration * 50);
     }
 
     private static @NotNull TranslatableComponent thumbnail(@Nullable AddPotionAction action) {
@@ -131,6 +131,7 @@ public record AddPotionAction(
             this.levelInput = add(1, 1, new ControlledNumberInput("add_potion.level", update(AddPotionAction::withLevel))
                     .range(1, effect.maxLevel()));
             this.durationInput = add(1, 3, new ControlledNumberInput("add_potion.duration", update(AddPotionAction::withDuration))
+                    .parsed(i -> i == 0 ? "" : String.valueOf(i / 20.), NumberUtil::parseDurationToTicks)
                     .formatted(i -> i == 0 ? "Infinite" : NumberUtil.formatDuration(i * 50L))
                     .range(INFINITE_DURATION, MAX_DURATION));
         }

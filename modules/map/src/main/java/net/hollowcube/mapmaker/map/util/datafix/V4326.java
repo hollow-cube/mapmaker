@@ -12,13 +12,13 @@ public class V4326 extends DataVersion {
 
         addFix(DataTypes.BLOCK_ENTITY, "mapmaker:checkpoint_plate", V4326::updateEffectPlateBlockEntity);
         addFix(DataTypes.BLOCK_ENTITY, "mapmaker:status_plate", V4326::updateEffectPlateBlockEntity);
+        addFix(DataTypes.ENTITY, "minecraft:marker", V4326::updateEffectMarker);
         addFix(HCDataTypes.WORLD, V4326::updateWorldSpawnCheckpoint);
         addFix(HCDataTypes.PLAY_STATE, V4326::fixPlayStateToActionMap);
     }
 
     private static Value updateEffectPlateBlockEntity(@NotNull Value blockEntity) {
         updateCheckpointData(blockEntity);
-
         return null;
     }
 
@@ -28,19 +28,31 @@ public class V4326 extends DataVersion {
         return null;
     }
 
+    private static Value updateEffectMarker(@NotNull Value entity) {
+        var data = entity.get("data");
+        var type = data.get("type").as(String.class, "");
+        if ("mapmaker:checkpoint".equals(type)) {
+            updateCheckpointData(data.get("checkpoint"));
+        } else if ("mapmaker:status".equals(type)) {
+            updateCheckpointData(data.get("status"));
+        }
+        return null;
+    }
+
     private static Value fixPlayStateToActionMap(Value playState) {
         // ghostBlocks, history, lastState, pos left alone.
 
-//        playState.put("mapmaker:progress_index", playState.remove("progressIndex"));
-//        playState.put("mapmaker:progress_index", playState.remove("timeLimit"));
-//        playState.put("mapmaker:progress_index", playState.remove("resetHeight"));
-//        // todo potions
-//        playState.put("mapmaker:progress_index", playState.remove("maxLives"));
-//        playState.put("mapmaker:progress_index", playState.remove("progressIndex"));
-//        playState.put("mapmaker:progress_index", playState.remove("progressIndex"));
-//        playState.put("mapmaker:progress_index", playState.remove("progressIndex"));
-//        playState.put("mapmaker:progress_index", playState.remove("progressIndex"));
-//        playState.put("mapmaker:progress_index", playState.remove("progressIndex"));
+        playState.put("mapmaker:progress_index", playState.remove("progressIndex"));
+        playState.put("mapmaker:timer", playState.remove("timeLimit"));
+        playState.put("mapmaker:reset_height", playState.remove("resetHeight"));
+        playState.put("mapmaker:potion_effects", playState.remove("potionEffects"));
+        var lives = Value.emptyMap();
+        lives.put("max", playState.remove("maxLives"));
+        lives.put("value", playState.remove("lives"));
+        if (lives.size(0) > 0)
+            playState.put("mapmaker:lives", lives);
+        // "items", HotbarItems.CODEC.optional(HotbarItems.EMPTY), PlayState::items,
+        // "settings", SavedMapSettings.CODEC.optional(), PlayState::settings,
 
         return playState;
     }
@@ -63,6 +75,14 @@ public class V4326 extends DataVersion {
             action.put("value", timeLimit / 50);
             actions.put(action);
         }
+        var extraTime = container.remove("extraTime").as(Number.class, 0).intValue();
+        if (extraTime > 0) {
+            var action = Value.emptyMap();
+            action.put("type", "mapmaker:timer");
+            action.put("operation", "add");
+            action.put("value", extraTime / 50);
+            actions.put(action);
+        }
         var resetHeight = container.remove("resetHeight");
         if (!resetHeight.isNull()) {
             var action = Value.emptyMap();
@@ -79,9 +99,12 @@ public class V4326 extends DataVersion {
         var potionEffects = container.remove("potionEffects");
         if (!potionEffects.isNull() && potionEffects.size(0) > 0) {
             for (var effect : potionEffects) {
+                int durationTicks = effect.remove("duration").as(Number.class, 0).intValue() / 50;
+                if (durationTicks <= 0) continue;
                 effect.put("effect", effect.remove("type"));
                 effect.put("type", "mapmaker:add_potion");
-                // level and duration are OK
+                effect.put("duration", durationTicks);
+                // level is OK
                 actions.put(effect);
             }
         }

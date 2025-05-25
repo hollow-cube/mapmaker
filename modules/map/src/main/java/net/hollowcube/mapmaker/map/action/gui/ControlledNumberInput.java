@@ -102,6 +102,7 @@ public class ControlledNumberInput extends Panel {
         host.pushView(simpleAnvil(
                 "generic2/anvil/field_container",
                 "action/anvil/" + this.key.replace(".", "_") + "_icon",
+                LanguageProviderV2.translateToPlain("gui.action." + key),
                 this::receiveAnvilEdit, this.toString.apply(this.value)
         ));
     }

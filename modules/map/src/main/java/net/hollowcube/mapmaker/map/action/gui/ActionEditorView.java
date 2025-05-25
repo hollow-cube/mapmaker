@@ -7,29 +7,34 @@ import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
 
 public class ActionEditorView extends Panel {
+    public static final Tag<Point> ACTION_LOCATION = Tag.Transient("action_location");
+
     private static final int MAX_ACTIONS = 7 * 3;
 
     private final ActionList actionList;
 
-    public ActionEditorView(@NotNull ActionList actions) {
+    public ActionEditorView(@NotNull ActionList actions, @NotNull String title) {
         super(9, 10);
         this.actionList = actions;
 
         background("action/list/container", -10, -31);
-        add(0, 0, title("Checkpoint Actions"));
+        add(0, 0, title(title + " Actions"));
 
         add(0, 0, backOrClose());
         add(1, 0, info("action.picker"));
-        add(2, 0, new Text("todo", 5, 1, "todo")
+        add(2, 0, new Text(null, 5, 1, "")
                 .align(Text.CENTER, Text.CENTER)
                 .background("generic2/btn/default/5_1"));
-        add(7, 0, new Button("todo", 2, 1)
-                .background("generic2/btn/default/2_1"));
+        add(7, 0, new Button("gui.action.custom_blocks", 2, 1)
+                .background("generic2/btn/default/2_1")
+                .sprite("action/icon/cmd", 12, 3));
 
         add(1, 2, new ActionListPanel());
     }
@@ -81,8 +86,10 @@ public class ActionEditorView extends Panel {
         }
 
         private void editExistingAction(@NotNull ActionList.Ref ref) {
-            var editor = ActionRegistry.getEditor(ref.key()).editor().apply(ref);
-            host.pushView(editor);
+            var editorFunc = ActionRegistry.getEditor(ref.key()).editor();
+            if (editorFunc != null) {
+                host.pushView(editorFunc.apply(ref));
+            }
         }
 
         private void removeExistingAction(int index) {

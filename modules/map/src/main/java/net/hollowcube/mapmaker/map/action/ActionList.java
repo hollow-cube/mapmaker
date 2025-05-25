@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-// TODO ANVILS NEED TITLEs
 public class ActionList {
     private final List<Ref> actions = new ArrayList<>();
 
@@ -68,7 +67,7 @@ public class ActionList {
     }
 
     /// Ref implements a mutable reference to an action/data.
-    public static class Ref implements Keyed {
+    public class Ref implements Keyed {
         private final Key key;
         private Action data;
 
@@ -95,6 +94,14 @@ public class ActionList {
             var newValue = updater.apply(cast());
             this.data = newValue;
             return newValue;
+        }
+
+        public void remove() {
+            actions.remove(this);
+        }
+
+        public @NotNull ActionList parent() {
+            return ActionList.this;
         }
     }
 }

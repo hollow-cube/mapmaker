@@ -5,7 +5,6 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.custom.CheckpointPlateBlock;
 import net.hollowcube.mapmaker.map.block.handler.SignBlockHandler;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
-import net.hollowcube.mapmaker.map.gui.effect.EditCheckpointView;
 import net.hollowcube.mapmaker.map.object.ObjectBlockHandler;
 import net.hollowcube.mapmaker.map.object.ObjectTypes;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
@@ -18,8 +17,6 @@ import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Map;
 
 /// Implements handling for editing and using checkpoint signs.
 /// This is not done as a BlockHandler because SignBlockHandler currently has too much inflexible behavior.
@@ -70,12 +67,12 @@ public class CheckpointSignFeatureProvider implements FeatureProvider {
 
         // Open checkpoint settings GUI
         var maxResetHeight = event.getBlockPosition().blockY();
-        world.server().showView(player, c -> new EditCheckpointView(c.with(Map.of("updateTarget", event.getBlockPosition())), checkpoint, maxResetHeight, () -> {
-            var instance = event.getInstance();
-            var blockPosition = event.getBlockPosition();
-
-            instance.setBlock(blockPosition, event.getBlock().withTag(CheckpointPlateBlock.SIGN_DATA_TAG, checkpoint));
-        }));
+//        world.server().showView(player, c -> new EditCheckpointView(c.with(Map.of("updateTarget", event.getBlockPosition())), checkpoint, maxResetHeight, () -> {
+//            var instance = event.getInstance();
+//            var blockPosition = event.getBlockPosition();
+//
+//            instance.setBlock(blockPosition, event.getBlock().withTag(CheckpointPlateBlock.SIGN_DATA_TAG, checkpoint));
+//        }));
     }
 
     private void handlePlayingSignClick(@NotNull PlayerBlockInteractEvent event) {

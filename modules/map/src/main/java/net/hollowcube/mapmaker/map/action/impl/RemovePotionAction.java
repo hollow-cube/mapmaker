@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public record RemovePotionAction(
@@ -32,7 +33,8 @@ public record RemovePotionAction(
             "effect", PotionInfo.CODEC.optional(), RemovePotionAction::effect,
             RemovePotionAction::new);
     public static final Action.Editor<RemovePotionAction> EDITOR = new Action.Editor<>(
-            RemovePotionAction.Editor::new, RemovePotionAction::makeSprite, RemovePotionAction::makeThumbnail);
+            RemovePotionAction.Editor::new, RemovePotionAction::makeSprite,
+            RemovePotionAction::makeThumbnail, Set.of());
 
     public @NotNull RemovePotionAction withEffect(@Nullable PotionInfo effect) {
         return new RemovePotionAction(effect);

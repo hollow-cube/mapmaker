@@ -23,6 +23,7 @@ public abstract class AbstractActionEditorPanel<T extends Action> extends Panel 
     public static final List<Component> LORE_POSTFIX_CLICKSELECT = LanguageProviderV2.translateMulti("gui.action.clickselect", List.of());
     public static final List<Component> LORE_POSTFIX_CLICKEDIT = LanguageProviderV2.translateMulti("gui.action.clickedit", List.of());
     public static final List<Component> LORE_POSTFIX_CLICKEDITORREMOVE = LanguageProviderV2.translateMulti("gui.action.clickeditorremove", List.of());
+    public static final List<Component> LORE_POSTFIX_NOT_AVAILABLE = LanguageProviderV2.translateMulti("gui.action.unavailable", List.of());
 
     protected final ActionList.Ref ref;
 
@@ -40,8 +41,10 @@ public abstract class AbstractActionEditorPanel<T extends Action> extends Panel 
         this.subtitleText = add(2, 0, new Text(null, 5, 1, "")
                 .align(Text.CENTER, Text.CENTER)
                 .background("generic2/btn/default/5_1"));
-        add(7, 0, new Button("todo", 2, 1)
-                .background("generic2/btn/default/2_1"));
+        add(7, 0, new Button("gui.action.remove", 2, 1)
+                .background("generic2/btn/default/2_1")
+                .sprite("action/icon/trash", 11, 3)
+                .onLeftClick(this::removeAction));
     }
 
     protected abstract void update(@NotNull T data);
@@ -62,6 +65,11 @@ public abstract class AbstractActionEditorPanel<T extends Action> extends Panel 
         super.mount(host, isInitial);
 
         update(this.ref.<T>cast());
+    }
+
+    private void removeAction() {
+        this.ref.remove();
+        host.popView();
     }
 
     protected @NotNull String translationKey(@NotNull String key) {

@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /// Action for the timer feature
 ///
@@ -42,7 +43,8 @@ public record EditTimerAction(
             "value", ExtraCodecs.clamppedInt(0, MAX_TIMER).optional(NO_TIMER), EditTimerAction::time,
             EditTimerAction::new);
     public static final Action.Editor<EditTimerAction> EDITOR = new Action.Editor<>(
-            EditTimerAction.Editor::new, EditTimerAction::makeSprite, EditTimerAction::makeThumbnail);
+            EditTimerAction.Editor::new, EditTimerAction::makeSprite,
+            EditTimerAction::makeThumbnail, Set.of());
     public static final PlayState.Attachment<Integer> SAVE_DATA = PlayState.attachment(KEY, ExtraCodecs.clamppedInt(NO_TIMER, MAX_TIMER));
 
     public @NotNull EditTimerAction withOperation(@NotNull Operation operation) {
@@ -60,11 +62,10 @@ public record EditTimerAction(
 
     @Override
     public void applyTo(@NotNull Player player, @NotNull PlayState state) {
-        // todo support other operations
-        if (time > NO_TIMER) {
-            // Only update the time limit if it is assigned in this effect.
-            // In a checkpoint it will have been reset prior to calling this function.
-            state.set(EditTimerAction.SAVE_DATA, time);
+        switch (operation) {
+            case SET -> state.set(SAVE_DATA, time > NO_TIMER ? time : null);
+            case ADD -> state.set(SAVE_DATA, state.get(SAVE_DATA, 0) + time);
+            case SUBTRACT -> state.update(SAVE_DATA, value -> Math.max(value - time, 0));
         }
     }
 
@@ -82,7 +83,7 @@ public record EditTimerAction(
         return Component.translatable("gui.action.timer.thumbnail", List.of(
                 // todo add operation.translationKey which does this
                 Component.translatable("gui.action.timer." + action.operation.name().toLowerCase(Locale.ROOT) + ".label"),
-                Component.text(action.time == 0 ? "Disable Timer" : NumberUtil.formatDuration(action.time * 50L))
+                Component.text(action.time == 0 ? (action.operation == Operation.SET ? "Disable Timer" : "-") : NumberUtil.formatDuration(action.time * 50L))
         ));
     }
 
@@ -101,7 +102,7 @@ public record EditTimerAction(
                             SPRITE_SUBTRACT.withOffset(2, 3)));
             this.valueInput = add(1, 3, new ControlledNumberInput("timer.value", update(EditTimerAction::withLives))
                     .formatted(i -> i == 0 ? "Disable Timer" : NumberUtil.formatDuration(i * 50L)) // Ticks to milliseconds
-                    .parsed(i -> String.valueOf(i / 50.0), s -> (int) Float.parseFloat(s) * 20) // Seconds to ticks
+                    .parsed(i -> i == 0 ? "" : String.valueOf(i / 50.0), NumberUtil::parseDurationToTicks)
                     .stepped(20, 5 * 20).range(NO_TIMER, MAX_TIMER));
         }
 

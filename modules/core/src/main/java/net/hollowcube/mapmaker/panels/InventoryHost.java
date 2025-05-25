@@ -17,10 +17,16 @@ import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.network.packet.server.play.OpenWindowPacket;
 import net.minestom.server.network.packet.server.play.WindowItemsPacket;
 import net.minestom.server.sound.SoundEvent;
+import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagHandler;
+import net.minestom.server.tag.TagReadable;
+import net.minestom.server.tag.TagWritable;
 import net.minestom.server.timer.Task;
 import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,12 +36,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.UnaryOperator;
 
 /**
  * InventoryHost manages the view stack, 'rendering' of the current view, and user interactions for the
  * single open GUI represented by this InventoryHost.
  */
-public class InventoryHost {
+public class InventoryHost implements TagReadable, TagWritable {
     private static final Logger logger = LoggerFactory.getLogger(InventoryHost.class);
     private static final Sound CLICK_SOUND = Sound.sound(SoundEvent.UI_BUTTON_CLICK, Sound.Source.PLAYER, 0.2f, 1f);
     private static final ThreadLocal<InventoryHost> CURRENT = new ThreadLocal<>();
@@ -52,6 +59,7 @@ public class InventoryHost {
 
     private final Player player;
     private final InventoryWrapper handle = new InventoryWrapper();
+    private final TagHandler tagHandler = TagHandler.newHandler();
     private Runnable closeCallback = null;
 
     private Task redrawTask = null;
@@ -131,6 +139,36 @@ public class InventoryHost {
     public void queueRedraw() {
         if (this.redrawTask != null && this.redrawTask.isAlive()) return;
         this.redrawTask = player.scheduler().scheduleEndOfTick(this::drawCurrentElement);
+    }
+
+    @Override
+    public <T> @UnknownNullability T getTag(@NotNull Tag<T> tag) {
+        return this.tagHandler.getTag(tag);
+    }
+
+    @Override
+    public <T> void setTag(@NotNull Tag<T> tag, @Nullable T value) {
+        this.tagHandler.setTag(tag, value);
+    }
+
+    @Override
+    public <T> @Nullable T getAndSetTag(@NotNull Tag<T> tag, @Nullable T value) {
+        return this.tagHandler.getAndSetTag(tag, value);
+    }
+
+    @Override
+    public <T> void updateTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
+        this.tagHandler.updateTag(tag, value);
+    }
+
+    @Override
+    public <T> @UnknownNullability T updateAndGetTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
+        return this.tagHandler.updateAndGetTag(tag, value);
+    }
+
+    @Override
+    public <T> @UnknownNullability T getAndUpdateTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
+        return this.tagHandler.getAndUpdateTag(tag, value);
     }
 
     // "rendering" implementation

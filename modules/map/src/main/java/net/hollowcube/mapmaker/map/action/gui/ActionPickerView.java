@@ -34,20 +34,25 @@ public class ActionPickerView extends Panel {
         int i = 0;
         for (var actionKey : ActionRegistry.keys()) {
             int x = i % 7, y = i / 7;
-            i++;
 
             var editor = ActionRegistry.getEditor(actionKey);
+            if (editor.exclusiveSet().stream().anyMatch(actionList::has))
+                continue; // skip if any exclusive action is already present
             add(x + 1, y + 2, new Button(null, 1, 1)
                     .text(Component.translatable("gui.action." + actionKey.value() + ".title"),
                             LanguageProviderV2.translateMulti("gui.action." + actionKey.value() + ".info.lore", List.of()))
                     .lorePostfix(AbstractActionEditorPanel.LORE_POSTFIX_CLICKSELECT)
                     .sprite(editor.sprite().apply(null))
                     .onLeftClick(() -> this.handleAddAction(actionKey, editor)));
+            i++;
         }
     }
 
     private void handleAddAction(@NotNull Key actionKey, @NotNull Action.Editor<?> editor) {
         var ref = this.actionList.addAction(actionKey);
-        host.pushView(editor.editor().apply(ref));
+        var editorFunc = editor.editor();
+        if (editorFunc != null) {
+            host.pushView(editorFunc.apply(ref));
+        } else host.popView();
     }
 }

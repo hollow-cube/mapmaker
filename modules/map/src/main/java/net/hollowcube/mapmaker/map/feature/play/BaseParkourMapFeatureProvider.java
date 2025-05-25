@@ -268,8 +268,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             var isStarting = saveState.getPlayStartTime() == 0 && saveState.getPlaytime() == 0;
 
             // If this is a fresh save state, attempt to add the base effect state
-            if (world.hasTag(SPAWN_CHECKPOINT_EFFECTS) && isStarting) {
-                updateCheckpointEffectState(world, player, world.getTag(SPAWN_CHECKPOINT_EFFECTS), playState);
+            var spawnCheckpoint = world.getTag(SPAWN_CHECKPOINT_EFFECTS);
+            if (spawnCheckpoint != null && isStarting) {
+                updateBaseEffectState(world, player, spawnCheckpoint.actions(), playState);
             }
 
             updatePlayerFromState(world, player, playState, isStarting);
@@ -380,7 +381,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         state.set(EditTimerAction.SAVE_DATA, null); // Time always reset on checkpoint
         player.removeTag(COUNTDOWN_END);
         updateStateFromPlayer(player, state);
-        updateCheckpointEffectState(world, player, data, state);
+        updateBaseEffectState(world, player, data.actions(), state);
 
         // The checkpoint (reset) pos is set to the teleport if its present, or the first
         // position the player touched the checkpoint otherwise. todo probably need to do a gravity snap here
@@ -423,15 +424,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // Ensure the event should trigger a status change for the current players state
         if (!data.repeatable() && state.hasStatus(event.statusId()))
             return; // Player already has the status plate in this checkpoint.
-//        if (checkProgressIndex(player, world, state, data)) return;
+        if (checkProgressIndex(player, world, state, data.actions())) return;
 
         // Apply the status changes
         updateStateFromPlayer(player, state);
-//        updateBaseEffectState(world, player, data, state);
-        var timeLimit = state.get(EditTimerAction.SAVE_DATA);
-        if (data.extraTime() > 0 && timeLimit != null) {
-            state.set(EditTimerAction.SAVE_DATA, timeLimit + data.extraTime());
-        }
+        updateBaseEffectState(world, player, data.actions(), state);
         state.addStatus(event.statusId());
 //        state.settings().update(data.settings());
 
@@ -451,7 +448,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             if (condition) {
                 if (PROGRESS_INDEX_WARNING.test(player)) {
                     player.sendMessage(Component.translatable("checkpoint.progress_index.not_acceptable",
-                            Component.text(currentIndex), Component.text(progressIndex)));
+                            Component.text(currentIndex), Component.text(progressIndex - 1)));
                 }
                 return true;
             }
@@ -626,11 +623,6 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         });
     }
 
-    private void updateCheckpointEffectState(@NotNull MapWorld world, @NotNull Player player, @NotNull CheckpointEffectDataV2 data, @NotNull PlayState state) {
-        updateBaseEffectState(world, player, data.actions(), state);
-//        state.settings().update(data.settings());
-    }
-
     private void updateBaseEffectState(@NotNull MapWorld world, @NotNull Player player, @NotNull ActionList actions, @NotNull PlayState state) {
         for (var action : actions.actions()) {
             action.applyTo(player, state);
@@ -655,7 +647,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         if (countdownEnd != -1) {
             // We have to clamp it to 1 because if we don't when they rejoin their time limit will
             // be less than or equal to 0 meaning it will allow them to play forever due tp <= 0 being infinite time.
-            state.set(EditTimerAction.SAVE_DATA, (int) Math.max(countdownEnd - now, 1));
+            state.set(EditTimerAction.SAVE_DATA, (int) Math.max((countdownEnd - now) / 50, 1));
         }
 
         // Update remaining time for the remaining effects (and remove if expired)
@@ -706,7 +698,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // Update the countdown timer (time may have been added
         var timeLimit = state.get(EditTimerAction.SAVE_DATA);
         if (timeLimit != null && !start) {
-            player.setTag(COUNTDOWN_END, System.currentTimeMillis() + timeLimit);
+            player.setTag(COUNTDOWN_END, System.currentTimeMillis() + (timeLimit * 50));
         } else {
             player.removeTag(COUNTDOWN_END);
         }
