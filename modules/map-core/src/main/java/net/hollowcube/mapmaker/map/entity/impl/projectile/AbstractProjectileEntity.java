@@ -22,6 +22,8 @@ import org.jetbrains.annotations.NotNull;
 
 /// Credit to [AtlasProjectiles](https://github.com/AtlasEngineCa/AtlasProjectiles/tree/main).
 public abstract class AbstractProjectileEntity extends Entity {
+    public static final int MAX_LIFETIME = 20 * 60; // 1 minute
+
     protected final Player shooter;
     protected boolean inBlock = false;
 
@@ -48,6 +50,9 @@ public abstract class AbstractProjectileEntity extends Entity {
         if (!callEntityCollision()) {
             callBlockCollision();
         }
+
+        if (isActive() && getAliveTicks() > MAX_LIFETIME)
+            remove();
     }
 
     protected PhysicsResult computePhysics(@NotNull Pos entityPosition, @NotNull Vec currentVelocity, @NotNull Block.Getter blockGetter, @NotNull Aerodynamics aerodynamics) {

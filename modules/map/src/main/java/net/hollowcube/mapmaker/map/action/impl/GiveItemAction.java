@@ -18,6 +18,7 @@ import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.TranslationArgument;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.component.DataComponents;
@@ -25,6 +26,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -67,7 +69,10 @@ public record GiveItemAction(
     private static @NotNull TranslatableComponent thumbnail(@Nullable GiveItemAction action) {
         if (action == null || action.item == null)
             return Component.translatable("gui.action.give_item.thumbnail.empty");
-        return Component.translatable("gui.action.give_potion.thumbnail", List.of());
+        var inner = action.item.thumbnail();
+        var args = new ArrayList<>(inner.arguments());
+        args.add(TranslationArgument.numeric(action.slot + 1));
+        return Component.translatable(inner.key(), args);
     }
 
     private static @NotNull AbstractActionEditorPanel<GiveItemAction> createEditor(@NotNull ActionList.Ref ref) {
@@ -94,8 +99,7 @@ public record GiveItemAction(
             for (var itemType : CheckpointItems.keys()) {
                 int x = i % 7, y = i / 7;
 
-                // todo translation key
-                add(x + 1, y + 2, new Button(itemType.value(), 1, 1)
+                add(x + 1, y + 2, new Button("gui.action.give_item." + itemType.value(), 1, 1)
                         .model(itemType.asString(), null)
                         .onLeftClick(() -> updateFunc.accept(itemType)));
                 i++;
@@ -127,10 +131,14 @@ public record GiveItemAction(
             var key = CheckpointItems.getKey(Objects.requireNonNull(ref.<GiveItemAction>cast().item));
             subtitleText.text(LanguageProviderV2.translateToPlain("gui.action.give_item." + key.value() + ".title"));
 
+
             this.slotInput = add(1, 1, new ControlledTriStateInput<>("give_item", Slot.class,
                     update((data, op) -> data.withSlot(op.ordinal())))
                     .label("choose slot").labels("slot0", "slot1", "slot2"));
             this.slotInput.update(Slot.ONE);
+            this.slotInput.iconButton().onLeftClick(() -> {
+                host.replaceView(new ItemPicker(ref));
+            });
         }
 
         @Override

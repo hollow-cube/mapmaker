@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.map.item.vanilla;
 
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.entity.impl.projectile.EnderPearlEntity;
+import net.hollowcube.mapmaker.map.entity.impl.projectile.WindChargeEntity;
 import net.hollowcube.mapmaker.map.feature.play.BaseParkourMapFeatureProvider;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.minestom.server.component.DataComponents;
@@ -13,12 +13,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EnderPearlItem extends ItemHandler {
-    private static final String DEFAULT_MODEL = Material.ENDER_PEARL.prototype().get(DataComponents.ITEM_MODEL);
-    private static final String INFINITE_MODEL = "mapmaker:infinite_ender_pearl";
+public class WindChargeItem extends ItemHandler {
+    private static final String DEFAULT_MODEL = Material.WIND_CHARGE.prototype().get(DataComponents.ITEM_MODEL);
+    private static final String INFINITE_MODEL = "mapmaker:infinite_wind_charge";
     private static final List<String> MODELS = List.of(DEFAULT_MODEL, INFINITE_MODEL);
 
-    public static final EnderPearlItem INSTANCE = new EnderPearlItem();
+    public static final WindChargeItem INSTANCE = new WindChargeItem();
 
     public static boolean isInfinite(@NotNull ItemStack itemStack) {
         return INFINITE_MODEL.equals(itemStack.get(DataComponents.ITEM_MODEL));
@@ -30,8 +30,8 @@ public class EnderPearlItem extends ItemHandler {
                 .withAmount(Math.max(1, count));
     }
 
-    private EnderPearlItem() {
-        super("minecraft:ender_pearl", RIGHT_CLICK_ANY);
+    private WindChargeItem() {
+        super("minecraft:wind_charge", RIGHT_CLICK_ANY);
     }
 
     @Override
@@ -45,7 +45,8 @@ public class EnderPearlItem extends ItemHandler {
         var world = MapWorld.forPlayerOptional(player);
         if (world == null || !world.isPlaying(player)) return; // Sanity
 
-        var entity = EnderPearlEntity.shootFromPlayerDirection(player, true);
+        var entity = WindChargeEntity.shootFromPlayerDirection(player, true);
+
         var entities = new ArrayList<>(player.getTag(BaseParkourMapFeatureProvider.OWNED_ENTITIES));
         entities.add(entity.getEntityId());
         player.setTag(BaseParkourMapFeatureProvider.OWNED_ENTITIES, entities);
@@ -54,4 +55,5 @@ public class EnderPearlItem extends ItemHandler {
             click.updateItemStack(b -> b.amount(click.itemStack().amount() - 1));
         }
     }
+
 }

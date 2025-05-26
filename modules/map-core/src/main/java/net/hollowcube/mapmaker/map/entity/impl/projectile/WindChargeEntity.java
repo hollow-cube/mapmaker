@@ -29,7 +29,7 @@ public class WindChargeEntity extends AbstractProjectileEntity {
 
         var entity = new WindChargeEntity(shooter);
         if (shooterOnly) entity.setAutoViewable(false);
-        entity.shoot(shooter.getPosition().add(0, shooter.getEyeHeight() - 0.1, 0), PROJECTILE_SHOOT_POWER, 0f);
+        entity.shoot(shooter.getPosition().add(0, shooter.getEyeHeight(), 0), PROJECTILE_SHOOT_POWER, 0f);
         if (shooterOnly) entity.addViewer(shooter);
         return entity;
     }
@@ -47,6 +47,11 @@ public class WindChargeEntity extends AbstractProjectileEntity {
             remove();
         if (shooter.getInstance() != instance)
             remove();
+    }
+
+    @Override
+    protected boolean callEntityCollision() {
+        return false; // do not remove on collide
     }
 
     @Override
@@ -130,18 +135,9 @@ public class WindChargeEntity extends AbstractProjectileEntity {
         float yaw = -shooter.getPosition().yaw();
         float originalPitch = -shooter.getPosition().pitch();
 
-        double pitchDiff = originalPitch - 45f;
-        if (pitchDiff == 0) pitchDiff = 0.0001;
-        double pitchAdjust = pitchDiff * 0.002145329238474369D;
-
         double dx = to.x() - from.x();
-        double dy = to.y() - from.y() + pitchAdjust;
+        double dy = to.y() - from.y();
         double dz = to.z() - from.z();
-
-        if (!hasNoGravity()) {
-            final double xzLength = Math.sqrt(dx * dx + dz * dz);
-            dy += xzLength * 0.20000000298023224D;
-        }
 
         final double length = Math.sqrt(dx * dx + dy * dy + dz * dz);
         dx /= length;
@@ -162,7 +158,6 @@ public class WindChargeEntity extends AbstractProjectileEntity {
 
         final double mul = ServerFlag.SERVER_TICKS_PER_SECOND * power;
         Vec v = new Vec(dx * mul, dy * mul, dz * mul); // zero upwards force for wind charge
-
         this.setInstance(instance, new Pos(from.x(), from.y() - this.boundingBox.height() / 2, from.z(), yaw, originalPitch)).whenComplete((result, throwable) -> {
             if (throwable != null) {
                 throwable.printStackTrace();

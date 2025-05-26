@@ -96,7 +96,7 @@ public class MapInstance extends InstanceContainer {
         FutureUtil.getUnchecked(saveInstance());
 
         var polarWorld = loader.world();
-        var worldData = PolarWriter.write(polarWorld);
+        var worldData = PolarWriter.write(polarWorld, PolarDataFixer.INSTANCE);
 
         // Reset to noop
         setChunkLoader(NoopChunkLoader.INSTANCE);

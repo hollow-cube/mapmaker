@@ -8,6 +8,7 @@ import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.compat.noxesium.packets.ClientboundChangeServerRulesPacket;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.util.InteractTarget;
+import net.hollowcube.mapmaker.map.util.PlayerCooldownExtension;
 import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
@@ -106,7 +107,7 @@ public class ItemRegistry {
     // Contains all the "public" item names known by this registry. Used for completions.
     private final Set<Key> allItemNames = new TreeSet<>((a, b) -> a.asString().compareToIgnoreCase(b.asString()));
 
-    private final TagCooldown useCooldown = new TagCooldown("mapmaker:hotbar_cooldown", 250);
+    private final TagCooldown useCooldown = new TagCooldown("mapmaker:hotbar_cooldown", 100);
 
     public ItemRegistry() {
         for (var item : Material.values()) {
@@ -242,7 +243,7 @@ public class ItemRegistry {
         var player = event.getPlayer();
         if (player.getTag(TRIGGER_TAG) != null) return;
 
-        if (useCooldown.test(player)) {
+        if (useCooldown.test(player) && PlayerCooldownExtension.tryUseItem(player, event.getItemStack())) {
             player.setTag(TRIGGER_TAG, true);
             itemHandler.rightClicked(new ItemHandler.Click(
                     itemHandler,
@@ -272,7 +273,7 @@ public class ItemRegistry {
         var itemHandler = getHandlerFromItemStack(itemStack);
         if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_BLOCK)) return;
 
-        if (useCooldown.test(player)) {
+        if (useCooldown.test(player) && PlayerCooldownExtension.tryUseItem(player, itemStack)) {
             player.setTag(TRIGGER_TAG, true);
             var placeOffset = event.getBlockFace().toDirection();
             itemHandler.rightClicked(new ItemHandler.Click(
@@ -298,7 +299,7 @@ public class ItemRegistry {
         var itemHandler = getHandlerFromItemStack(itemStack);
         if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_ENTITY)) return;
 
-        if (useCooldown.test(player)) {
+        if (useCooldown.test(player) && PlayerCooldownExtension.tryUseItem(player, itemStack)) {
             player.setTag(TRIGGER_TAG, true);
             itemHandler.rightClicked(new ItemHandler.Click(
                     itemHandler, player,

@@ -28,8 +28,8 @@ public class ActionEditorView extends Panel {
         add(0, 0, title(title + " Actions"));
 
         add(0, 0, backOrClose());
-        add(1, 0, info("action.picker"));
-        add(2, 0, new Text(null, 5, 1, "")
+        add(1, 0, info("action"));
+        add(2, 0, new Text(null, 5, 1, "Current Actions")
                 .align(Text.CENTER, Text.CENTER)
                 .background("generic2/btn/default/5_1"));
         add(7, 0, new Button("gui.action.custom_blocks", 2, 1)

@@ -128,12 +128,13 @@ public record AddPotionAction(
             // Should be non-null now because we otherwise open the picker
             var effect = Objects.requireNonNull(ref.<AddPotionAction>cast().effect());
             subtitleText.text(LanguageProviderV2.translateToPlain(translatable(effect.translationKey() + ".name")));
+
             this.levelInput = add(1, 1, new ControlledNumberInput("add_potion.level", update(AddPotionAction::withLevel))
                     .range(1, effect.maxLevel()));
             this.durationInput = add(1, 3, new ControlledNumberInput("add_potion.duration", update(AddPotionAction::withDuration))
                     .parsed(i -> i == 0 ? "" : String.valueOf(i / 20.), NumberUtil::parseDurationToTicks)
                     .formatted(i -> i == 0 ? "Infinite" : NumberUtil.formatDuration(i * 50L))
-                    .range(INFINITE_DURATION, MAX_DURATION));
+                    .range(INFINITE_DURATION, MAX_DURATION).stepped(5 * 20, 3 * 20));
         }
 
         @Override

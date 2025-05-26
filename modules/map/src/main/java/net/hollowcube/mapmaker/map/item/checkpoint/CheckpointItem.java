@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.item.checkpoint;
 
 import net.hollowcube.mapmaker.map.action.ActionList;
 import net.hollowcube.mapmaker.map.action.impl.GiveItemAction;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -19,8 +20,8 @@ public interface CheckpointItem {
         return this;
     }
 
-    default @NotNull GiveItemAction.AbstractItemEditor<?> createEditor(@NotNull ActionList.Ref ref) {
-        throw new UnsupportedOperationException("todo");
-    }
+    @NotNull TranslatableComponent thumbnail();
+
+    @NotNull GiveItemAction.AbstractItemEditor<?> createEditor(@NotNull ActionList.Ref ref);
 
 }

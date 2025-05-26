@@ -10,21 +10,26 @@ public class V4326 extends DataVersion {
     public V4326() {
         super(4326);
 
-        addFix(DataTypes.BLOCK_ENTITY, "mapmaker:checkpoint_plate", V4326::updateEffectPlateBlockEntity);
-        addFix(DataTypes.BLOCK_ENTITY, "mapmaker:status_plate", V4326::updateEffectPlateBlockEntity);
+        addFix(DataTypes.BLOCK_ENTITY, "mapmaker:checkpoint_plate", V4326::updateCheckpointPlateBlockEntity);
+        addFix(DataTypes.BLOCK_ENTITY, "mapmaker:status_plate", V4326::updateStatusPlateBlockEntity);
         addFix(DataTypes.ENTITY, "minecraft:marker", V4326::updateEffectMarker);
         addFix(HCDataTypes.WORLD, V4326::updateWorldSpawnCheckpoint);
         addFix(HCDataTypes.PLAY_STATE, V4326::fixPlayStateToActionMap);
     }
 
-    private static Value updateEffectPlateBlockEntity(@NotNull Value blockEntity) {
-        updateCheckpointData(blockEntity);
+    private static Value updateCheckpointPlateBlockEntity(@NotNull Value blockEntity) {
+        updateCheckpointData(blockEntity, true);
+        return null;
+    }
+
+    private static Value updateStatusPlateBlockEntity(@NotNull Value blockEntity) {
+        updateCheckpointData(blockEntity, false);
         return null;
     }
 
     private static Value updateWorldSpawnCheckpoint(@NotNull Value worldData) {
         var spawnCheckpoint = worldData.get("spawn_checkpoint_effects");
-        if (!spawnCheckpoint.isNull()) updateCheckpointData(spawnCheckpoint);
+        if (!spawnCheckpoint.isNull()) updateCheckpointData(spawnCheckpoint, true);
         return null;
     }
 
@@ -32,15 +37,15 @@ public class V4326 extends DataVersion {
         var data = entity.get("data");
         var type = data.get("type").as(String.class, "");
         if ("mapmaker:checkpoint".equals(type)) {
-            updateCheckpointData(data.get("checkpoint"));
+            updateCheckpointData(data.get("checkpoint"), true);
         } else if ("mapmaker:status".equals(type)) {
-            updateCheckpointData(data.get("status"));
+            updateCheckpointData(data.get("status"), false);
         }
         return null;
     }
 
     private static Value fixPlayStateToActionMap(Value playState) {
-        // ghostBlocks, history, lastState, pos left alone.
+        // ghostBlocks, history, pos left alone.
 
         playState.put("mapmaker:progress_index", playState.remove("progressIndex"));
         playState.put("mapmaker:timer", playState.remove("timeLimit"));
@@ -51,13 +56,44 @@ public class V4326 extends DataVersion {
         lives.put("value", playState.remove("lives"));
         if (lives.size(0) > 0)
             playState.put("mapmaker:lives", lives);
-        // "items", HotbarItems.CODEC.optional(HotbarItems.EMPTY), PlayState::items,
-        // "settings", SavedMapSettings.CODEC.optional(), PlayState::settings,
+        var items = playState.remove("items"); // was {item1,item2,item3,elytra}
+        if (playState.get("elytra").as(Boolean.class, false))
+            playState.put("mapmaker:elytra", true);
+        var newItems = Value.emptyMap();
+        newItems.put("item0", fixItem(items.remove("item1")));
+        newItems.put("item1", fixItem(items.remove("item2")));
+        newItems.put("item2", fixItem(items.remove("item3")));
+        if (newItems.size(0) > 0)
+            playState.put("mapmaker:hotbar_items", newItems);
+        playState.put("mapmaker:settings", playState.remove("settings"));
+
+        var lastState = playState.get("lastState");
+        if (!lastState.isNull()) fixPlayStateToActionMap(lastState);
 
         return playState;
     }
 
-    private static void updateCheckpointData(@NotNull Value container) {
+    private static Value fixItem(Value item) {
+        var type = item.get("type").as(String.class, "");
+        return switch (type) {
+            case "firework_rocket" -> {
+                var firework = Value.emptyMap();
+                firework.put("item", "minecraft:firework_rocket");
+                firework.put("amount", item.remove("quantity"));
+                firework.put("duration", item.remove("duration").as(Number.class, 0).intValue() / 50);
+                yield firework;
+            }
+            case "trident" -> {
+                var trident = Value.emptyMap();
+                trident.put("item", "minecraft:trident");
+                trident.put("riptide", item.remove("riptideLevel"));
+                yield trident;
+            }
+            default -> null;
+        };
+    }
+
+    private static void updateCheckpointData(@NotNull Value container, boolean isCheckpoint) {
         var actions = Value.emptyList();
 
         container.remove("name"); // Gone
@@ -73,6 +109,11 @@ public class V4326 extends DataVersion {
             var action = Value.emptyMap();
             action.put("type", "mapmaker:timer");
             action.put("value", timeLimit / 50);
+            actions.put(action);
+        } else if (isCheckpoint) {
+            // Historically checkpoints always reset your timer. Add a reset to account for this.
+            var action = Value.emptyMap();
+            action.put("type", "mapmaker:timer");
             actions.put(action);
         }
         var extraTime = container.remove("extraTime").as(Number.class, 0).intValue();
@@ -99,11 +140,9 @@ public class V4326 extends DataVersion {
         var potionEffects = container.remove("potionEffects");
         if (!potionEffects.isNull() && potionEffects.size(0) > 0) {
             for (var effect : potionEffects) {
-                int durationTicks = effect.remove("duration").as(Number.class, 0).intValue() / 50;
-                if (durationTicks <= 0) continue;
                 effect.put("effect", effect.remove("type"));
                 effect.put("type", "mapmaker:add_potion");
-                effect.put("duration", durationTicks);
+                effect.put("duration", effect.remove("duration").as(Number.class, 0).intValue() / 50);
                 // level is OK
                 actions.put(effect);
             }
@@ -133,18 +172,22 @@ public class V4326 extends DataVersion {
                     } else {
                         action.put("type", "mapmaker:give_item");
                         action.put("item", type);
-                        action.put("item", item.remove("item"));
-                        action.put("quantity", item.remove("quantity"));
-                        action.put("duration", item.remove("duration"));
+                        action.put("amount", item.remove("quantity"));
+                        action.put("duration", item.remove("duration").as(Number.class, 0).intValue() / 50);
                         action.put("riptideLevel", item.remove("riptideLevel"));
                     }
                     actions.put(action);
                 }
             }
         }
-
-        // TODO: settings
-        //  "settings", SavedMapSettings.CODEC.optional(), CheckpointEffectData::settings,
+        var settings = container.remove("settings");
+        settings.forEachEntry((key, value) -> {
+            var enable = value.as(Boolean.class, false);
+            var action = Value.emptyMap();
+            action.put("type", enable ? "mapmaker:enable_setting" : "mapmaker:disable_setting");
+            action.put("setting", key);
+            actions.put(action);
+        });
 
         if (actions.size(0) > 0)
             container.put("actions", actions);

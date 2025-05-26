@@ -5,13 +5,18 @@ import net.hollowcube.mapmaker.map.action.ActionList;
 import net.hollowcube.mapmaker.map.action.gui.ControlledNumberInput;
 import net.hollowcube.mapmaker.map.action.impl.GiveItemAction;
 import net.hollowcube.mapmaker.map.item.vanilla.WindChargeItem;
+import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.UseCooldown;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public record WindChargeCheckpointItem(int amount, int cooldown) implements CheckpointItem {
     private static final int INFINITE_AMOUNT = 0;
@@ -26,7 +31,8 @@ public record WindChargeCheckpointItem(int amount, int cooldown) implements Chec
             "cooldown", ExtraCodecs.clamppedInt(MIN_COOLDOWN, MAX_COOLDOWN).optional(DEFAULT_COOLDOWN), WindChargeCheckpointItem::cooldown,
             WindChargeCheckpointItem::new);
 
-    private static final ItemStack DEFAULT_ITEM = ItemStack.of(Material.STICK);
+    private static final ItemStack DEFAULT_ITEM = ItemStack.of(Material.STICK)
+            .with(DataComponents.ITEM_NAME, Material.WIND_CHARGE.prototype().get(DataComponents.ITEM_NAME));
 
     public @NotNull WindChargeCheckpointItem withAmount(int amount) {
         return new WindChargeCheckpointItem(amount, this.cooldown);
@@ -53,6 +59,14 @@ public record WindChargeCheckpointItem(int amount, int cooldown) implements Chec
     @Override
     public @NotNull StructCodec<? extends CheckpointItem> codec() {
         return CODEC;
+    }
+
+    @Override
+    public @NotNull TranslatableComponent thumbnail() {
+        return Component.translatable("gui.action.give_item.wind_charge.thumbnail", List.of(
+                Component.text(this.amount == INFINITE_AMOUNT ? "Infinite" : String.valueOf(this.amount)),
+                Component.text(this.cooldown > 0 ? NumberUtil.formatDuration(this.cooldown * 50L) : "No Cooldown")
+        ));
     }
 
     @Override

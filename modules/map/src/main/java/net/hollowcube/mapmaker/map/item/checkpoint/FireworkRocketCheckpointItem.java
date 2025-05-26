@@ -7,10 +7,15 @@ import net.hollowcube.mapmaker.map.action.impl.GiveItemAction;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 // TODO supported item types:
 // block (amount, placeable on - default target) todo need ∞ overlay?
@@ -26,7 +31,8 @@ public record FireworkRocketCheckpointItem(int amount, int duration) implements 
             "duration", ExtraCodecs.clamppedInt(INFINITE_DURATION, MAX_DURATION).optional(INFINITE_DURATION), FireworkRocketCheckpointItem::duration,
             FireworkRocketCheckpointItem::new);
 
-    private static final ItemStack DEFAULT_ITEM = ItemStack.of(Material.STICK);
+    private static final ItemStack DEFAULT_ITEM = ItemStack.of(Material.STICK)
+            .with(DataComponents.ITEM_NAME, Material.FIREWORK_ROCKET.prototype().get(DataComponents.ITEM_NAME));
 
     public @NotNull FireworkRocketCheckpointItem withAmount(int amount) {
         return new FireworkRocketCheckpointItem(amount, this.duration);
@@ -55,6 +61,14 @@ public record FireworkRocketCheckpointItem(int amount, int duration) implements 
     }
 
     @Override
+    public @NotNull TranslatableComponent thumbnail() {
+        return Component.translatable("gui.action.give_item.firework_rocket.thumbnail", List.of(
+                Component.text(this.amount == INFINITE_AMOUNT ? "Infinite" : String.valueOf(this.amount)),
+                Component.text(this.duration > 0 ? NumberUtil.formatDuration(this.duration * 50L) : "Infinite")
+        ));
+    }
+
+    @Override
     public @NotNull GiveItemAction.AbstractItemEditor<?> createEditor(ActionList.@NotNull Ref ref) {
         return new Editor(ref);
     }
@@ -75,7 +89,7 @@ public record FireworkRocketCheckpointItem(int amount, int duration) implements 
                     .parsed(dur -> NumberUtil.formatDuration(dur * 50L), NumberUtil::parseDurationToTicks)
                     .formatted(dur -> dur == INFINITE_DURATION ? "Infinite" : NumberUtil.formatDuration(dur * 50L))
                     .range(INFINITE_DURATION, MAX_DURATION)
-                    .stepped(20, 5 * 20)); // 1s, 5s steps
+                    .stepped(5, 20)); // 0.25s, 1s steps
         }
 
         @Override

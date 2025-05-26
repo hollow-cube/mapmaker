@@ -5,13 +5,18 @@ import net.hollowcube.mapmaker.map.action.ActionList;
 import net.hollowcube.mapmaker.map.action.gui.ControlledNumberInput;
 import net.hollowcube.mapmaker.map.action.impl.GiveItemAction;
 import net.hollowcube.mapmaker.map.item.vanilla.EnderPearlItem;
+import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.UseCooldown;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public record EnderPearlCheckpointItem(int amount, int cooldown) implements CheckpointItem {
     private static final int INFINITE_AMOUNT = 0;
@@ -26,7 +31,8 @@ public record EnderPearlCheckpointItem(int amount, int cooldown) implements Chec
             "cooldown", ExtraCodecs.clamppedInt(MIN_COOLDOWN, MAX_COOLDOWN).optional(DEFAULT_COOLDOWN), EnderPearlCheckpointItem::cooldown,
             EnderPearlCheckpointItem::new);
 
-    private static final ItemStack DEFAULT_ITEM = ItemStack.of(Material.STICK);
+    private static final ItemStack DEFAULT_ITEM = ItemStack.of(Material.STICK)
+            .with(DataComponents.ITEM_NAME, Material.ENDER_PEARL.prototype().get(DataComponents.ITEM_NAME));
 
     public @NotNull EnderPearlCheckpointItem withAmount(int amount) {
         return new EnderPearlCheckpointItem(amount, this.cooldown);
@@ -53,6 +59,14 @@ public record EnderPearlCheckpointItem(int amount, int cooldown) implements Chec
     public @NotNull CheckpointItem updateFromItemStack(@NotNull ItemStack itemStack) {
         if (this.amount == INFINITE_AMOUNT) return this;
         return withAmount(itemStack.amount());
+    }
+
+    @Override
+    public @NotNull TranslatableComponent thumbnail() {
+        return Component.translatable("gui.action.give_item.ender_pearl.thumbnail", List.of(
+                Component.text(this.amount == INFINITE_AMOUNT ? "Infinite" : String.valueOf(this.amount)),
+                Component.text(this.cooldown > 0 ? NumberUtil.formatDuration(this.cooldown * 50L) : "No Cooldown")
+        ));
     }
 
     @Override

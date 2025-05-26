@@ -78,7 +78,7 @@ public record EditLivesAction(
             case ADD -> {
                 var data = state.get(SAVE_DATA);
                 if (data == null) state.set(SAVE_DATA, new EditLivesAction.Data(lives, lives));
-                else state.set(SAVE_DATA, data.withValue(Math.min(data.value() + lives, data.max)));
+                else state.set(SAVE_DATA, data.withValue(Math.min(data.value() + lives, data.max + lives)));
             }
             case SUBTRACT -> {
                 var data = state.get(SAVE_DATA);
@@ -105,7 +105,6 @@ public record EditLivesAction(
     }
 
     private static class Editor extends AbstractActionEditorPanel<EditLivesAction> {
-
         private final ControlledTriStateInput<Operation> operationInput;
         private final ControlledNumberInput valueInput;
 

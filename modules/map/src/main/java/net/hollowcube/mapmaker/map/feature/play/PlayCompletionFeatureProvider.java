@@ -145,8 +145,7 @@ public class PlayCompletionFeatureProvider implements FeatureProvider {
             });
 
             // Show the completion animation
-            rewards.map(AppliedRewards::diff)
-                    .ifPresent(diff -> MapCompletionAnimation.schedule(player, diff, tryShowRateGui));
+            MapCompletionAnimation.schedule(player, new AppliedRewards.Inventory(null, null, null, null), tryShowRateGui);
 
             // Play the victory effect
             var playerData = PlayerDataV2.fromPlayer(player);

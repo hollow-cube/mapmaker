@@ -139,7 +139,7 @@ public record TeleportAction(
             super(width, 2);
             this.onChange = onChange;
 
-            var translationKey = "gui.action.teleport." + label;
+            var translationKey = "gui.action.teleport." + label + ".name";
             this.anvilTitle = LanguageProviderV2.translateToPlain(translationKey);
             add(0, 0, new Text(translationKey, width, 1, anvilTitle)
                     .font("small").align(1 + xOffset, 6));
@@ -150,7 +150,6 @@ public record TeleportAction(
 
         public void update(@NotNull String value) {
             if (RELATIVE_ZERO.equals(value)) value = "";
-            if (this.value.equals(value)) return;
 
             this.value = value;
             this.inputText.text(normalizeForDisplay(value));
@@ -165,7 +164,7 @@ public record TeleportAction(
         }
 
         private @NotNull String normalizeForDisplay(@NotNull String value) {
-            if (value.isEmpty()) return "";
+            if (value.isEmpty()) return "~";
             String[] parts = value.split("\\.");
             if (parts.length == 1) return value;
             // Drop trailing 0

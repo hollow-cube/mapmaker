@@ -5,6 +5,8 @@ import net.hollowcube.mapmaker.map.action.ActionList;
 import net.hollowcube.mapmaker.map.action.gui.ControlledNumberInput;
 import net.hollowcube.mapmaker.map.action.impl.GiveItemAction;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
@@ -12,6 +14,8 @@ import net.minestom.server.item.Material;
 import net.minestom.server.item.component.EnchantmentList;
 import net.minestom.server.item.enchant.Enchantment;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public record TridentCheckpointItem(int riptide) implements CheckpointItem {
     public static final int MIN_RIPTIDE = 1;
@@ -38,6 +42,13 @@ public record TridentCheckpointItem(int riptide) implements CheckpointItem {
     public @NotNull ItemStack createItemStack() {
         return DEFAULT_ITEM.with(DataComponents.ENCHANTMENTS,
                 EnchantmentList.EMPTY.with(Enchantment.RIPTIDE, riptide));
+    }
+
+    @Override
+    public @NotNull TranslatableComponent thumbnail() {
+        return Component.translatable("gui.action.give_item.trident.thumbnail", List.of(
+                Component.text(this.riptide)
+        ));
     }
 
     @Override

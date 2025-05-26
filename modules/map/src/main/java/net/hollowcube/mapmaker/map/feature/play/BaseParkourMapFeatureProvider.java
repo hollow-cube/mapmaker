@@ -78,6 +78,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     private static final Tag<Integer> DEFAULT_RESET_HEIGHT = Tag.Integer("mapmaker:play/reset_height").defaultValue(-64 - RESET_HEIGHT_OFFSET);
 
     private static final TagCooldown PROGRESS_INDEX_WARNING = new TagCooldown("mapmaker:play/progress_index_warning", 5000);
+    public static final Tag<List<Integer>> OWNED_ENTITIES = Tag.<List<Integer>>Transient("map_owned_entities").defaultValue(List.of());
 
     // This tag is present when the player has an active countdown and holds the time at which
     // the countdown will end, in ms since epoch.
@@ -342,6 +343,12 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         player.removeTag(COUNTDOWN_END);
 
         player.getAttribute(Attribute.SAFE_FALL_DISTANCE).removeModifier(NO_FALL_DAMAGE_MODIFIER);
+
+        var ownedEntities = player.getAndSetTag(BaseParkourMapFeatureProvider.OWNED_ENTITIES, null);
+        if (ownedEntities != null) for (var entityId : ownedEntities) {
+            var entity = event.getMapWorld().instance().getEntityById(entityId);
+            if (entity != null) entity.remove();
+        }
     }
 
     public void handleCheckpointPostChange(@NotNull MapPlayerCheckpointPostChangeEvent event) {
@@ -380,8 +387,6 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             return; // Player already has this checkpoint in their history (they are backtracking)
 
         // Apply the checkpoint/effect changes
-        state.set(EditTimerAction.SAVE_DATA, null); // Time always reset on checkpoint
-        player.removeTag(COUNTDOWN_END);
         updateStateFromPlayer(player, state);
         updateBaseEffectState(world, player, data.actions(), state);
 
