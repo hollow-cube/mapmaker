@@ -71,7 +71,7 @@ public record GiveItemAction(
             return Component.translatable("gui.action.give_item.thumbnail.empty");
         var inner = action.item.thumbnail();
         var args = new ArrayList<>(inner.arguments());
-        args.add(TranslationArgument.numeric(action.slot + 1));
+        args.addFirst(TranslationArgument.numeric(action.slot + 1));
         return Component.translatable(inner.key(), args);
     }
 
