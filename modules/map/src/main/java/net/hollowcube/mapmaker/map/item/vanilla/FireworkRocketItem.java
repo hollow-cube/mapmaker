@@ -18,6 +18,7 @@ import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class FireworkRocketItem extends ItemHandler {
     private static final Tag<Integer> DURATION_TAG = Tag.Integer("firework_duration").defaultValue(0);
     private static final String DEFAULT_MODEL = Material.FIREWORK_ROCKET.prototype().get(DataComponents.ITEM_MODEL);
     private static final String INFINITE_MODEL = "mapmaker:infinite_firework";
+    private static final List<String> MODELS = List.of(DEFAULT_MODEL, INFINITE_MODEL);
 
     public static final FireworkRocketItem INSTANCE = new FireworkRocketItem();
     public static final ItemStack DEFAULT = setDurationMillis(
@@ -71,8 +73,8 @@ public class FireworkRocketItem extends ItemHandler {
     }
 
     @Override
-    public @NotNull Material material() {
-        return Material.FIREWORK_ROCKET;
+    public @Nullable List<String> models() {
+        return MODELS;
     }
 
     @Override

@@ -40,6 +40,8 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 @SuppressWarnings("UnstableApiUsage")
 public class LanguageProviderV2 {
 
@@ -83,6 +85,16 @@ public class LanguageProviderV2 {
     private static final Map<String, @Nullable List<ElementNode>> multiComponentCache = new ConcurrentHashMap<>();
 
     private static final LRUCache<TranslatableComponent, Component> expandedComponentCache = new LRUCache<>(1000);
+
+    public static @NotNull String translateToPlain(@NotNull String translationKey) {
+        return PLAIN_TEXT.serialize(translate(translatable(translationKey)));
+    }
+
+    public static @NotNull String translateToPlain(@NotNull Component component) {
+        if (!(component instanceof TranslatableComponent translatable))
+            return PLAIN_TEXT.serialize(Objects.requireNonNull(component));
+        return PLAIN_TEXT.serialize(translate(translatable));
+    }
 
     @Contract("!null -> !null")
     public static @Nullable Component translate(@Nullable Component component) {
@@ -148,11 +160,11 @@ public class LanguageProviderV2 {
 
     public static @NotNull Component getVanillaTranslation(@NotNull Material material) {
         if (material.isBlock()) return getVanillaTranslation(material.registry().block());
-        return Component.translatable("item." + material.key().namespace() + "." + material.key().value());
+        return translatable("item." + material.key().namespace() + "." + material.key().value());
     }
 
     public static @NotNull Component getVanillaTranslation(@NotNull Block block) {
-        return Component.translatable("block." + block.key().namespace() + "." + block.key().value());
+        return translatable("block." + block.key().namespace() + "." + block.key().value());
     }
 
     // Use of a lot of internal Minimessage APIs below. May break in the future and need to write this ourselves.
@@ -185,7 +197,6 @@ public class LanguageProviderV2 {
                 }
             }
         };
-
     }
 
     static @Nullable ElementNode parseComponent(@NotNull String id) {

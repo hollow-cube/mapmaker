@@ -3,16 +3,16 @@ package net.hollowcube.mapmaker.map.feature.edit;
 import com.google.auto.service.AutoService;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.action.gui.ActionEditorView;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapChangeSpawnPointEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.feature.play.BaseParkourMapFeatureProvider;
-import net.hollowcube.mapmaker.map.gui.effect.EditCheckpointView;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
+import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.util.CoreTeams;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.GameMode;
@@ -29,7 +29,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -86,12 +85,12 @@ public class MapSpawnIndicatorFeatureProvider implements FeatureProvider {
         }
 
         // Open checkpoint settings view
-        var controller = world.server().guiController();
         int maxResetHeight = entity.getPosition().blockY();
         var checkpointData = world.getTag(BaseParkourMapFeatureProvider.SPAWN_CHECKPOINT_EFFECTS);
         //todo the blockPos passed here isnt valid and will fizzle. You shouldnt really be able to set the tp coords on this checkpoint anyway because you never actually get it.
-        controller.show(player, c -> new EditCheckpointView(c.with(Map.of("updateTarget", Vec.ZERO)), checkpointData,
-                maxResetHeight, () -> world.setTag(BaseParkourMapFeatureProvider.SPAWN_CHECKPOINT_EFFECTS, checkpointData)));
+        // todo need to pass in block pos for reset height.
+        var host = Panel.open(player, new ActionEditorView(checkpointData.actions(), "Spawn"));
+        host.onClose(() -> world.setTag(BaseParkourMapFeatureProvider.SPAWN_CHECKPOINT_EFFECTS, checkpointData));
     }
 
     private void handleSpawnInTestMode(@NotNull MapPlayerInitEvent event) {

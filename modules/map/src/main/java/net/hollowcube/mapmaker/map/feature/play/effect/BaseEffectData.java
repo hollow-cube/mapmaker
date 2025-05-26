@@ -27,7 +27,6 @@ public abstract class BaseEffectData {
     private boolean clearPotionEffects;
     private final PotionEffectList potionEffects;
     private Pos teleport;
-    //todo settings
     private HotbarItems items;
     private final SavedMapSettings settings;
 

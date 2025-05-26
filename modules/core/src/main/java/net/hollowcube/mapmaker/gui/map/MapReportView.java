@@ -68,6 +68,7 @@ public class MapReportView extends Panel {
         host.pushView(simpleAnvil(
                 "generic2/anvil/field_container",
                 "report_map/comment_anvil_icon",
+                "Report Comment",
                 this::handleCommentChange
         ));
     }

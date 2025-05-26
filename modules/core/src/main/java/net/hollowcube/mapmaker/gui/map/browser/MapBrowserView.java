@@ -78,6 +78,7 @@ public class MapBrowserView extends Panel {
         host.pushView(simpleAnvil(
                 "generic2/anvil/field_container",
                 "map_browser/search_anvil_icon",
+                "Search Maps by Name",
                 this::handleSearchTextChange
         ));
     }
@@ -89,8 +90,6 @@ public class MapBrowserView extends Panel {
             params = MapSearchParams.builder(host.player().getUuid().toString())
                     .query(searchText);
         }
-
-        System.out.println(params.build());
 
         var response = mapService.searchMaps(params.page(page).pageSize(pageSize).build());
         if (page == 0) pagination.totalPages(response.pageCount());

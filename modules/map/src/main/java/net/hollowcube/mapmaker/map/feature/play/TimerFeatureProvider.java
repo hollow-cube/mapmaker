@@ -3,9 +3,11 @@ package net.hollowcube.mapmaker.map.feature.play;
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.action.impl.EditTimerAction;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
@@ -66,7 +68,8 @@ public class TimerFeatureProvider implements FeatureProvider {
         if (saveState == null) return;
 
         long time = saveState.getRealPlaytime();
-        var effects = world.getTag(BaseParkourMapFeatureProvider.SPAWN_CHECKPOINT_EFFECTS);
+        var startingTimer = OpUtils.map(world.getTag(BaseParkourMapFeatureProvider.SPAWN_CHECKPOINT_EFFECTS),
+                checkpoint -> checkpoint.actions().findLast(EditTimerAction.class));
 
         // Append the countdown timer, but only if it's not a testing map.
         // We should not show the normal timer in testing mode.
@@ -74,8 +77,8 @@ public class TimerFeatureProvider implements FeatureProvider {
         var countdownEnd = player.getTag(BaseParkourMapFeatureProvider.COUNTDOWN_END);
         if (countdownEnd != -1) {
             time = Math.max(countdownEnd - System.currentTimeMillis(), 0);
-        } else if (time == 0 && effects != null && effects.timeLimit() > 0) {
-            time = effects.timeLimit();
+        } else if (time == 0 && startingTimer != null && startingTimer.time() > 0) {
+            time = startingTimer.time();
         } else if (world instanceof TestingMapWorld) {
             return;
         }

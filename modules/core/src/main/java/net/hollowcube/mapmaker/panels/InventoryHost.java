@@ -17,10 +17,16 @@ import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.network.packet.server.play.OpenWindowPacket;
 import net.minestom.server.network.packet.server.play.WindowItemsPacket;
 import net.minestom.server.sound.SoundEvent;
+import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagHandler;
+import net.minestom.server.tag.TagReadable;
+import net.minestom.server.tag.TagWritable;
 import net.minestom.server.timer.Task;
 import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,12 +36,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.UnaryOperator;
 
 /**
  * InventoryHost manages the view stack, 'rendering' of the current view, and user interactions for the
  * single open GUI represented by this InventoryHost.
  */
-public class InventoryHost {
+public class InventoryHost implements TagReadable, TagWritable {
     private static final Logger logger = LoggerFactory.getLogger(InventoryHost.class);
     private static final Sound CLICK_SOUND = Sound.sound(SoundEvent.UI_BUTTON_CLICK, Sound.Source.PLAYER, 0.2f, 1f);
     private static final ThreadLocal<InventoryHost> CURRENT = new ThreadLocal<>();
@@ -52,14 +59,18 @@ public class InventoryHost {
 
     private final Player player;
     private final InventoryWrapper handle = new InventoryWrapper();
+    private final TagHandler tagHandler = TagHandler.newHandler();
+    private Runnable closeCallback = null;
 
     private Task redrawTask = null;
     // If present, indicates a potentially pending click event. We should not respond to other clicks while this
     // is both not null and not CompletableFuture#isDone.
     private CompletableFuture<Void> pendingClick = null;
 
-    private final List<Panel> panels = new ArrayList<>();
-    private final List<InventoryType> inventoryTypes = new ArrayList<>();
+    private record StackedView(Panel panel, InventoryType inventoryType, boolean isTransient) {
+    }
+
+    private final List<StackedView> viewStack = new ArrayList<>();
 
     public InventoryHost(@NotNull Player player) {
         this.player = player;
@@ -73,33 +84,56 @@ public class InventoryHost {
         return Objects.requireNonNull(handle);
     }
 
+    public void pushTransientView(@NotNull Panel panel) {
+        pushView(panel, true);
+    }
+
+    /// Replaces the current view with a new one. This works similarly to what would happen
+    /// if the parent view was transient.
+    public void replaceView(@NotNull Panel panel) {
+        popView();
+        pushView(panel);
+    }
+
     public void pushView(@NotNull Panel panel) {
-        if (!panels.isEmpty()) {
-            var last = panels.getLast();
-            if (last != null) last.unmount();
+        pushView(panel, false);
+    }
+
+    private void pushView(@NotNull Panel panel, boolean isTransient) {
+        if (!viewStack.isEmpty()) {
+            var last = viewStack.getLast();
+            last.panel.unmount();
+
+            // If the top view is transient just remove it, we never need to return to it.
+            if (last.isTransient) viewStack.removeLast();
+        } else if (isTransient) {
+            throw new IllegalArgumentException("The initial view may not be transient");
         }
 
-        this.inventoryTypes.add(panel.inventoryType());
-        this.panels.add(panel);
+        this.viewStack.add(new StackedView(panel, panel.inventoryType(), isTransient));
         panel.mount(this, true);
 
         drawCurrentElement();
     }
 
     public void popView() {
-        if (panels.size() <= 1) return;
+        if (viewStack.size() <= 1) return;
 
-        var removed = this.panels.removeLast();
-        if (removed != null) removed.unmount();
-        this.inventoryTypes.removeLast();
+        // Remove old
+        var removed = this.viewStack.removeLast();
+        removed.panel.unmount();
 
-        panels.getLast().mount(this, false);
-
+        // Draw new
+        viewStack.getLast().panel.mount(this, false);
         drawCurrentElement();
     }
 
     public boolean canPopView() {
-        return panels.size() > 1;
+        return viewStack.size() > 1;
+    }
+
+    public void onClose(@NotNull Runnable callback) {
+        this.closeCallback = callback;
     }
 
     public void queueRedraw() {
@@ -107,22 +141,51 @@ public class InventoryHost {
         this.redrawTask = player.scheduler().scheduleEndOfTick(this::drawCurrentElement);
     }
 
+    @Override
+    public <T> @UnknownNullability T getTag(@NotNull Tag<T> tag) {
+        return this.tagHandler.getTag(tag);
+    }
+
+    @Override
+    public <T> void setTag(@NotNull Tag<T> tag, @Nullable T value) {
+        this.tagHandler.setTag(tag, value);
+    }
+
+    @Override
+    public <T> @Nullable T getAndSetTag(@NotNull Tag<T> tag, @Nullable T value) {
+        return this.tagHandler.getAndSetTag(tag, value);
+    }
+
+    @Override
+    public <T> void updateTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
+        this.tagHandler.updateTag(tag, value);
+    }
+
+    @Override
+    public <T> @UnknownNullability T updateAndGetTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
+        return this.tagHandler.updateAndGetTag(tag, value);
+    }
+
+    @Override
+    public <T> @UnknownNullability T getAndUpdateTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
+        return this.tagHandler.getAndUpdateTag(tag, value);
+    }
+
     // "rendering" implementation
 
     private void drawCurrentElement() {
         // Check if unmounted or closed
-        if (this.panels.isEmpty()) return;
-        final Panel root = this.panels.getLast();
+        if (this.viewStack.isEmpty()) return;
+        final StackedView root = this.viewStack.getLast();
 
         // Currently we always consume the player inventory so add 4 rows.
-        final InventoryType type = this.inventoryTypes.getLast();
-        int containerSizeInRows = getInterpretedSize(type) / 9;
+        int containerSizeInRows = getInterpretedSize(root.inventoryType) / 9;
         var menuBuilder = new MenuBuilder(9, containerSizeInRows + 4, containerSizeInRows);
-        root.build(menuBuilder);
+        root.panel.build(menuBuilder);
 
         if (!handle.isViewer(player))
             player.openInventory(handle);
-        this.handle.updateContents(type, menuBuilder.getItems(), menuBuilder.getTitle());
+        this.handle.updateContents(root.inventoryType, menuBuilder.getItems(), menuBuilder.getTitle());
     }
 
     private static void handleInventoryClick(@NotNull InventoryPreClickEvent event) {
@@ -159,9 +222,9 @@ public class InventoryHost {
         };
         if (clickType == null) return;
 
-        if (host.panels.isEmpty()) return;
-        var root = host.panels.getLast();
-        host.pendingClick = root.handleClick(clickType, slot % 9, slot / 9);
+        if (host.viewStack.isEmpty()) return;
+        var root = host.viewStack.getLast();
+        host.pendingClick = root.panel.handleClick(clickType, slot % 9, slot / 9);
         if (host.pendingClick != null) {
             host.player.playSound(CLICK_SOUND);
         }
@@ -186,8 +249,8 @@ public class InventoryHost {
     private static void handleAnvilInput(@NotNull PlayerAnvilInputEvent event) {
         if (!(event.getInventory() instanceof InventoryWrapper inventory)) return;
         var host = inventory.owner();
-        if (host.panels.isEmpty()) return;
-        if (!(host.panels.getLast() instanceof AbstractAnvilView anvil)) return;
+        if (host.viewStack.isEmpty()) return;
+        if (!(host.viewStack.getLast().panel instanceof AbstractAnvilView anvil)) return;
 
         anvil.handleAnvilInput(event.getInput());
     }
@@ -265,9 +328,10 @@ public class InventoryHost {
                 player.getInventory().update();
             }
 
-            if (result && !panels.isEmpty()) {
-                panels.getLast().unmount();
-                panels.clear();
+            if (result && !viewStack.isEmpty()) {
+                viewStack.getLast().panel.unmount();
+                viewStack.clear();
+                if (closeCallback != null) closeCallback.run();
             }
 
             return result;

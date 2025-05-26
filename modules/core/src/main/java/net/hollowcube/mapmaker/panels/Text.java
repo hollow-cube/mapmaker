@@ -12,6 +12,7 @@ public class Text extends Button {
     public static final int END = 1 << 31;
 
     private String text;
+    private String font = null;
     private int xAlign = START;
     private int yAlign = START;
 
@@ -22,6 +23,12 @@ public class Text extends Button {
 
     public @NotNull Text text(@NotNull String text) {
         this.text = text;
+        if (host != null) host.queueRedraw();
+        return this;
+    }
+
+    public @NotNull Text font(@Nullable String font) {
+        this.font = font;
         if (host != null) host.queueRedraw();
         return this;
     }
@@ -38,9 +45,11 @@ public class Text extends Button {
         super.build(builder);
 
         if (text.isEmpty()) return;
-        int x = computeAlignment(this.xAlign, FontUtil.measureText(text), builder.availWidth() * 18);
+        var text = this.font == null ? this.text : FontUtil.rewrite(this.font, this.text);
+        int width = FontUtil.measureTextV2(text);
+        int x = computeAlignment(this.xAlign, width, builder.availWidth() * 18);
         int y = computeAlignment(this.yAlign, FontUtil.DEFAULT_HEIGHT, builder.availHeight() * 18);
-        builder.drawText(x, y, text);
+        builder.drawText(x, y, text, width);
     }
 
     private int computeAlignment(int value, int size, int parentSize) {

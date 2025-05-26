@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map;
 
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
@@ -31,8 +30,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     record ErrorRes(String code) {
     }
-
-    private final int latestDataVersion = ServerRuntime.getRuntime().dataVersion();
 
     private final String url;
     private final String urlV2;
@@ -410,12 +407,12 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             // Note that this is a non-backwards compatible change, so once we write a new state an old server cannot necessarily
             // read this state. For now, we will likely ignore this, however in the future joining a map will require checking
             // the state and finding a compatible server (server data version > state data version).
-            if (!stateObj.isEmpty() && saveState.dataVersion > 0 && saveState.dataVersion < latestDataVersion) {
-                var upgraded = DataFixer.upgrade(serializer.dataType(), Transcoder.JSON, stateObj, saveState.dataVersion, latestDataVersion);
+            if (!stateObj.isEmpty() && saveState.dataVersion < DataFixer.maxVersion()) {
+                var upgraded = DataFixer.upgrade(serializer.dataType(), Transcoder.JSON, stateObj, saveState.dataVersion, DataFixer.maxVersion());
                 if (!(upgraded instanceof JsonObject upgradedObject))
                     throw new IllegalStateException("invalid save state upgrade: " + upgraded);
                 stateObj = upgradedObject;
-                saveState.dataVersion = latestDataVersion;
+                saveState.dataVersion = DataFixer.maxVersion();
             }
 
             saveState.serializer = serializer;
@@ -440,10 +437,11 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public @Nullable SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
+        update.updates.addProperty("dataVersion", DataFixer.maxVersion());
         var reqBody = GSON.toJson(update.updates);
         var req = HttpRequest.newBuilder()
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(reqBody))
-                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + id))
+                .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId + "/" + id))
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());

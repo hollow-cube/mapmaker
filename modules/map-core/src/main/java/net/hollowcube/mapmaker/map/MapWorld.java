@@ -23,7 +23,7 @@ import java.util.Objects;
 import java.util.function.UnaryOperator;
 
 public sealed interface MapWorld extends TagReadable, TagWritable permits AbstractMapWorld {
-    int DATA_VERSION = MinecraftServer.DATA_VERSION;
+    int DATA_VERSION = MinecraftServer.DATA_VERSION + 1;
 
     interface Constructor<T extends AbstractMapWorld> {
         @NotNull T create(@NotNull MapServer server, @NotNull MapData map);

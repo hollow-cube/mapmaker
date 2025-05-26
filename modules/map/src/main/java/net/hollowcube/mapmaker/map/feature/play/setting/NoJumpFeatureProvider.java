@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.action.Attachments;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerUpdateStateEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
@@ -36,7 +37,8 @@ public class NoJumpFeatureProvider extends AbstractSettingFeatureProvider {
         var state = SaveState.optionalFromPlayer(player);
         if (state == null) return true;
         var playstate = state.state(PlayState.class);
-        return !playstate.settings().get(MapSettings.NO_JUMP, world.map().settings());
+        return !playstate.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
+                .get(MapSettings.NO_JUMP, world.map().settings());
     }
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {

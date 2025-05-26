@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.TopTimesCommand;
@@ -30,6 +31,7 @@ import net.hollowcube.mapmaker.map.runtime.*;
 import net.hollowcube.mapmaker.map.terraform.MapServerModule;
 import net.hollowcube.mapmaker.map.util.MapJoinInfo;
 import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
+import net.hollowcube.mapmaker.map.util.datafix.V4326;
 import net.hollowcube.mapmaker.map.world.AbstractMapMakerMapWorld;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
@@ -53,10 +55,13 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 import static net.hollowcube.mapmaker.map.util.MapCondition.eventFilter;
 import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
@@ -307,6 +312,18 @@ public class MapServerRunner extends AbstractMapServer {
 
     protected void handleDisconnect(@NotNull PlayerDisconnectEvent event) {
         super.handlePlayerDisconnect(event.getPlayer());
+    }
+
+    @Override
+    protected @NotNull List<Supplier<DataVersion>> extraDataVersions() {
+        var versions = new ArrayList<>(super.extraDataVersions());
+        versions.addAll(extraDataVersionsForMaps());
+        return versions;
+    }
+
+    // Exposed for DevServer to use
+    public static List<Supplier<DataVersion>> extraDataVersionsForMaps() {
+        return List.of(V4326::new);
     }
 
     @Override

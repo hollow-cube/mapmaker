@@ -2,12 +2,14 @@ package net.hollowcube.mapmaker.map.world.savestate;
 
 import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.SaveStateType;
-import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
-import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
-import net.hollowcube.mapmaker.map.feature.play.setting.SavedMapSettings;
 import net.hollowcube.mapmaker.map.util.datafix.HCDataTypes;
+import net.kyori.adventure.key.InvalidKeyException;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.Result;
 import net.minestom.server.codec.StructCodec;
+import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -20,74 +22,49 @@ import java.util.function.Function;
 public final class PlayState {
     public static final int NO_RESET_HEIGHT = Integer.MIN_VALUE;
 
+    public sealed interface Attachment<T> extends Keyed permits AttachmentImpl {
+    }
+
+    public static <T> @NotNull Attachment<T> attachment(@NotNull Key key, @NotNull Codec<T> codec) {
+        return new AttachmentImpl<>(key, codec);
+    }
+
     private static final StructCodec<Map<Long, Block>> GHOST_BLOCKS_CODEC = StructCodec.struct(
             "ghostBlocks", ExtraCodecs.LONG_STRING.mapValue(ExtraCodecs.BLOCK_STATE_STRING).optional(Map.of()), Function.identity(),
             it -> it);
-    public static Codec<PlayState> CODEC = Codec.Recursive(codec -> StructCodec.struct(
+    public static Codec<PlayState> CODEC = net.minestom.server.codec.Codec.Recursive(codec -> StructCodec.struct(
             "lastState", codec.optional(), PlayState::lastState,
-            "history", Codec.STRING.list().optional(List.of()), PlayState::history,
-            "progressIndex", Codec.INT.optional(), PlayState::progressIndex,
-            "timeLimit", Codec.LONG.optional(), PlayState::timeLimit,
-            "resetHeight", Codec.INT.optional(), PlayState::resetHeight,
-            StructCodec.INLINE, PotionEffectList.CODEC, PlayState::potionEffects,
+            "history", net.minestom.server.codec.Codec.STRING.list().optional(List.of()), PlayState::history,
             "pos", ExtraCodecs.POS.optional(), PlayState::pos,
-            "maxLives", Codec.INT.optional(), PlayState::maxLives,
-            "lives", Codec.INT.optional(), PlayState::lives,
             StructCodec.INLINE, GHOST_BLOCKS_CODEC.optional(), PlayState::ghostBlocks,
-            "items", HotbarItems.CODEC.optional(HotbarItems.EMPTY), PlayState::items,
-            "settings", SavedMapSettings.CODEC.optional(), PlayState::settings,
+            StructCodec.INLINE, new ActionDataCodec(Integer.MAX_VALUE), PlayState::actionData,
             PlayState::new));
 
     public static final SaveStateType.Serializer<PlayState> SERIALIZER = SaveStateType.serializer("playState", CODEC, HCDataTypes.PLAY_STATE);
 
     private PlayState lastState; // The previous state of the player (ie at the last checkpoint)
-
     // Has two meanings:
     // in main state -> The list of status reached since the last checkpoint.
     // in last state -> The last entry is always the checkpoint that was reached at that state.
     private final List<String> history;
-    private Integer progressIndex;
-    private Long timeLimit; // Remaining time limit in ms
-    private Integer resetHeight;
-    private PotionEffectList potionEffects;
     private Pos pos;
-    private Integer maxLives; // Maximum number of lives for the current state
-    private Integer lives; // Number of lives remaining for the current state
     private Map<Long, Block> ghostBlocks;
-    private HotbarItems items;
-    private final SavedMapSettings overridenSettings;
-
-    private boolean tempReset = false;
+    private Map<Attachment<?>, Object> actionData;
 
     public PlayState() {
-        this(null, null, null, null, null,
-                null, null, null, null, null,
-                null, null);
+        this(null, null, null, null, null);
     }
 
     public PlayState(
             @Nullable PlayState lastState, @Nullable List<String> statusEffects,
-            @Nullable Integer progressIndex, @Nullable Long timeLimit,
-            @Nullable Integer resetHeight,
-            @Nullable PotionEffectList potionEffects, @Nullable Pos pos,
-            @Nullable Integer maxLives, @Nullable Integer lives,
-            @Nullable Map<Long, Block> ghostBlocks, @Nullable HotbarItems items,
-            @Nullable SavedMapSettings overridenSettings
+            @Nullable Pos pos, @Nullable Map<Long, Block> ghostBlocks,
+            @Nullable Map<Attachment<?>, Object> actionData
     ) {
         this.lastState = lastState;
         this.history = new ArrayList<>(Objects.requireNonNullElse(statusEffects, List.of()));
-        this.progressIndex = progressIndex;
-        this.timeLimit = timeLimit;
-        this.resetHeight = resetHeight;
-        this.potionEffects = potionEffects;
         this.pos = pos;
-        this.maxLives = maxLives;
-        this.lives = lives;
         this.ghostBlocks = new HashMap<>(Objects.requireNonNullElse(ghostBlocks, Map.of()));
-        this.items = Objects.requireNonNullElse(items, HotbarItems.EMPTY);
-        this.overridenSettings = Objects.requireNonNullElseGet(overridenSettings, SavedMapSettings::new);
-
-        this.tempReset = true;
+        this.actionData = new HashMap<>(Objects.requireNonNullElse(actionData, Map.of()));
     }
 
     public @Nullable PlayState lastState() {
@@ -102,33 +79,35 @@ public final class PlayState {
         return history;
     }
 
-    public @Nullable Integer progressIndex() {
-        return progressIndex;
+    @NotNull public Map<Attachment<?>, Object> actionData() {
+        return actionData;
     }
 
-    public @Nullable Long timeLimit() {
-        return timeLimit;
+    public <T> @Nullable T get(@NotNull Attachment<T> attachment) {
+        return (T) actionData.get(attachment);
     }
 
-    public @Nullable Integer resetHeight() {
-        return resetHeight;
+    public <T> @NotNull T get(@NotNull Attachment<T> attachment, @NotNull T defaultValue) {
+        return Objects.requireNonNullElse(get(attachment), defaultValue);
     }
 
-    public @NotNull PotionEffectList potionEffects() {
-        if (potionEffects == null) potionEffects = new PotionEffectList();
-        return potionEffects;
+    public <T> void set(@NotNull Attachment<T> attachment, @Nullable T value) {
+        if (value == null) {
+            actionData.remove(attachment);
+        } else {
+            actionData.put(attachment, value);
+        }
+    }
+
+    public <T> void update(@NotNull Attachment<T> attachment, @NotNull Function<T, T> updater) {
+        var existing = get(attachment);
+        if (existing != null) {
+            actionData.put(attachment, updater.apply(existing));
+        }
     }
 
     public @Nullable Pos pos() {
         return pos;
-    }
-
-    public @Nullable Integer maxLives() {
-        return maxLives;
-    }
-
-    public @Nullable Integer lives() {
-        return lives;
     }
 
     public @NotNull Map<Long, Block> ghostBlocks() {
@@ -151,56 +130,12 @@ public final class PlayState {
         history.clear();
     }
 
-    public void setProgressIndex(int progressIndex) {
-        this.progressIndex = progressIndex == -1 ? null : progressIndex;
-    }
-
-    public void setTimeLimit(long timeLimit) {
-        this.timeLimit = timeLimit <= 0 ? null : timeLimit;
-    }
-
-    public void setResetHeight(int resetHeight) {
-        this.resetHeight = resetHeight == NO_RESET_HEIGHT ? null : resetHeight;
-    }
-
     public void setPos(@Nullable Pos pos) {
         this.pos = pos;
     }
 
-    public void setMaxLives(int maxLives) {
-        this.maxLives = maxLives <= 0 ? null : maxLives;
-    }
-
-    public void setLives(int lives) {
-        this.lives = lives <= 0 ? null : lives;
-    }
-
-    public boolean tempReset() {
-        return tempReset;
-    }
-
-    public void setTempReset(boolean tempReset) {
-        this.tempReset = tempReset;
-    }
-
-    public HotbarItems items() {
-        return items;
-    }
-
-    public void setItems(HotbarItems items) {
-        this.items = items;
-    }
-
-    public SavedMapSettings settings() {
-        return overridenSettings;
-    }
-
     public @NotNull PlayState copy() {
-        return new PlayState(
-                lastState, history, progressIndex, timeLimit, resetHeight,
-                potionEffects.copy(), pos, maxLives, lives, new HashMap<>(ghostBlocks),
-                items, overridenSettings.copy()
-        );
+        return new PlayState(lastState, history, pos, new HashMap<>(ghostBlocks), new HashMap<>(actionData));
     }
 
     @Override
@@ -212,17 +147,69 @@ public final class PlayState {
         return "PlayState{" +
                 "lastState=" + String.valueOf(lastState != null) +
                 ", statusEffects=" + (history.size() > 1 ? history.size() : history) +
-                ", progressIndex=" + pretty(progressIndex) +
-                ", timeLimit=" + pretty(timeLimit) +
-                ", resetHeight=" + pretty(resetHeight) +
-                ", potionEffects=" + potionEffects +
                 ", pos=" + pretty(pos) +
-                ", maxLives=" + pretty(maxLives) +
-                ", lives=" + pretty(lives) +
                 '}';
     }
 
     private @NotNull String pretty(@NotNull Object optional) {
         return String.valueOf(optional);
+    }
+
+    private record AttachmentImpl<T>(@NotNull Key key, @NotNull Codec<T> codec) implements Attachment<T> {
+        private static final Map<Key, AttachmentImpl<?>> REGISTRY = new HashMap<>();
+
+        public AttachmentImpl {
+            REGISTRY.put(key, this);
+        }
+    }
+
+    private record ActionDataCodec(int maxSize) implements StructCodec<Map<Attachment<?>, Object>> {
+        private static final Codec<AttachmentImpl<?>> KEY_CODEC = Codec.KEY.transform(AttachmentImpl.REGISTRY::get, Keyed::key);
+
+        @Override
+        public @NotNull <D> Result<Map<Attachment<?>, Object>> decodeFromMap(@NotNull Transcoder<D> coder, Transcoder.@NotNull MapLike<D> map) {
+            if (map.size() > maxSize)
+                return new Result.Error<>("Map size exceeds maximum allowed size: " + maxSize);
+            if (map.isEmpty()) return new Result.Ok<>(Map.of());
+
+            final Map<Attachment<?>, Object> decodedMap = new HashMap<>(map.size());
+            for (final String key : map.keys()) {
+                try {
+                    Key.key(key);
+                } catch (InvalidKeyException ignored) {
+                    continue;
+                }
+                final Result<AttachmentImpl<?>> keyResult = KEY_CODEC.decode(coder, coder.createString(key));
+                if (!(keyResult instanceof Result.Ok(AttachmentImpl<?> decodedKey)))
+                    return keyResult.cast();
+                if (decodedKey == null) continue;
+                // The throwing decode here is fine since we are already iterating over known keys.
+                final Result<?> valueResult = decodedKey.codec.decode(coder, map.getValue(key).orElseThrow());
+                if (!(valueResult instanceof Result.Ok(Object decodedValue)))
+                    return valueResult.cast();
+                decodedMap.put(decodedKey, decodedValue);
+            }
+            return new Result.Ok<>(Map.copyOf(decodedMap));
+        }
+
+        @Override
+        public @NotNull <D> Result<D> encodeToMap(@NotNull Transcoder<D> coder, @NotNull Map<Attachment<?>, Object> value, Transcoder.@NotNull MapBuilder<D> map) {
+            if (value.size() > maxSize)
+                return new Result.Error<>("Map size exceeds maximum allowed size: " + maxSize);
+            if (value.isEmpty()) return new Result.Ok<>(coder.createMap().build());
+
+            for (final Map.Entry<Attachment<?>, Object> entry : value.entrySet()) {
+                final AttachmentImpl<Object> attachment = (AttachmentImpl<Object>) entry.getKey();
+                final Result<D> keyResult = KEY_CODEC.encode(coder, attachment);
+                if (!(keyResult instanceof Result.Ok(D encodedKey)))
+                    return keyResult.cast();
+                final Result<D> valueResult = attachment.codec.encode(coder, entry.getValue());
+                if (!(valueResult instanceof Result.Ok(D encodedValue)))
+                    return valueResult.cast();
+                map.put(encodedKey, encodedValue);
+            }
+
+            return new Result.Ok<>(map.build());
+        }
     }
 }

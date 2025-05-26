@@ -52,7 +52,9 @@ public class MapIconPanel extends Panel {
     }
 
     private void handlePlayMap() {
-        bridge.joinMap(host.player(), map.id(), ServerBridge.JoinMapState.PLAYING, "play_maps_gui");
+        var player = host.player();
+        player.closeInventory();
+        bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.PLAYING, "play_maps_gui");
     }
 
     private void handleViewMapDetails() {

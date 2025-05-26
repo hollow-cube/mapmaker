@@ -12,6 +12,7 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.hollowcube.mapmaker.map.runtime.MapAllocator;
+import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -71,6 +72,8 @@ public class DebugCommand extends CommandDsl {
                 "Relight the world");
         createPermissionedSubcommand("reheightmap", this::handleReHeightmapDebug,
                 "Rebuild the heightmap in the map");
+        createPermissionedSubcommand("yndranth", this::handleYndranthDebug,
+                "dump block nbt directly");
     }
 
     public @NotNull CommandDsl createPermissionlessSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
@@ -177,6 +180,22 @@ public class DebugCommand extends CommandDsl {
                 ext.heightmap(Heightmaps.WORLD_BOTTOM).recalculate();
             }
         }, 100);
+    }
+
+    private void handleYndranthDebug(@NotNull Player player, @NotNull CommandContext context) {
+        var blockPosition = player.getTargetBlockPosition(5);
+        if (blockPosition == null) {
+            player.sendMessage("No block in range!");
+            return;
+        }
+
+        var block = player.getInstance().getBlock(blockPosition);
+        if (block.nbt() == null) {
+            player.sendMessage("No block NBT");
+            return;
+        }
+
+        player.sendMessage(NbtUtil.prettyPrint(block.nbt()));
     }
 
     private void showMapAllocatorDebug(@NotNull Player player, @NotNull CommandContext context) {

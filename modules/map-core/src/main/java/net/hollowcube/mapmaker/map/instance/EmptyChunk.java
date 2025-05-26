@@ -54,7 +54,7 @@ public class EmptyChunk extends Chunk {
 
     @Override
     public @NotNull Section getSection(int section) {
-        return SECTIONS.get(section - 4);
+        return SECTIONS.get(section - minSection);
     }
 
     @Override

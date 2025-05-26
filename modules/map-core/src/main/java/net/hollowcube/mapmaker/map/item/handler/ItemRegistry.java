@@ -8,6 +8,7 @@ import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.compat.noxesium.packets.ClientboundChangeServerRulesPacket;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.util.InteractTarget;
+import net.hollowcube.mapmaker.map.util.PlayerCooldownExtension;
 import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
@@ -100,12 +101,13 @@ public class ItemRegistry {
     private final Map<String, ItemHandler> idToItemHandler = new HashMap<>();
     private final Map<String, ItemHandler> modelToItemHandler = new HashMap<>();
     private final Int2ObjectMap<ItemHandler> materialToItemHandler = new Int2ObjectArrayMap<>();
+    private final Int2ObjectMap<ItemHandler> itemModelToItemHandler = new Int2ObjectArrayMap<>();
     private final Int2ObjectMap<ItemHandler> blockToItemHandler = new Int2ObjectOpenHashMap<>();
 
     // Contains all the "public" item names known by this registry. Used for completions.
     private final Set<Key> allItemNames = new TreeSet<>((a, b) -> a.asString().compareToIgnoreCase(b.asString()));
 
-    private final TagCooldown useCooldown = new TagCooldown("mapmaker:hotbar_cooldown", 250);
+    private final TagCooldown useCooldown = new TagCooldown("mapmaker:hotbar_cooldown", 100);
 
     public ItemRegistry() {
         for (var item : Material.values()) {
@@ -123,10 +125,15 @@ public class ItemRegistry {
             idToItemHandler.put(itemHandler.key().asString().toLowerCase(Locale.ROOT), itemHandler);
             var sprite = itemHandler.sprite();
             var material = itemHandler.material();
+            var models = itemHandler.models();
             if (sprite != null) {
                 modelToItemHandler.put(sprite.model(), itemHandler);
             } else if (material != null) {
                 materialToItemHandler.put(material.id(), itemHandler);
+            } else if (models != null) {
+                for (var model : models) {
+                    itemModelToItemHandler.put(model.hashCode(), itemHandler);
+                }
             } else {
                 throw new IllegalArgumentException("ItemHandler must provide either a sprite or material");
             }
@@ -150,11 +157,16 @@ public class ItemRegistry {
             idToItemHandler.put(itemHandler.key().asString().toLowerCase(Locale.ROOT), itemHandler);
             var sprite = itemHandler.sprite();
             var material = itemHandler.material();
+            var models = itemHandler.models();
             if (sprite != null) {
                 modelToItemHandler.put(sprite.model(), itemHandler);
                 Check.argCondition(material != null, "material must be null if sprite is not");
             } else if (material != null) {
                 materialToItemHandler.put(material.id(), itemHandler);
+            } else if (models != null) {
+                for (var model : models) {
+                    itemModelToItemHandler.put(model.hashCode(), itemHandler);
+                }
             } else {
                 throw new IllegalArgumentException("ItemHandler must provide either a sprite or material");
             }
@@ -231,7 +243,7 @@ public class ItemRegistry {
         var player = event.getPlayer();
         if (player.getTag(TRIGGER_TAG) != null) return;
 
-        if (useCooldown.test(player)) {
+        if (useCooldown.test(player) && PlayerCooldownExtension.tryUseItem(player, event.getItemStack())) {
             player.setTag(TRIGGER_TAG, true);
             itemHandler.rightClicked(new ItemHandler.Click(
                     itemHandler,
@@ -261,7 +273,7 @@ public class ItemRegistry {
         var itemHandler = getHandlerFromItemStack(itemStack);
         if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_BLOCK)) return;
 
-        if (useCooldown.test(player)) {
+        if (useCooldown.test(player) && PlayerCooldownExtension.tryUseItem(player, itemStack)) {
             player.setTag(TRIGGER_TAG, true);
             var placeOffset = event.getBlockFace().toDirection();
             itemHandler.rightClicked(new ItemHandler.Click(
@@ -287,7 +299,7 @@ public class ItemRegistry {
         var itemHandler = getHandlerFromItemStack(itemStack);
         if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_ENTITY)) return;
 
-        if (useCooldown.test(player)) {
+        if (useCooldown.test(player) && PlayerCooldownExtension.tryUseItem(player, itemStack)) {
             player.setTag(TRIGGER_TAG, true);
             itemHandler.rightClicked(new ItemHandler.Click(
                     itemHandler, player,
@@ -398,7 +410,10 @@ public class ItemRegistry {
     private @Nullable ItemHandler getHandlerFromItemStack(@NotNull ItemStack itemStack) {
         var itemHandler = materialToItemHandler.get(itemStack.material().id());
         if (itemHandler != null) return itemHandler;
-        return modelToItemHandler.get(itemStack.get(DataComponents.ITEM_MODEL, ""));
+        var itemModel = itemStack.get(DataComponents.ITEM_MODEL, "");
+        itemHandler = modelToItemHandler.get(itemModel);
+        if (itemHandler != null) return itemHandler;
+        return itemModelToItemHandler.get(itemModel.hashCode());
     }
 
     public boolean isOnCooldown(@NotNull Player player) {

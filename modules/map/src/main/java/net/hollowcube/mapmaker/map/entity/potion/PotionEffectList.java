@@ -15,9 +15,8 @@ import java.util.concurrent.TimeUnit;
 public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
     public static final DecimalFormat DURATION_NUM_FORMAT = new DecimalFormat("#.###");
 
-    public static final StructCodec<PotionEffectList> CODEC = StructCodec.struct(
-            "potionEffects", Entry.CODEC.list().optional(List.of()), PotionEffectList::entries,
-            PotionEffectList::new);
+    public static final Codec<PotionEffectList> CODEC = Entry.CODEC.list().optional(List.of())
+            .transform(PotionEffectList::new, PotionEffectList::entries);
 
     public static final int MIN_DURATION_MS = 0;
     public static final int MAX_DURATION_MS = 1000 * 60 * 60 * 24; // 24h

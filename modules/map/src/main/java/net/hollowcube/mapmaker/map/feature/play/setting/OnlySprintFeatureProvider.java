@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.action.Attachments;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerUpdateStateEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerResetEvent;
@@ -42,7 +43,8 @@ public class OnlySprintFeatureProvider extends AbstractSettingFeatureProvider {
 
         var state = SaveState.fromPlayer(player);
         var playstate = state.state(PlayState.class);
-        return !playstate.settings().get(MapSettings.ONLY_SPRINT, world.map().settings());
+        return !playstate.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
+                .get(MapSettings.ONLY_SPRINT, world.map().settings());
     }
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {

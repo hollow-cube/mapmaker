@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":modules:canvas:api"))
     implementation(project(":modules:canvas:impl-standalone"))
     implementation(project(":modules:core"))
+    implementation(project(":modules:datafix"))
     implementation(project(":modules:hub"))
     implementation(project(":modules:map"))
     implementation(project(":modules:terraform"))

@@ -70,6 +70,13 @@ public abstract class ItemHandler {
         return null;
     }
 
+    /// Item model to match for this item
+    ///
+    /// Mutually exclusive with [#sprite()] and [#material()].
+    public @Nullable List<String> models() {
+        return null;
+    }
+
     /**
      * The sprite to represent this item.
      *
@@ -84,10 +91,12 @@ public abstract class ItemHandler {
         var baseTranslationKey = String.format("item.%s.%s", key().namespace(), key().value());
         builder.set(DataComponents.CUSTOM_NAME, LanguageProviderV2.translate(Component.translatable(baseTranslationKey + ".name")));
         builder.set(DataComponents.LORE, LanguageProviderV2.translateMulti(baseTranslationKey + ".lore", List.of()));
+
         updateItemStack(builder, nbt != null ? TagHandler.fromCompound(nbt) : TagHandler.newHandler());
 
         var sprite = sprite();
         if (sprite != null) builder.set(DataComponents.ITEM_MODEL, sprite.model());
+        else if (models() != null) builder.set(DataComponents.ITEM_MODEL, models().getFirst());
 
         return builder.build();
     }
