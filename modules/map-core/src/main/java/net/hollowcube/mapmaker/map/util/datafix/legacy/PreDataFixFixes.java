@@ -25,12 +25,12 @@ public final class PreDataFixFixes {
             case 19 -> 20; // OPTVARINT
             case 20 -> 21; // POSE
             case 21 -> 22; // CAT_VARIANT
-            case 22 -> 24; // FROG_VARIANT
-            case 23 -> 25; // OPT_GLOBAL_POSITION
-            case 24 -> 26; // PAINTING_VARIANT
-            case 25 -> 27; // SNIFFER_STATE
-            case 26 -> 29; // VECTOR3
-            case 27 -> 30; // QUATERNION
+            case 22 -> 26; // FROG_VARIANT
+            case 23 -> 29; // OPT_GLOBAL_POSITION
+            case 24 -> 30; // PAINTING_VARIANT
+            case 25 -> 31; // SNIFFER_STATE
+            case 26 -> 33; // VECTOR3
+            case 27 -> 34; // QUATERNION
             default -> index;
         };
     }
