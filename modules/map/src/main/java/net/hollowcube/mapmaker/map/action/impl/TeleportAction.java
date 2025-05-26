@@ -139,8 +139,8 @@ public record TeleportAction(
             super(width, 2);
             this.onChange = onChange;
 
-            var translationKey = "gui.action.teleport." + label + ".name";
-            this.anvilTitle = LanguageProviderV2.translateToPlain(translationKey);
+            var translationKey = "gui.action.teleport." + label;
+            this.anvilTitle = LanguageProviderV2.translateToPlain(translationKey + ".name");
             add(0, 0, new Text(translationKey, width, 1, anvilTitle)
                     .font("small").align(1 + xOffset, 6));
             this.inputText = add(0, 1, new Text(translationKey, width, 1, "")
