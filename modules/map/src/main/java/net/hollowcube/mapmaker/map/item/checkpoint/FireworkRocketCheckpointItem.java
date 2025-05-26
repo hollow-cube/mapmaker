@@ -10,9 +10,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
-import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -31,9 +29,6 @@ public record FireworkRocketCheckpointItem(int amount, int duration) implements 
             "duration", ExtraCodecs.clamppedInt(INFINITE_DURATION, MAX_DURATION).optional(INFINITE_DURATION), FireworkRocketCheckpointItem::duration,
             FireworkRocketCheckpointItem::new);
 
-    private static final ItemStack DEFAULT_ITEM = ItemStack.of(Material.STICK)
-            .with(DataComponents.ITEM_NAME, Material.FIREWORK_ROCKET.prototype().get(DataComponents.ITEM_NAME));
-
     public @NotNull FireworkRocketCheckpointItem withAmount(int amount) {
         return new FireworkRocketCheckpointItem(amount, this.duration);
     }
@@ -49,9 +44,7 @@ public record FireworkRocketCheckpointItem(int amount, int duration) implements 
 
     @Override
     public @NotNull ItemStack createItemStack() {
-        return FireworkRocketItem.setDurationMillis(
-                FireworkRocketItem.withCount(DEFAULT_ITEM, this.amount),
-                this.duration * 50);
+        return FireworkRocketItem.get(this.amount, this.duration * 50);
     }
 
     @Override

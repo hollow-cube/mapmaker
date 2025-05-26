@@ -7,10 +7,13 @@ import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.gui.displayentity.AbstractEditDisplayView;
 import net.hollowcube.mapmaker.map.gui.displayentity.CreateDisplayView;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.BlockFace;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class DisplayEntityItem extends ItemHandler {
 
@@ -22,8 +25,10 @@ public class DisplayEntityItem extends ItemHandler {
     }
 
     @Override
-    public @NotNull Material material() {
-        return Material.ACACIA_BOAT;
+    public void build(ItemStack.@NotNull Builder builder, @Nullable CompoundBinaryTag tag) {
+        super.build(builder, tag);
+
+        builder.material(Material.ACACIA_BOAT);
     }
 
     @Override
