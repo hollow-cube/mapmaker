@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.util.datafix;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
 public class V4326 extends DataVersion {
@@ -171,10 +172,10 @@ public class V4326 extends DataVersion {
                         action.put("type", "mapmaker:take_item");
                     } else {
                         action.put("type", "mapmaker:give_item");
-                        action.put("item", type);
+                        action.put("item", Key.key(type).asString());
                         action.put("amount", item.remove("quantity"));
                         action.put("duration", item.remove("duration").as(Number.class, 0).intValue() / 50);
-                        action.put("riptideLevel", item.remove("riptideLevel"));
+                        action.put("riptide", item.remove("riptideLevel"));
                     }
                     actions.put(action);
                 }

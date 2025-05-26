@@ -7,7 +7,9 @@ import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Transcoder;
+import net.minestom.server.registry.RegistryTranscoder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -416,7 +418,8 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             }
 
             saveState.serializer = serializer;
-            saveState.state = serializer.codec().decode(Transcoder.JSON, stateObj).orElseThrow();
+            var coder = new RegistryTranscoder<>(Transcoder.JSON, MinecraftServer.process());
+            saveState.state = serializer.codec().decode(coder, stateObj).orElseThrow();
         }
         return saveState;
     }

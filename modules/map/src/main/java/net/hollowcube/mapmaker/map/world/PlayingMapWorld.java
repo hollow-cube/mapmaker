@@ -5,6 +5,7 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.action.Attachments;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartFinishedEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartSpectatorEvent;
@@ -54,6 +55,11 @@ import java.util.Objects;
 @SuppressWarnings("UnstableApiUsage")
 public class PlayingMapWorld extends AbstractMapMakerMapWorld {
     private final Logger logger = LoggerFactory.getLogger(PlayingMapWorld.class);
+
+    static {
+        // Force init. Very gross should fix
+        var a = Attachments.PROGRESS_INDEX;
+    }
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("playing-events", EventFilter.INSTANCE)
             .addListener(PlayerBlockBreakEvent.class, event -> event.setCancelled(true))
