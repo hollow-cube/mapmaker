@@ -232,6 +232,13 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         MapCompletionAnimation.cancel(player); // In case the player resets themselves
 
+        // Remove any owned entities from the player
+        var ownedEntities = player.getAndSetTag(BaseParkourMapFeatureProvider.OWNED_ENTITIES, null);
+        if (ownedEntities != null) for (var entityId : ownedEntities) {
+            var entity = event.getMapWorld().instance().getEntityById(entityId);
+            if (entity != null) entity.remove();
+        }
+
         // Set the hotbar
         var itemRegistry = event.mapWorld().itemRegistry();
         var inventory = player.getInventory();

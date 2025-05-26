@@ -58,7 +58,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -281,7 +280,12 @@ public class MapServerRunner extends AbstractMapServer {
 
             // Create the world, holding the player here until it is ready for them to join.
             var map = mapService().getMap(joinInfo.playerId(), joinInfo.mapId());
-            var mapWorld = Objects.requireNonNull(FutureUtil.getUnchecked(allocator().create(map, worldTypeFor(joinInfo))));
+            var mapWorld = FutureUtil.getUnchecked(allocator().create(map, worldTypeFor(joinInfo)));
+            if (mapWorld == null) {
+                logger.error("Failed to create map world for {}:{}", joinInfo.playerId(), joinInfo.mapId());
+                player.kick(Component.text("Failed to create map world. Please try again later."));
+                return;
+            }
 
             // Ensure resource pack was applied before allowing the player in
             FutureUtil.getUnchecked(resourcePackFuture);

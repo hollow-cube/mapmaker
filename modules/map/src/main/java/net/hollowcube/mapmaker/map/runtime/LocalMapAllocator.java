@@ -170,25 +170,40 @@ public class LocalMapAllocator implements MapAllocator {
     // Small wrapper around direct allocator to keep track of players in the instance
     private <T extends AbstractMapWorld> T allocateTracked(@NotNull MapData map, @NotNull MapWorld.Constructor<T> ctor) {
         metrics.write(new MapInstanceCreatedEvent(map.id(), ctor.type().getSimpleName()));
-        var createdWorld = direct.allocateDirect(map, ctor);
-        createdWorld.instance().eventNode().addListener(PlayerInstanceLeaveEvent.class, event -> {
-            // Get the world from the instance because 1: the player is no longer in a world, and 2: we care about the root world (editing, not testing)
-            var world = MapWorld.unsafeFromInstance(event.getInstance());
-            if (world == null) return;
+        try {
+            var createdWorld = direct.allocateDirect(map, ctor);
+            createdWorld.instance().eventNode().addListener(PlayerInstanceLeaveEvent.class, event -> {
+                // Get the world from the instance because 1: the player is no longer in a world, and 2: we care about the root world (editing, not testing)
+                var world = MapWorld.unsafeFromInstance(event.getInstance());
+                if (world == null) return;
 
-            // If the owner has left, destroy the map on its next tick.
-            var playerData = PlayerDataV2.fromPlayer(event.getPlayer());
-            if (playerData.id().equals(world.map().owner()) && !world.map().isPublished()) {
-                world.instance().scheduleNextTick(ignored -> destroy(world.worldId(), Component.translatable("map.kicked")));
-                return;
+                // If the owner has left, destroy the map on its next tick.
+                var playerData = PlayerDataV2.fromPlayer(event.getPlayer());
+                if (playerData.id().equals(world.map().owner()) && !world.map().isPublished()) {
+                    world.instance().scheduleNextTick(ignored -> destroy(world.worldId(), Component.translatable("map.kicked")));
+                    return;
+                }
+
+                // Stop if there are still players in the instance
+                if (event.getInstance().getPlayers().size() > 1) return;
+
+                destroy(world.worldId(), Component.translatable("map.closed"));
+            });
+            return createdWorld;
+        } catch (Exception e) {
+            logger.error("Failed to allocate map " + map.id() + " of type " + ctor.type().getSimpleName(), e);
+            ExceptionReporter.reportException(e);
+
+            lock.lock();
+            try {
+                var key = new MapKey(map.id(), ctor.type());
+                maps.remove(key);
+            } finally {
+                lock.unlock();
             }
 
-            // Stop if there are still players in the instance
-            if (event.getInstance().getPlayers().size() > 1) return;
-
-            destroy(world.worldId(), Component.translatable("map.closed"));
-        });
-        return createdWorld;
+            return null;
+        }
     }
 
     // Direct allocator delegated calls.

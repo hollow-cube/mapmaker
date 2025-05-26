@@ -27,11 +27,13 @@ final class DirectMapAllocator implements MapAllocator {
 
     @Override
     public <T extends AbstractMapWorld> @NotNull T allocateDirect(@NotNull MapData map, @NotNull MapWorld.Constructor<T> ctor) {
+        T world = null;
         try {
-            var world = ctor.create(server, map);
+            world = ctor.create(server, map);
             world.load();
             return world;
         } catch (Exception e) {
+            if (world != null) free(world, CLOSED_MESSAGE);
             logger.error("failed to allocate world", e);
             throw new RuntimeException("failed to allocate world", e);
         }

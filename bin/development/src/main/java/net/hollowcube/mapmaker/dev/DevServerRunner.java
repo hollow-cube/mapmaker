@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 public class DevServerRunner extends AbstractMapServer {
@@ -170,7 +169,12 @@ public class DevServerRunner extends AbstractMapServer {
             }
 
             // Move session and spawn the player into the targeted map
-            var world = Objects.requireNonNull(FutureUtil.getUnchecked(targetWorld));
+            var world = FutureUtil.getUnchecked(targetWorld);
+            if (world == null) {
+                logger.error("failed to get target world for player {}: {}", player.getUsername(), targetWorld);
+                event.getPlayer().kick(Component.text("An unknown error has occurred. Please try again later."));
+                return;
+            }
             var joinType = world instanceof EditingMapWorld ? "editing" : "playing";
             var presence = new Presence(Presence.TYPE_MAPMAKER_MAP, joinType, "devserver", world.map().id());
             super.transferPlayerSession(player, presence);
@@ -232,6 +236,10 @@ public class DevServerRunner extends AbstractMapServer {
                 player.sendMessage("You are not in an editing world!");
             }
         }, "Enables progress index add mode for the current map");
+
+        dbg.createPermissionedSubcommand("inst", (player, _) -> {
+            System.out.println(MinecraftServer.getInstanceManager().getInstances());
+        }, "");
 
         return dbg;
     }
