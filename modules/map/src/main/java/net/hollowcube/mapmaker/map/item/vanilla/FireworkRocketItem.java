@@ -64,7 +64,7 @@ public class FireworkRocketItem extends VanillaItemHandler {
         int durationTicks = click.itemStack().getTag(DURATION_TAG) / MinecraftServer.TICK_MS;
         spawnRocketEntity(player, durationTicks);
         if (isFinite(click.itemStack())) {
-            click.updateItemStack(b -> b.amount(click.itemStack().amount() - 1));
+            click.consume(1);
         }
     }
 

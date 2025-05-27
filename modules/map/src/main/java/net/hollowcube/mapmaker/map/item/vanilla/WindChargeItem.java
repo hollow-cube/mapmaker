@@ -39,7 +39,7 @@ public class WindChargeItem extends VanillaItemHandler {
         player.setTag(BaseParkourMapFeatureProvider.OWNED_ENTITIES, entities);
 
         if (isFinite(click.itemStack())) {
-            click.updateItemStack(b -> b.amount(click.itemStack().amount() - 1));
+            click.consume(1);
         }
     }
 

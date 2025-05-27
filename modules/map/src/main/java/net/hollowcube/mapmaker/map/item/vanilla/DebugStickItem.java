@@ -48,7 +48,7 @@ public class DebugStickItem extends ItemHandler {
         } else {
             sendActionBar(player, String.format("Selected \"%s\" (%s)", newProperty, block.getProperty(newProperty)));
             if (!newProperty.equals(property)) {
-                click.updateItemStack(b -> b.set(TAG_PROPERTY, state.set(blockId, newProperty)));
+                click.update(b -> b.set(TAG_PROPERTY, state.set(blockId, newProperty)));
             }
         }
     }
@@ -73,7 +73,7 @@ public class DebugStickItem extends ItemHandler {
             sendActionBar(player, String.format("Set \"%s\" to %s", newProperty, newValue));
 
             if (!newProperty.equals(property)) {
-                click.updateItemStack(b -> b.set(TAG_PROPERTY, state.set(blockId, newProperty)));
+                click.update(b -> b.set(TAG_PROPERTY, state.set(blockId, newProperty)));
             }
         }
     }

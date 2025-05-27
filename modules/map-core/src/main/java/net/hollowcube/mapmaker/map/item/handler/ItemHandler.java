@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -126,15 +127,23 @@ public abstract class ItemHandler {
             return player.getInstance();
         }
 
-        public void updateItemStack(@NotNull Consumer<ItemStack.Builder> func) {
-            var updatedItemStack = itemStack.with(builder -> {
-                func.accept(builder);
+        public void consume(int amount) {
+            this.update((stack, builder) -> builder.amount(stack.amount() - amount));
+        }
 
-                var sprite = handler.sprite();
+        public void update(@NotNull BiConsumer<ItemStack, ItemStack.Builder> updater) {
+            var stack = this.itemStack();
+            this.player().setItemInHand(this.hand(), stack.with(builder -> {
+                updater.accept(stack, builder);
+
+                var sprite = this.handler().sprite();
                 if (sprite != null) builder.set(DataComponents.ITEM_MODEL, sprite.model());
-                builder.setTag(ID_TAG, handler.key().asString());
-            });
-            player.setItemInHand(hand, updatedItemStack);
+                builder.setTag(ID_TAG, this.handler().key().asString());
+            }));
+        }
+
+        public void update(@NotNull Consumer<ItemStack.Builder> updater) {
+            this.update((_, builder) -> updater.accept(builder));
         }
     }
 
