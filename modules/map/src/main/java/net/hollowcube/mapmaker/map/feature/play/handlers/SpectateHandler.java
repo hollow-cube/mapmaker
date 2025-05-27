@@ -89,9 +89,9 @@ public final class SpectateHandler {
             var id = world.itemRegistry().getItemId(inventory.getItemStack(i));
             if (id == null) continue;
             if (!canFly && id.equals(ToggleFlightItem.ID_ON)) {
-                inventory.setItemStack(i, ToggleFlightItem.INSTANCE_OFF.buildItemStack(null));
+                inventory.setItemStack(i, ToggleFlightItem.INSTANCE_OFF.getItemStack());
             } else if (canFly && id.equals(ToggleFlightItem.ID_OFF)) {
-                inventory.setItemStack(i, ToggleFlightItem.INSTANCE_ON.buildItemStack(null));
+                inventory.setItemStack(i, ToggleFlightItem.INSTANCE_ON.getItemStack());
             }
         }
 

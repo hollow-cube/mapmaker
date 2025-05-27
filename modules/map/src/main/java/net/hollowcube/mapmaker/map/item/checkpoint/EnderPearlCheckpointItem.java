@@ -10,9 +10,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
-import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
 import net.minestom.server.item.component.UseCooldown;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,9 +29,6 @@ public record EnderPearlCheckpointItem(int amount, int cooldown) implements Chec
             "cooldown", ExtraCodecs.clamppedInt(MIN_COOLDOWN, MAX_COOLDOWN).optional(DEFAULT_COOLDOWN), EnderPearlCheckpointItem::cooldown,
             EnderPearlCheckpointItem::new);
 
-    private static final ItemStack DEFAULT_ITEM = ItemStack.of(Material.STICK)
-            .with(DataComponents.ITEM_NAME, Material.ENDER_PEARL.prototype().get(DataComponents.ITEM_NAME));
-
     public @NotNull EnderPearlCheckpointItem withAmount(int amount) {
         return new EnderPearlCheckpointItem(amount, this.cooldown);
     }
@@ -49,10 +44,7 @@ public record EnderPearlCheckpointItem(int amount, int cooldown) implements Chec
 
     @Override
     public @NotNull ItemStack createItemStack() {
-        var itemStack = this.cooldown > 0
-                ? DEFAULT_ITEM.with(DataComponents.USE_COOLDOWN, new UseCooldown(this.cooldown / 20f, ID.asString()))
-                : DEFAULT_ITEM.without(DataComponents.USE_COOLDOWN);
-        return EnderPearlItem.withCount(itemStack, this.amount);
+        return EnderPearlItem.get(this.amount, this.cooldown > 0 ? new UseCooldown(this.cooldown / 20f, ID.asString()) : null);
     }
 
     @Override

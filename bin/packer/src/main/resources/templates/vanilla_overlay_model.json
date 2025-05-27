@@ -17,12 +17,24 @@
       },
       {
         "type": "minecraft:select",
-        "property": "minecraft:custom_model_data",
-        "index": 1,
+        "property": "minecraft:display_context",
         "fallback": {
           "type": "minecraft:empty"
         },
-        "cases": "$overlays"
+        "cases": [
+          {
+            "when": ["gui"],
+            "model": {
+              "type": "minecraft:select",
+              "property": "minecraft:custom_model_data",
+              "index": 1,
+              "fallback": {
+                "type": "minecraft:empty"
+              },
+              "cases": "$overlays"
+            }
+          }
+        ]
       }
     ]
   }

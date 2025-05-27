@@ -5,9 +5,11 @@ import net.hollowcube.common.util.ExtraTags;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.GenericTempActionBarProvider;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.DebugStickState;
 import net.minestom.server.tag.Tag;
@@ -25,8 +27,10 @@ public class DebugStickItem extends ItemHandler {
     }
 
     @Override
-    public @NotNull Material material() {
-        return Material.DEBUG_STICK;
+    public void build(ItemStack.@NotNull Builder builder, @Nullable CompoundBinaryTag tag) {
+        super.build(builder, tag);
+
+        builder.material(Material.DEBUG_STICK);
     }
 
     @Override
@@ -44,7 +48,7 @@ public class DebugStickItem extends ItemHandler {
         } else {
             sendActionBar(player, String.format("Selected \"%s\" (%s)", newProperty, block.getProperty(newProperty)));
             if (!newProperty.equals(property)) {
-                click.updateItemStack(b -> b.set(TAG_PROPERTY, state.set(blockId, newProperty)));
+                click.update(b -> b.set(TAG_PROPERTY, state.set(blockId, newProperty)));
             }
         }
     }
@@ -69,7 +73,7 @@ public class DebugStickItem extends ItemHandler {
             sendActionBar(player, String.format("Set \"%s\" to %s", newProperty, newValue));
 
             if (!newProperty.equals(property)) {
-                click.updateItemStack(b -> b.set(TAG_PROPERTY, state.set(blockId, newProperty)));
+                click.update(b -> b.set(TAG_PROPERTY, state.set(blockId, newProperty)));
             }
         }
     }

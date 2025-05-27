@@ -5,6 +5,8 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.lang.MessagesBase;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.mapmaker.util.OverlayItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.ShadowColor;
@@ -12,6 +14,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.component.DataComponent;
 import net.minestom.server.component.DataComponentMap;
 import net.minestom.server.component.DataComponents;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.component.CustomModelData;
 import net.minestom.server.item.component.HeadProfile;
 import org.jetbrains.annotations.NotNull;
@@ -94,6 +97,7 @@ public class Button extends Element implements ButtonClickAliases {
     public @NotNull Button model(@NotNull String model, @Nullable String overlay) {
         if (Objects.equals(this.itemModel, model) && Objects.equals(this.itemOverlay, overlay)) return this;
         this.itemModel = model;
+        this.itemOverlay = overlay;
 
         if (host != null) host.queueRedraw();
         return this;
@@ -112,6 +116,26 @@ public class Button extends Element implements ButtonClickAliases {
         this.extraComponents = extraComponents;
 
         if (host != null) host.queueRedraw();
+        return this;
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public @NotNull Button from(@NotNull ItemStack stack) {
+        var overlay = OverlayItem.getOverlay(stack);
+        var base = OverlayItem.getBaseModel(stack);
+
+        this.model(OpUtils.or(base, () -> stack.get(DataComponents.ITEM_MODEL)), overlay);
+        this.text(Component.empty()
+                .decoration(TextDecoration.ITALIC, false)
+                .append(OpUtils.firstNonNull(
+                        stack.get(DataComponents.CUSTOM_NAME),
+                        stack.get(DataComponents.ITEM_NAME),
+                        Component.empty()
+                )),
+                List.of()
+        );
+        this.extraComponents(stack.componentPatch());
+
         return this;
     }
 
@@ -209,8 +233,8 @@ public class Button extends Element implements ButtonClickAliases {
 
         if (this.itemModel == null || this.itemLore == null) return;
         builder.editSlotsWithout(0, 0, slotWidth, slotHeight, DataComponents.TOOLTIP_DISPLAY);
-        if (!"minecraft:stick".equals(itemModel))
-            builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.ITEM_MODEL, itemModel);
+        if (!"minecraft:stick".equals(itemModel) || itemOverlay != null)
+            builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.ITEM_MODEL, itemOverlay != null ? OverlayItem.OVERLAY_ITEM_MODEL : itemModel);
         if (itemProfile != null)
             builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.PROFILE, itemProfile);
         if (extraComponents != null) {
