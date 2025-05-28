@@ -1,8 +1,11 @@
 package net.hollowcube.mapmaker.map.feature.experimental.pathtool;
 
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static net.hollowcube.mapmaker.map.feature.experimental.pathtool.PathToolFeatureHandler.thePath;
 
@@ -13,8 +16,10 @@ public class PathToolItemHandler extends ItemHandler {
     }
 
     @Override
-    public @NotNull Material material() {
-        return Material.BLAZE_ROD;
+    public void build(ItemStack.@NotNull Builder builder, @Nullable CompoundBinaryTag tag) {
+        super.build(builder, tag);
+
+        builder.material(Material.BLAZE_ROD);
     }
 
     @Override

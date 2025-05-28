@@ -19,15 +19,12 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.TranslationArgument;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.codec.StructCodec;
-import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -147,12 +144,7 @@ public record GiveItemAction(
             if (data.item == null) return;
 
             this.slotInput.update(Slot.values()[data.slot]);
-            var iconButton = this.slotInput.iconButton();
-            var iconStack = data.item.createItemStack();
-            iconButton.model(iconStack.get(DataComponents.ITEM_MODEL), null);
-            iconButton.text(Component.text("").decoration(TextDecoration.ITALIC, false)
-                    .append(iconStack.get(DataComponents.CUSTOM_NAME, iconStack.get(DataComponents.ITEM_NAME))), List.of());
-            iconButton.extraComponents(iconStack.componentPatch());
+            this.slotInput.iconButton().from(data.item.createItemStack());
 
             updateItem((T) data.item);
         }
