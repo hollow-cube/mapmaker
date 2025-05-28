@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.block.custom;
 
+import net.hollowcube.common.util.JsonUtil;
 import net.hollowcube.common.util.dfu.DFU;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
@@ -103,6 +104,12 @@ public class StatusPlateBlock implements ObjectBlockHandler, InteractTarget, Pre
 
     @Override
     public void sendDebugInfo(@NotNull Player player, @NotNull Block block) {
-        // todo bring me back
+        var data = block.getTag(DATA_TAG);
+        var info = JsonUtil.toPrettyJson(StatusEffectData.CODEC, data);
+        if (info == null) {
+            player.sendMessage("No status data found for this block.");
+        } else {
+            player.sendMessage("Data: " + info);
+        }
     }
 }

@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.block.custom;
 
+import net.hollowcube.common.util.JsonUtil;
 import net.hollowcube.common.util.dfu.DFU;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.action.gui.ActionEditorView;
@@ -106,7 +107,13 @@ public class CheckpointPlateBlock implements ObjectBlockHandler, InteractTarget,
 
     @Override
     public void sendDebugInfo(@NotNull Player player, @NotNull Block block) {
-        // todo bring me back
+        var data = block.getTag(DATA_TAG);
+        var info = JsonUtil.toPrettyJson(CheckpointEffectDataV2.CODEC, data);
+        if (info == null) {
+            player.sendMessage("No checkpoint data found for this block.");
+        } else {
+            player.sendMessage("Data: " + info);
+        }
     }
 
     public static void updateItemStack(ItemStack.@NotNull Builder builder, @NotNull TagHandler tag) {
