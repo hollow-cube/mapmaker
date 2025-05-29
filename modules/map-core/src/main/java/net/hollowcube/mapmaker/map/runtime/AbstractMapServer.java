@@ -702,6 +702,9 @@ public abstract class AbstractMapServer implements MapServer {
 
         if (MINESTOM_PACKET_EXCEPTION.matcher(t.toString()).find())
             return false;
+        // Some expected IO exceptions that we don't want to report.
+        if (t.toString().contains("header parser received no bytes") || t.toString().contains("Connection reset by peer"))
+            return false;
 
         // todo fancier exception grouping
         return true;

@@ -37,7 +37,11 @@ void main() {
     if (icol.x == 78 && icol.y >> 2 == 11) {
         color = vec4(1);// Remove our marker color
 
-        vec2 center = (inverse(ProjMat) * inverse(ModelViewMat) * vec4(0, 0, 0, 1)).xy;//why cant i multiply from other side instead of using inverse?
+        //        vec2 center = vec2(floor(ceil(2.0/ProjMat[0][0] - 0.1)/2.0), floor(ceil(2.0/(-ProjMat[1][1]) + 0.1)/2.0));        center -= vec2(81, 94);
+        vec2 center = vec2(
+        trunc((ceil(2.0/ProjMat[0][0] - 0.001) - 176.0)/2.0)+88.0,
+        trunc((ceil(2.0/(-ProjMat[1][1]) - 0.001) - 222.0)/2.0)+111.0
+        );
         center -= vec2(81, 94);
 
         int sizeIndex = ((icol.y & 3) << 1) | ((icol.z >> 7) & 1);
@@ -51,7 +55,7 @@ void main() {
         }
         // TODO: offset between player and hotbar slots.
 
-        pos = vec3(floor(center + offset + slotPos), pos.z - 1);
+        pos = vec3(center + round(offset + slotPos), pos.z - 1);
     }
 
     gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);
