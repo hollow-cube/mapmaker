@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.gui.store;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
+import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
@@ -98,7 +99,7 @@ class AddonsPanel extends Panel {
             if (firstLocked != null) {
                 cost.background(COST_SPRITES[firstLocked.cost], -1, 24);
             } else {
-                cost.background(null);
+                cost.background((Sprite) null);
             }
         }
 

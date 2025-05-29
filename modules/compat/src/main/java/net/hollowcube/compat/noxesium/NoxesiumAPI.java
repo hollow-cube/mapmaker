@@ -6,7 +6,9 @@ import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.component.CustomData;
 import net.minestom.server.tag.Tag;
+import org.jetbrains.annotations.Nullable;
 
 public class NoxesiumAPI {
 
@@ -23,6 +25,11 @@ public class NoxesiumAPI {
 
     public static ItemStack setImmovable(ItemStack stack) {
         return stack.with(NoxesiumAPI::setImmovable);
+    }
+
+    public static CustomData setImmovable(@Nullable CustomData data) {
+        data = data == null ? CustomData.EMPTY : data;
+        return data.withTag(BUKKIT_TAG, IMMUTABLE_TAG);
     }
 
     public static boolean canUseFeature(Player player, NoxesiumFeature feature) {
