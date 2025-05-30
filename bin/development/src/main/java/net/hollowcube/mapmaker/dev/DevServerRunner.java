@@ -14,8 +14,6 @@ import net.hollowcube.mapmaker.map.MapMgmtConsumerImpl;
 import net.hollowcube.mapmaker.map.MapServerRunner;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.action.ActionList;
-import net.hollowcube.mapmaker.map.action.gui.ActionEditorView;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
@@ -25,7 +23,6 @@ import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
-import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerSkin;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.terraform.Terraform;
@@ -217,11 +214,6 @@ public class DevServerRunner extends AbstractMapServer {
     protected @NotNull DebugCommand createDebugCommand() {
         DebugCommand dbg = super.createDebugCommand();
 
-        dbg.createPermissionedSubcommand("act", (player, _) -> {
-            var host = Panel.open(player, new ActionEditorView(new ActionList(), "Debug"));
-            host.setTag(ActionEditorView.ACTION_LOCATION, player.getPosition());
-        }, "aaa");
-
         dbg.createPermissionedSubcommand("enableprogressaddition", (player, context) -> {
             var world = MapWorld.forPlayerOptional(player);
             if (world == null) {
@@ -236,10 +228,6 @@ public class DevServerRunner extends AbstractMapServer {
                 player.sendMessage("You are not in an editing world!");
             }
         }, "Enables progress index add mode for the current map");
-
-        dbg.createPermissionedSubcommand("inst", (player, _) -> {
-            System.out.println(MinecraftServer.getInstanceManager().getInstances());
-        }, "");
 
         return dbg;
     }
