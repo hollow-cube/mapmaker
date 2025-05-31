@@ -2,9 +2,12 @@ package net.hollowcube.mapmaker.dev;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
+import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.MojangUtil;
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.compat.moulberrytweaks.debugrender.DebugShape;
+import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderAddPacket;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
@@ -15,6 +18,7 @@ import net.hollowcube.mapmaker.map.MapServerRunner;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
+import net.hollowcube.mapmaker.map.command.utility.DebugPoiCommand;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
@@ -26,9 +30,11 @@ import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.player.PlayerSkin;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.terraform.Terraform;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
@@ -228,6 +234,23 @@ public class DevServerRunner extends AbstractMapServer {
                 player.sendMessage("You are not in an editing world!");
             }
         }, "Enables progress index add mode for the current map");
+
+        dbg.createPermissionlessSubcommand("render", (player, _) -> {
+            var pos = player.getPosition().add(0, 1, 0);
+            new ClientboundDebugRenderAddPacket(
+                    Key.key("matt:shape"),
+//                    new DebugShape.LineStrip(List.of(pos, pos.add(1)), 0xFFFFFFFF, 20f),
+//                    new DebugShape.Quad(pos, pos.add(1, 0, 0), pos.add(1, 1, 0), pos.add(0, 1, 0), 0xFFFFFFFF),
+//                    new DebugShape.Ellipsoid(player.getPosition().add(0, 1, 0), Vec.ONE,
+//                            new Quaternion(new Vec(1, 0, 0), 0).into(),
+//                            0xFFFFFFFF, 10),
+//                    new DebugShape.Text(player.getPosition().add(0, 1, 0), Component.text("hello, world!").appendNewline().append(Component.text("second line!")), true, 0xFF000000),
+                    new DebugShape.Box(pos, Vec.ONE, new Quaternion(new Vec(1, 0, 0), 0).into(), 0x33FFFFFF, 0xFFFFFFFF, 10),
+                    DebugShape.FLAG_SHOW_THROUGH_WALLS, 20).send(player);
+        }, "");
+
+        dbg.createPermissionlessSubcommand("poi", DebugPoiCommand::handleDebugRegions,
+                "Shows the location information about nearby pois");
 
         return dbg;
     }

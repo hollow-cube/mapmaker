@@ -360,6 +360,9 @@ public class MapServerRunner extends AbstractMapServer {
             }
         }, "Enables progress index add mode for the current map");
 
+        cmd.createPermissionlessSubcommand("poi", DebugPoiCommand::handleDebugRegions,
+                "Shows the location information about nearby pois");
+
         return cmd;
     }
 
