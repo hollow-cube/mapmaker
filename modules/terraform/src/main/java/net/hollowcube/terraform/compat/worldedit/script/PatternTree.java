@@ -15,7 +15,6 @@ import net.hollowcube.terraform.util.script.ParseException;
 import net.hollowcube.terraform.util.script.ParseTree;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;

@@ -1,6 +1,8 @@
 #version 150
 
 #moj_import <minecraft:fog.glsl>
+#moj_import <minecraft:dynamictransforms.glsl>
+#moj_import <minecraft:projection.glsl>
 
 in vec3 Position;
 in vec4 Color;
@@ -9,11 +11,8 @@ in ivec2 UV2;
 
 uniform sampler2D Sampler2;
 
-uniform mat4 ModelViewMat;
-uniform mat4 ProjMat;
-uniform int FogShape;
-
-out float vertexDistance;
+out float sphericalVertexDistance;
+out float cylindricalVertexDistance;
 out vec4 vertexColor;
 out vec2 texCoord0;
 
@@ -37,7 +36,6 @@ void main() {
     if (icol.x == 78 && icol.y >> 2 == 11) {
         color = vec4(1);// Remove our marker color
 
-        //        vec2 center = vec2(floor(ceil(2.0/ProjMat[0][0] - 0.1)/2.0), floor(ceil(2.0/(-ProjMat[1][1]) + 0.1)/2.0));        center -= vec2(81, 94);
         vec2 center = vec2(
         trunc((ceil(2.0/ProjMat[0][0] - 0.001) - 176.0)/2.0)+88.0,
         trunc((ceil(2.0/(-ProjMat[1][1]) - 0.001) - 222.0)/2.0)+111.0
@@ -55,11 +53,13 @@ void main() {
         }
         // TODO: offset between player and hotbar slots.
 
-        pos = vec3(center + round(offset + slotPos), pos.z - 1);
+        pos = vec3(center + round(offset + slotPos), pos.z - 0.03);
     }
 
     gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);
-    vertexDistance = fog_distance(pos, FogShape);
+
+    sphericalVertexDistance = fog_spherical_distance(pos);
+    cylindricalVertexDistance = fog_cylindrical_distance(pos);
     vertexColor = color * texelFetch(Sampler2, UV2 / 16, 0);
     texCoord0 = UV0;
 

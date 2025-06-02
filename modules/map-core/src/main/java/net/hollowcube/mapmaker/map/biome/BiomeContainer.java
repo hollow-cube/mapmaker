@@ -176,7 +176,7 @@ public class BiomeContainer implements TerraformInstanceBiomes {
             if (minestomBiome == null) continue;
 
             var namespace = Objects.requireNonNull(info.key());
-            var key = RegistryKey.<Biome>unsafeOf(namespace);
+            var key = RegistryKey.<Biome>unsafeOf(namespace.asString());
 
             var biome = new RegisteredBiome(nextId++, namespace.key(), info, minestomBiome);
 
