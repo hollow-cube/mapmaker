@@ -39,6 +39,7 @@ public final class CheckpointItems {
         register(FireworkRocketCheckpointItem.ID, FireworkRocketCheckpointItem.CODEC);
         register(TridentCheckpointItem.ID, TridentCheckpointItem.CODEC);
         register(WindChargeCheckpointItem.ID, WindChargeCheckpointItem.CODEC);
+        register(BlockCheckpointItem.ID, BlockCheckpointItem.CODEC);
     }
 
     private static <T extends CheckpointItem> void register(@NotNull Key id, @NotNull StructCodec<T> codec) {

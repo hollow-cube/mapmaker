@@ -19,6 +19,7 @@ import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.component.BlockPredicates;
 import net.minestom.server.item.component.ItemBlockState;
 import net.minestom.server.listener.BlockPlacementListener;
 import net.minestom.server.network.packet.client.play.ClientPlayerBlockPlacementPacket;
@@ -59,18 +60,19 @@ public class BlockPlacementFeatureProvider {
         // TODO: Decide at this point if this is a block placement we care about (eg if the item in hand is a placeable block)
         //  One minor note is that we need to start the timer if you place a block
 
-        final Block interactedBlock = instance.getBlock(blockPosition);
+        final var ghostBlockHolder = GhostBlockHolder.forPlayer(player);
+        final Block interactedBlock = ghostBlockHolder.getBlock(blockPosition);
 
         final BlockFace blockFace = packet.blockFace();
         final Point cursorPosition = new Vec(packet.cursorPositionX(), packet.cursorPositionY(), packet.cursorPositionZ());
 
         // Verify if the player can place the block
-//        BlockPredicates placePredicate = usedItem.get(DataComponents.CAN_PLACE_ON, BlockPredicates.NEVER);
-//        final boolean canPlaceBlock = placePredicate.test(interactedBlock);
-//        if (!canPlaceBlock) {
-//            player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
-//            return true;
-//        }
+        BlockPredicates placePredicate = usedItem.get(DataComponents.CAN_PLACE_ON, BlockPredicates.NEVER);
+        final boolean canPlaceBlock = placePredicate.test(interactedBlock);
+        if (!canPlaceBlock) {
+            player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
+            return true;
+        }
 
         // Get the newly placed block position
         Point placementPosition = blockPosition;
@@ -80,7 +82,7 @@ public class BlockPlacementFeatureProvider {
             // If the block is not replaceable, try to place next to it.
             placementPosition = blockPosition.relative(blockFace);
 
-            var placementBlock = instance.getBlock(placementPosition);
+            var placementBlock = ghostBlockHolder.getBlock(placementPosition);
             var placementRule = BLOCK_MANAGER.getBlockPlacementRule(placementBlock);
             if (!placementBlock.registry().isReplaceable() && !(placementRule != null && placementRule.isSelfReplaceable(
                     new BlockPlacementRule.Replacement(placementBlock, blockFace, cursorPosition, true, useMaterial)))) {
@@ -107,10 +109,12 @@ public class BlockPlacementFeatureProvider {
         final Block placedBlock = blockState.apply(useMaterial.block());
 
         Entity collisionEntity = CollisionUtils.canPlaceBlockAt(instance, placementPosition, placedBlock);
-        if (collisionEntity != null) return false;
+        if (collisionEntity != null) {
+            player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
+            return true;
+        }
 
         // Update the block on the client and record it for the checkpoint.
-        final var ghostBlockHolder = GhostBlockHolder.forPlayer(player);
         ghostBlockHolder.setBlock(placementPosition, placedBlock);
         player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
         final ItemStack newUsedItem = usedItem.consume(1);
