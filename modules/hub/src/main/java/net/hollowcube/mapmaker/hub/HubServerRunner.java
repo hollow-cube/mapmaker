@@ -96,7 +96,7 @@ public class HubServerRunner extends AbstractMapServer {
     // Static so it can be referenced from DevHubServer
     public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager, @NotNull HubMapWorld hubWorld, @NotNull Scheduler scheduler) {
         commandManager.register(new HelpCommand(commandManager, CommandCategories.GLOBAL));
-        commandManager.register(new PlayerInfoCommand(server.permManager(), server.playerService()));
+        commandManager.register(new PlayerInfoCommand(server.permManager(), server.playerService(), server.sessionManager()));
 
         commandManager.register(new HubFlyCommand(server.permManager()));
         commandManager.register(new HubSpawnCommand(hubWorld));

@@ -5,18 +5,19 @@ import net.hollowcube.command.util.CommandCategory;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.session.SessionManager;
 import org.jetbrains.annotations.NotNull;
 
 public class PlayerInfoCommand extends CommandDsl {
 
-    public PlayerInfoCommand(@NotNull PermManager permissions, @NotNull PlayerService players) {
+    public PlayerInfoCommand(@NotNull PermManager permissions, @NotNull PlayerService players, @NotNull SessionManager sessionManager) {
         super("playerinfo");
 
         category = CommandCategory.HIDDEN;
 
         setCondition(permissions.createPlatformCondition2(PlatformPerm.BAN_PLAYER));
 
-        addSubcommand(new SubCommand<>(permissions, "general", new GeneralInfoType()));
+        addSubcommand(new SubCommand<>(permissions, "general", new GeneralInfoType(sessionManager)));
         addSubcommand(new SubCommand<>(permissions, "channels", new ChannelsInfoType(false)));
         addSubcommand(new SubCommand<>(permissions, "channel_namespaces", new ChannelsInfoType(true)));
         addSubcommand(new SubCommand<>(permissions, "info_reports", new ReportsInfoType()));

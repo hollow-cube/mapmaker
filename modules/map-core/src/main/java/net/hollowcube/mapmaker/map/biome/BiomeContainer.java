@@ -205,7 +205,7 @@ public class BiomeContainer implements TerraformInstanceBiomes {
             } else {
                 var biome = this.parent.get(i);
                 entries.add(new RegistryDataPacket.Entry(key.key().asString(),
-                        Biome.REGISTRY_CODEC.encode(Transcoder.NBT, biome).orElseThrow()));
+                        Biome.NETWORK_CODEC.encode(Transcoder.NBT, biome).orElseThrow()));
             }
         }
 

@@ -40,6 +40,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Collectors;
 
 @Plugin(id = "hc-proxy", name = "hollowcube proxy plugin", version = "1.0", authors = "hollow cube")
 public class ProxyPlugin {
@@ -47,7 +48,9 @@ public class ProxyPlugin {
     private static final ChannelIdentifier RESOURCE_PACK_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "resource_pack");
     private static final Key TRANSFER_DATA_COOKIE = Key.key("mapmaker", "transfer_data");
 
-    private static final ProtocolVersion SUPPORTED_VERSION = ProtocolVersion.MINECRAFT_1_21_5;
+    private static final Set<ProtocolVersion> SUPPORTED_VERSIONS = Set.of(
+            ProtocolVersion.MINECRAFT_1_21_5
+    );
 
     public static final TextColor RED = TextColor.color(0xFA4141);
     public static final Component MAINTENANCE = Component.text()
@@ -60,7 +63,9 @@ public class ProxyPlugin {
     private static final Component WRONG_PROTOCOL = Component.text()
             .append(Component.text("You are using an unsupported version of Minecraft!", RED))
             .appendNewline().appendNewline()
-            .append(Component.text("Please try again on " + String.join(", ", SUPPORTED_VERSION.getVersionsSupportedBy()), RED))
+            .append(Component.text("Please try again on " + SUPPORTED_VERSIONS.stream()
+                    .flatMap(pv -> pv.getVersionsSupportedBy().stream())
+                    .collect(Collectors.joining(", ")), RED))
             .build();
 
     private final Logger logger;
@@ -106,7 +111,7 @@ public class ProxyPlugin {
         var player = event.getPlayer();
 
         // Disconnect if not on a supported version
-        if (event.getPlayer().getProtocolVersion() != SUPPORTED_VERSION) {
+        if (!SUPPORTED_VERSIONS.contains(event.getPlayer().getProtocolVersion())) {
             event.getPlayer().disconnect(WRONG_PROTOCOL);
             return;
         }
@@ -119,6 +124,7 @@ public class ProxyPlugin {
                 skinSignature = texProp.getSignature();
             }
 
+            var protocolVersion = player.getProtocolVersion();
             var pd = sessionService.createSession(
                     player.getUniqueId().toString(),
                     new SessionCreateRequest(
@@ -126,7 +132,8 @@ public class ProxyPlugin {
                             player.getUsername(),
                             player.getRemoteAddress().getAddress().getHostAddress(),
                             new SessionCreateRequest.Skin(skinTexture, skinSignature),
-                            player.getRawVirtualHost().orElse(null)
+                            player.getRawVirtualHost().orElse(null),
+                            protocolVersion.getProtocol(), protocolVersion.getMostRecentSupportedVersion()
                     )
             );
             playersJustJoined.add(player.getUniqueId());

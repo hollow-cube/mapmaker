@@ -224,13 +224,14 @@ public abstract class AbstractMapServer implements MapServer {
     public final void start() {
         // Minestom init bits
         var velocityConfig = config.get(VelocityConfig.class);
-        if (!velocityConfig.secret().isEmpty()) {
-            logger.info("Enabling modern forwarding...");
-            VelocityProxy.enable(velocityConfig.secret());
-        } else {
-            logger.info("Velocity not configured, using online mode...");
+//        if (!velocityConfig.secret().isEmpty()) {
+        logger.info("Enabling modern forwarding...");
+        VelocityProxy.enable("AsmMzWkjyrNvu5DprZWupQXy79mKFHK7d5Aj662YmVq4zEQns3RWb7NFpxvcTzgV");
+//            VelocityProxy.enable(velocityConfig.secret());
+//        } else {
+//            logger.info("Velocity not configured, using online mode...");
 //            MojangAuth.init();
-        }
+//        }
 
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
         MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProviderV2.translate(component);
