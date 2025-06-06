@@ -191,6 +191,15 @@ public class V4326 extends DataVersion {
             actions.put(action);
         });
 
+        var lives = container.remove("lives").as(Number.class, 0).intValue();
+        if (lives > 0) {
+            var action = Value.emptyMap();
+            action.put("type", "mapmaker:lives");
+            action.put("operation", "set");
+            action.put("value", lives);
+            actions.put(action);
+        }
+
         if (actions.size(0) > 0)
             container.put("actions", actions);
     }
