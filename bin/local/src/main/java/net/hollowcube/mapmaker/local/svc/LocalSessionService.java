@@ -35,7 +35,7 @@ public class LocalSessionService extends NoopSessionService {
                 ),
                 new PlayerSession(
                         id, Instant.now(),
-                        "local", "local",
+                        0, "local", "local",
                         false, player.getUsername(),
                         new PlayerSkin(player.getSkin()),
                         new Presence(Presence.TYPE_MAPMAKER_MAP, "editing", "local", "todo") //todo

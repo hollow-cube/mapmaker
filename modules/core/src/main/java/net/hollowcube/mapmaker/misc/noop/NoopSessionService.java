@@ -36,7 +36,7 @@ public class NoopSessionService implements SessionService {
                         new JsonObject(),
                         0, 0, 0
                 ),
-                new PlayerSession(id, Instant.now(), "noop-proxy-id", "noop-server-id", false, id, new PlayerSkin("", ""),
+                new PlayerSession(id, Instant.now(), 0, "noop-proxy-id", "noop-server-id", false, id, new PlayerSkin("", ""),
                         new Presence(req.type(), req.state(), req.server(), req.map())),
                 false
         );

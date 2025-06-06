@@ -22,6 +22,11 @@ public class LocalServer {
                         return (C) new GlobalConfig(true);
                     return parentConfig.get(clazz);
                 }
+
+                @Override
+                public void dump() {
+
+                }
             };
         });
     }
