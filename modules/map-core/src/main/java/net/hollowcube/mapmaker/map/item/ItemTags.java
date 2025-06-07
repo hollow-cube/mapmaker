@@ -1,15 +1,15 @@
 package net.hollowcube.mapmaker.map.item;
 
 import net.kyori.adventure.key.Key;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.gamedata.tags.Tag;
 import net.minestom.server.item.Material;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.StreamSupport;
 
 public final class ItemTags {
 
@@ -25,9 +25,9 @@ public final class ItemTags {
 
 
     private static @NotNull Collection<Key> builtin(@NotNull String name) {
-        var tag = MinecraftServer.getTagManager().getTag(Tag.BasicType.ITEMS, name);
+        var tag = Material.staticRegistry().getTag(Key.key(name));
         Check.notNull(tag, "Item tag " + name + " is not registered");
-        return tag.getValues();
+        return StreamSupport.stream(tag.spliterator(), false).map(RegistryKey::key).toList();
     }
 
     private static @NotNull Collection<Key> create(@NotNull Material... material) {

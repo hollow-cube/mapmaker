@@ -15,7 +15,7 @@ import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
-import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +36,7 @@ public class MapInstance extends InstanceContainer {
         this(dimensionName, hasLighting ? DimensionType.OVERWORLD : DimensionTypes.FULL_BRIGHT, hasLighting);
     }
 
-    public MapInstance(@NotNull String dimensionName, @NotNull DynamicRegistry.Key<DimensionType> dimensionType, boolean hasLighting) {
+    public MapInstance(@NotNull String dimensionName, @NotNull RegistryKey<DimensionType> dimensionType, boolean hasLighting) {
         super(UUID.randomUUID(), dimensionType, null, Key.key(dimensionName));
         this.hasLighting = hasLighting;
 

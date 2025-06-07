@@ -173,7 +173,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             player.sendPacket(serverProcess.frogVariant().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.pigVariant().registryDataPacket(serverProcess, excludeVanilla));
 
-            player.sendPacket(MinecraftServer.getTagManager().packet(serverProcess));
+            MinecraftServer.getConnectionManager().sendRegistryTags(player);
             event.setSendRegistryData(false);
 
             // Send feature flag so that vanilla doesnt show disabled items tooltip

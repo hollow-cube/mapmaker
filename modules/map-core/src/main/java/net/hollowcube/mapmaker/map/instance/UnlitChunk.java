@@ -6,7 +6,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.network.packet.server.play.data.LightData;
-import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -70,13 +70,13 @@ public class UnlitChunk extends DynamicChunk implements ChunkExt {
     }
 
     @Override
-    public @NotNull DynamicRegistry.Key<Biome> getBiome(int x, int y, int z) {
+    public @NotNull RegistryKey<Biome> getBiome(int x, int y, int z) {
         var key = TerraformBiomeChunk.getBiome(this, x, y, z);
         return key != null ? key : super.getBiome(x, y, z);
     }
 
     @Override
-    public void setBiome(int x, int y, int z, @NotNull DynamicRegistry.Key<Biome> biome) {
+    public void setBiome(int x, int y, int z, @NotNull RegistryKey<Biome> biome) {
         if (!TerraformBiomeChunk.setBiome(this, x, y, z, biome)) {
             super.setBiome(x, y, z, biome);
         }

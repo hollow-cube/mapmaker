@@ -6,7 +6,7 @@ import net.minestom.server.instance.ChunkHack;
 import net.minestom.server.instance.Section;
 import net.minestom.server.instance.palette.Palette;
 import net.minestom.server.network.packet.server.play.ChunkBiomesPacket;
-import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +20,7 @@ public final class TerraformBiomeChunk {
     private TerraformBiomeChunk() {
     }
 
-    public static @Nullable DynamicRegistry.Key<Biome> getBiome(
+    public static @Nullable RegistryKey<Biome> getBiome(
             @NotNull Chunk chunk,
             int x, int y, int z
     ) {
@@ -37,7 +37,7 @@ public final class TerraformBiomeChunk {
     public static boolean setBiome(
             @NotNull Chunk chunk,
             int x, int y, int z,
-            @NotNull DynamicRegistry.Key<Biome> biome
+            @NotNull RegistryKey<Biome> biome
     ) {
         assert Thread.holdsLock(chunk) : "Chunk must be locked before access";
         ChunkHack.invalidateChunk(chunk);
@@ -63,7 +63,7 @@ public final class TerraformBiomeChunk {
 
     public static void fillBiome(
             @NotNull Chunk chunk,
-            @NotNull DynamicRegistry.Key<Biome> biome
+            @NotNull RegistryKey<Biome> biome
     ) {
         assert Thread.holdsLock(chunk) : "Chunk must be locked before access";
         ChunkHack.invalidateChunk(chunk);
@@ -79,7 +79,7 @@ public final class TerraformBiomeChunk {
 
     public static void fillBiome(
             @NotNull Chunk chunk,
-            @NotNull DynamicRegistry.Key<Biome> biome,
+            @NotNull RegistryKey<Biome> biome,
             @NotNull BiomePredicate predicate
     ) {
         assert Thread.holdsLock(chunk) : "Chunk must be locked before access";
@@ -135,6 +135,6 @@ public final class TerraformBiomeChunk {
 
     @FunctionalInterface
     public interface BiomePredicate {
-        boolean test(int x, int y, int z, @Nullable DynamicRegistry.Key<Biome> old);
+        boolean test(int x, int y, int z, @Nullable RegistryKey<Biome> old);
     }
 }

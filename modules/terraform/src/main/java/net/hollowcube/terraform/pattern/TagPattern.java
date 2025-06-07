@@ -1,22 +1,23 @@
 package net.hollowcube.terraform.pattern;
 
 import net.hollowcube.terraform.task.edit.WorldView;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.gamedata.tags.Tag;
-import net.minestom.server.gamedata.tags.TagManager;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.registry.Registry;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.StreamSupport;
 
 public record TagPattern(
         @NotNull List<Block> blocks,
         boolean randomState
 ) implements Pattern {
-    private static final TagManager TAG_MANAGER = MinecraftServer.getTagManager();
+    private static final Registry<Block> BLOCK_REGISTRY = MinecraftServer.process().blocks();
 
     public TagPattern(@NotNull String tag, boolean randomState) {
         this(lookupTag(tag), randomState);
@@ -35,11 +36,11 @@ public record TagPattern(
 
     private static @NotNull List<Block> lookupTag(@NotNull String nsid) {
         //todo this should lookup from Terraform registry
-        var tag = TAG_MANAGER.getTag(Tag.BasicType.BLOCKS, nsid);
+        var tag = BLOCK_REGISTRY.getTag(Key.key(nsid));
         Check.notNull(tag, "no such tag: " + nsid);
 
-        return tag.getValues().stream()
-                .map(Block::fromKey)
+        return StreamSupport.stream(tag.spliterator(), false)
+                .map(key -> Block.fromKey(key.key()))
                 .filter(Objects::nonNull) // This is a sanity check
                 .toList();
     }

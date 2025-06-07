@@ -13,7 +13,7 @@ import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class CheckpointItems {
-    private static final DynamicRegistry<StructCodec<? extends CheckpointItem>> REGISTRY = DynamicRegistry.create("mapmaker:checkpoint_item");
+    private static final DynamicRegistry<StructCodec<? extends CheckpointItem>> REGISTRY = DynamicRegistry.create(Key.key("mapmaker:checkpoint_item"));
     private static final List<Key> KEYS = new ArrayList<>();
 
     public static final StructCodec<CheckpointItem> CODEC = Codec.RegistryTaggedUnion(_ -> REGISTRY, CheckpointItem::codec, "item");
