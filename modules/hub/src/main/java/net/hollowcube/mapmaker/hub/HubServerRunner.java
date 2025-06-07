@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.playerinfo.PlayerInfoCommand;
@@ -117,6 +118,8 @@ public class HubServerRunner extends AbstractMapServer {
 
     protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
         var player = event.getPlayer();
+        ProtocolVersions.requestProtocolVersionFromProxy(player);
+        if (!player.isOnline()) return;
 
         if (!transferPlayerSession(event.getPlayer(), HUB_PRESENCE)) {
             return;

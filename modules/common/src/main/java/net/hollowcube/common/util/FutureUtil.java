@@ -159,4 +159,17 @@ public final class FutureUtil {
             throw new RuntimeException(e);
         }
     }
+
+    @Contract("null, _ -> null")
+    public static <T> @UnknownNullability T getUnchecked(@Nullable Future<T> future, long timeoutMillis) {
+        FutureUtil.assertThreadWarn();
+        if (future == null) return null;
+        try {
+            return future.get(timeoutMillis, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException ignored) {
+            return null; // Timeout is expected, return null
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

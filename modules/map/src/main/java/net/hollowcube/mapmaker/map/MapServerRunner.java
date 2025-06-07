@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.command.CommandCategories;
@@ -259,6 +260,8 @@ public class MapServerRunner extends AbstractMapServer {
     protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
         try {
             var player = event.getPlayer();
+            ProtocolVersions.requestProtocolVersionFromProxy(player);
+            if (!player.isOnline()) return;
 
             // Queue resource pack download/apply while we do other things
             var resourcePackFuture = ResourcePackManager.sendResourcePack(player);

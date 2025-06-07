@@ -7,6 +7,7 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.util.CommandCategory;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
@@ -65,6 +66,8 @@ public class DebugCommand extends CommandDsl {
                 "Show debug information about the block you're looking at");
         createPermissionlessSubcommand("heightmap", this::handleHeightmapDebug,
                 "Show debug information about the heightmaps at your location");
+        createPermissionlessSubcommand("pvn", this::handlePvnDebug,
+                "Show your current protocol version");
 
         createPermissionedSubcommand("map_alloc", this::showMapAllocatorDebug,
                 "Show map allocator debug info");
@@ -196,6 +199,11 @@ public class DebugCommand extends CommandDsl {
         }
 
         player.sendMessage(NbtUtil.prettyPrint(block.nbt()));
+    }
+
+    private void handlePvnDebug(@NotNull Player player, @NotNull CommandContext context) {
+        int pvn = ProtocolVersions.getProtocolVersion(player);
+        player.sendMessage(Component.text("Protocol: " + pvn + " (" + ProtocolVersions.getProtocolName(pvn) + ")"));
     }
 
     private void showMapAllocatorDebug(@NotNull Player player, @NotNull CommandContext context) {

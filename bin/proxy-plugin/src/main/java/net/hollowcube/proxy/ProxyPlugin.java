@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 
 @Plugin(id = "hc-proxy", name = "hollowcube proxy plugin", version = "1.0", authors = "hollow cube")
 public class ProxyPlugin {
+    private static final ChannelIdentifier PROTOCOL_VERSION_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "pvn");
     private static final ChannelIdentifier TRANSFER_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "transfer");
     private static final ChannelIdentifier RESOURCE_PACK_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "resource_pack");
     private static final Key TRANSFER_DATA_COOKIE = Key.key("mapmaker", "transfer_data");
@@ -93,6 +94,7 @@ public class ProxyPlugin {
 
         proxy.getChannelRegistrar().register(TRANSFER_MESSAGE_ID);
         proxy.getChannelRegistrar().register(RESOURCE_PACK_MESSAGE_ID);
+        proxy.getChannelRegistrar().register(PROTOCOL_VERSION_MESSAGE_ID);
 
         anyhubServer = proxy.getServer("anyhub").orElseThrow();
 
@@ -159,6 +161,8 @@ public class ProxyPlugin {
             handleTransfer(event);
         } else if (RESOURCE_PACK_MESSAGE_ID.equals(event.getIdentifier())) {
             handleResourcePack(event);
+        } else if (PROTOCOL_VERSION_MESSAGE_ID.equals(event.getIdentifier())) {
+            handleProtocolVersionRequest(event);
         }
     }
 
@@ -224,6 +228,18 @@ public class ProxyPlugin {
                 }
             }
         });
+    }
+
+    private void handleProtocolVersionRequest(@NotNull PluginMessageEvent event) {
+        event.setResult(PluginMessageEvent.ForwardResult.handled());
+        if (!(event.getSource() instanceof ServerConnection serverConn)) return;
+        var player = serverConn.getPlayer();
+
+        logger.info("protocol version request from {}", player.getUsername());
+
+        int pvn = player.getProtocolVersion().getProtocol();
+        var reply = String.valueOf(pvn).getBytes(StandardCharsets.UTF_8);
+        serverConn.sendPluginMessage(PROTOCOL_VERSION_MESSAGE_ID, reply);
     }
 
     @Subscribe

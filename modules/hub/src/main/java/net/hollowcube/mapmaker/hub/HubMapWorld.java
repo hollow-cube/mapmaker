@@ -113,11 +113,10 @@ public class HubMapWorld extends AbstractMapWorld {
     @Override
     public void load() {
         logger.info("Loading hub world (map id = {})", map().id());
-        ReadableMapData mapWorldData;
-        if (!map().id().equals(Uuids.ZERO)) {
+        ReadableMapData mapWorldData = null;
+        if (!map().id().equals(Uuids.ZERO))
             mapWorldData = server().mapService().getMapWorldAsStream(map().id(), false);
-            Check.notNull(mapWorldData, "No world generated for hub world!");
-        } else {
+        if (mapWorldData == null) {
             try (var is = getClass().getResourceAsStream("/spawn/hcspawn.polar")) {
                 if (is == null) throw new IOException("hcspawn.polar not found");
                 var worldFileContent = Objects.requireNonNull(is.readAllBytes());
