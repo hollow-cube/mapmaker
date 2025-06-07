@@ -39,4 +39,5 @@ include(
     "bin:map-isolate",
     "bin:packer",
     "bin:proxy-plugin",
+    "bin:world-converter",
 )
