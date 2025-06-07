@@ -9,6 +9,8 @@ import com.miguelfonseca.completely.text.analyze.transform.LowerCaseTransformer;
 import com.miguelfonseca.completely.text.index.FuzzyIndex;
 import com.miguelfonseca.completely.text.index.PatriciaTrie;
 import com.miguelfonseca.completely.text.match.EditDistanceAutomaton;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,10 +23,26 @@ import java.util.function.Predicate;
 public final class Autocompletors {
 
     private static final AutocompleteEngine<IndexableMaterial> materials = createEngine();
+    private static final AutocompleteEngine<IndexableBlock> fullBlocks = createEngine();
 
     static {
         for (var material : Material.values()) {
             materials.add(new IndexableMaterial(material));
+        }
+        blocksLoop:
+        for (var block : Block.values()) {
+            var material = block.registry().material();
+            if (material == null) continue; // Non block item
+            if (!material.key().equals(block.key())) continue; // Weird block item (like flint and steel)
+
+            // Only add blocks that are full cubes
+            var shape = block.registry().collisionShape();
+            for (var face : BlockFace.values()) {
+                if (!shape.isFaceFull(face))
+                    continue blocksLoop;
+            }
+
+            fullBlocks.add(new IndexableBlock(block));
         }
     }
 
@@ -34,6 +52,21 @@ public final class Autocompletors {
             if (output.size() >= limit) break;
             if (predicate.test(material.material())) {
                 output.add(material.material());
+            }
+        }
+        return output;
+    }
+
+    public static @NotNull List<Block> searchBlocks(@NotNull String query, int limit) {
+        return searchBlocks(query, limit, _ -> true);
+    }
+
+    public static @NotNull List<Block> searchBlocks(@NotNull String query, int limit, Predicate<Block> predicate) {
+        List<Block> output = new ArrayList<>(limit);
+        for (var block : fullBlocks.search(query)) {
+            if (output.size() >= limit) break;
+            if (predicate.test(block.block())) {
+                output.add(block.block());
             }
         }
         return output;
@@ -70,6 +103,13 @@ public final class Autocompletors {
         @Override
         public List<String> getFields() {
             return List.of(material.name(), material.key().value(), material.key().value().replace("_", " "));
+        }
+    }
+
+    private record IndexableBlock(@NotNull Block block) implements Indexable {
+        @Override
+        public List<String> getFields() {
+            return List.of(block.name(), block.key().value(), block.key().value().replace("_", " "));
         }
     }
 

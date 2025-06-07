@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.map.action.Action;
 import net.hollowcube.mapmaker.map.action.ActionList;
 import net.hollowcube.mapmaker.map.action.ActionRegistry;
 import net.hollowcube.mapmaker.panels.Button;
+import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
 import net.kyori.adventure.key.Key;
@@ -30,6 +31,13 @@ public class ActionPickerView extends Panel {
         add(1, 0, info("action"));
         add(2, 0, new Text("gui.action.search.empty", 7, 1, "Search...")
                 .align(8, 5).background("action/editor/search_bar")); // TODO: search support
+    }
+
+    @Override
+    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+        super.mount(host, isInitial);
+
+        if (!isInitial) return;
 
         int i = 0;
         for (var actionKey : ActionRegistry.keys()) {

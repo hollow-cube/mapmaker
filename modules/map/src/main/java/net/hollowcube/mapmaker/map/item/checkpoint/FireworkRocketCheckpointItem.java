@@ -75,7 +75,7 @@ public record FireworkRocketCheckpointItem(int amount, int duration) implements 
 
             background("action/editor/container_lg", -10, -31);
 
-            this.amountInput = add(1, 3, makeGenericAmount(FireworkRocketCheckpointItem::withAmount));
+            this.amountInput = add(1, 3, makeGenericAmount(FireworkRocketCheckpointItem::withAmount, MAX_AMOUNT));
 
             this.durationInput = add(1, 5, new ControlledNumberInput("give_item.firework_rocket.duration",
                     updateItem(FireworkRocketCheckpointItem::withDuration), true)

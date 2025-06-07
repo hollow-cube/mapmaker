@@ -388,7 +388,7 @@ public final class FontUtil {
         var chars = offset > 0 ? POSITIVE_SPACE : NEGATIVE_SPACE;
         var sb = new StringBuilder();
         offset = Math.abs(offset);
-        Check.argCondition(offset > 0b1111111111, "Oof too big!");
+        Check.argCondition(offset > 0b1111111111, "Oof too big! offset=" + offset);
 
         for (int i = 0; i < 10; i++) {
             if ((offset & (1 << i)) != 0) {

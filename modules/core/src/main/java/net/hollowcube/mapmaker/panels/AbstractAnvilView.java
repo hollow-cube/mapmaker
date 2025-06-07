@@ -29,19 +29,21 @@ public abstract class AbstractAnvilView extends Panel {
 
     private String input;
 
+    protected Button inputButton;
+
     public AbstractAnvilView(@NotNull String container, @NotNull String icon, @NotNull String title, @NotNull String initialInput) {
         super(InventoryType.ANVIL, 9, 5);
         this.input = initialInput;
 
         background(container, -66, -40);
-        add(0, 0, new Button("", 0, 0)
+        add(0, 0, new Button(null, 0, 0)
                 .background(icon, -46, -1)); // kinda gross
 
         int titleWidth = FontUtil.measureTextV2(title);
         add(0, 0, new Text(null, 0, 0, title)
                 .align(-(titleWidth / 2) + 30, -31));
 
-        add(0, 0, new Button("", 1, 1)
+        this.inputButton = add(0, 0, new Button("", 1, 1)
                 .sprite("generic2/anvil/back", -33, 29)
                 .onLeftClick(() -> host.popView())
                 .text(Component.text(this.input), List.of()));

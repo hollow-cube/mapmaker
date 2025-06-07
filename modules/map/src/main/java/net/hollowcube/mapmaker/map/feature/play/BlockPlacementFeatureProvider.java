@@ -57,9 +57,6 @@ public class BlockPlacementFeatureProvider {
         final Chunk interactedChunk = instance.getChunkAt(blockPosition);
         if (!ChunkUtils.isLoaded(interactedChunk)) return true;
 
-        // TODO: Decide at this point if this is a block placement we care about (eg if the item in hand is a placeable block)
-        //  One minor note is that we need to start the timer if you place a block
-
         final var ghostBlockHolder = GhostBlockHolder.forPlayer(player);
         final Block interactedBlock = ghostBlockHolder.getBlock(blockPosition);
 
@@ -106,7 +103,7 @@ public class BlockPlacementFeatureProvider {
         }
 
         final ItemBlockState blockState = usedItem.get(DataComponents.BLOCK_STATE, ItemBlockState.EMPTY);
-        final Block placedBlock = blockState.apply(useMaterial.block());
+        Block placedBlock = blockState.apply(useMaterial.block());
 
         Entity collisionEntity = CollisionUtils.canPlaceBlockAt(instance, placementPosition, placedBlock);
         if (collisionEntity != null) {
@@ -114,11 +111,22 @@ public class BlockPlacementFeatureProvider {
             return true;
         }
 
+        var placementRule = BLOCK_MANAGER.getBlockPlacementRule(placedBlock);
+        if (placementRule != null) {
+            placedBlock = placementRule.blockPlace(new BlockPlacementRule.PlacementState(
+                    ghostBlockHolder, placedBlock, blockFace, placementPosition,
+                    cursorPosition, player.getPosition(),
+                    usedItem, player.isSneaking()
+            ));
+        }
+
         // Update the block on the client and record it for the checkpoint.
         ghostBlockHolder.setBlock(placementPosition, placedBlock);
-        player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
-        final ItemStack newUsedItem = usedItem.consume(1);
+        final ItemStack newUsedItem = usedItem.amount() == 99 ? usedItem : usedItem.consume(1);
         player.setItemInHand(hand, newUsedItem);
+        if (usedItem.amount() == 99) // Force an update to keep the stack at 99
+            player.getInventory().sendSlotRefresh(player.getHeldSlot(), newUsedItem);
+        player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
 
         return true; // Done :)
     }

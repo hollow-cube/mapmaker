@@ -24,6 +24,7 @@ public abstract class AbstractActionEditorPanel<T extends Action> extends Panel 
     public static final List<Component> LORE_POSTFIX_CLICKSELECT = LanguageProviderV2.translateMulti("gui.action.clickselect", List.of());
     public static final List<Component> LORE_POSTFIX_CLICKEDIT = LanguageProviderV2.translateMulti("gui.action.clickedit", List.of());
     public static final List<Component> LORE_POSTFIX_CLICKEDITORREMOVE = LanguageProviderV2.translateMulti("gui.action.clickeditorremove", List.of());
+    public static final List<Component> LORE_POSTFIX_CLICKREMOVE = LanguageProviderV2.translateMulti("gui.action.clickremove", List.of());
     public static final List<Component> LORE_POSTFIX_NOT_AVAILABLE = LanguageProviderV2.translateMulti("gui.action.unavailable", List.of());
 
     protected final ActionList.Ref ref;

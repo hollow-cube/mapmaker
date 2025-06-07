@@ -41,6 +41,8 @@ public final class ExtraCodecs {
 
     public static final Codec<Block> BLOCK_STATE_STRING = Codec.STRING
             .transform(BlockUtil::fromStringOld, BlockUtil::toString);
+    public static final Codec<Block> BLOCK_NAME_STRING = Codec.STRING
+            .transform(Block::fromKey, Block::name);
 
     public static <L, R> @NotNull Codec<Either<L, R>> either(@NotNull Codec<L> leftCodec, @NotNull Codec<R> rightCodec) {
         return new Codec<>() {
