@@ -39,7 +39,7 @@ public record BlockCheckpointItem(@NotNull Block block, int amount, List<Block> 
     public static final StructCodec<BlockCheckpointItem> CODEC = StructCodec.struct(
             "block", ExtraCodecs.BLOCK_NAME_STRING.optional(Block.STONE), BlockCheckpointItem::block,
             "amount", Codec.INT.optional(INFINITE_AMOUNT), BlockCheckpointItem::amount,
-            "placeable_on", ExtraCodecs.BLOCK_NAME_STRING.list(5).optional(DEFAULT_PLACEABLE_ON), BlockCheckpointItem::placeableOn,
+            "placeable_on", ExtraCodecs.BLOCK_NAME_STRING.list(7).optional(DEFAULT_PLACEABLE_ON), BlockCheckpointItem::placeableOn,
             BlockCheckpointItem::new);
 
     public @NotNull BlockCheckpointItem withBlock(@NotNull Block block) {

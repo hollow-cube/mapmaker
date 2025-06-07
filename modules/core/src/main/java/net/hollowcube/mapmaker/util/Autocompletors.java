@@ -34,6 +34,8 @@ public final class Autocompletors {
             var material = block.registry().material();
             if (material == null) continue; // Non block item
             if (!material.key().equals(block.key())) continue; // Weird block item (like flint and steel)
+            if (material == Material.COMMAND_BLOCK || material == Material.STRUCTURE_BLOCK)
+                continue; // Blocks with bad prediction
 
             // Only add blocks that are full cubes
             var shape = block.registry().collisionShape();

@@ -35,6 +35,14 @@ public class ControlledBlockListInput extends Panel {
             var block = blocks.get(i);
             var button = makeBlockButton(block)
                     .lorePostfix(AbstractActionEditorPanel.LORE_POSTFIX_CLICKREMOVE)
+                    .onLeftClick(() -> {
+                        host.pushView(new AnvilSearchView<>("action/anvil/teleport_icon", "Search Blocks",
+                                Autocompletors::searchBlocks, ControlledBlockListInput::makeBlockButton, block2 -> {
+                            onChange.accept(new ArrayList<>(blocks) {{
+                                set(blockIndex, block2);
+                            }});
+                        }));
+                    })
                     .onRightClick(() -> {
                         var newBlocks = new ArrayList<>(blocks);
                         newBlocks.remove(blockIndex);
