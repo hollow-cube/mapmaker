@@ -32,7 +32,9 @@ public class NoSneakFeatureProvider extends AbstractSettingFeatureProvider {
     }
 
     private static boolean canSneak(@NotNull Player player, @NotNull MapWorld world) {
-        var state = SaveState.fromPlayer(player);
+        var state = SaveState.optionalFromPlayer(player);
+        if (state == null) return true;
+
         var playstate = state.state(PlayState.class);
         return !playstate.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
                 .get(MapSettings.NO_SNEAK, world.map().settings());
