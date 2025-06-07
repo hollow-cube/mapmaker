@@ -8,12 +8,13 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.Signal;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
-import net.hollowcube.mapmaker.map.MapSize;
-import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.MapSize;
+import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
@@ -70,7 +71,7 @@ public class OrgMapEntry extends View {
     public void handleAddMap(@NotNull Player player) {
         try {
             var playerId = PlayerDataV2.fromPlayer(player).id();
-            mapService.createMap(MapCreateRequest.forOrg(playerId, orgId, MapSize.LARGE));
+            mapService.createMap(MapCreateRequest.forOrg(playerId, orgId, MapSize.LARGE, ProtocolVersions.getProtocolVersion(player)));
             performSignal(SIG_MAP_ADDED);
         } catch (Exception e) {
             ExceptionReporter.reportException(e, player);

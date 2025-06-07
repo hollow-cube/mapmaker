@@ -9,11 +9,12 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapSize;
+import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.store.ShopUpgradeCache;
@@ -101,7 +102,8 @@ public class CreateMap extends View {
 
         // Dispatch request to create the map
         try {
-            var createdMap = mapService.createMap(MapCreateRequest.forPlayer(playerData.id(), size, slot));
+            int protocolVersion = ProtocolVersions.getProtocolVersion(player);
+            var createdMap = mapService.createMap(MapCreateRequest.forPlayer(playerData.id(), size, slot, protocolVersion));
             performSignal(SIG_MAP_CREATED, slot, createdMap);
             submitButton.setState(State.ACTIVE);
         } catch (Exception e) {
