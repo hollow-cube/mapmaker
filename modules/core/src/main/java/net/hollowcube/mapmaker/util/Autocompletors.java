@@ -18,12 +18,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public final class Autocompletors {
 
     private static final AutocompleteEngine<IndexableMaterial> materials = createEngine();
     private static final AutocompleteEngine<IndexableBlock> fullBlocks = createEngine();
+
+    private static final Set<Block> EXCLUDED_BLOCKS = Set.of(
+            Block.STRUCTURE_BLOCK, Block.JIGSAW, Block.BARRIER,
+            Block.COMMAND_BLOCK, Block.CHAIN_COMMAND_BLOCK, Block.REPEATING_COMMAND_BLOCK
+    );
 
     static {
         for (var material : Material.values()) {
@@ -34,7 +40,7 @@ public final class Autocompletors {
             var material = block.registry().material();
             if (material == null) continue; // Non block item
             if (!material.key().equals(block.key())) continue; // Weird block item (like flint and steel)
-            if (material == Material.COMMAND_BLOCK || material == Material.STRUCTURE_BLOCK || material == Material.JIGSAW)
+            if (EXCLUDED_BLOCKS.contains(block))
                 continue; // Blocks with bad prediction
 
             // Only add blocks that are full cubes
