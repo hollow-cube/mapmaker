@@ -64,6 +64,7 @@ public final class ActionRegistry {
         register(TakeElytraAction.KEY, TakeElytraAction.CODEC, TakeElytraAction.EDITOR);
         register(GiveItemAction.KEY, GiveItemAction.CODEC, GiveItemAction.EDITOR);
         register(TakeItemAction.KEY, TakeItemAction.CODEC, TakeItemAction.EDITOR);
+        register(ChatAction.KEY, ChatAction.CODEC, ChatAction.EDITOR);
     }
 
     private static <T extends Action> RegistryKey<StructCodec<? extends Action>> register(Key name, StructCodec<T> codec, Action.Editor<T> editor) {

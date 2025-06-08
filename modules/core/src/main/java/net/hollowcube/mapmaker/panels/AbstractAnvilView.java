@@ -37,6 +37,7 @@ public abstract class AbstractAnvilView extends Panel {
 
         background(container, -66, -40);
         add(0, 0, new Button(null, 0, 0)
+                .disableTooltip()
                 .background(icon, -46, -1)); // kinda gross
 
         int titleWidth = FontUtil.measureTextV2(title);
@@ -44,10 +45,12 @@ public abstract class AbstractAnvilView extends Panel {
                 .align(-(titleWidth / 2) + 30, -31));
 
         this.inputButton = add(0, 0, new Button("", 1, 1)
+                .disableTooltip()
                 .sprite("generic2/anvil/back", -33, 29)
                 .onLeftClick(() -> host.popView())
                 .text(Component.text(this.input), List.of()));
         add(2, 0, new Button("gui.generic.empty", 1, 1)
+                .disableTooltip()
                 .sprite("generic2/anvil/checkmark", 34, 28)
                 .onLeftClick(() -> onSubmit(this.input)));
     }

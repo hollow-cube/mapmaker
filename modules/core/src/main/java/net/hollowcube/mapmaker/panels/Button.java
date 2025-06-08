@@ -17,12 +17,14 @@ import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.component.CustomModelData;
 import net.minestom.server.item.component.HeadProfile;
+import net.minestom.server.item.component.TooltipDisplay;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public class Button extends Element implements ButtonClickAliases {
@@ -51,6 +53,7 @@ public class Button extends Element implements ButtonClickAliases {
     protected DataComponentMap extraComponents = null;
     protected Sprite sprite;
     protected boolean disableHoverSprite = false;
+    protected boolean disableTooltip = false;
 
     private OnClickTypeSlot onLeftClick;
     private OnClickTypeSlot onLeftClickAsync;
@@ -136,6 +139,11 @@ public class Button extends Element implements ButtonClickAliases {
         );
         this.extraComponents(stack.componentPatch());
 
+        return this;
+    }
+
+    public @NotNull Button disableTooltip() {
+        this.disableTooltip = true;
         return this;
     }
 
@@ -232,7 +240,11 @@ public class Button extends Element implements ButtonClickAliases {
         }
 
         if (this.itemModel == null || this.itemLore == null) return;
-        builder.editSlotsWithout(0, 0, slotWidth, slotHeight, DataComponents.TOOLTIP_DISPLAY);
+        if (this.disableTooltip) {
+            builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(false, Set.of()));
+        } else {
+            builder.editSlotsWithout(0, 0, slotWidth, slotHeight, DataComponents.TOOLTIP_DISPLAY);
+        }
         if (!"minecraft:stick".equals(itemModel) || itemOverlay != null)
             builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.ITEM_MODEL, itemOverlay != null ? OverlayItem.OVERLAY_ITEM_MODEL : itemModel);
         if (itemProfile != null)
