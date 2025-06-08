@@ -66,6 +66,7 @@ public record ChatAction(
     @Override
     public void applyTo(@NotNull Player player, @NotNull PlayState state) {
         try {
+            // TODO needs a special icon in front to denote its from the mapmaker and not an official message
             player.sendMessage(CHAT_MESSAGE_PARSER.deserialize(this.message, gatherVariableResolvers(player, state)));
         } catch (Exception exception) {
             ExceptionReporter.reportException(exception, player);
