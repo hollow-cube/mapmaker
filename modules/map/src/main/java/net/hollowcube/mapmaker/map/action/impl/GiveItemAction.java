@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map.action.impl;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
-import net.hollowcube.mapmaker.map.MapFeatureFlags;
 import net.hollowcube.mapmaker.map.action.Action;
 import net.hollowcube.mapmaker.map.action.ActionList;
 import net.hollowcube.mapmaker.map.action.Attachments;
@@ -106,9 +105,6 @@ public record GiveItemAction(
             int i = 0;
             for (var itemType : CheckpointItems.keys()) {
                 int x = i % 7, y = i / 7;
-
-                if (itemType.equals(BlockCheckpointItem.ID) && !MapFeatureFlags.BLOCK_ITEM.test(host.player()))
-                    continue;
 
                 add(x + 1, y + 2, new Button("gui.action.give_item." + itemType.value(), 1, 1)
                         // TODO: generalize this handling rather than hardcoding to this specific behavior for block items

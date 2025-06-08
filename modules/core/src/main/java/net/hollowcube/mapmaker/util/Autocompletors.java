@@ -28,7 +28,8 @@ public final class Autocompletors {
 
     private static final Set<Block> EXCLUDED_BLOCKS = Set.of(
             Block.STRUCTURE_BLOCK, Block.JIGSAW, Block.BARRIER,
-            Block.COMMAND_BLOCK, Block.CHAIN_COMMAND_BLOCK, Block.REPEATING_COMMAND_BLOCK
+            Block.COMMAND_BLOCK, Block.CHAIN_COMMAND_BLOCK, Block.REPEATING_COMMAND_BLOCK,
+            Block.TEST_BLOCK, Block.TEST_INSTANCE_BLOCK
     );
 
     static {
