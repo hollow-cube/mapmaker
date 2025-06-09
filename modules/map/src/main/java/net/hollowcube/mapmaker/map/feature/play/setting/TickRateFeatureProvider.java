@@ -46,19 +46,18 @@ public class TickRateFeatureProvider extends AbstractSettingFeatureProvider {
         var player = event.getPlayer();
         if (!event.mapWorld().isPlaying(player)) return;
         if (!event.isMapJoin()) return;
-        updatePlayer(player);
+        updatePlayer(event.getMapWorld(), player);
     }
 
     public void playerUpdated(@NotNull MapPlayerUpdateStateEvent event) {
-        updatePlayer(event.player());
+        updatePlayer(event.getMapWorld(), event.player());
     }
 
     public void removePlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
         event.player().sendPacket(new SetTickStatePacket(ServerFlag.SERVER_TICKS_PER_SECOND, false));
     }
 
-    private void updatePlayer(@NotNull Player player) {
-        var world = MapWorld.forPlayer(player);
+    private void updatePlayer(@NotNull MapWorld world, @NotNull Player player) {
         player.sendPacket(new SetTickStatePacket(getTickRate(player, world), false));
     }
 }
