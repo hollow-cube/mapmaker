@@ -8,8 +8,10 @@ import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.scripting.api.LuaEventSource;
+import net.hollowcube.mapmaker.map.scripting.api.LuaLibTask;
+import net.hollowcube.mapmaker.map.scripting.api.entity.LuaPlayer;
 import net.hollowcube.mapmaker.map.scripting.api.math.LuaVectorTypeImpl;
-import net.hollowcube.mapmaker.map.scripting.api.player.LuaPlayer;
+import net.hollowcube.mapmaker.map.scripting.api.world.LuaBlock;
 import net.hollowcube.mapmaker.map.scripting.api.world.LuaParticle;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
@@ -30,7 +32,7 @@ public class ScriptingFeatureProvider implements FeatureProvider {
     public record ThreadRef(int ref, EventNode eventNode) {
     }
 
-    public static final Tag<ThreadRef> LUA_THREAD_REF_TAG = Tag.Transient("mapmaker:play/lua_thread_ref");
+    public static final Tag<LuaScriptState> LUA_THREAD_REF_TAG = Tag.Transient("mapmaker:play/lua_thread_ref");
 
     private static final LuauCompiler COMPILER = LuauCompiler.builder()
             .userdataTypes() // todo
@@ -62,6 +64,7 @@ public class ScriptingFeatureProvider implements FeatureProvider {
     }
 
     private void initPlayer(@NotNull MapPlayerInitEvent event) {
+        if (!(event.isFirstInit())) return;
         var global = Objects.requireNonNull(event.getMapWorld().getTag(LUA_STATE_TAG));
 
         var state = global.newThread();
@@ -71,12 +74,11 @@ public class ScriptingFeatureProvider implements FeatureProvider {
         LuaPlayer.push(state, new LuaPlayer(player));
         state.setGlobal("player");
 
-        EventNode eventNode = EventNode.type("script-local", EventFilter.ENTITY);
-        event.getMapWorld().eventNode().addChild(eventNode);
-
-        // Create a persistent reference to the table
-        int ref = global.ref(-1);
-        player.setTag(LUA_THREAD_REF_TAG, new ThreadRef(ref, eventNode));
+        // Create a persistent reference to the thread
+        var scriptState = new LuaScriptState(state, player, global.ref(-1));
+        state.setThreadData(scriptState);
+        player.setTag(LUA_THREAD_REF_TAG, scriptState);
+        event.getMapWorld().eventNode().addChild((EventNode) scriptState.eventNode());
 
         try {
             var bytecode = COMPILER.compile("""
@@ -88,7 +90,22 @@ public class ScriptingFeatureProvider implements FeatureProvider {
                         player:PlaySound("minecraft:entity.cat.ambient", player.Position, 1.5, 0.9)
                         player:PlaySound("minecraft:entity.cat.purr", player.Position, 2, 1)
                     
-                        -- TODO: Do text animation
+                        player:SetBlock(vec(8, -2, 24), Block.RedstoneLamp{lit = "true"})
+                    
+                        task.spawn(function()
+                            local numPoints = 20
+                            local radius = 2
+                            local angleStep = (2 * math.pi) / numPoints
+                    
+                            for i = 0, numPoints - 1 do
+                                local angle = i * angleStep
+                                local x = radius * math.cos(angle)
+                                local y = radius * math.sin(angle)
+                    
+                                player:SpawnParticle(Particle.Flame, vec(x + 8.5, y + 1.5, 27.5), vec(0.1, 0.1, 0.1), 0, 5)
+                                task.wait(2)
+                            end
+                        end)
                     
                         player:SendMessage("<pride>Checkpoint changed!")
                     end
@@ -107,18 +124,20 @@ public class ScriptingFeatureProvider implements FeatureProvider {
         var global = Objects.requireNonNull(event.getMapWorld().getTag(LUA_STATE_TAG));
 
         var player = event.getPlayer();
-        var ref = Objects.requireNonNull(player.getAndSetTag(LUA_THREAD_REF_TAG, null));
-        event.getMapWorld().eventNode().removeChild(ref.eventNode);
+        var scriptState = Objects.requireNonNull(player.getAndSetTag(LUA_THREAD_REF_TAG, null));
+        event.getMapWorld().eventNode().removeChild((EventNode) scriptState.eventNode());
 
-        global.unref(ref.ref);
+        global.unref(scriptState.mainRef());
     }
 
     private @NotNull LuaState createGlobalState() {
         var global = LuaState.newState();
         global.openLibs(); // todo probably dont give all for now
+        LuaLibTask.init(global);
 
         LuaVectorTypeImpl.init(global);
         LuaEventSource.init(global);
+        LuaBlock.init(global);
         LuaParticle.init(global);
         LuaPlayer.init(global);
 

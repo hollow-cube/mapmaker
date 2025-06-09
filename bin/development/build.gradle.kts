@@ -24,7 +24,6 @@ dependencies {
     implementation(libs.bundles.prometheus)
     implementation(libs.fastutil)
     implementation(libs.kafka)
-    implementation(libs.bundles.luau)
 }
 
 application {

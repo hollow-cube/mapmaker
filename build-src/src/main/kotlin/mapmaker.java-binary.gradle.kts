@@ -7,7 +7,7 @@ plugins {
 group = "net.hollowcube"
 
 repositories {
-    if (libs.minestom.get().version == "dev" || libs.polar.get().version == "dev")
+    if (libs.minestom.get().version == "dev" || libs.polar.get().version == "dev" || true)
         mavenLocal()
     mavenCentral()
 

@@ -1,11 +1,13 @@
-package net.hollowcube.mapmaker.map.scripting.api.player;
+package net.hollowcube.mapmaker.map.scripting.api.entity;
 
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaType;
+import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointChangeEvent;
 import net.hollowcube.mapmaker.map.scripting.api.LuaEventSource;
 import net.hollowcube.mapmaker.map.scripting.api.math.LuaVectorTypeImpl;
+import net.hollowcube.mapmaker.map.scripting.api.world.LuaBlock;
 import net.hollowcube.mapmaker.map.scripting.api.world.LuaParticle;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
@@ -18,9 +20,9 @@ import net.minestom.server.particle.Particle;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 
-import static net.hollowcube.mapmaker.map.scripting.util.LuaHelpers.*;
+import static net.hollowcube.mapmaker.map.scripting.util.LuaHelpers.checkKeyArg;
 
-public final class LuaPlayer {
+public class LuaPlayer extends LuaEntity {
     private static final String NAME = "Player";
 
     private static final MiniMessage MM = MiniMessage.miniMessage();
@@ -45,31 +47,24 @@ public final class LuaPlayer {
         return (LuaPlayer) state.checkUserDataArg(index, NAME);
     }
 
-    private final Player delegate;
-
     public LuaPlayer(@NotNull Player delegate) {
-        this.delegate = delegate;
+        super(delegate);
+    }
+
+    @Override
+    public @NotNull Player delegate() {
+        return (Player) super.delegate();
     }
 
     // Properties
 
-    private int getUuid(@NotNull LuaState state) {
-        state.pushString(delegate.getUuid().toString());
-        return 1;
-    }
-
     private int getUsername(@NotNull LuaState state) {
-        state.pushString(delegate.getUsername());
-        return 1;
-    }
-
-    private int getPosition(@NotNull LuaState state) {
-        LuaVectorTypeImpl.push(state, delegate.getPosition());
+        state.pushString(delegate().getUsername());
         return 1;
     }
 
     private int checkpointChanged(@NotNull LuaState state) {
-        LuaEventSource.push(state, new LuaEventSource<>(delegate, MapPlayerCheckpointChangeEvent.class));
+        LuaEventSource.push(state, new LuaEventSource<>(delegate(), MapPlayerCheckpointChangeEvent.class));
         return 1;
     }
 
@@ -77,7 +72,7 @@ public final class LuaPlayer {
 
     private int sendMessage(@NotNull LuaState state) {
         final String message = state.toString(1);
-        delegate.sendMessage(MM.deserialize(message));
+        delegate().sendMessage(MM.deserialize(message));
         return 0;
     }
 
@@ -98,7 +93,7 @@ public final class LuaPlayer {
             count = Math.clamp(state.checkIntegerArg(5), 0, 1000);
         }
 
-        delegate.sendPacket(new ParticlePacket(particle, pos, delta, speed, count));
+        delegate().sendPacket(new ParticlePacket(particle, pos, delta, speed, count));
         return 0;
     }
 
@@ -122,8 +117,17 @@ public final class LuaPlayer {
 
         // todo source enum
         Sound sound = Sound.sound(soundEvent, Sound.Source.MASTER, volume, pitch);
-        if (pos != null) this.delegate.playSound(sound, pos);
-        else this.delegate.playSound(sound);
+        if (pos != null) this.delegate().playSound(sound, pos);
+        else this.delegate().playSound(sound);
+        return 0;
+    }
+
+    private int setBlock(@NotNull LuaState state) {
+        var blockPosition = LuaVectorTypeImpl.checkArg(state, 1);
+        var block = LuaBlock.checkArg(state, 2);
+
+        var ghostBlocks = GhostBlockHolder.forPlayer(delegate());
+        ghostBlocks.setBlock(blockPosition, block);
         return 0;
     }
 
@@ -133,11 +137,9 @@ public final class LuaPlayer {
         final LuaPlayer player = checkArg(state, 1);
         final String key = state.checkStringArg(2);
         return switch (key) {
-            case "Uuid" -> player.getUuid(state);
             case "Username" -> player.getUsername(state);
-            case "Position" -> player.getPosition(state);
             case "CheckpointChanged" -> player.checkpointChanged(state);
-            default -> noSuchKey(state, NAME, key);
+            default -> LuaEntity.luaIndex(state, NAME, player, key);
         };
     }
 
@@ -149,7 +151,8 @@ public final class LuaPlayer {
             case "SendMessage" -> player.sendMessage(state);
             case "SpawnParticle" -> player.spawnParticle(state);
             case "PlaySound" -> player.playSound(state);
-            default -> noSuchMethod(state, NAME, methodName);
+            case "SetBlock" -> player.setBlock(state);
+            default -> LuaEntity.luaNameCall(state, NAME, player, methodName);
         };
     }
 

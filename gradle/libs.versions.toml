@@ -28,6 +28,7 @@ blossom = "2.1.0"
 velocity = "3.4.0-SNAPSHOT"
 classgraph = "4.8.179"
 luau = "0.2.2"
+luau-dev = "dev"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
@@ -76,7 +77,7 @@ otel-exporter-otlp = { group = "io.opentelemetry", name = "opentelemetry-exporte
 otel-exporter-sender-jdk = { group = "io.opentelemetry", name = "opentelemetry-exporter-sender-jdk", version.ref = "otel" }
 otel-semconv = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv", version.ref = "otel-semconv" }
 
-luau-lib = { group = "dev.hollowcube", name = "luau", version.ref = "luau" }
+luau-lib = { group = "dev.hollowcube", name = "luau", version.ref = "luau-dev" }
 luau-natives-macos-x64 = { group = "dev.hollowcube", name = "luau-natives-macos-x64", version.ref = "luau" }
 luau-natives-macos-arm64 = { group = "dev.hollowcube", name = "luau-natives-macos-arm64", version.ref = "luau" }
 luau-natives-linux-x64 = { group = "dev.hollowcube", name = "luau-natives-linux-x64", version.ref = "luau" }
