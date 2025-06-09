@@ -83,7 +83,8 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
     public static final Constructor<PlayingMapWorld> CTOR = AbstractMapWorld.ctor(PlayingMapWorld::new, PlayingMapWorld.class);
 
     public PlayingMapWorld(@NotNull MapServer server, @NotNull MapData map) {
-        super(server, map, new MapInstance(map.createDimensionName('p'), false));
+        super(server, map, new MapInstance(map.createDimensionName('p'), map.getSetting(MapSettings.LIGHTING)
+                ? MapInstance.LightingMode.LOADED : MapInstance.LightingMode.FULL_BRIGHT));
         instance.setGenerator(MapGenerators.voidWorld());
 
         instance.eventNode().addChild(eventNode); // Needs spectators, so register on instance.

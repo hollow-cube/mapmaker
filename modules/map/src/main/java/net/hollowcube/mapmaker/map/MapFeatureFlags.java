@@ -23,8 +23,6 @@ public final class MapFeatureFlags {
 
     public static final FeatureFlag MARKER_TOOL = FeatureFlag.of("map.marker_tool");
 
-    public static final FeatureFlag BLOCK_ITEM = FeatureFlag.of("map.block_item");
-
     // Internal
     public static final FeatureFlag DEBUG_PLAYING_OVERLAY = FeatureFlag.of("debug.playing_overlay");
 

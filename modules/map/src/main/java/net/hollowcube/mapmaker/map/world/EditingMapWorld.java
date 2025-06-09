@@ -86,7 +86,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
     private final TerraformInstanceStorageImpl terraformStorage = new TerraformInstanceStorageImpl();
 
     public EditingMapWorld(@NotNull MapServer server, @NotNull MapData map) {
-        super(server, map, new MapInstance(map.createDimensionName('e'), map.getSetting(MapSettings.LIGHTING)));
+        super(server, map, new MapInstance(map.createDimensionName('e'), map.getSetting(MapSettings.LIGHTING)
+                ? MapInstance.LightingMode.GENERATED : MapInstance.LightingMode.FULL_BRIGHT));
 
         this.terraform = server.facet(Terraform.class);
 

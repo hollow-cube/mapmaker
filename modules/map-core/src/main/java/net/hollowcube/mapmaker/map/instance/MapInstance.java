@@ -30,23 +30,34 @@ import java.util.concurrent.CompletableFuture;
 public class MapInstance extends InstanceContainer {
     private static final InstanceManager INSTANCE_MANAGER = MinecraftServer.getInstanceManager();
 
-    private final boolean hasLighting;
-
-    public MapInstance(@NotNull String dimensionName, boolean hasLighting) {
-        this(dimensionName, hasLighting ? DimensionType.OVERWORLD : DimensionTypes.FULL_BRIGHT, hasLighting);
+    public enum LightingMode {
+        // Run the light engine on changes.
+        GENERATED,
+        // Load lighting data from the world, but dont run the light engine.
+        LOADED,
+        // Don't load light, use static light data.
+        FULL_BRIGHT,
     }
 
-    public MapInstance(@NotNull String dimensionName, @NotNull RegistryKey<DimensionType> dimensionType, boolean hasLighting) {
+    private final LightingMode lightingMode;
+
+    public MapInstance(@NotNull String dimensionName, @NotNull LightingMode lightingMode) {
+        this(dimensionName, lightingMode == LightingMode.FULL_BRIGHT ? DimensionTypes.FULL_BRIGHT : DimensionType.OVERWORLD, lightingMode);
+    }
+
+    public MapInstance(@NotNull String dimensionName, @NotNull RegistryKey<DimensionType> dimensionType, @NotNull LightingMode lightingMode) {
         super(UUID.randomUUID(), dimensionType, null, Key.key(dimensionName));
-        this.hasLighting = hasLighting;
+        this.lightingMode = lightingMode;
 
         setTimeRate(0); //todo eventually this should be a map setting
         setTime(6000);
 
         // Lighting and dummy chunk loader. The chunk loader will be replaced if there is world data
         // for the map to load, otherwise we keep this one.
-        if (hasLighting) {
+        if (lightingMode == LightingMode.GENERATED) {
             setChunkSupplier(LitChunk::new);
+        } else if (lightingMode == LightingMode.LOADED) {
+            setChunkSupplier(UnlitChunk::new);
         } else {
             var fullBrightLightData = UnlitChunk.createStaticLightData(this, 15, 0);
             setChunkSupplier((instance, chunkX, chunkZ) -> new UnlitChunk(instance, chunkX, chunkZ, fullBrightLightData));
@@ -65,7 +76,7 @@ public class MapInstance extends InstanceContainer {
     public void load(@NotNull PolarWorld world, @Nullable PolarWorldAccess worldAccess) {
         var loader = new PolarLoader(world);
         if (worldAccess != null) loader.setWorldAccess(worldAccess);
-        if (!hasLighting) loader.setLoadLighting(false);
+        if (lightingMode == LightingMode.FULL_BRIGHT) loader.setLoadLighting(false);
         setChunkLoader(loader);
 
         // Load the world data
@@ -82,7 +93,7 @@ public class MapInstance extends InstanceContainer {
 
     public void loadStream(@NotNull ReadableMapData data, @Nullable PolarWorldAccess worldAccess) {
         FutureUtil.getUnchecked(PolarLoader.streamLoad(this, data.data(), data.length(),
-                PolarDataFixer.INSTANCE, worldAccess, hasLighting));
+                PolarDataFixer.INSTANCE, worldAccess, lightingMode != LightingMode.FULL_BRIGHT));
         setChunkSupplier(EmptyChunk::new);
     }
 

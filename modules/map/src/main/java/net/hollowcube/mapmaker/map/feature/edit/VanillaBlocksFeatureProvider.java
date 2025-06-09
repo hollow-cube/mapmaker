@@ -5,7 +5,6 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
-import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
@@ -28,8 +27,7 @@ public class VanillaBlocksFeatureProvider implements FeatureProvider {
         if (!(world instanceof PlayingMapWorld || world instanceof TestingMapWorld))
             return false;
 
-        world.eventNode().addListener(MapPlayerInitEvent.class, this::handlePlayerInit)
-                .addListener(MapWorldPlayerStopPlayingEvent.class, this::handlePlayerDeinit);
+        world.eventNode().addListener(MapPlayerInitEvent.class, this::handlePlayerInit);
 
         return true;
     }
@@ -39,10 +37,6 @@ public class VanillaBlocksFeatureProvider implements FeatureProvider {
     // triggered when resetting a map.
     private void handlePlayerInit(MapPlayerInitEvent event) {
         GhostBlockHolder.clear(event.getPlayer(), false);
-    }
-
-    private void handlePlayerDeinit(@NotNull MapWorldPlayerStopPlayingEvent event) {
-        GhostBlockHolder.clear(event.getPlayer(), true);
     }
 
 }

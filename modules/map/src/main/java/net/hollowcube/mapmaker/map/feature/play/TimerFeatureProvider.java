@@ -78,7 +78,7 @@ public class TimerFeatureProvider implements FeatureProvider {
         if (countdownEnd != -1) {
             time = Math.max(countdownEnd - System.currentTimeMillis(), 0);
         } else if (time == 0 && startingTimer != null && startingTimer.time() > 0) {
-            time = startingTimer.time();
+            time = startingTimer.time() * 50L; // Ticks to milliseconds
         } else if (world instanceof TestingMapWorld) {
             return;
         }
