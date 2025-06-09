@@ -18,18 +18,23 @@ import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
+import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
+import java.util.function.UnaryOperator;
 
 public final class TestingMapWorld extends AbstractMapMakerMapWorld {
     private static final Logger logger = LoggerFactory.getLogger(TestingMapWorld.class);
 
     private final EditingMapWorld parent;
+    private final TagHandler tagHandler = TagHandler.newHandler();
 
     public TestingMapWorld(@NotNull EditingMapWorld parent) {
         super(parent.server(), parent.map(), (MapInstance) parent.instance());
@@ -71,7 +76,7 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
     @Override
     public void load() {
         features().preinitMap(this);
-        
+
         super.load();
     }
 
@@ -125,5 +130,45 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
     @Override
     protected void sendBossBars(@NotNull Player player) {
         // Intentionally do nothing so we preserve the editing boss bar
+    }
+
+    @Override
+    public boolean hasTag(@NotNull Tag<?> tag) {
+        return tagHandler.hasTag(tag);
+    }
+
+    @Override
+    public <T> @UnknownNullability T getTag(@NotNull Tag<T> tag) {
+        return tagHandler.getTag(tag);
+    }
+
+    @Override
+    public <T> @UnknownNullability T getAndUpdateTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
+        return tagHandler.getAndUpdateTag(tag, value);
+    }
+
+    @Override
+    public <T> @UnknownNullability T updateAndGetTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
+        return tagHandler.updateAndGetTag(tag, value);
+    }
+
+    @Override
+    public <T> @Nullable T getAndSetTag(@NotNull Tag<T> tag, @Nullable T value) {
+        return tagHandler.getAndSetTag(tag, value);
+    }
+
+    @Override
+    public <T> void setTag(@NotNull Tag<T> tag, @Nullable T value) {
+        tagHandler.setTag(tag, value);
+    }
+
+    @Override
+    public <T> void updateTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
+        tagHandler.updateTag(tag, value);
+    }
+
+    @Override
+    public void removeTag(@NotNull Tag<?> tag) {
+        tagHandler.removeTag(tag);
     }
 }
