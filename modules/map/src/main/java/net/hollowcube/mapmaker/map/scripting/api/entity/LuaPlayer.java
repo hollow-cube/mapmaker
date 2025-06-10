@@ -5,6 +5,7 @@ import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaType;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointChangeEvent;
+import net.hollowcube.mapmaker.map.feature.play.BaseParkourMapFeatureProvider;
 import net.hollowcube.mapmaker.map.scripting.api.LuaEventSource;
 import net.hollowcube.mapmaker.map.scripting.api.math.LuaVectorTypeImpl;
 import net.hollowcube.mapmaker.map.scripting.api.world.LuaBlock;
@@ -13,6 +14,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
@@ -20,9 +22,12 @@ import net.minestom.server.particle.Particle;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 
-import static net.hollowcube.mapmaker.map.scripting.util.LuaHelpers.checkKeyArg;
+import java.util.ArrayList;
 
-public class LuaPlayer extends LuaEntity {
+import static net.hollowcube.mapmaker.map.scripting.util.LuaHelpers.*;
+
+// Note that Player is not an entity in Lua, though it does share some methods
+public final class LuaPlayer {
     private static final String NAME = "Player";
 
     private static final MiniMessage MM = MiniMessage.miniMessage();
@@ -47,24 +52,31 @@ public class LuaPlayer extends LuaEntity {
         return (LuaPlayer) state.checkUserDataArg(index, NAME);
     }
 
-    public LuaPlayer(@NotNull Player delegate) {
-        super(delegate);
-    }
+    private final Player delegate;
 
-    @Override
-    public @NotNull Player delegate() {
-        return (Player) super.delegate();
+    public LuaPlayer(@NotNull Player delegate) {
+        this.delegate = delegate;
     }
 
     // Properties
 
+    private int getUuid(@NotNull LuaState state) {
+        state.pushString(delegate.getUuid().toString());
+        return 1;
+    }
+
     private int getUsername(@NotNull LuaState state) {
-        state.pushString(delegate().getUsername());
+        state.pushString(delegate.getUsername());
+        return 1;
+    }
+
+    private int getPosition(@NotNull LuaState state) {
+        LuaVectorTypeImpl.push(state, delegate.getPosition());
         return 1;
     }
 
     private int checkpointChanged(@NotNull LuaState state) {
-        LuaEventSource.push(state, new LuaEventSource<>(delegate(), MapPlayerCheckpointChangeEvent.class));
+        LuaEventSource.push(state, new LuaEventSource<>(delegate, MapPlayerCheckpointChangeEvent.class));
         return 1;
     }
 
@@ -72,7 +84,7 @@ public class LuaPlayer extends LuaEntity {
 
     private int sendMessage(@NotNull LuaState state) {
         final String message = state.toString(1);
-        delegate().sendMessage(MM.deserialize(message));
+        delegate.sendMessage(MM.deserialize(message));
         return 0;
     }
 
@@ -93,7 +105,7 @@ public class LuaPlayer extends LuaEntity {
             count = Math.clamp(state.checkIntegerArg(5), 0, 1000);
         }
 
-        delegate().sendPacket(new ParticlePacket(particle, pos, delta, speed, count));
+        delegate.sendPacket(new ParticlePacket(particle, pos, delta, speed, count));
         return 0;
     }
 
@@ -117,8 +129,8 @@ public class LuaPlayer extends LuaEntity {
 
         // todo source enum
         Sound sound = Sound.sound(soundEvent, Sound.Source.MASTER, volume, pitch);
-        if (pos != null) this.delegate().playSound(sound, pos);
-        else this.delegate().playSound(sound);
+        if (pos != null) this.delegate.playSound(sound, pos);
+        else this.delegate.playSound(sound);
         return 0;
     }
 
@@ -126,9 +138,60 @@ public class LuaPlayer extends LuaEntity {
         var blockPosition = LuaVectorTypeImpl.checkArg(state, 1);
         var block = LuaBlock.checkArg(state, 2);
 
-        var ghostBlocks = GhostBlockHolder.forPlayer(delegate());
+        var ghostBlocks = GhostBlockHolder.forPlayer(delegate);
         ghostBlocks.setBlock(blockPosition, block);
         return 0;
+    }
+
+    /// SpawnEntity(type: EntityType, properties: table | nil): Entity
+    /// Defaults to spawning at the player's feet with 0 yaw/pitch.
+    private int spawnEntity(@NotNull LuaState state) {
+        var entityType = checkKeyArg(state, 1);
+        if (state.getTop() > 1 && state.type(2) != LuaType.TABLE) {
+            state.argError(2, "Expected a table for properties");
+            return 0; // Never reached, just to make java happy
+        }
+
+        var entityWrapper = LuaEntityCtor.create(entityType, null);
+        if (entityWrapper == null) {
+            state.error("Unknown entity type: " + entityType);
+            return 0; // Never reached, just to make java happy
+        }
+
+        // Apply any properties from the given table, if present.
+        Point position = delegate.getPosition();
+        float yaw = 0f, pitch = 0f;
+        if (state.getTop() > 1) {
+            state.pushNil();
+            while (state.next(2)) {
+                // Key is at index -2, value is at index -1
+                String key = state.toString(-2);
+                switch (key) {
+                    case "Position" -> position = LuaVectorTypeImpl.checkArg(state, -1);
+                    case "Yaw" -> yaw = (float) state.checkNumberArg(-1);
+                    case "Pitch" -> pitch = (float) state.checkNumberArg(-1);
+                    default -> entityWrapper.readFieldFromTable(state, key);
+                }
+
+                // Remove the value, keep the key for the next iteration
+                state.pop(1);
+            }
+        }
+
+        // Spawn the entity
+        var entity = entityWrapper.delegate();
+
+        // Track the entity in the player
+        var entities = new ArrayList<>(delegate.getTag(BaseParkourMapFeatureProvider.OWNED_ENTITIES));
+        entities.add(entity.getEntityId());
+        delegate.setTag(BaseParkourMapFeatureProvider.OWNED_ENTITIES, entities);
+
+        entity.setAutoViewable(false);
+        entity.setInstance(delegate.getInstance(), new Pos(position, yaw, pitch))
+                .thenRun(() -> entity.addViewer(delegate));
+
+        LuaEntity.push(state, entityWrapper);
+        return 1;
     }
 
     // Metamethods
@@ -137,9 +200,12 @@ public class LuaPlayer extends LuaEntity {
         final LuaPlayer player = checkArg(state, 1);
         final String key = state.checkStringArg(2);
         return switch (key) {
+            case "Uuid" -> player.getUuid(state);
             case "Username" -> player.getUsername(state);
+            case "Position" -> player.getPosition(state);
+            // Events
             case "CheckpointChanged" -> player.checkpointChanged(state);
-            default -> LuaEntity.luaIndex(state, NAME, player, key);
+            default -> noSuchKey(state, NAME, key);
         };
     }
 
@@ -152,7 +218,8 @@ public class LuaPlayer extends LuaEntity {
             case "SpawnParticle" -> player.spawnParticle(state);
             case "PlaySound" -> player.playSound(state);
             case "SetBlock" -> player.setBlock(state);
-            default -> LuaEntity.luaNameCall(state, NAME, player, methodName);
+            case "SpawnEntity" -> player.spawnEntity(state);
+            default -> noSuchMethod(state, NAME, methodName);
         };
     }
 

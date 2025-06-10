@@ -23,20 +23,23 @@ public class LuaEntity {
         state.pop(1);
     }
 
-    public static void push(@NotNull LuaState state, @NotNull LuaEntity player) {
-        state.newUserData(player);
+    public static void push(@NotNull LuaState state, @NotNull LuaEntity entity) {
+        state.newUserData(entity);
         state.getMetaTable(NAME);
         state.setMetaTable(-2);
     }
 
-    public static @NotNull LuaEntity checkArg(@NotNull LuaState state, int index) {
-        return (LuaEntity) state.checkUserDataArg(index, NAME);
+    public static <E extends LuaEntity> @NotNull E checkArg(@NotNull LuaState state, int index, @NotNull Class<E> type) {
+        var entity = (LuaEntity) state.checkUserDataArg(index, NAME);
+        if (!type.isAssignableFrom(entity.getClass()))
+            state.argError(index, "Expected " + type.getSimpleName() + ", got " + entity.getClass().getSimpleName());
+        return type.cast(entity);
     }
 
     private final Entity delegate;
 
-    public LuaEntity(@NotNull Entity delegate) {
-        this.delegate = delegate;
+    public LuaEntity(@NotNull Entity entity) {
+        this.delegate = entity;
     }
 
     public @NotNull Entity delegate() {
@@ -55,51 +58,73 @@ public class LuaEntity {
         return 1;
     }
 
+    private int getYaw(@NotNull LuaState state) {
+        state.pushNumber(delegate.getPosition().yaw());
+        return 1;
+    }
+
+    private int getPitch(@NotNull LuaState state) {
+        state.pushNumber(delegate.getPosition().pitch());
+        return 1;
+    }
+
     // Methods
+
+    private int remove(@NotNull LuaState state) {
+        if (delegate.isRemoved())
+            state.error("Entity is already removed");
+        delegate.remove();
+        return 0;
+    }
 
     // Metamethods
 
-    protected static int luaIndex(@NotNull LuaState state, @NotNull String typeName, @NotNull LuaEntity entity, @NotNull String methodName) {
+    protected int luaIndex(@NotNull LuaState state, @NotNull String methodName) {
         return switch (methodName) {
-            case "Uuid" -> entity.getUuid(state);
-            case "Position" -> entity.getPosition(state);
-            default -> noSuchKey(state, typeName, methodName);
+            case "Uuid" -> getUuid(state);
+            case "Position" -> getPosition(state);
+            default -> noSuchKey(state, NAME, methodName);
         };
     }
 
-    protected static int luaNewIndex(@NotNull LuaState state, @NotNull String typeName, @NotNull LuaEntity entity, @NotNull String methodName) {
+    protected int luaNewIndex(@NotNull LuaState state, @NotNull String methodName) {
         return switch (methodName) {
-            default -> noSuchKey(state, typeName, methodName);
+            default -> noSuchKey(state, NAME, methodName);
         };
     }
 
-    protected static int luaNameCall(@NotNull LuaState state, @NotNull String typeName, @NotNull LuaEntity entity, @NotNull String methodName) {
+    protected int readFieldFromTable(@NotNull LuaState state, @NotNull String fieldName) {
+        return switch (fieldName) {
+            default -> noSuchKey(state, NAME, fieldName);
+        };
+    }
+
+    protected int luaNameCall(@NotNull LuaState state, @NotNull String methodName) {
         return switch (methodName) {
-            case "Uuid" -> entity.getUuid(state);
-            case "Position" -> entity.getPosition(state);
-            default -> noSuchMethod(state, typeName, methodName);
+            case "Remove" -> remove(state);
+            default -> noSuchMethod(state, NAME, methodName);
         };
     }
 
     private static int luaIndex(@NotNull LuaState state) {
-        final LuaEntity entity = checkArg(state, 1);
+        final LuaEntity entity = checkArg(state, 1, LuaEntity.class);
         final String key = state.checkStringArg(2);
-        return luaIndex(state, NAME, entity, key);
+        return entity.luaIndex(state, key);
     }
 
     private static int luaNewIndex(@NotNull LuaState state) {
-        final LuaEntity entity = checkArg(state, 1);
+        final LuaEntity entity = checkArg(state, 1, LuaEntity.class);
         final String key = state.checkStringArg(2);
         state.remove(1); // Remove the userdata from the stack
         state.remove(1); // Remove the key from the stack
-        return luaNewIndex(state, NAME, entity, key);
+        return entity.luaNewIndex(state, key);
     }
 
     private static int luaNameCall(@NotNull LuaState state) {
-        final LuaEntity entity = checkArg(state, 1);
+        final LuaEntity entity = checkArg(state, 1, LuaEntity.class);
         state.remove(1); // Remove the player userdata from the stack
         final String methodName = state.nameCallAtom();
-        return luaNameCall(state, NAME, entity, methodName);
+        return entity.luaNameCall(state, methodName);
     }
 
 }

@@ -23,6 +23,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/*
+
+Open Questions about scripting:
+* How should we type things that take/return text components?
+* How should we type colors
+  * Roblox has a Color3 which probably makes sense to do something similar: https://create.roblox.com/docs/reference/engine/datatypes/Color3
+
+ */
 @AutoService(FeatureProvider.class)
 public class ScriptingFeatureProvider implements FeatureProvider {
     private static final String QB_DG = "5ede93ae-493a-4318-963e-7fa6ac7fc30b";
@@ -92,25 +100,66 @@ public class ScriptingFeatureProvider implements FeatureProvider {
                     
                         player:SetBlock(vec(8, -2, 24), Block.RedstoneLamp{lit = "true"})
                     
-                        task.spawn(function()
-                            local numPoints = 20
-                            local radius = 2
-                            local angleStep = (2 * math.pi) / numPoints
-                    
-                            for i = 0, numPoints - 1 do
-                                local angle = i * angleStep
-                                local x = radius * math.cos(angle)
-                                local y = radius * math.sin(angle)
-                    
-                                player:SpawnParticle(Particle.Flame, vec(x + 8.5, y + 1.5, 27.5), vec(0.1, 0.1, 0.1), 0, 5)
-                                task.wait(2)
-                            end
-                        end)
-                    
                         player:SendMessage("<pride>Checkpoint changed!")
                     end
                     
                     player.CheckpointChanged:Listen(onCheckpointChanged)
+                    
+                    local function utf8HeadTail(str)
+                        local startByte, endByte = utf8.offset(str, 1), utf8.offset(str, 2)
+                        if not startByte then return "", "" end
+                        if not endByte then return str, "" end
+                        return str:sub(startByte, endByte - 1), str:sub(endByte)
+                    end
+                    
+                    function rotateFirstUtf8CharToEnd(str)
+                        local firstChar, rest = utf8HeadTail(str)
+                        return rest .. firstChar
+                    end
+                    
+                    local LEVEL_TEXT_SCALE = vec(1.25, 1.25, 1.25)
+                    local AXES = {
+                        -- Index * 90 is the yaw for text displays.
+                        vec(-1, 0, 0), -- -X
+                        vec(0, 0, -1), -- -Z
+                        vec(1, 0, 0), -- +X
+                        vec(0, 0, 1), -- +Z
+                    }
+                    task.spawn(function()
+                        local cp1 = vec(8.5, 0, 24.5)
+                        local stackCount = 12
+                    
+                        -- Repeat for all 4 axes
+                        for index, axis in AXES do
+                            local text = "*LEVEL_1*LEVEL_1"
+                    
+                            -- Spawn one set for each Y level in the stack
+                            for i = 1, stackCount do
+                                text = rotateFirstUtf8CharToEnd(text)
+                                local displayText = string.gsub(text, "*", "···")
+                    
+                                -- Spawn the backset displays for 3d effect
+                                for j = 0, 2 do
+                                    player:SpawnEntity("minecraft:text_display", {
+                                        Position = cp1 + vec(0, 0.4 * (i - 1), 0) + (axis * 1.5) + (axis * -0.075 * j),
+                                        Yaw = index * 90,
+                                        Text = displayText,
+                                        Scale = LEVEL_TEXT_SCALE,
+                                        Background = 0,
+                                    })
+                                end
+                    
+                                -- One more entity for the inner face
+                                player:SpawnEntity("minecraft:text_display", {
+                                    Position = cp1 + vec(0, 0.4 * (i - 1), 0) + (axis * 1.5),
+                                    Yaw = index * 90 - 180,
+                                    Text = displayText,
+                                    Scale = LEVEL_TEXT_SCALE,
+                                    Background = 0,
+                                })
+                            end
+                        end
+                    end)
                     """);
 
             state.load("test.luau", bytecode);
