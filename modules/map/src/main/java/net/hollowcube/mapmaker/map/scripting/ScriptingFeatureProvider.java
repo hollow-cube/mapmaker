@@ -7,8 +7,11 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
+import net.hollowcube.mapmaker.map.scripting.api.LuaColor;
 import net.hollowcube.mapmaker.map.scripting.api.LuaEventSource;
 import net.hollowcube.mapmaker.map.scripting.api.LuaLibTask;
+import net.hollowcube.mapmaker.map.scripting.api.LuaText;
+import net.hollowcube.mapmaker.map.scripting.api.entity.LuaEntity;
 import net.hollowcube.mapmaker.map.scripting.api.entity.LuaPlayer;
 import net.hollowcube.mapmaker.map.scripting.api.math.LuaVectorTypeImpl;
 import net.hollowcube.mapmaker.map.scripting.api.world.LuaBlock;
@@ -36,9 +39,6 @@ public class ScriptingFeatureProvider implements FeatureProvider {
     private static final String QB_DG = "5ede93ae-493a-4318-963e-7fa6ac7fc30b";
 
     private static final Tag<LuaState> LUA_STATE_TAG = Tag.Transient("mapmaker:play/lua_state");
-
-    public record ThreadRef(int ref, EventNode eventNode) {
-    }
 
     public static final Tag<LuaScriptState> LUA_THREAD_REF_TAG = Tag.Transient("mapmaker:play/lua_thread_ref");
 
@@ -125,9 +125,14 @@ public class ScriptingFeatureProvider implements FeatureProvider {
                         vec(1, 0, 0), -- +X
                         vec(0, 0, 1), -- +Z
                     }
+                    local MIN_COLOR = Color.new("#ED377D")
+                    local MAX_COLOR = Color.new("#FB74D7")
                     task.spawn(function()
                         local cp1 = vec(8.5, 0, 24.5)
                         local stackCount = 12
+                    
+                        -- One list of entities per Y level (bottom to top)
+                        local entityStacks = {}
                     
                         -- Repeat for all 4 axes
                         for index, axis in AXES do
@@ -135,29 +140,113 @@ public class ScriptingFeatureProvider implements FeatureProvider {
                     
                             -- Spawn one set for each Y level in the stack
                             for i = 1, stackCount do
+                                local entityStack = entityStacks[i] or {}
                                 text = rotateFirstUtf8CharToEnd(text)
                                 local displayText = string.gsub(text, "*", "···")
+                                local displayColor = MIN_COLOR:Lerp(MAX_COLOR, i / stackCount)
+                                local backColor = displayColor * 0.34
                     
                                 -- Spawn the backset displays for 3d effect
                                 for j = 0, 2 do
-                                    player:SpawnEntity("minecraft:text_display", {
+                                    local layerColor = displayColor:Lerp(backColor, j / 2)
+                                    entityStack[#entityStack + 1] = player:SpawnEntity("minecraft:text_display", {
                                         Position = cp1 + vec(0, 0.4 * (i - 1), 0) + (axis * 1.5) + (axis * -0.075 * j),
                                         Yaw = index * 90,
-                                        Text = displayText,
+                                        Text = {
+                                            Text = displayText,
+                                            Color = layerColor,
+                                        },
                                         Scale = LEVEL_TEXT_SCALE,
                                         Background = 0,
+                                        TeleportDuration = 5,
+                                        StartInterpolation = 0,
                                     })
                                 end
                     
                                 -- One more entity for the inner face
-                                player:SpawnEntity("minecraft:text_display", {
+                                entityStack[#entityStack + 1] = player:SpawnEntity("minecraft:text_display", {
                                     Position = cp1 + vec(0, 0.4 * (i - 1), 0) + (axis * 1.5),
                                     Yaw = index * 90 - 180,
-                                    Text = displayText,
+                                    Text = {
+                                        Text = displayText,
+                                        Color = MIN_COLOR,
+                                    },
                                     Scale = LEVEL_TEXT_SCALE,
                                     Background = 0,
+                                    TeleportDuration = 5,
+                                    StartInterpolation = 0,
                                 })
+                    
+                                entityStacks[i] = entityStack
                             end
+                        end
+                    
+                        -- Do the drop effect
+                        task.wait(32) -- to 43
+                    
+                        for _, entity in entityStacks[12] do
+                            entity:Teleport(vec(0, -0.360000005, 0), nil, nil, "xyz")
+                        end
+                        task.wait(5) -- to 38
+                        for _, entity in entityStacks[12] do
+                            entity:Remove()
+                        end
+                    
+                        task.wait(4) -- to 34
+                        for _, entity in entityStacks[11] do
+                            entity:Teleport(vec(0, -0.360000005, 0), nil, nil, "xyz")
+                        end
+                        task.wait(5) -- to 29
+                        for _, entity in entityStacks[11] do
+                            entity:Remove()
+                        end
+                    
+                        task.wait(2) -- to 27
+                        for _, entity in entityStacks[10] do
+                            entity:Teleport(vec(0, -0.360000005, 0), nil, nil, "xyz")
+                        end
+                        task.wait(5) -- to 22
+                        for _, entity in entityStacks[10] do
+                            entity:Remove()
+                        end
+                    
+                        for _, entity in entityStacks[9] do
+                            entity:Teleport(vec(0, -0.360000005, 0), nil, nil, "xyz")
+                        end
+                        task.wait(4) -- to 18
+                        for _, entity in entityStacks[8] do
+                            entity:Teleport(vec(0, -0.360000005, 0), nil, nil, "xyz")
+                        end
+                        task.wait(1) -- to 17
+                        for _, entity in entityStacks[9] do
+                            entity:Remove()
+                        end
+                        task.wait(2) -- to 15
+                        for _, entity in entityStacks[7] do
+                            entity:Teleport(vec(0, -0.360000005, 0), nil, nil, "xyz")
+                        end
+                        task.wait(2) -- to 13
+                        for _, entity in entityStacks[8] do
+                            entity:Remove()
+                        end
+                        task.wait(1) -- to 12
+                        for _, entity in entityStacks[6] do
+                            entity:Teleport(vec(0, -0.360000005, 0), nil, nil, "xyz")
+                        end
+                        task.wait(2) -- to 10
+                        for _, entity in entityStacks[7] do
+                            entity:Remove()
+                        end
+                        for _, entity in entityStacks[5] do
+                            entity:Teleport(vec(0, -0.360000005, 0), nil, nil, "xyz")
+                        end
+                        task.wait(3) -- to 7 WE MISSED A STEP
+                        for _, entity in entityStacks[6] do
+                            entity:Remove()
+                        end
+                        task.wait(2) -- to 5 WE MISSED A STEP
+                        for _, entity in entityStacks[5] do
+                            entity:Remove()
                         end
                     end)
                     """);
@@ -167,6 +256,10 @@ public class ScriptingFeatureProvider implements FeatureProvider {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
+        /*
+
+         */
     }
 
     private void deinitPlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
@@ -185,9 +278,13 @@ public class ScriptingFeatureProvider implements FeatureProvider {
         LuaLibTask.init(global);
 
         LuaVectorTypeImpl.init(global);
+        LuaColor.init(global);
+        LuaText.init(global);
+
         LuaEventSource.init(global);
         LuaBlock.init(global);
         LuaParticle.init(global);
+        LuaEntity.init(global);
         LuaPlayer.init(global);
 
         global.sandbox();

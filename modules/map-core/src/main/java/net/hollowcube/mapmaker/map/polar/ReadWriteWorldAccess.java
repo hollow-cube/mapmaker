@@ -75,7 +75,7 @@ public class ReadWriteWorldAccess extends ReadWorldAccess {
     private @NotNull Set<MapEntity> getRootEntities(@NotNull Chunk chunk) {
         var entities = chunk.getInstance().getChunkEntities(chunk);
         return entities.stream()
-                .filter(e -> e instanceof MapEntity && e.getVehicle() == null)
+                .filter(e -> e instanceof MapEntity mapEntity && mapEntity.shouldSerialize() && e.getVehicle() == null)
                 .map(e -> (MapEntity) e)
                 .collect(Collectors.toSet());
     }

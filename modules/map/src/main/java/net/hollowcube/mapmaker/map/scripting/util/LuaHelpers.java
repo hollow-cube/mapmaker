@@ -36,6 +36,16 @@ public class LuaHelpers {
         }
     }
 
+    // Returns true if the key exists, it is at the top of the stack.
+    public static boolean tableGet(@NotNull LuaState state, int tableIndex, @NotNull String key) {
+        state.getField(tableIndex, key);
+        if (state.isNil(-1)) {
+            state.pop(1); // Pop the nil value
+            return false;
+        }
+        return true;
+    }
+
     public static @NotNull Key checkKeyArg(@NotNull LuaState state, int index) {
         var key = state.checkStringArg(index);
         try {

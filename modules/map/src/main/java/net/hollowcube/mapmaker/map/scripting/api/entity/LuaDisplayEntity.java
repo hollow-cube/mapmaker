@@ -2,10 +2,11 @@ package net.hollowcube.mapmaker.map.scripting.api.entity;
 
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
+import net.hollowcube.mapmaker.map.scripting.api.LuaColor;
+import net.hollowcube.mapmaker.map.scripting.api.LuaText;
 import net.hollowcube.mapmaker.map.scripting.api.math.LuaVectorTypeImpl;
 import net.hollowcube.mapmaker.map.scripting.api.world.LuaBlock;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
@@ -94,13 +95,20 @@ public abstract class LuaDisplayEntity extends LuaEntity {
     private int getGlowColorOverride(@NotNull LuaState state) {
         var color = delegate().getEntityMeta().getGlowColorOverride();
         if (color == -1) state.pushNil();
-        else state.pushInteger(color);
+        else LuaColor.push(state, TextColor.color(color));
         return 1;
     }
 
     private int setGlowColorOverride(@NotNull LuaState state, int index) {
-        int color = state.isNil(index) ? -1 : Math.max(0, state.checkIntegerArg(index));
-        delegate().getEntityMeta().setGlowColorOverride(color);
+        if (state.isNil(index)) {
+            delegate().getEntityMeta().setGlowColorOverride(-1);
+        } else {
+            var color = LuaColor.checkArg(state, index);
+            int rgb = color.red();
+            rgb = (rgb << 8) + color.green();
+            rgb = (rgb << 8) + color.blue();
+            delegate().getEntityMeta().setGlowColorOverride(rgb);
+        }
         return 0;
     }
 
@@ -365,16 +373,13 @@ public abstract class LuaDisplayEntity extends LuaEntity {
         }
 
         private int getText(@NotNull LuaState state) {
-            // TODO text components!
-            var text = delegate().getEntityMeta().getText();
-            var string = PlainTextComponentSerializer.plainText().serialize(text);
-            state.pushString(string);
+            LuaText.push(state, delegate().getEntityMeta().getText());
             return 1;
         }
 
         private int setText(@NotNull LuaState state, int index) {
-            var text = state.checkStringArg(index);
-            delegate().getEntityMeta().setText(Component.text(text));
+            var text = LuaText.checkArg(state, index);
+            delegate().getEntityMeta().setText(text);
             return 0;
         }
 

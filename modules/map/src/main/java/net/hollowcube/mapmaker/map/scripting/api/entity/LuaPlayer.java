@@ -4,6 +4,7 @@ import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaType;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
+import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointChangeEvent;
 import net.hollowcube.mapmaker.map.feature.play.BaseParkourMapFeatureProvider;
 import net.hollowcube.mapmaker.map.scripting.api.LuaEventSource;
@@ -180,6 +181,9 @@ public final class LuaPlayer {
 
         // Spawn the entity
         var entity = entityWrapper.delegate();
+        if (entity instanceof MapEntity mapEntity) {
+            mapEntity.doNotSerialize();
+        }
 
         // Track the entity in the player
         var entities = new ArrayList<>(delegate.getTag(BaseParkourMapFeatureProvider.OWNED_ENTITIES));

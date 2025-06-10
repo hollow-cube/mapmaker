@@ -2,7 +2,10 @@ package net.hollowcube.mapmaker.map.scripting.api.entity;
 
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.mapmaker.map.scripting.api.math.LuaVectorTypeImpl;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.RelativeFlags;
 import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.map.scripting.util.LuaHelpers.noSuchKey;
@@ -70,6 +73,47 @@ public class LuaEntity {
 
     // Methods
 
+    ///  Teleport(pos: vector, yaw: number?, pitch: number?, relativeFlags: string?)
+    private int teleport(@NotNull LuaState state) {
+        int top = state.getTop();
+        Point pos = LuaVectorTypeImpl.checkArg(state, 1);
+
+        float yaw, pitch;
+        int relFlags = 0;
+        if (top > 1 && !state.isNil(2)) {
+            yaw = (float) state.checkNumberArg(2);
+        } else {
+            yaw = 0;
+            relFlags |= RelativeFlags.YAW;
+        }
+        if (top > 2 && !state.isNil(3)) {
+            pitch = (float) state.checkNumberArg(3);
+        } else {
+            pitch = 0;
+            relFlags |= RelativeFlags.PITCH;
+        }
+        if (top > 3) {
+            for (char c : state.checkStringArg(4).toCharArray()) {
+                int flag = switch (c) {
+                    case 'x' -> RelativeFlags.X;
+                    case 'y' -> RelativeFlags.Y;
+                    case 'z' -> RelativeFlags.Z;
+                    case 'r' -> RelativeFlags.YAW;
+                    case 'p' -> RelativeFlags.PITCH;
+                    default -> {
+                        state.argError(4, "Unknown relative teleport flag: " + c);
+                        yield 0; // unreachable
+                    }
+                };
+                relFlags |= flag;
+            }
+        }
+
+        // todo ensure the target position is inside the world border (including bounding box)
+        delegate.teleport(new Pos(pos, yaw, pitch), null, relFlags);
+        return 0;
+    }
+
     private int remove(@NotNull LuaState state) {
         if (delegate.isRemoved())
             state.error("Entity is already removed");
@@ -101,6 +145,7 @@ public class LuaEntity {
 
     protected int luaNameCall(@NotNull LuaState state, @NotNull String methodName) {
         return switch (methodName) {
+            case "Teleport" -> teleport(state);
             case "Remove" -> remove(state);
             default -> noSuchMethod(state, NAME, methodName);
         };

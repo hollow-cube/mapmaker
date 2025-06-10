@@ -40,9 +40,9 @@ public interface TerraformEntity {
         if (!passengers.isEmpty()) {
             var passengerTagList = ListBinaryTag.builder(BinaryTagTypes.COMPOUND);
             for (var passenger : passengers) {
-                if (passenger instanceof TerraformEntity passengerEntity) {
-                    passengerTagList.add(passengerEntity.writeToTag());
-                }
+                if (!(passenger instanceof TerraformEntity passengerEntity) || !passengerEntity.shouldSerialize())
+                    continue;
+                passengerTagList.add(writeToTagWithPassengers(passengerEntity));
             }
             compound = compound.put("Passengers", passengerTagList.build());
         }
@@ -93,6 +93,8 @@ public interface TerraformEntity {
 
         return entity;
     }
+
+    boolean shouldSerialize();
 
     void readData(@NotNull CompoundBinaryTag tag);
 

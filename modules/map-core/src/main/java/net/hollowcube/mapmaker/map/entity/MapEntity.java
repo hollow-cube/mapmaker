@@ -23,12 +23,23 @@ import java.util.UUID;
 public class MapEntity extends Entity implements TerraformEntity {
     private static final Logger logger = LoggerFactory.getLogger(MapEntity.class);
 
+    private boolean serialize = true;
+
     protected MapEntity(@NotNull EntityType entityType) {
         super(entityType, UUID.randomUUID());
     }
 
     protected MapEntity(@NotNull EntityType entityType, @NotNull UUID uuid) {
         super(entityType, uuid);
+    }
+
+    @Override
+    public boolean shouldSerialize() {
+        return this.serialize;
+    }
+
+    public void doNotSerialize() {
+        this.serialize = false;
     }
 
     // Interaction
