@@ -26,14 +26,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-/*
-
-Open Questions about scripting:
-* How should we type things that take/return text components?
-* How should we type colors
-  * Roblox has a Color3 which probably makes sense to do something similar: https://create.roblox.com/docs/reference/engine/datatypes/Color3
-
- */
 @AutoService(FeatureProvider.class)
 public class ScriptingFeatureProvider implements FeatureProvider {
     private static final String QB_DG = "5ede93ae-493a-4318-963e-7fa6ac7fc30b";
