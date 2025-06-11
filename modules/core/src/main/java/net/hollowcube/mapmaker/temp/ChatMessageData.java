@@ -11,11 +11,14 @@ import java.util.List;
 public record ChatMessageData(
         @NotNull ClientChatMessageData.Type type,
 
+        // Unsigned chat
         @NotNull String sender,
         @NotNull String channel,
         @NotNull List<Part> parts,
         long seed,
+        boolean senderHasHypercube,
 
+        // System message
         @NotNull String target,
         @NotNull String key,
         @Nullable List<String> args,
