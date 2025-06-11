@@ -3,6 +3,8 @@ package net.hollowcube.mapmaker.map.scripting.api.entity;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaType;
+import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.action.Attachments;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointChangeEvent;
@@ -11,6 +13,7 @@ import net.hollowcube.mapmaker.map.scripting.api.LuaEventSource;
 import net.hollowcube.mapmaker.map.scripting.api.math.LuaVectorTypeImpl;
 import net.hollowcube.mapmaker.map.scripting.api.world.LuaBlock;
 import net.hollowcube.mapmaker.map.scripting.api.world.LuaParticle;
+import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -80,6 +83,15 @@ public final class LuaPlayer {
         LuaEventSource.push(state, new LuaEventSource<>(delegate, MapPlayerCheckpointChangeEvent.class));
         return 1;
     }
+
+    private int getProgressIndex(@NotNull LuaState state) {
+        var saveState = SaveState.optionalFromPlayer(delegate);
+        var playState = OpUtils.map(saveState, ss -> ss.state(PlayState.class));
+        int progressIndex = OpUtils.mapOr(playState, ps -> ps.get(Attachments.PROGRESS_INDEX, 0), 0);
+        state.pushInteger(progressIndex);
+        return 1;
+    }
+
 
     // Methods
 
@@ -209,6 +221,8 @@ public final class LuaPlayer {
             case "Position" -> player.getPosition(state);
             // Events
             case "CheckpointChanged" -> player.checkpointChanged(state);
+            // PK related, not sure if these should be here
+            case "ProgressIndex" -> player.getProgressIndex(state);
             default -> noSuchKey(state, NAME, key);
         };
     }

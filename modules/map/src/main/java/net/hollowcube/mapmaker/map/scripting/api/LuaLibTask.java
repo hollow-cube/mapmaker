@@ -37,6 +37,10 @@ public class LuaLibTask {
         thread.setThreadData(task);
         luaState.scheduler().submitTask(task);
 
+        // TODO: This ref is a straight memory leak
+        state.ref(-1); // Store the thread in the registry
+        state.pop(1); // Remove the thread
+
         return 0;
     }
 

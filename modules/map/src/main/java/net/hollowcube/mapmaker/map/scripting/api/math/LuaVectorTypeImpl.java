@@ -58,7 +58,7 @@ public final class LuaVectorTypeImpl {
             return 1;
         }
 
-        int elem = name.charAt(0) - 'x';
+        int elem = name.charAt(0) - 'X';
         if (elem < 0 || elem > 2) {
             state.error("No such key: " + name);
             return 0;

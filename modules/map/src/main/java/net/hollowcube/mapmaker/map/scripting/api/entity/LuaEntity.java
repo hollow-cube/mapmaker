@@ -115,9 +115,8 @@ public class LuaEntity {
     }
 
     private int remove(@NotNull LuaState state) {
-        if (delegate.isRemoved())
-            state.error("Entity is already removed");
-        delegate.remove();
+        if (!delegate.isRemoved())
+            delegate.remove();
         return 0;
     }
 
