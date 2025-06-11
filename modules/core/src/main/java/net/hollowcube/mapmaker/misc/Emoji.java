@@ -47,6 +47,10 @@ public record Emoji(
     public static final Emoji VOMIT = builder("vomit").parent("face").hypercube().build();
     public static final Emoji POOP = builder("poop").parent("misc").build();
     public static final Emoji DEVIL = builder("devil").parent("face").build();
+    public static final Emoji ALIEN = builder("alien").parent("face").build();
+    public static final Emoji BYEBYE = builder("byebye").parent("face").build();
+    public static final Emoji DESOLATE = builder("desolate").parent("face").build();
+    public static final Emoji HEARTEYES = builder("hearteyes").parent("face").build();
 
     public static final Emoji THUMBS_UP = builder("thumbs_up").parent("misc").build(); //todo alias
     public static final Emoji THUMBS_DOWN = builder("thumbs_down").parent("misc").build();
@@ -66,12 +70,19 @@ public record Emoji(
     public static final Emoji BEANS = builder("beans").parent("misc").hypercube().build();
 
     public static final Emoji BLOB = builder("blob").parent("itmg").build();
+    public static final Emoji GOLD_BLOB = builder("goldblob").parent("itmg").build();
     public static final Emoji SEAL = builder("seal").parent("itmg").build();
     public static final Emoji ITMG = builder("itmg").path("itmg/blob").hideInHelp().build();
 
     public static final Emoji GRASS = builder("grass").parent("misc").hypercube().build();
     public static final Emoji MUSHROOM = builder("mushroom").parent("misc").hypercube().build();
     public static final Emoji ROCKET = builder("rocket").parent("misc").build();
+    public static final Emoji COLON_3 = builder("3").parent("misc").build();
+    public static final Emoji BRAIN = builder("brain").parent("misc").build();
+    public static final Emoji EYE = builder("eye").parent("misc").build();
+    public static final Emoji GOAT = builder("goat").parent("misc").build();
+    public static final Emoji MOUTH = builder("mouth").parent("misc").build();
+    public static final Emoji PEPODUMB = builder("pepodumb").parent("misc").hypercube().build();
 
     public static final Emoji SUS_BLUE = builder("sus_blue").path("sus/blue").hideInHelp().hypercube().build();
     public static final Emoji SUS_BROWN = builder("sus_brown").path("sus/brown").hideInHelp().hypercube().build();
