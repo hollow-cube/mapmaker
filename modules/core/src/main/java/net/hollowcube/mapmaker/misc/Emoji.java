@@ -159,7 +159,7 @@ public record Emoji(
             var common = this.component;
             this.component = Either.right(random -> {
                 if (random == null) return common.map(Function.identity(), func -> func.apply(null));
-                return random.nextFloat() > chance ? alternative.get(random) : common.map(Function.identity(), func -> func.apply(random));
+                return random.nextFloat() < chance ? alternative.get(random) : common.map(Function.identity(), func -> func.apply(random));
             });
             return this;
         }
