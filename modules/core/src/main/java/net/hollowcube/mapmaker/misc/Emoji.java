@@ -69,7 +69,7 @@ public record Emoji(
     public static final Emoji SKULL = builder("skull").parent("face").build();
     public static final Emoji BEANS = builder("beans").parent("misc").hypercube().build();
 
-    public static final Emoji GOLD_BLOB = builder("goldblob").parent("itmg").build();
+    public static final Emoji GOLD_BLOB = builder("goldblob").hypercube().hideInHelp().parent("itmg").build();
     public static final Emoji SEAL = builder("seal").parent("itmg").build();
     public static final Emoji ITMG = builder("itmg").path("itmg/blob").hideInHelp().build();
     public static final Emoji BLOB = builder("blob").parent("itmg").alternative(GOLD_BLOB, 0.01f).build();
