@@ -69,10 +69,10 @@ public record Emoji(
     public static final Emoji SKULL = builder("skull").parent("face").build();
     public static final Emoji BEANS = builder("beans").parent("misc").hypercube().build();
 
-    public static final Emoji BLOB = builder("blob").parent("itmg").build();
     public static final Emoji GOLD_BLOB = builder("goldblob").parent("itmg").build();
     public static final Emoji SEAL = builder("seal").parent("itmg").build();
     public static final Emoji ITMG = builder("itmg").path("itmg/blob").hideInHelp().build();
+    public static final Emoji BLOB = builder("blob").parent("itmg").alternative(GOLD_BLOB, 0.01f).build();
 
     public static final Emoji GRASS = builder("grass").parent("misc").hypercube().build();
     public static final Emoji MUSHROOM = builder("mushroom").parent("misc").hypercube().build();
@@ -153,7 +153,15 @@ public record Emoji(
                 return choices[random.nextInt(choices.length)].get(random);
             });
             return this;
+        }
 
+        public Builder alternative(@NotNull Emoji alternative, float chance) {
+            var common = this.component;
+            this.component = Either.right(random -> {
+                if (random == null) return common.map(Function.identity(), func -> func.apply(null));
+                return random.nextFloat() > chance ? alternative.get(random) : common.map(Function.identity(), func -> func.apply(random));
+            });
+            return this;
         }
 
         public Builder hideInHelp() {
