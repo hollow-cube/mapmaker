@@ -51,7 +51,7 @@ public final class AxiomPlayer {
 
             AxiomClientboundSetRestrictionsPacket.Restrictions restrictions = new AxiomClientboundSetRestrictionsPacket.Restrictions(
                     true, true, true, true,
-                    AxiomCapabilities.ALL, -1, 200,
+                    AxiomCapabilities.ALL, -1, 0,
                     Pair.of(min, max)
             );
 

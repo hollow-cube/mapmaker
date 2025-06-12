@@ -8,20 +8,20 @@ import net.hollowcube.command.util.WordType;
 import net.hollowcube.terraform.instance.TerraformInstanceBiomes;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
-import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
-public class ArgumentBiome extends Argument<DynamicRegistry.Key<Biome>> {
+public class ArgumentBiome extends Argument<RegistryKey<Biome>> {
 
     ArgumentBiome(@NotNull String id) {
         super(id);
     }
 
     @Override
-    public @NotNull ParseResult<DynamicRegistry.Key<Biome>> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public @NotNull ParseResult<RegistryKey<Biome>> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
         if (!(sender instanceof Player player)) return syntaxError();
 
         var biomes = TerraformInstanceBiomes.forInstance(player.getInstance());
@@ -31,7 +31,7 @@ public class ArgumentBiome extends Argument<DynamicRegistry.Key<Biome>> {
 
         boolean partial = false;
 
-        for (DynamicRegistry.Key<Biome> key : biomes.keys()) {
+        for (RegistryKey<Biome> key : biomes.keys()) {
             var miniId = key.key().asMinimalString().toLowerCase(Locale.ROOT);
             var id = key.key().asString().toLowerCase(Locale.ROOT);
 
@@ -51,7 +51,7 @@ public class ArgumentBiome extends Argument<DynamicRegistry.Key<Biome>> {
 
         if (biomes == null) return;
 
-        for (DynamicRegistry.Key<Biome> key : biomes.keys()) {
+        for (RegistryKey<Biome> key : biomes.keys()) {
             var miniId = key.key().asMinimalString().toLowerCase(Locale.ROOT);
             var id = key.key().asString().toLowerCase(Locale.ROOT);
 

@@ -166,11 +166,12 @@ public class V4326 extends DataVersion {
                 var item = items.remove("item" + i);
                 if (!item.isNull()) {
                     var action = Value.emptyMap();
-                    action.put("slot", i - 1);
                     var type = item.get("type").as(String.class, "remove");
                     if ("remove".equals(type)) {
                         action.put("type", "mapmaker:take_item");
+                        action.put("slot" + (i - 1), true);
                     } else {
+                        action.put("slot", i - 1);
                         action.put("type", "mapmaker:give_item");
                         action.put("item", Key.key(type).asString());
                         action.put("amount", item.remove("quantity"));
@@ -189,6 +190,15 @@ public class V4326 extends DataVersion {
             action.put("setting", key);
             actions.put(action);
         });
+
+        var lives = container.remove("lives").as(Number.class, 0).intValue();
+        if (lives > 0) {
+            var action = Value.emptyMap();
+            action.put("type", "mapmaker:lives");
+            action.put("operation", "set");
+            action.put("value", lives);
+            actions.put(action);
+        }
 
         if (actions.size(0) > 0)
             container.put("actions", actions);

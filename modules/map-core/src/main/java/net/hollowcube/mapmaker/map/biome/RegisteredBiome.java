@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.map.biome;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +17,7 @@ public record RegisteredBiome(
         return Component.text(this.info.getName());
     }
 
-    public DynamicRegistry.Key<Biome> key() {
-        return DynamicRegistry.Key.of(this.innerKey);
+    public RegistryKey<Biome> key() {
+        return RegistryKey.unsafeOf(this.innerKey);
     }
 }

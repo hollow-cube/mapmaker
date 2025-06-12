@@ -20,7 +20,10 @@ import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.packet.server.CachedPacket;
+import net.minestom.server.network.packet.server.common.TagsPacket;
 import net.minestom.server.network.packet.server.configuration.SelectKnownPacksPacket;
+import net.minestom.server.registry.Registries;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -173,7 +176,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             player.sendPacket(serverProcess.frogVariant().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.pigVariant().registryDataPacket(serverProcess, excludeVanilla));
 
-            player.sendPacket(MinecraftServer.getTagManager().packet(serverProcess));
+            player.sendPacket(TEMP_TAGS_PACKET);
             event.setSendRegistryData(false);
 
             // Send feature flag so that vanilla doesnt show disabled items tooltip
@@ -297,5 +300,29 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
                 player.kick(CLOSED_MESSAGE);
             }
         }
+    }
+
+    private static final CachedPacket TEMP_TAGS_PACKET = new CachedPacket(AbstractMapWorld::createTagsPacket);
+
+    private static @NotNull TagsPacket createTagsPacket() {
+        final List<TagsPacket.Registry> entries = new ArrayList<>();
+
+        // The following are the registries which contain tags used by the vanilla client.
+        // We don't care about registries unused by the client.
+        final Registries registries = MinecraftServer.process();
+        entries.add(registries.bannerPattern().tagRegistry());
+        entries.add(registries.biome().tagRegistry());
+        entries.add(registries.blocks().tagRegistry());
+        entries.add(registries.catVariant().tagRegistry());
+        entries.add(registries.damageType().tagRegistry());
+        entries.add(registries.enchantment().tagRegistry());
+        entries.add(registries.entityType().tagRegistry());
+        entries.add(registries.fluid().tagRegistry());
+        entries.add(registries.gameEvent().tagRegistry());
+        entries.add(registries.instrument().tagRegistry());
+        entries.add(registries.material().tagRegistry());
+        entries.add(registries.paintingVariant().tagRegistry());
+
+        return new TagsPacket(entries);
     }
 }

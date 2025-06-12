@@ -22,13 +22,13 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
     }
 
     @Override
-    public @NotNull List<Punishment> getPunishments(@Nullable String playerId, @Nullable UUID executorId, @Nullable PunishmentType type) {
+    public @NotNull List<Punishment> getPunishments(@Nullable String playerId, @NotNull UUID executorId, @Nullable PunishmentType type) {
         var request = HttpRequest.newBuilder()
                 .uri(url(
                         "%s/punishments?playerId=%s&executorId=%s&type=%s",
                         url,
                         Objects.requireNonNullElse(playerId, ""),
-                        OpUtils.mapOr(executorId, Object::toString, ""),
+                        executorId,
                         OpUtils.mapOr(type, PunishmentType::name, "").toLowerCase(Locale.ROOT)
                 ))
                 .build();

@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.command.CommandCategories;
@@ -203,7 +204,7 @@ public class MapServerRunner extends AbstractMapServer {
         ));
 
         commandManager.register(new HubCommand(server.bridge()));
-        commandManager.register(new PlayerInfoCommand(server.permManager(), server.playerService()));
+        commandManager.register(new PlayerInfoCommand(server.permManager(), server.playerService(), server.sessionManager()));
 
         commandManager.register(new TopTimesCommand(server.mapService(), server.playerService(), server.sessionManager()));
 
@@ -259,6 +260,8 @@ public class MapServerRunner extends AbstractMapServer {
     protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
         try {
             var player = event.getPlayer();
+            ProtocolVersions.requestProtocolVersionFromProxy(player);
+            if (!player.isOnline()) return;
 
             // Queue resource pack download/apply while we do other things
             var resourcePackFuture = ResourcePackManager.sendResourcePack(player);
@@ -359,6 +362,9 @@ public class MapServerRunner extends AbstractMapServer {
                 player.sendMessage("You are not in an editing world!");
             }
         }, "Enables progress index add mode for the current map");
+
+        cmd.createPermissionlessSubcommand("poi", DebugPoiCommand::handleDebugRegions,
+                "Shows the location information about nearby pois");
 
         return cmd;
     }

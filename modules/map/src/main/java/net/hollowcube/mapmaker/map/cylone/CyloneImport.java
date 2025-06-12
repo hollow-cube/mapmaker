@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -72,7 +73,7 @@ public class CyloneImport {
                     .findFirst()
                     .orElse(null);
             if (tMap == null) {
-                tMap = mapService.createMap(MapCreateRequest.forOrg(AUTHORIZER, CYLONE_ORG_ID, MapSize.LARGE));
+                tMap = mapService.createMap(MapCreateRequest.forOrg(AUTHORIZER, CYLONE_ORG_ID, MapSize.LARGE, MinecraftServer.PROTOCOL_VERSION));
                 existingMaps.add(tMap);
             }
             var map = tMap;

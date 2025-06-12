@@ -37,6 +37,8 @@ public class PlayingDebugOverlay implements ActionBar.Provider {
             builder.pushColor(FontUtil.computeVerticalOffset(-50 + (i++ * 9)));
             if (entry.getKey() == null) continue;
             var line = entry.getKey().key().asString().replace("mapmaker:", "") + ": " + entry.getValue();
+            if (line.length() > 150)
+                line = line.substring(0, 150) + "...";
             builder.append(line);
             builder.offset(-FontUtil.measureText(line));
             builder.popColor();

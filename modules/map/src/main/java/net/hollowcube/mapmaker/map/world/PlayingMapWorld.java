@@ -27,6 +27,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.coordinate.ChunkRange;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Metadata;
@@ -42,6 +43,7 @@ import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.instance.Chunk;
 import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import org.jetbrains.annotations.NotNull;
@@ -49,8 +51,10 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PlayingMapWorld extends AbstractMapMakerMapWorld {
@@ -79,7 +83,8 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
     public static final Constructor<PlayingMapWorld> CTOR = AbstractMapWorld.ctor(PlayingMapWorld::new, PlayingMapWorld.class);
 
     public PlayingMapWorld(@NotNull MapServer server, @NotNull MapData map) {
-        super(server, map, new MapInstance(map.createDimensionName('p'), false));
+        super(server, map, new MapInstance(map.createDimensionName('p'), map.getSetting(MapSettings.LIGHTING)
+                ? MapInstance.LightingMode.LOADED : MapInstance.LightingMode.FULL_BRIGHT));
         instance.setGenerator(MapGenerators.voidWorld());
 
         instance.eventNode().addChild(eventNode); // Needs spectators, so register on instance.
@@ -140,9 +145,31 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
             // and go into a 1 block gap.
             final var finalSaveState = saveState;
             player.acquirable().sync(localPlayer -> {
+                var pos = Objects.requireNonNullElseGet(finalSaveState.state(PlayState.class).pos(), () -> map().settings().getSpawnPoint());
+                var instance = localPlayer.getInstance();
+
+                // TODO remove this godawful code and come up with a proper solution
+                // Start of HACK! This forces the chunks to load around the player so that they do not fall through the floor.
+                var chunksToLoad = new ArrayList<CompletableFuture<Chunk>>();
+                ChunkRange.chunksInRange(pos, localPlayer.getSettings().effectiveViewDistance(), (cx, cz) -> chunksToLoad.add(instance.loadChunk(cx, cz)));
+                CompletableFuture.allOf(chunksToLoad.toArray(new CompletableFuture[0])).join();
+
                 localPlayer.sendPacket(new BundlePacket());
-                localPlayer.teleport(Objects.requireNonNullElseGet(finalSaveState.state(PlayState.class).pos(), () -> map().settings().getSpawnPoint()),
-                        Vec.ZERO, null, RelativeFlags.NONE);
+
+                for (var chunkCompletableFuture : chunksToLoad) {
+                    if (!chunkCompletableFuture.isDone()) continue;
+                    var chunk = chunkCompletableFuture.getNow(null);
+                    if (chunk == null) continue;
+                    localPlayer.sendChunk(chunk);
+                }
+                // End of HACK!
+
+                localPlayer.teleport(
+                        Objects.requireNonNullElseGet(finalSaveState.state(PlayState.class).pos(), () -> map().settings().getSpawnPoint()),
+                        Vec.ZERO,
+                        null,
+                        RelativeFlags.NONE
+                );
                 ((MapPlayerImplImpl) player).updatePose();
                 localPlayer.sendPacket(new EntityMetaDataPacket(localPlayer.getEntityId(), Map.of(6, Metadata.Pose(localPlayer.getPose()))));
                 localPlayer.sendPacket(new BundlePacket());

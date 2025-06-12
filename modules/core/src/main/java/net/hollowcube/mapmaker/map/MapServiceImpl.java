@@ -34,13 +34,11 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     private final String url;
-    private final String urlV2;
     private final String urlV3;
     private final String legacyUrl;
 
     public MapServiceImpl(String url) {
         this.url = String.format("%s/v1/internal/maps", url);
-        this.urlV2 = String.format("%s/v2/internal/maps", url);
         this.urlV3 = String.format("%s/v3/internal", url);
         this.legacyUrl = String.format("%s/v1/internal/maps/legacy", url);
     }
@@ -82,7 +80,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public @NotNull MapProgressBatchResponse getMapProgress(@NotNull String playerId, @NotNull List<String> mapIds) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(urlV2 + "/progress?playerId=" + playerId + "&mapId=" + String.join(",", mapIds)))
+                .uri(URI.create(urlV3 + "/maps/progress?playerId=" + playerId + "&mapIds=" + String.join(",", mapIds)))
                 .header(AUTHORIZER_HEADER, playerId)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -201,7 +199,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     public void deleteVerification(@NotNull String authorizer, @NotNull String mapId) {
         var req = HttpRequest.newBuilder()
                 .method("DELETE", HttpRequest.BodyPublishers.noBody())
-                .uri(URI.create(url + "/" + mapId + "/verify"))
+                .uri(URI.create(urlV3 + "/maps/" + mapId + "/verify"))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -231,7 +229,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public byte @Nullable [] getMapWorld(@NotNull String id, boolean write) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/" + id + "/world?scope=" + (write ? "write" : "read")))
+                .uri(URI.create(urlV3 + "/maps/" + id + "/world?scope=" + (write ? "write" : "read")))
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofByteArray());
@@ -298,7 +296,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         var reqBody = GSON.toJson(req);
         var req2 = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
-                .uri(URI.create(url + "/" + mapId + "/report"))
+                .uri(URI.create(urlV3 + "/maps/" + mapId + "/report"))
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();
         var res = doRequest(req2, HttpResponse.BodyHandlers.ofString());
@@ -311,7 +309,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public @NotNull LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId) {
-        var uri = url + "/leaderboard/" + name;
+        var uri = urlV3 + "/maps/hub/leaderboard/" + name;
         if (playerId != null) uri += "?playerId=" + playerId;
         var req = HttpRequest.newBuilder()
                 .uri(URI.create(uri))
@@ -341,7 +339,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public void deletePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId, @Nullable String playerId) {
-        var uri = url + "/" + mapId + "/leaderboard/playtime";
+        var uri = urlV3 + "/maps/" + mapId + "/leaderboard/playtime";
         if (playerId != null) uri += "?playerId=" + playerId;
         var req = HttpRequest.newBuilder()
                 .uri(URI.create(uri))
@@ -358,7 +356,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public void restorePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId) {
-        var uri = url + "/" + mapId + "/leaderboard/playtime/restore";
+        var uri = urlV3 + "/maps/" + mapId + "/leaderboard/playtime/restore";
         var req = HttpRequest.newBuilder()
                 .uri(URI.create(uri))
                 .method("POST", HttpRequest.BodyPublishers.noBody())
@@ -376,7 +374,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType.Serializer<?> serializer) {
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.noBody())
-                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId))
+                .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId))
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -389,7 +387,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/latest?typeFilter=" + (type == null ? "" : type.name().toLowerCase(Locale.ROOT))))
+                .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId + "/latest?typeFilter=" + (type == null ? "" : type.name().toLowerCase(Locale.ROOT))))
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -427,7 +425,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public @Nullable SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/best"))
+                .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId + "/best"))
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -472,26 +470,28 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public @Nullable InputStream getSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId) {
-        var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + saveStateId + "/replay"))
-                .header(AUTHORIZER_HEADER, playerId)
-                .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofInputStream());
-        if (res.statusCode() == 200) return res.body(); // Ok
-        if (res.statusCode() == 404) return null; // Not found
-        throw new InternalError("Failed to get savestate replay: " + res.statusCode());
+        throw new UnsupportedOperationException("todo: reimplement in v3 api");
+//        var req = HttpRequest.newBuilder()
+//                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + saveStateId + "/replay"))
+//                .header(AUTHORIZER_HEADER, playerId)
+//                .build();
+//        var res = doRequest(req, HttpResponse.BodyHandlers.ofInputStream());
+//        if (res.statusCode() == 200) return res.body(); // Ok
+//        if (res.statusCode() == 404) return null; // Not found
+//        throw new InternalError("Failed to get savestate replay: " + res.statusCode());
     }
 
     @Override
     public void updateSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId, @NotNull InputStream dataStream) {
-        var req = HttpRequest.newBuilder()
-                .method("PUT", HttpRequest.BodyPublishers.ofInputStream(() -> dataStream))
-                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + saveStateId + "/replay"))
-                .header(AUTHORIZER_HEADER, playerId)
-                .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        if (res.statusCode() == 200) return; // Ok
-        throw new InternalError("Failed to update savestate replay: " + res.body());
+        throw new UnsupportedOperationException("todo: reimplement in v3 api");
+//        var req = HttpRequest.newBuilder()
+//                .method("PUT", HttpRequest.BodyPublishers.ofInputStream(() -> dataStream))
+//                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + saveStateId + "/replay"))
+//                .header(AUTHORIZER_HEADER, playerId)
+//                .build();
+//        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+//        if (res.statusCode() == 200) return; // Ok
+//        throw new InternalError("Failed to update savestate replay: " + res.body());
     }
 
     @Override

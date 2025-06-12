@@ -8,7 +8,9 @@ public record SessionCreateRequest(
         @NotNull String username,
         @NotNull String ip,
         @NotNull Skin skin,
-        @Nullable String connectedHost
+        @Nullable String connectedHost,
+        int protocolVersion,
+        @NotNull String version
 ) {
 
     public record Skin(

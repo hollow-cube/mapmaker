@@ -22,7 +22,7 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.UUIDUtils;
 import net.minestom.server.utils.validate.Check;
@@ -146,7 +146,7 @@ public class ReadWorldAccess implements PolarWorldAccess {
 
     @Override
     public int getBiomeId(@NotNull String name) {
-        var key = DynamicRegistry.Key.<Biome>of(name);
+        var key = RegistryKey.<Biome>unsafeOf(name);
         var id = mapWorld.biomes().getId(key);
         return id == -1 ? 0 : id;
     }

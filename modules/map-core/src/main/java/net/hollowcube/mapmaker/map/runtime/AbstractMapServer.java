@@ -99,6 +99,7 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
+import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.server.common.ServerLinksPacket;
@@ -229,7 +230,7 @@ public abstract class AbstractMapServer implements MapServer {
             VelocityProxy.enable(velocityConfig.secret());
         } else {
             logger.info("Velocity not configured, using online mode...");
-//            MojangAuth.init();
+            MojangAuth.init();
         }
 
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
@@ -701,6 +702,9 @@ public abstract class AbstractMapServer implements MapServer {
         }
 
         if (MINESTOM_PACKET_EXCEPTION.matcher(t.toString()).find())
+            return false;
+        // Some expected IO exceptions that we don't want to report.
+        if (t.toString().contains("header parser received no bytes") || t.toString().contains("Connection reset by peer"))
             return false;
 
         // todo fancier exception grouping

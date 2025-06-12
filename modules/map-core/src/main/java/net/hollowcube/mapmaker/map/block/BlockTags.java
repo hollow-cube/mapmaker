@@ -1,9 +1,8 @@
 package net.hollowcube.mapmaker.map.block;
 
 import net.kyori.adventure.key.Key;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.gamedata.tags.Tag;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,6 +10,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.StreamSupport;
 
 /**
  * A list of tags to various groups of blocks, taken from the block_tags.json from running <a href="https://github.com/hollow-cube/minestom-ce-data">Minestom CE's Data Generator</a>
@@ -193,9 +193,9 @@ public final class BlockTags {
     }
 
     private static @NotNull Collection<Key> builtin(@NotNull String name) {
-        var tag = MinecraftServer.getTagManager().getTag(Tag.BasicType.BLOCKS, name);
+        var tag = Block.staticRegistry().getTag(Key.key(name));
         Check.notNull(tag, "Tag " + name + " is not registered");
-        return tag.getValues();
+        return StreamSupport.stream(tag.spliterator(), false).map(RegistryKey::key).toList();
     }
 
     private static @NotNull Collection<Key> create(@NotNull Block... block) {

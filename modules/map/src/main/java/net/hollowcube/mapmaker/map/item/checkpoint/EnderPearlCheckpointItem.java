@@ -75,7 +75,7 @@ public record EnderPearlCheckpointItem(int amount, int cooldown) implements Chec
 
             background("action/editor/container_lg", -10, -31);
 
-            this.amountInput = add(1, 3, makeGenericAmount(EnderPearlCheckpointItem::withAmount));
+            this.amountInput = add(1, 3, makeGenericAmount(EnderPearlCheckpointItem::withAmount, MAX_AMOUNT));
             this.cooldownInput = add(1, 5, makeGenericCooldown(EnderPearlCheckpointItem::withCooldown, true));
         }
 

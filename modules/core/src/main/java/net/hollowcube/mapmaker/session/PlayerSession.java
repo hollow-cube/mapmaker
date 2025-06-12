@@ -11,6 +11,7 @@ import java.time.Instant;
 public record PlayerSession(
         @NotNull String playerId,
         @NotNull Instant createdAt,
+        int protocolVersion,
 
         @NotNull String proxyId,
         @NotNull String serverId,

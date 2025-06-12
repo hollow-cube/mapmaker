@@ -17,6 +17,7 @@ import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @AutoService(FeatureProvider.class)
 public class NoJumpFeatureProvider extends AbstractSettingFeatureProvider {
@@ -31,8 +32,8 @@ public class NoJumpFeatureProvider extends AbstractSettingFeatureProvider {
         return eventNode;
     }
 
-    private static boolean canJump(@NotNull Player player, MapWorld world) {
-        if (!world.isPlaying(player)) return true;
+    private static boolean canJump(@NotNull Player player, @Nullable MapWorld world) {
+        if (world == null || !world.isPlaying(player)) return true;
 
         var state = SaveState.optionalFromPlayer(player);
         if (state == null) return true;
@@ -60,7 +61,7 @@ public class NoJumpFeatureProvider extends AbstractSettingFeatureProvider {
     }
 
     private void updatePlayer(@NotNull Player player) {
-        var world = MapWorld.forPlayer(player);
+        var world = MapWorld.forPlayerOptional(player);
         var canJump = canJump(player, world);
         setJumpStrength(player, canJump ? Attribute.JUMP_STRENGTH.defaultValue() : 0);
     }

@@ -57,9 +57,9 @@ public record TakeItemAction(boolean slot0, boolean slot1, boolean slot2) implem
     public void applyTo(@NotNull Player player, @NotNull PlayState state) {
         if (!this.slot0 && !this.slot1 && !this.slot2) return;
         var items = state.get(Attachments.HOTBAR_ITEMS, HotbarItems.EMPTY);
-        if (!this.slot0) items = items.withItem(0, null);
-        if (!this.slot1) items = items.withItem(1, null);
-        if (!this.slot2) items = items.withItem(2, null);
+        if (this.slot0) items = items.withItem(0, null);
+        if (this.slot1) items = items.withItem(1, null);
+        if (this.slot2) items = items.withItem(2, null);
         state.set(Attachments.HOTBAR_ITEMS, items);
     }
 

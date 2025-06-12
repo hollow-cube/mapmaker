@@ -11,23 +11,26 @@ public record MapCreateRequest(
         boolean isOrg,
         @Nullable String owner,
         @NotNull MapSize size,
-        int slot
+        int slot,
+        int protocolVersion
 ) {
 
     public static @NotNull MapCreateRequest forOrg(
             @NotNull String authorizer,
             @NotNull String owner,
-            @NotNull MapSize size
+            @NotNull MapSize size,
+            int protocolVersion
     ) {
-        return new MapCreateRequest(authorizer, true, owner, size, -1);
+        return new MapCreateRequest(authorizer, true, owner, size, -1, protocolVersion);
     }
 
     public static @NotNull MapCreateRequest forPlayer(
             @NotNull String player,
             @NotNull MapSize size,
-            int slot
+            int slot,
+            int protocolVersion
     ) {
-        return new MapCreateRequest(player, false, player, size, slot);
+        return new MapCreateRequest(player, false, player, size, slot, protocolVersion);
     }
 
 }

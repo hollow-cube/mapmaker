@@ -11,6 +11,7 @@ import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,6 +41,8 @@ public final class ExtraCodecs {
 
     public static final Codec<Block> BLOCK_STATE_STRING = Codec.STRING
             .transform(BlockUtil::fromStringOld, BlockUtil::toString);
+    public static final Codec<Block> BLOCK_NAME_STRING = Codec.STRING
+            .transform(Block::fromKey, Block::name);
 
     public static <L, R> @NotNull Codec<Either<L, R>> either(@NotNull Codec<L> leftCodec, @NotNull Codec<R> rightCodec) {
         return new Codec<>() {
@@ -213,7 +216,7 @@ public final class ExtraCodecs {
             public @NotNull <D> Result<D> encodeToMap(@NotNull Transcoder<D> coder, @NotNull T value, Transcoder.@NotNull MapBuilder<D> map) {
                 //noinspection unchecked
                 final StructCodec<T> innerCodec = (StructCodec<T>) serializerGetter.apply(value);
-                final DynamicRegistry.Key<StructCodec<? extends T>> type = registry.getKey(innerCodec);
+                final RegistryKey<StructCodec<? extends T>> type = registry.getKey(innerCodec);
                 if (type == null) return new Result.Error<>("Unregistered serializer for: " + value);
 
                 map.put(key, coder.createString(type.name()));

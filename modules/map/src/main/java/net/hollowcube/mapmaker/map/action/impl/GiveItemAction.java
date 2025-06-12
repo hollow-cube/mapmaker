@@ -9,10 +9,12 @@ import net.hollowcube.mapmaker.map.action.gui.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.map.action.gui.ControlledNumberInput;
 import net.hollowcube.mapmaker.map.action.gui.ControlledTriStateInput;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
+import net.hollowcube.mapmaker.map.item.checkpoint.BlockCheckpointItem;
 import net.hollowcube.mapmaker.map.item.checkpoint.CheckpointItem;
 import net.hollowcube.mapmaker.map.item.checkpoint.CheckpointItems;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.panels.Button;
+import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.key.Key;
@@ -85,6 +87,14 @@ public record GiveItemAction(
 
             add(1, 1, AbstractActionEditorPanel.groupText(7, "choose item"));
 
+        }
+
+        @Override
+        protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+            super.mount(host, isInitial);
+
+            if (!isInitial) return;
+
             Consumer<Key> innerUpdateFunc = update((data, item) ->
                     data.withItem(CheckpointItems.createDefault(item)));
             Consumer<Key> updateFunc = key -> {
@@ -97,7 +107,8 @@ public record GiveItemAction(
                 int x = i % 7, y = i / 7;
 
                 add(x + 1, y + 2, new Button("gui.action.give_item." + itemType.value(), 1, 1)
-                        .model(itemType.asString(), null)
+                        // TODO: generalize this handling rather than hardcoding to this specific behavior for block items
+                        .model(itemType.equals(BlockCheckpointItem.ID) ? "minecraft:stone" : itemType.asString(), null)
                         .onLeftClick(() -> updateFunc.accept(itemType)));
                 i++;
             }
@@ -115,7 +126,7 @@ public record GiveItemAction(
             ONE, TWO, THREE; // We just use indices but multi select uses an enum for something idk
         }
 
-        private final ControlledTriStateInput<Slot> slotInput;
+        protected final ControlledTriStateInput<Slot> slotInput;
 
         public AbstractItemEditor(@NotNull ActionList.Ref ref) {
             this(ref, false);
@@ -128,14 +139,12 @@ public record GiveItemAction(
             var key = CheckpointItems.getKey(Objects.requireNonNull(ref.<GiveItemAction>cast().item));
             subtitleText.text(LanguageProviderV2.translateToPlain("gui.action.give_item." + key.value() + ".title"));
 
-
             this.slotInput = add(1, 1, new ControlledTriStateInput<>("give_item", Slot.class,
                     update((data, op) -> data.withSlot(op.ordinal())))
                     .label("choose slot").labels("slot0", "slot1", "slot2"));
             this.slotInput.update(Slot.ONE);
-            this.slotInput.iconButton().onLeftClick(() -> {
-                host.replaceView(new ItemPicker(ref));
-            });
+            this.slotInput.iconButton().onLeftClick(() -> host.replaceView(new ItemPicker(ref)));
+            this.slotInput.iconButton().onShiftLeftClick(() -> host.replaceView(new ItemPicker(ref)));
         }
 
         @Override
@@ -155,7 +164,7 @@ public record GiveItemAction(
             return update((data, value) -> data.withItem(setter.apply((T) data.item, value)));
         }
 
-        protected ControlledNumberInput makeGenericAmount(@NotNull BiFunction<T, Integer, T> setter) {
+        protected ControlledNumberInput makeGenericAmount(@NotNull BiFunction<T, Integer, T> setter, int maxAmount) {
             return new ControlledNumberInput("give_item.generic.amount", updateItem(setter))
                     .formatted(i -> i == 0 ? "Infinite" : String.valueOf(i))
                     .range(0, 99).stepped(1, 5);

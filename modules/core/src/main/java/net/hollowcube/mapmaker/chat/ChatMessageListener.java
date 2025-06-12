@@ -214,12 +214,16 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             var isColored = senderDisplyName.parts().size() > 1;
 
             for (var recipient : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+                var isSender = recipient.getUuid().toString().equals(message.sender());
                 var data = this.components.createGlobalMessage(recipient, message);
                 if (data.ping()) recipient.playSound(TAG_DING);
 
                 var text = data.text().color(isColored ? NamedTextColor.WHITE : NamedTextColor.GRAY);
 
                 recipient.sendMessage(Component.translatable("chat.channel.global", senderName, text));
+                if (isSender) {
+                    data.extra().values().forEach(recipient::sendMessage);
+                }
             }
 
             // If there is an extra message, handle it
@@ -244,6 +248,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             var isColored = senderDisplyName.parts().size() > 1;
 
             for (var recipient : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+                var isSender = recipient.getUuid().toString().equals(message.sender());
                 var map = OpUtils.map(sessionManager.getPresence(recipient.getUuid().toString()), Presence::mapId);
                 if (!Objects.equals(senderMap, map)) continue;
 
@@ -253,6 +258,10 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                 var text = data.text().color(isColored ? NamedTextColor.WHITE : NamedTextColor.GRAY);
 
                 recipient.sendMessage(Component.translatable("chat.channel.local", senderName, text));
+
+                if (isSender) {
+                    data.extra().values().forEach(recipient::sendMessage);
+                }
             }
 
             // If there is an extra message, handle it
@@ -288,6 +297,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                 sender.sendMessage(Component.translatable(
                         "chat.channel.dm.send", List.of(senderDisplayName, targetDisplayName, data.text())
                 ));
+                data.extra().values().forEach(sender::sendMessage);
             }
             for (var spy : spies) {
                 var data = this.components.createDirectMessage(spy, message);

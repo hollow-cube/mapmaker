@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.entity.impl.living.*;
 import net.hollowcube.mapmaker.map.entity.impl.other.EndCrystalEntity;
 import net.hollowcube.mapmaker.map.entity.impl.other.ItemFrameEntity;
+import net.hollowcube.mapmaker.map.entity.impl.other.LeashKnotEntity;
 import net.hollowcube.mapmaker.map.entity.impl.other.PaintingEntity;
 import net.hollowcube.mapmaker.map.entity.interaction.InteractionEntity;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
@@ -27,6 +28,7 @@ public final class MapEntities {
         MapEntityType.override(EntityType.PAINTING, PaintingEntity::new);
         MapEntityType.override(EntityType.ARMOR_STAND, ArmorStandEntity::new);
         MapEntityType.override(EntityType.END_CRYSTAL, EndCrystalEntity::new);
+        MapEntityType.override(EntityType.LEASH_KNOT, LeashKnotEntity::new);
 
         MapEntityType.override(EntityType.PANDA, PandaEntity::new);
         MapEntityType.override(EntityType.FOX, FoxEntity::new);

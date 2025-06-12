@@ -19,6 +19,8 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
+import net.minestom.server.registry.RegistryTag;
+import net.minestom.server.registry.TagKey;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -150,12 +152,12 @@ public interface PatternTree extends ParseTree<Pattern> {
             @Nullable NamespaceId namespaceId
     ) implements PatternTree {
         //todo this should come from the registry realistically
-        private static final Set<String> BLOCK_TAGS_NAMESPACES = MinecraftServer.getTagManager().getTagMap()
-                .get(net.minestom.server.gamedata.tags.Tag.BasicType.BLOCKS).stream()
+        private static final Set<String> BLOCK_TAGS_NAMESPACES = MinecraftServer.process().blocks().tags()
+                .stream().map(RegistryTag::key).filter(Objects::nonNull)
                 .map(tag -> tag.key().namespace()).collect(Collectors.toSet());
-        private static final List<Key> BLOCK_TAGS = MinecraftServer.getTagManager().getTagMap()
-                .get(net.minestom.server.gamedata.tags.Tag.BasicType.BLOCKS).stream()
-                .map(net.minestom.server.gamedata.tags.Tag::key).toList();
+        private static final List<Key> BLOCK_TAGS = MinecraftServer.process().blocks().tags()
+                .stream().map(RegistryTag::key).filter(Objects::nonNull)
+                .map(TagKey::key).toList();
 
         @Override
         public @NotNull Pattern into(@NotNull ParseContext context) throws ParseException {

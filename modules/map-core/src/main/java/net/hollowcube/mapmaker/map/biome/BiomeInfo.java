@@ -85,7 +85,7 @@ public class BiomeInfo {
 
     public @Nullable Key key() {
         if (getName().isEmpty()) return null;
-        return Key.key("custom", getName());
+        return Key.key("custom", getName().startsWith("custom:") ? getName().substring(7) : getName());
     }
 
     public @NotNull Material getDisplayItem() {

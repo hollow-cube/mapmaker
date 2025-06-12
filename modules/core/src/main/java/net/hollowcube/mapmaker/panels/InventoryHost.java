@@ -307,8 +307,9 @@ public class InventoryHost implements TagReadable, TagWritable {
         private void copyInventoryContents(@NotNull ItemStack[] items) {
             Check.argCondition(items.length < getSize(), "items length must be at least the size of the inventory");
             System.arraycopy(items, 0, itemStacks, 0, getSize());
-            if (items.length > getInterpretedSize(getInventoryType())) {
-                this.playerInventory = Arrays.copyOfRange(items, getSize(), items.length);
+            var size = getInterpretedSize(getInventoryType());
+            if (items.length > size) {
+                this.playerInventory = Arrays.copyOfRange(items, size, items.length);
             } else this.playerInventory = null;
         }
 

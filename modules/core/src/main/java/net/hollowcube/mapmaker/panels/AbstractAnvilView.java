@@ -38,12 +38,14 @@ public abstract class AbstractAnvilView extends Panel {
 
     private String input;
 
+    protected Button inputButton;
+
     public AbstractAnvilView(@NotNull String container, @NotNull String icon, @NotNull String title, @NotNull String initialInput) {
         super(InventoryType.ANVIL, 9, 5);
         this.input = initialInput;
 
         background(container, -66, -40);
-        add(0, 0, new Button("", 0, 0)
+        add(0, 0, new Button(null, 0, 0)
                 .extraComponents(HIDDEN_TOOLTIP)
                 .background(icon, -46, -1)); // kinda gross
 
@@ -51,7 +53,7 @@ public abstract class AbstractAnvilView extends Panel {
         add(0, 0, new Text(null, 0, 0, title)
                 .align(-(titleWidth / 2) + 30, -31));
 
-        add(0, 0, new Button("", 1, 1)
+        this.inputButton = add(0, 0, new Button("", 1, 1)
                 .extraComponents(HIDDEN_TOOLTIP)
                 .sprite("generic2/anvil/back", -33, 29)
                 .onLeftClick(() -> host.popView())

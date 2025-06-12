@@ -14,7 +14,7 @@ import net.minestom.server.network.packet.server.play.ChunkDataPacket;
 import net.minestom.server.network.packet.server.play.UpdateLightPacket;
 import net.minestom.server.network.packet.server.play.data.ChunkData;
 import net.minestom.server.network.packet.server.play.data.LightData;
-import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -162,12 +162,12 @@ public class EmptyChunk extends Chunk {
     }
 
     @Override
-    public DynamicRegistry.@NotNull Key<Biome> getBiome(int x, int y, int z) {
+    public @NotNull RegistryKey<Biome> getBiome(int x, int y, int z) {
         return Biome.PLAINS;
     }
 
     @Override
-    public void setBiome(int x, int y, int z, DynamicRegistry.@NotNull Key<Biome> biome) {
+    public void setBiome(int x, int y, int z, @NotNull RegistryKey<Biome> biome) {
 
     }
 }

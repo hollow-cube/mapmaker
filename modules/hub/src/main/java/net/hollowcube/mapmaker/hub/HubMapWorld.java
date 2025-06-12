@@ -85,7 +85,7 @@ public class HubMapWorld extends AbstractMapWorld {
             .addListener(PlayerChangeHeldSlotEvent.class, this::handleSwitchSlot);
 
     public HubMapWorld(@NotNull MapServer server, @NotNull MapData map) {
-        super(server, HUB_MAP_DATA, new MapInstance(HUB_MAP_DATA.id(), false));
+        super(server, HUB_MAP_DATA, new MapInstance(HUB_MAP_DATA.id(), MapInstance.LightingMode.FULL_BRIGHT));
         Check.stateCondition(HubMapWorld.instance != null, "HubMapWorld already created");
         HubMapWorld.instance = this;
 
@@ -113,11 +113,10 @@ public class HubMapWorld extends AbstractMapWorld {
     @Override
     public void load() {
         logger.info("Loading hub world (map id = {})", map().id());
-        ReadableMapData mapWorldData;
-        if (!map().id().equals(Uuids.ZERO)) {
+        ReadableMapData mapWorldData = null;
+        if (!map().id().equals(Uuids.ZERO))
             mapWorldData = server().mapService().getMapWorldAsStream(map().id(), false);
-            Check.notNull(mapWorldData, "No world generated for hub world!");
-        } else {
+        if (mapWorldData == null) {
             try (var is = getClass().getResourceAsStream("/spawn/hcspawn.polar")) {
                 if (is == null) throw new IOException("hcspawn.polar not found");
                 var worldFileContent = Objects.requireNonNull(is.readAllBytes());

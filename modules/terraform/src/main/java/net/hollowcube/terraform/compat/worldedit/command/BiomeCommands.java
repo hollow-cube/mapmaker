@@ -15,7 +15,7 @@ import net.kyori.adventure.util.RGBLike;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Chunk;
-import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 
@@ -119,7 +119,7 @@ public final class BiomeCommands {
 
     public static class SetBiome extends WECommand {
 
-        private final Argument<DynamicRegistry.Key<Biome>> biome = WEArgument.Biome("biome");
+        private final Argument<RegistryKey<Biome>> biome = WEArgument.Biome("biome");
 
         public SetBiome() {
             super("/setbiome");
@@ -176,7 +176,7 @@ public final class BiomeCommands {
     private static @NotNull Component getBiomeText(
             @NotNull String translation,
             @NotNull TerraformInstanceBiomes biomes,
-            @NotNull DynamicRegistry.Key<Biome> key,
+            @NotNull RegistryKey<Biome> key,
             @NotNull Biome biome
     ) {
         return ExtraComponents.translatable(translation)
