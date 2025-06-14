@@ -89,6 +89,12 @@
     "no_shadow": true,
     "trailing_space": 2
   },
+  "WORLD_MESSAGE": {
+    "type": "sprite",
+    "ref": "icon/chat/world",
+    "no_shadow": true,
+    "trailing_space": 2
+  },
 
   "CT1": {
     "type": "sprite",

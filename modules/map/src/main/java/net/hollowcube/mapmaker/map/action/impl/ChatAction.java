@@ -32,12 +32,13 @@ import java.util.Set;
 public record ChatAction(
         @NotNull String message
 ) implements Action {
-    private static final Sprite SPRITE = new Sprite("action/icon/chat", 3, 3);
+    private static final Sprite SPRITE = new Sprite("action/icon/chat", 2, 2);
     private static final MiniMessage CHAT_MESSAGE_PARSER = MiniMessage.builder()
             .tags(TagResolver.builder()
                     .resolver(StandardTags.color())
                     .resolver(StandardTags.decorations())
                     .resolver(StandardTags.gradient())
+                    .resolver(StandardTags.rainbow())
                     .resolver(StandardTags.hoverEvent())
                     .resolver(StandardTags.pride())
                     .build()
@@ -66,8 +67,10 @@ public record ChatAction(
     @Override
     public void applyTo(@NotNull Player player, @NotNull PlayState state) {
         try {
-            // TODO needs a special icon in front to denote its from the mapmaker and not an official message
-            player.sendMessage(CHAT_MESSAGE_PARSER.deserialize(this.message, gatherVariableResolvers(player, state)));
+            player.sendMessage(Component.translatable(
+                    "chat.action.message",
+                    CHAT_MESSAGE_PARSER.deserialize(this.message, gatherVariableResolvers(player, state))
+            ));
         } catch (Exception exception) {
             ExceptionReporter.reportException(exception, player);
         }
@@ -77,6 +80,7 @@ public record ChatAction(
         return new TagResolver[]{
                 Placeholder.unparsed("player", player.getUsername()),
                 variable("progressindex", state.get(Attachments.PROGRESS_INDEX, 0)),
+                variable("resetheight", state.get(Attachments.RESET_HEIGHT, -69)),
         };
     }
 
