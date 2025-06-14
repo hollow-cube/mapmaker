@@ -244,7 +244,7 @@ public class Button extends Element implements ButtonClickAliases {
 
         if (this.itemModel == null || this.itemLore == null) return;
         if (this.disableTooltip) {
-            builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(false, Set.of()));
+            builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, Set.of()));
         } else {
             builder.editSlotsWithout(0, 0, slotWidth, slotHeight, DataComponents.TOOLTIP_DISPLAY);
         }
