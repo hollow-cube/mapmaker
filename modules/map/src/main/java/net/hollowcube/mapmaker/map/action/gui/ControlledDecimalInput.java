@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.DecimalFormat;
 import java.util.function.Consumer;
 import java.util.function.DoubleFunction;
 import java.util.function.ToDoubleFunction;
@@ -13,6 +14,9 @@ import java.util.function.ToDoubleFunction;
 import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
 
 public class ControlledDecimalInput extends Panel {
+
+    private static final DecimalFormat DEFAULT_FORMATTER = new DecimalFormat("0.0#####");
+
     private final String key;
     private final Consumer<Double> onChange;
 
@@ -21,8 +25,8 @@ public class ControlledDecimalInput extends Panel {
     private final Button minusButton;
     private final Button plusButton;
 
-    private DoubleFunction<String> formatter = String::valueOf;
-    private DoubleFunction<String> toString = String::valueOf;
+    private DoubleFunction<String> formatter = DEFAULT_FORMATTER::format;
+    private DoubleFunction<String> toString = DEFAULT_FORMATTER::format;
     private ToDoubleFunction<String> fromString = Double::parseDouble;
     private double min = Double.MIN_VALUE, max = Double.MAX_VALUE;
     private double smallStep = 0.1, bigStep = 1;
