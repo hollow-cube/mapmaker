@@ -50,6 +50,7 @@ public class ProxyPlugin {
     private static final Key TRANSFER_DATA_COOKIE = Key.key("mapmaker", "transfer_data");
 
     private static final Set<ProtocolVersion> SUPPORTED_VERSIONS = Set.of(
+            ProtocolVersion.MINECRAFT_1_21_4,
             ProtocolVersion.MINECRAFT_1_21_5
     );
 
