@@ -73,7 +73,7 @@ public record BlockCheckpointItem(@NotNull Block block, int amount, List<Block> 
     @Override
     public @NotNull CheckpointItem updateFromItemStack(@NotNull ItemStack itemStack) {
         if (itemStack.amount() == MAX_AMOUNT + 1) return this;
-        return withAmount(itemStack.amount() - 1);
+        return withAmount(itemStack.amount());
     }
 
     @Override

@@ -33,8 +33,8 @@ public class EmojisCommand extends CommandDsl {
 
         for (var emoji : Emoji.values()) {
             if (!emoji.showInHelp()) continue;
-            (Emoji.isPublic(emoji) ? publicMsg : hypercubeMsg)
-                    .append(emoji.supplier().apply(null))
+            (emoji.isPublic() ? publicMsg : hypercubeMsg)
+                    .append(emoji.get(null))
                     .append(Component.text(SPACE_1PX));
         }
 

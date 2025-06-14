@@ -42,7 +42,11 @@ public class Element {
     }
 
     public @NotNull Element background(@Nullable String sprite, int x, int y) {
-        sprites[0] = sprite == null ? null : new Sprite(sprite, BadSprite.require(sprite), null, x, y);
+        return background(sprite == null ? null : new Sprite(sprite, BadSprite.require(sprite), null, x, y));
+    }
+
+    public @NotNull Element background(@Nullable Sprite sprite) {
+        sprites[0] = sprite;
         if (host != null) host.queueRedraw();
         return this;
     }

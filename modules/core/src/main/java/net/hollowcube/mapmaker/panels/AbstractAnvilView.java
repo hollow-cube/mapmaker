@@ -2,10 +2,14 @@ package net.hollowcube.mapmaker.panels;
 
 import net.hollowcube.common.util.FontUtil;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.component.DataComponentMap;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.inventory.InventoryType;
+import net.minestom.server.item.component.TooltipDisplay;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public abstract class AbstractAnvilView extends Panel {

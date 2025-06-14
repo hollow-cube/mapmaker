@@ -64,6 +64,7 @@ public final class ActionRegistry {
         register(TakeElytraAction.KEY, TakeElytraAction.CODEC, TakeElytraAction.EDITOR);
         register(GiveItemAction.KEY, GiveItemAction.CODEC, GiveItemAction.EDITOR);
         register(TakeItemAction.KEY, TakeItemAction.CODEC, TakeItemAction.EDITOR);
+        register(EditAttributeAction.KEY, EditAttributeAction.CODEC, EditAttributeAction.EDITOR);
         register(ChatAction.KEY, ChatAction.CODEC, ChatAction.EDITOR);
     }
 

@@ -60,7 +60,7 @@ public class Main {
                 buffer.write(NetworkBuffer.BYTE, (byte) 5); // Latest as of writing
                 buffer.write(NetworkBuffer.VAR_INT, MinecraftServer.DATA_VERSION);
 
-                instance.setTag(DFU.Tag(BiomeInfo.CODEC.list(), "biomes"), customBiomes);
+                instance.setTag(DFU.Tag(BiomeInfo.CODEC, "biomes").list(), customBiomes);
                 var worldData = instance.tagHandler().asCompound();
                 buffer.write(NetworkBuffer.NBT, worldData);
             }
@@ -89,7 +89,7 @@ public class Main {
 
             @Override
             public @NotNull String getBiomeName(int id) {
-                var name = MinecraftServer.getBiomeRegistry().getName(id).asString();
+                var name = MinecraftServer.getBiomeRegistry().getKey(id).name();
                 if (biomeRenames.containsKey(name)) {
                     return biomeRenames.get(name);
                 }
@@ -164,6 +164,7 @@ public class Main {
         var allBiomeOverrides = Files.walk(path.resolve("datapacks"))
                 .filter(Files::isDirectory)
                 .map(p -> p.resolve("data/minecraft/worldgen/biome"))
+                .filter(Files::isDirectory)
                 .flatMap(p -> {
                     try {
                         return Files.walk(p).filter(java.nio.file.Files::isRegularFile);

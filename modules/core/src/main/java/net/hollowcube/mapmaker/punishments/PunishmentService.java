@@ -12,7 +12,7 @@ import java.util.UUID;
 public interface PunishmentService {
 
     @NotNull
-    List<Punishment> getPunishments(@Nullable String playerId, @Nullable UUID executorId, @Nullable PunishmentType type);
+    List<Punishment> getPunishments(@Nullable String playerId, @NotNull UUID executorId, @Nullable PunishmentType type);
 
     @NotNull Punishment createPunishment(
             @NotNull UUID playerId, @NotNull UUID executorId,

@@ -19,7 +19,6 @@ import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Random;
@@ -30,6 +29,8 @@ public class MessageComponents {
 
     private static final TextColor PING_COLOR = TextColor.color(0xffe59e);
     private static final TextColor MAP_COLOR = TextColor.color(0x15ADD3);
+
+    private static final Component HYPERCUBE_ONLY_EMOJI = Component.translatable("chat.emoji.no_hypercube");
 
     private final Cache<String, MapData> mapDataCache = Caffeine.newBuilder()
             .maximumSize(25)
@@ -49,8 +50,10 @@ public class MessageComponents {
         this.playerService = playerService;
     }
 
+    // region Component Parts
+
     @Blocking
-    private @NotNull Component map(@NotNull String mapid, @NotNull Player player) {
+    private void map(@NotNull MessageComponent.Builder builder, @NotNull String mapid, @NotNull Player player) {
         var uuid = player.getUuid().toString();
         var map = mapDataCache.get(mapid, id -> mapService.getMap(uuid, id));
         var author = usernameCache.get(map.owner(), id -> playerService.getPlayerDisplayName2(id).build());
@@ -66,31 +69,45 @@ public class MessageComponents {
             result = result.appendNewline().append(LanguageProviderV2.translate(line));
         }
 
-        return Component.text(map.name(), MAP_COLOR)
-                .hoverEvent(HoverEvent.showText(result.build()))
-                .clickEvent(ClickEvent.runCommand("/play " + MapData.formatPublishedId(map.publishedId())));
+        builder.append(
+                Component.text(map.name(), MAP_COLOR)
+                        .hoverEvent(HoverEvent.showText(result.build()))
+                        .clickEvent(ClickEvent.runCommand("/play " + MapData.formatPublishedId(map.publishedId())))
+        );
     }
 
-    private @NotNull Component emoji(@NotNull String name, @Nullable Random random) {
+    private void emoji(@NotNull MessageComponent.Builder builder, boolean hasHypercube, @NotNull String name, @NotNull Random random) {
         var emoji = Emoji.findByName(name);
-        return emoji == null ? Component.text(":%s:".formatted(name)) : emoji.supplier().apply(random);
+        if (emoji == null) {
+            builder.append(Component.text(":%s:".formatted(name)));
+        } else if (!emoji.isPublic() && !hasHypercube && !emoji.isRandom()) {
+            builder.appendError("hypercube_only", HYPERCUBE_ONLY_EMOJI);
+            builder.append(Component.text(":%s:".formatted(name)));
+        } else {
+            // Random emojis can be used by anyone but only hypercube members can actually get the random emoji,
+            // non-hypercube members will get a fixed emoji.
+            builder.append(emoji.get(hasHypercube ? random : null));
+        }
     }
 
-    private @NotNull Component link(@NotNull String url) {
+    private void link(@NotNull MessageComponent.Builder builder, @NotNull String url) {
         url = url.replaceFirst("^https?://", "");
 
-        return Component.text(url, NamedTextColor.BLUE)
-                .append(Component.text(FontUtil.computeOffset(2)))
-                .append(Component.text(BadSprite.require("icon/chat/external_link").fontChar(), NamedTextColor.BLUE))
-                .hoverEvent(HoverEvent.showText(Component.text("Click to open link")))
-                .clickEvent(ClickEvent.openUrl("https://%s".formatted(url)));
+        builder.append(
+                Component.text(url, NamedTextColor.BLUE)
+                        .append(Component.text(FontUtil.computeOffset(2)))
+                        .append(Component.text(BadSprite.require("icon/chat/external_link").fontChar(), NamedTextColor.BLUE))
+                        .hoverEvent(HoverEvent.showText(Component.text("Click to open link")))
+                        .clickEvent(ClickEvent.openUrl("https://%s".formatted(url)))
+        );
     }
 
-    public @NotNull MessageComponent createGlobalMessage(@NotNull Player player, @NotNull ChatMessageData message) {
-        Random random = message.seed() == 0 ? null : new Random(message.seed());
+    // endregion
 
-        var builder = Component.text();
-        var playDing = false;
+    public @NotNull MessageComponent createGlobalMessage(@NotNull Player player, @NotNull ChatMessageData message) {
+        Random random = new Random(message.seed());
+
+        var builder = MessageComponent.builder();
 
         for (var part : message.parts()) {
             switch (part.type()) {
@@ -99,39 +116,39 @@ public class MessageComponents {
 
                     var namePattern = Pattern.compile(String.format("(?:^|\\s)(%s)", player.getUsername()), Pattern.CASE_INSENSITIVE);
                     if (namePattern.matcher(part.text()).find()) {
-                        playDing |= !player.getUuid().toString().equals(message.sender());
+                        builder.ping(!player.getUuid().toString().equals(message.sender()));
 
                         component = component.replaceText(TextReplacementConfig.builder()
                                 .match(namePattern)
-                                .replacement((match, $) -> Component.text(match.group(), PING_COLOR))
+                                .replacement((match, _) -> Component.text(match.group(), PING_COLOR))
                                 .build());
                     }
 
                     builder.append(component);
                 }
-                case EMOJI -> builder.append(this.emoji(part.name(), random));
-                case MAP -> builder.append(this.map(part.mapId(), player));
-                case URL -> builder.append(this.link(part.text()));
+                case EMOJI -> this.emoji(builder, message.senderHasHypercube(), part.name(), random);
+                case MAP -> this.map(builder, part.mapId(), player);
+                case URL -> this.link(builder, part.text());
             }
         }
 
-        return MessageComponent.of(builder.build(), playDing);
+        return builder.build();
     }
 
     public @NotNull MessageComponent createDirectMessage(@NotNull Player player, @NotNull ChatMessageData message) {
-        Random random = message.seed() == 0 ? null : new Random(message.seed());
+        Random random = new Random(message.seed());
 
-        var builder = Component.text();
+        var builder = MessageComponent.builder();
 
         for (var part : message.parts()) {
             switch (part.type()) {
                 case RAW -> builder.append(Component.text(part.text()));
-                case EMOJI -> builder.append(this.emoji(part.name(), random));
-                case MAP -> builder.append(this.map(part.mapId(), player));
-                case URL -> builder.append(this.link(part.text()));
+                case EMOJI -> this.emoji(builder, message.senderHasHypercube(), part.name(), random);
+                case MAP -> this.map(builder, part.mapId(), player);
+                case URL -> this.link(builder, part.text());
             }
         }
 
-        return MessageComponent.of(builder.build());
+        return builder.build();
     }
 }

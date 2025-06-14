@@ -41,7 +41,7 @@ import java.util.*;
 public class BiomeContainer implements TerraformInstanceBiomes {
     private static final Logger logger = LoggerFactory.getLogger(BiomeContainer.class);
 
-    private static final Tag<List<BiomeInfo>> TAG = DFU.Tag(BiomeInfo.CODEC.list().optional(List.of()), "biomes");
+    private static final Tag<List<BiomeInfo>> TAG = DFU.Tag(BiomeInfo.CODEC, "biomes").list().defaultValue(List.of());
     private static final RegistryKey<Biome> DEFAULT_BIOME = Biome.PLAINS;
 
     private static final int FIRST_BIOME_ID;

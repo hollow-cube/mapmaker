@@ -19,7 +19,11 @@ public class UnlitChunk extends DynamicChunk implements ChunkExt {
     private final Heightmaps heightmaps;
     private final LightData light;
 
-    public UnlitChunk(@NotNull Instance instance, int chunkX, int chunkZ, LightData light) {
+    public UnlitChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
+        this(instance, chunkX, chunkZ, null);
+    }
+
+    public UnlitChunk(@NotNull Instance instance, int chunkX, int chunkZ, @Nullable LightData light) {
         super(instance, chunkX, chunkZ);
         this.light = light;
         this.heightmaps = new Heightmaps(this);
@@ -66,7 +70,7 @@ public class UnlitChunk extends DynamicChunk implements ChunkExt {
 
     @Override
     protected LightData createLightData(boolean requiredFullChunk) {
-        return this.light;
+        return Objects.requireNonNullElseGet(this.light, () -> super.createLightData(requiredFullChunk));
     }
 
     @Override

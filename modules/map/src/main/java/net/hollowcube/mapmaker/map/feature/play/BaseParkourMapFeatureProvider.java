@@ -8,10 +8,9 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.action.ActionList;
 import net.hollowcube.mapmaker.map.action.Attachments;
-import net.hollowcube.mapmaker.map.action.impl.EditLivesAction;
-import net.hollowcube.mapmaker.map.action.impl.EditTimerAction;
-import net.hollowcube.mapmaker.map.action.impl.SetProgressIndexAction;
-import net.hollowcube.mapmaker.map.action.impl.TeleportAction;
+import net.hollowcube.mapmaker.map.action.impl.*;
+import net.hollowcube.mapmaker.map.action.impl.attributes.ActionAttributes;
+import net.hollowcube.mapmaker.map.action.impl.attributes.AttributeMap;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.map.event.*;
@@ -23,6 +22,7 @@ import net.hollowcube.mapmaker.map.feature.play.handlers.SpectateHandler;
 import net.hollowcube.mapmaker.map.feature.play.item.*;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
+import net.hollowcube.mapmaker.map.item.checkpoint.CheckpointItem;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.util.CustomizableHotbarManager;
 import net.hollowcube.mapmaker.map.util.MapMessages;
@@ -59,6 +59,7 @@ import net.minestom.server.potion.TimedPotion;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -283,7 +284,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
                 updateBaseEffectState(world, player, spawnCheckpoint.actions(), playState);
             }
 
-            updatePlayerFromState(world, player, playState, isStarting);
+            player.scheduler().scheduleEndOfTick(() -> updatePlayerFromState(world, player, playState, isStarting));
 
             // If this is OS, reset the player as they are added
             if (world.map().getSetting(MapSettings.ONLY_SPRINT) && !player.getTag(RESET_TAG) && event.isFirstInit()) {
@@ -351,10 +352,19 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         player.getAttribute(Attribute.SAFE_FALL_DISTANCE).removeModifier(NO_FALL_DAMAGE_MODIFIER);
 
+        // Update them to an empty state (aka reset their state to the default)
+        updatePlayerFromState(event.getMapWorld(), player, new PlayState());
+
+        GhostBlockHolder.clear(event.getPlayer(), true);
+
         var ownedEntities = player.getAndSetTag(BaseParkourMapFeatureProvider.OWNED_ENTITIES, null);
         if (ownedEntities != null) for (var entityId : ownedEntities) {
             var entity = event.getMapWorld().instance().getEntityById(entityId);
             if (entity != null) entity.remove();
+        }
+
+        for (var entry : ActionAttributes.ENTRIES.values()) {
+            player.getAttribute(entry.attribute()).setBaseValue(entry.attribute().defaultValue());
         }
     }
 
@@ -675,10 +685,16 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         var items = state.get(Attachments.HOTBAR_ITEMS, HotbarItems.EMPTY);
         state.set(Attachments.HOTBAR_ITEMS, new HotbarItems(
-                OpUtils.map(items.item0(), item -> item.updateFromItemStack(player.getInventory().getItemStack(3))),
-                OpUtils.map(items.item1(), item -> item.updateFromItemStack(player.getInventory().getItemStack(5))),
-                OpUtils.map(items.item2(), item -> item.updateFromItemStack(player.getInventory().getItemStack(6)))
+                OpUtils.map(items.item0(), item -> updateItemStack(player, item, 3)),
+                OpUtils.map(items.item1(), item -> updateItemStack(player, item, 5)),
+                OpUtils.map(items.item2(), item -> updateItemStack(player, item, 6))
         ));
+    }
+
+    private @Nullable CheckpointItem updateItemStack(@NotNull Player player, @NotNull CheckpointItem item, int slot) {
+        var itemStack = player.getInventory().getItemStack(slot);
+        if (itemStack.isAir()) return null; // Consumed
+        return item.updateFromItemStack(itemStack);
     }
 
     private void updatePlayerFromState(MapWorld world, @NotNull Player player, @NotNull PlayState state) {
@@ -686,6 +702,14 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     }
 
     private void updatePlayerFromState(MapWorld world, @NotNull Player player, @NotNull PlayState state, boolean start) {
+        // Update attributes
+        var attributes = state.get(EditAttributeAction.SAVE_DATA, AttributeMap.EMPTY);
+        for (var entry : ActionAttributes.ENTRIES.values()) {
+            var attribute = entry.attribute();
+            double value = attributes.getOrDefault(attribute, attribute.defaultValue());
+            player.getAttribute(attribute).setBaseValue(value);
+        }
+
         // Set the player health to the number of time they have (1 heart = 1 life)
         var lives = state.get(EditLivesAction.SAVE_DATA);
         if (lives != null) {

@@ -28,10 +28,10 @@ public record SignData(
     private static final List<Component> DEFAULT_MESSAGES = List.of(Component.empty(), Component.empty(), Component.empty(), Component.empty());
     private static final TextReplacementConfig EMOJI_REPLACER = TextReplacementConfig.builder()
             .match(Pattern.compile(":(?<name>[^:]+):"))
-            .replacement((result, builder) -> {
+            .replacement((result, _) -> {
                 var id = result.group("name");
                 var emoji = Emoji.findByName(id);
-                return emoji != null ? emoji.supplier().apply(ThreadLocalRandom.current()) : Component.text(":" + id + ":");
+                return emoji != null ? emoji.get(ThreadLocalRandom.current()) : Component.text(":" + id + ":");
             })
             .build();
 

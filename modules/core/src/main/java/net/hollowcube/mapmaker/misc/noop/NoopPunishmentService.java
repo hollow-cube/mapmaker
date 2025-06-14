@@ -13,7 +13,7 @@ import java.util.UUID;
 public class NoopPunishmentService implements PunishmentService {
 
     @Override
-    public @NotNull List<Punishment> getPunishments(@Nullable String playerId, @Nullable UUID executorId, @Nullable PunishmentType type) {
+    public @NotNull List<Punishment> getPunishments(@Nullable String playerId, @NotNull UUID executorId, @Nullable PunishmentType type) {
         return List.of();
     }
 
@@ -24,7 +24,7 @@ public class NoopPunishmentService implements PunishmentService {
 
     @Override
     public @NotNull Punishment createPunishment(@NotNull UUID playerId, @NotNull UUID executorId,
-                                                @NotNull PunishmentType type, @NotNull String comment,
+                                                @NotNull PunishmentType type, @Nullable String comment,
                                                 @Nullable String ladderId) {
         throw new UnsupportedOperationException("not implemented");
     }

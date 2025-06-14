@@ -6,6 +6,7 @@ import net.hollowcube.common.lang.MessagesBase;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.compat.noxesium.NoxesiumAPI;
 import net.hollowcube.mapmaker.util.OverlayItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
@@ -15,6 +16,7 @@ import net.minestom.server.component.DataComponent;
 import net.minestom.server.component.DataComponentMap;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.component.CustomData;
 import net.minestom.server.item.component.CustomModelData;
 import net.minestom.server.item.component.HeadProfile;
 import net.minestom.server.item.component.TooltipDisplay;
@@ -26,6 +28,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 public class Button extends Element implements ButtonClickAliases {
 
@@ -254,6 +257,9 @@ public class Button extends Element implements ButtonClickAliases {
                 builder.editSlots(0, 0, slotWidth, slotHeight, (DataComponent<Object>) entry.component(), entry.value());
             }
         }
+
+        builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.CUSTOM_DATA, (Function<CustomData, CustomData>) NoxesiumAPI::setImmovable);
+
         builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(
                 List.of(), List.of(), itemOverlay == null ? List.of(itemModel) : List.of(itemModel, itemOverlay), List.of()
         ));
