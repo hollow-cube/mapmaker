@@ -707,6 +707,10 @@ public abstract class AbstractMapServer implements MapServer {
         if (t.toString().contains("header parser received no bytes") || t.toString().contains("Connection reset by peer"))
             return false;
 
+        // Drop exceptions where the jvm has removed the stacktrace after the nth occurrance
+        if (t.getStackTrace() == null || t.getStackTrace().length == 0)
+            return false;
+
         // todo fancier exception grouping
         return true;
     }
