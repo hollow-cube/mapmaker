@@ -28,6 +28,11 @@ public class SaveStateUpdateRequest {
         return this;
     }
 
+    public @NotNull SaveStateUpdateRequest setProtocolVersion(int protocolVersion) {
+        updates.addProperty("protocolVersion", protocolVersion);
+        return this;
+    }
+
     public @NotNull SaveStateUpdateRequest setState(@NotNull Object state, @NotNull SaveStateType.Serializer<?> serializer) {
         var coder = new RegistryTranscoder<>(Transcoder.JSON, MinecraftServer.process());
         updates.add(serializer.name(), ((Codec<Object>) serializer.codec()).encode(coder, state).orElseThrow());

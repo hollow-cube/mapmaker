@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.world;
 
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.compat.axiom.AxiomPlayer;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
@@ -317,7 +318,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
     private @NotNull SaveState getOrCreateSaveState(@NotNull Player player) {
         var playerData = PlayerDataV2.fromPlayer(player);
-        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), SaveStateType.EDITING, EditState.SERIALIZER);
+        int protocolVersion = ProtocolVersions.getProtocolVersion(player);
+        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), protocolVersion, SaveStateType.EDITING, EditState.SERIALIZER);
         player.setTag(SaveState.TAG, saveState);
         return saveState;
     }
@@ -369,6 +371,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
     private @NotNull SaveStateUpdateRequest updateSaveState(@NotNull Player player, @NotNull SaveState saveState) {
         saveState.updatePlaytime();
+        saveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
         var buildState = saveState.state(EditState.class);
         buildState.setPos(player.getPosition());
         buildState.setFlying(player.isFlying());

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MapUpdateRequest {
+    public int protocolVersion = 0;
     public String name = null;
     public String icon = null;
     public MapVariant variant = null;
@@ -32,12 +33,15 @@ public class MapUpdateRequest {
 
     public MapQuality qualityOverride = null;
 
-
     public boolean hasChanges() {
         return name != null || icon != null || variant != null || subvariant != null || spawnPoint != null ||
                 onlySprint != null || noSprint != null || noJump != null || noSneak != null || boat != null ||
                 tags != null || !newObjects.isEmpty() || !removedObjects.isEmpty() || size != null ||
-                qualityOverride != null || extra != null;
+                qualityOverride != null || extra != null || protocolVersion != 0;
+    }
+
+    public void setProtocolVersion(int protocolVersion) {
+        this.protocolVersion = protocolVersion;
     }
 
     public void setName(@Nullable String name) {

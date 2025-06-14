@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.dev;
 
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapWorld;
@@ -8,6 +9,7 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -32,14 +34,22 @@ public class DevServerBridge implements ServerBridge {
 //            return;
 //        }
 
+        var playerId = PlayerDataV2.fromPlayer(player).id();
+        var map = mapService.getMap(playerId, mapId);
+
+        var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
+        if (playerProtocolVersion < map.protocolVersion()) {
+            player.sendMessage(Component.translatable("map_join.wrongversion",
+                    Component.text(map.name()), Component.text(ProtocolVersions.getProtocolName(map.protocolVersion()))));
+            return;
+        }
+
         // We need to remove the player from the map before entering configuration, because by the time we get
         // remove from instance event, the player already had their position reset (ie they are at 0,0,0).
         // todo: this seems like a minestom bug that should be fixed.
         var world = MapWorld.forPlayerOptional(player);
         if (world != null) world.removePlayer(player);
 
-        var playerId = PlayerDataV2.fromPlayer(player).id();
-        var map = mapService.getMap(playerId, mapId);
         MapWorld.Constructor<? extends AbstractMapWorld> worldType = switch (joinMapState) {
             case PLAYING, SPECTATING -> PlayingMapWorld.CTOR;
             case EDITING -> EditingMapWorld.CTOR;

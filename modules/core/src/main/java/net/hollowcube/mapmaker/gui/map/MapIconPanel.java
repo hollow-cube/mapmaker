@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.gui.map;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -53,6 +54,12 @@ public class MapIconPanel extends Panel {
 
     private void handlePlayMap() {
         var player = host.player();
+
+        // Don't try to join if the player is on the wrong version. Bridge will also check this, but it
+        // sends a message that we don't want to show in this case.
+        var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
+        if (playerProtocolVersion < map.protocolVersion()) return;
+
         player.closeInventory();
         bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.PLAYING, "play_maps_gui");
     }
@@ -89,8 +96,14 @@ public class MapIconPanel extends Panel {
         button.model(icon.name(), null);
 
         var authorName = OpUtils.mapOr(this.authorName, DisplayName::build, Component.text("loading"));
-        var entry = MapData.createHoverComponents(map, authorName, progress);
-        entry.getValue().addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display.footer", List.of()));
+        var playerProtocolVersion = ProtocolVersions.getProtocolVersion(host.player());
+        var entry = MapData.createHoverComponents(map, authorName, progress, playerProtocolVersion); // todo
+
+        if (playerProtocolVersion < map.protocolVersion()) {
+            entry.getValue().addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display.wrongversion.footer", List.of()));
+        } else {
+            entry.getValue().addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display.footer", List.of()));
+        }
         button.text(entry.getKey(), entry.getValue());
     }
 }

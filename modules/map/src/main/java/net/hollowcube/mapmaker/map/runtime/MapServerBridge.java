@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.runtime;
 
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapServerRunner;
@@ -11,13 +12,10 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.session.MapPresence;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.charset.StandardCharsets;
 
 public class MapServerBridge implements ServerBridge {
     private static final Logger logger = LoggerFactory.getLogger(MapServerBridge.class);
@@ -38,6 +36,15 @@ public class MapServerBridge implements ServerBridge {
         try {
             var playerId = player.getUuid().toString();
             logger.debug("trying to join map {} with state {} for {}", mapId, joinMapState, playerId);
+
+            var map = server.mapService().getMap(playerId, mapId);
+
+            var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
+            if (playerProtocolVersion < map.protocolVersion()) {
+                player.sendMessage(Component.translatable("map_join.wrongversion",
+                        Component.text(map.name()), Component.text(ProtocolVersions.getProtocolName(map.protocolVersion()))));
+                return;
+            }
 
             var targetState = switch (joinMapState) {
                 case EDITING -> MapPresence.STATE_EDITING;

@@ -30,6 +30,7 @@ public class SaveState {
     private long playtime;
     private transient long playStartTime;
     int dataVersion;
+    private int protocolVersion;
 
     SaveStateType.Serializer<?> serializer;
     Object state;
@@ -111,6 +112,14 @@ public class SaveState {
         playStartTime = currentTime;
     }
 
+    public int protocolVersion() {
+        return protocolVersion;
+    }
+
+    public void setProtocolVersion(int protocolVersion) {
+        this.protocolVersion = protocolVersion;
+    }
+
     public <T> @NotNull T state(@NotNull Class<T> stateType) {
         if (state == null)
             throw new IllegalStateException("State not loaded");
@@ -144,7 +153,8 @@ public class SaveState {
     public @NotNull SaveStateUpdateRequest createUpdateRequest() {
         var req = new SaveStateUpdateRequest()
                 .setPlaytime(playtime)
-                .setCompleted(completed);
+                .setCompleted(completed)
+                .setProtocolVersion(protocolVersion);
         if (serializer != null && state != null) {
             req.setState(state, serializer);
         }

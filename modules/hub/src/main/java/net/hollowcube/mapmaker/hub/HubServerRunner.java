@@ -68,7 +68,7 @@ public class HubServerRunner extends AbstractMapServer {
 
     @Override
     protected @NotNull ServerBridge createBridge() {
-        return globalConfig.noop() ? new NoopServerBridge() : new HubServerBridge(sessionService());
+        return globalConfig.noop() ? new NoopServerBridge() : new HubServerBridge(mapService(), sessionService());
     }
 
     @Override
