@@ -8,10 +8,9 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.action.ActionList;
 import net.hollowcube.mapmaker.map.action.Attachments;
-import net.hollowcube.mapmaker.map.action.impl.EditLivesAction;
-import net.hollowcube.mapmaker.map.action.impl.EditTimerAction;
-import net.hollowcube.mapmaker.map.action.impl.SetProgressIndexAction;
-import net.hollowcube.mapmaker.map.action.impl.TeleportAction;
+import net.hollowcube.mapmaker.map.action.impl.*;
+import net.hollowcube.mapmaker.map.action.impl.attributes.ActionAttributes;
+import net.hollowcube.mapmaker.map.action.impl.attributes.AttributeMap;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.map.event.*;
@@ -363,6 +362,10 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             var entity = event.getMapWorld().instance().getEntityById(entityId);
             if (entity != null) entity.remove();
         }
+
+        for (var entry : ActionAttributes.ENTRIES.values()) {
+            player.getAttribute(entry.attribute()).setBaseValue(entry.attribute().defaultValue());
+        }
     }
 
     public void handleCheckpointPostChange(@NotNull MapPlayerCheckpointPostChangeEvent event) {
@@ -699,6 +702,14 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     }
 
     private void updatePlayerFromState(MapWorld world, @NotNull Player player, @NotNull PlayState state, boolean start) {
+        // Update attributes
+        var attributes = state.get(EditAttributeAction.SAVE_DATA, AttributeMap.EMPTY);
+        for (var entry : ActionAttributes.ENTRIES.values()) {
+            var attribute = entry.attribute();
+            double value = attributes.getOrDefault(attribute, attribute.defaultValue());
+            player.getAttribute(attribute).setBaseValue(value);
+        }
+
         // Set the player health to the number of time they have (1 heart = 1 life)
         var lives = state.get(EditLivesAction.SAVE_DATA);
         if (lives != null) {
