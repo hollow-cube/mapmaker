@@ -50,9 +50,9 @@ public final class BlockUtil {
         BLOCK_PROPERTIES = blockmap;
 
         var blockToItem = new Int2ObjectOpenHashMap<Material>();
-        for (var material : Material.values()) {
-            var block = material.registry().block();
-            if (block == null) continue;
+        for (var block : Block.values()) {
+            var material = block.registry().material();
+            if (material == null) continue;
             blockToItem.put(block.id(), material);
         }
         BLOCK_TO_ITEM = blockToItem;
