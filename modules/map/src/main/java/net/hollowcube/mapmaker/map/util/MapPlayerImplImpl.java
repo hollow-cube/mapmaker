@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.util;
 
+import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.PhysicsResult;
@@ -145,7 +146,7 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
             fluidHeight = block.id() == blockAbove.id() ? 1 : (fluidHeight / 9.0);
             if (posMut.blockY() + fluidHeight < position.y()) continue; // Not in fluid
 
-            if (block.id() == Block.WATER.id()) {
+            if (block.id() == Block.WATER.id() || BlockUtil.isWaterlogged(block)) {
                 isInWater = true;
             } else if (block.id() == Block.LAVA.id()) {
                 isInLava = true;
@@ -155,7 +156,7 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
 
     private static double getFluidHeight(@NotNull Block block) {
         var level = block.getProperty("level");
-        if (level == null) return -1;
+        if (level == null) return BlockUtil.isWaterlogged(block) ? 8 : -1;
 
         try {
             var height = Math.min(8, Double.parseDouble(level));

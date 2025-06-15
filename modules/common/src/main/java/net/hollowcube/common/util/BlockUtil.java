@@ -125,6 +125,10 @@ public final class BlockUtil {
         return builder.toString();
     }
 
+    public static boolean isWaterlogged(@NotNull Block block) {
+        return "true".equals(block.getProperty("waterlogged"));
+    }
+
     public enum BlockParseResult {
         NO_BLOCK_TYPE, BLOCK_NOT_FOUND, INVALID_PROPERTIES, INVALID_PROPERTY_VALUE
     }
