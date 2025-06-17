@@ -1,6 +1,21 @@
 {
   "pack": {
-    "pack_format": 31,
+    "pack_format": 61,
+    "supported_formats": [
+      61,
+      81
+    ],
     "description": "MapMaker Resources"
+  },
+  "overlays": {
+    "entries": [
+      {
+        "formats": [
+          72,
+          81
+        ],
+        "directory": "771"
+      }
+    ]
   }
 }

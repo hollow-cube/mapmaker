@@ -55,9 +55,13 @@ final class TerraformRegistryImpl implements TerraformRegistry {
 
         // Copy vanilla blocks by their state IDs
         for (short i = 0; i < Short.MAX_VALUE; i++) {
-            var block = Block.fromStateId(i);
-            if (block == null) break; // Reached end
-            blocksByState.set(i, block);
+            try {
+                var block = Block.fromStateId(i);
+                if (block == null) break; // Reached end
+                blocksByState.set(i, block);
+            } catch (ArrayIndexOutOfBoundsException ignored) {
+                break;
+            }
         }
 
         int stateOverrides = 0;

@@ -314,6 +314,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         entries.add(registries.bannerPattern().tagRegistry());
         entries.add(registries.biome().tagRegistry());
         entries.add(registries.blocks().tagRegistry());
+        entries.add(registries.dialog().tagRegistry());
         entries.add(registries.catVariant().tagRegistry());
         entries.add(registries.damageType().tagRegistry());
         entries.add(registries.enchantment().tagRegistry());
