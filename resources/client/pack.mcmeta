@@ -1,20 +1,27 @@
 {
   "pack": {
-    "pack_format": 61,
-    "supported_formats": [
-      61,
-      81
-    ],
+    "pack_format": 46,
+    "supported_formats": {
+      "min_inclusive": 46,
+      "max_inclusive": 63
+    },
     "description": "MapMaker Resources"
   },
   "overlays": {
     "entries": [
       {
-        "formats": [
-          72,
-          81
-        ],
-        "directory": "771"
+        "formats": {
+          "min_inclusive": 46,
+          "max_inclusive": 55
+        },
+        "directory": "pvn_769"
+      },
+      {
+        "formats": {
+          "min_inclusive": 56,
+          "max_inclusive": 63
+        },
+        "directory": "pvn_771"
       }
     ]
   }
