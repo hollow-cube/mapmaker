@@ -161,6 +161,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             player.sendPacket(serverProcess.dimensionType().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(biomes().registryDataPacket(excludeVanilla));
             player.sendPacket(serverProcess.damageType().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(serverProcess.dialog().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.trimMaterial().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.trimPattern().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.bannerPattern().registryDataPacket(serverProcess, excludeVanilla));
@@ -313,6 +314,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         entries.add(registries.bannerPattern().tagRegistry());
         entries.add(registries.biome().tagRegistry());
         entries.add(registries.blocks().tagRegistry());
+        entries.add(registries.dialog().tagRegistry());
         entries.add(registries.catVariant().tagRegistry());
         entries.add(registries.damageType().tagRegistry());
         entries.add(registries.enchantment().tagRegistry());

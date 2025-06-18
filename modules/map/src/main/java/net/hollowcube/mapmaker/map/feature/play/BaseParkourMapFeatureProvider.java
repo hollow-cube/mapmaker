@@ -96,9 +96,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     private static final AttributeModifier NO_FALL_DAMAGE_MODIFIER = new AttributeModifier("mapmaker:play.no_fall_damage", 500, AttributeOperation.ADD_VALUE);
 
     private static final Equippable EMPTY_EQUIPPABLE = new Equippable(EquipmentSlot.CHESTPLATE, SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
-            null, null, null, false, false, false, false);
+            null, null, null, false, false, false, false,
+            false, SoundEvent.ITEM_SHEARS_SNIP);
     private static final Equippable ELYTRA_EQUIPPABLE = new Equippable(EquipmentSlot.CHESTPLATE, SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
-            "minecraft:elytra", null, null, false, false, false, false);
+            "minecraft:elytra", null, null, false, false, false,
+            false, false, SoundEvent.ITEM_SHEARS_SNIP);
 
     private static final CustomizableHotbarManager TESTING_HOTBAR = CustomizableHotbarManager.builder("hotbar/parkour/test")
             .defaultItem(0, MapDetailsItem.ID)

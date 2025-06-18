@@ -384,6 +384,7 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     protected abstract @NotNull MapAllocator createAllocator();
+
     protected abstract @NotNull ServerBridge createBridge();
 
     /**

@@ -78,11 +78,6 @@ public class EmptyChunk extends Chunk {
     }
 
     @Override
-    public long getLastChangeTime() {
-        return 0;
-    }
-
-    @Override
     public @NotNull SendablePacket getFullDataPacket() {
         return createChunkPacket();
     }
