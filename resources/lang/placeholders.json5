@@ -89,6 +89,12 @@
     "no_shadow": true,
     "trailing_space": 2
   },
+  "STAFF_CHANNEL": {
+    "type": "sprite",
+    "ref": "icon/chat/staff",
+    "no_shadow": true,
+    "trailing_space": 2
+  },
 
   "CT1": {
     "type": "sprite",
