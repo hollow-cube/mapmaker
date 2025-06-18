@@ -23,11 +23,7 @@ public class ChannelCommand extends AbstractChatCommand {
 
         var arg = CoreArgument.Message("message").description("The message content to send in the chat.");
 
-        addSyntax(playerOnly(
-                (player, ctx) -> this.handle(player, channel, ctx.get(arg))
-            ),
-                arg
-        );
+        addSyntax(playerOnly((player, ctx) -> this.handle(player, channel, ctx.get(arg))), arg);
     }
 
     public static class Global extends ChannelCommand {
