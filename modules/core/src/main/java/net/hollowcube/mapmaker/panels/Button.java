@@ -19,12 +19,15 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.component.CustomData;
 import net.minestom.server.item.component.CustomModelData;
 import net.minestom.server.item.component.HeadProfile;
+import net.minestom.server.item.component.TooltipDisplay;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
@@ -45,6 +48,11 @@ public class Button extends Element implements ButtonClickAliases {
         void onClick(ClickType clickType, int slot);
     }
 
+    @FunctionalInterface
+    public interface OnScroll {
+        void onScroll(@Range(from = -1, to = 1) int direction);
+    }
+
     protected Component itemTitle;
     protected List<Component> itemLore;
     protected List<Component> itemLorePostfix;
@@ -61,6 +69,7 @@ public class Button extends Element implements ButtonClickAliases {
     private OnClickTypeSlot onRightClickAsync;
     private OnClickTypeSlot onShiftLeftClick;
     private OnClickTypeSlot onShiftLeftClickAsync;
+    private OnScroll onScroll;
 
     public Button(@Nullable String translationKey, int width, int height) {
         super(width, height);
@@ -180,6 +189,12 @@ public class Button extends Element implements ButtonClickAliases {
         return this;
     }
 
+    @Override
+    public @NotNull Button onScroll(OnScroll onScroll) {
+        this.onScroll = onScroll;
+        return this;
+    }
+
     public @NotNull Button sprite(@Nullable String sprite) {
         return sprite(sprite, 0, 0);
     }
@@ -258,6 +273,19 @@ public class Button extends Element implements ButtonClickAliases {
             lore.addAll(itemLorePostfix);
         }
         builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.LORE, lore);
+
+        if (this.onScroll != null) {
+            builder.editSlots(
+                    0, 0, slotWidth, slotHeight, DataComponents.TOOLTIP_DISPLAY,
+                    (Function<TooltipDisplay, TooltipDisplay>) display ->
+                            display == null ? new TooltipDisplay(false, Set.of(DataComponents.BUNDLE_CONTENTS)) : display.without(DataComponents.BUNDLE_CONTENTS)
+            );
+            var contents = new ArrayList<ItemStack>();
+            for (int i = 0; i < 12; i++) contents.add(MenuBuilder.EMPTY_ITEM);
+            builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.BUNDLE_CONTENTS, contents);
+        } else {
+            builder.editSlotsWithout(0, 0, slotWidth, slotHeight, DataComponents.BUNDLE_CONTENTS);
+        }
     }
 
     @Override
@@ -280,4 +308,12 @@ public class Button extends Element implements ButtonClickAliases {
         return null;
     }
 
+    @Override
+    public @Nullable CompletableFuture<Void> handleScroll(@Range(from = -1, to = 1) int direction, int x, int y) {
+        if (onScroll != null) {
+            onScroll.onScroll(direction);
+            return CompletableFuture.completedFuture(null);
+        }
+        return null;
+    }
 }

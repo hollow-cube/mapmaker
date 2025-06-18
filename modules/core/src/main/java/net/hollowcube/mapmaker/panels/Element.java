@@ -9,6 +9,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.component.DataComponents;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -77,6 +78,10 @@ public class Element {
     }
 
     public @Nullable CompletableFuture<Void> handleClick(@NotNull ClickType clickType, int x, int y) {
+        return null;
+    }
+
+    public @Nullable CompletableFuture<Void> handleScroll(@Range(from = -1, to = 1) int direction, int x, int y) {
         return null;
     }
 

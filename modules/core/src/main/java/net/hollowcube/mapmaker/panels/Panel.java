@@ -9,6 +9,7 @@ import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.thread.TickThread;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,6 +103,17 @@ public abstract class Panel extends Element {
             if (x >= child.x && x < child.x + child.child.slotWidth
                     && y >= child.y && y < child.y + child.child.slotHeight) {
                 return child.child.handleClick(clickType, x - child.x, y - child.y);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public @Nullable CompletableFuture<Void> handleScroll(@Range(from = -1, to = 1) int direction, int x, int y) {
+        for (var child : children) {
+            if (x >= child.x && x < child.x + child.child.slotWidth
+                    && y >= child.y && y < child.y + child.child.slotHeight) {
+                return child.child.handleScroll(direction, x - child.x, y - child.y);
             }
         }
         return null;

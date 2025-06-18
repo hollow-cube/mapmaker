@@ -19,7 +19,7 @@ import java.util.function.Function;
 
 public class MenuBuilder {
     @TestOnly
-    public static final ItemStack EMPTY_ITEM = ItemStack.builder(Material.STICK)
+    public static final ItemStack EMPTY_ITEM = ItemStack.builder(Material.FLINT)
             .set(DataComponents.ITEM_MODEL, "minecraft:air")
             .set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, Set.of()))
             // Need to remove the name because the item can appear on the hotbar.
@@ -99,19 +99,7 @@ public class MenuBuilder {
     }
 
     public <T> void editSlotsWithout(int x, int y, int width, int height, @NotNull DataComponent<T> component) {
-        int startX = this.slotX + x;
-        int startY = this.slotY + y;
-        int endX = startX + width;
-        int endY = startY + height;
-        if (startX < 0 || startY < 0 || endX > this.absWidth || endY > this.absHeight) {
-            throw new IllegalArgumentException("Out of bounds " + startX + " " + startY + " " + endX + " " + endY);
-        }
-
-        for (int i = startY; i < endY; i++) {
-            for (int j = startX; j < endX; j++) {
-                this.items[i * this.absWidth + j] = this.items[i * this.absWidth + j].without(component);
-            }
-        }
+        this.editSlots(x, y, width, height, item -> item.without(component));
     }
 
     public <T> void editSlots(int x, int y, int width, int height, @NotNull DataComponent<T> component, @NotNull T data) {
@@ -119,6 +107,10 @@ public class MenuBuilder {
     }
 
     public <T> void editSlots(int x, int y, int width, int height, @NotNull DataComponent<T> component, @NotNull Function<T, T> editor) {
+        this.editSlots(x, y, width, height, item -> item.with(component, editor.apply(item.get(component))));
+    }
+
+    public void editSlots(int x, int y, int width, int height, @NotNull Function<ItemStack, ItemStack> editor) {
         int startX = this.slotX + x;
         int startY = this.slotY + y;
         int endX = startX + width;
@@ -129,8 +121,7 @@ public class MenuBuilder {
 
         for (int i = startY; i < endY; i++) {
             for (int j = startX; j < endX; j++) {
-                var item = this.items[i * this.absWidth + j];
-                this.items[i * this.absWidth + j] = item.with(component, editor.apply(item.get(component)));
+                this.items[i * this.absWidth + j] = editor.apply(this.items[i * this.absWidth + j]);
             }
         }
     }

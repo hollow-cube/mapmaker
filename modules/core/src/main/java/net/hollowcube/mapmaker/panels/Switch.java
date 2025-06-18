@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.panels;
 import net.hollowcube.canvas.ClickType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -82,6 +83,11 @@ public class Switch extends Element {
     @Override
     public @Nullable CompletableFuture<Void> handleClick(@NotNull ClickType clickType, int x, int y) {
         return children.get(selectedIndex).handleClick(clickType, x, y);
+    }
+
+    @Override
+    public @Nullable CompletableFuture<Void> handleScroll(@Range(from = -1, to = 1) int direction, int x, int y) {
+        return children.get(selectedIndex).handleScroll(direction, x, y);
     }
 
     @Override

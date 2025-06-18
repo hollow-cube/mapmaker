@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.panels;
 
 import net.hollowcube.canvas.ClickType;
+import net.hollowcube.common.events.SelectBundleSlotEvent;
 import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -54,23 +55,24 @@ public class InventoryHost implements TagReadable, TagWritable {
     static {
         MinecraftServer.getGlobalEventHandler()
                 .addListener(InventoryPreClickEvent.class, InventoryHost::handleInventoryClick)
+                .addListener(SelectBundleSlotEvent.class, InventoryHost::handleInventoryBundleSelect)
                 .addListener(PlayerAnvilInputEvent.class, InventoryHost::handleAnvilInput);
     }
 
     private final Player player;
-    private final InventoryWrapper handle = new InventoryWrapper();
+    protected final InventoryWrapper handle = new InventoryWrapper();
     private final TagHandler tagHandler = TagHandler.newHandler();
     private Runnable closeCallback = null;
 
     private Task redrawTask = null;
     // If present, indicates a potentially pending click event. We should not respond to other clicks while this
     // is both not null and not CompletableFuture#isDone.
-    private CompletableFuture<Void> pendingClick = null;
+    protected CompletableFuture<Void> pendingClick = null;
 
-    private record StackedView(Panel panel, InventoryType inventoryType, boolean isTransient) {
+    protected record StackedView(Panel panel, InventoryType inventoryType, boolean isTransient) {
     }
 
-    private final List<StackedView> viewStack = new ArrayList<>();
+    protected final List<StackedView> viewStack = new ArrayList<>();
 
     public InventoryHost(@NotNull Player player) {
         this.player = player;
@@ -189,27 +191,10 @@ public class InventoryHost implements TagReadable, TagWritable {
     }
 
     private static void handleInventoryClick(@NotNull InventoryPreClickEvent event) {
-        final int slot;
-        final InventoryHost host;
-        if (event.getInventory() instanceof InventoryWrapper inventory) {
-            host = inventory.owner(); // Click in an inventory
-            slot = event.getClick().slot();
-        } else if (event.getInventory() instanceof PlayerInventory &&
-                event.getPlayer().getOpenInventory() instanceof InventoryWrapper inventory) {
-            host = inventory.owner(); // Click in player inventory
-
-            // Slot needs to be offset from the top of the main inventory
-            int offsetSlot = event.getClick().slot();
-            int mainSize = getInterpretedSize(host.handle.getInventoryType());
-
-            // We need to reorder the hotbar to come last
-            slot = mainSize + offsetSlot + (offsetSlot < 9 ? 27 : -9);
-        } else return; // Don't care about this click.
-
-        // In case we are already handling a click, we should not accept another one.
-        if (host.pendingClick != null && !host.pendingClick.isDone()) {
-            return;
-        }
+        final var data = InventoryHostEvents.getHostAndSlot(event, event.getSlot());
+        if (data == null) return; // Not a click we care about.
+        final var host = data.left();
+        final int slot = data.rightInt();
 
         // At this point we always consume the click
         event.setCancelled(true);
@@ -222,11 +207,31 @@ public class InventoryHost implements TagReadable, TagWritable {
         };
         if (clickType == null) return;
 
-        if (host.viewStack.isEmpty()) return;
         var root = host.viewStack.getLast();
         host.pendingClick = root.panel.handleClick(clickType, slot % 9, slot / 9);
         if (host.pendingClick != null) {
             host.player.playSound(CLICK_SOUND);
+        }
+    }
+
+    private static void handleInventoryBundleSelect(@NotNull SelectBundleSlotEvent event) {
+        final var data = InventoryHostEvents.getHostAndSlot(event, event.slot());
+        if (data == null) return; // Not a click we care about.
+        final var host = data.left();
+        final int slot = data.rightInt();
+        int direction;
+        if (event.index() > 0 && event.index() < 6) {
+            direction = 1;
+        } else if (event.index() > 6 && event.index() < 12) {
+            direction = -1;
+        } else {
+            return; // Not a valid index for scrolling.
+        }
+
+        var root = host.viewStack.getLast();
+        host.pendingClick = root.panel.handleScroll(direction, slot % 9, slot / 9);
+        if (host.pendingClick != null) {
+            host.queueRedraw(); // This is gross but our current system is not designed to get a single item.
         }
     }
 
@@ -255,7 +260,7 @@ public class InventoryHost implements TagReadable, TagWritable {
         anvil.handleAnvilInput(event.getInput());
     }
 
-    private final class InventoryWrapper extends Inventory {
+    protected final class InventoryWrapper extends Inventory {
         private static final Component UNREACHABLE = Component.text("unreachable");
 
         private InventoryType inventoryType = InventoryType.CHEST_6_ROW;

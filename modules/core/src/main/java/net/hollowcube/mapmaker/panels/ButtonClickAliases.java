@@ -67,5 +67,6 @@ interface ButtonClickAliases {
 
     @NotNull Button onShiftLeftClickAsync(Button.OnClickTypeSlot onClick);
 
+    @NotNull Button onScroll(Button.OnScroll onScroll);
 
 }

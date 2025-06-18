@@ -90,6 +90,7 @@ import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.*;
 import net.hollowcube.posthog.PostHog;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.minestom.server.MinecraftServer;
@@ -101,8 +102,10 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
+import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.server.common.ServerLinksPacket;
+import net.minestom.server.registry.RegistryTagHacks;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -243,6 +246,7 @@ public abstract class AbstractMapServer implements MapServer {
         });
 
         EventExtensions.init();
+        RegistryTagHacks.insertIntoTag(MinecraftServer.process().material(), Key.key("bundles"), Material.FLINT);
 
         // Dependent service init
 
