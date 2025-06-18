@@ -29,6 +29,7 @@ public class V4307 extends DataVersion {
         fixGeneric(dataComponents, hiddenComponents, "minecraft:attribute_modifiers", "modifiers");
         fixGeneric(dataComponents, hiddenComponents, "minecraft:enchantments", "levels");
         fixGeneric(dataComponents, hiddenComponents, "minecraft:stored_enchantments", "levels");
+        fixGeneric(dataComponents, hiddenComponents, "minecraft:jukebox_playable", "song");
 
         boolean hideTooltip = dataComponents.remove("minecraft:hide_tooltip").as(Boolean.class, false);
         boolean hideAdditionalTooltip = dataComponents.remove("minecraft:hide_additional_tooltip").as(Boolean.class, false);
