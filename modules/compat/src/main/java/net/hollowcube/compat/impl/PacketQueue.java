@@ -20,8 +20,8 @@ public final class PacketQueue {
 
     private int flushCount = 0;
 
-    public void registerChannels(@NotNull Player player, @NotNull String[] channels) {
-        this.channels.addAll(List.of(channels));
+    public void registerChannels(@NotNull Player player, @NotNull List<String> channels) {
+        this.channels.addAll(channels);
         for (String channel : channels) {
             queue.removeIf(packet -> {
                 if (packet.getType().id().equals(channel)) {
@@ -33,7 +33,7 @@ public final class PacketQueue {
         }
     }
 
-    public void unregisterChannels(@NotNull String[] channels) {
+    public void unregisterChannels(@NotNull List<String> channels) {
         List.of(channels).forEach(this.channels::remove);
 
         for (String channel : channels) {

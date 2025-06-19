@@ -602,6 +602,7 @@ public abstract class AbstractMapServer implements MapServer {
             CompletableFuture.allOf(sessionResponseFuture, mapPlayerDataFuture, backpackDataFuture).join();
 
             var sessionResponse = sessionResponseFuture.get();
+            player.setTag(CompatProvider.FIRST_JOIN_TAG, sessionResponse.isJoin());
             player.setTag(PlayerDataV2.TAG, sessionResponse.data());
             sessionManager.updateSessionOptimistic(sessionResponse.session(), new SessionStateUpdateRequest.Metadata());
             player.setTag(MapPlayerData.TAG, mapPlayerDataFuture.get());

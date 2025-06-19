@@ -3,6 +3,8 @@ package net.hollowcube.compat.api;
 import net.hollowcube.compat.api.packet.PacketRegistry;
 import net.hollowcube.compat.impl.PacketRegistryImpl;
 import net.minestom.server.event.GlobalEventHandler;
+import net.minestom.server.tag.Tag;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ServiceLoader;
 
@@ -10,6 +12,8 @@ import java.util.ServiceLoader;
  * Provides compatibility with other mods or services.
  */
 public interface CompatProvider {
+    // Set to true if this is the first server join for the player (ie in a session, not first ever).
+    @NotNull Tag<Boolean> FIRST_JOIN_TAG = Tag.<Boolean>Transient("mod_compat:first_join").defaultValue(false);
 
     default void registerPackets(PacketRegistry registry) {
     }

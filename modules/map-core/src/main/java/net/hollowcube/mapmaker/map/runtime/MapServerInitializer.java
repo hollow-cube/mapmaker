@@ -6,6 +6,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.HttpConfig;
 import net.hollowcube.mapmaker.config.MinestomConfig;
+import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
 import net.hollowcube.mapmaker.util.HttpServerWrapper;
 import net.hollowcube.mapmaker.util.MinestomPrometheus;
 import net.hollowcube.posthog.PostHog;
@@ -68,6 +69,7 @@ public final class MapServerInitializer {
 
         var minecraftServer = MinecraftServer.init();
         MinestomPrometheus.init();
+        var ignored = DimensionTypes.FULL_BRIGHT; // Force initialization
         var server = serverFactory.apply(config);
 
         MinecraftServer.setBrandName("minestom");
