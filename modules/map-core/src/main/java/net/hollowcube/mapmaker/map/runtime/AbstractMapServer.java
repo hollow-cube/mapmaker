@@ -53,6 +53,7 @@ import net.hollowcube.mapmaker.cosmetic.impl.accessory.AbstractAccessoryImpl;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.posthog.PostHogFeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.unleash.UnleashConfig;
+import net.hollowcube.mapmaker.gui.settings.PlayerSettingsScreen;
 import net.hollowcube.mapmaker.invite.MapInviteAcceptedOrRejectedListener;
 import net.hollowcube.mapmaker.invite.MapInviteListener;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
@@ -397,6 +398,8 @@ public abstract class AbstractMapServer implements MapServer {
 
         CosmeticInventoryHandler.init(guiController);
         AbstractAccessoryImpl.addListeners(globalEventHandler);
+
+        PlayerSettingsScreen.init(playerService(), globalEventHandler);
 
         var entityEvents = EventNode.type("mapmaker:map/entity", EventFilter.INSTANCE);
         globalEventHandler.addChild(entityEvents);

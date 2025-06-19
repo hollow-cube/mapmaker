@@ -7,5 +7,7 @@
   "effect.minecraft.infested": "Swift Sneak",
   "item.brat\u0077urst.name": "Hot Dog",
   "time.sunm\u0065t\u0065or-cli\u0065ntbound.name": "",
-  "gui.recipebook.moreRecips": ""
+  "gui.recipebook.moreRecips": "",
+  "gui.stats": "Server Options",
+  "multiplayer.downloadingStats": "Requesting Server Options"
 }

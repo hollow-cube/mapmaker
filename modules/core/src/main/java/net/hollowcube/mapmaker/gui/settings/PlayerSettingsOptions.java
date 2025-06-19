@@ -1,0 +1,32 @@
+package net.hollowcube.mapmaker.gui.settings;
+
+import net.hollowcube.mapmaker.PlayerSettings;
+import net.hollowcube.mapmaker.map.VisibilityRule;
+import net.hollowcube.mapmaker.temp.ClientChatMessageData;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+
+import java.util.List;
+
+public class PlayerSettingsOptions {
+
+    public static final Key SETTINGS_DIALOG_ID = Key.key("hollowcube:player_settings");
+    public static final int OPTION_WIDTH = 150;
+
+    public static final List<PlayerSettingsOption> OPTIONS = List.of(
+            PlayerSettingsOption.forBool(
+                    PlayerSettings.ENABLE_WE_CUI,
+                    Component.translatable("dialog.settings.option.cui")
+            ),
+            PlayerSettingsOption.forSelect(
+                    PlayerSettings.CHAT_CHANNEL,
+                    Component.translatable("dialog.settings.option.chat"),
+                    ClientChatMessageData.CHANNEL_GLOBAL, ClientChatMessageData.CHANNEL_LOCAL
+            ),
+            PlayerSettingsOption.forEnum(
+                    PlayerSettings.NEARBY_PLAYER_VISIBILITY,
+                    Component.translatable("dialog.settings.option.visibility"),
+                    VisibilityRule.class
+            )
+    );
+}
