@@ -1,10 +1,7 @@
 package net.hollowcube.common.events;
 
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.network.packet.client.play.ClientCreativeInventoryActionPacket;
-import net.minestom.server.network.packet.client.play.ClientStatusPacket;
-import net.minestom.server.network.packet.client.play.ClientUpdateSignPacket;
-import net.minestom.server.network.packet.client.play.ClientVehicleMovePacket;
+import net.minestom.server.network.packet.client.play.*;
 
 public final class EventExtensions {
 
@@ -18,5 +15,6 @@ public final class EventExtensions {
         packets.setPlayListener(ClientVehicleMovePacket.class, PlayerMoveVehicleEvent::post);
         packets.setPlayListener(ClientUpdateSignPacket.class, UpdateSignTextEvent::post);
         packets.setPlayListener(ClientStatusPacket.class, RequestStatsEvent::post);
+        packets.setPlayListener(ClientPlayerDiggingPacket.class, PlayerHitBlockEvent::post);
     }
 }
