@@ -1,6 +1,6 @@
 package net.hollowcube.terraform.util;
 
-import net.minestom.server.instance.block.Block;
+import net.hollowcube.common.util.BlockUtil;
 import net.minestom.server.utils.validate.Check;
 
 public final class PaletteUtil {
@@ -14,7 +14,7 @@ public final class PaletteUtil {
     static {
         int bpe = 0;
         for (short id = 24134; id < Short.MAX_VALUE; id++) {
-            if (Block.fromStateId(id) == null) {
+            if (BlockUtil.fromStateIdOrNull(id) == null) {
                 bpe = (int) Math.ceil(Math.log(id) / Math.log(2));
                 break;
             }
