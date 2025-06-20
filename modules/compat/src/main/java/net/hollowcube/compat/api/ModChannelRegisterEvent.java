@@ -33,9 +33,10 @@ public class ModChannelRegisterEvent implements PlayerEvent {
     }
 
     public void excludeNamespace(@NotNull Component modName, @NotNull String... namespaces) {
-        disabledMods.add(modName);
+        boolean removed = false;
         for (String namespace : namespaces) {
-            channels.removeIf(channel -> channel.startsWith(namespace + ":"));
+            removed |= channels.removeIf(channel -> channel.startsWith(namespace + ":"));
         }
+        if (removed) disabledMods.add(modName);
     }
 }
