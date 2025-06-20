@@ -53,6 +53,7 @@ import net.hollowcube.mapmaker.cosmetic.impl.accessory.AbstractAccessoryImpl;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.posthog.PostHogFeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.unleash.UnleashConfig;
+import net.hollowcube.mapmaker.gui.settings.PlayerSettingsScreen;
 import net.hollowcube.mapmaker.invite.MapInviteAcceptedOrRejectedListener;
 import net.hollowcube.mapmaker.invite.MapInviteListener;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
@@ -384,6 +385,7 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     protected abstract @NotNull MapAllocator createAllocator();
+
     protected abstract @NotNull ServerBridge createBridge();
 
     /**
@@ -396,6 +398,8 @@ public abstract class AbstractMapServer implements MapServer {
 
         CosmeticInventoryHandler.init(guiController);
         AbstractAccessoryImpl.addListeners(globalEventHandler);
+
+        PlayerSettingsScreen.init(playerService(), globalEventHandler);
 
         var entityEvents = EventNode.type("mapmaker:map/entity", EventFilter.INSTANCE);
         globalEventHandler.addChild(entityEvents);
@@ -604,6 +608,7 @@ public abstract class AbstractMapServer implements MapServer {
             CompletableFuture.allOf(sessionResponseFuture, mapPlayerDataFuture, backpackDataFuture).join();
 
             var sessionResponse = sessionResponseFuture.get();
+            player.setTag(CompatProvider.FIRST_JOIN_TAG, sessionResponse.isJoin());
             player.setTag(PlayerDataV2.TAG, sessionResponse.data());
             sessionManager.updateSessionOptimistic(sessionResponse.session(), new SessionStateUpdateRequest.Metadata());
             player.setTag(MapPlayerData.TAG, mapPlayerDataFuture.get());

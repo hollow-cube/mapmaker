@@ -219,7 +219,7 @@ public final class ExtraCodecs {
                 final RegistryKey<StructCodec<? extends T>> type = registry.getKey(innerCodec);
                 if (type == null) return new Result.Error<>("Unregistered serializer for: " + value);
 
-                map.put(key, coder.createString(type.name()));
+                map.put(key, coder.createString(type.key().asString()));
                 return innerCodec.encodeToMap(coder, value, map);
             }
         };

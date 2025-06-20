@@ -129,6 +129,22 @@ public final class BlockUtil {
         return "true".equals(block.getProperty("waterlogged"));
     }
 
+    public static Block fromStateIdOrNull(int stateId) {
+        try {
+            return Block.fromStateId(stateId);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return null; // Return null if the state ID is invalid
+        }
+    }
+
+    public static Block fromBlockIdOrNull(int blockId) {
+        try {
+            return Block.fromBlockId(blockId);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return null; // Return null if the block ID is invalid
+        }
+    }
+
     public enum BlockParseResult {
         NO_BLOCK_TYPE, BLOCK_NOT_FOUND, INVALID_PROPERTIES, INVALID_PROPERTY_VALUE
     }

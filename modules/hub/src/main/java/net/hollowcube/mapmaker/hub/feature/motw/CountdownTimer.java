@@ -43,13 +43,10 @@ public class CountdownTimer implements Supplier<TaskSchedule> {
     }
 
     public long timeToNextWeek() {
-//        LocalDateTime now = LocalDateTime.now(ZoneId.of("America/New_York"));
-//        LocalDateTime nextSundayMidnight = now.with(TemporalAdjusters.next(DayOfWeek.SUNDAY)).toLocalDate().atStartOfDay();
-//        return ChronoUnit.MINUTES.between(now, nextSundayMidnight);
         var now = LocalDateTime.now(ZoneId.of("America/New_York"));
-        var startOfOpenBetaTime = LocalDateTime.parse("2024-04-05T10:00:00-04:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        var endOfOpenBetaTime = LocalDateTime.parse("2024-04-07T23:59:00-04:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        return ChronoUnit.MINUTES.between(now, now.isAfter(startOfOpenBetaTime) ? endOfOpenBetaTime : startOfOpenBetaTime);
+        var startOfMapContest = LocalDateTime.parse("2025-06-21T10:00:00-04:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        var endOfMapContest = LocalDateTime.parse("2024-06-29T22:00:00-04:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        return ChronoUnit.MINUTES.between(now, now.isAfter(startOfMapContest) ? endOfMapContest : startOfMapContest);
     }
 
     public void setDigits(int[] newDigits) {

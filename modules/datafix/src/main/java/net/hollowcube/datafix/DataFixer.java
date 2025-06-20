@@ -486,7 +486,8 @@ public class DataFixer {
                 V4305::new,
                 V4306::new,
                 V4307::new,
-                V4314::new
+                V4314::new,
+                V4321::new
         ));
     }
 }

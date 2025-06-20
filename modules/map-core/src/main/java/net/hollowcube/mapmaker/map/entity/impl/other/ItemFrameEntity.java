@@ -11,9 +11,11 @@ import net.minestom.server.entity.metadata.other.ItemFrameMeta;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.sound.SoundEvent;
+import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.Rotation;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.UUID;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -114,7 +116,7 @@ public class ItemFrameEntity extends MapEntity {
         super.writeData(tag);
 
         var meta = getEntityMeta();
-        tag.putByte("Facing", (byte) meta.getOrientation().ordinal());
+        tag.putByte("Facing", (byte) LEGACY_DIRECTIONS.indexOf(meta.getDirection()));
         if (meta.isInvisible()) tag.putBoolean("Invisible", true);
         if (!meta.getItem().isAir()) tag.put("Item", meta.getItem().toItemNBT());
 
@@ -126,7 +128,7 @@ public class ItemFrameEntity extends MapEntity {
         super.readData(tag);
 
         var meta = getEntityMeta();
-        meta.setOrientation(readOrientation(tag));
+        meta.setDirection(readDirection(tag));
         meta.setInvisible(tag.getBoolean("Invisible", false));
         if (tag.get("Item") instanceof CompoundBinaryTag itemTag)
             meta.setItem(ItemStack.fromItemNBT(itemTag));
@@ -139,14 +141,17 @@ public class ItemFrameEntity extends MapEntity {
         super.legacyLoad(buffer, version);
 
         // Orientation is part of the entity object data, not the generic metadata entries
-        getEntityMeta().setOrientation(buffer.read(NetworkBuffer.Enum(ItemFrameMeta.Orientation.class)));
+        getEntityMeta().setDirection(LEGACY_DIRECTIONS.get(buffer.read(NetworkBuffer.VAR_INT) % LEGACY_DIRECTIONS.size()));
     }
 
-    private @NotNull ItemFrameMeta.Orientation readOrientation(@NotNull CompoundBinaryTag tag) {
+    private @NotNull Direction readDirection(@NotNull CompoundBinaryTag tag) {
         int id = tag.getByte("Facing", tag.getByte("facing", (byte) 2));
-        for (var orientation : ItemFrameMeta.Orientation.values()) {
-            if (orientation.ordinal() == id) return orientation;
-        }
-        return ItemFrameMeta.Orientation.NORTH;
+        return LEGACY_DIRECTIONS.get(id % LEGACY_DIRECTIONS.size());
     }
+
+    private static final List<Direction> LEGACY_DIRECTIONS = List.of(
+            Direction.DOWN, Direction.UP,
+            Direction.NORTH, Direction.SOUTH,
+            Direction.WEST, Direction.EAST
+    );
 }

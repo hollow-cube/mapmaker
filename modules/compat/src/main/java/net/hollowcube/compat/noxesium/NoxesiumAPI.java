@@ -4,6 +4,8 @@ import com.noxcrew.noxesium.api.NoxesiumReferences;
 import com.noxcrew.noxesium.api.protocol.NoxesiumFeature;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.component.CustomData;
@@ -12,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class NoxesiumAPI {
 
+    public static final Component NAME = Component.text("Noxesium", NamedTextColor.WHITE);
     public static final Tag<Byte> NOXESIUM_VERSION = Tag.<Byte>Transient("noxesium:version")
             .defaultValue((byte) -1);
     public static final String CHANNEL = "noxesium-v2";

@@ -1,10 +1,10 @@
 [versions]
-minecraft = "1.21.5"
+minecraft = "1.21.6"
 annotations = "26.0.2"
 fastutil = "8.5.15"
 gson = "2.12.1"
-adventure = "4.20.0"
-minestom = "1_21_5-1c8431a9ec"
+adventure = "4.22.0"
+minestom = "1_21_6-c3ccee696b"
 posthog = "0.1.9"
 slf4j = "2.0.9"
 kafka = "3.9.0"
