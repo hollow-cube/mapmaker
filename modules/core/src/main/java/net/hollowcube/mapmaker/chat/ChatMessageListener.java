@@ -12,6 +12,8 @@ import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
+import net.hollowcube.mapmaker.perm.PermManager;
+import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -47,6 +49,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 public class ChatMessageListener extends BaseConsumer<ChatMessageData> implements PacketPlayListenerConsumer<ClientChatMessagePacket> {
     private static final Logger logger = LoggerFactory.getLogger(ChatMessageListener.class);
@@ -71,20 +74,25 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
     private final MapService mapService;
     private final PunishmentService punishmentService;
     private final FriendlyProducer producer;
+    private final PermManager permissions;
 
     private final AsyncLoadingCache<String, Optional<Punishment>> playerMuteCache;
 
     private final MessageComponents components;
 
-    public ChatMessageListener(@NotNull SessionManager sessionManager, @NotNull PlayerService playerService,
-                               @NotNull MapService mapService, @NotNull PunishmentService punishmentService,
-                               @NotNull String kafkaBrokers, @NotNull FriendlyProducer producer) {
+    public ChatMessageListener(
+            @NotNull SessionManager sessionManager, @NotNull PlayerService playerService,
+            @NotNull MapService mapService, @NotNull PunishmentService punishmentService,
+            @NotNull String kafkaBrokers, @NotNull FriendlyProducer producer,
+            @NotNull PermManager permissions
+    ) {
         super(CHAT_OUT_TOPIC, "chat", ChatMessageListener::fromJson, kafkaBrokers);
         this.sessionManager = sessionManager;
         this.playerService = playerService;
         this.mapService = mapService;
         this.punishmentService = punishmentService;
         this.producer = producer;
+        this.permissions = permissions;
 
         this.playerMuteCache = Caffeine.newBuilder()
                 .expireAfterWrite(10, TimeUnit.MINUTES)
@@ -195,8 +203,22 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
         switch (message.type()) {
             case CHAT_UNSIGNED -> FutureUtil.submitVirtual(() -> {
                 switch (message.channel()) {
-                    case ClientChatMessageData.CHANNEL_GLOBAL -> handleGlobalChat(message);
-                    case ClientChatMessageData.CHANNEL_LOCAL -> handleLocalChat(message);
+                    case ClientChatMessageData.CHANNEL_GLOBAL -> handleUnsignedChat(
+                            message, "chat.channel.global",
+                            _ -> true
+                    );
+                    case ClientChatMessageData.CHANNEL_LOCAL -> {
+                        var senderMap = OpUtils.map(sessionManager.getPresence(message.sender()), Presence::mapId);
+                        if (senderMap == null) return; // Can't find the sender's map
+                        handleUnsignedChat(message, "chat.channel.local", recipient -> {
+                            var recipientMap = OpUtils.map(sessionManager.getPresence(recipient.getUuid().toString()), Presence::mapId);
+                            return Objects.equals(senderMap, recipientMap);
+                        });
+                    }
+                    case ClientChatMessageData.CHANNEL_STAFF -> handleUnsignedChat(
+                            message, "chat.channel.staff",
+                            recipient -> this.permissions.hasPlatformPermission(recipient, PlatformPerm.MAP_ADMIN)
+                    );
                     default -> handleDirectMessage(message);
                 }
             });
@@ -205,7 +227,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
     }
 
     @Blocking
-    protected void handleGlobalChat(@NotNull ChatMessageData message) {
+    protected void handleUnsignedChat(@NotNull ChatMessageData message, @NotNull String key, @NotNull Predicate<Player> filter) {
         logger.info("Received chat message: {}", message);
 
         try {
@@ -215,49 +237,14 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
 
             for (var recipient : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                 var isSender = recipient.getUuid().toString().equals(message.sender());
-                var data = this.components.createGlobalMessage(recipient, message);
-                if (data.ping()) recipient.playSound(TAG_DING);
-
-                var text = data.text().color(isColored ? NamedTextColor.WHITE : NamedTextColor.GRAY);
-
-                recipient.sendMessage(Component.translatable("chat.channel.global", senderName, text));
-                if (isSender) {
-                    data.extra().values().forEach(recipient::sendMessage);
-                }
-            }
-
-            // If there is an extra message, handle it
-            if (message.extra() != null && message.extra().type() == ClientChatMessageData.Type.CHAT_SYSTEM) {
-                handleChatSystem(message.extra());
-            }
-        } catch (Exception e) {
-            ExceptionReporter.reportException(e);
-        }
-    }
-
-    @Blocking
-    protected void handleLocalChat(@NotNull ChatMessageData message) {
-        logger.info("Received chat message: {}", message);
-
-        try {
-            var senderMap = OpUtils.map(sessionManager.getPresence(message.sender()), Presence::mapId);
-            if (senderMap == null) return; // Can't find the sender's map
-
-            var senderDisplyName = playerService.getPlayerDisplayName2(message.sender());
-            var senderName = senderDisplyName.build(DisplayName.Context.DEFAULT);
-            var isColored = senderDisplyName.parts().size() > 1;
-
-            for (var recipient : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-                var isSender = recipient.getUuid().toString().equals(message.sender());
-                var map = OpUtils.map(sessionManager.getPresence(recipient.getUuid().toString()), Presence::mapId);
-                if (!Objects.equals(senderMap, map)) continue;
+                if (!filter.test(recipient)) continue;
 
                 var data = this.components.createGlobalMessage(recipient, message);
                 if (data.ping()) recipient.playSound(TAG_DING);
 
                 var text = data.text().color(isColored ? NamedTextColor.WHITE : NamedTextColor.GRAY);
 
-                recipient.sendMessage(Component.translatable("chat.channel.local", senderName, text));
+                recipient.sendMessage(Component.translatable(key, senderName, text));
 
                 if (isSender) {
                     data.extra().values().forEach(recipient::sendMessage);

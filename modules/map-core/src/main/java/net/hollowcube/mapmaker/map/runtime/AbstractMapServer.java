@@ -34,9 +34,9 @@ import net.hollowcube.mapmaker.chat.ChatChannelDisplay;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.chat.announcements.ChatAnnouncer;
 import net.hollowcube.mapmaker.command.*;
+import net.hollowcube.mapmaker.command.chat.ChannelCommand;
 import net.hollowcube.mapmaker.command.chat.ChatCommand;
 import net.hollowcube.mapmaker.command.chat.MsgCommand;
-import net.hollowcube.mapmaker.command.chat.ReplyCommand;
 import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.command.map.MapCommand;
 import net.hollowcube.mapmaker.command.punish.*;
@@ -297,7 +297,7 @@ public abstract class AbstractMapServer implements MapServer {
             var punishmentCreatedListener = new PunishmentManagementListener(playerService, permManager, kafkaConfig.bootstrapServers());
             shutdowner.queue("punishment-listener", punishmentCreatedListener::close);
 
-            chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, kafkaConfig.bootstrapServers(), producer);
+            chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, kafkaConfig.bootstrapServers(), producer, permManager);
             facets.put(ChatMessageListener.class, chatMessageListener);
             shutdowner.queue("chat-message-listener", chatMessageListener::close);
             MinecraftServer.getPacketListenerManager().setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
@@ -440,8 +440,11 @@ public abstract class AbstractMapServer implements MapServer {
             commandManager.register(new WhereCommand(sessionManager(), playerService(), mapService(), permManager()));
             commandManager.register(new ListCommand(sessionManager(), playerService()));
             commandManager.register(new MsgCommand(sessionManager(), mapService(), chatMessageListener));
-            commandManager.register(new ReplyCommand(sessionManager(), mapService(), chatMessageListener));
-            commandManager.register(new ChatCommand(playerService()));
+            commandManager.register(new ChannelCommand.Global(sessionManager(), mapService(), chatMessageListener));
+            commandManager.register(new ChannelCommand.Local(sessionManager(), mapService(), chatMessageListener));
+            commandManager.register(new ChannelCommand.Reply(sessionManager(), mapService(), chatMessageListener));
+            commandManager.register(new ChannelCommand.Staff(sessionManager(), mapService(), chatMessageListener, permManager()));
+            commandManager.register(new ChatCommand(playerService(), permManager()));
         }
 
         if (fullInstance) {
