@@ -36,7 +36,7 @@ public class InteractionEntity extends ObjectEntity {
     public void setBoundingBox(BoundingBox boundingBox) {
         super.setBoundingBox(boundingBox);
 
-        float width = (float) Math.max(boundingBox.width(), boundingBox.height());
+        float width = (float) Math.max(boundingBox.width(), boundingBox.depth());
         float height = (float) boundingBox.height();
 
         this.getEntityMeta().setWidth(width);
@@ -46,8 +46,17 @@ public class InteractionEntity extends ObjectEntity {
     }
 
     @Override
+    protected boolean onAxiomInteraction(@NotNull Player player) {
+        InteractionEditorScreen.openEditorScreen(this, player);
+        return true;
+    }
+
+    @Override
     public void onRightClick(@NotNull MapWorld world, @NotNull Player player, @NotNull PlayerHand hand, @NotNull Point interactPosition) {
-        if (this.handler == null) return;
-        this.handler.onPlayerInteract(player);
+        if (world.canEdit(player)) {
+            InteractionEditorScreen.openEditorScreen(this, player);
+        } else if (this.handler != null) {
+            this.handler.onPlayerInteract(player);
+        }
     }
 }

@@ -17,10 +17,12 @@ public class AxiomAPI {
     public static final int MAX_API_VERSION = 9;
     public static final int BLUEPRINT_VERSION = 1;
     public static final int EMPTY_BLOCK_STATE = Block.VOID_AIR.stateId();
-    public static final ListBinaryTag HIDDEN_MARKER_DATA = ListBinaryTag.listBinaryTag(BinaryTagTypes.STRING, List.of(
-            StringBinaryTag.stringBinaryTag("name"), StringBinaryTag.stringBinaryTag("min"), StringBinaryTag.stringBinaryTag("max"),
-            StringBinaryTag.stringBinaryTag("line_argb"), StringBinaryTag.stringBinaryTag("line_thickness"), StringBinaryTag.stringBinaryTag("face_argb")
-    ));
+    public static final List<String> HIDDEN_MARKER_KEYS = List.of(
+            "name", "min", "max", "line_argb", "line_thickness", "face_argb"
+    );
+    public static final ListBinaryTag HIDDEN_MARKER_DATA = ListBinaryTag.builder()
+            .add(HIDDEN_MARKER_KEYS.stream().map(StringBinaryTag::stringBinaryTag).toList())
+            .build();
     public static final List<String> RESERVED_MARKER_DATA = List.of("line_argb", "line_thickness", "face_argb", "axiom:hide", "axiom:modify");
 
 }

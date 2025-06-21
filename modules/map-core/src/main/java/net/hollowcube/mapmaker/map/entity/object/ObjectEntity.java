@@ -93,6 +93,15 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         return codec.decode(coder, getData());
     }
 
+    public @NotNull CompoundBinaryTag getCleanData() {
+        var data = CompoundBinaryTag.builder();
+        for (var entry : getTag(DATA_TAG)) {
+            if (AxiomAPI.HIDDEN_MARKER_KEYS.contains(entry.getKey())) continue;
+            data.put(entry.getKey(), entry.getValue());
+        }
+        return data.build();
+    }
+
     public @Nullable Point getMin() {
         return getTag(REGION_MIN_TAG);
     }
@@ -203,10 +212,11 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         if (!(event.marker() instanceof ObjectEntity entity)) return;
         if (world == null || !world.canEdit(event.player())) return;
         if (!world.instance().equals(entity.getInstance())) return;
-
-        event.setData(entity.getTag(DATA_TAG)
-                .put("axiom:hide", AxiomAPI.HIDDEN_MARKER_DATA)
-                .putString("type", entity.getType()));
+        if (!event.player().isSneaking() && entity.onAxiomInteraction(event.player())) {
+            event.setCancelled(true);
+        } else {
+            event.setData(entity.getTag(DATA_TAG).put("axiom:hide", AxiomAPI.HIDDEN_MARKER_DATA).putString("type", entity.getType()));
+        }
     }
 
     private static void handleAxiomUpdateMarkerData(@NotNull TerraformAxiomUpdateCustomEntityDataEvent event) {
@@ -215,37 +225,45 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
 
         var newData = event.data().getCompound("data");
         var updating = !newData.getBoolean("axiom:modify", false);
-        var minChanged = newData.get("min") != null;
-        var maxChanged = newData.get("max") != null;
+        marker.setData(newData, event.editor(), updating);
+    }
+
+    public void setData(@NotNull CompoundBinaryTag data, @Nullable Player initator, boolean update) {
+        var minChanged = data.get("min") != null;
+        var maxChanged = data.get("max") != null;
 
         var builder = CompoundBinaryTag.builder();
-        if (updating) builder.put(marker.getTag(DATA_TAG));
-        builder.put(newData);
+        if (update) builder.put(this.getTag(DATA_TAG));
+        builder.put(data);
 
         AxiomAPI.RESERVED_MARKER_DATA.forEach(builder::remove);
 
-        var oldType = marker.getType();
-        marker.setTag(DATA_TAG, builder.build());
+        var oldType = this.getType();
+        this.setTag(DATA_TAG, builder.build());
 
         // TODO cant use update tag here because of a class cast exception, likely a minestom issue - Gravy
-        if (updating) {
-            if (minChanged) marker.setTag(REGION_MIN_TAG, marker.getTag(REGION_MIN_TAG).sub(marker.getPosition()));
-            if (maxChanged) marker.setTag(REGION_MAX_TAG, marker.getTag(REGION_MAX_TAG).sub(marker.getPosition()));
+        if (update) {
+            if (minChanged) this.setTag(REGION_MIN_TAG, this.getTag(REGION_MIN_TAG).sub(this.getPosition()));
+            if (maxChanged) this.setTag(REGION_MAX_TAG, this.getTag(REGION_MAX_TAG).sub(this.getPosition()));
         }
 
-        marker.updateForViewers(); // Send updated region to viewers
-        marker.updateBoundingBox();
+        this.updateForViewers(); // Send updated region to viewers
+        this.updateBoundingBox();
 
-        var newType = marker.getType();
+        var newType = this.getType();
         if (!Objects.equals(oldType, newType)) {
-            if (marker.handler != null) marker.handler.onRemove();
+            if (this.handler != null) this.handler.onRemove();
+
 
             var world = MapWorld.forInstance(marker.getInstance());
             if (world != null) {
                 marker.handler = world.objectEntityHandlers().create(newType, marker);
             } else marker.handler = null;
         }
-        if (marker.handler != null) marker.handler.onDataChange(event.editor());
+
+        if (this.handler != null) {
+            this.handler.onDataChange(initator);
+        }
     }
 
     private void updateForViewers() {
@@ -271,6 +289,10 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
                 maxX - minX, maxY - minY, maxZ - minZ,
                 new Vec(minX, minY, minZ)
         ));
+    }
+
+    protected boolean onAxiomInteraction(@NotNull Player player) {
+        return false;
     }
 
     private @NotNull AxiomClientboundMarkerDataPacket createAxiomMarkerUpdatePacket() {

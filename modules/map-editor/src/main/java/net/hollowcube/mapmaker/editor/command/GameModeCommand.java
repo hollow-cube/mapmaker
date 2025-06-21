@@ -9,6 +9,7 @@ import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 
 import static net.hollowcube.mapmaker.editor.command.EditorConditions.builderOnly;
+import static net.hollowcube.command.CommandCondition.hideOnClient;
 
 /**
  * This command is hidden and is used for the purpose of vanilla game mode switching such as f3 + f4 and f3 + n.
@@ -22,10 +23,7 @@ public class GameModeCommand extends CommandDsl {
 
         this.category = CommandCategory.HIDDEN;
 
-        setCondition(CommandCondition.and(
-                (_, context) -> context.pass() == CommandContext.Pass.BUILD ? CommandCondition.HIDE : CommandCondition.ALLOW,
-                builderOnly()
-        ));
+        setCondition(CommandCondition.and(hideOnClient(), builderOnly()));
         addSyntax(playerOnly(this::setGamemode), argument);
     }
 

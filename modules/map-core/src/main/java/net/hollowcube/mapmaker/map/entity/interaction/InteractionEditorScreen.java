@@ -1,0 +1,128 @@
+package net.hollowcube.mapmaker.map.entity.interaction;
+
+import net.hollowcube.common.util.DialogInputsBuilder;
+import net.hollowcube.common.util.MathUtil;
+import net.hollowcube.common.util.Uuids;
+import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.map.MapWorld;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.TagStringIO;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.collision.BoundingBox;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.dialog.*;
+import net.minestom.server.entity.Player;
+import net.minestom.server.event.player.PlayerCustomClickEvent;
+import net.minestom.server.network.packet.server.common.ShowDialogPacket;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+import java.util.regex.Pattern;
+
+public class InteractionEditorScreen {
+
+    private static final Key EDITOR_SCREEN_ID = Key.key("hollowcube", "interaction_editor_screen");
+    private static final Pattern POSITION_REGEX = Pattern.compile(" *(?<x>\\d+(?:\\.\\d+)?) +(?<y>\\d+(?:\\.\\d+)?) +(?<z>\\d+(?:\\.\\d+)?) *");
+    private static final TagStringIO TAG_STRING_IO = TagStringIO.builder()
+            .acceptHeterogeneousLists(true)
+            .emitHeterogeneousLists(true)
+            .indent(4)
+            .build();
+
+    // region Data
+
+    private static Pos getPosition(@NotNull String data, @NotNull InteractionEntity interaction) {
+        var match = POSITION_REGEX.matcher(data);
+        return new Pos(
+                MathUtil.toDouble(match.find() ? match.group("x") : "", interaction.getPosition().x()),
+                MathUtil.toDouble(match.find() ? match.group("y") : "", interaction.getPosition().y()),
+                MathUtil.toDouble(match.find() ? match.group("z") : "", interaction.getPosition().z())
+        );
+    }
+
+    private static BoundingBox getBoundingBox(@NotNull String width, @NotNull String height, @NotNull InteractionEntity interaction) {
+        var bb = interaction.getBoundingBox();
+        var w = MathUtil.toDouble(width, bb.width());
+        var h = MathUtil.toDouble(height, bb.height());
+        return new BoundingBox(w, h, w);
+    }
+
+    public static CompoundBinaryTag getData(@NotNull String data) {
+        try {
+            return TAG_STRING_IO.asCompound(data);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // endregion
+
+    public static void onCallback(@NotNull PlayerCustomClickEvent event) {
+        if (!event.getKey().equals(EDITOR_SCREEN_ID)) return;
+        if (!(event.getPayload() instanceof CompoundBinaryTag payload)) return;
+        var world = MapWorld.forPlayerOptional(event.getPlayer());
+        var uuid = Uuids.parse(payload.getString("uuid"));
+
+        if (uuid == null || world == null || !world.canEdit(event.getPlayer())) return;
+
+        var entity = world.instance().getEntityByUuid(uuid);
+        if (!(entity instanceof InteractionEntity interaction)) return;
+
+        var pos = getPosition(payload.getString("position"), interaction);
+        var bb = getBoundingBox(payload.getString("width"), payload.getString("height"), interaction);
+        var data = getData(payload.getString("data"));
+
+        if (data != null) interaction.setData(data, event.getPlayer(), false);
+        interaction.teleport(pos);
+        interaction.setBoundingBox(bb);
+    }
+
+    public static void openEditorScreen(@NotNull InteractionEntity entity, @NotNull Player player) {
+        try {
+            var dialog = new Dialog.Confirmation(
+                    new DialogMetadata(
+                            Component.empty(), Component.empty(),
+                            true, false, DialogAfterAction.CLOSE,
+                            List.of(),
+                            DialogInputsBuilder.create()
+                                    .text(
+                                            "width", Component.text("Width"),
+                                            String.valueOf(entity.getEntityMeta().getWidth()),
+                                            10, 250
+                                    )
+                                    .text(
+                                            "height", Component.text("Height"),
+                                            String.valueOf(entity.getEntityMeta().getHeight()),
+                                            10, 250
+                                    )
+                                    .text(
+                                            "position", Component.text("Position (X Y Z)"),
+                                            String.format("%.2f %.2f %.2f", entity.getPosition().x(), entity.getPosition().y(), entity.getPosition().z()),
+                                            50, 250
+                                    )
+                                    .multiline(
+                                            "data", Component.text("Data"),
+                                            TAG_STRING_IO.asString(entity.getCleanData()),
+                                            Short.MAX_VALUE, Short.MAX_VALUE,
+                                            250, 150
+                                    )
+                                    .build()
+                    ),
+                    new DialogActionButton(Component.text("Close"), null, 125, null),
+                    new DialogActionButton(
+                            Component.text("Save"),
+                            null,
+                            125,
+                            new DialogAction.DynamicCustom(EDITOR_SCREEN_ID, CompoundBinaryTag.builder()
+                                    .putString("uuid", entity.getUuid().toString())
+                                    .build())
+                    )
+            );
+
+            player.sendPacket(new ShowDialogPacket(dialog));
+        } catch (Exception e) {
+            ExceptionReporter.reportException(e, player);
+        }
+    }
+}
