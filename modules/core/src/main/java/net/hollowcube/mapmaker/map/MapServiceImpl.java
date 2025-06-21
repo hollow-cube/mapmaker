@@ -213,8 +213,9 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public @NotNull MapData publishMap(@NotNull String authorizer, @NotNull String id) {
+        var body = "{}";
         var req = HttpRequest.newBuilder()
-                .method("POST", HttpRequest.BodyPublishers.noBody())
+                .method("POST", HttpRequest.BodyPublishers.ofString(body))
                 .uri(URI.create(urlV3 + "/maps/" + id + "/publish"))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
