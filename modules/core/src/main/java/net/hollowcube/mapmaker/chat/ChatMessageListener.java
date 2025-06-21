@@ -141,14 +141,14 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
         }
 
         var playerData = PlayerDataV2.fromPlayer(player);
-        if (sessionManager.isHidden(playerData.id())) {
+        String channel = playerData.getSetting(PlayerSettings.CHAT_CHANNEL);
+
+        if (!ClientChatMessageData.CHANNEL_STAFF.equals(channel) && sessionManager.isHidden(playerData.id())) {
             player.sendMessage(Component.text("you cannot chat while vanished"));
             return;
         }
 
         long messageSeed = ThreadLocalRandom.current().nextLong();
-        String channel = playerData.getSetting(PlayerSettings.CHAT_CHANNEL);
-
         FutureUtil.submitVirtual(() -> {
             String currentMapId = null;
             if (message.contains("[map]")) {
