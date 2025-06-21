@@ -1,4 +1,4 @@
-package net.hollowcube.common.util;
+package net.hollowcube.common.dialogs;
 
 import net.kyori.adventure.text.Component;
 import net.minestom.server.dialog.DialogInput;
@@ -15,7 +15,7 @@ public class DialogInputsBuilder {
         return new DialogInputsBuilder();
     }
 
-    private DialogInputsBuilder input(DialogInput input) {
+    public DialogInputsBuilder input(DialogInput input) {
         this.inputs.add(input);
         return this;
     }
@@ -50,7 +50,10 @@ public class DialogInputsBuilder {
             int maxLength, int maxLines,
             int width, int height
     ) {
-        return input(new DialogInput.Text(id, width, label, true, value, maxLength, new DialogInput.Text.Multiline(maxLines, height)));
+        return input(new DialogInput.Text(
+                id, width, label, true, value, maxLength != -1 ? maxLength : Integer.MAX_VALUE,
+                new DialogInput.Text.Multiline(maxLines != -1 ? maxLines : null, height)
+        ));
     }
 
     public List<DialogInput> build() {

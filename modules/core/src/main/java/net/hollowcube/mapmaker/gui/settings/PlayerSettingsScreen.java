@@ -1,22 +1,19 @@
 package net.hollowcube.mapmaker.gui.settings;
 
+import net.hollowcube.common.dialogs.DialogBuilder;
 import net.hollowcube.common.events.RequestStatsEvent;
-import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.dialog.*;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerCustomClickEvent;
 import net.minestom.server.network.packet.server.common.ShowDialogPacket;
 import net.minestom.server.network.packet.server.play.CloseWindowPacket;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 public class PlayerSettingsScreen {
 
@@ -47,24 +44,15 @@ public class PlayerSettingsScreen {
 
     private static void openSettingsDialog(@NotNull Player player) {
         var data = PlayerData.fromPlayer(player);
-        var dialog = new Dialog.Notice(
-                new DialogMetadata(
-                        LanguageProviderV2.translate(Component.translatable("dialog.settings.title")),
-                        LanguageProviderV2.translate(Component.translatable("dialog.settings.title")),
-                        true,
-                        true,
-                        DialogAfterAction.CLOSE,
-                        List.of(),
-                        PlayerSettingsOptions.OPTIONS.stream().map(it -> it.input().apply(data)).toList()
-                ),
-                new DialogActionButton(
-                        LanguageProviderV2.translate(Component.translatable("dialog.settings.close")),
-                        null,
-                        PlayerSettingsOptions.OPTION_WIDTH,
-                        new DialogAction.DynamicCustom(PlayerSettingsOptions.SETTINGS_DIALOG_ID, null)
-                )
-        );
-
+        var dialog = DialogBuilder.create()
+                .title(Component.translatable("dialog.settings.title"))
+                .closeOnEscape()
+                .inputs(it -> {
+                    for (var option : PlayerSettingsOptions.OPTIONS) {
+                        it.input(option.input().apply(data));
+                    }
+                })
+                .buildNotice(PlayerSettingsOptions.SETTINGS_DIALOG_ID, null);
         player.sendPacket(new ShowDialogPacket(dialog));
     }
 }

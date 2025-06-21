@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.map.entity.interaction;
 
-import net.hollowcube.common.util.DialogInputsBuilder;
+import net.hollowcube.common.dialogs.DialogBuilder;
 import net.hollowcube.common.util.MathUtil;
 import net.hollowcube.common.util.Uuids;
 import net.hollowcube.mapmaker.ExceptionReporter;
@@ -11,13 +11,11 @@ import net.kyori.adventure.nbt.TagStringIO;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.dialog.*;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerCustomClickEvent;
 import net.minestom.server.network.packet.server.common.ShowDialogPacket;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.regex.Pattern;
 
 public class InteractionEditorScreen {
@@ -76,49 +74,26 @@ public class InteractionEditorScreen {
         if (data != null) interaction.setData(data, event.getPlayer(), false);
         interaction.teleport(pos);
         interaction.setBoundingBox(bb);
+        event.getPlayer().closeDialog();
     }
 
     public static void openEditorScreen(@NotNull InteractionEntity entity, @NotNull Player player) {
         try {
-            var dialog = new Dialog.Confirmation(
-                    new DialogMetadata(
-                            Component.empty(), Component.empty(),
-                            true, false, DialogAfterAction.CLOSE,
-                            List.of(),
-                            DialogInputsBuilder.create()
-                                    .text(
-                                            "width", Component.text("Width"),
-                                            String.valueOf(entity.getEntityMeta().getWidth()),
-                                            10, 250
-                                    )
-                                    .text(
-                                            "height", Component.text("Height"),
-                                            String.valueOf(entity.getEntityMeta().getHeight()),
-                                            10, 250
-                                    )
-                                    .text(
-                                            "position", Component.text("Position (X Y Z)"),
-                                            String.format("%.2f %.2f %.2f", entity.getPosition().x(), entity.getPosition().y(), entity.getPosition().z()),
-                                            50, 250
-                                    )
-                                    .multiline(
-                                            "data", Component.text("Data"),
-                                            TAG_STRING_IO.asString(entity.getCleanData()),
-                                            Short.MAX_VALUE, Short.MAX_VALUE,
-                                            250, 150
-                                    )
-                                    .build()
-                    ),
-                    new DialogActionButton(Component.text("Close"), null, 125, null),
-                    new DialogActionButton(
-                            Component.text("Save"),
-                            null,
-                            125,
-                            new DialogAction.DynamicCustom(EDITOR_SCREEN_ID, CompoundBinaryTag.builder()
-                                    .putString("uuid", entity.getUuid().toString())
-                                    .build())
+            var width = String.valueOf(entity.getEntityMeta().getWidth());
+            var height = String.valueOf(entity.getEntityMeta().getHeight());
+            var position = String.format("%.2f %.2f %.2f", entity.getPosition().x(), entity.getPosition().y(), entity.getPosition().z());
+            var nbt = TAG_STRING_IO.asString(entity.getCleanData());
+
+
+            var dialog = DialogBuilder.create()
+                    .closeOnEscape()
+                    .inputs(it -> it
+                            .text("width", Component.text("Width"), width, 10, 250)
+                            .text("height", Component.text("Height"), height, 10, 250)
+                            .text("position", Component.text("Position (X Y Z)"), position, 50, 250)
+                            .multiline("data", Component.text("Data"), nbt, -1, -1, 250, 150)
                     )
-            );
+                    .buildConfirmation(EDITOR_SCREEN_ID, CompoundBinaryTag.builder().putString("uuid", entity.getUuid().toString()).build());
 
             player.sendPacket(new ShowDialogPacket(dialog));
         } catch (Exception e) {

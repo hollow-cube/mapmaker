@@ -20,6 +20,7 @@ import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.dialogs.DialogButtons;
 import net.hollowcube.common.events.EventExtensions;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
@@ -360,6 +361,7 @@ public abstract class AbstractMapServer implements MapServer {
         AbstractAccessoryImpl.addListeners(globalEventHandler);
 
         PlayerSettingsScreen.init(playerService(), globalEventHandler);
+        DialogButtons.init(globalEventHandler);
 
         var entityEvents = EventNode.type("mapmaker:map/entity", EventFilter.INSTANCE);
         globalEventHandler.addChild(entityEvents);
