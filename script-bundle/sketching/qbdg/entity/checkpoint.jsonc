@@ -1,0 +1,6 @@
+{
+    "model": "qbdg:checkpoint",
+    "components": {
+        // Probably doesn't need anything, its just a static model controlled programatically.
+    }
+}

@@ -1,0 +1,11 @@
+{
+    // Compatibility version for the script bundle. We can use this to enable or disable apis that should be available.
+    "compatibility": "2025.6.1",
+    "capabilities": [
+        // Can be used to enable experiments/permissioned features/etc.
+        // Not totally sure the use case just a guess.
+        "something",
+        "another-thing",
+        "etc"
+    ]
+}
