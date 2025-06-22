@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.map.action.gui.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.map.action.gui.ControlledNumberInput;
 import net.hollowcube.mapmaker.map.action.gui.ControlledTriStateInput;
 import net.hollowcube.mapmaker.map.action.util.Operation;
+import net.hollowcube.mapmaker.map.util.RelativePos;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.kyori.adventure.key.Key;
@@ -24,7 +25,8 @@ import java.util.Set;
 
 public record EditLivesAction(
         @NotNull Operation operation,
-        int lives
+        int lives,
+        @Nullable RelativePos deathPosition
 ) implements Action {
     private static final int DEFAULT_LIVES = 0; // Disables the lives mechanic.
 
@@ -37,32 +39,36 @@ public record EditLivesAction(
     public static final StructCodec<EditLivesAction> CODEC = StructCodec.struct(
             "operation", Operation.CODEC.optional(Operation.SET), EditLivesAction::operation,
             "value", ExtraCodecs.clamppedInt(0, 10).optional(DEFAULT_LIVES), EditLivesAction::lives,
-            EditLivesAction::new);
+            "deathPosition", RelativePos.CODEC.optional(), EditLivesAction::deathPosition,
+            EditLivesAction::new
+    );
     public static final Action.Editor<EditLivesAction> EDITOR = new Action.Editor<>(
             Editor::new, EditLivesAction::makeSprite, EditLivesAction::makeThumbnail, Set.of());
     public static final PlayState.Attachment<Data> SAVE_DATA = PlayState.attachment(KEY, Data.CODEC);
 
-    public record Data(int value, int max) {
+    public record Data(int value, int max, @Nullable RelativePos deathPosition) {
         public static final Codec<Data> CODEC = StructCodec.struct(
                 "value", ExtraCodecs.clamppedInt(0, 20), Data::value,
                 "max", ExtraCodecs.clamppedInt(0, 20), Data::max,
-                Data::new);
+                "deathPosition", RelativePos.CODEC.optional(), Data::deathPosition,
+                Data::new
+        );
 
         public @NotNull Data withValue(int value) {
-            return new Data(value, this.max);
+            return new Data(value, this.max, this.deathPosition);
         }
 
         public @NotNull Data withMax(int max) {
-            return new Data(this.value, max);
+            return new Data(this.value, max, this.deathPosition);
         }
     }
 
     public @NotNull EditLivesAction withOperation(@NotNull Operation operation) {
-        return new EditLivesAction(operation, this.lives);
+        return new EditLivesAction(operation, this.lives, this.deathPosition);
     }
 
     public @NotNull EditLivesAction withLives(int lives) {
-        return new EditLivesAction(this.operation, lives);
+        return new EditLivesAction(this.operation, lives, this.deathPosition);
     }
 
     @Override
@@ -74,10 +80,10 @@ public record EditLivesAction(
     public void applyTo(@NotNull Player player, @NotNull PlayState state) {
         switch (this.operation) {
             case SET -> state.set(EditLivesAction.SAVE_DATA, this.lives == 0
-                    ? null : new EditLivesAction.Data(lives, lives));
+                    ? null : new EditLivesAction.Data(lives, lives, this.deathPosition));
             case ADD -> {
                 var data = state.get(SAVE_DATA);
-                if (data == null) state.set(SAVE_DATA, new EditLivesAction.Data(lives, lives));
+                if (data == null) state.set(SAVE_DATA, new EditLivesAction.Data(lives, lives, this.deathPosition));
                 else state.set(SAVE_DATA, data.withValue(Math.min(data.value() + lives, data.max + lives)));
             }
             case SUBTRACT -> {
