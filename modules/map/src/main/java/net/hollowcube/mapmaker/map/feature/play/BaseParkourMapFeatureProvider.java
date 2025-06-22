@@ -614,10 +614,19 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         var playState = saveState.state(PlayState.class);
         // If they don't have a checkpoint or are on their last life, do a hard reset.
-        var isOutOfLives = OpUtils.mapOr(playState.get(EditLivesAction.SAVE_DATA), EditLivesAction.Data::value, 0) == 1;
+        var livesData = playState.get(EditLivesAction.SAVE_DATA);
+        var isOutOfLives = OpUtils.mapOr(livesData, EditLivesAction.Data::value, 0) == 1;
         if (playState.lastState() == null || isOutOfLives) {
             if (isOutOfLives) {
                 player.playSound(PLAYER_DEATH_SOUND);
+
+                if (livesData.deathPosition() != null) {
+                    playState = new PlayState();
+                    saveState.setState(playState);
+                    updatePlayerFromState(world, player, playState, true);
+                    resetTeleport(player, livesData.deathPosition().resolve(player.getPosition()));
+                    return;
+                }
             }
             hardReset(player, saveState);
             return;
