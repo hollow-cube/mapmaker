@@ -33,7 +33,7 @@ public class PlayerSettingsScreen {
             FutureUtil.submitVirtual(() -> data.writeUpdatesUpstream(players));
         });
         events.addListener(RequestStatsEvent.class, event -> {
-            if (ProtocolVersions.getProtocolVersion(event.player()) < ProtocolVersions.V1_21_6) {
+            if (!ProtocolVersions.hasProtocolVersion(event.player(), ProtocolVersions.V1_21_6)) {
                 event.player().sendMessage(Component.translatable("dialog.settings.unsupported"));
             } else {
                 event.player().sendPacket(new CloseWindowPacket(-1));

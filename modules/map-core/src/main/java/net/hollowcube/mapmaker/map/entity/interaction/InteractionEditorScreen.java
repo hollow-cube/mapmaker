@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.entity.interaction;
 
 import net.hollowcube.common.dialogs.DialogBuilder;
 import net.hollowcube.common.util.MathUtil;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.Uuids;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapWorld;
@@ -21,7 +22,7 @@ import java.util.regex.Pattern;
 public class InteractionEditorScreen {
 
     private static final Key EDITOR_SCREEN_ID = Key.key("hollowcube", "interaction_editor_screen");
-    private static final Pattern POSITION_REGEX = Pattern.compile(" *(?<x>\\d+(?:\\.\\d+)?) +(?<y>\\d+(?:\\.\\d+)?) +(?<z>\\d+(?:\\.\\d+)?) *");
+    private static final Pattern POSITION_REGEX = Pattern.compile(" *(?<x>-?\\d+(?:\\.\\d+)?) +(?<y>-?\\d+(?:\\.\\d+)?) +(?<z>-?\\d+(?:\\.\\d+)?) *");
     private static final TagStringIO TAG_STRING_IO = TagStringIO.builder()
             .acceptHeterogeneousLists(true)
             .emitHeterogeneousLists(true)
@@ -32,10 +33,11 @@ public class InteractionEditorScreen {
 
     private static Pos getPosition(@NotNull String data, @NotNull InteractionEntity interaction) {
         var match = POSITION_REGEX.matcher(data);
+        if (!match.matches()) return interaction.getPosition();
         return new Pos(
-                MathUtil.toDouble(match.find() ? match.group("x") : "", interaction.getPosition().x()),
-                MathUtil.toDouble(match.find() ? match.group("y") : "", interaction.getPosition().y()),
-                MathUtil.toDouble(match.find() ? match.group("z") : "", interaction.getPosition().z())
+                MathUtil.toDouble(match.group("x"), interaction.getPosition().x()),
+                MathUtil.toDouble(match.group("y"), interaction.getPosition().y()),
+                MathUtil.toDouble(match.group("z"), interaction.getPosition().z())
         );
     }
 
@@ -78,26 +80,30 @@ public class InteractionEditorScreen {
     }
 
     public static void openEditorScreen(@NotNull InteractionEntity entity, @NotNull Player player) {
-        try {
-            var width = String.valueOf(entity.getEntityMeta().getWidth());
-            var height = String.valueOf(entity.getEntityMeta().getHeight());
-            var position = String.format("%.2f %.2f %.2f", entity.getPosition().x(), entity.getPosition().y(), entity.getPosition().z());
-            var nbt = TAG_STRING_IO.asString(entity.getCleanData());
+        if (!ProtocolVersions.hasProtocolVersion(player, ProtocolVersions.V1_21_6)) {
+            player.sendMessage(Component.translatable("dialog.interaction_entity.unsupported"));
+        } else {
+            try {
+                var width = String.valueOf(entity.getEntityMeta().getWidth());
+                var height = String.valueOf(entity.getEntityMeta().getHeight());
+                var position = String.format("%.2f %.2f %.2f", entity.getPosition().x(), entity.getPosition().y(), entity.getPosition().z());
+                var nbt = TAG_STRING_IO.asString(entity.getCleanData());
 
 
-            var dialog = DialogBuilder.create()
-                    .closeOnEscape()
-                    .inputs(it -> it
-                            .text("width", Component.text("Width"), width, 10, 250)
-                            .text("height", Component.text("Height"), height, 10, 250)
-                            .text("position", Component.text("Position (X Y Z)"), position, 50, 250)
-                            .multiline("data", Component.text("Data"), nbt, -1, -1, 250, 150)
-                    )
-                    .buildConfirmation(EDITOR_SCREEN_ID, CompoundBinaryTag.builder().putString("uuid", entity.getUuid().toString()).build());
+                var dialog = DialogBuilder.create()
+                        .closeOnEscape()
+                        .inputs(it -> it
+                                .text("width", Component.text("Width"), width, 10, 250)
+                                .text("height", Component.text("Height"), height, 10, 250)
+                                .text("position", Component.text("Position (X Y Z)"), position, 50, 250)
+                                .multiline("data", Component.text("Data"), nbt, -1, -1, 250, 150)
+                        )
+                        .buildConfirmation(EDITOR_SCREEN_ID, CompoundBinaryTag.builder().putString("uuid", entity.getUuid().toString()).build());
 
-            player.sendPacket(new ShowDialogPacket(dialog));
-        } catch (Exception e) {
-            ExceptionReporter.reportException(e, player);
+                player.sendPacket(new ShowDialogPacket(dialog));
+            } catch (Exception e) {
+                ExceptionReporter.reportException(e, player);
+            }
         }
     }
 }

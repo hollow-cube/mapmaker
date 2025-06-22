@@ -40,6 +40,10 @@ public final class ProtocolVersions {
         return player.getTag(PROTOCOL_VERSION_TAG);
     }
 
+    public static boolean hasProtocolVersion(@NotNull Player player, int version) {
+        return getProtocolVersion(player) >= version;
+    }
+
     @Blocking
     public static void requestProtocolVersionFromProxy(@NotNull Player player) {
         var future = new CompletableFuture<Integer>();

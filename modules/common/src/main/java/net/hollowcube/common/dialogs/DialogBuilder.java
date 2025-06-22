@@ -55,15 +55,15 @@ public class DialogBuilder {
     public Dialog buildConfirmation(@NotNull Key key, @Nullable CompoundBinaryTag extra) {
         return new Dialog.Confirmation(
                 this.metadata(DialogAfterAction.NONE),
-                DialogButtons.button(Component.text("Save"), 150, key, extra),
-                DialogButtons.close(Component.text("Close"), 150)
+                DialogButtons.button(Component.translatable("dialog.generic.save"), 150, key, extra),
+                DialogButtons.close(Component.translatable("dialog.generic.close"), 150)
         );
     }
 
     public Dialog buildNotice(@NotNull Key key, @Nullable CompoundBinaryTag extra) {
         return new Dialog.Notice(
                 this.metadata(DialogAfterAction.CLOSE),
-                DialogButtons.button(Component.text("Close"), 150, key, extra)
+                DialogButtons.button(Component.translatable("dialog.generic.close"), 150, key, extra)
         );
     }
 }
