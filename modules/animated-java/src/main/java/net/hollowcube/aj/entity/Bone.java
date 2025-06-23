@@ -17,6 +17,22 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/*
+
+Bones:
+- parent
+- entity (text/other display in the future)
+  - has associated entity
+- camera?
+  - has associated entity
+- locator?
+
+
+ALL have transformation
+- invalidation of positions to indicate it needs to be resent?
+
+ */
+
 public interface Bone {
 
     @NotNull Node node();
@@ -136,6 +152,8 @@ public interface Bone {
                         MetadataDef.TextDisplay.TEXT.index(), Metadata.Chat(Component.text(text.text())),
                         MetadataDef.TextDisplay.BACKGROUND_COLOR.index(), Metadata.VarInt(0) // todo what should actual value be
                 );
+                case Node.Bone bone -> null; //todo
+                case Node.Locator bone -> null; //todo
                 case Node.Struct _ -> null;
             };
         }
