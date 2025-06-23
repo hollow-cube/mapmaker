@@ -14,3 +14,23 @@ Script bundles are structured similarly to resource packs:
 /manifest.json
 ```
 
+## Entity models
+
+We support animated java as well as a variation of bedrock entity models.
+
+### Animated Java
+
+* Bones
+* Variants
+* Animations
+
+### Bedrock
+
+* Geometry
+* Textures
+* Animations
+
+We will skip render controllers for now.
+
+We will skip animation controllers for now. It will be possible to trigger animations via scripting only.
+

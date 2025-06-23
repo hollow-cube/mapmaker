@@ -1,0 +1,10 @@
+{
+    "model": {
+        "type": "bedrock",
+        "model": "mymap:assembler",
+        "textures": "mymap:assmbler"
+    },
+    "components": {
+        // TODO
+    }
+}

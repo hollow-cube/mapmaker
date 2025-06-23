@@ -15,7 +15,9 @@ import java.util.UUID;
 public sealed interface Node {
     @NotNull Registry<StructCodec<? extends Node>> REGISTRY = DynamicRegistry.fromMap(Key.key("aj:node"),
             Map.entry(Key.key("struct"), Struct.CODEC),
-            Map.entry(Key.key("text_display"), TextDisplay.CODEC));
+            Map.entry(Key.key("bone"), Bone.CODEC),
+            Map.entry(Key.key("text_display"), TextDisplay.CODEC),
+            Map.entry(Key.key("locator"), Locator.CODEC));
     @NotNull StructCodec<Node> CODEC = Codec.RegistryTaggedUnion(_ -> REGISTRY, Node::codec, "type");
 
     record Base(
@@ -43,6 +45,17 @@ public sealed interface Node {
         }
     }
 
+    record Bone(@NotNull Node.Base base) implements Node {
+        private static final StructCodec<Bone> CODEC = StructCodec.struct(
+                StructCodec.INLINE, Base.CODEC, Bone::base,
+                Bone::new);
+
+        @Override
+        public @NotNull StructCodec<? extends Node> codec() {
+            return CODEC;
+        }
+    }
+
     record TextDisplay(
             @NotNull Base base,
             @NotNull String text,
@@ -57,6 +70,17 @@ public sealed interface Node {
                 "shadow", Codec.BOOLEAN, TextDisplay::shadow,
                 "see_through", Codec.BOOLEAN, TextDisplay::seeThrough,
                 TextDisplay::new);
+
+        @Override
+        public @NotNull StructCodec<? extends Node> codec() {
+            return CODEC;
+        }
+    }
+
+    record Locator(@NotNull Node.Base base) implements Node {
+        private static final StructCodec<Locator> CODEC = StructCodec.struct(
+                StructCodec.INLINE, Base.CODEC, Locator::base,
+                Locator::new);
 
         @Override
         public @NotNull StructCodec<? extends Node> codec() {

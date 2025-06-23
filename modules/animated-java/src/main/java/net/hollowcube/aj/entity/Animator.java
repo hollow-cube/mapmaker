@@ -1,6 +1,7 @@
 package net.hollowcube.aj.entity;
 
 import net.hollowcube.aj.Animation;
+import net.hollowcube.aj.animation.Channel;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,9 +38,9 @@ public interface Animator {
                 int tick = (int) (frame.time() * 20.0);
                 Keyframe keyframe = getOrCreateKeyframe(tick);
 
-                if (frame.channel() == Animation.Channel.POSITION)
+                if (frame.channel() == Channel.POSITION)
                     keyframe.translation = frame.value().div(16);
-                else if (frame.channel() == Animation.Channel.SCALE)
+                else if (frame.channel() == Channel.SCALE)
                     keyframe.scale = frame.value();
             }
         }
