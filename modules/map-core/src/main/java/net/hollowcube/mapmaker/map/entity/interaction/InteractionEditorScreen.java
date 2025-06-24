@@ -5,11 +5,13 @@ import net.hollowcube.common.util.MathUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.Uuids;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.gui.notifications.NotificationManager;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.TagStringIO;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -73,10 +75,19 @@ public class InteractionEditorScreen {
         var bb = getBoundingBox(payload.getString("width"), payload.getString("height"), interaction);
         var data = getData(payload.getString("data"));
 
-        if (data != null) interaction.setData(data, event.getPlayer(), false);
+        if (data != null) {
+            interaction.setData(data, event.getPlayer(), false);
+            event.getPlayer().closeDialog();
+        } else {
+            NotificationManager.showNotification(
+                    event.getPlayer(),
+                    "Error",
+                    "Could not parse data. Make sure it is valid NBT.",
+                    NamedTextColor.RED
+            );
+        }
         interaction.teleport(pos);
         interaction.setBoundingBox(bb);
-        event.getPlayer().closeDialog();
     }
 
     public static void openEditorScreen(@NotNull InteractionEntity entity, @NotNull Player player) {
