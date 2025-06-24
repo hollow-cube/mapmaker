@@ -110,7 +110,7 @@ public class ResetHeightDisplayFeatureProvider implements FeatureProvider {
             collidesWithEntities = false;
             preventBlockPlacement = false;
 
-            var meta = (TextDisplayMeta) getEntityMeta();
+            var meta = getEntityMeta();
 
             meta.setBackgroundColor(0x40FF0000);
             meta.setText(Component.text("\u3000")); // Pretty much a square
@@ -120,6 +120,11 @@ public class ResetHeightDisplayFeatureProvider implements FeatureProvider {
             meta.setPosRotInterpolationDuration(5);
 
             setInstance(player.getInstance(), new Pos(0, 0, 0, 0, -90));
+        }
+
+        @Override
+        public @NotNull TextDisplayMeta getEntityMeta() {
+            return (TextDisplayMeta) super.getEntityMeta();
         }
 
         @Override
@@ -155,10 +160,9 @@ public class ResetHeightDisplayFeatureProvider implements FeatureProvider {
 
             var resetHeight = playState.get(Attachments.RESET_HEIGHT, world.instance().getTag(BaseParkourMapFeatureProvider.DEFAULT_RESET_HEIGHT));
 
-            // These numbers are very magic, through trial and error I got them, they seemingly have 0 correlation to the font size and scale,
-            // and I was too lazy to figure out the clientside code.
-            // But they center it
-            this.teleport(new Pos(pos.x() + 10, resetHeight - 0.1f, pos.z() + 135, 0, -90));
+            var scale = Math.min(player.getSettings().viewDistance() * 16f, 256f);
+            this.teleport(new Pos(pos.x(), resetHeight - 0.1f, pos.z() + scale / 2f, 0, -90));
+            this.getEntityMeta().setScale(new Vec(3 * scale, 3 * scale, 1));
         }
     }
 }
