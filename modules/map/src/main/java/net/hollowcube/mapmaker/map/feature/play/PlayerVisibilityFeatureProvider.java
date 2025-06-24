@@ -122,10 +122,7 @@ public class PlayerVisibilityFeatureProvider implements FeatureProvider {
         private static @Nullable Pos getCheckpoint(Player player) {
             return OpUtils.map(
                     SaveState.optionalFromPlayer(player),
-                    state -> state
-                            .tryGetState(PlayState.class)
-                            .flatMap(p -> Optional.ofNullable(p.pos()))
-                            .orElse(null)
+                    state -> OpUtils.map(state.tryGetState(PlayState.class), PlayState::pos)
             );
         }
 
