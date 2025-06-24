@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -19,9 +20,11 @@ import org.slf4j.LoggerFactory;
 public class MapIsolateBridge implements ServerBridge {
     private static final Logger logger = LoggerFactory.getLogger(MapIsolateBridge.class);
 
+    private final MapService mapService;
     private final SessionService sessionService;
 
-    public MapIsolateBridge(@NotNull SessionService sessionService) {
+    public MapIsolateBridge(@NotNull MapService mapService, @NotNull SessionService sessionService) {
+        this.mapService = mapService;
         this.sessionService = sessionService;
     }
 
@@ -34,6 +37,14 @@ public class MapIsolateBridge implements ServerBridge {
 
         try {
             var playerId = player.getUuid().toString();
+            var map = mapService.getMap(playerId, mapId);
+
+            var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
+            if (playerProtocolVersion < map.protocolVersion()) {
+                player.sendMessage(Component.translatable("map_join.wrongversion",
+                        Component.text(map.name()), Component.text(ProtocolVersions.getProtocolName(map.protocolVersion()))));
+                return;
+            }
 
             var targetState = switch (joinMapState) {
                 case EDITING -> MapPresence.STATE_EDITING;

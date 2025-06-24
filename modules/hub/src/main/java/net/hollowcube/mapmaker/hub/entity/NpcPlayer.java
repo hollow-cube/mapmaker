@@ -1,18 +1,32 @@
 package net.hollowcube.mapmaker.hub.entity;
 
+import net.kyori.adventure.text.Component;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.*;
+import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
+import net.minestom.server.instance.Instance;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.server.play.*;
+import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("UnstableApiUsage")
 public class NpcPlayer extends BaseNpcEntity {
+    public static final Team NPC_TEAM = MinecraftServer.getTeamManager().createBuilder("hub_npcs")
+            .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER)
+            .build();
+
     private final String username;
     private final PlayerSkin skin;
+
+    private final NpcTextModel nameTag = new NpcTextModel();
+
+    private final Map<EquipmentSlot, ItemStack> equipment = new HashMap<>();
 
     public NpcPlayer(@NotNull String username, @Nullable PlayerSkin skin) {
         this(UUID.randomUUID(), username, skin);
@@ -22,6 +36,14 @@ public class NpcPlayer extends BaseNpcEntity {
         super(EntityType.PLAYER, uuid);
         this.username = username;
         this.skin = skin;
+
+        this.nameTag.setAutoViewable(false);
+        this.nameTag.getEntityMeta().setBillboardRenderConstraints(AbstractDisplayMeta.BillboardConstraints.CENTER);
+        this.nameTag.getEntityMeta().setText(Component.text(username));
+    }
+
+    public void setEquipment(@NotNull EquipmentSlot slot, @NotNull ItemStack itemStack) {
+        this.equipment.put(slot, itemStack);
     }
 
     @Override
@@ -60,13 +82,29 @@ public class NpcPlayer extends BaseNpcEntity {
 
         // Enable skin layers
         player.sendPackets(new EntityMetaDataPacket(getEntityId(), Map.of(17, Metadata.Byte((byte) 127))));
+
+        if (equipment.containsKey(EquipmentSlot.HELMET)) {
+            player.sendPacket(new TeamsPacket(NPC_TEAM.getTeamName(), new TeamsPacket.AddEntitiesToTeamAction(List.of(username))));
+            nameTag.addViewer(player);
+        }
+        if (!equipment.isEmpty()) {
+            player.sendPacket(new EntityEquipmentPacket(getEntityId(), equipment));
+        }
     }
 
     @Override
     public void updateOldViewer(@NotNull Player player) {
         super.updateOldViewer(player);
 
-        player.sendPacket(new PlayerInfoRemovePacket(getUuid()));
+        if (equipment.containsKey(EquipmentSlot.HELMET))
+            player.sendPacket(new PlayerInfoRemovePacket(getUuid()));
+        else nameTag.removeViewer(player);
     }
 
+    @Override
+    public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
+        if (equipment.containsKey(EquipmentSlot.HELMET))
+            this.nameTag.setInstance(instance, spawnPosition.add(0, 2.4, 0));
+        return super.setInstance(instance, spawnPosition);
+    }
 }

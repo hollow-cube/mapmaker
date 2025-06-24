@@ -5,6 +5,7 @@ import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.MojangUtil;
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
@@ -148,6 +149,7 @@ public class DevServerRunner extends AbstractMapServer {
     protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
         try {
             var player = event.getPlayer();
+            ProtocolVersions.unsafeSetProtocolVersion(player, MinecraftServer.PROTOCOL_VERSION);
 
             var targetWorld = player.getTag(DevServerBridge.TARGET_WORLD);
             if (targetWorld == null) {

@@ -20,6 +20,7 @@ import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.command.HubCommand;
 import net.hollowcube.mapmaker.map.command.build.*;
+import net.hollowcube.mapmaker.map.command.play.ResetHeightCommand;
 import net.hollowcube.mapmaker.map.command.play.SpectateCommand;
 import net.hollowcube.mapmaker.map.command.utility.*;
 import net.hollowcube.mapmaker.map.command.utility.entity.EntitiesCommand;
@@ -216,6 +217,7 @@ public class MapServerRunner extends AbstractMapServer {
         commandManager.register(new GameModeCommand());
 
         commandManager.register(new SpectateCommand());
+        commandManager.register(new ResetHeightCommand());
 
         commandManager.register(new FlyCommand());
         commandManager.register(new FlySpeedCommand());

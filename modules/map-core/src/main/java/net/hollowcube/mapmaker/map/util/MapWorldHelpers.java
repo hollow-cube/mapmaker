@@ -26,10 +26,8 @@ public final class MapWorldHelpers {
 
     @Blocking
     public static @NotNull SaveState getOrCreateSaveState(
-            @NotNull MapWorld world,
-            @NotNull String playerId,
-            @NotNull SaveStateType type,
-            @Nullable SaveStateType.Serializer<?> stateSerializer
+            @NotNull MapWorld world, @NotNull String playerId, int protocolVersion,
+            @NotNull SaveStateType type, @Nullable SaveStateType.Serializer<?> stateSerializer
     ) {
         var mapService = world.server().mapService();
         var map = world.map();
@@ -37,7 +35,7 @@ public final class MapWorldHelpers {
         try {
             return mapService.getLatestSaveState(map.id(), playerId, type, stateSerializer);
         } catch (MapService.NotFoundError ignored) {
-            return mapService.createSaveState(map.id(), playerId, stateSerializer);
+            return mapService.createSaveState(map.id(), playerId, protocolVersion, stateSerializer);
         }
     }
 

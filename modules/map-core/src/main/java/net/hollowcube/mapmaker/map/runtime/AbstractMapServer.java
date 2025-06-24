@@ -34,9 +34,9 @@ import net.hollowcube.mapmaker.chat.ChatChannelDisplay;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.chat.announcements.ChatAnnouncer;
 import net.hollowcube.mapmaker.command.*;
+import net.hollowcube.mapmaker.command.chat.ChannelCommand;
 import net.hollowcube.mapmaker.command.chat.ChatCommand;
 import net.hollowcube.mapmaker.command.chat.MsgCommand;
-import net.hollowcube.mapmaker.command.chat.ReplyCommand;
 import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.command.map.MapCommand;
 import net.hollowcube.mapmaker.command.punish.*;
@@ -53,6 +53,7 @@ import net.hollowcube.mapmaker.cosmetic.impl.accessory.AbstractAccessoryImpl;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.posthog.PostHogFeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.unleash.UnleashConfig;
+import net.hollowcube.mapmaker.gui.settings.PlayerSettingsScreen;
 import net.hollowcube.mapmaker.invite.MapInviteAcceptedOrRejectedListener;
 import net.hollowcube.mapmaker.invite.MapInviteListener;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
@@ -296,7 +297,7 @@ public abstract class AbstractMapServer implements MapServer {
             var punishmentCreatedListener = new PunishmentManagementListener(playerService, permManager, kafkaConfig.bootstrapServers());
             shutdowner.queue("punishment-listener", punishmentCreatedListener::close);
 
-            chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, kafkaConfig.bootstrapServers(), producer);
+            chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, kafkaConfig.bootstrapServers(), producer, permManager);
             facets.put(ChatMessageListener.class, chatMessageListener);
             shutdowner.queue("chat-message-listener", chatMessageListener::close);
             MinecraftServer.getPacketListenerManager().setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
@@ -384,6 +385,7 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     protected abstract @NotNull MapAllocator createAllocator();
+
     protected abstract @NotNull ServerBridge createBridge();
 
     /**
@@ -396,6 +398,8 @@ public abstract class AbstractMapServer implements MapServer {
 
         CosmeticInventoryHandler.init(guiController);
         AbstractAccessoryImpl.addListeners(globalEventHandler);
+
+        PlayerSettingsScreen.init(playerService(), globalEventHandler);
 
         var entityEvents = EventNode.type("mapmaker:map/entity", EventFilter.INSTANCE);
         globalEventHandler.addChild(entityEvents);
@@ -436,8 +440,11 @@ public abstract class AbstractMapServer implements MapServer {
             commandManager.register(new WhereCommand(sessionManager(), playerService(), mapService(), permManager()));
             commandManager.register(new ListCommand(sessionManager(), playerService()));
             commandManager.register(new MsgCommand(sessionManager(), mapService(), chatMessageListener));
-            commandManager.register(new ReplyCommand(sessionManager(), mapService(), chatMessageListener));
-            commandManager.register(new ChatCommand(playerService()));
+            commandManager.register(new ChannelCommand.Global(sessionManager(), mapService(), chatMessageListener));
+            commandManager.register(new ChannelCommand.Local(sessionManager(), mapService(), chatMessageListener));
+            commandManager.register(new ChannelCommand.Reply(sessionManager(), mapService(), chatMessageListener));
+            commandManager.register(new ChannelCommand.Staff(sessionManager(), mapService(), chatMessageListener, permManager()));
+            commandManager.register(new ChatCommand(playerService(), permManager()));
         }
 
         if (fullInstance) {
@@ -601,6 +608,7 @@ public abstract class AbstractMapServer implements MapServer {
             CompletableFuture.allOf(sessionResponseFuture, mapPlayerDataFuture, backpackDataFuture).join();
 
             var sessionResponse = sessionResponseFuture.get();
+            player.setTag(CompatProvider.FIRST_JOIN_TAG, sessionResponse.isJoin());
             player.setTag(PlayerDataV2.TAG, sessionResponse.data());
             sessionManager.updateSessionOptimistic(sessionResponse.session(), new SessionStateUpdateRequest.Metadata());
             player.setTag(MapPlayerData.TAG, mapPlayerDataFuture.get());
@@ -705,6 +713,10 @@ public abstract class AbstractMapServer implements MapServer {
             return false;
         // Some expected IO exceptions that we don't want to report.
         if (t.toString().contains("header parser received no bytes") || t.toString().contains("Connection reset by peer"))
+            return false;
+
+        // Drop exceptions where the jvm has removed the stacktrace after the nth occurrance
+        if (t.getStackTrace() == null || t.getStackTrace().length == 0)
             return false;
 
         // todo fancier exception grouping

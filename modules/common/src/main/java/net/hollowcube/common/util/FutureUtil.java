@@ -83,12 +83,16 @@ public final class FutureUtil {
     }
 
     public static void submitVirtual(@NotNull Runnable runnable) {
+        createVirtual(runnable);
+    }
+
+    public static Thread createVirtual(@NotNull Runnable runnable) {
         if (isShuttingDown) {
             runnable.run();
-            return;
+            return null;
         }
 
-        Thread.startVirtualThread(() -> {
+        return Thread.startVirtualThread(() -> {
             try {
                 runnable.run();
             } catch (Throwable e) {

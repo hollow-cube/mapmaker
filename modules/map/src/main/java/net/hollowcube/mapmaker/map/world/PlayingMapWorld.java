@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.world;
 
 import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
@@ -191,7 +192,8 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
         var playerData = PlayerDataV2.fromPlayer(player);
 
         var stateType = map().verification() == MapVerification.PENDING ? SaveStateType.VERIFYING : SaveStateType.PLAYING;
-        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), stateType, PlayState.SERIALIZER);
+        int protocolVersion = ProtocolVersions.getProtocolVersion(player);
+        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), protocolVersion, stateType, PlayState.SERIALIZER);
         player.setTag(SaveState.TAG, saveState);
         return saveState;
     }
@@ -246,6 +248,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState == null) return null; // Sanity check
         var update = saveState.createUpdateRequest();
+        update.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
 
         // Write the save state to the database
         try {

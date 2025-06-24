@@ -89,7 +89,8 @@ final class TestMapServer implements MapServer {
         throw new UnsupportedOperationException("not implemented");
     }
 
-    @SuppressWarnings("unchecked") @Override
+    @SuppressWarnings("unchecked")
+    @Override
     public <T> @NotNull T facet(@NotNull Class<T> type) {
         if (type == FeatureList.class) return (T) features;
         throw new UnsupportedOperationException("no such feature " + type);

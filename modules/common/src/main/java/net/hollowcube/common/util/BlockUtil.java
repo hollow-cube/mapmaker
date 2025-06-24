@@ -50,9 +50,9 @@ public final class BlockUtil {
         BLOCK_PROPERTIES = blockmap;
 
         var blockToItem = new Int2ObjectOpenHashMap<Material>();
-        for (var material : Material.values()) {
-            var block = material.registry().block();
-            if (block == null) continue;
+        for (var block : Block.values()) {
+            var material = block.registry().material();
+            if (material == null) continue;
             blockToItem.put(block.id(), material);
         }
         BLOCK_TO_ITEM = blockToItem;
@@ -123,6 +123,26 @@ public final class BlockUtil {
         builder.append(']');
 
         return builder.toString();
+    }
+
+    public static boolean isWaterlogged(@NotNull Block block) {
+        return "true".equals(block.getProperty("waterlogged"));
+    }
+
+    public static Block fromStateIdOrNull(int stateId) {
+        try {
+            return Block.fromStateId(stateId);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return null; // Return null if the state ID is invalid
+        }
+    }
+
+    public static Block fromBlockIdOrNull(int blockId) {
+        try {
+            return Block.fromBlockId(blockId);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return null; // Return null if the block ID is invalid
+        }
     }
 
     public enum BlockParseResult {

@@ -64,7 +64,7 @@ public class MapIsolateServerRunner extends AbstractMapServer {
 
     @Override
     protected @NotNull ServerBridge createBridge() {
-        return new MapIsolateBridge(sessionService());
+        return new MapIsolateBridge(mapService(), sessionService());
     }
 
     @Override

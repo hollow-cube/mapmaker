@@ -1,9 +1,16 @@
 package net.hollowcube.compat.impl;
 
+import net.hollowcube.common.util.ProtocolVersions;
+import net.hollowcube.compat.api.CompatProvider;
+import net.hollowcube.compat.api.ModChannelRegisterEvent;
 import net.hollowcube.compat.api.packet.ClientboundModPacket;
 import net.hollowcube.compat.api.packet.PacketRegistry;
 import net.hollowcube.compat.api.packet.ServerboundModPacket;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerPluginMessageEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
@@ -13,6 +20,8 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.TestOnly;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
@@ -37,10 +46,22 @@ public final class PacketRegistryImpl implements PacketRegistry {
             var player = event.getPlayer();
             var id = event.getIdentifier().intern();
             switch (id) {
-                case REGISTER_CHANNEL ->
-                        PacketQueue.get(player).registerChannels(player, event.getMessageString().split("\0"));
-                case UNREGISTER_CHANNEL ->
-                        PacketQueue.get(player).unregisterChannels(event.getMessageString().split("\0"));
+                case REGISTER_CHANNEL -> {
+                    var channels = new ArrayList<>(Arrays.asList(event.getMessageString().split("\0")));
+                    var registerEvent = new ModChannelRegisterEvent(player, channels);
+                    EventDispatcher.call(registerEvent);
+                    PacketQueue.get(player).registerChannels(player, channels);
+                    if (!registerEvent.getDisabledMods().isEmpty() && Boolean.TRUE.equals(player.getAndSetTag(CompatProvider.FIRST_JOIN_TAG, null))) {
+                        var pvnText = Component.text(ProtocolVersions.getProtocolName(MinecraftServer.PROTOCOL_VERSION));
+                        var disabledModList = Component.join(JoinConfiguration.commas(true), registerEvent.getDisabledMods());
+                        System.out.println(disabledModList);
+                        player.sendMessage(Component.translatable("join.unsupported_mods", pvnText, disabledModList));
+                    }
+                }
+                case UNREGISTER_CHANNEL -> {
+                    var channels = Arrays.asList(event.getMessageString().split("\0"));
+                    PacketQueue.get(player).unregisterChannels(channels);
+                }
                 default -> {
                     ServerboundModPacket.Type<?> type = this.serverbound.get(id);
                     if (type == null) {

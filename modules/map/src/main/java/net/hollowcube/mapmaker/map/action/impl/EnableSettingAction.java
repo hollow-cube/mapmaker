@@ -71,6 +71,7 @@ public record EnableSettingAction(
     public void applyTo(@NotNull Player player, @NotNull PlayState state) {
         var settings = state.get(Attachments.SETTINGS);
         if (settings == null) state.set(Attachments.SETTINGS, settings = new SavedMapSettings());
+        if (setting == null || !(setting.defaultValue() instanceof Boolean)) return;
         settings.set((MapSetting<Boolean>) setting, true);
     }
 

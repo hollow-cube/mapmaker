@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.misc.Emoji;
@@ -59,10 +60,13 @@ public class MessageComponents {
         var author = usernameCache.get(map.owner(), id -> playerService.getPlayerDisplayName2(id).build());
         var progress = mapService.getMapProgress(uuid, List.of(mapid)).getProgress(mapid);
 
-        var components = MapData.createHoverComponents(map, author, progress);
+        var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
+        var components = MapData.createHoverComponents(map, author, progress, playerProtocolVersion);
 
         var lore = components.getValue();
-        lore.addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display_headless.footer", List.of()));
+        if (playerProtocolVersion >= map.protocolVersion()) {
+            lore.addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display_headless.footer", List.of()));
+        }
 
         var result = Component.text().append(components.getKey());
         for (var line : lore) {

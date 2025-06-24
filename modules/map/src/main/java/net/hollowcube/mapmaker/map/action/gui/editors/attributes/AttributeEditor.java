@@ -28,10 +28,7 @@ public class AttributeEditor extends AbstractActionEditorPanel<EditAttributeActi
         this.operation.update(Operation.SET);
         this.operation.iconButton().onLeftClick(() -> this.host.replaceView(new AttributesEditor(ref)));
 
-        this.value = add(1, 3, new ControlledDecimalInput("attribute", update(EditAttributeAction::withValue))
-                .label("value")
-                .range(entry.attribute().minValue(), entry.attribute().maxValue())
-        );
+        this.value = add(1, 3, new ControlledDecimalInput("attribute", update(EditAttributeAction::withValue)).label("value"));
     }
 
     @Override
@@ -40,5 +37,10 @@ public class AttributeEditor extends AbstractActionEditorPanel<EditAttributeActi
 
         this.operation.update(data.operation());
         this.value.update(data.value());
+
+        switch (data.operation()) {
+            case SET -> this.value.range(data.attribute().minValue(), data.attribute().maxValue());
+            case ADD, SUBTRACT -> this.value.range(0.0, Math.abs(data.attribute().minValue()) + Math.abs(data.attribute().maxValue()));
+        }
     }
 }

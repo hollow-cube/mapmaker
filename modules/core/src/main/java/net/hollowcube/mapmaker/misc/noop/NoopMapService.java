@@ -135,7 +135,7 @@ public class NoopMapService implements MapService {
     }
 
     @Override
-    public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType.Serializer<?> serializer) {
+    public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId, int protocolVersion, @Nullable SaveStateType.Serializer<?> serializer) {
         var obj = serializer.codec().decode(Transcoder.JSON, new JsonObject()).orElseThrow();
         return new SaveState(UUID.randomUUID().toString(), playerId, mapId, SaveStateType.PLAYING, serializer, obj);
     }

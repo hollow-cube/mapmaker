@@ -213,8 +213,9 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public @NotNull MapData publishMap(@NotNull String authorizer, @NotNull String id) {
+        var body = "{}";
         var req = HttpRequest.newBuilder()
-                .method("POST", HttpRequest.BodyPublishers.noBody())
+                .method("POST", HttpRequest.BodyPublishers.ofString(body))
                 .uri(URI.create(urlV3 + "/maps/" + id + "/publish"))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
@@ -371,9 +372,11 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType.Serializer<?> serializer) {
+    public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId, int protocolVersion, @Nullable SaveStateType.Serializer<?> serializer) {
         var req = HttpRequest.newBuilder()
-                .method("POST", HttpRequest.BodyPublishers.noBody())
+                .method("POST", HttpRequest.BodyPublishers.ofString("""
+                        {"protocolVersion": %d}
+                        """.formatted(protocolVersion)))
                 .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId))
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();

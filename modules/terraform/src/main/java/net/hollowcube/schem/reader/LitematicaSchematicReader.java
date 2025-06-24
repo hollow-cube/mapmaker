@@ -119,9 +119,9 @@ public class LitematicaSchematicReader implements SchematicReader {
                             index / (size.x() * size.z())
                     );
                     if (dataVersion != gameData.dataVersion()) {
-                        blockEntity = gameData.upgradeBlockEntity(dataVersion, gameData.dataVersion(), blockEntityId, blockEntity);
+                        blockEntity = gameData.upgradeBlockEntity(dataVersion, gameData.dataVersion(), blockEntityId.asString(), blockEntity);
                     }
-                    blockEntities.put(blockIndex(size, blockPosition), new BlockEntityData(blockEntityId, blockPosition, blockEntity));
+                    blockEntities.put(blockIndex(size, blockPosition), new BlockEntityData(blockEntityId.asString(), blockPosition, blockEntity));
                 }
             }
         }));

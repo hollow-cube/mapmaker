@@ -64,7 +64,7 @@ public enum CosmeticType {
                     .set(DataComponents.LORE, LanguageProviderV2.translateMulti(baseTranslation + ".lore", List.of()));
             if (equipmentSlot != null) {
                 builder.set(DataComponents.EQUIPPABLE, new Equippable(equipmentSlot, SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
-                        null, null, null, false, false, false, false));
+                        null, null, null, false, false, false, false, false, SoundEvent.ITEM_SHEARS_SNIP));
             }
             this.blankIcon = builder.build().withTag(COSMETIC_TAG, true);
         }

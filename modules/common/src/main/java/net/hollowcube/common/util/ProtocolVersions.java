@@ -18,10 +18,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public final class ProtocolVersions {
+    public static final int V1_21_4 = 769;
     public static final int V1_21_5 = 770;
+    public static final int V1_21_6 = 771;
 
     public static final int UNKNOWN = -1;
-    public static final int MIN_SUPPORTED = V1_21_5;
+    public static final int MIN_SUPPORTED = V1_21_4;
     public static final int CURRENT = MinecraftServer.PROTOCOL_VERSION;
     private static final Logger logger = LoggerFactory.getLogger(ProtocolVersions.class);
 
@@ -66,8 +68,14 @@ public final class ProtocolVersions {
         player.setTag(PROTOCOL_VERSION_TAG, pvn);
     }
 
+    public static void unsafeSetProtocolVersion(@NotNull Player player, int protocolVersion) {
+        player.setTag(PROTOCOL_VERSION_TAG, protocolVersion);
+    }
+
     private static final Map<String, Integer> ID_TO_NAME = Map.ofEntries(
-            Map.entry("1.21.5", V1_21_5)
+            Map.entry("1.21.4", V1_21_4),
+            Map.entry("1.21.5", V1_21_5),
+            Map.entry("1.21.6", V1_21_6)
     );
     private static final Map<Integer, String> NAME_TO_ID = ID_TO_NAME.entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));

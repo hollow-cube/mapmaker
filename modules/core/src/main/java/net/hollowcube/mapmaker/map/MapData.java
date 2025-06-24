@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.object.ObjectData;
@@ -54,6 +56,7 @@ public class MapData {
 
     private String id;
     private String owner;
+    private int protocolVersion = 0;
     private MapSettings settings;
     private MapVerification verification = MapVerification.UNVERIFIED;
 
@@ -108,6 +111,10 @@ public class MapData {
 
     public @NotNull String owner() {
         return owner;
+    }
+
+    public int protocolVersion() {
+        return protocolVersion;
     }
 
     public @NotNull MapSettings settings() {
@@ -306,7 +313,8 @@ public class MapData {
     @NonBlocking
     public static @NotNull Map.Entry<Component, List<Component>> createHoverComponents(
             @NotNull MapData map, @NotNull Component authorName,
-            @Nullable Map.Entry<PersonalizedMapData.Progress, Integer> personalProgress
+            @Nullable Map.Entry<PersonalizedMapData.Progress, Integer> personalProgress,
+            int playerProtocolVersion
     ) {
         class Holder {
             static final BadSprite PLAYS_ICON = BadSprite.require("icon/map_tooltip/plays");
@@ -366,7 +374,12 @@ public class MapData {
             lore.add(Component.empty());
         }
 
-        if (personalProgress != null) {
+        if (playerProtocolVersion < map.protocolVersion()) {
+            lore.addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display.wrongversion", List.of(
+                    Component.text(ProtocolVersions.getProtocolName(map.protocolVersion()))
+            )));
+            lore.add(Component.empty());
+        } else if (personalProgress != null) {
             var progress = personalProgress.getKey();
             var playtime = personalProgress.getValue();
             if (progress == PersonalizedMapData.Progress.COMPLETE) {

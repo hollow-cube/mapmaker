@@ -82,6 +82,8 @@ public class TridentFeatureProvider implements FeatureProvider {
     }
 
     private void beginRiptideAttack(@NotNull PlayerCancelItemUseEvent event, int riptideLevel) {
+        if (!isWet(event.getPlayer())) return;
+
         event.setRiptideSpinAttack(true);
 
         var player = event.getPlayer();

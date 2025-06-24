@@ -11,7 +11,7 @@ public class ExampleWorld extends AbstractMapWorld {
     public static final Constructor<ExampleWorld> CTOR = AbstractMapWorld.ctor(ExampleWorld::new, ExampleWorld.class);
 
     protected ExampleWorld(@NotNull MapServer server, @NotNull MapData map) {
-        super(server, map, new MapInstance("mapmaker:test", false));
+        super(server, map, new MapInstance("mapmaker:test", MapInstance.LightingMode.FULL_BRIGHT));
 
         instance().setGenerator(MapGenerators.stoneWorld());
     }

@@ -50,7 +50,9 @@ public class ProxyPlugin {
     private static final Key TRANSFER_DATA_COOKIE = Key.key("mapmaker", "transfer_data");
 
     private static final Set<ProtocolVersion> SUPPORTED_VERSIONS = Set.of(
-            ProtocolVersion.MINECRAFT_1_21_5
+            ProtocolVersion.MINECRAFT_1_21_4,
+            ProtocolVersion.MINECRAFT_1_21_5,
+            ProtocolVersion.MINECRAFT_1_21_6
     );
 
     public static final TextColor RED = TextColor.color(0xFA4141);
@@ -276,7 +278,7 @@ public class ProxyPlugin {
         if (reason != null) {
             // TODO: This feels like a bad way to do this. What's the proper way?
             var text = PlainTextComponentSerializer.plainText().serialize(reason).toLowerCase(Locale.ROOT);
-            if (text.contains("banned") || text.contains("kicked") || text.contains("version")) {
+            if (text.contains("banned") || (text.contains("kicked") && !text.contains("you were kicked from ")) || text.contains("version")) {
                 event.setResult(KickedFromServerEvent.DisconnectPlayer.create(reason));
                 return;
             }
