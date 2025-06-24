@@ -138,10 +138,10 @@ public class SaveState {
         return stateType.cast(state);
     }
 
-    public <T> @NotNull Optional<T> tryGetState(@NotNull Class<T> stateType) {
-        if (state == null) return Optional.empty();
-        if (!stateType.isAssignableFrom(state.getClass())) return Optional.empty();
-        return Optional.of(stateType.cast(state));
+    public <T> @Nullable T tryGetState(@NotNull Class<T> stateType) {
+        if (state == null) return null;
+        if (!stateType.isAssignableFrom(state.getClass())) return null;
+        return stateType.cast(state);
     }
 
     public void setState(@NotNull Object state) {

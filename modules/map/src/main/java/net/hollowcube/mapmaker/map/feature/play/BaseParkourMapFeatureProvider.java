@@ -76,7 +76,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     }
 
     private static final int RESET_HEIGHT_OFFSET = 5;
-    private static final Tag<Integer> DEFAULT_RESET_HEIGHT = Tag.Integer("mapmaker:play/reset_height").defaultValue(-64 - RESET_HEIGHT_OFFSET);
+    public static final Tag<Integer> DEFAULT_RESET_HEIGHT = Tag.Integer("mapmaker:play/reset_height").defaultValue(-64 - RESET_HEIGHT_OFFSET);
 
     private static final TagCooldown PROGRESS_INDEX_WARNING = new TagCooldown("mapmaker:play/progress_index_warning", 5000);
     public static final Tag<List<Integer>> OWNED_ENTITIES = Tag.<List<Integer>>Transient("map_owned_entities").defaultValue(List.of());
@@ -524,7 +524,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             var saveState = SaveState.optionalFromPlayer(player);
             if (saveState == null) return;
 
-            var playState = saveState.tryGetState(PlayState.class).orElse(null);
+            var playState = saveState.tryGetState(PlayState.class);
             if (playState == null) return;
             var resetHeight = Objects.requireNonNullElseGet(playState.get(Attachments.RESET_HEIGHT),
                     () -> world.instance().getTag(DEFAULT_RESET_HEIGHT));
