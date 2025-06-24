@@ -103,6 +103,8 @@ public class ResetHeightDisplayFeatureProvider implements FeatureProvider {
         public Display(@NotNull Player player) {
             super(EntityType.TEXT_DISPLAY, UUID.randomUUID());
 
+            setAutoViewable(false);
+            setAutoViewEntities(false);
             setNoGravity(true);
             hasPhysics = false;
             collidesWithEntities = false;
@@ -118,9 +120,6 @@ public class ResetHeightDisplayFeatureProvider implements FeatureProvider {
             meta.setPosRotInterpolationDuration(5);
 
             setInstance(player.getInstance(), new Pos(0, 0, 0, 0, -90));
-
-            setAutoViewable(false);
-            setAutoViewEntities(false);
         }
 
         @Override
