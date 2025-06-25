@@ -82,17 +82,14 @@ public class ResetHeightDisplayFeatureProvider implements FeatureProvider {
     }
 
     public static void toggle(@NotNull Player player) {
-        var display = player.updateAndGetTag(DISPLAY_TAG, it -> {
-            if (it != null) {
-                it.setInstance(player.getInstance());
-                return it;
-            }
-            return new Display(player);
-        });
-
-        if (display.isViewer(player)) {
+        var display = player.getTag(DISPLAY_TAG);
+        if (display != null) {
             display.hide(player);
+            display.remove();
+            player.removeTag(DISPLAY_TAG);
         } else {
+            display = new Display(player);
+            player.setTag(DISPLAY_TAG, display);
             display.show(player);
         }
     }
