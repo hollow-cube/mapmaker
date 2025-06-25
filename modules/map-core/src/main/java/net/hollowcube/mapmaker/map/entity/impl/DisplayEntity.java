@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.entity.impl;
 
+import net.hollowcube.common.math.Mat4;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
@@ -89,7 +90,7 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
             transformationTag.put("right_rotation", ListBinaryTag.listBinaryTag(BinaryTagTypes.FLOAT, elems));
         }
         var transformation = transformationTag.build();
-        if (transformation.size() > 0) tag.put("transformation", transformation);
+        if (!transformation.isEmpty()) tag.put("transformation", transformation);
 
         if (meta.getBillboardRenderConstraints() != AbstractDisplayMeta.BillboardConstraints.FIXED)
             tag.put("billboard", BILLBOARD_CONSTRAINTS.encode(Transcoder.NBT, meta.getBillboardRenderConstraints()).orElseThrow());
@@ -135,8 +136,11 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
             if (transform.get("right_rotation") instanceof ListBinaryTag rightRot && rightRot.size() == 4 && rightRot.elementType() == BinaryTagTypes.FLOAT)
                 meta.setRightRotation(new float[]{rightRot.getFloat(0), rightRot.getFloat(1), rightRot.getFloat(2), rightRot.getFloat(3)});
         } else if (transformationTag instanceof ListBinaryTag transformation && transformation.size() == 16 && transformation.elementType() == BinaryTagTypes.FLOAT) {
-            // https://github.com/apache/commons-math/blob/ffcdf39f8fa7ccd19c5c21a73fccb90c753592cd/commons-math-legacy/src/main/java/org/apache/commons/math4/legacy/linear/SingularValueDecomposition.java#L53
-            throw new UnsupportedOperationException("SVD is not supported yet.");
+            var matrix = new Mat4(transformation::getFloat).svdDecompose();
+            meta.setTranslation(matrix.translation());
+//            meta.setLeftRotation(matrix.leftRotation().into());
+            meta.setScale(matrix.scale());
+//            meta.setRightRotation(matrix.rightRotation().into());
         }
         if (tag.get("billboard") instanceof StringBinaryTag billboardName)
             meta.setBillboardRenderConstraints(BILLBOARD_CONSTRAINTS.decode(Transcoder.NBT, billboardName).orElseThrow());
