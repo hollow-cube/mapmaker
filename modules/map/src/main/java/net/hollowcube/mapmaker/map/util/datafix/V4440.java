@@ -5,12 +5,12 @@ import net.hollowcube.datafix.util.Value;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
-public class V4439 extends DataVersion {
+public class V4440 extends DataVersion {
 
-    public V4439() {
-        super(4439);
+    public V4440() {
+        super(4440);
 
-        addFix(HCDataTypes.PLAY_STATE, V4439::updateHotbarPlaceableOn);
+        addFix(HCDataTypes.PLAY_STATE, V4440::updateHotbarPlaceableOn);
     }
 
     private static Value updateHotbarPlaceableOn(@NotNull Value data) {
@@ -18,6 +18,11 @@ public class V4439 extends DataVersion {
         updateHotbarPlaceableOnForItem(hotbar.get("item0"));
         updateHotbarPlaceableOnForItem(hotbar.get("item1"));
         updateHotbarPlaceableOnForItem(hotbar.get("item2"));
+
+        var lastState = data.get("lastState");
+        if (!lastState.isNull()) {
+            updateHotbarPlaceableOn(lastState);
+        }
         return null;
     }
 
