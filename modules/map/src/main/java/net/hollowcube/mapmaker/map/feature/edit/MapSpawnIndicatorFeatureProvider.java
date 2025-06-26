@@ -85,11 +85,9 @@ public class MapSpawnIndicatorFeatureProvider implements FeatureProvider {
         }
 
         // Open checkpoint settings view
-        int maxResetHeight = entity.getPosition().blockY();
         var checkpointData = world.getTag(BaseParkourMapFeatureProvider.SPAWN_CHECKPOINT_EFFECTS);
-        //todo the blockPos passed here isnt valid and will fizzle. You shouldnt really be able to set the tp coords on this checkpoint anyway because you never actually get it.
-        // todo need to pass in block pos for reset height.
         var host = Panel.open(player, new ActionEditorView(checkpointData.actions(), "Spawn"));
+        host.setTag(ActionEditorView.ACTION_LOCATION, entity.getPosition());
         host.onClose(() -> world.setTag(BaseParkourMapFeatureProvider.SPAWN_CHECKPOINT_EFFECTS, checkpointData));
     }
 

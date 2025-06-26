@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public record ResetHeightAction(
@@ -62,7 +63,7 @@ public record ResetHeightAction(
         return new ActionEditorAnvil<>(ref, ResetHeightAction::valueToString, ResetHeightAction::stringToValue) {
             @Override
             protected boolean validateResult(@NotNull ResetHeightAction result) {
-                var actionLocation = host.getTag(ActionEditorView.ACTION_LOCATION);
+                var actionLocation = Objects.requireNonNull(host.getTag(ActionEditorView.ACTION_LOCATION), "action location");
                 int maxResetHeight = actionLocation.blockY();
                 var teleport = ref.parent().findLast(TeleportAction.class);
                 if (teleport != null) maxResetHeight = Math.max(maxResetHeight,

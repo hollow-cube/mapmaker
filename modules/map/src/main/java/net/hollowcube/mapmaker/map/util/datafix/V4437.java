@@ -15,8 +15,8 @@ public class V4437 extends DataVersion {
         addFix(DataTypes.BLOCK_ENTITY, "mapmaker:status_plate", V4437::updateItemActionPlaceableOn);
     }
 
-    private static Value updateItemActionPlaceableOn(@NotNull Value blockEntity) {
-        for (var action : blockEntity.get("actions")) {
+    static Value updateItemActionPlaceableOn(@NotNull Value container) {
+        for (var action : container.get("actions")) {
             if (!"mapmaker:give_item".equals(action.getValue("type")))
                 continue;
 
