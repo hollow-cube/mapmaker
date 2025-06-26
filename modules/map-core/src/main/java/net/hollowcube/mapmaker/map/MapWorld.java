@@ -6,7 +6,6 @@ import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
@@ -23,7 +22,6 @@ import java.util.Objects;
 import java.util.function.UnaryOperator;
 
 public sealed interface MapWorld extends TagReadable, TagWritable permits AbstractMapWorld {
-    int DATA_VERSION = MinecraftServer.DATA_VERSION + 1;
 
     interface Constructor<T extends AbstractMapWorld> {
         @NotNull T create(@NotNull MapServer server, @NotNull MapData map);
@@ -59,24 +57,30 @@ public sealed interface MapWorld extends TagReadable, TagWritable permits Abstra
      * @return the locally unique id of this world.
      */
     @NotNull String worldId();
+
     default boolean isReadOnly() {
         return true;
     }
 
     @NotNull MapServer server();
+
     @NotNull MapData map();
 
     @NotNull Instance instance();
+
     default @NotNull Pos spawnPoint(@NotNull Player player) {
         return map().settings().getSpawnPoint();
     }
 
     @NotNull ItemRegistry itemRegistry();
+
     @NotNull BiomeContainer biomes();
+
     @NotNull ObjectEntityHandlerRegistry objectEntityHandlers();
     // AnimationManager, etc.
 
     @NotNull Collection<Player> players();
+
     @NotNull Collection<Player> spectators();
 
     @Deprecated
@@ -87,19 +91,24 @@ public sealed interface MapWorld extends TagReadable, TagWritable permits Abstra
 
     @Blocking
     void configurePlayer(@NotNull AsyncPlayerConfigurationEvent event);
+
     @Blocking
     void addPlayer(@NotNull Player player);
+
     @Blocking
     void addSpectator(@NotNull Player player);
+
     @Blocking
     void removePlayer(@NotNull Player player);
 
     default boolean isPlaying(@NotNull Player player) {
         return players().contains(player);
     }
+
     default boolean isSpectating(@NotNull Player player) {
         return spectators().contains(player);
     }
+
     default boolean canEdit(@NotNull Player player) {
         return false; // Worlds are read-only by default
     }
@@ -110,6 +119,7 @@ public sealed interface MapWorld extends TagReadable, TagWritable permits Abstra
      * @return An event node for the active players and spectators in the world.
      */
     @NotNull EventNode<InstanceEvent> eventNode();
+
     default void callEvent(@NotNull InstanceEvent event) {
         instance().eventNode().call(event);
     }
@@ -120,30 +130,37 @@ public sealed interface MapWorld extends TagReadable, TagWritable permits Abstra
     default boolean hasTag(@NotNull Tag<?> tag) {
         return instance().hasTag(tag);
     }
+
     @Override
     default <T> @UnknownNullability T getTag(@NotNull Tag<T> tag) {
         return instance().getTag(tag);
     }
+
     @Override
     default <T> @UnknownNullability T getAndUpdateTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
         throw new UnsupportedOperationException("World is read-only");
     }
+
     @Override
     default <T> @UnknownNullability T updateAndGetTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
         throw new UnsupportedOperationException("World is read-only");
     }
+
     @Override
     default <T> @Nullable T getAndSetTag(@NotNull Tag<T> tag, @Nullable T value) {
         throw new UnsupportedOperationException("World is read-only");
     }
+
     @Override
     default <T> void setTag(@NotNull Tag<T> tag, @Nullable T value) {
         throw new UnsupportedOperationException("World is read-only");
     }
+
     @Override
     default <T> void updateTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
         throw new UnsupportedOperationException("World is read-only");
     }
+
     @Override
     default void removeTag(@NotNull Tag<?> tag) {
         throw new UnsupportedOperationException("World is read-only");

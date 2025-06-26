@@ -32,18 +32,20 @@ public record BlockCheckpointItem(@NotNull Block block, int amount, List<Block> 
     private static final int MAX_AMOUNT = 98;
 
     private static final List<Block> DEFAULT_PLACEABLE_ON = List.of(
-            Block.TARGET
+            Block.STONE, Block.TARGET
     );
 
     public static final Key ID = Key.key("mapmaker:block");
     public static final StructCodec<BlockCheckpointItem> CODEC = StructCodec.struct(
             "block", ExtraCodecs.BLOCK_NAME_STRING.optional(Block.STONE), BlockCheckpointItem::block,
             "amount", Codec.INT.optional(INFINITE_AMOUNT), BlockCheckpointItem::amount,
-            "placeable_on", ExtraCodecs.BLOCK_NAME_STRING.list(7).optional(DEFAULT_PLACEABLE_ON), BlockCheckpointItem::placeableOn,
+            // we allow 8 here for historical reasons (we changed from always including the chosen block
+            // to never including it, and a migration can result in 8 blocks in the list. The UI does not allow this.)
+            "placeable_on", ExtraCodecs.BLOCK_NAME_STRING.list(8).optional(DEFAULT_PLACEABLE_ON), BlockCheckpointItem::placeableOn,
             BlockCheckpointItem::new);
 
     public @NotNull BlockCheckpointItem withBlock(@NotNull Block block) {
-        return new BlockCheckpointItem(block, this.amount, this.placeableOn);
+        return new BlockCheckpointItem(block, this.amount, List.of(block, Block.TARGET));
     }
 
     public @NotNull BlockCheckpointItem withAmount(int amount) {
@@ -60,10 +62,7 @@ public record BlockCheckpointItem(@NotNull Block block, int amount, List<Block> 
 
     @Override
     public @NotNull ItemStack createItemStack() {
-        var canPlaceOn = new ArrayList<RegistryKey<Block>>();
-        canPlaceOn.add(this.block);
-        canPlaceOn.addAll(this.placeableOn);
-
+        var canPlaceOn = new ArrayList<RegistryKey<Block>>(this.placeableOn);
         var material = Objects.requireNonNullElse(this.block.registry().material(), Material.STONE);
         int amount = this.amount == INFINITE_AMOUNT ? MAX_AMOUNT + 1 : this.amount;
         return ItemStack.of(material, amount).with(DataComponents.MAX_STACK_SIZE, amount)

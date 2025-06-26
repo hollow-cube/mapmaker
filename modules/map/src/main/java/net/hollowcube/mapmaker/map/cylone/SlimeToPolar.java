@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.ints.IntIntPair;
 import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.util.Value;
-import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.custom.CheckpointPlateBlock;
 import net.hollowcube.polar.*;
 import net.kyori.adventure.nbt.*;
@@ -131,7 +130,7 @@ public class SlimeToPolar {
                 }
                 for (int idx = 0; idx < blockPalette.length; idx++) {
                     blockPalette[idx] = DataFixer.upgrade(DataTypes.FLAT_BLOCK_STATE,
-                                    Value.wrap(blockPalette[idx]), slimeWorld.dataVersion(), MapWorld.DATA_VERSION)
+                                    Value.wrap(blockPalette[idx]), slimeWorld.dataVersion(), DataFixer.maxVersion())
                             .as(String.class, blockPalette[idx]);
                 }
 
@@ -147,7 +146,7 @@ public class SlimeToPolar {
                 for (int idx = 0; idx < biomePalette.length; idx++) {
                     biomePalette[idx] = (String) DataFixer.upgrade(DataTypes.BIOME_NAME,
                             Value.wrap(biomePalette[idx]), slimeWorld.dataVersion(),
-                            MapWorld.DATA_VERSION).as(String.class, biomePalette[idx]);
+                            DataFixer.maxVersion()).as(String.class, biomePalette[idx]);
                 }
 
                 PolarSection.LightContent blockLightContent = PolarSection.LightContent.MISSING;
@@ -169,7 +168,7 @@ public class SlimeToPolar {
             var blockEntities = new ArrayList<PolarChunk.BlockEntity>();
             for (var tileEntity : slimeWorld.blockEntities()) {
                 var upgradedTileEntity = (CompoundBinaryTag) DataFixer.upgrade(DataTypes.BLOCK_ENTITY,
-                        Transcoder.NBT, tileEntity, slimeWorld.dataVersion(), MapWorld.DATA_VERSION);
+                        Transcoder.NBT, tileEntity, slimeWorld.dataVersion(), DataFixer.maxVersion());
                 var x = upgradedTileEntity.getInt("x");
                 var y = upgradedTileEntity.getInt("y");
                 var z = upgradedTileEntity.getInt("z");
@@ -192,9 +191,8 @@ public class SlimeToPolar {
                 CompoundBinaryTag upgradedEntity;
                 try {
                     upgradedEntity = (CompoundBinaryTag) DataFixer.upgrade(DataTypes.ENTITY,
-                            Transcoder.NBT, slimeEntity, slimeWorld.dataVersion(), MapWorld.DATA_VERSION);
+                            Transcoder.NBT, slimeEntity, slimeWorld.dataVersion(), DataFixer.maxVersion());
                 } catch (Exception e) {
-                    System.out.println("ENTITY UPGRADE FAIL: " + TagStringIOExt.writeTag(slimeEntity));
                     e.printStackTrace();
                     upgradedEntity = slimeEntity;
                 }
@@ -220,11 +218,11 @@ public class SlimeToPolar {
 
         var worldData = NetworkBuffer.makeArray(buffer -> {
             buffer.write(NetworkBuffer.BYTE, (byte) 5);
-            buffer.write(NetworkBuffer.VAR_INT, MapWorld.DATA_VERSION);
+            buffer.write(NetworkBuffer.VAR_INT, DataFixer.maxVersion());
             buffer.write(NetworkBuffer.NBT, CompoundBinaryTag.empty());
         });
 
-        var world = new PolarWorld(PolarWorld.LATEST_VERSION, MapWorld.DATA_VERSION,
+        var world = new PolarWorld(PolarWorld.LATEST_VERSION, DataFixer.maxVersion(),
                 PolarWorld.CompressionType.ZSTD, (byte) -4, (byte) 19,
                 worldData, chunks);
 
@@ -285,7 +283,7 @@ public class SlimeToPolar {
 
         for (var tileEntity : slimeWorld.blockEntities()) {
             var upgradedTileEntity = (CompoundBinaryTag) DataFixer.upgrade(DataTypes.BLOCK_ENTITY, Transcoder.NBT,
-                    tileEntity, slimeWorld.dataVersion(), MapWorld.DATA_VERSION);
+                    tileEntity, slimeWorld.dataVersion(), DataFixer.maxVersion());
             var x = upgradedTileEntity.getInt("x");
             var y = upgradedTileEntity.getInt("y");
             var z = upgradedTileEntity.getInt("z");

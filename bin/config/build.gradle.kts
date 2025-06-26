@@ -9,6 +9,7 @@ val isRelease = rootProject.properties.getOrDefault("isRelease", "false").toStri
 dependencies {
     implementation(project(":modules:common"))
     implementation(project(":modules:map-core"))
+    implementation(project(":modules:datafix"))
 
     implementation(libs.minestom)
 }

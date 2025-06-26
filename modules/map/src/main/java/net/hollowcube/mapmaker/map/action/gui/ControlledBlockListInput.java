@@ -30,7 +30,7 @@ public class ControlledBlockListInput extends Panel {
                 .font("small").align(1, -11));
 
         int i = 0;
-        for (; i < blocks.size(); i++) {
+        for (; i < Math.min(7, blocks.size()); i++) {
             final int blockIndex = i;
             var block = blocks.get(i);
             var button = makeBlockButton(block)
