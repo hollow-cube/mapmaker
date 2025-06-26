@@ -138,9 +138,9 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
         } else if (transformationTag instanceof ListBinaryTag transformation && transformation.size() == 16 && transformation.elementType() == BinaryTagTypes.FLOAT) {
             var matrix = new Mat4(transformation::getFloat).svdDecompose();
             meta.setTranslation(matrix.translation());
-//            meta.setLeftRotation(matrix.leftRotation().into());
+            meta.setLeftRotation(matrix.leftRotation().into());
             meta.setScale(matrix.scale());
-//            meta.setRightRotation(matrix.rightRotation().into());
+            meta.setRightRotation(matrix.rightRotation().into());
         }
         if (tag.get("billboard") instanceof StringBinaryTag billboardName)
             meta.setBillboardRenderConstraints(BILLBOARD_CONSTRAINTS.decode(Transcoder.NBT, billboardName).orElseThrow());

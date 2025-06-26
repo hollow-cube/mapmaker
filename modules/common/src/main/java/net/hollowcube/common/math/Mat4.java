@@ -33,39 +33,39 @@ public class Mat4 {
     public Mat4(float[] floats) {
         Check.argCondition(floats.length != 16, "Array must have exactly 16 elements");
         this.m00 = floats[0];
-        this.m01 = floats[1];
-        this.m02 = floats[2];
-        this.m03 = floats[3];
-        this.m10 = floats[4];
+        this.m01 = floats[4];
+        this.m02 = floats[8];
+        this.m03 = floats[12];
+        this.m10 = floats[1];
         this.m11 = floats[5];
-        this.m12 = floats[6];
-        this.m13 = floats[7];
-        this.m20 = floats[8];
-        this.m21 = floats[9];
+        this.m12 = floats[9];
+        this.m13 = floats[13];
+        this.m20 = floats[2];
+        this.m21 = floats[6];
         this.m22 = floats[10];
-        this.m23 = floats[11];
-        this.m30 = floats[12];
-        this.m31 = floats[13];
-        this.m32 = floats[14];
+        this.m23 = floats[14];
+        this.m30 = floats[3];
+        this.m31 = floats[7];
+        this.m32 = floats[11];
         this.m33 = floats[15];
     }
 
     public Mat4(@NotNull FloatIndexer floats) {
         this.m00 = floats.get(0);
-        this.m01 = floats.get(1);
-        this.m02 = floats.get(2);
-        this.m03 = floats.get(3);
-        this.m10 = floats.get(4);
+        this.m01 = floats.get(4);
+        this.m02 = floats.get(8);
+        this.m03 = floats.get(12);
+        this.m10 = floats.get(1);
         this.m11 = floats.get(5);
-        this.m12 = floats.get(6);
-        this.m13 = floats.get(7);
-        this.m20 = floats.get(8);
-        this.m21 = floats.get(9);
+        this.m12 = floats.get(9);
+        this.m13 = floats.get(13);
+        this.m20 = floats.get(2);
+        this.m21 = floats.get(6);
         this.m22 = floats.get(10);
-        this.m23 = floats.get(11);
-        this.m30 = floats.get(12);
-        this.m31 = floats.get(13);
-        this.m32 = floats.get(14);
+        this.m23 = floats.get(14);
+        this.m30 = floats.get(3);
+        this.m31 = floats.get(7);
+        this.m32 = floats.get(11);
         this.m33 = floats.get(15);
     }
 

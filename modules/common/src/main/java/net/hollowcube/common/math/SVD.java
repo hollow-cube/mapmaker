@@ -12,20 +12,10 @@ public record SVD(
     private static final float G = (float) (3.0F + 2.0F * Math.sqrt(2.0F));
     private static final GivensParameters PI_4 = GivensParameters.fromPositiveAngle((float) (java.lang.Math.PI / 4));
 
-    public static void main(String[] args) {
-        var floats = new float[]{0f, -0.877f, 0f, 1.94875f, 0f, 0f, 0.5f, 2.125f, -0.5f, 0f, 0f, 0.97375f, 0f, 0f, 0f, 1f};
-        var mat = new Mat4(floats);
-        var svd = mat.svdDecompose();
-        System.out.println(svd.translation);
-        System.out.println(svd.leftRotation);
-        System.out.println(svd.scale);
-        System.out.println(svd.rightRotation);
-    }
-
     static @NotNull SVD decompose(@NotNull Mat4 transform) {
         float scale = 1.0F / transform.m33();
-        var result = decomposeInternal(new Mat3(transform).scale(scale));
         var translation = transform.translation().mul(scale);
+        var result = decomposeInternal(new Mat3(transform).scale(scale));
         return new SVD(translation, result.leftRotation, result.scale, result.rightRotation);
     }
 
