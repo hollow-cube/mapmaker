@@ -28,6 +28,7 @@ public class V4437 extends DataVersion {
                 // Create the placeable list
                 placeableOn = Value.emptyList();
                 placeableOn.put(block);
+                placeableOn.put("minecraft:target");
                 action.put("placeable_on", placeableOn);
             } else {
                 // Add itself to placeable on
