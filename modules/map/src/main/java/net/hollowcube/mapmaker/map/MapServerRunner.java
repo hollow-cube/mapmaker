@@ -36,6 +36,7 @@ import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
 import net.hollowcube.mapmaker.map.util.datafix.V4326;
 import net.hollowcube.mapmaker.map.util.datafix.V4437;
 import net.hollowcube.mapmaker.map.util.datafix.V4438;
+import net.hollowcube.mapmaker.map.util.datafix.V4439;
 import net.hollowcube.mapmaker.map.world.AbstractMapMakerMapWorld;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
@@ -334,7 +335,7 @@ public class MapServerRunner extends AbstractMapServer {
 
     // Exposed for DevServer to use
     public static List<Supplier<DataVersion>> extraDataVersionsForMaps() {
-        return List.of(V4326::new, V4437::new, V4438::new);
+        return List.of(V4326::new, V4437::new, V4438::new, V4439::new);
     }
 
     @Override
