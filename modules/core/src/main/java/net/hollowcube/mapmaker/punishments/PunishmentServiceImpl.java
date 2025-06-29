@@ -25,7 +25,7 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
     public @NotNull List<Punishment> getPunishments(@Nullable String playerId, @NotNull UUID executorId, @Nullable PunishmentType type) {
         var request = HttpRequest.newBuilder()
                 .uri(url(
-                        "%s/punishments?playerId=%s&executorId=%s&type=%s",
+                        "%s/punishments?playerId=%s&executorId=%s&punishmentType=%s",
                         url,
                         Objects.requireNonNullElse(playerId, ""),
                         executorId,
