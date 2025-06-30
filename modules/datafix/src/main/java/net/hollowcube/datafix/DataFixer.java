@@ -246,6 +246,17 @@ public class DataFixer {
             return fix.fix(parent);
         }
 
+        if (path[i].equals("*")) {
+            parent.forEachEntry((id, entry) -> {
+                var result = forEachAtPath(entry, path, i + 1, fix);
+                if (result != null) {
+                    parent.put(id, result);
+                }
+            });
+
+            return null;
+        }
+
         var value = parent.get(path[i]);
         if (value.isNull()) return null;
         if (value.isListLike()) {

@@ -15,7 +15,7 @@ public class V3838 extends DataVersion {
         addReference(DataTypes.BLOCK_ENTITY, "minecraft:checkpoint_plate", V3838::itemHolder);
 
         // Both states 'added' in this version
-        addReference(HCDataTypes.EDIT_STATE, field -> field.list("inventory", DataTypes.ITEM_STACK));
+        addReference(HCDataTypes.EDIT_STATE, field -> field.single("inventory.*", DataTypes.ITEM_STACK));
         addReference(HCDataTypes.PLAY_STATE, field -> field.list("ghostBlocks", DataTypes.FLAT_BLOCK_STATE));
     }
 
