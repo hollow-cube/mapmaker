@@ -16,6 +16,7 @@ import net.minestom.server.utils.chunk.ChunkCache;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
+import java.util.Objects;
 
 // I(matt)DK what to name this class lol
 public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerRiptideExtension, PlayerLiquidExtension {
@@ -172,15 +173,13 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
 
         var position = getPosition();
         var iter = bb.getBlocks(getPosition());
+        var blocks = Objects.requireNonNullElse(GhostBlockHolder.forPlayerOptional(this), instance);
+
+
         while (iter.hasNext()) {
             var posMut = iter.next();
             var pos = new Vec(posMut.x(), posMut.y(), posMut.z());
-            var block = instance.getBlock(pos, Block.Getter.Condition.TYPE);
-            if (block.id() == Block.BIG_DRIPLEAF.id()) {
-                // Fetch dripleaf state from the ghost block holder to make sure we get the right value for this player
-                var ghostBlocks = GhostBlockHolder.forPlayerOptional(this);
-                if (ghostBlocks != null) block = ghostBlocks.getBlock(pos);
-            }
+            var block = blocks.getBlock(pos, Block.Getter.Condition.TYPE);
 
             // For now just ignore scaffolding. It seems to have a dynamic bounding box, or is just parsed
             // incorrectly in MinestomDataGenerator.
