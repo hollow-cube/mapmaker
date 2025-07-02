@@ -69,6 +69,7 @@ public class CosmeticEntry extends View {
         costs.put("accessory/donut", 8);
         costs.put("accessory/wrench", 15);
         costs.put("accessory/training_sword", 12);
+        costs.put("accessory/shonk", 25);
         costs.put("accessory/burger", 25);
         costs.put("accessory/dynamite", 18);
         costs.put("accessory/knights_sword", 22);
