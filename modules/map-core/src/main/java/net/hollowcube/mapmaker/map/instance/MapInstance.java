@@ -107,6 +107,8 @@ public class MapInstance extends InstanceContainer {
         FutureUtil.getUnchecked(saveInstance());
 
         var polarWorld = loader.world();
+        if (polarWorld.chunks().isEmpty())
+            throw new IllegalStateException("Avoiding saving empty instance!");
         var worldData = PolarWriter.write(polarWorld, PolarDataFixer.INSTANCE);
 
         // Reset to noop
