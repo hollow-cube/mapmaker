@@ -43,6 +43,8 @@ public class EntityBone extends AbstractBone {
                 new Pos(0, 0, 0, -180, 0), (float) 0, 0, (short) 0, (short) 0, (short) 0));
         player.sendPacket(new EntityMetaDataPacket(entityId, this.baseMetadata));
 
+        System.out.println("spawning " + ((ItemStack) baseMetadata.get(MetadataDef.ItemDisplay.DISPLAYED_ITEM.index()).value()).get(DataComponents.ITEM_MODEL));
+
         super.updateNewViewer(player);
     }
 
@@ -65,7 +67,7 @@ public class EntityBone extends AbstractBone {
 //                    MetadataDef.Display.HEIGHT.index(), Metadata.Float(3.0f), // todo what should actual value be
 //                    MetadataDef.Display.TRANSFORMATION_INTERPOLATION_DURATION.index(), Metadata.VarInt(1),
                     MetadataDef.Display.TRANSLATION.index(), Metadata.Vector3(node.base().defaultTransform().decomposed().translation()),
-//                    MetadataDef.Display.ROTATION_LEFT.index(), Metadata.Quaternion(node.base().defaultTransform().decomposed().leftRotation()),
+                    MetadataDef.Display.ROTATION_LEFT.index(), Metadata.Quaternion(node.base().defaultTransform().decomposed().leftRotation()),
                     MetadataDef.Display.SCALE.index(), Metadata.Vector3(node.base().defaultTransform().decomposed().scale()),
                     MetadataDef.ItemDisplay.DISPLAY_TYPE.index(), Metadata.Byte((byte) ItemDisplayMeta.DisplayContext.HEAD.ordinal()),
                     MetadataDef.ItemDisplay.DISPLAYED_ITEM.index(), Metadata.ItemStack(ItemStack.of(Material.STICK)

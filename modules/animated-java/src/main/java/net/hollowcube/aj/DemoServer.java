@@ -1,6 +1,7 @@
 package net.hollowcube.aj;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import net.hollowcube.aj.entity.ModelEntity;
 import net.hollowcube.multipart.bedrock.BedrockGeoModel;
@@ -22,6 +23,9 @@ public class DemoServer {
     public static void main(String[] args) throws Exception {
         var server = MinecraftServer.init();
 
+        var _ = ModelEntity.class;
+        var _ = Node.CODEC;
+
         var path = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/script-bundle/sketching/mymap/models/entity/assembler.geo.json");
 //        var path = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/script-bundle/sketching/mymap/ajmodel/buggy_tier_1.json");
 //        var path = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/script-bundle/sketching/mymap/ajmodel/assembler.json");
@@ -30,7 +34,9 @@ public class DemoServer {
 //        var path = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/script-bundle/sketching/mymap/ajmodel/bass_ribbit.json");
 //        var path = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/script-bundle/sketching/qbdg/ajmodel/checkpoint.json");
         var json = new Gson().fromJson(Files.readString(path), JsonObject.class).getAsJsonArray("minecraft:geometry").get(0);
-        var model = BedrockGeoModel.CODEC.decode(new RegistryTranscoder<>(Transcoder.JSON, MinecraftServer.process()), json).orElseThrow();
+        var model = ResourcePackGen.fixRotation(BedrockGeoModel.CODEC.decode(new RegistryTranscoder<>(Transcoder.JSON, MinecraftServer.process()), json).orElseThrow());
+
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(model));
 
         var instance = MinecraftServer.getInstanceManager().createInstanceContainer();
         instance.setChunkSupplier(LightingChunk::new);

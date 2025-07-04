@@ -6,6 +6,7 @@ import net.hollowcube.aj.Transform;
 import net.hollowcube.aj.bone.AbstractBone;
 import net.hollowcube.aj.bone.EntityBone;
 import net.hollowcube.aj.bone.StructBone;
+import net.hollowcube.aj.util.Quaternion;
 import net.hollowcube.multipart.bedrock.BedrockGeoModel;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
@@ -74,11 +75,40 @@ public class ModelEntity extends Entity {
 
         Map<String, AbstractBone> elementMap = new HashMap<>();
         for (var element : model.bones()) {
+            if (element.cubes().isEmpty()) {
+                elementMap.put(element.name(), new StructBone());
+                continue;
+            }
+
+            var leftRotation = Quaternion.fromEulerAngles(Vec.ZERO).into();
+
+//            var cu = element.cubes().stream().findFirst().orElse(null);
+            var rot = element.rotation();
+            if (rot != null && !rot.isZero()) {
+                leftRotation = Quaternion.fromEulerAngles(new Vec(rot.x(), rot.y(), -rot.z())).into();
+            }
+//            if ("as_armsupport_fix".equals(element.name())) {
+//                leftRotation = Quaternion.fromEulerAngles(new Vec(0, 180, 37.5)).into();
+//            }
+//            if ("laserarm".equals(element.name())) {
+//                leftRotation = Quaternion.fromEulerAngles(new Vec(0, 180, 42.5)).into();
+//            }
+            var translation = element.pivot().div(16).mul(1, 1, -1);
+//            if ("as_armsupport_rotated_967027".equals(element.name())) {
+//                System.out.println(element.pivot());
+//                translation = new Vec(6.5, 16.475, 0.5).div(16);
+////                translation = translation.add(new Vec(-1.5, 1.5, 0).div(16));
+//            } else {
+//                translation = Vec.ZERO;
+//            }
+//            var translation = Vec.ZERO;
+
             var entity = new EntityBone(new Node.Bone(new Node.Base(UUID.randomUUID(), element.name(), null, new Transform.Default(
-                    new Transform(Vec.ZERO, new float[]{0, 1, 0, 0}, Vec.ONE),
+                    new Transform(translation, leftRotation, Vec.ONE),
                     new float[]{0, 0}
             ))));
             elementMap.put(element.name(), entity);
+//            if ("as_armsupport_rotated_967027".equals(element.name()))
             this.leafEntityIds.add(entity.entityId());
         }
 
