@@ -30,6 +30,9 @@ public class ModelEntity extends Entity {
 
     public BedrockAnimation.Animation animation;
 
+    public float fixedTime = -1;
+    public int animTick = 0;
+
     public ModelEntity(@NotNull Model model, @Nullable UUID uuid) {
         super(EntityType.INTERACTION, Objects.requireNonNullElseGet(uuid, UUID::randomUUID));
 
@@ -148,13 +151,17 @@ public class ModelEntity extends Entity {
     public void tick(long time) {
         super.tick(time);
 
-        if (getAliveTicks() % 2 == 0) return;
+        int tick = animTick++;
+        if (tick % 2 == 0) return;
 
         var animation = this.animation;
         if (animation == null) return;
 
-        float timeSeconds = (getAliveTicks() * 50f) / 1000f;
+        float timeSeconds = (tick * 50f) / 1000f;
         timeSeconds %= (float) animation.animationLength();
+        if (fixedTime >= 0) {
+            timeSeconds = fixedTime;
+        }
 
         boneById.values().forEach(Bone::reset);
 
@@ -171,7 +178,7 @@ public class ModelEntity extends Entity {
                 int lastIndex = -1;
                 for (int i = position.size() - 1; i >= 0; i--) {
                     // todo binary search here would be better. if we dont need to play in reverse we could also be stateful and a bit smarter.
-                    if (timeSeconds > position.get(i).time()) {
+                    if (timeSeconds >= position.get(i).time()) {
                         lastIndex = i;
                         break;
                     }

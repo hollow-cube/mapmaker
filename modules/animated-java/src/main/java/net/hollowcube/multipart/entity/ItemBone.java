@@ -14,6 +14,7 @@ import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.network.packet.server.play.SpawnEntityPacket;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -40,7 +41,6 @@ public final class ItemBone extends Bone {
         // TODO: if we want to get fancy we could probably make the packet buffer directly and avoid all the allocation here
         //       using a bufferedpacket/PacketWriting. would need to bench if its actually worth it.
         player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(
-                MetadataDef.Display.TRANSFORMATION_INTERPOLATION_DURATION.index(), Metadata.VarInt(2),
                 MetadataDef.Display.TRANSLATION.index(), Metadata.Vector3(new Vec(dx, dy, dz)),
                 MetadataDef.Display.ROTATION_LEFT.index(), Metadata.Quaternion(Quaternion.fromEulerAngles(
                         rx + defaultTransform.rx(),
@@ -56,14 +56,21 @@ public final class ItemBone extends Bone {
         super.updateNewViewer(player);
     }
 
+    private boolean firstUpdate = true;
+
     @Override
     protected void sendUpdates(@NotNull Player player, @NotNull Vec translation, @NotNull Quaternion rotation, @NotNull Vec scale) {
-        player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(
-                MetadataDef.Display.INTERPOLATION_DELAY.index(), Metadata.VarInt(0),
+        var updates = new HashMap<>(Map.of(
                 MetadataDef.Display.TRANSLATION.index(), Metadata.Vector3(translation),
                 MetadataDef.Display.ROTATION_LEFT.index(), Metadata.Quaternion(rotation.into()),
                 MetadataDef.Display.SCALE.index(), Metadata.Vector3(scale)
-        )));
+        ));
+        if (!firstUpdate) {
+            updates.put(MetadataDef.Display.TRANSFORMATION_INTERPOLATION_DURATION.index(), Metadata.VarInt(2));
+            updates.put(MetadataDef.Display.INTERPOLATION_DELAY.index(), Metadata.VarInt(0));
+        }
+        player.sendPacket(new EntityMetaDataPacket(entityId, updates));
+        this.firstUpdate = false;
     }
 
 }

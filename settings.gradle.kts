@@ -7,6 +7,9 @@ rootProject.name = "mapmaker"
 
 includeBuild("build-src")
 
+// Submodule-d public dependencies
+includeBuild("modules/multipart")
+
 include(
         "modules:animated-java",
         "modules:canvas:api",

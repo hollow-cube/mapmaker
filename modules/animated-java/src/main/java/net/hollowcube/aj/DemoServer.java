@@ -1,7 +1,6 @@
 package net.hollowcube.aj;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import net.hollowcube.aj.entity.ModelEntity;
 import net.hollowcube.multipart.bedrock.BedrockAnimation;
@@ -93,9 +92,11 @@ public class DemoServer {
         var animJson = new Gson().fromJson(Files.readString(animPath), JsonObject.class);
         var anims = BedrockAnimation.CODEC.decode(new RegistryTranscoder<>(Transcoder.JSON, MinecraftServer.process()), animJson).orElseThrow();
         anims = fixAnimationStartingFrames(anims);
-        var idle = anims.animations().get("deploy");
+        var deployAnimation = anims.animations().get("deploy");
+        var idleAnimation = anims.animations().get("idle");
+        var craftAnimation = anims.animations().get("craft");
 
-        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(idle));
+//        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(idle));
 
         var instance = MinecraftServer.getInstanceManager().createInstanceContainer();
         instance.setChunkSupplier(LightingChunk::new);
@@ -111,7 +112,7 @@ public class DemoServer {
                     event.getPlayer().setGameMode(GameMode.CREATIVE);
 
                     var entity = new ModelEntity(model, null);
-                    entity.animation = idle;
+                    entity.animation = idleAnimation;
                     entity.setInstance(instance, new Pos(0, 40, 0, -180, 0));
                 })
                 .addListener(PlayerChatEvent.class, event -> {
