@@ -19,6 +19,7 @@ public record Animation(
         @NotNull List<UUID> excludedNodes
 //        @NotNull Map<UUID, List<Keyframe>> animators
 ) {
+
     public static final StructCodec<Animation> CODEC = StructCodec.struct(
             "name", Codec.STRING, Animation::name,
             "loop_mode", LoopMode.CODEC, Animation::loopMode,
