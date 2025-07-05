@@ -1,5 +1,6 @@
 package net.hollowcube.multipart.entity;
 
+import net.hollowcube.aj.util.Quaternion;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,7 +17,22 @@ public record Transform(
                 (float) scale.x(), (float) scale.y(), (float) scale.z(), pivot);
     }
 
-    public static class Mutable {
-        public float dx, dy, dz;
+    public static final class Mutable {
+        public Vec translation;
+        public Quaternion rotation;
+
+        public Mutable() {
+            this.translation = Vec.ZERO;
+            this.rotation = new Quaternion(0, 0, 0, 1);
+        }
+
+        public Mutable(Vec translation, Quaternion rotation) {
+            this.translation = translation;
+            this.rotation = rotation;
+        }
+
+        public Mutable copy() {
+            return new Mutable(translation, rotation);
+        }
     }
 }

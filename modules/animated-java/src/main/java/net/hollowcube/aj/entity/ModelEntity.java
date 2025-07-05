@@ -101,7 +101,8 @@ public class ModelEntity extends Entity {
                 Vec.ZERO,
 //                element.pivot().div(16).mul(1, 1, -1),
                 element.rotation().mul(1, 1, -1),
-                Vec.ONE, element.pivot().div(16).mul(1, 1, -1)
+                Vec.ONE,
+                element.pivot().div(16).mul(1, 1, -1)
         );
 
         Bone b;
@@ -177,9 +178,6 @@ public class ModelEntity extends Entity {
 
                     var currentPos = lastFrame.value().lerp(nextFrame.value(), t);
                     bone.offsetPosition(currentPos.div(16).mul(1, 1, -1));
-                    if ("laserprinter2".equals(entry.getKey())) {
-                        System.out.println(currentPos);
-                    }
                 }
             }
 

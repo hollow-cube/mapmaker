@@ -42,7 +42,11 @@ public final class ItemBone extends Bone {
         player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(
                 MetadataDef.Display.TRANSFORMATION_INTERPOLATION_DURATION.index(), Metadata.VarInt(2),
                 MetadataDef.Display.TRANSLATION.index(), Metadata.Vector3(new Vec(dx, dy, dz).add(defaultTransform.pivot())),
-                MetadataDef.Display.ROTATION_LEFT.index(), Metadata.Quaternion(Quaternion.fromEulerAngles(rx, ry, rz)),
+                MetadataDef.Display.ROTATION_LEFT.index(), Metadata.Quaternion(Quaternion.fromEulerAngles(
+                        rx + defaultTransform.rx(),
+                        ry + defaultTransform.ry(),
+                        rz + defaultTransform.rz()
+                )),
                 MetadataDef.Display.SCALE.index(), Metadata.Vector3(new Vec(sx, sy, sz)),
                 MetadataDef.ItemDisplay.DISPLAY_TYPE.index(), Metadata.Byte((byte) ItemDisplayMeta.DisplayContext.HEAD.ordinal()),
                 MetadataDef.ItemDisplay.DISPLAYED_ITEM.index(), Metadata.ItemStack(ItemStack.of(Material.STICK)
@@ -53,22 +57,13 @@ public final class ItemBone extends Bone {
     }
 
     @Override
-    public void updateFor(@NotNull Player player, @NotNull Transform.Mutable tr) {
-
-        var translate = new Vec(tr.dx + dx, tr.dy + dy, tr.dz + dz);
-//        translate = (Vec) ModelMath.rotate(translate.sub(defaultTransform.pivot()), new Vec(rx, ry, rz)).add(defaultTransform.pivot());
-
-        //todo should use viewable packets on the root entity
+    protected void sendUpdates(@NotNull Player player, @NotNull Vec translation, @NotNull Quaternion rotation) {
         player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(
                 MetadataDef.Display.INTERPOLATION_DELAY.index(), Metadata.VarInt(0),
-                MetadataDef.Display.TRANSLATION.index(), Metadata.Vector3(translate.add(defaultTransform.pivot())),
-                MetadataDef.Display.ROTATION_LEFT.index(), Metadata.Quaternion(Quaternion.fromEulerAngles(rx, ry, rz)),
+                MetadataDef.Display.TRANSLATION.index(), Metadata.Vector3(translation),
+                MetadataDef.Display.ROTATION_LEFT.index(), Metadata.Quaternion(rotation.into()),
                 MetadataDef.Display.SCALE.index(), Metadata.Vector3(new Vec(sx, sy, sz))
         )));
-
-
-        super.updateFor(player, tr);
-
     }
 
 }

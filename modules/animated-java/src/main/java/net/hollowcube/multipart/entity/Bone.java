@@ -1,5 +1,6 @@
 package net.hollowcube.multipart.entity;
 
+import net.hollowcube.aj.util.Quaternion;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -38,26 +39,51 @@ public sealed class Bone permits ItemBone {
     }
 
     public void updateFor(@NotNull Player player, @NotNull Transform.Mutable tr) {
-        tr.dx += dx;
-        tr.dy += dy;
-        tr.dz += dz;
+        // 1. Compose this bone's rotation
+        Quaternion localRotation = Quaternion.fromEulerAngles(new Vec(rx, ry, rz));
+        Quaternion defaultRotation = Quaternion.fromEulerAngles(new Vec(defaultTransform.rx(), defaultTransform.ry(), defaultTransform.rz()));
+        Quaternion boneRotation = defaultRotation.multiply(localRotation);
+        Quaternion accumulatedRotation = tr.rotation.multiply(boneRotation);
+
+        // 2. Calculate this bone's final world position
+        // Start with the bone's rest position offset from model origin
+        Vec restOffset = defaultTransform.pivot();
+
+        // Add animated translation (relative to rest position)
+        Vec animatedTranslation = new Vec(dx, dy, dz);
+        Vec rotatedAnimatedTranslation = boneRotation.rotate(animatedTranslation);
+        Vec totalOffset = restOffset.add(rotatedAnimatedTranslation);
+
+        // Apply parent transformation to the total offset
+        Vec rotatedByParent = tr.rotation.rotate(totalOffset);
+        Vec accumulatedTranslation = tr.translation.add(rotatedByParent);
+
+        // Send to entity
+        sendUpdates(player, accumulatedTranslation, accumulatedRotation);
+
+        // Recurse to children - they inherit this bone's world transformation
         if (!this.children.isEmpty()) {
+            Transform.Mutable childTransform = new Transform.Mutable(
+                    accumulatedTranslation.sub(restOffset),
+                    accumulatedRotation
+            );
             for (var child : this.children) {
-                child.updateFor(player, tr);
+                child.updateFor(player, childTransform);
             }
         }
-        tr.dx -= dx;
-        tr.dy -= dy;
-        tr.dz -= dz;
+    }
+
+    protected void sendUpdates(@NotNull Player player, @NotNull Vec translation, @NotNull Quaternion rotation) {
+        // do nothing for this bone, subclasses should override this
     }
 
     public void reset() {
         this.dx = defaultTransform.dx();
         this.dy = defaultTransform.dy();
         this.dz = defaultTransform.dz();
-        this.rx = defaultTransform.rx();
-        this.ry = defaultTransform.ry();
-        this.rz = defaultTransform.rz();
+        this.rx = 0;
+        this.ry = 0;
+        this.rz = 0;
         this.sx = defaultTransform.sx();
         this.sy = defaultTransform.sy();
         this.sz = defaultTransform.sz();

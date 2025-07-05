@@ -87,6 +87,14 @@ public final class Quaternion {
         return this;
     }
 
+    public Quaternion multiply(Quaternion q) {
+        double nw = w * q.w - x * q.x - y * q.y - z * q.z;
+        double nx = w * q.x + x * q.w + y * q.z - z * q.y;
+        double ny = w * q.y + y * q.w + z * q.x - x * q.z;
+        double nz = w * q.z + z * q.w + x * q.y - y * q.x;
+        return new Quaternion(nx, ny, nz, nw);
+    }
+
     public Quaternion scaleThis(double scale) {
         if (scale != 1) {
             w *= scale;
@@ -220,6 +228,26 @@ public final class Quaternion {
     public static float[] fromEulerAngles(float x, float y, float z) {
         // todo this should all be inlined
         return fromEulerAngles(new Vec(x, y, z)).into();
+    }
+
+    public Vec rotate(Vec v) {
+        // Extract quaternion components
+        double qx = this.x;
+        double qy = this.y;
+        double qz = this.z;
+        double qw = this.w;
+
+        // t = 2 * cross(q_xyz, v)
+        double tx = 2 * (qy * v.z() - qz * v.y());
+        double ty = 2 * (qz * v.x() - qx * v.z());
+        double tz = 2 * (qx * v.y() - qy * v.x());
+
+        // v' = v + qw * t + cross(q_xyz, t)
+        return new Vec(
+                v.x() + qw * tx + (qy * tz - qz * ty),
+                v.y() + qw * ty + (qz * tx - qx * tz),
+                v.z() + qw * tz + (qx * ty - qy * tx)
+        );
     }
 
 }
