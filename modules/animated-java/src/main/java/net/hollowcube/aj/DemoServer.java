@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import net.hollowcube.aj.entity.ModelEntity;
+import net.hollowcube.multipart.bedrock.BedrockAnimation;
 import net.hollowcube.multipart.bedrock.BedrockGeoModel;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Transcoder;
@@ -27,6 +28,7 @@ public class DemoServer {
         var _ = Node.CODEC;
 
         var path = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/script-bundle/sketching/mymap/models/entity/assembler.geo.json");
+        var animPath = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/script-bundle/sketching/mymap/models/entity/model.animation.json");
 //        var path = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/script-bundle/sketching/mymap/ajmodel/buggy_tier_1.json");
 //        var path = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/script-bundle/sketching/mymap/ajmodel/assembler.json");
 //        var path = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/script-bundle/sketching/mymap/ajmodel/gem_golem.json");
@@ -36,7 +38,11 @@ public class DemoServer {
         var json = new Gson().fromJson(Files.readString(path), JsonObject.class).getAsJsonArray("minecraft:geometry").get(0);
         var model = ResourcePackGen.fixRotation(BedrockGeoModel.CODEC.decode(new RegistryTranscoder<>(Transcoder.JSON, MinecraftServer.process()), json).orElseThrow());
 
-        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(model));
+        var animJson = new Gson().fromJson(Files.readString(animPath), JsonObject.class);
+        var anims = BedrockAnimation.CODEC.decode(new RegistryTranscoder<>(Transcoder.JSON, MinecraftServer.process()), animJson).orElseThrow();
+        var idle = anims.animations().get("craft");
+
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(idle));
 
         var instance = MinecraftServer.getInstanceManager().createInstanceContainer();
         instance.setChunkSupplier(LightingChunk::new);
@@ -52,6 +58,7 @@ public class DemoServer {
                     event.getPlayer().setGameMode(GameMode.CREATIVE);
 
                     var entity = new ModelEntity(model, null);
+                    entity.animation = idle;
                     entity.setInstance(instance, new Pos(0, 40, 0, -180, 0));
                 })
                 .addListener(PlayerChatEvent.class, event -> {

@@ -217,4 +217,9 @@ public final class Quaternion {
                 .mulThis(new Quaternion(new Vec(0, 0, 1), Math.toRadians(angles.z())));
     }
 
+    public static float[] fromEulerAngles(float x, float y, float z) {
+        // todo this should all be inlined
+        return fromEulerAngles(new Vec(x, y, z)).into();
+    }
+
 }
