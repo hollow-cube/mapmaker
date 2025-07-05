@@ -4,6 +4,7 @@ import net.hollowcube.aj.util.Quaternion;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 
+// Default transform for each bone will have the position, rotation, and scale relative to the parent bone always.
 public record Transform(
         float dx, float dy, float dz,
         float rx, float ry, float rz,

@@ -83,27 +83,35 @@ public class ModelEntity extends Entity {
         for (var element : model.bones()) {
             // Only create the root bones, others will be created recursively.
             if (element.parent() != null) continue;
-            this.rootBones.add(createBone(model.bones(), element));
+            this.rootBones.add(createBone(model.bones(), element, new Transform(Vec.ZERO, Vec.ZERO, Vec.ONE, Vec.ZERO)));
         }
 
         System.out.println("done");
     }
 
-    private Bone createBone(@NotNull List<BedrockGeoModel.Bone> bones, @NotNull BedrockGeoModel.Bone element) {
+    private Bone createBone(@NotNull List<BedrockGeoModel.Bone> bones, @NotNull BedrockGeoModel.Bone element, @NotNull Transform parentTransform) {
+
         var children = new ArrayList<Bone>();
         for (var child : bones) {
             if (!element.name().equals(child.parent()))
                 continue;
-            children.add(createBone(bones, child));
+            children.add(createBone(bones, child, new net.hollowcube.multipart.entity.Transform(
+                    element.pivot().div(16).mul(1, 1, -1),
+                    element.rotation().mul(1, 1, -1), //todo
+                    Vec.ONE, Vec.ZERO
+//                element.pivot().div(16).mul(1, 1, -1)
+            )));
         }
 
         var transform = new net.hollowcube.multipart.entity.Transform(
-                Vec.ZERO,
-//                element.pivot().div(16).mul(1, 1, -1),
-                element.rotation().mul(1, 1, -1),
-                Vec.ONE,
                 element.pivot().div(16).mul(1, 1, -1)
+                        .sub(parentTransform.dx(), parentTransform.dy(), parentTransform.dz()),
+                element.rotation().mul(1, 1, -1),
+                Vec.ONE, Vec.ZERO
         );
+//        if (transform.rx() != 0 || transform.ry() != 0 || transform.rz() != 0) {
+//            System.out.println("Bone " + element.name() + " has non-zero rotation: " + transform.rx() + ", " + transform.ry() + ", " + transform.rz());
+//        }
 
         Bone b;
         if (element.cubes().isEmpty()) {
@@ -120,7 +128,11 @@ public class ModelEntity extends Entity {
     public void updateNewViewer(@NotNull Player player) {
         super.updateNewViewer(player);
 
+        // todo obviously shouldnt spawn and update immediately
         for (var bone : this.rootBones) bone.updateNewViewer(player);
+        for (var root : this.rootBones) {
+            root.updateFor(player, new Transform.Mutable());
+        }
         player.sendPacket(new SetPassengersPacket(getEntityId(), this.leafEntityIds));
 
     }

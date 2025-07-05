@@ -41,7 +41,7 @@ public final class ItemBone extends Bone {
         //       using a bufferedpacket/PacketWriting. would need to bench if its actually worth it.
         player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(
                 MetadataDef.Display.TRANSFORMATION_INTERPOLATION_DURATION.index(), Metadata.VarInt(2),
-                MetadataDef.Display.TRANSLATION.index(), Metadata.Vector3(new Vec(dx, dy, dz).add(defaultTransform.pivot())),
+                MetadataDef.Display.TRANSLATION.index(), Metadata.Vector3(new Vec(dx, dy, dz)),
                 MetadataDef.Display.ROTATION_LEFT.index(), Metadata.Quaternion(Quaternion.fromEulerAngles(
                         rx + defaultTransform.rx(),
                         ry + defaultTransform.ry(),

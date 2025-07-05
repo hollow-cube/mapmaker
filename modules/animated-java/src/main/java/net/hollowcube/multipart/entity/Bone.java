@@ -39,39 +39,66 @@ public sealed class Bone permits ItemBone {
     }
 
     public void updateFor(@NotNull Player player, @NotNull Transform.Mutable tr) {
-        // 1. Compose this bone's rotation
-        Quaternion localRotation = Quaternion.fromEulerAngles(new Vec(rx, ry, rz));
-        Quaternion defaultRotation = Quaternion.fromEulerAngles(new Vec(defaultTransform.rx(), defaultTransform.ry(), defaultTransform.rz()));
-        Quaternion boneRotation = defaultRotation.multiply(localRotation);
-        Quaternion accumulatedRotation = tr.rotation.multiply(boneRotation);
+        // 1. Compute the total rotation: default + animated
+        var defaultRotation = Quaternion.fromEulerAngles(new Vec(defaultTransform.rx(), defaultTransform.ry(), defaultTransform.rz()));
+        var animatedRotation = Quaternion.fromEulerAngles(new Vec(rx, ry, rz));
+        var totalRotation = defaultRotation.multiply(animatedRotation);
 
-        // 2. Calculate this bone's final world position
-        // Start with the bone's rest position offset from model origin
-        Vec restOffset = defaultTransform.pivot();
+        // 2. Apply parent's rotation to this bone's offset
+        var rotatedOffset = tr.rotation.rotate(new Vec(dx, dy, dz));
+        var finalTranslation = tr.translation.add(rotatedOffset);
 
-        // Add animated translation (relative to rest position)
-        Vec animatedTranslation = new Vec(dx, dy, dz);
-        Vec rotatedAnimatedTranslation = boneRotation.rotate(animatedTranslation);
-        Vec totalOffset = restOffset.add(rotatedAnimatedTranslation);
+        // 3. Compose rotations: parent rotation * this bone's rotation
+        var finalRotation = tr.rotation.multiply(totalRotation);
 
-        // Apply parent transformation to the total offset
-        Vec rotatedByParent = tr.rotation.rotate(totalOffset);
-        Vec accumulatedTranslation = tr.translation.add(rotatedByParent);
+        // 4. Send the final transform to client
+        sendUpdates(player, finalTranslation, finalRotation);
 
-        // Send to entity
-        sendUpdates(player, accumulatedTranslation, accumulatedRotation);
-
-        // Recurse to children - they inherit this bone's world transformation
+        // 5. Propagate to children with accumulated transforms
         if (!this.children.isEmpty()) {
             Transform.Mutable childTransform = new Transform.Mutable(
-                    accumulatedTranslation.sub(restOffset),
-                    accumulatedRotation
+                    finalTranslation,
+                    finalRotation
             );
             for (var child : this.children) {
                 child.updateFor(player, childTransform);
             }
         }
     }
+
+
+//        // 1. Compose this bone's rotation
+//        Quaternion localRotation = Quaternion.fromEulerAngles(new Vec(rx, ry, rz));
+//        Quaternion defaultRotation = Quaternion.fromEulerAngles(new Vec(defaultTransform.rx(), defaultTransform.ry(), defaultTransform.rz()));
+//        Quaternion boneRotation = defaultRotation.multiply(localRotation);
+//        Quaternion accumulatedRotation = tr.rotation.multiply(boneRotation);
+//
+//        // 2. Calculate this bone's final world position
+//        // Start with the bone's rest position offset from model origin
+//        Vec restOffset = defaultTransform.pivot();
+//
+//        // Add animated translation (relative to rest position)
+//        Vec animatedTranslation = new Vec(dx, dy, dz);
+//        Vec rotatedAnimatedTranslation = boneRotation.rotate(animatedTranslation);
+//        Vec totalOffset = restOffset.add(rotatedAnimatedTranslation);
+//
+//        // Apply parent transformation to the total offset
+//        Vec rotatedByParent = tr.rotation.rotate(totalOffset);
+//        Vec accumulatedTranslation = tr.translation.add(rotatedByParent);
+//
+//        // Send to entity
+//        sendUpdates(player, accumulatedTranslation, accumulatedRotation);
+//
+//        // Recurse to children - they inherit this bone's world transformation
+//        if (!this.children.isEmpty()) {
+//            Transform.Mutable childTransform = new Transform.Mutable(
+//                    accumulatedTranslation.sub(restOffset),
+//                    accumulatedRotation
+//            );
+//            for (var child : this.children) {
+//                child.updateFor(player, childTransform);
+//            }
+//        }
 
     protected void sendUpdates(@NotNull Player player, @NotNull Vec translation, @NotNull Quaternion rotation) {
         // do nothing for this bone, subclasses should override this
@@ -81,9 +108,9 @@ public sealed class Bone permits ItemBone {
         this.dx = defaultTransform.dx();
         this.dy = defaultTransform.dy();
         this.dz = defaultTransform.dz();
-        this.rx = 0;
-        this.ry = 0;
-        this.rz = 0;
+        this.rx = 0; //defaultTransform.rx();
+        this.ry = 0; //defaultTransform.ry();
+        this.rz = 0; //defaultTransform.rz();
         this.sx = defaultTransform.sx();
         this.sy = defaultTransform.sy();
         this.sz = defaultTransform.sz();
