@@ -16,11 +16,63 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.registry.RegistryTranscoder;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class DemoServer {
+
+    private static BedrockAnimation fixAnimationStartingFrames(@NotNull BedrockAnimation animation) {
+        var newAnimations = new HashMap<String, BedrockAnimation.Animation>();
+        for (var entry : animation.animations().entrySet()) {
+            var newBones = new HashMap<String, BedrockAnimation.Animator>();
+            for (var boneEntry : entry.getValue().bones().entrySet()) {
+                var animator = boneEntry.getValue();
+                // if the first frame is not 0, we need to clone the first one to zero.
+
+                var position = animator.position();
+                if (!position.isEmpty()) {
+                    var first = position.getFirst();
+                    if (first.time() != 0) {
+                        position = new ArrayList<>(position);
+                        position.addFirst(new BedrockAnimation.Keyframe(0, first.value()));
+                    }
+                }
+                var rotation = animator.rotation();
+                if (!rotation.isEmpty()) {
+                    var first = rotation.getFirst();
+                    if (first.time() != 0) {
+                        rotation = new ArrayList<>(rotation);
+                        rotation.addFirst(new BedrockAnimation.Keyframe(0, first.value()));
+                    }
+                }
+                var scale = animator.scale();
+                if (!scale.isEmpty()) {
+                    var first = scale.getFirst();
+                    if (first.time() != 0) {
+                        scale = new ArrayList<>(scale);
+                        scale.addFirst(new BedrockAnimation.Keyframe(0, first.value()));
+                    }
+                }
+                newBones.put(boneEntry.getKey(), new BedrockAnimation.Animator(
+                        position,
+                        rotation,
+                        scale
+                ));
+            }
+
+            newAnimations.put(entry.getKey(), new BedrockAnimation.Animation(
+                    entry.getValue().loop(),
+                    entry.getValue().animationLength(),
+                    newBones
+            ));
+        }
+        return new BedrockAnimation(animation.formatVersion(), newAnimations);
+    }
+
     public static void main(String[] args) throws Exception {
         var server = MinecraftServer.init();
 
@@ -40,7 +92,8 @@ public class DemoServer {
 
         var animJson = new Gson().fromJson(Files.readString(animPath), JsonObject.class);
         var anims = BedrockAnimation.CODEC.decode(new RegistryTranscoder<>(Transcoder.JSON, MinecraftServer.process()), animJson).orElseThrow();
-        var idle = anims.animations().get("craft");
+        anims = fixAnimationStartingFrames(anims);
+        var idle = anims.animations().get("deploy");
 
         System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(idle));
 

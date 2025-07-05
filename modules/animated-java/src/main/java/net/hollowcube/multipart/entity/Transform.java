@@ -21,19 +21,22 @@ public record Transform(
     public static final class Mutable {
         public Vec translation;
         public Quaternion rotation;
+        public Vec scale;
 
         public Mutable() {
             this.translation = Vec.ZERO;
             this.rotation = new Quaternion(0, 0, 0, 1);
+            this.scale = Vec.ONE;
         }
 
-        public Mutable(Vec translation, Quaternion rotation) {
+        public Mutable(Vec translation, Quaternion rotation, Vec scale) {
             this.translation = translation;
             this.rotation = rotation;
+            this.scale = scale;
         }
 
         public Mutable copy() {
-            return new Mutable(translation, rotation);
+            return new Mutable(translation, rotation, scale);
         }
     }
 }

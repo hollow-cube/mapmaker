@@ -57,12 +57,12 @@ public final class ItemBone extends Bone {
     }
 
     @Override
-    protected void sendUpdates(@NotNull Player player, @NotNull Vec translation, @NotNull Quaternion rotation) {
+    protected void sendUpdates(@NotNull Player player, @NotNull Vec translation, @NotNull Quaternion rotation, @NotNull Vec scale) {
         player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(
                 MetadataDef.Display.INTERPOLATION_DELAY.index(), Metadata.VarInt(0),
                 MetadataDef.Display.TRANSLATION.index(), Metadata.Vector3(translation),
                 MetadataDef.Display.ROTATION_LEFT.index(), Metadata.Quaternion(rotation.into()),
-                MetadataDef.Display.SCALE.index(), Metadata.Vector3(new Vec(sx, sy, sz))
+                MetadataDef.Display.SCALE.index(), Metadata.Vector3(scale)
         )));
     }
 
