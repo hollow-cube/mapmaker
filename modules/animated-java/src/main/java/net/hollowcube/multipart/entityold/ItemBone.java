@@ -1,4 +1,4 @@
-package net.hollowcube.multipart.entity;
+package net.hollowcube.multipart.entityold;
 
 import net.hollowcube.aj.util.Quaternion;
 import net.minestom.server.component.DataComponents;

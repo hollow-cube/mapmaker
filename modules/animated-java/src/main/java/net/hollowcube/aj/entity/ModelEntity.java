@@ -7,9 +7,9 @@ import net.hollowcube.aj.bone.EntityBone;
 import net.hollowcube.aj.bone.StructBone;
 import net.hollowcube.multipart.bedrock.BedrockAnimation;
 import net.hollowcube.multipart.bedrock.BedrockGeoModel;
-import net.hollowcube.multipart.entity.Bone;
-import net.hollowcube.multipart.entity.ItemBone;
-import net.hollowcube.multipart.entity.Transform;
+import net.hollowcube.multipart.entityold.Bone;
+import net.hollowcube.multipart.entityold.ItemBone;
+import net.hollowcube.multipart.entityold.Transform;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
@@ -98,7 +98,7 @@ public class ModelEntity extends Entity {
         for (var child : bones) {
             if (!element.name().equals(child.parent()))
                 continue;
-            children.add(createBone(bones, child, new net.hollowcube.multipart.entity.Transform(
+            children.add(createBone(bones, child, new net.hollowcube.multipart.entityold.Transform(
                     element.pivot().div(16).mul(1, 1, -1),
                     element.rotation().mul(1, 1, -1), //todo
                     Vec.ONE, Vec.ZERO
@@ -106,7 +106,7 @@ public class ModelEntity extends Entity {
             )));
         }
 
-        var transform = new net.hollowcube.multipart.entity.Transform(
+        var transform = new net.hollowcube.multipart.entityold.Transform(
                 element.pivot().div(16).mul(1, 1, -1)
                         .sub(parentTransform.dx(), parentTransform.dy(), parentTransform.dz()),
                 element.rotation().mul(1, 1, -1),
@@ -120,7 +120,7 @@ public class ModelEntity extends Entity {
         if (element.cubes().isEmpty()) {
             b = new Bone(transform, children);
         } else {
-            b = new ItemBone(transform, children, "mymap:" + element.name());
+            b = new ItemBone(transform, children, "demo:assembler/" + element.name());
             this.leafEntityIds.add(((ItemBone) b).entityId());
         }
         boneById.put(element.name(), b);
