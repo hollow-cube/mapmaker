@@ -61,7 +61,6 @@ public record BedrockAnimation(
                 "animation_length", Codec.DOUBLE, Animation::animationLength,
                 "bones", Codec.STRING.mapValue(Animator.CODEC), Animation::bones,
                 Animation::new);
-
     }
 
     public record Animator(
@@ -161,6 +160,5 @@ public record BedrockAnimation(
                 return new Result.Ok<>(result.build());
             }
         };
-
     }
 }
