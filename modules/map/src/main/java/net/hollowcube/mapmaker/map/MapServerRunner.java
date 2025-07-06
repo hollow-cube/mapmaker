@@ -33,10 +33,7 @@ import net.hollowcube.mapmaker.map.runtime.*;
 import net.hollowcube.mapmaker.map.terraform.MapServerModule;
 import net.hollowcube.mapmaker.map.util.MapJoinInfo;
 import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
-import net.hollowcube.mapmaker.map.util.datafix.V4326;
-import net.hollowcube.mapmaker.map.util.datafix.V4437;
-import net.hollowcube.mapmaker.map.util.datafix.V4438;
-import net.hollowcube.mapmaker.map.util.datafix.V4440;
+import net.hollowcube.mapmaker.map.util.datafix.*;
 import net.hollowcube.mapmaker.map.world.AbstractMapMakerMapWorld;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
@@ -335,7 +332,7 @@ public class MapServerRunner extends AbstractMapServer {
 
     // Exposed for DevServer to use
     public static List<Supplier<DataVersion>> extraDataVersionsForMaps() {
-        return List.of(V4326::new, V4437::new, V4438::new, V4440::new);
+        return List.of(V4326::new, V4437::new, V4438::new, V4440::new, V4441::new);
     }
 
     @Override
