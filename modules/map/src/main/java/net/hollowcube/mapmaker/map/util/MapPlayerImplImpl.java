@@ -27,8 +27,6 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
 
     private boolean isInWater, isInLava;
 
-    private EntityPose pose = EntityPose.STANDING;
-
     public MapPlayerImplImpl(@NotNull PlayerConnection playerConnection, @NotNull GameProfile gameProfile) {
         super(playerConnection, gameProfile);
     }
@@ -126,16 +124,6 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
 
         if (newPose != oldPose) setPose(newPose);
         updateWaterLavaState();
-    }
-
-    @Override
-    public @NotNull EntityPose getPose() {
-        return this.pose;
-    }
-
-    @Override
-    public void setPose(@NotNull EntityPose pose) {
-        this.pose = pose;
     }
 
     private void updateWaterLavaState() {
