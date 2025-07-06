@@ -15,10 +15,10 @@ public class V4441 extends DataVersion {
 
     private static Value fixBrokenAttributeModifiers(@NotNull Value data) {
         var components = data.get("components");
-        var attributeModifiers = components.get("mapmaker:attribute_modifiers");
+        var attributeModifiers = components.get("minecraft:attribute_modifiers");
         if (attributeModifiers.isMapLike() && attributeModifiers.size(0) == 0)
             // Remove empty attribute modifiers
-            components.remove("mapmaker:attribute_modifiers");
+            components.remove("minecraft:attribute_modifiers");
         return null;
     }
 }
