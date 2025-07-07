@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub.feature.misc;
 
-import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.cosmetic.Hats;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
@@ -29,7 +28,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
-@AutoService(HubFeature.class)
+//@AutoService(HubFeature.class)
 public class BirthdayGuyFeature implements HubFeature {
     private static final Pos BIRTHDAY_NPC_POS = new Pos(-3.5, 40, 4.5, -135, 0);
     private static final Tag<Thread> CLICK_TASK = Tag.Transient("birthday_guy_click_task");
