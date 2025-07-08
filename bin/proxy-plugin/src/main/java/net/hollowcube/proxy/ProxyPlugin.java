@@ -52,7 +52,8 @@ public class ProxyPlugin {
     private static final Set<ProtocolVersion> SUPPORTED_VERSIONS = Set.of(
             ProtocolVersion.MINECRAFT_1_21_4,
             ProtocolVersion.MINECRAFT_1_21_5,
-            ProtocolVersion.MINECRAFT_1_21_6
+            ProtocolVersion.MINECRAFT_1_21_6,
+            ProtocolVersion.MINECRAFT_1_21_7
     );
 
     public static final TextColor RED = TextColor.color(0xFA4141);
