@@ -332,7 +332,7 @@ public class MapServerRunner extends AbstractMapServer {
 
     // Exposed for DevServer to use
     public static List<Supplier<DataVersion>> extraDataVersionsForMaps() {
-        return List.of(V4326::new, V4437::new, V4438::new, V4440::new, V4441::new);
+        return List.of(V4326::new, V4437::new, V4438::new, V4440::new, V4441::new, V4442::new);
     }
 
     @Override
