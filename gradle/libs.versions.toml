@@ -4,7 +4,7 @@ annotations = "26.0.2"
 fastutil = "8.5.15"
 gson = "2.12.1"
 adventure = "4.23.0"
-minestom = "1_21_6-9df70894c3"
+minestom = "1_21_6-20250708.214416-5"
 posthog = "0.1.9"
 slf4j = "2.0.9"
 kafka = "3.9.0"
@@ -34,7 +34,7 @@ autoservice = { group = "com.google.auto.service", name = "auto-service", versio
 autoservice-annotations = { group = "com.google.auto.service", name = "auto-service-annotations", version.ref = "autoservice" }
 fastutil = { group = "it.unimi.dsi", name = "fastutil", version.ref = "fastutil" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
-minestom = { group = "net.minestom", name = "minestom-snapshots", version.ref = "minestom" }
+minestom = { group = "net.minestom", name = "minestom", version.ref = "minestom" }
 posthog = { group = "dev.hollowcube", name = "posthog-java", version.ref = "posthog" }
 slf4j = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
 slf4j-jul = { group = "org.slf4j", name = "jul-to-slf4j", version.ref = "slf4j" }

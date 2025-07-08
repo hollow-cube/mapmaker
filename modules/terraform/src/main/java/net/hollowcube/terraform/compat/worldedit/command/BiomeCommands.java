@@ -162,7 +162,7 @@ public final class BiomeCommands {
                 }
             }
 
-            TerraformBiomeChunk.sendBiomeUpdates(chunks);
+            TerraformBiomeChunk.sendBiomeUpdates(biomes, chunks);
 
             player.sendMessage(ExtraComponents.translatable("commands.set_biome.success")
                     .with(biomes.getName(biome))

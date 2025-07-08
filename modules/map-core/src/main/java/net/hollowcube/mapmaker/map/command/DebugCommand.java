@@ -20,7 +20,6 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.ComponentUtil;
-import net.kyori.adventure.nbt.TagStringIOExt;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Chunk;
@@ -153,7 +152,7 @@ public class DebugCommand extends CommandDsl {
                 player.sendMessage("Block: " + "no handler");
             }
 
-            player.sendMessage(block.nbt() == null ? "No block NBT" : TagStringIOExt.writeTag(block.nbt()));
+            player.sendMessage(block.nbt() == null ? Component.text("No block NBT") : NbtUtil.prettyPrint(block.nbt()));
         }
     }
 
