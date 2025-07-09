@@ -19,9 +19,16 @@
       {
         "formats": {
           "min_inclusive": 56,
-          "max_inclusive": 64
+          "max_inclusive": 63
         },
         "directory": "pvn_771"
+      },
+      {
+        "formats": {
+          "min_inclusive": 64,
+          "max_inclusive": 64
+        },
+        "directory": "pvn_772"
       }
     ]
   }
