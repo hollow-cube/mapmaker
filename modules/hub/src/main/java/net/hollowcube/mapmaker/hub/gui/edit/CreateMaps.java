@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub.gui.edit;
 
 import net.hollowcube.canvas.Element;
+import net.hollowcube.canvas.Label;
 import net.hollowcube.canvas.Switch;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.annotation.*;
@@ -8,16 +9,20 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.hub.feature.contest.MapContest;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.PlayerSetting;
+import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 public class CreateMaps extends View {
     private static final PlayerSetting<Integer> SELECTED_SLOT = PlayerSetting.Int("create_maps.selected_slot", 0);
@@ -33,6 +38,9 @@ public class CreateMaps extends View {
     private @Outlet("creator") CreateMap creator;
 
     private @OutletGroup("slot\\d") EditMapIconBase[] slots;
+
+    private @Outlet("contest_switch") Switch contestSwitcher;
+    private @Outlet("contest_slot_locked") Label contestButtonLocked;
 
     private final PlayerDataV2 playerData;
 
@@ -107,6 +115,15 @@ public class CreateMaps extends View {
                 slots[slot].setToSelected(map);
             });
         }
+
+        // Map contest
+        var now = LocalDateTime.now();
+        long millisToUnlock = ChronoUnit.MILLIS.between(now, MapContest.BUTTON_UNLOCK_DATE);
+        long millisToStart = ChronoUnit.MILLIS.between(now, MapContest.START_DATE);
+        long millisToEnd = ChronoUnit.MILLIS.between(now, MapContest.END_DATE);
+
+        contestSwitcher.setOption(millisToUnlock <= 0); // enabled
+        contestButtonLocked.setArgs(Component.text(NumberUtil.formatPlayerPlaytime(millisToStart)));
     }
 
     @Action("personal_world")
