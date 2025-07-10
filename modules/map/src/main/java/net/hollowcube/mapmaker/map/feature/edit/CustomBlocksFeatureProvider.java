@@ -78,6 +78,7 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
 
         world.objectEntityHandlers().registerForMarkers(MapLeaderboardMarkerHandler.ID, MapLeaderboardMarkerHandler::new);
         world.objectEntityHandlers().registerForMarkers(BouncePadMarkerHandler.ID, BouncePadMarkerHandler::new);
+        world.objectEntityHandlers().registerForMarkers(HappyGhastMarkerHandler.ID, HappyGhastMarkerHandler::new);
         world.objectEntityHandlers().register(ResetMarkerHandler.ID, ResetMarkerHandler::new);
     }
 

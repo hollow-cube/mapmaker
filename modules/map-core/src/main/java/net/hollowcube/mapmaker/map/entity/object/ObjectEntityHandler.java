@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.entity.object;
 
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,6 +20,9 @@ public abstract class ObjectEntityHandler {
     }
 
     public void onDataChange(@Nullable Player player) {
+    }
+
+    public void onPositionChange(@NotNull Pos newPosition) {
     }
 
     public void onRemove() {

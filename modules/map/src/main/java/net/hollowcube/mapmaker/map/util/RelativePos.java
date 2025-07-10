@@ -1,13 +1,16 @@
 package net.hollowcube.mapmaker.map.util;
 
 import net.hollowcube.common.util.Either;
+import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.Result;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.RelativeFlags;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.function.Function;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -19,6 +22,7 @@ public record RelativePos(
     public static final RelativePos REL_ZERO = new RelativePos(Pos.ZERO, RelativeFlags.COORD | RelativeFlags.VIEW);
 
     public static final StructCodec<RelativePos> CODEC = new CodecImpl();
+    public static final Codec<RelativePos> ARRAY_CODEC = new ArrayCodecImpl();
 
     public @NotNull String strX() {
         return (relativeFlags & RelativeFlags.X) != 0 ? "~" + inner.x() : String.valueOf(inner.x());
@@ -164,6 +168,80 @@ public record RelativePos(
             }
 
             return new Result.Error<>("Coordinate must be number or string, but got " + result);
+        }
+    }
+
+    private static class ArrayCodecImpl implements Codec<RelativePos> {
+        @Override
+        public @NotNull <D> Result<RelativePos> decode(@NotNull Transcoder<D> coder, @NotNull D value) {
+            var listResult = coder.getList(value);
+            if (!(listResult instanceof Result.Ok(var list)))
+                return listResult.cast();
+
+            var xResult = parseNumberOrString(coder, list, 0);
+            if (!(xResult instanceof Result.Ok(var x))) return xResult.cast();
+            var yResult = parseNumberOrString(coder, list, 1);
+            if (!(yResult instanceof Result.Ok(var y))) return yResult.cast();
+            var zResult = parseNumberOrString(coder, list, 2);
+            if (!(zResult instanceof Result.Ok(var z))) return zResult.cast();
+            var yawResult = parseNumberOrString(coder, list, 3);
+            if (!(yawResult instanceof Result.Ok(var yaw))) return yawResult.cast();
+            var pitchResult = parseNumberOrString(coder, list, 4);
+            if (!(pitchResult instanceof Result.Ok(var pitch))) return pitchResult.cast();
+
+            int flags = 0;
+            if (x.isRight()) flags |= RelativeFlags.X;
+            if (y.isRight()) flags |= RelativeFlags.Y;
+            if (z.isRight()) flags |= RelativeFlags.Z;
+            if (yaw.isRight()) flags |= RelativeFlags.YAW;
+            if (yaw.isRight()) flags |= RelativeFlags.PITCH;
+            return new Result.Ok<>(new RelativePos(new Pos(
+                    x.map(Function.identity(), Function.identity()),
+                    y.map(Function.identity(), Function.identity()),
+                    z.map(Function.identity(), Function.identity()),
+                    yaw.map(Function.identity(), Function.identity()).floatValue(),
+                    pitch.map(Function.identity(), Function.identity()).floatValue()
+            ), flags));
+        }
+
+        @Override
+        public @NotNull <D> Result<D> encode(@NotNull Transcoder<D> coder, @Nullable RelativePos value) {
+            if (value == null) return new Result.Error<>("null");
+            var list = coder.createList(5);
+            list.add((value.relativeFlags & RelativeFlags.X) != 0
+                    ? coder.createString("~" + value.inner.x())
+                    : coder.createDouble(value.inner.x()));
+            list.add((value.relativeFlags & RelativeFlags.Y) != 0
+                    ? coder.createString("~" + value.inner.y())
+                    : coder.createDouble(value.inner.y()));
+            list.add((value.relativeFlags & RelativeFlags.Z) != 0
+                    ? coder.createString("~" + value.inner.z())
+                    : coder.createDouble(value.inner.z()));
+            list.add((value.relativeFlags & RelativeFlags.YAW) != 0
+                    ? coder.createString("~" + value.inner.yaw())
+                    : coder.createFloat(value.inner.yaw()));
+            list.add((value.relativeFlags & RelativeFlags.PITCH) != 0
+                    ? coder.createString("~" + value.inner.pitch())
+                    : coder.createFloat(value.inner.pitch()));
+            return new Result.Ok<>(list.build());
+        }
+
+        // Right either means its relative
+        private <D> Result<Either<Double, Double>> parseNumberOrString(@NotNull Transcoder<D> coder, @NotNull List<D> list, int index) {
+            if (index < 0 || index >= list.size())
+                return new Result.Ok<>(Either.right(0.0));
+            var raw = list.get(index);
+            if (coder.getDouble(raw) instanceof Result.Ok(Double number))
+                return new Result.Ok<>(Either.left(number));
+            if (coder.getString(raw) instanceof Result.Ok(String str)) {
+                if ("~".equals(str))
+                    return new Result.Ok<>(Either.right(0.0));
+                if (str.startsWith("~"))
+                    return new Result.Ok<>(Either.right(Double.parseDouble(str.substring(1))));
+                return new Result.Ok<>(Either.left(Double.parseDouble(str)));
+            }
+
+            return new Result.Error<>("Coordinate must be number or string, but got " + raw);
         }
     }
 

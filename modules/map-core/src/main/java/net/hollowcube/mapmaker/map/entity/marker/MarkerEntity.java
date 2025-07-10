@@ -6,13 +6,19 @@ import net.hollowcube.mapmaker.map.event.entity.MarkerEntityEnteredEvent;
 import net.hollowcube.mapmaker.map.event.entity.MarkerEntityExitedEvent;
 import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.minestom.server.collision.BoundingBox;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.RelativeFlags;
+import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Represents a viewable marker entity using axiom or particles to display (depending on the client).
@@ -60,6 +66,17 @@ public class MarkerEntity extends ObjectEntity {
             world.callEvent(new MarkerEntityExitedEvent(world, player, this));
             if (this.handler != null) this.handler.onPlayerExit(player);
         }
+    }
+
+    @Override
+    public @NotNull CompletableFuture<Void> teleport(
+            @NotNull Pos position, @NotNull Vec velocity, long @Nullable [] chunks,
+            @MagicConstant(flagsFromClass = RelativeFlags.class) int flags,
+            boolean shouldConfirm
+    ) {
+        return super.teleport(position, velocity, chunks, flags, shouldConfirm).thenRun(() -> {
+            if (handler != null) handler.onPositionChange(position);
+        });
     }
 
     @Override
