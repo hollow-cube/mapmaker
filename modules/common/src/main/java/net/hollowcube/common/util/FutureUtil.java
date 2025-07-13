@@ -1,6 +1,7 @@
 package net.hollowcube.common.util;
 
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -175,5 +176,19 @@ public final class FutureUtil {
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /// Blocks until the end of the current tick for the entity, then runs the task _on the tick thread_ and returns.
+    public static void waitForEndOfTick(@NotNull Entity entity, @NotNull Runnable task) {
+        var future = new CompletableFuture<Void>();
+        entity.scheduler().scheduleEndOfTick(() -> {
+            try {
+                task.run();
+                future.complete(null);
+            } catch (Throwable e) {
+                future.completeExceptionally(e);
+            }
+        });
+        FutureUtil.getUnchecked(future);
     }
 }

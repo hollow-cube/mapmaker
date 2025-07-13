@@ -353,9 +353,13 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         } catch (Throwable t) {
             logger.error("Failed to save player state for {}", player.getUuid(), t);
         } finally {
-            player.removeTag(SaveState.TAG);
-            player.removeTag(TeleportHistoryFeatureProvider.LAST_LOCATION);
-            super.removePlayer(player);
+            // Remove the player at the end of the tick to ensure that all edit-state processing is done before
+            // they no longer have an editing state.
+            FutureUtil.waitForEndOfTick(player, () -> {
+                player.removeTag(SaveState.TAG);
+                player.removeTag(TeleportHistoryFeatureProvider.LAST_LOCATION);
+                super.removePlayer(player);
+            });
         }
     }
 

@@ -113,13 +113,16 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
 
     @Override
     public void removePlayer(@NotNull Player player) {
-        callEvent(new MapWorldPlayerStopPlayingEvent(this, player));
+        // This must be done at end of tick to avoid trying to perform
+        // play-state actions after we have removed their play state.
+        FutureUtil.waitForEndOfTick(player, () -> {
+            callEvent(new MapWorldPlayerStopPlayingEvent(this, player));
 
-        super.removePlayer(player);
+            super.removePlayer(player);
 
-        // We never need to save their state because this is a test state and only managed locally.
-
-        player.removeTag(SaveState.TAG);
+            // We never need to save their state because this is a test state and only managed locally.
+            player.removeTag(SaveState.TAG);
+        });
     }
 
     @Override
