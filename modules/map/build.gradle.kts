@@ -17,7 +17,7 @@ dependencies {
     implementation(libs.zstd)
     implementation(libs.gson)
     implementation(libs.completely)
-    implementation(libs.mql)
+    implementation(libs.included.molang)
     implementation(libs.polar)
     implementation(libs.fastutil)
     implementation(libs.kafka)

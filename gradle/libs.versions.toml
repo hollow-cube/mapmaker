@@ -27,6 +27,7 @@ graalvm = "24.2.1"
 blossom = "2.1.0"
 velocity = "3.4.0-SNAPSHOT"
 classgraph = "4.8.179"
+included = "-INCLUDED"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
@@ -47,9 +48,10 @@ similarity = { group = "info.debatty", name = "java-string-similarity", version.
 completely = { group = "com.miguelfonseca.completely", name = "completely-core", version.ref = "completely" }
 jctools = { group = "org.jctools", name = "jctools-core", version.ref = "jctools" }
 caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
-mql = { group = "dev.hollowcube", name = "mql", version.ref = "mql" }
 json5 = { group = "de.marhali", name = "json5-java", version.ref = "json5" }
 velocity-api = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
+
+included-molang = { group = "dev.hollowcube", name = "molang", version.ref = "included" }
 
 nativeimage = { group = "org.graalvm.sdk", name = "nativeimage", version.ref = "graalvm" }
 classgraph = { group = "io.github.classgraph", name = "classgraph", version.ref = "classgraph" }

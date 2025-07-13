@@ -8,7 +8,7 @@ group = "net.hollowcube"
 
 repositories {
     // This code is duplicated in the java-library configuration, should make any changes there also.
-    val centralLibs = listOf(libs.minestom, libs.polar, libs.mql, libs.posthog, libs.adventure.api)
+    val centralLibs = listOf(libs.minestom, libs.polar, libs.posthog, libs.adventure.api)
             .mapNotNull { it.get().version }
     if (centralLibs.any { it == "dev" })
         mavenLocal()

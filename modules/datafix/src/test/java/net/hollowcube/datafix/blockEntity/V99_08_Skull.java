@@ -1,6 +1,5 @@
 package net.hollowcube.datafix.blockEntity;
 
-import net.kyori.adventure.nbt.TagStringIOExt;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,7 +12,6 @@ class V99_08_Skull extends AbstractBlockEntityUpgradeTest {
     @Test
     void upgradeId() {
         var result = upgradeC(0, CURRENT);
-        System.out.println(TagStringIOExt.writeTag(result, "    "));
         assertEquals("minecraft:skull", result.getString("id"));
     }
 

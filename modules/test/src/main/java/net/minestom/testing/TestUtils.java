@@ -1,9 +1,5 @@
 package net.minestom.testing;
 
-import net.kyori.adventure.nbt.CompoundBinaryTag;
-import net.kyori.adventure.nbt.TagStringIOExt;
-
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Set;
@@ -30,15 +26,6 @@ public final class TestUtils {
 
     public static <T> void assertEqualsIgnoreOrder(Collection<T> expected, Collection<? extends T> actual) {
         assertEquals(Set.copyOf(expected), Set.copyOf(actual));
-    }
-
-    public static void assertEqualsSNBT(String snbt, CompoundBinaryTag compound) {
-        try {
-            final var converted = TagStringIOExt.readTag(snbt);
-            assertEquals(converted, compound);
-        } catch (IOException e) {
-            fail(e);
-        }
     }
 
     public static void assertEqualsIgnoreSpace(String s1, String s2, boolean matchCase) {

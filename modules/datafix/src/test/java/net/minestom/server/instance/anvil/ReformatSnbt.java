@@ -1,6 +1,6 @@
 package net.minestom.server.instance.anvil;
 
-import net.kyori.adventure.nbt.TagStringIOExt;
+import net.minestom.server.adventure.MinestomAdventure;
 
 public class ReformatSnbt {
     public static void main(String[] args) throws Exception {
@@ -49,6 +49,6 @@ public class ReformatSnbt {
                 
                 """;
 
-        System.out.println(TagStringIOExt.writeTag(TagStringIOExt.readTag(snbt), ""));
+        System.out.println(MinestomAdventure.tagStringIO().asString(MinestomAdventure.tagStringIO().asTag(snbt)));
     }
 }
