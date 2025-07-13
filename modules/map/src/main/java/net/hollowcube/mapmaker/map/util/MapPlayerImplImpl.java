@@ -185,8 +185,9 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
             // incorrectly in MinestomDataGenerator.
             if (block.id() == Block.SCAFFOLDING.id()) continue;
 
-            var hit = block.registry().collisionShape()
-                    .intersectBox(position.sub(pos.blockX(), pos.blockY(), pos.blockZ()), bb);
+            var collisionShape = block.registry().collisionShape();
+            var hit = collisionShape != null && collisionShape.intersectBox(
+                    position.sub(pos.blockX(), pos.blockY(), pos.blockZ()), bb);
             if (hit) return false;
         }
 

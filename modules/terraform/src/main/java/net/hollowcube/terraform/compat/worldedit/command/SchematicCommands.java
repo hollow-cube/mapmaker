@@ -284,8 +284,8 @@ public final class SchematicCommands {
             var mask = context.get(maskArg);
 
             if (flags.contains(Flags.MASK)) {
-                //todo idk what exception this should be
-                Check.argCondition(mask == null, "Mask is required when using the mask flag");
+                player.sendMessage("Mask is required when using the mask flag");
+                return;
             } else mask = Mask.always();
 
             // Warnings for currently unsupported flags
@@ -368,8 +368,8 @@ public final class SchematicCommands {
             var mask = context.get(maskArg);
 
             if (flags.contains(Flags.MASK)) {
-                //todo idk what exception this should be
-                Check.argCondition(mask == null, "Mask is required when using the mask flag");
+                player.sendMessage("Mask is required when using the mask flag");
+                return;
             } else mask = Mask.always();
             if (flags.contains(Flags.AIR_SKIP)) {
                 mask = Mask.and(mask, Mask.not(Mask.air()));

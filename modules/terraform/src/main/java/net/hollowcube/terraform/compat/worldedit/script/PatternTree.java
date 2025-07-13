@@ -325,7 +325,6 @@ public interface PatternTree extends ParseTree<Pattern> {
     }
 
     record Hand(int start, int end, @NotNull PlayerHand hand) implements PatternTree {
-
         @Override
         public @NotNull Pattern into(@NotNull ParseContext context) throws ParseException {
             var item = context.getPlayer().getItemInHand(this.hand).material();
@@ -334,6 +333,11 @@ public interface PatternTree extends ParseTree<Pattern> {
                     start, end, "no block in hand"
             );
             return new BlockPattern(context.registry().blockState(block.stateId()));
+        }
+
+        @Override
+        public void suggest(@NotNull TerraformRegistry registry, @NotNull Suggestion suggestion) {
+            // No suggestions, but dont want an error
         }
     }
 

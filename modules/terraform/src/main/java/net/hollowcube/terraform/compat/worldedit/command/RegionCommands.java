@@ -363,7 +363,8 @@ public final class RegionCommands {
             var mask = context.get(maskArg);
 
             if (flags.contains(Flags.MASK)) {
-                Check.notNull(mask, "mask is required with the mask flag");
+                player.sendMessage("Mask is required with the mask flag.");
+                return;
             } else {
                 mask = Mask.always();
             }

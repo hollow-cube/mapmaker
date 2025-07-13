@@ -89,7 +89,7 @@ public record ResetHeightAction(
 
     private static @NotNull ResetHeightAction stringToValue(@NotNull ResetHeightAction action, @NotNull String value) {
         if (value.isEmpty()) return action.withValue(NO_RESET_HEIGHT);
-        return action.withValue(Integer.parseInt(value));
+        return action.withValue((int) Double.parseDouble(value));
     }
 
 }
