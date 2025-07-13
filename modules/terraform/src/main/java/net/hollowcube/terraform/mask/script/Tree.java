@@ -11,6 +11,7 @@ import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 public interface Tree {
 
@@ -41,7 +42,7 @@ public interface Tree {
 
         @Override
         public @NotNull Mask toMask() throws MaskParseException {
-            var block = Block.fromKey(Key.key(block()));
+            var block = Block.fromKey(Key.key(block().toLowerCase(Locale.ROOT)));
             if (block == null) {
                 throw new MaskParseException(start, start + block().length(),
                         String.format("No such block: %s", block()));
