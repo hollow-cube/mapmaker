@@ -1,0 +1,3 @@
+[submodule "modules/schem"]
+	path = modules/schem
+	url = git@github.com:hollow-cube/schem.git
