@@ -1,15 +1,21 @@
 package net.hollowcube.mapmaker.map.block.custom;
 
+import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
 import net.hollowcube.mapmaker.map.util.RelativePos;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.EquipmentSlot;
+import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.attribute.Attribute;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,7 +30,9 @@ public class HappyGhastMarkerHandler extends ObjectEntityHandler {
             @NotNull List<RelativePos> path,
             double speed,
             boolean smooth,
-            boolean loop
+            boolean loop,
+            @Nullable NamedTextColor harness,
+            double scale
     ) {
         private static final double DEFAULT_SPEED = 3.6; // blocks per second
         public static final StructCodec<Data> CODEC = StructCodec.struct(
@@ -33,13 +41,15 @@ public class HappyGhastMarkerHandler extends ObjectEntityHandler {
                 "speed", Codec.DOUBLE.optional(DEFAULT_SPEED), Data::speed,
                 "smooth", Codec.BOOLEAN.optional(false), Data::smooth,
                 "loop", Codec.BOOLEAN.optional(false), Data::loop,
+                "harness", ExtraCodecs.NAMED_TEXT_COLOR.optional(), Data::harness,
+                "scale", ExtraCodecs.clamppedDouble(0.0625, 1.0).optional(1.0), Data::scale,
                 Data::new);
     }
 
     private record Keyframe(double time, Vec position) {
     }
 
-    private final Entity ghastEntity;
+    private final LivingEntity ghastEntity;
 
     private List<Keyframe> keyframes;
     private double totalDuration = 0;
@@ -48,7 +58,7 @@ public class HappyGhastMarkerHandler extends ObjectEntityHandler {
 
     public HappyGhastMarkerHandler(@NotNull MarkerEntity entity) {
         super(ID, entity);
-        this.ghastEntity = new Entity(EntityType.HAPPY_GHAST) {{
+        this.ghastEntity = new LivingEntity(EntityType.HAPPY_GHAST) {{
             setNoGravity(true);
             hasPhysics = false;
         }};
@@ -92,6 +102,12 @@ public class HappyGhastMarkerHandler extends ObjectEntityHandler {
         this.totalDuration = lastTime;
         this.smooth = data.smooth;
         this.startTick = ghastEntity.getAliveTicks();
+
+        ghastEntity.getAttribute(Attribute.SCALE).setBaseValue(data.scale);
+        if (data.harness != null) {
+            var harnessMaterial = Material.fromKey("minecraft:" + data.harness + "_harness");
+            ghastEntity.setEquipment(EquipmentSlot.BODY, ItemStack.of(harnessMaterial));
+        }
     }
 
     @Override

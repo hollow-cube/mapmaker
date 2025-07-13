@@ -4,6 +4,7 @@ import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.common.util.Either;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.KeyPattern;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.Result;
 import net.minestom.server.codec.StructCodec;
@@ -24,13 +25,9 @@ public final class ExtraCodecs {
     public static final Codec<Integer> INT_STRING = Codec.STRING.transform(Integer::parseInt, String::valueOf);
     public static final Codec<Long> LONG_STRING = Codec.STRING.transform(Long::parseLong, String::valueOf);
 
-    //    public static final Codec<PotionEffect> POTION_EFFECT = Codec.STRING.xmap(PotionEffect::fromKey, PotionEffect::name);
-//
-//    public static final Codec<Point> POINT = Codec.DOUBLE.listOf().xmap(list -> {
-//        Check.stateCondition(list.size() != 3, "Expected 3 doubles, got " + list.size());
-//        return new Vec(list.get(0), list.get(1), list.get(2));
-//    }, point -> List.of(point.x(), point.y(), point.z()));
-//
+    public static final Codec<NamedTextColor> NAMED_TEXT_COLOR = Codec.STRING.transform(
+            NamedTextColor.NAMES::valueOrThrow, NamedTextColor.NAMES::keyOrThrow);
+
     public static final StructCodec<Pos> POS = StructCodec.struct(
             "x", clamppedDouble(-30000000, 30000000), Pos::x,
             "y", clamppedDouble(-30000000, 30000000), Pos::y,
