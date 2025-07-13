@@ -30,7 +30,7 @@ public class HCNativeImageFeature implements Feature {
                 .enableClassInfo()
                 .enableFieldInfo()
                 .enableAnnotationInfo()
-                .acceptPackages("net.hollowcube.mapmaker")
+                .acceptPackages("net.hollowcube.mapmaker", "net.hollowcube.posthog")
                 .scan()) {
 
             scanResult.getSubclasses(Record.class)
