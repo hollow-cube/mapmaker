@@ -11,13 +11,15 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class MapDrainCommand extends CommandDsl {
-    private final Argument<@NotNull MapData> mapArg;
+    private final Argument<@Nullable MapData> mapArg;
     private final Argument<String> reasonArg = Argument.GreedyString("reason")
             .description("The reason for draining the map");
 
@@ -30,7 +32,7 @@ public class MapDrainCommand extends CommandDsl {
         description = "Drains all active instances of a map";
         examples = List.of("/map drain 123-456-789", "/map drain a12345bc-67de-8f91-ghij-2345k6l78912");
 
-        mapArg = CoreArgument.PlayableMap("map", mapService)
+        mapArg = CoreArgument.Map("map", mapService)
                 .description("The ID of the map to drain");
 
         setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
@@ -42,6 +44,11 @@ public class MapDrainCommand extends CommandDsl {
         var map = context.get(mapArg);
         var reason = context.get(reasonArg);
 
+        if (map == null) {
+            player.sendMessage(
+                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+            return;
+        }
         var message = new MapMgmtConsumer.MapUpdateMessage(MapMgmtConsumer.MapUpdateMessage.ACTION_DRAIN, map.id(), reason);
         var sendableMessage = AbstractHttpService.GSON.toJson(message);
         producer.produceAndForget(MapMgmtConsumer.TOPIC_NAME, sendableMessage);

@@ -436,7 +436,7 @@ public abstract class AbstractMapServer implements MapServer {
         commandManager.register(new HideCommand(playerService()));
 
         if (fullInstance) {
-            commandManager.register(new PlayCommand(mapService(), sessionManager(), bridge(), guiController()));
+            commandManager.register(new PlayCommand(playerService(), mapService(), sessionManager(), bridge()));
             commandManager.register(new WhereCommand(sessionManager(), playerService(), mapService(), permManager()));
             commandManager.register(new ListCommand(sessionManager(), playerService()));
             commandManager.register(new MsgCommand(sessionManager(), mapService(), chatMessageListener));

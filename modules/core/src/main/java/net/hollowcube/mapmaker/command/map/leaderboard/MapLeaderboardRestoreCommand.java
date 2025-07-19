@@ -8,11 +8,13 @@ import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class MapLeaderboardRestoreCommand extends CommandDsl {
-    private final Argument<@NotNull MapData> mapArg;
+    private final Argument<@Nullable MapData> mapArg;
 
     private final MapService mapService;
 
@@ -22,17 +24,21 @@ public class MapLeaderboardRestoreCommand extends CommandDsl {
 
         description = "Syncs the leaderboard with internal source of truth. Do not use unless you know this is correct";
 
-        mapArg = CoreArgument.PlayableMap("map", mapService)
+        mapArg = CoreArgument.Map("map", mapService)
                 .description("The ID of the map to restore");
 
         addSyntax(playerOnly(this::handleRestoreLeaderboard), mapArg);
     }
 
     private void handleRestoreLeaderboard(@NotNull Player player, @NotNull CommandContext context) {
-        var playerId = PlayerDataV2.fromPlayer(player).id();
-
         var map = context.get(mapArg);
+        if (map == null) {
+            player.sendMessage(
+                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+            return;
+        }
 
+        var playerId = PlayerDataV2.fromPlayer(player).id();
         try {
             mapService.restorePlaytimeLeaderboard(playerId, map.id());
             player.sendMessage("restored for " + map.settings().getName());
