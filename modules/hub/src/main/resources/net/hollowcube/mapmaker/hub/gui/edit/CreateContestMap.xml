@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<component width="9" height="9" align="ttb" sprite="create_maps/create/contest_container">
+    <box width="9" height="1" align="ltr">
+        <BackButton2/>
+        <label translationKey="gui.create_maps.new_map.information" sprite="generic/information"/>
+        <text id="slot_id_create" width="5" translationKey="gui.create_maps.new_map.title" font="slot_title"
+              sprite="generic/text_display_5" centered="true"/>
+        <button width="2" translationKey="gui.create_maps.new_map.reset_to_default" sprite="generic/2x1s/reset"/>
+    </box>
+
+    <spacer width="9" height="4"/>
+
+    <box width="9" align="ltr">
+        <spacer width="2"/>
+        <button id="submit" width="5" translationKey="create_maps.slot.comp.create.info"/>
+    </box>
+
+    <box width="9" height="3" align="ltr">
+        <spacer height="3"/>
+        <spacer width="3" height="3" sprite="create_maps/big_button_closed"/>
+        <spacer height="3"/>
+        <spacer width="3" height="3" sprite="create_maps/big_button_closed"/>
+        <spacer height="3"/>
+    </box>
+
+</component>

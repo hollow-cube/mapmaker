@@ -5,6 +5,7 @@
     <switch id="switch" width="9" height="9">
         <EditMap id="editor"/>
         <CreateMap id="creator"/>
+        <CreateContestMap id="contest_creator"/>
     </switch>
 
     <box width="9" height="1" align="ltr">
@@ -21,6 +22,14 @@
                 <button id="build_with_friends" translationKey="gui.create_maps.build_with_friends" width="2"/>
             </box>
             <button id="contest_slot_locked" translationKey="gui.create_maps.contest_slot.locked"
+                    sprite="create_maps/contest_locked" width="4"/>
+            <button id="contest_slot_create" translationKey="gui.create_maps.contest_slot.create"
+                    sprite="create_maps/contest_available" width="4"/>
+            <button id="contest_slot_in_progress" translationKey="gui.create_maps.contest_slot.in_progress"
+                    sprite="create_maps/contest_available" width="4"/>
+            <button id="contest_slot_submitted" translationKey="gui.create_maps.contest_slot.submitted"
+                    sprite="create_maps/contest_submitted" width="4"/>
+            <button id="contest_slot_completed" translationKey="gui.create_maps.contest_slot.completed"
                     sprite="create_maps/contest_locked" width="4"/>
         </switch>
 

@@ -14,6 +14,7 @@ public record MapCreateRequest(
         int slot,
         int protocolVersion
 ) {
+    private static final int CONTEST_SLOT = 1_000_000;
 
     public static @NotNull MapCreateRequest forOrg(
             @NotNull String authorizer,
@@ -31,6 +32,11 @@ public record MapCreateRequest(
             int protocolVersion
     ) {
         return new MapCreateRequest(player, false, player, size, slot, protocolVersion);
+    }
+
+    public static @NotNull MapCreateRequest forContest(@NotNull String player, int protocolVersion) {
+        // Map size is irrelevant it is always overwritten to be colossal.
+        return new MapCreateRequest(player, false, player, MapSize.NORMAL, CONTEST_SLOT, protocolVersion);
     }
 
 }

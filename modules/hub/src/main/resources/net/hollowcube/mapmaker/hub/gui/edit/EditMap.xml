@@ -29,8 +29,12 @@
             <box width="9" align="ltr">
                 <button id="map_type_tab_parkour" width="3"
                         translationKey="gui.create_maps.map_info_tab.select_type.parkour"/>
-                <button id="map_type_tab_building" width="3"
-                        translationKey="gui.create_maps.map_info_tab.select_type.building"/>
+                <switch id="building_contest_lock_switch" width="3">
+                    <button id="map_type_tab_building" width="3"
+                            translationKey="gui.create_maps.map_info_tab.select_type.building"/>
+                    <button width="3"
+                            translationKey="gui.create_maps.slot.comp.map_info_tab.select_type.building"/>
+                </switch>
                 <button width="3" translationKey="gui.create_maps.map_info_tab.select_type.adventure"/>
             </box>
             <switch id="map_type_tab_switch" width="9" height="2">
@@ -578,12 +582,17 @@
                     sprite="create_maps/tab_settings/icon_selected"/>
         </switch>
         <spacer/>
-        <switch id="tab_actions_switch">
-            <button id="tab_actions" translationKey="gui.create_maps.map_actions_tab"
+        <switch id="tab_actions_contest_switch">
+            <switch id="tab_actions_switch">
+                <button id="tab_actions" translationKey="gui.create_maps.map_actions_tab"
+                        sprite="create_maps/tab_actions/icon"
+                        backgroundSprite="create_maps/tab_actions/icon_bg_default"/>
+                <button translationKey="gui.create_maps.map_actions_tab"
+                        sprite="create_maps/tab_actions/icon_selected"/>
+            </switch>
+            <button translationKey="gui.create_maps.slot.comp.map_actions_tab"
                     sprite="create_maps/tab_actions/icon"
                     backgroundSprite="create_maps/tab_actions/icon_bg_default"/>
-            <button translationKey="gui.create_maps.map_actions_tab"
-                    sprite="create_maps/tab_actions/icon_selected"/>
         </switch>
         <spacer/>
     </box>
@@ -593,27 +602,51 @@
         <button id="edit_in_world" width="3" height="3" translationKey="gui.create_maps.build_map"
                 sprite="create_maps/build"/>
         <spacer height="3"/>
-        <switch id="publish_switch" width="3" height="3">
-            <button width="3" height="3" translationKey="gui.create_maps.verify_error"
-                    sprite="create_maps/verify_error"/>
-            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.build_once"
-                    sprite="create_maps/publish_error"/>
-            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.play_longer"
-                    sprite="create_maps/publish_error"/>
-            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.missing_finish_plate"
-                    sprite="create_maps/verify_error"/>
-            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.bad_status_plate"
-                    sprite="create_maps/publish_error"/>
-            <button id="verify" width="3" height="3" translationKey="gui.create_maps.verify_map"
-                    sprite="create_maps/verify"/>
-            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.no_name"
-                    sprite="create_maps/publish_error"/>
-            <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.no_display_item"
-                    sprite="create_maps/publish_error"/>
-            <button id="publish" width="3" height="3" translationKey="gui.create_maps.publish_map"
-                    sprite="create_maps/publish"/>
+        <switch id="contest_publish_switch" width="3" height="3">
+            <switch id="publish_switch" width="3" height="3">
+                <button width="3" height="3" translationKey="gui.create_maps.verify_error"
+                        sprite="create_maps/verify_error"/>
+                <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.build_once"
+                        sprite="create_maps/publish_error"/>
+                <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.play_longer"
+                        sprite="create_maps/publish_error"/>
+                <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.missing_finish_plate"
+                        sprite="create_maps/verify_error"/>
+                <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.bad_status_plate"
+                        sprite="create_maps/publish_error"/>
+                <button id="verify" width="3" height="3" translationKey="gui.create_maps.verify_map"
+                        sprite="create_maps/verify"/>
+                <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.no_name"
+                        sprite="create_maps/publish_error"/>
+                <button width="3" height="3" translationKey="gui.create_maps.can't_publish_map.no_display_item"
+                        sprite="create_maps/publish_error"/>
+                <button id="publish" width="3" height="3" translationKey="gui.create_maps.publish_map"
+                        sprite="create_maps/publish"/>
+            </switch>
+            <switch id="publish_contest_switch" width="3" height="3">
+                <button width="3" height="3" translationKey="gui.create_maps.verify_error"
+                        sprite="create_maps/verify_error"/>
+                <button width="3" height="3" translationKey="gui.create_maps.can't_submit_map.build_once"
+                        sprite="create_maps/submit_error"/>
+                <button width="3" height="3" translationKey="gui.create_maps.can't_submit_map.play_longer"
+                        sprite="create_maps/submit_error"/>
+                <button width="3" height="3" translationKey="gui.create_maps.can't_submit_map.missing_finish_plate"
+                        sprite="create_maps/verify_error"/>
+                <button width="3" height="3" translationKey="gui.create_maps.can't_submit_map.bad_status_plate"
+                        sprite="create_maps/submit_error"/>
+                <button id="verify_contest" width="3" height="3" translationKey="gui.create_maps.verify_map"
+                        sprite="create_maps/verify"/>
+                <button width="3" height="3" translationKey="gui.create_maps.can't_submit_map.no_name"
+                        sprite="create_maps/submit_error"/>
+                <button width="3" height="3" translationKey="gui.create_maps.can't_submit_map.no_display_item"
+                        sprite="create_maps/submit_error"/>
+                <button id="publish_contest" width="3" height="3" translationKey="gui.create_maps.slot.comp.submit"
+                        sprite="create_maps/submit"/>
+            </switch>
         </switch>
         <spacer height="3"/>
     </box>
+
+    <box id="contest_build_lock_icon" width="0" height="0" align="ltr" sprite="create_maps/contest_build_lock"/>
 
 </component>

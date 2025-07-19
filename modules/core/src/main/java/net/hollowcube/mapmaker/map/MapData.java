@@ -73,6 +73,8 @@ public class MapData {
     private List<ObjectData> objects = new ArrayList<>();
     private transient int objectUsage = -1;
 
+    private String contest;
+
     public MapData() {
     }
 
@@ -266,6 +268,10 @@ public class MapData {
     public @Nullable ObjectData getObject(String id) {
         var object = objects().stream().filter(obj -> obj.id().equals(id)).findFirst();
         return object.orElse(null);
+    }
+
+    public @Nullable String contest() {
+        return contest;
     }
 
     public static @NotNull String formatPublishedId(long number) {

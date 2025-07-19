@@ -185,7 +185,7 @@ public class NoopMapService implements MapService {
         return new MapPlayerData(
                 playerId,
                 new String[]{null, "62da0aaf-8cad-4c13-869c-02b07688988d", null, null},
-                null, null
+                null, null, null
         );
     }
 

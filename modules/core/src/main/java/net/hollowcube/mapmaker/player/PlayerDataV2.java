@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.player;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import net.hollowcube.common.util.RuntimeGson;
@@ -9,7 +10,6 @@ import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -105,6 +105,11 @@ public class PlayerDataV2 {
         var raw = setting.write(value);
         settings().add(setting.key(), raw);
         updates.updateSetting(setting.key(), raw);
+    }
+
+    public void resetSetting(@NotNull PlayerSetting<?> setting) {
+        settings().remove(setting.key());
+        updates.updateSetting(setting.key(), JsonNull.INSTANCE);
     }
 
     public @NotNull Collection<Map.Entry<String, JsonElement>> settingsRawValues() {

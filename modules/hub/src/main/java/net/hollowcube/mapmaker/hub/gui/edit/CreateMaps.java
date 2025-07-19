@@ -12,6 +12,7 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.hub.feature.contest.MapContest;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapPlayerData;
+import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -29,6 +30,7 @@ public class CreateMaps extends View {
 
     public static final String SIG_RESET = "create_maps.reset";
 
+    private @ContextObject MapService mapService;
     private @ContextObject PlayerService playerService;
     private @ContextObject Player player;
     private @ContextObject ServerBridge bridge;
@@ -36,13 +38,19 @@ public class CreateMaps extends View {
     private @Outlet("switch") Switch switcher;
     private @Outlet("editor") EditMap editor;
     private @Outlet("creator") CreateMap creator;
+    private @Outlet("contest_creator") CreateContestMap contestCreator;
 
     private @OutletGroup("slot\\d") EditMapIconBase[] slots;
 
     private @Outlet("contest_switch") Switch contestSwitcher;
     private @Outlet("contest_slot_locked") Label contestButtonLocked;
+    private @Outlet("contest_slot_create") Label contestButtonCreate;
+    private @Outlet("contest_slot_in_progress") Label contestButtonInProgress;
+    private @Outlet("contest_slot_submitted") Label contestButtonSubmitted;
+    private @Outlet("contest_slot_completed") Label contestButtonCompleted;
 
     private final PlayerDataV2 playerData;
+    private MapData contestMap;
 
     public CreateMaps(@NotNull Context context) {
         super(context);
@@ -53,6 +61,22 @@ public class CreateMaps extends View {
 
     @Signal(CreateMap.SIG_MAP_CREATED)
     public void mapCreated(int slot, @NotNull MapData map) {
+        if (slot == MapContest.MAP_CONTEST_SLOT) {
+            // Map contest slot is handled slightly differently...
+            playerData.setSetting(SELECTED_SLOT, slot);
+
+            this.contestMap = map;
+            performSignal(EditMapIconBase.SIG_SELECT_MAP_IN_SLOT, contestMap, MapContest.MAP_CONTEST_SLOT);
+            editor.showMap(contestMap, MapContest.MAP_CONTEST_SLOT);
+            switcher.setOption(0);
+            playerData.setSetting(SELECTED_SLOT, MapContest.MAP_CONTEST_SLOT);
+
+            var pd = MapPlayerData.fromPlayer(player);
+            pd.setContestSlot(map.id());
+
+            return;
+        }
+
         // Need to 'predict' that the map will now be in the slot since we likely haven't received an update from remote.
         var pd = MapPlayerData.fromPlayer(player);
         pd.mapSlots()[slot] = map.id();
@@ -108,12 +132,15 @@ public class CreateMaps extends View {
         } else {
             // Otherwise, select the slot we have saved for them, otherwise the first slot with a map
             var savedSlot = this.playerData.getSetting(SELECTED_SLOT);
-            var slot = slots[savedSlot].getSlotState() == EditMapIconBase.State.FULL ? savedSlot : firstSlot;
-            async(() -> {
-                var map = slots[slot].mapDataFuture.get();
-                selectMapInSlot(map, slot);
-                slots[slot].setToSelected(map);
-            });
+            if (savedSlot != MapContest.MAP_CONTEST_SLOT) {
+                var slot = slots[savedSlot].getSlotState() == EditMapIconBase.State.FULL ? savedSlot : firstSlot;
+                async(() -> {
+                    var map = slots[slot].mapDataFuture.get();
+                    selectMapInSlot(map, slot);
+                    slots[slot].setToSelected(map);
+                });
+            }
+            // if you have map contest selected we handle it below.
         }
 
         // Map contest
@@ -122,8 +149,47 @@ public class CreateMaps extends View {
         long millisToStart = ChronoUnit.MILLIS.between(now, MapContest.START_DATE);
         long millisToEnd = ChronoUnit.MILLIS.between(now, MapContest.END_DATE);
 
-        contestSwitcher.setOption(millisToUnlock <= 0); // enabled
+        // idk if there is a better way to write this its kinda wack :sob:
+        int status = 0;
+        if (millisToEnd <= 0) {
+            status = 5; // Contest over, always this status
+        } else if (millisToUnlock <= 0) {
+            if (millisToStart <= 0) {
+                if (playerData.getContestSlot() != null) {
+                    if (contestMap != null && contestMap.isPublished()) {
+                        status = 4; // Map submitted
+                    } else status = 3; // Map in progress
+                } else status = 2; // Contest started, map not created
+            } else status = 1; // Contest not yet started
+        }
+        contestSwitcher.setOption(status);
+        if (millisToEnd > 0 && playerData.getContestSlot() != null && contestMap == null) {
+            contestSwitcher.setState(State.LOADING);
+            async(() -> {
+                contestMap = mapService.getMap(playerData.id(), playerData.getContestSlot());
+                player.scheduleNextTick(_ -> {
+                    contestSwitcher.setState(State.ACTIVE);
+                    if (contestMap.isPublished())
+                        contestSwitcher.setOption(4); // Map submitted
+
+                    var savedSlot = this.playerData.getSetting(SELECTED_SLOT);
+                    if (savedSlot == MapContest.MAP_CONTEST_SLOT) {
+                        if (contestMap != null && !contestMap.isPublished())
+                            selectContestMap(player);
+                        else {
+                            this.playerData.resetSetting(SELECTED_SLOT);
+                            reset(); // Reselect slot 0
+                        }
+                    }
+                });
+            });
+        }
+
         contestButtonLocked.setArgs(Component.text(NumberUtil.formatPlayerPlaytime(millisToStart)));
+        var timeToEndComponent = Component.text(NumberUtil.formatPlayerPlaytime(millisToEnd));
+        contestButtonCreate.setArgs(timeToEndComponent);
+        contestButtonInProgress.setArgs(timeToEndComponent);
+        contestButtonSubmitted.setArgs(timeToEndComponent);
     }
 
     @Action("personal_world")
@@ -147,6 +213,24 @@ public class CreateMaps extends View {
     @Signal(Element.SIG_UNMOUNT)
     private void onUnmount() {
         FutureUtil.submitVirtual(() -> playerData.writeUpdatesUpstream(playerService));
+    }
+
+    @Action("contest_slot_create")
+    public void createContestMap(@NotNull Player player) {
+        long millisToStart = ChronoUnit.MILLIS.between(LocalDateTime.now(), MapContest.START_DATE);
+        if (millisToStart > 0) return; // Sanity check
+
+        switcher.setOption(2);
+    }
+
+    @Action("contest_slot_in_progress")
+    public void selectContestMap(@NotNull Player player) {
+        if (contestMap == null) return; // Sanity check
+
+        performSignal(EditMapIconBase.SIG_SELECT_MAP_IN_SLOT, contestMap, MapContest.MAP_CONTEST_SLOT);
+        editor.showMap(contestMap, MapContest.MAP_CONTEST_SLOT);
+        switcher.setOption(0);
+        playerData.setSetting(SELECTED_SLOT, MapContest.MAP_CONTEST_SLOT);
     }
 
 }
