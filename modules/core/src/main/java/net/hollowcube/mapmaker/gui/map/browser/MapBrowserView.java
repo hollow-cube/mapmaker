@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.panels.Element;
 import net.hollowcube.mapmaker.panels.Pagination;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
@@ -31,10 +32,14 @@ public class MapBrowserView extends Panel {
     private final PlayerService playerService;
     private final MapService mapService;
     private final ServerBridge bridge;
+    private final boolean fetchOnMount;
 
-    private final Pagination<MapSearchParams.Builder> pagination;
+    protected final Text titleText;
+
+    protected final Pagination<MapSearchParams.Builder> pagination;
     private final Text searchTextElement;
-    private final SimpleSortPanel simpleSortPanel;
+    private SimpleSortPanel simpleSortPanel;
+    protected boolean ignoreParamsOnSearch = true;
 
     private volatile String searchText = "";
 
@@ -47,9 +52,10 @@ public class MapBrowserView extends Panel {
         this.playerService = playerService;
         this.mapService = mapService;
         this.bridge = bridge;
+        this.fetchOnMount = fetchOnMount;
 
         background("map_browser/container", -10, -31);
-        add(0, 0, title("Play Maps"));
+        this.titleText = add(0, 0, title("Play Maps"));
 
         add(0, 0, backOrClose());
         this.searchTextElement = add(1, 0, new Text("gui.map_browser.search_maps.empty", 8, 1, "Search...")
@@ -65,11 +71,16 @@ public class MapBrowserView extends Panel {
 
         // !!! WARNING !!!
         // Once we support advanced search, the simpleSort function needs to force the ui into simple mode.
-        this.simpleSortPanel = add(0, 6, new SimpleSortPanel(this::handleSortChange, fetchOnMount));
+        add(0, 6, createBottomPanel());
+    }
+
+    protected Element createBottomPanel() {
+        return this.simpleSortPanel = new SimpleSortPanel(this::handleSortChange, fetchOnMount);
     }
 
     // This is a pretty gross inflexible method, but its fine for now
     public void simpleSort(@NotNull SortPreset preset) {
+        if (this.simpleSortPanel == null) return; // Sanity
         this.simpleSortPanel.setSync(false);
         this.simpleSortPanel.setSort(preset);
     }
@@ -86,10 +97,10 @@ public class MapBrowserView extends Panel {
     @Blocking
     private @NotNull List<? extends Panel> onSearch(@NotNull MapSearchParams.Builder params, int page, int pageSize) {
         // If we have a search query, ignore the given params.
-        if (!this.searchText.isEmpty()) {
+        if (ignoreParamsOnSearch && !this.searchText.isEmpty()) {
             params = MapSearchParams.builder(host.player().getUuid().toString())
                     .query(searchText);
-        }
+        } else params = params.query(searchText);
 
         var response = mapService.searchMaps(params.page(page).pageSize(pageSize).build());
         if (page == 0) pagination.totalPages(response.pageCount());

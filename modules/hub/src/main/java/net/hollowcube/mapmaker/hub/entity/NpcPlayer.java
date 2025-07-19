@@ -42,6 +42,10 @@ public class NpcPlayer extends BaseNpcEntity {
         this.nameTag.getEntityMeta().setText(Component.text(username));
     }
 
+    public void setNameTag(@NotNull Component name) {
+        this.nameTag.getEntityMeta().setText(name);
+    }
+
     public void setEquipment(@NotNull EquipmentSlot slot, @NotNull ItemStack itemStack) {
         this.equipment.put(slot, itemStack);
     }

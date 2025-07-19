@@ -22,7 +22,7 @@ public class Element {
 
     private final Sprite[] sprites = new Sprite[2]; // 0=background, 1=foreground
 
-    protected Element(int slotWidth, int slotHeight) {
+    public Element(int slotWidth, int slotHeight) {
         this.slotWidth = slotWidth;
         this.slotHeight = slotHeight;
     }
