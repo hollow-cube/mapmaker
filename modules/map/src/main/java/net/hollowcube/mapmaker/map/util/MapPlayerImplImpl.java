@@ -168,6 +168,9 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
     }
 
     private boolean canFitWithBoundingBox(@NotNull EntityPose pose) {
+        var instance = getInstance();
+        if (instance == null) return true; // Sanity check not in an instance
+
         BoundingBox bb = pose == EntityPose.STANDING ? boundingBox : BoundingBox.fromPose(pose);
         if (bb == null) return false;
 
