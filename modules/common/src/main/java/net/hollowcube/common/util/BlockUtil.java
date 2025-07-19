@@ -2,6 +2,7 @@ package net.hollowcube.common.util;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
@@ -84,6 +85,8 @@ public final class BlockUtil {
 
         if (nbtIndex == -1) {
             // Only block name
+            if (!Key.parseable(input))
+                return Either.right(BlockParseResult.BLOCK_NOT_FOUND);
             final Block block = Block.fromKey(input);
             if (block == null)
                 return Either.right(BlockParseResult.BLOCK_NOT_FOUND);
@@ -93,6 +96,8 @@ public final class BlockUtil {
                 return Either.right(BlockParseResult.INVALID_PROPERTIES);
             // Block state
             final String blockName = input.substring(0, nbtIndex);
+            if (!Key.parseable(blockName))
+                return Either.right(BlockParseResult.BLOCK_NOT_FOUND);
             Block block = Block.fromKey(blockName);
             if (block == null)
                 return Either.right(BlockParseResult.BLOCK_NOT_FOUND);
