@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.kafka;
 
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.minestom.server.MinecraftServer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.errors.WakeupException;
@@ -38,7 +37,8 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
         consumer = new KafkaConsumer<>(Map.of(
                 "client.id", runtime.hostname() + "-" + topic,
                 "group.id", runtime.hostname(),
-                "bootstrap.servers", bootstrapServers
+                "bootstrap.servers", bootstrapServers,
+                "max.poll.interval.ms", "900000"
         ), new StringDeserializer(), new StringDeserializer());
         consumer.subscribe(List.of(topic));
 
