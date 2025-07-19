@@ -53,11 +53,14 @@ public final class UtilityCommands {
             });
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-fill")
+            var task = session.buildTask("we-fill")
                     .metadata() //todo
                     .compute(computeFunc)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -81,11 +84,14 @@ public final class UtilityCommands {
             var computeFunc = RegionFunctions.drain(new BlockVec(center), radius, (_, _, block) -> !flags.contains(Flags.KEEP_WATERLOGGED) || !"true".equals(block.getProperty("waterlogged")));
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-drain")
+            var task = session.buildTask("we-drain")
                     .metadata() //todo
                     .compute(computeFunc)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
 
         enum Flags {
@@ -131,11 +137,14 @@ public final class UtilityCommands {
             var generator = RegionFunctions.replace(region, Mask.always(), Pattern.air());
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-removeabove")
+            var task = session.buildTask("we-removeabove")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -164,11 +173,14 @@ public final class UtilityCommands {
             var generator = RegionFunctions.replace(region, Mask.always(), Pattern.air());
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-removebelow")
+            var task = session.buildTask("we-removebelow")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -192,11 +204,14 @@ public final class UtilityCommands {
             var generator = RegionFunctions.replace(region, mask, Pattern.air());
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-removenear")
+            var task = session.buildTask("we-removenear")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -224,11 +239,14 @@ public final class UtilityCommands {
             var generator = RegionFunctions.replace(region, fromMask, toPattern);
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-replacenear")
+            var task = session.buildTask("we-replacenear")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 

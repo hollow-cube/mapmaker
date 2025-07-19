@@ -6,6 +6,7 @@ import net.hollowcube.terraform.session.LocalSession;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.time.Instant;
@@ -116,17 +117,32 @@ public interface Task {
             return this;
         }
 
-        public @NotNull Task dryRun() {
+        public @Nullable Task dryRunIfCapacity() {
             this.dry = true;
-            return submit();
+            return submitIfCapacity();
         }
 
-        public @NotNull Task submit() {
+        public @Nullable Task submitIfCapacity() {
             Check.argCondition(computeFunc == null && buffer == null, "Must provide either a compute function or a buffer");
             Check.argCondition(computeFunc != null && buffer != null, "Cannot provide both a compute function and a buffer");
 
+            try {
+                var task = new TaskImpl(session, tag, dry, ephemeral, computeFunc, buffer, postApplyFunc);
+                session.submitTask(task);
+                return task;
+            } catch (TooManyTasksException ignored) {
+                return null;
+            }
+        }
+
+        public @Nullable Task submitForce() {
+            Check.argCondition(computeFunc == null && buffer == null,
+                               "Must provide either a compute function or a buffer");
+            Check.argCondition(computeFunc != null && buffer != null,
+                               "Cannot provide both a compute function and a buffer");
+
             var task = new TaskImpl(session, tag, dry, ephemeral, computeFunc, buffer, postApplyFunc);
-            session.submitTask(task);
+            session.submitTaskForce(task);
             return task;
         }
     }

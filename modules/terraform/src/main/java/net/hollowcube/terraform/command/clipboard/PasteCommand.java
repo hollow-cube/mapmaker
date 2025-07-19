@@ -11,6 +11,7 @@ import net.hollowcube.terraform.session.Clipboard;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.hollowcube.terraform.task.edit.WorldView;
+import net.hollowcube.terraform.util.Messages;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -48,7 +49,7 @@ public class PasteCommand extends CommandDsl {
         var playerPosition = player.getPosition();
 
         var session = LocalSession.forPlayer(player);
-        session.buildTask("paste")
+        var submitted = session.buildTask("paste")
                 .metadata()
                 .compute((task, world) -> {
                     var buffer = BlockBuffer.builder(world);
@@ -65,7 +66,10 @@ public class PasteCommand extends CommandDsl {
                     });
                     return buffer.build();
                 })
-                .submit();
+                               .submitIfCapacity();
+        if (submitted == null) {
+            player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+        }
     }
 
 }

@@ -46,11 +46,14 @@ public final class GenerationCommands {
             var generator = ShapeFunctions.cylinder(player.getPosition(), pattern, radius.withY(height), true);
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-hcyl")
+            var task = session.buildTask("we-hcyl")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -78,11 +81,14 @@ public final class GenerationCommands {
             var generator = ShapeFunctions.cylinder(player.getPosition(), pattern, new Vec(radius.x(), height, radius.y()), flags.contains(Flags.HOLLOW));
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-cyl")
+            var task = session.buildTask("we-cyl")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
 
         private enum Flags {
@@ -112,11 +118,14 @@ public final class GenerationCommands {
             var generator = ShapeFunctions.sphere(position, pattern, radius, true);
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-sphere")
+            var task = session.buildTask("we-sphere")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
 
         private enum Flags {
@@ -146,11 +155,14 @@ public final class GenerationCommands {
             var generator = ShapeFunctions.sphere(position, pattern, radius, flags.contains(Flags.HOLLOW));
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-sphere")
+            var task = session.buildTask("we-sphere")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
 
         private enum Flags {
@@ -176,11 +188,14 @@ public final class GenerationCommands {
             var generator = ShapeFunctions.pyramid(player.getPosition(), pattern, height, true);
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-hpyramid")
+            var task = session.buildTask("we-hpyramid")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -225,11 +240,14 @@ public final class GenerationCommands {
 
             var session = LocalSession.forPlayer(player);
             session.cui().renderer().switchTo(ClientRenderer.RenderContext.NORMAL, false);
-            session.buildTask("we-pyramid")
+            var task = session.buildTask("we-pyramid")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
 
         private enum Flags {

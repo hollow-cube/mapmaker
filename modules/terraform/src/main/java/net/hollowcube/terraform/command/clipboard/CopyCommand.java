@@ -8,6 +8,7 @@ import net.hollowcube.terraform.session.Clipboard;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.hollowcube.terraform.task.ComputeFunc;
+import net.hollowcube.terraform.util.Messages;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
@@ -39,13 +40,16 @@ public class CopyCommand extends CommandDsl {
         var clipboard = playerSession.clipboard(Clipboard.DEFAULT);
 
         // Take away the blocks, then add the undo batch to the clipboard
-        localSession.buildTask("copy")
+        var task = localSession.buildTask("copy")
                 .metadata() //todo
                 .compute(ComputeFunc.set(region, Pattern.block(Block.AIR)))
                 .post(result -> {
                     player.sendMessage(Component.translatable("terraform.copy", Component.translatable(String.valueOf(result.blocksChanged()))));
                     clipboard.setData(result.undoBuffer().toSchematic(new Vec(-pos.blockX(), -pos.blockY(), -pos.blockZ())));
                 })
-                .dryRun();
+                               .dryRunIfCapacity();
+        if (task == null) {
+            player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+        }
     }
 }

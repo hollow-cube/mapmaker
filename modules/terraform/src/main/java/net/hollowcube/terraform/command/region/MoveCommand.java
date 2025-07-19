@@ -7,6 +7,7 @@ import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.compute.RegionFunctions;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.LocalSession;
+import net.hollowcube.terraform.util.Messages;
 import net.hollowcube.terraform.util.math.DirectionUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -46,7 +47,7 @@ public class MoveCommand extends CommandDsl {
 
         // Execute the change
         var session = LocalSession.forPlayer(player);
-        session.buildTask("move")
+        var task = session.buildTask("move")
                 .metadata() //todo
                 .compute(generator)
                 .post(result -> {
@@ -59,6 +60,9 @@ public class MoveCommand extends CommandDsl {
 //                    selection.selectPrimary(newPrimary, false);
 //                    selection.selectSecondary(newSecondary, false);
                 })
-                .submit();
+                          .submitIfCapacity();
+        if (task == null) {
+            player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+        }
     }
 }

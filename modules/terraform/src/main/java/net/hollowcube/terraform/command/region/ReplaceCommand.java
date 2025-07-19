@@ -9,6 +9,7 @@ import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.task.ComputeFunc;
+import net.hollowcube.terraform.util.Messages;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -38,12 +39,15 @@ public final class ReplaceCommand extends CommandDsl {
 
         // Execute the change
         var session = LocalSession.forPlayer(player);
-        session.buildTask("replace")
+        var task = session.buildTask("replace")
                 .metadata() //todo
                 .compute(ComputeFunc.replace(region, mask, pattern))
                 .post(result -> {
                     player.sendMessage(Component.translatable("terraform.selection.replace", Component.translatable(String.valueOf(result.blocksChanged()))));
                 })
-                .submit();
+                          .submitIfCapacity();
+        if (task == null) {
+            player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+        }
     }
 }
