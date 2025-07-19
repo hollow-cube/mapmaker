@@ -8,6 +8,7 @@ import net.hollowcube.canvas.annotation.ContextObject;
 import net.hollowcube.canvas.annotation.Outlet;
 import net.hollowcube.canvas.annotation.OutletGroup;
 import net.hollowcube.canvas.internal.Context;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -69,6 +70,8 @@ public class BuilderMenuView extends View {
     @Action("save_and_exit")
     private void saveAndExit(@NotNull Player player) {
         player.closeInventory();
+        var world = MapWorld.forPlayerOptional(player);
+        if (world != null) world.removePlayer(player);
         bridge.joinHub(player);
     }
 

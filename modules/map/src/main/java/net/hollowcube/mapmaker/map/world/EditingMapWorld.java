@@ -212,6 +212,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         saveLock.lock();
         try {
             if (isAutoSave) logger.info("Autosaving world {}", map().id());
+            if (!isAutoSave) logger.info("Manually saving world {}", map().id());
 
             // Save the map settings
             map().settings().withUpdateRequest(updates -> {
