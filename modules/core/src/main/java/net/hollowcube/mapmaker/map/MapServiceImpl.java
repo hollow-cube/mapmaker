@@ -235,7 +235,10 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofByteArray());
         return switch (res.statusCode()) {
-            case 200 -> res.body();
+            case 200 -> {
+                logger.log(System.Logger.Level.INFO, "Received map world for " + id + ", length: " + res.body().length);
+                yield res.body();
+            }
             case 204 -> null;
             case 404 -> throw new NotFoundError(id);
             default -> throw new InternalError("Failed to get map world: " + new String(res.body()));
@@ -277,6 +280,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public void updateMapWorld(@NotNull String id, byte @NotNull [] worldData) {
+        logger.log(System.Logger.Level.INFO, "Updating map world for " + id + ", length: " + worldData.length);
         var req = HttpRequest.newBuilder()
                 .method("PUT", HttpRequest.BodyPublishers.ofByteArray(worldData))
                 .uri(URI.create(urlV3 + "/maps/" + id + "/world"))
