@@ -336,7 +336,7 @@ jobs:
         uses: hollow-cube/actions/secrets@main
         with:
           token: ${{ secrets.VAULT_TOKEN }}
-          path: prod/mapmaker
+          path: prod/map-isolate
       # </ALERT>
       - name: Upgrade/install helm chart
         env:

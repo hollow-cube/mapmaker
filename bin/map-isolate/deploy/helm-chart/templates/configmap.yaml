@@ -12,3 +12,6 @@ data:
     image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
     env:
       MAPMAKER_RESOURCE_PACK_HASH: {{ .Values.mapmaker.resourcePackHash }}
+{{- range $key, $value := .Values.env }}
+      {{ $key }}: {{ $value | quote }}
+{{- end }}
