@@ -27,6 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
 public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
+    private static final double MAX_PARTICLES_PER_SECOND = 100;
     public static final String ID = "mapmaker:particle_emitter";
 
     private boolean isValid = false;
@@ -162,7 +163,7 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
             if (!(data.get("rate") instanceof NumberBinaryTag rateTag))
                 throw new IllegalArgumentException("rate: expected number, got " + data.get("rate").getClass().getSimpleName());
             Check.argCondition(rateTag.doubleValue() <= 0, "rate: must be positive");
-            this.rate = rateTag.doubleValue();
+            this.rate = Math.min(rateTag.doubleValue(), MAX_PARTICLES_PER_SECOND / 20.0);
         } else this.rate = 1;
 
         // Lifetime

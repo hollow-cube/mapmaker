@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.Uuids;
+import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
@@ -27,8 +28,11 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 public class MapIsolateServerRunner extends AbstractMapServer {
     private static final Logger logger = LoggerFactory.getLogger(MapIsolateServerRunner.class);
@@ -134,5 +138,12 @@ public class MapIsolateServerRunner extends AbstractMapServer {
 
     protected void handleDisconnect(@NotNull PlayerDisconnectEvent event) {
         super.handlePlayerDisconnect(event.getPlayer());
+    }
+
+    @Override
+    protected @NotNull List<Supplier<DataVersion>> extraDataVersions() {
+        var versions = new ArrayList<>(super.extraDataVersions());
+        versions.addAll(MapServerRunner.extraDataVersionsForMaps());
+        return versions;
     }
 }

@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":modules:canvas:api"))
     implementation(project(":modules:canvas:impl-standalone"))
     implementation(project(":modules:core"))
+    implementation(project(":modules:datafix"))
     implementation(project(":modules:map"))
     implementation(project(":modules:terraform"))
 
