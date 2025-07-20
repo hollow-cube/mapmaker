@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
 import net.hollowcube.mapmaker.map.util.RelativePos;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.Result;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -75,7 +76,15 @@ public class HappyGhastMarkerHandler extends ObjectEntityHandler {
 
     @Override
     public void onDataChange(@Nullable Player player) {
-        var data = entity.getData(Data.CODEC);
+        var parseResult = entity.getData(Data.CODEC);
+        if (!(parseResult instanceof Result.Ok(var data))) {
+            if (player != null) {
+                var msg = ((Result.Error<?>) parseResult).message();
+                player.sendMessage("Invalid marker data: " + msg);
+            }
+            return;
+        }
+
 
         double lastTime = 0;
         var lastPos = entity.getPosition().withView(0, 0);

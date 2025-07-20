@@ -13,6 +13,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.Result;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.color.AlphaColor;
@@ -87,9 +88,9 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         return getTag(DATA_TAG);
     }
 
-    public <T> @NotNull T getData(@NotNull Codec<T> codec) {
+    public <T> @NotNull Result<T> getData(@NotNull Codec<T> codec) {
         var coder = new RegistryTranscoder<>(Transcoder.NBT, MinecraftServer.process());
-        return codec.decode(coder, getData()).orElseThrow();
+        return codec.decode(coder, getData());
     }
 
     public @Nullable Point getMin() {
