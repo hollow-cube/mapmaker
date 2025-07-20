@@ -15,6 +15,7 @@ import net.hollowcube.mapmaker.map.world.AbstractMapMakerMapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.session.Presence;
+import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventNode;
@@ -35,6 +36,7 @@ public class MapIsolateServerRunner extends AbstractMapServer {
     private final String mapId;
 
     private AbstractMapMakerMapWorld world;
+    private Terraform terraform;
     private FeatureList features;
 
     public MapIsolateServerRunner(@NotNull ConfigLoaderV3 config) {
@@ -81,6 +83,9 @@ public class MapIsolateServerRunner extends AbstractMapServer {
         var hdb = new HeadDatabase(otel);
         addBinding(HeadDatabase.class, hdb, "headDatabase", "hdb");
         MapServerRunner.registerCommands(this, commandManager(), hdb);
+
+        this.terraform = MapServerRunner.initBuildLogic(mapService(), commandManager());
+        addBinding(Terraform.class, terraform);
 
         this.features = FeatureList.load(config);
         addBinding(FeatureList.class, features);
