@@ -200,7 +200,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
         super.close(reason);
 
-        if (autoSaveTask != null) autoSaveTask.cancel();
+        if (autoSaveTask != null)
+            autoSaveTask.cancel();
         save(false);
 
         // Unload the backing world
@@ -239,12 +240,12 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
             }
 
             // Save the players data
-            Set.copyOf(players()).forEach(p -> {
+            for (var p : Set.copyOf(players())) {
                 if (!p.isOnline()) {
                     logger.warn("Player {} is not online, removing from map {}", p.getUsername(), map().id());
                     removePlayer(p); // Sanity
                 }
-            });
+            }
             for (var player : players()) {
                 var playerData = PlayerDataV2.fromPlayer(player);
 

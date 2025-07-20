@@ -180,6 +180,10 @@ public final class FutureUtil {
 
     /// Blocks until the end of the current tick for the entity, then runs the task _on the tick thread_ and returns.
     public static void waitForEndOfTick(@NotNull Entity entity, @NotNull Runnable task) {
+        if (entity.isRemoved()) {
+            task.run(); // Player isnt ticking, run immediately.
+            return;
+        }
         var future = new CompletableFuture<Void>();
         entity.scheduler().scheduleEndOfTick(() -> {
             try {
