@@ -161,13 +161,18 @@ public record RelativePos(
             if (!(result instanceof Result.Ok(D raw))) return result.cast();
             if (coder.getDouble(raw) instanceof Result.Ok(Double number))
                 return new Result.Ok<>(Either.left(number));
-            if (coder.getString(raw) instanceof Result.Ok(String str)) {
-                if (str.startsWith("~"))
-                    return new Result.Ok<>(Either.right(Double.parseDouble(str.substring(1))));
-                return new Result.Ok<>(Either.left(Double.parseDouble(str)));
-            }
+            try {
+                if (coder.getString(raw) instanceof Result.Ok(String str)) {
+                    if (str.startsWith("~"))
+                        return new Result.Ok<>(Either.right(Double.parseDouble(str.substring(1))));
+                    return new Result.Ok<>(Either.left(Double.parseDouble(str)));
+                }
 
-            return new Result.Error<>("Coordinate must be number or string, but got " + result);
+                return new Result.Error<>("Coordinate must be number or string, but got " + result);
+            } catch (NumberFormatException ignored) {
+                // Just default to 0.0
+                return new Result.Ok<>(Either.right(0.0));
+            }
         }
     }
 
