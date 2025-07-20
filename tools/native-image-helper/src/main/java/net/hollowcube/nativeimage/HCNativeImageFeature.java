@@ -65,6 +65,8 @@ public class HCNativeImageFeature implements Feature {
             RuntimeReflection.register(ctor);
         for (var field : gsonClass.getDeclaredFields())
             RuntimeReflection.register(field);
+        for (var field : gsonClass.getDeclaredMethods())
+            RuntimeReflection.register(field);
     }
 
     private void processViewClass(@NotNull BeforeAnalysisAccess access, @NotNull CanvasClasses classes, @NotNull ClassInfo ci) {
