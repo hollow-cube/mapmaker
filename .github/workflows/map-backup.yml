@@ -1,7 +1,7 @@
 name: map-backup.yml
 on:
   schedule:
-    - cron: '0 */2 * * *'
+    - cron: '0 * * * *'
 jobs:
   backup:
     runs-on: ubuntu-latest
