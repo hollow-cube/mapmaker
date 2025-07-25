@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.playerinfo.PlayerInfoCommand;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.hub.command.util.HubFlyCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubSpawnCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubTrainCommand;
@@ -46,7 +47,7 @@ public class HubServerRunner extends AbstractMapServer {
 
     private HubMapWorld world;
 
-    HubServerRunner(@NotNull ConfigLoaderV3 config) {
+    public HubServerRunner(@NotNull ConfigLoaderV3 config) {
         super(config);
 
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("hub-init")
@@ -118,8 +119,12 @@ public class HubServerRunner extends AbstractMapServer {
 
     protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
         var player = event.getPlayer();
-        ProtocolVersions.requestProtocolVersionFromProxy(player);
-        if (!player.isOnline()) return;
+        if (!config.get(VelocityConfig.class).secret().isEmpty()) {
+            ProtocolVersions.requestProtocolVersionFromProxy(player);
+            if (!player.isOnline()) return;
+        } else {
+            ProtocolVersions.unsafeSetProtocolVersion(player, MinecraftServer.PROTOCOL_VERSION);
+        }
 
         if (!transferPlayerSession(event.getPlayer(), HUB_PRESENCE)) {
             return;

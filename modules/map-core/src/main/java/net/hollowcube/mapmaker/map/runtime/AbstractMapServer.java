@@ -229,7 +229,7 @@ public abstract class AbstractMapServer implements MapServer {
         if (!velocityConfig.secret().isEmpty()) {
             logger.info("Enabling modern forwarding...");
             VelocityProxy.enable(velocityConfig.secret());
-        } else {
+        } else if (!globalConfig.noop()) {
             logger.info("Velocity not configured, using online mode...");
             MojangAuth.init();
         }
