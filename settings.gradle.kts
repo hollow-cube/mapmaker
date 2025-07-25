@@ -1,3 +1,11 @@
+pluginManagement {
+    repositories {
+        maven(url = "https://maven.fabricmc.net/")
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 plugins {
     // Settings plugins cannot be declared from the version catalog
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.9.0"
@@ -34,6 +42,7 @@ include(
 
 include(
     "tools:native-image-helper",
+    "tools:puppeteer",
 )
 
 include(

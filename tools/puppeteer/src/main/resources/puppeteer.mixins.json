@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "net.hollowcube.puppeteer.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "OptionsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}
