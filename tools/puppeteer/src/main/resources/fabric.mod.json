@@ -6,15 +6,14 @@
   "environment": "*",
   "entrypoints": {
     "fabric-client-gametest": [
-      "net.hollowcube.puppeteer.SampleClientTest",
-      "net.hollowcube.puppeteer.SampleOtherTest"
+      "net.hollowcube.puppeteer.SampleClientTest"
     ]
   },
   "depends": {
     "fabricloader": ">=0.16.14",
     "minecraft": "~1.21.8",
     "java": ">=21",
-    "fabric-api": "*"
+    "fabric-client-gametest-api-v1": "*"
   },
   "mixins": [
     "puppeteer.mixins.json"
