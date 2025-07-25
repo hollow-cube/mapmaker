@@ -70,9 +70,9 @@ public record EnableSettingAction(
     @Override
     public void applyTo(@NotNull Player player, @NotNull PlayState state) {
         var settings = state.get(Attachments.SETTINGS);
-        if (settings == null) state.set(Attachments.SETTINGS, settings = new SavedMapSettings());
+        if (settings == null)  settings = new SavedMapSettings();
         if (setting == null || !(setting.defaultValue() instanceof Boolean)) return;
-        settings.set((MapSetting<Boolean>) setting, true);
+        state.set(Attachments.SETTINGS, settings.with((MapSetting<Boolean>) setting, true));
     }
 
     private static @NotNull TranslatableComponent makeThumbnail(@Nullable EnableSettingAction action) {

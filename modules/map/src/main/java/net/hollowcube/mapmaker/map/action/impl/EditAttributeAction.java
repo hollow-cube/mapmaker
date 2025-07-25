@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 @SuppressWarnings("UnstableApiUsage")
 public record EditAttributeAction(
@@ -61,12 +62,12 @@ public record EditAttributeAction(
     public void applyTo(@NotNull Player player, @NotNull PlayState state) {
         if (this.attribute == null) return;
 
-        var current = state.get(SAVE_DATA, new AttributeMap());
+        var current = Objects.requireNonNullElseGet(state.get(SAVE_DATA), AttributeMap::new);
         if (this.operation == Operation.SET) {
-            current.put(this.attribute, this.value);
+            current = current.with(this.attribute, this.value);
         } else {
             var value = current.getOrDefault(this.attribute, this.attribute.defaultValue());
-            current.put(this.attribute, this.operation.apply(value, this.value));
+            current = current.with(this.attribute, this.operation.apply(value, this.value));
         }
 
         state.set(SAVE_DATA, current);
