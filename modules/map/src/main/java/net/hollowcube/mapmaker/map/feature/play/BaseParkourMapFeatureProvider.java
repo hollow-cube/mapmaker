@@ -20,6 +20,7 @@ import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectDataV2;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.map.feature.play.handlers.SpectateHandler;
 import net.hollowcube.mapmaker.map.feature.play.item.*;
+import net.hollowcube.mapmaker.map.feature.play.setting.OnlySprintFeatureProvider;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.hollowcube.mapmaker.map.item.checkpoint.CheckpointItem;
@@ -289,7 +290,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             player.scheduler().scheduleEndOfTick(() -> updatePlayerFromState(world, player, playState, isStarting));
 
             // If this is OS, reset the player as they are added
-            if (world.map().getSetting(MapSettings.ONLY_SPRINT) && !player.getTag(RESET_TAG) && event.isFirstInit()) {
+            if (!OnlySprintFeatureProvider.canSprint(playState, world) && !player.getTag(RESET_TAG) && event.isFirstInit()) {
                 player.setTag(RESET_TAG, true);
                 player.scheduleNextTick(ignored -> player.removeTag(RESET_TAG));
 //                player.sendMessage(Component.translatable("map.spectator_mode.only_sprint"));

@@ -43,10 +43,12 @@ public class OnlySprintFeatureProvider extends AbstractSettingFeatureProvider {
 
         var state = SaveState.optionalFromPlayer(player);
         if (state == null) return true; // Sanity check
+        return canSprint(state.state(PlayState.class), world);
+    }
 
-        var playstate = state.state(PlayState.class);
-        return !playstate.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
-                .get(MapSettings.ONLY_SPRINT, world.map().settings());
+    public static boolean canSprint(@NotNull PlayState state, @NotNull MapWorld world) {
+        return !state.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
+                     .get(MapSettings.ONLY_SPRINT, world.map().settings());
     }
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {
