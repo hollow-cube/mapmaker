@@ -2,8 +2,11 @@ package net.hollowcube.mapmaker.map.util;
 
 import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.block.handler.PressurePlateBlockMixin;
+import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
+import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.collision.PhysicsUtils;
@@ -21,12 +24,10 @@ import net.minestom.server.utils.chunk.ChunkCache;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 // I(matt)DK what to name this class lol
-public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerRiptideExtension, PlayerLiquidExtension {
+public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerRiptideExtension, PlayerLiquidExtension, PlayerPlayStateExtension {
     private int riptideTicks = 0;
 
     // Only present sometimes (eg during riptide)
@@ -34,6 +35,7 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
 
     // it only has pressure plates for now, kinda want to move away from using blocks statefully like this
     private final Map<PressurePlateBlockMixin, BlockHandler.Tick> blocksSteppedOn = new HashMap<>();
+    private final Set<SpatialObject> objectsTouching = new HashSet<>();
     private boolean isInWater, isInLava;
 
     public MapPlayerImplImpl(@NotNull PlayerConnection playerConnection, @NotNull GameProfile gameProfile) {
@@ -138,7 +140,15 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
     @Override
     protected void setPositionInternal(@NotNull Pos newPosition) {
         super.setPositionInternal(newPosition);
-        updateTouchingPressurePlates();
+
+        // For now only do these checks when playing. May want to generalize to allow for more behavior in editing mode?
+        // Feels kinda yikes for this to care about the world state of the player.
+        var playWorld = OpUtils.map(MapWorld.forPlayerOptional(this), MapWorld::playWorld);
+        if (playWorld != null) {
+            updateTouchingPressurePlates();
+            updateTouchingMarkerEntities(playWorld);
+        }
+
     }
 
     private void updateWaterLavaState() {
@@ -244,6 +254,12 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
         return false;
     }
 
+    @Override
+    public void resetPlayingState() {
+        this.blocksSteppedOn.clear();
+        this.objectsTouching.clear();
+    }
+
     private void updateTouchingPressurePlates() {
         var instance = getInstance();
         if (instance == null || !isActive()) return; // Sanity check not in an instance
@@ -283,5 +299,30 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
         }
         blocksSteppedOn.clear();
         blocksSteppedOn.putAll(newBlocks);
+    }
+
+    private void updateTouchingMarkerEntities(@NotNull MapWorld playWorld) {
+        var position = getPosition();
+        var boundingBox = getBoundingBox();
+        var newObjects = playWorld.octree().intersectingObjects(new net.hollowcube.mapmaker.map.util.spatial.BoundingBox(
+                (float) (position.x() + boundingBox.minX()),
+                (float) (position.y() + boundingBox.minY()),
+                (float) (position.z() + boundingBox.minZ()),
+                (float) (position.x() + boundingBox.maxX()),
+                (float) (position.y() + boundingBox.maxY()),
+                (float) (position.z() + boundingBox.maxZ())
+        ));
+
+        for (var newObject : newObjects) {
+            if (!objectsTouching.remove(newObject) && newObject instanceof MarkerEntity marker) {
+                marker.onPlayerEntered(playWorld, this);
+            }
+        }
+        for (var object : objectsTouching) {
+            if (object instanceof MarkerEntity marker)
+                marker.onPlayerExited(playWorld, this);
+        }
+        objectsTouching.clear();
+        objectsTouching.addAll(newObjects);
     }
 }

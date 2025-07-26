@@ -27,6 +27,7 @@ import net.hollowcube.mapmaker.map.item.checkpoint.CheckpointItem;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.util.CustomizableHotbarManager;
 import net.hollowcube.mapmaker.map.util.MapMessages;
+import net.hollowcube.mapmaker.map.util.PlayerPlayStateExtension;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
@@ -233,6 +234,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var player = event.getPlayer();
         var world = event.getMapWorld();
         if (!world.isPlaying(player)) return;
+
+        if (player instanceof PlayerPlayStateExtension ext)
+            ext.resetPlayingState();
 
         MapCompletionAnimation.cancel(player); // In case the player resets themselves
 

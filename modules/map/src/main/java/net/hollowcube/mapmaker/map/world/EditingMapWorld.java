@@ -366,6 +366,14 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
     }
 
     @Override
+    public void queueCollisionTreeRebuild() {
+        super.queueCollisionTreeRebuild();
+        if (testWorld != null) {
+            testWorld.queueCollisionTreeRebuild();
+        }
+    }
+
+    @Override
     public <T> void setTag(@NotNull Tag<T> tag, @Nullable T value) {
         instance().setTag(tag, value);
     }

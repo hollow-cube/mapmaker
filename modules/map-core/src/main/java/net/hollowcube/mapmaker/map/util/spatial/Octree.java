@@ -7,6 +7,10 @@ import java.util.List;
 @NotNullByDefault
 public interface Octree {
 
+    static Octree emptyOctree() {
+        return EmptyOctree.INSTANCE;
+    }
+
     /// Creates a new [Octree] with a bounding box that covers 2^scalePowerOfTwo blocks in all
     /// dimensions.
     ///
@@ -17,7 +21,8 @@ public interface Octree {
 
     List<SpatialObject> intersectingObjects(BoundingBox boundingBox);
 
-    record BoundingBoxDebug(boolean isObject, BoundingBox boundingBox) {}
+    record BoundingBoxDebug(boolean isObject, BoundingBox boundingBox) {
+    }
 
     List<BoundingBoxDebug> debugBoundingBoxes();
 

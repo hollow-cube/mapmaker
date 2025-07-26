@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
@@ -9,6 +10,8 @@ import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandlerRegistry;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
+import net.hollowcube.mapmaker.map.util.spatial.Octree;
+import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
 import net.hollowcube.terraform.instance.TerraformInstanceBiomes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -37,6 +40,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
+
+import static net.hollowcube.mapmaker.map.util.spatial.Octree.simpleOctree;
 
 @SuppressWarnings("UnstableApiUsage")
 public non-sealed abstract class AbstractMapWorld implements MapWorld {
@@ -75,6 +80,8 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
     private final Set<Player> playersUnmodifiable = Collections.unmodifiableSet(players);
     private final Set<Player> spectators = new CopyOnWriteArraySet<>();
     private final Set<Player> spectatorsUnmodifiable = Collections.unmodifiableSet(spectators);
+
+    private Octree octree = null;
 
     protected AbstractMapWorld(@NotNull MapServer server, @NotNull MapData map, @NotNull MapInstance instance) {
         this.server = server;
@@ -283,6 +290,30 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         removePlayerSet(this, spectators, reason);
         players.clear();
         spectators.clear();
+    }
+
+    @Override
+    public @NotNull Octree octree() {
+        FutureUtil.assertTickThreadWarn();
+        if (octree == null) {
+            List<SpatialObject> allObjects = new ArrayList<>();
+            for (var entity : instance().getEntities()) {
+                if (entity.isRemoved() || !(entity instanceof SpatialObject spatial)) continue;
+                if (spatial.boundingBox().size().isZero()) continue;
+                allObjects.add(spatial);
+            }
+
+            var size = OpUtils.mapOr(map().settings().getSize(),
+                    MapSize::size, MapSize.NORMAL.size());
+            var powerOfTwo = (int) Math.ceil(Math.log(Math.min(size, 4096)) / Math.log(2));
+            this.octree = simpleOctree(powerOfTwo, allObjects);
+        }
+        return octree;
+    }
+
+    @Override
+    public void queueCollisionTreeRebuild() {
+        this.octree = null;
     }
 
     private static void removePlayerSet(@NotNull MapWorld world, @NotNull Collection<Player> players, @Nullable Component reason) {

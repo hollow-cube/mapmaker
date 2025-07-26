@@ -247,7 +247,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         createAxiomMarkerUpdatePacket().sendToViewers(this);
     }
 
-    private void updateBoundingBox() {
+    protected void updateBoundingBox() {
         Point min = getMin(), max = getMax();
         if (min == null || max == null) {
             setBoundingBox(NO_BB);

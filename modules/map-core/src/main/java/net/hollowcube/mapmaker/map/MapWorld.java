@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map;
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandlerRegistry;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
+import net.hollowcube.mapmaker.map.util.spatial.Octree;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -113,6 +114,8 @@ public sealed interface MapWorld extends TagReadable, TagWritable permits Abstra
         return false; // Worlds are read-only by default
     }
 
+    // Event Handling
+
     /**
      * Gets the {@link EventNode} for this world.
      *
@@ -123,6 +126,13 @@ public sealed interface MapWorld extends TagReadable, TagWritable permits Abstra
     default void callEvent(@NotNull InstanceEvent event) {
         instance().eventNode().call(event);
     }
+
+    // Collision tree
+
+    @NotNull Octree octree();
+
+    /// Queues a rebuild of the collision tree, will be processed sometime in the future up to the implementation.
+    void queueCollisionTreeRebuild();
 
     // TagReadable/TagWritable read-only implementation (EditingMapWorld overrides the write methods to make it writable)
 
