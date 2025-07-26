@@ -1,21 +1,28 @@
 package net.hollowcube.mapmaker.map.util;
 
 import net.hollowcube.common.util.BlockUtil;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
+import net.hollowcube.mapmaker.map.block.handler.PressurePlateBlockMixin;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.collision.PhysicsUtils;
+import net.minestom.server.coordinate.BlockVec;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityPose;
 import net.minestom.server.entity.metadata.LivingEntityMeta;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.utils.chunk.ChunkCache;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 // I(matt)DK what to name this class lol
@@ -25,6 +32,8 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
     // Only present sometimes (eg during riptide)
     private PhysicsResult nextPhysicsResult = null;
 
+    // it only has pressure plates for now, kinda want to move away from using blocks statefully like this
+    private final Map<PressurePlateBlockMixin, BlockHandler.Tick> blocksSteppedOn = new HashMap<>();
     private boolean isInWater, isInLava;
 
     public MapPlayerImplImpl(@NotNull PlayerConnection playerConnection, @NotNull GameProfile gameProfile) {
@@ -124,6 +133,12 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
 
         if (newPose != oldPose) setPose(newPose);
         updateWaterLavaState();
+    }
+
+    @Override
+    protected void setPositionInternal(@NotNull Pos newPosition) {
+        super.setPositionInternal(newPosition);
+        updateTouchingPressurePlates();
     }
 
     private void updateWaterLavaState() {
@@ -227,5 +242,46 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
         }
 
         return false;
+    }
+
+    private void updateTouchingPressurePlates() {
+        var instance = getInstance();
+        if (instance == null || !isActive()) return; // Sanity check not in an instance
+
+        final EntityPose pose = getPose();
+        final BoundingBox bb = pose == EntityPose.STANDING ? boundingBox : BoundingBox.fromPose(pose);
+        if (bb == null) return;
+
+        var newBlocks = new HashMap<PressurePlateBlockMixin, BlockHandler.Tick>();
+
+        var position = getPosition();
+        var iter = bb.getBlocks(getPosition());
+        while (iter.hasNext()) {
+            var posMut = iter.next();
+            var pos = new BlockVec(posMut.x(), posMut.y(), posMut.z());
+            var chunk = instance.getChunkAt(pos);
+            if (chunk == null || !chunk.isLoaded()) continue;
+            var block = chunk.getBlock(pos, Block.Getter.Condition.CACHED);
+            var handler = OpUtils.map(block, Block::handler);
+            if (!(handler instanceof PressurePlateBlockMixin plate))
+                continue;
+
+            var hit = PressurePlateBlockMixin.BOUNDING_BOX.intersectBox(
+                    position.sub(pos.blockX(), pos.blockY(), pos.blockZ()), bb);
+            if (hit) newBlocks.put(plate, new BlockHandler.Tick(block, instance, pos));
+        }
+
+        // Diff the new players with the old players
+        for (var entry : newBlocks.entrySet()) {
+            var removed = blocksSteppedOn.remove(entry.getKey());
+            if (removed == null) {
+                entry.getKey().onPlatePressed(entry.getValue(), this);
+            }
+        }
+        for (var entry : blocksSteppedOn.entrySet()) {
+            entry.getKey().onPlateReleased(entry.getValue(), this);
+        }
+        blocksSteppedOn.clear();
+        blocksSteppedOn.putAll(newBlocks);
     }
 }

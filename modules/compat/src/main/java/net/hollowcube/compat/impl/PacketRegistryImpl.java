@@ -54,7 +54,6 @@ public final class PacketRegistryImpl implements PacketRegistry {
                     if (!registerEvent.getDisabledMods().isEmpty() && Boolean.TRUE.equals(player.getAndSetTag(CompatProvider.FIRST_JOIN_TAG, null))) {
                         var pvnText = Component.text(ProtocolVersions.getProtocolName(MinecraftServer.PROTOCOL_VERSION));
                         var disabledModList = Component.join(JoinConfiguration.commas(true), registerEvent.getDisabledMods());
-                        System.out.println(disabledModList);
                         player.sendMessage(Component.translatable("join.unsupported_mods", pvnText, disabledModList));
                     }
                 }
