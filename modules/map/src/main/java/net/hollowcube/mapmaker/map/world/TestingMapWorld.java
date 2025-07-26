@@ -103,12 +103,14 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
         super.addPlayer(player);
         player.setGameMode(GameMode.ADVENTURE);
 
-        var startingPos = player.getPosition();
-        SpectateHandler.setCheckpoint(player, startingPos);
-        player.teleport(startingPos, Vec.ZERO, null, RelativeFlags.NONE); //todo is this necessary it seems hella dumb?
+        player.scheduler().scheduleEndOfTick(() -> {
+            var startingPos = player.getPosition();
+            SpectateHandler.setCheckpoint(player, startingPos);
+            player.teleport(startingPos, Vec.ZERO, null, RelativeFlags.NONE); //todo is this necessary it seems hella dumb?
 
-        var isMapJoin = player.getAndSetTag(FIRST_JOIN_TAG, null) != null;
-        callEvent(new MapPlayerInitEvent(this, player, true, isMapJoin));
+            var isMapJoin = player.getAndSetTag(FIRST_JOIN_TAG, null) != null;
+            callEvent(new MapPlayerInitEvent(this, player, true, isMapJoin));
+        });
     }
 
     @Override
