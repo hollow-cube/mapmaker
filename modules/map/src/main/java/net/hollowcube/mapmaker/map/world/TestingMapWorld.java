@@ -71,7 +71,7 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
     @Override
     public void load() {
         features().preinitMap(this);
-        
+
         super.load();
     }
 
@@ -128,5 +128,10 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
     @Override
     protected void sendBossBars(@NotNull Player player) {
         // Intentionally do nothing so we preserve the editing boss bar
+    }
+
+    @Override
+    public @Nullable MapWorld playWorld() {
+        return this;
     }
 }

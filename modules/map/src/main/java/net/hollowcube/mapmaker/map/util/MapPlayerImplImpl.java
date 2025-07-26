@@ -143,7 +143,8 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
 
         // For now only do these checks when playing. May want to generalize to allow for more behavior in editing mode?
         // Feels kinda yikes for this to care about the world state of the player.
-        var playWorld = OpUtils.map(MapWorld.forPlayerOptional(this), MapWorld::playWorld);
+        var playWorld = MapWorld.forPlayerOptional(this);
+        if (playWorld != null) playWorld = playWorld.playWorld();
         if (playWorld != null) {
             updateTouchingPressurePlates();
             updateTouchingMarkerEntities(playWorld);
@@ -282,8 +283,8 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
             if (!(handler instanceof PressurePlateBlockMixin plate))
                 continue;
 
-            var hit = PressurePlateBlockMixin.BOUNDING_BOX.intersectBox(
-                    position.sub(pos.blockX(), pos.blockY(), pos.blockZ()), bb);
+            var hit = bb.intersectBox(position.sub(pos.blockX() + 0.5, pos.blockY(), pos.blockZ() + 0.5),
+                    PressurePlateBlockMixin.BOUNDING_BOX);
             if (hit) newBlocks.put(plate, new BlockHandler.Tick(block, instance, pos));
         }
 
