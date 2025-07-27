@@ -18,9 +18,13 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public final class MapWorldHelpers {
+
+    public static final UUID MAP_WORLD_RESOURCE_PACK_UUID = UUID.fromString("5225c051-ed7a-4315-bf4d-c75e000d029a");
+
     private MapWorldHelpers() {
     }
 

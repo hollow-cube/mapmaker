@@ -14,6 +14,7 @@ import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.polar.LoadingWorldAccess;
 import net.hollowcube.mapmaker.map.polar.PolarDataFixer;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
+import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.misc.BossBars;
 import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
@@ -149,6 +150,8 @@ public class HubMapWorld extends AbstractMapWorld {
         } else {
             player.setRespawnPoint(spawnPoint(player));
         }
+
+        player.removeResourcePacks(MapWorldHelpers.MAP_WORLD_RESOURCE_PACK_UUID);
     }
 
     @Override

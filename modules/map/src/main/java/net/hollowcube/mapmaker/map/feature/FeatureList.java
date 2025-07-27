@@ -4,6 +4,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +77,12 @@ public class FeatureList {
             throw new RuntimeException(e);
         }
         return enabledFeatures;
+    }
+
+    public void configurePlayer(@NotNull MapWorld world, @NotNull Player player) {
+        for (var feature : features) {
+            feature.configurePlayer(world, player);
+        }
     }
 
     public void close() {

@@ -43,6 +43,7 @@ public class MapSettings {
     public static final MapSetting<TimeOfDay> TIME_OF_DAY = MapSetting.Enum("time_of_day", TimeOfDay.NOON);
     public static final MapSetting<WeatherType> WEATHER_TYPE = MapSetting.Enum("weather_type", WeatherType.CLEAR);
     public static final MapSetting<Boolean> LIGHTING = MapSetting.Bool("lighting", false);
+    public static final MapSetting<String> RESOURCE_PACK = MapSetting.String("resource_pack", "");
 
     public static final MapSetting<Boolean>[] TOOLTIP_SETTINGS = new MapSetting[]{
             BOAT, ONLY_SPRINT, NO_SPRINT, NO_JUMP, NO_SNEAK,

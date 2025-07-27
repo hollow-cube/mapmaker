@@ -26,6 +26,10 @@ public record MapSetting<T>(
         return new MapSetting<>(key, defaultValue, ExtraCodecs.clamppedInt(min, max));
     }
 
+    public static @NotNull MapSetting<String> String(@NotNull String key, @NotNull String defaultValue) {
+        return new MapSetting<>(key, defaultValue, Codec.STRING);
+    }
+
     public static <T extends Enum<T>> @NotNull MapSetting<T> Enum(@NotNull String key, T defaultValue) {
         //noinspection unchecked
         return new MapSetting<>(key, defaultValue, Codec.Enum((Class<T>) defaultValue.getClass()));
