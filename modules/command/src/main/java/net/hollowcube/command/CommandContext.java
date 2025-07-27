@@ -26,7 +26,7 @@ public interface CommandContext {
     @UnknownNullability
     String getRaw(@NotNull Argument<?> arg);
 
-    <T> @UnknownNullability T get(@NotNull Argument<T> arg);
+    <T> T get(@NotNull Argument<T> arg);
 
     boolean has(@NotNull Argument<?> arg);
 

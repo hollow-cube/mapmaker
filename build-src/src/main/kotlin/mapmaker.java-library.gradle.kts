@@ -3,8 +3,20 @@ plugins {
 }
 
 repositories {
-    if (libs.minestom.get().version == "dev")
+    // This code is duplicated in the java-binary configuration, should make any changes there also.
+    val centralLibs = listOf(libs.minestom, libs.polar, libs.posthog, libs.adventure.api)
+            .mapNotNull { it.get().version }
+    if (centralLibs.any { it == "dev" })
         mavenLocal()
+    if (centralLibs.any { it.endsWith("-SNAPSHOT") || it.matches(Regex("^.+-(\\d{8})\\.(\\d{6})-(\\d+)\$")) }) {
+        maven(url = "https://central.sonatype.com/repository/maven-snapshots/") {
+            content {
+                includeGroup("net.minestom")
+                includeGroup("dev.hollowcube")
+            }
+        }
+    }
+
     mavenCentral()
 
     maven(url = "https://maven.noxcrew.com/public") {
@@ -34,7 +46,7 @@ dependencies {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(23)
+        languageVersion = JavaLanguageVersion.of(24)
         vendor = JvmVendorSpec.GRAAL_VM
     }
 }

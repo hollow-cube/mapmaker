@@ -2,14 +2,19 @@ package net.hollowcube.mapmaker.map.util;
 
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.common.util.FutureUtil;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.*;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
+import net.minestom.server.network.packet.server.play.SetCooldownPacket;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.snapshot.PlayerSnapshot;
@@ -18,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -28,12 +32,13 @@ import java.util.function.Predicate;
  * Overrides the following behavior:
  * - Always set listed to false on tab list entries. They will be managed by the session manager.
  */
-public abstract class MapPlayerImpl extends CommandHandlingPlayer implements PlayerVisibilityExtension {
+public abstract class MapPlayerImpl extends CommandHandlingPlayer implements PlayerVisibilityExtension, PlayerCooldownExtension {
 
     private Function<Player, Visibility> visibilityFunc = null;
 
     // entity id -> visibility ordinal
     private final Int2IntMap visibilityByEntity = new Int2IntArrayMap();
+    private final Object2IntMap<String> cooldownGroups = new Object2IntArrayMap<>();
 
     public MapPlayerImpl(@NotNull PlayerConnection playerConnection, @NotNull GameProfile gameProfile) {
         super(playerConnection, gameProfile);
@@ -48,6 +53,21 @@ public abstract class MapPlayerImpl extends CommandHandlingPlayer implements Pla
     public void updateVisibility() {
         if (visibilityFunc == null) return;
         getViewers().forEach(this::updateVisibility);
+    }
+
+    @Override
+    public boolean tryUseItem(@NotNull ItemStack itemStack) {
+        var useCooldown = itemStack.get(DataComponents.USE_COOLDOWN);
+        if (useCooldown == null || useCooldown.cooldownGroup() == null)
+            return true;
+
+        int cooldownEnd = cooldownGroups.getInt(useCooldown.cooldownGroup());
+        if (cooldownEnd > getAliveTicks()) return false; // Still in cooldown
+
+        int cooldownTicks = (int) (useCooldown.seconds() * 20);
+        cooldownGroups.put(useCooldown.cooldownGroup(), (int) (getAliveTicks() + cooldownTicks));
+        sendPacket(new SetCooldownPacket(useCooldown.cooldownGroup(), cooldownTicks));
+        return true;
     }
 
     @Override

@@ -47,7 +47,8 @@ public abstract class AbstractMapMakerMapWorld extends AbstractMapWorld {
 
     @Override
     public void close(@Nullable Component reason) {
-        this.enabledFeatures.forEach(fp -> fp.cleanupMap(this));
+        if (this.enabledFeatures != null)
+            this.enabledFeatures.forEach(fp -> fp.cleanupMap(this));
         this.enabledFeatures = null;
 
         super.close(reason);

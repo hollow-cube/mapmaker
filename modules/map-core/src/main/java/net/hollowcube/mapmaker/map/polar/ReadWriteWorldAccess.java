@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.polar;
 
+import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
@@ -9,7 +10,6 @@ import net.hollowcube.terraform.entity.TerraformEntity;
 import net.kyori.adventure.nbt.BinaryTagTypes;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.ListBinaryTag;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
@@ -34,7 +34,7 @@ public class ReadWriteWorldAccess extends ReadWorldAccess {
         buffer.write(NetworkBuffer.BYTE, (byte) VERSION_LATEST);
 
         // Always write latest data version for now
-        buffer.write(NetworkBuffer.VAR_INT, MapWorld.DATA_VERSION);
+        buffer.write(NetworkBuffer.VAR_INT, DataFixer.maxVersion());
 
         var worldData = mapWorld.instance().tagHandler().asCompound();
         buffer.write(NetworkBuffer.NBT, worldData);

@@ -49,7 +49,7 @@ public record PotionInfo(
         return effects.values();
     }
 
-    public static @NotNull Collection<PotionInfo> sortedValues() {
+    public static @NotNull List<PotionInfo> sortedValues() {
         var result = new ArrayList<>(effects.values());
         result.sort(null);
         return result;
@@ -77,6 +77,14 @@ public record PotionInfo(
     public static final PotionInfo DOLPHINS_GRACE = builder("dolphins_grace").setVanillaEffect(PotionEffect.DOLPHINS_GRACE).setIcon("effect/potion/icon/dolphins_grace").build();
     public static final PotionInfo SWIFT_SNEAK = builder("swift_sneak").maxLevel(5).setVanillaEffect(PotionEffect.INFESTED).setIcon("effect/potion/icon/swift_sneak")
             .attribute(Attribute.SNEAKING_SPEED, "minecraft:enchantment.swift_sneak", level -> 0.15 * (level + 1), AttributeOperation.ADD_VALUE).build();
+
+    public @NotNull String translationKey() {
+        return "gui.effect.potion.type." + id;
+    }
+
+    public @NotNull String itemModel() {
+        return Objects.requireNonNull(this.icon.get(DataComponents.ITEM_MODEL));
+    }
 
     @Override
     public int compareTo(@NotNull PotionInfo o) {

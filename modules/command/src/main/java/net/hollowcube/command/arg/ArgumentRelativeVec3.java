@@ -1,13 +1,18 @@
 package net.hollowcube.command.arg;
 
+import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
+import net.hollowcube.common.util.PlayerUtil;
+import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
 public class ArgumentRelativeVec3 extends Argument<Point> {
 
@@ -19,11 +24,11 @@ public class ArgumentRelativeVec3 extends Argument<Point> {
     public @NotNull ParseResult<Point> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
         var origin = (sender instanceof Player player) ? player.getPosition() : Vec.ZERO;
         var x = readCoordinate(origin.x(), reader);
-        if (x == null) return new ParseResult.Failure<>(-1);
+        if (x == null) return partial();
         var y = readCoordinate(origin.y(), reader);
-        if (y == null) return new ParseResult.Failure<>(-1);
+        if (y == null) return partialWithValue(new Vec(x, origin.y(), origin.z()));
         var z = readCoordinate(origin.z(), reader);
-        if (z == null) return new ParseResult.Failure<>(-1);
+        if (z == null) return partialWithValue(new Vec(x, y, origin.z()));
         return new ParseResult.Success<>(new Vec(x, y, z));
     }
 
@@ -40,4 +45,35 @@ public class ArgumentRelativeVec3 extends Argument<Point> {
         }
     }
 
+    @Override
+    public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
+        if (sender instanceof Player player) {
+            var targetBlockPosition = PlayerUtil.getTargetBlock(player, PlayerUtil.DEFAULT_PLACEMENT_DISTANCE, false);
+            var coordinateIndex = raw.split(" ").length;
+            if (targetBlockPosition != null) {
+                int x = targetBlockPosition.blockX(), y = targetBlockPosition.blockY(), z = targetBlockPosition.blockZ();
+                suggest(suggestion, coordinateIndex, raw, x, y, z);
+            } else {
+                suggest(suggestion, coordinateIndex, raw, "~", "~", "~");
+            }
+        }
+        super.suggest(sender, raw, suggestion);
+    }
+
+    private void suggest(@NotNull Suggestion suggestion, @Range(from = 1, to = 4) int coordinateIndex, @NotNull String raw, @NotNull Object first, @NotNull Object second, @NotNull Object third) {
+        if (coordinateIndex == 1) {
+            suggestion.add("%s".formatted(first));
+            suggestion.add("%s %s".formatted(first, second));
+            suggestion.add("%s %s %s".formatted(first, second, third));
+        } else if (coordinateIndex == 2) {
+            suggestion.add("%s %s".formatted(raw, third));
+        }
+    }
+    @Override
+    public void properties(@NotNull NetworkBuffer buffer) {}
+
+    @Override
+    public @NotNull ArgumentParserType argumentType() {
+        return ArgumentParserType.VEC3;
+    }
 }

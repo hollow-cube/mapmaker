@@ -40,9 +40,10 @@ public class OrgMapsItem extends ItemHandler {
     }
 
     @Override
-    public @NotNull ItemStack buildItemStack(@Nullable CompoundBinaryTag nbt) {
-        return super.buildItemStack(nbt)
-                .with(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
+    public void build(ItemStack.@NotNull Builder builder, @Nullable CompoundBinaryTag tag) {
+        super.build(builder, tag);
+
+        builder.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
     }
 
     private static final Map<String, String> USER_ORGS = Map.ofEntries(

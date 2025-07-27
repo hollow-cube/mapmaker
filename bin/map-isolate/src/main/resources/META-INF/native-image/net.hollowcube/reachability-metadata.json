@@ -1,0 +1,58 @@
+{
+  "resources": [
+    {
+      "glob": "META-INF/services/ch.qos.logback.classic.spi.Configurator"
+    },
+    {
+      "glob": "META-INF/services/com.sun.net.httpserver.spi.HttpServerProvider"
+    },
+    {
+      "glob": "META-INF/services/io.opentelemetry.context.ContextStorageProvider"
+    },
+    {
+      "glob": "META-INF/services/java.lang.System$LoggerFinder"
+    },
+    {
+      "glob": "META-INF/services/java.net.spi.InetAddressResolverProvider"
+    },
+    {
+      "glob": "META-INF/services/java.net.spi.URLStreamHandlerProvider"
+    },
+    {
+      "glob": "META-INF/services/java.nio.channels.spi.SelectorProvider"
+    },
+    {
+      "glob": "META-INF/services/java.time.zone.ZoneRulesProvider"
+    },
+    {
+      "glob": "META-INF/services/javax.xml.parsers.SAXParserFactory"
+    },
+    {
+      "glob": "META-INF/services/net.hollowcube.common.ServerRuntime"
+    },
+    {
+      "glob": "META-INF/services/net.hollowcube.compat.api.CompatProvider"
+    },
+    {
+      "glob": "META-INF/services/net.hollowcube.mapmaker.map.feature.FeatureProvider"
+    },
+    {
+      "glob": "META-INF/services/net.kyori.adventure.text.logger.slf4j.ComponentLoggerProvider"
+    },
+    {
+      "glob": "META-INF/services/net.kyori.adventure.text.minimessage.MiniMessage$Provider"
+    },
+    {
+      "glob": "META-INF/services/net.kyori.adventure.text.serializer.gson.GsonComponentSerializer$Provider"
+    },
+    {
+      "glob": "META-INF/services/net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer$Provider"
+    },
+    {
+      "glob": "META-INF/services/net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer$Provider"
+    },
+    {
+      "glob": "META-INF/services/org.slf4j.spi.SLF4JServiceProvider"
+    }
+  ]
+}

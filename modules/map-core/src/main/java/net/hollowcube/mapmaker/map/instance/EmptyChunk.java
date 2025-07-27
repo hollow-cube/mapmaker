@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.instance;
 
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.Section;
@@ -14,7 +15,7 @@ import net.minestom.server.network.packet.server.play.ChunkDataPacket;
 import net.minestom.server.network.packet.server.play.UpdateLightPacket;
 import net.minestom.server.network.packet.server.play.data.ChunkData;
 import net.minestom.server.network.packet.server.play.data.LightData;
-import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -54,7 +55,7 @@ public class EmptyChunk extends Chunk {
 
     @Override
     public @NotNull Section getSection(int section) {
-        return SECTIONS.get(section - 4);
+        return SECTIONS.get(section - minSection);
     }
 
     @Override
@@ -78,11 +79,6 @@ public class EmptyChunk extends Chunk {
     }
 
     @Override
-    public long getLastChangeTime() {
-        return 0;
-    }
-
-    @Override
     public @NotNull SendablePacket getFullDataPacket() {
         return createChunkPacket();
     }
@@ -94,7 +90,7 @@ public class EmptyChunk extends Chunk {
             for (Section section : SECTIONS) {
                 networkBuffer.write(SHORT, (short) section.blockPalette().count());
                 networkBuffer.write(Palette.BLOCK_SERIALIZER, section.blockPalette());
-                networkBuffer.write(Palette.BIOME_SERIALIZER, section.biomePalette());
+                networkBuffer.write(Palette.biomeSerializer(MinecraftServer.getBiomeRegistry().size()), section.biomePalette());
             }
         });
 
@@ -162,12 +158,12 @@ public class EmptyChunk extends Chunk {
     }
 
     @Override
-    public DynamicRegistry.@NotNull Key<Biome> getBiome(int x, int y, int z) {
+    public @NotNull RegistryKey<Biome> getBiome(int x, int y, int z) {
         return Biome.PLAINS;
     }
 
     @Override
-    public void setBiome(int x, int y, int z, DynamicRegistry.@NotNull Key<Biome> biome) {
+    public void setBiome(int x, int y, int z, @NotNull RegistryKey<Biome> biome) {
 
     }
 }

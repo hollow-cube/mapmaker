@@ -1,14 +1,13 @@
 package net.hollowcube.mapmaker.punishments;
 
 import com.google.gson.reflect.TypeToken;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.punishments.types.Punishment;
 import net.hollowcube.mapmaker.punishments.types.PunishmentLadder;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -16,8 +15,6 @@ import java.net.http.HttpResponse;
 import java.util.*;
 
 public class PunishmentServiceImpl extends AbstractHttpService implements PunishmentService {
-    private static final Logger logger = LoggerFactory.getLogger(PunishmentServiceImpl.class);
-
     private final String url;
 
     public PunishmentServiceImpl(@NotNull String url) {
@@ -25,20 +22,15 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
     }
 
     @Override
-    public @NotNull List<Punishment> getPunishments(@Nullable String playerId, @Nullable UUID executorId, @Nullable PunishmentType type) {
-        var queryBuilder = urlQueryBuilder();
-        if (playerId != null) {
-            queryBuilder.add("playerId", playerId);
-        }
-        if (executorId != null) {
-            queryBuilder.add("executorId", executorId.toString());
-        }
-        if (type != null) {
-            queryBuilder.add("type", type.name().toLowerCase(Locale.ROOT));
-        }
-
+    public @NotNull List<Punishment> getPunishments(@Nullable String playerId, @NotNull UUID executorId, @Nullable PunishmentType type) {
         var request = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/punishments" + queryBuilder.build()))
+                .uri(url(
+                        "%s/punishments?playerId=%s&executorId=%s&punishmentType=%s",
+                        url,
+                        Objects.requireNonNullElse(playerId, ""),
+                        executorId,
+                        OpUtils.mapOr(type, PunishmentType::name, "").toLowerCase(Locale.ROOT)
+                ))
                 .build();
         var response = doRequest(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
@@ -52,7 +44,7 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
     @Override
     public @Nullable Punishment getActivePunishment(@NotNull String playerId, @NotNull PunishmentType type) {
         var request = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/punishments/" + playerId + "/active?punishmentType=" + type.name().toLowerCase(Locale.ROOT)))
+                .uri(url("%s/punishments/%s/active?punishmentType=%s", url, playerId, type.name().toLowerCase(Locale.ROOT)))
                 .GET()
                 .build();
 

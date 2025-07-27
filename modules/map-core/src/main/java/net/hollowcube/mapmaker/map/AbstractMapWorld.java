@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
@@ -9,6 +10,8 @@ import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandlerRegistry;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
+import net.hollowcube.mapmaker.map.util.spatial.Octree;
+import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
 import net.hollowcube.terraform.instance.TerraformInstanceBiomes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -20,7 +23,10 @@ import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.packet.server.CachedPacket;
+import net.minestom.server.network.packet.server.common.TagsPacket;
 import net.minestom.server.network.packet.server.configuration.SelectKnownPacksPacket;
+import net.minestom.server.registry.Registries;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -34,6 +40,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
+
+import static net.hollowcube.mapmaker.map.util.spatial.Octree.simpleOctree;
 
 @SuppressWarnings("UnstableApiUsage")
 public non-sealed abstract class AbstractMapWorld implements MapWorld {
@@ -72,6 +80,8 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
     private final Set<Player> playersUnmodifiable = Collections.unmodifiableSet(players);
     private final Set<Player> spectators = new CopyOnWriteArraySet<>();
     private final Set<Player> spectatorsUnmodifiable = Collections.unmodifiableSet(spectators);
+
+    private Octree octree = null;
 
     protected AbstractMapWorld(@NotNull MapServer server, @NotNull MapData map, @NotNull MapInstance instance) {
         this.server = server;
@@ -156,8 +166,9 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             var serverProcess = MinecraftServer.process();
             player.sendPacket(serverProcess.chatType().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.dimensionType().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.biome().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(biomes().registryDataPacket(excludeVanilla));
             player.sendPacket(serverProcess.damageType().registryDataPacket(serverProcess, excludeVanilla));
+            player.sendPacket(serverProcess.dialog().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.trimMaterial().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.trimPattern().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.bannerPattern().registryDataPacket(serverProcess, excludeVanilla));
@@ -172,9 +183,8 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             player.sendPacket(serverProcess.cowVariant().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.frogVariant().registryDataPacket(serverProcess, excludeVanilla));
             player.sendPacket(serverProcess.pigVariant().registryDataPacket(serverProcess, excludeVanilla));
-//            player.sendPacket(biomes().registryDataPacket(excludeVanilla));
 
-            player.sendPacket(MinecraftServer.getTagManager().packet(serverProcess));
+            player.sendPacket(TEMP_TAGS_PACKET);
             event.setSendRegistryData(false);
 
             // Send feature flag so that vanilla doesnt show disabled items tooltip
@@ -197,7 +207,11 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         }
     }
 
-    public abstract void preAddPlayer(@NotNull AsyncPlayerConfigurationEvent event);
+    public void preAddPlayer(@NotNull AsyncPlayerConfigurationEvent event) {
+        final var player = event.getPlayer();
+
+        player.setRespawnPoint(spawnPoint(player));
+    }
 
     @Override
     public void addPlayer(@NotNull Player player) {
@@ -278,6 +292,30 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
         spectators.clear();
     }
 
+    @Override
+    public @NotNull Octree octree() {
+        FutureUtil.assertTickThreadWarn();
+        if (octree == null) {
+            List<SpatialObject> allObjects = new ArrayList<>();
+            for (var entity : instance().getEntities()) {
+                if (entity.isRemoved() || !(entity instanceof SpatialObject spatial)) continue;
+                if (spatial.boundingBox().size().isZero()) continue;
+                allObjects.add(spatial);
+            }
+
+            var size = OpUtils.mapOr(map().settings().getSize(),
+                    MapSize::size, MapSize.NORMAL.size());
+            var powerOfTwo = (int) Math.ceil(Math.log(Math.min(size, 4096)) / Math.log(2));
+            this.octree = simpleOctree(powerOfTwo, allObjects);
+        }
+        return octree;
+    }
+
+    @Override
+    public void queueCollisionTreeRebuild() {
+        this.octree = null;
+    }
+
     private static void removePlayerSet(@NotNull MapWorld world, @NotNull Collection<Player> players, @Nullable Component reason) {
         for (var player : Set.copyOf(players)) {
             try {
@@ -294,5 +332,30 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
                 player.kick(CLOSED_MESSAGE);
             }
         }
+    }
+
+    private static final CachedPacket TEMP_TAGS_PACKET = new CachedPacket(AbstractMapWorld::createTagsPacket);
+
+    private static @NotNull TagsPacket createTagsPacket() {
+        final List<TagsPacket.Registry> entries = new ArrayList<>();
+
+        // The following are the registries which contain tags used by the vanilla client.
+        // We don't care about registries unused by the client.
+        final Registries registries = MinecraftServer.process();
+        entries.add(registries.bannerPattern().tagRegistry());
+        entries.add(registries.biome().tagRegistry());
+        entries.add(registries.blocks().tagRegistry());
+        entries.add(registries.dialog().tagRegistry());
+        entries.add(registries.catVariant().tagRegistry());
+        entries.add(registries.damageType().tagRegistry());
+        entries.add(registries.enchantment().tagRegistry());
+        entries.add(registries.entityType().tagRegistry());
+        entries.add(registries.fluid().tagRegistry());
+        entries.add(registries.gameEvent().tagRegistry());
+        entries.add(registries.instrument().tagRegistry());
+        entries.add(registries.material().tagRegistry());
+        entries.add(registries.paintingVariant().tagRegistry());
+
+        return new TagsPacket(entries);
     }
 }

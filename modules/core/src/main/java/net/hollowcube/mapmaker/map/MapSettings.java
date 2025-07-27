@@ -38,6 +38,7 @@ public class MapSettings {
     public static final MapSetting<Boolean> NO_RELOG = MapSetting.Bool("no_relog", false);
     public static final MapSetting<Integer> TICK_RATE = MapSetting.Int("tick_rate", ServerFlag.SERVER_TICKS_PER_SECOND, 1, ServerFlag.SERVER_TICKS_PER_SECOND);
     public static final MapSetting<Boolean> NO_TURN = MapSetting.Bool("no_turn", false);
+    public static final MapSetting<Integer> DOUBLE_JUMP = MapSetting.Int("double_jump", 0, 0, 100);
 
     public static final MapSetting<TimeOfDay> TIME_OF_DAY = MapSetting.Enum("time_of_day", TimeOfDay.NOON);
     public static final MapSetting<WeatherType> WEATHER_TYPE = MapSetting.Enum("weather_type", WeatherType.CLEAR);
@@ -508,19 +509,20 @@ public class MapSettings {
         return this.extra;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "UnstableApiUsage"})
     public <T> @NotNull T get(@NotNull MapSetting<T> setting) {
         if (this.extra == null) return setting.defaultValue();
         var data = this.extra.get(setting.key());
         if (data == null) return setting.defaultValue();
         return (T) this.cache.computeIfAbsent(
                 setting,
-                ($) -> setting.codec()
+                (_) -> setting.codec()
                         .decode(Transcoder.JSON, data)
                         .orElse(setting.defaultValue())
         );
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public <T> void set(@NotNull MapSetting<T> setting, @NotNull T value) {
         if (this.extra == null) this.extra = new JsonObject();
         updateLock.lock();

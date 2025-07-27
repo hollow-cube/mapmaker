@@ -17,15 +17,13 @@ public class SavedMapSettings {
 
     private final Map<MapSetting<?>, Object> settings = new HashMap<>();
 
+    public static final SavedMapSettings EMPTY = new SavedMapSettings();
+
     public SavedMapSettings() {
     }
 
     private SavedMapSettings(Map<MapSetting<?>, ?> settings) {
         this.settings.putAll(settings);
-    }
-
-    public boolean isEmpty() {
-        return this.settings.isEmpty();
     }
 
     @SuppressWarnings("unchecked")
@@ -38,31 +36,10 @@ public class SavedMapSettings {
         return (T) this.settings.get(setting);
     }
 
-    public <T> void set(MapSetting<T> setting, T value) {
-        this.settings.put(setting, value);
-    }
-
-    public <T> void reset(MapSetting<T> setting) {
-        this.settings.remove(setting);
-    }
-
-    public void clear() {
-        this.settings.clear();
-    }
-
-    public void update(SavedMapSettings settings) {
-        this.settings.putAll(settings.settings);
-    }
-
-    public void update(MapSettings settings) {
-        this.clear();
-        for (MapSetting<?> value : MapSetting.ID_MAP.values()) {
-            this.settings.put(value, settings.get(value));
-        }
-    }
-
-    public SavedMapSettings copy() {
-        return new SavedMapSettings(new HashMap<>(this.settings));
+    public <T> SavedMapSettings with(MapSetting<T> setting, T value) {
+        SavedMapSettings copy = new SavedMapSettings(this.settings);
+        copy.settings.put(setting, value);
+        return copy;
     }
 
     @Override

@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.BaseNpcEntity;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.hollowcube.mapmaker.hub.feature.contest.MapContest;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -20,6 +21,9 @@ import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @AutoService(HubFeature.class)
 public class MapOfTheWeekFeature implements HubFeature {
@@ -47,13 +51,24 @@ public class MapOfTheWeekFeature implements HubFeature {
         mapEntity.getEntityMeta().setScale(new Vec(4));
         mapEntity.setInstance(world.instance(), MAP_ENTITY_POS);
         mapEntity.setInteractionBox(6, 6, new Pos(0, -0.5, 0));
+        MapContest.scheduleAtStart(world, () -> {
+            mapEntity.setModel(Material.STICK, BadSprite.require("item_comp_10"));
+            mapEntity.getEntityMeta().setScale(new Vec(5));
+            mapEntity.teleport(MAP_ENTITY_POS.add(0, 2.5, 0).withView(0, 0));
+        });
+
         server.scheduler().submitTask(this::mapEntityUpdate, ExecutionType.TICK_START);
     }
 
     private void handleMapInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {
         if (isLeftClick) return;
+        var millisToStart = ChronoUnit.MILLIS.between(LocalDateTime.now(), MapContest.START_DATE);
+        if (millisToStart > 0) {
+            player.sendMessage(Component.translatable("motw.coming_soon"));
+            return;
+        }
 
-        player.sendMessage(Component.translatable("motw.coming_soon"));
+        MapContest.openSubmissionMenu(player);
     }
 
     private @NotNull TaskSchedule mapEntityUpdate() {
@@ -62,7 +77,9 @@ public class MapOfTheWeekFeature implements HubFeature {
 
         meta.setTransformationInterpolationStartDelta(0);
         meta.setTransformationInterpolationDuration(20 * MAP_ENTITY_UPDATE_INTERVAL);
-        meta.setLeftRotation(new Quaternion(new Vec(0, 0, 1).normalize(), Math.toRadians(mapEntityRotationTarget)).into());
+        var millisToStart = ChronoUnit.MILLIS.between(LocalDateTime.now(), MapContest.START_DATE);
+        var rot = millisToStart > 0 ? new Vec(0, 0, 1) : new Vec(0, 1, 0);
+        meta.setLeftRotation(new Quaternion(rot.normalize(), Math.toRadians(mapEntityRotationTarget)).into());
         mapEntityRotationTarget += 90;
 
         meta.setNotifyAboutChanges(true);

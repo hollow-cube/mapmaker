@@ -19,6 +19,7 @@ public final class Accessories {
     public static Cosmetic EXCALIBUR = builder("excalibur").rarity(Rarity.LEGENDARY).build();
     public static Cosmetic SHRINKING_DEVICE = builder("shrinking_device").rarity(Rarity.LEGENDARY)
             .impl(ShrinkingDeviceImpl::new).build();
+    public static Cosmetic SHONK = builder("shonk").rarity(Rarity.RARE).build();
 
     public static @NotNull Cosmetic.Builder builder(@NotNull String id) {
         return new Cosmetic.Builder(CosmeticType.ACCESSORY, id)

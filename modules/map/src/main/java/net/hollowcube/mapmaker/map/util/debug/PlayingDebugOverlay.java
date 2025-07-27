@@ -26,7 +26,23 @@ public class PlayingDebugOverlay implements ActionBar.Provider {
         if (saveState == null || !world.isPlaying(player)) return;
 
         var sliced = slice(saveState.state(PlayState.class).toString(false));
-        builder.offset(-FontUtil.measureText(sliced) / 2).append("line_0", sliced);
+        builder.offset(-FontUtil.measureText(sliced) / 2)
+                .append("line_0", sliced);
+        builder.offset(-FontUtil.measureText(sliced) / 2);
+
+        builder.offset(-300);
+        int i = 0;
+        var actions = saveState.state(PlayState.class).actionData();
+        for (var entry : actions.entrySet()) {
+            builder.pushColor(FontUtil.computeVerticalOffset(-50 + (i++ * 9)));
+            if (entry.getKey() == null) continue;
+            var line = entry.getKey().key().asString().replace("mapmaker:", "") + ": " + entry.getValue();
+            if (line.length() > 150)
+                line = line.substring(0, 150) + "...";
+            builder.append(line);
+            builder.offset(-FontUtil.measureText(line));
+            builder.popColor();
+        }
     }
 
     private @NotNull String slice(@NotNull String str) {

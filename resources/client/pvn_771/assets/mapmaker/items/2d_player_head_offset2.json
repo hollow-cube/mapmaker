@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "mapmaker:item/2d_player_head_offset2",
+    "model": {
+      "type": "minecraft:player_head"
+    }
+  }
+}

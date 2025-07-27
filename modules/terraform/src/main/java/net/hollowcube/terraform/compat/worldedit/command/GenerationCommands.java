@@ -2,14 +2,17 @@ package net.hollowcube.terraform.compat.worldedit.command;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.terraform.command.util.CommandPreviewHelper;
 import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.compat.worldedit.command.arg.WEArgument;
 import net.hollowcube.terraform.compat.worldedit.util.WECommand;
 import net.hollowcube.terraform.compute.ShapeFunctions;
+import net.hollowcube.terraform.cui.ClientRenderer;
 import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.util.Messages;
 import net.hollowcube.terraform.util.math.CoordinateUtil;
+import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +20,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.EnumSet;
 
 public final class GenerationCommands {
+
+    private GenerationCommands() {
+
+    }
 
     public static class HCyl extends WECommand {
         private final Argument<Pattern> patternArg = TFArgument.Pattern("pattern");
@@ -39,11 +46,14 @@ public final class GenerationCommands {
             var generator = ShapeFunctions.cylinder(player.getPosition(), pattern, radius.withY(height), true);
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-hcyl")
+            var task = session.buildTask("we-hcyl")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -52,10 +62,6 @@ public final class GenerationCommands {
         private final Argument<Pattern> patternArg = TFArgument.Pattern("pattern");
         private final Argument<Vec> radiusArg = WEArgument.CommaSeparatedVec2("radii");
         private final Argument<Integer> heightArg = Argument.Int("height").clamp(1, 100).defaultValue(1);
-
-        private enum Flags {
-            HOLLOW
-        }
 
         public Cyl() {
             super("/cyl");
@@ -75,11 +81,18 @@ public final class GenerationCommands {
             var generator = ShapeFunctions.cylinder(player.getPosition(), pattern, new Vec(radius.x(), height, radius.y()), flags.contains(Flags.HOLLOW));
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-cyl")
+            var task = session.buildTask("we-cyl")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
+        }
+
+        private enum Flags {
+            HOLLOW
         }
     }
 
@@ -87,10 +100,6 @@ public final class GenerationCommands {
         private final Argument<EnumSet<Flags>> flagsArg = WEArgument.FlagSet(Flags.class);
         private final Argument<Pattern> patternArg = TFArgument.Pattern("pattern");
         private final Argument<Vec> radiusArg = WEArgument.CommaSeparatedVec3("radius");
-
-        private enum Flags {
-            RAISE
-        }
 
         public HSphere() {
             super("/hsphere");
@@ -109,11 +118,18 @@ public final class GenerationCommands {
             var generator = ShapeFunctions.sphere(position, pattern, radius, true);
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-sphere")
+            var task = session.buildTask("we-sphere")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
+        }
+
+        private enum Flags {
+            RAISE
         }
     }
 
@@ -121,11 +137,6 @@ public final class GenerationCommands {
         private final Argument<EnumSet<Flags>> flagsArg = WEArgument.FlagSet(Flags.class);
         private final Argument<Pattern> patternArg = TFArgument.Pattern("pattern");
         private final Argument<Vec> radiusArg = WEArgument.CommaSeparatedVec3("radius");
-
-        private enum Flags {
-            RAISE,
-            HOLLOW
-        }
 
         public Sphere() {
             super("/sphere");
@@ -144,11 +155,19 @@ public final class GenerationCommands {
             var generator = ShapeFunctions.sphere(position, pattern, radius, flags.contains(Flags.HOLLOW));
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-sphere")
+            var task = session.buildTask("we-sphere")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
+        }
+
+        private enum Flags {
+            RAISE,
+            HOLLOW
         }
     }
 
@@ -169,11 +188,14 @@ public final class GenerationCommands {
             var generator = ShapeFunctions.pyramid(player.getPosition(), pattern, height, true);
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-hpyramid")
+            var task = session.buildTask("we-hpyramid")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -182,15 +204,31 @@ public final class GenerationCommands {
         private final Argument<Pattern> patternArg = TFArgument.Pattern("pattern");
         private final Argument<Integer> heightArg = Argument.Int("height").clamp(1, 100);
 
-        private enum Flags {
-            HOLLOW
-        }
-
         public Pyramid() {
             super("/pyramid");
 
-            addSyntax(playerOnly(this::execute), patternArg, heightArg);
-            addSyntax(playerOnly(this::execute), flagsArg, patternArg, heightArg);
+            addSyntax(playerOnly(this::execute), playerOnly(this::suggest), patternArg, heightArg);
+            addSyntax(playerOnly(this::execute), playerOnly(this::suggest), flagsArg, patternArg, heightArg);
+        }
+
+        private void suggest(@NotNull Player player, @NotNull CommandContext context) {
+            var height = 0;
+            if (context.has(heightArg)) {
+                height = context.get(heightArg);
+            } else {
+                height = 5;
+            }
+
+            var session = LocalSession.forPlayer(player);
+            var renderer = session.cui().renderer();
+            renderer.switchTo(ClientRenderer.RenderContext.COMMAND, true);
+            CommandPreviewHelper.debounceContext(player, renderer);
+            renderer.begin("pyramid");
+            session.cui().renderer().pyramid(
+                    new BlockVec(player.getPosition()).add(0.5, 0, 0.5),
+                    height,
+                    ClientRenderer.RenderType.PRIMARY);
+            renderer.end("pyramid");
         }
 
         private void execute(@NotNull Player player, @NotNull CommandContext context) {
@@ -201,15 +239,19 @@ public final class GenerationCommands {
             var generator = ShapeFunctions.pyramid(player.getPosition(), pattern, height, flags.contains(Flags.HOLLOW));
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-pyramid")
+            session.cui().renderer().switchTo(ClientRenderer.RenderContext.NORMAL, false);
+            var task = session.buildTask("we-pyramid")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
-    }
 
-    private GenerationCommands() {
-
+        private enum Flags {
+            HOLLOW
+        }
     }
 }

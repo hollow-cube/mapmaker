@@ -150,12 +150,18 @@ public class SessionManager {
 
     private void handleSessionDelete(@NotNull SessionUpdateMessage message) {
         logger.debug("remote session deleted for {}", message.playerId());
-        // Do not send a leave message if the player is hidden
         var removed = sessions.remove(message.playerId());
-        if (removed == null || removed.hidden()) return;
+        if (removed == null) return;
 
-        broadcastLeaveMessage(message.playerId());
-        syntheticTab.removeSession(message.playerId());
+        // Only send a leave message if the player is not hidden
+        if (!removed.hidden()) {
+            broadcastLeaveMessage(message.playerId());
+            syntheticTab.removeSession(message.playerId());
+        }
+
+        // If we have the player locally that is bad, kick them immediately.
+        var player = CONNECTION_MANAGER.getOnlinePlayerByUuid(UUID.fromString(message.playerId()));
+        if (player != null) player.kick(Component.text("An error has occurred, please try again.\n(session.kicked)"));
     }
 
     private void handleSessionUpdate(@NotNull PlayerSession session, @NotNull SessionStateUpdateRequest.Metadata metadata) {

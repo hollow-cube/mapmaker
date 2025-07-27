@@ -10,7 +10,7 @@ dependencies {
     // for example neither of which actually include :modules:map directly.
     implementation(project(":modules:map"))
     implementation(project(":modules:compat"))
-    implementation(project(":modules:script-engine"))
+//    implementation(project(":modules:script-engine"))
     implementation(project(":modules:canvas:api"))
     implementation(project(":modules:canvas:impl-standalone"))
 

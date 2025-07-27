@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.playerinfo.PlayerInfoCommand;
@@ -62,12 +63,12 @@ public class HubServerRunner extends AbstractMapServer {
 
     @Override
     protected @NotNull MapAllocator createAllocator() {
-        return MapAllocator.direct(this);
+        return MapAllocator.directAllocator(this);
     }
 
     @Override
     protected @NotNull ServerBridge createBridge() {
-        return globalConfig.noop() ? new NoopServerBridge() : new HubServerBridge(sessionService());
+        return globalConfig.noop() ? new NoopServerBridge() : new HubServerBridge(mapService(), sessionService());
     }
 
     @Override
@@ -96,7 +97,7 @@ public class HubServerRunner extends AbstractMapServer {
     // Static so it can be referenced from DevHubServer
     public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager, @NotNull HubMapWorld hubWorld, @NotNull Scheduler scheduler) {
         commandManager.register(new HelpCommand(commandManager, CommandCategories.GLOBAL));
-        commandManager.register(new PlayerInfoCommand(server.permManager(), server.playerService()));
+        commandManager.register(new PlayerInfoCommand(server.permManager(), server.playerService(), server.sessionManager()));
 
         commandManager.register(new HubFlyCommand(server.permManager()));
         commandManager.register(new HubSpawnCommand(hubWorld));
@@ -117,6 +118,8 @@ public class HubServerRunner extends AbstractMapServer {
 
     protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
         var player = event.getPlayer();
+        ProtocolVersions.requestProtocolVersionFromProxy(player);
+        if (!player.isOnline()) return;
 
         if (!transferPlayerSession(event.getPlayer(), HUB_PRESENCE)) {
             return;

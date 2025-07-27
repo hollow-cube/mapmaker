@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.map.polar;
 import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.util.Value;
-import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.polar.PolarDataConverter;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.codec.Transcoder;
@@ -25,7 +24,7 @@ public class PolarDataFixer implements PolarDataConverter {
 
     @Override
     public int dataVersion() {
-        return MapWorld.DATA_VERSION;
+        return DataFixer.maxVersion();
     }
 
     @Override

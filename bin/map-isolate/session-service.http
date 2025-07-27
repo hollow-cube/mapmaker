@@ -1,0 +1,12 @@
+# Contains some utilities for interacting with the session service manually to join an isolate server running in IDE.
+
+### Create Session
+
+POST http://localhost:9127/v3/internal/session/aceb326f-da15-45bc-bf2f-11940c21780c
+Content-Type: application/json
+
+{
+    "proxy": "devserver",
+    "username": "notmattw",
+    "ip": "127.0.0.1"
+}

@@ -1,0 +1,19 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+    <logger name="net.minestom.server" level="ERROR"/>
+    <logger name="io.netty" level="WARN"/>
+    <logger name="io.grpc" level="WARN"/>
+    <logger name="io.helidon" level="WARN"/>
+    <logger name="jdk.event.security" level="WARN"/>
+    <logger name="sun.net.www" level="WARN"/>
+    <logger name="org.apache.kafka" level="WARN"/>
+    <logger name="com.github.benmanes.caffeine.cache" level="ERROR"/>
+</configuration>

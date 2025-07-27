@@ -28,4 +28,9 @@ public final class ArgumentMask extends Argument<Mask> {
             return partial(e.getMessage());
         }
     }
+
+    @Override
+    public boolean shouldSuggest() {
+        return false;
+    }
 }

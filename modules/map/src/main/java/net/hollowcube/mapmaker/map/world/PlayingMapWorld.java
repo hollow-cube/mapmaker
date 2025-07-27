@@ -2,9 +2,11 @@ package net.hollowcube.mapmaker.map.world;
 
 import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.action.Attachments;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartFinishedEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerStartSpectatorEvent;
@@ -26,6 +28,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.coordinate.ChunkRange;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Metadata;
@@ -41,6 +44,7 @@ import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.instance.Chunk;
 import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import org.jetbrains.annotations.NotNull;
@@ -48,12 +52,19 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PlayingMapWorld extends AbstractMapMakerMapWorld {
     private final Logger logger = LoggerFactory.getLogger(PlayingMapWorld.class);
+
+    static {
+        // Force init. Very gross should fix
+        var a = Attachments.PROGRESS_INDEX;
+    }
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("playing-events", EventFilter.INSTANCE)
             .addListener(PlayerBlockBreakEvent.class, event -> event.setCancelled(true))
@@ -73,7 +84,8 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
     public static final Constructor<PlayingMapWorld> CTOR = AbstractMapWorld.ctor(PlayingMapWorld::new, PlayingMapWorld.class);
 
     public PlayingMapWorld(@NotNull MapServer server, @NotNull MapData map) {
-        super(server, map, new MapInstance(map.createDimensionName('p'), false));
+        super(server, map, new MapInstance(map.createDimensionName('p'), map.getSetting(MapSettings.LIGHTING)
+                ? MapInstance.LightingMode.LOADED : MapInstance.LightingMode.FULL_BRIGHT));
         instance.setGenerator(MapGenerators.voidWorld());
 
         instance.eventNode().addChild(eventNode); // Needs spectators, so register on instance.
@@ -98,7 +110,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 
     protected void loadWorld() {
         // Load the map itself (eg blocks, if present)
-        var mapData = server().mapService().getMapWorldAsStream(map().id(), true);
+        var mapData = server().mapService().getMapWorldAsStream(map().id(), false);
         if (mapData != null) {
             instance.loadStream(mapData, new LoadingWorldAccess(new ReadWorldAccess(this), this::onDataLoaded));
         }
@@ -134,9 +146,31 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
             // and go into a 1 block gap.
             final var finalSaveState = saveState;
             player.acquirable().sync(localPlayer -> {
+                var pos = Objects.requireNonNullElseGet(finalSaveState.state(PlayState.class).pos(), () -> map().settings().getSpawnPoint());
+                var instance = localPlayer.getInstance();
+
+                // TODO remove this godawful code and come up with a proper solution
+                // Start of HACK! This forces the chunks to load around the player so that they do not fall through the floor.
+                var chunksToLoad = new ArrayList<CompletableFuture<Chunk>>();
+                ChunkRange.chunksInRange(pos, localPlayer.getSettings().effectiveViewDistance(), (cx, cz) -> chunksToLoad.add(instance.loadChunk(cx, cz)));
+                CompletableFuture.allOf(chunksToLoad.toArray(new CompletableFuture[0])).join();
+
                 localPlayer.sendPacket(new BundlePacket());
-                localPlayer.teleport(Objects.requireNonNullElseGet(finalSaveState.state(PlayState.class).pos(), () -> map().settings().getSpawnPoint()),
-                        Vec.ZERO, null, RelativeFlags.NONE);
+
+                for (var chunkCompletableFuture : chunksToLoad) {
+                    if (!chunkCompletableFuture.isDone()) continue;
+                    var chunk = chunkCompletableFuture.getNow(null);
+                    if (chunk == null) continue;
+                    localPlayer.sendChunk(chunk);
+                }
+                // End of HACK!
+
+                localPlayer.teleport(
+                        Objects.requireNonNullElseGet(finalSaveState.state(PlayState.class).pos(), () -> map().settings().getSpawnPoint()),
+                        Vec.ZERO,
+                        null,
+                        RelativeFlags.NONE
+                );
                 ((MapPlayerImplImpl) player).updatePose();
                 localPlayer.sendPacket(new EntityMetaDataPacket(localPlayer.getEntityId(), Map.of(6, Metadata.Pose(localPlayer.getPose()))));
                 localPlayer.sendPacket(new BundlePacket());
@@ -158,7 +192,8 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
         var playerData = PlayerDataV2.fromPlayer(player);
 
         var stateType = map().verification() == MapVerification.PENDING ? SaveStateType.VERIFYING : SaveStateType.PLAYING;
-        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), stateType, PlayState.SERIALIZER);
+        int protocolVersion = ProtocolVersions.getProtocolVersion(player);
+        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), protocolVersion, stateType, PlayState.SERIALIZER);
         player.setTag(SaveState.TAG, saveState);
         return saveState;
     }
@@ -186,25 +221,6 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
 //        if (teleport) player.teleport(map.settings().getSpawnPoint()).join();
     }
 
-//    public @Blocking void startFinished(@NotNull Player player, boolean teleport) {
-//
-//        player.setTag(TAG_PLAYING, false); // Sanity
-//        player.setTag(MapHooks.PLAYING, false); // Sanity
-//
-//        spectatingPlayers.add(player);
-//
-//        net.hollowcube.mapmaker.map.world.MapWorldHelpers.resetPlayer(player);
-//        player.setGameMode(GameMode.ADVENTURE);
-//        player.setAllowFlying(true);
-//        player.setInvisible(true);
-//        ActionBar.forPlayer(player).addProvider(finishedActionBarProvider);
-//
-//        instance.eventNode().call(new MapPlayerStartFinishedEvent(this, player));
-//
-//        if (teleport) player.teleport(map.settings().getSpawnPoint()).join();
-
-    /// /        player.sendMessage("Now spectating " + map.settings().getName());
-//    }
     @Override
     public void removePlayer(@NotNull Player player) {
         if (isPlaying(player)) {
@@ -232,6 +248,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
         var saveState = SaveState.optionalFromPlayer(player);
         if (saveState == null) return null; // Sanity check
         var update = saveState.createUpdateRequest();
+        update.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
 
         // Write the save state to the database
         try {

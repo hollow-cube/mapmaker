@@ -37,6 +37,10 @@ public interface BuiltinTool {
 
     @NotNull Material material();
 
+    default @NotNull ItemStack.Builder createItemStack() {
+        return ItemStack.builder(material());
+    }
+
 
     void leftClicked(@NotNull Click click);
 

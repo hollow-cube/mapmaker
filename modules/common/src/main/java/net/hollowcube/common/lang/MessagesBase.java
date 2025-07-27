@@ -16,17 +16,7 @@ public interface MessagesBase extends ComponentLike {
     @NotNull String translationKey();
 
     default @NotNull Component with(@NotNull Object... args) {
-        var componentArgs = new ComponentLike[args.length];
-        for (int i = 0; i < args.length; i++) {
-            var arg = args[i];
-            componentArgs[i] = switch (arg) {
-                case Component comp -> comp;
-                case Number number -> TranslationArgument.numeric(number);
-                case Boolean bool -> TranslationArgument.bool(bool);
-                default -> Component.text(arg.toString());
-            };
-        }
-        return Component.translatable(translationKey(), componentArgs);
+        return Component.translatable(translationKey(), asArgs(args));
     }
 
     default @NotNull Component with(@NotNull List<Component> args) {
@@ -45,5 +35,20 @@ public interface MessagesBase extends ComponentLike {
     @Override
     default @NotNull Component asComponent() {
         return Component.translatable(translationKey());
+    }
+
+    static @NotNull List<ComponentLike> asArgs(Object... args) {
+        if (args.length == 0) return List.of();
+        var componentArgs = new ComponentLike[args.length];
+        for (int i = 0; i < args.length; i++) {
+            var arg = args[i];
+            componentArgs[i] = switch (arg) {
+                case Component comp -> comp;
+                case Number number -> TranslationArgument.numeric(number);
+                case Boolean bool -> TranslationArgument.bool(bool);
+                default -> Component.text(arg.toString());
+            };
+        }
+        return List.of(componentArgs);
     }
 }

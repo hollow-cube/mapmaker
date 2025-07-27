@@ -1,9 +1,6 @@
 package net.hollowcube.mapmaker.hub.gui.edit;
 
-import net.hollowcube.canvas.Label;
-import net.hollowcube.canvas.Switch;
-import net.hollowcube.canvas.Text;
-import net.hollowcube.canvas.View;
+import net.hollowcube.canvas.*;
 import net.hollowcube.canvas.annotation.*;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.ServerRuntime;
@@ -11,9 +8,10 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.common.ConfirmAction;
-import net.hollowcube.mapmaker.gui.play.MapDetailsView;
+import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -54,8 +52,14 @@ public class EditMap extends View {
         PUBLISH;
     }
 
+    private @Outlet("tab_actions_contest_switch") Switch tabActionsContestSwitch;
+    private @Outlet("building_contest_lock_switch") Switch contestBuildingLockSwitch;
+    private @Outlet("contest_build_lock_icon") Element contestBuildLockIcon;
+    private @Outlet("contest_publish_switch") Switch contestPublishSwitch;
     private @Outlet("publish_switch") Switch publishSwitch;
+    private @Outlet("publish_contest_switch") Switch publishContestSwitch;
     private @Outlet("publish") Label publishButton;
+    private @Outlet("publish_contest") Label publishContestButton;
 
     // INFO TAB
     private @Outlet("map_name") Text mapNameText;
@@ -217,8 +221,13 @@ public class EditMap extends View {
         this.showInfoTab();
 
         for (var slotId : slotIds) {
-            slotId.setText(String.format("Slot #%d", slot + 1));
-            slotId.setArgs(Component.text(slot + 1));
+            if (map.contest() != null) {
+                slotId.setText("Map Comp Slot");
+                slotId.setArgs(Component.text("6"));
+            } else {
+                slotId.setText(String.format("Slot #%d", slot + 1));
+                slotId.setArgs(Component.text(slot + 1));
+            }
         }
 
         updateElementsFromMap();
@@ -256,6 +265,11 @@ public class EditMap extends View {
         }
     }
 
+    @Action(value = "verify_contest", async = true)
+    private void verifyContestMap(@NotNull Player player) {
+        verifyMap(player);
+    }
+
     @Action(value = "verify", async = true)
     private void verifyMap(@NotNull Player player) {
         if (map.verification() == MapVerification.UNVERIFIED) {
@@ -279,6 +293,13 @@ public class EditMap extends View {
         pushView(context -> new ConfirmAction(context,
                 () -> popView("publish_sig", player),
                 Component.translatable("Publish your map " + map.name())));
+    }
+
+    @Action(value = "publish_contest")
+    private void publishContestMap(@NotNull Player player) {
+        pushView(context -> new ConfirmAction(context,
+                                              () -> popView("publish_sig_contest", player),
+                                              Component.translatable("gui.create_maps.slot.comp.submit.confirm")));
     }
 
     @Signal("publish_sig")
@@ -305,7 +326,24 @@ public class EditMap extends View {
 
             // Open the map details view for the newly published map
             var authorName = playerService.getPlayerDisplayName2(publishedMap.owner());
-            pushView(c -> new MapDetailsView(c, map, authorName));
+            Panel.open(player, new MapDetailsView(playerService, mapService, bridge, map, authorName, true));
+        });
+    }
+
+    @Signal("publish_sig_contest")
+    private void publishContestMapLogic(@NotNull Player player) {
+        FutureUtil.submitVirtual(() -> {
+            var playerData = PlayerDataV2.fromPlayer(player);
+            try {
+                publishContestButton.setState(State.LOADING);
+                mapService.publishMap(playerData.id(), map.id());
+                player.sendMessage(Component.translatable("create_maps.slot.comp.submission.success"));
+            } catch (Exception e) {
+                logger.log(System.Logger.Level.ERROR, "Failed to publish map", e);
+            } finally {
+                publishContestButton.setState(State.ACTIVE);
+                player.closeInventory();
+            }
         });
     }
 
@@ -648,8 +686,15 @@ public class EditMap extends View {
         mapSettingsTimeOfDay.setOption(map.getSetting(MapSettings.TIME_OF_DAY).ordinal());
         mapSettingsWeatherType.setOption(map.getSetting(MapSettings.WEATHER_TYPE).ordinal());
 
+        contestBuildLockIcon.setState(
+                tabSwitch.getOption() != 0 || map.contest() == null ? State.HIDDEN : State.ACTIVE);
+        tabActionsContestSwitch.setOption(map.contest() != null);
+        contestBuildingLockSwitch.setOption(map.contest() != null);
+        contestPublishSwitch.setOption(map.contest() != null);
         async(() -> {
-            publishSwitch.setOption(getPublishState().ordinal());
+            var publishState = getPublishState().ordinal();
+            publishContestSwitch.setOption(publishState);
+            publishSwitch.setOption(publishState);
         });
     }
 
@@ -673,6 +718,7 @@ public class EditMap extends View {
             mapPlayerData.update(new MapPlayerData(
                     mapPlayerData.id(),
                     newMapSlots,
+                    mapPlayerData.getContestSlot(),
                     mapPlayerData.lastPlayedMap(),
                     mapPlayerData.lastEditedMap()
             ));
@@ -731,6 +777,9 @@ public class EditMap extends View {
         if (index == 2 && map != null && map.settings().getVariant().equals(MapVariant.BUILDING)) {
             mapSettingsTabSwitch.setOption(0);
         }
+        tabActionsContestSwitch.setOption(map != null && map.contest() != null);
+        contestBuildLockIcon.setState(
+                tabSwitch.getOption() != 0 || map == null || map.contest() == null ? State.HIDDEN : State.ACTIVE);
     }
 
     public void showInformation(@NotNull Player player) {

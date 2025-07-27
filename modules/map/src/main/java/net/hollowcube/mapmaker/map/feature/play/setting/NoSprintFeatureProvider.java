@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.action.Attachments;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerUpdateStateEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
@@ -29,12 +30,14 @@ public class NoSprintFeatureProvider extends AbstractSettingFeatureProvider {
         return eventNode;
     }
 
-    private static boolean canSprint(@NotNull Player player, MapWorld world) {
+    private static boolean canSprint(@NotNull Player player, @NotNull MapWorld world) {
         if (!world.isPlaying(player)) return true;
+        var state = SaveState.optionalFromPlayer(player);
+        if (state == null) return true; // Sanity
 
-        var state = SaveState.fromPlayer(player);
         var playstate = state.state(PlayState.class);
-        return !playstate.settings().get(MapSettings.NO_SPRINT, world.map().settings());
+        return !playstate.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
+                .get(MapSettings.NO_SPRINT, world.map().settings());
     }
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {
@@ -47,16 +50,11 @@ public class NoSprintFeatureProvider extends AbstractSettingFeatureProvider {
     }
 
     public void playerUpdated(@NotNull MapPlayerUpdateStateEvent event) {
-        updatePlayer(event.player());
+        var canSprint = canSprint(event.player(), event.getMapWorld());
+        event.player().setFood(canSprint ? 20 : 6);
     }
 
     public void removePlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
         event.player().setFood(20);
-    }
-
-    private void updatePlayer(@NotNull Player player) {
-        var world = MapWorld.forPlayer(player);
-        var canSprint = canSprint(player, world);
-        player.setFood(canSprint ? 20 : 6);
     }
 }

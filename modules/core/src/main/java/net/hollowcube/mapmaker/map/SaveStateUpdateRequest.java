@@ -1,8 +1,10 @@
 package net.hollowcube.mapmaker.map;
 
 import com.google.gson.JsonObject;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.Transcoder;
+import net.minestom.server.registry.RegistryTranscoder;
 import org.jetbrains.annotations.NotNull;
 
 public class SaveStateUpdateRequest {
@@ -26,8 +28,14 @@ public class SaveStateUpdateRequest {
         return this;
     }
 
+    public @NotNull SaveStateUpdateRequest setProtocolVersion(int protocolVersion) {
+        updates.addProperty("protocolVersion", protocolVersion);
+        return this;
+    }
+
     public @NotNull SaveStateUpdateRequest setState(@NotNull Object state, @NotNull SaveStateType.Serializer<?> serializer) {
-        updates.add(serializer.name(), ((Codec<Object>) serializer.codec()).encode(Transcoder.JSON, state).orElseThrow());
+        var coder = new RegistryTranscoder<>(Transcoder.JSON, MinecraftServer.process());
+        updates.add(serializer.name(), ((Codec<Object>) serializer.codec()).encode(coder, state).orElseThrow());
         return this;
     }
 

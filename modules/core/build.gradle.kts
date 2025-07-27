@@ -6,14 +6,11 @@ repositories {
     maven(url = "https://maven.noxcrew.com/public")
 }
 
-val builtin by configurations.creating
-
 dependencies {
     implementation(project(":modules:canvas:api"))
     implementation(project(":modules:command"))
     implementation(project(":modules:compat"))
     implementation(project(":modules:common"))
-    implementation(project(":modules:script-engine"))
     implementation(project(":modules:datafix"))
 
     implementation(libs.minestom)
@@ -31,25 +28,4 @@ dependencies {
     implementation(libs.bundles.prometheus)
 
     testImplementation(project(":modules:test"))
-    builtin(project(":modules:script-engine:builtin", "builtin"))
-}
-
-tasks.register<Copy>("copyBuiltinModule") {
-    from(builtin)
-    into(layout.buildDirectory.dir("builtin"))
-
-    eachFile {
-        val remapPath: List<String> = listOf("builtin") + relativePath.segments
-        relativePath = RelativePath(true, *remapPath.toTypedArray())
-    }
-}
-
-tasks.named("processTestResources") {
-    dependsOn("copyBuiltinModule")
-}
-
-java {
-    sourceSets["test"].resources {
-        srcDir(layout.buildDirectory.dir("builtin"))
-    }
 }

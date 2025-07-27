@@ -132,12 +132,16 @@ public final class TerraformImpl implements Terraform {
 
     @Override
     public void savePlayerSession(@NotNull Player player, boolean drop) {
-        var session = PlayerSession.forPlayer(player);
-        var sessionData = session.write();
-        storage.savePlayerSession(session.id(), sessionData);
-        if (drop) player.removeTag(PlayerSession.TAG);
-        logger.debug("Saved session for {} ({}) drop={}, size={}", player.getUuid(), player.getUsername(),
-                drop, Format.formatBytes(sessionData.length));
+        try {
+            var session = PlayerSession.forPlayer(player);
+            var sessionData = session.write();
+            storage.savePlayerSession(session.id(), sessionData);
+            if (drop) player.removeTag(PlayerSession.TAG);
+            logger.debug("Saved session for {} ({}) drop={}, size={}", player.getUuid(), player.getUsername(),
+                         drop, Format.formatBytes(sessionData.length));
+        } catch (NullPointerException ignored) {
+            logger.warn("No session found for {} ({})", player.getUuid(), player.getUsername());
+        }
     }
 
     @Override
@@ -160,7 +164,12 @@ public final class TerraformImpl implements Terraform {
         var instance = Objects.requireNonNullElseGet(playerInstance, player::getInstance);
         var tag = Tag.<LocalSession>Transient(String.format("terraform:session/%s", player.getUuid()));
 
-        var session = Objects.requireNonNull(instance.getTag(tag), "Local session not initialized");
+        var session = instance.getTag(tag);
+        if (session == null) {
+            logger.warn("No local session found for {} ({})", player.getUuid(), player.getUsername());
+            return;
+        }
+
         var sessionData = session.write();
         storage.saveLocalSession(session.playerId(), session.id(), sessionData);
         if (drop) instance.removeTag(tag);

@@ -22,4 +22,8 @@ public final class PlayerSettings {
 
     public static PlayerSetting<Boolean> IS_VANISHED = PlayerSetting.Bool("is_hidden", false);
 
+    // Terraform
+
+    public static PlayerSetting<Boolean> ENABLE_WE_CUI = PlayerSetting.Bool("we_outline_cui", false);
+
 }

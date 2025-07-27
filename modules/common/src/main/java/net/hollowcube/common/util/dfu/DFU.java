@@ -1,8 +1,10 @@
 package net.hollowcube.common.util.dfu;
 
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.Transcoder;
+import net.minestom.server.registry.RegistryTranscoder;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagSerializer;
 import org.jetbrains.annotations.NotNull;
@@ -33,10 +35,11 @@ public final class DFU {
     }
 
     public static <T> @NotNull TagSerializer<T> codecTagSerializer(@NotNull Codec<T> codec) {
+        var coder = new RegistryTranscoder<>(Transcoder.NBT, MinecraftServer.process());
         return TagSerializer.fromCompound(
-                compound -> codec.decode(Transcoder.NBT, compound).orElseThrow(),
+                compound -> codec.decode(coder, compound).orElseThrow(),
                 value -> {
-                    var tag = codec.encode(Transcoder.NBT, value).orElseThrow();
+                    var tag = codec.encode(coder, value).orElseThrow();
                     if (tag instanceof CompoundBinaryTag compound) return compound;
                     return CompoundBinaryTag.empty();
                 }
@@ -44,7 +47,8 @@ public final class DFU {
     }
 
     public static <T> @NotNull CompoundBinaryTag encodeNbt(@NotNull Codec<T> codec, @NotNull T value) {
-        return (CompoundBinaryTag) codec.encode(Transcoder.NBT, value).orElseThrow();
+        var coder = new RegistryTranscoder<>(Transcoder.NBT, MinecraftServer.process());
+        return (CompoundBinaryTag) codec.encode(coder, value).orElseThrow();
     }
 
     private static <T> @NotNull Supplier<T> codecEmptySupplier(@NotNull Codec<T> codec) {

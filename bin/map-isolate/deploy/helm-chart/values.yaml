@@ -1,0 +1,26 @@
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: map-isolate
+  tag: "latest"
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: { }
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 9124
+
+mapmaker:
+  resourcePackHash: ""
+
+env: { }

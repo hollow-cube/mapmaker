@@ -71,7 +71,7 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
     @Override
     public void load() {
         features().preinitMap(this);
-        
+
         super.load();
     }
 
@@ -103,27 +103,37 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
         super.addPlayer(player);
         player.setGameMode(GameMode.ADVENTURE);
 
-        var startingPos = player.getPosition();
-        SpectateHandler.setCheckpoint(player, startingPos);
-        player.teleport(startingPos, Vec.ZERO, null, RelativeFlags.NONE); //todo is this necessary it seems hella dumb?
+        player.scheduler().scheduleEndOfTick(() -> {
+            var startingPos = player.getPosition();
+            SpectateHandler.setCheckpoint(player, startingPos);
+            player.teleport(startingPos, Vec.ZERO, null, RelativeFlags.NONE); //todo is this necessary it seems hella dumb?
 
-        var isMapJoin = player.getAndSetTag(FIRST_JOIN_TAG, null) != null;
-        callEvent(new MapPlayerInitEvent(this, player, true, isMapJoin));
+            var isMapJoin = player.getAndSetTag(FIRST_JOIN_TAG, null) != null;
+            callEvent(new MapPlayerInitEvent(this, player, true, isMapJoin));
+        });
     }
 
     @Override
     public void removePlayer(@NotNull Player player) {
-        callEvent(new MapWorldPlayerStopPlayingEvent(this, player));
+        // This must be done at end of tick to avoid trying to perform
+        // play-state actions after we have removed their play state.
+        FutureUtil.waitForEndOfTick(player, () -> {
+            callEvent(new MapWorldPlayerStopPlayingEvent(this, player));
 
-        super.removePlayer(player);
+            super.removePlayer(player);
 
-        // We never need to save their state because this is a test state and only managed locally.
-
-        player.removeTag(SaveState.TAG);
+            // We never need to save their state because this is a test state and only managed locally.
+            player.removeTag(SaveState.TAG);
+        });
     }
 
     @Override
     protected void sendBossBars(@NotNull Player player) {
         // Intentionally do nothing so we preserve the editing boss bar
+    }
+
+    @Override
+    public @Nullable MapWorld playWorld() {
+        return this;
     }
 }

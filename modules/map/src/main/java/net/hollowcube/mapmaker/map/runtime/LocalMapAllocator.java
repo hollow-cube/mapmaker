@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.runtime;
 
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapData;
@@ -54,7 +55,7 @@ public class LocalMapAllocator implements MapAllocator {
 
     public LocalMapAllocator(@NotNull MapServer server) {
         this.metrics = server.metrics();
-        this.direct = MapAllocator.direct(server);
+        this.direct = MapAllocator.directAllocator(server);
     }
 
     @SuppressWarnings("unchecked")
@@ -90,22 +91,28 @@ public class LocalMapAllocator implements MapAllocator {
     @Override
     public @NotNull Future<Boolean> destroy(@NotNull String worldId, @NotNull Component reason) {
         Callable<Boolean> task = () -> {
-            for (var map : List.copyOf(maps.entrySet())) {
-                var key = map.getKey();
-                var world = FutureUtil.getUnchecked(map.getValue());
-                if (!world.worldId().equals(worldId)) continue;
+            try {
+                for (var map : List.copyOf(maps.entrySet())) {
+                    var key = map.getKey();
+                    var world = FutureUtil.getUnchecked(map.getValue());
+                    if (!world.worldId().equals(worldId)) continue;
 
-                lock.lock();
-                try {
-                    maps.remove(key);
-                } finally {
-                    lock.unlock();
+                    lock.lock();
+                    try {
+                        maps.remove(key);
+                    } finally {
+                        lock.unlock();
+                    }
+                    direct.free(world, reason);
+                    return true;
                 }
-                direct.free(world, reason);
-                return true;
-            }
 
-            return false;
+                return false;
+            } catch (Exception e) {
+                logger.error("failed to destroy world " + worldId, e);
+                ExceptionReporter.reportException(e);
+                return false;
+            }
         };
         return isClosing ? FutureUtil.callNow(task) : VIRTUAL_EXECUTOR.submit(task);
     }
@@ -163,25 +170,40 @@ public class LocalMapAllocator implements MapAllocator {
     // Small wrapper around direct allocator to keep track of players in the instance
     private <T extends AbstractMapWorld> T allocateTracked(@NotNull MapData map, @NotNull MapWorld.Constructor<T> ctor) {
         metrics.write(new MapInstanceCreatedEvent(map.id(), ctor.type().getSimpleName()));
-        var createdWorld = direct.allocateDirect(map, ctor);
-        createdWorld.instance().eventNode().addListener(PlayerInstanceLeaveEvent.class, event -> {
-            // Get the world from the instance because 1: the player is no longer in a world, and 2: we care about the root world (editing, not testing)
-            var world = MapWorld.unsafeFromInstance(event.getInstance());
-            if (world == null) return;
+        try {
+            var createdWorld = direct.allocateDirect(map, ctor);
+            createdWorld.instance().eventNode().addListener(PlayerInstanceLeaveEvent.class, event -> {
+                // Get the world from the instance because 1: the player is no longer in a world, and 2: we care about the root world (editing, not testing)
+                var world = MapWorld.unsafeFromInstance(event.getInstance());
+                if (world == null) return;
 
-            // If the owner has left, destroy the map on its next tick.
-            var playerData = PlayerDataV2.fromPlayer(event.getPlayer());
-            if (playerData.id().equals(world.map().owner()) && !world.map().isPublished()) {
-                world.instance().scheduleNextTick(ignored -> destroy(world.worldId(), Component.translatable("map.kicked")));
-                return;
+                // If the owner has left, destroy the map on its next tick.
+                var playerData = PlayerDataV2.fromPlayer(event.getPlayer());
+                if (playerData.id().equals(world.map().owner()) && !world.map().isPublished()) {
+                    world.instance().scheduleNextTick(ignored -> destroy(world.worldId(), Component.translatable("map.kicked")));
+                    return;
+                }
+
+                // Stop if there are still players in the instance
+                if (event.getInstance().getPlayers().size() > 1) return;
+
+                destroy(world.worldId(), Component.translatable("map.closed"));
+            });
+            return createdWorld;
+        } catch (Exception e) {
+            logger.error("Failed to allocate map " + map.id() + " of type " + ctor.type().getSimpleName(), e);
+            ExceptionReporter.reportException(e);
+
+            lock.lock();
+            try {
+                var key = new MapKey(map.id(), ctor.type());
+                maps.remove(key);
+            } finally {
+                lock.unlock();
             }
 
-            // Stop if there are still players in the instance
-            if (event.getInstance().getPlayers().size() > 1) return;
-
-            destroy(world.worldId(), Component.translatable("map.closed"));
-        });
-        return createdWorld;
+            return null;
+        }
     }
 
     // Direct allocator delegated calls.
@@ -211,10 +233,15 @@ public class LocalMapAllocator implements MapAllocator {
                 builder.append(Component.text(" (" + key.worldType().getSimpleName() + ")"));
 
                 if (entry.getValue().isDone()) {
-                    var world = FutureUtil.getUnchecked(entry.getValue());
-                    var shortWorldId = world.worldId().substring(0, Math.min(8, world.worldId().length()));
-                    builder.append(Component.text(": ").append(ComponentUtil.createBasicCopy(shortWorldId, world.worldId())));
-                    world.appendDebugInfo(builder);
+                    try {
+                        var world = FutureUtil.getUnchecked(entry.getValue());
+                        var shortWorldId = world.worldId().substring(0, Math.min(8, world.worldId().length()));
+                        builder.append(Component.text(": ").append(ComponentUtil.createBasicCopy(shortWorldId, world.worldId())));
+                        world.appendDebugInfo(builder);
+                    } catch (Throwable e) {
+                        builder.append(Component.text(": (failed to allocate)"));
+                        builder.append(Component.text("  ᴇʀʀᴏʀ: " + e.getMessage()));
+                    }
                 } else {
                     builder.append(Component.text(": (loading)"));
                 }

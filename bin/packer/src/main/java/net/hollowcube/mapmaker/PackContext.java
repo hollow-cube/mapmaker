@@ -9,37 +9,61 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
 public class PackContext {
 
-    private Path resources;
-    private Path out;
+    private final Path resources;
+    private final Path out;
+    private final Path minecraft;
     private boolean minify = true;
     private int resourceId = 0;
 
-    private Path rpMinecraftBase;
-    private Path rpMapmakerBase;
-    private String mapmakerRefBase;
+    private final Path rpMinecraftBase;
+    private final Path rpMapmakerBase;
+    private final String mapmakerRefBase;
 
     private final Map<String, String> remapping = new HashMap<>();
 
     private final JsonObject fontFile;
 
-    private JsonArray serverSprites = new JsonArray();
+    private final JsonArray serverSprites = new JsonArray();
 
     public final JsonObject dynamicData = new JsonObject();
 
 
-    public PackContext(Path resources, Path out) throws IOException {
+    public PackContext(Path resources, Path out, Path minecraft) throws IOException {
         this.resources = resources;
         this.out = out;
+        this.minecraft = minecraft;
+
+        Files.walkFileTree(out.resolve("client"), new FileVisitor<>() {
+            @Override
+            public @NotNull FileVisitResult preVisitDirectory(Path dir, @NotNull BasicFileAttributes attrs) throws IOException {
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public @NotNull FileVisitResult visitFile(Path file, @NotNull BasicFileAttributes attrs) throws IOException {
+                Files.deleteIfExists(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public @NotNull FileVisitResult visitFileFailed(Path file, @NotNull IOException exc) throws IOException {
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public @NotNull FileVisitResult postVisitDirectory(Path dir, @Nullable IOException exc) throws IOException {
+                Files.deleteIfExists(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
 
         copyStaticFiles();
 
@@ -64,6 +88,10 @@ public class PackContext {
 
     public @NotNull Path out() {
         return out;
+    }
+
+    public @NotNull Path vanilla() {
+        return minecraft;
     }
 
     // Resource pack methods

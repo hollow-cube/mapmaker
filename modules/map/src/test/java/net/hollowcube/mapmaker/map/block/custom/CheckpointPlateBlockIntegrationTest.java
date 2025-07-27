@@ -1,16 +1,16 @@
 package net.hollowcube.mapmaker.map.block.custom;
 
 import com.google.gson.JsonObject;
-import net.hollowcube.mapmaker.map.MapIntegrationTest;
-import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.AbstractMapIntegrationTest;
+import net.hollowcube.mapmaker.map.action.impl.ResetHeightAction;
+import net.hollowcube.mapmaker.map.action.impl.TeleportAction;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerCheckpointChangeEvent;
-import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
+import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectDataV2;
+import net.hollowcube.mapmaker.map.util.RelativePos;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.Player;
-import net.minestom.testing.Env;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -20,21 +20,24 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@MapIntegrationTest
-class CheckpointPlateBlockIntegrationTest {
+class CheckpointPlateBlockIntegrationTest extends AbstractMapIntegrationTest {
 
     @Test
-    void checkpointTeleport(Env env, MapWorld world, Player player) {
+    void checkpointTeleport() {
         var expected = new Pos(5, 5, 5);
-        placeCheckpoint(world, c -> c.setTeleport(expected), null);
+        placeCheckpoint(c -> c.actions().addAction(TeleportAction.KEY)
+                .<TeleportAction>update(_ -> new TeleportAction(new RelativePos(expected, 0))), null);
 
         env.tick();
         assertEquals(expected, player.getPosition());
     }
 
     @Test
-    void checkpointResetHeight(Env env, MapWorld world, Player player) {
-        placeCheckpoint(world, c -> c.setResetHeight(12), null);
+    void checkpointResetHeight() {
+        placeCheckpoint(c -> c.actions()
+                        .addAction(ResetHeightAction.KEY)
+                        .<ResetHeightAction>update(it -> it.withValue(12)),
+                null);
 
         env.listen(world.eventNode(), MapPlayerCheckpointChangeEvent.class)
                 .followup(); // Ensure checkpoint change is called
@@ -49,10 +52,11 @@ class CheckpointPlateBlockIntegrationTest {
         assertEquals(new Pos(0, 40, 0), player.getPosition());
     }
 
-    private static void placeCheckpoint(@NotNull MapWorld world, @NotNull Consumer<CheckpointEffectData> editor, @Nullable Point position) {
-        var checkpoint = CheckpointEffectData.CODEC.decode(Transcoder.JSON, new JsonObject()).orElseThrow();
+    private void placeCheckpoint(@NotNull Consumer<CheckpointEffectDataV2> editor, @Nullable Point position) {
+        var checkpoint = CheckpointEffectDataV2.CODEC.decode(Transcoder.JSON, new JsonObject()).orElseThrow();
         editor.accept(checkpoint);
         var block = CheckpointPlateBlock.ITEM.block().withTag(CheckpointPlateBlock.DATA_TAG, checkpoint);
         world.instance().setBlock(Objects.requireNonNullElse(position, new Pos(0, 40, 0)), block);
     }
+
 }

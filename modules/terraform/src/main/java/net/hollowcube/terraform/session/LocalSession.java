@@ -7,6 +7,7 @@ import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.history.Change;
 import net.hollowcube.terraform.task.Task;
 import net.hollowcube.terraform.task.TaskImpl;
+import net.hollowcube.terraform.task.TooManyTasksException;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
@@ -24,7 +25,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import static net.hollowcube.terraform.util.ProtocolUtil.assertMarker;
 import static net.hollowcube.terraform.util.ProtocolUtil.insertMarker;
 import static net.minestom.server.network.NetworkBuffer.SHORT;
-import static net.minestom.server.network.NetworkBuffer.VAR_INT;
 
 /**
  * A Terraform session local to a world. Stores only information relevant to the
@@ -134,8 +134,20 @@ public class LocalSession {
         taskLock.lock();
         try {
             if (tasks.size() >= MAX_QUEUED_TASKS)
-                throw new RuntimeException("too many tasks queued"); //todo
+                throw new TooManyTasksException();
 
+            var taskInternal = (TaskImpl) task;
+            tasks.add(taskInternal);
+            ((TerraformImpl) terraform()).submitTask(taskInternal);
+        } finally {
+            taskLock.unlock();
+        }
+    }
+
+    @ApiStatus.Internal
+    public void submitTaskForce(@NotNull Task task) {
+        taskLock.lock();
+        try {
             var taskInternal = (TaskImpl) task;
             tasks.add(taskInternal);
             ((TerraformImpl) terraform()).submitTask(taskInternal);

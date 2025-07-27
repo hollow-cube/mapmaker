@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "mapmaker:item/colored_cube",
+    "tints": [
+      {
+        "type": "minecraft:custom_model_data",
+        "default": -1
+      }
+    ]
+  }
+}

@@ -1,10 +1,12 @@
 package net.hollowcube.mapmaker.player;
 
+import net.hollowcube.common.util.RuntimeGson;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.StructCodec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@RuntimeGson
 public record PlayerSkin(
         @Nullable String texture,
         @Nullable String signature

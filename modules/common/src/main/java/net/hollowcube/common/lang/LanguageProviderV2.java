@@ -1,10 +1,10 @@
 package net.hollowcube.common.lang;
 
-import com.google.gson.*;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.TranslatableComponent;
-import net.kyori.adventure.text.TranslationArgument;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import net.kyori.adventure.text.*;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.Context;
@@ -39,6 +39,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
+
+import static net.kyori.adventure.text.Component.translatable;
 
 @SuppressWarnings("UnstableApiUsage")
 public class LanguageProviderV2 {
@@ -84,6 +86,16 @@ public class LanguageProviderV2 {
 
     private static final LRUCache<TranslatableComponent, Component> expandedComponentCache = new LRUCache<>(1000);
 
+    public static @NotNull String translateToPlain(@NotNull String translationKey) {
+        return PLAIN_TEXT.serialize(translate(translatable(translationKey)));
+    }
+
+    public static @NotNull String translateToPlain(@NotNull Component component) {
+        if (!(component instanceof TranslatableComponent translatable))
+            return PLAIN_TEXT.serialize(Objects.requireNonNull(component));
+        return PLAIN_TEXT.serialize(translate(translatable));
+    }
+
     @Contract("!null -> !null")
     public static @Nullable Component translate(@Nullable Component component) {
         if (component == null) return null;
@@ -120,12 +132,13 @@ public class LanguageProviderV2 {
         return result;
     }
 
-    public static @NotNull List<Component> translateMulti(@NotNull String key, @NotNull List<Component> args) {
+    public static @NotNull List<Component> translateMulti(@NotNull String key, @NotNull List<? extends ComponentLike> args) {
         var partials = multiComponentCache.computeIfAbsent(key, LanguageProviderV2::parseMultiComponent);
         if (partials == null) return List.of(); // Must return empty because we use it for lore which is not required.
 
         // Apply the args to the partials (after translating the args)
         var translatedArgs = args.stream()
+                .map(ComponentLike::asComponent)
                 .map(LanguageProviderV2::translate)
                 .toList();
         return partials.stream()
@@ -133,7 +146,7 @@ public class LanguageProviderV2 {
                 .toList();
     }
 
-    public static @NotNull Component translateMultiMerged(@NotNull String key, @NotNull List<Component> args) {
+    public static @NotNull Component translateMultiMerged(@NotNull String key, @NotNull List<? extends ComponentLike> args) {
         var partials = translateMulti(key, args);
         if (partials.isEmpty()) return Component.empty();
         if (partials.size() == 1) return partials.get(0);
@@ -147,11 +160,11 @@ public class LanguageProviderV2 {
 
     public static @NotNull Component getVanillaTranslation(@NotNull Material material) {
         if (material.isBlock()) return getVanillaTranslation(material.registry().block());
-        return Component.translatable("item." + material.key().namespace() + "." + material.key().value());
+        return translatable("item." + material.key().namespace() + "." + material.key().value());
     }
 
     public static @NotNull Component getVanillaTranslation(@NotNull Block block) {
-        return Component.translatable("block." + block.key().namespace() + "." + block.key().value());
+        return translatable("block." + block.key().namespace() + "." + block.key().value());
     }
 
     // Use of a lot of internal Minimessage APIs below. May break in the future and need to write this ourselves.
@@ -184,7 +197,6 @@ public class LanguageProviderV2 {
                 }
             }
         };
-
     }
 
     static @Nullable ElementNode parseComponent(@NotNull String id) {
@@ -227,7 +239,7 @@ public class LanguageProviderV2 {
                         var component = args.get(index);
                         var format = match.group("format");
                         var formatter = format == null ? null : NUMBER_FORMATTERS.get(format);
-                        if (formatter != null && component instanceof TranslationArgument argument && argument.value() instanceof Number number){
+                        if (formatter != null && component instanceof TranslationArgument argument && argument.value() instanceof Number number) {
                             return formatter.format(number);
                         }
                         return PLAIN_TEXT.serialize(component);

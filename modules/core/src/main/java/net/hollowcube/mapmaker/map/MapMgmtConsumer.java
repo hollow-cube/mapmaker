@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 public abstract class MapMgmtConsumer extends BaseConsumer<MapMgmtConsumer.MapUpdateMessage> {
     private static final Logger logger = LoggerFactory.getLogger(MapMgmtConsumer.class);
 
+    @RuntimeGson
     public record MapUpdateMessage(
             @MagicConstant(valuesFromClass = MapUpdateMessage.class) int action,
             @NotNull String id,

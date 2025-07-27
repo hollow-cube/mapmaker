@@ -5,6 +5,8 @@ import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.compat.axiom.events.AxiomMarkerDataRequestEvent;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.action.gui.ActionEditorView;
+import net.hollowcube.mapmaker.map.action.impl.TeleportAction;
 import net.hollowcube.mapmaker.map.block.custom.*;
 import net.hollowcube.mapmaker.map.block.custom.bouncepad.BouncePadMarkerHandler;
 import net.hollowcube.mapmaker.map.entity.marker.MapLeaderboardMarkerHandler;
@@ -22,13 +24,12 @@ import net.hollowcube.mapmaker.map.feature.edit.item.DisplayEntityItem;
 import net.hollowcube.mapmaker.map.feature.edit.item.EnterTestModeItem;
 import net.hollowcube.mapmaker.map.feature.edit.item.SpawnPointItem;
 import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
-import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
+import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectDataV2;
 import net.hollowcube.mapmaker.map.feature.play.effect.StatusEffectData;
-import net.hollowcube.mapmaker.map.gui.effect.EditCheckpointView;
-import net.hollowcube.mapmaker.map.gui.effect.EditStatusView;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
+import net.hollowcube.mapmaker.panels.Panel;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -45,7 +46,6 @@ import net.minestom.server.item.component.ItemBlockState;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -78,6 +78,7 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
 
         world.objectEntityHandlers().registerForMarkers(MapLeaderboardMarkerHandler.ID, MapLeaderboardMarkerHandler::new);
         world.objectEntityHandlers().registerForMarkers(BouncePadMarkerHandler.ID, BouncePadMarkerHandler::new);
+        world.objectEntityHandlers().registerForMarkers(HappyGhastMarkerHandler.ID, HappyGhastMarkerHandler::new);
         world.objectEntityHandlers().register(ResetMarkerHandler.ID, ResetMarkerHandler::new);
     }
 
@@ -123,18 +124,22 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
             case "mapmaker:checkpoint" -> {
                 // Block the edit and open the checkpoint editor gui
                 event.setCancelled(true);
-                var checkpointData = Objects.requireNonNullElseGet(marker.getTag(CheckpointPlateBlock.ENTITY_DATA_TAG), CheckpointEffectData::empty);
-                var maxResetHeight = (int) (Objects.requireNonNullElse(marker.getMin(), Pos.ZERO).y() + marker.getPosition().y());
-                world.server().guiController().show(player, c -> new EditCheckpointView(c.with(Map.of("updateTarget", marker)),
-                        checkpointData, maxResetHeight, () -> marker.setTag(CheckpointPlateBlock.ENTITY_DATA_TAG, checkpointData)));
+                var checkpointData = Objects.requireNonNullElseGet(marker.getTag(CheckpointPlateBlock.ENTITY_DATA_TAG), CheckpointEffectDataV2::new);
+                var actionLocation = marker.getPosition().withY(y -> y + Objects.requireNonNullElse(marker.getMin(), Pos.ZERO).y());
+                var host = Panel.open(player, new ActionEditorView(checkpointData.actions(), "Checkpoint"));
+                host.setTag(ActionEditorView.ACTION_LOCATION, actionLocation);
+                host.setTag(TeleportAction.SPC_TAG, marker);
+                host.onClose(() -> marker.setTag(CheckpointPlateBlock.ENTITY_DATA_TAG, checkpointData));
             }
             case "mapmaker:status" -> {
                 // Block the edit and open the status plate editor gui
                 event.setCancelled(true);
-                var statusData = Objects.requireNonNullElseGet(marker.getTag(StatusPlateBlock.ENTITY_DATA_TAG), StatusEffectData::empty);
-                var maxResetHeight = (int) (Objects.requireNonNullElse(marker.getMin(), Pos.ZERO).y() + marker.getPosition().y());
-                world.server().guiController().show(player, c -> new EditStatusView(c.with(Map.of("updateTarget", marker)),
-                        statusData, maxResetHeight, () -> marker.setTag(StatusPlateBlock.ENTITY_DATA_TAG, statusData)));
+                var statusData = Objects.requireNonNullElseGet(marker.getTag(StatusPlateBlock.ENTITY_DATA_TAG), StatusEffectData::new);
+                var actionLocation = marker.getPosition().withY(y -> y + Objects.requireNonNullElse(marker.getMin(), Pos.ZERO).y());
+                var host = Panel.open(player, new ActionEditorView(statusData.actions(), "Status"));
+                host.setTag(ActionEditorView.ACTION_LOCATION, actionLocation);
+                host.setTag(TeleportAction.SPC_TAG, marker);
+                host.onClose(() -> marker.setTag(StatusPlateBlock.ENTITY_DATA_TAG, statusData));
             }
             case "mapmaker:finish" -> {
                 // Block the edit and do nothing there are no finish plate settings yet :)

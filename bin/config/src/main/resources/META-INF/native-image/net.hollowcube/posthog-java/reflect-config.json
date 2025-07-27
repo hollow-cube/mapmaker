@@ -1,0 +1,154 @@
+[
+  {
+    "name": "net.hollowcube.posthog.FeatureFlagsResponse",
+    "allDeclaredFields": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": ["java.util.List", "java.util.Map", "java.util.Map"]
+      }, {
+        "name": "cohorts",
+        "parameterTypes": []
+      }, {
+        "name": "flags",
+        "parameterTypes": []
+      }, {
+        "name": "groupTypeMapping",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "net.hollowcube.posthog.FeatureFlagsResponse$Condition",
+    "allDeclaredFields": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": ["java.util.List", "java.lang.Integer", "java.lang.String"]
+      }, {
+        "name": "properties",
+        "parameterTypes": []
+      }, {
+        "name": "rolloutPercentage",
+        "parameterTypes": []
+      }, {
+        "name": "variant",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "net.hollowcube.posthog.FeatureFlagsResponse$Filters",
+    "allDeclaredFields": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.Integer", "java.util.List", "net.hollowcube.posthog.FeatureFlagsResponse$Variants", "java.util.Map"
+        ]
+      }, {
+        "name": "aggregationGroupTypeIndex",
+        "parameterTypes": []
+      }, {
+        "name": "groups",
+        "parameterTypes": []
+      }, {
+        "name": "multivariate",
+        "parameterTypes": []
+      }, {
+        "name": "payloads",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "net.hollowcube.posthog.FeatureFlagsResponse$Flag",
+    "allDeclaredFields": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.String", "boolean", "java.lang.Integer", "boolean",
+          "net.hollowcube.posthog.FeatureFlagsResponse$Filters", "java.lang.Boolean"
+        ]
+      }, {
+        "name": "active",
+        "parameterTypes": []
+      }, {
+        "name": "ensureExperienceContinuity",
+        "parameterTypes": []
+      }, {
+        "name": "filters",
+        "parameterTypes": []
+      }, {
+        "name": "isSimpleFlag",
+        "parameterTypes": []
+      }, {
+        "name": "key",
+        "parameterTypes": []
+      }, {
+        "name": "rolloutPercentage",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "net.hollowcube.posthog.FeatureFlagsResponse$Property",
+    "allDeclaredFields": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.String", "java.lang.String", "com.google.gson.JsonElement", "java.lang.String", "boolean"
+        ]
+      }, {
+        "name": "key",
+        "parameterTypes": []
+      }, {
+        "name": "negation",
+        "parameterTypes": []
+      }, {
+        "name": "operator",
+        "parameterTypes": []
+      }, {
+        "name": "type",
+        "parameterTypes": []
+      }, {
+        "name": "value",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "net.hollowcube.posthog.FeatureFlagsResponse$Variant",
+    "allDeclaredFields": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": ["java.lang.String", "java.lang.String", "java.lang.Integer"]
+      }, {
+        "name": "key",
+        "parameterTypes": []
+      }, {
+        "name": "name",
+        "parameterTypes": []
+      }, {
+        "name": "rolloutPercentage",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "net.hollowcube.posthog.FeatureFlagsResponse$Variants",
+    "allDeclaredFields": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": ["java.util.List"]
+      }, {
+        "name": "variants",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

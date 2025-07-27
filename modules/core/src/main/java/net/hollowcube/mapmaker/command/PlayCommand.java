@@ -1,44 +1,44 @@
 package net.hollowcube.mapmaker.command;
 
-import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.gui.play.PlayMapsView;
+import net.hollowcube.mapmaker.gui.map.browser.MapBrowserView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
+import net.hollowcube.mapmaker.panels.Panel;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 public class PlayCommand extends CommandDsl {
 
-    private final Argument<Optional<MapData>> mapArg;
+    private final Argument<@Nullable MapData> mapArg;
 
+    private final PlayerService playerService;
     private final MapService mapService;
     private final SessionManager sessionManager;
     private final ServerBridge bridge;
-    private final Controller guis;
 
     public PlayCommand(
+            @NotNull PlayerService playerService,
             @NotNull MapService mapService,
             @NotNull SessionManager sessionManager,
-            @NotNull ServerBridge bridge,
-            @NotNull Controller guis
+            @NotNull ServerBridge bridge
     ) {
         super("play");
+        this.playerService = playerService;
         this.mapService = mapService;
         this.sessionManager = sessionManager;
         this.bridge = bridge;
-        this.guis = guis;
 
         mapArg = CoreArgument.Map("map", mapService)
                 .description("The ID of the map to play");
@@ -47,19 +47,16 @@ public class PlayCommand extends CommandDsl {
         description = "Teleport to a map, resuming your progress if you have any";
         examples = List.of("/play 123-456-789");
 
-//        addSyntax(playerOnly(this::handleDefault));
+        addSyntax(playerOnly(this::handleDefault));
         addSyntax(playerOnly(this::joinTargetMap), mapArg);
     }
 
     private void handleDefault(@NotNull Player player, @NotNull CommandContext context) {
-        player.sendMessage("todo this should open the map search gui");
-        //var server = HubWorld.fromInstance(player.getInstance()).server(); TODO properly
-        //server.newOpenGUI(player, context -> new PlayMapsView(context.with(Map.of("query", ""))));
+        Panel.open(player, new MapBrowserView(playerService, mapService, bridge));
     }
 
     private void joinTargetMap(@NotNull Player player, @NotNull CommandContext context) {
-        var map = context.get(mapArg).orElse(null);
-
+        var map = context.get(mapArg);
         if (map == null) {
             player.sendMessage(Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;

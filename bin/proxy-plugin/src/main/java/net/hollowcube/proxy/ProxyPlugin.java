@@ -8,8 +8,12 @@ import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.event.permission.PermissionsSetupEvent;
-import com.velocitypowered.api.event.player.*;
+import com.velocitypowered.api.event.player.CookieReceiveEvent;
+import com.velocitypowered.api.event.player.CookieStoreEvent;
+import com.velocitypowered.api.event.player.KickedFromServerEvent;
+import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.event.player.configuration.PlayerFinishedConfigurationEvent;
+import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -36,12 +40,21 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Collectors;
 
 @Plugin(id = "hc-proxy", name = "hollowcube proxy plugin", version = "1.0", authors = "hollow cube")
 public class ProxyPlugin {
+    private static final ChannelIdentifier PROTOCOL_VERSION_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "pvn");
     private static final ChannelIdentifier TRANSFER_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "transfer");
     private static final ChannelIdentifier RESOURCE_PACK_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "resource_pack");
     private static final Key TRANSFER_DATA_COOKIE = Key.key("mapmaker", "transfer_data");
+
+    private static final Set<ProtocolVersion> SUPPORTED_VERSIONS = Set.of(
+            ProtocolVersion.MINECRAFT_1_21_4,
+            ProtocolVersion.MINECRAFT_1_21_5,
+            ProtocolVersion.MINECRAFT_1_21_6,
+            ProtocolVersion.MINECRAFT_1_21_7
+    );
 
     public static final TextColor RED = TextColor.color(0xFA4141);
     public static final Component MAINTENANCE = Component.text()
@@ -50,6 +63,13 @@ public class ProxyPlugin {
             .append(Component.text("Join the discord for updates!"))
             .appendNewline()
             .append(Component.text("discord.hollowcube.net", TextColor.color(0x3895FF)))
+            .build();
+    private static final Component WRONG_PROTOCOL = Component.text()
+            .append(Component.text("You are using an unsupported version of Minecraft!", RED))
+            .appendNewline().appendNewline()
+            .append(Component.text("Please try again on " + SUPPORTED_VERSIONS.stream()
+                    .flatMap(pv -> pv.getVersionsSupportedBy().stream())
+                    .collect(Collectors.joining(", ")), RED))
             .build();
 
     private final Logger logger;
@@ -64,6 +84,7 @@ public class ProxyPlugin {
     private final Map<UUID, byte[]> transferData = new ConcurrentHashMap<>();
 
     private final Set<UUID> playersJustJoined = new CopyOnWriteArraySet<>();
+    private final Map<UUID, Integer> playerConnectAttempts = new ConcurrentHashMap<>();
 
     @Inject
     public ProxyPlugin(@NotNull Logger logger, @NotNull ProxyServer proxy) {
@@ -76,6 +97,7 @@ public class ProxyPlugin {
 
         proxy.getChannelRegistrar().register(TRANSFER_MESSAGE_ID);
         proxy.getChannelRegistrar().register(RESOURCE_PACK_MESSAGE_ID);
+        proxy.getChannelRegistrar().register(PROTOCOL_VERSION_MESSAGE_ID);
 
         anyhubServer = proxy.getServer("anyhub").orElseThrow();
 
@@ -90,15 +112,15 @@ public class ProxyPlugin {
     }
 
     @Subscribe
-    public void handleChooseInitialServer(@NotNull PlayerChooseInitialServerEvent event) {
-//        if (!playersWithSession.contains(event.getPlayer().getUniqueId())) {
-//            event.getPlayer().disconnect(Component.text("something went wrong"));
-//        }
-    }
-
-    @Subscribe
     public void handleLogin(@NotNull LoginEvent event) {
         var player = event.getPlayer();
+
+        // Disconnect if not on a supported version
+        if (!SUPPORTED_VERSIONS.contains(event.getPlayer().getProtocolVersion())) {
+            event.getPlayer().disconnect(WRONG_PROTOCOL);
+            return;
+        }
+
         try {
             String skinTexture = null, skinSignature = null;
             var texProp = getGPProperty(player.getGameProfile(), "textures");
@@ -107,14 +129,16 @@ public class ProxyPlugin {
                 skinSignature = texProp.getSignature();
             }
 
-            var pd = sessionService.createSessionV2(
+            var protocolVersion = player.getProtocolVersion();
+            var pd = sessionService.createSession(
                     player.getUniqueId().toString(),
                     new SessionCreateRequest(
                             ProxySessionService.hostname,
                             player.getUsername(),
                             player.getRemoteAddress().getAddress().getHostAddress(),
                             new SessionCreateRequest.Skin(skinTexture, skinSignature),
-                            player.getRawVirtualHost().orElse(null)
+                            player.getRawVirtualHost().orElse(null),
+                            protocolVersion.getProtocol(), protocolVersion.getMostRecentSupportedVersion()
                     )
             );
             playersJustJoined.add(player.getUniqueId());
@@ -140,6 +164,8 @@ public class ProxyPlugin {
             handleTransfer(event);
         } else if (RESOURCE_PACK_MESSAGE_ID.equals(event.getIdentifier())) {
             handleResourcePack(event);
+        } else if (PROTOCOL_VERSION_MESSAGE_ID.equals(event.getIdentifier())) {
+            handleProtocolVersionRequest(event);
         }
     }
 
@@ -207,24 +233,38 @@ public class ProxyPlugin {
         });
     }
 
+    private void handleProtocolVersionRequest(@NotNull PluginMessageEvent event) {
+        event.setResult(PluginMessageEvent.ForwardResult.handled());
+        if (!(event.getSource() instanceof ServerConnection serverConn)) return;
+        var player = serverConn.getPlayer();
+
+        logger.info("protocol version request from {}", player.getUsername());
+
+        int pvn = player.getProtocolVersion().getProtocol();
+        var reply = String.valueOf(pvn).getBytes(StandardCharsets.UTF_8);
+        serverConn.sendPluginMessage(PROTOCOL_VERSION_MESSAGE_ID, reply);
+    }
+
     @Subscribe
     public void handlePostConnect(@NotNull ServerPostConnectEvent event) {
         var playerId = event.getPlayer().getUniqueId();
         if (!playersJustJoined.contains(playerId)) return;
 
         playersJustJoined.remove(playerId);
+        playerConnectAttempts.remove(playerId);
     }
 
     @Subscribe
     public void handleDisconnect(@NotNull DisconnectEvent event) {
-        var playerId = event.getPlayer().getUniqueId().toString();
+        var playerId = event.getPlayer().getUniqueId();
         try {
-            sessionService.deleteSessionV2(playerId);
+            sessionService.deleteSession(playerId.toString());
         } catch (Exception e) {
             logger.error("failed to delete session (v2) for {}", playerId, e);
         } finally {
-            resourcePacks.remove(event.getPlayer().getUniqueId());
-            playersJustJoined.remove(event.getPlayer().getUniqueId());
+            resourcePacks.remove(playerId);
+            playersJustJoined.remove(playerId);
+            playerConnectAttempts.remove(playerId);
         }
     }
 
@@ -239,7 +279,7 @@ public class ProxyPlugin {
         if (reason != null) {
             // TODO: This feels like a bad way to do this. What's the proper way?
             var text = PlainTextComponentSerializer.plainText().serialize(reason).toLowerCase(Locale.ROOT);
-            if (text.contains("banned") || text.contains("kicked") || text.contains("version")) {
+            if (text.contains("banned") || (text.contains("kicked") && !text.contains("you were kicked from ")) || text.contains("version")) {
                 event.setResult(KickedFromServerEvent.DisconnectPlayer.create(reason));
                 return;
             }
@@ -249,23 +289,17 @@ public class ProxyPlugin {
         // velocity assumes it cannot immediately reconnect to it. In reality, reconnecting will point to another
         // ready instance, so it is totally safe to do so.
         if ("anyhub".equals(serverName)) {
+            int attempts = playerConnectAttempts.merge(event.getPlayer().getUniqueId(), 1, Integer::sum);
+            if (attempts > 5) {
+                event.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text("Unable to recover. Please try again")));
+                return;
+            }
+
             logger.info("reconnecting {} to hub", event.getPlayer().getUsername());
             event.setResult(KickedFromServerEvent.RedirectPlayer.create(anyhubServer, Component.empty()));
             return;
         }
 
-//        if (event.getServer().getServerInfo().getName().equals("hub-minecraft")) return;
-//
-//        var playerId = event.getPlayer().getUniqueId().toString();
-//        logger.info("kicked from server, joining a new hub: {}", playerId);
-
-//        var res = sessionService.joinHubV2(new JoinHubRequest(playerId));
-//        logger.info("join hub result: {}", res);
-//        var rs = proxy.createRawRegisteredServer(new ServerInfo("hub", new InetSocketAddress(res.serverClusterIp(), 25565)));
-        //todo in the future we will need to let ss choose a hub to match you with friends, but for now it seems fine to just direct to any hub server?
-
-//        var rs = proxy.createRawRegisteredServer(new ServerInfo("hub-minecraft", new InetSocketAddress("hub-minecraft", 25565)));
-//        event.setResult(KickedFromServerEvent.RedirectPlayer.create(rs));
     }
 
     private @Nullable GameProfile.Property getGPProperty(@NotNull GameProfile gp, @NotNull String name) {

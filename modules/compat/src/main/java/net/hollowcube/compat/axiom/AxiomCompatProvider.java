@@ -2,9 +2,11 @@ package net.hollowcube.compat.axiom;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.compat.api.CompatProvider;
+import net.hollowcube.compat.api.ModChannelRegisterEvent;
 import net.hollowcube.compat.api.packet.PacketRegistry;
 import net.hollowcube.compat.axiom.packets.clientbound.*;
 import net.hollowcube.compat.axiom.packets.serverbound.*;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.entity.EntitySpawnEvent;
 import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
@@ -44,6 +46,13 @@ public class AxiomCompatProvider implements CompatProvider {
 
     @Override
     public void registerListeners(GlobalEventHandler events) {
+        events.addListener(ModChannelRegisterEvent.class, event -> {
+            // Disable Axiom for people who arent on the latest version because we don't handle
+            // converting the block or item states axiom uses.
+            if (event.getPlayerProtocolVersion() != MinecraftServer.PROTOCOL_VERSION)
+                event.excludeNamespace(AxiomAPI.NAME, AxiomAPI.CHANNEL);
+        });
+
         events.addListener(RemoveEntityFromInstanceEvent.class, AxiomEventHandler::onEntityRemoved);
         events.addListener(EntitySpawnEvent.class, AxiomEventHandler::onEntitySpawned);
     }

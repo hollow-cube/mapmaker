@@ -46,10 +46,13 @@ public class StackCommand extends CommandDsl {
         var generator = RegionFunctions.stack(region, direction, count);
 
         var session = LocalSession.forPlayer(player);
-        session.buildTask("stack")
+        var task = session.buildTask("stack")
                 .metadata() //todo
                 .compute(generator)
                 .post(result -> player.sendMessage(Messages.SELECTION_STACKED.with(result.blocksChanged())))
-                .submit();
+                          .submitIfCapacity();
+        if (task == null) {
+            player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+        }
     }
 }

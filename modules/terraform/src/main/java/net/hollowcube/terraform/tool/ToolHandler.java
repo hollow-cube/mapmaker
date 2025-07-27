@@ -1,5 +1,6 @@
 package net.hollowcube.terraform.tool;
 
+import net.hollowcube.common.events.PlayerHitBlockEvent;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.event.EventFilter;
@@ -24,7 +25,7 @@ public class ToolHandler {
     private static final System.Logger logger = System.getLogger(ToolHandler.class.getName());
 
     private final EventNode<InstanceEvent> eventNode = EventNode.type("terraform:tool/handler", EventFilter.INSTANCE)
-            .addListener(PlayerBlockBreakEvent.class, this::handleBreakBlock)
+            .addListener(PlayerHitBlockEvent.class, this::handleBreakBlock)
             .addListener(PlayerUseItemOnBlockEvent.class, this::handleUseItemOnBlock)
             .addListener(PlayerBlockInteractEvent.class, this::handleBlockInteract)
             .addListener(PlayerUseItemEvent.class, this::handleUseItem)
@@ -67,11 +68,12 @@ public class ToolHandler {
     public @NotNull ItemStack createBuiltinTool(@NotNull Key key) {
         var tool = tools.get(key.asString());
         Check.notNull(tool, "missing tool: " + key.asString());
-        return ItemStack.of(tool.material())
-                .withTag(BuiltinTool.TYPE, key.asString());
+        return tool.createItemStack()
+                .set(BuiltinTool.TYPE, key.asString())
+                .build();
     }
 
-    private void handleBreakBlock(@NotNull PlayerBlockBreakEvent event) {
+    private void handleBreakBlock(@NotNull PlayerHitBlockEvent event) {
         var itemStack = event.getPlayer().getItemInMainHand();
         var tool = getTool(itemStack);
 
@@ -86,7 +88,7 @@ public class ToolHandler {
                 PlayerHand.MAIN,
                 event.getBlockPosition(),
                 null,
-                event.getBlockFace(),
+                event.getFace(),
                 null
         ));
     }

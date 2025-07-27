@@ -2,13 +2,12 @@ package net.hollowcube.mapmaker.map.item.vanilla;
 
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.feature.play.vanilla.ElytraFeatureProvider;
-import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.util.NumberUtil;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
@@ -18,61 +17,39 @@ import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-
-public class FireworkRocketItem extends ItemHandler {
+public class FireworkRocketItem extends VanillaItemHandler {
     private static final Tag<Entity> FIREWORK_TAG = Tag.Transient("mapmaker:elytra_firework");
     private static final Tag<Integer> DURATION_TAG = Tag.Integer("firework_duration").defaultValue(0);
-    private static final String DEFAULT_MODEL = Material.FIREWORK_ROCKET.prototype().get(DataComponents.ITEM_MODEL);
-    private static final String INFINITE_MODEL = "mapmaker:infinite_firework";
 
     public static final FireworkRocketItem INSTANCE = new FireworkRocketItem();
-    public static final ItemStack DEFAULT = setDurationMillis(
-            ItemStack.of(Material.FIREWORK_ROCKET)
-                    .without(DataComponents.FIREWORKS)
-                    .with(DataComponents.MAX_STACK_SIZE, 99),
-            1000);
 
     public static void removeRocket(@NotNull Player player) {
         var removed = player.getAndSetTag(FIREWORK_TAG, null);
         if (removed != null) removed.remove();
     }
 
-    public static int getDurationMillis(@NotNull ItemStack itemStack) {
-        return itemStack.getTag(DURATION_TAG);
-    }
-
-    public static @NotNull ItemStack setDurationMillis(@NotNull ItemStack itemStack, int durationMillis) {
-        return itemStack.withTag(DURATION_TAG, durationMillis)
-                .with(DataComponents.LORE, List.of(
-                        Component.text("Duration: " + NumberUtil.formatDuration(durationMillis), TextColor.color(0xB0B0B0))
-                                .decoration(TextDecoration.ITALIC, false)));
-    }
-
-    public static boolean isInfinite(@NotNull ItemStack itemStack) {
-        return INFINITE_MODEL.equals(itemStack.get(DataComponents.ITEM_MODEL));
-    }
-
-    public static int getCount(@NotNull ItemStack itemStack) {
-        return isInfinite(itemStack) ? 0 : itemStack.amount();
-    }
-
-    public static @NotNull ItemStack withCount(@NotNull ItemStack itemStack, int count) {
-        if (count <= 0) {
-            return itemStack.withAmount(1).with(DataComponents.ITEM_MODEL, INFINITE_MODEL);
-        } else {
-            return itemStack.withAmount(count).with(DataComponents.ITEM_MODEL, DEFAULT_MODEL);
-        }
+    public static @NotNull ItemStack get(int count, int durationMillis) {
+        var stack = FireworkRocketItem.INSTANCE.getItemStack(count);
+        stack = stack.withTag(DURATION_TAG, durationMillis);
+        stack = stack.withLore(
+                Component.text("Duration: " + NumberUtil.formatDuration(durationMillis))
+                        .color(TextColor.color(0xB0B0B0))
+                        .decoration(TextDecoration.ITALIC, false)
+        );
+        return stack;
     }
 
     private FireworkRocketItem() {
-        super("minecraft:firework_rocket", RIGHT_CLICK_ANY);
+        super(Material.FIREWORK_ROCKET, RIGHT_CLICK_ANY);
     }
 
     @Override
-    public @NotNull Material material() {
-        return Material.FIREWORK_ROCKET;
+    public void build(ItemStack.@NotNull Builder builder, @Nullable CompoundBinaryTag tag) {
+        super.build(builder, tag);
+
+        builder.material(this.item);
     }
 
     @Override
@@ -86,8 +63,8 @@ public class FireworkRocketItem extends ItemHandler {
 
         int durationTicks = click.itemStack().getTag(DURATION_TAG) / MinecraftServer.TICK_MS;
         spawnRocketEntity(player, durationTicks);
-        if (!isInfinite(click.itemStack())) {
-            click.updateItemStack(b -> b.amount(click.itemStack().amount() - 1));
+        if (isFinite(click.itemStack())) {
+            click.consume(1);
         }
     }
 

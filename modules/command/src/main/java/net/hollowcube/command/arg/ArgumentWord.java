@@ -50,4 +50,9 @@ public class ArgumentWord extends Argument<String> {
             }
         }
     }
+
+    @Override
+    public boolean shouldSuggest() {
+        return this.values != null && !this.values.isEmpty();
+    }
 }

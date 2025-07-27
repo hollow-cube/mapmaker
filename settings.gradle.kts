@@ -7,6 +7,10 @@ rootProject.name = "mapmaker"
 
 includeBuild("build-src")
 
+// Submodule-d public dependencies
+includeBuild("modules/molang")
+includeBuild("modules/schem")
+
 include(
     "modules:canvas:api",
     "modules:canvas:impl-standalone",
@@ -20,20 +24,24 @@ include(
     "modules:map-core",
     "modules:nbs",
     "modules:replay",
-    "modules:script-engine",
-    "modules:script-engine:builtin",
-    "modules:script-engine:npm",
     "modules:terraform",
     "modules:map-core-test",
     "modules:test",
-);
+)
+
+include(
+    "tools:native-image-helper",
+)
 
 include(
     "bin:config",
     "bin:development",
+    "bin:example",
     "bin:hub",
     "bin:local",
     "bin:map",
+    "bin:map-isolate",
     "bin:packer",
     "bin:proxy-plugin",
+    "bin:world-converter",
 )

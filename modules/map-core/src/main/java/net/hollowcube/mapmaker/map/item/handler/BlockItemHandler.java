@@ -1,14 +1,15 @@
 package net.hollowcube.mapmaker.map.item.handler;
 
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.event.BlockItemPlaceEvent;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
 import net.minestom.server.item.component.CustomData;
 import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
@@ -20,17 +21,17 @@ public class BlockItemHandler extends ItemHandler {
 
     private final Block block;
     private final BadSprite sprite;
-    private final ItemUpdateFunc updateFunc;
+    private final ItemUpdateFunc extraData;
 
     public BlockItemHandler(@NotNull Supplier<BlockHandler> blockHandler, @NotNull Block block, @NotNull String sprite) {
         this(blockHandler, block, sprite, null);
     }
 
-    public BlockItemHandler(@NotNull Supplier<BlockHandler> blockHandler, @NotNull Block block, @NotNull String sprite, @Nullable ItemUpdateFunc updateFunc) {
+    public BlockItemHandler(@NotNull Supplier<BlockHandler> blockHandler, @NotNull Block block, @NotNull String sprite, @Nullable ItemUpdateFunc extraData) {
         super(blockHandler.get().getKey().asString(), RIGHT_CLICK_BLOCK);
         this.block = block.withHandler(blockHandler.get());
         this.sprite = BadSprite.require(sprite);
-        this.updateFunc = updateFunc;
+        this.extraData = extraData;
     }
 
     public @NotNull Block block() {
@@ -43,13 +44,19 @@ public class BlockItemHandler extends ItemHandler {
     }
 
     @Override
-    public @Nullable Material material() {
-        return block.registry().material();
-    }
+    public void build(ItemStack.@NotNull Builder builder, @Nullable CompoundBinaryTag tag) {
+        super.build(builder, tag);
 
-    @Override
-    protected void updateItemStack(ItemStack.@NotNull Builder builder, @NotNull TagHandler data) {
-        if (updateFunc != null) updateFunc.updateItemStack(builder, data);
+        var material = this.block.registry().material();
+        if (material != null) {
+            builder.material(material);
+        }
+        if (this.extraData != null) {
+            this.extraData.updateItemStack(
+                    builder,
+                    TagHandler.fromCompound(OpUtils.or(tag, CompoundBinaryTag::empty))
+            );
+        }
     }
 
     @Override

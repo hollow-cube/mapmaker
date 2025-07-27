@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.world;
 
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.compat.axiom.AxiomPlayer;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
@@ -87,7 +88,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
     private final TerraformInstanceStorageImpl terraformStorage = new TerraformInstanceStorageImpl();
 
     public EditingMapWorld(@NotNull MapServer server, @NotNull MapData map) {
-        super(server, map, new MapInstance(map.createDimensionName('e'), map.getSetting(MapSettings.LIGHTING)));
+        super(server, map, new MapInstance(map.createDimensionName('e'), map.getSetting(MapSettings.LIGHTING)
+                ? MapInstance.LightingMode.GENERATED : MapInstance.LightingMode.FULL_BRIGHT));
 
         this.terraform = server.facet(Terraform.class);
 
@@ -141,6 +143,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         FutureUtil.submitVirtual(() -> enterTestModeInternal(player));
     }
 
+    @Blocking
     private void enterTestModeInternal(@NotNull Player player) {
         if (!isPlaying(player) && !isSpectating(player)) {
             logger.error("Player {} tried to enter test mode for {} without being in the map. Currently in {}",
@@ -198,7 +201,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
         super.close(reason);
 
-        if (autoSaveTask != null) autoSaveTask.cancel();
+        if (autoSaveTask != null)
+            autoSaveTask.cancel();
         save(false);
 
         // Unload the backing world
@@ -210,6 +214,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         saveLock.lock();
         try {
             if (isAutoSave) logger.info("Autosaving world {}", map().id());
+            if (!isAutoSave) logger.info("Manually saving world {}", map().id());
 
             // Save the map settings
             map().settings().withUpdateRequest(updates -> {
@@ -236,12 +241,12 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
             }
 
             // Save the players data
-            Set.copyOf(players()).forEach(p -> {
+            for (var p : Set.copyOf(players())) {
                 if (!p.isOnline()) {
                     logger.warn("Player {} is not online, removing from map {}", p.getUsername(), map().id());
                     removePlayer(p); // Sanity
                 }
-            });
+            }
             for (var player : players()) {
                 var playerData = PlayerDataV2.fromPlayer(player);
 
@@ -318,7 +323,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
     private @NotNull SaveState getOrCreateSaveState(@NotNull Player player) {
         var playerData = PlayerDataV2.fromPlayer(player);
-        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), SaveStateType.EDITING, EditState.SERIALIZER);
+        int protocolVersion = ProtocolVersions.getProtocolVersion(player);
+        var saveState = MapWorldHelpers.getOrCreateSaveState(this, playerData.id(), protocolVersion, SaveStateType.EDITING, EditState.SERIALIZER);
         player.setTag(SaveState.TAG, saveState);
         return saveState;
     }
@@ -352,9 +358,21 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         } catch (Throwable t) {
             logger.error("Failed to save player state for {}", player.getUuid(), t);
         } finally {
-            player.removeTag(SaveState.TAG);
-            player.removeTag(TeleportHistoryFeatureProvider.LAST_LOCATION);
-            super.removePlayer(player);
+            // Remove the player at the end of the tick to ensure that all edit-state processing is done before
+            // they no longer have an editing state.
+            FutureUtil.waitForEndOfTick(player, () -> {
+                player.removeTag(SaveState.TAG);
+                player.removeTag(TeleportHistoryFeatureProvider.LAST_LOCATION);
+                super.removePlayer(player);
+            });
+        }
+    }
+
+    @Override
+    public void queueCollisionTreeRebuild() {
+        super.queueCollisionTreeRebuild();
+        if (testWorld != null) {
+            testWorld.queueCollisionTreeRebuild();
         }
     }
 
@@ -370,6 +388,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
     private @NotNull SaveStateUpdateRequest updateSaveState(@NotNull Player player, @NotNull SaveState saveState) {
         saveState.updatePlaytime();
+        saveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
         var buildState = saveState.state(EditState.class);
         buildState.setPos(player.getPosition());
         buildState.setFlying(player.isFlying());

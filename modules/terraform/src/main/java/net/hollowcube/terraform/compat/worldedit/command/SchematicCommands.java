@@ -6,10 +6,12 @@ import net.hollowcube.common.types.Axis;
 import net.hollowcube.schem.Rotation;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.command.util.ArgumentRotation;
+import net.hollowcube.terraform.command.util.CommandPreviewHelper;
 import net.hollowcube.terraform.compat.worldedit.command.arg.WEArgument;
 import net.hollowcube.terraform.compat.worldedit.util.WECommand;
 import net.hollowcube.terraform.compat.worldedit.util.WEMessages;
 import net.hollowcube.terraform.compute.RegionFunctions;
+import net.hollowcube.terraform.cui.ClientRenderer;
 import net.hollowcube.terraform.mask.Mask;
 import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.selection.Selection;
@@ -21,6 +23,7 @@ import net.hollowcube.terraform.task.edit.WorldView;
 import net.hollowcube.terraform.util.Format;
 import net.hollowcube.terraform.util.Messages;
 import net.hollowcube.terraform.util.transformations.SchematicTransformation;
+import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
@@ -237,7 +240,7 @@ public final class SchematicCommands {
             }
 
             var origin = player.getPosition();
-            session.buildTask("we-copy")
+            var task = session.buildTask("we-copy")
                     .metadata() //todo
                     .compute(RegionFunctions.replace(region, mask, Pattern.air()))
                     .post(result -> {
@@ -250,7 +253,10 @@ public final class SchematicCommands {
                         clipboard.setData(result.undoBuffer().toSchematic(offset));
                         player.sendMessage(Messages.CLIPBOARD_COPY.with(result.blocksChanged()));
                     })
-                    .dryRun();
+                              .dryRunIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -281,8 +287,8 @@ public final class SchematicCommands {
             var mask = context.get(maskArg);
 
             if (flags.contains(Flags.MASK)) {
-                //todo idk what exception this should be
-                Check.argCondition(mask == null, "Mask is required when using the mask flag");
+                player.sendMessage("Mask is required when using the mask flag");
+                return;
             } else mask = Mask.always();
 
             // Warnings for currently unsupported flags
@@ -302,7 +308,7 @@ public final class SchematicCommands {
             }
 
             var origin = player.getPosition();
-            session.buildTask("we-cut")
+            var task = session.buildTask("we-cut")
                     .metadata() //todo
                     .compute(RegionFunctions.replace(region, mask, pattern))
                     .post(result -> {
@@ -310,7 +316,10 @@ public final class SchematicCommands {
                         clipboard.setData(result.undoBuffer().toSchematic(offset));
                         player.sendMessage(Messages.CLIPBOARD_CUT.with(result.blocksChanged()));
                     })
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -331,9 +340,33 @@ public final class SchematicCommands {
         public Paste() {
             super("/paste");
 
-            addSyntax(playerOnly(this::execute));
+            addSyntax(playerOnly(this::execute), playerOnly(this::suggest));
             addSyntax(playerOnly(this::execute), flagsArg);
             addSyntax(playerOnly(this::execute), flagsArg, maskArg);
+        }
+
+        private void suggest(@NotNull Player player, @NotNull CommandContext context) {
+            var playerSession = PlayerSession.forPlayer(player);
+            var clipboard = playerSession.clipboard(Clipboard.DEFAULT);
+            var schem = clipboard.getTransformedSchematic();
+
+            var session = LocalSession.forPlayer(player);
+
+            // Compute the region for the block buffer and to select the region if that flag is set
+            var origin = new BlockVec(player.getPosition());
+            var min = origin.add(schem.offset());
+            var max = min.add(schem.size());
+
+            var renderer = session.cui().renderer();
+
+            renderer.switchTo(ClientRenderer.RenderContext.COMMAND, true);
+            CommandPreviewHelper.debounceContext(player, renderer);
+            renderer.begin("paste");
+            session.cui().renderer().cuboid(
+                    min,
+                    max,
+                    ClientRenderer.RenderType.PRIMARY);
+            renderer.end("paste");
         }
 
         private void execute(@NotNull Player player, @NotNull CommandContext context) {
@@ -341,8 +374,8 @@ public final class SchematicCommands {
             var mask = context.get(maskArg);
 
             if (flags.contains(Flags.MASK)) {
-                //todo idk what exception this should be
-                Check.argCondition(mask == null, "Mask is required when using the mask flag");
+                player.sendMessage("Mask is required when using the mask flag");
+                return;
             } else mask = Mask.always();
             if (flags.contains(Flags.AIR_SKIP)) {
                 mask = Mask.and(mask, Mask.not(Mask.air()));
@@ -367,6 +400,7 @@ public final class SchematicCommands {
             var origin = player.getPosition();
             var min = origin.add(schem.offset());
             var max = min.add(schem.size());
+            session.cui().renderer().switchTo(ClientRenderer.RenderContext.NORMAL, false);
 
             if (flags.contains(Flags.NO_PASTE)) {
                 selection.setType(Region.Type.CUBOID);
@@ -377,7 +411,7 @@ public final class SchematicCommands {
             }
 
             var sourceMask = mask;
-            session.buildTask("we-paste")
+            var submitted = session.buildTask("we-paste")
                     .metadata() //todo
                     .compute((task, world) -> {
                         var buffer = BlockBuffer.builder(world); //, min, max);
@@ -402,7 +436,10 @@ public final class SchematicCommands {
                         }
                         player.sendMessage(Messages.CLIPBOARD_PASTE.with(result.blocksChanged()));
                     })
-                    .submit();
+                                   .submitIfCapacity();
+            if (submitted == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 

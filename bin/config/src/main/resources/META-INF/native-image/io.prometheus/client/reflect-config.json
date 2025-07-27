@@ -1,0 +1,13 @@
+[
+  {
+    "name": "io.prometheus.client.Striped64",
+    "fields": [
+      {
+        "name": "base"
+      },
+      {
+        "name": "busy"
+      }
+    ]
+  }
+]

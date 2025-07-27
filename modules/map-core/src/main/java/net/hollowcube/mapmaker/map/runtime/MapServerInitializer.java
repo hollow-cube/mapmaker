@@ -2,9 +2,11 @@ package net.hollowcube.mapmaker.map.runtime;
 
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.HTTPServer;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.HttpConfig;
 import net.hollowcube.mapmaker.config.MinestomConfig;
+import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
 import net.hollowcube.mapmaker.util.HttpServerWrapper;
 import net.hollowcube.mapmaker.util.MinestomPrometheus;
 import net.hollowcube.posthog.PostHog;
@@ -63,8 +65,11 @@ public final class MapServerInitializer {
 
         var config = loadConfig.get();
 
+        FutureUtil.markShutdown(true);
+
         var minecraftServer = MinecraftServer.init();
         MinestomPrometheus.init();
+        var ignored = DimensionTypes.FULL_BRIGHT; // Force initialization
         var server = serverFactory.apply(config);
 
         MinecraftServer.setBrandName("minestom");
@@ -98,6 +103,7 @@ public final class MapServerInitializer {
         httpServer.addRoute("/metrics", new HTTPServer.HTTPMetricHandler(CollectorRegistry.defaultRegistry));
         httpServer.addRoute("/alive", new HttpServerWrapper.AliveHttpHandler());
         httpServer.addRoute("/ready", new HttpServerWrapper.ReadyHttpHandler(server.healthChecks()));
+        httpServer.addRoute("/players", new HttpServerWrapper.PlayerStatusHandler());
         httpServer.start();
 
         logger.info("Web server is running at {}:{}", httpConfig.host(), httpServer.port());
@@ -111,6 +117,8 @@ public final class MapServerInitializer {
             httpServer.shutdown();
             System.exit(1);
         }
+
+        FutureUtil.markShutdown(false);
 
         var minestomConfig = config.get(MinestomConfig.class);
         minecraftServer.start(minestomConfig.host(), minestomConfig.port());

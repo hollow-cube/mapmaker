@@ -11,6 +11,7 @@ import io.opentelemetry.semconv.SemanticAttributes;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.backpack.BackpackItem;
+import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.player.DisplayName;
@@ -25,21 +26,18 @@ import net.hollowcube.mapmaker.util.gson.*;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.item.Material;
+import org.intellij.lang.annotations.PrintFormat;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public abstract class AbstractHttpService {
@@ -51,15 +49,16 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(BackpackItem.class, new EnumTypeAdapter<>(BackpackItem.class))
             .registerTypeAdapter(RewardType.class, new EnumTypeAdapter<>(RewardType.class))
             .registerTypeAdapter(MapTags.Tag.class, new EnumTypeAdapter<>(MapTags.Tag.class))
+            .registerTypeAdapter(InviteType.class, new EnumTypeAdapter<>(InviteType.class))
             .registerTypeAdapter(MapVerification.class, new LenientEnumTypeAdapter<>(MapVerification.class))
             .registerTypeAdapter(MapSize.class, new LenientEnumTypeAdapter<>(MapSize.class))
-            .registerTypeAdapter(PersonalizedMapData.Progress.class, new EnumOrdinalTypeAdapter<>(PersonalizedMapData.Progress.class))
+            .registerTypeAdapter(PersonalizedMapData.Progress.class, new EnumTypeAdapter<>(PersonalizedMapData.Progress.class))
             .registerTypeAdapter(ClientChatMessageData.Type.class, new EnumOrdinalTypeAdapter<>(ClientChatMessageData.Type.class))
             .registerTypeAdapter(ChatMessageData.Part.Type.class, new EnumOrdinalTypeAdapter<>(ChatMessageData.Part.Type.class))
             .registerTypeAdapter(SessionUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(SessionUpdateMessage.Action.class))
             .registerTypeAdapter(MapRating.State.class, new LenientEnumTypeAdapter<>(MapRating.State.class))
             .registerTypeAdapter(MapQuality.class, new LenientEnumTypeAdapter<>(MapQuality.class))
-            .registerTypeAdapter(ReportCategory.class, new EnumOrdinalTypeAdapter<>(ReportCategory.class))
+            .registerTypeAdapter(ReportCategory.class, new EnumTypeAdapter<>(ReportCategory.class))
             .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
             .registerTypeAdapter(Material.class, new MaterialTypeAdapter())
             .registerTypeAdapter(Component.class, new ComponentTypeAdapter())
@@ -156,40 +155,7 @@ public abstract class AbstractHttpService {
         hostname = hn;
     }
 
-    protected static @NotNull UrlQueryBuilder urlQueryBuilder() {
-        return new UrlQueryBuilder();
-    }
-
-    protected static final class UrlQueryBuilder {
-
-        private final Map<String, String> parts = new HashMap<>();
-
-        public UrlQueryBuilder add(@NotNull String key, @NotNull String value) {
-            this.parts.put(key, value);
-            return this;
-        }
-
-        public @NotNull String build() {
-            var result = new StringBuilder();
-            boolean first = true;
-
-            for (var entry : this.parts.entrySet()) {
-                if (first) {
-                    first = false;
-                    result.append('?');
-                } else {
-                    result.append('&');
-                }
-                result.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
-                result.append('=');
-                result.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
-            }
-
-            return result.toString();
-        }
-    }
-
-    protected static @NotNull URI url(@NotNull String format, @NotNull String... args) {
-        return URI.create(String.format(format, (Object[]) args));
+    protected static @NotNull URI url(@PrintFormat String format, @NotNull Object... args) {
+        return URI.create(String.format(format, args));
     }
 }

@@ -1,0 +1,141 @@
+[
+  {
+    "name": "net.minestom.server.adventure.provider.MinestomComponentLoggerProvider"
+  },
+  {
+    "name": "net.minestom.server.adventure.provider.MinestomGsonComponentSerializerProvider"
+  },
+  {
+    "name": "net.minestom.server.adventure.provider.MinestomLegacyComponentSerializerProvider"
+  },
+  {
+    "name": "net.minestom.server.adventure.provider.MinestomPlainTextComponentSerializerProvider"
+  },
+  {
+    "name": "net.minestom.server.coordinate.Vec",
+    "allDeclaredFields": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "double",
+          "double",
+          "double"
+        ]
+      },
+      {
+        "name": "x"
+      },
+      {
+        "name": "y"
+      },
+      {
+        "name": "z"
+      }
+    ]
+  },
+  {
+    "name": "net.minestom.server.coordinate.Pos",
+    "allDeclaredFields": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "double",
+          "double",
+          "double",
+          "float",
+          "float"
+        ]
+      },
+      {
+        "name": "x"
+      },
+      {
+        "name": "y"
+      },
+      {
+        "name": "z"
+      },
+      {
+        "name": "yaw"
+      },
+      {
+        "name": "pitch"
+      }
+    ]
+  },
+  {
+    "name": "net.minestom.server.entity.EntityView$Option",
+    "fields": [
+      {
+        "name": "auto"
+      }
+    ]
+  },
+  {
+    "name": "net.minestom.server.entity.MetadataHolder",
+    "fields": [
+      {
+        "name": "notifyAboutChanges"
+      }
+    ]
+  },
+  {
+    "name": "net.minestom.server.event.EventNodeLazyImpl",
+    "fields": [
+      {
+        "name": "mapped"
+      }
+    ]
+  },
+  {
+    "name": "net.minestom.server.instance.DynamicChunk",
+    "fields": [
+      {
+        "name": "entries"
+      },
+      {
+        "name": "needsCompleteHeightmapRefresh"
+      },
+      {
+        "name": "tickableMap"
+      }
+    ]
+  },
+  {
+    "name": "net.minestom.server.instance.InstanceContainer",
+    "methods": [
+      {
+        "name": "cacheChunk",
+        "parameterTypes": [
+          "net.minestom.server.instance.Chunk"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "net.minestom.server.network.NetworkBufferImpl",
+    "fields": [
+      {
+        "name": "address"
+      }
+    ]
+  },
+  {
+    "name": "net.minestom.server.network.player.PlayerConnection",
+    "fields": [
+      {
+        "name": "knownPacksFuture"
+      }
+    ]
+  },
+  {
+    "name": "net.minestom.server.timer.TaskImpl",
+    "fields": [
+      {
+        "name": "parked"
+      }
+    ]
+  }
+]

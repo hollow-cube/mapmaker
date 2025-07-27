@@ -10,30 +10,23 @@ import java.util.stream.Collectors;
 
 @RuntimeGson
 public final class MapProgressBatchResponse {
-    private List<Entry> progress = new ArrayList<>();
+    private List<Entry> results = new ArrayList<>();
     private transient Map<String, Map.Entry<PersonalizedMapData.Progress, Integer>> progressByMap;
 
-    public MapProgressBatchResponse() {
-        // Gson constructor
-    }
-
-    public MapProgressBatchResponse(List<Entry> progress) {
-        this.progress = progress;
-    }
-
     public List<Entry> progress() {
-        return progress;
+        return results;
     }
 
     public Map.Entry<PersonalizedMapData.Progress, Integer> getProgress(@NotNull String mapId) {
         if (progressByMap == null) {
-            progressByMap = progress.stream()
+            progressByMap = results.stream()
                     .collect(Collectors.toMap(Entry::mapId, e -> Map.entry(e.progress, e.playtime)));
         }
 
         return progressByMap.get(mapId);
     }
 
+    @RuntimeGson
     public record Entry(@NotNull String mapId, @NotNull PersonalizedMapData.Progress progress, int playtime) {
 
     }

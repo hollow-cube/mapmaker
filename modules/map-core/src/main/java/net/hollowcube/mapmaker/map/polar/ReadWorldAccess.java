@@ -22,7 +22,7 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.UUIDUtils;
 import net.minestom.server.utils.validate.Check;
@@ -88,9 +88,9 @@ public class ReadWorldAccess implements PolarWorldAccess {
         if (buffer.read(NetworkBuffer.NBT) instanceof CompoundBinaryTag worldData) {
 
             // Upgrade the world if needed
-            if (dataVersion != -1 && dataVersion < MapWorld.DATA_VERSION) {
+            if (dataVersion != -1 && dataVersion < DataFixer.maxVersion()) {
                 worldData = (CompoundBinaryTag) DataFixer.upgrade(HCDataTypes.WORLD, Transcoder.NBT,
-                        worldData, dataVersion, MapWorld.DATA_VERSION);
+                        worldData, dataVersion, DataFixer.maxVersion());
             }
 
             // Apply the tags to the world.
@@ -123,9 +123,9 @@ public class ReadWorldAccess implements PolarWorldAccess {
         var chunkData = (CompoundBinaryTag) buffer.read(NetworkBuffer.NBT);
 
         // Upgrade the chunk if needed
-        if (dataVersion < MapWorld.DATA_VERSION) {
+        if (dataVersion < DataFixer.maxVersion()) {
             chunkData = (CompoundBinaryTag) DataFixer.upgrade(HCDataTypes.CHUNK, Transcoder.NBT,
-                    chunkData, dataVersion, MapWorld.DATA_VERSION);
+                    chunkData, dataVersion, DataFixer.maxVersion());
         }
 
         // Load the chunk NBT
@@ -146,7 +146,7 @@ public class ReadWorldAccess implements PolarWorldAccess {
 
     @Override
     public int getBiomeId(@NotNull String name) {
-        var key = DynamicRegistry.Key.<Biome>of(name);
+        var key = RegistryKey.<Biome>unsafeOf(name);
         var id = mapWorld.biomes().getId(key);
         return id == -1 ? 0 : id;
     }

@@ -1,9 +1,11 @@
 package net.hollowcube.mapmaker.session;
 
+import net.hollowcube.common.util.RuntimeGson;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
+@RuntimeGson
 public record SessionUpdateMessage(
         @NotNull Action action,
         @NotNull String playerId,

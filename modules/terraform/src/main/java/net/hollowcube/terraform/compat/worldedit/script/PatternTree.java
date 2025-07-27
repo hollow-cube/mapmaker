@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import net.hollowcube.command.suggestion.Suggestion;
+import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.terraform.TerraformRegistry;
 import net.hollowcube.terraform.mask.script.Tree;
 import net.hollowcube.terraform.pattern.*;
@@ -19,6 +20,8 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
+import net.minestom.server.registry.RegistryTag;
+import net.minestom.server.registry.TagKey;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -150,12 +153,12 @@ public interface PatternTree extends ParseTree<Pattern> {
             @Nullable NamespaceId namespaceId
     ) implements PatternTree {
         //todo this should come from the registry realistically
-        private static final Set<String> BLOCK_TAGS_NAMESPACES = MinecraftServer.getTagManager().getTagMap()
-                .get(net.minestom.server.gamedata.tags.Tag.BasicType.BLOCKS).stream()
+        private static final Set<String> BLOCK_TAGS_NAMESPACES = MinecraftServer.process().blocks().tags()
+                .stream().map(RegistryTag::key).filter(Objects::nonNull)
                 .map(tag -> tag.key().namespace()).collect(Collectors.toSet());
-        private static final List<Key> BLOCK_TAGS = MinecraftServer.getTagManager().getTagMap()
-                .get(net.minestom.server.gamedata.tags.Tag.BasicType.BLOCKS).stream()
-                .map(net.minestom.server.gamedata.tags.Tag::key).toList();
+        private static final List<Key> BLOCK_TAGS = MinecraftServer.process().blocks().tags()
+                .stream().map(RegistryTag::key).filter(Objects::nonNull)
+                .map(TagKey::key).toList();
 
         @Override
         public @NotNull Pattern into(@NotNull ParseContext context) throws ParseException {
@@ -322,7 +325,6 @@ public interface PatternTree extends ParseTree<Pattern> {
     }
 
     record Hand(int start, int end, @NotNull PlayerHand hand) implements PatternTree {
-
         @Override
         public @NotNull Pattern into(@NotNull ParseContext context) throws ParseException {
             var item = context.getPlayer().getItemInHand(this.hand).material();
@@ -331,6 +333,11 @@ public interface PatternTree extends ParseTree<Pattern> {
                     start, end, "no block in hand"
             );
             return new BlockPattern(context.registry().blockState(block.stateId()));
+        }
+
+        @Override
+        public void suggest(@NotNull TerraformRegistry registry, @NotNull Suggestion suggestion) {
+            // No suggestions, but dont want an error
         }
     }
 
@@ -562,7 +569,7 @@ public interface PatternTree extends ParseTree<Pattern> {
             var propertiesByName = new HashMap<String, Set<String>>();
 
             for (int id = 0; id < 10_000; id++) {
-                var block = Block.fromBlockId(id);
+                var block = BlockUtil.fromBlockIdOrNull(id);
                 if (block == null) break;
 
                 var localProps = new HashMap<String, Set<String>>();

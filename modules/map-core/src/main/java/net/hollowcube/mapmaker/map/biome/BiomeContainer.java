@@ -12,6 +12,7 @@ import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
 import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.tag.TagWritable;
@@ -40,8 +41,8 @@ import java.util.*;
 public class BiomeContainer implements TerraformInstanceBiomes {
     private static final Logger logger = LoggerFactory.getLogger(BiomeContainer.class);
 
-    private static final Tag<List<BiomeInfo>> TAG = DFU.Tag(BiomeInfo.CODEC.list().optional(List.of()), "biomes");
-    private static final DynamicRegistry.Key<Biome> DEFAULT_BIOME = Biome.PLAINS;
+    private static final Tag<List<BiomeInfo>> TAG = DFU.Tag(BiomeInfo.CODEC, "biomes").list().defaultValue(List.of());
+    private static final RegistryKey<Biome> DEFAULT_BIOME = Biome.PLAINS;
 
     private static final int FIRST_BIOME_ID;
 
@@ -60,25 +61,25 @@ public class BiomeContainer implements TerraformInstanceBiomes {
     private final DynamicRegistry<Biome> parent = MinecraftServer.getBiomeRegistry();
     private final List<BiomeInfo> biomes = new ArrayList<>(); // Raw biome data
 
-    private final Map<DynamicRegistry.Key<Biome>, RegisteredBiome> keyToBiome = new HashMap<>();
+    private final Map<RegistryKey<Biome>, RegisteredBiome> keyToBiome = new HashMap<>();
     private final Int2ObjectMap<RegisteredBiome> idToBiome = new Int2ObjectArrayMap<>();
 
     private boolean initialized = false;
 
     @Override
-    public @Nullable Biome getBiome(@NotNull DynamicRegistry.Key<Biome> key) {
+    public @Nullable Biome getBiome(@NotNull RegistryKey<Biome> key) {
         var biome = this.keyToBiome.get(key);
         return biome != null ? biome.biome() : this.parent.get(key);
     }
 
     @Override
-    public int getId(@NotNull DynamicRegistry.Key<Biome> key) {
+    public int getId(@NotNull RegistryKey<Biome> key) {
         var biome = this.keyToBiome.get(key);
         return biome != null ? biome.id() : this.parent.getId(key);
     }
 
     @Override
-    public DynamicRegistry.Key<Biome> getKey(int id) {
+    public RegistryKey<Biome> getKey(int id) {
         return Objects.requireNonNullElse(
                 OpUtils.map(this.idToBiome.get(id), RegisteredBiome::key),
                 this.parent.getKey(id)
@@ -86,8 +87,8 @@ public class BiomeContainer implements TerraformInstanceBiomes {
     }
 
     @Override
-    public @NotNull Collection<DynamicRegistry.Key<Biome>> keys() {
-        List<DynamicRegistry.Key<Biome>> keys = new ArrayList<>();
+    public @NotNull Collection<RegistryKey<Biome>> keys() {
+        List<RegistryKey<Biome>> keys = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             var key = this.parent.getKey(i);
             if (key == null) break;
@@ -98,7 +99,7 @@ public class BiomeContainer implements TerraformInstanceBiomes {
     }
 
     @Override
-    public @NotNull Component getName(@NotNull DynamicRegistry.Key<Biome> key) {
+    public @NotNull Component getName(@NotNull RegistryKey<Biome> key) {
         var biome = keyToBiome.get(key);
         if (biome != null) return biome.name();
         var translationKey = "biome.%s.%s".formatted(key.key().namespace(), key.key().value());
@@ -175,7 +176,7 @@ public class BiomeContainer implements TerraformInstanceBiomes {
             if (minestomBiome == null) continue;
 
             var namespace = Objects.requireNonNull(info.key());
-            var key = DynamicRegistry.Key.<Biome>of(namespace);
+            var key = RegistryKey.<Biome>unsafeOf(namespace.asString());
 
             var biome = new RegisteredBiome(nextId++, namespace.key(), info, minestomBiome);
 
@@ -197,12 +198,15 @@ public class BiomeContainer implements TerraformInstanceBiomes {
         List<RegistryDataPacket.Entry> entries = new ArrayList<>();
 
         // Add parent biomes
-        for (var biome : parent.values()) {
-            String name = parent.getKey(biome).name();
+        for (int i = 0; i < 1000; i++) {
+            var key = this.parent.getKey(i);
+            if (key == null) break;
             if (excludeVanilla) {
-                entries.add(new RegistryDataPacket.Entry(name, null));
+                entries.add(new RegistryDataPacket.Entry(key.key().asString(), null));
             } else {
-                entries.add(new RegistryDataPacket.Entry(name, Biome.REGISTRY_CODEC.encode(Transcoder.NBT, biome).orElseThrow()));
+                var biome = this.parent.get(i);
+                entries.add(new RegistryDataPacket.Entry(key.key().asString(),
+                        Biome.NETWORK_CODEC.encode(Transcoder.NBT, biome).orElseThrow()));
             }
         }
 

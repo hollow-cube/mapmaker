@@ -107,6 +107,7 @@ public final class PlacementRules {
         register(Block.CHISELED_BOOKSHELF, b -> new FacingHorizontalPlacementRule(b, true));
         register(Block.END_PORTAL_FRAME, b -> new FacingHorizontalPlacementRule(b, true));
         register(Block.VAULT, b -> new FacingHorizontalPlacementRule(b, true));
+        register(Block.DRIED_GHAST, b -> new FacingHorizontalPlacementRule(b, true));
 
         register(Block.DISPENSER, b -> new FacingAllAxisPlacementRule(b, false));
         register(Block.DROPPER, b -> new FacingAllAxisPlacementRule(b, false));

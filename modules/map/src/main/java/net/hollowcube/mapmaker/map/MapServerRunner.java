@@ -4,6 +4,8 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.ProtocolVersions;
+import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.TopTimesCommand;
@@ -18,6 +20,7 @@ import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.command.HubCommand;
 import net.hollowcube.mapmaker.map.command.build.*;
+import net.hollowcube.mapmaker.map.command.play.ResetHeightCommand;
 import net.hollowcube.mapmaker.map.command.play.SpectateCommand;
 import net.hollowcube.mapmaker.map.command.utility.*;
 import net.hollowcube.mapmaker.map.command.utility.entity.EntitiesCommand;
@@ -30,6 +33,7 @@ import net.hollowcube.mapmaker.map.runtime.*;
 import net.hollowcube.mapmaker.map.terraform.MapServerModule;
 import net.hollowcube.mapmaker.map.util.MapJoinInfo;
 import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
+import net.hollowcube.mapmaker.map.util.datafix.*;
 import net.hollowcube.mapmaker.map.world.AbstractMapMakerMapWorld;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
@@ -53,10 +57,12 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 import static net.hollowcube.mapmaker.map.util.MapCondition.eventFilter;
 import static net.hollowcube.mapmaker.map.util.MapCondition.mapFilter;
@@ -157,6 +163,7 @@ public class MapServerRunner extends AbstractMapServer {
                 .module(Terraform.BASE_MODULE)
                 .module(Terraform.AXIOM_MODULE)
                 .module(Terraform.WORLDEDIT_MODULE)
+                .module(Terraform.VANILLA_MODULE)
                 .module(MapServerModule::new)
                 .storage(mapService instanceof NoopMapService ? "TerraformStorageMemory" : "TerraformStorageHttp")
                 .build();
@@ -198,7 +205,7 @@ public class MapServerRunner extends AbstractMapServer {
         ));
 
         commandManager.register(new HubCommand(server.bridge()));
-        commandManager.register(new PlayerInfoCommand(server.permManager(), server.playerService()));
+        commandManager.register(new PlayerInfoCommand(server.permManager(), server.playerService(), server.sessionManager()));
 
         commandManager.register(new TopTimesCommand(server.mapService(), server.playerService(), server.sessionManager()));
 
@@ -210,6 +217,7 @@ public class MapServerRunner extends AbstractMapServer {
         commandManager.register(new GameModeCommand());
 
         commandManager.register(new SpectateCommand());
+        commandManager.register(new ResetHeightCommand());
 
         commandManager.register(new FlyCommand());
         commandManager.register(new FlySpeedCommand());
@@ -254,6 +262,8 @@ public class MapServerRunner extends AbstractMapServer {
     protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
         try {
             var player = event.getPlayer();
+            ProtocolVersions.requestProtocolVersionFromProxy(player);
+            if (!player.isOnline()) return;
 
             // Queue resource pack download/apply while we do other things
             var resourcePackFuture = ResourcePackManager.sendResourcePack(player);
@@ -275,7 +285,12 @@ public class MapServerRunner extends AbstractMapServer {
 
             // Create the world, holding the player here until it is ready for them to join.
             var map = mapService().getMap(joinInfo.playerId(), joinInfo.mapId());
-            var mapWorld = Objects.requireNonNull(FutureUtil.getUnchecked(allocator().create(map, worldTypeFor(joinInfo))));
+            var mapWorld = FutureUtil.getUnchecked(allocator().create(map, worldTypeFor(joinInfo)));
+            if (mapWorld == null) {
+                logger.error("Failed to create map world for {}:{}", joinInfo.playerId(), joinInfo.mapId());
+                player.kick(Component.text("Failed to create map world. Please try again later."));
+                return;
+            }
 
             // Ensure resource pack was applied before allowing the player in
             FutureUtil.getUnchecked(resourcePackFuture);
@@ -309,6 +324,18 @@ public class MapServerRunner extends AbstractMapServer {
     }
 
     @Override
+    protected @NotNull List<Supplier<DataVersion>> extraDataVersions() {
+        var versions = new ArrayList<>(super.extraDataVersions());
+        versions.addAll(extraDataVersionsForMaps());
+        return versions;
+    }
+
+    // Exposed for DevServer to use
+    public static List<Supplier<DataVersion>> extraDataVersionsForMaps() {
+        return List.of(V4326::new, V4437::new, V4438::new, V4440::new, V4441::new, V4442::new);
+    }
+
+    @Override
     protected @NotNull DebugCommand createDebugCommand() {
         var cmd = super.createDebugCommand();
 
@@ -337,6 +364,9 @@ public class MapServerRunner extends AbstractMapServer {
                 player.sendMessage("You are not in an editing world!");
             }
         }, "Enables progress index add mode for the current map");
+
+        cmd.createPermissionlessSubcommand("poi", DebugPoiCommand::handleDebugRegions,
+                "Shows the location information about nearby pois");
 
         return cmd;
     }

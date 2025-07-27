@@ -8,7 +8,11 @@ import java.util.function.Supplier;
 
 public sealed interface ParseResult<T> permits ParseResult.Partial, ParseResult.Success, ParseResult.Failure {
 
-    record Partial<T>(@Nullable String message) implements ParseResult<T> {
+    record Partial<T>(@Nullable String message, @Nullable Supplier<@UnknownNullability T> valueFunc) implements ParseResult<T> {
+
+        public Partial(@Nullable String message) {
+            this(message, null);
+        }
 
         public Partial() {
             this(null);

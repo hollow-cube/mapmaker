@@ -1,27 +1,33 @@
 package net.hollowcube.mapmaker.map.feature.play;
 
 import com.google.auto.service.AutoService;
-import io.prometheus.client.Counter;
 import net.hollowcube.common.events.PlayerMoveVehicleEvent;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.dfu.DFU;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.action.ActionList;
+import net.hollowcube.mapmaker.map.action.Attachments;
+import net.hollowcube.mapmaker.map.action.impl.*;
+import net.hollowcube.mapmaker.map.action.impl.attributes.ActionAttributes;
+import net.hollowcube.mapmaker.map.action.impl.attributes.AttributeMap;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
+import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.map.event.*;
 import net.hollowcube.mapmaker.map.event.vnext.*;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
-import net.hollowcube.mapmaker.map.feature.play.effect.BaseEffectData;
-import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectData;
-import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItem;
+import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectDataV2;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.map.feature.play.handlers.SpectateHandler;
 import net.hollowcube.mapmaker.map.feature.play.item.*;
+import net.hollowcube.mapmaker.map.feature.play.setting.OnlySprintFeatureProvider;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
+import net.hollowcube.mapmaker.map.item.checkpoint.CheckpointItem;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.util.CustomizableHotbarManager;
 import net.hollowcube.mapmaker.map.util.MapMessages;
+import net.hollowcube.mapmaker.map.util.PlayerPlayStateExtension;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
@@ -55,6 +61,7 @@ import net.minestom.server.potion.TimedPotion;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -64,12 +71,6 @@ import java.util.concurrent.CompletableFuture;
 @SuppressWarnings("UnstableApiUsage")
 @AutoService(FeatureProvider.class)
 public class BaseParkourMapFeatureProvider implements FeatureProvider {
-    private static final int THIRTY_MINUTES = 30 * 60 * 1000;
-    private static final Counter RESETS_AFTER_30_MINUTES = Counter.build()
-            .name("reset_after_30_minutes_count")
-            .help("Number of times a player has reset after 30 minutes of play")
-            .register();
-
     static {
         MinecraftServer.getPacketListenerManager().setPlayListener(
                 ClientPlayerBlockPlacementPacket.class,
@@ -77,16 +78,17 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     }
 
     private static final int RESET_HEIGHT_OFFSET = 5;
-    private static final Tag<Integer> DEFAULT_RESET_HEIGHT = Tag.Integer("mapmaker:play/reset_height").defaultValue(-64 - RESET_HEIGHT_OFFSET);
+    public static final Tag<Integer> DEFAULT_RESET_HEIGHT = Tag.Integer("mapmaker:play/reset_height").defaultValue(-64 - RESET_HEIGHT_OFFSET);
 
     private static final TagCooldown PROGRESS_INDEX_WARNING = new TagCooldown("mapmaker:play/progress_index_warning", 5000);
+    public static final Tag<List<Integer>> OWNED_ENTITIES = Tag.<List<Integer>>Transient("map_owned_entities").defaultValue(List.of());
 
     // This tag is present when the player has an active countdown and holds the time at which
     // the countdown will end, in ms since epoch.
     public static final Tag<Long> COUNTDOWN_END = Tag.Long("mapmaker:play/countdown_end").defaultValue(-1L);
 
     // Holds the CheckpointEffectData applied to the player on first spawn.
-    public static final Tag<CheckpointEffectData> SPAWN_CHECKPOINT_EFFECTS = DFU.Tag(CheckpointEffectData.CODEC, "spawn_checkpoint_effects");
+    public static final Tag<CheckpointEffectDataV2> SPAWN_CHECKPOINT_EFFECTS = DFU.Tag(CheckpointEffectDataV2.CODEC, "spawn_checkpoint_effects");
 
     private static final Sound ADD_EFFECTS_SOUND = Sound.sound(SoundEvent.BLOCK_BREWING_STAND_BREW, Sound.Source.BLOCK, 1, 1f);
     private static final Sound REMOVE_EFFECTS_SOUND = Sound.sound(SoundEvent.BLOCK_BREWING_STAND_BREW, Sound.Source.BLOCK, 1, 0.1f);
@@ -96,9 +98,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     private static final AttributeModifier NO_FALL_DAMAGE_MODIFIER = new AttributeModifier("mapmaker:play.no_fall_damage", 500, AttributeOperation.ADD_VALUE);
 
     private static final Equippable EMPTY_EQUIPPABLE = new Equippable(EquipmentSlot.CHESTPLATE, SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
-            null, null, null, false, false, false, false);
+            null, null, null, false, false, false, false,
+            false, SoundEvent.ITEM_SHEARS_SNIP);
     private static final Equippable ELYTRA_EQUIPPABLE = new Equippable(EquipmentSlot.CHESTPLATE, SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
-            "minecraft:elytra", null, null, false, false, false, false);
+            "minecraft:elytra", null, null, false, false, false,
+            false, false, SoundEvent.ITEM_SHEARS_SNIP);
 
     private static final CustomizableHotbarManager TESTING_HOTBAR = CustomizableHotbarManager.builder("hotbar/parkour/test")
             .defaultItem(0, MapDetailsItem.ID)
@@ -112,9 +116,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     private static final CustomizableHotbarManager PLAYING_HOTBAR = CustomizableHotbarManager.builder("hotbar/parkour")
             .defaultItem(0, MapDetailsItem.ID)
             .defaultItem(1, ReturnToCheckpointItem.ID)
-            .defaultItem(2, RateMapItem.ID, (player, world) -> MapRatingFeatureProvider.isMapRatable(world))
+            .defaultItem(2, RateMapItem.ID, (_, world) -> MapRatingFeatureProvider.isMapRatable(world))
 
-            .defaultItem(4, EnterSpectatorModeItem.ID, (player, world) -> !world.map().getSetting(MapSettings.NO_SPECTATOR))
+            .defaultItem(4, EnterSpectatorModeItem.ID, (_, world) -> !world.map().getSetting(MapSettings.NO_SPECTATOR))
 
             .defaultItem(7, ResetSaveStateItem.ID)
             .defaultItem(8, ReturnToHubItem.ID)
@@ -133,7 +137,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
     private static final CustomizableHotbarManager FINISH_HOTBAR = CustomizableHotbarManager.builder("hotbar/parkour/finish")
             .defaultItem(0, MapDetailsItem.ID)
-            .defaultItem(2, RateMapItem.ID, (player, world) -> MapRatingFeatureProvider.isMapRatable(world))
+            .defaultItem(2, RateMapItem.ID, (_, world) -> MapRatingFeatureProvider.isMapRatable(world))
 
             .defaultItem(7, ResetSaveStateItem.ID)
             .defaultItem(8, ReturnToHubItem.ID)
@@ -231,7 +235,17 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var world = event.getMapWorld();
         if (!world.isPlaying(player)) return;
 
+        if (player instanceof PlayerPlayStateExtension ext)
+            ext.resetPlayingState();
+
         MapCompletionAnimation.cancel(player); // In case the player resets themselves
+
+        // Remove any owned entities from the player
+        var ownedEntities = player.getAndSetTag(BaseParkourMapFeatureProvider.OWNED_ENTITIES, null);
+        if (ownedEntities != null) for (var entityId : ownedEntities) {
+            var entity = event.getMapWorld().instance().getEntityById(entityId);
+            if (entity != null) entity.remove();
+        }
 
         // Set the hotbar
         var itemRegistry = event.mapWorld().itemRegistry();
@@ -272,14 +286,15 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             var isStarting = saveState.getPlayStartTime() == 0 && saveState.getPlaytime() == 0;
 
             // If this is a fresh save state, attempt to add the base effect state
-            if (world.hasTag(SPAWN_CHECKPOINT_EFFECTS) && isStarting) {
-                updateCheckpointEffectState(world, player, world.getTag(SPAWN_CHECKPOINT_EFFECTS), playState);
+            var spawnCheckpoint = world.getTag(SPAWN_CHECKPOINT_EFFECTS);
+            if (spawnCheckpoint != null && isStarting) {
+                updateBaseEffectState(world, player, spawnCheckpoint.actions(), playState);
             }
 
-            updatePlayerFromState(world, player, playState, isStarting);
+            player.scheduler().scheduleEndOfTick(() -> updatePlayerFromState(world, player, playState, isStarting));
 
             // If this is OS, reset the player as they are added
-            if (world.map().getSetting(MapSettings.ONLY_SPRINT) && !player.getTag(RESET_TAG) && event.isFirstInit()) {
+            if (!OnlySprintFeatureProvider.canSprint(playState, world) && !player.getTag(RESET_TAG) && event.isFirstInit()) {
                 player.setTag(RESET_TAG, true);
                 player.scheduleNextTick(ignored -> player.removeTag(RESET_TAG));
 //                player.sendMessage(Component.translatable("map.spectator_mode.only_sprint"));
@@ -343,6 +358,21 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         player.removeTag(COUNTDOWN_END);
 
         player.getAttribute(Attribute.SAFE_FALL_DISTANCE).removeModifier(NO_FALL_DAMAGE_MODIFIER);
+
+        // Update them to an empty state (aka reset their state to the default)
+        updatePlayerFromState(event.getMapWorld(), player, new PlayState());
+
+        GhostBlockHolder.clear(event.getPlayer(), true);
+
+        var ownedEntities = player.getAndSetTag(BaseParkourMapFeatureProvider.OWNED_ENTITIES, null);
+        if (ownedEntities != null) for (var entityId : ownedEntities) {
+            var entity = event.getMapWorld().instance().getEntityById(entityId);
+            if (entity != null) entity.remove();
+        }
+
+        for (var entry : ActionAttributes.ENTRIES.values()) {
+            player.getAttribute(entry.attribute()).setBaseValue(entry.attribute().defaultValue());
+        }
     }
 
     public void handleCheckpointPostChange(@NotNull MapPlayerCheckpointPostChangeEvent event) {
@@ -359,7 +389,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         if (state.history().isEmpty()) return;
         if (state.lastState() == null) return;
         if (!state.history().getLast().equals(event.checkpointId())) return;
-        if (data.teleport() != null) return;
+        if (data.actions().has(TeleportAction.KEY)) return;
         var pos = state.pos();
         if (pos == null) return;
         float yaw = player.getPosition().yaw();
@@ -376,20 +406,18 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var data = event.effectData();
 
         // Ensure the event should trigger a checkpoint change for the current players state
-        if (checkProgressIndex(player, world, state, data)) return;
+        if (checkProgressIndex(player, world, state, data.actions())) return;
         if (state.lastState() != null && state.lastState().hasStatus(event.checkpointId()))
             return; // Player already has this checkpoint in their history (they are backtracking)
+
+        // Apply the checkpoint/effect changes
+        updateStateFromPlayer(player, state);
+        updateBaseEffectState(world, player, data.actions(), state);
 
         // The checkpoint (reset) pos is set to the teleport if its present, or the first
         // position the player touched the checkpoint otherwise. todo probably need to do a gravity snap here
         // to bring it down to the ground.
-        var checkpointPos = Objects.requireNonNullElseGet(data.teleport(), player::getPosition);
-
-        // Apply the checkpoint/effect changes
-        state.setTimeLimit(-1); // Time always reset on checkpoint
-        player.removeTag(COUNTDOWN_END);
-        updateStateFromPlayer(player, state);
-        updateCheckpointEffectState(world, player, data, state);
+        var checkpointPos = player.getPosition();
 
         List<String> newHistory;
         if (world.map().getSetting(MapSettings.PROGRESS_INDEX_ADDITION)) {
@@ -406,16 +434,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         state.setLastState(new PlayState(
                 null,
                 newHistory,
-                state.progressIndex(),
-                state.timeLimit(),
-                state.resetHeight(),
-                state.potionEffects().copy(),
                 checkpointPos,
-                state.maxLives(),
-                state.lives(),
                 Map.copyOf(state.ghostBlocks()),
-                state.items(),
-                state.settings().copy()
+                Map.copyOf(state.actionData())
         ));
 
         // Update the player based on the new state
@@ -434,33 +455,30 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // Ensure the event should trigger a status change for the current players state
         if (!data.repeatable() && state.hasStatus(event.statusId()))
             return; // Player already has the status plate in this checkpoint.
-        if (checkProgressIndex(player, world, state, data)) return;
+        if (checkProgressIndex(player, world, state, data.actions())) return;
 
         // Apply the status changes
         updateStateFromPlayer(player, state);
-        updateBaseEffectState(world, player, data, state);
-        if (data.extraTime() > 0 && state.timeLimit() != null) {
-            state.setTimeLimit(state.timeLimit() + data.extraTime());
-        }
+        updateBaseEffectState(world, player, data.actions(), state);
         state.addStatus(event.statusId());
-        state.settings().update(data.settings());
 
         // Update the player based on the new state
         updatePlayerFromState(world, player, state);
     }
 
-    private boolean checkProgressIndex(@NotNull Player player, @NotNull MapWorld world, @NotNull PlayState state, @NotNull BaseEffectData data) {
-        if (data.progressIndex() > 0) {
-            int currentIndex = Objects.requireNonNullElse(state.progressIndex(), 0);
+    private boolean checkProgressIndex(@NotNull Player player, @NotNull MapWorld world, @NotNull PlayState state, @NotNull ActionList actionList) {
+        int progressIndex = OpUtils.mapOr(actionList.findLast(SetProgressIndexAction.class), SetProgressIndexAction::value, -1);
+        if (progressIndex > 0) {
+            int currentIndex = state.get(Attachments.PROGRESS_INDEX, 0);
             boolean condition = world.map().getSetting(MapSettings.PROGRESS_INDEX_ADDITION)
                     // With additive index you can get anything <= current + 1
-                    ? (data.progressIndex() > currentIndex + 1)
+                    ? (progressIndex > currentIndex + 1)
                     // Without additive progress index you must be at the prior index or the current one
-                    : (data.progressIndex() != currentIndex && data.progressIndex() != currentIndex + 1);
+                    : (progressIndex != currentIndex && progressIndex != currentIndex + 1);
             if (condition) {
                 if (PROGRESS_INDEX_WARNING.test(player)) {
                     player.sendMessage(Component.translatable("checkpoint.progress_index.not_acceptable",
-                            Component.text(currentIndex), Component.text(data.progressIndex())));
+                            Component.text(currentIndex), Component.text(progressIndex - 1)));
                 }
                 return true;
             }
@@ -496,9 +514,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // Start the timer.
         saveState.setPlayStartTime(System.currentTimeMillis());
 
-        var effects = world.getTag(SPAWN_CHECKPOINT_EFFECTS);
-        if (effects != null && effects.timeLimit() > 0) {
-            player.setTag(COUNTDOWN_END, System.currentTimeMillis() + effects.timeLimit());
+        var timer = saveState.state(PlayState.class).get(EditTimerAction.SAVE_DATA);
+        if (timer != null && timer > 0) {
+            player.setTag(COUNTDOWN_END, System.currentTimeMillis() + (timer * 50L));
         }
     }
 
@@ -511,9 +529,10 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             var saveState = SaveState.optionalFromPlayer(player);
             if (saveState == null) return;
 
-            var playState = saveState.tryGetState(PlayState.class).orElse(null);
+            var playState = saveState.tryGetState(PlayState.class);
             if (playState == null) return;
-            var resetHeight = Objects.requireNonNullElseGet(playState.resetHeight(), () -> world.instance().getTag(DEFAULT_RESET_HEIGHT));
+            var resetHeight = Objects.requireNonNullElseGet(playState.get(Attachments.RESET_HEIGHT),
+                    () -> world.instance().getTag(DEFAULT_RESET_HEIGHT));
             if (player.getPosition().y() < resetHeight) {
                 softReset(player, saveState);
                 return;
@@ -546,11 +565,6 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         // Remove the playing tag so that they can't trigger a checkpoint/status/completion
         abstractWorld.removePlayerImmediate(player);
-
-        // iTMG thinks that this happens a lot and we should add a feature to let people
-        if (saveState.getRealPlaytime() > THIRTY_MINUTES) {
-            RESETS_AFTER_30_MINUTES.inc();
-        }
 
         saveState.uncomplete();
         saveState.setPlaytime(0);
@@ -589,7 +603,8 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             // If the checkpoint is below the reset height, teleport to the spawn instead to prevent getting stuck.
             // If they set the spawn below the world then its a joke map anyway and i don't care.
             var playState = saveState.state(PlayState.class);
-            var resetHeight = Objects.requireNonNullElseGet(playState.resetHeight(), () -> world.instance().getTag(DEFAULT_RESET_HEIGHT));
+            var resetHeight = Objects.requireNonNullElseGet(playState.get(Attachments.RESET_HEIGHT),
+                    () -> world.instance().getTag(DEFAULT_RESET_HEIGHT));
             if (checkpoint.y() < resetHeight) {
                 resetTeleport(player, world.spawnPoint(player)).thenRun(() -> {
                     EventDispatcher.call(new MapPlayerInitEvent(world, player, false, false));
@@ -604,10 +619,19 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         var playState = saveState.state(PlayState.class);
         // If they don't have a checkpoint or are on their last life, do a hard reset.
-        var isOutOfLives = Objects.requireNonNullElse(playState.lives(), 0) == 1;
+        var livesData = playState.get(EditLivesAction.SAVE_DATA);
+        var isOutOfLives = OpUtils.mapOr(livesData, EditLivesAction.Data::value, 0) == 1;
         if (playState.lastState() == null || isOutOfLives) {
             if (isOutOfLives) {
                 player.playSound(PLAYER_DEATH_SOUND);
+
+                if (livesData.deathPosition() != null) {
+                    playState = new PlayState();
+                    saveState.setState(playState);
+                    updatePlayerFromState(world, player, playState, true);
+                    resetTeleport(player, livesData.deathPosition().resolve(player.getPosition()));
+                    return;
+                }
             }
             hardReset(player, saveState);
             return;
@@ -618,9 +642,10 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         // "pop" the last state to the current
         playState = playState.lastState();
-        if (playState.lives() != null) {
+        var lives = playState.get(EditLivesAction.SAVE_DATA);
+        if (lives != null) {
             // This is definitely valid, we checked above to see if this was the last life.
-            playState.setLives(playState.lives() - 1);
+            playState.set(EditLivesAction.SAVE_DATA, lives.withValue(lives.value() - 1));
             player.playSound(PLAYER_HURT_SOUND);
         }
         saveState.setState(playState);
@@ -637,62 +662,10 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         });
     }
 
-    private void updateCheckpointEffectState(@NotNull MapWorld world, @NotNull Player player, @NotNull CheckpointEffectData data, @NotNull PlayState state) {
-        updateBaseEffectState(world, player, data, state);
-        if (data.lives() > 0) {
-            state.setMaxLives(data.lives());
-            state.setLives(data.lives());
-        } else {
-            state.setMaxLives(-1);
-            state.setLives(-1);
+    private void updateBaseEffectState(@NotNull MapWorld world, @NotNull Player player, @NotNull ActionList actions, @NotNull PlayState state) {
+        for (var action : actions.actions()) {
+            action.applyTo(player, state);
         }
-        state.settings().update(data.settings());
-    }
-
-    private void updateBaseEffectState(@NotNull MapWorld world, @NotNull Player player, @NotNull BaseEffectData data, @NotNull PlayState state) {
-        if (data.progressIndex() != -1) {
-            boolean useProgressAddition = world.map().getSetting(MapSettings.PROGRESS_INDEX_ADDITION);
-            state.setProgressIndex(useProgressAddition ? (Objects.requireNonNullElse(state.progressIndex(), 0) + data.progressIndex()) : data.progressIndex());
-        }
-        if (data.timeLimit() > 0) {
-            // Only update the time limit if it is assigned in this effect.
-            // In a checkpoint it will have been reset prior to calling this function.
-            state.setTimeLimit(data.timeLimit());
-        }
-        if (data.resetHeight() != BaseEffectData.NO_RESET_HEIGHT) {
-            state.setResetHeight(data.resetHeight());
-        }
-        if (data.clearPotionEffects()) {
-            // Play 'remove' effect if we had effects and they were removed
-            if (!state.potionEffects().isEmpty() && data.potionEffects().isEmpty()) {
-                player.playSound(REMOVE_EFFECTS_SOUND);
-            }
-            state.potionEffects().clear();
-        }
-        if (!data.potionEffects().isEmpty()) {
-            player.playSound(ADD_EFFECTS_SOUND);
-            for (var newEffect : data.potionEffects().entries()) {
-                var existingEffect = state.potionEffects().getOrCreate(newEffect.type());
-                existingEffect.setLevel(newEffect.level());
-                existingEffect.setDuration(newEffect.duration());
-            }
-        }
-        final var teleport = data.teleport();
-        if (teleport != null) {
-            resetTeleport(player, teleport).thenRun(() -> {
-                player.playSound(Sound.sound(SoundEvent.ENTITY_PLAYER_TELEPORT, Sound.Source.PLAYER, 0.5f, 1f), player.getPosition());
-            });
-        }
-        var newItem1 = state.items().item1();
-        if (data.items().item1() != null) newItem1 = data.items().item1();
-        var newItem2 = state.items().item2();
-        if (data.items().item2() != null) newItem2 = data.items().item2();
-        var newItem3 = state.items().item3();
-        if (data.items().item3() != null) newItem3 = data.items().item3();
-        var newElytra = state.items().elytra();
-        if (data.items().elytra() != null) newElytra = data.items().elytra();
-
-        state.setItems(new HotbarItems(newItem1, newItem2, newItem3, newElytra));
     }
 
     private void updateStateFromPlayer(@NotNull Player player, @NotNull PlayState state) {
@@ -702,11 +675,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         if (countdownEnd != -1) {
             // We have to clamp it to 1 because if we don't when they rejoin their time limit will
             // be less than or equal to 0 meaning it will allow them to play forever due tp <= 0 being infinite time.
-            state.setTimeLimit(Math.max(countdownEnd - now, 1));
+            state.set(EditTimerAction.SAVE_DATA, (int) Math.max((countdownEnd - now) / 50, 1));
         }
 
         // Update remaining time for the remaining effects (and remove if expired)
-        var iter = state.potionEffects().entries().iterator();
+        var iter = state.get(Attachments.POTION_EFFECTS, new PotionEffectList()).entries().iterator();
         while (iter.hasNext()) {
             var entry = iter.next();
             if (entry.duration() <= 0) continue; // No need to update if infinite
@@ -726,13 +699,18 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var ghostBlocks = GhostBlockHolder.forPlayerOptional(player);
         state.setGhostBlocks(ghostBlocks == null ? Map.of() : ghostBlocks.save());
 
-        var items = state.items();
-        state.setItems(new HotbarItems(
-                items.item1() == null ? HotbarItem.Remove.INSTANCE : items.item1().fromItemStack(player.getInventory().getItemStack(3)),
-                items.item2() == null ? HotbarItem.Remove.INSTANCE : items.item2().fromItemStack(player.getInventory().getItemStack(5)),
-                items.item3() == null ? HotbarItem.Remove.INSTANCE : items.item3().fromItemStack(player.getInventory().getItemStack(6)),
-                items.elytra()
+        var items = state.get(Attachments.HOTBAR_ITEMS, HotbarItems.EMPTY);
+        state.set(Attachments.HOTBAR_ITEMS, new HotbarItems(
+                OpUtils.map(items.item0(), item -> updateItemStack(player, item, 3)),
+                OpUtils.map(items.item1(), item -> updateItemStack(player, item, 5)),
+                OpUtils.map(items.item2(), item -> updateItemStack(player, item, 6))
         ));
+    }
+
+    private @Nullable CheckpointItem updateItemStack(@NotNull Player player, @NotNull CheckpointItem item, int slot) {
+        var itemStack = player.getInventory().getItemStack(slot);
+        if (itemStack.isAir()) return null; // Consumed
+        return item.updateFromItemStack(itemStack);
     }
 
     private void updatePlayerFromState(MapWorld world, @NotNull Player player, @NotNull PlayState state) {
@@ -740,25 +718,35 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     }
 
     private void updatePlayerFromState(MapWorld world, @NotNull Player player, @NotNull PlayState state, boolean start) {
-        // Set the player health to the number of lives they have (1 heart = 1 life)
-        if (state.maxLives() != null && state.lives() != null) {
-            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(2 * state.maxLives());
-            player.setHealth(2 * state.lives());
+        // Update attributes
+        var attributes = state.get(EditAttributeAction.SAVE_DATA, AttributeMap.EMPTY);
+        for (var entry : ActionAttributes.ENTRIES.values()) {
+            var attribute = entry.attribute();
+            double value = attributes.getOrDefault(attribute, attribute.defaultValue());
+            player.getAttribute(attribute).setBaseValue(value);
+        }
+
+        // Set the player health to the number of time they have (1 heart = 1 life)
+        var lives = state.get(EditLivesAction.SAVE_DATA);
+        if (lives != null) {
+            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(2 * lives.max());
+            player.setHealth(2 * lives.value());
         } else {
             player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(Attribute.MAX_HEALTH.defaultValue());
             player.setHealth((float) Attribute.MAX_HEALTH.defaultValue());
         }
 
         // Update the countdown timer (time may have been added
-        if (state.timeLimit() != null && !start) {
-            player.setTag(COUNTDOWN_END, System.currentTimeMillis() + state.timeLimit());
+        var timeLimit = state.get(EditTimerAction.SAVE_DATA);
+        if (timeLimit != null && !start) {
+            player.setTag(COUNTDOWN_END, System.currentTimeMillis() + (timeLimit * 50));
         } else {
             player.removeTag(COUNTDOWN_END);
         }
 
         // Update the potions on the player
         player.clearEffects();
-        for (var entry : state.potionEffects().entries()) {
+        for (var entry : state.get(Attachments.POTION_EFFECTS, new PotionEffectList()).entries()) {
             player.addEffect(new Potion(
                     entry.type().vanillaEffect(),
                     (byte) (entry.level() - 1),
@@ -773,16 +761,13 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         }
 
         // Apply items to current state.
-        var item1 = state.items().item1();
-        player.getInventory().setItemStack(3, item1 == null || item1 instanceof HotbarItem.Remove
-                ? ItemStack.AIR : item1.toItemStack(false));
-        var item2 = state.items().item2();
-        player.getInventory().setItemStack(5, item2 == null || item2 instanceof HotbarItem.Remove
-                ? ItemStack.AIR : item2.toItemStack(false));
-        var item3 = state.items().item3();
-        player.getInventory().setItemStack(6, item3 == null || item3 instanceof HotbarItem.Remove
-                ? ItemStack.AIR : item3.toItemStack(false));
-        if (Objects.requireNonNullElse(state.items().elytra(), false)) {
+        var items = state.get(Attachments.HOTBAR_ITEMS, HotbarItems.EMPTY);
+        player.getInventory().setItemStack(3, items.item0() == null ? ItemStack.AIR : items.item0().createItemStack());
+        player.getInventory().setItemStack(5, items.item1() == null ? ItemStack.AIR : items.item1().createItemStack());
+        player.getInventory().setItemStack(6, items.item2() == null ? ItemStack.AIR : items.item2().createItemStack());
+
+        // Apply elytra or remove it if not relevant
+        if (state.get(Attachments.ELYTRA, false)) {
             player.setChestplate(player.getChestplate().with(DataComponents.GLIDER)
                     .with(DataComponents.EQUIPPABLE, ELYTRA_EQUIPPABLE));
         } else {

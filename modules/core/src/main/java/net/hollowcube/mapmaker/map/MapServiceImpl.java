@@ -2,13 +2,14 @@ package net.hollowcube.mapmaker.map;
 
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Transcoder;
+import net.minestom.server.registry.RegistryTranscoder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,20 +33,14 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     record ErrorRes(String code) {
     }
 
-    private final int latestDataVersion = ServerRuntime.getRuntime().dataVersion();
-
     private final String url;
-    private final String urlV2;
     private final String urlV3;
     private final String legacyUrl;
-    private final String perfdumpUrl;
 
     public MapServiceImpl(String url) {
         this.url = String.format("%s/v1/internal/maps", url);
-        this.urlV2 = String.format("%s/v2/internal/maps", url);
         this.urlV3 = String.format("%s/v3/internal", url);
         this.legacyUrl = String.format("%s/v1/internal/maps/legacy", url);
-        this.perfdumpUrl = String.format("%s/v1/internal/perfdump", url);
     }
 
     @Override
@@ -85,7 +80,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public @NotNull MapProgressBatchResponse getMapProgress(@NotNull String playerId, @NotNull List<String> mapIds) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(urlV2 + "/progress?playerId=" + playerId + "&mapId=" + String.join(",", mapIds)))
+                .uri(URI.create(urlV3 + "/maps/progress?playerId=" + playerId + "&mapIds=" + String.join(",", mapIds)))
                 .header(AUTHORIZER_HEADER, playerId)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -204,7 +199,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     public void deleteVerification(@NotNull String authorizer, @NotNull String mapId) {
         var req = HttpRequest.newBuilder()
                 .method("DELETE", HttpRequest.BodyPublishers.noBody())
-                .uri(URI.create(url + "/" + mapId + "/verify"))
+                .uri(URI.create(urlV3 + "/maps/" + mapId + "/verify"))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -218,8 +213,9 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public @NotNull MapData publishMap(@NotNull String authorizer, @NotNull String id) {
+        var body = "{}";
         var req = HttpRequest.newBuilder()
-                .method("POST", HttpRequest.BodyPublishers.noBody())
+                .method("POST", HttpRequest.BodyPublishers.ofString(body))
                 .uri(URI.create(urlV3 + "/maps/" + id + "/publish"))
                 .header(AUTHORIZER_HEADER, authorizer)
                 .build();
@@ -234,12 +230,15 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public byte @Nullable [] getMapWorld(@NotNull String id, boolean write) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/" + id + "/world?scope=" + (write ? "write" : "read")))
+                .uri(URI.create(urlV3 + "/maps/" + id + "/world?scope=" + (write ? "write" : "read")))
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofByteArray());
         return switch (res.statusCode()) {
-            case 200 -> res.body();
+            case 200 -> {
+                logger.log(System.Logger.Level.INFO, "Received map world for " + id + ", length: " + res.body().length);
+                yield res.body();
+            }
             case 204 -> null;
             case 404 -> throw new NotFoundError(id);
             default -> throw new InternalError("Failed to get map world: " + new String(res.body()));
@@ -281,6 +280,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public void updateMapWorld(@NotNull String id, byte @NotNull [] worldData) {
+        logger.log(System.Logger.Level.INFO, "Updating map world for " + id + ", length: " + worldData.length);
         var req = HttpRequest.newBuilder()
                 .method("PUT", HttpRequest.BodyPublishers.ofByteArray(worldData))
                 .uri(URI.create(urlV3 + "/maps/" + id + "/world"))
@@ -301,7 +301,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         var reqBody = GSON.toJson(req);
         var req2 = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
-                .uri(URI.create(url + "/" + mapId + "/report"))
+                .uri(URI.create(urlV3 + "/maps/" + mapId + "/report"))
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();
         var res = doRequest(req2, HttpResponse.BodyHandlers.ofString());
@@ -314,7 +314,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public @NotNull LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId) {
-        var uri = url + "/leaderboard/" + name;
+        var uri = urlV3 + "/maps/hub/leaderboard/" + name;
         if (playerId != null) uri += "?playerId=" + playerId;
         var req = HttpRequest.newBuilder()
                 .uri(URI.create(uri))
@@ -344,7 +344,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public void deletePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId, @Nullable String playerId) {
-        var uri = url + "/" + mapId + "/leaderboard/playtime";
+        var uri = urlV3 + "/maps/" + mapId + "/leaderboard/playtime";
         if (playerId != null) uri += "?playerId=" + playerId;
         var req = HttpRequest.newBuilder()
                 .uri(URI.create(uri))
@@ -361,7 +361,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public void restorePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId) {
-        var uri = url + "/" + mapId + "/leaderboard/playtime/restore";
+        var uri = urlV3 + "/maps/" + mapId + "/leaderboard/playtime/restore";
         var req = HttpRequest.newBuilder()
                 .uri(URI.create(uri))
                 .method("POST", HttpRequest.BodyPublishers.noBody())
@@ -376,10 +376,12 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType.Serializer<?> serializer) {
+    public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId, int protocolVersion, @Nullable SaveStateType.Serializer<?> serializer) {
         var req = HttpRequest.newBuilder()
-                .method("POST", HttpRequest.BodyPublishers.noBody())
-                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId))
+                .method("POST", HttpRequest.BodyPublishers.ofString("""
+                        {"protocolVersion": %d}
+                        """.formatted(protocolVersion)))
+                .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId))
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -392,7 +394,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/latest?typeFilter=" + (type == null ? "" : type.name().toLowerCase(Locale.ROOT))))
+                .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId + "/latest?typeFilter=" + (type == null ? "" : type.name().toLowerCase(Locale.ROOT))))
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -412,16 +414,17 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             // Note that this is a non-backwards compatible change, so once we write a new state an old server cannot necessarily
             // read this state. For now, we will likely ignore this, however in the future joining a map will require checking
             // the state and finding a compatible server (server data version > state data version).
-            if (!stateObj.isEmpty() && saveState.dataVersion > 0 && saveState.dataVersion < latestDataVersion) {
-                var upgraded = DataFixer.upgrade(serializer.dataType(), Transcoder.JSON, stateObj, saveState.dataVersion, latestDataVersion);
+            if (!stateObj.isEmpty() && saveState.dataVersion < DataFixer.maxVersion()) {
+                var upgraded = DataFixer.upgrade(serializer.dataType(), Transcoder.JSON, stateObj, saveState.dataVersion, DataFixer.maxVersion());
                 if (!(upgraded instanceof JsonObject upgradedObject))
                     throw new IllegalStateException("invalid save state upgrade: " + upgraded);
                 stateObj = upgradedObject;
-                saveState.dataVersion = latestDataVersion;
+                saveState.dataVersion = DataFixer.maxVersion();
             }
 
             saveState.serializer = serializer;
-            saveState.state = serializer.codec().decode(Transcoder.JSON, stateObj).orElseThrow();
+            var coder = new RegistryTranscoder<>(Transcoder.JSON, MinecraftServer.process());
+            saveState.state = serializer.codec().decode(coder, stateObj).orElseThrow();
         }
         return saveState;
     }
@@ -429,7 +432,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public @Nullable SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId) {
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/best"))
+                .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId + "/best"))
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -442,10 +445,11 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public @Nullable SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
+        update.updates.addProperty("dataVersion", DataFixer.maxVersion());
         var reqBody = GSON.toJson(update.updates);
         var req = HttpRequest.newBuilder()
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(reqBody))
-                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + id))
+                .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId + "/" + id))
                 .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
@@ -473,26 +477,28 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     @Override
     public @Nullable InputStream getSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId) {
-        var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + saveStateId + "/replay"))
-                .header(AUTHORIZER_HEADER, playerId)
-                .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofInputStream());
-        if (res.statusCode() == 200) return res.body(); // Ok
-        if (res.statusCode() == 404) return null; // Not found
-        throw new InternalError("Failed to get savestate replay: " + res.statusCode());
+        throw new UnsupportedOperationException("todo: reimplement in v3 api");
+//        var req = HttpRequest.newBuilder()
+//                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + saveStateId + "/replay"))
+//                .header(AUTHORIZER_HEADER, playerId)
+//                .build();
+//        var res = doRequest(req, HttpResponse.BodyHandlers.ofInputStream());
+//        if (res.statusCode() == 200) return res.body(); // Ok
+//        if (res.statusCode() == 404) return null; // Not found
+//        throw new InternalError("Failed to get savestate replay: " + res.statusCode());
     }
 
     @Override
     public void updateSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId, @NotNull InputStream dataStream) {
-        var req = HttpRequest.newBuilder()
-                .method("PUT", HttpRequest.BodyPublishers.ofInputStream(() -> dataStream))
-                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + saveStateId + "/replay"))
-                .header(AUTHORIZER_HEADER, playerId)
-                .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        if (res.statusCode() == 200) return; // Ok
-        throw new InternalError("Failed to update savestate replay: " + res.body());
+        throw new UnsupportedOperationException("todo: reimplement in v3 api");
+//        var req = HttpRequest.newBuilder()
+//                .method("PUT", HttpRequest.BodyPublishers.ofInputStream(() -> dataStream))
+//                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + saveStateId + "/replay"))
+//                .header(AUTHORIZER_HEADER, playerId)
+//                .build();
+//        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+//        if (res.statusCode() == 200) return; // Ok
+//        throw new InternalError("Failed to update savestate replay: " + res.body());
     }
 
     @Override

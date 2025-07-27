@@ -9,7 +9,6 @@ dependencies {
     implementation(project(":modules:terraform"))
     implementation(project(":modules:replay"))
     implementation(project(":modules:datafix"))
-    implementation(project(":modules:script-engine"))
 
     implementation(libs.minestom)
     implementation(libs.bundles.otel)
@@ -18,7 +17,7 @@ dependencies {
     implementation(libs.zstd)
     implementation(libs.gson)
     implementation(libs.completely)
-    implementation(libs.mql)
+    implementation(libs.included.molang)
     implementation(libs.polar)
     implementation(libs.fastutil)
     implementation(libs.kafka)

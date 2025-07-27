@@ -15,13 +15,13 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.tag.TagHandler;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -32,6 +32,8 @@ import java.util.function.Consumer;
  * Items are identified by their {@link #key()}, which is hashed to set the custom model data of the item stack.
  */
 public abstract class ItemHandler {
+
+    public static final Tag<String> ID_TAG = Tag.String("mapmaker:handler");
 
     public static final int RIGHT_CLICK_AIR = 1 << 1;
     public static final int RIGHT_CLICK_BLOCK = 1 << 2;
@@ -62,43 +64,32 @@ public abstract class ItemHandler {
     }
 
     /**
-     * The material to represent this item.
-     *
-     * <p>Mutually exclusive with {@link #sprite()}, which must be provided if this is not.</p>
-     */
-    public @Nullable Material material() {
-        return null;
-    }
-
-    /**
      * The sprite to represent this item.
-     *
-     * <p>Mutually exclusive with {@link #material()}, which must be provided if this is not.</p>
+     * <p>For more advanced item representation override {@link ItemHandler#build(ItemStack.Builder, CompoundBinaryTag)}</p>
      */
     public @Nullable BadSprite sprite() {
         return null;
     }
 
-    public @NotNull ItemStack buildItemStack(@Nullable CompoundBinaryTag nbt) {
-        var builder = ItemStack.builder(Objects.requireNonNullElse(material(), Material.STICK));
-        var baseTranslationKey = String.format("item.%s.%s", key().namespace(), key().value());
-        builder.set(DataComponents.CUSTOM_NAME, LanguageProviderV2.translate(Component.translatable(baseTranslationKey + ".name")));
-        builder.set(DataComponents.LORE, LanguageProviderV2.translateMulti(baseTranslationKey + ".lore", List.of()));
-        updateItemStack(builder, nbt != null ? TagHandler.fromCompound(nbt) : TagHandler.newHandler());
+    public void build(@NotNull ItemStack.Builder builder, @Nullable CompoundBinaryTag tag) {
+        var translation = String.format("item.%s.%s", key().namespace(), key().value());
+        builder.set(DataComponents.CUSTOM_NAME, LanguageProviderV2.translate(Component.translatable(translation + ".name")));
+        builder.set(DataComponents.LORE, LanguageProviderV2.translateMulti(translation + ".lore", List.of()));
+        builder.setTag(ID_TAG, key().asString());
+        builder.material(Material.STICK);
 
-        var sprite = sprite();
+        var sprite = this.sprite();
         if (sprite != null) builder.set(DataComponents.ITEM_MODEL, sprite.model());
-
-        return builder.build();
     }
 
-    /**
-     * updateItemStack is responsible for updating the base item with any custom data based on NBT.
-     * <p>
-     * By default, the builder will have the name and lore set which can be overridden.
-     * The custom model data is set after this function, and will overwrite any value set here.
-     */
-    protected void updateItemStack(@NotNull ItemStack.Builder builder, @NotNull TagHandler data) {
+    public final @NotNull ItemStack getItemStack() {
+        return getItemStack(null);
+    }
+
+    public final @NotNull ItemStack getItemStack(@Nullable CompoundBinaryTag tag) {
+        var builder = ItemStack.builder(Material.AIR);
+        this.build(builder, tag);
+        return builder.build();
     }
 
     protected void leftClicked(@NotNull Click click) {
@@ -121,18 +112,38 @@ public abstract class ItemHandler {
             @UnknownNullability BlockFace face,
             @UnknownNullability Entity entity
     ) {
+
+        public Click(
+                @NotNull ItemHandler handler,
+                @NotNull Player player,
+                @NotNull ItemStack itemStack,
+                @NotNull PlayerHand hand,
+                @UnknownNullability Entity entity
+        ) {
+            this(handler, player, itemStack, hand, null, null, null, entity);
+        }
+
         public @UnknownNullability Instance instance() {
             return player.getInstance();
         }
 
-        public void updateItemStack(@NotNull Consumer<ItemStack.Builder> func) {
-            var updatedItemStack = itemStack.with(builder -> {
-                func.accept(builder);
+        public void consume(int amount) {
+            this.update((stack, builder) -> builder.amount(stack.amount() - amount));
+        }
 
-                var sprite = handler.sprite();
+        public void update(@NotNull BiConsumer<ItemStack, ItemStack.Builder> updater) {
+            var stack = this.itemStack();
+            this.player().setItemInHand(this.hand(), stack.with(builder -> {
+                updater.accept(stack, builder);
+
+                var sprite = this.handler().sprite();
                 if (sprite != null) builder.set(DataComponents.ITEM_MODEL, sprite.model());
-            });
-            player.setItemInHand(hand, updatedItemStack);
+                builder.setTag(ID_TAG, this.handler().key().asString());
+            }));
+        }
+
+        public void update(@NotNull Consumer<ItemStack.Builder> updater) {
+            this.update((_, builder) -> updater.accept(builder));
         }
     }
 

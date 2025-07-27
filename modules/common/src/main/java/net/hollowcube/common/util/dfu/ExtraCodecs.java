@@ -2,12 +2,17 @@ package net.hollowcube.common.util.dfu;
 
 import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.common.util.Either;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.KeyPattern;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.Result;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,13 +25,9 @@ public final class ExtraCodecs {
     public static final Codec<Integer> INT_STRING = Codec.STRING.transform(Integer::parseInt, String::valueOf);
     public static final Codec<Long> LONG_STRING = Codec.STRING.transform(Long::parseLong, String::valueOf);
 
-    //    public static final Codec<PotionEffect> POTION_EFFECT = Codec.STRING.xmap(PotionEffect::fromKey, PotionEffect::name);
-//
-//    public static final Codec<Point> POINT = Codec.DOUBLE.listOf().xmap(list -> {
-//        Check.stateCondition(list.size() != 3, "Expected 3 doubles, got " + list.size());
-//        return new Vec(list.get(0), list.get(1), list.get(2));
-//    }, point -> List.of(point.x(), point.y(), point.z()));
-//
+    public static final Codec<NamedTextColor> NAMED_TEXT_COLOR = Codec.STRING.transform(
+            NamedTextColor.NAMES::valueOrThrow, NamedTextColor.NAMES::keyOrThrow);
+
     public static final StructCodec<Pos> POS = StructCodec.struct(
             "x", clamppedDouble(-30000000, 30000000), Pos::x,
             "y", clamppedDouble(-30000000, 30000000), Pos::y,
@@ -36,7 +37,9 @@ public final class ExtraCodecs {
             Pos::new);
 
     public static final Codec<Block> BLOCK_STATE_STRING = Codec.STRING
-            .transform(BlockUtil::fromString, BlockUtil::toString);
+            .transform(BlockUtil::fromStringOld, BlockUtil::toString);
+    public static final Codec<Block> BLOCK_NAME_STRING = Codec.STRING
+            .transform(Block::fromKey, Block::name);
 
     public static <L, R> @NotNull Codec<Either<L, R>> either(@NotNull Codec<L> leftCodec, @NotNull Codec<R> rightCodec) {
         return new Codec<>() {
@@ -184,6 +187,37 @@ public final class ExtraCodecs {
                 }
 
                 return new Result.Ok<>(map.build());
+            }
+        };
+    }
+
+    /// Behaves like Minestom RegistryTaggedUnion, but does not require registries to be present in the codec.
+    public static <T> @NotNull StructCodec<T> ExtRegistryCodec(
+            @NotNull DynamicRegistry<StructCodec<? extends T>> registry,
+            @NotNull Function<T, StructCodec<? extends T>> serializerGetter,
+            @NotNull String key
+    ) {
+        return new StructCodec<T>() {
+            @Override
+            public @NotNull <D> Result<T> decodeFromMap(@NotNull Transcoder<D> coder, Transcoder.@NotNull MapLike<D> map) {
+                final Result<String> type = map.getValue(key).map(coder::getString);
+                if (!(type instanceof Result.Ok(@KeyPattern String tag)))
+                    return type.mapError(e -> key + ": " + e).cast();
+                final StructCodec<T> innerCodec = (StructCodec<T>) registry.get(Key.key(tag));
+                if (innerCodec == null) return new Result.Error<>("No such key: " + tag);
+
+                return innerCodec.decodeFromMap(coder, map);
+            }
+
+            @Override
+            public @NotNull <D> Result<D> encodeToMap(@NotNull Transcoder<D> coder, @NotNull T value, Transcoder.@NotNull MapBuilder<D> map) {
+                //noinspection unchecked
+                final StructCodec<T> innerCodec = (StructCodec<T>) serializerGetter.apply(value);
+                final RegistryKey<StructCodec<? extends T>> type = registry.getKey(innerCodec);
+                if (type == null) return new Result.Error<>("Unregistered serializer for: " + value);
+
+                map.put(key, coder.createString(type.key().asString()));
+                return innerCodec.encodeToMap(coder, value, map);
             }
         };
     }

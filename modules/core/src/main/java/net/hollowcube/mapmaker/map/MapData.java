@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.object.ObjectData;
@@ -50,10 +52,11 @@ public class MapData {
 
     public static final int MIN_PLAYS_FOR_DIFFICULTY = 10;
 
-    public static final String SPAWN_MAP_ID = System.getenv("MAPMAKER_SPAWN_MAP_ID");
+    public static final String SPAWN_MAP_ID = "b210fa07-d64c-4100-a2db-1426c35b7533";
 
     private String id;
     private String owner;
+    private int protocolVersion = 0;
     private MapSettings settings;
     private MapVerification verification = MapVerification.UNVERIFIED;
 
@@ -70,7 +73,13 @@ public class MapData {
     private List<ObjectData> objects = new ArrayList<>();
     private transient int objectUsage = -1;
 
+    private String contest;
+
     public MapData() {
+    }
+
+    public MapData(@NotNull String id, @NotNull String owner) {
+        this(id, owner, new MapSettings(), 0, null);
     }
 
     public MapData(
@@ -104,6 +113,10 @@ public class MapData {
 
     public @NotNull String owner() {
         return owner;
+    }
+
+    public int protocolVersion() {
+        return protocolVersion;
     }
 
     public @NotNull MapSettings settings() {
@@ -257,6 +270,10 @@ public class MapData {
         return object.orElse(null);
     }
 
+    public @Nullable String contest() {
+        return contest;
+    }
+
     public static @NotNull String formatPublishedId(long number) {
         // Pad zeros if necessary
         var numberString = new StringBuilder(String.valueOf(number));
@@ -302,7 +319,8 @@ public class MapData {
     @NonBlocking
     public static @NotNull Map.Entry<Component, List<Component>> createHoverComponents(
             @NotNull MapData map, @NotNull Component authorName,
-            @Nullable Map.Entry<PersonalizedMapData.Progress, Integer> personalProgress
+            @Nullable Map.Entry<PersonalizedMapData.Progress, Integer> personalProgress,
+            int playerProtocolVersion
     ) {
         class Holder {
             static final BadSprite PLAYS_ICON = BadSprite.require("icon/map_tooltip/plays");
@@ -362,7 +380,12 @@ public class MapData {
             lore.add(Component.empty());
         }
 
-        if (personalProgress != null) {
+        if (playerProtocolVersion < map.protocolVersion()) {
+            lore.addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display.wrongversion", List.of(
+                    Component.text(ProtocolVersions.getProtocolName(map.protocolVersion()))
+            )));
+            lore.add(Component.empty());
+        } else if (personalProgress != null) {
             var progress = personalProgress.getKey();
             var playtime = personalProgress.getValue();
             if (progress == PersonalizedMapData.Progress.COMPLETE) {

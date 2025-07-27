@@ -2,14 +2,12 @@ package net.hollowcube.mapmaker.map.feature.play.setting;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.mapmaker.map.MapSettings;
-import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.action.Attachments;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.vnext.MapPlayerResetEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
-import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
-import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Vec;
@@ -34,9 +32,12 @@ public class NoSneakFeatureProvider extends AbstractSettingFeatureProvider {
     }
 
     private static boolean canSneak(@NotNull Player player, @NotNull MapWorld world) {
-        var state = SaveState.fromPlayer(player);
+        var state = SaveState.optionalFromPlayer(player);
+        if (state == null) return true;
+
         var playstate = state.state(PlayState.class);
-        return !playstate.settings().get(MapSettings.NO_SNEAK, world.map().settings());
+        return !playstate.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
+                .get(MapSettings.NO_SNEAK, world.map().settings());
     }
 
     public void onPlayerInit(@NotNull MapPlayerInitEvent event) {

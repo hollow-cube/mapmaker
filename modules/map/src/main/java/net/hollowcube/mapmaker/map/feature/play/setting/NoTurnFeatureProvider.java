@@ -6,6 +6,7 @@ import net.hollowcube.compat.noxesium.rules.NoxesiumServerRules;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.action.Attachments;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerUpdateStateEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
@@ -20,6 +21,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @AutoService(FeatureProvider.class)
 public class NoTurnFeatureProvider extends AbstractSettingFeatureProvider {
@@ -35,14 +37,15 @@ public class NoTurnFeatureProvider extends AbstractSettingFeatureProvider {
         return eventNode;
     }
 
-    private static boolean canTurn(@NotNull Player player, MapWorld world) {
-        if (!world.isPlaying(player)) return true;
+    private static boolean canTurn(@NotNull Player player, @Nullable MapWorld world) {
+        if (world == null || !world.isPlaying(player)) return true;
 
         var state = SaveState.optionalFromPlayer(player);
         if (state == null) return true;
-        
+
         var playstate = state.state(PlayState.class);
-        return !playstate.settings().get(MapSettings.NO_TURN, world.map().settings());
+        return !playstate.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
+                .get(MapSettings.NO_TURN, world.map().settings());
     }
 
     public void initPlayer(@NotNull MapPlayerInitEvent event) {
@@ -69,17 +72,12 @@ public class NoTurnFeatureProvider extends AbstractSettingFeatureProvider {
     }
 
     public void playerUpdated(@NotNull MapPlayerUpdateStateEvent event) {
-        updatePlayer(event.player());
+        var canTurn = canTurn(event.player(), event.getMapWorld());
+        setNoxesiumNoTurn(event.player(), !canTurn);
     }
 
     public void removePlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
         setNoxesiumNoTurn(event.player(), false);
-    }
-
-    private void updatePlayer(@NotNull Player player) {
-        var world = MapWorld.forPlayer(player);
-        var canTurn = canTurn(player, world);
-        setNoxesiumNoTurn(player, !canTurn);
     }
 
     private void setNoxesiumNoTurn(@NotNull Player player, boolean noTurn) {

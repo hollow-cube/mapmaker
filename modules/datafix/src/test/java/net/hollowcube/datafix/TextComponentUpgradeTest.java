@@ -2,7 +2,7 @@ package net.hollowcube.datafix;
 
 import net.hollowcube.datafix.util.Value;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
-import net.kyori.adventure.nbt.TagStringIOExt;
+import net.minestom.server.adventure.MinestomAdventure;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,14 +11,15 @@ public class TextComponentUpgradeTest extends AbstractDataFixTest {
 
     @Test
     void v4291StyleFlagsToString() throws Exception {
-        var raw = TagStringIOExt.readTag("{\"text\": \"Hover me\", \"bold\": true}");
+        var raw = MinestomAdventure.tagStringIO().asTag("{\"text\": \"Hover me\", \"bold\": true}");
         var actual = upgrade(DataTypes.TEXT_COMPONENT, valueFromTag(raw), 4189, 4325);
         assertEquals((byte) 1, actual.get("bold").value());
     }
 
     @Test
     void v4291HoverContentsRename() throws Exception {
-        var raw = TagStringIOExt.readTag("{\"text\": \"Hover me\", \"hoverEvent\": {\"action\": \"show_text\", \"contents\": {\"text\": \"I am hover\"}}}");
+        var raw = MinestomAdventure.tagStringIO()
+                                   .asTag("{\"text\": \"Hover me\", \"hoverEvent\": {\"action\": \"show_text\", \"contents\": {\"text\": \"I am hover\"}}}");
         var result = (CompoundBinaryTag) tagFromValue(upgrade(DataTypes.TEXT_COMPONENT, valueFromTag(raw), 4189, 4325));
 
         assertNull(result.get("hoverEvent"));

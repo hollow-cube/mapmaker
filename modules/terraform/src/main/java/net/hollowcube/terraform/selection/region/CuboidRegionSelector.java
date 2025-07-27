@@ -2,6 +2,7 @@ package net.hollowcube.terraform.selection.region;
 
 import net.hollowcube.common.util.NetworkBufferTypes;
 import net.hollowcube.terraform.cui.ClientInterface;
+import net.hollowcube.terraform.cui.ClientRenderer;
 import net.hollowcube.terraform.util.math.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
@@ -10,7 +11,6 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@SuppressWarnings("UnstableApiUsage")
 public class CuboidRegionSelector implements RegionSelector {
     public static final Factory FACTORY = new Factory("cuboid", CuboidRegionSelector::new);
     private static final byte DATA_VERSION = 1;
@@ -79,12 +79,13 @@ public class CuboidRegionSelector implements RegionSelector {
     private void updateRender() {
         var renderer = cui.renderer();
 
+        renderer.switchTo(ClientRenderer.RenderContext.NORMAL, false);
         renderer.begin("cuboid"); //todo the ClientInterface should hide this detail. One should be created per selector
         if (pos1 != null && pos2 != null) {
             renderer.cuboid(
                     CoordinateUtil.min(pos1, pos2),
-                    CoordinateUtil.max(pos1, pos2).add(1, 1, 1)
-            );
+                    CoordinateUtil.max(pos1, pos2).add(1, 1, 1),
+                    ClientRenderer.RenderType.PRIMARY);
         }
         renderer.end("cuboid");
     }

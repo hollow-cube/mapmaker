@@ -25,6 +25,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.datafix.DataFixer;
+import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
@@ -33,9 +34,9 @@ import net.hollowcube.mapmaker.chat.ChatChannelDisplay;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.chat.announcements.ChatAnnouncer;
 import net.hollowcube.mapmaker.command.*;
+import net.hollowcube.mapmaker.command.chat.ChannelCommand;
 import net.hollowcube.mapmaker.command.chat.ChatCommand;
 import net.hollowcube.mapmaker.command.chat.MsgCommand;
-import net.hollowcube.mapmaker.command.chat.ReplyCommand;
 import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.command.map.MapCommand;
 import net.hollowcube.mapmaker.command.punish.*;
@@ -52,6 +53,7 @@ import net.hollowcube.mapmaker.cosmetic.impl.accessory.AbstractAccessoryImpl;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.posthog.PostHogFeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.unleash.UnleashConfig;
+import net.hollowcube.mapmaker.gui.settings.PlayerSettingsScreen;
 import net.hollowcube.mapmaker.invite.MapInviteAcceptedOrRejectedListener;
 import net.hollowcube.mapmaker.invite.MapInviteListener;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
@@ -82,7 +84,6 @@ import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.punishments.PunishmentManagementListener;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.PunishmentServiceImpl;
-import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
@@ -103,7 +104,6 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.server.common.ServerLinksPacket;
-import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -118,11 +118,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public abstract class AbstractMapServer implements MapServer {
     private final Logger logger = LoggerFactory.getLogger(MapServer.class);
-
-    private static final Tag<ScriptEngine> SCRIPT_ENGINE_TAG = Tag.Transient("instance_script_engine");
 
     protected final ConfigLoaderV3 config;
     protected final GlobalConfig globalConfig;
@@ -135,8 +136,6 @@ public abstract class AbstractMapServer implements MapServer {
     private final PermManager permManager;
     private final PunishmentService punishmentService;
     private PlayerInviteService inviteService; // So many dependencies very yikes
-
-    private ScriptEngine scriptEngine;
 
     // Listeners for other features
     private MapAllocator allocator;
@@ -158,6 +157,8 @@ public abstract class AbstractMapServer implements MapServer {
     private final Shutdowner shutdowner = new Shutdowner(this::awaitQuiescence);
 
     protected AbstractMapServer(@NotNull ConfigLoaderV3 config) {
+        config.dump();
+
         this.config = config;
         this.globalConfig = config.get(GlobalConfig.class);
 
@@ -166,8 +167,8 @@ public abstract class AbstractMapServer implements MapServer {
         this.metrics = createMetricWriter(config);
         shutdowner.queue("metric-writer", metrics::close);
 
-        var playerServiceUrl = System.getenv("MAPMAKER_PLAYER_SERVICE_URL");
-        if (playerServiceUrl != null) {
+        var playerServiceUrl = config.get(Player_ServiceConfig.class).url();
+        if (!playerServiceUrl.isEmpty()) {
             playerService = new PlayerServiceImpl(otel, playerServiceUrl);
             punishmentService = new PunishmentServiceImpl(playerServiceUrl);
         } else if (globalConfig.noop()) {
@@ -179,23 +180,24 @@ public abstract class AbstractMapServer implements MapServer {
             punishmentService = new PunishmentServiceImpl(localUrl);
         }
 
-        var sessionServiceUrl = System.getenv("MAPMAKER_SESSION_SERVICE_URL");
-        if (sessionServiceUrl != null) sessionService = new SessionServiceImpl(otel, sessionServiceUrl);
+        var sessionServiceUrl = config.get(Session_ServiceConfig.class).url();
+        if (!sessionServiceUrl.isEmpty()) sessionService = new SessionServiceImpl(otel, sessionServiceUrl);
         else if (globalConfig.noop()) sessionService = new NoopSessionService();
         else sessionService = new SessionServiceImpl(otel, "http://localhost:9127"); // tilt
 
-        var mapServiceUrl = System.getenv("MAPMAKER_MAP_SERVICE_URL");
-        if (mapServiceUrl != null) mapService = new MapServiceImpl(mapServiceUrl);
+        var mapServiceUrl = config.get(Map_ServiceConfig.class).url();
+        if (!mapServiceUrl.isEmpty()) mapService = new MapServiceImpl(mapServiceUrl);
         else if (globalConfig.noop()) mapService = new NoopMapService();
         else mapService = new MapServiceImpl("http://localhost:9125"); // tilt
 
         if (globalConfig.noop()) {
             permManager = new NoopPermManager();
         } else {
-            var spicedbUrl = System.getenv("MAPMAKER_SPICEDB_URL");
-            if (spicedbUrl == null) spicedbUrl = "http://localhost:8443";
-            var spicedbToken = System.getenv("MAPMAKER_SPICEDB_TOKEN");
-            if (spicedbToken == null) spicedbToken = "supersecretkey";
+            var spicedbConfig = config.get(SpiceDBConfig.class);
+            var spicedbUrl = spicedbConfig.url();
+            if (spicedbUrl.isEmpty()) spicedbUrl = "http://localhost:8443";
+            var spicedbToken = spicedbConfig.token();
+            if (spicedbToken.isEmpty()) spicedbToken = "supersecretkey";
             permManager = new PermManagerImpl(otel, spicedbUrl, spicedbToken);
         }
 
@@ -295,7 +297,7 @@ public abstract class AbstractMapServer implements MapServer {
             var punishmentCreatedListener = new PunishmentManagementListener(playerService, permManager, kafkaConfig.bootstrapServers());
             shutdowner.queue("punishment-listener", punishmentCreatedListener::close);
 
-            chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, kafkaConfig.bootstrapServers(), producer);
+            chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, kafkaConfig.bootstrapServers(), producer, permManager);
             facets.put(ChatMessageListener.class, chatMessageListener);
             shutdowner.queue("chat-message-listener", chatMessageListener::close);
             MinecraftServer.getPacketListenerManager().setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
@@ -383,13 +385,8 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     protected abstract @NotNull MapAllocator createAllocator();
-    protected abstract @NotNull ServerBridge createBridge();
 
-    @Override
-    public @NotNull ScriptEngine scriptEngine() {
-        if (this.scriptEngine == null) this.scriptEngine = new ScriptEngine(scheduler());
-        return this.scriptEngine;
-    }
+    protected abstract @NotNull ServerBridge createBridge();
 
     /**
      * Called just before the server starts, but after all services have been initialized.
@@ -401,6 +398,8 @@ public abstract class AbstractMapServer implements MapServer {
 
         CosmeticInventoryHandler.init(guiController);
         AbstractAccessoryImpl.addListeners(globalEventHandler);
+
+        PlayerSettingsScreen.init(playerService(), globalEventHandler);
 
         var entityEvents = EventNode.type("mapmaker:map/entity", EventFilter.INSTANCE);
         globalEventHandler.addChild(entityEvents);
@@ -428,8 +427,8 @@ public abstract class AbstractMapServer implements MapServer {
         if (fullInstance) commandManager.register(new CosmeticsCommand(guiController()));
         if (fullInstance) commandManager.register(new RulesCommand());
         commandManager.register(createDebugCommand());
-        commandManager.register(new StoreCommand(this::scriptEngine, playerService(), permManager()));
-        commandManager.register(new HypercubeCommand(this::scriptEngine, playerService(), permManager()));
+        commandManager.register(new StoreCommand(playerService(), permManager()));
+        commandManager.register(new HypercubeCommand(playerService(), permManager()));
         commandManager.register(new DiscordCommand());
         if (fullInstance) commandManager.register(new LinkCommand(playerService()));
         if (fullInstance) commandManager.register(new TotpCommand(playerService(), guiController()));
@@ -437,12 +436,15 @@ public abstract class AbstractMapServer implements MapServer {
         commandManager.register(new HideCommand(playerService()));
 
         if (fullInstance) {
-            commandManager.register(new PlayCommand(mapService(), sessionManager(), bridge(), guiController()));
+            commandManager.register(new PlayCommand(playerService(), mapService(), sessionManager(), bridge()));
             commandManager.register(new WhereCommand(sessionManager(), playerService(), mapService(), permManager()));
             commandManager.register(new ListCommand(sessionManager(), playerService()));
             commandManager.register(new MsgCommand(sessionManager(), mapService(), chatMessageListener));
-            commandManager.register(new ReplyCommand(sessionManager(), mapService(), chatMessageListener));
-            commandManager.register(new ChatCommand(playerService()));
+            commandManager.register(new ChannelCommand.Global(sessionManager(), mapService(), chatMessageListener));
+            commandManager.register(new ChannelCommand.Local(sessionManager(), mapService(), chatMessageListener));
+            commandManager.register(new ChannelCommand.Reply(sessionManager(), mapService(), chatMessageListener));
+            commandManager.register(new ChannelCommand.Staff(sessionManager(), mapService(), chatMessageListener, permManager()));
+            commandManager.register(new ChatCommand(playerService(), permManager()));
         }
 
         if (fullInstance) {
@@ -475,7 +477,7 @@ public abstract class AbstractMapServer implements MapServer {
             commandManager.register(new KickCommand(punishmentService(), sessionManager(), permManager()));
         }
 
-        DataFixer.addFixVersions(List.of(V3701::new, V3838::new, V4325_1::new));
+        DataFixer.addFixVersions(extraDataVersions());
         DataFixer.buildModel();
     }
 
@@ -576,6 +578,10 @@ public abstract class AbstractMapServer implements MapServer {
                 .buildAndRegisterGlobal();
     }
 
+    protected @NotNull List<Supplier<DataVersion>> extraDataVersions() {
+        return List.of(V3701::new, V3838::new, V4325_1::new);
+    }
+
     protected @NotNull DebugCommand createDebugCommand() {
         return new DebugCommand(playerService(), permManager(), mapService(), allocator());
     }
@@ -602,6 +608,7 @@ public abstract class AbstractMapServer implements MapServer {
             CompletableFuture.allOf(sessionResponseFuture, mapPlayerDataFuture, backpackDataFuture).join();
 
             var sessionResponse = sessionResponseFuture.get();
+            player.setTag(CompatProvider.FIRST_JOIN_TAG, sessionResponse.isJoin());
             player.setTag(PlayerDataV2.TAG, sessionResponse.data());
             sessionManager.updateSessionOptimistic(sessionResponse.session(), new SessionStateUpdateRequest.Metadata());
             player.setTag(MapPlayerData.TAG, mapPlayerDataFuture.get());
@@ -685,8 +692,32 @@ public abstract class AbstractMapServer implements MapServer {
         logger.info("disconnect - {}", player.getUsername());
     }
 
-    private static boolean posthogExceptionMiddleware(Throwable t, JsonObject message) {
-        if (t instanceof OutOfMemoryError) return false;
+    private static final Pattern MINESTOM_PACKET_EXCEPTION;
+
+    static {
+        try {
+            MINESTOM_PACKET_EXCEPTION = Pattern.compile("Packet id .+ isn't registered!");
+        } catch (PatternSyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static boolean posthogExceptionMiddleware(@NotNull Throwable t, JsonObject message) {
+        var oom = t;
+        while (oom != null) {
+            if (oom instanceof OutOfMemoryError) return false;
+            else oom = oom.getCause();
+        }
+
+        if (MINESTOM_PACKET_EXCEPTION.matcher(t.toString()).find())
+            return false;
+        // Some expected IO exceptions that we don't want to report.
+        if (t.toString().contains("header parser received no bytes") || t.toString().contains("Connection reset by peer"))
+            return false;
+
+        // Drop exceptions where the jvm has removed the stacktrace after the nth occurrance
+        if (t.getStackTrace() == null || t.getStackTrace().length == 0)
+            return false;
 
         // todo fancier exception grouping
         return true;

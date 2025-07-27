@@ -2,7 +2,10 @@ package net.hollowcube.command.arg;
 
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
+import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -60,10 +63,9 @@ public abstract class Argument<T> {
         return new ArgumentMaterial(id);
     }
 
-    public static @NotNull ArgumentItemStack ItemStack(@NotNull String id) {
-        return new ArgumentItemStack(id);
+    public static @NotNull ArgumentBlock Block(@NotNull String id) {
+        return new ArgumentBlock(id);
     }
-
 
     // Impl
 
@@ -82,14 +84,14 @@ public abstract class Argument<T> {
     }
 
 
-    // Properties
 
+    // Properties
     public boolean isOptional() {
         return defaultProvider != null;
     }
 
     public @NotNull Argument<T> defaultValue(@Nullable T value) {
-        return defaultValue(sender -> value);
+        return defaultValue(_ -> value);
     }
 
     public @NotNull Argument<T> defaultValue(@NotNull Function<CommandSender, T> provider) {
@@ -110,6 +112,23 @@ public abstract class Argument<T> {
         return this;
     }
 
+    public @NotNull ArgumentParserType argumentType() {
+        // score holder just reads every character until a whitespace,
+        // only drawback is that we can't have any strings that start with @
+        return ArgumentParserType.SCORE_HOLDER;
+    }
+
+    public void properties(@NotNull NetworkBuffer buffer) {
+        buffer.write(NetworkBuffer.BYTE, (byte) 1);
+    }
+
+    public @NotNull DeclareCommandsPacket.NodeType getType() {
+        return DeclareCommandsPacket.NodeType.ARGUMENT;
+    }
+
+    public boolean shouldSuggest() {
+        return true;
+    }
 
     // Transforms
 
@@ -120,7 +139,6 @@ public abstract class Argument<T> {
     public <R> @NotNull Argument<R> map(@NotNull ArgumentMap.ParseFunc<T, R> mapFunc, @NotNull ArgumentMap.SuggestFunc suggestFunc) {
         return new ArgumentMap<>(id, this, mapFunc, suggestFunc);
     }
-
 
     // Logic
 
@@ -139,6 +157,13 @@ public abstract class Argument<T> {
 
     public @NotNull ParseResult<T> partial(@Nullable String message) {
         return new ParseResult.Partial<>(message);
+    }
+
+    public @NotNull ParseResult<T> partial(@Nullable String message, T value) {
+        return new ParseResult.Partial<>(message, () -> value);
+    }
+    public @NotNull ParseResult<T> partialWithValue(T value) {
+        return new ParseResult.Partial<>(null, () -> value);
     }
 
     public @NotNull ParseResult<T> success(@NotNull Supplier<@UnknownNullability T> valueFunc) {
@@ -164,6 +189,4 @@ public abstract class Argument<T> {
     public @NotNull ParseResult<T> syntaxError(int start, @Nullable String message) {
         return new ParseResult.Failure<>(start, message);
     }
-
-
 }

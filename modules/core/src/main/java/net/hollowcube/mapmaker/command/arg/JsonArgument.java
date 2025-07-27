@@ -40,6 +40,11 @@ public class JsonArgument extends Argument<JsonElement> {
         }
     }
 
+    @Override
+    public boolean shouldSuggest() {
+        return false;
+    }
+
     private static class StringReaderReader extends Reader {
 
         private final StringReader reader;

@@ -29,6 +29,15 @@ public class OpUtils {
      * Maps a nullable input to an output using a mapper function if the input is not null, otherwise returns a fallback value.
      */
     @NotNull
+    public static <I, O> O mapOr(@Nullable I input, Function<I, O> mapper, Supplier<O> fallback) {
+        if (input == null) return fallback.get();
+        return Objects.requireNonNullElseGet(mapper.apply(input), fallback);
+    }
+
+    /**
+     * Maps a nullable input to an output using a mapper function if the input is not null, otherwise returns a fallback value.
+     */
+    @NotNull
     public static <I, O> O mapOr(@Nullable I input, Function<I, O> mapper, O fallback) {
         if (input == null) return fallback;
         return Objects.requireNonNullElse(mapper.apply(input), fallback);
@@ -40,6 +49,18 @@ public class OpUtils {
     @UnknownNullability
     public static <O, A extends O, B extends O> O or(@Nullable A input, @NotNull Supplier<B> fallback) {
         return input == null ? fallback.get() : input;
+    }
+
+    /**
+     * Takes an amount of nullable inputs and returns the first non-null input, or null if all inputs throws null pointer exception.
+     */
+    @SafeVarargs
+    @NotNull
+    public static <O, A extends O> O firstNonNull(@Nullable A ...inputs) {
+        for (A input : inputs) {
+            if (input != null) return input;
+        }
+        throw new NullPointerException("All inputs are null");
     }
 
     /**

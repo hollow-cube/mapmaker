@@ -16,10 +16,10 @@ image:
 resources:
   limits:
     #    cpu: 1500m
-    memory: 5Gi
+    memory: 10Gi
   requests:
     #    cpu: 500m
-    memory: 5Gi
+    memory: 10Gi
 
 serviceMonitor:
   enabled: true
@@ -29,8 +29,6 @@ env:
   MAPMAKER_RESOURCE_PACK_HASH: "$RESOURCE_PACK_HASH"
   MAPMAKER_SHUTDOWN_MAX_WAIT_MILLIS: "21600000" # 6 hours
 
-  MAPMAKER_METRICS_PASSWORD: "${METRICS_PASSWORD}"
-  MAPMAKER_METRICS_PYROSCOPE_ENDPOINT: "http://pyroscope.monitoring.svc.cluster.local:4040"
   MAPMAKER_TRACING_OTLP_ENDPOINT: "http://tempo.monitoring.svc.cluster.local:4318/v1/traces"
 
   MAPMAKER_VELOCITY_SECRET: "AsmMzWkjyrNvu5DprZWupQXy79mKFHK7d5Aj662YmVq4zEQns3RWb7NFpxvcTzgV"
@@ -46,11 +44,7 @@ env:
 
   MAPMAKER_UNLEASH_ENABLED: "false"
   MAPMAKER_UNLEASH_USE_POSTHOG: "true"
-  MAPMAKER_UNLEASH_ADDRESS: "http://unleash.mgmt.svc.cluster.local:4242/api"
-  MAPMAKER_UNLEASH_TOKEN: "${UNLEASH_TOKEN}"
   MAPMAKER_UNLEASH_POSTHOG_PROJECT_API_KEY: "${POSTHOG_PROJECT_API_KEY}"
   MAPMAKER_UNLEASH_POSTHOG_PERSONAL_API_KEY: "${POSTHOG_PERSONAL_API_KEY}"
-
-  MAPMAKER_SPAWN_MAP_ID: "b210fa07-d64c-4100-a2db-1426c35b7533"
 
 replicaCount: 1

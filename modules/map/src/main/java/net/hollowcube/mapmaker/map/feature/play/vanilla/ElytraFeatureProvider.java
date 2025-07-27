@@ -5,7 +5,9 @@ import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
+import net.hollowcube.mapmaker.map.item.vanilla.EnderPearlItem;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
+import net.hollowcube.mapmaker.map.item.vanilla.WindChargeItem;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.minestom.server.event.EventFilter;
@@ -34,6 +36,8 @@ public class ElytraFeatureProvider implements FeatureProvider {
 
         world.instance().eventNode().addChild(eventNode);
         world.itemRegistry().registerSilent(FireworkRocketItem.INSTANCE);
+        world.itemRegistry().registerSilent(EnderPearlItem.INSTANCE);
+        world.itemRegistry().registerSilent(WindChargeItem.INSTANCE);
 
         return true;
     }

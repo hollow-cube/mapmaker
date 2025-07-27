@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandManager;
+import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.terraform.selection.region.RegionSelector;
 import net.hollowcube.terraform.storage.TerraformStorage;
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
@@ -55,7 +56,7 @@ final class TerraformRegistryImpl implements TerraformRegistry {
 
         // Copy vanilla blocks by their state IDs
         for (short i = 0; i < Short.MAX_VALUE; i++) {
-            var block = Block.fromStateId(i);
+            var block = BlockUtil.fromStateIdOrNull(i);
             if (block == null) break; // Reached end
             blocksByState.set(i, block);
         }

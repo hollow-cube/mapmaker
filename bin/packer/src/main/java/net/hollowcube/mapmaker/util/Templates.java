@@ -34,18 +34,14 @@ public final class Templates {
                 var value = prim.getAsString();
                 if (value.startsWith("$")) {
                     var result = context.get(value.substring(1));
-                    if (result == null) throw new IllegalArgumentException("Missing context value: " + value);
-                    if (result instanceof JsonElement json) {
-                        yield json;
-                    } else if (result instanceof String str) {
-                        yield new JsonPrimitive(str);
-                    } else if (result instanceof Boolean b) {
-                        yield new JsonPrimitive(b);
-                    } else if (result instanceof Number n) {
-                        yield new JsonPrimitive(n);
-                    } else {
-                        throw new IllegalArgumentException("Invalid context value: " + value + " " + result.getClass());
-                    }
+                    yield switch (result) {
+                        case JsonElement json -> json;
+                        case String str -> new JsonPrimitive(str);
+                        case Boolean b -> new JsonPrimitive(b);
+                        case Number n -> new JsonPrimitive(n);
+                        case null -> throw new IllegalArgumentException("Missing context value: " + value);
+                        default -> throw new IllegalArgumentException("Invalid context value: " + value + " " + result.getClass());
+                    };
                 } else {
                     yield prim;
                 }
@@ -55,7 +51,7 @@ public final class Templates {
     }
 
     private static @NotNull JsonElement loadTemplate(@NotNull String name) {
-        return TEMPLATES.computeIfAbsent(name, n -> {
+        return TEMPLATES.computeIfAbsent(name, _ -> {
             try (var is = Templates.class.getResourceAsStream("/templates/" + name + ".json")) {
                 if (is == null) throw new IllegalArgumentException("Template not found: " + name);
 

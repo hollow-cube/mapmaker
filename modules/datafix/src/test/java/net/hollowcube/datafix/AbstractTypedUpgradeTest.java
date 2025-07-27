@@ -2,7 +2,7 @@ package net.hollowcube.datafix;
 
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
-import net.kyori.adventure.nbt.TagStringIOExt;
+import net.minestom.server.adventure.MinestomAdventure;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -20,7 +20,7 @@ public class AbstractTypedUpgradeTest extends AbstractDataFixTest {
         var path = "/" + type + "/" + getClass().getSimpleName() + ".snbt";
         try (var is = getClass().getResourceAsStream(path)) {
             var snbt = new String(Objects.requireNonNull(is, path).readAllBytes(), StandardCharsets.UTF_8);
-            this.tag = TagStringIOExt.readTag(snbt);
+            this.tag = MinestomAdventure.tagStringIO().asTag(snbt);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

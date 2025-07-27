@@ -22,7 +22,9 @@ public class ArgumentMaterial extends Argument<Material> {
 
     @Override
     public @NotNull ParseResult<Material> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
-        var word = reader.readWord(WordType.GREEDY).toLowerCase(Locale.ROOT); //todo
+        var word = reader.readWord(WordType.GREEDY).toLowerCase(Locale.ROOT);
+        if (!Key.parseable(word))
+            return syntaxError("not a material: " + word);
         var material = Material.fromKey(word);
         if (material != null) return success(material);
 

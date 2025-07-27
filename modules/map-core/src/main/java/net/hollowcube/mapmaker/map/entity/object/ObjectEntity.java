@@ -12,6 +12,9 @@ import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomUpdateCustomEnt
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.Result;
+import net.minestom.server.codec.Transcoder;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.color.AlphaColor;
 import net.minestom.server.coordinate.Point;
@@ -21,6 +24,7 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.registry.RegistryTranscoder;
 import net.minestom.server.tag.Tag;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
@@ -82,6 +86,11 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
 
     public @NotNull CompoundBinaryTag getData() {
         return getTag(DATA_TAG);
+    }
+
+    public <T> @NotNull Result<T> getData(@NotNull Codec<T> codec) {
+        var coder = new RegistryTranscoder<>(Transcoder.NBT, MinecraftServer.process());
+        return codec.decode(coder, getData());
     }
 
     public @Nullable Point getMin() {
@@ -238,7 +247,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         createAxiomMarkerUpdatePacket().sendToViewers(this);
     }
 
-    private void updateBoundingBox() {
+    protected void updateBoundingBox() {
         Point min = getMin(), max = getMax();
         if (min == null || max == null) {
             setBoundingBox(NO_BB);

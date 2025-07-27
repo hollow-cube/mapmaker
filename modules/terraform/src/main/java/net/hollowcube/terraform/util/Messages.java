@@ -51,6 +51,7 @@ public enum Messages implements MessageSet {
 
     TOOL_CREATED("terraform.tool.create"), // 0=name
 
+    GENERIC_QUEUE_FULL("terraform.generic.queue_full"),
     GENERIC_ENTITIES_UNSUPPORTED("terraform.generic.entities_unsupported"),
     GENERIC_BIOMES_UNSUPPORTED("terraform.generic.biomes_unsupported"),
     PASTE_ORIGINAL_POS_UNSUPPORTED("terraform.clipboard.paste.original_pos_unsupported"),

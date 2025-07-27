@@ -7,11 +7,30 @@ import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 
+import java.util.List;
+
 public class V165 extends DataVersion {
+    private static final List<String> LINE_FIELDS = List.of("Text1", "Text2", "Text3", "Text4");
+
     public V165() {
         super(165);
 
-        addFix(DataTypes.TEXT_COMPONENT, V165::fixTextComponentStrictJson);
+        addFix(DataTypes.BLOCK_ENTITY, "minecraft:sign", V165::fixSignTextComponentStrictJson);
+        addFix(DataTypes.ITEM_STACK, "minecraft:written_book", V165::fixWrittenBookTextComponentStrictJson);
+    }
+
+    private static Value fixSignTextComponentStrictJson(Value value) {
+        for (var field : LINE_FIELDS)
+            value.put(field, fixTextComponentStrictJson(value.get(field)));
+        return null;
+    }
+
+    private static Value fixWrittenBookTextComponentStrictJson(Value value) {
+        var pages = value.get("tag").get("pages");
+        for (int i = 0; i < pages.size(0); i++) {
+            value.put(i, fixTextComponentStrictJson(value.get(i)));
+        }
+        return null;
     }
 
     private static Value fixTextComponentStrictJson(Value value) {
@@ -35,7 +54,5 @@ public class V165 extends DataVersion {
         }
 
         return Value.wrap("{\"text\":\"" + s + "\"}");
-
-
     }
 }

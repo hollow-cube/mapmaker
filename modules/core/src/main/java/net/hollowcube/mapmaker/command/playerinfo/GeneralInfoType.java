@@ -1,6 +1,10 @@
 package net.hollowcube.mapmaker.command.playerinfo;
 
+import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.compat.impl.PacketQueue;
+import net.hollowcube.mapmaker.session.PlayerSession;
+import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
@@ -24,14 +28,24 @@ class GeneralInfoType extends PlayerInfoType.ForPlayer {
             "worldedit"
     );
 
+    private final SessionManager sessionManager;
+
+    GeneralInfoType(@NotNull SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+    }
+
     @Override
     public void execute(@NotNull Player user, @NotNull Player target) {
         Set<String> channels = PacketQueue.get(target).channels();
         Set<String> namespaces = channels.stream().map(s -> s.split(":")[0]).collect(Collectors.toSet());
         String brand = Objects.requireNonNullElse(target.getTag(CLIENT_BRAND), "Unknown");
 
+        var session = sessionManager.getSession(target.getUuid().toString());
+        int protocolVersion = OpUtils.mapOr(session, PlayerSession::protocolVersion, -1);
+
         Component info = Component.empty()
                 .append(Component.text("Player info for %s".formatted(target.getUsername()))).appendNewline()
+                .append(Component.text("Version: ")).append(Component.text(ProtocolVersions.getProtocolName(protocolVersion) + " (" + protocolVersion + ")")).appendNewline()
                 .append(Component.text("Settings: ")).append(Component.text(target.getSettings().toString()))
                 .appendNewline()
                 .append(Component.text("Brand: ")).append(Component.text(brand))

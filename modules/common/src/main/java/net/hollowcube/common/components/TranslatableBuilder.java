@@ -17,6 +17,10 @@ public class TranslatableBuilder {
         this.key = key;
     }
 
+    public static TranslatableBuilder of(@NotNull String key) {
+        return new TranslatableBuilder(key);
+    }
+
     @Contract("_ -> this")
     public @NotNull TranslatableBuilder with(@NotNull String text) {
         return with(Component.text(text));

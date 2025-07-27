@@ -38,11 +38,13 @@ public final class SetCommand extends CommandDsl {
 
         // Execute the change
         var session = LocalSession.forPlayer(player);
-        session.buildTask("set")
+        var task = session.buildTask("set")
                 .metadata() //todo
                 .compute(ComputeFunc.set(region, pattern))
                 .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                .submit();
-
+                          .submitIfCapacity();
+        if (task == null) {
+            player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+        }
     }
 }

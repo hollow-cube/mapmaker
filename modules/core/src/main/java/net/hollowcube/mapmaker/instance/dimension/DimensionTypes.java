@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.instance.dimension;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.ServerProcess;
-import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
@@ -11,9 +11,9 @@ public final class DimensionTypes {
     private DimensionTypes() {
     }
 
-    public static final DynamicRegistry.Key<DimensionType> FULL_BRIGHT;
+    public static final RegistryKey<DimensionType> FULL_BRIGHT;
 
-    public static final DynamicRegistry.Key<DimensionType> MAPMAKER_MAP;
+    public static final RegistryKey<DimensionType> MAPMAKER_MAP;
 
     static {
         var registry = MinecraftServer.getDimensionTypeRegistry();

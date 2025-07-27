@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.requests;
 
+import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapQuality;
 import net.hollowcube.mapmaker.map.MapVariant;
@@ -11,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@RuntimeGson
 public record MapSearchParams(
         @NotNull String authorizer,
         int page,
@@ -21,7 +23,8 @@ public record MapSearchParams(
         @NotNull EnumSet<MapData.Difficulty> difficulties,
         @Nullable String owner,
         @Nullable String query,
-        @NotNull EnumSet<MapVariant> variants
+        @NotNull EnumSet<MapVariant> variants,
+        @Nullable String contest
 ) {
 
     public String toUrl(@NotNull String url) {
@@ -40,6 +43,8 @@ public record MapSearchParams(
 
         params.put("parkour", String.valueOf(this.variants.contains(MapVariant.PARKOUR)));
         params.put("building", String.valueOf(this.variants.contains(MapVariant.BUILDING)));
+
+        if (this.contest != null) params.put("contest", this.contest);
 
         return url + "?" + params.entrySet().stream()
                 .map(it -> it.getKey() + "=" + URLEncoder.encode(it.getValue(), StandardCharsets.UTF_8))
@@ -68,6 +73,7 @@ public record MapSearchParams(
         private boolean ascending = false;
         private String owner = null;
         private String query = null;
+        private String contest = null;
 
         private Builder(@NotNull String authorizer) {
             this.authorizer = authorizer;
@@ -121,8 +127,14 @@ public record MapSearchParams(
             return this;
         }
 
+        public Builder contest(@Nullable String contest) {
+            this.contest = contest;
+            return this;
+        }
+
         public MapSearchParams build() {
-            return new MapSearchParams(authorizer, page, pageSize, best, ascending, qualities, difficulties, owner, query, variants);
+            return new MapSearchParams(authorizer, page, pageSize, best, ascending, qualities,
+                                       difficulties, owner, query, variants, contest);
         }
     }
 }

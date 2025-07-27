@@ -10,26 +10,93 @@ import net.hollowcube.terraform.pattern.Pattern;
 import net.hollowcube.terraform.selection.region.CuboidRegion;
 import net.hollowcube.terraform.session.LocalSession;
 import net.hollowcube.terraform.util.Messages;
+import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.EnumSet;
+
 public final class UtilityCommands {
 
-    public static class Fill extends WECommand {
-        public Fill() {
-            super("/fill");
-        }
+    private UtilityCommands() {
     }
 
-    public static class Fillr extends WECommand {
-        public Fillr() {
-            super("/fillr");
+    public static class Fill extends WECommand {
+        private final Argument<Pattern> patternArg = WEArgument.Pattern("pattern");
+        private final Argument<Integer> radiusArg = Argument.Int("radius").min(1).max(300);
+        private final Argument<Integer> depthArg = Argument.Int("depth").min(1).max(300).defaultValue(300);
+
+        public Fill() {
+            super("/fill", "/fillr");
+
+            addSyntax(playerOnly(this::execute), patternArg, radiusArg);
+            addSyntax(playerOnly(this::execute), patternArg, radiusArg, depthArg);
+        }
+
+        private void execute(@NotNull Player player, @NotNull CommandContext context) {
+            var pattern = context.get(patternArg);
+            var radius = context.get(radiusArg);
+            var depth = context.get(depthArg);
+
+            var center = player.getPosition();
+            @SuppressWarnings("UnstableApiUsage")
+            var minWorldY = player.getInstance().getCachedDimensionType().minY();
+            var minY = Math.max(center.y() - depth, minWorldY);
+
+
+            var computeFunc = RegionFunctions.floodFill(new BlockVec(center), radius, pattern, (_, point, block) -> {
+                if (!block.isAir()) {
+                    return false;
+                }
+
+                return point.blockY() <= center.blockY() && point.blockY() > minY;
+            });
+
+            var session = LocalSession.forPlayer(player);
+            var task = session.buildTask("we-fill")
+                    .metadata() //todo
+                    .compute(computeFunc)
+                    .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
     public static class Drain extends WECommand {
+        private final Argument<Integer> radiusArg = Argument.Int("radius").min(1).max(300);
+        private final Argument<EnumSet<Flags>> flagsArg = WEArgument.FlagSet(Flags.class);
+
         public Drain() {
             super("/drain");
+
+            addSyntax(playerOnly(this::execute), radiusArg);
+            addSyntax(playerOnly(this::execute), radiusArg, flagsArg);
+        }
+
+        private void execute(@NotNull Player player, @NotNull CommandContext context) {
+            var radius = context.get(radiusArg);
+            var flags = context.get(flagsArg);
+
+            var center = player.getPosition();
+
+            var computeFunc = RegionFunctions.drain(new BlockVec(center), radius, (_, _, block) -> !flags.contains(Flags.KEEP_WATERLOGGED) || !"true".equals(block.getProperty("waterlogged")));
+
+            var session = LocalSession.forPlayer(player);
+            var task = session.buildTask("we-drain")
+                    .metadata() //todo
+                    .compute(computeFunc)
+                    .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
+        }
+
+        enum Flags {
+            KEEP_WATERLOGGED,
+            WATERLOGGED // to allow copied commands from the internet to still work, it's our default behaviour to un-waterlog
         }
     }
 
@@ -70,11 +137,14 @@ public final class UtilityCommands {
             var generator = RegionFunctions.replace(region, Mask.always(), Pattern.air());
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-removeabove")
+            var task = session.buildTask("we-removeabove")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -103,11 +173,14 @@ public final class UtilityCommands {
             var generator = RegionFunctions.replace(region, Mask.always(), Pattern.air());
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-removebelow")
+            var task = session.buildTask("we-removebelow")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -131,11 +204,14 @@ public final class UtilityCommands {
             var generator = RegionFunctions.replace(region, mask, Pattern.air());
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-removenear")
+            var task = session.buildTask("we-removenear")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -163,11 +239,14 @@ public final class UtilityCommands {
             var generator = RegionFunctions.replace(region, fromMask, toPattern);
 
             var session = LocalSession.forPlayer(player);
-            session.buildTask("we-replacenear")
+            var task = session.buildTask("we-replacenear")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -175,8 +254,5 @@ public final class UtilityCommands {
         public Help() {
             super("/help");
         }
-    }
-
-    private UtilityCommands() {
     }
 }

@@ -1,24 +1,26 @@
 package net.hollowcube.command;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.builder.CommandEvaluationContext;
+import net.hollowcube.command.builder.CommandNodeBuilder;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.suggestion.Suggestion;
+import net.hollowcube.command.suggestion.SuggestionContext;
 import net.hollowcube.command.util.CommandReflection;
 import net.hollowcube.command.util.StringReader;
-import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
-import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-
-import static net.minestom.server.network.NetworkBuffer.VAR_INT;
 
 public class CommandManagerImpl implements CommandManager {
     private final CommandManagerImpl parent;
@@ -67,7 +69,8 @@ public class CommandManagerImpl implements CommandManager {
     @Override
     public @NotNull Suggestion suggest(@NotNull CommandSender sender, @NotNull String input) {
         var reader = new StringReader(input);
-        var result = root.suggest(sender, reader);
+        var context = new SuggestionContext(sender);
+        var result = root.suggest(sender, reader, context);
         if (result.isEmpty() && parent != null) {
             return parent.suggest(sender, input);
 //            var parentResult = parent.suggest(sender, input);
@@ -86,43 +89,51 @@ public class CommandManagerImpl implements CommandManager {
         return result;
     }
 
+    private boolean shouldHide(@NotNull CommandNode node, @NotNull Player player) {
+        if (!node.isConditional()) return false;
+
+        return CommandCondition.HIDE == node.condition.test(player, new CommandNode.ConditionContext(player, CommandContext.Pass.BUILD));
+    }
+
     @Override
     public @NotNull DeclareCommandsPacket createCommandPacket(@NotNull Player player) {
         var nodes = new ArrayList<DeclareCommandsPacket.Node>();
         var root = new DeclareCommandsPacket.Node();
         nodes.add(root);
 
-        // Note about redirects:
-        // Currently we just tell brigadier that they are a new root literal node which works fine since we never
-        // actually send real arguments to the client. However, once we do, they will need to be handled better.
+        Object2IntMap<CommandNode> commandMap = new Object2IntOpenHashMap<>();
+        AtomicInteger id = new AtomicInteger(1);
+        @SuppressWarnings("SuspiciousMethodCalls") // intellij dumb
+        var context = new CommandEvaluationContext(
+                player,
+                commandMap::getInt,
+                commandMap::containsKey,
+                node -> commandMap.put(node, id.getAndIncrement())
+        );
 
         var rootNodes = new IntArrayList();
-        for (var entry : reflect().commands(player, true)) {
-            var node = entry.getValue();
-            if (node.condition != null) {
-                var result = node.condition.test(player, new CommandNode.ConditionContext(player, CommandContext.Pass.BUILD));
-                if (result == CommandCondition.HIDE) continue;
-            }
-            if (node.redirect != null && node.redirect.condition != null) {
-                var result = node.redirect.condition.test(player, new CommandNode.ConditionContext(player, CommandContext.Pass.BUILD));
-                if (result == CommandCondition.HIDE) continue;
+        for (var command : reflect().commands(player, true)) {
+            var name = command.getKey();
+            var node = command.getValue();
+            if (shouldHide(node, player)) {
+                continue;
             }
 
-            var args = new DeclareCommandsPacket.Node();
-            args.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.ARGUMENT, true, false, true);
-            args.name = "args";
-            args.parser = ArgumentParserType.STRING;
-            args.properties = NetworkBuffer.makeArray(buffer -> buffer.write(VAR_INT, 2));
-            args.suggestionsType = "minecraft:ask_server";
-            nodes.add(args);
 
-            var packetNode = new DeclareCommandsPacket.Node();
-            packetNode.flags = DeclareCommandsPacket.getFlag(DeclareCommandsPacket.NodeType.LITERAL, true, false, false);
-            packetNode.name = entry.getKey().toLowerCase(Locale.ROOT);
-            packetNode.children = new int[]{nodes.size() - 1};
-            rootNodes.add(nodes.size());
-            nodes.add(packetNode);
+            var builder = new CommandNodeBuilder(name, node);
+            context.register(node);
+            Set<CommandNode.ArgumentPair> children = new HashSet<>();
+            node.visitChildren(children::add);
+            children.removeIf(child -> shouldHide(child.node(), player));
+            children.forEach(pair -> context.register(pair.node()));
+            //noinspection DataFlowIssue - should never occure since we register it 5 lines above
+            rootNodes.add(context.getId(node).intValue());
+            nodes.add(builder.toNode(context));
+            nodes.addAll(children.stream()
+                    .map(CommandNodeBuilder::new)
+                    .map(builders -> builders.toNode(context)).toList());
         }
+
         root.children = rootNodes.toIntArray();
 
         return new DeclareCommandsPacket(nodes, 0);

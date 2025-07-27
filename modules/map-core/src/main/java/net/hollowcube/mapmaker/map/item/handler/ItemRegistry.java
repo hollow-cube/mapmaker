@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.item.handler;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.hollowcube.command.arg.Argument;
@@ -8,6 +7,7 @@ import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.compat.noxesium.packets.ClientboundChangeServerRulesPacket;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.util.InteractTarget;
+import net.hollowcube.mapmaker.map.util.PlayerCooldownExtension;
 import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
@@ -27,7 +27,6 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.ItemBlockState;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -75,9 +74,6 @@ public class ItemRegistry {
                     }
                 }
         );
-//        .errorHandler((sender, context) -> {
-//            sender.sendMessage("unknown item: " + context.getRaw(word)); // todo translate
-//        });
     }
 
     private static final Tag<Boolean> TRIGGER_TAG = Tag.Transient("mapmaker:triggered");
@@ -97,19 +93,16 @@ public class ItemRegistry {
                     .build());
 
     private final ReentrantLock lock = new ReentrantLock();
+
     private final Map<String, ItemHandler> idToItemHandler = new HashMap<>();
-    private final Map<String, ItemHandler> modelToItemHandler = new HashMap<>();
-    private final Int2ObjectMap<ItemHandler> materialToItemHandler = new Int2ObjectArrayMap<>();
     private final Int2ObjectMap<ItemHandler> blockToItemHandler = new Int2ObjectOpenHashMap<>();
+    private final Set<Key> publicItems = new TreeSet<>((a, b) -> a.asString().compareToIgnoreCase(b.asString()));
 
-    // Contains all the "public" item names known by this registry. Used for completions.
-    private final Set<Key> allItemNames = new TreeSet<>((a, b) -> a.asString().compareToIgnoreCase(b.asString()));
-
-    private final TagCooldown useCooldown = new TagCooldown("mapmaker:hotbar_cooldown", 250);
+    private final TagCooldown useCooldown = new TagCooldown("mapmaker:hotbar_cooldown", 100);
 
     public ItemRegistry() {
         for (var item : Material.values()) {
-            allItemNames.add(item.key());
+            publicItems.add(item.key());
         }
     }
 
@@ -117,24 +110,15 @@ public class ItemRegistry {
         return eventNode;
     }
 
-    public void register(@NotNull ItemHandler itemHandler) {
+    public void register(@NotNull ItemHandler handle) {
         try {
             lock.lock();
-            idToItemHandler.put(itemHandler.key().asString().toLowerCase(Locale.ROOT), itemHandler);
-            var sprite = itemHandler.sprite();
-            var material = itemHandler.material();
-            if (sprite != null) {
-                modelToItemHandler.put(sprite.model(), itemHandler);
-            } else if (material != null) {
-                materialToItemHandler.put(material.id(), itemHandler);
-            } else {
-                throw new IllegalArgumentException("ItemHandler must provide either a sprite or material");
-            }
-            if (itemHandler instanceof BlockItemHandler blockItemHandler) {
-                blockToItemHandler.put(blockItemHandler.block().id(), itemHandler);
+            idToItemHandler.put(handle.key().asString().toLowerCase(Locale.ROOT), handle);
+            if (handle instanceof BlockItemHandler blockItemHandler) {
+                blockToItemHandler.put(blockItemHandler.block().id(), handle);
             }
 
-            allItemNames.add(itemHandler.key());
+            publicItems.add(handle.key());
         } finally {
             lock.unlock();
         }
@@ -148,16 +132,6 @@ public class ItemRegistry {
         try {
             lock.lock();
             idToItemHandler.put(itemHandler.key().asString().toLowerCase(Locale.ROOT), itemHandler);
-            var sprite = itemHandler.sprite();
-            var material = itemHandler.material();
-            if (sprite != null) {
-                modelToItemHandler.put(sprite.model(), itemHandler);
-                Check.argCondition(material != null, "material must be null if sprite is not");
-            } else if (material != null) {
-                materialToItemHandler.put(material.id(), itemHandler);
-            } else {
-                throw new IllegalArgumentException("ItemHandler must provide either a sprite or material");
-            }
         } finally {
             lock.unlock();
         }
@@ -172,7 +146,7 @@ public class ItemRegistry {
 
         var itemHandler = idToItemHandler.get(namespace);
         if (itemHandler != null) {
-            return itemHandler.buildItemStack(nbt);
+            return itemHandler.getItemStack(nbt);
         }
 
         var material = Material.fromKey(namespace);
@@ -190,7 +164,7 @@ public class ItemRegistry {
         if (!(itemHandler instanceof BlockItemHandler bih) || !Objects.equals(bih.block().handler().getKey(), block.handler().getKey()))
             return null;
 
-        var itemStack = itemHandler.buildItemStack(includeData ? block.nbt() : null);
+        var itemStack = itemHandler.getItemStack(includeData ? block.nbt() : null);
         if (includeData && !block.properties().isEmpty()) {
             itemStack = itemStack.with(DataComponents.BLOCK_STATE, new ItemBlockState(block.properties()));
         }
@@ -205,7 +179,7 @@ public class ItemRegistry {
 
     private @NotNull List<String> suggestItems(@Nullable String filter) {
         var normalFilter = filter == null ? "" : filter.toLowerCase(Locale.ROOT);
-        return allItemNames.stream()
+        return publicItems.stream()
                 .filter(name -> name.asString().startsWith(normalFilter)
                         || name.value().startsWith(normalFilter))
                 .limit(20)
@@ -231,7 +205,7 @@ public class ItemRegistry {
         var player = event.getPlayer();
         if (player.getTag(TRIGGER_TAG) != null) return;
 
-        if (useCooldown.test(player)) {
+        if (useCooldown.test(player) && PlayerCooldownExtension.tryUseItem(player, event.getItemStack())) {
             player.setTag(TRIGGER_TAG, true);
             itemHandler.rightClicked(new ItemHandler.Click(
                     itemHandler,
@@ -261,7 +235,7 @@ public class ItemRegistry {
         var itemHandler = getHandlerFromItemStack(itemStack);
         if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_BLOCK)) return;
 
-        if (useCooldown.test(player)) {
+        if (useCooldown.test(player) && PlayerCooldownExtension.tryUseItem(player, itemStack)) {
             player.setTag(TRIGGER_TAG, true);
             var placeOffset = event.getBlockFace().toDirection();
             itemHandler.rightClicked(new ItemHandler.Click(
@@ -284,19 +258,12 @@ public class ItemRegistry {
         if (player.getTag(TRIGGER_TAG) != null) return;
 
         var itemStack = player.getItemInHand(event.getHand());
-        var itemHandler = getHandlerFromItemStack(itemStack);
-        if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_ENTITY)) return;
+        var handler = getHandlerFromItemStack(itemStack);
+        if (handler == null || !handler.allows(ItemHandler.RIGHT_CLICK_ENTITY)) return;
 
-        if (useCooldown.test(player)) {
+        if (useCooldown.test(player) && PlayerCooldownExtension.tryUseItem(player, itemStack)) {
             player.setTag(TRIGGER_TAG, true);
-            itemHandler.rightClicked(new ItemHandler.Click(
-                    itemHandler, player,
-                    itemStack, event.getHand(),
-                    null,
-                    null,
-                    null,
-                    event.getTarget()
-            ));
+            handler.rightClicked(new ItemHandler.Click(handler, player, itemStack, event.getHand(), event.getTarget()));
         }
     }
 
@@ -355,18 +322,11 @@ public class ItemRegistry {
         if (player.getTag(TRIGGER_TAG) != null) return;
 
         var itemStack = player.getItemInMainHand();
-        var itemHandler = getHandlerFromItemStack(itemStack);
-        if (itemHandler == null || !itemHandler.allows(ItemHandler.LEFT_CLICK_ENTITY)) return;
+        var handler = getHandlerFromItemStack(itemStack);
+        if (handler == null || !handler.allows(ItemHandler.LEFT_CLICK_ENTITY)) return;
 
         player.setTag(TRIGGER_TAG, true);
-        itemHandler.leftClicked(new ItemHandler.Click(
-                itemHandler, player,
-                itemStack, PlayerHand.MAIN,
-                null,
-                null,
-                null,
-                event.getTarget()
-        ));
+        handler.leftClicked(new ItemHandler.Click(handler, player, itemStack, PlayerHand.MAIN, event.getTarget()));
     }
 
     private void handleLeftClickGui(@NotNull InventoryPreClickEvent event) {
@@ -389,16 +349,19 @@ public class ItemRegistry {
 //        ));
     }
 
-    private void handlePlayerSpawn(PlayerSpawnEvent event) {
+    private void handlePlayerSpawn(@NotNull PlayerSpawnEvent event) {
         if (!event.isFirstSpawn()) return;
-        List<ItemStack> items = this.idToItemHandler.keySet().stream().map(it -> getItemStack(it, null)).toList();
+        List<ItemStack> items = this.idToItemHandler.keySet().stream()
+                .map(Key::key)
+                .filter(this.publicItems::contains)
+                .map(it -> getItemStack(it, null)).toList();
         ClientboundChangeServerRulesPacket.creativeTab(items).send(event.getPlayer());
     }
 
     private @Nullable ItemHandler getHandlerFromItemStack(@NotNull ItemStack itemStack) {
-        var itemHandler = materialToItemHandler.get(itemStack.material().id());
-        if (itemHandler != null) return itemHandler;
-        return modelToItemHandler.get(itemStack.get(DataComponents.ITEM_MODEL, ""));
+        var id = itemStack.getTag(ItemHandler.ID_TAG);
+        if (id == null) return null;
+        return idToItemHandler.get(id.toLowerCase(Locale.ROOT));
     }
 
     public boolean isOnCooldown(@NotNull Player player) {

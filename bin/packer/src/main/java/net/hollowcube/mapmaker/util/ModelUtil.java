@@ -27,7 +27,7 @@ public final class ModelUtil {
     public static @NotNull JsonObject createBasicItem(@NotNull String modelPath) {
         JsonObject root = new JsonObject();
         JsonObject model = new JsonObject();
-        model.addProperty("type", "minecraft:model");
+        model.addProperty("type", "model");
         model.addProperty("model", modelPath);
         root.add("model", model);
         return root;

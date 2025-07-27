@@ -1,0 +1,12 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "pattern": "\\Qen_US.json\\E"
+      },
+      {
+        "pattern": "\\Qdefault_config.json\\E"
+      }
+    ]
+  }
+}

@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.player;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
@@ -13,10 +14,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+@RuntimeGson
 public record DisplayName(
         @NotNull List<Part> parts
 ) implements ComponentLike {
 
+    @RuntimeGson
     public record Part(@NotNull String type, @NotNull String text, @Nullable String color) {
     }
 

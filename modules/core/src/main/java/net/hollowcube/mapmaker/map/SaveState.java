@@ -6,6 +6,7 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -29,6 +30,7 @@ public class SaveState {
     private long playtime;
     private transient long playStartTime;
     int dataVersion;
+    private int protocolVersion;
 
     SaveStateType.Serializer<?> serializer;
     Object state;
@@ -110,18 +112,36 @@ public class SaveState {
         playStartTime = currentTime;
     }
 
+    public int protocolVersion() {
+        return protocolVersion;
+    }
+
+    public void setProtocolVersion(int protocolVersion) {
+        this.protocolVersion = protocolVersion;
+    }
+
     public <T> @NotNull T state(@NotNull Class<T> stateType) {
         if (state == null)
             throw new IllegalStateException("State not loaded");
         if (!stateType.isAssignableFrom(state.getClass()))
-            throw new IllegalArgumentException("State type mismatch. had " + state.getClass() + ", expected " + stateType);
+            throw new IllegalArgumentException("State type mismatch. had " + state.getClass() + ", expected " + stateType + " details: " + Map.of(
+                    "id", id,
+                    "playerId", playerId,
+                    "mapId", mapId,
+                    "state", state,
+                    "stateType", stateType,
+                    "serializer", serializer,
+                    "dataVersion", dataVersion,
+                    "playtime", playtime,
+                    "completed", completed
+            ));
         return stateType.cast(state);
     }
 
-    public <T> @NotNull Optional<T> tryGetState(@NotNull Class<T> stateType) {
-        if (state == null) return Optional.empty();
-        if (!stateType.isAssignableFrom(state.getClass())) return Optional.empty();
-        return Optional.of(stateType.cast(state));
+    public <T> @Nullable T tryGetState(@NotNull Class<T> stateType) {
+        if (state == null) return null;
+        if (!stateType.isAssignableFrom(state.getClass())) return null;
+        return stateType.cast(state);
     }
 
     public void setState(@NotNull Object state) {
@@ -133,7 +153,8 @@ public class SaveState {
     public @NotNull SaveStateUpdateRequest createUpdateRequest() {
         var req = new SaveStateUpdateRequest()
                 .setPlaytime(playtime)
-                .setCompleted(completed);
+                .setCompleted(completed)
+                .setProtocolVersion(protocolVersion);
         if (serializer != null && state != null) {
             req.setState(state, serializer);
         }

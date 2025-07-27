@@ -18,6 +18,7 @@ record ConfigLoaderV3Impl(@NotNull JsonObject root) implements ConfigLoaderV3 {
     private static final Logger logger = LoggerFactory.getLogger(ConfigLoaderV3Impl.class);
     private static final Gson GSON = new GsonBuilder()
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .setPrettyPrinting()
             .disableJdkUnsafe()
             .create();
 
@@ -35,10 +36,13 @@ record ConfigLoaderV3Impl(@NotNull JsonObject root) implements ConfigLoaderV3 {
                 if (split.length != 2) continue;
                 envmap.put(split[0], split[1]);
             }
-            // Load env overrides from .env
-            Path dotEnvPath = Path.of(".env");
-            if (Files.exists(dotEnvPath)) {
-                for (var line : Files.readAllLines(dotEnvPath)) {
+            // Load env overrides from .env and vault injector
+            var extraPaths = List.of(".env", "/vault/secrets/service");
+            for (var pathString : extraPaths) {
+                var path = Path.of(pathString);
+                if (!Files.exists(path)) continue;
+
+                for (var line : Files.readAllLines(path)) {
                     if (line.isBlank() || line.startsWith("#")) continue;
                     var split = line.split("=");
                     if (split.length != 2) continue;
@@ -79,6 +83,11 @@ record ConfigLoaderV3Impl(@NotNull JsonObject root) implements ConfigLoaderV3 {
         var element = GSON.fromJson(root.get(path), clazz);
         Check.notNull(element, "Config path " + path + " not found. Add entry in default_config.json.");
         return element;
+    }
+
+    @Override
+    public void dump() {
+        System.out.println(GSON.toJson(root));
     }
 
     private static JsonElement replaceEnvVarOverrides(@NotNull Map<String, String> env, List<String> path, JsonElement element) {

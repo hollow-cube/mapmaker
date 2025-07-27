@@ -3,9 +3,9 @@ package net.hollowcube.terraform.compat.worldedit.script;
 import net.hollowcube.terraform.pattern.*;
 import net.hollowcube.terraform.util.script.ParseContext;
 import net.hollowcube.terraform.util.script.ParseException;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.gamedata.tags.Tag;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.testing.Env;
 import net.minestom.testing.EnvTest;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -199,8 +200,8 @@ class WEPatternBuildTest {
     class TestTag {
         @Test
         void testValidNoStar(Env env) {
-            var expected = MinecraftServer.getTagManager().getTag(Tag.BasicType.BLOCKS, "minecraft:stairs")
-                    .getValues().stream().map(Block::fromKey).toList();
+            var expected = StreamSupport.stream(Block.staticRegistry().getTag(Key.key("stairs")).spliterator(), false)
+                    .map(RegistryKey::name).map(Block::fromKey).toList();
             var pattern = assertBuilds(TagPattern.class, "##stairs");
             assertEquals(expected, pattern.blocks());
             assertFalse(pattern.randomState());
