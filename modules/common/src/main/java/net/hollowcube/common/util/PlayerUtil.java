@@ -9,16 +9,11 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.network.packet.server.configuration.SelectKnownPacksPacket;
-import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.utils.block.BlockIterator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Field;
 import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Utility class for player-related operations.
@@ -85,27 +80,5 @@ public final class PlayerUtil {
                 null, true
         );
         return !result.collisionX() && !result.collisionY() && !result.collisionZ();
-    }
-
-    @SuppressWarnings({"unchecked", "UnstableApiUsage"})
-    public static @NotNull CompletableFuture<List<SelectKnownPacksPacket.Entry>> stealKnownPacksFuture(@NotNull Player player) {
-        class Holder {
-            static Field knownPacksFuture;
-        }
-        try {
-            if (Holder.knownPacksFuture == null) {
-                Holder.knownPacksFuture = PlayerConnection.class.getDeclaredField("knownPacksFuture");
-                Holder.knownPacksFuture.setAccessible(true);
-            }
-            Object future = Holder.knownPacksFuture.get(player.getPlayerConnection());
-            if (future == null) {
-                // There is a race here which could result in the client responding too quickly. In that case we need to re request
-                // the known packs. todo: find a better way around this, its really cursed.
-                return player.getPlayerConnection().requestKnownPacks(List.of(SelectKnownPacksPacket.MINECRAFT_CORE));
-            }
-            return (CompletableFuture<List<SelectKnownPacksPacket.Entry>>) future;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }

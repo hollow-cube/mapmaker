@@ -15,7 +15,7 @@ import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.impl.ModelCosmeticImpl;
 import net.hollowcube.mapmaker.gui.common.ConfirmAction;
 import net.hollowcube.mapmaker.hub.merchant.MerchantTrade;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.store.CostEntry;
 import net.hollowcube.mapmaker.store.CostList;
@@ -107,7 +107,7 @@ public class CosmeticEntry extends View {
     private @Outlet("off") Label offIcon;
     private @Outlet("on") Label onIcon;
 
-    private final PlayerDataV2 playerData;
+    private final PlayerData playerData;
     private final Cosmetic cosmetic;
     private final boolean isLocked;
     private final int row;
@@ -115,7 +115,7 @@ public class CosmeticEntry extends View {
     private ItemStack offItemStack = null;
     private boolean isPreviewing = false;
 
-    public CosmeticEntry(@NotNull Context context, @NotNull PlayerDataV2 playerData, @NotNull PlayerBackpack backpack, @NotNull Cosmetic cosmetic, boolean isLocked, int row) {
+    public CosmeticEntry(@NotNull Context context, @NotNull PlayerData playerData, @NotNull PlayerBackpack backpack, @NotNull Cosmetic cosmetic, boolean isLocked, int row) {
         super(context);
         this.playerData = playerData;
         this.cosmetic = cosmetic;
@@ -228,7 +228,7 @@ public class CosmeticEntry extends View {
                 cubits = entry.getValue();
         }
 
-        var playerData = PlayerDataV2.fromPlayer(player);
+        var playerData = PlayerData.fromPlayer(player);
         playerService.buyCosmetic(playerData.id(), trade.result(), null, cubits, new JsonObject());
 
         var icon = trade.result().iconItem();

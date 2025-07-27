@@ -1,7 +1,0 @@
-<?xml version="1.0" ?>
-<component align="ltr">
-    <switch id="type">
-        <!-- Add icon -->
-        <button id="btn" translationKey="changed" sprite="green_concrete"/>
-    </switch>
-</component>

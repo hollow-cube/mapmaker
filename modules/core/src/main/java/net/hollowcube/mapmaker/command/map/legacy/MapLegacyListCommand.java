@@ -8,7 +8,7 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +42,7 @@ public class MapLegacyListCommand extends CommandDsl {
         if (context.has(playerArg)) target = context.get(playerArg);
 
         try {
-            var playerData = PlayerDataV2.fromPlayer(player);
+            var playerData = PlayerData.fromPlayer(player);
             var legacyMaps = mapService.getLegacyMaps(playerData.id(), target);
 
             if (legacyMaps.isEmpty()) {

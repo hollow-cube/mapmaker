@@ -4,8 +4,8 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.player.DisplayName;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerDataUpdateMessage;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
@@ -58,7 +58,7 @@ public class PlayerDataUpdateConsumer extends BaseConsumer<PlayerDataUpdateMessa
         // todo message.experience
         // todo message.hypercubeExp
 
-        var playerData = PlayerDataV2.fromPlayer(player);
+        var playerData = PlayerData.fromPlayer(player);
         if (message.coins() != null) playerData.setCoins(message.coins());
         if (message.cubits() != null) playerData.setCubits(message.cubits());
 

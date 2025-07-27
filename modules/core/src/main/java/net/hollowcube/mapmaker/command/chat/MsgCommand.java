@@ -2,21 +2,15 @@ package net.hollowcube.mapmaker.command.chat;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
-import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.session.SessionManager;
-import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.concurrent.ThreadLocalRandom;
 
 public class MsgCommand extends AbstractChatCommand {
 
@@ -44,7 +38,7 @@ public class MsgCommand extends AbstractChatCommand {
             player.sendMessage(Component.translatable("generic.other_players_only"));
             return;
         }
-        if (PlayerDataV2.fromPlayer(player).id().equals(target)) {
+        if (PlayerData.fromPlayer(player).id().equals(target)) {
             player.sendMessage(Component.translatable("chat.msg.cant_message_yourself"));
             return;
         }

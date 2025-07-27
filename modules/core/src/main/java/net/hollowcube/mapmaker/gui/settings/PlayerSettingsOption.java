@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.gui.settings;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.StringBinaryTag;
@@ -18,8 +18,8 @@ import java.util.stream.Stream;
 
 public record PlayerSettingsOption(
         @NotNull String key,
-        @NotNull Function<PlayerDataV2, DialogInput> input,
-        @NotNull BiConsumer<PlayerDataV2, BinaryTag> applicator
+        @NotNull Function<PlayerData, DialogInput> input,
+        @NotNull BiConsumer<PlayerData, BinaryTag> applicator
 ) {
 
     private static DialogInput.SingleOption.Option option(@NotNull String value, boolean selected) {
@@ -110,9 +110,6 @@ public record PlayerSettingsOption(
                 }
         );
     }
-
-
-
 
 
 }

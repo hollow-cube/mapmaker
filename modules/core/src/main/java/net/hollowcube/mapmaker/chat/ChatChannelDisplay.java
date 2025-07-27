@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.chat;
 
 import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.mapmaker.PlayerSettings;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -26,7 +26,7 @@ public class ChatChannelDisplay implements ActionBar.Provider {
 
     @Override
     public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
-        var channel = PlayerDataV2.fromPlayer(player).getSetting(PlayerSettings.CHAT_CHANNEL);
+        var channel = PlayerData.fromPlayer(player).getSetting(PlayerSettings.CHAT_CHANNEL);
         var sprite = switch (channel) {
             case ClientChatMessageData.CHANNEL_LOCAL -> LOCAL;
             case ClientChatMessageData.CHANNEL_STAFF -> STAFF;
