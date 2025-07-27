@@ -279,7 +279,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
         // We must set the respawn point during config so that their spawn chunks are sent there.
         // This prevents falling through the floor when joining.
-        player.setRespawnPoint(Objects.requireNonNullElseGet(saveState.state(EditState.class).pos(), () -> map().settings().getSpawnPoint()));
+        player.setRespawnPoint(Objects.requireNonNullElseGet(saveState.state(EditState.class).pos(),
+                () -> map().settings().getSpawnPoint()));
     }
 
     @Override

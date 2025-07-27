@@ -14,6 +14,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.Collection;
 import java.util.List;
@@ -60,6 +61,15 @@ public class PlayerDataV2 {
         this.playtime = playtime;
         this.coins = coins;
         this.cubits = cubits;
+    }
+
+    @VisibleForTesting
+    public PlayerDataV2(@NotNull Player player) {
+        this(player.getUuid().toString(),
+                player.getUsername(),
+                new DisplayName(List.of(new DisplayName.Part("username", player.getUsername(), null))),
+                new JsonObject(), 0, 0, 0
+        );
     }
 
     /**

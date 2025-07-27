@@ -1,10 +1,13 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.thread.TickSchedulerThread;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.Blocking;
+import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNullByDefault;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -35,7 +38,29 @@ public sealed interface MapWorld2 permits AbstractMapWorld2 {
     /// - Players spectating a playing map will appear in the playing world.
     @UnmodifiableView Collection<Player> players();
 
+
+    // REGION: Registries
+
+    ItemRegistry itemRegistry();
+
+
+    // REGION: Lifecycle
+
     @Blocking void configurePlayer(AsyncPlayerConfigurationEvent event);
+
+    @NonBlocking void spawnPlayer(Player player);
+
+    @NonBlocking void removePlayer(Player player);
+
+    /// Called each tick on the tick scheduler thread. This means that it will always be
+    /// after end of tick schedules on the instance, and before the next tick schedules.
+    ///
+    /// Generally should be used for transitioning players between states.
+    default @NonBlocking void safePointTick() {
+        if (!(Thread.currentThread() instanceof TickSchedulerThread)) // Sanity check
+            throw new IllegalStateException("safePointTick called from non-scheduler thread!");
+    }
+
 
     // TODO(new worlds): Re-add tag readable?
 

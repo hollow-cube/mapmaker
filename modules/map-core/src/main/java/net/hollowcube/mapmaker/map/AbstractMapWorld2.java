@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
+import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.minestom.server.FeatureFlag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
@@ -8,7 +10,9 @@ import org.jetbrains.annotations.NotNullByDefault;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @NotNullByDefault
 public non-sealed abstract class AbstractMapWorld2 implements MapWorld2 {
@@ -17,10 +21,17 @@ public non-sealed abstract class AbstractMapWorld2 implements MapWorld2 {
     private final MapData map;
     private final MapInstance instance;
 
+    private final Set<Player> players = new HashSet<>();
+    private final Set<Player> playersImmutable = Collections.unmodifiableSet(players);
+
+    private final ItemRegistry itemRegistry = new ItemRegistry();
+
     protected AbstractMapWorld2(MapServer server, MapData map, MapInstance instance) {
         this.server = server;
         this.map = map;
         this.instance = instance;
+
+        this.instance.setGenerator(MapGenerators.voidWorld());
     }
 
     @Override
@@ -40,7 +51,12 @@ public non-sealed abstract class AbstractMapWorld2 implements MapWorld2 {
 
     @Override
     public @UnmodifiableView Collection<Player> players() {
-        return List.of();
+        return playersImmutable;
+    }
+
+    @Override
+    public ItemRegistry itemRegistry() {
+        return itemRegistry;
     }
 
     @Override
@@ -55,7 +71,19 @@ public non-sealed abstract class AbstractMapWorld2 implements MapWorld2 {
         // !! Implementations must set player spawn position.
     }
 
-    
+    @Override
+    public void spawnPlayer(Player player) {
+        assert !this.players.contains(player);
+        this.players.add(player);
+    }
+
+    @Override
+    public void removePlayer(Player player) {
+        assert this.players.contains(player);
+        this.players.remove(player);
+    }
+
+
     protected static MapInstance makeMapInstance(MapData map, char classifier) {
         var lightingMode = map.getSetting(MapSettings.LIGHTING)
                 ? MapInstance.LightingMode.GENERATED

@@ -15,6 +15,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.entity.attribute.Attribute;
 import org.jetbrains.annotations.Blocking;
+import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,6 +56,28 @@ public final class MapWorldHelpers {
             player.updateViewerRule(null);
             player.getPlayerMeta().setFlyingWithElytra(false);
         });
+
+        // Reapply the cosmetics they have on
+        var playerData = PlayerDataV2.fromPlayer(player);
+        MiscFunctionality.applyCosmetics(player, playerData);
+    }
+
+    @NonBlocking
+    public static void resetPlayerOnTickThread(@NotNull Player player) {
+        player.refreshCommands();
+        player.setGameMode(GameMode.ADVENTURE);
+        player.setAllowFlying(false);
+        player.setFlying(false);
+        player.setFlyingSpeed(0.05f);
+        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20);
+        player.setHealth(20);
+        player.setInvisible(false);
+        player.setVelocity(Vec.ZERO);
+        player.clearEffects();
+        player.getInventory().clear();
+        player.updateViewerRule(null);
+        player.getPlayerMeta().setFlyingWithElytra(false);
+        player.setPermissionLevel(4);
 
         // Reapply the cosmetics they have on
         var playerData = PlayerDataV2.fromPlayer(player);
