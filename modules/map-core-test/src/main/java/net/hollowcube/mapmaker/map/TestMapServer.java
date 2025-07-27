@@ -24,10 +24,18 @@ import java.util.Map;
 import java.util.function.Function;
 
 final class TestMapServer implements MapServer {
-    private final FeatureList features = FeatureList.load(ConfigLoaderV3.loadFromText(new byte[0], Map.of()));
+    private final FeatureList features;
 
     private final MapService mapService = new NoopMapService();
     private final PlayerService playerService = new NoopPlayerService();
+
+    public TestMapServer() {
+        this(true);
+    }
+
+    public TestMapServer(boolean loadFeatures) {
+        features = loadFeatures ? FeatureList.load(ConfigLoaderV3.loadFromText(new byte[0], Map.of())) : null;
+    }
 
     @Override
     public @NotNull MetricWriter metrics() {

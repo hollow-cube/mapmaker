@@ -20,6 +20,7 @@ import java.util.Set;
 import static net.hollowcube.mapmaker.map.util.EventUtil.playerEventNode;
 
 public class EditorMapWorld2 extends AbstractMapWorld2 {
+    private static final int WORLD_BORDER_WARNING_DISTANCE = 5;
 
     private final Set<Player> editingPlayers = new HashSet<>();
     private final EventNode<PlayerInstanceEvent> editingEventNode = playerEventNode(editingPlayers);
@@ -34,6 +35,16 @@ public class EditorMapWorld2 extends AbstractMapWorld2 {
     /// Events for only players who are actively editing the map.
     public EventNode<PlayerInstanceEvent> editingEventNode() {
         return this.editingEventNode;
+    }
+
+    @Override
+    protected void configureInstance() {
+        super.configureInstance();
+
+        // Warning distance creates the red border when nearby the world border.
+        instance().setWorldBorder(instance().getWorldBorder()
+                .withWarningTime(WORLD_BORDER_WARNING_DISTANCE)
+                .withWarningDistance(WORLD_BORDER_WARNING_DISTANCE));
     }
 
     @Override

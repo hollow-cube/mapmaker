@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -352,8 +353,8 @@ public class MapSettings {
         }
     }
 
-    public @Nullable MapSize getSize() {
-        return size;
+    public @NotNull MapSize getSize() {
+        return Objects.requireNonNullElse(size, MapSize.NORMAL);
     }
 
     public void setSize(@NotNull MapSize size) {

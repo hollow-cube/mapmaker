@@ -4,8 +4,11 @@ import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.minestom.server.FeatureFlag;
+import net.minestom.server.ServerFlag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
+import net.minestom.server.instance.Weather;
+import net.minestom.server.instance.WorldBorder;
 import org.jetbrains.annotations.NotNullByDefault;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -31,7 +34,7 @@ public non-sealed abstract class AbstractMapWorld2 implements MapWorld2 {
         this.map = map;
         this.instance = instance;
 
-        this.instance.setGenerator(MapGenerators.voidWorld());
+        configureInstance();
     }
 
     @Override
@@ -81,6 +84,29 @@ public non-sealed abstract class AbstractMapWorld2 implements MapWorld2 {
     public void removePlayer(Player player) {
         assert this.players.contains(player);
         this.players.remove(player);
+    }
+
+    protected void configureInstance() {
+        instance().setGenerator(MapGenerators.voidWorld());
+
+        var diameter = map().settings().getSize().size();
+        instance().setWorldBorder(new WorldBorder(diameter,
+                0f, 0f, 0,
+                0, ServerFlag.WORLD_BORDER_SIZE
+        ));
+
+        instance().setTime(switch (map().getSetting(MapSettings.TIME_OF_DAY)) {
+            case NOON -> 6000;
+            case SUNRISE -> 23000;
+            case SUNSET -> 13000;
+            case NIGHT -> 18000;
+        });
+
+        instance().setWeather(switch (map().getSetting(MapSettings.WEATHER_TYPE)) {
+            case CLEAR -> new Weather(0, 0);
+            case RAINING -> new Weather(1f, 0f);
+            case THUNDERSTORM -> new Weather(1f, 1f);
+        }, 1);
     }
 
 
