@@ -22,11 +22,13 @@ include(
     "modules:hub",
     "modules:map",
     "modules:map-core",
+    "modules:map-editor",
     "modules:nbs",
     "modules:replay",
     "modules:terraform",
-    "modules:map-core-test",
+
     "modules:test",
+    "modules:map-core-test",
 )
 
 include(

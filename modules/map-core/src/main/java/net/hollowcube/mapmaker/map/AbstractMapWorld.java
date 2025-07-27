@@ -202,7 +202,7 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             //       Those two cases need to be fixed in a generic way that handles all other cases.
             player.setAutoViewEntities(false);
         } catch (Exception e) {
-            logger.error("Failed to configure player", e);
+            ExceptionReporter.reportException(e, player);
             player.kick("An unexpected error occurred while configuring your player. Please try again.");
         }
     }
