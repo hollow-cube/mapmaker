@@ -19,6 +19,29 @@ import org.jetbrains.annotations.NotNull;
 
 public final class MapEntities {
 
+    // TODO: no duplicate
+    public static void initNoEvents() {
+        MapEntityType.override(EntityType.ITEM_FRAME, ItemFrameEntity::new);
+        MapEntityType.override(EntityType.GLOW_ITEM_FRAME, ItemFrameEntity.Glowing::new);
+        MapEntityType.override(EntityType.PAINTING, PaintingEntity::new);
+        MapEntityType.override(EntityType.ARMOR_STAND, ArmorStandEntity::new);
+        MapEntityType.override(EntityType.END_CRYSTAL, EndCrystalEntity::new);
+        MapEntityType.override(EntityType.LEASH_KNOT, LeashKnotEntity::new);
+
+        MapEntityType.override(EntityType.PANDA, PandaEntity::new);
+        MapEntityType.override(EntityType.FOX, FoxEntity::new);
+        MapEntityType.override(EntityType.WOLF, WolfEntity::new);
+        MapEntityType.override(EntityType.CHICKEN, ChickenEntity::new);
+        MapEntityType.override(EntityType.SHULKER, ShulkerEntity::new);
+
+        MapEntityType.override(EntityType.BLOCK_DISPLAY, DisplayEntity.Block::new);
+        MapEntityType.override(EntityType.ITEM_DISPLAY, DisplayEntity.Item::new);
+        MapEntityType.override(EntityType.TEXT_DISPLAY, DisplayEntity.Text::new);
+
+        MapEntityType.override(EntityType.MARKER, MarkerEntity::new);
+        MapEntityType.override(EntityType.INTERACTION, InteractionEntity::new);
+    }
+
     public static void init(@NotNull EventNode<InstanceEvent> eventNode) {
         eventNode.addListener(PlayerEntityInteractEvent.class, MapEntities::handleEntityInteract);
         eventNode.addListener(EntityAttackEvent.class, MapEntities::handleEntityAttack);

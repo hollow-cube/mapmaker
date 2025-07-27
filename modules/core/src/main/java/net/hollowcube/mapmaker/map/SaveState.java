@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 @RuntimeGson
 public class SaveState {
@@ -152,6 +151,18 @@ public class SaveState {
 
     public @NotNull SaveStateUpdateRequest createUpdateRequest() {
         var req = new SaveStateUpdateRequest()
+                .setPlaytime(playtime)
+                .setCompleted(completed)
+                .setProtocolVersion(protocolVersion);
+        if (serializer != null && state != null) {
+            req.setState(state, serializer);
+        }
+        return req;
+    }
+
+    public @NotNull SaveStateUpdateRequest createUpsertRequest() {
+        var req = new SaveStateUpdateRequest()
+                .setType(type)
                 .setPlaytime(playtime)
                 .setCompleted(completed)
                 .setProtocolVersion(protocolVersion);

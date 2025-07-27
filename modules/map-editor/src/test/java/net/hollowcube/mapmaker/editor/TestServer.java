@@ -6,8 +6,13 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.timer.TaskSchedule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestServer {
+
+    private static final Logger log = LoggerFactory.getLogger(TestServer.class);
 
     public static void main(String[] args) {
         var server = MinecraftServer.init();
@@ -30,7 +35,9 @@ public class TestServer {
                 });
 
         MinecraftServer.getSchedulerManager()
-                .scheduleEndOfTick(world::safePointTick);
+                .buildTask(world::safePointTick)
+                .repeat(TaskSchedule.tick(1))
+                .schedule();
 
         server.start("0.0.0.0", 25565);
     }

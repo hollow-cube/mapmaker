@@ -23,6 +23,7 @@ include(
     "modules:map",
     "modules:map-core",
     "modules:map-editor",
+    "modules:map-runtime",
     "modules:nbs",
     "modules:replay",
     "modules:terraform",

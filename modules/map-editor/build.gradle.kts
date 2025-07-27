@@ -5,7 +5,9 @@ plugins {
 
 dependencies {
     api(project(":modules:map-core"))
-    api(project(":modules:compat"))
+    implementation(project(":modules:compat"))
 
     implementation(libs.minestom)
+
+    testImplementation(project(":modules:test"))
 }

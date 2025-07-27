@@ -52,7 +52,11 @@ public abstract class ItemHandler {
     private final int flags;
 
     protected ItemHandler(@NotNull String key, int... flags) {
-        this.key = Key.key(key);
+        this(Key.key(key), flags);
+    }
+
+    protected ItemHandler(@NotNull Key key, int... flags) {
+        this.key = key;
 
         int flag = 0;
         for (int f : flags) flag |= f;

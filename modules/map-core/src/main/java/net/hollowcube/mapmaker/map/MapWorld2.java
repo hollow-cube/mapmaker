@@ -1,21 +1,36 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
+import net.minestom.server.ServerFlag;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
+import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.thread.TickSchedulerThread;
 import net.minestom.server.timer.Scheduler;
-import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NonBlocking;
-import org.jetbrains.annotations.NotNullByDefault;
-import org.jetbrains.annotations.UnmodifiableView;
+import org.jetbrains.annotations.*;
 
 import java.util.Collection;
 
 /// Any world running on mapmaker.
 @NotNullByDefault
 public sealed interface MapWorld2 permits AbstractMapWorld2 {
+
+    /// Returns the _root_ map world for the given instance (if this instance is a map world).
+    /// Note that in a case where there are sub-worlds, this will never return them (for example,
+    /// the editing world will always be returned even if a test instance exists).
+    static @Nullable MapWorld2 forInstance(Instance instance) {
+        return instance.getTag(AbstractMapWorld2.ROOT_MAP_WORLD_TAG);
+    }
+
+    static @Nullable MapWorld2 forPlayer(Player player) {
+        var instance = player.getInstance();
+        if (instance == null) return null;
+
+        // todo needs to get more complicated for sub-worlds
+        return forInstance(instance);
+    }
 
     MapServer server();
 
@@ -26,6 +41,12 @@ public sealed interface MapWorld2 permits AbstractMapWorld2 {
     ///
     /// For example, a testing world for parkour maps are in the same instance as the editing world.
     Instance instance();
+
+    /// An event node which is localized to only players actively in the world.
+    ///
+    /// This will trigger no matter the state of the player, you likely want more specific
+    /// event nodes from the map implementation.
+    EventNode<InstanceEvent> eventNode();
 
     default Scheduler scheduler() {
         return instance().scheduler();
@@ -57,7 +78,7 @@ public sealed interface MapWorld2 permits AbstractMapWorld2 {
     ///
     /// Generally should be used for transitioning players between states.
     default @NonBlocking void safePointTick() {
-        if (!(Thread.currentThread() instanceof TickSchedulerThread)) // Sanity check
+        if (!ServerFlag.INSIDE_TEST && !(Thread.currentThread() instanceof TickSchedulerThread)) // Sanity check
             throw new IllegalStateException("safePointTick called from non-scheduler thread!");
     }
 

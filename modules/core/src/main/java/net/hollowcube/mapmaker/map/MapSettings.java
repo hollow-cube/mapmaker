@@ -133,7 +133,7 @@ public class MapSettings {
     public MapSettings() {
         this.name = "";
         this.icon = null;
-        this.variant = MapVariant.BUILDING;
+        this.variant = MapVariant.PARKOUR;
         this.size = MapSize.NORMAL;
         this.spawnPoint = new Pos(0.5, 40, 0.5);
         this.tags = new ArrayList<>();

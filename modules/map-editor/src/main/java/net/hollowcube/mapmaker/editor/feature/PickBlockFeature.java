@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.editor.feature;
 
 import net.hollowcube.common.util.BlockUtil;
+import net.hollowcube.mapmaker.editor.EditorMapWorld2;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -16,13 +17,12 @@ public final class PickBlockFeature {
     public static void handlePickBlock(@NotNull PlayerPickBlockEvent event) {
         var player = event.getPlayer();
         if (player.getGameMode() != GameMode.CREATIVE) return; // Sanity
-//        var world = MapWorld.forPlayerOptional(player);
-//        if (world == null || !world.canEdit(player)) return; // Sanity
-// TODO(new worlds): re-add world logic
+        var world = EditorMapWorld2.forPlayer(player);
+        if (world == null) return; // Sanity
 
         // First try to get the block from the item registry
         var block = event.getBlock();
-        ItemStack itemStack = null;//world.itemRegistry().getItemStack(block, event.isIncludeData());
+        ItemStack itemStack = world.itemRegistry().getItemStack(block, event.isIncludeData());
 
         // Otherwise create the item stack from the block
         if (itemStack == null) {

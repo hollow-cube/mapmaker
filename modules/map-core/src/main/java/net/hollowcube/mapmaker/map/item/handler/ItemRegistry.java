@@ -137,6 +137,18 @@ public class ItemRegistry {
         }
     }
 
+    public boolean setItemStack(@NotNull Player player, @NotNull Key id, int slot) {
+        return setItemStack(player, id, slot, null);
+    }
+
+    public boolean setItemStack(@NotNull Player player, @NotNull Key id, int slot, @Nullable CompoundBinaryTag nbt) {
+        var itemStack = getItemStack(id, nbt);
+        if (itemStack == null) return false;
+
+        player.getInventory().setItemStack(slot, itemStack);
+        return true;
+    }
+
     public @UnknownNullability ItemStack getItemStack(@NotNull Key id, @Nullable CompoundBinaryTag nbt) {
         return getItemStack(id.asString(), nbt);
     }
