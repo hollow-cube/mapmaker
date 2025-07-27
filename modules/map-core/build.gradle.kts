@@ -14,7 +14,7 @@ dependencies {
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)
     implementation(libs.gson)
-    implementation(libs.mql)
+    implementation(libs.included.molang)
     implementation(libs.polar)
     implementation(libs.posthog)
     implementation(libs.bundles.otel)

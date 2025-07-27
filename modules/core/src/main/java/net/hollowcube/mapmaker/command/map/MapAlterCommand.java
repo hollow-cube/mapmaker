@@ -19,6 +19,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
@@ -30,7 +31,7 @@ import static net.hollowcube.command.dsl.CommandDsl.playerOnly;
 @SuppressWarnings("UnstableApiUsage")
 public class MapAlterCommand {
 
-    private final Argument<MapData> mapArg;
+    private final Argument<@Nullable MapData> mapArg;
     private final Argument<MapVariant> typeArg = Argument.Enum("type", MapVariant.class)
             .description("The new type for the map");
     private final Argument<String> nameArg = Argument.GreedyString("name")
@@ -56,7 +57,7 @@ public class MapAlterCommand {
         this.mapService = mapService;
         this.permManager = permManager;
 
-        mapArg = CoreArgument.PlayableMap("map", mapService) //todo should be any map dependent on context.
+        mapArg = CoreArgument.Map("map", mapService) //todo should be any map dependent on context.
                 .description("The ID of the map to edit");
 
         var subvariantTypes = new ArrayList<String>();
@@ -118,6 +119,11 @@ public class MapAlterCommand {
         var map = context.get(mapArg);
         var newType = context.get(typeArg);
 
+        if (map == null) {
+            player.sendMessage(
+                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+            return;
+        }
         if (map.settings().getVariant() == newType) {
             player.sendMessage("Map already has type " + newType);
             return;
@@ -133,6 +139,11 @@ public class MapAlterCommand {
         var map = context.get(mapArg);
         var newName = context.get(nameArg);
 
+        if (map == null) {
+            player.sendMessage(
+                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+            return;
+        }
         map.settings().setName(newName);
         if (doMapUpdate(player, map)) {
             player.sendMessage("Map name set to " + newName);
@@ -143,6 +154,11 @@ public class MapAlterCommand {
         var map = context.get(mapArg);
         var newDisplayItem = context.get(displayItemArg);
 
+        if (map == null) {
+            player.sendMessage(
+                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+            return;
+        }
         map.settings().setIcon(newDisplayItem);
         if (doMapUpdate(player, map)) {
             player.sendMessage(Component.text("Map display item set to ").append(LanguageProviderV2.getVanillaTranslation(newDisplayItem)));
@@ -153,6 +169,11 @@ public class MapAlterCommand {
         var map = context.get(mapArg);
         var newSubVariant = context.get(subvariantArg);
 
+        if (map == null) {
+            player.sendMessage(
+                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+            return;
+        }
         try {
             if (map.settings().getVariant() == MapVariant.PARKOUR) {
                 var subVariant = ParkourSubVariant.valueOf(newSubVariant.toUpperCase());
@@ -174,6 +195,11 @@ public class MapAlterCommand {
         var map = context.get(mapArg);
         var newSize = context.get(sizeArg);
 
+        if (map == null) {
+            player.sendMessage(
+                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+            return;
+        }
         map.settings().setSize(newSize);
         if (doMapUpdate(player, map)) {
             player.sendMessage(Component.text("Map size set to " + newSize));
@@ -184,6 +210,11 @@ public class MapAlterCommand {
         var map = context.get(mapArg);
         var tag = context.get(tagArg);
 
+        if (map == null) {
+            player.sendMessage(
+                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+            return;
+        }
         var added = map.settings().addTag(tag);
         if (!added) {
             player.sendMessage(Component.text("Map already has tag " + tag));
@@ -198,6 +229,11 @@ public class MapAlterCommand {
         var map = context.get(mapArg);
         var tag = context.get(tagArg);
 
+        if (map == null) {
+            player.sendMessage(
+                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+            return;
+        }
         var removed = map.settings().removeTag(tag);
         if (!removed) {
             player.sendMessage(Component.text("Map does not have tag " + tag));
@@ -212,6 +248,11 @@ public class MapAlterCommand {
         var map = context.get(mapArg);
         var newQuality = context.get(qualityArg);
 
+        if (map == null) {
+            player.sendMessage(
+                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+            return;
+        }
         map.settings().modifyUpdateRequest(req -> req.setQualityOverride(newQuality));
         if (doMapUpdate(player, map)) {
             player.sendMessage(Component.text("Set quality override to " + newQuality));
@@ -223,6 +264,11 @@ public class MapAlterCommand {
         var setting = context.get(settingsArg);
         var json = context.get(settingDataArg);
 
+        if (map == null) {
+            player.sendMessage(
+                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+            return;
+        }
         var result = setting.codec().decode(Transcoder.JSON, json);
         switch (result) {
             case Result.Ok(Object data) -> {

@@ -19,6 +19,7 @@ public class ChatChannelDisplay implements ActionBar.Provider {
 
     private static final BadSprite GLOBAL = BadSprite.require("hud/chat/global_channel");
     private static final BadSprite LOCAL = BadSprite.require("hud/chat/local_channel");
+    private static final BadSprite STAFF = BadSprite.require("hud/chat/staff_channel");
 
     private ChatChannelDisplay() {
     }
@@ -26,7 +27,11 @@ public class ChatChannelDisplay implements ActionBar.Provider {
     @Override
     public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
         var channel = PlayerDataV2.fromPlayer(player).getSetting(PlayerSettings.CHAT_CHANNEL);
-        var sprite = channel.equals(ClientChatMessageData.CHANNEL_GLOBAL) ? GLOBAL : LOCAL;
+        var sprite = switch (channel) {
+            case ClientChatMessageData.CHANNEL_LOCAL -> LOCAL;
+            case ClientChatMessageData.CHANNEL_STAFF -> STAFF;
+            default -> GLOBAL;
+        };
         var offset = player.getItemInOffHand().isAir() ? NORMAL_OFFSET : OFF_HAND_OFFSET;
 
         builder.pos(offset);

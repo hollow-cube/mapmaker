@@ -3,6 +3,7 @@ package net.hollowcube.worldconverter;
 
 import net.kyori.adventure.nbt.*;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.Section;
@@ -56,7 +57,7 @@ public class AnvilLoader {
         return chunk;
     }
 
-    private static void loadSections(@NotNull Chunk chunk, @NotNull CompoundBinaryTag chunkData) {
+    private static void loadSections(@NotNull Chunk chunk, @NotNull CompoundBinaryTag chunkData) throws IOException {
         for (BinaryTag sectionTag : chunkData.getList("sections", BinaryTagTypes.COMPOUND)) {
             final CompoundBinaryTag sectionData = (CompoundBinaryTag) sectionTag;
 
@@ -140,7 +141,7 @@ public class AnvilLoader {
         }
     }
 
-    private static Block[] loadBlockPalette(@NotNull ListBinaryTag paletteTag) {
+    private static Block[] loadBlockPalette(@NotNull ListBinaryTag paletteTag) throws IOException {
         Block[] convertedPalette = new Block[paletteTag.size()];
         for (int i = 0; i < convertedPalette.length; i++) {
             CompoundBinaryTag paletteEntry = paletteTag.getCompound(i);
@@ -157,7 +158,7 @@ public class AnvilLoader {
                         properties.put(property.getKey(), propertyValue.value());
                     } else {
                         LOGGER.warn("Fail to parse block state properties {}, expected a string for {}, but contents were {}",
-                                propertiesNBT, property.getKey(), TagStringIOExt.writeTag(property.getValue()));
+                                    propertiesNBT, property.getKey(), MinestomAdventure.tagStringIO().asString(property.getValue()));
                     }
                 }
                 if (!properties.isEmpty()) block = block.withProperties(properties);

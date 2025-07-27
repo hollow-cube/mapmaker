@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":modules:canvas:api"))
     implementation(project(":modules:canvas:impl-standalone"))
     implementation(project(":modules:core"))
+    implementation(project(":modules:datafix"))
     implementation(project(":modules:map"))
     implementation(project(":modules:terraform"))
 
@@ -57,7 +58,7 @@ graalvmNative {
             fallback.set(false)
             buildArgs(
                 listOf(
-                    "--enable-native-access=ALL-UNNAMED",
+                    "--enable-native-access=ALL-UNNAMED", "-H:+AllowVMInspection",
                     "--features=net.hollowcube.nativeimage.HCNativeImageFeature",
                     "--static-nolibc", "--no-fallback",
                     "--emit build-report",

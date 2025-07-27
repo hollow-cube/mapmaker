@@ -240,7 +240,7 @@ public final class SchematicCommands {
             }
 
             var origin = player.getPosition();
-            session.buildTask("we-copy")
+            var task = session.buildTask("we-copy")
                     .metadata() //todo
                     .compute(RegionFunctions.replace(region, mask, Pattern.air()))
                     .post(result -> {
@@ -253,7 +253,10 @@ public final class SchematicCommands {
                         clipboard.setData(result.undoBuffer().toSchematic(offset));
                         player.sendMessage(Messages.CLIPBOARD_COPY.with(result.blocksChanged()));
                     })
-                    .dryRun();
+                              .dryRunIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -284,8 +287,8 @@ public final class SchematicCommands {
             var mask = context.get(maskArg);
 
             if (flags.contains(Flags.MASK)) {
-                //todo idk what exception this should be
-                Check.argCondition(mask == null, "Mask is required when using the mask flag");
+                player.sendMessage("Mask is required when using the mask flag");
+                return;
             } else mask = Mask.always();
 
             // Warnings for currently unsupported flags
@@ -305,7 +308,7 @@ public final class SchematicCommands {
             }
 
             var origin = player.getPosition();
-            session.buildTask("we-cut")
+            var task = session.buildTask("we-cut")
                     .metadata() //todo
                     .compute(RegionFunctions.replace(region, mask, pattern))
                     .post(result -> {
@@ -313,7 +316,10 @@ public final class SchematicCommands {
                         clipboard.setData(result.undoBuffer().toSchematic(offset));
                         player.sendMessage(Messages.CLIPBOARD_CUT.with(result.blocksChanged()));
                     })
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -368,8 +374,8 @@ public final class SchematicCommands {
             var mask = context.get(maskArg);
 
             if (flags.contains(Flags.MASK)) {
-                //todo idk what exception this should be
-                Check.argCondition(mask == null, "Mask is required when using the mask flag");
+                player.sendMessage("Mask is required when using the mask flag");
+                return;
             } else mask = Mask.always();
             if (flags.contains(Flags.AIR_SKIP)) {
                 mask = Mask.and(mask, Mask.not(Mask.air()));
@@ -405,7 +411,7 @@ public final class SchematicCommands {
             }
 
             var sourceMask = mask;
-            session.buildTask("we-paste")
+            var submitted = session.buildTask("we-paste")
                     .metadata() //todo
                     .compute((task, world) -> {
                         var buffer = BlockBuffer.builder(world); //, min, max);
@@ -430,7 +436,10 @@ public final class SchematicCommands {
                         }
                         player.sendMessage(Messages.CLIPBOARD_PASTE.with(result.blocksChanged()));
                     })
-                    .submit();
+                                   .submitIfCapacity();
+            if (submitted == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 

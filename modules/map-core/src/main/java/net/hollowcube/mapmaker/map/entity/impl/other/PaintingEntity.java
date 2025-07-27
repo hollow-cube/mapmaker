@@ -12,6 +12,7 @@ import net.minestom.server.entity.metadata.other.PaintingMeta;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.registry.RegistryTranscoder;
 import net.minestom.server.sound.SoundEvent;
+import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -60,11 +61,12 @@ public class PaintingEntity extends MapEntity {
                 get(DataComponents.PAINTING_VARIANT)).orElseThrow());
 
         var meta = getEntityMeta();
-        tag.putByte("facing", (byte) switch (meta.getOrientation()) {
+        tag.putByte("facing", (byte) switch (meta.getDirection()) {
             case SOUTH -> 0;
             case WEST -> 1;
             case NORTH -> 2;
             case EAST -> 3;
+            default -> 0;
         });
     }
 
@@ -79,7 +81,7 @@ public class PaintingEntity extends MapEntity {
         }
 
         var meta = getEntityMeta();
-        meta.setOrientation(readOrientation(tag));
+        meta.setDirection(readDirection(tag));
     }
 
     @Override
@@ -87,15 +89,20 @@ public class PaintingEntity extends MapEntity {
         super.legacyLoad(buffer, version);
 
         // Orientation is part of the entity object data, not the generic metadata entries
-        getEntityMeta().setOrientation(buffer.read(NetworkBuffer.Enum(PaintingMeta.Orientation.class)));
+        getEntityMeta().setDirection(switch (buffer.read(NetworkBuffer.VAR_INT)) {
+            case 1 -> Direction.WEST;
+            case 2 -> Direction.NORTH;
+            case 3 -> Direction.EAST;
+            default -> Direction.SOUTH;
+        });
     }
 
-    private @NotNull PaintingMeta.Orientation readOrientation(@NotNull CompoundBinaryTag tag) {
+    private @NotNull Direction readDirection(@NotNull CompoundBinaryTag tag) {
         return switch (tag.getByte("facing", (byte) 0)) {
-            case 1 -> PaintingMeta.Orientation.WEST;
-            case 2 -> PaintingMeta.Orientation.NORTH;
-            case 3 -> PaintingMeta.Orientation.EAST;
-            default -> PaintingMeta.Orientation.SOUTH;
+            case 1 -> Direction.WEST;
+            case 2 -> Direction.NORTH;
+            case 3 -> Direction.EAST;
+            default -> Direction.SOUTH;
         };
     }
 }

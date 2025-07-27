@@ -23,12 +23,16 @@ public class V4307 extends DataVersion {
         var hiddenComponents = Value.emptyList();
         fixGeneric(dataComponents, hiddenComponents, "minecraft:can_place_on", "predicates");
         fixGeneric(dataComponents, hiddenComponents, "minecraft:can_break", "predicates");
-        fixGeneric(dataComponents, hiddenComponents, "minecraft:trim", null);
-        fixGeneric(dataComponents, hiddenComponents, "minecraft:unbreakable", null);
-        fixGeneric(dataComponents, hiddenComponents, "minecraft:dyed_color", "rgb");
+        fixGeneric(dataComponents, hiddenComponents, "minecraft:trim");
+        fixGeneric(dataComponents, hiddenComponents, "minecraft:unbreakable");
+
+        // "color" is checked here aswell because of a bad data fix from the past that caused { color: 0 } to be saved instead of { rgb: 0 }
+        // Map: 3681b846-1137-4b53-a689-610d9a941b3f for example
+        fixGeneric(dataComponents, hiddenComponents, "minecraft:dyed_color", "rgb", "color");
         fixGeneric(dataComponents, hiddenComponents, "minecraft:attribute_modifiers", "modifiers");
         fixGeneric(dataComponents, hiddenComponents, "minecraft:enchantments", "levels");
         fixGeneric(dataComponents, hiddenComponents, "minecraft:stored_enchantments", "levels");
+        fixGeneric(dataComponents, hiddenComponents, "minecraft:jukebox_playable", "song");
 
         boolean hideTooltip = dataComponents.remove("minecraft:hide_tooltip").as(Boolean.class, false);
         boolean hideAdditionalTooltip = dataComponents.remove("minecraft:hide_additional_tooltip").as(Boolean.class, false);
@@ -51,15 +55,18 @@ public class V4307 extends DataVersion {
         return null;
     }
 
-    private static void fixGeneric(Value dataComponents, Value hiddenComponents, String name, @Nullable String field) {
+    private static void fixGeneric(Value dataComponents, Value hiddenComponents, String name, String... fields) {
         var component = dataComponents.get(name);
 
         var showInTooltip = component.remove("show_in_tooltip").as(Boolean.class, true);
         if (!showInTooltip) hiddenComponents.put(name);
-        if (field == null) return;
 
-        var flat = component.get(field);
-        if (!flat.isNull()) dataComponents.put(name, flat);
+        for (var field : fields) {
+            var flat = component.get(field);
+            if (flat.isNull()) continue;
+            dataComponents.put(name, flat);
+            break;
+        }
     }
 
     static {

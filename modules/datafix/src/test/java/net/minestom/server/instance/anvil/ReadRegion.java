@@ -1,6 +1,6 @@
 package net.minestom.server.instance.anvil;
 
-import net.kyori.adventure.nbt.TagStringIOExt;
+import net.minestom.server.adventure.MinestomAdventure;
 
 import java.nio.file.Path;
 
@@ -32,7 +32,7 @@ public class ReadRegion {
 //                System.out.println(level.keySet());
                 var entities = chunk.getList("Entities");
                 for (var entity : entities) {
-                    System.out.println("ENT: " + TagStringIOExt.writeTag(entity));
+                    System.out.println("ENT: " + MinestomAdventure.tagStringIO().asString(entity));
                 }
 //                var tileEntities = chunk.getList("block_entities");
 //                for (var tileEntity : tileEntities) {

@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.instance;
 
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.Section;
@@ -78,11 +79,6 @@ public class EmptyChunk extends Chunk {
     }
 
     @Override
-    public long getLastChangeTime() {
-        return 0;
-    }
-
-    @Override
     public @NotNull SendablePacket getFullDataPacket() {
         return createChunkPacket();
     }
@@ -94,7 +90,7 @@ public class EmptyChunk extends Chunk {
             for (Section section : SECTIONS) {
                 networkBuffer.write(SHORT, (short) section.blockPalette().count());
                 networkBuffer.write(Palette.BLOCK_SERIALIZER, section.blockPalette());
-                networkBuffer.write(Palette.BIOME_SERIALIZER, section.biomePalette());
+                networkBuffer.write(Palette.biomeSerializer(MinecraftServer.getBiomeRegistry().size()), section.biomePalette());
             }
         });
 

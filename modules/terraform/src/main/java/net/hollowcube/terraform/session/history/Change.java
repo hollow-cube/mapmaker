@@ -14,7 +14,7 @@ public interface Change {
                         .metadata() //todo
                         .buffer(undo)
                         .ephemeral()
-                        .submit();
+                       .submitForce();
             }
 
             @Override
@@ -23,7 +23,7 @@ public interface Change {
                         .metadata()
                         .buffer(redo)
                         .ephemeral()
-                        .submit();
+                       .submitForce();
             }
         };
     }

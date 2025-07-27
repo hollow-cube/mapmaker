@@ -30,7 +30,7 @@ public class HCNativeImageFeature implements Feature {
                 .enableClassInfo()
                 .enableFieldInfo()
                 .enableAnnotationInfo()
-                .acceptPackages("net.hollowcube.mapmaker")
+                .acceptPackages("net.hollowcube.mapmaker", "net.hollowcube.posthog")
                 .scan()) {
 
             scanResult.getSubclasses(Record.class)
@@ -64,6 +64,8 @@ public class HCNativeImageFeature implements Feature {
         for (var ctor : gsonClass.getDeclaredConstructors())
             RuntimeReflection.register(ctor);
         for (var field : gsonClass.getDeclaredFields())
+            RuntimeReflection.register(field);
+        for (var field : gsonClass.getDeclaredMethods())
             RuntimeReflection.register(field);
     }
 

@@ -108,14 +108,15 @@ public final class TerraformBiomeChunk {
         }
     }
 
-    public static void sendBiomeUpdates(@NotNull List<Chunk> chunks) {
+    public static void sendBiomeUpdates(@NotNull TerraformInstanceBiomes biomes, @NotNull List<Chunk> chunks) {
         List<ChunkBiomesPacket.ChunkBiomeData> data = new ArrayList<>();
         for (Chunk chunk : chunks) {
             data.add(new ChunkBiomesPacket.ChunkBiomeData(
                     chunk.getChunkX(), chunk.getChunkZ(),
                     ProtocolUtil.makeArray(1024, buffer -> {
                         for (Section section : chunk.getSections()) {
-                            Palette.BIOME_SERIALIZER.write(buffer, section.biomePalette());
+                            var serializer = Palette.biomeSerializer(biomes.size());
+                            buffer.write(serializer, section.biomePalette());
                         }
                     })
             ));

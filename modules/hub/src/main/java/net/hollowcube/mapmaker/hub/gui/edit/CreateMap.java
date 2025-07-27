@@ -23,8 +23,6 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class CreateMap extends View {
-    private static final System.Logger logger = System.getLogger(CreateMap.class.getSimpleName());
-
     public static final String SIG_MAP_CREATED = "map_created";
 
     private @ContextObject Player player;

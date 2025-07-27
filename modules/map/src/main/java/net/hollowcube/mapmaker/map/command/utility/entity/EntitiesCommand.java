@@ -5,7 +5,8 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntity;
-import net.kyori.adventure.nbt.TagStringIOExt;
+import net.hollowcube.mapmaker.map.util.NbtUtil;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,7 +37,7 @@ public class EntitiesCommand extends CommandDsl {
         entities.forEach(entity -> {
             player.sendMessage(" - " + entity.getEntityType() + " at " + entity.getPosition());
             if (entity instanceof ObjectEntity marker) {
-                player.sendMessage("   " + TagStringIOExt.writeTag(marker.getData()));
+                player.sendMessage(Component.text("   ").append(NbtUtil.prettyPrint(marker.getData())));
             }
         });
     }

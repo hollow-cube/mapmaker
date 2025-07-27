@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class MapLeaderboardDeleteCommand extends CommandDsl {
-    private final Argument<@NotNull MapData> mapArg;
+    private final Argument<@Nullable MapData> mapArg;
     private final Argument<@Nullable String> playerArg;
 
     private final MapService mapService;
@@ -28,7 +29,7 @@ public class MapLeaderboardDeleteCommand extends CommandDsl {
         description = "Removes a player's or all completion times on a map";
         examples = List.of("/map lb delete 123-456-789", "/map lb delete 123-456-789 SethPRG");
 
-        mapArg = CoreArgument.PlayableMap("map", mapService)
+        mapArg = CoreArgument.Map("map", mapService)
                 .description("The ID of the map to delete entries from");
         playerArg = CoreArgument.AnyPlayerId("player", playerService)
                 .description("The player (optional) to delete the entries of");
@@ -38,15 +39,20 @@ public class MapLeaderboardDeleteCommand extends CommandDsl {
     }
 
     private void handleDeleteLeaderboard(@NotNull Player player, @NotNull CommandContext context) {
-        var playerId = PlayerDataV2.fromPlayer(player).id();
-
         var map = context.get(mapArg);
         var target = context.get(playerArg);
+
+        if (map == null) {
+            player.sendMessage(
+                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+            return;
+        }
         if (target == null) {
             player.sendMessage("currently you cannot delete an entire leaderboard");
             return;
         }
 
+        var playerId = PlayerDataV2.fromPlayer(player).id();
         try {
             mapService.deletePlaytimeLeaderboard(playerId, map.id(), target);
             player.sendMessage("deleted for " + target);

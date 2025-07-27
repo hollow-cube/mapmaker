@@ -23,13 +23,13 @@ public class ItemFrameInteractionRule implements BlockInteractionRule {
         var entity = this.glowing ? new ItemFrameEntity.Glowing(UUID.randomUUID()) : new ItemFrameEntity(UUID.randomUUID());
 
         var meta = (ItemFrameMeta) entity.getEntityMeta();
-        meta.setOrientation(switch (interaction.blockFace()) {
-            case BOTTOM -> ItemFrameMeta.Orientation.DOWN;
-            case TOP -> ItemFrameMeta.Orientation.UP;
-            case NORTH -> ItemFrameMeta.Orientation.NORTH;
-            case SOUTH -> ItemFrameMeta.Orientation.SOUTH;
-            case WEST -> ItemFrameMeta.Orientation.WEST;
-            case EAST -> ItemFrameMeta.Orientation.EAST;
+        meta.setDirection(switch (interaction.blockFace()) {
+            case BOTTOM -> Direction.DOWN;
+            case TOP -> Direction.UP;
+            case NORTH -> Direction.NORTH;
+            case SOUTH -> Direction.SOUTH;
+            case WEST -> Direction.WEST;
+            case EAST -> Direction.EAST;
         });
 
         var pos = this.calculatePlacementPos(interaction.blockPosition(), interaction.blockFace());

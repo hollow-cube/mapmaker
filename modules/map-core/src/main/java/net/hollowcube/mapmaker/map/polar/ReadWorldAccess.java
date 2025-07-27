@@ -88,9 +88,9 @@ public class ReadWorldAccess implements PolarWorldAccess {
         if (buffer.read(NetworkBuffer.NBT) instanceof CompoundBinaryTag worldData) {
 
             // Upgrade the world if needed
-            if (dataVersion != -1 && dataVersion < MapWorld.DATA_VERSION) {
+            if (dataVersion != -1 && dataVersion < DataFixer.maxVersion()) {
                 worldData = (CompoundBinaryTag) DataFixer.upgrade(HCDataTypes.WORLD, Transcoder.NBT,
-                        worldData, dataVersion, MapWorld.DATA_VERSION);
+                        worldData, dataVersion, DataFixer.maxVersion());
             }
 
             // Apply the tags to the world.
@@ -123,9 +123,9 @@ public class ReadWorldAccess implements PolarWorldAccess {
         var chunkData = (CompoundBinaryTag) buffer.read(NetworkBuffer.NBT);
 
         // Upgrade the chunk if needed
-        if (dataVersion < MapWorld.DATA_VERSION) {
+        if (dataVersion < DataFixer.maxVersion()) {
             chunkData = (CompoundBinaryTag) DataFixer.upgrade(HCDataTypes.CHUNK, Transcoder.NBT,
-                    chunkData, dataVersion, MapWorld.DATA_VERSION);
+                    chunkData, dataVersion, DataFixer.maxVersion());
         }
 
         // Load the chunk NBT

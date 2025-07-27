@@ -11,6 +11,7 @@ import io.opentelemetry.semconv.SemanticAttributes;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.backpack.BackpackItem;
+import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.player.DisplayName;
@@ -48,6 +49,7 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(BackpackItem.class, new EnumTypeAdapter<>(BackpackItem.class))
             .registerTypeAdapter(RewardType.class, new EnumTypeAdapter<>(RewardType.class))
             .registerTypeAdapter(MapTags.Tag.class, new EnumTypeAdapter<>(MapTags.Tag.class))
+            .registerTypeAdapter(InviteType.class, new EnumTypeAdapter<>(InviteType.class))
             .registerTypeAdapter(MapVerification.class, new LenientEnumTypeAdapter<>(MapVerification.class))
             .registerTypeAdapter(MapSize.class, new LenientEnumTypeAdapter<>(MapSize.class))
             .registerTypeAdapter(PersonalizedMapData.Progress.class, new EnumTypeAdapter<>(PersonalizedMapData.Progress.class))

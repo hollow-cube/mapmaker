@@ -6,10 +6,14 @@ import net.hollowcube.command.CommandExecutor;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.util.CommandCategory;
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
+import net.hollowcube.compat.moulberrytweaks.debugrender.DebugShape;
+import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderAddPacket;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.hollowcube.mapmaker.map.runtime.MapAllocator;
@@ -20,8 +24,9 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.ComponentUtil;
-import net.kyori.adventure.nbt.TagStringIOExt;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.LightingChunk;
@@ -39,7 +44,10 @@ public class DebugCommand extends CommandDsl {
     private final CommandCondition adminCondition;
     private final CommandCondition localCondition;
 
-    public DebugCommand(@NotNull PlayerService playerService, @NotNull PermManager permManager, @NotNull MapService mapService, @NotNull MapAllocator allocator) {
+    public DebugCommand(
+            @NotNull PlayerService playerService, @NotNull PermManager permManager, @NotNull MapService mapService,
+            @NotNull MapAllocator allocator
+    ) {
         super("debug");
         this.allocator = allocator;
 
@@ -47,7 +55,8 @@ public class DebugCommand extends CommandDsl {
         category = CommandCategory.HIDDEN;
 
         adminCondition = permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN);
-        localCondition = ($, $$) -> ServerRuntime.getRuntime().isDevelopment() ? CommandCondition.ALLOW : CommandCondition.DENY;
+        localCondition = ($, $$) -> ServerRuntime.getRuntime().isDevelopment() ? CommandCondition.ALLOW
+                : CommandCondition.DENY;
 
         // Mapmaker stuff
         createPermissionlessSubcommand("rp", this::handleDebugResourcePack,
@@ -77,17 +86,22 @@ public class DebugCommand extends CommandDsl {
                 "Rebuild the heightmap in the map");
         createPermissionedSubcommand("yndranth", this::handleYndranthDebug,
                 "dump block nbt directly");
+        createPermissionedSubcommand("tree", this::handleTreeDebug,
+                "show map octree");
     }
 
-    public @NotNull CommandDsl createPermissionlessSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
+    public @NotNull CommandDsl createPermissionlessSubcommand(
+            @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
         return createSubcommand(name, handler, null, description);
     }
 
-    public @NotNull CommandDsl createPermissionedSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
+    public @NotNull CommandDsl createPermissionedSubcommand(
+            @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
         return createSubcommand(name, handler, adminCondition, description);
     }
 
-    public @NotNull CommandDsl createLocalSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
+    public @NotNull CommandDsl createLocalSubcommand(
+            @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
         return createSubcommand(name, handler, localCondition, description);
     }
 
@@ -117,7 +131,10 @@ public class DebugCommand extends CommandDsl {
         player.sendMessage("Release: " + !ServerRuntime.getRuntime().isDevelopment());
     }
 
-    private @NotNull CommandDsl createSubcommand(@NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @Nullable CommandCondition condition, @NotNull String description) {
+    private @NotNull CommandDsl createSubcommand(
+            @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @Nullable CommandCondition condition,
+            @NotNull String description
+    ) {
         var cmd = new CommandDsl(name);
         cmd.setDescription(description);
         cmd.setCondition(condition);
@@ -148,12 +165,13 @@ public class DebugCommand extends CommandDsl {
             bd.sendDebugInfo(player, block);
         } else {
             if (block.handler() != null) {
-                player.sendMessage("Block: " + block.handler().getKey() + "@" + block.handler().getClass().getSimpleName());
+                player.sendMessage(
+                        "Block: " + block.handler().getKey() + "@" + block.handler().getClass().getSimpleName());
             } else {
                 player.sendMessage("Block: " + "no handler");
             }
 
-            player.sendMessage(block.nbt() == null ? "No block NBT" : TagStringIOExt.writeTag(block.nbt()));
+            player.sendMessage(block.nbt() == null ? Component.text("No block NBT") : NbtUtil.prettyPrint(block.nbt()));
         }
     }
 
@@ -210,6 +228,34 @@ public class DebugCommand extends CommandDsl {
         allocator.showDebugInfo(player);
     }
 
+    private void handleTreeDebug(@NotNull Player player, @NotNull CommandContext context) {
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null) {
+            player.sendMessage("You are not in a map world!");
+            return;
+        }
+
+        player.scheduleNextTick(_ -> {
+            var boundingBoxes = world.octree().debugBoundingBoxes();
+            player.sendMessage("Found " + boundingBoxes.size() + " bounding boxes in octree.");
+
+            int i = 0;
+            for (var bb : boundingBoxes) {
+                var color = bb.isObject() ? 0x00FF00 : 0x0000FF; // Green for objects, blue for tree
+                var size = bb.boundingBox().size();
+                if (size.isZero()) {
+                    size = new Vec(0.5);
+                }
+                new ClientboundDebugRenderAddPacket(
+                        Key.key("octree", String.valueOf(i++)),
+                        new DebugShape.Box(bb.boundingBox().center(), size, Quaternion.ZERO,
+                                0, color | 0xFF000000, 5),
+                        0, 20 * 20).send(player); // 20s
+            }
+        });
+
+    }
+
     private void relightWorld(@NotNull Player player, @NotNull CommandContext context) {
         queueRateLimitedWorldUpdate(player, "relight", batch -> {
             LightingChunk.relight(player.getInstance(), batch);
@@ -217,7 +263,8 @@ public class DebugCommand extends CommandDsl {
         }, 50);
     }
 
-    private void queueRateLimitedWorldUpdate(@NotNull Player player, @NotNull String name, @NotNull Consumer<List<Chunk>> action, int rate) {
+    private void queueRateLimitedWorldUpdate(
+            @NotNull Player player, @NotNull String name, @NotNull Consumer<List<Chunk>> action, int rate) {
         FutureUtil.submitVirtual(() -> {
             var chunks = List.copyOf(player.getInstance().getChunks());
             int nBatches = (chunks.size() + rate - 1) / rate;

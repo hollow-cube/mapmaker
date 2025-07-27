@@ -10,12 +10,12 @@ import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public class MapArgument extends Argument<Optional<MapData>> {
+public class MapArgument extends Argument<@Nullable MapData> {
 
     private final MapService mapService;
 
@@ -25,7 +25,7 @@ public class MapArgument extends Argument<Optional<MapData>> {
     }
 
     @Override
-    public @NotNull ParseResult<Optional<MapData>> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public @NotNull ParseResult<@Nullable MapData> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
         String mapId = reader.readWord(WordType.BRIGADIER);
         if (!(sender instanceof Player player)) return syntaxError(-1);
 
@@ -50,12 +50,12 @@ public class MapArgument extends Argument<Optional<MapData>> {
         return new ParseResult.Failure<>(-1);
     }
 
-    private static ParseResult.Success<Optional<MapData>> getOrEmpty(Supplier<MapData> supplier) {
+    private static ParseResult.Success<@Nullable MapData> getOrEmpty(Supplier<MapData> supplier) {
         return new ParseResult.Success<>(() -> {
             try {
-                return Optional.ofNullable(supplier.get());
+                return supplier.get();
             } catch (Throwable ignored) {
-                return Optional.empty();
+                return null;
             }
         });
     }

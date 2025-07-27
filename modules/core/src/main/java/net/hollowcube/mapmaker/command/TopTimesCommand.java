@@ -16,8 +16,7 @@ import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Optional;
+import org.jetbrains.annotations.Nullable;
 
 public class TopTimesCommand extends CommandDsl {
 
@@ -26,7 +25,7 @@ public class TopTimesCommand extends CommandDsl {
     private static final String MAP_CANT_HAVE_TIMES = "commands.top_times.map_cant_have_top_times";
     private static final Component NO_MAP_PLAYED = Component.translatable("commands.top_times.no_maps_played");
 
-    private final Argument<Optional<MapData>> mapArg;
+    private final Argument<@Nullable MapData> mapArg;
 
     private final MapService maps;
     private final PlayerService players;
@@ -50,7 +49,7 @@ public class TopTimesCommand extends CommandDsl {
     private void showTopTimes(@NotNull Player player, @NotNull CommandContext context) {
         MapData map;
         if (context.has(mapArg)) {
-            map = context.get(mapArg).orElse(null);
+            map = context.get(mapArg);
             if (map == null) {
                 player.sendMessage(Component.translatable(NO_MAP_FOUND, Component.text(context.getRaw(mapArg))));
                 return;

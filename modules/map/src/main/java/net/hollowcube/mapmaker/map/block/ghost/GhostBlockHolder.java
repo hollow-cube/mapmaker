@@ -18,7 +18,6 @@ import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -64,8 +63,8 @@ public class GhostBlockHolder implements Block.Getter, Block.Setter {
     private final Player player;
     private final Instance instance;
 
-    private final Long2ObjectMap<Block> blocks = new Long2ObjectArrayMap<>();
-    private final Long2ObjectMap<TaskWrapper> tasks = new Long2ObjectArrayMap<>();
+    private Long2ObjectMap<Block> blocks = new Long2ObjectArrayMap<>();
+    private Long2ObjectMap<TaskWrapper> tasks = new Long2ObjectArrayMap<>();
 
     private GhostBlockHolder(@NotNull Player player) {
         this.player = player;
@@ -105,17 +104,19 @@ public class GhostBlockHolder implements Block.Getter, Block.Setter {
     }
 
     public void clear() {
-        Set.copyOf(tasks.values()).forEach(TaskWrapper::cancel);
-        tasks.clear();
+        var oldTasks = this.tasks;
+        this.tasks = new Long2ObjectArrayMap<>();
+        var oldBlocks = this.blocks;
+        this.blocks = new Long2ObjectArrayMap<>();
 
-        for (var entry : blocks.long2ObjectEntrySet()) {
+        oldTasks.values().forEach(TaskWrapper::cancel);
+        for (var entry : oldBlocks.long2ObjectEntrySet()) {
             var blockPosition = PositionUtil.unpackPosition(entry.getLongKey());
             if (!instance.isChunkLoaded(blockPosition)) continue;
 
             var instanceBlock = instance.getBlock(blockPosition, Condition.TYPE);
             player.sendPacket(new BlockChangePacket(blockPosition, instanceBlock));
         }
-        blocks.clear();
     }
 
     public @NotNull Map<Long, Block> save() {
@@ -165,11 +166,12 @@ public class GhostBlockHolder implements Block.Getter, Block.Setter {
         }
 
         public void cancel() {
+            var handle = this.handle;
+            this.handle = null;
             if (handle == null) return;
             tasks.remove(PositionUtil.packPosition(blockPosition));
             setBlock(blockPosition, null);
             handle.cancel();
-            handle = null;
         }
 
         @Override

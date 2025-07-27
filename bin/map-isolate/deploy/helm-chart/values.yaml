@@ -22,3 +22,5 @@ service:
 
 mapmaker:
   resourcePackHash: ""
+
+env: { }

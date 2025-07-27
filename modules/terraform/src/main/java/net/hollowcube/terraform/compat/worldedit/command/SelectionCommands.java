@@ -468,11 +468,14 @@ public final class SelectionCommands {
 
             // This is kind of a hack to ensure that the count is queued like any other operation.
             // Basically we schedule a BS task which does the expected counting and then returns an empty buffer.
-            session.buildTask("we-count")
+            var task = session.buildTask("we-count")
                     .compute(counter)
                     .post(result -> player.sendMessage(WEMessages.SELECTION_COUNT.with(counter.total())))
                     .ephemeral()
-                    .dryRun();
+                              .dryRunIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -512,7 +515,7 @@ public final class SelectionCommands {
 
             // This is kind of a hack to ensure that the count is queued like any other operation.
             // Basically we schedule a BS task which does the expected counting and then returns an empty buffer.
-            session.buildTask("we-distr")
+            var task = session.buildTask("we-distr")
                     .compute(counter)
                     .post(result -> {
                         //todo translation keys
@@ -533,7 +536,10 @@ public final class SelectionCommands {
                         }
                     })
                     .ephemeral()
-                    .dryRun();
+                              .dryRunIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 

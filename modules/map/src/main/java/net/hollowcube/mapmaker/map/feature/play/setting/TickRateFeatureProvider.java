@@ -36,7 +36,9 @@ public class TickRateFeatureProvider extends AbstractSettingFeatureProvider {
     private static int getTickRate(@NotNull Player player, @NotNull MapWorld world) {
         if (!world.isPlaying(player)) return ServerFlag.SERVER_TICKS_PER_SECOND;
 
-        var state = SaveState.fromPlayer(player);
+        var state = SaveState.optionalFromPlayer(player);
+        if (state == null) return ServerFlag.SERVER_TICKS_PER_SECOND; // Sanity
+
         var playstate = state.state(PlayState.class);
         return Objects.requireNonNullElse(playstate.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
                 .get(MapSettings.TICK_RATE, world.map().settings()), ServerFlag.SERVER_TICKS_PER_SECOND);

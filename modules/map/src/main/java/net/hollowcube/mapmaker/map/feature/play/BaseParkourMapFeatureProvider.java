@@ -20,12 +20,14 @@ import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectDataV2;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.map.feature.play.handlers.SpectateHandler;
 import net.hollowcube.mapmaker.map.feature.play.item.*;
+import net.hollowcube.mapmaker.map.feature.play.setting.OnlySprintFeatureProvider;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.hollowcube.mapmaker.map.item.checkpoint.CheckpointItem;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.util.CustomizableHotbarManager;
 import net.hollowcube.mapmaker.map.util.MapMessages;
+import net.hollowcube.mapmaker.map.util.PlayerPlayStateExtension;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
@@ -76,7 +78,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     }
 
     private static final int RESET_HEIGHT_OFFSET = 5;
-    private static final Tag<Integer> DEFAULT_RESET_HEIGHT = Tag.Integer("mapmaker:play/reset_height").defaultValue(-64 - RESET_HEIGHT_OFFSET);
+    public static final Tag<Integer> DEFAULT_RESET_HEIGHT = Tag.Integer("mapmaker:play/reset_height").defaultValue(-64 - RESET_HEIGHT_OFFSET);
 
     private static final TagCooldown PROGRESS_INDEX_WARNING = new TagCooldown("mapmaker:play/progress_index_warning", 5000);
     public static final Tag<List<Integer>> OWNED_ENTITIES = Tag.<List<Integer>>Transient("map_owned_entities").defaultValue(List.of());
@@ -96,9 +98,11 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
     private static final AttributeModifier NO_FALL_DAMAGE_MODIFIER = new AttributeModifier("mapmaker:play.no_fall_damage", 500, AttributeOperation.ADD_VALUE);
 
     private static final Equippable EMPTY_EQUIPPABLE = new Equippable(EquipmentSlot.CHESTPLATE, SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
-            null, null, null, false, false, false, false);
+            null, null, null, false, false, false, false,
+            false, SoundEvent.ITEM_SHEARS_SNIP);
     private static final Equippable ELYTRA_EQUIPPABLE = new Equippable(EquipmentSlot.CHESTPLATE, SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
-            "minecraft:elytra", null, null, false, false, false, false);
+            "minecraft:elytra", null, null, false, false, false,
+            false, false, SoundEvent.ITEM_SHEARS_SNIP);
 
     private static final CustomizableHotbarManager TESTING_HOTBAR = CustomizableHotbarManager.builder("hotbar/parkour/test")
             .defaultItem(0, MapDetailsItem.ID)
@@ -231,6 +235,9 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         var world = event.getMapWorld();
         if (!world.isPlaying(player)) return;
 
+        if (player instanceof PlayerPlayStateExtension ext)
+            ext.resetPlayingState();
+
         MapCompletionAnimation.cancel(player); // In case the player resets themselves
 
         // Remove any owned entities from the player
@@ -287,7 +294,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             player.scheduler().scheduleEndOfTick(() -> updatePlayerFromState(world, player, playState, isStarting));
 
             // If this is OS, reset the player as they are added
-            if (world.map().getSetting(MapSettings.ONLY_SPRINT) && !player.getTag(RESET_TAG) && event.isFirstInit()) {
+            if (!OnlySprintFeatureProvider.canSprint(playState, world) && !player.getTag(RESET_TAG) && event.isFirstInit()) {
                 player.setTag(RESET_TAG, true);
                 player.scheduleNextTick(ignored -> player.removeTag(RESET_TAG));
 //                player.sendMessage(Component.translatable("map.spectator_mode.only_sprint"));
@@ -522,7 +529,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             var saveState = SaveState.optionalFromPlayer(player);
             if (saveState == null) return;
 
-            var playState = saveState.tryGetState(PlayState.class).orElse(null);
+            var playState = saveState.tryGetState(PlayState.class);
             if (playState == null) return;
             var resetHeight = Objects.requireNonNullElseGet(playState.get(Attachments.RESET_HEIGHT),
                     () -> world.instance().getTag(DEFAULT_RESET_HEIGHT));
@@ -612,10 +619,19 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
 
         var playState = saveState.state(PlayState.class);
         // If they don't have a checkpoint or are on their last life, do a hard reset.
-        var isOutOfLives = OpUtils.mapOr(playState.get(EditLivesAction.SAVE_DATA), EditLivesAction.Data::value, 0) == 1;
+        var livesData = playState.get(EditLivesAction.SAVE_DATA);
+        var isOutOfLives = OpUtils.mapOr(livesData, EditLivesAction.Data::value, 0) == 1;
         if (playState.lastState() == null || isOutOfLives) {
             if (isOutOfLives) {
                 player.playSound(PLAYER_DEATH_SOUND);
+
+                if (livesData.deathPosition() != null) {
+                    playState = new PlayState();
+                    saveState.setState(playState);
+                    updatePlayerFromState(world, player, playState, true);
+                    resetTeleport(player, livesData.deathPosition().resolve(player.getPosition()));
+                    return;
+                }
             }
             hardReset(player, saveState);
             return;

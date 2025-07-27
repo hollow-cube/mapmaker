@@ -4,6 +4,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
+import org.jetbrains.annotations.NotNull;
 
 public final class Quaternion {
     public static final float[] ZERO = new float[]{0, 0, 0, 1};
@@ -19,6 +20,10 @@ public final class Quaternion {
     private double y;
     private double z;
     private double w;
+
+    public Quaternion() {
+        this(0, 0, 0, 1);
+    }
 
     public Quaternion(final Quaternion q) {
         this(q.x, q.y, q.z, q.w);
@@ -38,12 +43,36 @@ public final class Quaternion {
         this.w = q.w;
     }
 
+    public @NotNull Quaternion set(float x, float y, float z, float w) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.w = w;
+        return this;
+    }
+
     public Quaternion(Vec axis, double angle) {
         set(axis, angle);
     }
 
     public double norm() {
         return Math.sqrt(dot(this));
+    }
+
+    public double w() {
+        return w;
+    }
+
+    public double x() {
+        return x;
+    }
+
+    public double y() {
+        return y;
+    }
+
+    public double z() {
+        return z;
     }
 
     public double getW() {
@@ -73,6 +102,32 @@ public final class Quaternion {
         x = axis.x() * s;
         y = axis.y() * s;
         z = axis.z() * s;
+        return this;
+    }
+
+    public Quaternion mul(Quaternion q) {
+        return set(
+                (float) Math.fma(this.w, q.x(), Math.fma(this.x, q.w(), Math.fma(this.y, q.z(), -this.z * q.y()))),
+                (float) Math.fma(this.w, q.y(), Math.fma(-this.x, q.z(), Math.fma(this.y, q.w(), this.z * q.x()))),
+                (float) Math.fma(this.w, q.z(), Math.fma(this.x, q.y(), Math.fma(-this.y, q.x(), this.z * q.w()))),
+                (float) Math.fma(this.w, q.w(), Math.fma(-this.x, q.x(), Math.fma(-this.y, q.y(), -this.z * q.z())))
+        );
+    }
+
+    public @NotNull Quaternion conjugate() {
+        this.x = -this.x;
+        this.y = -this.y;
+        this.z = -this.z;
+        this.w = this.w;
+        return this;
+    }
+
+    public Quaternion normalize() {
+        float invNorm = MathUtil.invsqrt((float) Math.fma(this.x, this.x, Math.fma(this.y, this.y, Math.fma(this.z, this.z, this.w * this.w))));
+        this.x = this.x * invNorm;
+        this.y = this.y * invNorm;
+        this.z = this.z * invNorm;
+        this.w = this.w * invNorm;
         return this;
     }
 
@@ -217,4 +272,13 @@ public final class Quaternion {
                 .mulThis(new Quaternion(new Vec(0, 0, 1), Math.toRadians(angles.z())));
     }
 
+    @Override
+    public String toString() {
+        return "Quaternion{" +
+                "x=" + x +
+                ", y=" + y +
+                ", z=" + z +
+                ", w=" + w +
+                '}';
+    }
 }

@@ -150,7 +150,7 @@ public class PatternParser {
     }
 
     private @NotNull PatternTree weighted(@NotNull Token numTok) {
-        var weight = Integer.parseInt(lexer.span(numTok));
+        int weight = (int) Double.parseDouble(lexer.span(numTok));
         lexer.next(); // Eat the percent
 
         var inner = single(false);
@@ -161,7 +161,7 @@ public class PatternParser {
     }
 
     private @NotNull PatternTree legacyBlock(@NotNull Token numTok) {
-        var blockId = Integer.parseInt(lexer.span(numTok));
+        int blockId = (int) Double.parseDouble(lexer.span(numTok));
         int end = numTok.end(), colon = -1, blockData = -1;
 
         var tok = lexer.peek();

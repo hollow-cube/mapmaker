@@ -4,7 +4,6 @@ import net.hollowcube.mapmaker.map.entity.impl.other.PaintingEntity;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.metadata.other.PaintingMeta;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
@@ -25,11 +24,11 @@ public class PaintingInteractionRule implements BlockInteractionRule {
         if (variant != null) entity.set(DataComponents.PAINTING_VARIANT, variant);
 
         var meta = entity.getEntityMeta();
-        meta.setOrientation(switch (blockFace) {
-            case NORTH -> PaintingMeta.Orientation.NORTH;
-            case SOUTH -> PaintingMeta.Orientation.SOUTH;
-            case WEST -> PaintingMeta.Orientation.WEST;
-            case EAST -> PaintingMeta.Orientation.EAST;
+        meta.setDirection(switch (blockFace) {
+            case NORTH -> Direction.NORTH;
+            case SOUTH -> Direction.SOUTH;
+            case WEST -> Direction.WEST;
+            case EAST -> Direction.EAST;
             case TOP, BOTTOM -> throw new IllegalStateException("unreachable");
         });
 

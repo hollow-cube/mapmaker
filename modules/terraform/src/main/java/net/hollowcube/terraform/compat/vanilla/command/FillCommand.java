@@ -88,12 +88,14 @@ public class FillCommand extends CommandDsl {
 
         var session = LocalSession.forPlayer(player);
         session.cui().renderer().switchTo(ClientRenderer.RenderContext.NORMAL, false);
-        session.buildTask("vanilla-fill")
+        var task = session.buildTask("vanilla-fill")
                 .metadata()
                 .compute(func)
                 .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                .submit();
-
+                          .submitIfCapacity();
+        if (task == null) {
+            player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+        }
     }
 
     private enum Mode {

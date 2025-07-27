@@ -139,11 +139,14 @@ public class CloneCommand extends CommandDsl {
 
         var session = LocalSession.forPlayer(player);
         session.cui().renderer().switchTo(ClientRenderer.RenderContext.NORMAL, false);
-        session.buildTask("vanilla-clone")
+        var task = session.buildTask("vanilla-clone")
                 .metadata() // todo
                 .compute(RegionFunctions.clone(min, max, destination, sourceMask, mode == Mode.MOVE))
                 .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                .submit();
+                          .submitIfCapacity();
+        if (task == null) {
+            player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+        }
     }
 
     private enum CopyMode {

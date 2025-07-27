@@ -7,6 +7,10 @@ rootProject.name = "mapmaker"
 
 includeBuild("build-src")
 
+// Submodule-d public dependencies
+includeBuild("modules/molang")
+includeBuild("modules/schem")
+
 include(
     "modules:canvas:api",
     "modules:canvas:impl-standalone",

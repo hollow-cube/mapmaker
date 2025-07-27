@@ -200,7 +200,8 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
 
         super.close(reason);
 
-        if (autoSaveTask != null) autoSaveTask.cancel();
+        if (autoSaveTask != null)
+            autoSaveTask.cancel();
         save(false);
 
         // Unload the backing world
@@ -212,6 +213,7 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         saveLock.lock();
         try {
             if (isAutoSave) logger.info("Autosaving world {}", map().id());
+            if (!isAutoSave) logger.info("Manually saving world {}", map().id());
 
             // Save the map settings
             map().settings().withUpdateRequest(updates -> {
@@ -238,12 +240,12 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
             }
 
             // Save the players data
-            Set.copyOf(players()).forEach(p -> {
+            for (var p : Set.copyOf(players())) {
                 if (!p.isOnline()) {
                     logger.warn("Player {} is not online, removing from map {}", p.getUsername(), map().id());
                     removePlayer(p); // Sanity
                 }
-            });
+            }
             for (var player : players()) {
                 var playerData = PlayerDataV2.fromPlayer(player);
 
@@ -353,9 +355,21 @@ public class EditingMapWorld extends AbstractMapMakerMapWorld {
         } catch (Throwable t) {
             logger.error("Failed to save player state for {}", player.getUuid(), t);
         } finally {
-            player.removeTag(SaveState.TAG);
-            player.removeTag(TeleportHistoryFeatureProvider.LAST_LOCATION);
-            super.removePlayer(player);
+            // Remove the player at the end of the tick to ensure that all edit-state processing is done before
+            // they no longer have an editing state.
+            FutureUtil.waitForEndOfTick(player, () -> {
+                player.removeTag(SaveState.TAG);
+                player.removeTag(TeleportHistoryFeatureProvider.LAST_LOCATION);
+                super.removePlayer(player);
+            });
+        }
+    }
+
+    @Override
+    public void queueCollisionTreeRebuild() {
+        super.queueCollisionTreeRebuild();
+        if (testWorld != null) {
+            testWorld.queueCollisionTreeRebuild();
         }
     }
 

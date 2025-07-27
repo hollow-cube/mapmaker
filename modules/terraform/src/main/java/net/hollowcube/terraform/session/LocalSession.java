@@ -144,6 +144,18 @@ public class LocalSession {
         }
     }
 
+    @ApiStatus.Internal
+    public void submitTaskForce(@NotNull Task task) {
+        taskLock.lock();
+        try {
+            var taskInternal = (TaskImpl) task;
+            tasks.add(taskInternal);
+            ((TerraformImpl) terraform()).submitTask(taskInternal);
+        } finally {
+            taskLock.unlock();
+        }
+    }
+
     /**
      * <p>Attempts to cancel the given task managed by this {@link LocalSession}.</p>
      *

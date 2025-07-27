@@ -1,10 +1,10 @@
 [versions]
-minecraft = "1.21.5"
+minecraft = "1.21.6"
 annotations = "26.0.2"
 fastutil = "8.5.15"
 gson = "2.12.1"
-adventure = "4.20.0"
-minestom = "1_21_5-1c8431a9ec"
+adventure = "4.23.0"
+minestom = "2025.07.11-1.21.7"
 posthog = "0.1.9"
 slf4j = "2.0.9"
 kafka = "3.9.0"
@@ -14,7 +14,7 @@ noxesium = "2.5.0"
 zstd = "1.5.7-2"
 otel = "1.45.0"
 otel-semconv = "1.28.0-alpha"
-polar = "1.14.2"
+polar = "1.14.6"
 similarity = "2.0.0"
 completely = "0.9.0"
 jctools = "4.0.5"
@@ -27,6 +27,7 @@ graalvm = "24.2.1"
 blossom = "2.1.0"
 velocity = "3.4.0-SNAPSHOT"
 classgraph = "4.8.179"
+included = "-INCLUDED"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
@@ -34,7 +35,7 @@ autoservice = { group = "com.google.auto.service", name = "auto-service", versio
 autoservice-annotations = { group = "com.google.auto.service", name = "auto-service-annotations", version.ref = "autoservice" }
 fastutil = { group = "it.unimi.dsi", name = "fastutil", version.ref = "fastutil" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
-minestom = { group = "net.minestom", name = "minestom-snapshots", version.ref = "minestom" }
+minestom = { group = "net.minestom", name = "minestom", version.ref = "minestom" }
 posthog = { group = "dev.hollowcube", name = "posthog-java", version.ref = "posthog" }
 slf4j = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
 slf4j-jul = { group = "org.slf4j", name = "jul-to-slf4j", version.ref = "slf4j" }
@@ -47,9 +48,10 @@ similarity = { group = "info.debatty", name = "java-string-similarity", version.
 completely = { group = "com.miguelfonseca.completely", name = "completely-core", version.ref = "completely" }
 jctools = { group = "org.jctools", name = "jctools-core", version.ref = "jctools" }
 caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
-mql = { group = "dev.hollowcube", name = "mql", version.ref = "mql" }
 json5 = { group = "de.marhali", name = "json5-java", version.ref = "json5" }
 velocity-api = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
+
+included-molang = { group = "dev.hollowcube", name = "molang", version.ref = "included" }
 
 nativeimage = { group = "org.graalvm.sdk", name = "nativeimage", version.ref = "graalvm" }
 classgraph = { group = "io.github.classgraph", name = "classgraph", version.ref = "classgraph" }

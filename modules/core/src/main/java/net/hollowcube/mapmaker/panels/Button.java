@@ -62,6 +62,7 @@ public class Button extends Element implements ButtonClickAliases {
     protected DataComponentMap extraComponents = null;
     protected Sprite sprite;
     protected boolean disableHoverSprite = false;
+    protected boolean disableTooltip = false;
 
     private OnClickTypeSlot onLeftClick;
     private OnClickTypeSlot onLeftClickAsync;
@@ -148,6 +149,11 @@ public class Button extends Element implements ButtonClickAliases {
         );
         this.extraComponents(stack.componentPatch());
 
+        return this;
+    }
+
+    public @NotNull Button disableTooltip() {
+        this.disableTooltip = true;
         return this;
     }
 
@@ -250,7 +256,11 @@ public class Button extends Element implements ButtonClickAliases {
         }
 
         if (this.itemModel == null || this.itemLore == null) return;
-        builder.editSlotsWithout(0, 0, slotWidth, slotHeight, DataComponents.TOOLTIP_DISPLAY);
+        if (this.disableTooltip) {
+            builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, Set.of()));
+        } else {
+            builder.editSlotsWithout(0, 0, slotWidth, slotHeight, DataComponents.TOOLTIP_DISPLAY);
+        }
         if (!"minecraft:stick".equals(itemModel) || itemOverlay != null)
             builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.ITEM_MODEL, itemOverlay != null ? OverlayItem.OVERLAY_ITEM_MODEL : itemModel);
         if (itemProfile != null)

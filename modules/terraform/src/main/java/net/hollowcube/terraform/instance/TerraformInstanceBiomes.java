@@ -25,6 +25,10 @@ public interface TerraformInstanceBiomes {
 
     @NotNull Component getName(@NotNull RegistryKey<Biome> key);
 
+    default int size() {
+        return keys().size();
+    }
+
     static @Nullable TerraformInstanceBiomes forInstance(@NotNull Instance instance) {
         return instance.getTag(BIOMES);
     }

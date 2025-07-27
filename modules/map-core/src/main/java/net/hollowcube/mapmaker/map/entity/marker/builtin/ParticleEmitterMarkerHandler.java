@@ -2,8 +2,9 @@ package net.hollowcube.mapmaker.map.entity.marker.builtin;
 
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
-import net.hollowcube.mql.jit.MqlCompiler;
-import net.hollowcube.mql.jit.ValueScript;
+import net.hollowcube.molang.MolangExpr;
+import net.hollowcube.molang.eval.MolangEvaluator;
+import net.hollowcube.molang.eval.MolangValue;
 import net.kyori.adventure.nbt.*;
 import net.minestom.server.color.AlphaColor;
 import net.minestom.server.color.Color;
@@ -20,44 +21,42 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.invoke.MethodHandles;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
+    private static final double MAX_PARTICLES_PER_SECOND = 100;
     public static final String ID = "mapmaker:particle_emitter";
-
-    private static final MqlCompiler<ValueScript> COMPILER;
-
-    static {
-        try {
-            COMPILER = new MqlCompiler<>(MethodHandles.privateLookupIn(ValueScript.class, MethodHandles.lookup()), ValueScript.class);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     private boolean isValid = false;
     private int lifetime; // Loop duration, in ticks. 0 for infinite
     private double rate; // Particles per tick
-    private Function<ValueScript.Variables, Particle> particle;
-    private ValueScript positionX;
-    private ValueScript positionY;
-    private ValueScript positionZ;
+    private Supplier<Particle> particle;
+    private MolangExpr positionX;
+    private MolangExpr positionY;
+    private MolangExpr positionZ;
     // Speed, count and offsetXYZ are mutually exclusive with velocityXYZ
-    private ValueScript speed;
-    private ValueScript count;
-    private ValueScript offsetX;
-    private ValueScript offsetY;
-    private ValueScript offsetZ;
+    private MolangExpr speed;
+    private MolangExpr count;
+    private MolangExpr offsetX;
+    private MolangExpr offsetY;
+    private MolangExpr offsetZ;
     // See above comment
-    private ValueScript velocityX;
-    private ValueScript velocityY;
-    private ValueScript velocityZ;
+    private MolangExpr velocityX;
+    private MolangExpr velocityY;
+    private MolangExpr velocityZ;
     // If not provided or 1, particles will be spawned. Otherwise they will not.
-    private ValueScript active;
+    private MolangExpr active;
 
-    private final ValueScript.Variables variables = new ValueScript.Variables();
+    private final Variables variables = new Variables();
+    private final MolangEvaluator molangEval = new MolangEvaluator(Map.of(
+            "variable", variables,
+            "v", variables,
+            "query", Queries.INSTANCE,
+            "q", Queries.INSTANCE
+    ));
     private double toSpawn = 0;
     private int age = -1; // Current loop age
 
@@ -100,7 +99,7 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
         while (toSpawn >= 1) {
             toSpawn--;
 
-            if (active != null && active.eval(ValueScript.Queries.INSTANCE, variables) != 1)
+            if (active != null && !molangEval.evalBool(active))
                 continue;
 
             variables.particleRandom1 = ThreadLocalRandom.current().nextDouble();
@@ -111,9 +110,9 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
             Point position = entity.getPosition();
             if (positionX != null) {
                 position = position.add(
-                        positionX.eval(ValueScript.Queries.INSTANCE, variables),
-                        positionY.eval(ValueScript.Queries.INSTANCE, variables),
-                        positionZ.eval(ValueScript.Queries.INSTANCE, variables)
+                        molangEval.eval(positionX),
+                        molangEval.eval(positionY),
+                        molangEval.eval(positionZ)
                 );
             }
 
@@ -121,19 +120,19 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
             int computedCount;
             Vec computedOffset;
             if (speed != null || count != null || offsetX != null) {
-                computedSpeed = (float) (speed != null ? speed.eval(ValueScript.Queries.INSTANCE, variables) : 0);
-                double evaledCount = count != null ? count.eval(ValueScript.Queries.INSTANCE, variables) : 1;
+                computedSpeed = (float) (speed != null ? molangEval.eval(speed) : 0);
+                double evaledCount = count != null ? molangEval.eval(count) : 1;
                 computedCount = evaledCount < 1 ? 1 : (int) evaledCount;
                 computedOffset = new Vec(
-                        offsetX != null ? offsetX.eval(ValueScript.Queries.INSTANCE, variables) : 0,
-                        offsetY != null ? offsetY.eval(ValueScript.Queries.INSTANCE, variables) : 0,
-                        offsetZ != null ? offsetZ.eval(ValueScript.Queries.INSTANCE, variables) : 0
+                        offsetX != null ? molangEval.eval(offsetX) : 0,
+                        offsetY != null ? molangEval.eval(offsetY) : 0,
+                        offsetZ != null ? molangEval.eval(offsetZ) : 0
                 );
             } else if (velocityX != null) {
                 var computedVelocity = new Vec(
-                        velocityX.eval(ValueScript.Queries.INSTANCE, variables),
-                        velocityY.eval(ValueScript.Queries.INSTANCE, variables),
-                        velocityZ.eval(ValueScript.Queries.INSTANCE, variables)
+                        molangEval.eval(velocityX),
+                        molangEval.eval(velocityY),
+                        molangEval.eval(velocityZ)
                 );
                 computedSpeed = (float) computedVelocity.length();
                 computedCount = 0;
@@ -144,7 +143,7 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
                 computedOffset = Vec.ZERO;
             }
 
-            var computedParticle = particle.apply(variables);
+            var computedParticle = particle.get();
             entity.sendPacketToViewers(new ParticlePacket(computedParticle, false, false, position, computedOffset, computedSpeed, computedCount));
         }
     }
@@ -164,7 +163,7 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
             if (!(data.get("rate") instanceof NumberBinaryTag rateTag))
                 throw new IllegalArgumentException("rate: expected number, got " + data.get("rate").getClass().getSimpleName());
             Check.argCondition(rateTag.doubleValue() <= 0, "rate: must be positive");
-            this.rate = rateTag.doubleValue();
+            this.rate = Math.min(rateTag.doubleValue(), MAX_PARTICLES_PER_SECOND / 20.0);
         } else this.rate = 1;
 
         // Lifetime
@@ -229,16 +228,16 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
         return type == BinaryTagTypes.STRING || type == BinaryTagTypes.BYTE || type == BinaryTagTypes.SHORT || type == BinaryTagTypes.INT || type == BinaryTagTypes.LONG || type == BinaryTagTypes.FLOAT || type == BinaryTagTypes.DOUBLE;
     }
 
-    private @Nullable ValueScript loadValueScript(@NotNull String name, @Nullable BinaryTag tag) {
+    private @Nullable MolangExpr loadValueScript(@NotNull String name, @Nullable BinaryTag tag) {
         if (tag == null) return null;
         if (tag instanceof StringBinaryTag scriptTag) {
             try {
-                return COMPILER.compile(scriptTag.value()).newInstance(); //todo dont use newinstance
+                return MolangExpr.parseOrThrow(scriptTag.value());
             } catch (Throwable e) {
                 throw new IllegalArgumentException(name + ": failed to compile script: " + e.getMessage());
             }
         } else if (tag instanceof NumberBinaryTag numberTag) {
-            return (ignored1, ignored2) -> numberTag.doubleValue();
+            return new MolangExpr.Num(numberTag.doubleValue());
         } else {
             throw new IllegalArgumentException(name + ": expected number or script, got " + tag.getClass().getSimpleName());
         }
@@ -248,20 +247,20 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
         switch (rawParticle) {
             case Particle.Block blockParticle when data.get("block") instanceof StringBinaryTag blockName -> {
                 try {
-                    particle = ignored -> blockParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
+                    particle = () -> blockParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
                 } catch (ArgumentSyntaxException e) {
                     throw new IllegalArgumentException("Invalid block state: " + e.getMessage());
                 }
             }
             case Particle.BlockMarker blockMarkerParticle when data.get("block") instanceof StringBinaryTag blockName -> {
                 try {
-                    particle = ignored -> blockMarkerParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
+                    particle = () -> blockMarkerParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
                 } catch (ArgumentSyntaxException e) {
                     throw new IllegalArgumentException("Invalid block state: " + e.getMessage());
                 }
             }
             case Particle.Dust dustParticle -> {
-                ValueScript red, green, blue;
+                MolangExpr red, green, blue;
                 if (data.keySet().contains("color")) {
                     var colorTag = assertVecTag("color", data.get("color"));
                     red = loadValueScript("color.r", colorTag.get(0));
@@ -269,26 +268,26 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
                     blue = loadValueScript("color.b", colorTag.get(2));
                 } else red = green = blue = null;
                 var scale = loadValueScript("scale", data.get("scale"));
-                particle = variables -> {
+                particle = () -> {
                     var p = dustParticle;
                     if (red != null && green != null && blue != null) p = p.withColor(new Color(
-                            (int) (red.eval(ValueScript.Queries.INSTANCE, variables) * 255.),
-                            (int) (green.eval(ValueScript.Queries.INSTANCE, variables) * 255.),
-                            (int) (blue.eval(ValueScript.Queries.INSTANCE, variables) * 255.)
+                            (int) (molangEval.eval(red) * 255.),
+                            (int) (molangEval.eval(green) * 255.),
+                            (int) (molangEval.eval(blue) * 255.)
                     ));
-                    if (scale != null) p = p.withScale((float) scale.eval(ValueScript.Queries.INSTANCE, variables));
+                    if (scale != null) p = p.withScale((float) molangEval.eval(scale));
                     return p;
                 };
             }
             case Particle.DustColorTransition dustColorTransitionParticle -> {
-                ValueScript red, green, blue;
+                MolangExpr red, green, blue;
                 if (data.keySet().contains("color")) {
                     var colorTag = assertVecTag("color", data.get("color"));
                     red = loadValueScript("color.r", colorTag.get(0));
                     green = loadValueScript("color.g", colorTag.get(1));
                     blue = loadValueScript("color.b", colorTag.get(2));
                 } else red = green = blue = null;
-                ValueScript tRed, tGreen, tBlue;
+                MolangExpr tRed, tGreen, tBlue;
                 if (data.keySet().contains("transition")) {
                     var transitionTag = assertVecTag("transition", data.get("transition"));
                     tRed = loadValueScript("transition.r", transitionTag.get(0));
@@ -296,25 +295,25 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
                     tBlue = loadValueScript("transition.b", transitionTag.get(2));
                 } else tRed = tGreen = tBlue = null;
                 var scale = loadValueScript("scale", data.get("scale"));
-                particle = variables -> {
+                particle = () -> {
                     var p = dustColorTransitionParticle;
                     if (red != null && green != null && blue != null) p = p.withColor(new Color(
-                            (int) (red.eval(ValueScript.Queries.INSTANCE, variables) * 255.),
-                            (int) (green.eval(ValueScript.Queries.INSTANCE, variables) * 255.),
-                            (int) (blue.eval(ValueScript.Queries.INSTANCE, variables) * 255.)
+                            (int) (molangEval.eval(red) * 255.),
+                            (int) (molangEval.eval(green) * 255.),
+                            (int) (molangEval.eval(blue) * 255.)
                     ));
                     if (tRed != null && tGreen != null && tBlue != null) p = p.withTransitionColor(new Color(
-                            (int) (tRed.eval(ValueScript.Queries.INSTANCE, variables) * 255.),
-                            (int) (tGreen.eval(ValueScript.Queries.INSTANCE, variables) * 255.),
-                            (int) (tBlue.eval(ValueScript.Queries.INSTANCE, variables) * 255.)
+                            (int) (molangEval.eval(tRed) * 255.),
+                            (int) (molangEval.eval(tGreen) * 255.),
+                            (int) (molangEval.eval(tBlue) * 255.)
                     ));
-                    if (scale != null) p = p.withScale((float) scale.eval(ValueScript.Queries.INSTANCE, variables));
+                    if (scale != null) p = p.withScale((float) molangEval.eval(scale));
                     return p;
                 };
             }
             case Particle.DustPillar dustPillarParticle when data.get("block") instanceof StringBinaryTag blockName -> {
                 try {
-                    particle = ignored -> dustPillarParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
+                    particle = () -> dustPillarParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
                 } catch (ArgumentSyntaxException e) {
                     throw new IllegalArgumentException("Invalid block state: " + e.getMessage());
                 }
@@ -322,7 +321,7 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
             // EntityEffect
             case Particle.FallingDust fallingDustParticle when data.get("block") instanceof StringBinaryTag blockName -> {
                 try {
-                    particle = ignored -> fallingDustParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
+                    particle = () -> fallingDustParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
                 } catch (ArgumentSyntaxException e) {
                     throw new IllegalArgumentException("Invalid block state: " + e.getMessage());
                 }
@@ -330,7 +329,7 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
             case Particle.Item itemParticle when data.get("item") instanceof StringBinaryTag itemName -> {
                 var material = Material.fromKey(itemName.value());
                 Check.argCondition(material == null, "Unknown item: " + itemName);
-                particle = ignored -> itemParticle.withItem(ItemStack.of(material));
+                particle = () -> itemParticle.withItem(ItemStack.of(material));
                 //todo should support custom model data and maybe other components.
             }
             // SculkCharge, Shriek, Vibration
@@ -339,16 +338,124 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
                 var green = loadValueScript("color.g", colorTag.get(1));
                 var blue = loadValueScript("color.b", colorTag.get(2));
                 var alpha = loadValueScript("color.a", colorTag.get(3));
-                particle = variables -> itemParticle.withColor(new AlphaColor(
-                        (int) (alpha.eval(ValueScript.Queries.INSTANCE, variables) * 255.),
-                        (int) (red.eval(ValueScript.Queries.INSTANCE, variables) * 255.),
-                        (int) (green.eval(ValueScript.Queries.INSTANCE, variables) * 255.),
-                        (int) (blue.eval(ValueScript.Queries.INSTANCE, variables) * 255.)
+                particle = () -> itemParticle.withColor(new AlphaColor(
+                        alpha != null ? (int) (molangEval.eval(alpha)) : 255,
+                        red != null ? (int) (molangEval.eval(red)) : 255,
+                        green != null ? (int) (molangEval.eval(green)) : 255,
+                        blue != null ? (int) (molangEval.eval(blue)) : 255
                 ));
             }
             default -> {
-                particle = ignored -> rawParticle;
+                particle = () -> rawParticle;
             } // No data or unsupported
+        }
+    }
+
+
+    private static class Variables implements MolangValue.Holder {
+        public double age;
+        public double lifetime;
+        public double random1;
+        public double random2;
+        public double random3;
+        public double random4;
+        public double particleRandom1;
+        public double particleRandom2;
+        public double particleRandom3;
+        public double particleRandom4;
+
+        @Override
+        public @NotNull MolangValue get(@NotNull String field) {
+            return switch (field) {
+                case "age" -> new MolangValue.Num(age);
+                case "lifetime" -> new MolangValue.Num(lifetime);
+                case "random_1" -> new MolangValue.Num(random1);
+                case "random_2" -> new MolangValue.Num(random2);
+                case "random_3" -> new MolangValue.Num(random3);
+                case "random_4" -> new MolangValue.Num(random4);
+                case "particle_random_1" -> new MolangValue.Num(particleRandom1);
+                case "particle_random_2" -> new MolangValue.Num(particleRandom2);
+                case "particle_random_3" -> new MolangValue.Num(particleRandom3);
+                case "particle_random_4" -> new MolangValue.Num(particleRandom4);
+                default -> MolangValue.NIL;
+            };
+        }
+    }
+
+    private static class Queries implements MolangValue.Holder {
+        public static final Queries INSTANCE = new Queries();
+
+        private Queries() {
+        }
+
+        private static double hsbToRed(double hue, double saturation, double brightness) {
+            if (saturation == 0) return brightness;
+            double h = (hue - Math.floor(hue)) * 6.0f;
+            double f = h - Math.floor(h);
+            return switch ((int) h) {
+                case 1 -> brightness * (1.0f - saturation * f);
+                case 2, 3 -> brightness * (1.0f - saturation);
+                case 4 -> brightness * (1.0f - (saturation * (1.0f - f)));
+                default -> brightness;
+            };
+        }
+
+        private static double hsbToGreen(double hue, double saturation, double brightness) {
+            if (saturation == 0) return brightness;
+            double h = (hue - Math.floor(hue)) * 6.0f;
+            double f = h - Math.floor(h);
+            return switch ((int) h) {
+                case 0 -> brightness * (1.0f - (saturation * (1.0f - f)));
+                case 3 -> brightness * (1.0f - saturation * f);
+                case 4, 5 -> brightness * (1.0f - saturation);
+                default -> brightness;
+            };
+        }
+
+        private static double hsbToBlue(double hue, double saturation, double brightness) {
+            if (saturation == 0) return brightness;
+            double h = (hue - Math.floor(hue)) * 6.0f;
+            double f = h - Math.floor(h);
+            return switch ((int) h) {
+                case 0, 1 -> brightness * (1.0f - saturation);
+                case 2 -> brightness * (1.0f - (saturation * (1.0f - f)));
+                case 5 -> brightness * (1.0f - saturation * f);
+                default -> brightness;
+            };
+        }
+
+        private static final MolangValue.Function HSB_TO_RED = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 3);
+            return new MolangValue.Num(hsbToRed(args[0], args[1], args[2]));
+        };
+        private static final MolangValue.Function HSB_TO_GREEN = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 3);
+            return new MolangValue.Num(hsbToGreen(args[0], args[1], args[2]));
+        };
+        private static final MolangValue.Function HSB_TO_BLUE = (rawArgs) -> {
+            double[] args = checkArgs(rawArgs, 3);
+            return new MolangValue.Num(hsbToBlue(args[0], args[1], args[2]));
+        };
+
+        @Override
+        public @NotNull MolangValue get(@NotNull String field) {
+            return switch (field) {
+                case "hsb_to_red" -> HSB_TO_RED;
+                case "hsb_to_green" -> HSB_TO_GREEN;
+                case "hsb_to_blue" -> HSB_TO_BLUE;
+                default -> MolangValue.NIL;
+            };
+        }
+
+        private static double[] checkArgs(@NotNull List<MolangValue> args, int expected) {
+            if (args.size() != expected)
+                throw new IllegalArgumentException("expected " + expected + " arguments, got: " + args.size());
+            double[] result = new double[expected];
+            for (int i = 0; i < expected; i++) {
+                // TODO: this needs to generate a content error...
+                result[i] = args.get(i) instanceof MolangValue.Num(double value) ? value : 0.0;
+            }
+            return result;
         }
     }
 }

@@ -13,6 +13,7 @@ import net.hollowcube.terraform.entity.TerraformEntity;
 import net.hollowcube.terraform.event.TerraformModifyEntityEvent;
 import net.hollowcube.terraform.event.TerraformMoveEntityEvent;
 import net.hollowcube.terraform.session.LocalSession;
+import net.hollowcube.terraform.util.Messages;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.BinaryTagTypes;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
@@ -151,12 +152,14 @@ public class AxiomModule implements TerraformModule {
         if (!(event.buffer() instanceof AxiomBlockBuffer buffer)) return;
 
         var session = LocalSession.forPlayer(event.player());
-        session.buildTask("axiom-" + event.id())
+        var task = session.buildTask("axiom-" + event.id())
                 .metadata()
                 .buffer(new AxiomTerraformBuffer(buffer))
                 .ephemeral()
-                .submit();
-
+                          .submitIfCapacity();
+        if (task == null) {
+            event.getPlayer().sendMessage(Messages.GENERIC_QUEUE_FULL);
+        }
         event.setHandled(true);
     }
 

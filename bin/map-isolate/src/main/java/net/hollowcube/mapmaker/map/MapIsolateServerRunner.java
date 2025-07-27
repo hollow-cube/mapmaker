@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.Uuids;
+import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.map.feature.FeatureList;
 import net.hollowcube.mapmaker.map.hdb.HeadDatabase;
@@ -15,6 +16,7 @@ import net.hollowcube.mapmaker.map.world.AbstractMapMakerMapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.session.Presence;
+import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventNode;
@@ -26,8 +28,11 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 public class MapIsolateServerRunner extends AbstractMapServer {
     private static final Logger logger = LoggerFactory.getLogger(MapIsolateServerRunner.class);
@@ -35,6 +40,7 @@ public class MapIsolateServerRunner extends AbstractMapServer {
     private final String mapId;
 
     private AbstractMapMakerMapWorld world;
+    private Terraform terraform;
     private FeatureList features;
 
     public MapIsolateServerRunner(@NotNull ConfigLoaderV3 config) {
@@ -81,6 +87,9 @@ public class MapIsolateServerRunner extends AbstractMapServer {
         var hdb = new HeadDatabase(otel);
         addBinding(HeadDatabase.class, hdb, "headDatabase", "hdb");
         MapServerRunner.registerCommands(this, commandManager(), hdb);
+
+        this.terraform = MapServerRunner.initBuildLogic(mapService(), commandManager());
+        addBinding(Terraform.class, terraform);
 
         this.features = FeatureList.load(config);
         addBinding(FeatureList.class, features);
@@ -129,5 +138,12 @@ public class MapIsolateServerRunner extends AbstractMapServer {
 
     protected void handleDisconnect(@NotNull PlayerDisconnectEvent event) {
         super.handlePlayerDisconnect(event.getPlayer());
+    }
+
+    @Override
+    protected @NotNull List<Supplier<DataVersion>> extraDataVersions() {
+        var versions = new ArrayList<>(super.extraDataVersions());
+        versions.addAll(MapServerRunner.extraDataVersionsForMaps());
+        return versions;
     }
 }

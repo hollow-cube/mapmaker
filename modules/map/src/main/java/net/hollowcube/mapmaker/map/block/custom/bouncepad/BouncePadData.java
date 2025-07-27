@@ -3,17 +3,20 @@ package net.hollowcube.mapmaker.map.block.custom.bouncepad;
 import net.hollowcube.common.util.Either;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
-import net.hollowcube.mql.jit.BouncePadScript;
-import net.hollowcube.mql.jit.MqlCompiler;
+import net.hollowcube.mapmaker.map.feature.play.vanilla.ElytraFeatureProvider;
+import net.hollowcube.molang.MolangExpr;
+import net.hollowcube.molang.eval.MolangEvaluator;
+import net.hollowcube.molang.eval.MolangValue;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.EntityPose;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.invoke.MethodHandles;
+import java.util.Map;
 
 @SuppressWarnings("UnstableApiUsage")
 public sealed interface BouncePadData extends DebugCommand.BlockDebug {
@@ -69,30 +72,22 @@ public sealed interface BouncePadData extends DebugCommand.BlockDebug {
                 "dz", Codec.STRING, data -> data.dzScript,
                 Molang::new);
 
-        // TODO: replace with stable value when that exists. dont currently support mql with native image
-        private static MqlCompiler<BouncePadScript> COMPILER;
-
-        private static @NotNull MqlCompiler<BouncePadScript> compiler() {
-            if (COMPILER == null) {
-                try {
-                    COMPILER = new MqlCompiler<>(MethodHandles.privateLookupIn(BouncePadScript.class, MethodHandles.lookup()), BouncePadScript.class);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            return COMPILER;
-        }
-
         private final String dxScript;
         private final String dyScript;
         private final String dzScript;
 
-        private final BouncePadScript.Queries queries = new BouncePadScript.Queries();
-        private final BouncePadScript.Variables variables = new BouncePadScript.Variables();
+        private final Queries queries = new Queries();
+        private final Variables variables = new Variables();
+        private final MolangEvaluator molangEval = new MolangEvaluator(Map.of(
+                "query", queries,
+                "q", queries,
+                "variable", variables,
+                "v", variables
+        ));
 
-        private BouncePadScript dx;
-        private BouncePadScript dy;
-        private BouncePadScript dz;
+        private MolangExpr dx;
+        private MolangExpr dy;
+        private MolangExpr dz;
         private boolean failedCompilation;
 
         public Molang(String dxScript, String dyScript, String dzScript) {
@@ -104,10 +99,9 @@ public sealed interface BouncePadData extends DebugCommand.BlockDebug {
         @Override
         public void onUpdate(@Nullable Player player) {
             try {
-                var compiler = compiler();
-                this.dx = compiler.compile(this.dxScript).newInstance();
-                this.dy = compiler.compile(this.dyScript).newInstance();
-                this.dz = compiler.compile(this.dzScript).newInstance();
+                this.dx = MolangExpr.parseOrThrow(this.dxScript);
+                this.dy = MolangExpr.parseOrThrow(this.dyScript);
+                this.dz = MolangExpr.parseOrThrow(this.dzScript);
             } catch (Exception e) {
                 this.failedCompilation = true;
                 if (player != null) {
@@ -136,9 +130,9 @@ public sealed interface BouncePadData extends DebugCommand.BlockDebug {
             this.variables.pitch = pos.pitch();
 
             return new Vec(
-                    this.dx.eval(this.queries, this.variables),
-                    this.dy.eval(this.queries, this.variables),
-                    this.dz.eval(this.queries, this.variables)
+                    molangEval.eval(this.dx),
+                    molangEval.eval(this.dy),
+                    molangEval.eval(this.dz)
             );
         }
 
@@ -148,6 +142,63 @@ public sealed interface BouncePadData extends DebugCommand.BlockDebug {
             player.sendMessage("dx: " + this.dxScript);
             player.sendMessage("dy: " + this.dyScript);
             player.sendMessage("dz: " + this.dzScript);
+        }
+
+        private static class Variables implements MolangValue.Holder {
+            public double x;
+            public double y;
+            public double z;
+            public double dx;
+            public double dy;
+            public double dz;
+            public double yaw;
+            public double pitch;
+
+            @Override
+            public @NotNull MolangValue get(@NotNull String field) {
+                return switch (field) {
+                    case "x" -> new MolangValue.Num(x);
+                    case "y" -> new MolangValue.Num(y);
+                    case "z" -> new MolangValue.Num(z);
+                    case "dx" -> new MolangValue.Num(dx);
+                    case "dy" -> new MolangValue.Num(dy);
+                    case "dz" -> new MolangValue.Num(dz);
+                    case "yaw" -> new MolangValue.Num(yaw);
+                    case "pitch" -> new MolangValue.Num(pitch);
+                    default -> MolangValue.NIL;
+                };
+            }
+        }
+
+        private static class Queries implements MolangValue.Holder {
+            public @Nullable Player player;
+
+            public double isSneaking() {
+                return player != null && player.getPose() == EntityPose.SNEAKING ? 1 : 0;
+            }
+
+            public double isSwimming() {
+                return player != null && player.getPose() == EntityPose.SWIMMING ? 1 : 0;
+            }
+
+            public double isSprinting() {
+                return player != null && player.isSprinting() ? 1 : 0;
+            }
+
+            public double isGliding() {
+                return player != null && player.hasTag(ElytraFeatureProvider.IS_GLIDING_TAG) ? 1 : 0;
+            }
+
+            @Override
+            public @NotNull MolangValue get(@NotNull String field) {
+                return switch (field) {
+                    case "isSneaking" -> new MolangValue.Num(isSneaking());
+                    case "isSwimming" -> new MolangValue.Num(isSwimming());
+                    case "isSprinting" -> new MolangValue.Num(isSprinting());
+                    case "isGliding" -> new MolangValue.Num(isGliding());
+                    default -> MolangValue.NIL;
+                };
+            }
         }
     }
 }

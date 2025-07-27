@@ -4,6 +4,7 @@ import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
 import net.hollowcube.common.util.BlockUtil;
+import net.hollowcube.common.util.Either;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.instance.block.Block;
@@ -27,17 +28,15 @@ public class ArgumentBlock extends Argument<Block> {
     @Override
     public @NotNull ParseResult<Block> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
         var result = BlockUtil.fromString(reader.readWord(WordType.GREEDY).toLowerCase(Locale.ROOT));
-
-        if (result.isLeft()) {
-            return success(result.left());
-        }
-
-        final BlockUtil.BlockParseResult right = result.right();
-        return switch (right) {
-            case INVALID_PROPERTIES -> partial();
-            case BLOCK_NOT_FOUND -> partial("Unknown block");
-            case INVALID_PROPERTY_VALUE -> syntaxError("Invalid block properties");
-            case NO_BLOCK_TYPE -> syntaxError("Expected block type");
+        return switch (result) {
+            case Either.Left(var value) -> success(value);
+            case Either.Right(var error) -> switch (error) {
+                case INVALID_PROPERTIES -> partial();
+                case BLOCK_NOT_FOUND -> partial("Unknown block");
+                case INVALID_PROPERTY_VALUE -> syntaxError("Invalid block properties");
+                case NO_BLOCK_TYPE -> syntaxError("Expected block type");
+                case null -> syntaxError(); // Sanity check
+            };
         };
     }
 
@@ -49,8 +48,10 @@ public class ArgumentBlock extends Argument<Block> {
         if (index != -1) {
             var blockId = raw.substring(0, index);
             var properties = raw.substring(index + 1);
-            var block = Block.fromKey(blockId);
 
+            if (!Key.parseable(blockId))
+                return; // Not valid, not sure what to do.
+            var block = Block.fromKey(blockId);
             if (block == null) {
                 return;
             }
@@ -65,7 +66,7 @@ public class ArgumentBlock extends Argument<Block> {
             }
 
             var blockProperties = BlockUtil.getBlockProperties(block).entrySet()
-                    .stream().filter(entry -> !usedProperties.contains(entry.getKey()));
+                                           .stream().filter(entry -> !usedProperties.contains(entry.getKey()));
             suggestion.setStart(suggestion.getStart() + index + 1 + Math.max(0, lastPropertyStart + 1));
 
             var lastProperty = properties.substring(lastPropertyStart + 1);
@@ -93,7 +94,7 @@ public class ArgumentBlock extends Argument<Block> {
                 }
                 if (entry.getKey().equals(lastProperty)) {
                     suggestion.getEntries().clear();
-                    suggestion.setStart(suggestion.getStart() +entry.getKey().length());
+                    suggestion.setStart(suggestion.getStart() + entry.getKey().length());
                     suggestion.add("=");
                 }
             });
@@ -106,7 +107,7 @@ public class ArgumentBlock extends Argument<Block> {
                 suggestion.add(blockId.asString());
         }
 
-        if (suggestion.getEntries().size() == 1 && Block.fromKey(raw) != null) {
+        if (suggestion.getEntries().size() == 1 && Key.parseable(raw) && Block.fromKey(raw) != null) {
             suggestion.getEntries().clear();
             suggestion.setStart(suggestion.getStart() + raw.length());
             suggestion.add("[");

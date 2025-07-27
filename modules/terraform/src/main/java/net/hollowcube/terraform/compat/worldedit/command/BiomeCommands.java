@@ -162,11 +162,11 @@ public final class BiomeCommands {
                 }
             }
 
-            TerraformBiomeChunk.sendBiomeUpdates(chunks);
+            TerraformBiomeChunk.sendBiomeUpdates(biomes, chunks);
 
             player.sendMessage(ExtraComponents.translatable("commands.set_biome.success")
                     .with(biomes.getName(biome))
-                    .with(biome.name())
+                    .with(biome.key().asString())
                     .build()
             );
         }
@@ -181,7 +181,7 @@ public final class BiomeCommands {
     ) {
         return ExtraComponents.translatable(translation)
                 .with(biomes.getName(key))
-                .with(key.name())
+                .with(key.key().asString())
                 .with(biome.hasPrecipitation() ? "true" : "false")
                 .with(biome.effects().skyColor().toString())
                 .with(biome.effects().fogColor().toString())

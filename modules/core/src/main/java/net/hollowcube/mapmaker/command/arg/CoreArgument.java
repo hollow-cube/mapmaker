@@ -2,13 +2,11 @@ package net.hollowcube.mapmaker.command.arg;
 
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,46 +71,6 @@ public final class CoreArgument {
     }
 
     // Map Stuff
-
-    /**
-     * @deprecated Use {@link #Map(String, MapService)} instead.
-     * This method does not provide adequate error handling and the optional version should be used instead.
-     */
-    @Deprecated
-    public static @NotNull Argument<MapData> PlayableMap(
-            @NotNull String id,
-            @NotNull MapService mapService
-    ) {
-        return Argument.Word(id).map(
-                /* Mapper */ (sender, raw) -> {
-                    if (!(sender instanceof Player player))
-                        return new ParseResult.Failure<>(-1);
-                    var playerData = PlayerDataV2.fromPlayer(player);
-
-                    try { // Try as published ID
-                        var publishedId = MapData.parsePublishedID(raw);
-                        return new ParseResult.Success<>(() -> mapService.getMapByPublishedId(playerData.id(), publishedId));
-                    } catch (IllegalArgumentException ignored) {
-                        // Not a valid published ID
-                    }
-
-                    try { // Try as a full ID
-                        var fullId = UUID.fromString(raw).toString();
-                        return new ParseResult.Success<>(() -> mapService.getMap(playerData.id(), fullId));
-                    } catch (IllegalArgumentException ignored) {
-                        // Not a valid UUID
-                    }
-
-                    // Not a valid id so always fail
-                    return new ParseResult.Failure<>(-1);
-                },
-                /* Suggester */ (sender, raw, suggestion) ->
-                        // No suggestions, it is a published map so either the full id or published id.
-                        // Either way not likely being typed out manually.
-                {
-                }
-        );
-    }
 
     public static MapArgument Map(@NotNull String id, @NotNull MapService mapService) {
         return new MapArgument(id, mapService);

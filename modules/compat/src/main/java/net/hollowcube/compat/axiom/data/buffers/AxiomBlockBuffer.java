@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectArrayMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
+import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.common.util.Either;
 import net.hollowcube.compat.axiom.AxiomAPI;
 import net.minestom.server.instance.block.Block;
@@ -26,7 +27,7 @@ public record AxiomBlockBuffer(
     static {
         int bpe = 0;
         for (short id = 24134; id < Short.MAX_VALUE; id++) {
-            if (Block.fromStateId(id) == null) {
+            if (BlockUtil.fromStateIdOrNull(id) == null) {
                 bpe = (int) Math.ceil(Math.log(id) / Math.log(2));
                 break;
             }

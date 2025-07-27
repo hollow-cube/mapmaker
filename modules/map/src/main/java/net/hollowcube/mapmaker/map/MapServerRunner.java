@@ -20,6 +20,7 @@ import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.command.HubCommand;
 import net.hollowcube.mapmaker.map.command.build.*;
+import net.hollowcube.mapmaker.map.command.play.ResetHeightCommand;
 import net.hollowcube.mapmaker.map.command.play.SpectateCommand;
 import net.hollowcube.mapmaker.map.command.utility.*;
 import net.hollowcube.mapmaker.map.command.utility.entity.EntitiesCommand;
@@ -32,7 +33,7 @@ import net.hollowcube.mapmaker.map.runtime.*;
 import net.hollowcube.mapmaker.map.terraform.MapServerModule;
 import net.hollowcube.mapmaker.map.util.MapJoinInfo;
 import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
-import net.hollowcube.mapmaker.map.util.datafix.V4326;
+import net.hollowcube.mapmaker.map.util.datafix.*;
 import net.hollowcube.mapmaker.map.world.AbstractMapMakerMapWorld;
 import net.hollowcube.mapmaker.map.world.EditingMapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
@@ -216,6 +217,7 @@ public class MapServerRunner extends AbstractMapServer {
         commandManager.register(new GameModeCommand());
 
         commandManager.register(new SpectateCommand());
+        commandManager.register(new ResetHeightCommand());
 
         commandManager.register(new FlyCommand());
         commandManager.register(new FlySpeedCommand());
@@ -330,7 +332,7 @@ public class MapServerRunner extends AbstractMapServer {
 
     // Exposed for DevServer to use
     public static List<Supplier<DataVersion>> extraDataVersionsForMaps() {
-        return List.of(V4326::new);
+        return List.of(V4326::new, V4437::new, V4438::new, V4440::new, V4441::new, V4442::new);
     }
 
     @Override

@@ -7,6 +7,7 @@ import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.command.util.TFArgument;
 import net.hollowcube.terraform.selection.Selection;
 import net.hollowcube.terraform.session.LocalSession;
+import net.hollowcube.terraform.util.Messages;
 import net.hollowcube.terraform.util.math.DirectionUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Vec;
@@ -47,7 +48,7 @@ public class SmearCommand extends CommandDsl {
 
         // Execute the change
         var session = LocalSession.forPlayer(player);
-        session.buildTask("smear")
+        var submitted = session.buildTask("smear")
                 .metadata() //todo
                 .compute((task, world) -> {
                     //todo we can compute the known block buffer size here (which is more efficient)
@@ -72,6 +73,9 @@ public class SmearCommand extends CommandDsl {
                     player.sendMessage(Component.translatable("terraform.selection.smear",
                             Component.translatable(String.valueOf(result.blocksChanged()))));
                 })
-                .submit();
+                               .submitIfCapacity();
+        if (submitted == null) {
+            player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+        }
     }
 }

@@ -20,6 +20,7 @@ public class MapPlayerData {
 
     private String id;
     private String[] mapSlots = new String[5];
+    private String contestSlot;
     private String lastPlayedMap;
     private String lastEditedMap;
 
@@ -30,9 +31,13 @@ public class MapPlayerData {
         this.id = id;
     }
 
-    public MapPlayerData(@NotNull String id, String[] mapSlots, @Nullable String lastPlayedMap, @Nullable String lastEditedMap) {
+    public MapPlayerData(
+            @NotNull String id, String[] mapSlots, @Nullable String contestSlot, @Nullable String lastPlayedMap,
+            @Nullable String lastEditedMap
+    ) {
         this.id = id;
         this.mapSlots = mapSlots;
+        this.contestSlot = contestSlot;
         this.lastPlayedMap = lastPlayedMap;
         this.lastEditedMap = lastEditedMap;
     }
@@ -75,6 +80,7 @@ public class MapPlayerData {
         this.mapSlots = other.mapSlots;
         this.lastPlayedMap = other.lastPlayedMap;
         this.lastEditedMap = other.lastEditedMap;
+        this.contestSlot = other.contestSlot;
     }
 
     public @NotNull SlotState getSlotState(int slot) {
@@ -90,6 +96,14 @@ public class MapPlayerData {
             return null;
         var mapId = mapSlots[slot];
         return mapId == null || mapId.isEmpty() ? null : mapId;
+    }
+
+    public @Nullable String getContestSlot() {
+        return contestSlot == null || contestSlot.isEmpty() ? null : contestSlot;
+    }
+
+    public void setContestSlot(@Nullable String contestSlot) {
+        this.contestSlot = contestSlot;
     }
 
     @Override

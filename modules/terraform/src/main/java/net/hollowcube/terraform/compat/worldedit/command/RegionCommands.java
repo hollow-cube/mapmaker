@@ -55,12 +55,14 @@ public final class RegionCommands {
             }
 
             var generator = RegionFunctions.replace(region, Mask.always(), pattern);
-
-            session.buildTask("we-set")
+            var task = session.buildTask("we-set")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -105,11 +107,13 @@ public final class RegionCommands {
             if (selection.selector() instanceof CuboidRegionSelector regionSelector) { // todo add line selection once selection switching is added
                 var generator = RegionFunctions.line(regionSelector.getPos1().add(0.5, 0.5, 0.5), regionSelector.getPos2().add(0.5, 0.5, 0.5), pattern);
                 session.cui().renderer().switchTo(ClientRenderer.RenderContext.NORMAL, false);
-                session.buildTask("we-line")
+                var task = session.buildTask("we-line")
                         .metadata() //todo
                         .compute(generator)
                         .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                        .submit();
+                                  .submitIfCapacity();
+                if (task == null)
+                    player.sendMessage(Messages.GENERIC_QUEUE_FULL);
                 return;
             }
 
@@ -147,11 +151,14 @@ public final class RegionCommands {
 
             var generator = RegionFunctions.replace(region, mask, pattern);
 
-            session.buildTask("we-replace")
+            var task = session.buildTask("we-replace")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -179,11 +186,14 @@ public final class RegionCommands {
 
             var generator = RegionFunctions.replace(region, OVERLAY_MASK, pattern);
 
-            session.buildTask("we-overlay")
+            var task = session.buildTask("we-overlay")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -243,11 +253,14 @@ public final class RegionCommands {
             }
 
             session.cui().renderer().switchTo(ClientRenderer.RenderContext.NORMAL, false);
-            session.buildTask("we-center")
+            var task = session.buildTask("we-center")
                     .metadata() //todo
                     .compute(ComputeFunc.set(getCenter(region), pattern))
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -283,12 +296,14 @@ public final class RegionCommands {
             }
 
             var generator = RegionFunctions.cuboid(cuboid, pattern, true, FACES);
-
-            session.buildTask("we-walls")
+            var task = session.buildTask("we-walls")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
 
     }
@@ -319,12 +334,14 @@ public final class RegionCommands {
             }
 
             var generator = RegionFunctions.cuboid(cuboid, pattern, true, FACES);
-
-            session.buildTask("we-faces")
+            var task = session.buildTask("we-faces")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged())))
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
@@ -363,7 +380,8 @@ public final class RegionCommands {
             var mask = context.get(maskArg);
 
             if (flags.contains(Flags.MASK)) {
-                Check.notNull(mask, "mask is required with the mask flag");
+                player.sendMessage("Mask is required with the mask flag.");
+                return;
             } else {
                 mask = Mask.always();
             }
@@ -387,8 +405,7 @@ public final class RegionCommands {
             }
 
             var generator = RegionFunctions.move(region, direction, count, replace, mask);
-
-            session.buildTask("we-move")
+            var task = session.buildTask("we-move")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> {
@@ -402,7 +419,10 @@ public final class RegionCommands {
                         }
                         player.sendMessage(Messages.SELECTION_MOVED.with(result.blocksChanged()));
                     })
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
 
         private enum Flags {
@@ -463,8 +483,7 @@ public final class RegionCommands {
             }
 
             var generator = RegionFunctions.stack(region, direction, count, mask);
-
-            session.buildTask("we-stack")
+            var task = session.buildTask("we-stack")
                     .metadata() //todo
                     .compute(generator)
                     .post(result -> {
@@ -478,7 +497,10 @@ public final class RegionCommands {
                         }
                         player.sendMessage(Messages.GENERIC_BLOCKS_CHANGED.with(result.blocksChanged()));
                     })
-                    .submit();
+                              .submitIfCapacity();
+            if (task == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
 
         private enum Flags {
@@ -519,7 +541,7 @@ public final class RegionCommands {
             var offset = new Vec(dir.normalX(), dir.normalY(), dir.normalZ());
 
             // Execute the change
-            session.buildTask("we-smear")
+            var submitted = session.buildTask("we-smear")
                     .metadata() //todo
                     .compute((task, world) -> {
                         //todo we can compute the known block buffer size here (which is more efficient)
@@ -543,7 +565,10 @@ public final class RegionCommands {
                         player.sendMessage(Component.translatable("terraform.selection.smear",
                                 Component.translatable(String.valueOf(result.blocksChanged()))));
                     })
-                    .submit();
+                                   .submitIfCapacity();
+            if (submitted == null) {
+                player.sendMessage(Messages.GENERIC_QUEUE_FULL);
+            }
         }
     }
 
