@@ -76,9 +76,16 @@ public class MarkerEntity extends ObjectEntity implements SpatialObject {
         Point min = OpUtils.map(this.getMin(), pos::add), max = OpUtils.map(this.getMax(), pos::add);
         if (min == null || max == null) return net.hollowcube.mapmaker.map.util.spatial.BoundingBox.ZERO;
 
+        var minX = (float) Math.min(min.x(), max.x());
+        var minY = (float) Math.min(min.y(), max.y());
+        var minZ = (float) Math.min(min.z(), max.z());
+        var maxX = (float) Math.max(min.x(), max.x());
+        var maxY = (float) Math.max(min.y(), max.y());
+        var maxZ = (float) Math.max(min.z(), max.z());
+
         return new net.hollowcube.mapmaker.map.util.spatial.BoundingBox(
-                (float) min.x(), (float) min.y(), (float) min.z(),
-                (float) max.x(), (float) max.y(), (float) max.z()
+                minX, minY, minZ,
+                maxX, maxY, maxZ
         );
     }
 }
