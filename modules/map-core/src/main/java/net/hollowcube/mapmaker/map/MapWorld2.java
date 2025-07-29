@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.mapmaker.map.event.Map2Event;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.minestom.server.ServerFlag;
 import net.minestom.server.entity.Player;
@@ -47,6 +48,10 @@ public sealed interface MapWorld2 permits AbstractMapWorld2 {
     /// This will trigger no matter the state of the player, you likely want more specific
     /// event nodes from the map implementation.
     EventNode<InstanceEvent> eventNode();
+
+    default void callEvent(Map2Event event) {
+        instance().eventNode().call(event);
+    }
 
     default Scheduler scheduler() {
         return instance().scheduler();

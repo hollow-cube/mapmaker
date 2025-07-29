@@ -93,6 +93,10 @@ public non-sealed abstract class AbstractMapWorld2<S extends PlayerState<S, W>, 
         return eventNode;
     }
 
+    public EventNode<PlayerInstanceEvent> eventNode(Class<? extends S> stateType) {
+        return eventNodesByState[stateIndex(stateType)];
+    }
+
     @Override
     public @UnmodifiableView Collection<Player> players() {
         return playersImmutable;
@@ -134,20 +138,20 @@ public non-sealed abstract class AbstractMapWorld2<S extends PlayerState<S, W>, 
         this.players.add(player);
 
         final var initialState = initialState(player);
-        initialState.configurePlayer((W) this, player, null);
         playerStates.put(player, initialState);
+        initialState.configurePlayer((W) this, player, null);
     }
 
     @Override
     public void removePlayer(Player player) {
         assert this.players.contains(player);
-        this.players.remove(player);
 
         final var state = playerStates.remove(player);
+        state.resetPlayer((W) this, player, null);
         playersByState[stateIndex(state)].remove(player);
         pendingStateChanges.remove(player);
 
-        state.resetPlayer((W) this, player, null);
+        this.players.remove(player);
     }
 
     @Override
@@ -164,16 +168,14 @@ public non-sealed abstract class AbstractMapWorld2<S extends PlayerState<S, W>, 
             final var nextState = entry.getValue();
 
             try {
-                playersByState[stateIndex(lastState)].remove(player);
                 lastState.resetPlayer((W) this, player, nextState);
+                playersByState[stateIndex(lastState)].remove(player);
 
-                // Any failure of state handling will result in the player not having a state,
-                // ie this dead zone between calls.
                 // todo what should we do if theres a failure here?
 
-                nextState.configurePlayer((W) this, player, lastState);
                 playerStates.put(player, nextState);
                 playersByState[stateIndex(nextState)].add(player);
+                nextState.configurePlayer((W) this, player, lastState);
             } finally {
                 iter.remove();
             }
@@ -213,8 +215,12 @@ public non-sealed abstract class AbstractMapWorld2<S extends PlayerState<S, W>, 
     // endregion
 
     private int stateIndex(S state) {
+        return stateIndex((Class<? extends S>) state.getClass());
+    }
+
+    private int stateIndex(Class<? extends S> state) {
         for (int i = 0; i < stateClass.getPermittedSubclasses().length; i++) {
-            if (stateClass.getPermittedSubclasses()[i].isInstance(state)) {
+            if (stateClass.getPermittedSubclasses()[i] == state) {
                 return i;
             }
         }

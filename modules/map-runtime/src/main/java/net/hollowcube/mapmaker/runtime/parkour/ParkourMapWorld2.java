@@ -1,21 +1,18 @@
-package net.hollowcube.mapmaker.runtime;
+package net.hollowcube.mapmaker.runtime.parkour;
 
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
+import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
-import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.hollowcube.mapmaker.runtime.parkour.item.ResetSaveStateItem;
+import net.hollowcube.mapmaker.runtime.parkour.item.ToggleGameplayItem;
 import net.hollowcube.mapmaker.runtime.parkour.item.ToggleSpectatorModeItem;
+import net.hollowcube.mapmaker.runtime.parkour.setting.OnlySprintSetting;
 import net.hollowcube.mapmaker.runtime.polar.ReadWorldAccess2;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.inventory.InventoryPreClickEvent;
-import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
-import net.minestom.server.event.player.PlayerBlockBreakEvent;
-import net.minestom.server.event.player.PlayerBlockPlaceEvent;
-import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,17 +33,17 @@ public class ParkourMapWorld2 extends AbstractMapWorld2<ParkourState, ParkourMap
     protected ParkourMapWorld2(MapServer server, MapData map, MapInstance instance) {
         super(server, map, instance, ParkourState.class);
 
+        itemRegistry().registerSilent(ResetSaveStateItem.INSTANCE);
         itemRegistry().registerSilent(ToggleSpectatorModeItem.INSTANCE_OFF);
         itemRegistry().registerSilent(ToggleSpectatorModeItem.INSTANCE_ON);
-        itemRegistry().registerSilent(ResetSaveStateItem.INSTANCE);
+        itemRegistry().registerSilent(ToggleGameplayItem.INSTANCE_OFF);
+        itemRegistry().registerSilent(ToggleGameplayItem.INSTANCE_ON);
+
+        eventNode(ParkourState.Playing.class)
+                .addChild(OnlySprintSetting.EVENT_NODE);
 
         // Make the entire world readonly to all players inside it (spec or playing doesn't matter)
-        eventNode()
-                .addListener(PlayerBlockBreakEvent.class, event -> event.setCancelled(true))
-                .addListener(PlayerBlockPlaceEvent.class, event -> event.setCancelled(true))
-                .addListener(ItemDropEvent.class, event -> event.setCancelled(true))
-                .addListener(InventoryPreClickEvent.class, event -> event.setCancelled(true))
-                .addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true));
+        eventNode().addChild(EventUtil.EVENT_NODE);
     }
 
     public void setSaveState(Player player, SaveState saveState) {
@@ -57,13 +54,56 @@ public class ParkourMapWorld2 extends AbstractMapWorld2<ParkourState, ParkourMap
         return player.getTag(PLAY_STATE_TAG);
     }
 
+    public void hardResetPlayer(Player player) {
+        var newSaveState = new SaveState(UUID.randomUUID().toString(),
+                map().id(), player.getUuid().toString(), SaveStateType.PLAYING,
+                PlayState.SERIALIZER, new PlayState());
+        newSaveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
+        setSaveState(player, newSaveState);
+        changePlayerState(player, new ParkourState.Playing(newSaveState, true));
+    }
+
+    public void softResetPlayer(Player player) {
+        // TODO this must be a safe point action also. So can clone the save state or something maybe.
+
+        if (!(getPlayerState(player) instanceof ParkourState.Playing(var saveState, var _)))
+            return; //todo need to get cp from spec save state i guess
+        var playState = saveState.state(PlayState.class);
+
+        // If they don't have a checkpoint, do a hard rest (todo or are out of lives)
+        if (playState.lastState() == null) {
+            hardResetPlayer(player); // todo
+            return;
+        }
+
+        // "pop" the last state to the current
+        playState = playState.lastState();
+        // todo decrement lives.
+        saveState.setState(playState);
+        // Create a copy so that we can reset to the checkpoint again
+        playState.setLastState(playState.copy());
+
+        // todo this should just be re-setting your state to playing which will re-trigger the play state setup which should tp. not doing it here
+        ParkourState.Playing.resetTeleport(player, Objects.requireNonNull(playState.pos()));
+
+//        player.removeTag(COUNTDOWN_END); // Remove so it is reapplied by updatePlayerFromState
+//        // Apply the current state to the player and teleport them
+//        updatePlayerFromState(world, player, playState);
+//        resetTeleport(player, Objects.requireNonNull(playState.pos())).thenRun(() -> {
+//            abstractWorld.addPlayerImmediate(player);
+//
+//            EventDispatcher.call(new MapPlayerInitEvent(world, player, false, false));
+//        });
+
+    }
+
     // region Player Lifecycle
 
     @Override
     protected ParkourState initialState(Player player) {
-        var saveState = Objects.requireNonNull(getSaveState(player),
+        var saveState = Objects.requireNonNull(getSaveState(player), () ->
                 "Player " + player.getUsername() + " has no save state in ParkourMapWorld2");
-        return new ParkourState.Playing(saveState);
+        return new ParkourState.Playing(saveState, true);
     }
 
     @Override

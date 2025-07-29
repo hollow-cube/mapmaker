@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.runtime.parkour.item;
 
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
-import net.hollowcube.mapmaker.runtime.ParkourMapWorld2;
+import net.hollowcube.mapmaker.map.world.savestate.PlayState;
+import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld2;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -32,13 +32,19 @@ public class ToggleSpectatorModeItem extends ItemHandler {
     }
 
     @Override
-    protected void rightClicked(@NotNull Click click) {
+    protected void rightClicked(Click click) {
         var player = click.player();
         var world = ParkourMapWorld2.forPlayer(player);
         if (world == null) return;
 
-        world.changePlayerState(player, activeSpectator ? new ParkourState.Spectating(false)
-                : new ParkourState.Playing(Objects.requireNonNull(world.getSaveState(player))));
+        var nextState = switch (world.getPlayerState(player)) {
+            case ParkourState.Playing(var saveState, var _) when activeSpectator ->
+                    new ParkourState.Spectating(saveState.state(PlayState.class), false);
+            case ParkourState.Spectating(var _, var _) when !activeSpectator ->
+                    new ParkourState.Playing(Objects.requireNonNull(world.getSaveState(player)), true);
+            case null, default -> null;
+        };
+        if (nextState != null) world.changePlayerState(player, nextState);
     }
 
 }

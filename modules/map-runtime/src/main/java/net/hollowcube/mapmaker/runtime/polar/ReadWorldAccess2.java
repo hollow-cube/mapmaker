@@ -25,7 +25,6 @@ import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.UUIDUtils;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,21 +42,21 @@ public class ReadWorldAccess2 implements PolarWorldAccess {
     public static final int VERSION_PRE_CHUNK_NBT = 4;
 
     protected final MapWorld2 mapWorld;
-    private final MarkerLoader markerLoader;
+    private final @Nullable MarkerLoader markerLoader;
 
     private int dataVersion = -1;
 
-    public ReadWorldAccess2(@NotNull MapWorld2 mapWorld) {
+    public ReadWorldAccess2(MapWorld2 mapWorld) {
         this(mapWorld, null);
     }
 
-    public ReadWorldAccess2(@NotNull MapWorld2 mapWorld, @Nullable MarkerLoader markerLoader) {
+    public ReadWorldAccess2(MapWorld2 mapWorld, @Nullable MarkerLoader markerLoader) {
         this.mapWorld = mapWorld;
         this.markerLoader = markerLoader;
     }
 
     @Override
-    public void loadWorldData(@NotNull Instance instance, @Nullable NetworkBuffer buffer) {
+    public void loadWorldData(Instance instance, @Nullable NetworkBuffer buffer) {
         if (buffer == null) return;
 
         int version;
@@ -98,7 +97,7 @@ public class ReadWorldAccess2 implements PolarWorldAccess {
     }
 
     @Override
-    public void loadChunkData(@NotNull Chunk chunk, @Nullable NetworkBuffer buffer) {
+    public void loadChunkData(Chunk chunk, @Nullable NetworkBuffer buffer) {
         int version;
         try {
             version = buffer.read(NetworkBuffer.VAR_INT);
@@ -133,7 +132,7 @@ public class ReadWorldAccess2 implements PolarWorldAccess {
     protected static final int WORLD_BOTTOM = 16;
 
     @Override
-    public void loadHeightmaps(@NotNull Chunk rawChunk, int[][] heightmaps) {
+    public void loadHeightmaps(Chunk rawChunk, int[][] heightmaps) {
         if (!(rawChunk instanceof ChunkExt chunk)) return;
 
         chunk.loadHeightmap(Heightmaps.WORLD_SURFACE, heightmaps[Heightmaps.WORLD_SURFACE]);
@@ -153,7 +152,7 @@ public class ReadWorldAccess2 implements PolarWorldAccess {
 //        return Objects.requireNonNullElse(mapWorld.biomes().getKey(id), Biome.PLAINS).name();
 //    }
 
-    private void loadEntityWithPassengers(@NotNull Chunk chunk, @NotNull CompoundBinaryTag tag) {
+    private void loadEntityWithPassengers(Chunk chunk, CompoundBinaryTag tag) {
         var entity = createEntityUnspawned(tag);
         if (entity == null) return;
 
@@ -180,7 +179,7 @@ public class ReadWorldAccess2 implements PolarWorldAccess {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    private @Nullable Entity createEntityUnspawned(@NotNull CompoundBinaryTag tag) {
+    private @Nullable Entity createEntityUnspawned(CompoundBinaryTag tag) {
         EntityType entityType = EntityType.fromKey(tag.getString("id"));
         if (entityType == null) {
             logger.warn("Unknown entity type {}", tag.getString("id"));
@@ -194,7 +193,7 @@ public class ReadWorldAccess2 implements PolarWorldAccess {
         return entity;
     }
 
-    private boolean tryLoadMarker(@NotNull Entity entity, @NotNull Pos spawnPosition) {
+    private boolean tryLoadMarker(Entity entity, Pos spawnPosition) {
 //        if (entity instanceof MarkerEntity marker && markerLoader != null) {
 //            boolean shouldSpawn = markerLoader.loadMarker(mapWorld, marker.getType(), marker.getData(), spawnPosition);
 //            if (!shouldSpawn) {
@@ -206,7 +205,7 @@ public class ReadWorldAccess2 implements PolarWorldAccess {
     }
 
     @Deprecated // WARN :: No new calls should be added to this function
-    private @NotNull CompletableFuture<Void> legacyReadEntity(@NotNull Chunk chunk, @NotNull NetworkBuffer buffer) {
+    private CompletableFuture<Void> legacyReadEntity(Chunk chunk, NetworkBuffer buffer) {
         var entityType = buffer.read(NetworkBuffer.STRING);
         var uuid = buffer.read(NetworkBuffer.UUID);
         var pos = buffer.read(NetworkBuffer.VECTOR3D);

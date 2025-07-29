@@ -1,23 +1,19 @@
 package net.hollowcube.mapmaker.runtime.parkour.item;
 
-import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.map.SaveState;
-import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.map.feature.play.handlers.SpectateHandler;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
-import net.hollowcube.mapmaker.runtime.ParkourMapWorld2;
+import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld2;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
-import java.util.UUID;
 
 public class ResetSaveStateItem extends ItemHandler {
     private static final TagCooldown CONFIRM_COOLDOWN = new TagCooldown("mapmaker:play/reset_item_confirm", 2000);
@@ -37,28 +33,23 @@ public class ResetSaveStateItem extends ItemHandler {
     }
 
     @Override
-    protected void rightClicked(@NotNull Click click) {
+    protected void rightClicked(Click click) {
         var player = click.player();
         var world = ParkourMapWorld2.forPlayer(player);
         if (world == null) return;
 
         var currentState = world.getPlayerState(player);
-        if (currentState instanceof ParkourState.Playing(var saveState)
+        if (currentState instanceof ParkourState.Playing(var saveState, var _)
                 && requireConfirmation(player, saveState)
                 && CONFIRM_COOLDOWN.test(player)) {
             player.sendMessage(Component.translatable("item.mapmaker.reset_savestate.confirm"));
             return;
         }
 
-        var newSaveState = new SaveState(UUID.randomUUID().toString(),
-                world.map().id(), player.getUuid().toString(), SaveStateType.PLAYING,
-                PlayState.SERIALIZER, new PlayState());
-        newSaveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
-        world.setSaveState(player, newSaveState);
-        world.changePlayerState(player, new ParkourState.Playing(newSaveState));
+        world.hardResetPlayer(player);
     }
 
-    private boolean requireConfirmation(@NotNull Player player, @NotNull SaveState saveState) {
+    private boolean requireConfirmation(Player player, SaveState saveState) {
         // If you have a spectator checkpoint, never require confirmation
         if (SpectateHandler.getCheckpoint(player) != null) return false;
         // The reset item requires confirm click if the playtime is > MIN_RESET_TIME or if the player has a checkpoint

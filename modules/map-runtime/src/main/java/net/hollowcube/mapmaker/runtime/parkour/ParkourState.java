@@ -9,8 +9,10 @@ import net.hollowcube.mapmaker.map.feature.play.MapCompletionAnimation;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
-import net.hollowcube.mapmaker.runtime.ParkourMapWorld2;
+import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerStartPlayingEvent;
+import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerUpdateStateEvent;
 import net.hollowcube.mapmaker.runtime.parkour.item.ResetSaveStateItem;
+import net.hollowcube.mapmaker.runtime.parkour.item.ToggleGameplayItem;
 import net.hollowcube.mapmaker.runtime.parkour.item.ToggleSpectatorModeItem;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -28,7 +30,7 @@ import java.util.concurrent.CompletableFuture;
 
 public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMapWorld2> {
 
-    record Playing(SaveState saveState) implements ParkourState {
+    record Playing(SaveState saveState, boolean isScorable) implements ParkourState {
         private static final AttributeModifier NO_FALL_DAMAGE_MODIFIER = new AttributeModifier("mapmaker:play.no_fall_damage", 500, AttributeOperation.ADD_VALUE);
 
         @Override
@@ -40,6 +42,8 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             // 5 = cp item
             world.itemRegistry().setItemStack(player, ToggleSpectatorModeItem.ID_ON, 5);
             world.itemRegistry().setItemStack(player, ResetSaveStateItem.ID, 7);
+            // todo below is temp, remove it
+            if (!isScorable) world.itemRegistry().setItemStack(player, ToggleGameplayItem.ID_OFF, 7);
             // 9 = details
 
             // If we are not exiting config for the first time, spawn at the save position.
@@ -48,6 +52,12 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
                 resetTeleport(player, Objects.requireNonNullElseGet(playState.pos(),
                         () -> world.map().settings().getSpawnPoint()));
             }
+
+            boolean isFreshState = saveState.getPlaytime() == 0, isMapJoin = lastState == null;
+            world.callEvent(new ParkourMapPlayerStartPlayingEvent(world, player, isFreshState, isMapJoin));
+
+            // todo
+            world.callEvent(new ParkourMapPlayerUpdateStateEvent(world, player, saveState, saveState.state(PlayState.class)));
         }
 
         @Override
@@ -59,7 +69,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             var playState = saveState.state(PlayState.class);
             playState.setPos(player.getPosition());
 
-            FutureUtil.submitVirtual(() -> {
+            if (isScorable) FutureUtil.submitVirtual(() -> {
                 var update = saveState.createUpsertRequest();
                 update.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
 
@@ -76,7 +86,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             });
         }
 
-        private static CompletableFuture<Void> resetTeleport(Player player, Pos position) {
+        static CompletableFuture<Void> resetTeleport(Player player, Pos position) {
             FireworkRocketItem.removeRocket(player);
             player.getPlayerMeta().setFlyingWithElytra(false);
             player.getInstance().eventNode().call(new PlayerStopFlyingWithElytraEvent(player));
@@ -84,7 +94,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         }
     }
 
-    record Spectating(boolean finished) implements ParkourState {
+    record Spectating(PlayState savedPlayState, boolean finished) implements ParkourState {
 
         @Override
         public void configurePlayer(ParkourMapWorld2 world, Player player, @Nullable ParkourState lastState) {
@@ -92,6 +102,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             player.setAllowFlying(true);
 
             world.itemRegistry().setItemStack(player, ToggleSpectatorModeItem.ID_OFF, 5);
+            world.itemRegistry().setItemStack(player, ToggleGameplayItem.ID_ON, 7);
         }
 
         @Override
