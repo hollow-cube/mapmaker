@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.entity.object;
 
-import net.hollowcube.common.util.ExtraTags;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.compat.axiom.AxiomAPI;
 import net.hollowcube.compat.axiom.AxiomPlayer;
@@ -10,7 +9,7 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomUpdateCustomEntityDataEvent;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.*;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.Result;
@@ -30,6 +29,7 @@ import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -50,13 +50,13 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
             .map(Key::key, Key::asString)
             .defaultValue(UNKNOWN_TYPE);
     protected static final Tag<@Nullable String> NAME_TAG = Tag.String("name").path("data");
-    protected static final Tag<@Nullable Vec> REGION_MIN_TAG = ExtraTags.VecAsList("min").path("data");
-    protected static final Tag<@Nullable Vec> REGION_MAX_TAG = ExtraTags.VecAsList("max").path("data");
+    protected static final Tag<@Nullable Vec> REGION_MIN_TAG = VecAsList("min").path("data");
+    protected static final Tag<@Nullable Vec> REGION_MAX_TAG = VecAsList("max").path("data");
 
     static {
-        var globalEventHandler = MinecraftServer.getGlobalEventHandler();
-        globalEventHandler.addListener(AxiomMarkerDataRequestEvent.class, ObjectEntity::handleAxiomRequestMarkerData);
-        globalEventHandler.addListener(TerraformAxiomUpdateCustomEntityDataEvent.class, ObjectEntity::handleAxiomUpdateMarkerData);
+        var events = MinecraftServer.getGlobalEventHandler();
+        events.addListener(AxiomMarkerDataRequestEvent.class, ObjectEntity::handleAxiomRequestMarkerData);
+        events.addListener(TerraformAxiomUpdateCustomEntityDataEvent.class, ObjectEntity::handleAxiomUpdateMarkerData);
     }
 
     protected @Nullable ObjectEntityHandler handler;
@@ -184,7 +184,11 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> teleport(@NotNull Pos position, long @Nullable [] chunks, @MagicConstant(flagsFromClass = RelativeFlags.class) int flags) {
+    public @NotNull CompletableFuture<Void> teleport(
+            @NotNull Pos position,
+            long @Nullable [] chunks,
+            @MagicConstant(flagsFromClass = RelativeFlags.class) int flags
+    ) {
         return super.teleport(position, chunks, flags)
                 .thenRun(() -> createAxiomMarkerUpdatePacket().sendToViewers(this));
     }
@@ -200,7 +204,9 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         if (world == null || !world.canEdit(event.player())) return;
         if (!world.instance().equals(entity.getInstance())) return;
 
-        event.setData(entity.getTag(DATA_TAG).put("axiom:hide", AxiomAPI.HIDDEN_MARKER_DATA).putString("type", entity.getType()));
+        event.setData(entity.getTag(DATA_TAG)
+                              .put("axiom:hide", AxiomAPI.HIDDEN_MARKER_DATA)
+                              .putString("type", entity.getType()));
     }
 
     private static void handleAxiomUpdateMarkerData(@NotNull TerraformAxiomUpdateCustomEntityDataEvent event) {
@@ -291,5 +297,37 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
 
         return entity instanceof ObjectEntity object ? object : null;
     }
+
+    // Axiom allows yo uto use '~' to represent a position relative to the position, but all our vecs are relative.
+    private static double asAxiomDouble(@NotNull BinaryTag tag) {
+        if (tag instanceof NumberBinaryTag number) {
+            return number.doubleValue();
+        } else if (tag instanceof StringBinaryTag string) {
+            try {
+                return string.value().startsWith("~") ? Double.parseDouble(string.value().substring(1))
+                        : Double.parseDouble(string.value());
+            } catch (Exception _) {
+            }
+        }
+        return 0.0;
+    }
+
+    private static @NotNull Tag<Vec> VecAsList(@NotNull String key) {
+        return Tag.NBT(key).list().map(
+                entries -> {
+                    double x = 0.0, y = 0.0, z = 0.0;
+                    if (entries.size() >= 1) x = asAxiomDouble(entries.get(0));
+                    if (entries.size() >= 2) y = asAxiomDouble(entries.get(1));
+                    if (entries.size() >= 3) z = asAxiomDouble(entries.get(2));
+                    return new Vec(x, y, z);
+                },
+                vec -> List.of(
+                        DoubleBinaryTag.doubleBinaryTag(vec.x()),
+                        DoubleBinaryTag.doubleBinaryTag(vec.y()),
+                        DoubleBinaryTag.doubleBinaryTag(vec.z())
+                )
+        );
+    }
+
 
 }
