@@ -145,7 +145,7 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
         // Feels kinda yikes for this to care about the world state of the player.
         var playWorld = MapWorld.forPlayerOptional(this);
         if (playWorld != null) playWorld = playWorld.playWorld();
-        if (playWorld != null) {
+        if (playWorld != null && playWorld.isPlaying(this)) {
             updateTouchingPressurePlates();
             updateTouchingMarkerEntities(playWorld);
         }
