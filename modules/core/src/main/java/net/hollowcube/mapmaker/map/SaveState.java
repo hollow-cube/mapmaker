@@ -172,5 +172,24 @@ public class SaveState {
         return req;
     }
 
+    public @NotNull SaveState copy(@NotNull Object newState) {
+        if (state.getClass() != newState.getClass())
+            throw new UnsupportedOperationException("Cannot copy SaveState with different state type. Original state: " + state.getClass() + ", new state: " + newState.getClass());
+
+        var copy = new SaveState();
+        copy.id = id;
+        copy.playerId = playerId;
+        copy.mapId = mapId;
+        copy.type = type;
+        copy.completed = completed;
+        copy.playtime = playtime;
+        copy.playStartTime = playStartTime;
+        copy.dataVersion = dataVersion;
+        copy.protocolVersion = protocolVersion;
+        copy.serializer = serializer;
+        copy.state = newState;
+        return copy;
+    }
+
 
 }

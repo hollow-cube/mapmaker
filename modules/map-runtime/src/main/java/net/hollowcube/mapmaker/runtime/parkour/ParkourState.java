@@ -14,6 +14,7 @@ import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerUpdateState
 import net.hollowcube.mapmaker.runtime.parkour.item.ResetSaveStateItem;
 import net.hollowcube.mapmaker.runtime.parkour.item.ToggleGameplayItem;
 import net.hollowcube.mapmaker.runtime.parkour.item.ToggleSpectatorModeItem;
+import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
@@ -37,6 +38,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         public void configurePlayer(ParkourMapWorld2 world, Player player, @Nullable ParkourState lastState) {
             ParkourState.super.configurePlayer(world, player, lastState);
             player.getAttribute(Attribute.SAFE_FALL_DISTANCE).addModifier(NO_FALL_DAMAGE_MODIFIER);
+            ActionBar.forPlayer(player).addProvider(ParkourTimer.INSTANCE);
 
             // 123 = items
             // 5 = cp item
@@ -58,14 +60,20 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
 
             // todo
             world.callEvent(new ParkourMapPlayerUpdateStateEvent(world, player, saveState, saveState.state(PlayState.class)));
+
+            // If the playtime is non-zero (ie they have played before) start timing immediately.
+            // Otherwise, we will start timing when they move the first time.
+            if (saveState.getPlaytime() > 0) saveState.setPlayStartTime(System.currentTimeMillis());
         }
 
         @Override
         public void resetPlayer(ParkourMapWorld2 world, Player player, @Nullable ParkourState nextState) {
             player.getAttribute(Attribute.SAFE_FALL_DISTANCE).removeModifier(NO_FALL_DAMAGE_MODIFIER);
+            ActionBar.forPlayer(player).removeProvider(ParkourTimer.INSTANCE);
 
             // Any time we switch away from playing we attempt to save the current state.
             saveState.updatePlaytime();
+            saveState.setPlayStartTime(0);
             var playState = saveState.state(PlayState.class);
             playState.setPos(player.getPosition());
 

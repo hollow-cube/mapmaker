@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.map.feature.play;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.common.events.PlayerMoveVehicleEvent;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.dfu.DFU;
 import net.hollowcube.mapmaker.ExceptionReporter;
@@ -48,7 +47,6 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
-import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerStopFlyingWithElytraEvent;
 import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
@@ -153,8 +151,6 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             .addListener(MapPlayerCheckpointPostChangeEvent.class, this::handleCheckpointPostChange)
             .addListener(MapPlayerStatusChangeEvent.class, this::handleStatusChange)
             .addListener(MapPlayerResetEvent.class, this::handlePlayerReset)
-            .addListener(PlayerMoveEvent.class, event -> handleInitTimerFromMove(event.getPlayer(), event.getNewPosition()))
-            .addListener(PlayerMoveVehicleEvent.class, event -> handleInitTimerFromMove(event.getPlayer(), event.getNewPosition()))
             .addListener(PlayerTickEvent.class, this::handlePlayerTick)
 
             .addListener(InventoryPreClickEvent.class, event -> {

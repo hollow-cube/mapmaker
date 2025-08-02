@@ -1,7 +1,10 @@
 package net.hollowcube.mapmaker.runtime.parkour;
 
+import net.hollowcube.common.events.PlayerMoveVehicleEvent;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.action.impl.EditTimerAction;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
@@ -11,13 +14,18 @@ import net.hollowcube.mapmaker.runtime.parkour.item.ToggleGameplayItem;
 import net.hollowcube.mapmaker.runtime.parkour.item.ToggleSpectatorModeItem;
 import net.hollowcube.mapmaker.runtime.parkour.setting.OnlySprintSetting;
 import net.hollowcube.mapmaker.runtime.polar.ReadWorldAccess2;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
+import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.UUID;
+
+import static net.hollowcube.mapmaker.map.feature.play.BaseParkourMapFeatureProvider.COUNTDOWN_END;
 
 public class ParkourMapWorld2 extends AbstractMapWorld2<ParkourState, ParkourMapWorld2> {
     private static final Tag<SaveState> PLAY_STATE_TAG = Tag.Transient("parkour_play_state");
@@ -40,6 +48,8 @@ public class ParkourMapWorld2 extends AbstractMapWorld2<ParkourState, ParkourMap
         itemRegistry().registerSilent(ToggleGameplayItem.INSTANCE_ON);
 
         eventNode(ParkourState.Playing.class)
+                .addListener(PlayerMoveEvent.class, event -> initTimerFromMove(event.getPlayer(), event.getNewPosition()))
+                .addListener(PlayerMoveVehicleEvent.class, event -> initTimerFromMove(event.getPlayer(), event.getNewPosition()))
                 .addChild(OnlySprintSetting.EVENT_NODE);
 
         // Make the entire world readonly to all players inside it (spec or playing doesn't matter)
@@ -64,37 +74,25 @@ public class ParkourMapWorld2 extends AbstractMapWorld2<ParkourState, ParkourMap
     }
 
     public void softResetPlayer(Player player) {
-        // TODO this must be a safe point action also. So can clone the save state or something maybe.
+        if (!(getPlayerState(player) instanceof ParkourState.Playing(var saveState, var isScorable)))
+            return;
 
-        if (!(getPlayerState(player) instanceof ParkourState.Playing(var saveState, var _)))
-            return; //todo need to get cp from spec save state i guess
-        var playState = saveState.state(PlayState.class);
-
-        // If they don't have a checkpoint, do a hard rest (todo or are out of lives)
-        if (playState.lastState() == null) {
+        // "pop" the last state to the current
+        var newPlayState = OpUtils.map(saveState.state(PlayState.class).lastState(), PlayState::copy);
+        if (newPlayState == null) {
+            // If they don't have a checkpoint, do a hard rest (todo or are out of lives)
             hardResetPlayer(player); // todo
             return;
         }
 
-        // "pop" the last state to the current
-        playState = playState.lastState();
         // todo decrement lives.
-        saveState.setState(playState);
-        // Create a copy so that we can reset to the checkpoint again
-        playState.setLastState(playState.copy());
 
-        // todo this should just be re-setting your state to playing which will re-trigger the play state setup which should tp. not doing it here
-        ParkourState.Playing.resetTeleport(player, Objects.requireNonNull(playState.pos()));
+        // Create a copy so that we can reset to this checkpoint again
+        newPlayState.setLastState(newPlayState.copy());
 
-//        player.removeTag(COUNTDOWN_END); // Remove so it is reapplied by updatePlayerFromState
-//        // Apply the current state to the player and teleport them
-//        updatePlayerFromState(world, player, playState);
-//        resetTeleport(player, Objects.requireNonNull(playState.pos())).thenRun(() -> {
-//            abstractWorld.addPlayerImmediate(player);
-//
-//            EventDispatcher.call(new MapPlayerInitEvent(world, player, false, false));
-//        });
-
+        // Resume playing from this state as a safe point action
+        var newSaveState = saveState.copy(newPlayState);
+        changePlayerState(player, new ParkourState.Playing(newSaveState, isScorable));
     }
 
     // region Player Lifecycle
@@ -137,6 +135,24 @@ public class ParkourMapWorld2 extends AbstractMapWorld2<ParkourState, ParkourMap
         super.removePlayer(player);
 
         player.removeTag(PLAY_STATE_TAG);
+    }
+
+    private void initTimerFromMove(Player player, Pos newPos) {
+        if (!(getPlayerState(player) instanceof ParkourState.Playing(var saveState, var _)))
+            return;
+        if (saveState.getPlayStartTime() != 0) return;
+
+        var oldPosition = player.getPosition();
+        if (Vec.fromPoint(oldPosition).equals(Vec.fromPoint(newPos)))
+            return; // Player did not actually move, just turn their head
+
+        // Start the timer.
+        saveState.setPlayStartTime(System.currentTimeMillis());
+
+        var timer = saveState.state(PlayState.class).get(EditTimerAction.SAVE_DATA);
+        if (timer != null && timer > 0) {
+            player.setTag(COUNTDOWN_END, System.currentTimeMillis() + (timer * 50L));
+        }
     }
 
     // endregion

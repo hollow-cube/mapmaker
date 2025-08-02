@@ -4,6 +4,8 @@ import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
+import net.hollowcube.mapmaker.map.util.spatial.Octree;
+import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
 import net.minestom.server.FeatureFlag;
 import net.minestom.server.ServerFlag;
 import net.minestom.server.entity.Player;
@@ -22,6 +24,7 @@ import org.jetbrains.annotations.*;
 import java.util.*;
 
 import static net.hollowcube.mapmaker.map.util.EventUtil.playerEventNode;
+import static net.hollowcube.mapmaker.map.util.spatial.Octree.simpleOctree;
 
 @NotNullByDefault
 public non-sealed abstract class AbstractMapWorld2<S extends PlayerState<S, W>, W extends AbstractMapWorld2<S, W>> implements MapWorld2 {
@@ -47,6 +50,9 @@ public non-sealed abstract class AbstractMapWorld2<S extends PlayerState<S, W>, 
     private final Map<Player, S> pendingStateChanges = new HashMap<>();
 
     private final ItemRegistry itemRegistry = new ItemRegistry();
+
+    private Octree octree = Octree.emptyOctree();
+    private boolean octreeDirty = true;
 
     protected AbstractMapWorld2(MapServer server, MapData map, MapInstance instance, Class<S> stateClass) {
         this.server = server;
@@ -95,6 +101,16 @@ public non-sealed abstract class AbstractMapWorld2<S extends PlayerState<S, W>, 
 
     public EventNode<PlayerInstanceEvent> eventNode(Class<? extends S> stateType) {
         return eventNodesByState[stateIndex(stateType)];
+    }
+
+    @Override
+    public Octree collisionTree() {
+        return this.octree;
+    }
+
+    @Override
+    public void queueCollisionTreeRebuild() {
+        this.octreeDirty = true;
     }
 
     @Override
@@ -159,6 +175,22 @@ public non-sealed abstract class AbstractMapWorld2<S extends PlayerState<S, W>, 
     public void safePointTick() {
         MapWorld2.super.safePointTick();
 
+        // Rebuild octree for new entities.
+        if (octreeDirty) {
+            List<SpatialObject> allObjects = new ArrayList<>();
+            for (var entity : instance().getEntities()) {
+                if (entity.isRemoved() || !(entity instanceof SpatialObject spatial)) continue;
+                if (spatial.boundingBox().size().isZero()) continue;
+                allObjects.add(spatial);
+            }
+
+            var size = OpUtils.mapOr(map().settings().getSize(),
+                    MapSize::size, MapSize.NORMAL.size());
+            var powerOfTwo = (int) Math.ceil(Math.log(Math.min(size, 4096)) / Math.log(2));
+            this.octree = simpleOctree(powerOfTwo, allObjects);
+        }
+
+        // Apply pending state changes.
         var iter = pendingStateChanges.entrySet().iterator();
         while (iter.hasNext()) {
             // todo some concept of async pending change would be nice.

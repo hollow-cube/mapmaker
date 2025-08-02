@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.map.MapServerRunner;
 import net.hollowcube.mapmaker.map.MapServiceImpl;
 import net.hollowcube.mapmaker.map.MockMapServer;
 import net.hollowcube.mapmaker.map.entity.MapEntities;
+import net.hollowcube.mapmaker.map.feature.play.effect.CheckpointEffectDataV2;
 import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
@@ -53,6 +54,7 @@ public class TestServer {
         };
 
         var _ = HotbarItems.CODEC;
+        var _ = CheckpointEffectDataV2.CODEC;
 
         var world = new ParkourMapWorld2(mapServer, map);
         world.loadWorld();

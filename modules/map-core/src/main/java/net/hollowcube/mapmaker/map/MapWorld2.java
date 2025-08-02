@@ -2,12 +2,15 @@ package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.mapmaker.map.event.Map2Event;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
+import net.hollowcube.mapmaker.map.util.spatial.Octree;
 import net.minestom.server.ServerFlag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagReadable;
 import net.minestom.server.thread.TickSchedulerThread;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.*;
@@ -16,7 +19,7 @@ import java.util.Collection;
 
 /// Any world running on mapmaker.
 @NotNullByDefault
-public sealed interface MapWorld2 permits AbstractMapWorld2 {
+public sealed interface MapWorld2 extends TagReadable permits AbstractMapWorld2 {
 
     /// Returns the _root_ map world for the given instance (if this instance is a map world).
     /// Note that in a case where there are sub-worlds, this will never return them (for example,
@@ -57,6 +60,11 @@ public sealed interface MapWorld2 permits AbstractMapWorld2 {
         return instance().scheduler();
     }
 
+    Octree collisionTree();
+
+    /// Queues a rebuild of the collision tree, will be processed sometime in the future up to the implementation.
+    void queueCollisionTreeRebuild();
+
     /// An immutable view of the players in this world.
     ///
     /// This includes all players who are participating in any way, specifically:
@@ -88,6 +96,18 @@ public sealed interface MapWorld2 permits AbstractMapWorld2 {
     }
 
 
-    // TODO(new worlds): Re-add tag readable?
+    //region Tag implementation
+
+    @Override
+    default <T> @UnknownNullability T getTag(Tag<T> tag) {
+        return instance().getTag(tag);
+    }
+
+    @Override
+    default boolean hasTag(Tag<?> tag) {
+        return instance().hasTag(tag);
+    }
+
+    //endregion
 
 }
