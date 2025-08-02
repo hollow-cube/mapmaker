@@ -131,6 +131,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
         player.setRespawnPoint(Objects.requireNonNullElseGet(saveState.state(PlayState.class).pos(),
                 () -> map().settings().getSpawnPoint()));
         player.setTag(FIRST_JOIN_TAG, true);
+        features().configurePlayer(this, player);
     }
 
     @Override

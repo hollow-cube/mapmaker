@@ -86,6 +86,7 @@ public final class TestingMapWorld extends AbstractMapMakerMapWorld {
     @Override
     public void preAddPlayer(@NotNull AsyncPlayerConfigurationEvent event) {
         event.getPlayer().setTag(FIRST_JOIN_TAG, true);
+        features().configurePlayer(this, event.getPlayer());
         // Irrelevant for testing world
     }
 

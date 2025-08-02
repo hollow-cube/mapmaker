@@ -3,6 +3,8 @@ package net.hollowcube.mapmaker.map.feature;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
+import net.minestom.server.entity.Player;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.instance.block.BlockHandler;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -56,4 +58,12 @@ public interface FeatureProvider {
     default @Blocking void cleanupMap(@NotNull MapWorld world) {
     }
 
+    /**
+     * Called when a player joins a map world. This is called during the {@link AsyncPlayerConfigurationEvent}
+     *
+     * @param world The {@link MapWorld} the player is joining
+     * @param player The {@link Player} that is joining the map world
+     */
+    default @Blocking void configurePlayer(@NotNull MapWorld world, @NotNull Player player) {
+    }
 }
