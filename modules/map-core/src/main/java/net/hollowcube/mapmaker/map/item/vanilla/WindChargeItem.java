@@ -1,16 +1,14 @@
 package net.hollowcube.mapmaker.map.item.vanilla;
 
+import net.hollowcube.mapmaker.map.MapPlayer2;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.impl.projectile.WindChargeEntity;
-import net.hollowcube.mapmaker.map.feature.play.BaseParkourMapFeatureProvider;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.UseCooldown;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
 
 public class WindChargeItem extends VanillaItemHandler {
 
@@ -33,10 +31,7 @@ public class WindChargeItem extends VanillaItemHandler {
         if (world == null || !world.isPlaying(player)) return; // Sanity
 
         var entity = WindChargeEntity.shootFromPlayerDirection(player, true);
-
-        var entities = new ArrayList<>(player.getTag(BaseParkourMapFeatureProvider.OWNED_ENTITIES));
-        entities.add(entity.getEntityId());
-        player.setTag(BaseParkourMapFeatureProvider.OWNED_ENTITIES, entities);
+        ((MapPlayer2) player).addOwnedEntity(entity);
 
         if (isFinite(click.itemStack())) {
             click.consume(1);

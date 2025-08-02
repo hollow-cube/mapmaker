@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker.map.item.vanilla;
 
-import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.feature.play.vanilla.ElytraFeatureProvider;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
@@ -54,12 +52,10 @@ public class FireworkRocketItem extends VanillaItemHandler {
 
     @Override
     protected void rightClicked(@NotNull Click click) {
-        var player = click.player();
-        var world = MapWorld.forPlayerOptional(player);
-        if (world == null || !world.isPlaying(player)) return; // Sanity
+        final var player = click.player();
 
         // You can only start a rocket boost while already gliding
-        if (!player.hasTag(ElytraFeatureProvider.IS_GLIDING_TAG)) return;
+        if (!player.isFlyingWithElytra()) return;
 
         int durationTicks = click.itemStack().getTag(DURATION_TAG) / MinecraftServer.TICK_MS;
         spawnRocketEntity(player, durationTicks);

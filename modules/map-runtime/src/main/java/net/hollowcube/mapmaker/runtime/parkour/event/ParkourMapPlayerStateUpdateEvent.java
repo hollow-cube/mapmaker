@@ -6,9 +6,8 @@ import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld2;
 import net.minestom.server.entity.Player;
 
-public record ParkourMapPlayerUpdateStateEvent(
+public record ParkourMapPlayerStateUpdateEvent(
         ParkourMapWorld2 world, Player player,
-        SaveState saveState, PlayState playState,
-        boolean isFreshState
+        SaveState saveState, PlayState playState
 ) implements Map2PlayerEvent {
 }

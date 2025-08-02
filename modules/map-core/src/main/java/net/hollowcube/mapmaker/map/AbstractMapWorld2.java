@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
+import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandlerRegistry;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.util.spatial.Octree;
@@ -50,6 +51,7 @@ public non-sealed abstract class AbstractMapWorld2<S extends PlayerState<S, W>, 
     private final Map<Player, S> pendingStateChanges = new HashMap<>();
 
     private final ItemRegistry itemRegistry = new ItemRegistry();
+    private final ObjectEntityHandlerRegistry objectEntityHandlerRegistry = new ObjectEntityHandlerRegistry();
 
     private Octree octree = Octree.emptyOctree();
     private boolean octreeDirty = true;
@@ -118,10 +120,19 @@ public non-sealed abstract class AbstractMapWorld2<S extends PlayerState<S, W>, 
         return playersImmutable;
     }
 
+    //region Registries
+
     @Override
     public ItemRegistry itemRegistry() {
         return itemRegistry;
     }
+
+    @Override
+    public ObjectEntityHandlerRegistry objectEntityHandlerRegistry() {
+        return objectEntityHandlerRegistry;
+    }
+
+    //endregion
 
     // region Player Lifecycle
 
@@ -155,6 +166,7 @@ public non-sealed abstract class AbstractMapWorld2<S extends PlayerState<S, W>, 
 
         final var initialState = initialState(player);
         playerStates.put(player, initialState);
+        playersByState[stateIndex(initialState)].add(player);
         initialState.configurePlayer((W) this, player, null);
     }
 

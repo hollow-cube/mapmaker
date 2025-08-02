@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.map.block.custom.bouncepad;
 import net.hollowcube.common.util.Either;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
-import net.hollowcube.mapmaker.map.feature.play.vanilla.ElytraFeatureProvider;
 import net.hollowcube.molang.MolangExpr;
 import net.hollowcube.molang.eval.MolangEvaluator;
 import net.hollowcube.molang.eval.MolangValue;
@@ -186,7 +185,7 @@ public sealed interface BouncePadData extends DebugCommand.BlockDebug {
             }
 
             public double isGliding() {
-                return player != null && player.hasTag(ElytraFeatureProvider.IS_GLIDING_TAG) ? 1 : 0;
+                return player != null && player.isFlyingWithElytra() ? 1 : 0;
             }
 
             @Override

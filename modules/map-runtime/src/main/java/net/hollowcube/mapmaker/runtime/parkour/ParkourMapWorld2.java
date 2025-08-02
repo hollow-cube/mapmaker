@@ -5,15 +5,29 @@ import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.action.impl.EditTimerAction;
+import net.hollowcube.mapmaker.map.block.custom.HappyGhastMarkerHandler;
+import net.hollowcube.mapmaker.map.block.custom.bouncepad.BouncePadMarkerHandler;
+import net.hollowcube.mapmaker.map.entity.marker.MapLeaderboardMarkerHandler;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
+import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
+import net.hollowcube.mapmaker.map.item.vanilla.EnderPearlItem;
+import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
+import net.hollowcube.mapmaker.map.item.vanilla.WindChargeItem;
 import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.runtime.item.MapDetailsItem;
+import net.hollowcube.mapmaker.runtime.parkour.action.LegacyActionStateManager;
+import net.hollowcube.mapmaker.runtime.parkour.hud.ParkourDebugHud;
 import net.hollowcube.mapmaker.runtime.parkour.item.ResetSaveStateItem;
+import net.hollowcube.mapmaker.runtime.parkour.item.ReturnToCheckpointItem;
 import net.hollowcube.mapmaker.runtime.parkour.item.ToggleGameplayItem;
 import net.hollowcube.mapmaker.runtime.parkour.item.ToggleSpectatorModeItem;
+import net.hollowcube.mapmaker.runtime.parkour.marker.CheckpointMarkerHandler;
+import net.hollowcube.mapmaker.runtime.parkour.marker.StatusMarkerHandler;
 import net.hollowcube.mapmaker.runtime.parkour.setting.OnlySprintSetting;
 import net.hollowcube.mapmaker.runtime.polar.ReadWorldAccess2;
+import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
@@ -22,6 +36,7 @@ import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -29,6 +44,17 @@ import static net.hollowcube.mapmaker.map.feature.play.BaseParkourMapFeatureProv
 
 public class ParkourMapWorld2 extends AbstractMapWorld2<ParkourState, ParkourMapWorld2> {
     private static final Tag<SaveState> PLAY_STATE_TAG = Tag.Transient("parkour_play_state");
+
+    private static final List<ItemHandler> SILENT_ITEMS = List.of(
+            // Hotbar items
+            MapDetailsItem.INSTANCE,
+            ReturnToCheckpointItem.INSTANCE, ResetSaveStateItem.INSTANCE,
+            ToggleSpectatorModeItem.INSTANCE_OFF, ToggleSpectatorModeItem.INSTANCE_ON,
+            ToggleGameplayItem.INSTANCE_OFF, ToggleGameplayItem.INSTANCE_ON,
+            // Gameplay items
+            FireworkRocketItem.INSTANCE, EnderPearlItem.INSTANCE,
+            WindChargeItem.INSTANCE
+    );
 
     public static @Nullable ParkourMapWorld2 forPlayer(Player player) {
         return MapWorld2.forPlayer(player) instanceof ParkourMapWorld2 w ? w : null;
@@ -41,15 +67,18 @@ public class ParkourMapWorld2 extends AbstractMapWorld2<ParkourState, ParkourMap
     protected ParkourMapWorld2(MapServer server, MapData map, MapInstance instance) {
         super(server, map, instance, ParkourState.class);
 
-        itemRegistry().registerSilent(ResetSaveStateItem.INSTANCE);
-        itemRegistry().registerSilent(ToggleSpectatorModeItem.INSTANCE_OFF);
-        itemRegistry().registerSilent(ToggleSpectatorModeItem.INSTANCE_ON);
-        itemRegistry().registerSilent(ToggleGameplayItem.INSTANCE_OFF);
-        itemRegistry().registerSilent(ToggleGameplayItem.INSTANCE_ON);
+        SILENT_ITEMS.forEach(itemRegistry()::registerSilent);
+
+        objectEntityHandlerRegistry().registerForMarkers(MapLeaderboardMarkerHandler.ID, MapLeaderboardMarkerHandler::new);
+        objectEntityHandlerRegistry().registerForMarkers(BouncePadMarkerHandler.ID, BouncePadMarkerHandler::new);
+        objectEntityHandlerRegistry().registerForMarkers(HappyGhastMarkerHandler.ID, HappyGhastMarkerHandler::new);
+        objectEntityHandlerRegistry().registerForMarkers(CheckpointMarkerHandler.ID, CheckpointMarkerHandler::new);
+        objectEntityHandlerRegistry().registerForMarkers(StatusMarkerHandler.ID, StatusMarkerHandler::new);
 
         eventNode(ParkourState.Playing.class)
                 .addListener(PlayerMoveEvent.class, event -> initTimerFromMove(event.getPlayer(), event.getNewPosition()))
                 .addListener(PlayerMoveVehicleEvent.class, event -> initTimerFromMove(event.getPlayer(), event.getNewPosition()))
+                .addChild(LegacyActionStateManager.EVENT_NODE)
                 .addChild(OnlySprintSetting.EVENT_NODE);
 
         // Make the entire world readonly to all players inside it (spec or playing doesn't matter)
@@ -128,6 +157,11 @@ public class ParkourMapWorld2 extends AbstractMapWorld2<ParkourState, ParkourMap
                 saveState.state(PlayState.class).pos(),
                 () -> map().settings().getSpawnPoint()
         ));
+
+        // TODO: do not add debug overlay always
+        if (MapFeatureFlags.DEBUG_PLAYING_OVERLAY.test(player) || true) {
+            ActionBar.forPlayer(player).addProvider(ParkourDebugHud.INSTANCE);
+        }
     }
 
     @Override
@@ -135,6 +169,9 @@ public class ParkourMapWorld2 extends AbstractMapWorld2<ParkourState, ParkourMap
         super.removePlayer(player);
 
         player.removeTag(PLAY_STATE_TAG);
+
+        // Always try to remove, feature flag could have been removed since entering world and we still want it gone
+        ActionBar.forPlayer(player).removeProvider(ParkourDebugHud.INSTANCE);
     }
 
     private void initTimerFromMove(Player player, Pos newPos) {

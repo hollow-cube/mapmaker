@@ -7,6 +7,7 @@ import net.hollowcube.compat.axiom.AxiomPlayer;
 import net.hollowcube.compat.axiom.events.AxiomMarkerDataRequestEvent;
 import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundMarkerDataPacket;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.MapWorld2;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomUpdateCustomEntityDataEvent;
 import net.kyori.adventure.key.Key;
@@ -114,6 +115,8 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
 
     @Override
     public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
+        var world2 = MapWorld2.forInstance(instance); // todo this is more complex, also update visible
+
         var world = MapWorld.unsafeFromInstance(instance);
         visible = world != null && !world.isReadOnly();
         if (handler != null) {
@@ -121,8 +124,11 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
             handler = null;
         }
         return super.setInstance(instance, spawnPosition).thenRun(() -> {
-            if (world == null) return;
-            handler = world.objectEntityHandlers().create(getType(), this);
+            if (world != null) {
+                handler = world.objectEntityHandlers().create(getType(), this);
+            } else if (world2 != null) {
+                handler = world2.objectEntityHandlerRegistry().create(getType(), this);
+            }
         });
     }
 

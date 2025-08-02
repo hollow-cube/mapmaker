@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.runtime.parkour;
+package net.hollowcube.mapmaker.runtime.parkour.hud;
 
 import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
@@ -6,6 +6,8 @@ import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.action.impl.EditTimerAction;
 import net.hollowcube.mapmaker.map.feature.play.BaseParkourMapFeatureProvider;
 import net.hollowcube.mapmaker.misc.BackgroundSpriteSet;
+import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld2;
+import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.format.ShadowColor;
@@ -13,14 +15,14 @@ import net.minestom.server.entity.Player;
 
 import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
-public class ParkourTimer implements ActionBar.Provider {
+public class ParkourTimerHud implements ActionBar.Provider {
     private static final BackgroundSpriteSet BACKGROUND = new BackgroundSpriteSet("hud/bossbar/line1");
     private static final BadSprite TIMER = BadSprite.SPRITE_MAP.get("hud/timer");
     private static final int BACKGROUND_PADDING = 2;
 
-    public static final ParkourTimer INSTANCE = new ParkourTimer();
+    public static final ParkourTimerHud INSTANCE = new ParkourTimerHud();
 
-    private ParkourTimer() {
+    private ParkourTimerHud() {
     }
 
     @Override
@@ -64,11 +66,11 @@ public class ParkourTimer implements ActionBar.Provider {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof ParkourTimer;
+        return obj instanceof ParkourTimerHud;
     }
 
     @Override
     public int hashCode() {
-        return 31 * ParkourTimer.class.hashCode();
+        return 31 * ParkourTimerHud.class.hashCode();
     }
 }

@@ -1,16 +1,13 @@
 package net.hollowcube.mapmaker.map.item.vanilla;
 
-import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.MapPlayer2;
 import net.hollowcube.mapmaker.map.entity.impl.projectile.EnderPearlEntity;
-import net.hollowcube.mapmaker.map.feature.play.BaseParkourMapFeatureProvider;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.UseCooldown;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
 
 public class EnderPearlItem extends VanillaItemHandler {
 
@@ -29,13 +26,9 @@ public class EnderPearlItem extends VanillaItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
-        var world = MapWorld.forPlayerOptional(player);
-        if (world == null || !world.isPlaying(player)) return; // Sanity
 
         var entity = EnderPearlEntity.shootFromPlayerDirection(player, true);
-        var entities = new ArrayList<>(player.getTag(BaseParkourMapFeatureProvider.OWNED_ENTITIES));
-        entities.add(entity.getEntityId());
-        player.setTag(BaseParkourMapFeatureProvider.OWNED_ENTITIES, entities);
+        ((MapPlayer2) player).addOwnedEntity(entity);
 
         if (isFinite(click.itemStack())) {
             click.consume(1);

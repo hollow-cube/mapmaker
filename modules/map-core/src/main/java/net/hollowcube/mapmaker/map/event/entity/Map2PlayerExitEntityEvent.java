@@ -1,0 +1,12 @@
+package net.hollowcube.mapmaker.map.event.entity;
+
+import net.hollowcube.mapmaker.map.MapWorld2;
+import net.hollowcube.mapmaker.map.event.Map2PlayerEvent;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.Player;
+
+public record Map2PlayerExitEntityEvent(
+        MapWorld2 world, Player player,
+        Entity exitedEntity
+) implements Map2PlayerEvent {
+}

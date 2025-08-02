@@ -103,7 +103,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             false, false, SoundEvent.ITEM_SHEARS_SNIP);
 
     private static final CustomizableHotbarManager TESTING_HOTBAR = CustomizableHotbarManager.builder("hotbar/parkour/test")
-            .defaultItem(0, MapDetailsItem.ID)
+//            .defaultItem(0, MapDetailsItem.ID)
             .defaultItem(1, ReturnToCheckpointItem.ID)
             .defaultItem(2, SetSpectatorCheckpointItem.ID_TESTING)
 
@@ -112,7 +112,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             .build();
 
     private static final CustomizableHotbarManager PLAYING_HOTBAR = CustomizableHotbarManager.builder("hotbar/parkour")
-            .defaultItem(0, MapDetailsItem.ID)
+//            .defaultItem(0, MapDetailsItem.ID)
             .defaultItem(1, ReturnToCheckpointItem.ID)
             .defaultItem(2, RateMapItem.ID, (_, world) -> MapRatingFeatureProvider.isMapRatable(world))
 
@@ -123,7 +123,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             .build();
 
     private static final CustomizableHotbarManager SPEC_HOTBAR = CustomizableHotbarManager.builder("hotbar/parkour/spec")
-            .defaultItem(0, MapDetailsItem.ID)
+//            .defaultItem(0, MapDetailsItem.ID)
             .defaultItem(1, ReturnToSpectatorCheckpointItem.ID)
             .defaultItem(2, SetSpectatorCheckpointItem.ID_SPECTATOR)
 
@@ -134,7 +134,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             .build();
 
     private static final CustomizableHotbarManager FINISH_HOTBAR = CustomizableHotbarManager.builder("hotbar/parkour/finish")
-            .defaultItem(0, MapDetailsItem.ID)
+//            .defaultItem(0, MapDetailsItem.ID)
             .defaultItem(2, RateMapItem.ID, (_, world) -> MapRatingFeatureProvider.isMapRatable(world))
 
             .defaultItem(7, ResetSaveStateItem.ID)
@@ -207,7 +207,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         // Register all the functional items 'silently' so they can only be given by code, not commands or anything.
         var itemRegistry = world.itemRegistry();
         itemRegistry.registerSilent(CustomizableHotbarManager.RESET_TO_DEFAULT_ITEM);
-        itemRegistry.registerSilent(MapDetailsItem.INSTANCE);
+//        itemRegistry.registerSilent(MapDetailsItem.INSTANCE);
         itemRegistry.registerSilent(ReturnToCheckpointItem.INSTANCE);
         itemRegistry.registerSilent(EnterSpectatorModeItem.INSTANCE);
         itemRegistry.registerSilent(ExitSpectatorModeItem.INSTANCE);
@@ -254,14 +254,14 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
             }
         } else {
             if (event.getMapWorld() instanceof TestingMapWorld) {
-                inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
+//                inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
                 inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToCheckpointItem.ID, null));
                 inventory.setItemStack(2, itemRegistry.getItemStack(SetSpectatorCheckpointItem.ID_TESTING, null));
 
                 inventory.setItemStack(7, itemRegistry.getItemStack(ResetSaveStateItem.ID, null));
                 inventory.setItemStack(8, itemRegistry.getItemStack(ExitTestModeItem.ID, null));
             } else {
-                inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
+//                inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
                 inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToCheckpointItem.ID, null));
                 if (MapRatingFeatureProvider.isMapRatable(event.mapWorld())) {
                     inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
@@ -311,7 +311,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         if (MapFeatureFlags.CUSTOMIZABLE_HOTBAR.test(player)) {
             SPEC_HOTBAR.apply(player, event.getMapWorld());
         } else {
-            inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
+//            inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
             inventory.setItemStack(1, itemRegistry.getItemStack(ReturnToSpectatorCheckpointItem.ID, null));
             inventory.setItemStack(2, itemRegistry.getItemStack(SetSpectatorCheckpointItem.ID_SPECTATOR, null));
             inventory.setItemStack(4, itemRegistry.getItemStack(ExitSpectatorModeItem.ID, null));
@@ -329,7 +329,7 @@ public class BaseParkourMapFeatureProvider implements FeatureProvider {
         if (MapFeatureFlags.CUSTOMIZABLE_HOTBAR.test(player)) {
             FINISH_HOTBAR.apply(player, event.getMapWorld());
         } else {
-            inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
+//            inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
             if (MapRatingFeatureProvider.isMapRatable(event.mapWorld())) {
                 inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
             }

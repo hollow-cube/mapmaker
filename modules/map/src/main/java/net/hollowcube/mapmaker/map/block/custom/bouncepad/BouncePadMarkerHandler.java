@@ -9,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class BouncePadMarkerHandler extends ObjectEntityHandler {
-
     public static final String ID = "mapmaker:bounce_pad";
 
     private BouncePadData data;

@@ -12,7 +12,6 @@ import net.hollowcube.mapmaker.map.block.custom.StatusPlateBlock;
 import net.hollowcube.mapmaker.map.feature.edit.item.DisplayEntityItem;
 import net.hollowcube.mapmaker.map.feature.edit.item.EnterTestModeItem;
 import net.hollowcube.mapmaker.map.feature.edit.item.SpawnPointItem;
-import net.hollowcube.mapmaker.map.feature.play.item.MapDetailsItem;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.terraform.session.LocalSession;
@@ -72,7 +71,8 @@ public class BuilderMenuTabItems {
 
     public static final Item[] CUSTOM_ITEMS = new Item[]{
             Item.of(
-                    MapDetailsItem.INSTANCE,
+                    EnterTestModeItem.INSTANCE,
+//                    MapDetailsItem.INSTANCE,
                     "gui.builder_menu.custom_items.edit_map_details",
                     "hud/hotbar/edit_map_details",
                     DISABLED

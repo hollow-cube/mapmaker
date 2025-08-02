@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandlerRegistry;
 import net.hollowcube.mapmaker.map.event.Map2Event;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.util.spatial.Octree;
@@ -76,6 +77,8 @@ public sealed interface MapWorld2 extends TagReadable permits AbstractMapWorld2 
     // REGION: Registries
 
     ItemRegistry itemRegistry();
+
+    ObjectEntityHandlerRegistry objectEntityHandlerRegistry();
 
 
     // REGION: Lifecycle

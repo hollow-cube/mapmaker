@@ -14,4 +14,5 @@ dependencies {
 
     testImplementation(project(":modules:compat"))
     testImplementation(project(":modules:test"))
+    testImplementation(libs.bundles.otel)
 }

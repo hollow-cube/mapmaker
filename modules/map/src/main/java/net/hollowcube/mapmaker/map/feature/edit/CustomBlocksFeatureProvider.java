@@ -8,8 +8,6 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.action.gui.ActionEditorView;
 import net.hollowcube.mapmaker.map.action.impl.TeleportAction;
 import net.hollowcube.mapmaker.map.block.custom.*;
-import net.hollowcube.mapmaker.map.block.custom.bouncepad.BouncePadMarkerHandler;
-import net.hollowcube.mapmaker.map.entity.marker.MapLeaderboardMarkerHandler;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.event.entity.MarkerEntityEnteredEvent;
@@ -76,9 +74,9 @@ public class CustomBlocksFeatureProvider implements FeatureProvider {
         if (world.map().settings().getVariant() != MapVariant.PARKOUR)
             return;
 
-        world.objectEntityHandlers().registerForMarkers(MapLeaderboardMarkerHandler.ID, MapLeaderboardMarkerHandler::new);
-        world.objectEntityHandlers().registerForMarkers(BouncePadMarkerHandler.ID, BouncePadMarkerHandler::new);
-        world.objectEntityHandlers().registerForMarkers(HappyGhastMarkerHandler.ID, HappyGhastMarkerHandler::new);
+//        world.objectEntityHandlers().registerForMarkers(MapLeaderboardMarkerHandler.ID, MapLeaderboardMarkerHandler::new);
+//        world.objectEntityHandlers().registerForMarkers(BouncePadMarkerHandler.ID, BouncePadMarkerHandler::new);
+//        world.objectEntityHandlers().registerForMarkers(HappyGhastMarkerHandler.ID, HappyGhastMarkerHandler::new);
         world.objectEntityHandlers().register(ResetMarkerHandler.ID, ResetMarkerHandler::new);
     }
 

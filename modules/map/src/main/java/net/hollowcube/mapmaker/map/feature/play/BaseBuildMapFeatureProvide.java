@@ -7,7 +7,6 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
 import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
 import net.hollowcube.mapmaker.map.feature.FeatureProvider;
-import net.hollowcube.mapmaker.map.feature.play.item.MapDetailsItem;
 import net.hollowcube.mapmaker.map.feature.play.item.RateMapItem;
 import net.hollowcube.mapmaker.map.feature.play.item.ReturnToHubItem;
 import net.hollowcube.mapmaker.map.util.CustomizableHotbarManager;
@@ -22,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 public class BaseBuildMapFeatureProvide implements FeatureProvider {
 
     private static final CustomizableHotbarManager BUILDING_HOTBAR = CustomizableHotbarManager.builder("hotbar/build")
-            .defaultItem(0, MapDetailsItem.ID)
+//            .defaultItem(0, MapDetailsItem.ID)
             .defaultItem(2, RateMapItem.ID, (ignored, world) -> MapRatingFeatureProvider.isMapRatable(world))
             .defaultItem(8, ReturnToHubItem.ID)
             .build();
@@ -42,7 +41,7 @@ public class BaseBuildMapFeatureProvide implements FeatureProvider {
 
         var itemRegistry = world.itemRegistry();
         itemRegistry.registerSilent(CustomizableHotbarManager.RESET_TO_DEFAULT_ITEM);
-        itemRegistry.registerSilent(MapDetailsItem.INSTANCE);
+//        itemRegistry.registerSilent(MapDetailsItem.INSTANCE);
         itemRegistry.registerSilent(ReturnToHubItem.INSTANCE);
         itemRegistry.registerSilent(RateMapItem.INSTANCE);
 
@@ -59,7 +58,7 @@ public class BaseBuildMapFeatureProvide implements FeatureProvider {
         if (MapFeatureFlags.CUSTOMIZABLE_HOTBAR.test(player)) {
             BUILDING_HOTBAR.apply(player, event.mapWorld());
         } else {
-            inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
+//            inventory.setItemStack(0, itemRegistry.getItemStack(MapDetailsItem.ID, null));
             inventory.setItemStack(2, itemRegistry.getItemStack(RateMapItem.ID, null));
             inventory.setItemStack(8, itemRegistry.getItemStack(ReturnToHubItem.ID, null));
         }

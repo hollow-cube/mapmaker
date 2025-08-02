@@ -50,6 +50,14 @@ public class MarkerEntity extends ObjectEntity implements SpatialObject {
         if (this.handler != null) this.handler.onPlayerExit(player);
     }
 
+    public void onPlayerEntered2NoEventTemp(@NotNull Player player) {
+        if (this.handler != null) this.handler.onPlayerEnter(player);
+    }
+
+    public void onPlayerExited2NoEventTemp(@NotNull Player player) {
+        if (this.handler != null) this.handler.onPlayerExit(player);
+    }
+
     @Override
     public @NotNull CompletableFuture<Void> teleport(
             @NotNull Pos position, @NotNull Vec velocity, long @Nullable [] chunks,

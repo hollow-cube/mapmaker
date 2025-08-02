@@ -15,7 +15,6 @@ import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.polar.LoadingWorldAccess;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.util.CustomizableHotbarManager;
-import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.hollowcube.mapmaker.misc.BossBars;
@@ -171,7 +170,7 @@ public class PlayingMapWorld extends AbstractMapMakerMapWorld {
                         null,
                         RelativeFlags.NONE
                 );
-                ((MapPlayerImplImpl) player).updatePose();
+//                ((MapPlayerImplImpl) player).updatePose(); todo this needs to exist probably.
                 localPlayer.sendPacket(new EntityMetaDataPacket(localPlayer.getEntityId(), Map.of(6, Metadata.Pose(localPlayer.getPose()))));
                 localPlayer.sendPacket(new BundlePacket());
             });

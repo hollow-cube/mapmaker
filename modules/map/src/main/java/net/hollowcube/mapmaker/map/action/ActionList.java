@@ -1,7 +1,9 @@
 package net.hollowcube.mapmaker.map.action;
 
+import net.hollowcube.mapmaker.map.world.savestate.PlayState;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,6 +26,12 @@ public class ActionList {
     public ActionList(@NotNull ActionList actions) {
         for (var action : actions.actions) {
             this.actions.add(new Ref(action.key(), action.action()));
+        }
+    }
+
+    public void applyTo(@NotNull Player player, @NotNull PlayState state) {
+        for (var action : actions) {
+            action.action().applyTo(player, state);
         }
     }
 

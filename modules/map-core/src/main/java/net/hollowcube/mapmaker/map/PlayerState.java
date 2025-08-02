@@ -18,4 +18,6 @@ public interface PlayerState<S extends PlayerState<S, W>, W extends AbstractMapW
         // Nothing, we defensively reset by default on configure.
     }
 
+    //todo can add some "handleConflict" method to deal with multiple states queued within a single tick
+
 }
