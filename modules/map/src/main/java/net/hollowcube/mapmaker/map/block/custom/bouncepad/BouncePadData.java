@@ -116,24 +116,28 @@ public sealed interface BouncePadData extends DebugCommand.BlockDebug {
             if ((this.dx == null || this.dy == null || this.dz == null) && !this.failedCompilation) this.onUpdate(null);
             if (this.failedCompilation) return null;
 
-            var pos = player.getPosition();
-            var vel = player.getVelocity();
+            try {
+                var pos = player.getPosition();
+                var vel = player.getVelocity();
 
-            this.queries.player = player;
-            this.variables.x = pos.x();
-            this.variables.y = pos.y();
-            this.variables.z = pos.z();
-            this.variables.dx = vel.x();
-            this.variables.dy = vel.y();
-            this.variables.dz = vel.z();
-            this.variables.yaw = pos.yaw();
-            this.variables.pitch = pos.pitch();
+                this.queries.player = player;
+                this.variables.x = pos.x();
+                this.variables.y = pos.y();
+                this.variables.z = pos.z();
+                this.variables.dx = vel.x();
+                this.variables.dy = vel.y();
+                this.variables.dz = vel.z();
+                this.variables.yaw = pos.yaw();
+                this.variables.pitch = pos.pitch();
 
-            return new Vec(
-                    molangEval.eval(this.dx),
-                    molangEval.eval(this.dy),
-                    molangEval.eval(this.dz)
-            );
+                return new Vec(
+                        molangEval.eval(this.dx),
+                        molangEval.eval(this.dy),
+                        molangEval.eval(this.dz)
+                );
+            } catch (Throwable e) {
+                return null;
+            }
         }
 
         @Override
