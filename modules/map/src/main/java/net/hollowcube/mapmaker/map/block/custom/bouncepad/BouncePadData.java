@@ -2,8 +2,11 @@ package net.hollowcube.mapmaker.map.block.custom.bouncepad;
 
 import net.hollowcube.common.util.Either;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
+import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.feature.play.vanilla.ElytraFeatureProvider;
+import net.hollowcube.mapmaker.map.world.TestingMapWorld;
 import net.hollowcube.molang.MolangExpr;
 import net.hollowcube.molang.eval.MolangEvaluator;
 import net.hollowcube.molang.eval.MolangValue;
@@ -131,13 +134,17 @@ public sealed interface BouncePadData extends DebugCommand.BlockDebug {
                 this.variables.pitch = pos.pitch();
 
                 return new Vec(
-                        molangEval.eval(this.dx),
-                        molangEval.eval(this.dy),
-                        molangEval.eval(this.dz)
+                        evaluate(this.dx, player),
+                        evaluate(this.dy, player),
+                        evaluate(this.dz, player)
                 );
-            } catch (Throwable e) {
-                return null;
+            } catch (ArithmeticException e) {
+                logToPlayerInTest(player, "Arithmetic error in Molang expression: " + e.getMessage());
+            } catch (Exception e) {
+                // Sanity check for unexpected errors, but molang should handle errors gracefully
+                ExceptionReporter.reportException(e, player);
             }
+            return null;
         }
 
         @Override
@@ -146,6 +153,28 @@ public sealed interface BouncePadData extends DebugCommand.BlockDebug {
             player.sendMessage("dx: " + this.dxScript);
             player.sendMessage("dy: " + this.dyScript);
             player.sendMessage("dz: " + this.dzScript);
+        }
+
+        private double evaluate(@NotNull MolangExpr expr, @NotNull Player player) {
+            var result = molangEval.eval(expr);
+            var errors = molangEval.getErrors();
+            if (!errors.isEmpty()) {
+                StringBuilder errorMessage = new StringBuilder();
+                errorMessage.append("Molang evaluation errors for '").append(expr).append("' :\n");
+                for (var error : errors) {
+                    errorMessage.append(" - ").append(error.message()).append("\n");
+                }
+                logToPlayerInTest(player, errorMessage.toString());
+            }
+
+            return Double.isFinite(result) ? result : 0.0;
+        }
+
+        private void logToPlayerInTest(@NotNull Player player, @NotNull String message) {
+            var world = MapWorld.forPlayerOptional(player);
+            if (world instanceof TestingMapWorld) {
+                player.sendMessage(message);
+            }
         }
 
         private static class Variables implements MolangValue.Holder {
