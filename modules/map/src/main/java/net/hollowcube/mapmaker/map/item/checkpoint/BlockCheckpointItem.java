@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.map.action.gui.ControlledNumberInput;
 import net.hollowcube.mapmaker.map.action.impl.GiveItemAction;
 import net.hollowcube.mapmaker.panels.AnvilSearchView;
 import net.hollowcube.mapmaker.util.Autocompletors;
+import net.hollowcube.mapmaker.util.ItemUtils;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -56,12 +57,19 @@ public record BlockCheckpointItem(@NotNull Block block, int amount, List<Block> 
         return new BlockCheckpointItem(this.block, this.amount, placeableOn);
     }
 
+    public boolean isValid() {
+        return ItemUtils.PLACEABLE_BLOCKS.contains(this.block()) && ItemUtils.PLACEABLE_BLOCKS.containsAll(this.placeableOn());
+    }
+
+    @Override
     public @NotNull StructCodec<? extends CheckpointItem> codec() {
         return CODEC;
     }
 
     @Override
     public @NotNull ItemStack createItemStack() {
+        if (!isValid()) return ItemStack.AIR;
+
         var canPlaceOn = new ArrayList<RegistryKey<Block>>(this.placeableOn);
         var material = Objects.requireNonNullElse(this.block.registry().material(), Material.STONE);
         int amount = this.amount == INFINITE_AMOUNT ? MAX_AMOUNT + 1 : this.amount;
@@ -77,11 +85,14 @@ public record BlockCheckpointItem(@NotNull Block block, int amount, List<Block> 
 
     @Override
     public @NotNull TranslatableComponent thumbnail() {
-        return Component.translatable("gui.action.give_item.block.thumbnail", List.of(
-                LanguageProviderV2.getVanillaTranslation(this.block),
-                Component.text(this.amount == INFINITE_AMOUNT ? "Infinite" : String.valueOf(this.amount)),
-                Component.text(this.placeableOn.size())
-        ));
+        if (this.isValid()) {
+            return Component.translatable("gui.action.give_item.block.thumbnail", List.of(
+                    LanguageProviderV2.getVanillaTranslation(this.block),
+                    Component.text(this.amount == INFINITE_AMOUNT ? "Infinite" : String.valueOf(this.amount)),
+                    Component.text(this.placeableOn.size())
+            ));
+        }
+        return Component.translatable("gui.action.give_item.block.thumbnail.invalid");
     }
 
     @Override
@@ -107,8 +118,7 @@ public record BlockCheckpointItem(@NotNull Block block, int amount, List<Block> 
                     });
 
             this.amountInput = add(1, 3, makeGenericAmount(BlockCheckpointItem::withAmount, MAX_AMOUNT));
-            this.placeableOnInput = add(1, 5, new ControlledBlockListInput(7,
-                    updateItem(BlockCheckpointItem::withPlaceableOn)));
+            this.placeableOnInput = add(1, 5, new ControlledBlockListInput(7, updateItem(BlockCheckpointItem::withPlaceableOn)));
         }
 
         @Override
@@ -116,6 +126,13 @@ public record BlockCheckpointItem(@NotNull Block block, int amount, List<Block> 
             this.slotInput.iconButton().model(item.block.name(), null);
             this.amountInput.update(item.amount);
             this.placeableOnInput.update(item.placeableOn);
+
+            if (!item.isValid()) {
+                this.slotInput.iconButton().text(
+                        Component.translatable("gui.action.give_item.block.invalid.name"),
+                        LanguageProviderV2.translateMulti("gui.action.give_item.block.invalid.lore", List.of())
+                );
+            }
         }
     }
 
