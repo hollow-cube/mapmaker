@@ -21,6 +21,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class TestServer {
+    static {
+        System.setProperty("minestom.chunk-view-distance", "16");
+    }
 
     public static void main(String[] args) {
         var server = MinecraftServer.init();
