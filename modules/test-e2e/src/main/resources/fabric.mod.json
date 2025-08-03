@@ -6,7 +6,7 @@
   "environment": "*",
   "entrypoints": {
     "fabric-client-gametest": [
-      "net.hollowcube.puppeteer.SampleClientTest"
+      "net.hollowcube.test.SampleClientTest"
     ]
   },
   "depends": {
@@ -16,6 +16,6 @@
     "fabric-client-gametest-api-v1": "*"
   },
   "mixins": [
-    "puppeteer.mixins.json"
+    "test-e2e.mixins.json"
   ]
 }

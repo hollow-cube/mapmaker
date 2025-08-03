@@ -6,12 +6,11 @@ plugins {
     id("mapmaker.java-library")
     id("mapmaker.packer-data")
 
-    id("fabric-loom") version "1.11-SNAPSHOT"
-
-    id("com.gradleup.shadow") version "9.0.0-beta12"
+    alias(libs.plugins.loom)
 }
 
-val lib: Configuration by configurations.creating {
+// Includes a dependency as well as its transitive dependencies in the mod.
+val includeTransitive: Configuration by configurations.creating {
     extendsFrom(configurations.implementation.get())
 }
 
@@ -25,17 +24,26 @@ dependencies {
     modImplementation(fabricApi.module("fabric-client-gametest-api-v1", "0.129.0+1.21.8"))
 
     implementation(libs.minestom)
-    lib(libs.minestom)
+    includeTransitive(libs.minestom)
     implementation(project(":modules:hub"))
-    lib(project(":modules:hub"))
-    lib(project(":bin:config"))
+    includeTransitive(project(":modules:hub"))
+    implementation(project(":modules:map-runtime"))
+    includeTransitive(project(":modules:map-runtime"))
+    implementation(libs.bundles.otel)
+    includeTransitive(libs.bundles.otel)
+    implementation(project(":modules:compat"))
+    includeTransitive(project(":modules:compat"))
+    implementation(project(":modules:datafix"))
+    includeTransitive(project(":modules:datafix"))
+    includeTransitive(project(":bin:config"))
 }
 
 tasks.processIncludeJars {
-    from(lib)
+    from(includeTransitive)
 }
 
 tasks.register<ClientProductionRunTask>("runGameTests") {
+    dependsOn(":bin:packer:buildClient", ":modules:test-e2e:downloadAssets")
     outputs.upToDateWhen { false }
 
     mods.from(configurations.modImplementation)
@@ -49,14 +57,9 @@ tasks.register<ClientProductionRunTask>("runGameTests") {
         val resourcePackDirectory = gameDirectory.get().dir("resourcepacks")
         resourcePackDirectory.asFile.mkdirs()
         Files.copy(
-            kotlin.io.path.Path("/Users/matt/dev/projects/hollowcube/mapmaker/build/client.zip"),
+            rootProject.layout.buildDirectory.dir("client.zip").get().asFile.toPath(),
             resourcePackDirectory.asFile.toPath().resolve("client.zip"),
             StandardCopyOption.REPLACE_EXISTING
         )
-//        Files.writeString(
-//            gameDirectory.get().file("options.txt").asFile.toPath(),
-//            "resourcePacks:[\"vanilla\",\"client.zip\"]"
-//        )
     }
-
 }

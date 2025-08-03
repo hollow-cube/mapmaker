@@ -1,5 +1,7 @@
-package net.hollowcube.mapmaker.runtime.parkour;
+package net.hollowcube.test;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.map.*;
@@ -9,25 +11,36 @@ import net.hollowcube.mapmaker.map.feature.play.effect.HotbarItems;
 import net.hollowcube.mapmaker.map.runtime.NoopServerBridge;
 import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerServiceImpl;
+import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld2;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.hollowcube.puppeteer.PuppeteerServerTest;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class TestServer {
-    static {
-        System.setProperty("minestom.chunk-view-distance", "16");
+@SuppressWarnings("UnstableApiUsage")
+public class SampleClientTest extends PuppeteerServerTest {
+
+    @Override
+    public void runTest(Object server1, ClientGameTestContext context) {
+        context.runOnClient(client -> client.gui.getDebugOverlay().toggleOverlay());
+        context.takeScreenshot("server");
+
+        context.getInput().pressKey(InputConstants.KEY_1);
+        context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_RIGHT);
+        context.waitTicks(100);
+        context.takeScreenshot("gui");
     }
 
-    public static void main(String[] args) {
-        var server = MinecraftServer.init();
-
+    @Override
+    public void createServer() {
         CompatProvider.load(MinecraftServer.getGlobalEventHandler());
 
         DataFixer.addFixVersions(MapServerRunner.extraDataVersionsForMaps());
@@ -89,14 +102,5 @@ public class TestServer {
                                 .scheduleEndOfTick(this);
                     }
                 });
-//        MinecraftServer.getSchedulerManager()
-//                .buildTask(world::safePointTick)
-//                .repeat(TaskSchedule.tick(1))
-//                .schedule();
-//        MinecraftServer.getSchedulerManager()
-//                .buildShutdownTask(world::close);
-
-        server.start("0.0.0.0", 25565);
     }
-
 }

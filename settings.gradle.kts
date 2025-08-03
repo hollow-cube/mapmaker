@@ -38,11 +38,11 @@ include(
 
     "modules:test",
     "modules:map-core-test",
+    "modules:test-e2e",
 )
 
 include(
     "tools:native-image-helper",
-    "tools:puppeteer",
 )
 
 include(

@@ -195,7 +195,7 @@ public class ParkourMapWorld2 extends AbstractMapWorld2<ParkourState, ParkourMap
     // endregion
 
     @Override
-    protected void loadWorld() {
+    public void loadWorld() {
         var mapData = server().mapService().getMapWorldAsStream(map().id(), false);
         if (mapData == null) return;
 

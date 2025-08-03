@@ -28,6 +28,7 @@ blossom = "2.1.0"
 velocity = "3.4.0-SNAPSHOT"
 classgraph = "4.8.179"
 included = "-INCLUDED"
+loom = "1.11-SNAPSHOT"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
@@ -88,3 +89,4 @@ otel = ["otel-api", "otel-context", "otel-sdk", "otel-sdk-common", "otel-sdk-tra
 
 [plugins]
 blossom = { id = "net.kyori.blossom", version.ref = "blossom" }
+loom = { id = "fabric-loom", version.ref = "loom" }
