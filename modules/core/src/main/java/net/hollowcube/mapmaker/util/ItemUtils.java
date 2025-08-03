@@ -27,13 +27,14 @@ public final class ItemUtils {
             Block.PURPLE_SHULKER_BOX, Block.RED_SHULKER_BOX, Block.WHITE_SHULKER_BOX, Block.YELLOW_SHULKER_BOX,
             Block.DISPENSER, Block.DROPPER, Block.RESPAWN_ANCHOR
     );
+    private static final Set<Block> INCLUDED_BLOCKS = Set.of(
+            Block.HONEY_BLOCK, Block.SLIME_BLOCK, Block.LADDER
+    );
     public static final Set<Block> PLACEABLE_BLOCKS;
     static {
-        Set<Block> blocks = new HashSet<>();
 
         // Manual blocks that arnt full blocks but are still placeable
-        blocks.add(Block.HONEY_BLOCK);
-        blocks.add(Block.SLIME_BLOCK);
+        Set<Block> blocks = new HashSet<>(INCLUDED_BLOCKS);
 
         blocksLoop:
         for (var block : Block.values()) {
