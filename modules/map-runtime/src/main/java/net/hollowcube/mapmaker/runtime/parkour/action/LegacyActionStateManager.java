@@ -93,9 +93,9 @@ public class LegacyActionStateManager {
 
         // Apply items to current state.
         var items = state.get(Attachments.HOTBAR_ITEMS, HotbarItems.EMPTY);
-        player.getInventory().setItemStack(3, items.item0() == null ? ItemStack.AIR : items.item0().createItemStack());
-        player.getInventory().setItemStack(5, items.item1() == null ? ItemStack.AIR : items.item1().createItemStack());
-        player.getInventory().setItemStack(6, items.item2() == null ? ItemStack.AIR : items.item2().createItemStack());
+        player.getInventory().setItemStack(0, items.item0() == null ? ItemStack.AIR : items.item0().createItemStack());
+        player.getInventory().setItemStack(1, items.item1() == null ? ItemStack.AIR : items.item1().createItemStack());
+        player.getInventory().setItemStack(2, items.item2() == null ? ItemStack.AIR : items.item2().createItemStack());
 
         // Apply elytra or remove it if not relevant
         if (state.get(Attachments.ELYTRA, false)) {
@@ -143,9 +143,9 @@ public class LegacyActionStateManager {
 
         var items = playState.get(Attachments.HOTBAR_ITEMS, HotbarItems.EMPTY);
         playState.set(Attachments.HOTBAR_ITEMS, new HotbarItems(
-                OpUtils.map(items.item0(), item -> updateItemStack(player, item, 3)),
-                OpUtils.map(items.item1(), item -> updateItemStack(player, item, 5)),
-                OpUtils.map(items.item2(), item -> updateItemStack(player, item, 6))
+                OpUtils.map(items.item0(), item -> updateItemStack(player, item, 0)),
+                OpUtils.map(items.item1(), item -> updateItemStack(player, item, 1)),
+                OpUtils.map(items.item2(), item -> updateItemStack(player, item, 2))
         ));
     }
 
