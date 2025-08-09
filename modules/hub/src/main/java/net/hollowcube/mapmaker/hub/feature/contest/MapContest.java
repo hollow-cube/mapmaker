@@ -40,7 +40,7 @@ public class MapContest implements HubFeature {
     public static final LocalDateTime START_DATE = LocalDateTime.parse(
             "2025-07-19T12:00:00-04:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     public static final LocalDateTime END_DATE = LocalDateTime.parse(
-            "2025-08-09T12:00:00-04:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            "2025-08-18T00:00:00-04:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 
     private static final Pos TEXT_SPAWN_POS = new Pos(-37.5, 42 + 7, 54.5, 0, 0);
     private static final Pos NPC_SPAWN_POS = new Pos(-37.5, 40, 47.5, 180, 10);
@@ -60,8 +60,8 @@ public class MapContest implements HubFeature {
             return;
         }
         world.instance().scheduler().buildTask(task)
-             .delay(Duration.ofMillis(millisToStart))
-             .schedule();
+                .delay(Duration.ofMillis(millisToStart))
+                .schedule();
     }
 
     private void spawnText(@NotNull HubMapWorld world) {
