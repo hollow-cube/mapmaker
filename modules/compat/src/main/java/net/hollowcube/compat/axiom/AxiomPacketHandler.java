@@ -48,8 +48,10 @@ final class AxiomPacketHandler {
     }
 
     static void onHello(@NotNull Player player, @NotNull AxiomServerboundHelloPacket packet) {
-        if (packet.apiVersion() < AxiomAPI.API_VERSION) {
-            player.sendMessage("Incompatible Axiom API version. Please update your client.");
+        if (packet.apiVersion() < AxiomAPI.MIN_API_VERSION) {
+            player.sendMessage("Incompatible Axiom API version. Please update your mod.");
+        } else if (packet.apiVersion() > AxiomAPI.MAX_API_VERSION) {
+            player.sendMessage("Axiom API version is too new. Please be patient while we update the server. For now, you can use an older version of the mod.");
         } else {
             AxiomPlayer.setVersion(player, packet.apiVersion());
         }

@@ -13,7 +13,8 @@ public class AxiomAPI {
     
     public static final Component NAME = Component.text("Axiom", NamedTextColor.WHITE);
     public static final String CHANNEL = "axiom";
-    public static final int API_VERSION = 8;
+    public static final int MIN_API_VERSION = 8;
+    public static final int MAX_API_VERSION = 8;
     public static final int BLUEPRINT_VERSION = 1;
     public static final int EMPTY_BLOCK_STATE = Block.STRUCTURE_VOID.stateId();
     public static final ListBinaryTag HIDDEN_MARKER_DATA = ListBinaryTag.listBinaryTag(BinaryTagTypes.STRING, List.of(

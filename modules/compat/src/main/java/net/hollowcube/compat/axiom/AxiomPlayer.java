@@ -37,6 +37,9 @@ public final class AxiomPlayer {
     }
 
     public static void setEnabled(@NotNull Player player, boolean enabled) {
+        int version = getVersion(player);
+        if (version < AxiomAPI.MIN_API_VERSION || version > AxiomAPI.MAX_API_VERSION) return;
+
         player.setTag(AXIOM_ENABLED, enabled);
 
         List<ClientboundModPacket<?>> packets;
