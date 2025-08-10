@@ -98,7 +98,11 @@ final class AxiomPacketHandler {
     // Data Operations
 
     static void onMarkerDataRequest(@NotNull Player player, @NotNull AxiomServerboundMarkerRequestPacket packet) {
-        var event = new AxiomMarkerDataRequestEvent(player, packet.id());
+        var event = switch (packet.reason()) {
+            case COPYING -> new AxiomMarkerDataRequestEvent.Copying(player, packet.id());
+            case RIGHT_CLICK -> new AxiomMarkerDataRequestEvent.RightClick(player, packet.id());
+            default -> new AxiomMarkerDataRequestEvent(player, packet.id());
+        };
         EventDispatcher.call(event);
         if (event.getData() == null || event.isCancelled()) return;
 

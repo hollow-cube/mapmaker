@@ -42,7 +42,7 @@ public final class WorldProperty<T> {
 
     @ApiStatus.Internal
     public void write(@NotNull Player player, @NotNull NetworkBuffer buffer) {
-        buffer.write(NetworkBuffer.STRING, this.id.toString());
+        buffer.write(NetworkBuffer.KEY, this.id);
         buffer.write(NetworkBuffer.STRING, this.name);
         buffer.write(NetworkBuffer.BOOLEAN, this.localized);
         this.widget.write(buffer);
