@@ -53,7 +53,9 @@ public final class AxiomPlayer {
 
             AxiomClientboundSetRestrictionsPacket.Restrictions restrictions = new AxiomClientboundSetRestrictionsPacket.Restrictions(
                     Set.of(
-                            AxiomPermission.ALL
+                            AxiomPermission.ENTITY,
+                            AxiomPermission.ANNOTATION,
+                            AxiomPermission.DEFAULT
                     ),
                     Set.of(
                             AxiomPermission.PLAYER_GAMEMODE_ADVENTURE,

@@ -41,9 +41,9 @@ final class AxiomPacketHandler {
         };
     }
 
-    static <T extends ServerboundModPacket<T>> BiConsumer<@NotNull Player, @NotNull T> disabled(String message) {
-        return (player, packet) -> {
-            if (AxiomPlayer.isEnabled(player)) player.sendMessage(message);
+    static <T extends ServerboundModPacket<T>> BiConsumer<@NotNull Player, @NotNull T> disabled(@Nullable String message) {
+        return (player, _) -> {
+            if (AxiomPlayer.isEnabled(player) && message != null) player.sendMessage(message);
         };
     }
 

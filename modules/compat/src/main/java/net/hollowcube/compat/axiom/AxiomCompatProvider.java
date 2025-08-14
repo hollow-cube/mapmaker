@@ -29,7 +29,7 @@ public class AxiomCompatProvider implements CompatProvider {
         registry.register(AxiomServerboundSetBufferPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSetBuffer));
         registry.register(AxiomServerboundSetFlySpeedPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSetFlySpeed));
         registry.register(AxiomServerboundSetGameModePacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSetGameMode));
-        // set no physical trigger
+        registry.register(AxiomServerboundSetNoPhysicalTriggerPacket.TYPE, AxiomPacketHandler.disabled(null));
         registry.register(AxiomServerboundSetTimePacket.TYPE, AxiomPacketHandler.disabled("Time modification is disabled on HollowCube."));
         registry.register(AxiomServerboundSetWorldPropertyPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSetWorldProperty));
         registry.register(AxiomServerboundSpawnEntitiesPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSpawnEntities));
