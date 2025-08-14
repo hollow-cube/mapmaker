@@ -134,7 +134,7 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
         }
 
         if (newPose != oldPose) setPose(newPose);
-        updateWaterLavaState();
+        updateInsideBlockStates();
     }
 
     @Override
@@ -152,31 +152,52 @@ public abstract class MapPlayerImplImpl extends MapPlayerImpl implements PlayerR
 
     }
 
-    private void updateWaterLavaState() {
+    private void updateInsideBlockStates() {
         final BoundingBox bb = getBoundingBox().contract(0.001, 0.001, 0.001);
         var position = getPosition();
         var instance = getInstance();
+        var meta = this.getPlayerMeta();
 
+        boolean isInPowderedSnow = false;
         isInWater = isInLava = false;
         var iter = bb.getBlocks(position);
         while (iter.hasNext()) {
-            if (isInWater && isInLava) break;
+            if (isInWater && isInLava && isInPowderedSnow) break;
             var posMut = iter.next();
 
-            var block = instance.getBlock(posMut.blockX(), posMut.blockY(),
-                    posMut.blockZ(), Block.Getter.Condition.TYPE);
+            var block = instance.getBlock(
+                    posMut.blockX(), posMut.blockY(), posMut.blockZ(),
+                    Block.Getter.Condition.TYPE
+            );
+            if (block == null) continue;
+
             double fluidHeight = getFluidHeight(block);
-            if (fluidHeight < 0) continue;
+            if (fluidHeight >= 0) {
+                var blockAbove = instance.getBlock(
+                        posMut.blockX(), posMut.blockY() + 1, posMut.blockZ(),
+                        Block.Getter.Condition.TYPE
+                );
+                fluidHeight = blockAbove != null && block.id() == blockAbove.id() ? 1 : (fluidHeight / 9.0);
+                if (posMut.blockY() + fluidHeight < position.y()) continue; // Not in fluid
 
-            var blockAbove = instance.getBlock(posMut.blockX(), posMut.blockY() + 1,
-                    posMut.blockZ(), Block.Getter.Condition.TYPE);
-            fluidHeight = block.id() == blockAbove.id() ? 1 : (fluidHeight / 9.0);
-            if (posMut.blockY() + fluidHeight < position.y()) continue; // Not in fluid
+                if (block.id() == Block.WATER.id() || BlockUtil.isWaterlogged(block)) {
+                    isInWater = true;
+                } else if (block.id() == Block.LAVA.id()) {
+                    isInLava = true;
+                }
+            } else if (block.id() == Block.POWDER_SNOW.id()) {
+                isInPowderedSnow = true;
+                var ticks = meta.getTickFrozen();
+                if (ticks < 140) {
+                    meta.setTickFrozen(Math.min(ticks + 1, 140));
+                }
+            }
+        }
 
-            if (block.id() == Block.WATER.id() || BlockUtil.isWaterlogged(block)) {
-                isInWater = true;
-            } else if (block.id() == Block.LAVA.id()) {
-                isInLava = true;
+        if (!isInPowderedSnow) {
+            var ticks = meta.getTickFrozen();
+            if (ticks > 0) {
+                meta.setTickFrozen(Math.max(ticks - 2, 0));
             }
         }
     }
