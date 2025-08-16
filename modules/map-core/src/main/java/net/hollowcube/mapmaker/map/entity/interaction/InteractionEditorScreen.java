@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.map.entity.interaction;
 
 import net.hollowcube.common.dialogs.DialogBuilder;
-import net.hollowcube.common.util.MathUtil;
+import net.hollowcube.common.math.MathUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.Uuids;
 import net.hollowcube.mapmaker.ExceptionReporter;
@@ -37,16 +37,16 @@ public class InteractionEditorScreen {
         var match = POSITION_REGEX.matcher(data);
         if (!match.matches()) return interaction.getPosition();
         return new Pos(
-                MathUtil.toDouble(match.group("x"), interaction.getPosition().x()),
-                MathUtil.toDouble(match.group("y"), interaction.getPosition().y()),
-                MathUtil.toDouble(match.group("z"), interaction.getPosition().z())
+                MathUtil.parseFiniteDouble(match.group("x"), interaction.getPosition().x()),
+                MathUtil.parseFiniteDouble(match.group("y"), interaction.getPosition().y()),
+                MathUtil.parseFiniteDouble(match.group("z"), interaction.getPosition().z())
         );
     }
 
     private static BoundingBox getBoundingBox(@NotNull String width, @NotNull String height, @NotNull InteractionEntity interaction) {
         var bb = interaction.getBoundingBox();
-        var w = MathUtil.toDouble(width, bb.width());
-        var h = MathUtil.toDouble(height, bb.height());
+        var w = MathUtil.parseFiniteDouble(width, bb.width());
+        var h = MathUtil.parseFiniteDouble(height, bb.height());
         return new BoundingBox(w, h, w);
     }
 
