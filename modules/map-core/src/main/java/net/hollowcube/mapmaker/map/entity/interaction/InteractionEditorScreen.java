@@ -82,7 +82,7 @@ public class InteractionEditorScreen {
             NotificationManager.showNotification(
                     event.getPlayer(),
                     "Error",
-                    "Could not parse data. Make sure it is valid NBT.",
+                    "Can't parse, make sure it's valid NBT.",
                     NamedTextColor.RED
             );
         }
