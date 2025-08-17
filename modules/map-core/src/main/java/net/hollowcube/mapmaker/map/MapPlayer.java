@@ -270,10 +270,6 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
 
     public void removeOwnedEntities() {
         FutureUtil.assertTickThread();
-
-        var instance = getInstance();
-        if (instance == null) return;
-
         var iter = ownedEntities.intIterator();
         while (iter.hasNext()) {
             var entity = instance.getEntityById(iter.nextInt());
