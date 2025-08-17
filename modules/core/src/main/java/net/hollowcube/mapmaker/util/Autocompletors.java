@@ -28,7 +28,7 @@ public final class Autocompletors {
         for (var material : Material.values()) {
             materials.add(new IndexableMaterial(material));
         }
-        for (var block : ItemUtils.PLACEABLE_ON_BLOCKS) {
+        for (var block : ItemUtils.PLACEABLE_BLOCKS) {
             fullBlocks.add(new IndexableBlock(block));
         }
     }

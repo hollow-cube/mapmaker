@@ -30,11 +30,7 @@ public final class ItemUtils {
     private static final Set<Block> INCLUDED_BLOCKS = Set.of(
             Block.HONEY_BLOCK, Block.SLIME_BLOCK, Block.LADDER
     );
-    private static final Set<Block> EXTRA_PLACEABLE_ON = Set.of(
-            Block.STRUCTURE_VOID
-    );
     public static final Set<Block> PLACEABLE_BLOCKS;
-    public static final Set<Block> PLACEABLE_ON_BLOCKS;
 
     static {
 
@@ -60,10 +56,6 @@ public final class ItemUtils {
         }
 
         PLACEABLE_BLOCKS = Set.copyOf(blocks);
-
-        var placeableOn = new HashSet<>(PLACEABLE_BLOCKS);
-        placeableOn.addAll(EXTRA_PLACEABLE_ON);
-        PLACEABLE_ON_BLOCKS = Set.copyOf(placeableOn);
     }
 
     private ItemUtils() {

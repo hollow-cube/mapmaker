@@ -57,7 +57,7 @@ public record BlockCheckpointItem(Block block, int amount, List<Block> placeable
     }
 
     public boolean isValid() {
-        return ItemUtils.PLACEABLE_BLOCKS.contains(this.block()) && ItemUtils.PLACEABLE_ON_BLOCKS.containsAll(this.placeableOn());
+        return ItemUtils.PLACEABLE_BLOCKS.contains(this.block()) && ItemUtils.PLACEABLE_BLOCKS.containsAll(this.placeableOn());
     }
 
     @Override

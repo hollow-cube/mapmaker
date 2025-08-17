@@ -196,8 +196,6 @@ public final class PlacementRules {
         register(Block.WILDFLOWERS, b -> new QuadSegmentPlacementRule(b, "flower_amount"));
         register(Block.LEAF_LITTER, b -> new QuadSegmentPlacementRule(b, "segment_amount"));
 
-        register(Block.STRUCTURE_VOID, AlwaysReplacePlacementRule::new);
-
         // Annoying single use wall of shame >:(
 
         register(Block.BELL, BellPlacementRule::new);

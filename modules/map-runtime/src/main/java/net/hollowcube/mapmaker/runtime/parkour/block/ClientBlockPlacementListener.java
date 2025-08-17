@@ -105,9 +105,8 @@ public class ClientBlockPlacementListener {
         final ItemBlockState blockState = usedItem.get(DataComponents.BLOCK_STATE, ItemBlockState.EMPTY);
         Block placedBlock = blockState.apply(useMaterial.block());
 
-        // Note that not all players can necessarily see each other so don't block placement inside a player you cant see.
         Entity collisionEntity = CollisionUtils.canPlaceBlockAt(instance, placementPosition, placedBlock);
-        if (collisionEntity != null && collisionEntity.isViewer(player)) {
+        if (collisionEntity != null) {
             player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
             return true;
         }
@@ -119,12 +118,6 @@ public class ClientBlockPlacementListener {
                     cursorPosition, player.getPosition(),
                     usedItem, player.isSneaking()
             ));
-        }
-
-        // If we have a pending teleport out for the player, ignore any placements which occur during that time
-        if (player.getLastSentTeleportId() != player.getLastReceivedTeleportId()) {
-            player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
-            return true;
         }
 
         // Update the block on the client and record it for the checkpoint.

@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.editor;
 import net.hollowcube.mapmaker.editor.item.ExitTestModeItem;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.SaveStateType;
-import net.hollowcube.mapmaker.map.util.spatial.Octree;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
@@ -32,16 +31,6 @@ public class TestParkourMapWorld extends ParkourMapWorld {
     @Override
     public ParkourState.AnyPlaying createPlayingState(SaveState saveState) {
         return new ParkourState.Testing(saveState, null);
-    }
-
-    @Override
-    public Octree collisionTree() {
-        return parent.collisionTree();
-    }
-
-    @Override
-    public void queueCollisionTreeRebuild() {
-        parent.queueCollisionTreeRebuild();
     }
 
     @Override

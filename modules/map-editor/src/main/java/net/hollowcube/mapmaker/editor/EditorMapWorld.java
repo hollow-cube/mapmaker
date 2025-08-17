@@ -99,7 +99,6 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         itemRegistry().register(FinishEditor.PLATE_ITEM);
         itemRegistry().register(BouncePadEditor.ITEM);
 
-        ParkourMapWorld.registerMarkers(objectEntityHandlers());
         objectEntityHandlers().registerEditor(CheckpointMarkerHandler.ID, CheckpointEditor.MARKER_EDITOR);
         objectEntityHandlers().registerEditor(StatusMarkerHandler.ID, StatusEditor.MARKER_EDITOR);
         objectEntityHandlers().registerEditor(FinishMarkerHandler.ID, FinishEditor.MARKER_EDITOR);

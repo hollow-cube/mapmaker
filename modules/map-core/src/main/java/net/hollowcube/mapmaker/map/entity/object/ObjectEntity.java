@@ -114,8 +114,8 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
 
     @Override
     public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
-        var world = MapWorld.forInstance(instance);
-        visible = world != null && world.canEdit(null);
+        var world = MapWorld.forInstance(instance); // todo this is more complex, also update visible
+//        visible = world != null && !world.isReadOnly(); TODO: visible shouldnt exist, should just use manual viewers.
         if (handler != null) {
             handler.onRemove();
             handler = null;
@@ -129,10 +129,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
 
     @Override
     public void readData(@NotNull CompoundBinaryTag tag) {
-        super.readData(tag);
-        // Always reset these two tags in case the parent updated them incorrectly.
-        setNoGravity(true);
-        hasPhysics = false;
+        // Do not read default entity tags
 
         setTag(DATA_TAG, tag.getCompound("data"));
         updateBoundingBox();
@@ -141,7 +138,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
 
     @Override
     public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
-        super.writeData(tag);
+        // Do not write default entity tags
 
         tag.put("data", getTag(DATA_TAG));
     }
@@ -202,19 +199,10 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
     }
 
     private static void handleAxiomRequestMarkerData(@NotNull AxiomMarkerDataRequestEvent.RightClick event) {
-        final var player = event.player();
-        final var world = MapWorld.forPlayer(player);
+        var world = MapWorld.forPlayer(event.player());
         if (!(event.marker() instanceof ObjectEntity entity)) return;
         if (world == null || !world.canEdit(event.player())) return;
         if (!world.instance().equals(entity.getInstance())) return;
-
-        var editor = world.objectEntityHandlers().getEditor(entity.getType());
-        if (!player.isSneaking() && editor != null) {
-            if (editor.onPlayerEdit(player, entity)) {
-                event.setCancelled(true);
-                return;
-            }
-        }
 
         event.setData(entity.getTag(DATA_TAG)
                 .put("axiom:hide", AxiomAPI.HIDDEN_MARKER_DATA)
