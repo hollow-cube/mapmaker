@@ -239,7 +239,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                     // Stop if there are still players in the instance
                     if (event.getInstance().getPlayers().size() > 1) return;
 
-                    destroy(key, Component.translatable("map.closed"));
+                    FutureUtil.submitVirtual(() -> destroy(key, Component.translatable("map.closed")));
                 });
             }
 
@@ -307,7 +307,8 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
         FutureUtil.getUnchecked(CompletableFuture.allOf(futures));
 
         // Close the world itself
-        world.close();
+        MinecraftServer.getSchedulerManager()
+                .scheduleEndOfTick(world::close);
     }
 
     public void close() {

@@ -136,6 +136,8 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         objectEntityHandlers.registerForMarkers(ResetMarkerHandler.ID, ResetMarkerHandler::new);
     }
 
+    private final SaveStateType saveStateType;
+
     protected int defaultResetHeight;
 
     public ParkourMapWorld(MapServer server, MapData map) {
@@ -145,6 +147,9 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     protected ParkourMapWorld(MapServer server, MapData map, MapInstance instance) {
         super(server, map, instance, ParkourState.class);
         Check.stateCondition(initProcess == null, "ParkourMapWorld is not initialized, was `ParkourMapWorld2.initGlobalReferences()` called?");
+
+        this.saveStateType = map.verification() == MapVerification.PENDING
+                ? SaveStateType.VERIFYING : SaveStateType.PLAYING;
         this.defaultResetHeight = instance().getCachedDimensionType().minY();
 
         SILENT_ITEMS.forEach(itemRegistry()::registerSilent);
@@ -192,7 +197,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     public void hardResetPlayer(Player player) {
         var newSaveState = new SaveState(UUID.randomUUID().toString(),
-                map().id(), player.getUuid().toString(), SaveStateType.PLAYING,
+                map().id(), player.getUuid().toString(), saveStateType,
                 PlayState.SERIALIZER, new PlayState());
         newSaveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
         changePlayerState(player, createPlayingState(newSaveState));
@@ -250,13 +255,13 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         final var playerData = PlayerData.fromPlayer(player);
         SaveState saveState;
         try {
-            saveState = server().mapService().getLatestSaveState(map().id(), playerData.id(),
-                    SaveStateType.PLAYING, PlayState.SERIALIZER);
+            saveState = server().mapService().getLatestSaveState(map().id(),
+                    playerData.id(), saveStateType, PlayState.SERIALIZER);
         } catch (MapService.NotFoundError ignored) {
             // No save state yet, create one locally.
             // We do an upsert to save, so it will be created in the map service at that point.
             saveState = new SaveState(UUID.randomUUID().toString(),
-                    map().id(), playerData.id(), SaveStateType.PLAYING,
+                    map().id(), playerData.id(), saveStateType,
                     PlayState.SERIALIZER, new PlayState());
             saveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
         }
