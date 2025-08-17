@@ -108,8 +108,6 @@ public class DevServer extends AbstractMultiMapServer {
     }
 
     private void performMapInit() {
-        ParkourMapWorld.initGlobalReferences();
-
         Predicate<InstanceEvent> filter = event -> {
             if (!(MapWorld.forInstance(event.getInstance()) instanceof EditorMapWorld editor))
                 return false;
