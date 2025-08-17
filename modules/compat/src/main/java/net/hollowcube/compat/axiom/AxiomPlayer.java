@@ -2,23 +2,18 @@ package net.hollowcube.compat.axiom;
 
 import it.unimi.dsi.fastutil.Pair;
 import net.hollowcube.compat.api.packet.ClientboundModPacket;
-import net.hollowcube.compat.axiom.data.AxiomPermission;
+import net.hollowcube.compat.axiom.data.AxiomCapabilities;
 import net.hollowcube.compat.axiom.events.AxiomEnabledEvent;
-import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundEnablePacket;
-import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundIgnoreDisplayEntitiesPacket;
-import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundRegisterWorldPropertiesPacket;
-import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundSetRestrictionsPacket;
+import net.hollowcube.compat.axiom.packets.clientbound.*;
 import net.hollowcube.compat.axiom.properties.registry.PropertyRegistry;
 import net.minestom.server.coordinate.BlockVec;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
@@ -30,8 +25,11 @@ public final class AxiomPlayer {
 
     private static final AxiomClientboundEnablePacket.ServerConfig SERVER_CONFIG = new AxiomClientboundEnablePacket.ServerConfig(
             0x100000, // 1mb,
-            AxiomAPI.BLUEPRINT_VERSION,
-            List.of(), List.of() // Custom Blocks
+            false, false,
+            5,
+            16, true, // Editor Tabs
+            List.of(), List.of(), // Custom Blocks
+            AxiomAPI.BLUEPRINT_VERSION
     );
 
     public static boolean isEnabled(@NotNull Player player) {
@@ -52,28 +50,22 @@ public final class AxiomPlayer {
             var max = new BlockVec(border.centerX() + border.diameter() / 2, dimension.maxY(), border.centerZ() + border.diameter() / 2);
 
             AxiomClientboundSetRestrictionsPacket.Restrictions restrictions = new AxiomClientboundSetRestrictionsPacket.Restrictions(
-                    Set.of(
-                            AxiomPermission.ENTITY,
-                            AxiomPermission.ANNOTATION,
-                            AxiomPermission.DEFAULT
-                    ),
-                    Set.of(
-                            AxiomPermission.PLAYER_GAMEMODE_ADVENTURE,
-                            AxiomPermission.PLAYER_GAMEMODE_SURVIVAL
-                    ),
-                    -1,
+                    true, true, true, true,
+                    AxiomCapabilities.ALL, -1, 0,
                     Pair.of(min, max)
             );
 
             packets = List.of(
                     new AxiomClientboundEnablePacket(SERVER_CONFIG),
                     new AxiomClientboundRegisterWorldPropertiesPacket(player, PropertyRegistry.CATEGORIES),
-                    new AxiomClientboundSetRestrictionsPacket(restrictions)
+                    new AxiomClientboundSetRestrictionsPacket(restrictions),
+                    new AxiomClientboundAllowedGamemodesPacket(EnumSet.of(GameMode.CREATIVE, GameMode.SPECTATOR))
             );
         } else {
             packets = List.of(
                     new AxiomClientboundEnablePacket(null),
-                    new AxiomClientboundRegisterWorldPropertiesPacket(player, Map.of())
+                    new AxiomClientboundRegisterWorldPropertiesPacket(player, Map.of()),
+                    new AxiomClientboundAllowedGamemodesPacket(EnumSet.allOf(GameMode.class))
             );
         }
 

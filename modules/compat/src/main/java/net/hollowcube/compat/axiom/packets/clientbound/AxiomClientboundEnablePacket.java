@@ -29,15 +29,25 @@ public record AxiomClientboundEnablePacket(
 
     public record ServerConfig(
             int maxBufferSize,
-            int blueprintVersion,
+            boolean sendSourceInfo,
+            boolean sendSourceSettings,
+            int maxReachDistance,
+            int maxViews,
+            boolean editableViews,
             @NotNull List<Block> blocksWithCustomData,
-            @NotNull List<Block> ignoreRotationSet
+            @NotNull List<Block> ignoreRotationSet,
+            int blueprintVersion
     ) {
         public static final NetworkBuffer.Type<ServerConfig> SERIALIZER = NetworkBufferTemplate.template(
                 NetworkBuffer.INT, ServerConfig::maxBufferSize,
-                NetworkBuffer.VAR_INT, ServerConfig::blueprintVersion,
+                NetworkBuffer.BOOLEAN, ServerConfig::sendSourceInfo,
+                NetworkBuffer.BOOLEAN, ServerConfig::sendSourceSettings,
+                NetworkBuffer.VAR_INT, ServerConfig::maxReachDistance,
+                NetworkBuffer.VAR_INT, ServerConfig::maxViews,
+                NetworkBuffer.BOOLEAN, ServerConfig::editableViews,
                 Block.NETWORK_TYPE.list(Short.MAX_VALUE), ServerConfig::blocksWithCustomData,
                 Block.NETWORK_TYPE.list(Short.MAX_VALUE), ServerConfig::ignoreRotationSet,
+                NetworkBuffer.VAR_INT, ServerConfig::blueprintVersion,
                 ServerConfig::new
         );
     }

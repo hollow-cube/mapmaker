@@ -15,6 +15,7 @@ import java.util.UUID;
 public record AxiomServerboundSetBufferPacket(
         @NotNull String dimension,
         @NotNull UUID id,
+        @Nullable CompoundBinaryTag sourceInfo,
         @NotNull AxiomBuffer buffer
 ) implements ServerboundModPacket<AxiomServerboundSetBufferPacket> {
 
@@ -23,6 +24,7 @@ public record AxiomServerboundSetBufferPacket(
             (buffer) -> new AxiomServerboundSetBufferPacket(
                     buffer.read(NetworkBuffer.STRING),
                     buffer.read(NetworkBuffer.UUID),
+                    !buffer.read(NetworkBuffer.BOOLEAN) && buffer.read(NetworkBuffer.NBT) instanceof CompoundBinaryTag it ? it : null,
                     switch (buffer.read(NetworkBuffer.BYTE)) {
                         case 0 -> AxiomBlockBuffer.read(buffer);
                         case 1 -> AxiomBiomeBuffer.read(buffer);

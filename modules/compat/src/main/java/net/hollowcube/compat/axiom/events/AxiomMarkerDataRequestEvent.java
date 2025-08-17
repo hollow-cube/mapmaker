@@ -4,14 +4,13 @@ import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.CancellableEvent;
-import net.minestom.server.event.trait.RecursiveEvent;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-public class AxiomMarkerDataRequestEvent implements AxiomEvent, RecursiveEvent, CancellableEvent {
+public class AxiomMarkerDataRequestEvent implements AxiomEvent, CancellableEvent {
 
     private final Player player;
     private final Entity marker;
@@ -54,17 +53,5 @@ public class AxiomMarkerDataRequestEvent implements AxiomEvent, RecursiveEvent, 
     @Override
     public void setCancelled(boolean cancel) {
         this.cancelled = cancel;
-    }
-
-    public static class RightClick extends AxiomMarkerDataRequestEvent {
-        public RightClick(@NotNull Player player, @NotNull UUID uuid) {
-            super(player, uuid);
-        }
-    }
-
-    public static class Copying extends AxiomMarkerDataRequestEvent {
-        public Copying(@NotNull Player player, @NotNull UUID uuid) {
-            super(player, uuid);
-        }
     }
 }
