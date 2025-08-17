@@ -15,7 +15,6 @@ import net.hollowcube.mapmaker.map.command.DebugPoiCommand;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.ComponentUtil;
@@ -68,8 +67,6 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
 
     public AbstractMultiMapServer(@NotNull ConfigLoaderV3 config) {
         super(config);
-
-        ParkourMapWorld.initGlobalReferences();
 
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("map-init")
                 .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
