@@ -25,6 +25,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.datafix.DataFixer;
+import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
@@ -60,11 +61,18 @@ import net.hollowcube.mapmaker.invite.PlayerInviteServiceImpl;
 import net.hollowcube.mapmaker.kafka.FriendlyProducer;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.*;
-import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.entity.MapEntities;
+import net.hollowcube.mapmaker.map.object.ObjectTypes;
 import net.hollowcube.mapmaker.map.util.AnonHealthCheck;
 import net.hollowcube.mapmaker.map.util.DynamicController;
+import net.hollowcube.mapmaker.map.util.MapPlayerImpl;
+import net.hollowcube.mapmaker.map.util.datafix.versions.V3701;
+import net.hollowcube.mapmaker.map.util.datafix.versions.V3838;
+import net.hollowcube.mapmaker.map.util.datafix.versions.V4325_1;
+import net.hollowcube.mapmaker.metrics.MetricWriter;
+import net.hollowcube.mapmaker.metrics.MetricWriterNoop;
+import net.hollowcube.mapmaker.metrics.MetricWriterPosthog;
 import net.hollowcube.mapmaker.misc.ExpBarRenderer;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.misc.noop.*;
@@ -110,6 +118,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -120,6 +129,7 @@ public abstract class AbstractMapServer implements MapServer {
     protected final GlobalConfig globalConfig;
 
     protected final OpenTelemetry otel;
+    private final MetricWriter metrics;
     private final SessionService sessionService;
     private final PlayerService playerService;
     private final MapService mapService;
@@ -128,6 +138,7 @@ public abstract class AbstractMapServer implements MapServer {
     private PlayerInviteService inviteService; // So many dependencies very yikes
 
     // Listeners for other features
+    private MapAllocator allocator;
     private ServerBridge bridge;
     private FriendlyProducer producer;
 
@@ -152,6 +163,9 @@ public abstract class AbstractMapServer implements MapServer {
         this.globalConfig = config.get(GlobalConfig.class);
 
         this.otel = initTracing(config);
+
+        this.metrics = createMetricWriter(config);
+        shutdowner.queue("metric-writer", metrics::close);
 
         var playerServiceUrl = config.get(Player_ServiceConfig.class).url();
         if (!playerServiceUrl.isEmpty()) {
@@ -193,6 +207,14 @@ public abstract class AbstractMapServer implements MapServer {
         ShopUpgradeCache.init(permManager);
     }
 
+    protected @NotNull MetricWriter createMetricWriter(@NotNull ConfigLoaderV3 config) {
+        var metricsConfig = config.get(MetricsConfig.class);
+        if (metricsConfig.password() != null && !metricsConfig.password().isEmpty()) {
+            return new MetricWriterPosthog();
+        }
+        return new MetricWriterNoop();
+    }
+
     protected abstract @NotNull String name();
 
     @Override
@@ -214,12 +236,14 @@ public abstract class AbstractMapServer implements MapServer {
 
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
         MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProviderV2.translate(component);
+        MinecraftServer.getConnectionManager().setPlayerProvider((connection, gameProfile) -> new MapPlayerImpl(connection, gameProfile) {
+            @Override
+            public @NotNull CommandManager getCommandManager() {
+                return commandManager;
+            }
+        });
 
         EventExtensions.init();
-
-        // Block handlers are always necessary to prevent invisible/visually incorrect blocks,
-        // even if we don't have block placement.
-        BlockHandlers.init();
 
         // Dependent service init
 
@@ -240,6 +264,8 @@ public abstract class AbstractMapServer implements MapServer {
         }
         shutdowner.queue("feature-flag-provider", FeatureFlagProvider.current()::close);
 
+        allocator = createAllocator();
+        shutdowner.queue("map-allocator", allocator::close);
         bridge = createBridge();
 
         var kafkaConfig = config.get(KafkaConfig.class);
@@ -285,11 +311,18 @@ public abstract class AbstractMapServer implements MapServer {
         facets.put(Controller.class, guiController);
         prepareStart();
 
+        var ignored = ObjectTypes.CHECKPOINT_PLATE; // Will fix when reworking ram usage
+
         // Copy the facets map to prevent modification
         facets = Map.copyOf(facets);
 
         // Finally, mark the service as ready for Kubernetes
         isReady = true;
+    }
+
+    @Override
+    public @NotNull MetricWriter metrics() {
+        return metrics;
     }
 
     @Override
@@ -323,6 +356,11 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     @Override
+    public @NotNull MapAllocator allocator() {
+        return allocator;
+    }
+
+    @Override
     public @NotNull ServerBridge bridge() {
         return bridge;
     }
@@ -346,6 +384,8 @@ public abstract class AbstractMapServer implements MapServer {
         return MinecraftServer.getSchedulerManager();
     }
 
+    protected abstract @NotNull MapAllocator createAllocator();
+
     protected abstract @NotNull ServerBridge createBridge();
 
     /**
@@ -368,6 +408,7 @@ public abstract class AbstractMapServer implements MapServer {
         addBinding(MapServer.class, this, "mapServer", "server");
         addBinding(ConfigLoaderV3.class, config);
 
+        addBinding(MetricWriter.class, metrics, "metrics");
         addBinding(SessionService.class, sessionService, "sessionService");
         addBinding(PlayerService.class, playerService, "playerService");
         addBinding(MapService.class, mapService, "mapService");
@@ -375,6 +416,7 @@ public abstract class AbstractMapServer implements MapServer {
         addBinding(PunishmentService.class, punishmentService, "punishmentService");
         addBinding(PlayerInviteService.class, inviteService, "playerInviteService");
 
+        addBinding(MapAllocator.class, allocator, "allocator");
         addBinding(SessionManager.class, sessionManager, "sessionManager");
         addBinding(ServerBridge.class, bridge(), "bridge");
 
@@ -435,6 +477,7 @@ public abstract class AbstractMapServer implements MapServer {
             commandManager.register(new KickCommand(punishmentService(), sessionManager(), permManager()));
         }
 
+        DataFixer.addFixVersions(extraDataVersions());
         DataFixer.buildModel();
     }
 
@@ -535,8 +578,12 @@ public abstract class AbstractMapServer implements MapServer {
                 .buildAndRegisterGlobal();
     }
 
+    protected @NotNull List<Supplier<DataVersion>> extraDataVersions() {
+        return List.of(V3701::new, V3838::new, V4325_1::new);
+    }
+
     protected @NotNull DebugCommand createDebugCommand() {
-        return new DebugCommand(playerService(), permManager(), mapService());
+        return new DebugCommand(playerService(), permManager(), mapService(), allocator());
     }
 
     /**
@@ -562,7 +609,7 @@ public abstract class AbstractMapServer implements MapServer {
 
             var sessionResponse = sessionResponseFuture.get();
             player.setTag(CompatProvider.FIRST_JOIN_TAG, sessionResponse.isJoin());
-            player.setTag(PlayerData.TAG, sessionResponse.data());
+            player.setTag(PlayerDataV2.TAG, sessionResponse.data());
             sessionManager.updateSessionOptimistic(sessionResponse.session(), new SessionStateUpdateRequest.Metadata());
             player.setTag(MapPlayerData.TAG, mapPlayerDataFuture.get());
             var backpack = new PlayerBackpack(player);
@@ -590,7 +637,7 @@ public abstract class AbstractMapServer implements MapServer {
 
     protected void handleFirstSpawn(@NotNull Player player) {
         logger.info("doing spawn for {}", player.getUsername());
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = PlayerDataV2.fromPlayer(player);
 
         player.sendPacket(new ServerLinksPacket(List.of(
                 new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.WEBSITE, "https://hollowcube.net/"),
@@ -614,20 +661,22 @@ public abstract class AbstractMapServer implements MapServer {
         actionBar.addProvider(new ExpBarRenderer());
 
         // Add the player to the world they are spawning into
-        var world = MapWorld.forInstance(player.getInstance());
+        //todo need to support joining as a spectator
+        var world = MapWorld.unsafeFromInstance(player.getInstance());
         if (world == null) { // Sanity check
             player.kick("unknown error");
             return;
         }
-        try {
-            world.spawnPlayer(player);
-
-            // See comment in AbstractMapWorld#configurePlayer
-            player.setAutoViewEntities(true);
-        } catch (Exception e) {
-            ExceptionReporter.reportException(e, player);
-            player.kick(Component.text("Failed to join the world. Please try again later."));
-        }
+        FutureUtil.submitVirtual(() -> {
+            try {
+                world.addPlayer(player);
+                // See comment in AbstractMapWorld#configurePlayer
+                player.scheduleNextTick(ignored -> player.setAutoViewEntities(true));
+            } catch (Exception e) {
+                ExceptionReporter.reportException(e, player);
+                player.kick(Component.text("Failed to join the world. Please try again later."));
+            }
+        });
 
         if (CoreFeatureFlags.SERVER_STAT_OVERLAY.test(player)) {
             actionBar.addProvider(new ServerStatsHud());

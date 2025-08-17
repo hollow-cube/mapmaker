@@ -57,7 +57,7 @@ public class AnvilLoader {
         return chunk;
     }
 
-    private static void loadSections(@NotNull Chunk chunk, @NotNull CompoundBinaryTag chunkData) {
+    private static void loadSections(@NotNull Chunk chunk, @NotNull CompoundBinaryTag chunkData) throws IOException {
         for (BinaryTag sectionTag : chunkData.getList("sections", BinaryTagTypes.COMPOUND)) {
             final CompoundBinaryTag sectionData = (CompoundBinaryTag) sectionTag;
 
@@ -141,7 +141,7 @@ public class AnvilLoader {
         }
     }
 
-    private static Block[] loadBlockPalette(@NotNull ListBinaryTag paletteTag) {
+    private static Block[] loadBlockPalette(@NotNull ListBinaryTag paletteTag) throws IOException {
         Block[] convertedPalette = new Block[paletteTag.size()];
         for (int i = 0; i < convertedPalette.length; i++) {
             CompoundBinaryTag paletteEntry = paletteTag.getCompound(i);
@@ -157,12 +157,8 @@ public class AnvilLoader {
                     if (property.getValue() instanceof StringBinaryTag propertyValue) {
                         properties.put(property.getKey(), propertyValue.value());
                     } else {
-                        try {
-                            LOGGER.warn("Fail to parse block state properties {}, expected a string for {}, but contents were {}",
+                        LOGGER.warn("Fail to parse block state properties {}, expected a string for {}, but contents were {}",
                                     propertiesNBT, property.getKey(), MinestomAdventure.tagStringIO().asString(property.getValue()));
-                        } catch (Exception e) {
-                            LOGGER.warn("Fail to parse block state properties {}", propertiesNBT, e);
-                        }
                     }
                 }
                 if (!properties.isEmpty()) block = block.withProperties(properties);

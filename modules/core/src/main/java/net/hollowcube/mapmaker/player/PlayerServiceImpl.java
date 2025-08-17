@@ -124,7 +124,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         // If the player is online we have an up-to-date display name anyway
         var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(id));
         if (player != null) {
-            return PlayerData.fromPlayer(player).displayName2();
+            return PlayerDataV2.fromPlayer(player).displayName2();
         }
 
         //todo probably should have some basic cache here

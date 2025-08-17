@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<?import net.hollowcube.mapmaker.map.gui.biome ?>
+<component width="9" height="9" align="ttb">
+    <box width="9" height="1" align="ltr">
+        <BackButton/>
+        <label translationKey="gui.biome_list.information"/>
+        <text id="gui_title" width="5" translationKey="gui.biome_list.title" font="slot_title"
+              centered="true"/>
+    </box>
+
+    <box width="9" height="3" align="ltr">
+        <spacer width="1" height="3"/>
+
+        <pagination id="biome_list" width="7" height="3" child="BiomeEntry"/>
+
+        <spacer width="1" height="3"/>
+    </box>
+
+    <text id="capacity" width="9" translationKey="gui.biome_list.capacity"
+          font="line_4" centered="true"/>
+
+</component>

@@ -6,7 +6,7 @@ import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +29,7 @@ public class MapArgument extends Argument<@Nullable MapData> {
         String mapId = reader.readWord(WordType.BRIGADIER);
         if (!(sender instanceof Player player)) return syntaxError(-1);
 
-        var playerId = PlayerData.fromPlayer(player).id();
+        var playerId = PlayerDataV2.fromPlayer(player).id();
 
         try {
             // Try as published ID

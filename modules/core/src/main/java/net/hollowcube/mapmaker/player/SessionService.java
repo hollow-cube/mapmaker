@@ -11,7 +11,7 @@ import java.util.List;
 @Blocking
 public interface SessionService {
 
-    @NotNull PlayerData createSession(@NotNull String id, @NotNull String proxy, @NotNull String username, @NotNull String ip, @NotNull PlayerSkin skin);
+    @NotNull PlayerDataV2 createSession(@NotNull String id, @NotNull String proxy, @NotNull String username, @NotNull String ip, @NotNull PlayerSkin skin);
 
     @NotNull TransferSessionResponse transferSession(@NotNull String id, @NotNull SessionTransferRequest req);
 

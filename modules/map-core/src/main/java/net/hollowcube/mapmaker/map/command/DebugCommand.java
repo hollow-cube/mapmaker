@@ -14,13 +14,13 @@ import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderAddPa
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
+import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.ComponentUtil;
@@ -39,19 +39,23 @@ import java.util.function.Consumer;
 
 public class DebugCommand extends CommandDsl {
 
+    private final MapAllocator allocator;
+
     private final CommandCondition adminCondition;
     private final CommandCondition localCondition;
 
     public DebugCommand(
-            @NotNull PlayerService playerService, @NotNull PermManager permManager, @NotNull MapService mapService
+            @NotNull PlayerService playerService, @NotNull PermManager permManager, @NotNull MapService mapService,
+            @NotNull MapAllocator allocator
     ) {
         super("debug");
+        this.allocator = allocator;
 
         description = "Debugging utilities for map maker";
         category = CommandCategory.HIDDEN;
 
         adminCondition = permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN);
-        localCondition = (_, _) -> ServerRuntime.getRuntime().isDevelopment() ? CommandCondition.ALLOW
+        localCondition = ($, $$) -> ServerRuntime.getRuntime().isDevelopment() ? CommandCondition.ALLOW
                 : CommandCondition.DENY;
 
         // Mapmaker stuff
@@ -74,6 +78,8 @@ public class DebugCommand extends CommandDsl {
         createPermissionlessSubcommand("pvn", this::handlePvnDebug,
                 "Show your current protocol version");
 
+        createPermissionedSubcommand("map_alloc", this::showMapAllocatorDebug,
+                "Show map allocator debug info");
         createPermissionedSubcommand("relight", this::relightWorld,
                 "Relight the world");
         createPermissionedSubcommand("reheightmap", this::handleReHeightmapDebug,
@@ -82,8 +88,6 @@ public class DebugCommand extends CommandDsl {
                 "dump block nbt directly");
         createPermissionedSubcommand("tree", this::handleTreeDebug,
                 "show map octree");
-        createPermissionedSubcommand("fixthedripleaf", this::fixTheDripleaf,
-                "add dripleaf block handlers to relevant blocks");
     }
 
     public @NotNull CommandDsl createPermissionlessSubcommand(
@@ -108,7 +112,7 @@ public class DebugCommand extends CommandDsl {
     }
 
     private void handleDebugSelf(@NotNull Player player, @NotNull CommandContext context) {
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = PlayerDataV2.fromPlayer(player);
         player.sendMessage(Component.text(playerData.username() + " (" + playerData.id().substring(0, 8) + "...)"));
         player.sendMessage(Component.text("Display: ").append(playerData.displayName2().build()));
         var rawSettings = playerData.settingsRawValues();
@@ -220,15 +224,19 @@ public class DebugCommand extends CommandDsl {
         player.sendMessage(Component.text("Protocol: " + pvn + " (" + ProtocolVersions.getProtocolName(pvn) + ")"));
     }
 
+    private void showMapAllocatorDebug(@NotNull Player player, @NotNull CommandContext context) {
+        allocator.showDebugInfo(player);
+    }
+
     private void handleTreeDebug(@NotNull Player player, @NotNull CommandContext context) {
-        var world = MapWorld.forPlayer(player);
+        var world = MapWorld.forPlayerOptional(player);
         if (world == null) {
             player.sendMessage("You are not in a map world!");
             return;
         }
 
         player.scheduleNextTick(_ -> {
-            var boundingBoxes = world.collisionTree().debugBoundingBoxes();
+            var boundingBoxes = world.octree().debugBoundingBoxes();
             player.sendMessage("Found " + boundingBoxes.size() + " bounding boxes in octree.");
 
             int i = 0;
@@ -253,27 +261,6 @@ public class DebugCommand extends CommandDsl {
             LightingChunk.relight(player.getInstance(), batch);
             batch.forEach(player::sendChunk);
         }, 50);
-    }
-
-    private void fixTheDripleaf(@NotNull Player player, @NotNull CommandContext context) {
-        var instance = player.getInstance();
-        var dimensionHeight = instance.getCachedDimensionType().height();
-        player.sendMessage("Fixing the dripleaf!!!");
-        int fixed = 0;
-        for (var chunk : instance.getChunks()) {
-            for (int x = 0; x < 16; x++) {
-                for (int z = 0; z < 16; z++) {
-                    for (int y = -64; y < dimensionHeight; y++) {
-                        var block = chunk.getBlock(x, y, z);
-                        if (block.name().equals("minecraft:big_dripleaf")) {
-                            chunk.setBlock(x, y, z, block.withHandler(DripleafBlock.INSTANCE));
-                            fixed++;
-                        }
-                    }
-                }
-            }
-        }
-        player.sendMessage("Fixed " + fixed + " dripleaf blocks!");
     }
 
     private void queueRateLimitedWorldUpdate(

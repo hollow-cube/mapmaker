@@ -4,7 +4,7 @@ import net.hollowcube.common.events.RequestStatsEvent;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
@@ -25,7 +25,7 @@ public class PlayerSettingsScreen {
             if (!event.getKey().equals(PlayerSettingsOptions.SETTINGS_DIALOG_ID)) return;
             if (!(event.getPayload() instanceof CompoundBinaryTag tag)) return;
 
-            var data = PlayerData.fromPlayer(event.getPlayer());
+            var data = PlayerDataV2.fromPlayer(event.getPlayer());
 
             for (var option : PlayerSettingsOptions.OPTIONS) {
                 var value = tag.get(option.key());
@@ -46,7 +46,7 @@ public class PlayerSettingsScreen {
     }
 
     private static void openSettingsDialog(@NotNull Player player) {
-        var data = PlayerData.fromPlayer(player);
+        var data = PlayerDataV2.fromPlayer(player);
         var dialog = new Dialog.Notice(
                 new DialogMetadata(
                         LanguageProviderV2.translate(Component.translatable("dialog.settings.title")),

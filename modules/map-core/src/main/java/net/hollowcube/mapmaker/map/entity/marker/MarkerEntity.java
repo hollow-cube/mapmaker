@@ -3,6 +3,8 @@ package net.hollowcube.mapmaker.map.entity.marker;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntity;
+import net.hollowcube.mapmaker.map.event.entity.MarkerEntityEnteredEvent;
+import net.hollowcube.mapmaker.map.event.entity.MarkerEntityExitedEvent;
 import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -38,11 +40,13 @@ public class MarkerEntity extends ObjectEntity implements SpatialObject {
         this.sendToClient = false;
     }
 
-    public void onPlayerEntered2NoEventTemp(@NotNull Player player) {
+    public void onPlayerEntered(@NotNull MapWorld world, @NotNull Player player) {
+        world.callEvent(new MarkerEntityEnteredEvent(world, player, this));
         if (this.handler != null) this.handler.onPlayerEnter(player);
     }
 
-    public void onPlayerExited2NoEventTemp(@NotNull Player player) {
+    public void onPlayerExited(@NotNull MapWorld world, @NotNull Player player) {
+        world.callEvent(new MarkerEntityExitedEvent(world, player, this));
         if (this.handler != null) this.handler.onPlayerExit(player);
     }
 
@@ -54,7 +58,7 @@ public class MarkerEntity extends ObjectEntity implements SpatialObject {
     ) {
         return super.teleport(position, velocity, chunks, flags, shouldConfirm).thenRun(() -> {
             if (handler != null) handler.onPositionChange(position);
-            var world = MapWorld.forInstance(instance);
+            var world = MapWorld.unsafeFromInstance(instance);
             if (world != null) world.queueCollisionTreeRebuild();
         });
     }
@@ -62,7 +66,7 @@ public class MarkerEntity extends ObjectEntity implements SpatialObject {
     @Override
     protected void updateBoundingBox() {
         super.updateBoundingBox();
-        var world = MapWorld.forInstance(instance);
+        var world = MapWorld.unsafeFromInstance(instance);
         if (world != null) world.queueCollisionTreeRebuild();
     }
 

@@ -5,7 +5,7 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import net.kyori.adventure.text.Component;
@@ -50,7 +50,7 @@ public abstract class AbstractChatCommand extends CommandDsl {
             currentMapId = currentMap.id();
         }
 
-        var playerId = PlayerData.fromPlayer(player).id();
+        var playerId = PlayerDataV2.fromPlayer(player).id();
         long messageSeed = ThreadLocalRandom.current().nextLong();
         this.messages.trySendChatMessage(player, new ClientChatMessageData(
                 ClientChatMessageData.Type.CHAT_UNSIGNED,

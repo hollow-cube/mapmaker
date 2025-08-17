@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 @RuntimeGson
 public record TransferSessionResponse(
-        @NotNull PlayerData data,
+        @NotNull PlayerDataV2 data,
         @NotNull PlayerSession session,
         boolean isJoin
 ) {

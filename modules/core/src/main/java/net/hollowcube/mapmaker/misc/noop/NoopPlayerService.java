@@ -19,7 +19,7 @@ public class NoopPlayerService implements PlayerService {
     public @NotNull DisplayName getPlayerDisplayName2(@NotNull String id) {
         var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(id));
         if (player != null) {
-            return PlayerData.fromPlayer(player).displayName2();
+            return PlayerDataV2.fromPlayer(player).displayName2();
         }
 
         if (id.equals("597481a0-02fb-441c-9188-c407bec05084"))

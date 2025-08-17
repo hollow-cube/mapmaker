@@ -7,7 +7,7 @@ import net.hollowcube.mapmaker.map.LeaderboardData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.DisplayName;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
@@ -76,7 +76,7 @@ class MapDetailsTimesPanel extends Panel {
         if (!isInitial) return;
 
         async(() -> {
-            var playerId = PlayerData.fromPlayer(host.player()).id();
+            var playerId = PlayerDataV2.fromPlayer(host.player()).id();
             var leaderboard = mapService.getPlaytimeLeaderboard(mapId, playerId);
             var displayNames = playerService.getPlayerDisplayNames(leaderboard.top()
                     .stream().map(LeaderboardData.Entry::player).toList());

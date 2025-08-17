@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.to_be_refactored;
 
 import net.hollowcube.common.util.FontUIBuilder;
 import net.minestom.server.entity.Player;
-import net.minestom.server.network.ConnectionState;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +10,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 public final class ActionBar {
-    //todo can just fold this into MapPlayer2.
 
     private static final Tag<ActionBar> TAG = Tag.Transient("action_bar");
 
@@ -52,9 +50,6 @@ public final class ActionBar {
     }
 
     private @NotNull TaskSchedule update() {
-        if (player.getPlayerConnection().getConnectionState() != ConnectionState.PLAY)
-            return TaskSchedule.tick(2);
-
         //todo in the future, we should make this smarter to not recompute when values haven't changed.
 
         long now = System.currentTimeMillis();

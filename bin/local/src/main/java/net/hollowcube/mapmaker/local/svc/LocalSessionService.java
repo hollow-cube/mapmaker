@@ -15,7 +15,7 @@ import java.util.List;
 public class LocalSessionService extends NoopSessionService {
 
     @Override
-    public @NotNull PlayerData createSession(@NotNull String id, @NotNull String proxy, @NotNull String username, @NotNull String ip, @NotNull PlayerSkin skin) {
+    public @NotNull PlayerDataV2 createSession(@NotNull String id, @NotNull String proxy, @NotNull String username, @NotNull String ip, @NotNull PlayerSkin skin) {
         throw new UnsupportedOperationException("i dont think i need this");
     }
 
@@ -27,7 +27,7 @@ public class LocalSessionService extends NoopSessionService {
         Check.notNull(player, "no player in config");
 
         return new TransferSessionResponse(
-                new PlayerData(
+                new PlayerDataV2(
                         id, player.getUsername(),
                         new DisplayName(List.of(new DisplayName.Part("username", player.getUsername(), null))),
                         new JsonObject(),

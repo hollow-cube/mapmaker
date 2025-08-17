@@ -8,7 +8,7 @@ import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
@@ -38,7 +38,7 @@ public class UnvanishCommand extends CommandDsl {
     private void handleVanish(@NotNull Player player, @NotNull CommandContext context) {
         boolean isSilent = context.has(silentArg);
 
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = PlayerDataV2.fromPlayer(player);
         if (!sessionManager.isHidden(playerData.id())) {
             player.sendMessage("you are already visible");
             return;

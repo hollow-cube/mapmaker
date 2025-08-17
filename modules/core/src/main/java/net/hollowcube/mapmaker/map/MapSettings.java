@@ -18,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -134,7 +133,7 @@ public class MapSettings {
     public MapSettings() {
         this.name = "";
         this.icon = null;
-        this.variant = MapVariant.PARKOUR;
+        this.variant = MapVariant.BUILDING;
         this.size = MapSize.NORMAL;
         this.spawnPoint = new Pos(0.5, 40, 0.5);
         this.tags = new ArrayList<>();
@@ -354,8 +353,8 @@ public class MapSettings {
         }
     }
 
-    public @NotNull MapSize getSize() {
-        return Objects.requireNonNullElse(size, MapSize.NORMAL);
+    public @Nullable MapSize getSize() {
+        return size;
     }
 
     public void setSize(@NotNull MapSize size) {

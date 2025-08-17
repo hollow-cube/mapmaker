@@ -8,7 +8,7 @@ import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.kyori.adventure.text.Component;
@@ -35,7 +35,7 @@ public class CosmeticView extends View {
     private @Outlet("show_locked_switch") Switch showLockedSwitch;
     private @Outlet("cosmetic_list") Pagination pagination;
 
-    private final PlayerData playerData;
+    private final PlayerDataV2 playerData;
     private CosmeticType selectedTab = null;
 
     public CosmeticView(@NotNull Context context) {
@@ -44,7 +44,7 @@ public class CosmeticView extends View {
 
     public CosmeticView(@NotNull Context context, @NotNull CosmeticType selectedTab) {
         super(context);
-        this.playerData = PlayerData.fromPlayer(player);
+        this.playerData = PlayerDataV2.fromPlayer(player);
 
         titleText.setText("Cosmetics");
         showLockedSwitch.setOption(playerData.getSetting(SHOW_LOCKED) ? 1 : 0);

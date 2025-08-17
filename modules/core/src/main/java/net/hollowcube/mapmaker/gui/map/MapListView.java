@@ -9,7 +9,7 @@ import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Pagination;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.utils.Unit;
 import org.jetbrains.annotations.Blocking;
@@ -127,7 +127,7 @@ public abstract class MapListView extends Panel {
 
         @Override
         protected Map.@NotNull Entry<List<MapData>, Integer> search(int page, int pageSize) {
-            var playerId = PlayerData.fromPlayer(host.player()).id();
+            var playerId = PlayerDataV2.fromPlayer(host.player()).id();
             var history = mapService.getPlayerMapHistory(playerId, page, pageSize);
             var mapIds = history.results().stream().map(MapHistory.Entry::mapId).toList();
             var maps = mapService.getMaps(playerId, mapIds);

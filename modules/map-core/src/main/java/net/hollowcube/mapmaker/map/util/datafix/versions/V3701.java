@@ -1,14 +1,11 @@
 package net.hollowcube.mapmaker.map.util.datafix.versions;
 
-import com.google.auto.service.AutoService;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
-import net.hollowcube.datafix.ExternalDataFix;
 import net.hollowcube.datafix.fixes.BlockEntityRenameFix;
 import net.hollowcube.mapmaker.map.util.datafix.HCDataTypes;
 
-@AutoService(ExternalDataFix.class)
-public class V3701 extends DataVersion implements ExternalDataFix {
+public class V3701 extends DataVersion {
     public V3701() {
         super(3701);
 

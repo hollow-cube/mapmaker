@@ -4,7 +4,9 @@ import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
+import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.metrics.MetricWriter;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
@@ -19,22 +21,17 @@ import java.util.function.Function;
 public interface MapServer {
 
     // Core services
+    @NotNull MetricWriter metrics();
     @NotNull SessionService sessionService();
-
     @NotNull PlayerService playerService();
-
     @NotNull MapService mapService();
-
     @NotNull PermManager permManager();
-
     @NotNull PunishmentService punishmentService();
-
     @NotNull PlayerInviteService inviteService();
 
     // Higher level managers
-
+    @NotNull MapAllocator allocator();
     @NotNull SessionManager sessionManager();
-
     @NotNull ServerBridge bridge();
 
     @NotNull Controller guiController();

@@ -1,13 +1,27 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.util.RuntimeGson;
+import net.minestom.server.entity.Player;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 @RuntimeGson
 public class SaveState {
+    public static final Tag<SaveState> TAG = Tag.Transient("mapmaker:map/save_state");
+
+    public static @NotNull SaveState fromPlayer(@NotNull Player player) {
+        return Objects.requireNonNull(optionalFromPlayer(player));
+    }
+
+    public static @Nullable SaveState optionalFromPlayer(@NotNull Player player) {
+        return player.getTag(TAG);
+    }
+
     private String id;
     private String playerId;
     private String mapId;
@@ -147,39 +161,5 @@ public class SaveState {
         return req;
     }
 
-    public @NotNull SaveStateUpdateRequest createUpsertRequest() {
-        var req = new SaveStateUpdateRequest()
-                .setType(type)
-                .setPlaytime(playtime)
-                .setCompleted(completed)
-                .setProtocolVersion(protocolVersion);
-        if (serializer != null && state != null) {
-            req.setState(state, serializer);
-        }
-        return req;
-    }
-
-    public SaveState copy(Object newState) {
-        if (state.getClass() != newState.getClass())
-            throw new UnsupportedOperationException("Cannot copy SaveState with different state type. Original state: " + state.getClass() + ", new state: " + newState.getClass());
-
-        var copy = new SaveState();
-        copy.id = id;
-        copy.playerId = playerId;
-        copy.mapId = mapId;
-        copy.type = type;
-        copy.completed = completed;
-        copy.playtime = playtime;
-        copy.playStartTime = playStartTime;
-        copy.dataVersion = dataVersion;
-        copy.protocolVersion = protocolVersion;
-        copy.serializer = serializer;
-        copy.state = newState;
-
-        // Snapshot the old state here.
-        copy.updatePlaytime();
-        copy.setPlayStartTime(0);
-        return copy;
-    }
 
 }

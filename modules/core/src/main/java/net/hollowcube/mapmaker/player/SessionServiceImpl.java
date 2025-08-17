@@ -24,7 +24,7 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
     }
 
     @Override
-    public @NotNull PlayerData createSession(@NotNull String id, @NotNull String proxy, @NotNull String username, @NotNull String ip, @NotNull PlayerSkin skin) {
+    public @NotNull PlayerDataV2 createSession(@NotNull String id, @NotNull String proxy, @NotNull String username, @NotNull String ip, @NotNull PlayerSkin skin) {
         logger.log(System.Logger.Level.INFO, "creating new session for {0} ({1}) from {2}", id, username, ip);
         var reqBody = GSON.toJson(Map.of(
                 "proxy", proxy,
@@ -38,7 +38,7 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
-            case 201 -> GSON.fromJson(res.body(), PlayerData.class);
+            case 201 -> GSON.fromJson(res.body(), PlayerDataV2.class);
             case 401 -> throw createUnauthorizedError(res);
             default -> throw new InternalError("Failed to create session (" + res.statusCode() + "): " + res.body());
         };
@@ -56,7 +56,7 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
         return switch (res.statusCode()) {
             case 201 -> GSON.fromJson(res.body(), TransferSessionResponse.class);
             case 401 -> throw createUnauthorizedError(res);
-            default -> throw new InternalError("Failed to transfer session (" + res.statusCode() + "): " + res.body());
+            default -> throw new InternalError("Failed to create session (" + res.statusCode() + "): " + res.body());
         };
     }
 

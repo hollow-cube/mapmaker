@@ -72,7 +72,7 @@ public abstract class Panel extends Element {
     protected void sync(@NotNull Runnable runnable) {
         final InventoryHost host = this.host;
         if (host == null) return;
-        if (Thread.currentThread() instanceof TickThread) runnable.run();
+        if (TickThread.current() != null) runnable.run();
         else host.player().scheduleNextTick(_ -> runnable.run());
     }
 

@@ -91,9 +91,6 @@ public final class PlacementRules {
         register(Block.INFESTED_DEEPSLATE, AxisPlacementRule::new);
         register(Block.CHAIN, AxisPlacementRule::new);
         register(Block.CREAKING_HEART, AxisPlacementRule::new);
-        register(Block.OCHRE_FROGLIGHT, AxisPlacementRule::new);
-        register(Block.PEARLESCENT_FROGLIGHT, AxisPlacementRule::new);
-        register(Block.VERDANT_FROGLIGHT, AxisPlacementRule::new);
 
         register(Block.FURNACE, b -> new FacingHorizontalPlacementRule(b, true));
         register(Block.LECTERN, b -> new FacingHorizontalPlacementRule(b, true));

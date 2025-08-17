@@ -31,7 +31,6 @@ public final class ItemUtils {
             Block.HONEY_BLOCK, Block.SLIME_BLOCK, Block.LADDER
     );
     public static final Set<Block> PLACEABLE_BLOCKS;
-
     static {
 
         // Manual blocks that arnt full blocks but are still placeable

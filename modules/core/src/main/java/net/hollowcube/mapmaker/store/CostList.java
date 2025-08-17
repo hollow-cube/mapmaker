@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.store;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.codec.Codec;
@@ -24,7 +24,7 @@ public record CostList(
         this(Map.of(entry, amount));
     }
 
-    public boolean appendLore(@NotNull PlayerData playerData, @NotNull PlayerBackpack backpack, @NotNull List<Component> lore) {
+    public boolean appendLore(@NotNull PlayerDataV2 playerData, @NotNull PlayerBackpack backpack, @NotNull List<Component> lore) {
         boolean canAfford = true, canP2W = false; //todo add support for buying with cubits later
         for (var entry : entries.entrySet()) {
             var type = entry.getKey();
@@ -42,7 +42,7 @@ public record CostList(
         return canAfford;
     }
 
-    public boolean canAfford(@NotNull PlayerData playerData, @NotNull PlayerBackpack backpack) {
+    public boolean canAfford(@NotNull PlayerDataV2 playerData, @NotNull PlayerBackpack backpack) {
         for (var entry : entries.entrySet()) {
             if (entry.getKey().getCount(playerData, backpack) < entry.getValue())
                 return false;

@@ -1,0 +1,89 @@
+<?xml version="1.0" ?>
+<?import net.hollowcube.mapmaker.gui.common ?>
+<?import net.hollowcube.mapmaker.map.gui.effect.potion ?>
+<component width="9" height="10" wipe_player_inv="true" align="ttb" sprite="effect/potion/potion_editor">
+    <text id="title" width="0" height="0" translationKey=""
+          font="map_details_title2" shift="47"/>
+    <!-- Header -->
+    <box width="9" align="ltr">
+        <BackButton2/>
+        <label translationKey="gui.effect.potion.editor.information" sprite="generic/information"/>
+
+        <text id="header" width="5" translationKey="gui.effect.potion.editor.header"
+              font="play_maps_page" centered="true" sprite="generic/text_display_5"/>
+
+        <button id="reset" width="2" translationKey="gui.effect.potion.editor.reset" sprite="generic/2x1s/reset"/>
+    </box>
+
+    <spacer/>
+
+    <box width="9" height="1" align="ltr">
+        <spacer/>
+
+        <switch id="level_dec5_switch">
+            <button id="level_dec5_off" translationKey="gui.effect.potion.level.dec5_off"
+                    sprite="generic/modify_r1/disabled_minus"/>
+            <button id="level_dec5_on" translationKey="gui.effect.potion.level.dec5_on"
+                    sprite="generic/modify_r1/two_minus"/>
+        </switch>
+        <switch id="level_dec1_switch">
+            <button id="level_dec1_off" translationKey="gui.effect.potion.level.dec1_off"
+                    sprite="generic/modify_r1/disabled_minus"/>
+            <button id="level_dec1_on" translationKey="gui.effect.potion.level.dec1_on"
+                    sprite="generic/modify_r1/one_minus"/>
+        </switch>
+
+        <text id="level" width="3" translationKey="gui.effect.potion.level.current"
+              font="line_2" centered="true" shift="1"/>
+
+        <switch id="level_inc1_switch">
+            <button id="level_inc1_off" translationKey="gui.effect.potion.level.inc1_off"
+                    sprite="generic/modify_r1/disabled_plus"/>
+            <button id="level_inc1_on" translationKey="gui.effect.potion.level.inc1_on"
+                    sprite="generic/modify_r1/one_plus"/>
+        </switch>
+        <switch id="level_inc5_switch">
+            <button id="level_inc5_off" translationKey="gui.effect.potion.level.inc5_off"
+                    sprite="generic/modify_r1/disabled_plus"/>
+            <button id="level_inc5_on" translationKey="gui.effect.potion.level.inc5_on"
+                    sprite="generic/modify_r1/two_plus"/>
+        </switch>
+
+    </box>
+
+    <spacer/>
+
+    <box width="9" height="1" align="ltr">
+        <spacer/>
+
+        <switch id="time_dec5_switch">
+            <button id="time_dec5_off" translationKey="gui.effect.potion.time.dec5_off"
+                    sprite="generic/modify_r3/disabled_minus"/>
+            <button id="time_dec5_on" translationKey="gui.effect.potion.time.dec5_on"
+                    sprite="generic/modify_r3/two_minus"/>
+        </switch>
+        <switch id="time_dec1_switch">
+            <button id="time_dec1_off" translationKey="gui.effect.potion.time.dec1_off"
+                    sprite="generic/modify_r3/disabled_minus"/>
+            <button id="time_dec1_on" translationKey="gui.effect.potion.time.dec1_on"
+                    sprite="generic/modify_r3/one_minus"/>
+        </switch>
+
+        <text id="time" width="3" translationKey="gui.effect.potion.duration.current"
+              font="line_4" centered="true" shift="1"/>
+
+        <switch id="time_inc1_switch">
+            <button id="time_inc1_off" translationKey="gui.effect.potion.time.inc1_off"
+                    sprite="generic/modify_r3/disabled_plus"/>
+            <button id="time_inc1_on" translationKey="gui.effect.potion.time.inc1_on"
+                    sprite="generic/modify_r3/one_plus"/>
+        </switch>
+        <switch id="time_inc5_switch">
+            <button id="time_inc5_off" translationKey="gui.effect.potion.time.inc5_off"
+                    sprite="generic/modify_r3/disabled_plus"/>
+            <button id="time_inc5_on" translationKey="gui.effect.potion.time.inc5_on"
+                    sprite="generic/modify_r3/two_plus"/>
+        </switch>
+    </box>
+
+</component>

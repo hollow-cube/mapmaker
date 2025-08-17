@@ -11,7 +11,7 @@ import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
@@ -42,7 +42,7 @@ public class ChatCommand extends CommandDsl {
 
     private void handle(@NotNull Player player, @NotNull CommandContext context) {
         var channel = context.get(channelArg);
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = PlayerDataV2.fromPlayer(player);
         if (!channel.available.test(this.permissions, player)) return;
 
         playerData.setSetting(PlayerSettings.CHAT_CHANNEL, channel.name().toLowerCase(Locale.ROOT));
@@ -63,8 +63,7 @@ public class ChatCommand extends CommandDsl {
 
             boolean isPartial = false;
             for (var value : Channel.values()) {
-                if (!(sender instanceof Player player) || !value.available.test(ChatCommand.this.permissions, player))
-                    continue;
+                if (!(sender instanceof Player player) || !value.available.test(ChatCommand.this.permissions, player)) continue;
 
                 var name = value.name().toLowerCase(Locale.ROOT);
                 if (name.equals(word)) return success(value);
@@ -78,8 +77,7 @@ public class ChatCommand extends CommandDsl {
         public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
             raw = raw.toLowerCase(Locale.ROOT);
             for (var value : Channel.values()) {
-                if (!(sender instanceof Player player) || !value.available.test(ChatCommand.this.permissions, player))
-                    continue;
+                if (!(sender instanceof Player player) || !value.available.test(ChatCommand.this.permissions, player)) continue;
 
                 var name = value.name().toLowerCase(Locale.ROOT);
                 if (name.startsWith(raw)) suggestion.add(name);

@@ -56,8 +56,7 @@ public class MinestomPrometheus {
         var threads = dispatcher.threads();
         for (int i = 0; i < threads.size(); i++) {
             final var thread = threads.get(i);
-            // TODO: reenable
-//            tickThreadElements.setChild(gaugeSupplier(() -> thread.entries().size()), String.valueOf(i));
+            tickThreadElements.setChild(gaugeSupplier(() -> thread.entries().size()), String.valueOf(i));
             tickThreadTick.setChild(gaugeSupplier(thread::getTick), String.valueOf(i));
         }
 

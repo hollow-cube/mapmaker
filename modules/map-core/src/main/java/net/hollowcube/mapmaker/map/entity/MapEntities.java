@@ -44,24 +44,22 @@ public final class MapEntities {
         MapEntityType.override(EntityType.INTERACTION, InteractionEntity::new);
     }
 
-    // TODO split editing logic
     private static void handleEntityInteract(@NotNull PlayerEntityInteractEvent event) {
         if (!(event.getTarget() instanceof MapEntity mapEntity)) return;
 
         var player = event.getPlayer();
-        var world = MapWorld.forPlayer(player);
-        if (world == null || !world.players().contains(player)) return;
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null || !world.isPlaying(player)) return;
 
         mapEntity.onRightClick(world, player, event.getHand(), event.getInteractPosition());
     }
 
-    // TODO split editing logic
     private static void handleEntityAttack(@NotNull EntityAttackEvent event) {
         if (!(event.getTarget() instanceof MapEntity mapEntity)) return;
 
         if (!(event.getEntity() instanceof Player player)) return;
-        var world = MapWorld.forPlayer(player);
-        if (world == null || !world.players().contains(player)) return;
+        var world = MapWorld.forPlayerOptional(player);
+        if (world == null || !world.isPlaying(player)) return;
 
         mapEntity.onLeftClick(world, player);
     }

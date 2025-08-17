@@ -6,7 +6,7 @@ import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +33,7 @@ public class HypercubeCommand extends CommandDsl {
 
     private void handleHypercubeInfo(@NotNull Player player, @NotNull CommandContext context) {
         try {
-            var playerId = PlayerData.fromPlayer(player).id();
+            var playerId = PlayerDataV2.fromPlayer(player).id();
             var status = playerService.getHypercubeStatus(playerId);
             if (status == null) {
                 Panel.open(player, new StoreView(playerService, permManager, TAB_HYPERCUBE));

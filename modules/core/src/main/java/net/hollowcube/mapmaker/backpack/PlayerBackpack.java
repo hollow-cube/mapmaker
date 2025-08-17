@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.backpack;
 
 import com.google.gson.JsonObject;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -81,7 +81,7 @@ public class PlayerBackpack {
     private static void handleSetRecipeBookState(@NotNull ClientSetRecipeBookStatePacket packet, @NotNull Player player) {
         if (packet.bookType() != ClientSetRecipeBookStatePacket.BookType.CRAFTING) return;
 
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = PlayerDataV2.fromPlayer(player);
         playerData.setSetting(IS_BACKPACK_OPEN, packet.bookOpen());
         playerData.setSetting(IS_BACKPACK_FILTERED, packet.filterActive());
         // No need to write updates, the player data will be saved when leaving the hub

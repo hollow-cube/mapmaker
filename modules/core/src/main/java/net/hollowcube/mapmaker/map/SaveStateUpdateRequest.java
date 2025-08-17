@@ -7,8 +7,6 @@ import net.minestom.server.codec.Transcoder;
 import net.minestom.server.registry.RegistryTranscoder;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Locale;
-
 public class SaveStateUpdateRequest {
     JsonObject updates = new JsonObject();
 
@@ -18,11 +16,6 @@ public class SaveStateUpdateRequest {
 
     public JsonObject updates() {
         return updates;
-    }
-
-    public @NotNull SaveStateUpdateRequest setType(@NotNull SaveStateType type) {
-        updates.addProperty("type", type.name().toLowerCase(Locale.ROOT));
-        return this;
     }
 
     public @NotNull SaveStateUpdateRequest setCompleted(boolean completed) {

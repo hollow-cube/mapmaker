@@ -7,7 +7,7 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.store.ShopUpgradeCache;
@@ -47,7 +47,7 @@ final class StoreHelpers {
 
     static void buyPackage(@NotNull PlayerService playerService, @NotNull Player player, @NotNull Package packageName) {
         try {
-            var playerData = PlayerData.fromPlayer(player);
+            var playerData = PlayerDataV2.fromPlayer(player);
             var resp = playerService.createCheckoutLink(
                     PURCHASE_SOURCE, playerData.username(), packageName.name().toLowerCase(Locale.ROOT));
 
@@ -74,7 +74,7 @@ final class StoreHelpers {
             return; // Sanity check
 
         // Ensure the player has enough cubits to buy the upgrade.
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = PlayerDataV2.fromPlayer(player);
         var backpack = PlayerBackpack.fromPlayer(player);
         if (!upgrade.canAfford(playerData, backpack)) {
             // Cannot afford, prompt to buy more cubits

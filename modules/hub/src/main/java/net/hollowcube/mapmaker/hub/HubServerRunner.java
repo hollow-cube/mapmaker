@@ -1,0 +1,164 @@
+package net.hollowcube.mapmaker.hub;
+
+import net.hollowcube.command.CommandManager;
+import net.hollowcube.command.util.HelpCommand;
+import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.ProtocolVersions;
+import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.command.CommandCategories;
+import net.hollowcube.mapmaker.command.playerinfo.PlayerInfoCommand;
+import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.hub.command.util.HubFlyCommand;
+import net.hollowcube.mapmaker.hub.command.util.HubSpawnCommand;
+import net.hollowcube.mapmaker.hub.command.util.HubTrainCommand;
+import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.hollowcube.mapmaker.hub.util.HubPlayerState;
+import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
+import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
+import net.hollowcube.mapmaker.map.runtime.MapAllocator;
+import net.hollowcube.mapmaker.map.runtime.NoopServerBridge;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.misc.ProxySupport;
+import net.hollowcube.mapmaker.misc.ResourcePackManager;
+import net.hollowcube.mapmaker.player.JoinHubRequest;
+import net.hollowcube.mapmaker.player.SessionService;
+import net.hollowcube.mapmaker.session.Presence;
+import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.hollowcube.mapmaker.util.ServerBeginShutdownEvent;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
+import net.minestom.server.event.player.PlayerDisconnectEvent;
+import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.timer.Scheduler;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ServiceLoader;
+import java.util.concurrent.CompletableFuture;
+
+public class HubServerRunner extends AbstractMapServer {
+    private static final Logger logger = LoggerFactory.getLogger(HubServerRunner.class);
+    private static final Presence HUB_PRESENCE = new Presence("mapmaker:hub",
+            "__hub_unused__", ServerRuntime.getRuntime().hostname(), "hub");
+
+    private HubMapWorld world;
+
+    HubServerRunner(@NotNull ConfigLoaderV3 config) {
+        super(config);
+
+        MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("hub-init")
+                .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
+                .addListener(PlayerSpawnEvent.class, this::handleSpawn)
+                .addListener(PlayerDisconnectEvent.class, this::handleDisconnect)
+                .addListener(ServerBeginShutdownEvent.class, this::handleServerShutdown));
+    }
+
+    @Override
+    protected @NotNull String name() {
+        return "mapmaker-hub";
+    }
+
+    @Override
+    protected @NotNull MapAllocator createAllocator() {
+        return MapAllocator.directAllocator(this);
+    }
+
+    @Override
+    protected @NotNull ServerBridge createBridge() {
+        return globalConfig.noop() ? new NoopServerBridge() : new HubServerBridge(mapService(), sessionService());
+    }
+
+    @Override
+    public @NotNull Scheduler scheduler() {
+        return world.instance().scheduler();
+    }
+
+    @Override
+    protected void prepareStart() {
+        super.prepareStart();
+
+        // Create the hub world once, which will never go away.
+        var worldFuture = new CompletableFuture<HubMapWorld>();
+        FutureUtil.submitVirtual(() -> worldFuture.complete(
+                allocator().allocateDirect(HubMapWorld.HUB_MAP_DATA, HubMapWorld.CTOR)));
+        this.world = worldFuture.join(); // Wait to continue.
+        addBinding(HubMapWorld.class, world, "world", "hubWorld", "hubMapWorld");
+        addBinding(Scheduler.class, world.instance().scheduler());
+
+        BlockHandlers.init(); // No need for placement rules etc. Just these to avoid invisible blocks
+
+        registerCommands(this, commandManager(), world, world.instance().scheduler());
+        loadHubFeatures(this, world);
+    }
+
+    // Static so it can be referenced from DevHubServer
+    public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager, @NotNull HubMapWorld hubWorld, @NotNull Scheduler scheduler) {
+        commandManager.register(new HelpCommand(commandManager, CommandCategories.GLOBAL));
+        commandManager.register(new PlayerInfoCommand(server.permManager(), server.playerService(), server.sessionManager()));
+
+        commandManager.register(new HubFlyCommand(server.permManager()));
+        commandManager.register(new HubSpawnCommand(hubWorld));
+        commandManager.register(new HubTrainCommand(server.permManager(), scheduler));
+    }
+
+    // Static so it can be referenced from DevHubServer
+    public static void loadHubFeatures(@NotNull AbstractMapServer server, @NotNull HubMapWorld world) {
+        for (var feature : ServiceLoader.load(HubFeature.class)) {
+            try {
+                logger.debug("Loading feature {}", feature.getClass().getName());
+                feature.load(server, world);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to load feature " + feature.getClass().getName(), e);
+            }
+        }
+    }
+
+    protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
+        var player = event.getPlayer();
+        ProtocolVersions.requestProtocolVersionFromProxy(player);
+        if (!player.isOnline()) return;
+
+        if (!transferPlayerSession(event.getPlayer(), HUB_PRESENCE)) {
+            return;
+        }
+
+        FutureUtil.getUnchecked(ResourcePackManager.sendResourcePack(player));
+        if (!player.isOnline()) return;
+
+        // Setup the player in the world
+        world.configurePlayer(event);
+    }
+
+    protected void handleSpawn(@NotNull PlayerSpawnEvent event) {
+        if (!event.isFirstSpawn()) return;
+        super.handleFirstSpawn(event.getPlayer());
+    }
+
+    protected void handleDisconnect(@NotNull PlayerDisconnectEvent event) {
+        super.handlePlayerDisconnect(event.getPlayer());
+    }
+
+    private void handleServerShutdown(@NotNull ServerBeginShutdownEvent ignored) {
+        // When the hub is instructed to shut down, try to move the players to a new hub.
+        var players = MinecraftServer.getConnectionManager().getOnlinePlayers();
+        FutureUtil.submitVirtual(() -> {
+            for (var player : players) {
+                try {
+                    var hub = sessionService().joinHubV2(new JoinHubRequest(
+                            player.getUuid().toString(), AbstractHttpService.hostname));
+
+                    var state = new HubPlayerState(player.getPosition(), player.getHeldSlot());
+                    ProxySupport.transferWithData(player, hub.serverClusterIp(), state);
+                } catch (SessionService.NoAvailableServerException ignored2) {
+                    // No other hub is available. Leave them here for now, they can move on their own
+                    // when a hub becomes available.
+                } catch (Exception e) {
+                    ExceptionReporter.reportException(e, player);
+                }
+            }
+        });
+    }
+}

@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.map.polar;
 
 import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.map.AbstractMapWorld;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
@@ -13,7 +13,7 @@ import net.kyori.adventure.nbt.ListBinaryTag;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.tag.TagHandler;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,27 +24,24 @@ import java.util.stream.Collectors;
 public class ReadWriteWorldAccess extends ReadWorldAccess {
     private static final Logger logger = LoggerFactory.getLogger(ReadWriteWorldAccess.class);
 
-    public ReadWriteWorldAccess(AbstractMapWorld<?, ?> mapWorld) {
+    public ReadWriteWorldAccess(@NotNull MapWorld mapWorld) {
         super(mapWorld);
     }
 
     @Override
-    public void saveWorldData(Instance instance, NetworkBuffer buffer) {
+    public void saveWorldData(@NotNull Instance instance, @NotNull NetworkBuffer buffer) {
         logger.debug("writing polar world data");
         buffer.write(NetworkBuffer.BYTE, (byte) VERSION_LATEST);
 
         // Always write latest data version for now
         buffer.write(NetworkBuffer.VAR_INT, DataFixer.maxVersion());
 
-        // Create the compound here rather than writing the instance tag
-        // so we avoid writing anything accidentally.
-        var data = TagHandler.newHandler();
-        mapWorld.saveWorldTag(data);
-        buffer.write(NetworkBuffer.NBT, data.asCompound());
+        var worldData = mapWorld.instance().tagHandler().asCompound();
+        buffer.write(NetworkBuffer.NBT, worldData);
     }
 
     @Override
-    public void saveChunkData(Chunk chunk, NetworkBuffer buffer) {
+    public void saveChunkData(@NotNull Chunk chunk, @NotNull NetworkBuffer buffer) {
         buffer.write(NetworkBuffer.VAR_INT, VERSION_LATEST);
 
         CompoundBinaryTag.Builder tag = CompoundBinaryTag.builder();
@@ -54,7 +51,7 @@ public class ReadWriteWorldAccess extends ReadWorldAccess {
     }
 
     @Override
-    public void saveHeightmaps(Chunk rawChunk, int[][] heightmaps) {
+    public void saveHeightmaps(@NotNull Chunk rawChunk, int[][] heightmaps) {
         if (!(rawChunk instanceof ChunkExt chunk)) return;
 
         heightmaps[Heightmaps.WORLD_SURFACE] = chunk.saveHeightmap(Heightmaps.WORLD_SURFACE);
@@ -62,7 +59,7 @@ public class ReadWriteWorldAccess extends ReadWorldAccess {
         heightmaps[WORLD_BOTTOM] = chunk.saveHeightmap(Heightmaps.WORLD_BOTTOM);
     }
 
-    private ListBinaryTag saveEntities(Chunk chunk) {
+    private @NotNull ListBinaryTag saveEntities(@NotNull Chunk chunk) {
         ListBinaryTag.Builder<CompoundBinaryTag> entitiesTag = ListBinaryTag.builder(BinaryTagTypes.COMPOUND);
 
         for (var entity : getRootEntities(chunk)) {
@@ -76,7 +73,7 @@ public class ReadWriteWorldAccess extends ReadWorldAccess {
         return entitiesTag.build();
     }
 
-    private Set<MapEntity> getRootEntities(Chunk chunk) {
+    private @NotNull Set<MapEntity> getRootEntities(@NotNull Chunk chunk) {
         var entities = chunk.getInstance().getChunkEntities(chunk);
         return entities.stream()
                 .filter(e -> e instanceof MapEntity && e.getVehicle() == null)

@@ -31,14 +31,6 @@ public class ObjectEntityHandlerRegistry {
         factories.put(id, factory);
     }
 
-    public void registerEditor(String id) {
-// TODO
-    }
-
-    public void registerEditor(String id, ObjectEntityEditor editor) {
-
-    }
-
     public @Nullable ObjectEntityHandler create(@Nullable String type, @NotNull ObjectEntity entity) {
         if (type == null) return null;
         var factory = factories.get(type);

@@ -6,7 +6,7 @@ import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.DisplayName;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.to_be_refactored.SyntheticTabListManager;
@@ -212,7 +212,7 @@ public class SessionManager {
     }
 
     public void configureVanishedPlayer(@NotNull Player player) {
-        player.updateViewableRule(p -> hasSeeVanishedPerm.test(PlayerData.fromPlayer(p).id()));
+        player.updateViewableRule(p -> hasSeeVanishedPerm.test(PlayerDataV2.fromPlayer(p).id()));
     }
 
     private void configureVisiblePlayer(@NotNull Player player) {

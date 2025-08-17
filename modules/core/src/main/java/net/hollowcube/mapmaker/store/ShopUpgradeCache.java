@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.store;
 
 import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +32,7 @@ public final class ShopUpgradeCache {
      */
     public static boolean has(@NotNull Player player, @NotNull ShopUpgrade upgrade, boolean direct) {
         EnumMap<ShopUpgrade, Predicate<String>> entries = direct ? directEntries : indirectEntries;
-        return entries.getOrDefault(upgrade, _ -> false).test(PlayerData.fromPlayer(player).id());
+        return entries.getOrDefault(upgrade, _ -> false).test(PlayerDataV2.fromPlayer(player).id());
     }
 
     /**

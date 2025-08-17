@@ -14,11 +14,14 @@ import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.utils.UUIDUtils;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
 @SuppressWarnings("UnstableApiUsage")
 public class MapEntity extends Entity implements TerraformEntity {
+    private static final Logger logger = LoggerFactory.getLogger(MapEntity.class);
 
     protected MapEntity(@NotNull EntityType entityType) {
         super(entityType, UUID.randomUUID());

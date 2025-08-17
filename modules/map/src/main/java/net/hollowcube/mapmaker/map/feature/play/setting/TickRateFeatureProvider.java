@@ -1,0 +1,65 @@
+package net.hollowcube.mapmaker.map.feature.play.setting;
+
+import com.google.auto.service.AutoService;
+import net.hollowcube.mapmaker.map.MapSettings;
+import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.action.Attachments;
+import net.hollowcube.mapmaker.map.event.MapPlayerInitEvent;
+import net.hollowcube.mapmaker.map.event.MapPlayerUpdateStateEvent;
+import net.hollowcube.mapmaker.map.event.MapWorldPlayerStopPlayingEvent;
+import net.hollowcube.mapmaker.map.feature.FeatureProvider;
+import net.hollowcube.mapmaker.map.world.savestate.PlayState;
+import net.minestom.server.ServerFlag;
+import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.network.packet.server.play.SetTickStatePacket;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
+
+@AutoService(FeatureProvider.class)
+public class TickRateFeatureProvider extends AbstractSettingFeatureProvider {
+
+    private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:play/tickrate", EventFilter.INSTANCE)
+            .addListener(MapPlayerInitEvent.class, this::initPlayer)
+            .addListener(MapPlayerUpdateStateEvent.class, this::playerUpdated)
+            .addListener(MapWorldPlayerStopPlayingEvent.class, this::removePlayer);
+
+    @Override
+    protected EventNode<InstanceEvent> getEvents() {
+        return eventNode;
+    }
+
+    private static int getTickRate(@NotNull Player player, @NotNull MapWorld world) {
+        if (!world.isPlaying(player)) return ServerFlag.SERVER_TICKS_PER_SECOND;
+
+        var state = SaveState.optionalFromPlayer(player);
+        if (state == null) return ServerFlag.SERVER_TICKS_PER_SECOND; // Sanity
+
+        var playstate = state.state(PlayState.class);
+        return Objects.requireNonNullElse(playstate.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
+                .get(MapSettings.TICK_RATE, world.map().settings()), ServerFlag.SERVER_TICKS_PER_SECOND);
+    }
+
+    public void initPlayer(@NotNull MapPlayerInitEvent event) {
+        var player = event.getPlayer();
+        if (!event.mapWorld().isPlaying(player)) return;
+        if (!event.isMapJoin()) return;
+        updatePlayer(event.getMapWorld(), player);
+    }
+
+    public void playerUpdated(@NotNull MapPlayerUpdateStateEvent event) {
+        updatePlayer(event.getMapWorld(), event.player());
+    }
+
+    public void removePlayer(@NotNull MapWorldPlayerStopPlayingEvent event) {
+        event.player().sendPacket(new SetTickStatePacket(ServerFlag.SERVER_TICKS_PER_SECOND, false));
+    }
+
+    private void updatePlayer(@NotNull MapWorld world, @NotNull Player player) {
+        player.sendPacket(new SetTickStatePacket(getTickRate(player, world), false));
+    }
+}

@@ -18,8 +18,8 @@ public class NoopSessionService implements SessionService {
     }
 
     @Override
-    public @NotNull PlayerData createSession(@NotNull String id, @NotNull String proxy, @NotNull String username, @NotNull String ip, @NotNull PlayerSkin skin) {
-        return new PlayerData(
+    public @NotNull PlayerDataV2 createSession(@NotNull String id, @NotNull String proxy, @NotNull String username, @NotNull String ip, @NotNull PlayerSkin skin) {
+        return new PlayerDataV2(
                 id, username,
                 new DisplayName(List.of(new DisplayName.Part("username", username, null))),
                 new JsonObject(),
@@ -30,7 +30,7 @@ public class NoopSessionService implements SessionService {
     @Override
     public @NotNull TransferSessionResponse transferSession(@NotNull String id, @NotNull SessionTransferRequest req) {
         return new TransferSessionResponse(
-                new PlayerData(
+                new PlayerDataV2(
                         id, id,
                         new DisplayName(List.of(new DisplayName.Part("username", id, null))),
                         new JsonObject(),

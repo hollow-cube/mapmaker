@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.cosmetic.impl.accessory;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.cosmetic.impl.ModelCosmeticImpl;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.event.Event;
@@ -18,7 +18,7 @@ public abstract class AbstractAccessoryImpl extends ModelCosmeticImpl {
             if (event.getHand() != PlayerHand.OFF || !player.getItemInMainHand().isAir())
                 return; // TODO: using air check here is bad, but oh well.
 
-            var playerData = PlayerData.fromPlayer(player);
+            var playerData = PlayerDataV2.fromPlayer(player);
             var accessory = Cosmetic.byId(CosmeticType.ACCESSORY, playerData.getSetting(CosmeticType.ACCESSORY.setting()));
             if (accessory != null && accessory.impl() instanceof AbstractAccessoryImpl impl) {
                 impl.useItem(player);

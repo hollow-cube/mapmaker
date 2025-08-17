@@ -5,7 +5,7 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.map.VisibilityRule;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -27,7 +27,7 @@ public class HideCommand extends CommandDsl {
     }
 
     private void handleHidePlayers(@NotNull Player player, @NotNull CommandContext context) {
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = PlayerDataV2.fromPlayer(player);
         var current = playerData.getSetting(PlayerSettings.NEARBY_PLAYER_VISIBILITY);
         var newValue = current == VisibilityRule.GHOST ? VisibilityRule.HIDDEN : VisibilityRule.GHOST;
         playerData.setSetting(PlayerSettings.NEARBY_PLAYER_VISIBILITY, newValue);

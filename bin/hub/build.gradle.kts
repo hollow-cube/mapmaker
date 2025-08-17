@@ -13,18 +13,16 @@ dependencies {
 
     implementation(project(":modules:canvas:api"))
     implementation(project(":modules:canvas:impl-standalone"))
-    implementation(project(":modules:map-core"))
+    implementation(project(":modules:core"))
+    implementation(project(":modules:hub"))
 
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)
-    implementation(libs.polar)
-    implementation(libs.included.schem)
-
     implementation(libs.slf4j.jul)
     implementation(libs.logback)
     implementation(libs.bundles.prometheus)
 }
 
 application {
-    mainClass = "net.hollowcube.mapmaker.hub.HubMain"
+    mainClass = "net.hollowcube.mapmaker.hub.Main"
 }

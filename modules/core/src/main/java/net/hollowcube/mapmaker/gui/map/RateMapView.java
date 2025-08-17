@@ -6,7 +6,7 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerDataV2;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -59,7 +59,7 @@ public class RateMapView extends Panel {
         updateLocalRatingState(resultState);
 
         // Update the remote state async TODO: this should cancel prior request if there is already one out.
-        var playerId = PlayerData.fromPlayer(host.player()).id();
+        var playerId = PlayerDataV2.fromPlayer(host.player()).id();
         async(() -> {
             mapService.setMapRating(this.map.id(), playerId, new MapRating(resultState, null));
             sync(() -> this.onChange.accept(newState));

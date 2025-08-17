@@ -1,9 +1,6 @@
 <component name="ProjectRunConfigurationManager">
     <configuration default="false" name="DevServer" type="Application" factoryName="Application">
-        <envs>
-            <env name="MAPMAKER_RESOURCE_PACK_HASH" value="dev"/>
-        </envs>
-        <option name="MAIN_CLASS_NAME" value="net.hollowcube.mapmaker.dev.DevMain"/>
+        <option name="MAIN_CLASS_NAME" value="net.hollowcube.mapmaker.dev.DevServer"/>
         <module name="mapmaker.bin.development.main"/>
         <option name="VM_PARAMETERS" value="--enable-native-access=ALL-UNNAMED"/>
         <method v="2">
