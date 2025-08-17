@@ -31,10 +31,6 @@ public class ObjectEntityHandlerRegistry {
         factories.put(id, factory);
     }
 
-    public void registerEditor(String id) {
-// TODO
-    }
-
     public void registerEditor(String id, ObjectEntityEditor editor) {
 
     }

@@ -254,11 +254,10 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         if (!Objects.equals(oldType, newType)) {
             if (this.handler != null) this.handler.onRemove();
 
-
-            var world = MapWorld.forInstance(marker.getInstance());
+            var world = MapWorld.forInstance(this.getInstance());
             if (world != null) {
-                marker.handler = world.objectEntityHandlers().create(newType, marker);
-            } else marker.handler = null;
+                this.handler = world.objectEntityHandlers().create(newType, this);
+            } else this.handler = null;
         }
 
         if (this.handler != null) {

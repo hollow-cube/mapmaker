@@ -63,7 +63,7 @@ public class InteractionEditorScreen {
     public static void onCallback(@NotNull PlayerCustomClickEvent event) {
         if (!event.getKey().equals(EDITOR_SCREEN_ID)) return;
         if (!(event.getPayload() instanceof CompoundBinaryTag payload)) return;
-        var world = MapWorld.forPlayerOptional(event.getPlayer());
+        var world = MapWorld.forPlayer(event.getPlayer());
         var uuid = Uuids.parse(payload.getString("uuid"));
 
         if (uuid == null || world == null || !world.canEdit(event.getPlayer())) return;
