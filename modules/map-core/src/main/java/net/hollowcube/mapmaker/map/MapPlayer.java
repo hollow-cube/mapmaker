@@ -64,7 +64,6 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
     static {
         MinecraftServer.getPacketListenerManager().setPlayListener(ClientPongPacket.class, (packet, player) -> {
             if (player instanceof MapPlayer mp) mp.lastReceivedPingId = packet.id();
-            System.out.println("received id: " + packet.id());
         });
     }
 
