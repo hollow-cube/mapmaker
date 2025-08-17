@@ -20,7 +20,6 @@ import net.hollowcube.mapmaker.map.event.entity.Map2PlayerExitEntityEvent;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.util.PlayerVisibility;
 import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.collision.PhysicsUtils;
@@ -34,9 +33,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.PlayerProvider;
-import net.minestom.server.network.packet.client.common.ClientPongPacket;
 import net.minestom.server.network.packet.server.SendablePacket;
-import net.minestom.server.network.packet.server.common.PingPacket;
 import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
@@ -60,13 +57,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public abstract class MapPlayer extends CommandHandlingPlayer {
-
-    static {
-        MinecraftServer.getPacketListenerManager().setPlayListener(ClientPongPacket.class, (packet, player) -> {
-            if (player instanceof MapPlayer mp) mp.lastReceivedPingId = packet.id();
-            System.out.println("received id: " + packet.id());
-        });
-    }
 
     public static @NotNull PlayerProvider simpleMapPlayer(@NotNull CommandManager commandManager) {
         return (connection, profile) -> new MapPlayer(connection, profile) {
@@ -134,14 +124,6 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
-    }
-
-    @Override
-    public void sendPacket(@NotNull SendablePacket packet) {
-        // In case it is sent from somewhere else
-        if (packet instanceof PingPacket(int id))
-            lastPingId.set(id);
-        super.sendPacket(packet);
     }
 
     @Override
@@ -239,25 +221,6 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
                     throw new RuntimeException("Failed to teleport player " + getUsername(), ex);
                 });
     }
-
-    //region EXT: Ping
-
-    private final AtomicInteger lastPingId = new AtomicInteger(0);
-    private int lastReceivedPingId = -1;
-
-    public int lastPingId() {
-        return lastPingId.get();
-    }
-
-    public int lastReceivedPingId() {
-        return lastReceivedPingId;
-    }
-
-    public void ping() {
-        sendPacket(new PingPacket(lastPingId.incrementAndGet()));
-    }
-
-    //endregion
 
     //region EXT: Owned Entities
 
@@ -517,8 +480,6 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         final BoundingBox bb = getBoundingBox().contract(0.001, 0.001, 0.001);
         var position = getPosition();
         var instance = getInstance();
-        if (instance == null) return;
-
         var meta = this.getPlayerMeta();
 
         isInWater = isInLava = false;

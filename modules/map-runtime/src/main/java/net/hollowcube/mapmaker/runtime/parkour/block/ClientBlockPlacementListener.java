@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.runtime.parkour.block;
 
-import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
@@ -108,7 +107,7 @@ public class ClientBlockPlacementListener {
 
         // Note that not all players can necessarily see each other so don't block placement inside a player you cant see.
         Entity collisionEntity = CollisionUtils.canPlaceBlockAt(instance, placementPosition, placedBlock);
-        if (collisionEntity != null && (collisionEntity.isViewer(player) || collisionEntity == player)) {
+        if (collisionEntity != null && collisionEntity.isViewer(player)) {
             player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
             return true;
         }
@@ -123,9 +122,7 @@ public class ClientBlockPlacementListener {
         }
 
         // If we have a pending teleport out for the player, ignore any placements which occur during that time
-        boolean outOfSync = player.getLastSentTeleportId() != player.getLastReceivedTeleportId()
-                || ((MapPlayer) player).lastPingId() != ((MapPlayer) player).lastReceivedPingId();
-        if (outOfSync) {
+        if (player.getLastSentTeleportId() != player.getLastReceivedTeleportId()) {
             player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
             return true;
         }
