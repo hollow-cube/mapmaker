@@ -6,6 +6,7 @@ import net.hollowcube.compat.api.ModChannelRegisterEvent;
 import net.hollowcube.compat.api.packet.ClientboundModPacket;
 import net.hollowcube.compat.api.packet.PacketRegistry;
 import net.hollowcube.compat.api.packet.ServerboundModPacket;
+import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.minestom.server.MinecraftServer;
@@ -19,6 +20,8 @@ import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.TestOnly;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +34,7 @@ public final class PacketRegistryImpl implements PacketRegistry {
 
     private static final String REGISTER_CHANNEL = "minecraft:register";
     private static final String UNREGISTER_CHANNEL = "minecraft:unregister";
+    private static final Logger log = LoggerFactory.getLogger(PacketRegistryImpl.class);
     private static PacketRegistryImpl INSTANCE;
 
     private final Map<String, ServerboundModPacket.Type<?>> serverbound = new ConcurrentHashMap<>();
@@ -104,7 +108,16 @@ public final class PacketRegistryImpl implements PacketRegistry {
 
     @SuppressWarnings("unchecked")
     private <T extends ServerboundModPacket<T>> void handlePacket(ServerboundModPacket.Type<T> type, PlayerPluginMessageEvent event) {
-        var packet = NetworkBuffer.wrap(event.getMessage(), 0, event.getMessage().length).read(type.codec());
+        T packet;
+        try {
+            packet = NetworkBuffer.wrap(event.getMessage(), 0, event.getMessage().length).read(type.codec());
+        } catch (Exception e) {
+            var wrapped = new RuntimeException("Failed to decode packet: " + type.id(), e);
+            PostHog.captureException(wrapped, event.getPlayer().getUuid().toString());
+            log.error("failed to decode packet for {}: {}", event.getPlayer().getUsername(), type.id(), wrapped);
+            return;
+        }
+
         var handler = (BiConsumer<Player, T>) this.handlers.get(event.getIdentifier());
         if (handler == null) return;
         handler.accept(event.getPlayer(), packet);
