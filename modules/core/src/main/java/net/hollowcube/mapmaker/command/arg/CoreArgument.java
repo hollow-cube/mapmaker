@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.command.arg;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
@@ -17,11 +17,11 @@ public final class CoreArgument {
 
     // Player stuff
 
-    public static @NotNull Argument<PlayerDataV2> AnyPlayerData(@NotNull String id, @NotNull PlayerService playerService) {
+    public static @NotNull Argument<PlayerData> AnyPlayerData(@NotNull String id, @NotNull PlayerService playerService) {
         return Argument.Word(id).map(
                 /* Mapper */ (sender, raw) -> {
                     //todo
-                    var pd = new PlayerDataV2(UUID.randomUUID().toString(), raw, Component.text(raw));
+                    var pd = new PlayerData(UUID.randomUUID().toString(), raw, Component.text(raw));
                     return new ParseResult.Success<>(pd);
                 },
                 /* Suggester */ (sender, raw, suggestion) -> {

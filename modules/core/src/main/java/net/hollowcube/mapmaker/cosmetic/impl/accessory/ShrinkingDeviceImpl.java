@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.cosmetic.impl.accessory;
 
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.TagCooldown;
@@ -31,7 +31,7 @@ public class ShrinkingDeviceImpl extends AbstractAccessoryImpl {
 
     @Override
     public void useItem(@NotNull Player player) {
-        var playerId = PlayerDataV2.fromPlayer(player).id();
+        var playerId = PlayerData.fromPlayer(player).id();
         var session = SessionManager.instance.getSession(playerId);
         if (session == null || session.presence() == null) return;
 

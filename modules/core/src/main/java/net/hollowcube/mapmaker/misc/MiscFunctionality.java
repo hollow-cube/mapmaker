@@ -6,7 +6,7 @@ import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.session.MapPresence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -37,7 +37,7 @@ public final class MiscFunctionality {
     }
 
     public static void assignTeam(@NotNull Player player) {
-        var playerData = PlayerDataV2.fromPlayer(player);
+        var playerData = PlayerData.fromPlayer(player);
         player.setTeam(CoreTeams.DEFAULT);
 //        player.setTeam(switch (playerData.displayName2().getBadgeName()) {
 //            case "dev_3", "mod_3", "ct_3" -> CoreTeams.RED;
@@ -85,7 +85,7 @@ public final class MiscFunctionality {
         // which should not show this ui for sure (it looks awful).
         if (p.getGameMode() == GameMode.SPECTATOR) return;
 
-        var playerData = PlayerDataV2.fromPlayer(p);
+        var playerData = PlayerData.fromPlayer(p);
 
         builder.pushShadowColor(ShadowColor.none());
         builder.pos(11).drawInPlace(CURRENCY_DISPLAY);
@@ -114,7 +114,7 @@ public final class MiscFunctionality {
 
     @Blocking
     public static @Nullable MapData getCurrentMap(@NotNull SessionManager sessionManager, @NotNull MapService mapService, @NotNull Player player) {
-        var playerId = PlayerDataV2.fromPlayer(player).id();
+        var playerId = PlayerData.fromPlayer(player).id();
         return getCurrentMap(sessionManager, mapService, playerId);
     }
 
@@ -125,7 +125,7 @@ public final class MiscFunctionality {
         return mapService.getMap(playerId, presence.mapId());
     }
 
-    public static void applyCosmetics(@NotNull Player player, @NotNull PlayerDataV2 playerData) {
+    public static void applyCosmetics(@NotNull Player player, @NotNull PlayerData playerData) {
         for (var cosmeticType : CosmeticType.VALUES) {
             var cosmetic = Cosmetic.byId(cosmeticType, playerData.getCosmetic(cosmeticType));
             var itemStack = cosmetic == null ? cosmeticType.blankIcon() : cosmetic.impl().iconItem();

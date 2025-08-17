@@ -1,23 +1,25 @@
 package net.hollowcube.mapmaker.map.util;
 
-import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.SaveState;
-import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.map.event.MapPlayerTeleportingEvent;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
+import net.kyori.adventure.resource.ResourcePackInfo;
+import net.kyori.adventure.resource.ResourcePackRequest;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.entity.attribute.Attribute;
-import org.jetbrains.annotations.Blocking;
+import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import java.net.URI;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -28,22 +30,28 @@ public final class MapWorldHelpers {
     private MapWorldHelpers() {
     }
 
-    @Blocking
-    public static @NotNull SaveState getOrCreateSaveState(
-            @NotNull MapWorld world, @NotNull String playerId, int protocolVersion,
-            @NotNull SaveStateType type, @Nullable SaveStateType.Serializer<?> stateSerializer
-    ) {
-        var mapService = world.server().mapService();
-        var map = world.map();
+    public static void applyMapResourcePack(MapData map, Player player) {
+        var pack = map.getSetting(MapSettings.RESOURCE_PACK);
+        if (pack.isEmpty()) {
+            player.removeResourcePacks(MAP_WORLD_RESOURCE_PACK_UUID);
+        } else {
+            var url = String.format("https://hollowcube-resource-pack.s3.amazonaws.com/%s.zip", pack);
+            var request = ResourcePackRequest.resourcePackRequest()
+                    .packs(ResourcePackInfo.resourcePackInfo(MAP_WORLD_RESOURCE_PACK_UUID, URI.create(url), pack))
+                    .prompt(LanguageProviderV2.translate(Component.translatable("map.join.resource_pack.prompt")))
+                    .required(true);
 
-        try {
-            return mapService.getLatestSaveState(map.id(), playerId, type, stateSerializer);
-        } catch (MapService.NotFoundError ignored) {
-            return mapService.createSaveState(map.id(), playerId, protocolVersion, stateSerializer);
+            player.sendResourcePacks(request);
         }
     }
 
-    public static void resetPlayer(@NotNull Player player) {
+    @NonBlocking
+    public static void resetPlayerOnTickThread(@NotNull Player player) {
+        resetPlayerOnTickThread(player, true);
+    }
+
+    @NonBlocking
+    public static void resetPlayerOnTickThread(@NotNull Player player, boolean clearInventory) {
         player.refreshCommands();
         player.setGameMode(GameMode.ADVENTURE);
         player.setAllowFlying(false);
@@ -54,21 +62,20 @@ public final class MapWorldHelpers {
         player.setInvisible(false);
         player.setVelocity(Vec.ZERO);
         player.clearEffects();
-        player.getInventory().clear();
-        player.scheduleNextTick(ignored -> {
-            player.updateViewerRule(null);
-            player.getPlayerMeta().setFlyingWithElytra(false);
-        });
+        if (clearInventory) player.getInventory().clear();
+        player.updateViewerRule(null);
+        player.getPlayerMeta().setFlyingWithElytra(false);
+        player.setPermissionLevel(4);
 
         // Reapply the cosmetics they have on
-        var playerData = PlayerDataV2.fromPlayer(player);
+        var playerData = PlayerData.fromPlayer(player);
         MiscFunctionality.applyCosmetics(player, playerData);
     }
 
     public static CompletableFuture<Void> teleportPlayer(@NotNull Player player, @NotNull Point position) {
-        MapWorld world = MapWorld.forPlayer(player);
-        world.callEvent(new MapPlayerTeleportingEvent(world, player, position));
-        return player.teleport(Pos.fromPoint(position), Vec.ZERO, null, RelativeFlags.NONE);
+        var world = MapWorld.forPlayer(player);
+        if (world != null) world.callEvent(new MapPlayerTeleportingEvent(world, player, position));
+        return player.teleport(position.asPos(), Vec.ZERO, null, RelativeFlags.NONE);
     }
 
 }

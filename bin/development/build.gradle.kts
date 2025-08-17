@@ -5,13 +5,16 @@ plugins {
 
 dependencies {
     implementation(project(":bin:config"))
+    implementation(project(":bin:hub"))
+    implementation(project(":bin:map"))
+
+    implementation(project(":modules:map-core"))
+    implementation(project(":modules:map-runtime"))
+    implementation(project(":modules:map-editor"))
 
     implementation(project(":modules:canvas:api"))
     implementation(project(":modules:canvas:impl-standalone"))
-    implementation(project(":modules:core"))
     implementation(project(":modules:datafix"))
-    implementation(project(":modules:hub"))
-    implementation(project(":modules:map"))
     implementation(project(":modules:terraform"))
     implementation(project(":modules:compat"))
 
@@ -27,5 +30,5 @@ dependencies {
 }
 
 application {
-    mainClass = "net.hollowcube.mapmaker.dev.DevServer"
+    mainClass = "net.hollowcube.mapmaker.dev.DevMain"
 }

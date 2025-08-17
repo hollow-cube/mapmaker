@@ -11,7 +11,7 @@ import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.codec.Result;
 import net.minestom.server.codec.Transcoder;
@@ -296,7 +296,7 @@ public class MapAlterCommand {
     @Blocking
     private boolean doMapUpdate(@NotNull Player player, @NotNull MapData map) {
         try {
-            var playerId = PlayerDataV2.fromPlayer(player).id();
+            var playerId = PlayerData.fromPlayer(player).id();
             map.settings().withUpdateRequest(req -> {
                 mapService.updateMap(playerId, map.id(), req);
                 return true; // Exceptions handled outside

@@ -12,6 +12,12 @@ public final class PlayerSettings {
 
     public static final PlayerSetting<String> CHAT_CHANNEL = PlayerSetting.String("chat_channel", ClientChatMessageData.CHANNEL_GLOBAL);
 
+    // Hub
+
+    // Note that this is keyed badly (ie to general not indicating its a hub option),
+    // but changing it is a pain so it will remaind :)
+    public static final PlayerSetting<Integer> HUB_SELECTED_SLOT = PlayerSetting.Int("selected_slot", 0);
+
 
     // Playing (parkour) maps
 

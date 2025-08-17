@@ -84,10 +84,10 @@ public sealed interface Terraform permits TerraformImpl {
      * <p>This call may block the current thread, it is the callers responsibility to call it in a safe point.</p>
      */
     @Blocking
-    void initLocalSession(@NotNull Player player, @NotNull String sessionId);
+    void initLocalSession(@NotNull Player player, @NotNull Instance instance, @NotNull String sessionId);
 
     @Blocking
-    void saveLocalSession(@NotNull Player player, @Nullable Instance instance, boolean drop);
+    void saveLocalSession(@NotNull Player player, @NotNull Instance instance, boolean drop);
 
     //todo rework how tools are handled completely
     @NotNull ToolHandler toolHandler();

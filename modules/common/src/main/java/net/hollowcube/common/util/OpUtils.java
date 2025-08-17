@@ -21,7 +21,7 @@ public class OpUtils {
      * Maps a nullable input to an output using a mapper function if the input is not null.
      */
     @Contract("null, _ -> null")
-    public static <I, O> O map(@Nullable I input, Function<I, O> mapper) {
+    public static <I, O> O map(@Nullable I input, Function<@NotNull I, @Nullable O> mapper) {
         return input == null ? null : mapper.apply(input);
     }
 
@@ -29,7 +29,7 @@ public class OpUtils {
      * Maps a nullable input to an output using a mapper function if the input is not null, otherwise returns a fallback value.
      */
     @NotNull
-    public static <I, O> O mapOr(@Nullable I input, Function<I, O> mapper, Supplier<O> fallback) {
+    public static <I, O> O mapOr(@Nullable I input, Function<@NotNull I, O> mapper, Supplier<O> fallback) {
         if (input == null) return fallback.get();
         return Objects.requireNonNullElseGet(mapper.apply(input), fallback);
     }
@@ -38,7 +38,7 @@ public class OpUtils {
      * Maps a nullable input to an output using a mapper function if the input is not null, otherwise returns a fallback value.
      */
     @NotNull
-    public static <I, O> O mapOr(@Nullable I input, Function<I, O> mapper, O fallback) {
+    public static <I, O> O mapOr(@Nullable I input, Function<@NotNull I, O> mapper, O fallback) {
         if (input == null) return fallback;
         return Objects.requireNonNullElse(mapper.apply(input), fallback);
     }

@@ -19,14 +19,15 @@ include(
     "modules:compat",
     "modules:core",
     "modules:datafix",
-    "modules:hub",
-    "modules:map",
     "modules:map-core",
+    "modules:map-editor",
+    "modules:map-runtime",
     "modules:nbs",
     "modules:replay",
     "modules:terraform",
-    "modules:map-core-test",
+
     "modules:test",
+    "modules:map-core-test",
 )
 
 include(
@@ -38,7 +39,7 @@ include(
     "bin:development",
     "bin:example",
     "bin:hub",
-    "bin:local",
+//    "bin:local", TEMP DISABLED UNTIL UPDATED TO NEW WORLDS
     "bin:map",
     "bin:map-isolate",
     "bin:packer",

@@ -44,6 +44,7 @@ public abstract class ItemHandler {
 
     // Not implemented very well, and not included in the ANY flags.
     public static final int LEFT_CLICK_GUI = 1 << 7;
+    public static final int CONSUME_ITEM = 1 << 8;
 
     public static final int RIGHT_CLICK_ANY = RIGHT_CLICK_AIR | RIGHT_CLICK_BLOCK | RIGHT_CLICK_ENTITY;
     public static final int LEFT_CLICK_ANY = LEFT_CLICK_AIR | LEFT_CLICK_BLOCK | LEFT_CLICK_ENTITY;
@@ -52,7 +53,11 @@ public abstract class ItemHandler {
     private final int flags;
 
     protected ItemHandler(@NotNull String key, int... flags) {
-        this.key = Key.key(key);
+        this(Key.key(key), flags);
+    }
+
+    protected ItemHandler(@NotNull Key key, int... flags) {
+        this.key = key;
 
         int flag = 0;
         for (int f : flags) flag |= f;
@@ -96,6 +101,20 @@ public abstract class ItemHandler {
     }
 
     protected void rightClicked(@NotNull Click click) {
+    }
+
+    protected int beginConsume(@NotNull Click click) {
+        return -1;
+    }
+
+    public enum ConsumeItemResult {
+        CANCEL,
+        SUCCESS,
+        RIPTIDE_SPIN,
+    }
+
+    protected ConsumeItemResult cancelConsume(@NotNull Click click, long duration) {
+        return ConsumeItemResult.CANCEL;
     }
 
     protected final boolean allows(int flag) {
@@ -144,6 +163,10 @@ public abstract class ItemHandler {
 
         public void update(@NotNull Consumer<ItemStack.Builder> updater) {
             this.update((_, builder) -> updater.accept(builder));
+        }
+
+        public void update(@NotNull ItemStack newItemStack) {
+            this.player().setItemInHand(this.hand(), newItemStack);
         }
     }
 

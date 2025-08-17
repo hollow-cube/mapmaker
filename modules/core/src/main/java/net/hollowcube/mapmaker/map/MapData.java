@@ -76,6 +76,7 @@ public class MapData {
     private String contest;
 
     public MapData() {
+        this(UUID.randomUUID().toString(), UUID.randomUUID().toString());
     }
 
     public MapData(@NotNull String id, @NotNull String owner) {

@@ -8,8 +8,10 @@ dependencies {
     api(project(":modules:core"))
     implementation(project(":modules:canvas:api"))
     implementation(project(":modules:compat"))
-    implementation(project(":modules:terraform"))
     implementation(project(":modules:datafix"))
+
+    // TODO: This is a gross dependency but currently necessary for some terraform related events
+    implementation(project(":modules:terraform"))
 
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)

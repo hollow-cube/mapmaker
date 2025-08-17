@@ -9,7 +9,7 @@ import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Switch;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import org.jetbrains.annotations.NotNull;
 
@@ -72,7 +72,7 @@ class SimpleSortPanel extends Panel {
 
     @Override
     protected void mount(@NotNull InventoryHost host, boolean isInitial) {
-        var playerData = PlayerDataV2.fromPlayer(host.player());
+        var playerData = PlayerData.fromPlayer(host.player());
         this.sort = playerData.getSetting(SORT_PRESET);
         sortSwitch.select(sort.ordinal());
 
@@ -104,7 +104,7 @@ class SimpleSortPanel extends Panel {
         onSearchChange();
 
         if (host == null || !sync) return;
-        var playerData = PlayerDataV2.fromPlayer(host.player());
+        var playerData = PlayerData.fromPlayer(host.player());
         playerData.setSetting(SORT_PRESET, sort);
     }
 
@@ -114,7 +114,7 @@ class SimpleSortPanel extends Panel {
         onSearchChange();
 
         if (host == null || !sync) return;
-        var playerData = PlayerDataV2.fromPlayer(host.player());
+        var playerData = PlayerData.fromPlayer(host.player());
         playerData.setSetting(DIFFICULTIES, new ArrayList<>(difficulties));
     }
 

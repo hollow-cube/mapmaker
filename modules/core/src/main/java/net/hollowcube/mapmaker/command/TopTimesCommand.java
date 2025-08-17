@@ -10,7 +10,7 @@ import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
@@ -59,7 +59,7 @@ public class TopTimesCommand extends CommandDsl {
                     MiscFunctionality.getCurrentMap(sessions, maps, player),
                     () -> OpUtils.map(
                             MapPlayerData.fromPlayer(player).lastPlayedMap(),
-                            id -> maps.getMap(PlayerDataV2.fromPlayer(player).id(), id)
+                            id -> maps.getMap(PlayerData.fromPlayer(player).id(), id)
                     )
             );
 
@@ -72,7 +72,7 @@ public class TopTimesCommand extends CommandDsl {
         if (map.settings().getVariant() != MapVariant.PARKOUR) {
             player.sendMessage(Component.translatable(MAP_CANT_HAVE_TIMES, Component.text(map.id())));
         } else {
-            var playerData = PlayerDataV2.fromPlayer(player);
+            var playerData = PlayerData.fromPlayer(player);
             var leaderboard = maps.getPlaytimeLeaderboard(map.id(), playerData.id());
             var messages = leaderboard.toComponents(players, false);
 

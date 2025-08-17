@@ -7,7 +7,7 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -52,7 +52,7 @@ public class MapLeaderboardDeleteCommand extends CommandDsl {
             return;
         }
 
-        var playerId = PlayerDataV2.fromPlayer(player).id();
+        var playerId = PlayerData.fromPlayer(player).id();
         try {
             mapService.deletePlaytimeLeaderboard(playerId, map.id(), target);
             player.sendMessage("deleted for " + target);

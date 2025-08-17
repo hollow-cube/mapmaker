@@ -1,41 +1,30 @@
 package net.hollowcube.mapmaker.dev;
 
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
-import net.hollowcube.mapmaker.map.AbstractMapWorld;
-import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.map.world.EditingMapWorld;
-import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.Future;
+import java.util.Locale;
 
-public class DevServerBridge implements ServerBridge {
-    public static final Tag<Future<? extends AbstractMapWorld>> TARGET_WORLD = Tag.Transient("mapmaker:map/target_world");
+public final class DevServerBridge implements ServerBridge {
+    private final DevServer server;
 
-    private final MapService mapService;
-    private final MapAllocator allocator;
-
-    public DevServerBridge(@NotNull MapService mapService, @NotNull MapAllocator allocator) {
-        this.mapService = mapService;
-        this.allocator = allocator;
+    public DevServerBridge(@NotNull DevServer server) {
+        this.server = server;
     }
 
     @Override
     public void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState, @NotNull String source) {
-//        if (CoreFeatureFlags.MAP_DISABLE_ALL.test()) {
-//            player.sendMessage(Component.translatable("ff.maps_disabled"));
-//            return;
-//        }
-
-        var playerId = PlayerDataV2.fromPlayer(player).id();
-        var map = mapService.getMap(playerId, mapId);
+        FutureUtil.assertThread();
+        var playerId = PlayerData.fromPlayer(player).id();
+        var map = server.mapService().getMap(playerId, mapId);
 
         var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
         if (playerProtocolVersion < map.protocolVersion()) {
@@ -44,33 +33,27 @@ public class DevServerBridge implements ServerBridge {
             return;
         }
 
-        // We need to remove the player from the map before entering configuration, because by the time we get
-        // remove from instance event, the player already had their position reset (ie they are at 0,0,0).
-        // todo: this seems like a minestom bug that should be fixed.
-        var world = MapWorld.forPlayerOptional(player);
-        if (world != null) world.removePlayer(player);
-
-        MapWorld.Constructor<? extends AbstractMapWorld> worldType = switch (joinMapState) {
-            case PLAYING, SPECTATING -> PlayingMapWorld.CTOR;
-            case EDITING -> EditingMapWorld.CTOR;
-        };
-        var worldFuture = allocator.create(map, worldType);
-
-        player.setTag(TARGET_WORLD, worldFuture);
-        player.startConfigurationPhase();
+        joinMapInternal(player, mapId, joinMapState);
     }
 
     @Override
     public void joinHub(@NotNull Player player) {
+        joinMapInternal(player, HubServer.HUB_MAP_DATA.id(), JoinMapState.PLAYING);
+    }
+
+    private void joinMapInternal(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState) {
+        var playerId = PlayerData.fromPlayer(player).id();
+
+        server.addPendingJoin(playerId, mapId, joinMapState.name().toLowerCase(Locale.ROOT));
 
         // We need to remove the player from the map before entering configuration, because by the time we get
         // remove from instance event, the player already had their position reset (ie they are at 0,0,0).
-        var world = MapWorld.forPlayerOptional(player);
-        if (world != null) world.removePlayer(player);
-
-        // Any player reconfiguring without that tag will be sent to the hub, so simply remove it and reconfigure.
-        player.removeTag(TARGET_WORLD);
-        player.startConfigurationPhase();
+        var world = MapWorld.forPlayer(player);
+        if (world == null) {
+            MinecraftServer.getSchedulerManager().scheduleEndOfTick(player::startConfigurationPhase);
+        } else {
+            world.scheduleRemovePlayer(player).thenRun(player::startConfigurationPhase);
+        }
     }
 
 }

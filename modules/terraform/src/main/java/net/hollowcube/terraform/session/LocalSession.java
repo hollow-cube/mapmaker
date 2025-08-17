@@ -38,6 +38,8 @@ import static net.minestom.server.network.NetworkBuffer.SHORT;
 @SuppressWarnings("UnstableApiUsage")
 public class LocalSession {
     private static final Logger logger = LoggerFactory.getLogger(LocalSession.class);
+    public static final Tag<LocalSession> TAG = Tag.Transient("terraform:local_session");
+
     private static final int STATE_VERSION = 1;
 
     // todo: turn these into player capabilities
@@ -50,9 +52,7 @@ public class LocalSession {
     }
 
     public static @Nullable LocalSession forPlayerOptional(@NotNull Player player) {
-        var instance = player.getInstance();
-        var tag = Tag.<LocalSession>Transient(String.format("terraform:session/%s", player.getUuid()));
-        return instance.getTag(tag);
+        return player.getTag(TAG);
     }
 
     private final PlayerSession playerSession;

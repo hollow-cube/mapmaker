@@ -4,7 +4,7 @@ annotations = "26.0.2"
 fastutil = "8.5.15"
 gson = "2.12.1"
 adventure = "4.23.0"
-minestom = "2025.07.11-1.21.7"
+minestom = "2025.07.30-1.21.8"
 posthog = "0.1.9"
 slf4j = "2.0.9"
 kafka = "3.9.0"
@@ -14,7 +14,7 @@ noxesium = "2.5.0"
 zstd = "1.5.7-2"
 otel = "1.45.0"
 otel-semconv = "1.28.0-alpha"
-polar = "1.14.6"
+polar = "1.14.7"
 similarity = "2.0.0"
 completely = "0.9.0"
 jctools = "4.0.5"
@@ -52,6 +52,7 @@ json5 = { group = "de.marhali", name = "json5-java", version.ref = "json5" }
 velocity-api = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
 
 included-molang = { group = "dev.hollowcube", name = "molang", version.ref = "included" }
+included-schem = { group = "dev.hollowcube", name = "schem", version.ref = "included" }
 
 nativeimage = { group = "org.graalvm.sdk", name = "nativeimage", version.ref = "graalvm" }
 classgraph = { group = "io.github.classgraph", name = "classgraph", version.ref = "classgraph" }

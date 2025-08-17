@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public class HangingSignPlacementRule extends WaterloggedPlacementRule {
@@ -115,37 +116,17 @@ public class HangingSignPlacementRule extends WaterloggedPlacementRule {
         return BlockTags.FENCES.contains(block.key());
     }
 
+    @SuppressWarnings("PatternValidation")
     private @Nullable Block convertToWallSign(@NotNull Block block) {
-        if (!BlockTags.CEILING_HANGING_SIGNS.contains(block.key())) {
-            System.out.println("Tried to convert a non-hanging sign into a wall hanging sign, " + block.key());
-            return null;
-        }
-        // TODO Is there a better way?
-        // Something like indexof('_'), then do substring(0, indexof('_')) + "wall_" + substring(indexof('_')) ?
-        if (block.compare(Block.OAK_HANGING_SIGN)) {
-            return Block.OAK_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
-        } else if (block.compare(Block.DARK_OAK_HANGING_SIGN)) {
-            return Block.DARK_OAK_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
-        } else if (block.compare(Block.BIRCH_HANGING_SIGN)) {
-            return Block.BIRCH_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
-        } else if (block.compare(Block.JUNGLE_HANGING_SIGN)) {
-            return Block.JUNGLE_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
-        } else if (block.compare(Block.ACACIA_HANGING_SIGN)) {
-            return Block.ACACIA_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
-        } else if (block.compare(Block.SPRUCE_HANGING_SIGN)) {
-            return Block.SPRUCE_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
-        } else if (block.compare(Block.MANGROVE_HANGING_SIGN)) {
-            return Block.MANGROVE_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
-        } else if (block.compare(Block.CHERRY_HANGING_SIGN)) {
-            return Block.CHERRY_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
-        } else if (block.compare(Block.BAMBOO_HANGING_SIGN)) {
-            return Block.BAMBOO_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
-        } else if (block.compare(Block.CRIMSON_HANGING_SIGN)) {
-            return Block.CRIMSON_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
-        } else if (block.compare(Block.WARPED_HANGING_SIGN)) {
-            return Block.WARPED_WALL_HANGING_SIGN.withNbt(block.nbt()).withHandler(block.handler());
-        } else {
-            return null;
-        }
+        if (!BlockTags.CEILING_HANGING_SIGNS.contains(block.key()))
+            throw new IllegalStateException("non hanging sign converted to hanging sign: " + block.key());
+
+        var blockName = block.key().asString();
+        int index = blockName.lastIndexOf('_', blockName.indexOf("hanging_sign"));
+        if (index == -1) return null;
+
+        var wallBlockName = blockName.substring(0, index + 1) + "wall_" + blockName.substring(index + 1);
+        return Objects.requireNonNull(Block.fromKey(wallBlockName), wallBlockName)
+                .withNbt(block.nbt()).withHandler(block.handler());
     }
 }

@@ -5,9 +5,9 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.compat.noxesium.packets.ClientboundChangeServerRulesPacket;
+import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.map.util.InteractTarget;
-import net.hollowcube.mapmaker.map.util.PlayerCooldownExtension;
+import net.hollowcube.mapmaker.map.event.Map2PlayerBlockInteractEvent;
 import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
@@ -20,6 +20,8 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
+import net.minestom.server.event.item.PlayerBeginItemUseEvent;
+import net.minestom.server.event.item.PlayerCancelItemUseEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.block.Block;
@@ -45,7 +47,7 @@ public class ItemRegistry {
         return Argument.Word(id).map(
                 /* mapper */ (sender, raw) -> {
                     if (!(sender instanceof Player player)) return null;
-                    var world = MapWorld.forPlayerOptional(player);
+                    var world = MapWorld.forPlayer(player);
                     if (world == null) return null;
                     var itemRegistry = world.itemRegistry();
 
@@ -64,7 +66,7 @@ public class ItemRegistry {
                 },
                 /* suggester */ (sender, raw, suggestion) -> {
                     if (!(sender instanceof Player player)) return;
-                    var world = MapWorld.forPlayerOptional(player);
+                    var world = MapWorld.forPlayer(player);
                     if (world == null) return;
                     var itemRegistry = world.itemRegistry();
 
@@ -87,6 +89,8 @@ public class ItemRegistry {
             .addListener(EntityAttackEvent.class, this::handleHitEntity)
             .addListener(InstanceTickEvent.class, this::handleInstanceTick)
             .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn)
+            .addListener(PlayerBeginItemUseEvent.class, this::handleBeginItemUse)
+            .addListener(PlayerCancelItemUseEvent.class, this::handleCancelItemUse)
             .addListener(EventListener.builder(InventoryPreClickEvent.class)
                     .handler(this::handleLeftClickGui)
                     .ignoreCancelled(false)
@@ -137,6 +141,18 @@ public class ItemRegistry {
         }
     }
 
+    public boolean setItemStack(@NotNull Player player, @NotNull Key id, int slot) {
+        return setItemStack(player, id, slot, null);
+    }
+
+    public boolean setItemStack(@NotNull Player player, @NotNull Key id, int slot, @Nullable CompoundBinaryTag nbt) {
+        var itemStack = getItemStack(id, nbt);
+        if (itemStack == null) return false;
+
+        player.getInventory().setItemStack(slot, itemStack);
+        return true;
+    }
+
     public @UnknownNullability ItemStack getItemStack(@NotNull Key id, @Nullable CompoundBinaryTag nbt) {
         return getItemStack(id.asString(), nbt);
     }
@@ -172,6 +188,10 @@ public class ItemRegistry {
         return itemStack;
     }
 
+    public @Nullable String getItemId(@NotNull Player player, int slot) {
+        return getItemId(player.getInventory().getItemStack(slot));
+    }
+
     public @Nullable String getItemId(@NotNull ItemStack itemStack) {
         var itemHandler = getHandlerFromItemStack(itemStack);
         return itemHandler == null ? null : itemHandler.key().asString();
@@ -205,7 +225,7 @@ public class ItemRegistry {
         var player = event.getPlayer();
         if (player.getTag(TRIGGER_TAG) != null) return;
 
-        if (useCooldown.test(player) && PlayerCooldownExtension.tryUseItem(player, event.getItemStack())) {
+        if (useCooldown.test(player) && player instanceof MapPlayer mp && mp.tryUseItem(event.getItemStack())) {
             player.setTag(TRIGGER_TAG, true);
             itemHandler.rightClicked(new ItemHandler.Click(
                     itemHandler,
@@ -227,15 +247,19 @@ public class ItemRegistry {
         var player = event.getPlayer();
         if (player.getTag(TRIGGER_TAG) != null) return;
 
-        // This is a somewhat weird special case to allow right clicking a checkpoint with a checkpoint. But oh well.
-        if (!player.isSneaking() && event.getBlock().handler() instanceof InteractTarget)
-            return;
+        // See note on the event for why this exists :(
+        var world = MapWorld.forPlayer(player);
+        if (world != null && !player.isSneaking() && event.getBlock().handler() != null) {
+            var newEvent = new Map2PlayerBlockInteractEvent(world, player, event.getBlock(), event.getBlockPosition(), event.getHand());
+            world.callEvent(newEvent);
+            if (newEvent.isCancelled()) return;
+        }
 
         var itemStack = player.getItemInHand(event.getHand());
         var itemHandler = getHandlerFromItemStack(itemStack);
         if (itemHandler == null || !itemHandler.allows(ItemHandler.RIGHT_CLICK_BLOCK)) return;
 
-        if (useCooldown.test(player) && PlayerCooldownExtension.tryUseItem(player, itemStack)) {
+        if (useCooldown.test(player) && player instanceof MapPlayer mp && mp.tryUseItem(itemStack)) {
             player.setTag(TRIGGER_TAG, true);
             var placeOffset = event.getBlockFace().toDirection();
             itemHandler.rightClicked(new ItemHandler.Click(
@@ -261,7 +285,7 @@ public class ItemRegistry {
         var handler = getHandlerFromItemStack(itemStack);
         if (handler == null || !handler.allows(ItemHandler.RIGHT_CLICK_ENTITY)) return;
 
-        if (useCooldown.test(player) && PlayerCooldownExtension.tryUseItem(player, itemStack)) {
+        if (useCooldown.test(player) && player instanceof MapPlayer mp && mp.tryUseItem(itemStack)) {
             player.setTag(TRIGGER_TAG, true);
             handler.rightClicked(new ItemHandler.Click(handler, player, itemStack, event.getHand(), event.getTarget()));
         }
@@ -349,6 +373,30 @@ public class ItemRegistry {
 //        ));
     }
 
+    private void handleBeginItemUse(@NotNull PlayerBeginItemUseEvent event) {
+        var player = event.getPlayer();
+        var itemStack = player.getItemInMainHand();
+        var handler = getHandlerFromItemStack(itemStack);
+        if (handler == null || !handler.allows(ItemHandler.CONSUME_ITEM)) return;
+
+        int duration = handler.beginConsume(new ItemHandler.Click(handler, player, itemStack,
+                PlayerHand.MAIN, null, null, null, null));
+        if (duration < 0) event.setCancelled(true);
+        else event.setItemUseDuration(duration);
+    }
+
+    private void handleCancelItemUse(@NotNull PlayerCancelItemUseEvent event) {
+        var player = event.getPlayer();
+        var itemStack = player.getItemInMainHand();
+        var handler = getHandlerFromItemStack(itemStack);
+        if (handler == null || !handler.allows(ItemHandler.CONSUME_ITEM)) return;
+
+        var click = new ItemHandler.Click(handler, player, itemStack,
+                PlayerHand.MAIN, null, null, null, null);
+        var result = handler.cancelConsume(click, event.getUseDuration());
+        event.setRiptideSpinAttack(result == ItemHandler.ConsumeItemResult.RIPTIDE_SPIN);
+    }
+
     private void handlePlayerSpawn(@NotNull PlayerSpawnEvent event) {
         if (!event.isFirstSpawn()) return;
         List<ItemStack> items = this.idToItemHandler.keySet().stream()
@@ -359,8 +407,8 @@ public class ItemRegistry {
     }
 
     private @Nullable ItemHandler getHandlerFromItemStack(@NotNull ItemStack itemStack) {
-        var id = itemStack.getTag(ItemHandler.ID_TAG);
-        if (id == null) return null;
+        var id = Objects.requireNonNullElseGet(itemStack.getTag(ItemHandler.ID_TAG),
+                () -> itemStack.material().key().asString());
         return idToItemHandler.get(id.toLowerCase(Locale.ROOT));
     }
 

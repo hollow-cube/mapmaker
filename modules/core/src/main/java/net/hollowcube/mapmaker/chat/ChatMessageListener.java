@@ -15,7 +15,7 @@ import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.DisplayName;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.event.PunishmentCreatedEvent;
@@ -140,7 +140,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             return;
         }
 
-        var playerData = PlayerDataV2.fromPlayer(player);
+        var playerData = PlayerData.fromPlayer(player);
         String channel = playerData.getSetting(PlayerSettings.CHAT_CHANNEL);
 
         if (!ClientChatMessageData.CHANNEL_STAFF.equals(channel) && sessionManager.isHidden(playerData.id())) {
@@ -171,7 +171,7 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
     @Blocking
     private boolean testMuteState(@NotNull Player player) {
         try {
-            var playerId = PlayerDataV2.fromPlayer(player).id();
+            var playerId = PlayerData.fromPlayer(player).id();
             var mute = playerMuteCache.get(playerId).get(3, TimeUnit.SECONDS);
             if (mute.isPresent()) {
                 player.sendMessage(Component.translatable("punishment.muted"));
