@@ -27,7 +27,6 @@ public final class AxiomPlayer {
     static final Tag<Boolean> AXIOM_ENABLED = Tag.<Boolean>Transient("axiom:enabled").defaultValue(false);
     static final Tag<Integer> AXIOM_VERSION = Tag.<Integer>Transient("axiom:version").defaultValue(-1);
     static final Tag<Set<UUID>> AXIOM_IGNORED_ENTITIES = Tag.<Set<UUID>>Transient("axiom:ignored_entities").defaultValue(ConcurrentHashMap::newKeySet);
-    static final Tag<Boolean> AXIOM_PENDING_ENABLE = Tag.Transient("axiom:pending_enable");
 
     private static final AxiomClientboundEnablePacket.ServerConfig SERVER_CONFIG = new AxiomClientboundEnablePacket.ServerConfig(
             0x100000, // 1mb,
@@ -40,24 +39,6 @@ public final class AxiomPlayer {
     }
 
     public static void setEnabled(@NotNull Player player, boolean enabled) {
-        if (getVersion(player) == -1) {
-            player.setTag(AXIOM_PENDING_ENABLE, enabled);
-        } else {
-            enableInternal(player, enabled);
-        }
-    }
-
-    public static void handlePendingEnable(@NotNull Player player) {
-        Boolean enable = player.getAndSetTag(AXIOM_PENDING_ENABLE, null);
-        if (enable == null) return;
-
-        int version = getVersion(player);
-        if (version >= AxiomAPI.MIN_API_VERSION && version <= AxiomAPI.MAX_API_VERSION) {
-            enableInternal(player, enable);
-        }
-    }
-
-    private static void enableInternal(Player player, boolean enabled) {
         player.setTag(AXIOM_ENABLED, enabled);
 
         List<ClientboundModPacket<?>> packets;
