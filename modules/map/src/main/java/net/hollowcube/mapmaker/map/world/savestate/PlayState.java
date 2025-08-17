@@ -23,10 +23,16 @@ public final class PlayState {
     public static final int NO_RESET_HEIGHT = Integer.MIN_VALUE;
 
     public sealed interface Attachment<T> extends Keyed permits AttachmentImpl {
+
+        T copy(T value);
     }
 
     public static <T> @NotNull Attachment<T> attachment(@NotNull Key key, @NotNull Codec<T> codec) {
-        return new AttachmentImpl<>(key, codec);
+        return new AttachmentImpl<>(key, codec, Function.identity());
+    }
+
+    public static <T> @NotNull Attachment<T> attachment(@NotNull Key key, @NotNull Codec<T> codec, @NotNull Function<T, T> copy) {
+        return new AttachmentImpl<>(key, codec, copy);
     }
 
     private static final StructCodec<Map<Long, Block>> GHOST_BLOCKS_CODEC = StructCodec.struct(
@@ -119,7 +125,7 @@ public final class PlayState {
     }
 
     public void setLastState(@Nullable PlayState lastState) {
-        this.lastState = lastState;
+        this.lastState = lastState == null ? null : lastState.copy();
     }
 
     public void addStatus(@NotNull String id) {
@@ -135,7 +141,17 @@ public final class PlayState {
     }
 
     public @NotNull PlayState copy() {
-        return new PlayState(lastState, history, pos, new HashMap<>(ghostBlocks), new HashMap<>(actionData));
+        var newActions = new HashMap<Attachment<?>, Object>(actionData.size());
+        for (var entry : actionData.entrySet()) {
+            newActions.put(entry.getKey(), ((Attachment<Object>) entry.getKey()).copy(entry.getValue()));
+        }
+
+
+        return new PlayState(
+                lastState, history, pos,
+                new HashMap<>(ghostBlocks),
+                newActions
+        );
     }
 
     @Override
@@ -155,11 +171,17 @@ public final class PlayState {
         return String.valueOf(optional);
     }
 
-    private record AttachmentImpl<T>(@NotNull Key key, @NotNull Codec<T> codec) implements Attachment<T> {
+    private record AttachmentImpl<T>(@NotNull Key key, @NotNull Codec<T> codec,
+                                     @NotNull Function<T, T> copy) implements Attachment<T> {
         private static final Map<Key, AttachmentImpl<?>> REGISTRY = new HashMap<>();
 
         public AttachmentImpl {
             REGISTRY.put(key, this);
+        }
+
+        @Override
+        public T copy(T value) {
+            return copy.apply(value);
         }
     }
 

@@ -14,7 +14,7 @@ public class Attachments {
     public static final PlayState.Attachment<Integer> RESET_HEIGHT = PlayState.attachment(
             Key.key("mapmaker:reset_height"), Codec.INT);
     public static final PlayState.Attachment<PotionEffectList> POTION_EFFECTS = PlayState.attachment(
-            Key.key("mapmaker:potion_effects"), PotionEffectList.CODEC);
+            Key.key("mapmaker:potion_effects"), PotionEffectList.CODEC, PotionEffectList::copy);
     public static final PlayState.Attachment<Boolean> ELYTRA = PlayState.attachment(
             Key.key("mapmaker:elytra"), Codec.BOOLEAN);
     public static final PlayState.Attachment<HotbarItems> HOTBAR_ITEMS = PlayState.attachment(
