@@ -154,7 +154,7 @@ public class AxiomModule implements TerraformModule {
         var session = LocalSession.forPlayer(event.player());
         var task = session.buildTask("axiom-" + event.id())
                 .metadata()
-                .buffer(AxiomTerraformBuffer.of(buffer))
+                .buffer(new AxiomTerraformBuffer(buffer))
                 .ephemeral()
                           .submitIfCapacity();
         if (task == null) {
