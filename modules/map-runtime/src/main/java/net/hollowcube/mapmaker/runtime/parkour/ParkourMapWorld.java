@@ -11,6 +11,7 @@ import net.hollowcube.mapmaker.cosmetic.impl.victory.AbstractVictoryEffectImpl;
 import net.hollowcube.mapmaker.gui.map.RateMapView;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
+import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandlerRegistry;
 import net.hollowcube.mapmaker.map.entity.potion.PotionHandler;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
@@ -125,6 +126,16 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         MinecraftServer.getGlobalEventHandler().addChild(PotionHandler.EVENT_NODE);
     }
 
+    public static void registerMarkers(ObjectEntityHandlerRegistry objectEntityHandlers) {
+        objectEntityHandlers.registerForMarkers(MapLeaderboardMarkerHandler.ID, MapLeaderboardMarkerHandler::new);
+        objectEntityHandlers.registerForMarkers(BouncePadMarkerHandler.ID, BouncePadMarkerHandler::new);
+        objectEntityHandlers.registerForMarkers(HappyGhastMarkerHandler.ID, HappyGhastMarkerHandler::new);
+        objectEntityHandlers.registerForMarkers(CheckpointMarkerHandler.ID, CheckpointMarkerHandler::new);
+        objectEntityHandlers.registerForMarkers(StatusMarkerHandler.ID, StatusMarkerHandler::new);
+        objectEntityHandlers.registerForMarkers(FinishMarkerHandler.ID, FinishMarkerHandler::new);
+        objectEntityHandlers.registerForMarkers(ResetMarkerHandler.ID, ResetMarkerHandler::new);
+    }
+
     protected int defaultResetHeight;
 
     public ParkourMapWorld(MapServer server, MapData map) {
@@ -138,13 +149,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
         SILENT_ITEMS.forEach(itemRegistry()::registerSilent);
 
-        objectEntityHandlers().registerForMarkers(MapLeaderboardMarkerHandler.ID, MapLeaderboardMarkerHandler::new);
-        objectEntityHandlers().registerForMarkers(BouncePadMarkerHandler.ID, BouncePadMarkerHandler::new);
-        objectEntityHandlers().registerForMarkers(HappyGhastMarkerHandler.ID, HappyGhastMarkerHandler::new);
-        objectEntityHandlers().registerForMarkers(CheckpointMarkerHandler.ID, CheckpointMarkerHandler::new);
-        objectEntityHandlers().registerForMarkers(StatusMarkerHandler.ID, StatusMarkerHandler::new);
-        objectEntityHandlers().registerForMarkers(FinishMarkerHandler.ID, FinishMarkerHandler::new);
-        objectEntityHandlers().registerForMarkers(ResetMarkerHandler.ID, ResetMarkerHandler::new);
+        registerMarkers(objectEntityHandlers());
 
         eventNode(ParkourState.AnyPlaying.class)
                 .addListener(PlayerMoveEvent.class, event -> handlePlayerOrVehicleMove(event.getPlayer(), event.getNewPosition()))
