@@ -11,12 +11,14 @@ import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.Set;
 
 public record AxiomServerboundSetBlockPacket(
         @NotNull Map<Point, Block> blocks,
-        boolean updateNeighbors,
+        @Nullable Set<Point> updateNeighbors,
         @MagicConstant(valuesFromClass = AxiomSetBlockFlag.class) int reason,
         boolean breaking,
 
@@ -33,7 +35,7 @@ public record AxiomServerboundSetBlockPacket(
             AxiomAPI.CHANNEL, "set_block",
             NetworkBufferTemplate.template(
                     NetworkBuffer.BLOCK_POSITION.mapValue(Block.NETWORK_TYPE), AxiomServerboundSetBlockPacket::blocks,
-                    NetworkBuffer.BOOLEAN, AxiomServerboundSetBlockPacket::updateNeighbors,
+                    NetworkBuffer.BLOCK_POSITION.set().optional(), AxiomServerboundSetBlockPacket::updateNeighbors,
                     NetworkBuffer.VAR_INT, AxiomServerboundSetBlockPacket::reason,
                     NetworkBuffer.BOOLEAN, AxiomServerboundSetBlockPacket::breaking,
 

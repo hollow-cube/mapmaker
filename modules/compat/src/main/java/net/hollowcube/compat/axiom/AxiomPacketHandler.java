@@ -171,7 +171,7 @@ final class AxiomPacketHandler {
                 instance.placeBlock(new BlockHandler.PlayerPlacement(
                         block, instance, pos, player, packet.hand(), packet.face(),
                         (float) packet.cursor().x(), (float) packet.cursor().y(), (float) packet.cursor().z()
-                ), packet.updateNeighbors());
+                ), packet.updateNeighbors() != null && packet.updateNeighbors().contains(pos));
             }
         } finally {
             player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
