@@ -2,12 +2,13 @@ package net.hollowcube.compat.axiom.packets.clientbound;
 
 import it.unimi.dsi.fastutil.Pair;
 import net.hollowcube.compat.axiom.AxiomAPI;
-import net.hollowcube.compat.axiom.data.AxiomCapabilities;
+import net.hollowcube.compat.axiom.data.AxiomPermission;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
-import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Set;
 
 public record AxiomClientboundSetRestrictionsPacket(
     @Nullable Restrictions restrictions
@@ -27,32 +28,23 @@ public record AxiomClientboundSetRestrictionsPacket(
     }
 
     public record Restrictions(
-            boolean canUseBlueprints,
-            boolean canuseEditor,
-            boolean canEditDisplayEntities,
-            boolean canCreateAnnotations,
-            @MagicConstant(valuesFromClass = AxiomCapabilities.class) int allowedCapabilities,
+            Set<AxiomPermission> allowed,
+            Set<AxiomPermission> disallowed,
             int infiniteReachLimit,
-            int sectionsRateLimit,
-
             Pair<BlockVec, BlockVec> bounds
     ) {
 
         private static final NetworkBuffer.Type<Pair<BlockVec, BlockVec>> BOUNDS_SERIALIZER = NetworkBufferTemplate.template(
-                NetworkBuffer.VAR_INT, it -> 1,
+                NetworkBuffer.VAR_INT, _ -> 1,
                 NetworkBuffer.BLOCK_POSITION, Pair::left,
                 NetworkBuffer.BLOCK_POSITION, Pair::right,
-                ($, start, end) -> Pair.of(new BlockVec(start), new BlockVec(end))
+                (_, start, end) -> Pair.of(new BlockVec(start), new BlockVec(end))
         );
 
         public static final NetworkBuffer.Type<Restrictions> SERIALIZER = NetworkBufferTemplate.template(
-                NetworkBuffer.BOOLEAN, Restrictions::canUseBlueprints,
-                NetworkBuffer.BOOLEAN, Restrictions::canuseEditor,
-                NetworkBuffer.BOOLEAN, Restrictions::canEditDisplayEntities,
-                NetworkBuffer.BOOLEAN, Restrictions::canCreateAnnotations,
-                NetworkBuffer.INT, Restrictions::allowedCapabilities,
+                AxiomPermission.TYPE.set(), Restrictions::allowed,
+                AxiomPermission.TYPE.set(), Restrictions::disallowed,
                 NetworkBuffer.INT, Restrictions::infiniteReachLimit,
-                NetworkBuffer.VAR_INT, Restrictions::sectionsRateLimit,
                 BOUNDS_SERIALIZER, Restrictions::bounds,
                 Restrictions::new
         );

@@ -41,9 +41,9 @@ final class AxiomPacketHandler {
         };
     }
 
-    static <T extends ServerboundModPacket<T>> BiConsumer<@NotNull Player, @NotNull T> disabled(String message) {
-        return (player, packet) -> {
-            if (AxiomPlayer.isEnabled(player)) player.sendMessage(message);
+    static <T extends ServerboundModPacket<T>> BiConsumer<@NotNull Player, @NotNull T> disabled(@Nullable String message) {
+        return (player, _) -> {
+            if (AxiomPlayer.isEnabled(player) && message != null) player.sendMessage(message);
         };
     }
 
@@ -98,7 +98,11 @@ final class AxiomPacketHandler {
     // Data Operations
 
     static void onMarkerDataRequest(@NotNull Player player, @NotNull AxiomServerboundMarkerRequestPacket packet) {
-        var event = new AxiomMarkerDataRequestEvent(player, packet.id());
+        var event = switch (packet.reason()) {
+            case COPYING -> new AxiomMarkerDataRequestEvent.Copying(player, packet.id());
+            case RIGHT_CLICK -> new AxiomMarkerDataRequestEvent.RightClick(player, packet.id());
+            default -> new AxiomMarkerDataRequestEvent(player, packet.id());
+        };
         EventDispatcher.call(event);
         if (event.getData() == null || event.isCancelled()) return;
 
