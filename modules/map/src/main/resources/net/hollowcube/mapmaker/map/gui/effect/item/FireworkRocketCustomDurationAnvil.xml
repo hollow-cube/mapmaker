@@ -1,9 +1,0 @@
-<component id="anvil" width="9" height="5" align="ltr" sprite="anvil/field_container">
-    <text id="title" width="0" height="0" translationKey=""
-          font="anvil_title" shift="-26"/>
-    <box width="9" height="1" align="ltr">
-        <button id="input" translationKey="forced.input" sprite="anvil/back" backgroundSprite="anvil/back_bg"/>
-        <label translationKey="gui.generic.empty" sprite="anvil/clock"/>
-        <button id="output" translationKey="gui.generic.empty" backgroundSprite="anvil/checkmark_bg"/>
-    </box>
-</component>

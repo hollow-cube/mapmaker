@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.session;
 
 import net.hollowcube.mapmaker.PlayerSettings;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.cui.ClientInterface;
 import net.hollowcube.terraform.cui.ClientRenderer;
@@ -148,7 +148,7 @@ public class PlayerSession {
 
     public void updateRenderer() {
         var isDefaultRenderer = this.renderer instanceof DefaultClientRenderer;
-        if (PlayerDataV2.fromPlayer(player).getSetting(PlayerSettings.ENABLE_WE_CUI)) {
+        if (PlayerData.fromPlayer(player).getSetting(PlayerSettings.ENABLE_WE_CUI)) {
             if (!isDefaultRenderer) {
                 this.renderer = new DefaultClientRenderer(player);
 

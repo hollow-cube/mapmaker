@@ -10,7 +10,7 @@ import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.DisplayName;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -101,7 +101,7 @@ public class MapDetailsView extends Panel {
         // Fetch the latest save state to show in play button
         async(() -> {
             try {
-                var playerId = PlayerDataV2.fromPlayer(host.player()).id();
+                var playerId = PlayerData.fromPlayer(host.player()).id();
                 var saveState = mapService.getLatestSaveState(map.id(), playerId, SaveStateType.PLAYING, null);
 
                 playButton.translationKey("gui.map_details.continue_map", formatMapPlaytime(saveState.getPlaytime(), true));

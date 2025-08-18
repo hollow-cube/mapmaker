@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.misc;
 
 import net.hollowcube.common.util.FontUIBuilder;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.format.ShadowColor;
@@ -53,7 +53,7 @@ public class ExpBarRenderer implements ActionBar.Provider {
         if (player.getGameMode() == GameMode.SPECTATOR) return;
 
         // Update the player experience bar if it has changed
-        var playerData = PlayerDataV2.fromPlayer(player);
+        var playerData = PlayerData.fromPlayer(player);
         if (playerData.experience() != lastExp) {
             player.setLevel(playerData.level());
             player.setExp(playerData.levelProgress());

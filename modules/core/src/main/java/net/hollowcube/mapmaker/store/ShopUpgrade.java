@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.store;
 
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.perm.PlatformPermLike;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,11 +51,11 @@ public enum ShopUpgrade {
         return indirectPerm;
     }
 
-    public boolean canAfford(@NotNull PlayerDataV2 playerData, @NotNull PlayerBackpack backpack) {
+    public boolean canAfford(@NotNull PlayerData playerData, @NotNull PlayerBackpack backpack) {
         return cost.canAfford(playerData, backpack);
     }
 
-    public void appendLore(@NotNull PlayerDataV2 playerData, @NotNull PlayerBackpack backpack, @NotNull List<Component> lore) {
+    public void appendLore(@NotNull PlayerData playerData, @NotNull PlayerBackpack backpack, @NotNull List<Component> lore) {
         cost.appendLore(playerData, backpack, lore);
     }
 

@@ -2,13 +2,14 @@ package net.hollowcube.mapmaker.map.block.handler;
 
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.component.DataComponents;
+import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.component.CustomData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-final class BlockHandlerHelpers {
+public final class BlockHandlerHelpers {
 
     /**
      * @param placement
@@ -21,6 +22,15 @@ final class BlockHandlerHelpers {
 
         // Block data was present, apply it
         updateBlock(placement, blockData);
+        return true;
+    }
+
+    public static boolean applyStoredBlockData(PlayerBlockPlaceEvent event) {
+        var itemStack = event.getPlayer().getItemInHand(event.getHand());
+        var blockData = extractBlockData(itemStack);
+        if (blockData == null) return false;
+
+        event.setBlock(event.getBlock().withNbt(blockData));
         return true;
     }
 

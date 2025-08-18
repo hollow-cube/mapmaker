@@ -16,8 +16,8 @@ dependencies {
     implementation(project(":modules:canvas:impl-standalone"))
     implementation(project(":modules:core"))
     implementation(project(":modules:datafix"))
-    implementation(project(":modules:map"))
     implementation(project(":modules:terraform"))
+    implementation(project(":modules:map-runtime"))
 
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)
@@ -49,7 +49,7 @@ tasks.nativeCompile {
 }
 
 application {
-    mainClass = "net.hollowcube.mapmaker.map.IsolateMain"
+    mainClass = "net.hollowcube.mapmaker.isolate.IsolateMain"
 }
 
 graalvmNative {

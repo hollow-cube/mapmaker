@@ -50,6 +50,12 @@ public class DataFixer {
         int currentState = state.get();
         if (currentState != 0) return;
 
+        for (var externalFix : ServiceLoader.load(ExternalDataFix.class)) {
+            if (!(externalFix instanceof DataVersion dataVersion))
+                throw new UnsupportedOperationException("ExternalDataFix must implement DataVersion");
+            maxVersion = Math.max(maxVersion, dataVersion.version());
+        }
+
         int maxId = dataTypes.stream().mapToInt(DataType::id).max().orElse(0);
         schemas = new OptimizedSchema[maxId + 1];
 

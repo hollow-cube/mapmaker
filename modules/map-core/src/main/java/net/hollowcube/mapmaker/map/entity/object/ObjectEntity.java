@@ -114,21 +114,22 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
 
     @Override
     public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
-        var world = MapWorld.unsafeFromInstance(instance);
-        visible = world != null && !world.isReadOnly();
+        var world = MapWorld.forInstance(instance); // todo this is more complex, also update visible
+//        visible = world != null && !world.isReadOnly(); TODO: visible shouldnt exist, should just use manual viewers.
         if (handler != null) {
             handler.onRemove();
             handler = null;
         }
         return super.setInstance(instance, spawnPosition).thenRun(() -> {
-            if (world == null) return;
-            handler = world.objectEntityHandlers().create(getType(), this);
+            if (world != null) {
+                handler = world.objectEntityHandlers().create(getType(), this);
+            }
         });
     }
 
     @Override
     public void readData(@NotNull CompoundBinaryTag tag) {
-        super.readData(tag);
+        // Do not read default entity tags
 
         setTag(DATA_TAG, tag.getCompound("data"));
         updateBoundingBox();
@@ -137,7 +138,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
 
     @Override
     public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
-        super.writeData(tag);
+        // Do not write default entity tags
 
         tag.put("data", getTag(DATA_TAG));
     }
@@ -146,8 +147,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
     public void updateNewViewer(@NotNull Player player) {
         if (sendToClient) super.updateNewViewer(player);
 
-        // see below for why this is commented
-        var world = MapWorld.forPlayerOptional(player);
+        var world = MapWorld.forPlayer(player);
         if (world == null) return;
 
         if (handler != null) handler.addViewer(world, player);
@@ -160,7 +160,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
     public void updateOldViewer(@NotNull Player player) {
         if (sendToClient) super.updateOldViewer(player);
 
-        var world = MapWorld.forPlayerOptional(player);
+        var world = MapWorld.forPlayer(player);
         if (world == null) return;
 
         if (handler != null) handler.removeViewer(world, player);
@@ -199,14 +199,14 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
     }
 
     private static void handleAxiomRequestMarkerData(@NotNull AxiomMarkerDataRequestEvent event) {
-        var world = MapWorld.forPlayerOptional(event.player());
+        var world = MapWorld.forPlayer(event.player());
         if (!(event.marker() instanceof ObjectEntity entity)) return;
         if (world == null || !world.canEdit(event.player())) return;
         if (!world.instance().equals(entity.getInstance())) return;
 
         event.setData(entity.getTag(DATA_TAG)
-                              .put("axiom:hide", AxiomAPI.HIDDEN_MARKER_DATA)
-                              .putString("type", entity.getType()));
+                .put("axiom:hide", AxiomAPI.HIDDEN_MARKER_DATA)
+                .putString("type", entity.getType()));
     }
 
     private static void handleAxiomUpdateMarkerData(@NotNull TerraformAxiomUpdateCustomEntityDataEvent event) {
@@ -240,7 +240,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         if (!Objects.equals(oldType, newType)) {
             if (marker.handler != null) marker.handler.onRemove();
 
-            var world = MapWorld.unsafeFromInstance(marker.getInstance());
+            var world = MapWorld.forInstance(marker.getInstance());
             if (world != null) {
                 marker.handler = world.objectEntityHandlers().create(newType, marker);
             } else marker.handler = null;
@@ -291,7 +291,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         if (entity == null) return null;
 
         // Ensure they are in the same instance, and that the world is editable
-        var world = MapWorld.forPlayerOptional(editor);
+        var world = MapWorld.forPlayer(editor);
         if (world == null || !world.instance().equals(entity.getInstance()) || !world.canEdit(editor))
             return null;
 

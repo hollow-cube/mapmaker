@@ -43,7 +43,7 @@ public class CampfireBlockHandler implements BlockHandler {
     public boolean onInteract(@NotNull BlockHandler.Interaction interaction) {
         var player = interaction.getPlayer();
         if (interaction.getHand() != PlayerHand.MAIN || player.isSneaking()) return true;
-        var world = MapWorld.forPlayerOptional(player);
+        var world = MapWorld.forPlayer(player);
         if (world == null || !world.canEdit(player)) return true;
 
         var handItemStack = player.getItemInHand(interaction.getHand());
