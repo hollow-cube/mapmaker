@@ -58,7 +58,7 @@ graalvmNative {
             fallback.set(false)
             buildArgs(
                 listOf(
-                    "--enable-native-access=ALL-UNNAMED", "-H:+AllowVMInspection",
+                    "--enable-native-access=ALL-UNNAMED", "--enable-monitoring=jfr",
                     "--features=net.hollowcube.nativeimage.HCNativeImageFeature",
                     "--static-nolibc", "--no-fallback",
                     "--emit build-report",

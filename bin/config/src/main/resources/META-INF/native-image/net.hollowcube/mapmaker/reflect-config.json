@@ -131,5 +131,11 @@
   },
   {
     "name": "net.hollowcube.mql.jit.BouncePadScript$Variables"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.runtime.parkour.ParkourState"
+  },
+  {
+    "name": "net.hollowcube.mapmaker.runtime.parkour.ParkourState$AnyPlaying"
   }
 ]
