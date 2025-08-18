@@ -22,7 +22,7 @@ public class FinishMarkerHandler extends ObjectEntityHandler {
         if (!(world.getPlayerState(player) instanceof ParkourState.Playing2(var saveState)))
             return;
 
-        world.changePlayerState(player, new ParkourState.Finished(saveState, System.currentTimeMillis()));
+        world.changePlayerState(player, new ParkourState.Finished(saveState));
     }
 
 }
