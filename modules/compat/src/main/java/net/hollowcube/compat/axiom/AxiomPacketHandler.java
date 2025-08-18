@@ -55,6 +55,8 @@ final class AxiomPacketHandler {
         } else {
             AxiomPlayer.setVersion(player, packet.apiVersion());
         }
+
+        AxiomPlayer.handlePendingEnable(player);
     }
 
     // Player Operations
