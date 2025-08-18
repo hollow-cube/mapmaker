@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.runtime.parkour;
 
 import net.hollowcube.common.events.PlayerMoveVehicleEvent;
-import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.dfu.DFU;
@@ -362,24 +361,27 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     public void performFinishEffects(Player player, SaveState finishState) {
         // Show the completed message after removing the player because it is theoretically possible to not have the savestate fetched yet.
-        var bestSaveState = FutureUtil.getUnchecked(Objects.requireNonNullElseGet(
-                player.getTag(BEST_SAVE_STATE_TAG), () -> CompletableFuture.completedFuture(null)));
-        if (bestSaveState == null) {
-            player.sendMessage(Component.translatable("map.completed.first", Component.text(formatMapPlaytime(finishState.getPlaytime(), true))));
-        } else {
-            // Diff playtime rounded to ticks prior to subtracting for correct display.
-            var diffPlaytime = (bestSaveState.getPlaytime() - bestSaveState.getPlaytime() % MinecraftServer.TICK_MS) -
-                    (finishState.getPlaytime() - finishState.getPlaytime() % MinecraftServer.TICK_MS);
-            player.sendMessage(Component.translatable("map.completed.with_prior",
-                    Component.text(formatMapPlaytime(finishState.getPlaytime(), true)),
-                    // Note: roundToTicks is not used here. We do the rounding above because we need to round prior to calculating the difference.
-                    Component.text((diffPlaytime < 0 ? "+" : "-") + formatMapPlaytime(Math.abs(diffPlaytime), false), diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN)));
+        Future<@Nullable SaveState> bestSaveStateFuture = Objects.requireNonNullElseGet(
+                player.getTag(BEST_SAVE_STATE_TAG), () -> CompletableFuture.completedFuture(null));
+        if (bestSaveStateFuture.state() != Future.State.SUCCESS) {
+            var bestSaveState = bestSaveStateFuture.resultNow();
+            if (bestSaveState == null) {
+                player.sendMessage(Component.translatable("map.completed.first", Component.text(formatMapPlaytime(finishState.getPlaytime(), true))));
+            } else {
+                // Diff playtime rounded to ticks prior to subtracting for correct display.
+                var diffPlaytime = (bestSaveState.getPlaytime() - bestSaveState.getPlaytime() % MinecraftServer.TICK_MS) -
+                        (finishState.getPlaytime() - finishState.getPlaytime() % MinecraftServer.TICK_MS);
+                player.sendMessage(Component.translatable("map.completed.with_prior",
+                        Component.text(formatMapPlaytime(finishState.getPlaytime(), true)),
+                        // Note: roundToTicks is not used here. We do the rounding above because we need to round prior to calculating the difference.
+                        Component.text((diffPlaytime < 0 ? "+" : "-") + formatMapPlaytime(Math.abs(diffPlaytime), false), diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN)));
+            }
         }
 
         // Will be called when the completion animation is finished
         var lastRatingFuture = player.getTag(RateMapItem.LAST_RATING_TAG);
         final Runnable tryShowRateGui = () -> {
-            if (RateMapItem.isMapRatable(this) && lastRatingFuture.isDone()) {
+            if (RateMapItem.isMapRatable(this) && lastRatingFuture.state() == Future.State.SUCCESS) {
                 final MapRating lastRating = lastRatingFuture.resultNow();
                 if (lastRating == null || lastRating.state() == MapRating.State.UNRATED) {
                     Panel.open(player, new RateMapView(server().mapService(), map(), MapRating.State.UNRATED, newState ->

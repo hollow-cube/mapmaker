@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.runtime.parkour.block;
 
+import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.kyori.adventure.key.Key;
@@ -24,8 +25,11 @@ public class FinishPlateBlock implements BlockHandler, PressurePlateBlock {
         if (!(collision.world() instanceof ParkourMapWorld world)) return;
 
         var nextState = switch (world.getPlayerState(player)) {
-            case ParkourState.Playing2(var saveState) ->
-                    new ParkourState.Finished(saveState, System.currentTimeMillis());
+            case ParkourState.Playing2(var saveState) -> {
+                var finishState = saveState.copy(saveState.state(PlayState.class));
+                finishState.complete(System.currentTimeMillis());
+                yield new ParkourState.Finished(finishState);
+            }
             case ParkourState.Testing(var _, var parent) -> {
                 if (parent != null) yield parent;
 
