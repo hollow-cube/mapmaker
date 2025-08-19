@@ -23,6 +23,8 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 
 public class CreateMaps extends View {
@@ -144,7 +146,7 @@ public class CreateMaps extends View {
         }
 
         // Map contest
-        var now = LocalDateTime.now();
+        var now = LocalDateTime.now(ZoneId.ofOffset("GMT", ZoneOffset.ofHours(-4)));
         long millisToUnlock = ChronoUnit.MILLIS.between(now, MapContest.BUTTON_UNLOCK_DATE);
         long millisToStart = ChronoUnit.MILLIS.between(now, MapContest.START_DATE);
         long millisToEnd = ChronoUnit.MILLIS.between(now, MapContest.END_DATE);
