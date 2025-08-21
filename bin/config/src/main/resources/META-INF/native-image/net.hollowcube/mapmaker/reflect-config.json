@@ -133,9 +133,13 @@
     "name": "net.hollowcube.mql.jit.BouncePadScript$Variables"
   },
   {
-    "name": "net.hollowcube.mapmaker.runtime.parkour.ParkourState"
+    "name": "net.hollowcube.mapmaker.runtime.parkour.ParkourState",
+    "allDeclaredClasses": true,
+    "allPermittedSubclasses": true
   },
   {
-    "name": "net.hollowcube.mapmaker.runtime.parkour.ParkourState$AnyPlaying"
+    "name": "net.hollowcube.mapmaker.runtime.parkour.ParkourState$AnyPlaying",
+    "allDeclaredClasses": true,
+    "allPermittedSubclasses": true
   }
 ]
