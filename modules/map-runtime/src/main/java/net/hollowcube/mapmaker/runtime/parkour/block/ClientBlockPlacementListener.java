@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.runtime.parkour.block;
 
-import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
@@ -123,8 +122,8 @@ public class ClientBlockPlacementListener {
         }
 
         // If we have a pending teleport out for the player, ignore any placements which occur during that time
-        boolean outOfSync = player.getLastSentTeleportId() != player.getLastReceivedTeleportId()
-                || ((MapPlayer) player).lastPingId() != ((MapPlayer) player).lastReceivedPingId();
+        boolean outOfSync = player.getLastSentTeleportId() != player.getLastReceivedTeleportId();
+//                || ((MapPlayer) player).lastPingId() != ((MapPlayer) player).lastReceivedPingId();
         if (outOfSync) {
             player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
             return true;
