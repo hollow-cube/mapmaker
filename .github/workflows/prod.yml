@@ -50,7 +50,6 @@ jobs:
 
   docker-build-map:
     runs-on: ubuntu-latest
-    if: false
     steps:
       - name: Import Secrets
         uses: hollow-cube/actions/secrets@main
@@ -95,7 +94,6 @@ jobs:
           tags: mworzala/mapmaker-map:${{ github.sha }}
   docker-build-hub:
     runs-on: ubuntu-latest
-    if: false
     steps:
       - name: Import Secrets
         uses: hollow-cube/actions/secrets@main
@@ -185,7 +183,6 @@ jobs:
 
   helm-build:
     runs-on: ubuntu-latest
-    if: false
     steps:
       - name: Helm build
         uses: hollow-cube/actions/helm-build@main
@@ -204,7 +201,6 @@ jobs:
 
   helm-deploy-hub:
     name: Deploy Hub Server
-    if: false
     runs-on: 'ubuntu-latest'
     needs:
       - docker-build-hub
@@ -259,7 +255,6 @@ jobs:
 
   helm-deploy-map:
     name: Deploy Map Server
-    if: false
     runs-on: 'ubuntu-latest'
     needs:
       - docker-build-map

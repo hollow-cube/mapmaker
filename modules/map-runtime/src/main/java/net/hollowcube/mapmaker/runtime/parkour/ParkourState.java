@@ -192,8 +192,10 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             AnyPlaying.super.resetPlayer(world, player, nextState);
 
             // Wdon't save if entering finished state, that state will handle saving the record.
-            if (!(nextState instanceof Finished))
-                FutureUtil.submitVirtual(() -> writeSaveState(world, player, saveState));
+            boolean shouldSave = !(nextState instanceof Finished)
+                    // Save if exiting, >10s playing, or completed
+                    && (nextState == null || saveState.getRealPlaytime() > 10_000 || saveState.isCompleted());
+            if (shouldSave) FutureUtil.submitVirtual(() -> writeSaveState(world, player, saveState));
         }
 
     }
