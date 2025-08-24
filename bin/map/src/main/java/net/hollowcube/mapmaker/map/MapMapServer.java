@@ -31,6 +31,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.event.trait.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,8 +82,22 @@ public class MapMapServer extends AbstractMultiMapServer {
         MinecraftServer.getConnectionManager()
                 .setPlayerProvider(simpleMapPlayer(commandManager()));
 
-        var terraformEvents = EventNode.type("tf-events", EventFilter.INSTANCE);
-        var interactionEvents = EventNode.type("tf-events", EventFilter.INSTANCE);
+        var terraformEvents = EventNode.event("tf-events", EventFilter.INSTANCE, event -> {
+            if (event instanceof PlayerEvent pe) {
+                var world = MapWorld.forPlayer(pe.getPlayer());
+                return world instanceof EditorMapWorld;
+            }
+
+            return true;
+        });
+        var interactionEvents = EventNode.event("tf-events", EventFilter.INSTANCE, event -> {
+            if (event instanceof PlayerEvent pe) {
+                var world = MapWorld.forPlayer(pe.getPlayer());
+                return world instanceof EditorMapWorld;
+            }
+
+            return true;
+        });
         this.terraform = initBuildLogic(mapService(), commandManager(), terraformEvents, interactionEvents);
         MinecraftServer.getGlobalEventHandler().addChild(terraformEvents).addChild(interactionEvents);
 
