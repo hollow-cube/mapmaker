@@ -262,7 +262,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
                 marker.handler = world.objectEntityHandlers().create(newType, marker);
             } else marker.handler = null;
         }
-        if (marker.handler != null) marker.handler.onDataChange(event.editor());
+        marker.handleDataChange(event.editor());
     }
 
     private static void handleAxiomEnabled(@NotNull AxiomEnabledEvent event) {
@@ -279,6 +279,10 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
                         object.createAxiomMarkerUpdatePacket().send(player);
                     }
                 });
+    }
+
+    public void handleDataChange(@Nullable Player player) {
+        if (this.handler != null) this.handler.onDataChange(player);
     }
 
     private void updateForViewers() {

@@ -40,7 +40,10 @@ public class CheckpointEditor {
         var host = Panel.open(player, new ActionEditorView(checkpointData.actions(), "Checkpoint"));
         host.setTag(ActionEditorView.ACTION_LOCATION, actionLocation);
         host.setTag(TeleportAction.SPC_TAG, entity);
-        host.onClose(() -> entity.setTag(CheckpointPlateBlock.ENTITY_DATA_TAG, checkpointData));
+        host.onClose(() -> {
+            entity.setTag(CheckpointPlateBlock.ENTITY_DATA_TAG, checkpointData);
+            entity.handleDataChange(player);
+        });
         return true;
     };
 
