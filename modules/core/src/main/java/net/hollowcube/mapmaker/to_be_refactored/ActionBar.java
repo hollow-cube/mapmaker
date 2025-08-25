@@ -70,10 +70,12 @@ public final class ActionBar {
         long now = System.currentTimeMillis();
         providers.removeIf(provider -> provider.expiration() > 0 && provider.expiration() < now);
 
-        int hash = 0;
+        int hash = 1;
         for (Provider provider : providers) {
-            hash ^= provider.cacheKey(player);
+            hash = 31 * hash + provider.cacheKey(player);
+            hash = 31 * hash + provider.getClass().hashCode();
         }
+
         if (hash != lastHash) {
             lastHash = hash;
 
