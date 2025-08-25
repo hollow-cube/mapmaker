@@ -62,6 +62,7 @@ public class MapData {
 
     private long publishedId;
     private Instant publishedAt;
+    private boolean listed;
 
     private int likes;
     private int uniquePlays;
@@ -150,6 +151,10 @@ public class MapData {
 
     public long publishedId() {
         return publishedId;
+    }
+
+    public boolean isListed() {
+        return listed;
     }
 
     public @UnknownNullability String publishedIdString() {
@@ -334,6 +339,10 @@ public class MapData {
 
         var title = MapData.rewriteWithQualityFont(map.quality(), map.settings().getNameSafe())
                 .decoration(TextDecoration.ITALIC, false);
+
+        if (!map.isListed()) {
+            title = title.append(Component.translatable("gui.play_maps.map_display.unlisted"));
+        }
 
         var quality = map.quality();
         var starText = new StringBuilder();

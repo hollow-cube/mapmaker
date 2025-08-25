@@ -5,7 +5,6 @@ import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
 import net.hollowcube.mapmaker.map.ReadableMapData;
 import net.hollowcube.mapmaker.map.polar.PolarDataFixer;
-import net.hollowcube.mapmaker.util.NoopChunkLoader;
 import net.hollowcube.polar.*;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
@@ -13,6 +12,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
 import net.minestom.server.instance.Chunk;
+import net.minestom.server.instance.IChunkLoader;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.registry.RegistryKey;
@@ -88,31 +88,31 @@ public class MapInstance extends InstanceContainer {
         FutureUtil.getUnchecked(CompletableFuture.allOf(loadingChunks.toArray(CompletableFuture[]::new)));
 
         // Delete the polar world to avoid the second copy of the world data
-        setChunkLoader(NoopChunkLoader.INSTANCE);
+        setChunkLoader(IChunkLoader.noop());
     }
 
     public void loadStream(@NotNull ReadableMapData data, @Nullable PolarWorldAccess worldAccess) {
         FutureUtil.getUnchecked(PolarLoader.streamLoad(this, data.data(), data.length(),
                 PolarDataFixer.INSTANCE, worldAccess, lightingMode != LightingMode.FULL_BRIGHT));
         setChunkSupplier(EmptyChunk::new);
+        setChunkLoader(IChunkLoader.noop());
     }
 
     @Blocking
-    public byte @NotNull [] save(@Nullable PolarWorldAccess worldAccess) {
+    public byte @NotNull [] save(@NotNull PolarWorldAccess worldAccess) {
         // Since we deleted the loader we need a new one
-        var loader = new PolarLoader(new PolarWorld());
-        if (worldAccess != null) loader.setWorldAccess(worldAccess);
-        setChunkLoader(loader);
+        var polarWorld = new PolarWorld();
+        setChunkLoader(new PolarLoader(polarWorld)
+                .setWorldAccess(worldAccess));
 
         FutureUtil.getUnchecked(saveInstance());
 
-        var polarWorld = loader.world();
         if (polarWorld.chunks().isEmpty())
             throw new IllegalStateException("Avoiding saving empty instance!");
         var worldData = PolarWriter.write(polarWorld, PolarDataFixer.INSTANCE);
 
         // Reset to noop
-        setChunkLoader(NoopChunkLoader.INSTANCE);
+        setChunkLoader(IChunkLoader.noop());
 
         return worldData;
     }

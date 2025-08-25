@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.runtime.parkour;
 
 import net.hollowcube.common.events.PlayerMoveVehicleEvent;
-import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.dfu.DFU;
@@ -11,6 +10,7 @@ import net.hollowcube.mapmaker.cosmetic.impl.victory.AbstractVictoryEffectImpl;
 import net.hollowcube.mapmaker.gui.map.RateMapView;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
+import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandlerRegistry;
 import net.hollowcube.mapmaker.map.entity.potion.PotionHandler;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
@@ -77,7 +77,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     private static final Sound PLAYER_HURT_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_HURT, Sound.Source.PLAYER, 1, 1f);
     private static final Sound PLAYER_DEATH_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_DEATH, Sound.Source.PLAYER, 1, 1f);
 
-    private static final Tag<Future<@Nullable SaveState>> BEST_SAVE_STATE_TAG = Tag.Transient("map:best_save_state");
+    private static final Tag<Future<@Nullable Long>> BEST_PLAYTIME = Tag.Transient("map:best_playtime");
 
     private static final List<ItemHandler> SILENT_ITEMS = List.of(
             // Hotbar items
@@ -125,6 +125,18 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         MinecraftServer.getGlobalEventHandler().addChild(PotionHandler.EVENT_NODE);
     }
 
+    public static void registerMarkers(ObjectEntityHandlerRegistry objectEntityHandlers) {
+        objectEntityHandlers.registerForMarkers(MapLeaderboardMarkerHandler.ID, MapLeaderboardMarkerHandler::new);
+        objectEntityHandlers.registerForMarkers(BouncePadMarkerHandler.ID, BouncePadMarkerHandler::new);
+        objectEntityHandlers.registerForMarkers(HappyGhastMarkerHandler.ID, HappyGhastMarkerHandler::new);
+        objectEntityHandlers.registerForMarkers(CheckpointMarkerHandler.ID, CheckpointMarkerHandler::new);
+        objectEntityHandlers.registerForMarkers(StatusMarkerHandler.ID, StatusMarkerHandler::new);
+        objectEntityHandlers.registerForMarkers(FinishMarkerHandler.ID, FinishMarkerHandler::new);
+        objectEntityHandlers.registerForMarkers(ResetMarkerHandler.ID, ResetMarkerHandler::new);
+    }
+
+    private final SaveStateType saveStateType;
+
     protected int defaultResetHeight;
 
     public ParkourMapWorld(MapServer server, MapData map) {
@@ -134,17 +146,14 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     protected ParkourMapWorld(MapServer server, MapData map, MapInstance instance) {
         super(server, map, instance, ParkourState.class);
         Check.stateCondition(initProcess == null, "ParkourMapWorld is not initialized, was `ParkourMapWorld2.initGlobalReferences()` called?");
+
+        this.saveStateType = map.verification() == MapVerification.PENDING
+                ? SaveStateType.VERIFYING : SaveStateType.PLAYING;
         this.defaultResetHeight = instance().getCachedDimensionType().minY();
 
         SILENT_ITEMS.forEach(itemRegistry()::registerSilent);
 
-        objectEntityHandlers().registerForMarkers(MapLeaderboardMarkerHandler.ID, MapLeaderboardMarkerHandler::new);
-        objectEntityHandlers().registerForMarkers(BouncePadMarkerHandler.ID, BouncePadMarkerHandler::new);
-        objectEntityHandlers().registerForMarkers(HappyGhastMarkerHandler.ID, HappyGhastMarkerHandler::new);
-        objectEntityHandlers().registerForMarkers(CheckpointMarkerHandler.ID, CheckpointMarkerHandler::new);
-        objectEntityHandlers().registerForMarkers(StatusMarkerHandler.ID, StatusMarkerHandler::new);
-        objectEntityHandlers().registerForMarkers(FinishMarkerHandler.ID, FinishMarkerHandler::new);
-        objectEntityHandlers().registerForMarkers(ResetMarkerHandler.ID, ResetMarkerHandler::new);
+        registerMarkers(objectEntityHandlers());
 
         eventNode(ParkourState.AnyPlaying.class)
                 .addListener(PlayerMoveEvent.class, event -> handlePlayerOrVehicleMove(event.getPlayer(), event.getNewPosition()))
@@ -187,7 +196,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     public void hardResetPlayer(Player player) {
         var newSaveState = new SaveState(UUID.randomUUID().toString(),
-                map().id(), player.getUuid().toString(), SaveStateType.PLAYING,
+                map().id(), player.getUuid().toString(), saveStateType,
                 PlayState.SERIALIZER, new PlayState());
         newSaveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
         changePlayerState(player, createPlayingState(newSaveState));
@@ -245,13 +254,13 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         final var playerData = PlayerData.fromPlayer(player);
         SaveState saveState;
         try {
-            saveState = server().mapService().getLatestSaveState(map().id(), playerData.id(),
-                    SaveStateType.PLAYING, PlayState.SERIALIZER);
+            saveState = server().mapService().getLatestSaveState(map().id(),
+                    playerData.id(), saveStateType, PlayState.SERIALIZER);
         } catch (MapService.NotFoundError ignored) {
             // No save state yet, create one locally.
             // We do an upsert to save, so it will be created in the map service at that point.
             saveState = new SaveState(UUID.randomUUID().toString(),
-                    map().id(), playerData.id(), SaveStateType.PLAYING,
+                    map().id(), playerData.id(), saveStateType,
                     PlayState.SERIALIZER, new PlayState());
             saveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
         }
@@ -265,9 +274,11 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             RateMapItem.initLastRating(server().mapService(), player, map());
         }
 
-        var future = MapService.VIRTUAL_EXECUTOR.submit(() -> server().mapService()
-                .getBestSaveState(map().id(), player.getUuid().toString()));
-        player.setTag(BEST_SAVE_STATE_TAG, future);
+        var future = MapService.VIRTUAL_EXECUTOR.submit(() -> OpUtils.map(
+                server().mapService().getBestSaveState(map().id(), player.getUuid().toString()),
+                SaveState::getPlaytime
+        ));
+        player.setTag(BEST_PLAYTIME, future);
 
         return createPlayingState(saveState);
     }
@@ -277,7 +288,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         // Always try to remove, feature flag could have been removed since entering world and we still want it gone
         ActionBar.forPlayer(player).removeProvider(ParkourDebugHud.INSTANCE);
 
-        player.removeTag(BEST_SAVE_STATE_TAG);
+        player.removeTag(BEST_PLAYTIME);
 
         super.removePlayer(player);
     }
@@ -352,26 +363,44 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     public void performFinishEffects(Player player, SaveState finishState) {
         // Show the completed message after removing the player because it is theoretically possible to not have the savestate fetched yet.
-        var bestSaveState = FutureUtil.getUnchecked(Objects.requireNonNullElseGet(
-                player.getTag(BEST_SAVE_STATE_TAG), () -> CompletableFuture.completedFuture(null)));
-        if (bestSaveState == null) {
-            player.sendMessage(Component.translatable("map.completed.first", Component.text(formatMapPlaytime(finishState.getPlaytime(), true))));
-        } else {
-            // Diff playtime rounded to ticks prior to subtracting for correct display.
-            var diffPlaytime = (bestSaveState.getPlaytime() - bestSaveState.getPlaytime() % MinecraftServer.TICK_MS) -
-                    (finishState.getPlaytime() - finishState.getPlaytime() % MinecraftServer.TICK_MS);
-            player.sendMessage(Component.translatable("map.completed.with_prior",
-                    Component.text(formatMapPlaytime(finishState.getPlaytime(), true)),
-                    // Note: roundToTicks is not used here. We do the rounding above because we need to round prior to calculating the difference.
-                    Component.text((diffPlaytime < 0 ? "+" : "-") + formatMapPlaytime(Math.abs(diffPlaytime), false), diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN)));
+        Future<@Nullable Long> bestPlaytimeFuture = Objects.requireNonNullElseGet(
+                player.getTag(BEST_PLAYTIME),
+                () -> CompletableFuture.completedFuture(null)
+        );
+        if (bestPlaytimeFuture.state() == Future.State.SUCCESS) {
+            var bestPlaytime = bestPlaytimeFuture.resultNow();
+            if (bestPlaytime == null) {
+                player.setTag(BEST_PLAYTIME, CompletableFuture.completedFuture(finishState.getPlaytime()));
+                player.sendMessage(Component.translatable(
+                        "map.completed.first",
+                        Component.text(formatMapPlaytime(finishState.getPlaytime(), true))
+                ));
+            } else {
+                // Diff playtime rounded to ticks prior to subtracting for correct display.
+                var diffPlaytime = (bestPlaytime - bestPlaytime % MinecraftServer.TICK_MS) -
+                        (finishState.getPlaytime() - finishState.getPlaytime() % MinecraftServer.TICK_MS);
+                var diffColor = diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN;
+                var diffSymbol = diffPlaytime < 0 ? "+" : "-";
+                player.sendMessage(Component.translatable(
+                        "map.completed.with_prior",
+                        Component.text(formatMapPlaytime(finishState.getPlaytime(), true)),
+                        // Note: roundToTicks is not used here. We do the rounding above because we need to round prior to calculating the difference.
+                        Component.text(diffSymbol + formatMapPlaytime(Math.abs(diffPlaytime), false), diffColor)
+                ));
+
+                if (finishState.getPlaytime() < bestPlaytime) {
+                    player.setTag(BEST_PLAYTIME, CompletableFuture.completedFuture(finishState.getPlaytime()));
+                }
+            }
         }
 
         // Will be called when the completion animation is finished
         var lastRatingFuture = player.getTag(RateMapItem.LAST_RATING_TAG);
         final Runnable tryShowRateGui = () -> {
-            if (RateMapItem.isMapRatable(this) && lastRatingFuture.isDone()) {
+            if (RateMapItem.isMapRatable(this) && lastRatingFuture.state() == Future.State.SUCCESS) {
                 final MapRating lastRating = lastRatingFuture.resultNow();
-                if (lastRating == null || lastRating.state() == MapRating.State.UNRATED) {
+                // Note that we dont want to open the GUI if you have since opened a different inventory because its really annoying in practice.
+                if ((lastRating == null || lastRating.state() == MapRating.State.UNRATED) && player.getOpenInventory() == null) {
                     Panel.open(player, new RateMapView(server().mapService(), map(), MapRating.State.UNRATED, newState ->
                             player.setTag(RateMapItem.LAST_RATING_TAG, CompletableFuture.completedFuture(new MapRating(newState, null)))));
                 }

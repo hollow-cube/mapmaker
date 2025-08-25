@@ -65,7 +65,7 @@ public final class MapWorldHelpers {
         if (clearInventory) player.getInventory().clear();
         player.updateViewerRule(null);
         player.getPlayerMeta().setFlyingWithElytra(false);
-        player.setPermissionLevel(4);
+//        player.setPermissionLevel(4); TODO this enables operator commands on the client which is problematic, we need to find another way to do this
 
         // Reapply the cosmetics they have on
         var playerData = PlayerData.fromPlayer(player);

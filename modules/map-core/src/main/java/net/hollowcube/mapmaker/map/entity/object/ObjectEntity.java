@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.map.entity.object;
 
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.compat.axiom.AxiomAPI;
-import net.hollowcube.compat.axiom.AxiomPlayer;
+import net.hollowcube.compat.axiom.events.AxiomEnabledEvent;
 import net.hollowcube.compat.axiom.events.AxiomMarkerDataRequestEvent;
 import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundMarkerDataPacket;
 import net.hollowcube.mapmaker.map.MapWorld;
@@ -22,6 +22,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.RelativeFlags;
+import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.registry.RegistryTranscoder;
 import net.minestom.server.tag.Tag;
@@ -57,6 +58,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         var events = MinecraftServer.getGlobalEventHandler();
         events.addListener(AxiomMarkerDataRequestEvent.RightClick.class, ObjectEntity::handleAxiomRequestMarkerData);
         events.addListener(TerraformAxiomUpdateCustomEntityDataEvent.class, ObjectEntity::handleAxiomUpdateMarkerData);
+        events.addListener(AxiomEnabledEvent.class, ObjectEntity::handleAxiomEnabled);
     }
 
     protected @Nullable ObjectEntityHandler handler;
@@ -123,8 +125,8 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
 
     @Override
     public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
-        var world = MapWorld.forInstance(instance); // todo this is more complex, also update visible
-//        visible = world != null && !world.isReadOnly(); TODO: visible shouldnt exist, should just use manual viewers.
+        var world = MapWorld.forInstance(instance);
+        visible = world != null && world.canEdit(null);
         if (handler != null) {
             handler.onRemove();
             handler = null;
@@ -138,7 +140,10 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
 
     @Override
     public void readData(@NotNull CompoundBinaryTag tag) {
-        // Do not read default entity tags
+        super.readData(tag);
+        // Always reset these two tags in case the parent updated them incorrectly.
+        setNoGravity(true);
+        hasPhysics = false;
 
         setTag(DATA_TAG, tag.getCompound("data"));
         updateBoundingBox();
@@ -147,7 +152,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
 
     @Override
     public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
-        // Do not write default entity tags
+        super.writeData(tag);
 
         tag.put("data", getTag(DATA_TAG));
     }
@@ -160,7 +165,10 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         if (world == null) return;
 
         if (handler != null) handler.addViewer(world, player);
-        if (world.canEdit(player) && AxiomPlayer.isEnabled(player)) {
+
+        // We dont check for axiom here because on join we dont know if its enabled or not.
+        // We should have received the channel tho so itll get stopped if the mod isnt installed.
+        if (world.canEdit(player)) {
             createAxiomMarkerUpdatePacket().send(player);
         }
     }
@@ -208,15 +216,23 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
     }
 
     private static void handleAxiomRequestMarkerData(@NotNull AxiomMarkerDataRequestEvent.RightClick event) {
-        var world = MapWorld.forPlayer(event.player());
+        final var player = event.player();
+        final var world = MapWorld.forPlayer(player);
         if (!(event.marker() instanceof ObjectEntity entity)) return;
         if (world == null || !world.canEdit(event.player())) return;
         if (!world.instance().equals(entity.getInstance())) return;
-        if (!event.player().isSneaking() && entity.onAxiomInteraction(event.player())) {
-            event.setCancelled(true);
-        } else {
-            event.setData(entity.getTag(DATA_TAG).put("axiom:hide", AxiomAPI.HIDDEN_MARKER_DATA).putString("type", entity.getType()));
+
+        var editor = world.objectEntityHandlers().getEditor(entity.getType());
+        if (!player.isSneaking() && editor != null) {
+            if (editor.onPlayerEdit(player, entity)) {
+                event.setCancelled(true);
+                return;
+            }
         }
+
+        event.setData(entity.getTag(DATA_TAG)
+                .put("axiom:hide", AxiomAPI.HIDDEN_MARKER_DATA)
+                .putString("type", entity.getType()));
     }
 
     private static void handleAxiomUpdateMarkerData(@NotNull TerraformAxiomUpdateCustomEntityDataEvent event) {
@@ -259,10 +275,27 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
                 this.handler = world.objectEntityHandlers().create(newType, this);
             } else this.handler = null;
         }
+        marker.handleDataChange(initator);
+    }
 
-        if (this.handler != null) {
-            this.handler.onDataChange(initator);
-        }
+    private static void handleAxiomEnabled(@NotNull AxiomEnabledEvent event) {
+        if (!event.isEnabled()) return;
+
+        var player = event.player();
+
+        event.getInstance().getEntityTracker().nearbyEntitiesByChunkRange(
+                player.getPosition(),
+                player.getSettings().effectiveViewDistance(),
+                EntityTracker.Target.ENTITIES,
+                entity -> {
+                    if (entity instanceof ObjectEntity object && object.isViewer(player)) {
+                        object.createAxiomMarkerUpdatePacket().send(player);
+                    }
+                });
+    }
+
+    public void handleDataChange(@Nullable Player player) {
+        if (this.handler != null) this.handler.onDataChange(player);
     }
 
     private void updateForViewers() {
@@ -288,10 +321,6 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
                 maxX - minX, maxY - minY, maxZ - minZ,
                 new Vec(minX, minY, minZ)
         ));
-    }
-
-    protected boolean onAxiomInteraction(@NotNull Player player) {
-        return false;
     }
 
     private @NotNull AxiomClientboundMarkerDataPacket createAxiomMarkerUpdatePacket() {

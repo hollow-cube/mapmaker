@@ -18,6 +18,7 @@ public class MapUpdateRequest {
     public String subvariant = null;
     public Pos spawnPoint = null;
     public MapSize size = null;
+    public Boolean listed = null;
 
     public Boolean onlySprint = null;
     public Boolean noSprint = null;
@@ -37,7 +38,7 @@ public class MapUpdateRequest {
         return name != null || icon != null || variant != null || subvariant != null || spawnPoint != null ||
                 onlySprint != null || noSprint != null || noJump != null || noSneak != null || boat != null ||
                 tags != null || !newObjects.isEmpty() || !removedObjects.isEmpty() || size != null ||
-                qualityOverride != null || extra != null || protocolVersion != 0;
+                qualityOverride != null || extra != null || protocolVersion != 0 || listed != null;
     }
 
     public void setProtocolVersion(int protocolVersion) {
@@ -66,6 +67,10 @@ public class MapUpdateRequest {
 
     public void setSize(@Nullable MapSize size) {
         this.size = size;
+    }
+
+    public void setListed(boolean listed) {
+        this.listed = listed;
     }
 
     public void setOnlySprint(boolean onlySprint) {

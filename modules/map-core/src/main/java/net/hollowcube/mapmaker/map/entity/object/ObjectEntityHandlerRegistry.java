@@ -13,6 +13,7 @@ import java.util.function.Function;
 
 public class ObjectEntityHandlerRegistry {
     private final Map<String, Function<ObjectEntity, ObjectEntityHandler>> factories = new HashMap<>();
+    private final Map<String, ObjectEntityEditor> editors = new HashMap<>();
 
     public ObjectEntityHandlerRegistry() {
         registerForMarkers(ParticleEmitterMarkerHandler.ID, ParticleEmitterMarkerHandler::new);
@@ -32,7 +33,7 @@ public class ObjectEntityHandlerRegistry {
     }
 
     public void registerEditor(String id, ObjectEntityEditor editor) {
-
+        editors.put(id, editor);
     }
 
     public @Nullable ObjectEntityHandler create(@Nullable String type, @NotNull ObjectEntity entity) {
@@ -42,4 +43,7 @@ public class ObjectEntityHandlerRegistry {
         return factory.apply(entity);
     }
 
+    public @Nullable ObjectEntityEditor getEditor(@NotNull String type) {
+        return editors.get(type);
+    }
 }

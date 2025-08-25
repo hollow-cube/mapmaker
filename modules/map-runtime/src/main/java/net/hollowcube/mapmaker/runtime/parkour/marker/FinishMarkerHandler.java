@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.runtime.parkour.marker;
 
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
+import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.minestom.server.entity.Player;
@@ -22,7 +23,9 @@ public class FinishMarkerHandler extends ObjectEntityHandler {
         if (!(world.getPlayerState(player) instanceof ParkourState.Playing2(var saveState)))
             return;
 
-        world.changePlayerState(player, new ParkourState.Finished(saveState, System.currentTimeMillis()));
+        var finishState = saveState.copy(saveState.state(PlayState.class));
+        finishState.complete(System.currentTimeMillis());
+        world.changePlayerState(player, new ParkourState.Finished(finishState));
     }
 
 }

@@ -5,6 +5,7 @@ import net.hollowcube.command.CommandBuilder;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.*;
@@ -49,6 +50,11 @@ public class MapAlterCommand {
             .description("The setting to modify");
     private final Argument<JsonElement> settingDataArg = CoreArgument.Json("data")
             .description("The new data for the setting");
+    private final Argument<Boolean> listedArg = Argument.Bool("listed")
+            .description("Whether the map should be listed");
+    private final Argument<String> versionArg = Argument.Word("version")
+            .with(ProtocolVersions.SUPPORTED_PROTOCOL_NAMES)
+            .description("The new minimum required version for the map");
 
     private final MapService mapService;
     private final PermManager permManager;
@@ -111,6 +117,14 @@ public class MapAlterCommand {
                                 .description("Change a setting of a map")
                                 .executes(playerOnly(this::handleSetSetting), settingsArg, settingDataArg)
                                 .examples("/map alter 123-456-789 setting reset_in_water false"))
+                        .child("listed", unlisted -> unlisted
+                                .description("Set whether the map is listed")
+                                .executes(playerOnly(this::handleSetListed), listedArg)
+                                .examples("/map alter 123-456-789 listed true"))
+                        .child("version", version -> version
+                                .description("Set the minimum required version for the map")
+                                .executes(playerOnly(this::handleSetVersion), versionArg)
+                                .examples("/map alter 123-456-789 version 1.21.7"))
                 )
         );
     }
@@ -281,6 +295,41 @@ public class MapAlterCommand {
                 player.sendMessage(Component.text("Invalid data for setting " + setting.key()));
                 player.sendMessage(Component.text("Error: " + message));
             }
+        }
+    }
+
+    private void handleSetListed(@NotNull Player player, @NotNull CommandContext context) {
+        var map = context.get(mapArg);
+        var listed = context.get(listedArg);
+
+        if (map == null) {
+            player.sendMessage(
+                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+            return;
+        }
+        map.settings().modifyUpdateRequest(req -> req.setListed(listed));
+        if (doMapUpdate(player, map)) {
+            player.sendMessage(Component.text(listed ? "Set map to listed" : "Set map to unlisted"));
+        }
+    }
+
+    private void handleSetVersion(@NotNull Player player, @NotNull CommandContext context) {
+        var map = context.get(mapArg);
+        var version = context.get(versionArg);
+
+        if (map == null) {
+            player.sendMessage(
+                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+            return;
+        }
+        var protocolVersion = ProtocolVersions.getProtocolVersion(version);
+        if (protocolVersion == -1) {
+            player.sendMessage(Component.text("Unknown version " + version));
+            return;
+        }
+        map.settings().modifyUpdateRequest(req -> req.setProtocolVersion(protocolVersion));
+        if (doMapUpdate(player, map)) {
+            player.sendMessage(Component.text("Set minimum required version to " + version));
         }
     }
 

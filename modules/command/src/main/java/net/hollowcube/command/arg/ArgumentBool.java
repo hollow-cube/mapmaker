@@ -28,7 +28,8 @@ public class ArgumentBool extends Argument<Boolean> {
     public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
         if ("true".startsWith(raw)) {
             suggestion.add("true");
-        } else if ("false".startsWith(raw)) {
+        }
+        if ("false".startsWith(raw)) {
             suggestion.add("false");
         }
     }

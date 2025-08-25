@@ -192,8 +192,10 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             AnyPlaying.super.resetPlayer(world, player, nextState);
 
             // Wdon't save if entering finished state, that state will handle saving the record.
-            if (!(nextState instanceof Finished))
-                FutureUtil.submitVirtual(() -> writeSaveState(world, player, saveState));
+            boolean shouldSave = !(nextState instanceof Finished)
+                    // Save if exiting, >10s playing, or completed
+                    && (nextState == null || saveState.getRealPlaytime() > 10_000 || saveState.isCompleted());
+            if (shouldSave) FutureUtil.submitVirtual(() -> writeSaveState(world, player, saveState));
         }
 
     }
@@ -264,7 +266,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         }
     }
 
-    record Finished(SaveState saveState, long timestamp) implements ParkourState {
+    record Finished(SaveState saveState) implements ParkourState {
 
         @Override
         public void configurePlayer(ParkourMapWorld world, Player player, @Nullable ParkourState lastState) {
@@ -276,7 +278,6 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             world.itemRegistry().setItemStack(player, ResetSaveStateItem.ID, 7);
             world.itemRegistry().setItemStack(player, MapDetailsItem.ID, 8);
 
-            saveState.complete(timestamp);
             FutureUtil.submitVirtual(() -> writeSaveState(world, player, saveState));
 
             // If this is a verification, immediately remove them from the world and send them back to the hub

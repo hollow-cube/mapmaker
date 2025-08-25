@@ -15,6 +15,11 @@ public class FinishedModeHud implements ActionBar.Provider {
     }
 
     @Override
+    public int cacheKey(Player player) {
+        return 0;
+    }
+
+    @Override
     public void provide(Player player, FontUIBuilder builder) {
         builder.pushShadowColor(ShadowColor.none());
         builder.pos(-FINISHED_SPRITE.width() / 2).drawInPlace(FINISHED_SPRITE);

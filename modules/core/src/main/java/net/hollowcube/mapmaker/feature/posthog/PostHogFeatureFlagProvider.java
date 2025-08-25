@@ -30,14 +30,15 @@ public class PostHogFeatureFlagProvider implements FeatureFlagProvider {
                 yield PostHog.getFeatureFlag(transformedName, playerData.id(), FeatureFlagContext.newBuilder()
                         .personProperties(Map.of(
                                 "username", playerData.username(),
-                                "is_hypercube", playerData.isHypercube()
+                                "is_hypercube", String.valueOf(playerData.isHypercube())
                         ))
                         .build()).isEnabled();
             }
             case PlayerData playerData ->
                     PostHog.getFeatureFlag(transformedName, playerData.id(), FeatureFlagContext.newBuilder()
                             .personProperties(Map.of(
-                                    "username", playerData.username()
+                                    "username", playerData.username(),
+                                    "is_hypercube", String.valueOf(playerData.isHypercube())
                             ))
                             .build()).isEnabled();
             case MapData map -> {

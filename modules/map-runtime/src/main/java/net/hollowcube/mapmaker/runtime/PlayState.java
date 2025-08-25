@@ -124,7 +124,7 @@ public final class PlayState {
     }
 
     public void setLastState(@Nullable PlayState lastState) {
-        this.lastState = lastState;
+        this.lastState = lastState == null ? null : lastState.copy();
     }
 
     public void addStatus(String id) {

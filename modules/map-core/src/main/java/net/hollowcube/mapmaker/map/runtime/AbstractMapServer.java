@@ -612,7 +612,7 @@ public abstract class AbstractMapServer implements MapServer {
 
         var actionBar = ActionBar.forPlayer(player);
         actionBar.addProvider(ChatChannelDisplay.INSTANCE);
-        actionBar.addProvider(MiscFunctionality::buildCurrencyDisplay);
+        actionBar.addProvider(MiscFunctionality.CurrencyDisplayHud.INSTANCE);
         actionBar.addProvider(new ExpBarRenderer());
 
         // Add the player to the world they are spawning into

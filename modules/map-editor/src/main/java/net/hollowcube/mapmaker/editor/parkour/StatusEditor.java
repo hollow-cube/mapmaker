@@ -37,7 +37,10 @@ public class StatusEditor {
         var host = Panel.open(player, new ActionEditorView(statusData.actions(), "Status"));
         host.setTag(ActionEditorView.ACTION_LOCATION, actionLocation);
         host.setTag(TeleportAction.SPC_TAG, entity);
-        host.onClose(() -> entity.setTag(StatusPlateBlock.ENTITY_DATA_TAG, statusData));
+        host.onClose(() -> {
+            entity.setTag(StatusPlateBlock.ENTITY_DATA_TAG, statusData);
+            entity.handleDataChange(player);
+        });
         return true;
     };
 
