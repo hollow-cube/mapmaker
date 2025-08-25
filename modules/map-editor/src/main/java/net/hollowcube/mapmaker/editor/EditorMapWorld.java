@@ -19,6 +19,8 @@ import net.hollowcube.mapmaker.editor.vanilla.DisplayEntityEditor;
 import net.hollowcube.mapmaker.editor.vanilla.PickBlock;
 import net.hollowcube.mapmaker.editor.vanilla.SignEditor;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.entity.interaction.InteractionEditorScreen;
+import net.hollowcube.mapmaker.map.entity.interaction.InteractionEntity;
 import net.hollowcube.mapmaker.map.event.MapPlayerTeleportingEvent;
 import net.hollowcube.mapmaker.map.item.vanilla.DebugStickItem;
 import net.hollowcube.mapmaker.map.polar.ReadWriteWorldAccess;
@@ -103,6 +105,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         objectEntityHandlers().registerEditor(CheckpointMarkerHandler.ID, CheckpointEditor.MARKER_EDITOR);
         objectEntityHandlers().registerEditor(StatusMarkerHandler.ID, StatusEditor.MARKER_EDITOR);
         objectEntityHandlers().registerEditor(FinishMarkerHandler.ID, FinishEditor.MARKER_EDITOR);
+        objectEntityHandlers().registerDefaultEditor(InteractionEntity.class, InteractionEditorScreen.MARKER_EDITOR);
 
         eventNode(EditorState.Building.class)
                 .addListener(PlayerTickEvent.class, this::handlePlayerTick)

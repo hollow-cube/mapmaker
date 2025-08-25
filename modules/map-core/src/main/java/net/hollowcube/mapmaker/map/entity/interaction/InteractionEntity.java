@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class InteractionEntity extends ObjectEntity {
+public final class InteractionEntity extends ObjectEntity {
 
     public InteractionEntity(@NotNull UUID uuid) {
         super(EntityType.INTERACTION, uuid);
@@ -43,12 +43,6 @@ public class InteractionEntity extends ObjectEntity {
         this.getEntityMeta().setHeight(height);
         this.setTag(REGION_MIN_TAG, new Vec(-width / 2, 0, -width / 2));
         this.setTag(REGION_MAX_TAG, new Vec(width / 2, height, width / 2));
-    }
-
-    @Override
-    protected boolean onAxiomInteraction(@NotNull Player player) {
-        InteractionEditorScreen.openEditorScreen(this, player);
-        return true;
     }
 
     @Override

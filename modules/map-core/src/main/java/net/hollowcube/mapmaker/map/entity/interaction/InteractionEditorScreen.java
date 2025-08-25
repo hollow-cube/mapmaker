@@ -7,6 +7,7 @@ import net.hollowcube.common.util.Uuids;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.notifications.NotificationManager;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.entity.object.ObjectEntityEditor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.TagStringIO;
@@ -30,6 +31,14 @@ public class InteractionEditorScreen {
             .emitHeterogeneousLists(true)
             .indent(4)
             .build();
+
+    public static final ObjectEntityEditor MARKER_EDITOR = (player, entity) -> {
+        if (entity instanceof InteractionEntity interaction) {
+            InteractionEditorScreen.openEditorScreen(interaction, player);
+            return true;
+        }
+        return false;
+    };
 
     // region Data
 

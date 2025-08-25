@@ -222,7 +222,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         if (world == null || !world.canEdit(event.player())) return;
         if (!world.instance().equals(entity.getInstance())) return;
 
-        var editor = world.objectEntityHandlers().getEditor(entity.getType());
+        var editor = world.objectEntityHandlers().getEditor(entity.getType(), entity.getClass());
         if (!player.isSneaking() && editor != null) {
             if (editor.onPlayerEdit(player, entity)) {
                 event.setCancelled(true);
@@ -275,7 +275,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
                 this.handler = world.objectEntityHandlers().create(newType, this);
             } else this.handler = null;
         }
-        marker.handleDataChange(initator);
+        this.handleDataChange(initator);
     }
 
     private static void handleAxiomEnabled(@NotNull AxiomEnabledEvent event) {
