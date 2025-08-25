@@ -3,19 +3,19 @@ package net.hollowcube.mapmaker.editor.command.utility;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.common.components.TranslatableBuilder;
 import net.minestom.server.entity.Player;
 
 import static net.hollowcube.command.CommandCondition.or;
 import static net.hollowcube.mapmaker.editor.command.EditorConditions.builderOnly;
 import static net.hollowcube.mapmaker.editor.command.utility.FlyCommand.playingOrSpectatingFilter;
-import static net.kyori.adventure.text.Component.translatable;
 
 public class FlySpeedCommand extends CommandDsl {
     private static final float DEFAULT_SPEED = 0.05f;
 
     private final Argument<Float> speedArg = Argument.Float("speed").clamp(0f, 10f)
             .description("How fast to fly (from 0 to 10)");
-//            .errorHandler((sender, context) -> sender.sendMessage("invalid fly speed todo: "));
+    //            .errorHandler((sender, context) -> sender.sendMessage("invalid fly speed todo: "));
 
     public FlySpeedCommand() {
         super("flyspeed");
@@ -31,7 +31,11 @@ public class FlySpeedCommand extends CommandDsl {
         float flySpeedArg = context.get(speedArg);
 
         player.setFlyingSpeed(DEFAULT_SPEED * flySpeedArg);
-        player.sendMessage(translatable("command.flyspeed.changed", formatSpeed(flySpeedArg)));
+        player.sendMessage(
+                TranslatableBuilder.of("command.flyspeed.changed")
+                        .with(formatSpeed(flySpeedArg))
+                        .build()
+        );
     }
 
     private String formatSpeed(float speed) {
