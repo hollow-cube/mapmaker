@@ -36,13 +36,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
@@ -63,6 +58,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
     // all happen during login (Minestom pre login event).
     // Note that we will separately hold them in the configuration phase until the map world is ready.
     private final Map<String, CompletableFuture<@Nullable MapJoinInfo>> pendingPlayerJoins = new ConcurrentHashMap<>();
+    private final Set<AbstractMapWorld<?, ?>> closingWorlds = new ConcurrentHashMap<AbstractMapWorld<?, ?>, Integer>().keySet(1);
 
     private volatile boolean isClosed = false;
 
@@ -282,6 +278,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
     }
 
     private void destroy(@NotNull MapKey key, @NotNull Component reason) {
+        FutureUtil.assertThread();
         final Future<AbstractMapWorld<?, ?>> worldFuture;
         worldLock.lock();
         try {
@@ -292,26 +289,37 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
         if (worldFuture == null) return;
 
         var world = FutureUtil.getUnchecked(worldFuture);
+        try {
+            closingWorlds.add(world);
 
-        // Remove all players from the world.
-        var players = List.copyOf(world.players());
-        var futures = new CompletableFuture[players.size()];
-        for (int i = 0; i < players.size(); i++) {
-            var player = players.get(i);
-            player.sendMessage(reason);
-            futures[i] = world.scheduleRemovePlayer(player)
-                    .thenRun(() -> bridge().joinHub(player))
-                    .exceptionally(e -> {
-                        ExceptionReporter.reportException(new RuntimeException("failed to remove player", e), player);
-                        player.kick(reason);
-                        return null;
-                    });
+            // Remove all players from the world.
+            var players = List.copyOf(world.players());
+            var futures = new CompletableFuture[players.size()];
+            for (int i = 0; i < players.size(); i++) {
+                var player = players.get(i);
+                player.sendMessage(reason);
+                futures[i] = world.scheduleRemovePlayer(player)
+                        .thenRun(() -> bridge().joinHub(player))
+                        .exceptionally(e -> {
+                            ExceptionReporter.reportException(new RuntimeException("failed to remove player", e), player);
+                            player.kick(reason);
+                            return null;
+                        });
+            }
+            try {
+                CompletableFuture.allOf(futures).get(15, TimeUnit.SECONDS);
+            } catch (TimeoutException ignored) {
+                logger.error("failed to drain players in 15s, exiting.");
+            } catch (RuntimeException | InterruptedException | ExecutionException e) {
+                logger.error("failed to drain players", e);
+            }
+
+            // Close the world itself
+            MinecraftServer.getSchedulerManager()
+                    .scheduleEndOfTick(world::close);
+        } finally {
+            closingWorlds.remove(world);
         }
-        FutureUtil.getUnchecked(CompletableFuture.allOf(futures));
-
-        // Close the world itself
-        MinecraftServer.getSchedulerManager()
-                .scheduleEndOfTick(world::close);
     }
 
     public void close() {
@@ -345,6 +353,9 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                 if (worldToTick.state() != Future.State.SUCCESS) continue;
 
                 worldToTick.resultNow().safePointTick();
+            }
+            for (var worldToTick : closingWorlds) {
+                worldToTick.safePointTick();
             }
         } catch (Exception e) {
             ExceptionReporter.reportException(new SafePointTickException(e));
