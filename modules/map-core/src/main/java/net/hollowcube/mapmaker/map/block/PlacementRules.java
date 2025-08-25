@@ -196,7 +196,8 @@ public final class PlacementRules {
         register(Block.WILDFLOWERS, b -> new QuadSegmentPlacementRule(b, "flower_amount"));
         register(Block.LEAF_LITTER, b -> new QuadSegmentPlacementRule(b, "segment_amount"));
 
-        register(Block.STRUCTURE_VOID, AlwaysReplacePlacementRule::new);
+        register(Block.SHORT_GRASS, AlwaysReplacePlacementRule::new); // theres a lot more should search in registry or something
+        register(Block.STRUCTURE_VOID, StructureVoidPlacementRule::new);
 
         // Annoying single use wall of shame >:(
 
