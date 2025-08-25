@@ -363,7 +363,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         // Show the completed message after removing the player because it is theoretically possible to not have the savestate fetched yet.
         Future<@Nullable SaveState> bestSaveStateFuture = Objects.requireNonNullElseGet(
                 player.getTag(BEST_SAVE_STATE_TAG), () -> CompletableFuture.completedFuture(null));
-        if (bestSaveStateFuture.state() != Future.State.SUCCESS) {
+        if (bestSaveStateFuture.state() == Future.State.SUCCESS) {
             var bestSaveState = bestSaveStateFuture.resultNow();
             if (bestSaveState == null) {
                 player.sendMessage(Component.translatable("map.completed.first", Component.text(formatMapPlaytime(finishState.getPlaytime(), true))));
@@ -383,7 +383,8 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         final Runnable tryShowRateGui = () -> {
             if (RateMapItem.isMapRatable(this) && lastRatingFuture.state() == Future.State.SUCCESS) {
                 final MapRating lastRating = lastRatingFuture.resultNow();
-                if (lastRating == null || lastRating.state() == MapRating.State.UNRATED) {
+                // Note that we dont want to open the GUI if you have since opened a different inventory because its really annoying in practice.
+                if ((lastRating == null || lastRating.state() == MapRating.State.UNRATED) && player.getOpenInventory() == null) {
                     Panel.open(player, new RateMapView(server().mapService(), map(), MapRating.State.UNRATED, newState ->
                             player.setTag(RateMapItem.LAST_RATING_TAG, CompletableFuture.completedFuture(new MapRating(newState, null)))));
                 }
