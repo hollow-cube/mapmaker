@@ -77,7 +77,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     private static final Sound PLAYER_HURT_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_HURT, Sound.Source.PLAYER, 1, 1f);
     private static final Sound PLAYER_DEATH_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_DEATH, Sound.Source.PLAYER, 1, 1f);
 
-    private static final Tag<Future<@Nullable SaveState>> BEST_SAVE_STATE_TAG = Tag.Transient("map:best_save_state");
+    private static final Tag<Future<@Nullable Long>> BEST_PLAYTIME = Tag.Transient("map:best_playtime");
 
     private static final List<ItemHandler> SILENT_ITEMS = List.of(
             // Hotbar items
@@ -274,9 +274,11 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             RateMapItem.initLastRating(server().mapService(), player, map());
         }
 
-        var future = MapService.VIRTUAL_EXECUTOR.submit(() -> server().mapService()
-                .getBestSaveState(map().id(), player.getUuid().toString()));
-        player.setTag(BEST_SAVE_STATE_TAG, future);
+        var future = MapService.VIRTUAL_EXECUTOR.submit(() -> OpUtils.map(
+                server().mapService().getBestSaveState(map().id(), player.getUuid().toString()),
+                SaveState::getPlaytime
+        ));
+        player.setTag(BEST_PLAYTIME, future);
 
         return createPlayingState(saveState);
     }
@@ -286,7 +288,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         // Always try to remove, feature flag could have been removed since entering world and we still want it gone
         ActionBar.forPlayer(player).removeProvider(ParkourDebugHud.INSTANCE);
 
-        player.removeTag(BEST_SAVE_STATE_TAG);
+        player.removeTag(BEST_PLAYTIME);
 
         super.removePlayer(player);
     }
@@ -361,20 +363,34 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     public void performFinishEffects(Player player, SaveState finishState) {
         // Show the completed message after removing the player because it is theoretically possible to not have the savestate fetched yet.
-        Future<@Nullable SaveState> bestSaveStateFuture = Objects.requireNonNullElseGet(
-                player.getTag(BEST_SAVE_STATE_TAG), () -> CompletableFuture.completedFuture(null));
-        if (bestSaveStateFuture.state() == Future.State.SUCCESS) {
-            var bestSaveState = bestSaveStateFuture.resultNow();
-            if (bestSaveState == null) {
-                player.sendMessage(Component.translatable("map.completed.first", Component.text(formatMapPlaytime(finishState.getPlaytime(), true))));
+        Future<@Nullable Long> bestPlaytimeFuture = Objects.requireNonNullElseGet(
+                player.getTag(BEST_PLAYTIME),
+                () -> CompletableFuture.completedFuture(null)
+        );
+        if (bestPlaytimeFuture.state() == Future.State.SUCCESS) {
+            var bestPlaytime = bestPlaytimeFuture.resultNow();
+            if (bestPlaytime == null) {
+                player.setTag(BEST_PLAYTIME, CompletableFuture.completedFuture(finishState.getPlaytime()));
+                player.sendMessage(Component.translatable(
+                        "map.completed.first",
+                        Component.text(formatMapPlaytime(finishState.getPlaytime(), true))
+                ));
             } else {
                 // Diff playtime rounded to ticks prior to subtracting for correct display.
-                var diffPlaytime = (bestSaveState.getPlaytime() - bestSaveState.getPlaytime() % MinecraftServer.TICK_MS) -
+                var diffPlaytime = (bestPlaytime - bestPlaytime % MinecraftServer.TICK_MS) -
                         (finishState.getPlaytime() - finishState.getPlaytime() % MinecraftServer.TICK_MS);
-                player.sendMessage(Component.translatable("map.completed.with_prior",
+                var diffColor = diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN;
+                var diffSymbol = diffPlaytime < 0 ? "+" : "-";
+                player.sendMessage(Component.translatable(
+                        "map.completed.with_prior",
                         Component.text(formatMapPlaytime(finishState.getPlaytime(), true)),
                         // Note: roundToTicks is not used here. We do the rounding above because we need to round prior to calculating the difference.
-                        Component.text((diffPlaytime < 0 ? "+" : "-") + formatMapPlaytime(Math.abs(diffPlaytime), false), diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN)));
+                        Component.text(diffSymbol + formatMapPlaytime(Math.abs(diffPlaytime), false), diffColor)
+                ));
+
+                if (finishState.getPlaytime() < bestPlaytime) {
+                    player.setTag(BEST_PLAYTIME, CompletableFuture.completedFuture(finishState.getPlaytime()));
+                }
             }
         }
 
