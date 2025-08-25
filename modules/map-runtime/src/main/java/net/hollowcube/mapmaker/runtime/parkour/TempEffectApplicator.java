@@ -79,7 +79,7 @@ public class TempEffectApplicator {
         // Update the player based on the new state
         world.callEvent(new ParkourMapPlayerUpdateStateEvent(world, player, saveState, playState, false, false, false));
 
-        player.sendMessage(translatable(isTemporary ? " spec.checkpoint.set" : "play.checkpoint.reached"));
+        player.sendMessage(translatable(isTemporary ? "spec.checkpoint.set" : "play.checkpoint.reached"));
         player.playSound(CHECKPOINT_SOUND);
     }
 
