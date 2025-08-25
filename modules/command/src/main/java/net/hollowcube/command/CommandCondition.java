@@ -22,7 +22,11 @@ public interface CommandCondition {
     int HIDE = 2;
 
     static @NotNull CommandCondition nosuggestion() {
-        return (sender, context) -> context.pass() == CommandContext.Pass.SUGGEST ? HIDE : ALLOW;
+        return (_, context) -> context.pass() == CommandContext.Pass.SUGGEST ? HIDE : ALLOW;
+    }
+
+    static @NotNull CommandCondition hideOnClient() {
+        return (_, context) -> context.pass() == CommandContext.Pass.BUILD ? HIDE : ALLOW;
     }
 
     static @NotNull CommandCondition and(@NotNull CommandCondition... conditions) {

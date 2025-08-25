@@ -95,6 +95,15 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         return codec.decode(coder, getData());
     }
 
+    public @NotNull CompoundBinaryTag getCleanData() {
+        var data = CompoundBinaryTag.builder();
+        for (var entry : getTag(DATA_TAG)) {
+            if (AxiomAPI.HIDDEN_MARKER_KEYS.contains(entry.getKey())) continue;
+            data.put(entry.getKey(), entry.getValue());
+        }
+        return data.build();
+    }
+
     public @Nullable Point getMin() {
         return getTag(REGION_MIN_TAG);
     }
@@ -213,7 +222,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         if (world == null || !world.canEdit(event.player())) return;
         if (!world.instance().equals(entity.getInstance())) return;
 
-        var editor = world.objectEntityHandlers().getEditor(entity.getType());
+        var editor = world.objectEntityHandlers().getEditor(entity.getType(), entity.getClass());
         if (!player.isSneaking() && editor != null) {
             if (editor.onPlayerEdit(player, entity)) {
                 event.setCancelled(true);
@@ -232,37 +241,41 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
 
         var newData = event.data().getCompound("data");
         var updating = !newData.getBoolean("axiom:modify", false);
-        var minChanged = newData.get("min") != null;
-        var maxChanged = newData.get("max") != null;
+        marker.setData(newData, event.editor(), updating);
+    }
+
+    public void setData(@NotNull CompoundBinaryTag data, @Nullable Player initator, boolean update) {
+        var minChanged = data.get("min") != null;
+        var maxChanged = data.get("max") != null;
 
         var builder = CompoundBinaryTag.builder();
-        if (updating) builder.put(marker.getTag(DATA_TAG));
-        builder.put(newData);
+        if (update) builder.put(this.getTag(DATA_TAG));
+        builder.put(data);
 
         AxiomAPI.RESERVED_MARKER_DATA.forEach(builder::remove);
 
-        var oldType = marker.getType();
-        marker.setTag(DATA_TAG, builder.build());
+        var oldType = this.getType();
+        this.setTag(DATA_TAG, builder.build());
 
         // TODO cant use update tag here because of a class cast exception, likely a minestom issue - Gravy
-        if (updating) {
-            if (minChanged) marker.setTag(REGION_MIN_TAG, marker.getTag(REGION_MIN_TAG).sub(marker.getPosition()));
-            if (maxChanged) marker.setTag(REGION_MAX_TAG, marker.getTag(REGION_MAX_TAG).sub(marker.getPosition()));
+        if (update) {
+            if (minChanged) this.setTag(REGION_MIN_TAG, this.getTag(REGION_MIN_TAG).sub(this.getPosition()));
+            if (maxChanged) this.setTag(REGION_MAX_TAG, this.getTag(REGION_MAX_TAG).sub(this.getPosition()));
         }
 
-        marker.updateForViewers(); // Send updated region to viewers
-        marker.updateBoundingBox();
+        this.updateForViewers(); // Send updated region to viewers
+        this.updateBoundingBox();
 
-        var newType = marker.getType();
+        var newType = this.getType();
         if (!Objects.equals(oldType, newType)) {
-            if (marker.handler != null) marker.handler.onRemove();
+            if (this.handler != null) this.handler.onRemove();
 
-            var world = MapWorld.forInstance(marker.getInstance());
+            var world = MapWorld.forInstance(this.getInstance());
             if (world != null) {
-                marker.handler = world.objectEntityHandlers().create(newType, marker);
-            } else marker.handler = null;
+                this.handler = world.objectEntityHandlers().create(newType, this);
+            } else this.handler = null;
         }
-        marker.handleDataChange(event.editor());
+        this.handleDataChange(initator);
     }
 
     private static void handleAxiomEnabled(@NotNull AxiomEnabledEvent event) {

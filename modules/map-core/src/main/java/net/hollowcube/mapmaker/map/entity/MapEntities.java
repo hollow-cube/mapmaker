@@ -7,12 +7,14 @@ import net.hollowcube.mapmaker.map.entity.impl.other.EndCrystalEntity;
 import net.hollowcube.mapmaker.map.entity.impl.other.ItemFrameEntity;
 import net.hollowcube.mapmaker.map.entity.impl.other.LeashKnotEntity;
 import net.hollowcube.mapmaker.map.entity.impl.other.PaintingEntity;
+import net.hollowcube.mapmaker.map.entity.interaction.InteractionEditorScreen;
 import net.hollowcube.mapmaker.map.entity.interaction.InteractionEntity;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityAttackEvent;
+import net.minestom.server.event.player.PlayerCustomClickEvent;
 import net.minestom.server.event.player.PlayerEntityInteractEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import org.jetbrains.annotations.NotNull;
@@ -42,6 +44,9 @@ public final class MapEntities {
 
         MapEntityType.override(EntityType.MARKER, MarkerEntity::new);
         MapEntityType.override(EntityType.INTERACTION, InteractionEntity::new);
+
+        // Events
+        eventNode.addListener(PlayerCustomClickEvent.class, InteractionEditorScreen::onCallback);
     }
 
     // TODO split editing logic
