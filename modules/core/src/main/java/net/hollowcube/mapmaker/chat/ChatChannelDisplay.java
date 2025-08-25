@@ -25,6 +25,13 @@ public class ChatChannelDisplay implements ActionBar.Provider {
     }
 
     @Override
+    public int cacheKey(@NotNull Player player) {
+        var channel = PlayerData.fromPlayer(player).getSetting(PlayerSettings.CHAT_CHANNEL);
+        var offset = player.getItemInOffHand().isAir() ? NORMAL_OFFSET : OFF_HAND_OFFSET;
+        return channel.hashCode() * 31 + offset;
+    }
+
+    @Override
     public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
         var channel = PlayerData.fromPlayer(player).getSetting(PlayerSettings.CHAT_CHANNEL);
         var sprite = switch (channel) {

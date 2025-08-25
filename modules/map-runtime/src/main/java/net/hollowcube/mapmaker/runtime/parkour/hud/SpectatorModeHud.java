@@ -15,6 +15,11 @@ public class SpectatorModeHud implements ActionBar.Provider {
     }
 
     @Override
+    public int cacheKey(Player player) {
+        return 0;
+    }
+
+    @Override
     public void provide(Player player, FontUIBuilder builder) {
         builder.pushShadowColor(ShadowColor.none());
         builder.pos(-SPECTATOR_SPRITE.width() / 2).drawInPlace(SPECTATOR_SPRITE);

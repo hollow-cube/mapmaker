@@ -10,6 +10,7 @@ import net.minestom.server.monitoring.BenchmarkManager;
 import net.minestom.server.monitoring.TickMonitor;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ServerStatsHud implements ActionBar.Provider {
@@ -26,6 +27,12 @@ public class ServerStatsHud implements ActionBar.Provider {
 
     private double lastTickTime;
     private int lastMemoryUsage;
+
+    @Override
+    public int cacheKey(@NotNull Player player) {
+        long now = System.currentTimeMillis();
+        return Objects.hash(now - lastUpdate > 1000);
+    }
 
     @Override
     public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {

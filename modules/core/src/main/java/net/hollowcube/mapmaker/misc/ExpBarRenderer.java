@@ -47,11 +47,7 @@ public class ExpBarRenderer implements ActionBar.Provider {
     private long lastExp = -1;
 
     @Override
-    public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
-        // Never show in spectator. It generally makes no sense, but also Axiom uses spectator when in editor mode,
-        // which should not show this ui for sure (it looks awful).
-        if (player.getGameMode() == GameMode.SPECTATOR) return;
-
+    public int cacheKey(@NotNull Player player) {
         // Update the player experience bar if it has changed
         var playerData = PlayerData.fromPlayer(player);
         if (playerData.experience() != lastExp) {
@@ -59,6 +55,16 @@ public class ExpBarRenderer implements ActionBar.Provider {
             player.setExp(playerData.levelProgress());
             lastExp = playerData.experience();
         }
+
+        var showExpBar = player.getGameMode() == GameMode.CREATIVE;
+        return showExpBar ? (int) (player.getExp() * XP_BAR_WIDTH) : -1;
+    }
+
+    @Override
+    public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
+        // Never show in spectator. It generally makes no sense, but also Axiom uses spectator when in editor mode,
+        // which should not show this ui for sure (it looks awful).
+        if (player.getGameMode() == GameMode.SPECTATOR) return;
 
         var hasExperienceBar = player.getGameMode() == GameMode.SURVIVAL || player.getGameMode() == GameMode.ADVENTURE;
         if (hasExperienceBar) return; // Use the builtin one for these.

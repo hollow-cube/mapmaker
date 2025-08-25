@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.to_be_refactored;
 
 import net.hollowcube.common.util.FontUIBuilder;
+import net.hollowcube.common.util.FutureUtil;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionState;
 import net.minestom.server.tag.Tag;
@@ -9,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ThreadLocalRandom;
 
 public final class ActionBar {
     //todo can just fold this into MapPlayer2.
@@ -31,10 +33,16 @@ public final class ActionBar {
         default long expiration() {
             return -1;
         }
+
+        default int cacheKey(@NotNull Player player) {
+            return ThreadLocalRandom.current().nextInt();
+        }
     }
 
-    private final Set<Provider> providers = new CopyOnWriteArraySet<>();
+    private final Set<Provider> providers = new CopyOnWriteArraySet<>(); // todo later can make this not copy
     private final Player player;
+
+    private int lastHash = 0;
 
     private ActionBar(@NotNull Player player) {
         this.player = player;
@@ -43,11 +51,13 @@ public final class ActionBar {
     }
 
     public void addProvider(@NotNull Provider provider) {
+        FutureUtil.assertTickThreadWarn();
         providers.remove(provider); // Remove if already exists (to use latest version always)
         providers.add(provider);
     }
 
     public void removeProvider(@NotNull Provider provider) {
+        FutureUtil.assertTickThreadWarn();
         providers.remove(provider);
     }
 
@@ -55,10 +65,15 @@ public final class ActionBar {
         if (player.getPlayerConnection().getConnectionState() != ConnectionState.PLAY)
             return TaskSchedule.tick(2);
 
-        //todo in the future, we should make this smarter to not recompute when values haven't changed.
-
         long now = System.currentTimeMillis();
         providers.removeIf(provider -> provider.expiration() > 0 && provider.expiration() < now);
+
+        int hash = 0;
+        for (Provider provider : providers) {
+            hash ^= provider.cacheKey(player);
+        }
+        if (hash == lastHash) return TaskSchedule.tick(2);
+        lastHash = hash;
 
         var builder = new FontUIBuilder();
         for (Provider provider : providers) {

@@ -8,10 +8,18 @@ import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.minestom.server.entity.Player;
 
+import java.util.Objects;
+
 public class ParkourDebugHud implements ActionBar.Provider {
     public static final ParkourDebugHud INSTANCE = new ParkourDebugHud();
 
     private ParkourDebugHud() {
+    }
+
+    @Override
+    public int cacheKey(Player player) {
+        var world = ParkourMapWorld.forPlayer(player);
+        return Objects.hash(world != null, world != null ? world.getPlayerState(player) : null);
     }
 
     @Override

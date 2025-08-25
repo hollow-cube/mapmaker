@@ -25,6 +25,14 @@ public class ParkourTimerHud implements ActionBar.Provider {
     }
 
     @Override
+    public int cacheKey(Player player) {
+        var world = ParkourMapWorld.forPlayer(player);
+        var state = world == null ? null : world.getPlayerState(player);
+        var saveState = state instanceof ParkourState.AnyPlaying p ? p.saveState() : null;
+        return saveState == null ? -1 : Long.hashCode(saveState.getRealPlaytime());
+    }
+
+    @Override
     public void provide(Player player, FontUIBuilder builder) {
         var world = ParkourMapWorld.forPlayer(player);
         if (world == null) return;

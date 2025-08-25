@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.session.MapPresence;
 import net.hollowcube.mapmaker.session.SessionManager;
+import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.CoreTeams;
 import net.hollowcube.mapmaker.util.NumberUtil;
@@ -80,22 +81,39 @@ public final class MiscFunctionality {
 
     private static final BadSprite CURRENCY_DISPLAY = BadSprite.SPRITE_MAP.get("hud/currency_display");
 
-    public static void buildCurrencyDisplay(@NotNull Player p, @NotNull FontUIBuilder builder) {
-        // Never show in spectator. It generally makes no sense, but also Axiom uses spectator when in editor mode,
-        // which should not show this ui for sure (it looks awful).
-        if (p.getGameMode() == GameMode.SPECTATOR) return;
+    public static final class CurrencyDisplayHud implements ActionBar.Provider {
+        public static final CurrencyDisplayHud INSTANCE = new CurrencyDisplayHud();
 
-        var playerData = PlayerData.fromPlayer(p);
+        private CurrencyDisplayHud() {
+        }
 
-        builder.pushShadowColor(ShadowColor.none());
-        builder.pos(11).drawInPlace(CURRENCY_DISPLAY);
+        @Override
+        public int cacheKey(@NotNull Player player) {
+            var playerData = PlayerData.fromPlayer(player);
+            return Objects.hash(
+                    player.getGameMode() == GameMode.SPECTATOR,
+                    playerData.coins(), playerData.cubits()
+            );
+        }
 
-        int MAX_TEXT_WIDTH = 22;
+        @Override
+        public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
+            // Never show in spectator. It generally makes no sense, but also Axiom uses spectator when in editor mode,
+            // which should not show this ui for sure (it looks awful).
+            if (player.getGameMode() == GameMode.SPECTATOR) return;
 
-        var coinText = NumberUtil.formatCurrency(playerData.coins());
-        builder.pos(15 + (MAX_TEXT_WIDTH - FontUtil.measureText("currency", coinText))).append("currency", coinText);
-        var cubitText = NumberUtil.formatCurrency(playerData.cubits());
-        builder.pos(56 + (MAX_TEXT_WIDTH - FontUtil.measureText("currency", cubitText))).append("currency", cubitText);
+            var playerData = PlayerData.fromPlayer(player);
+
+            builder.pushShadowColor(ShadowColor.none());
+            builder.pos(11).drawInPlace(CURRENCY_DISPLAY);
+
+            int MAX_TEXT_WIDTH = 22;
+
+            var coinText = NumberUtil.formatCurrency(playerData.coins());
+            builder.pos(15 + (MAX_TEXT_WIDTH - FontUtil.measureText("currency", coinText))).append("currency", coinText);
+            var cubitText = NumberUtil.formatCurrency(playerData.cubits());
+            builder.pos(56 + (MAX_TEXT_WIDTH - FontUtil.measureText("currency", cubitText))).append("currency", cubitText);
+        }
     }
 
     private static final BadSprite XP_BAR_BACKGROUND = BadSprite.SPRITE_MAP.get("hud/level/xp_bar_background");
