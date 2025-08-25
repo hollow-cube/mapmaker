@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           java-version: '24'
           distribution: 'graalvm'
@@ -60,7 +60,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           java-version: '24'
           distribution: 'graalvm'
@@ -104,7 +104,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           java-version: '24'
           distribution: 'graalvm'
@@ -148,7 +148,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           java-version: '24'
           distribution: 'graalvm'
