@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.to_be_refactored;
 
 import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FutureUtil;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionState;
 import net.minestom.server.tag.Tag;
@@ -42,6 +43,7 @@ public final class ActionBar {
     private final Set<Provider> providers = new CopyOnWriteArraySet<>(); // todo later can make this not copy
     private final Player player;
 
+    private Component lastContent = Component.empty();
     private int lastHash = 0;
 
     private ActionBar(@NotNull Player player) {
@@ -72,20 +74,22 @@ public final class ActionBar {
         for (Provider provider : providers) {
             hash ^= provider.cacheKey(player);
         }
-        if (hash == lastHash) return TaskSchedule.tick(2);
-        lastHash = hash;
+        if (hash != lastHash) {
+            lastHash = hash;
 
-        var builder = new FontUIBuilder();
-        for (Provider provider : providers) {
-            // Add it to action bar.
-            var mark = builder.mark();
-            provider.provide(player, builder);
-            builder.restore(mark);
-            builder.pos(0);
+            var builder = new FontUIBuilder();
+            for (Provider provider : providers) {
+                // Add it to action bar.
+                var mark = builder.mark();
+                provider.provide(player, builder);
+                builder.restore(mark);
+                builder.pos(0);
+            }
+
+            lastContent = builder.build(true);
         }
 
-        player.sendActionBar(builder.build(true));
-
+        player.sendActionBar(lastContent);
         return TaskSchedule.tick(2);
     }
 
