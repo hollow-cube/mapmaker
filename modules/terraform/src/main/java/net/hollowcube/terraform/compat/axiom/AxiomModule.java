@@ -156,7 +156,7 @@ public class AxiomModule implements TerraformModule {
                 .metadata()
                 .buffer(AxiomTerraformBuffer.of(buffer))
                 .ephemeral()
-                          .submitIfCapacity();
+                .submitForce();
         if (task == null) {
             event.getPlayer().sendMessage(Messages.GENERIC_QUEUE_FULL);
         }
