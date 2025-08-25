@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.entity.object;
 
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.compat.axiom.AxiomAPI;
+import net.hollowcube.compat.axiom.events.AxiomEnabledEvent;
 import net.hollowcube.compat.axiom.events.AxiomMarkerDataRequestEvent;
 import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundMarkerDataPacket;
 import net.hollowcube.mapmaker.map.MapWorld;
@@ -21,6 +22,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.RelativeFlags;
+import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.registry.RegistryTranscoder;
 import net.minestom.server.tag.Tag;
@@ -56,6 +58,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         var events = MinecraftServer.getGlobalEventHandler();
         events.addListener(AxiomMarkerDataRequestEvent.RightClick.class, ObjectEntity::handleAxiomRequestMarkerData);
         events.addListener(TerraformAxiomUpdateCustomEntityDataEvent.class, ObjectEntity::handleAxiomUpdateMarkerData);
+        events.addListener(AxiomEnabledEvent.class, ObjectEntity::handleAxiomEnabled);
     }
 
     protected @Nullable ObjectEntityHandler handler;
@@ -260,6 +263,22 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
             } else marker.handler = null;
         }
         if (marker.handler != null) marker.handler.onDataChange(event.editor());
+    }
+
+    private static void handleAxiomEnabled(@NotNull AxiomEnabledEvent event) {
+        if (!event.isEnabled()) return;
+
+        var player = event.player();
+
+        event.getInstance().getEntityTracker().nearbyEntitiesByChunkRange(
+                player.getPosition(),
+                player.getSettings().effectiveViewDistance(),
+                EntityTracker.Target.ENTITIES,
+                entity -> {
+                    if (entity instanceof ObjectEntity object && object.isViewer(player)) {
+                        object.createAxiomMarkerUpdatePacket().send(player);
+                    }
+                });
     }
 
     private void updateForViewers() {

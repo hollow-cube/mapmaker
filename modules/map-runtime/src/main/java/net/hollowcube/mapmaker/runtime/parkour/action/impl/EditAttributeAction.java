@@ -11,6 +11,7 @@ import net.hollowcube.mapmaker.runtime.parkour.action.util.Operation;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslationArgument;
+import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
@@ -31,7 +32,7 @@ public record EditAttributeAction(
     public static final StructCodec<EditAttributeAction> CODEC = StructCodec.struct(
             "attribute", Attribute.CODEC.optional(), EditAttributeAction::attribute,
             "operation", Operation.CODEC.optional(Operation.ADD), EditAttributeAction::operation,
-            "value", StructCodec.DOUBLE.optional(0.0), EditAttributeAction::value,
+            "value", Codec.DOUBLE.optional(0.0), EditAttributeAction::value,
             EditAttributeAction::new
     );
 
