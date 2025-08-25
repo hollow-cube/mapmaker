@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map.entity.object;
 
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.compat.axiom.AxiomAPI;
-import net.hollowcube.compat.axiom.AxiomPlayer;
 import net.hollowcube.compat.axiom.events.AxiomMarkerDataRequestEvent;
 import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundMarkerDataPacket;
 import net.hollowcube.mapmaker.map.MapWorld;
@@ -154,7 +153,10 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         if (world == null) return;
 
         if (handler != null) handler.addViewer(world, player);
-        if (world.canEdit(player) && AxiomPlayer.isEnabled(player)) {
+
+        // We dont check for axiom here because on join we dont know if its enabled or not.
+        // We should have received the channel tho so itll get stopped if the mod isnt installed.
+        if (world.canEdit(player)) {
             createAxiomMarkerUpdatePacket().send(player);
         }
     }
