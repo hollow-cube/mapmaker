@@ -299,7 +299,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                 var player = players.get(i);
                 player.sendMessage(reason);
                 futures[i] = world.scheduleRemovePlayer(player)
-                        .thenRun(() -> bridge().joinHub(player))
+                        .thenRunAsync(() -> bridge().joinHub(player), FutureUtil.VIRUTAL_EXECUTOR)
                         .exceptionally(e -> {
                             ExceptionReporter.reportException(new RuntimeException("failed to remove player", e), player);
                             player.kick(reason);

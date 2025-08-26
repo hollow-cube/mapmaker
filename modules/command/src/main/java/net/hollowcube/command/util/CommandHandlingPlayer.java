@@ -121,7 +121,7 @@ public abstract class CommandHandlingPlayer extends Player {
                 }
             } catch (Exception e) {
                 PostHog.captureException(e, player.getUuid().toString());
-                log.error("command suggestion failure", e);
+                log.error("command suggestion failure on: '" + packet.text() + "'", e);
             }
         });
     }
