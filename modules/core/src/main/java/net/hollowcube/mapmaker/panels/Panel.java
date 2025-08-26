@@ -73,7 +73,10 @@ public abstract class Panel extends Element {
         final InventoryHost host = this.host;
         if (host == null) return;
         if (Thread.currentThread() instanceof TickThread) runnable.run();
-        else host.player().scheduleNextTick(_ -> runnable.run());
+        else host.player().scheduleNextTick(_ -> {
+            if (this.host == null) return; // Inventory was closed since the original call.
+            runnable.run();
+        });
     }
 
     // Impl
