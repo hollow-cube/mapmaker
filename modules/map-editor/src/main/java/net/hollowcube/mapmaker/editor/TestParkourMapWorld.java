@@ -22,6 +22,8 @@ public class TestParkourMapWorld extends ParkourMapWorld {
 
     private final EditorMapWorld parent;
 
+    private boolean isRebuildingCollisionTree = false;
+
     public TestParkourMapWorld(EditorMapWorld parent) {
         super(parent.server(), parent.map(), parent.instance());
         this.parent = parent;

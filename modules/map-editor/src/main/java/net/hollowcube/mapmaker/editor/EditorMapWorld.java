@@ -259,13 +259,6 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         tag.setTag(SPAWN_CHECKPOINT_EFFECTS, instance().getTag(SPAWN_CHECKPOINT_EFFECTS));
     }
 
-    @Override
-    public void queueCollisionTreeRebuild() {
-        super.queueCollisionTreeRebuild();
-        if (testWorld != null)
-            testWorld.queueCollisionTreeRebuild();
-    }
-
     //endregion World Lifecycle
 
     //region Test World Lifecycle
