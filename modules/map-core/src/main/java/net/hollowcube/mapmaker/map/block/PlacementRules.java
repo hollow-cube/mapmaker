@@ -207,6 +207,7 @@ public final class PlacementRules {
         register(Block.SNOW, SnowPlacementRule::new);
         register(Block.SCAFFOLDING, ScaffoldingPlacementRule::new);
         register(Block.JIGSAW, JigsawPlacementRule::new);
+        register(Block.CRAFTER, CrafterPlacementRule::new);
         register(Block.FIRE, FirePlacementRule::new);
         register(Block.REDSTONE_WIRE, RedstoneWirePlacementRule::new);
         register(Block.PALE_HANGING_MOSS, PaleHangingMossPlacementRule::new);

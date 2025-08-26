@@ -244,7 +244,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         marker.setData(newData, event.editor(), updating);
     }
 
-    public void setData(@NotNull CompoundBinaryTag data, @Nullable Player initator, boolean update) {
+    public void setData(@NotNull CompoundBinaryTag data, @Nullable Player initiator, boolean update) {
         var minChanged = data.get("min") != null;
         var maxChanged = data.get("max") != null;
 
@@ -271,11 +271,9 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
             if (this.handler != null) this.handler.onRemove();
 
             var world = MapWorld.forInstance(this.getInstance());
-            if (world != null) {
-                this.handler = world.objectEntityHandlers().create(newType, this);
-            } else this.handler = null;
+            this.handler = world != null ? world.objectEntityHandlers().create(newType, this) : null;
         }
-        this.handleDataChange(initator);
+        this.handleDataChange(initiator);
     }
 
     private static void handleAxiomEnabled(@NotNull AxiomEnabledEvent event) {
