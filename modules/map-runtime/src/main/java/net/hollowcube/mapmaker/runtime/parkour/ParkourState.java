@@ -64,14 +64,6 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             var spawnCheckpoint = world.getTag(ParkourMapWorld.SPAWN_CHECKPOINT_EFFECTS);
             if (spawnCheckpoint != null && isFreshState) spawnCheckpoint.actions().applyTo(player, playState);
 
-            world.callEvent(new ParkourMapPlayerUpdateStateEvent(world, player, saveState(), playState, isFreshState, isMapJoin, false));
-
-            if (!isFreshState) {
-                // If the playtime is non-zero (ie they have played before) start timing immediately.
-                // Otherwise, we will start timing when they move the first time.
-                saveState().setPlayStartTime(System.currentTimeMillis());
-            } else ((MapPlayer) player).resetTouchingState();
-
             // If we are not exiting config for the first time, spawn at the save position.
             // For initial exit we use the player respawn point set during config, so this
             // logic also exists in ParkourMapWorld.
@@ -79,6 +71,14 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
                 resetTeleport(player, Objects.requireNonNullElseGet(playState.pos(),
                         () -> world.map().settings().getSpawnPoint()));
             }
+
+            world.callEvent(new ParkourMapPlayerUpdateStateEvent(world, player, saveState(), playState, isFreshState, isMapJoin, false));
+
+            if (!isFreshState) {
+                // If the playtime is non-zero (ie they have played before) start timing immediately.
+                // Otherwise, we will start timing when they move the first time.
+                saveState().setPlayStartTime(System.currentTimeMillis());
+            } else ((MapPlayer) player).resetTouchingState();
 
             if (lastState == null && MapFeatureFlags.DEBUG_PLAYING_OVERLAY.test(player)) {
                 ActionBar.forPlayer(player).addProvider(ParkourDebugHud.INSTANCE);

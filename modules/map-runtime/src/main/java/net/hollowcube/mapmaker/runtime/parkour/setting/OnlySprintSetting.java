@@ -66,7 +66,8 @@ public class OnlySprintSetting {
         if ((player.isSprinting() && !player.isSneaking()) || startPosition == null) return;
 
         var startPos = player.getTag(ONLY_SPRINT_START_POSITION);
-        if (startPos.distanceSquared(event.getNewPosition()) < 1) return;
+        if (startPos.distanceSquared(event.getNewPosition()) < 1)
+            return;
 
         // They moved >1 block before starting sprinting, reset them
         player.removeTag(ONLY_SPRINT_START_POSITION);
