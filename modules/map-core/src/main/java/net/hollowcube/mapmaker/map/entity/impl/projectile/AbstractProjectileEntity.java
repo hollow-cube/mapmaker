@@ -1,5 +1,8 @@
 package net.hollowcube.mapmaker.map.entity.impl.projectile;
 
+import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.block.CollidableBlock;
+import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.ServerFlag;
 import net.minestom.server.collision.*;
@@ -98,15 +101,15 @@ public abstract class AbstractProjectileEntity extends Entity {
             Block hitBlock = null;
             Point hitPoint = null;
             if (previousPhysicsResult.collisionShapes()[0] instanceof ShapeImpl) {
-                hitBlock = instance.getBlock(previousPhysicsResult.collisionPoints()[0].sub(0, Vec.EPSILON, 0), Block.Getter.Condition.TYPE);
+                hitBlock = instance.getBlock(previousPhysicsResult.collisionPoints()[0].sub(0, Vec.EPSILON, 0));
                 hitPoint = previousPhysicsResult.collisionPoints()[0];
             }
             if (previousPhysicsResult.collisionShapes()[1] instanceof ShapeImpl) {
-                hitBlock = instance.getBlock(previousPhysicsResult.collisionPoints()[1].sub(0, Vec.EPSILON, 0), Block.Getter.Condition.TYPE);
+                hitBlock = instance.getBlock(previousPhysicsResult.collisionPoints()[1].sub(0, Vec.EPSILON, 0));
                 hitPoint = previousPhysicsResult.collisionPoints()[1];
             }
             if (previousPhysicsResult.collisionShapes()[2] instanceof ShapeImpl) {
-                hitBlock = instance.getBlock(previousPhysicsResult.collisionPoints()[2].sub(0, Vec.EPSILON, 0), Block.Getter.Condition.TYPE);
+                hitBlock = instance.getBlock(previousPhysicsResult.collisionPoints()[2].sub(0, Vec.EPSILON, 0));
                 hitPoint = previousPhysicsResult.collisionPoints()[2];
             }
 
@@ -162,6 +165,18 @@ public abstract class AbstractProjectileEntity extends Entity {
         movementTick();
         super.update(time);
         EventDispatcher.call(new EntityTickEvent(this));
+    }
+
+    // This should probably be part of handleBlockCollision but we dont always call it and i dont want
+    // to mess with that method and this class is kinda cooked already so kinda dnc.
+    protected void handlePossibleDripleafCollision(Player shooter, Block hitBlock, Point hitPos) {
+        if (!(hitBlock.handler() instanceof DripleafBlock dripleaf))
+            return;
+
+        var world = MapWorld.forPlayer(shooter);
+        if (world == null) return;
+
+        dripleaf.handleProjectileCollision(new CollidableBlock.Collision(world, shooter, hitPos.asBlockVec(), hitBlock));
     }
 
     protected void handleBlockCollision(Block hitBlock, Point hitPos, Pos posBefore) {

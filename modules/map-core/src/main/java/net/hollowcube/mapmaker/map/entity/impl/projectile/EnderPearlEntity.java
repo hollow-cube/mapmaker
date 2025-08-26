@@ -53,6 +53,8 @@ public class EnderPearlEntity extends AbstractProjectileEntity {
 
     @Override
     protected void handleBlockCollision(Block hitBlock, Point hitPos, Pos posBefore) {
+        super.handlePossibleDripleafCollision(shooter, hitBlock, hitPos);
+
         remove();
 
         shooter.playSound(Sound.sound(SoundEvent.ENTITY_PLAYER_TELEPORT, Sound.Source.PLAYER, 1, 1), posBefore);

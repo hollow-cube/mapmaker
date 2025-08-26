@@ -8,6 +8,7 @@ import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
+import net.minestom.server.network.packet.server.play.BlockChangePacket;
 
 import java.util.Locale;
 import java.util.Map;
@@ -41,6 +42,18 @@ public class DripleafBlock implements BlockHandler, CollidableBlock {
         ghostBlocks.submitTask(collision.blockPosition(), new DecayTask(), false);
     }
 
+    public void handleProjectileCollision(Collision collision) {
+        if (!collision.world().shouldTriggerDripleaf(collision.player())) {
+            // The client predicted the hit we need to revert it to the server state
+            collision.player().sendPacket(new BlockChangePacket(collision.blockPosition(), collision.block()));
+            return;
+        }
+
+        // Otherwise it should immediately go to last state and reset as normal
+        GhostBlockHolder ghostBlocks = GhostBlockHolder.forPlayer(collision.player());
+        ghostBlocks.submitTask(collision.blockPosition(), new DecayTask(Tilt.PARTIAL), true);
+    }
+
     private enum Tilt {
         NONE(0),
         UNSTABLE(10),
@@ -65,6 +78,14 @@ public class DripleafBlock implements BlockHandler, CollidableBlock {
 
     private static class DecayTask implements BlockUpdateTask {
         private Tilt state = Tilt.NONE;
+
+        public DecayTask() {
+            this(Tilt.NONE);
+        }
+
+        public DecayTask(Tilt initialState) {
+            this.state = initialState;
+        }
 
         @Override
         public Map.Entry<Integer, Block> execute(Block block) {

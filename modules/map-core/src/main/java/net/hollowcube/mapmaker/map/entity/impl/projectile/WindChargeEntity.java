@@ -56,10 +56,7 @@ public class WindChargeEntity extends AbstractProjectileEntity {
 
     @Override
     protected void handleBlockCollision(Block hitBlock, Point hitPos, Pos posBefore) {
-
-//        shooter.playSound(Sound.sound(SoundEvent.ENTITY_PLAYER_TELEPORT, Sound.Source.PLAYER, 1, 1), posBefore);
-//        shooter.teleport(posBefore.withView(0, 0), Vec.ZERO,
-//                null, RelativeFlags.VIEW | RelativeFlags.DELTA_COORD);
+        super.handlePossibleDripleafCollision(shooter, hitBlock, hitPos);
 
         float diameter = EXPLOSION_RADIUS * 2.0f;
         // these values are the bounding box of the explosion aka only move those people ever.
