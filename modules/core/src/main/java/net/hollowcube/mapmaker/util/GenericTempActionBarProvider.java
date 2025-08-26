@@ -19,7 +19,7 @@ public class GenericTempActionBarProvider implements ActionBar.Provider {
 
     @Override
     public int cacheKey(@NotNull Player player) {
-        return 0;
+        return message.hashCode();
     }
 
     @Override
