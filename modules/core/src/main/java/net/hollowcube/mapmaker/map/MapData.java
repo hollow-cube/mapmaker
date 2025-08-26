@@ -404,7 +404,7 @@ public class MapData {
                         .append(Component.text(FontUtil.computeOffset(6)))
                         .append(Component.translatable("gui.play_maps.map_display.completed", Component.text(NumberUtil.formatMapPlaytime(playtime, true)))));
                 lore.add(Component.empty());
-            } else if (progress == PersonalizedMapData.Progress.STARTED) {
+            } else if (progress == PersonalizedMapData.Progress.STARTED && playtime > 0) {
                 lore.add(Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
                         .append(Component.translatable("gui.play_maps.map_display.in_progress", Component.text(NumberUtil.formatMapPlaytime(playtime, true)))));
                 lore.add(Component.empty());
