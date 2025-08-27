@@ -295,12 +295,12 @@ public class InventoryHost implements TagReadable, TagWritable {
             copyInventoryContents(items);
 
             try {
-                sendPacketToViewers(new BundlePacket());
-                sendPacketToViewers(new OpenWindowPacket(getWindowId(), getInventoryType().getWindowType(), getTitle()));
+                player.sendPacket(new BundlePacket());
+                player.sendPacket(new OpenWindowPacket(getWindowId(), getInventoryType().getWindowType(), getTitle()));
                 update();
                 updatePlayerInventory();
             } finally {
-                sendPacketToViewers(new BundlePacket());
+                player.sendPacket(new BundlePacket());
             }
         }
 
