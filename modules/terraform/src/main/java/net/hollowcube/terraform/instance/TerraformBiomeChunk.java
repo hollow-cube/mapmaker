@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.instance;
 
 import net.hollowcube.terraform.util.ProtocolUtil;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.ChunkHack;
 import net.minestom.server.instance.Section;
@@ -110,12 +111,12 @@ public final class TerraformBiomeChunk {
 
     public static void sendBiomeUpdates(@NotNull TerraformInstanceBiomes biomes, @NotNull List<Chunk> chunks) {
         List<ChunkBiomesPacket.ChunkBiomeData> data = new ArrayList<>();
+        var serializer = Palette.biomeSerializer(MinecraftServer.getBiomeRegistry().size() + biomes.size());
         for (Chunk chunk : chunks) {
             data.add(new ChunkBiomesPacket.ChunkBiomeData(
                     chunk.getChunkX(), chunk.getChunkZ(),
                     ProtocolUtil.makeArray(1024, buffer -> {
                         for (Section section : chunk.getSections()) {
-                            var serializer = Palette.biomeSerializer(biomes.size());
                             buffer.write(serializer, section.biomePalette());
                         }
                     })
