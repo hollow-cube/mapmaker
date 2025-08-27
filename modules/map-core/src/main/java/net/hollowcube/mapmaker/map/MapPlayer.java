@@ -228,24 +228,27 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         }
 
         if (newPose != oldPose) setPose(newPose);
-        updateBlockTouchState();
 
         if (this.hasTag(DebugRenderersCommand.DEBUG_PLAYER_BOUNDING_BOX)) {
             var box = getBoundingBox();
             var center = this.getPosition().add(0, box.height() / 2.0, 0);
             var id = Key.key("player_bounding_box");
 
-            this.sendPacket(new BundlePacket());
-            new ClientboundDebugRenderRemovePacket(id).send(this);
-            new ClientboundDebugRenderAddPacket(
-                    id,
-                    new DebugShape.Box(
-                            center, new Vec(box.width(), box.height(), box.depth()), Quaternion.ZERO,
-                            0, 0xFFFF0000, 5
-                    ),
-                    DebugShape.FLAG_WIREFRAME, 10
-            ).send(this);
-            this.sendPacket(new BundlePacket());
+            try {
+                this.sendPacket(new BundlePacket());
+                new ClientboundDebugRenderRemovePacket(id).send(this);
+                new ClientboundDebugRenderAddPacket(
+                        id,
+                        new DebugShape.Box(
+                                center, new Vec(box.width(), box.height(), box.depth()), Quaternion.ZERO,
+                                0, 0xFFFF0000, 5
+                        ),
+                        DebugShape.FLAG_WIREFRAME, 10
+                ).send(this);
+                this.sendPacket(new BundlePacket());
+            } finally {
+                this.sendPacket(new BundlePacket());
+            }
         }
     }
 
@@ -526,79 +529,6 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
     public void setFlyingWithElytra(boolean isFlying) {
         super.setFlyingWithElytra(isFlying);
         if (!isFlying) FireworkRocketItem.removeRocket(this);
-    }
-
-    //endregion
-
-    //region EXT: Touching Blocks
-
-    public boolean isInWater() {
-        return isInWater;
-    }
-
-    public boolean isInLava() {
-        return isInLava;
-    }
-
-    private void updateBlockTouchState() {
-        final BoundingBox bb = getBoundingBox().contract(0.001, 0.001, 0.001);
-        var position = getPosition();
-        var instance = getInstance();
-        if (instance == null) return;
-
-        var meta = this.getPlayerMeta();
-
-        isInWater = isInLava = false;
-        boolean isInPowderedSnow = false;
-
-        var iter = bb.getBlocks(position);
-        while (iter.hasNext()) {
-            if (isInWater && isInLava && isInPowderedSnow) break;
-            var posMut = iter.next();
-
-            var block = instance.getBlock(
-                    posMut.blockX(), posMut.blockY(), posMut.blockZ(),
-                    Block.Getter.Condition.TYPE);
-            if (block == null) continue;
-            double fluidHeight = getFluidHeight(block);
-            if (fluidHeight >= 0) {
-                var blockAbove = instance.getBlock(posMut.blockX(), posMut.blockY() + 1,
-                        posMut.blockZ(), Block.Getter.Condition.TYPE);
-                fluidHeight = blockAbove != null && block.id() == blockAbove.id() ? 1 : (fluidHeight / 9.0);
-                if (posMut.blockY() + fluidHeight < position.y()) continue; // Not in fluid
-
-                if (block.id() == Block.WATER.id() || BlockUtil.isWaterlogged(block)) {
-                    isInWater = true;
-                } else if (block.id() == Block.LAVA.id()) {
-                    isInLava = true;
-                }
-            } else if (block.id() == Block.POWDER_SNOW.id()) {
-                isInPowderedSnow = true;
-                var ticks = meta.getTickFrozen();
-                if (ticks < 140) {
-                    meta.setTickFrozen(Math.min(ticks + 1, 140));
-                }
-            }
-        }
-
-        if (!isInPowderedSnow) {
-            var ticks = meta.getTickFrozen();
-            if (ticks > 0) {
-                meta.setTickFrozen(Math.max(ticks - 2, 0));
-            }
-        }
-    }
-
-    private static double getFluidHeight(@NotNull Block block) {
-        var level = block.getProperty("level");
-        if (level == null) return BlockUtil.isWaterlogged(block) ? 8 : -1;
-
-        try {
-            var height = Math.min(8, Double.parseDouble(level));
-            return height == 0 ? 8 : 8 - height;
-        } catch (NumberFormatException ignored) {
-            return -1;
-        }
     }
 
     //endregion
