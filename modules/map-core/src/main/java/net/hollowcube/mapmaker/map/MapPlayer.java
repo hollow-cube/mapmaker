@@ -245,7 +245,6 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
                         ),
                         DebugShape.FLAG_WIREFRAME, 10
                 ).send(this);
-                this.sendPacket(new BundlePacket());
             } finally {
                 this.sendPacket(new BundlePacket());
             }
