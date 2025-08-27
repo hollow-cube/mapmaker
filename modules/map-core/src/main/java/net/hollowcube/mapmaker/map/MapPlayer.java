@@ -9,17 +9,23 @@ import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.CommandHandlingPlayer;
+import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.compat.moulberrytweaks.debugrender.DebugShape;
+import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderAddPacket;
+import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderRemovePacket;
 import net.hollowcube.mapmaker.map.block.CollidableBlock;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
+import net.hollowcube.mapmaker.map.command.DebugRenderersCommand;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.event.entity.Map2PlayerEnterEntityEvent;
 import net.hollowcube.mapmaker.map.event.entity.Map2PlayerExitEntityEvent;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.util.PlayerVisibility;
 import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.PhysicsResult;
@@ -223,6 +229,24 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
 
         if (newPose != oldPose) setPose(newPose);
         updateBlockTouchState();
+
+        if (this.hasTag(DebugRenderersCommand.DEBUG_PLAYER_BOUNDING_BOX)) {
+            var box = getBoundingBox();
+            var center = this.getPosition().add(0, box.height() / 2.0, 0);
+            var id = Key.key("player_bounding_box");
+
+            this.sendPacket(new BundlePacket());
+            new ClientboundDebugRenderRemovePacket(id).send(this);
+            new ClientboundDebugRenderAddPacket(
+                    id,
+                    new DebugShape.Box(
+                            center, new Vec(box.width(), box.height(), box.depth()), Quaternion.ZERO,
+                            0, 0xFFFF0000, 5
+                    ),
+                    DebugShape.FLAG_WIREFRAME, 10
+            ).send(this);
+            this.sendPacket(new BundlePacket());
+        }
     }
 
     public @NotNull CompletableFuture<Void> teleport(
@@ -403,7 +427,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         var instance = getInstance();
         if (instance == null) return true; // Sanity check not in an instance
 
-        BoundingBox bb = pose == EntityPose.STANDING ? boundingBox : BoundingBox.fromPose(pose);
+        BoundingBox bb = this.getBoundingBox(pose);
         if (bb == null) return false;
 
         var position = getPosition();
@@ -617,8 +641,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         var instance = getInstance();
         if (instance == null || !isActive()) return; // Sanity check not in an instance
 
-        final EntityPose pose = getPose();
-        final BoundingBox bb = pose == EntityPose.STANDING ? boundingBox : BoundingBox.fromPose(pose);
+        final BoundingBox bb = this.getBoundingBox();
         if (bb == null) return;
 
         var newBlocks = new HashMap<CollisionKey, CollidableBlock.Collision>();

@@ -2,6 +2,7 @@ package net.hollowcube.command.util;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandResult;
+import net.hollowcube.common.extensions.ExtendedPlayer;
 import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -24,7 +25,7 @@ import org.slf4j.LoggerFactory;
  *
  * <p>It is valid to override BLAH BLAH BLAH</p>
  */
-public abstract class CommandHandlingPlayer extends Player {
+public abstract class CommandHandlingPlayer extends ExtendedPlayer {
 
     private static final Logger log = LoggerFactory.getLogger(CommandHandlingPlayer.class);
 
