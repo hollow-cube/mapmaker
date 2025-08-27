@@ -15,11 +15,16 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.ChunkHack;
+import net.minestom.server.tag.Tag;
+import net.minestom.server.utils.Unit;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-public final class DebugPoiCommand {
+public final class DebugRenderersCommand {
+
+    public static final Tag<Unit> DEBUG_PLAYER_BOUNDING_BOX = Tag.Transient("mapmaker:debug_player_bounding_box");
+
     private static final int CHUNK_RANGE = 3;
 
     private static final Map<String, Integer> MARKER_COLORS = Map.of(
@@ -36,14 +41,19 @@ public final class DebugPoiCommand {
             "mapmaker:bounce_pad", 0x5555ff
     );
 
+    private static boolean assertMoulberryTweaks(@NotNull Player player) {
+        if (!MoulberryTweaksAPI.isPresent(player)) {
+            player.sendMessage(Component.translatable("commands.debug.needs_mt"));
+            return true;
+        }
+        return false;
+    }
+
     public static void handleDebugRegions(@NotNull Player player, @NotNull CommandContext ignored) {
         var world = MapWorld.forPlayer(player);
         if (world == null) return; // Sanity
 
-        if (!MoulberryTweaksAPI.isPresent(player)) {
-            player.sendMessage(Component.translatable("commands.debug.poi.no_mod"));
-            return;
-        }
+        if (assertMoulberryTweaks(player)) return;
 
         // Collect entities
         for (var entity : world.instance().getNearbyEntities(player.getPosition(), 3 * 16)) {
@@ -90,6 +100,16 @@ public final class DebugPoiCommand {
         });
     }
 
-    private DebugPoiCommand() {
+    public static void handleDebugBoundingBox(@NotNull Player player, @NotNull CommandContext ignored) {
+        if (assertMoulberryTweaks(player)) return;
+
+        if (player.hasTag(DEBUG_PLAYER_BOUNDING_BOX)) {
+            player.removeTag(DEBUG_PLAYER_BOUNDING_BOX);
+        } else {
+            player.setTag(DEBUG_PLAYER_BOUNDING_BOX, Unit.INSTANCE);
+        }
+    }
+
+    private DebugRenderersCommand() {
     }
 }

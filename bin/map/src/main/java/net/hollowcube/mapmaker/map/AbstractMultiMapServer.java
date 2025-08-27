@@ -11,7 +11,7 @@ import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
-import net.hollowcube.mapmaker.map.command.DebugPoiCommand;
+import net.hollowcube.mapmaker.map.command.DebugRenderersCommand;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -400,8 +400,17 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
             }
         }, "Enables progress index add mode for the current map");
 
-        cmd.createPermissionlessSubcommand("poi", DebugPoiCommand::handleDebugRegions,
-                "Shows the location information about nearby pois");
+        cmd.createPermissionedSubcommand(
+                "boundingbox",
+                DebugRenderersCommand::handleDebugBoundingBox,
+                "Shows the bounding box of the player"
+        );
+
+        cmd.createPermissionlessSubcommand(
+                "poi",
+                DebugRenderersCommand::handleDebugRegions,
+                "Shows the location information about nearby pois"
+        );
 
         return cmd;
     }
