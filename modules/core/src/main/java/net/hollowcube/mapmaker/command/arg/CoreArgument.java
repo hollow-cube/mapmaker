@@ -35,6 +35,7 @@ public final class CoreArgument {
     public static @NotNull Argument<@Nullable String> AnyPlayerId(@NotNull String id, @NotNull PlayerService playerService) {
         return Argument.Word(id).map(
                 /* Mapper */ (sender, raw) -> new ParseResult.Success<>(() -> {
+                    if (raw.trim().isEmpty()) return null;
                     try {
                         return playerService.getPlayerId(raw);
                     } catch (PlayerService.NotFoundError ignored) {
