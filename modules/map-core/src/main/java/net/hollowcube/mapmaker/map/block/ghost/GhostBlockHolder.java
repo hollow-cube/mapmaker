@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.map.util.PositionUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.packet.server.play.BlockChangePacket;
@@ -100,6 +101,16 @@ public class GhostBlockHolder implements Block.Getter, Block.Setter {
         } else {
             blocks.remove(PositionUtil.packPosition(blockPosition));
             player.sendPacket(new BlockChangePacket(blockPosition, instance.getBlock(blockPosition, Condition.TYPE)));
+        }
+    }
+
+    public void resendChunk(@NotNull Chunk chunk) {
+        for (var entry : this.blocks.long2ObjectEntrySet()) {
+            var blockPosition = PositionUtil.unpackPosition(entry.getLongKey());
+            if (blockPosition.chunkX() != chunk.getChunkX() || blockPosition.chunkZ() != chunk.getChunkZ())
+                continue;
+
+            player.sendPacket(new BlockChangePacket(blockPosition, entry.getValue()));
         }
     }
 

@@ -136,9 +136,11 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
                 player.sendPacket(new BundlePacket());
 
                 var chunk = player.getInstance().getChunkAt(position);
-                if (chunk != null) player.sendPacket(chunk.getFullDataPacket());
-                var ghostBlocks = GhostBlockHolder.forPlayerOptional(player);
-                if (ghostBlocks != null) ghostBlocks.load(ghostBlocks.save());
+                if (chunk != null) {
+                    player.sendPacket(chunk.getFullDataPacket());
+                    var ghostBlocks = GhostBlockHolder.forPlayerOptional(player);
+                    if (ghostBlocks != null) ghostBlocks.resendChunk(chunk);
+                }
 
                 player.setFlyingWithElytra(false);
                 var future = player.teleport(position, Vec.ZERO, null, RelativeFlags.NONE);
