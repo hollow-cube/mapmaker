@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.punishments;
 
 import com.google.gson.reflect.TypeToken;
-import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.punishments.types.Punishment;
 import net.hollowcube.mapmaker.punishments.types.PunishmentLadder;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
@@ -22,15 +21,20 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
     }
 
     @Override
-    public @NotNull List<Punishment> getPunishments(@Nullable String playerId, @NotNull UUID executorId, @Nullable PunishmentType type) {
+    public @NotNull List<Punishment> getPunishments(@Nullable String playerId, @Nullable UUID executorId, @Nullable PunishmentType type) {
+        var queryBuilder = urlQueryBuilder();
+        if (playerId != null) {
+            queryBuilder.add("playerId", playerId);
+        }
+        if (executorId != null) {
+            queryBuilder.add("executorId", executorId.toString());
+        }
+        if (type != null) {
+            queryBuilder.add("type", type.name().toLowerCase(Locale.ROOT));
+        }
+
         var request = HttpRequest.newBuilder()
-                .uri(url(
-                        "%s/punishments?playerId=%s&executorId=%s&punishmentType=%s",
-                        url,
-                        Objects.requireNonNullElse(playerId, ""),
-                        executorId,
-                        OpUtils.mapOr(type, PunishmentType::name, "").toLowerCase(Locale.ROOT)
-                ))
+                .uri(URI.create(url + "/punishments" + queryBuilder.build()))
                 .build();
         var response = doRequest(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
@@ -44,7 +48,7 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
     @Override
     public @Nullable Punishment getActivePunishment(@NotNull String playerId, @NotNull PunishmentType type) {
         var request = HttpRequest.newBuilder()
-                .uri(url("%s/punishments/%s/active?punishmentType=%s", url, playerId, type.name().toLowerCase(Locale.ROOT)))
+                .uri(URI.create(url + "/punishments/" + playerId + "/active?punishmentType=" + type.name().toLowerCase(Locale.ROOT)))
                 .GET()
                 .build();
 
@@ -106,7 +110,7 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
 
     @Override
     public @NotNull List<PunishmentLadder> getAllLadders() {
-        return this.getLadders("");
+        return this.getLadders("?punishmentType=");
     }
 
     @Override

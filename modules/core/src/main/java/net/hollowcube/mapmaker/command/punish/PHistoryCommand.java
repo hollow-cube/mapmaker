@@ -60,7 +60,7 @@ public class PHistoryCommand extends CommandDsl {
             return;
         }
 
-        var punishments = new ArrayList<>(punishmentService.getPunishments(target, player.getUuid(), type));
+        var punishments = new ArrayList<>(punishmentService.getPunishments(target, null, type));
         punishments.sort(Comparator.comparingLong(p -> p.createdAt().toEpochMilli()));
         if (punishments.isEmpty()) {
             player.sendMessage(Component.translatable("punishment.history.none"));
