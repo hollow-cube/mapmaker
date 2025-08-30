@@ -29,7 +29,9 @@ public final class TerraformBiomeChunk {
         if (biomes != null) {
             var section = chunk.getSectionAt(y);
             var palette = section.biomePalette();
-            var index = palette.get(x / 4, y / 4, z / 4);
+            var index = palette.get(globalToSectionRelative(x) / 4,
+                    globalToSectionRelative(y) / 4,
+                    globalToSectionRelative(z) / 4);
             return Objects.requireNonNull(biomes.getKey(index), "no such biome for index: " + index);
         }
         return null;
