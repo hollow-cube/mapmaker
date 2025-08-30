@@ -56,7 +56,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
 
     static {
         var events = MinecraftServer.getGlobalEventHandler();
-        events.addListener(AxiomMarkerDataRequestEvent.RightClick.class, ObjectEntity::handleAxiomRequestMarkerData);
+        events.addListener(AxiomMarkerDataRequestEvent.class, ObjectEntity::handleAxiomRequestMarkerData);
         events.addListener(TerraformAxiomUpdateCustomEntityDataEvent.class, ObjectEntity::handleAxiomUpdateMarkerData);
         events.addListener(AxiomEnabledEvent.class, ObjectEntity::handleAxiomEnabled);
     }
@@ -215,7 +215,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         // Intentionally do nothing
     }
 
-    private static void handleAxiomRequestMarkerData(@NotNull AxiomMarkerDataRequestEvent.RightClick event) {
+    private static void handleAxiomRequestMarkerData(@NotNull AxiomMarkerDataRequestEvent event) {
         final var player = event.player();
         final var world = MapWorld.forPlayer(player);
         if (!(event.marker() instanceof ObjectEntity entity)) return;
@@ -223,7 +223,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         if (!world.instance().equals(entity.getInstance())) return;
 
         var editor = world.objectEntityHandlers().getEditor(entity.getType(), entity.getClass());
-        if (!player.isSneaking() && editor != null) {
+        if (event instanceof AxiomMarkerDataRequestEvent.RightClick && !player.isSneaking() && editor != null) {
             if (editor.onPlayerEdit(player, entity)) {
                 event.setCancelled(true);
                 return;
