@@ -1,8 +1,8 @@
 package net.hollowcube.schem.builder;
 
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.hollowcube.mapmaker.util.ProtocolUtil;
 import net.hollowcube.schem.BlockEntityData;
 import net.hollowcube.schem.Schematic;
@@ -65,13 +65,13 @@ public class UnboundedSchematicBuilder implements SchematicBuilder {
         offset = offset.add(min);
         var blockCount = size.blockX() * size.blockY() * size.blockZ();
 
-        // Map of Block -> Palette ID
-        Object2IntMap<Block> paletteMap = new Object2IntArrayMap<>();
+        // Map of Block State -> Palette ID
+        Int2IntMap paletteMap = new Int2IntOpenHashMap();
 
         // We always keep air as palette block zero, since it is likely the vast
         // majority of blocks, so we want to ensure that it is one byte.
         if (blockSet.containsValue(Block.AIR)) {
-            paletteMap.put(Block.AIR, 0);
+            paletteMap.put(Block.AIR.stateId(), 0);
         }
 
         var blockEntities = new Int2ObjectArrayMap<BlockEntityData>();
@@ -111,11 +111,11 @@ public class UnboundedSchematicBuilder implements SchematicBuilder {
 
             // Write block palette index
             int blockId;
-            if (!paletteMap.containsKey(block)) {
+            if (!paletteMap.containsKey(block.stateId())) {
                 blockId = paletteMap.size();
-                paletteMap.put(block, paletteMap.size());
+                paletteMap.put(block.stateId(), paletteMap.size());
             } else {
-                blockId = paletteMap.getInt(block);
+                blockId = paletteMap.get(block.stateId());
             }
             ProtocolUtil.writeVarInt(blockBytes, blockId);
 
@@ -129,8 +129,8 @@ public class UnboundedSchematicBuilder implements SchematicBuilder {
         }
 
         var palette = new Block[paletteMap.size()];
-        for (var entry : paletteMap.object2IntEntrySet()) {
-            palette[entry.getIntValue()] = entry.getKey();
+        for (var entry : paletteMap.int2IntEntrySet()) {
+            palette[entry.getIntValue()] = Block.fromStateId(entry.getIntKey());
         }
 
         var out = new byte[blockBytes.position()];

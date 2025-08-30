@@ -253,7 +253,7 @@ public final class SchematicCommands {
                         clipboard.setData(result.undoBuffer().toSchematic(offset));
                         player.sendMessage(Messages.CLIPBOARD_COPY.with(result.blocksChanged()));
                     })
-                              .dryRunIfCapacity();
+                    .dryRunIfCapacity();
             if (task == null) {
                 player.sendMessage(Messages.GENERIC_QUEUE_FULL);
             }
@@ -316,7 +316,7 @@ public final class SchematicCommands {
                         clipboard.setData(result.undoBuffer().toSchematic(offset));
                         player.sendMessage(Messages.CLIPBOARD_CUT.with(result.blocksChanged()));
                     })
-                              .submitIfCapacity();
+                    .submitIfCapacity();
             if (task == null) {
                 player.sendMessage(Messages.GENERIC_QUEUE_FULL);
             }
@@ -436,7 +436,7 @@ public final class SchematicCommands {
                         }
                         player.sendMessage(Messages.CLIPBOARD_PASTE.with(result.blocksChanged()));
                     })
-                                   .submitIfCapacity();
+                    .submitIfCapacity();
             if (submitted == null) {
                 player.sendMessage(Messages.GENERIC_QUEUE_FULL);
             }
