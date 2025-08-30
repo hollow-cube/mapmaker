@@ -8,7 +8,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      mapmaker.hollowcubenet/role: map-isolate
+      mapmaker.hollowcube.net/role: map-isolate
   podMetricsEndpoints:
     - port: http
       path: /metrics

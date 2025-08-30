@@ -2,21 +2,17 @@ package net.hollowcube.mapmaker.isolate;
 
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.common.util.MojangUtil;
-import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.Uuids;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
-import net.hollowcube.mapmaker.player.PlayerSkin;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.session.Presence;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
-import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.timer.ExecutionType;
@@ -50,7 +46,6 @@ public class MapIsolateServer extends AbstractMapServer {
         System.out.println("Args: " + Arrays.toString(IsolateMain.args));
 
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("map-init")
-                .addListener(AsyncPlayerPreLoginEvent.class, this::handleLogin)
                 .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
                 .addListener(PlayerSpawnEvent.class, this::handleSpawn)
                 .addListener(PlayerDisconnectEvent.class, this::handleDisconnect));
@@ -96,16 +91,6 @@ public class MapIsolateServer extends AbstractMapServer {
         }
 
         addBinding(Scheduler.class, world.instance().scheduler());
-    }
-
-    protected void handleLogin(AsyncPlayerPreLoginEvent event) {
-        var profile = event.getGameProfile();
-        var playerId = profile.uuid().toString();
-        net.minestom.server.entity.PlayerSkin skin = MojangUtil.getSkinFromUuid(playerId);
-        sessionService().createSession(playerId, "devserver-integrated", profile.name(), "127.0.0.1",
-                new PlayerSkin(OpUtils.map(skin, net.minestom.server.entity.PlayerSkin::textures),
-                        OpUtils.map(skin, net.minestom.server.entity.PlayerSkin::signature))
-        );
     }
 
     protected void handleConfigPhase(AsyncPlayerConfigurationEvent event) {
