@@ -1,4 +1,5 @@
-FROM gcr.io/distroless/base
+FROM debian:bookworm-slim
+#FROM gcr.io/distroless/base
 
 WORKDIR /app
 COPY ./bin/map-isolate/build/native/nativeCompile /app
