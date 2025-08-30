@@ -120,7 +120,7 @@ public class HappyGhastMarkerHandler extends ObjectEntityHandler {
 
     @Override
     public void onTick() {
-        if (keyframes.isEmpty()) return;
+        if (keyframes.isEmpty() || ghastEntity.getInstance() == null) return;
 
         double timeSeconds = (ghastEntity.getAliveTicks() - startTick) / 20.0;
         timeSeconds %= totalDuration; // Looping
