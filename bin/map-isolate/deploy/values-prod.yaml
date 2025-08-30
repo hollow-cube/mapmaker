@@ -1,5 +1,7 @@
 image:
   repository: mworzala/mapmaker-map-isolate
+  pullSecrets:
+    - name: dockerio
 
 mapmaker:
   resourcePackHash: ${RESOURCE_PACK_HASH}

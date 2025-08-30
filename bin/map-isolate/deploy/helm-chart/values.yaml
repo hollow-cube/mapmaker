@@ -4,6 +4,7 @@ fullnameOverride: ""
 image:
   repository: map-isolate
   tag: "latest"
+  pullSecrets: [ ]
 
 serviceAccount:
   # Specifies whether a service account should be created
