@@ -11,16 +11,18 @@ public final class PositionUtil {
     }
 
     public static long packPosition(int x, int y, int z) {
-        return ((long) (x & 0x3FFFFFF) << 38) | ((long) (z & 0x3FFFFFF) << 12) | (long) (y & 0xFFF);
+        return ((long) (x & 0x1FFFFFF) << 38) | ((long) (z & 0x1FFFFFF) << 13) | (long) (y & 0x1FFF);
     }
 
     public static @NotNull Point unpackPosition(long packedPosition) {
-        int x = (int) (packedPosition >> 38) & 0x3FFFFFF;
-        int z = (int) (packedPosition >> 12) & 0x3FFFFFF;
-        int y = (int) packedPosition & 0xFFF;
-        // Adjust the sign bit if necessary for x and z
-        if (x >= 1 << 25) x -= 1 << 26;
-        if (z >= 1 << 25) z -= 1 << 26;
+        int x = (int) (packedPosition >> 38) & 0x1FFFFFF;
+        int z = (int) (packedPosition >> 13) & 0x1FFFFFF;
+        int y = (int) packedPosition & 0x1FFF;
+
+        if (x >= 1 << 24) x -= 1 << 25;  // 25-bit signed range: -16777216 to 16777215
+        if (z >= 1 << 24) z -= 1 << 25;  // 25-bit signed range: -16777216 to 16777215
+        if (y >= 1 << 12) y -= 1 << 13;  // 13-bit signed range: -4096 to 4095
+
         return new Vec(x, y, z);
     }
 
