@@ -46,6 +46,10 @@ public class PStatusCommand extends CommandDsl {
 
     private void showPlayerStatus(@NotNull Player player, @NotNull CommandContext context) {
         var target = context.get(playerArg);
+        if (target == null) {
+            player.sendMessage("Unknown player: " + context.getRaw(playerArg));
+            return;
+        }
 
         var targetDisplayName = playerService.getPlayerDisplayName2(target).build();
         player.sendMessage(Component.translatable("punishment.status.header", targetDisplayName));

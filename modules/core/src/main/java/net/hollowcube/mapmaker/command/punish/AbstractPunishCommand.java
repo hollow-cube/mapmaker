@@ -77,6 +77,10 @@ abstract class AbstractPunishCommand extends CommandDsl {
             var ladder = context.get(this.ladderArgument);
             var comment = context.get(this.commentArgument);
 
+            if (target == null) {
+                sender.sendMessage("Unknown player: " + context.getRaw(targetArgument));
+                return;
+            }
             if (ladder == null) {
                 sender.sendMessage("Unknown ladder: " + context.getRaw(ladderArgument));
                 return;

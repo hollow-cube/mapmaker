@@ -55,6 +55,11 @@ public class PHistoryCommand extends CommandDsl {
         var target = context.get(playerArg);
         var type = context.get(typeArg);
 
+        if (target == null) {
+            player.sendMessage("Unknown player: " + context.getRaw(playerArg));
+            return;
+        }
+
         var punishments = new ArrayList<>(punishmentService.getPunishments(target, player.getUuid(), type));
         punishments.sort(Comparator.comparingLong(p -> p.createdAt().toEpochMilli()));
         if (punishments.isEmpty()) {

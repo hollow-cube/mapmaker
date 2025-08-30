@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import static net.hollowcube.schem.old.CoordinateUtil.blockIndex;
 
@@ -58,7 +59,9 @@ public record SpongeSchematic(
                     var block = blockPalette.get(reader.next());
                     var blockEntity = blockEntitiesByPos.get(blockIndex(size, x, y, z));
                     if (blockEntity != null) {
-                        block = block.withHandler(BLOCK_MANAGER.getHandlerOrDummy(blockEntity.id()))
+                        // Lower case the IDs always to prevent parse errors, especially for legacy names like 'Beacon'
+                        var lowerKey = blockEntity.id().toLowerCase(Locale.ROOT);
+                        block = block.withHandler(BLOCK_MANAGER.getHandlerOrDummy(lowerKey))
                                 .withNbt(blockEntity.data());
                     }
 

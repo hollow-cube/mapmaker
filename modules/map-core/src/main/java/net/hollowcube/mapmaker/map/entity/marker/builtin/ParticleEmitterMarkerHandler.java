@@ -20,6 +20,8 @@ import net.minestom.server.particle.Particle;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -29,6 +31,7 @@ import java.util.function.Supplier;
 public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
     private static final double MAX_PARTICLES_PER_SECOND = 100;
     public static final String ID = "mapmaker:particle_emitter";
+    private static final Logger logger = LoggerFactory.getLogger(ParticleEmitterMarkerHandler.class);
 
     private boolean isValid = false;
     private int lifetime; // Loop duration, in ticks. 0 for infinite
@@ -143,8 +146,12 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
                 computedOffset = Vec.ZERO;
             }
 
-            var computedParticle = particle.get();
-            entity.sendPacketToViewers(new ParticlePacket(computedParticle, false, false, position, computedOffset, computedSpeed, computedCount));
+            try {
+                var computedParticle = particle.get();
+                entity.sendPacketToViewers(new ParticlePacket(computedParticle, false, false, position, computedOffset, computedSpeed, computedCount));
+            } catch (IllegalArgumentException e) {
+                logger.error("failed molang eval in particle spawn: {}", e.getMessage());
+            }
         }
     }
 

@@ -31,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -48,7 +49,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
             .map(n -> (CompoundBinaryTag) n, n -> n)
             .defaultValue(CompoundBinaryTag.empty());
     protected static final Tag<Key> TYPE_TAG = Tag.String("type").path("data")
-            .map(Key::key, Key::asString)
+            .map(s -> Key.key(s.toLowerCase(Locale.ROOT)), Key::asString)
             .defaultValue(UNKNOWN_TYPE);
     protected static final Tag<@Nullable String> NAME_TAG = Tag.String("name").path("data");
     protected static final Tag<@Nullable Vec> REGION_MIN_TAG = VecAsList("min").path("data");

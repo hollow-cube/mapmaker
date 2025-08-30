@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
@@ -40,11 +41,13 @@ public abstract class MapMgmtConsumer extends BaseConsumer<MapMgmtConsumer.MapUp
     @Override
     protected final void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull MapUpdateMessage msg) {
         logger.info("Received map update message ({}): {}", msg.action, msg);
-        switch (msg.action) {
-            case MapUpdateMessage.ACTION_CREATE -> handleMapCreate(msg.id());
-            case MapUpdateMessage.ACTION_DELETE -> handleMapDelete(msg.id());
-            case MapUpdateMessage.ACTION_DRAIN -> handleMapDrain(msg.id(), msg.drainReason());
-        }
+        FutureUtil.submitVirtual(() -> {
+            switch (msg.action) {
+                case MapUpdateMessage.ACTION_CREATE -> handleMapCreate(msg.id());
+                case MapUpdateMessage.ACTION_DELETE -> handleMapDelete(msg.id());
+                case MapUpdateMessage.ACTION_DRAIN -> handleMapDrain(msg.id(), msg.drainReason());
+            }
+        });
     }
 
     protected void handleMapCreate(@NotNull String mapId) {
