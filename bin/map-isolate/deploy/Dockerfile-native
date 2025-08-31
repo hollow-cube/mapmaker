@@ -1,15 +1,10 @@
-FROM debian:bookworm-slim
-#FROM gcr.io/distroless/base
-
-RUN apt-get update && apt-get install -y \
-    procps \
-    htop \
-    strace \
-    && rm -rf /var/lib/apt/lists/*
+FROM gcr.io/distroless/base
 
 WORKDIR /app
 COPY ./bin/map-isolate/build/native/nativeCompile /app
 COPY ./bin/map-isolate/build/minestom-data /app
+
+USER 65532
 
 EXPOSE 25565
 CMD ["./map-isolate"]
