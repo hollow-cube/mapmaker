@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub;
 
-import net.hollowcube.common.util.Uuids;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.hub.item.*;
 import net.hollowcube.mapmaker.hub.util.HubTransferData;
@@ -75,7 +74,7 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
     @Override
     protected void loadWorldData() {
         ReadableMapData mapWorldData = null;
-        if (!map().id().equals(Uuids.ZERO))
+        if (!map().id().equals(MapData.SPAWN_MAP_ID))
             mapWorldData = server().mapService().getMapWorldAsStream(map().id(), false);
         if (mapWorldData == null) {
             try (var is = getClass().getResourceAsStream("/spawn/hcspawn.polar")) {

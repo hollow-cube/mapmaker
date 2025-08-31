@@ -65,10 +65,11 @@ public class DevServer extends AbstractMultiMapServer {
         return new DevServerBridge(this);
     }
 
-    // todo impl is identical to multi map server should just merge
     @Override
     protected @NotNull Future<AbstractMapWorld<?, ?>> createWorldForRequest(@NotNull MapJoinInfo joinInfo) {
-        var map = mapService().getMap(joinInfo.playerId(), joinInfo.mapId());
+        var map = joinInfo.mapId().equals(MapData.SPAWN_MAP_ID)
+                ? HubServer.HUB_MAP_DATA
+                : mapService().getMap(joinInfo.playerId(), joinInfo.mapId());
 
         final boolean isEditor = Presence.MAP_BUILDING_STATES.contains(joinInfo.state());
         return createWorld(map, isEditor, _ -> {
