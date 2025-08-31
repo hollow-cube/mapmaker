@@ -6,7 +6,7 @@ public class IsolateMain {
     public static String[] args;
 
     public static void main(String[] args) {
-        if (args.length > 0 && "noop".equals(args[1])) {
+        if (args.length > 0 && "noop".equals(args[0])) {
             System.out.println("Exiting because of noop argument.");
             System.exit(0);
         }
