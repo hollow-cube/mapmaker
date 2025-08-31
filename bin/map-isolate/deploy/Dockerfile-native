@@ -4,7 +4,5 @@ WORKDIR /app
 COPY ./bin/map-isolate/build/native/nativeCompile /app
 COPY ./bin/map-isolate/build/minestom-data /app
 
-USER 65532
-
 EXPOSE 25565
 CMD ["./map-isolate"]

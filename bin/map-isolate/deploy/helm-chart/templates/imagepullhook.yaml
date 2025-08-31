@@ -16,5 +16,5 @@ spec:
       containers:
         - name: prepull
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          command: [ 'echo', 'Pre-pull complete' ]
+          command: [ './map-isolate', 'noop' ]
       restartPolicy: Never
