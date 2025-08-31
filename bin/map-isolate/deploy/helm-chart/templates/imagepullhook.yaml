@@ -17,4 +17,11 @@ spec:
         - name: prepull
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command: [ './map-isolate', 'noop' ]
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ "ALL" ]
+            seccompProfile:
+              type: RuntimeDefault
       restartPolicy: Never
