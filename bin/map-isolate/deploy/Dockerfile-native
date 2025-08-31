@@ -1,5 +1,7 @@
 FROM gcr.io/distroless/base
 
+USER 65532:65532
+
 WORKDIR /app
 COPY ./bin/map-isolate/build/native/nativeCompile /app
 COPY ./bin/map-isolate/build/minestom-data /app
