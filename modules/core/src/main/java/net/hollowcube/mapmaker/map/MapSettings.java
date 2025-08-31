@@ -53,6 +53,11 @@ public class MapSettings {
     // Weird/one off/experimental settings
     public static final MapSetting<Boolean> PROGRESS_INDEX_ADDITION = MapSetting.Bool("progress_index_addition", false);
 
+    // Internal settings
+
+    // Overrides the map instance size in map-per-server deployments. Should generally not be used a size will be inferred by default.
+    public static final MapSetting<String> INSTANCE_SIZE = MapSetting.String("instance_size", "");
+
     transient MapUpdateRequest updates = new MapUpdateRequest();
     transient ReentrantLock updateLock = new ReentrantLock();
 

@@ -23,6 +23,14 @@ public interface ServerRuntime {
         return "dev";
     }
 
+    /// The server allocation size, eg "micro", "small", etc.
+    /// Only relevant for map-per-server deployments. Will be "multi" for multi-map servers.
+    ///
+    /// Not an enum because this should not be used for any logic, just an indicator.
+    default @NotNull String size() {
+        return "unknown";
+    }
+
     default @NotNull String shortCommit() {
         if (commit().length() < 7)
             return commit();

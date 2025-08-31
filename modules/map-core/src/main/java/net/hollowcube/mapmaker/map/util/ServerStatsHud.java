@@ -1,8 +1,11 @@
-package net.hollowcube.mapmaker.util;
+package net.hollowcube.mapmaker.map.util;
 
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
+import net.kyori.adventure.text.format.ShadowColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.server.ServerTickMonitorEvent;
@@ -10,6 +13,7 @@ import net.minestom.server.monitoring.BenchmarkManager;
 import net.minestom.server.monitoring.TickMonitor;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -47,7 +51,19 @@ public class ServerStatsHud implements ActionBar.Provider {
 
         builder.offset(125);
         var text = String.format("%.2f", lastTickTime) + "ms // " + lastMemoryUsage + "MB";
-        builder.append(FontUtil.rewrite("line_2", text), FontUtil.measureText(text));
+        var textWidth = FontUtil.measureText(text);
+        builder.append(FontUtil.rewrite("line_2", text), textWidth);
+
+        var world = MapWorld.forPlayer(player);
+        if (world == null) return;
+
+        builder.offset(-textWidth);
+
+        builder.pushShadowColor(ShadowColor.none());
+        builder.pushColor(FontUtil.computeVerticalOffset(44));
+        builder.append(world.map().settings().getSize().name().toLowerCase(Locale.ROOT) + "-" + ServerRuntime.getRuntime().size());
+        builder.popShadowColor();
+        builder.popColor();
     }
 
     @Override

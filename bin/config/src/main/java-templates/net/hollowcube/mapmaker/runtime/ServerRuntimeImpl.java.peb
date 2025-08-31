@@ -16,6 +16,7 @@ public class ServerRuntimeImpl implements ServerRuntime {
     private String commit = "{{ commitHash }}";
     private String minestom = "{{ minestomVersion }}";
     private String resourcePackHash = null;
+    private String size = "unknown";
     private boolean isRelease = {{ isRelease }};
 
     public ServerRuntimeImpl() {
@@ -27,6 +28,9 @@ public class ServerRuntimeImpl implements ServerRuntime {
 
         var resourcePackHash = System.getenv("MAPMAKER_RESOURCE_PACK_HASH");
         if (resourcePackHash != null) this.resourcePackHash = resourcePackHash;
+
+        var instanceSize = System.getenv("MAPMAKER_INSTANCE_SIZE");
+        if (instanceSize != null) this.size = instanceSize;
     }
 
     @Override
@@ -56,5 +60,10 @@ public class ServerRuntimeImpl implements ServerRuntime {
     @Override
     public boolean isDevelopment() {
         return !isRelease && commit().equals("dev");
+    }
+
+    @Override
+    public @NotNull String size() {
+        return size;
     }
 }
