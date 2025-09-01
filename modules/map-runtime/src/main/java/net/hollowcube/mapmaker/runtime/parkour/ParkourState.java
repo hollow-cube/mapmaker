@@ -83,6 +83,8 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             if (lastState == null && MapFeatureFlags.DEBUG_PLAYING_OVERLAY.test(player)) {
                 ActionBar.forPlayer(player).addProvider(ParkourDebugHud.INSTANCE);
             }
+
+            ((MapPlayer) player).setPoseExperiment(MapFeatureFlags.NO_POSE_CHANGES.test(player));
         }
 
         @Override

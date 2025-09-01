@@ -159,6 +159,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
                 .addListener(PlayerMoveEvent.class, event -> handlePlayerOrVehicleMove(event.getPlayer(), event.getNewPosition()))
                 .addListener(PlayerMoveVehicleEvent.class, event -> handlePlayerOrVehicleMove(event.getPlayer(), event.getNewPosition()))
                 .addListener(PlayerTickEvent.class, this::handlePlayerTick)
+                .addChild(DelayedBlockInteractions.EVENT_NODE)
                 .addChild(LegacyActionStateManager.EVENT_NODE)
                 .addChild(ResetHeightDisplay.EVENT_NODE)
                 .addChild(DoubleJumpSetting.EVENT_NODE)

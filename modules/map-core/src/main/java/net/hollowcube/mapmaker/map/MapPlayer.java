@@ -110,7 +110,9 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
 
     // Only present sometimes (eg during riptide)
     private PhysicsResult nextPhysicsResult = null;
-    private boolean isInWater, isInLava;
+
+    private EntityPose pose = EntityPose.STANDING;
+    private boolean poseExperiment = false;
 
     // Need to key it because block handlers can be singletons
     record CollisionKey(CollidableBlock block, BlockVec pos) {
@@ -190,6 +192,19 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         visibilityByEntity.clear();
     }
 
+    public void setPoseExperiment(boolean enabled) {
+        this.poseExperiment = enabled;
+    }
+
+    public boolean hasPoseExperiment() {
+        return this.poseExperiment;
+    }
+
+    @Override
+    public @NotNull EntityPose getPose() {
+        return this.poseExperiment ? this.pose : super.getPose();
+    }
+
     /// We override this to use our own canFitWithBoundingBox implementation which correctly handles per-player blocks.
     @Override
     public void updatePose() {
@@ -226,7 +241,8 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
             newPose = EntityPose.STANDING;
         }
 
-        if (newPose != oldPose) setPose(newPose);
+        if (newPose != oldPose && !this.poseExperiment) setPose(newPose);
+        this.pose = newPose;
 
         if (this.hasTag(DebugRenderersCommand.DEBUG_PLAYER_BOUNDING_BOX)) {
             var box = getBoundingBox();
