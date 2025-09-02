@@ -34,7 +34,7 @@ public class DelayedBlockInteractions {
         var world = MapWorld.forPlayer(player);
         if (world == null || player.isSneaking()) return;
         if (!DELAYED_BLOCKS.contains(event.getBlock().key())) return;
-        if (!(player instanceof MapPlayer mp) || !mp.hasPoseExperiment()) return;
+        if (!(player instanceof MapPlayer mp) || mp.canSendPose()) return;
 
         var pos = event.getBlockPosition();
         var block = event.getBlock();

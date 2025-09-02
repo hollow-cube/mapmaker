@@ -112,7 +112,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
     private PhysicsResult nextPhysicsResult = null;
 
     private EntityPose pose = EntityPose.STANDING;
-    private boolean poseExperiment = false;
+    private boolean canSendPose = true;
 
     // Need to key it because block handlers can be singletons
     record CollisionKey(CollidableBlock block, BlockVec pos) {
@@ -192,17 +192,18 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         visibilityByEntity.clear();
     }
 
-    public void setPoseExperiment(boolean enabled) {
-        this.poseExperiment = enabled;
+    // region EXT: Pose
+    public void setCanSendPose(boolean canSend) {
+        this.canSendPose = canSend;
     }
 
-    public boolean hasPoseExperiment() {
-        return this.poseExperiment;
+    public boolean canSendPose() {
+        return this.canSendPose;
     }
 
     @Override
     public @NotNull EntityPose getPose() {
-        return this.poseExperiment ? this.pose : super.getPose();
+        return this.canSendPose ? super.getPose() : this.pose;
     }
 
     /// We override this to use our own canFitWithBoundingBox implementation which correctly handles per-player blocks.
@@ -241,7 +242,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
             newPose = EntityPose.STANDING;
         }
 
-        if (newPose != oldPose && !this.poseExperiment) setPose(newPose);
+        if (newPose != oldPose && this.canSendPose) setPose(newPose);
         this.pose = newPose;
 
         if (this.hasTag(DebugRenderersCommand.DEBUG_PLAYER_BOUNDING_BOX)) {
@@ -265,6 +266,8 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
             }
         }
     }
+
+    // endregion
 
     public @NotNull CompletableFuture<Void> teleport(
             @NotNull Pos position, @NotNull Vec velocity, long @Nullable [] chunks,

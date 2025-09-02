@@ -29,6 +29,7 @@ import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -38,6 +39,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
 
     sealed interface AnyPlaying extends ParkourState {
         AttributeModifier NO_FALL_DAMAGE_MODIFIER = new AttributeModifier("mapmaker:play.no_fall_damage", 500, AttributeOperation.ADD_VALUE);
+        Instant NO_POSE_CHANGES_EPOCH = Instant.ofEpochMilli(1756771200000L); // 2025-09-02 12:00:00 GMT
 
         SaveState saveState();
 
@@ -49,9 +51,11 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
 
         @Override
         default void configurePlayer(ParkourMapWorld world, Player player, @Nullable ParkourState lastState) {
+            var mp = (MapPlayer) player;
+
             player.getAttribute(Attribute.SAFE_FALL_DISTANCE).addModifier(NO_FALL_DAMAGE_MODIFIER);
             player.updateViewerRule(new PlayerVisibility.ViewerRule(player, world));
-            ((MapPlayer) player).setVisibilityFunc(new PlayerVisibility.VisibilityRule(player, world));
+            mp.setVisibilityFunc(new PlayerVisibility.VisibilityRule(player, world));
 
             // Timer is only added for scorable playing states.
             ActionBar.forPlayer(player).addProvider(ParkourTimerHud.INSTANCE);
@@ -84,7 +88,12 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
                 ActionBar.forPlayer(player).addProvider(ParkourDebugHud.INSTANCE);
             }
 
-            ((MapPlayer) player).setPoseExperiment(MapFeatureFlags.NO_POSE_CHANGES.test(player));
+            var map = world.map();
+            switch (map.getSetting(MapSettings.CAN_SEND_POSE)) {
+                case NOT_SET -> mp.setCanSendPose(map.publishedAt() != null && map.publishedAt().isBefore(NO_POSE_CHANGES_EPOCH));
+                case TRUE -> mp.setCanSendPose(true);
+                case FALSE -> mp.setCanSendPose(false);
+            }
         }
 
         @Override

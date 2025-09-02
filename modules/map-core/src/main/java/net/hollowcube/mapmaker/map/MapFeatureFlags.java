@@ -7,7 +7,6 @@ public final class MapFeatureFlags {
     // Experiments
     public static final FeatureFlag BIOME_EDITOR = FeatureFlag.of("map.biome_editor");
     public static final FeatureFlag DISPLAY_ENTITY_EDITOR = FeatureFlag.of("map.display_entity_editor");
-    public static final FeatureFlag NO_POSE_CHANGES = FeatureFlag.of("map.no_pose_changes");
 
     public static final FeatureFlag MARKER_TOOL = FeatureFlag.of("map.marker_tool");
 

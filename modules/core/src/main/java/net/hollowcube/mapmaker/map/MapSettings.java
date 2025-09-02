@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.map.setting.TimeOfDay;
 import net.hollowcube.mapmaker.map.setting.WeatherType;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.util.TriState;
 import net.minestom.server.ServerFlag;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
@@ -45,6 +46,7 @@ public class MapSettings {
     public static final MapSetting<WeatherType> WEATHER_TYPE = MapSetting.Enum("weather_type", WeatherType.CLEAR);
     public static final MapSetting<Boolean> LIGHTING = MapSetting.Bool("lighting", false);
     public static final MapSetting<String> RESOURCE_PACK = MapSetting.String("resource_pack", "");
+    public static final MapSetting<TriState> CAN_SEND_POSE = MapSetting.Enum("can_send_pose", TriState.NOT_SET);
 
     public static final MapSetting<Boolean>[] TOOLTIP_SETTINGS = new MapSetting[]{
             BOAT, ONLY_SPRINT, NO_SPRINT, NO_JUMP, NO_SNEAK,
