@@ -111,7 +111,6 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
     // Only present sometimes (eg during riptide)
     private PhysicsResult nextPhysicsResult = null;
 
-    private EntityPose pose = EntityPose.STANDING;
     private boolean canSendPose = true;
 
     // Need to key it because block handlers can be singletons
@@ -147,6 +146,18 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         // In case it is sent from somewhere else
         if (packet instanceof PingPacket(int id))
             lastPingId.set(id);
+        // Don't send pose packets to self if we aren't supposed to
+        if (
+                packet instanceof EntityMetaDataPacket(var entity, var entries) &&
+                entity == this.getEntityId() &&
+                entries.containsKey(MetadataDef.POSE.index()) &&
+                !canSendPose
+        ) {
+            var newEntries = new HashMap<>(entries);
+            newEntries.remove(MetadataDef.POSE.index());
+            super.sendPacket(new EntityMetaDataPacket(entity, newEntries));
+            return;
+        }
         super.sendPacket(packet);
     }
 
@@ -201,11 +212,6 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         return this.canSendPose;
     }
 
-    @Override
-    public @NotNull EntityPose getPose() {
-        return this.canSendPose ? super.getPose() : this.pose;
-    }
-
     /// We override this to use our own canFitWithBoundingBox implementation which correctly handles per-player blocks.
     @Override
     public void updatePose() {
@@ -242,8 +248,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
             newPose = EntityPose.STANDING;
         }
 
-        if (newPose != oldPose && this.canSendPose) setPose(newPose);
-        this.pose = newPose;
+        if (newPose != oldPose) setPose(newPose);
 
         if (this.hasTag(DebugRenderersCommand.DEBUG_PLAYER_BOUNDING_BOX)) {
             var box = getBoundingBox();
