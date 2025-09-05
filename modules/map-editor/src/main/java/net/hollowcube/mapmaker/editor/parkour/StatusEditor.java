@@ -19,6 +19,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.TagHandler;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static net.hollowcube.mapmaker.map.util.EventUtil.playerEventNode;
@@ -32,13 +33,14 @@ public class StatusEditor {
             .addListener(Map2PlayerBlockInteractEvent.class, StatusEditor::handleBlockInteract);
 
     public static final ObjectEntityEditor MARKER_EDITOR = (player, entity) -> {
-        var statusData = Objects.requireNonNullElseGet(entity.getTag(StatusPlateBlock.ENTITY_DATA_TAG), ActionTriggerData::new);
+        var data = Objects.requireNonNullElseGet(entity.getTag(StatusPlateBlock.ENTITY_DATA_TAG), ActionTriggerData::new);
+        var repeatable = new AtomicBoolean(data.repeatable());
         var actionLocation = entity.getPosition().withY(y -> y + Objects.requireNonNullElse(entity.getMin(), Pos.ZERO).y());
-        var host = Panel.open(player, new ActionEditorView(statusData.actions(), "Status"));
+        var host = Panel.open(player, new ActionEditorView(data.actions(), repeatable, "Status"));
         host.setTag(ActionEditorView.ACTION_LOCATION, actionLocation);
         host.setTag(TeleportAction.SPC_TAG, entity);
         host.onClose(() -> {
-            entity.setTag(StatusPlateBlock.ENTITY_DATA_TAG, statusData);
+            entity.setTag(StatusPlateBlock.ENTITY_DATA_TAG, data.withRepeatable(repeatable.get()));
             entity.handleDataChange(player);
         });
         return true;
@@ -65,11 +67,12 @@ public class StatusEditor {
 
         // Open checkpoint settings GUI
         var data = Objects.requireNonNullElseGet(event.block().getTag(StatusPlateBlock.DATA_TAG), ActionTriggerData::new);
-        var host = Panel.open(player, new ActionEditorView(data.actions(), "Status"));
+        var repeatable = new AtomicBoolean(data.repeatable());
+        var host = Panel.open(player, new ActionEditorView(data.actions(), repeatable, "Status"));
         host.setTag(ActionEditorView.ACTION_LOCATION, event.blockPosition());
         host.setTag(TeleportAction.SPC_TAG, event.blockPosition());
         host.onClose(() -> {
-            var newNbt = DFU.encodeNbt(ActionTriggerData.CODEC, data);
+            var newNbt = DFU.encodeNbt(ActionTriggerData.CODEC, data.withRepeatable(repeatable.get()));
             world.instance().setBlock(event.blockPosition(), event.block().withNbt(newNbt));
         });
     }

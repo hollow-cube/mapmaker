@@ -23,4 +23,7 @@ public record ActionTriggerData(
         this(new ActionList(), false);
     }
 
+    public ActionTriggerData withRepeatable(boolean repeatable) {
+        return new ActionTriggerData(actions, repeatable);
+    }
 }

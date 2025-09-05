@@ -9,6 +9,9 @@ import net.hollowcube.mapmaker.runtime.parkour.action.ActionList;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionRegistry;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.tag.Tag;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
 
@@ -20,6 +23,10 @@ public class ActionEditorView extends Panel {
     private final ActionList actionList;
 
     public ActionEditorView(ActionList actions, String title) {
+        this(actions, null, title);
+    }
+
+    public ActionEditorView(ActionList actions, @Nullable AtomicBoolean repeatable, String title) {
         super(9, 10);
         this.actionList = actions;
 
@@ -31,11 +38,39 @@ public class ActionEditorView extends Panel {
         add(2, 0, new Text(null, 5, 1, "Current Actions")
                 .align(Text.CENTER, Text.CENTER)
                 .background("generic2/btn/default/5_1"));
-        add(7, 0, new Button("gui.action.custom_blocks", 2, 1)
-                .background("generic2/btn/default/2_1")
-                .sprite("action/icon/cmd", 12, 3));
+
+        if (repeatable != null) {
+            add(7, 0, new RepeatableButton(repeatable, 2, 1));
+        } else {
+            add(7, 0, new Button("gui.action.custom_blocks", 2, 1)
+                    .background("generic2/btn/default/2_1")
+                    .sprite("action/icon/cmd", 12, 3));
+        }
 
         add(1, 2, new ActionListPanel());
+    }
+
+    private static class RepeatableButton extends Button {
+
+        private final AtomicBoolean state;
+
+        public RepeatableButton(AtomicBoolean state, int width, int height) {
+            super(null, width, height);
+
+            this.onLeftClick(() -> {
+                state.set(!state.get());
+                update();
+            });
+
+            this.state = state;
+            this.update();
+        }
+
+        private void update() {
+            var state = this.state.get();
+            this.translationKey(state ? "gui.status.repeatable.on" : "gui.status.repeatable.off");
+            this.background(state ? "action/list/repeatable_on" : "action/list/repeatable_off");
+        }
     }
 
     private class ActionListPanel extends Panel {
