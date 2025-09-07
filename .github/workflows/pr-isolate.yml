@@ -46,6 +46,7 @@ jobs:
           AWS_S3_REGION: "us-east-1"
           SOURCE_DIR: out
   docker-build-map-isolate:
+    needs: resource-pack-build
     runs-on: ubuntu-latest
     steps:
       - name: Import Secrets
@@ -71,6 +72,7 @@ jobs:
         env:
           MAPMAKER_VERSION: ${{ github.ref_name }}
           MAPMAKER_COMMIT_HASH: ${{ github.sha }}
+          MAPMAKER_RESOURCE_PACK_HASH: ${{ needs.resource-pack-build.outputs.resource_pack_sha }}
         run: ./gradlew :bin:map-isolate:nativeCompile -PisRelease=false --no-configuration-cache
 
       # Build and push docker image

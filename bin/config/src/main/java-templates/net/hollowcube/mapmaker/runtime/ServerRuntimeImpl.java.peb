@@ -15,7 +15,7 @@ public class ServerRuntimeImpl implements ServerRuntime {
     private String version = "{{ version }}";
     private String commit = "{{ commitHash }}";
     private String minestom = "{{ minestomVersion }}";
-    private String resourcePackHash = null;
+    private String resourcePackHash = {{ resourcePackHash }};
     private String size = "unknown";
     private boolean isRelease = {{ isRelease }};
 
@@ -27,7 +27,8 @@ public class ServerRuntimeImpl implements ServerRuntime {
         if (commit != null) this.commit = commit;
 
         var resourcePackHash = System.getenv("MAPMAKER_RESOURCE_PACK_HASH");
-        if (resourcePackHash != null) this.resourcePackHash = resourcePackHash;
+        if (this.resourcePackHash == null && resourcePackHash != null)
+            this.resourcePackHash = resourcePackHash;
 
         var instanceSize = System.getenv("MAPMAKER_INSTANCE_SIZE");
         if (instanceSize != null) this.size = instanceSize;
