@@ -70,8 +70,8 @@ jobs:
       # Build server
       - name: Build standalone binary
         env:
-          MAPMAKER_VERSION: ${{ github.ref_name }}
-          MAPMAKER_COMMIT_HASH: ${{ github.sha }}
+          MAPMAKER_VERSION: ${{ github.event.pull_request.title || github.ref_name }}
+          MAPMAKER_COMMIT_HASH: ${{ github.event.pull_request.head.sha || github.sha }}
           MAPMAKER_RESOURCE_PACK_HASH: ${{ needs.resource-pack-build.outputs.resource_pack_sha }}
         run: ./gradlew :bin:map-isolate:nativeCompile -PisRelease=false --no-configuration-cache
 
