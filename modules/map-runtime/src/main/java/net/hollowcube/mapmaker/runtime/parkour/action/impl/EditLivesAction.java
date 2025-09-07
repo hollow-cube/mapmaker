@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.runtime.parkour.action.impl;
 
-import net.hollowcube.common.util.RelativePos;
+import net.hollowcube.common.math.relative.RelativePos;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.runtime.PlayState;
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+@SuppressWarnings("UnstableApiUsage")
 public record EditLivesAction(
         Operation operation,
         int lives,
@@ -38,7 +39,7 @@ public record EditLivesAction(
     public static final StructCodec<EditLivesAction> CODEC = StructCodec.struct(
             "operation", Operation.CODEC.optional(Operation.SET), EditLivesAction::operation,
             "value", ExtraCodecs.clamppedInt(0, 10).optional(DEFAULT_LIVES), EditLivesAction::lives,
-            "deathPosition", RelativePos.CODEC.optional(), EditLivesAction::deathPosition,
+            "deathPosition", RelativePos.STRUCT_CODEC.optional(), EditLivesAction::deathPosition,
             EditLivesAction::new
     );
     public static final Action.Editor<EditLivesAction> EDITOR = new Action.Editor<>(
@@ -49,7 +50,7 @@ public record EditLivesAction(
         public static final Codec<Data> CODEC = StructCodec.struct(
                 "value", ExtraCodecs.clamppedInt(0, 20), Data::value,
                 "max", ExtraCodecs.clamppedInt(0, 20), Data::max,
-                "deathPosition", RelativePos.CODEC.optional(), Data::deathPosition,
+                "deathPosition", RelativePos.STRUCT_CODEC.optional(), Data::deathPosition,
                 Data::new
         );
 

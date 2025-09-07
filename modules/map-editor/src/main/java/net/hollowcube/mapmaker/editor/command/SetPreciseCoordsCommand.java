@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.editor.command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.common.util.RelativePos;
+import net.hollowcube.common.math.relative.RelativePos;
 import net.hollowcube.mapmaker.editor.parkour.CheckpointEditor;
 import net.hollowcube.mapmaker.editor.parkour.StatusEditor;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
@@ -70,7 +70,7 @@ public class SetPreciseCoordsCommand extends CommandDsl {
             for (int i = 0; i < data.size(); i++) {
                 var ref = data.get(i);
                 if (ref != null && ref.action() instanceof TeleportAction) {
-                    ref.update(_ -> new TeleportAction(new RelativePos(pos, RelativeFlags.NONE)));
+                    ref.update(_ -> new TeleportAction(RelativePos.abs(pos)));
                 }
             }
             updated.set(true);

@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.runtime.parkour.marker;
 
-import net.hollowcube.common.util.RelativePos;
+import net.hollowcube.common.math.relative.RelativeVec;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
@@ -27,7 +27,7 @@ public class HappyGhastMarkerHandler extends ObjectEntityHandler {
     public static final String ID = "mapmaker:happy_ghast";
 
     public record Data(
-            List<RelativePos> path,
+            List<RelativeVec> path,
             double speed,
             boolean smooth,
             boolean loop,
@@ -36,8 +36,7 @@ public class HappyGhastMarkerHandler extends ObjectEntityHandler {
     ) {
         private static final double DEFAULT_SPEED = 3.6; // blocks per second
         public static final StructCodec<Data> CODEC = StructCodec.struct(
-                // While technically these can contain pitch and yaw, it is always ignored.
-                "path", RelativePos.ARRAY_CODEC.list(64).optional(List.of()), Data::path,
+                "path", RelativeVec.ARRAY_CODEC.list(64).optional(List.of()), Data::path,
                 "speed", Codec.DOUBLE.optional(DEFAULT_SPEED), Data::speed,
                 "smooth", Codec.BOOLEAN.optional(false), Data::smooth,
                 "loop", Codec.BOOLEAN.optional(false), Data::loop,
@@ -84,15 +83,15 @@ public class HappyGhastMarkerHandler extends ObjectEntityHandler {
             return;
         }
 
+        var origin = entity.getPosition().asVec();
 
         double lastTime = 0;
-        var lastPos = entity.getPosition().withView(0, 0);
+        var lastPos = origin;
         var newKeyframes = new ArrayList<Keyframe>(data.path().size());
         newKeyframes.add(new Keyframe(0, Vec.fromPoint(lastPos)));
         for (int i = 0; i < data.path.size(); i++) {
             var relativePos = data.path().get(i);
-            var position = relativePos.resolve(entity.getPosition())
-                    .withView(0, 0);
+            var position = relativePos.resolve(origin);
             var duration = lastPos.distance(position) / Math.abs(data.speed);
             lastTime += duration;
             lastPos = position;

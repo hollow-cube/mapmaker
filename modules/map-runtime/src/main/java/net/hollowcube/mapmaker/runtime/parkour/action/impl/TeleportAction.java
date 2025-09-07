@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.runtime.parkour.action.impl;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.common.util.RelativePos;
+import net.hollowcube.common.math.relative.RelativePos;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Sprite;
@@ -37,7 +37,7 @@ public record TeleportAction(RelativePos target) implements Action {
 
     public static final Key KEY = Key.key("mapmaker:teleport");
     public static final StructCodec<TeleportAction> CODEC = StructCodec.struct(
-            StructCodec.INLINE, RelativePos.CODEC.optional(RelativePos.REL_ZERO), TeleportAction::target,
+            StructCodec.INLINE, RelativePos.STRUCT_CODEC.optional(RelativePos.ORIGIN), TeleportAction::target,
             TeleportAction::new);
     public static final Action.Editor<TeleportAction> EDITOR = new Action.Editor<>(
             TeleportAction.Editor::new, _ -> SPRITE_DEFAULT,
@@ -50,15 +50,15 @@ public record TeleportAction(RelativePos target) implements Action {
 
     @Override
     public void applyTo(Player player, PlayState state) {
-        player.teleport(target.inner(), Vec.ZERO, null, target.relativeFlags());
+        player.teleport(target.pos(), Vec.ZERO, null, target.flags());
         player.playSound(TELEPORT_SOUND, target.resolve(player.getPosition()));
     }
 
     private static TranslatableComponent makeThumbnail(@Nullable TeleportAction action) {
         if (action == null) return Component.translatable("gui.action.teleport.thumbnail.empty");
         return Component.translatable("gui.action.teleport.thumbnail", List.of(
-                tildeOnly(action.target.strX()), tildeOnly(action.target.strY()), tildeOnly(action.target.strZ()),
-                tildeOnly(action.target.strYaw()), tildeOnly(action.target.strPitch())
+                tildeOnly(action.target.x()), tildeOnly(action.target.y()), tildeOnly(action.target.z()),
+                tildeOnly(action.target.yaw()), tildeOnly(action.target.pitch())
         ));
     }
 
@@ -81,23 +81,23 @@ public record TeleportAction(RelativePos target) implements Action {
 
             subtitleText.text("Set Coords");
 
-            this.xInput = add(1, 1, new TexturelessNumberInput(2, 0, "x", safeUpdate(RelativePos::withStrX)));
-            this.yInput = add(3, 1, new TexturelessNumberInput(2, 6, "y", safeUpdate(RelativePos::withStrY)));
-            this.zInput = add(5, 1, new TexturelessNumberInput(3, 12, "z", safeUpdate(RelativePos::withStrZ)));
+            this.xInput = add(1, 1, new TexturelessNumberInput(2, 0, "x", safeUpdate(RelativePos::withX)));
+            this.yInput = add(3, 1, new TexturelessNumberInput(2, 6, "y", safeUpdate(RelativePos::withY)));
+            this.zInput = add(5, 1, new TexturelessNumberInput(3, 12, "z", safeUpdate(RelativePos::withZ)));
 
-            this.yawInput = add(1, 3, new TexturelessNumberInput(2, 0, "yaw", safeUpdate(RelativePos::withStrYaw)));
-            this.pitchInput = add(3, 3, new TexturelessNumberInput(2, 6, "pitch", safeUpdate(RelativePos::withStrPitch)));
+            this.yawInput = add(1, 3, new TexturelessNumberInput(2, 0, "yaw", safeUpdate(RelativePos::withYaw)));
+            this.pitchInput = add(3, 3, new TexturelessNumberInput(2, 6, "pitch", safeUpdate(RelativePos::withPitch)));
             this.commandButton = add(5, 4, new Button("gui.action.teleport.command", 3, 1)
                     .onLeftClick(this::beginCommandUpdate));
         }
 
         @Override
         protected void update(TeleportAction action) {
-            this.xInput.update(action.target.strX());
-            this.yInput.update(action.target.strY());
-            this.zInput.update(action.target.strZ());
-            this.yawInput.update(action.target.strYaw());
-            this.pitchInput.update(action.target.strPitch());
+            this.xInput.update(action.target.x());
+            this.yInput.update(action.target.y());
+            this.zInput.update(action.target.z());
+            this.yawInput.update(action.target.yaw());
+            this.pitchInput.update(action.target.pitch());
 
             commandButton.lorePostfix(host.hasTag(TeleportAction.SPC_TAG)
                     ? LORE_POSTFIX_CLICKEDIT : LORE_POSTFIX_NOT_AVAILABLE);
