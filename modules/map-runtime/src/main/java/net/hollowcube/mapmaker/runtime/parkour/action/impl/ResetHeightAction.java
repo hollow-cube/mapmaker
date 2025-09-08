@@ -59,30 +59,53 @@ public record ResetHeightAction(
         return action == null || action.value == NO_RESET_HEIGHT
                 ? Component.translatable("gui.action.reset_height.thumbnail.clear")
                 : Component.translatable("gui.action.reset_height.thumbnail", List.of(
-                Component.text(action.value)
-        ));
+                        Component.text(action.value)
+                ));
     }
 
     private static Panel makeEditor(ActionList.Ref ref) {
         return new ActionEditorAnvil<>(ref, ResetHeightAction::valueToString, ResetHeightAction::stringToValue) {
+
+            @Override
+            protected ResetHeightAction parse(ResetHeightAction data, String text) {
+                try {
+                    return super.parse(data, text);
+                } catch (NumberFormatException _) {
+                    host.player().sendMessage(Component.translatable("create_maps.checkpoint.reset_height.nan"));
+                    host.player().closeInventory();
+                    return data.withValue(NO_RESET_HEIGHT);
+                }
+            }
+
             @Override
             protected boolean validateResult(ResetHeightAction result) {
                 var actionLocation = Objects.requireNonNull(host.getTag(ActionEditorView.ACTION_LOCATION), "action location");
                 int maxResetHeight = actionLocation.blockY();
                 var teleport = ref.parent().findLast(TeleportAction.class);
-                if (teleport != null) maxResetHeight = Math.max(maxResetHeight,
-                        teleport.target().resolve(Pos.fromPoint(actionLocation)).blockY());
+                if (teleport != null) {
+                    maxResetHeight = Math.max(
+                            maxResetHeight,
+                            teleport.target().resolve(Pos.fromPoint(actionLocation)).blockY()
+                    );
+                }
 
-                if (result.value < -64) {
+                if (result.value == NO_RESET_HEIGHT) {
+                    return true;
+                } else if (result.value < -64) {
                     host.player().sendMessage(Component.translatable("create_maps.checkpoint.reset_height.too_low"));
                     host.player().closeInventory();
                     return false;
                 } else if (result.value > maxResetHeight) {
-                    host.player().sendMessage(Component.translatable("create_maps.checkpoint.reset_height.too_high",
-                            Component.text(result.value), Component.text(maxResetHeight)));
+                    host.player().sendMessage(Component.translatable(
+                            "create_maps.checkpoint.reset_height.too_high",
+                            Component.text(result.value),
+                            Component.text(maxResetHeight)
+                    ));
                     host.player().closeInventory();
                     return false;
-                } else return true;
+                } else {
+                    return true;
+                }
             }
         };
     }
