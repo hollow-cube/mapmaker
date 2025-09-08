@@ -41,6 +41,7 @@ import org.jetbrains.annotations.*;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiPredicate;
 
 import static net.hollowcube.mapmaker.map.util.spatial.Octree.simpleOctree;
 
@@ -68,7 +69,7 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     private final Map<Player, S> playerStates = new HashMap<>();
     // pendingStateChanges is a map to deduplicate single tick changes (it should be
     // impossible to change a player's state multiple times per tick, latest wins).
-    private final Map<Player, S> pendingStateChanges = new HashMap<>();
+    private final Map<Player, PlayerStateChange<S, W>> pendingStateChanges = new HashMap<>();
     private final Map<Player, CompletableFuture<@Nullable Void>> pendingRemovals = new ConcurrentHashMap<>();
     protected volatile boolean isClosed;
 
@@ -178,8 +179,16 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         return playerStates.get(player);
     }
 
-    public void changePlayerState(Player player, S nextState) {
-        pendingStateChanges.merge(player, nextState, S::handleConflict);
+    public final void changePlayerState(Player player, S nextState) {
+        changePlayerState(player, nextState, (_, _) -> true);
+    }
+
+    public void changePlayerState(Player player, S nextState, BiPredicate<Player, S> predicate) {
+        pendingStateChanges.merge(
+                player,
+                new PlayerStateChange<>(nextState, predicate),
+                PlayerStateChange::handleConflict
+        );
     }
 
     @Override
@@ -300,19 +309,22 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
             final var entry = iter.next();
             final var player = entry.getKey();
             final var lastState = playerStates.get(player);
-            final var nextState = entry.getValue();
+            final var change = entry.getValue();
+            final var nextState = change.state();
 
             var stateChangeEvent = new MapCoreJFR.StateChange(getClass(), lastState.getClass(), nextState.getClass());
             stateChangeEvent.begin();
             try {
-                lastState.resetPlayer((W) this, player, nextState);
-                playersByState[stateIndex(lastState)].remove(player);
+                if (change.canChange(player)) {
+                    lastState.resetPlayer((W) this, player, nextState);
+                    playersByState[stateIndex(lastState)].remove(player);
 
-                // todo what should we do if theres a failure here?
+                    // todo what should we do if theres a failure here?
 
-                playerStates.put(player, nextState);
-                playersByState[stateIndex(nextState)].add(player);
-                nextState.configurePlayer((W) this, player, lastState);
+                    playerStates.put(player, nextState);
+                    playersByState[stateIndex(nextState)].add(player);
+                    nextState.configurePlayer((W) this, player, lastState);
+                }
             } finally {
                 stateChangeEvent.commit();
                 iter.remove();

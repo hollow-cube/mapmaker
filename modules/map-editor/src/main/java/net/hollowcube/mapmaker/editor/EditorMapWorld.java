@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
 import static net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld.SPAWN_CHECKPOINT_EFFECTS;
@@ -331,8 +332,8 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     }
 
     @Override
-    public void changePlayerState(Player player, EditorState nextState) {
-        super.changePlayerState(player, nextState);
+    public void changePlayerState(Player player, EditorState nextState, BiPredicate<Player, EditorState> predicate) {
+        super.changePlayerState(player, nextState, predicate);
         spawnEntity.updateViewableRule();
     }
 

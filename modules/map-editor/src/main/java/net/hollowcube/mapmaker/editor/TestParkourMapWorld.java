@@ -17,12 +17,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.BiPredicate;
 
 public class TestParkourMapWorld extends ParkourMapWorld {
 
     private final EditorMapWorld parent;
-
-    private boolean isRebuildingCollisionTree = false;
 
     public TestParkourMapWorld(EditorMapWorld parent) {
         super(parent.server(), parent.map(), parent.instance());
@@ -86,10 +85,10 @@ public class TestParkourMapWorld extends ParkourMapWorld {
     }
 
     @Override
-    public void changePlayerState(Player player, ParkourState nextState) {
+    public void changePlayerState(Player player, ParkourState nextState, BiPredicate<Player, ParkourState> predicate) {
         if (nextState instanceof ParkourState.Playing2)
             throw new IllegalStateException("Test worlds may never be scorable");
-        super.changePlayerState(player, nextState);
+        super.changePlayerState(player, nextState, predicate);
     }
 
     @Override

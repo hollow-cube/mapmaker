@@ -31,17 +31,22 @@ public class SpectateHelper {
             case null, default -> null;
         };
 
-        // Must be standing on the ground (not falling) to enter spectator mode
+        // Map can't be no-spec
         if (nextState instanceof ParkourState.Spectating) {
             if (world.map().getSetting(MapSettings.NO_SPECTATOR)) return;
-
-            if (!player.isOnGround() && player.getVehicle() == null) {
-                player.sendMessage(Component.translatable("map.spectator_mode.solid_ground"));
-                return;
-            }
+            world.changePlayerState(player, nextState, SpectateHelper::checkStateChange);
+        } else if (nextState != null) {
+            world.changePlayerState(player, nextState);
         }
+    }
 
-        if (nextState != null) world.changePlayerState(player, nextState);
+    // Must be standing on the ground (not falling) to enter spectator mode
+    private static boolean checkStateChange(Player player, ParkourState state) {
+        if (!player.isOnGround() && player.getVehicle() == null) {
+            player.sendMessage(Component.translatable("map.spectator_mode.solid_ground"));
+            return false;
+        }
+        return true;
     }
 
     public static void changeGameplaySettingsState(ParkourMapWorld world, Player player, TriState nextGameplayState) {
