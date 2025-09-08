@@ -67,6 +67,7 @@ public class OpUtils {
      * Safely casts an object to a class.
      */
     @Contract("null, _ -> null")
+    @UnknownNullability
     public static <T> T safeCast(Object object, Class<T> clazz) {
         return clazz.isInstance(object) ? clazz.cast(object) : null;
     }

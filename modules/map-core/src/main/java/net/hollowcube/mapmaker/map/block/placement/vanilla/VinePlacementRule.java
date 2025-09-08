@@ -90,7 +90,7 @@ public final class VinePlacementRule extends BaseBlockPlacementRule {
         }
         if ($$0.id() == this.block.id()) {
             $$6 = $$0;
-        } else if ($$0.id() == Block.WATER.id()) {
+        } else if ($$0.id() == Block.WATER.id() && this.block.getProperty("waterlogged") != null) {
             $$6 = this.block.withProperty("waterlogged", "true");
         } else {
             $$6 = this.block;
