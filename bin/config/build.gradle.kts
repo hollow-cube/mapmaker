@@ -27,7 +27,7 @@ sourceSets {
                 val staticPackHash = System.getenv("MAPMAKER_RESOURCE_PACK_HASH")
                 property(
                     "resourcePackHash",
-                    if (staticPackHash != null) "\"${this}\"" else "null"
+                    if (staticPackHash != null) "\"${staticPackHash}\"" else "null"
                 )
             }
         }
