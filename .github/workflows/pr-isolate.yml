@@ -90,4 +90,4 @@ jobs:
           file: "bin/map-isolate/deploy/Dockerfile-native"
           platforms: linux/amd64
           push: true
-          tags: mworzala/mapmaker-map-isolate:${{ github.sha }}
+          tags: mworzala/mapmaker-map-isolate:preview-${{ github.event.pull_request.head.sha || github.sha }}
