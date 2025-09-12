@@ -24,7 +24,7 @@ public class MapPlayCommand extends CommandDsl {
     private final ServerBridge bridge;
 
     public MapPlayCommand(@NotNull MapService mapService, @NotNull PermManager permManager, @NotNull ServerBridge bridge) {
-        super("edit");
+        super("play");
         this.mapService = mapService;
         this.bridge = bridge;
 
