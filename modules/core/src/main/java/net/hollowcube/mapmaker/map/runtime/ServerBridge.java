@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.runtime;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Implements required communication from hub servers to all available map servers.
@@ -13,6 +14,11 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface ServerBridge {
 
+    record JoinConfig(@NotNull String mapId, @NotNull JoinMapState joinMapState, @NotNull String source,
+                      @Nullable String isolateOverride) {
+
+    }
+
     /**
      * Sends the given player to an instance of the given map.
      * <p>
@@ -21,7 +27,12 @@ public interface ServerBridge {
      * system, or an external allocator/matchmaker.
      */
     @Blocking
-    void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState, @NotNull String source);
+    default void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState, @NotNull String source) {
+        joinMap(player, new JoinConfig(mapId, joinMapState, source, null));
+    }
+
+    @Blocking
+    void joinMap(@NotNull Player player, JoinConfig joinConfig);
 
     void joinHub(@NotNull Player player);
 

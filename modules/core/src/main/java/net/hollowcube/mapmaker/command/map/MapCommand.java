@@ -22,6 +22,7 @@ public class MapCommand extends CommandDsl {
 
     public final MapDeleteCommand delete;
     public final MapEditCommand edit;
+    public final MapPlayCommand play;
     public final MapLeaderboardCommand leaderboard;
     public final MapAlterCommand alter;
     public final MapDrainCommand drain;
@@ -53,6 +54,7 @@ public class MapCommand extends CommandDsl {
         // Permissioned commands
         addSubcommand(this.delete = new MapDeleteCommand(mapService, permManager));
         addSubcommand(this.edit = new MapEditCommand(mapService, permManager, bridge));
+        addSubcommand(this.play = new MapPlayCommand(mapService, permManager, bridge));
         addSubcommand(this.leaderboard = new MapLeaderboardCommand(playerService, mapService, permManager));
         this.alter = new MapAlterCommand(mapService, permManager);
         addSubcommand(this.drain = new MapDrainCommand(mapService, permManager, producer));

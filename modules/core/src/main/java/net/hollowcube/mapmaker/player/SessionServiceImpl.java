@@ -10,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -148,6 +150,34 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
             case 401 -> throw createUnauthorizedError(res);
             case 503 -> throw new NoAvailableServerException();
             default -> throw new InternalError("Failed to findMapServer (" + res.statusCode() + "): " + res.body());
+        };
+    }
+
+    private record IsolateOverride(
+            @NotNull String id,
+            @NotNull Instant lastUpdated
+    ) {
+    }
+
+    @Override
+    public @NotNull List<String> getIsolateOverrides() {
+        var req = HttpRequest.newBuilder()
+                .GET()
+                .uri(url("%s/server/isolate-overrides", baseUrl))
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> {
+                var entries = GSON.fromJson(res.body(), new TypeToken<List<IsolateOverride>>() {
+                });
+                yield entries.stream()
+                        .sorted(Comparator.comparing(a -> a.lastUpdated))
+                        .map(IsolateOverride::id)
+                        .toList();
+            }
+            case 401 -> throw createUnauthorizedError(res);
+            case 503 -> throw new NoAvailableServerException();
+            default -> throw new InternalError("Failed to join hub (" + res.statusCode() + "): " + res.body());
         };
     }
 

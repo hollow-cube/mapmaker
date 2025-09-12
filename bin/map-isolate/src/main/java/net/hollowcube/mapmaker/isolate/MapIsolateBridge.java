@@ -28,7 +28,7 @@ public class MapIsolateBridge implements ServerBridge {
     }
 
     @Override
-    public void joinMap(Player player, String mapId, JoinMapState joinMapState, String source) {
+    public void joinMap(Player player, JoinConfig joinConfig) {
         if (CoreFeatureFlags.MAP_DISABLE_ALL.test()) {
             player.sendMessage(Component.translatable("ff.maps_disabled"));
             return;
@@ -36,7 +36,7 @@ public class MapIsolateBridge implements ServerBridge {
 
         try {
             var playerId = player.getUuid().toString();
-            var map = mapService.getMap(playerId, mapId);
+            var map = mapService.getMap(playerId, joinConfig.mapId());
 
             var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
             if (playerProtocolVersion < map.protocolVersion()) {
@@ -45,12 +45,12 @@ public class MapIsolateBridge implements ServerBridge {
                 return;
             }
 
-            var targetState = switch (joinMapState) {
+            var targetState = switch (joinConfig.joinMapState()) {
                 case EDITING -> MapPresence.STATE_EDITING;
                 case PLAYING -> MapPresence.STATE_PLAYING;
                 case SPECTATING -> MapPresence.STATE_SPECTATING;
             };
-            var response = sessionService.joinMapV2(new JoinMapRequest(playerId, mapId, targetState, source));
+            var response = sessionService.joinMapV2(new JoinMapRequest(playerId, joinConfig.mapId(), targetState, joinConfig.source(), joinConfig.isolateOverride()));
             logger.info("join map result: {}", response);
 
             ProxySupport.transfer(player, response.serverClusterIp());

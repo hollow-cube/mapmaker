@@ -1,0 +1,54 @@
+package net.hollowcube.mapmaker.command.map;
+
+import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.arg.Argument;
+import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.command.arg.CoreArgument;
+import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.perm.PermManager;
+import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+
+public class MapPlayCommand extends CommandDsl {
+    private final Argument<@Nullable MapData> mapArg;
+    private final Argument<String> isolateArg;
+
+    private final MapService mapService;
+    private final ServerBridge bridge;
+
+    public MapPlayCommand(@NotNull MapService mapService, @NotNull PermManager permManager, @NotNull ServerBridge bridge) {
+        super("edit");
+        this.mapService = mapService;
+        this.bridge = bridge;
+
+        description = "Play a map (forced)";
+        examples = List.of("/map play 123-456-789", "/map play a12345bc-67de-8f91-ghij-2345k6l78912");
+        mapArg = CoreArgument.Map("map", mapService)
+                .description("The ID of the map to play");
+        isolateArg = Argument.GreedyString("isolate");
+
+        setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
+        addSyntax(playerOnly(this::handleForcePlayMap), mapArg);
+        addSyntax(playerOnly(this::handleForcePlayMap), mapArg, isolateArg);
+    }
+
+    private void handleForcePlayMap(@NotNull Player player, @NotNull CommandContext context) {
+        var map = context.get(mapArg);
+        var isolateOverride = context.get(isolateArg);
+
+        if (map == null) {
+            player.sendMessage(
+                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+            return;
+        }
+
+        bridge.joinMap(player, new ServerBridge.JoinConfig(map.id(), ServerBridge.JoinMapState.PLAYING, "staff_edit_map", isolateOverride));
+    }
+}

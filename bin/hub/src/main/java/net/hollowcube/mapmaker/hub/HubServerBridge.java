@@ -12,7 +12,6 @@ import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.session.MapPresence;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,20 +21,20 @@ public class HubServerBridge implements ServerBridge {
     private final MapService mapService;
     private final SessionService sessionService;
 
-    public HubServerBridge(@NotNull MapService mapService, @NotNull SessionService sessionService) {
+    public HubServerBridge(MapService mapService, SessionService sessionService) {
         this.mapService = mapService;
         this.sessionService = sessionService;
     }
 
     @Override
-    public void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState, @NotNull String source) {
+    public void joinMap(Player player, JoinConfig joinConfig) {
         if (CoreFeatureFlags.MAP_DISABLE_ALL.test()) {
             player.sendMessage(Component.translatable("ff.maps_disabled"));
             return;
         }
 
         var playerId = player.getUuid().toString();
-        var map = mapService.getMap(playerId, mapId);
+        var map = mapService.getMap(playerId, joinConfig.mapId());
 
         var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
         if (playerProtocolVersion < map.protocolVersion()) {
@@ -46,12 +45,12 @@ public class HubServerBridge implements ServerBridge {
 
         MiscFunctionality.sendFadeout(player);
         try {
-            logger.debug("trying to join map {} with state {} for {}", mapId, joinMapState, playerId);
-            var res = sessionService.joinMapV2(new JoinMapRequest(playerId, mapId, switch (joinMapState) {
+            logger.debug("trying to join map {} with state {} for {}", joinConfig.mapId(), joinConfig.joinMapState(), playerId);
+            var res = sessionService.joinMapV2(new JoinMapRequest(playerId, joinConfig.mapId(), switch (joinConfig.joinMapState()) {
                 case EDITING -> MapPresence.STATE_EDITING;
                 case PLAYING -> MapPresence.STATE_PLAYING;
                 case SPECTATING -> MapPresence.STATE_SPECTATING;
-            }, source));
+            }, joinConfig.source(), joinConfig.isolateOverride()));
             logger.info("join map result: {}", res);
             ProxySupport.transfer(player, res.serverClusterIp());
         } catch (Exception e) {
@@ -63,7 +62,7 @@ public class HubServerBridge implements ServerBridge {
     }
 
     @Override
-    public void joinHub(@NotNull Player player) {
+    public void joinHub(Player player) {
         // This is a noop for the standalone hub bridge.
     }
 }

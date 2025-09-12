@@ -29,7 +29,7 @@ public class MapServerBridge implements ServerBridge {
     }
 
     @Override
-    public void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState, @NotNull String source) {
+    public void joinMap(@NotNull Player player, @NotNull JoinConfig joinConfig) {
         if (CoreFeatureFlags.MAP_DISABLE_ALL.test()) {
             player.sendMessage(Component.translatable("ff.maps_disabled"));
             return;
@@ -37,9 +37,9 @@ public class MapServerBridge implements ServerBridge {
 
         try {
             var playerId = player.getUuid().toString();
-            logger.debug("trying to join map {} with state {} for {}", mapId, joinMapState, playerId);
+            logger.debug("trying to join map {} with state {} for {}", joinConfig.mapId(), joinConfig.joinMapState(), playerId);
 
-            var map = server.mapService().getMap(playerId, mapId);
+            var map = server.mapService().getMap(playerId, joinConfig.mapId());
 
             var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
             if (playerProtocolVersion < map.protocolVersion()) {
@@ -48,18 +48,18 @@ public class MapServerBridge implements ServerBridge {
                 return;
             }
 
-            var targetState = switch (joinMapState) {
+            var targetState = switch (joinConfig.joinMapState()) {
                 case EDITING -> MapPresence.STATE_EDITING;
                 case PLAYING -> MapPresence.STATE_PLAYING;
                 case SPECTATING -> MapPresence.STATE_SPECTATING;
             };
-            var response = server.sessionService().joinMapV2(new JoinMapRequest(playerId, mapId, targetState, source));
+            var response = server.sessionService().joinMapV2(new JoinMapRequest(playerId, joinConfig.mapId(), targetState, joinConfig.source(), joinConfig.isolateOverride()));
             logger.info("join map result: {}", response);
 
             var currentServerId = AbstractHttpService.hostname;
             if (currentServerId.equals(response.server())) {
                 logger.info("moving between maps on this server");
-                this.moveBetweenMapsOnThisServer(player, mapId, targetState);
+                this.moveBetweenMapsOnThisServer(player, joinConfig.mapId(), targetState);
             } else {
                 logger.info("moving to other server");
                 ProxySupport.transfer(player, response.serverClusterIp());

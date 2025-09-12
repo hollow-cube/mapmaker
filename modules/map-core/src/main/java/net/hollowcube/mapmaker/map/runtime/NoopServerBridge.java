@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class NoopServerBridge implements ServerBridge {
     @Override
-    public void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState, @NotNull String source) {
+    public void joinMap(@NotNull Player player, @NotNull JoinConfig joinConfig) {
         player.sendMessage("joinMap not implemented in noop bridge");
     }
 

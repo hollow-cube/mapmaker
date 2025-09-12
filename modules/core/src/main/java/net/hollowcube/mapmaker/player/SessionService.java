@@ -25,6 +25,8 @@ public interface SessionService {
 
     @NotNull JoinMapResponse joinHubV2(@NotNull JoinHubRequest req);
 
+    @NotNull List<String> getIsolateOverrides();
+
     default @NotNull JoinMapResponse findMapServer(@NotNull String mapId) {
         throw new UnsupportedOperationException("todo");
     }

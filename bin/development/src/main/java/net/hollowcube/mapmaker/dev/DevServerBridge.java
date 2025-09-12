@@ -21,10 +21,10 @@ public final class DevServerBridge implements ServerBridge {
     }
 
     @Override
-    public void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState, @NotNull String source) {
+    public void joinMap(@NotNull Player player, @NotNull JoinConfig joinConfig) {
         FutureUtil.assertThread();
         var playerId = PlayerData.fromPlayer(player).id();
-        var map = server.mapService().getMap(playerId, mapId);
+        var map = server.mapService().getMap(playerId, joinConfig.mapId());
 
         var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
         if (playerProtocolVersion < map.protocolVersion()) {
@@ -33,7 +33,7 @@ public final class DevServerBridge implements ServerBridge {
             return;
         }
 
-        joinMapInternal(player, mapId, joinMapState);
+        joinMapInternal(player, joinConfig.mapId(), joinConfig.joinMapState());
     }
 
     @Override
