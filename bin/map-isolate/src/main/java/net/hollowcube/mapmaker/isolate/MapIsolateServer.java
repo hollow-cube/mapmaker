@@ -4,9 +4,11 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.Uuids;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
+import net.hollowcube.mapmaker.runtime.freeform.FreeformMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.session.Presence;
 import net.kyori.adventure.text.Component;
@@ -34,7 +36,7 @@ public class MapIsolateServer extends AbstractMapServer {
     // Its only kinda unknown. it's not created in the constructor, but after prepareState
     // it is always not-null which should cover any reasonable logic.
     // TODO: pretty sure we could do init in constructor, should investigate.
-    private @UnknownNullability ParkourMapWorld world;
+    private @UnknownNullability AbstractMapWorld<?, ?> world;
 
     public MapIsolateServer(ConfigLoaderV3 config) {
         super(config);
@@ -78,7 +80,7 @@ public class MapIsolateServer extends AbstractMapServer {
         try {
             var map = mapService().getMap(Uuids.ZERO, this.mapId);
 
-            world = new ParkourMapWorld(this, map);
+            world = new FreeformMapWorld(this, map);
             world.loadWorld();
 
             // We schedule on first tick end because submitTask invokes the executor immediately to determine
