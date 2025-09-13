@@ -18,6 +18,12 @@ public interface Action {
     default void applyTo(Player player, PlayState state) {
     }
 
+    enum Type {
+        SPAWN,
+        CHECKPOINT,
+        STATUS,
+    }
+
     record Editor<T extends Action>(
             @Nullable Function<ActionList.Ref, Panel> editor,
             Function<@Nullable T, Sprite> sprite,

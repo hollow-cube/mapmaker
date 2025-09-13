@@ -9,15 +9,13 @@ import net.minestom.server.codec.Transcoder;
 import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.registry.RegistryKey;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class ActionRegistry {
     private static final DynamicRegistry<StructCodec<? extends Action>> REGISTRY = DynamicRegistry.create(Key.key("mapmaker:action"));
     private static final DynamicRegistry<Action.Editor<? extends Action>> EDITOR_REGISTRY = DynamicRegistry.create(Key.key("mapmaker:action_editor"));
-    private static final List<Key> KEYS = new ArrayList<>();
+    private static final Map<Action.Type, List<Key>> KEYS = new HashMap<>();
 
     public static final Codec<RegistryKey<StructCodec<? extends Action>>> KEY_CODEC = RegistryKey.codec(_ -> REGISTRY);
     public static final Codec<Action> CODEC = Codec.RegistryTaggedUnion(_ -> REGISTRY, Action::codec, "type");
@@ -45,8 +43,8 @@ public final class ActionRegistry {
         return codec.decode(Transcoder.NBT, CompoundBinaryTag.empty()).orElseThrow();
     }
 
-    public static List<Key> keys() {
-        return KEYS;
+    public static List<Key> keys(Action.Type type) {
+        return KEYS.getOrDefault(type, List.of());
     }
 
     static {
@@ -67,10 +65,13 @@ public final class ActionRegistry {
         register(ChatAction.KEY, ChatAction.CODEC, ChatAction.EDITOR);
     }
 
-    private static <T extends Action> RegistryKey<StructCodec<? extends Action>> register(Key name, StructCodec<T> codec, Action.Editor<T> editor) {
+    private static <T extends Action> RegistryKey<StructCodec<? extends Action>> register(Key name, StructCodec<T> codec, Action.Editor<T> editor, Action.Type... types) {
         var key = REGISTRY.register(name, codec);
         EDITOR_REGISTRY.register(name, editor);
-        KEYS.add(name);
+        if (types.length == 0) types = Action.Type.values();
+        for (var type : types) {
+            KEYS.computeIfAbsent(type, _ -> new ArrayList<>()).add(name);
+        }
         return key;
     }
 

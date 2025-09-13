@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.map.event.Map2PlayerBlockInteractEvent;
 import net.hollowcube.mapmaker.map.item.handler.BlockItemHandler;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.panels.Panel;
+import net.hollowcube.mapmaker.runtime.parkour.action.Action;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
 import net.hollowcube.mapmaker.runtime.parkour.action.gui.ActionEditorView;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.TeleportAction;
@@ -36,7 +37,7 @@ public class StatusEditor {
         var data = Objects.requireNonNullElseGet(entity.getTag(StatusPlateBlock.ENTITY_DATA_TAG), ActionTriggerData::new);
         var repeatable = new AtomicBoolean(data.repeatable());
         var actionLocation = entity.getPosition().withY(y -> y + Objects.requireNonNullElse(entity.getMin(), Pos.ZERO).y());
-        var host = Panel.open(player, new ActionEditorView(data.actions(), repeatable, "Status"));
+        var host = Panel.open(player, new ActionEditorView(data.actions(), Action.Type.STATUS, repeatable, "Status"));
         host.setTag(ActionEditorView.ACTION_LOCATION, actionLocation);
         host.setTag(TeleportAction.SPC_TAG, entity);
         host.onClose(() -> {
@@ -68,7 +69,7 @@ public class StatusEditor {
         // Open checkpoint settings GUI
         var data = Objects.requireNonNullElseGet(event.block().getTag(StatusPlateBlock.DATA_TAG), ActionTriggerData::new);
         var repeatable = new AtomicBoolean(data.repeatable());
-        var host = Panel.open(player, new ActionEditorView(data.actions(), repeatable, "Status"));
+        var host = Panel.open(player, new ActionEditorView(data.actions(), Action.Type.STATUS, repeatable, "Status"));
         host.setTag(ActionEditorView.ACTION_LOCATION, event.blockPosition());
         host.setTag(TeleportAction.SPC_TAG, event.blockPosition());
         host.onClose(() -> {

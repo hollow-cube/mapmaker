@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.map.event.Map2PlayerBlockInteractEvent;
 import net.hollowcube.mapmaker.map.item.handler.BlockItemHandler;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.panels.Panel;
+import net.hollowcube.mapmaker.runtime.parkour.action.Action;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
 import net.hollowcube.mapmaker.runtime.parkour.action.gui.ActionEditorView;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.TeleportAction;
@@ -37,7 +38,7 @@ public class CheckpointEditor {
     public static final ObjectEntityEditor MARKER_EDITOR = (player, entity) -> {
         var checkpointData = Objects.requireNonNullElseGet(entity.getTag(CheckpointPlateBlock.ENTITY_DATA_TAG), ActionTriggerData::new);
         var actionLocation = entity.getPosition().withY(y -> y + Objects.requireNonNullElse(entity.getMin(), Pos.ZERO).y());
-        var host = Panel.open(player, new ActionEditorView(checkpointData.actions(), "Checkpoint"));
+        var host = Panel.open(player, new ActionEditorView(checkpointData.actions(), Action.Type.CHECKPOINT, "Checkpoint"));
         host.setTag(ActionEditorView.ACTION_LOCATION, actionLocation);
         host.setTag(TeleportAction.SPC_TAG, entity);
         host.onClose(() -> {
@@ -68,7 +69,7 @@ public class CheckpointEditor {
             return;
 
         var data = Objects.requireNonNullElseGet(event.block().getTag(CheckpointPlateBlock.DATA_TAG), ActionTriggerData::new);
-        var host = Panel.open(player, new ActionEditorView(data.actions(), "Checkpoint"));
+        var host = Panel.open(player, new ActionEditorView(data.actions(), Action.Type.CHECKPOINT, "Checkpoint"));
         host.setTag(ActionEditorView.ACTION_LOCATION, event.blockPosition());
         host.setTag(TeleportAction.SPC_TAG, event.blockPosition());
         host.onClose(() -> {

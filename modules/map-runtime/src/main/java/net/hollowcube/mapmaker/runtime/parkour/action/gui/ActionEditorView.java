@@ -21,14 +21,16 @@ public class ActionEditorView extends Panel {
     private static final int MAX_ACTIONS = 7 * 3;
 
     private final ActionList actionList;
+    private final Action.Type type;
 
-    public ActionEditorView(ActionList actions, String title) {
-        this(actions, null, title);
+    public ActionEditorView(ActionList actions, Action.Type type, String title) {
+        this(actions, type, null, title);
     }
 
-    public ActionEditorView(ActionList actions, @Nullable AtomicBoolean repeatable, String title) {
+    public ActionEditorView(ActionList actions, Action.Type type, @Nullable AtomicBoolean repeatable, String title) {
         super(9, 10);
         this.actionList = actions;
+        this.type = type;
 
         background("action/list/container", -10, -31);
         add(0, 0, title(title + " Actions"));
@@ -115,7 +117,7 @@ public class ActionEditorView extends Panel {
                 int x = i % 7, y = i / 7;
                 add(x, y, new Button("gui.action.add", 1, 1)
                         .sprite("generic2/icon/add", 3, 3)
-                        .onLeftClick(() -> host.pushTransientView(new ActionPickerView(actionList))));
+                        .onLeftClick(() -> host.pushTransientView(new ActionPickerView(actionList, type))));
             }
         }
 

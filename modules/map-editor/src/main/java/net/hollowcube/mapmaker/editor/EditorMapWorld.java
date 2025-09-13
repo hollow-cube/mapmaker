@@ -28,6 +28,7 @@ import net.hollowcube.mapmaker.misc.BossBars;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
+import net.hollowcube.mapmaker.runtime.parkour.action.Action;
 import net.hollowcube.mapmaker.runtime.parkour.action.gui.ActionEditorView;
 import net.hollowcube.mapmaker.runtime.parkour.marker.CheckpointMarkerHandler;
 import net.hollowcube.mapmaker.runtime.parkour.marker.FinishMarkerHandler;
@@ -408,7 +409,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
         // Open checkpoint settings view
         var checkpointData = getTag(SPAWN_CHECKPOINT_EFFECTS);
-        var host = Panel.open(player, new ActionEditorView(checkpointData.actions(), "Spawn"));
+        var host = Panel.open(player, new ActionEditorView(checkpointData.actions(), Action.Type.SPAWN, "Spawn"));
         host.setTag(ActionEditorView.ACTION_LOCATION, entity.getPosition());
         host.onClose(() -> instance().setTag(SPAWN_CHECKPOINT_EFFECTS, checkpointData));
     }

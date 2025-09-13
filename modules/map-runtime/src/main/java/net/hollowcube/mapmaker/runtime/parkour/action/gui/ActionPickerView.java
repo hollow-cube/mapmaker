@@ -17,10 +17,12 @@ import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
 
 public class ActionPickerView extends Panel {
     private final ActionList actionList;
+    private final Action.Type type;
 
-    public ActionPickerView(ActionList actionList) {
+    public ActionPickerView(ActionList actionList, Action.Type type) {
         super(9, 10);
         this.actionList = actionList;
+        this.type = type;
 
         background("action/list/container", -10, -31);
         add(0, 0, title("Add Action"));
@@ -39,7 +41,7 @@ public class ActionPickerView extends Panel {
         if (!isInitial) return;
 
         int i = 0;
-        for (var actionKey : ActionRegistry.keys()) {
+        for (var actionKey : ActionRegistry.keys(this.type)) {
             int x = i % 7, y = i / 7;
 
             var editor = ActionRegistry.getEditor(actionKey);
