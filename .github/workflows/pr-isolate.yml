@@ -4,50 +4,8 @@ on:
     branches: [ main ]
 
 jobs:
-  resource-pack-build:
-    runs-on: ubuntu-latest
-    outputs:
-      resource_pack_sha: ${{ steps.process.outputs.resource_pack_sha }}
-    steps:
-      - name: Import Secrets
-        uses: hollow-cube/actions/secrets@main
-        with:
-          token: ${{ secrets.VAULT_TOKEN }}
-          path: global/resourcepacks3
-      - uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
-      - uses: actions/setup-java@v5
-        with:
-          java-version: '24'
-          distribution: 'graalvm'
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-read-only: true
-
-      - name: Build resource pack
-        run: ./gradlew :bin:packer:buildClient
-      - name: Round 2
-        id: process
-        run: |
-          export RESOURCE_PACK_SHA=$(sha1sum build/client.zip | cut -d ' ' -f1)
-          echo "resource_pack_sha=${RESOURCE_PACK_SHA}" >> "$GITHUB_OUTPUT"
-          echo "Resource Pack Hash: ${RESOURCE_PACK_SHA}" >> "$GITHUB_STEP_SUMMARY"
-          
-          mkdir -p out
-          cp build/client.zip out/mapmaker-${RESOURCE_PACK_SHA}.zip
-      - name: Upload resource pack
-        uses: jakejarvis/s3-sync-action@master
-        env:
-          AWS_S3_BUCKET: hollowcube-resource-pack
-          AWS_ACCESS_KEY_ID: ${{ env.RP_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ env.RP_SECRET_KEY }}
-          AWS_S3_REGION: "us-east-1"
-          SOURCE_DIR: out
   docker-build-map-isolate:
-    needs: resource-pack-build
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-16vcpu-ubuntu-2404
     steps:
       - name: Import Secrets
         uses: hollow-cube/actions/secrets@main
@@ -66,16 +24,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: true
-
-      # Build server
-      - name: Build standalone binary
-        env:
-          MAPMAKER_VERSION: ${{ github.event.pull_request.title || github.ref_name }}
-          MAPMAKER_COMMIT_HASH: ${{ github.event.pull_request.head.sha || github.sha }}
-          MAPMAKER_RESOURCE_PACK_HASH: ${{ needs.resource-pack-build.outputs.resource_pack_sha }}
-        run: ./gradlew :bin:map-isolate:nativeCompile -PisRelease=false --no-configuration-cache
-
-      # Build and push docker image
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub
@@ -83,7 +31,35 @@ jobs:
         with:
           username: mworzala
           password: ${{ env.DOCKER_PASS }}
-      - name: Build and push
+
+      - name: Build resource pack
+        id: build-rp
+        run: |
+          ./gradlew :bin:packer:buildClient
+          
+          export RESOURCE_PACK_SHA=$(sha1sum build/client.zip | cut -d ' ' -f1)
+          echo "resource_pack_sha=${RESOURCE_PACK_SHA}" >> "$GITHUB_OUTPUT"
+          echo "Resource Pack Hash: ${RESOURCE_PACK_SHA}" >> "$GITHUB_STEP_SUMMARY"
+
+          mkdir -p out/resource-pack
+          cp build/client.zip out/resource-pack/${RESOURCE_PACK_SHA}.zip
+      - name: Upload resource pack
+        uses: jakejarvis/s3-sync-action@master
+        env:
+          AWS_S3_ENDPOINT: https://bdb9cb2904188b760591dc1589a1ccf3.r2.cloudflarestorage.com/assets
+          AWS_S3_BUCKET: assets
+          AWS_ACCESS_KEY_ID: ${{ env.R2_ASSETS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.R2_ASSETS_SECRET_KEY }}
+          AWS_S3_REGION: "auto"
+          SOURCE_DIR: out
+
+      - name: Build map-isolate native image
+        env:
+          MAPMAKER_VERSION: ${{ github.event.pull_request.title || github.ref_name }}
+          MAPMAKER_COMMIT_HASH: ${{ github.event.pull_request.head.sha || github.sha }}
+          MAPMAKER_RESOURCE_PACK_HASH: ${{ steps.build-rp.outputs.resource_pack_sha }}
+        run: ./gradlew :bin:map-isolate:nativeCompile -PisRelease=false --no-configuration-cache
+      - name: Build & push docker image
         uses: docker/build-push-action@v3
         with:
           context: .
