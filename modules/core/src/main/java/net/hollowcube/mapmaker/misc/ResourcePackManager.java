@@ -21,8 +21,7 @@ public final class ResourcePackManager {
     private static final Logger logger = LoggerFactory.getLogger(ResourcePackManager.class);
     private static final GlobalEventHandler EVENT_HANDLER = MinecraftServer.getGlobalEventHandler();
 
-    private static final String RESOURCE_PACK_URL = "https://hollowcube-resource-pack.s3.amazonaws.com/mapmaker-%s.zip";
-    //    private static final String RESOURCE_PACK_URL = "https://pub-620a83127bac451cbe2c402881b1b7d8.r2.dev/mapmaker-%s.zip";
+    private static final String RESOURCE_PACK_URL = "https://assets.hollowcube.net/resource-pack/%s.zip";
     private static final UUID RESOURCE_PACK_ID = UUID.fromString("aceb326f-da15-45bc-bf2f-11940c21780c");
 
     /**

@@ -22,7 +22,6 @@ import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
-import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.ComponentUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -123,8 +122,11 @@ public class DebugCommand extends CommandDsl {
     }
 
     private void handleDebugServer(@NotNull Player player, @NotNull CommandContext context) {
-        player.sendMessage("Host: " + AbstractHttpService.hostname);
-        player.sendMessage("Release: " + !ServerRuntime.getRuntime().isDevelopment());
+        var runtime = ServerRuntime.getRuntime();
+
+        player.sendMessage("Host: " + runtime.hostname());
+        player.sendMessage("Release: " + !runtime.isDevelopment() + " (" + runtime.commit().substring(0, 8) + ")");
+        player.sendMessage("Size: " + runtime.size());
     }
 
     private @NotNull CommandDsl createSubcommand(

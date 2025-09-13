@@ -15,7 +15,7 @@ jobs:
         uses: hollow-cube/actions/secrets@main
         with:
           token: ${{ secrets.VAULT_TOKEN }}
-          path: global/resourcepacks3
+          path: global/github
       - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
@@ -29,23 +29,23 @@ jobs:
           cache-read-only: false
 
       - name: Build resource pack
-        run: ./gradlew :bin:packer:buildClient
-      - name: Round 2
-        id: process
         run: |
+          ./gradlew :bin:packer:buildClient
+          
           export RESOURCE_PACK_SHA=$(sha1sum build/client.zip | cut -d ' ' -f1)
           echo "resource_pack_sha=${RESOURCE_PACK_SHA}" >> "$GITHUB_OUTPUT"
           echo "Resource Pack Hash: ${RESOURCE_PACK_SHA}" >> "$GITHUB_STEP_SUMMARY"
-          
-          mkdir -p out
-          cp build/client.zip out/mapmaker-${RESOURCE_PACK_SHA}.zip
+
+          mkdir -p out/resource-pack
+          cp build/client.zip out/resource-pack/${RESOURCE_PACK_SHA}.zip
       - name: Upload resource pack
         uses: jakejarvis/s3-sync-action@master
         env:
-          AWS_S3_BUCKET: hollowcube-resource-pack
-          AWS_ACCESS_KEY_ID: ${{ env.RP_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ env.RP_SECRET_KEY }}
-          AWS_S3_REGION: "us-east-1"
+          AWS_S3_ENDPOINT: https://bdb9cb2904188b760591dc1589a1ccf3.r2.cloudflarestorage.com
+          AWS_S3_BUCKET: assets
+          AWS_ACCESS_KEY_ID: ${{ env.R2_ASSETS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.R2_ASSETS_SECRET_KEY }}
+          AWS_S3_REGION: "auto"
           SOURCE_DIR: out
 
   docker-build-map:
