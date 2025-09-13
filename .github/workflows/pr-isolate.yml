@@ -46,7 +46,7 @@ jobs:
       - name: Upload resource pack
         uses: jakejarvis/s3-sync-action@master
         env:
-          AWS_S3_ENDPOINT: https://bdb9cb2904188b760591dc1589a1ccf3.r2.cloudflarestorage.com/assets
+          AWS_S3_ENDPOINT: https://bdb9cb2904188b760591dc1589a1ccf3.r2.cloudflarestorage.com
           AWS_S3_BUCKET: assets
           AWS_ACCESS_KEY_ID: ${{ env.R2_ASSETS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ env.R2_ASSETS_SECRET_KEY }}
