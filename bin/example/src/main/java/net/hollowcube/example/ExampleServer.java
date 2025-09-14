@@ -2,6 +2,7 @@ package net.hollowcube.example;
 
 import net.hollowcube.common.util.MojangUtil;
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
@@ -69,9 +70,17 @@ public class ExampleServer extends AbstractMapServer {
         net.minestom.server.entity.PlayerSkin skin = MojangUtil.getSkinFromUuid(playerId);
 
         // TODO: when running with a proxy the session would be created by the proxy so this doesn't make sense.
-        sessionService().createSession(playerId, "devserver-integrated", profile.name(), "127.0.0.1",
-                new PlayerSkin(OpUtils.map(skin, net.minestom.server.entity.PlayerSkin::textures),
-                        OpUtils.map(skin, net.minestom.server.entity.PlayerSkin::signature))
+        sessionService().createSession(
+                playerId,
+                "devserver-integrated",
+                profile.name(),
+                "127.0.0.1",
+                new PlayerSkin(
+                        OpUtils.map(skin, net.minestom.server.entity.PlayerSkin::textures),
+                        OpUtils.map(skin, net.minestom.server.entity.PlayerSkin::signature)
+                ),
+                ProtocolVersions.getProtocolName(event.getConnection().getProtocolVersion()),
+                event.getConnection().getProtocolVersion()
         );
     }
 

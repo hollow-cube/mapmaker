@@ -5,6 +5,7 @@ import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.MojangUtil;
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
 import net.hollowcube.mapmaker.editor.EditorState;
@@ -137,9 +138,17 @@ public class DevServer extends AbstractMultiMapServer {
         var playerId = profile.uuid().toString();
         net.minestom.server.entity.PlayerSkin skin = MojangUtil.getSkinFromUuid(playerId);
 
-        var pd = sessionService().createSession(playerId, "devserver-integrated", profile.name(), "127.0.0.1",
-                new PlayerSkin(OpUtils.map(skin, net.minestom.server.entity.PlayerSkin::textures),
-                        OpUtils.map(skin, net.minestom.server.entity.PlayerSkin::signature))
+        var pd = sessionService().createSession(
+                playerId,
+                "devserver-integrated",
+                profile.name(),
+                "127.0.0.1",
+                new PlayerSkin(
+                        OpUtils.map(skin, net.minestom.server.entity.PlayerSkin::textures),
+                        OpUtils.map(skin, net.minestom.server.entity.PlayerSkin::signature)
+                ),
+                ProtocolVersions.getProtocolName(event.getConnection().getProtocolVersion()),
+                event.getConnection().getProtocolVersion()
         );
 
         addPendingJoin(playerId, HubServer.HUB_MAP_DATA.id(), "playing");

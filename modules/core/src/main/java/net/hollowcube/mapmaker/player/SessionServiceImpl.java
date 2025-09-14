@@ -26,13 +26,23 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
     }
 
     @Override
-    public @NotNull PlayerData createSession(@NotNull String id, @NotNull String proxy, @NotNull String username, @NotNull String ip, @NotNull PlayerSkin skin) {
+    public @NotNull PlayerData createSession(
+            @NotNull String id,
+            @NotNull String proxy,
+            @NotNull String username,
+            @NotNull String ip,
+            @NotNull PlayerSkin skin,
+            @NotNull String version,
+            int protocolVersion
+    ) {
         logger.log(System.Logger.Level.INFO, "creating new session for {0} ({1}) from {2}", id, username, ip);
         var reqBody = GSON.toJson(Map.of(
                 "proxy", proxy,
                 "username", username,
                 "ip", ip,
-                "skin", skin
+                "skin", skin,
+                "protocolVersion", protocolVersion,
+                "version", version
         ));
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))

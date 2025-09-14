@@ -18,7 +18,7 @@ public class NoopSessionService implements SessionService {
     }
 
     @Override
-    public @NotNull PlayerData createSession(@NotNull String id, @NotNull String proxy, @NotNull String username, @NotNull String ip, @NotNull PlayerSkin skin) {
+    public @NotNull PlayerData createSession(@NotNull String id, @NotNull String proxy, @NotNull String username, @NotNull String ip, @NotNull PlayerSkin skin, @NotNull String version, int protocolVersion) {
         return new PlayerData(
                 id, username,
                 new DisplayName(List.of(new DisplayName.Part("username", username, null))),
