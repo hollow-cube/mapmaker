@@ -1,0 +1,10 @@
+{
+  "bundles": [],
+  "resources": {
+    "includes": [
+      {
+        "pattern": "net/hollowcube/luau/(windows|linux|macos)/(x64|arm64)/lib(compiler|globalref|vm).(so|dll|dylib)"
+      }
+    ]
+  }
+}
