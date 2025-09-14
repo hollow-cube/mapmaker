@@ -9,7 +9,7 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.runtime.parkour.action.Action;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
 import net.hollowcube.mapmaker.runtime.parkour.action.gui.ActionEditorView;
-import net.hollowcube.mapmaker.runtime.parkour.action.impl.TeleportAction;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.base.CoordinateAction;
 import net.hollowcube.mapmaker.runtime.parkour.block.StatusPlateBlock;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -39,7 +39,7 @@ public class StatusEditor {
         var actionLocation = entity.getPosition().withY(y -> y + Objects.requireNonNullElse(entity.getMin(), Pos.ZERO).y());
         var host = Panel.open(player, new ActionEditorView(data.actions(), Action.Type.STATUS, repeatable, "Status"));
         host.setTag(ActionEditorView.ACTION_LOCATION, actionLocation);
-        host.setTag(TeleportAction.SPC_TAG, entity);
+        host.setTag(CoordinateAction.SPC_TAG, entity);
         host.onClose(() -> {
             entity.setTag(StatusPlateBlock.ENTITY_DATA_TAG, data.withRepeatable(repeatable.get()));
             entity.handleDataChange(player);
@@ -71,7 +71,7 @@ public class StatusEditor {
         var repeatable = new AtomicBoolean(data.repeatable());
         var host = Panel.open(player, new ActionEditorView(data.actions(), Action.Type.STATUS, repeatable, "Status"));
         host.setTag(ActionEditorView.ACTION_LOCATION, event.blockPosition());
-        host.setTag(TeleportAction.SPC_TAG, event.blockPosition());
+        host.setTag(CoordinateAction.SPC_TAG, event.blockPosition());
         host.onClose(() -> {
             var newNbt = DFU.encodeNbt(ActionTriggerData.CODEC, data.withRepeatable(repeatable.get()));
             world.instance().setBlock(event.blockPosition(), event.block().withNbt(newNbt));

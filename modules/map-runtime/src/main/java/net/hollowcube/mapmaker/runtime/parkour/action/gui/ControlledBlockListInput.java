@@ -35,7 +35,7 @@ public class ControlledBlockListInput extends Panel {
             var button = makeBlockButton(block)
                     .lorePostfix(AbstractActionEditorPanel.LORE_POSTFIX_CLICKREMOVE)
                     .onLeftClick(() -> {
-                        host.pushView(new AnvilSearchView<>("action/anvil/teleport_icon", "Search Blocks",
+                        host.pushView(new AnvilSearchView<>("action/anvil/search_icon", "Search Blocks",
                                 Autocompletors::searchBlocks, ControlledBlockListInput::makeBlockButton, block2 -> {
                             onChange.accept(new ArrayList<>(blocks) {{
                                 set(blockIndex, block2);
@@ -53,7 +53,7 @@ public class ControlledBlockListInput extends Panel {
             add(i, 0, new Button("gui.action.add", 1, 1)
                     .sprite("generic2/icon/add", 3, 3)
                     .onLeftClick(() -> {
-                        host.pushView(new AnvilSearchView<>("action/anvil/teleport_icon", "Search Blocks",
+                        host.pushView(new AnvilSearchView<>("action/anvil/search_icon", "Search Blocks",
                                 Autocompletors::searchBlocks, ControlledBlockListInput::makeBlockButton, block -> {
                             onChange.accept(new ArrayList<>(blocks) {{
                                 add(block);

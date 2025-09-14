@@ -10,13 +10,13 @@ import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionList;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.ResetHeightAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.TeleportAction;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.base.CoordinateAction;
 import net.hollowcube.mapmaker.runtime.parkour.block.CheckpointPlateBlock;
 import net.hollowcube.mapmaker.runtime.parkour.block.StatusPlateBlock;
 import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
-import net.minestom.server.entity.RelativeFlags;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -45,7 +45,7 @@ public class SetPreciseCoordsCommand extends CommandDsl {
 
     private void updatePreciseCoords(Player player, CommandContext context) {
         // Ensure they are editing a block
-        var updateTarget = player.getTag(TeleportAction.SPC_TAG);
+        var updateTarget = player.getTag(CoordinateAction.SPC_TAG);
         if (updateTarget == null) {
             player.sendMessage(translatable("command.set_precise_coords.no_target"));
             return;
@@ -94,7 +94,7 @@ public class SetPreciseCoordsCommand extends CommandDsl {
         } else return;
 
         if (updated.get()) {
-            player.removeTag(TeleportAction.SPC_TAG);
+            player.removeTag(CoordinateAction.SPC_TAG);
             player.sendMessage(translatable("command.set_precise_coords.success", CoordinateUtil.asTranslationArgs(pos)));
         } else {
             player.sendMessage(translatable("create_maps.checkpoint.teleport.too_low"));
