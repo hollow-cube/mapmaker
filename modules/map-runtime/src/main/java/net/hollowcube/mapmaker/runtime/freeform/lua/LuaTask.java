@@ -4,6 +4,7 @@ import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaStatus;
 import net.hollowcube.luau.LuaType;
 import net.hollowcube.mapmaker.runtime.freeform.script.LuaScriptState;
+import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
 
 import java.util.Map;
@@ -15,6 +16,7 @@ public class LuaTask {
     public static void init(LuaState state) {
         state.registerLib(NAME, Map.of(
                 "spawn", LuaTask::spawn,
+                "cancel", LuaTask::cancel,
                 "wait", LuaTask::wait
         ));
         state.pop(1);
@@ -34,12 +36,25 @@ public class LuaTask {
         // using this form of scheduleTask.
         var task = new LuaTaskWrapper(luaState, thread);
         thread.setThreadData(task);
-        luaState.world().scheduler().submitTask(task);
+        task.selfRef = luaState.world().scheduler().submitTask(task);
 
         // TODO: This ref is a straight memory leak
         state.ref(-1); // Store the thread in the registry
-        state.pop(1); // Remove the thread
 
+        // Return the thread
+        state.pop(1);
+        return 1;
+    }
+
+    private static int cancel(LuaState state) {
+        state.checkType(1, LuaType.THREAD);
+        var thread = state.toThread(1);
+        if (!(thread.getThreadData() instanceof LuaTaskWrapper task)) {
+            state.argError(1, "must be called with a task");
+            return 0;
+        }
+
+        task.selfRef.cancel();
         return 0;
     }
 
@@ -62,6 +77,7 @@ public class LuaTask {
     private static class LuaTaskWrapper implements Supplier<TaskSchedule>, LuaScriptState.Holder {
         private final LuaScriptState state;
         private final LuaState thread;
+        private Task selfRef;
 
         private int waitTicks = -1;
 

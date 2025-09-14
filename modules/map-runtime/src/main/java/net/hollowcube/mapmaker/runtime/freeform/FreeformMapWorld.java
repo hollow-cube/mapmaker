@@ -88,15 +88,13 @@ public class FreeformMapWorld extends AbstractMapWorld<FreeformState, FreeformMa
                     
                     function count_neighbors_bitwise(board, width, height, x, y)
                         local count = 0
-                        local base_bit = y * width + x
                     
                         for dy = -1, 1 do
                             for dx = -1, 1 do
-                                if dx ~= 0 or dy ~= 0 then
+                                if dx ~= 0 or dy ~= 0 then -- Skip center cell
                                     local nx, ny = x + dx, y + dy
                                     if nx >= 0 and nx < width and ny >= 0 and ny < height then
-                                        local neighbor_bit = (y + dy) * width + (x + dx)
-                                        count = count + buffer.readbits(board, neighbor_bit, 1)
+                                        count = count + buffer.readbits(board, ny * width + nx, 1)
                                     end
                                 end
                             end
@@ -106,13 +104,14 @@ public class FreeformMapWorld extends AbstractMapWorld<FreeformState, FreeformMa
                     
                     local worldSpace = create_bit_board(64, 64)
                     local copySpace = create_bit_board(64, 64)
+                    local stepTask = nil
                     
-                    -- init world
-                    for x = 0, 63 do
-                        for z = 0, 63 do
-                            local idx = x * 64 + z
-                            local active = world:GetBlock(vec(-x, 39, -z)) == Block.Stone
-                            set_cell(worldSpace, 64, x, z, active)
+                    function init()
+                        for x = 0, 63 do
+                            for z = 0, 63 do
+                                local active = world:GetBlock(vec(-x, 39, -z)) == Block.Stone
+                                set_cell(worldSpace, 64, x, z, active)
+                            end
                         end
                     end
                     
@@ -121,47 +120,46 @@ public class FreeformMapWorld extends AbstractMapWorld<FreeformState, FreeformMa
                     
                         for x = 0, 63 do
                             for z = 0, 63 do
-                                local idx = x * 64 + z
-                                local active = get_cell(copySpace, 64, x, z)
+                                local active = get_cell(copySpace, 64, x, z) == 1
                                 local neighbors = count_neighbors_bitwise(copySpace, 64, 64, x, z)
                     
+                                local new_state = false
                                 if active then
-                                    -- A live cell with fewer than two live neighbors dies.
-                                    -- A live cell with more than three live neighbors dies.
-                                    if neighbors < 2 or neighbors > 3 then
-                                        set_cell(worldSpace, 64, x, z, false)
-                                        world:SetBlock(vec(-x, 39, -z), Block.Air)
+                                    if neighbors == 2 or neighbors == 3 then
+                                        new_state = true -- Cell survives
+                                    else
+                                        new_state = false -- Cell dies
                                     end
-                                    -- A live cell with two or three live neighbors continues to live on to the next generation.
                                 else
-                                    -- A dead cell with exactly three live neighbors becomes a live cell in the next generation.
                                     if neighbors == 3 then
-                                        set_cell(worldSpace, 64, x, z, true)
-                                        world:SetBlock(vec(-x, 39, -z), Block.Stone)
+                                        new_state = true -- Cell becomes alive
                                     end
+                                end
+                    
+                                if new_state ~= active then
+                                    set_cell(worldSpace, 64, x, z, new_state)
+                                    world:SetBlock(vec(-x, 39, -z), new_state and Block.Stone or Block.Air)
                                 end
                             end
                         end
-                    
                     end
                     
-                    task.spawn(function()
-                        print('Hello, Task!')
-                        task.wait(80)
-                        print('should be printed later')
+                    function toggleGame()
+                        if stepTask then
+                            task.cancel(stepTask)
+                            stepTask = nil
+                        else
+                            stepTask = task.spawn(function()
+                                init()
+                                while true do
+                                    task.wait(10)
+                                    step()
+                                end
+                            end)
+                        end
+                    end
                     
-                        step()
-                        task.wait(20)
-                        step()
-                        task.wait(20)
-                        step()
-                        task.wait(20)
-                        step()
-                        task.wait(20)
-                        step()
-                        task.wait(20)
-                        step()
-                    end)
+                    toggleGame()
                     """));
             worldThread.state().pcall(0, 0);
         } catch (LuauCompileException e) {
