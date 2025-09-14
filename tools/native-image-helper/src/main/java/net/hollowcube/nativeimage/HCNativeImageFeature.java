@@ -3,13 +3,18 @@ package net.hollowcube.nativeimage;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
-import org.graalvm.nativeimage.hosted.Feature;
-import org.graalvm.nativeimage.hosted.RuntimeReflection;
-import org.graalvm.nativeimage.hosted.RuntimeResourceAccess;
+import net.hollowcube.luau.util.GlobalRef;
+import org.graalvm.nativeimage.hosted.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
+import java.lang.foreign.AddressLayout;
+import java.lang.foreign.FunctionDescriptor;
+import java.lang.foreign.MemoryLayout;
+import java.lang.foreign.ValueLayout;
 import java.lang.reflect.Constructor;
+
+import static java.lang.foreign.ValueLayout.JAVA_BYTE;
 
 /// Responsible for doing a bunch of dynamic registration required for native image.
 ///
@@ -20,6 +25,140 @@ import java.lang.reflect.Constructor;
 ///   registered for reflection
 /// * Minestom MetadataDef subclasses are registered for runtime lookup.
 public class HCNativeImageFeature implements Feature {
+
+    private static final ValueLayout.OfShort C_SHORT = ValueLayout.JAVA_SHORT;
+    private static final ValueLayout.OfInt C_INT = ValueLayout.JAVA_INT;
+    private static final ValueLayout.OfFloat C_FLOAT = ValueLayout.JAVA_FLOAT;
+    private static final ValueLayout.OfDouble C_DOUBLE = ValueLayout.JAVA_DOUBLE;
+    private static final AddressLayout C_POINTER = ValueLayout.ADDRESS.withTargetLayout(MemoryLayout.sequenceLayout(java.lang.Long.MAX_VALUE, JAVA_BYTE));
+    private static final ValueLayout.OfLong C_LONG = ValueLayout.JAVA_LONG;
+
+    @Override
+    public void duringSetup(DuringSetupAccess access) {
+        RuntimeJNIAccess.register(GlobalRef.class);
+
+        // todo probably can set Linker.Option.critical() for lots of the functions
+        // There are also a lot of duplicates, but i(matt) am lazy to remove them.
+        RuntimeForeignAccess.registerForUpcall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_POINTER, C_LONG, C_LONG));
+        RuntimeForeignAccess.registerForUpcall(FunctionDescriptor.of(C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForUpcall(FunctionDescriptor.ofVoid(C_POINTER));
+        RuntimeForeignAccess.registerForUpcall(FunctionDescriptor.ofVoid(C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForUpcall(FunctionDescriptor.ofVoid(C_POINTER, C_POINTER));
+        RuntimeForeignAccess.registerForUpcall(FunctionDescriptor.of(C_SHORT, C_POINTER, C_LONG));
+        RuntimeForeignAccess.registerForUpcall(FunctionDescriptor.ofVoid(C_POINTER));
+        RuntimeForeignAccess.registerForUpcall(FunctionDescriptor.ofVoid(C_POINTER, C_LONG, C_LONG));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_POINTER, C_LONG, C_LONG));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_LONG, C_POINTER, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_SHORT, C_POINTER, C_LONG));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_LONG, C_LONG));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_DOUBLE, C_POINTER, C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_INT, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_DOUBLE));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_FLOAT, C_FLOAT, C_FLOAT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_POINTER, C_LONG));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_POINTER, C_POINTER, C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_LONG, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_LONG, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_LONG));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_POINTER, C_POINTER, C_LONG, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT, C_INT, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_LONG, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_DOUBLE));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_POINTER, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_INT, C_POINTER, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_DOUBLE, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_DOUBLE, C_POINTER, C_INT, C_DOUBLE));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER, C_POINTER, C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER, C_INT));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER, C_INT, C_POINTER, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(C_INT, C_POINTER));
+        RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(C_POINTER));
+    }
 
     @Override
     public void beforeAnalysis(BeforeAnalysisAccess access) {
