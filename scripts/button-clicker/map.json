@@ -1,0 +1,9 @@
+{
+  "id": "3080cf33-8ff9-4d3e-a469-a457a896ab3d",
+  "entrypoints": [
+    {
+      "type": "world",
+      "script": "world.luau"
+    }
+  ]
+}
