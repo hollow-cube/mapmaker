@@ -2,10 +2,6 @@ plugins {
     id("mapmaker.java-library")
 }
 
-repositories {
-    mavenLocal()
-}
-
 dependencies {
     api(project(":modules:map-core"))
     api(project(":modules:terraform")) //TODO: this exists for entity implementations, but it shouldn't.

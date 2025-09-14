@@ -4,11 +4,6 @@ plugins {
     id("org.graalvm.buildtools.native") version "0.10.6"
 }
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
-
 dependencies {
     implementation(project(":bin:config"))
 

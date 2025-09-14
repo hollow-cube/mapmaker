@@ -152,7 +152,7 @@ public class FreeformMapWorld extends AbstractMapWorld<FreeformState, FreeformMa
                             stepTask = task.spawn(function()
                                 init()
                                 while true do
-                                    task.wait(10)
+                                    task.wait(2)
                                     step()
                                 end
                             end)

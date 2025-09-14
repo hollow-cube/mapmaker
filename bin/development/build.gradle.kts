@@ -3,10 +3,6 @@ plugins {
     id("mapmaker.packer-data")
 }
 
-repositories {
-    mavenLocal()
-}
-
 dependencies {
     implementation(project(":bin:config"))
     implementation(project(":bin:hub"))
