@@ -38,8 +38,15 @@ public class SetSpectatorCheckpointItem extends ItemHandler {
 
         var added = switch (world.getPlayerState(player)) {
             case ParkourState.Testing(var saveState, var _) -> {
-                TempEffectApplicator.applyCheckpoint(world, new ActionTriggerData(),
-                        player, saveState, "temp-spec-" + UUID.randomUUID(), true);
+                TempEffectApplicator.applyCheckpoint(
+                        world,
+                        new ActionTriggerData(),
+                        player,
+                        saveState,
+                        "temp-spec-" + UUID.randomUUID(),
+                        player.getPosition(),
+                        true
+                );
                 yield true;
             }
             case ParkourState.Spectating(var _, var gameState) -> {

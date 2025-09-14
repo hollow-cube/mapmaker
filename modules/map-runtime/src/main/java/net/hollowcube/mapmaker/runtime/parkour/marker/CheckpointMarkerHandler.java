@@ -28,7 +28,7 @@ public class CheckpointMarkerHandler extends ObjectEntityHandler {
     public void onPlayerEnter(Player player) {
         if (this.data == null) return;
 
-        TempEffectApplicator.applyCheckpoint(data, player, entity.getUuid().toString());
+        TempEffectApplicator.applyCheckpoint(data, player, entity.getUuid().toString(), entity.getPosition());
     }
 
     @Override

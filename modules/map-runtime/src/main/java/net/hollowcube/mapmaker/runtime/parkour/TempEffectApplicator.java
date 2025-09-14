@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionList;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
 import net.hollowcube.mapmaker.runtime.parkour.action.Attachments;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.RespawnPosAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.SetProgressIndexAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.TeleportAction;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerStateUpdateEvent;
@@ -15,6 +16,9 @@ import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerUpdateState
 import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.BlockVec;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.sound.SoundEvent;
 
@@ -30,17 +34,17 @@ public class TempEffectApplicator {
 
     private static final Sound CHECKPOINT_SOUND = Sound.sound(SoundEvent.ENTITY_EXPERIENCE_ORB_PICKUP, Sound.Source.MASTER, 0.1f, 0f);
 
-    public static void applyCheckpoint(ActionTriggerData data, Player player, String checkpointId) {
+    public static void applyCheckpoint(ActionTriggerData data, Player player, String checkpointId, Point position) {
         var world = ParkourMapWorld.forPlayer(player);
         if (world == null) return;
         if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p))
             return;
 
-        applyCheckpoint(world, data, player, p.saveState(), checkpointId, false);
+        applyCheckpoint(world, data, player, p.saveState(), checkpointId, position, false);
     }
 
     // TODO: does this all need to be applied at a safe point or does it matter at all?
-    public static void applyCheckpoint(ParkourMapWorld world, ActionTriggerData data, Player player, SaveState saveState, String checkpointId, boolean isTemporary) {
+    public static void applyCheckpoint(ParkourMapWorld world, ActionTriggerData data, Player player, SaveState saveState, String checkpointId, Point position, boolean isTemporary) {
         var playState = saveState.state(PlayState.class);
 
         // Ensure the event should trigger a checkpoint change for the current players state
@@ -52,9 +56,25 @@ public class TempEffectApplicator {
         world.callEvent(new ParkourMapPlayerStateUpdateEvent(world, player, saveState, playState));
         data.actions().applyTo(player, playState);
 
-        // The checkpoint (reset) pos is set to the teleport if its present, or the first
+        // The checkpoint (reset) pos is set to the respawn position if its present, or if
+        // its present the teleport position, or the first
         // position the player touched the checkpoint otherwise.
-        var checkpointPos = player.getPosition();
+        var respawnPosition = OpUtils.mapOr(
+                data.actions().findLast(RespawnPosAction.class),
+                action -> {
+                    float yaw = player.getPosition().yaw();
+                    float pitch = player.getPosition().pitch();
+                    Pos origin;
+                    if (position instanceof BlockVec(int x, int y, int z)) {
+                        // If the position is a block vector then we want to center the player on the block
+                        origin = new Pos(x + 0.5, y, z + 0.5, yaw, pitch);
+                    } else {
+                        origin = new Pos(position, yaw, pitch);
+                    }
+                    return action.target().resolve(origin);
+                },
+                player.getPosition()
+        );
 
         List<String> newHistory;
         if (world.map().getSetting(MapSettings.PROGRESS_INDEX_ADDITION)) {
@@ -71,7 +91,7 @@ public class TempEffectApplicator {
         playState.setLastState(new PlayState(
                 null,
                 newHistory,
-                checkpointPos,
+                respawnPosition,
                 Map.copyOf(playState.ghostBlocks()),
                 Map.copyOf(playState.actionData())
         ));

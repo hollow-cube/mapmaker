@@ -32,7 +32,12 @@ public class CheckpointPlateBlock implements BlockHandler, PressurePlateBlock, D
     @Override
     public void onEnter(Collision collision) {
         var data = collision.block().getTag(DATA_TAG);
-        TempEffectApplicator.applyCheckpoint(data, collision.player(), createId(collision.blockPosition()));
+        TempEffectApplicator.applyCheckpoint(
+                data,
+                collision.player(),
+                createId(collision.blockPosition()),
+                collision.blockPosition()
+        );
     }
 
     @Override
