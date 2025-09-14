@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.runtime.parkour.action.gui.editors.generic;
 
+import it.unimi.dsi.fastutil.Pair;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.math.relative.RelativePos;
 import net.hollowcube.mapmaker.panels.Button;
@@ -51,15 +52,15 @@ public class CoordinateActionEditor<T extends CoordinateAction<T>> extends Abstr
         this.pitchInput.update(action.target().pitch());
 
         commandButton.lorePostfix(
-                host.hasTag(CoordinateAction.SPC_TAG) ? LORE_POSTFIX_CLICKEDIT : LORE_POSTFIX_NOT_AVAILABLE);
+                host.hasTag(CoordinateAction.SPC_TARGET_TAG) ? LORE_POSTFIX_CLICKEDIT : LORE_POSTFIX_NOT_AVAILABLE);
     }
 
     private void beginCommandUpdate() {
-        var spcTarget = host.getTag(CoordinateAction.SPC_TAG);
+        var spcTarget = host.getTag(CoordinateAction.SPC_TARGET_TAG);
         if (spcTarget == null) return;
 
         host.player().sendMessage(Component.translatable("command.set_precise_coords.begin"));
-        host.player().setTag(CoordinateAction.SPC_TAG, spcTarget);
+        host.player().setTag(CoordinateAction.SPC_EDIT_TAG, Pair.of(this.ref.key(), spcTarget));
         host.player().closeInventory();
     }
 

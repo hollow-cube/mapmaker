@@ -9,7 +9,6 @@ import net.hollowcube.mapmaker.editor.parkour.StatusEditor;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionList;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.ResetHeightAction;
-import net.hollowcube.mapmaker.runtime.parkour.action.impl.TeleportAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.base.CoordinateAction;
 import net.hollowcube.mapmaker.runtime.parkour.block.CheckpointPlateBlock;
 import net.hollowcube.mapmaker.runtime.parkour.block.StatusPlateBlock;
@@ -45,7 +44,7 @@ public class SetPreciseCoordsCommand extends CommandDsl {
 
     private void updatePreciseCoords(Player player, CommandContext context) {
         // Ensure they are editing a block
-        var updateTarget = player.getTag(CoordinateAction.SPC_TAG);
+        var updateTarget = player.getTag(CoordinateAction.SPC_EDIT_TAG);
         if (updateTarget == null) {
             player.sendMessage(translatable("command.set_precise_coords.no_target"));
             return;
@@ -69,14 +68,14 @@ public class SetPreciseCoordsCommand extends CommandDsl {
             // but it could change between closing the GUI and running the command so IDK.
             for (int i = 0; i < data.size(); i++) {
                 var ref = data.get(i);
-                if (ref != null && ref.action() instanceof TeleportAction) {
-                    ref.update(_ -> new TeleportAction(RelativePos.abs(pos)));
+                if (ref != null && ref.action() instanceof CoordinateAction<?> action && ref.key().equals(updateTarget.key())) {
+                    ref.update(_ -> action.withTarget(RelativePos.abs(pos)));
                 }
             }
             updated.set(true);
         };
 
-        if (updateTarget instanceof Point targetBlockPosition) {
+        if (updateTarget.value() instanceof Point targetBlockPosition) {
             var block = player.getInstance().getBlock(targetBlockPosition);
             if (block.handler() instanceof CheckpointPlateBlock) {
                 CheckpointEditor.editBlock(player.getInstance(), targetBlockPosition, block,
@@ -85,7 +84,7 @@ public class SetPreciseCoordsCommand extends CommandDsl {
                 StatusEditor.editBlock(player.getInstance(), targetBlockPosition, block,
                         data -> updater.accept(data.actions()));
             } else return;
-        } else if (updateTarget instanceof MarkerEntity marker) {
+        } else if (updateTarget.value() instanceof MarkerEntity marker) {
             if ("mapmaker:checkpoint".equals(marker.getType())) {
                 var data = marker.getTag(CheckpointPlateBlock.ENTITY_DATA_TAG);
                 updater.accept(data.actions());
@@ -94,7 +93,7 @@ public class SetPreciseCoordsCommand extends CommandDsl {
         } else return;
 
         if (updated.get()) {
-            player.removeTag(CoordinateAction.SPC_TAG);
+            player.removeTag(CoordinateAction.SPC_EDIT_TAG);
             player.sendMessage(translatable("command.set_precise_coords.success", CoordinateUtil.asTranslationArgs(pos)));
         } else {
             player.sendMessage(translatable("create_maps.checkpoint.teleport.too_low"));
