@@ -1,0 +1,36 @@
+[
+  {
+    "name": "net.hollowcube.luau.internal.vm.lua_CFunction$Function",
+    "methods": [
+      {
+        "name": "apply",
+        "parameterTypes": [
+          "java.lang.foreign.MemorySegment"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "net.hollowcube.luau.internal.vm.lua_Callbacks$userthread$Function",
+    "methods": [
+      {
+        "name": "apply",
+        "parameterTypes": [
+          "java.lang.foreign.MemorySegment",
+          "java.lang.foreign.MemorySegment"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "net.hollowcube.luau.internal.vm.lua_newuserdatadtor$dtor$Function",
+    "methods": [
+      {
+        "name": "apply",
+        "parameterTypes": [
+          "java.lang.foreign.MemorySegment"
+        ]
+      }
+    ]
+  }
+]
