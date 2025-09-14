@@ -1,4 +1,5 @@
-FROM gcr.io/distroless/cc
+#FROM gcr.io/distroless/cc
+FROM debian:bookworm-slim
 
 USER 65532:65532
 
