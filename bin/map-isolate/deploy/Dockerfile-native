@@ -1,5 +1,5 @@
 #FROM gcr.io/distroless/cc
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 USER 65532:65532
 
