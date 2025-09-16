@@ -178,6 +178,7 @@ public class MapMapServer extends AbstractMultiMapServer {
         commandManager.register(new UpCommand());
         commandManager.register(new BackCommand());
 
+        commandManager.register(new BannerCommand());
         commandManager.register(new PHeadCommand());
         commandManager.register(new HdbCommand(hdb, server.guiController()));
 
