@@ -58,7 +58,7 @@ graalvmNative {
                     "-H:+UnlockExperimentalVMOptions", "-H:+ForeignAPISupport",
                     "-H:+MLProfileInferenceUseGNNModel",
 
-                    "-H:+UseCompressedReferences", "-H:+CollectYoungGenerationSeparately",
+                    "-H:+UseCompressedReferences",
 
                     "--features=net.hollowcube.nativeimage.HCNativeImageFeature",
                     "--static-nolibc", "--no-fallback",
