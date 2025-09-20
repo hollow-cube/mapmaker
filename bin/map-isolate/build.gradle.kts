@@ -55,6 +55,7 @@ graalvmNative {
                 listOf(
                     "--enable-native-access=ALL-UNNAMED", "--enable-monitoring=jfr",
                     "-H:+UnlockExperimentalVMOptions", "-H:+ForeignAPISupport",
+                    "-H:+MLProfileInferenceUseGNNModel",
                     "--features=net.hollowcube.nativeimage.HCNativeImageFeature",
                     "--static-nolibc", "--no-fallback",
                     "--emit build-report",
