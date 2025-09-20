@@ -28,8 +28,8 @@ blossom = "2.1.0"
 velocity = "3.4.0-SNAPSHOT"
 classgraph = "4.8.179"
 included = "-INCLUDED"
-luau = "0.4.0"
-luau-natives = "0.4.0"
+luau = "0.5.1"
+luau-natives = "0.5.1"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
