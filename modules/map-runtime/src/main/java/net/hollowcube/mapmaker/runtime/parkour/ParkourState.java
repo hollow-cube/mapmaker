@@ -90,7 +90,8 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
 
             var map = world.map();
             switch (map.getSetting(MapSettings.CAN_SEND_POSE)) {
-                case NOT_SET -> mp.setCanSendPose(map.publishedAt() != null && map.publishedAt().isBefore(NO_POSE_CHANGES_EPOCH));
+                case NOT_SET ->
+                        mp.setCanSendPose(map.publishedAt() != null && map.publishedAt().isBefore(NO_POSE_CHANGES_EPOCH));
                 case TRUE -> mp.setCanSendPose(true);
                 case FALSE -> mp.setCanSendPose(false);
             }
@@ -266,6 +267,12 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             if (!gameState.get(SpectateHelper.GAME_STATE_SAVED, false)) {
                 var saveState = lastState instanceof AnyPlaying p ? p.saveState() : savedState;
                 gameState.setFrom(saveState.state(PlayState.class));
+
+                // If we have an empty save state with no playtime, try to add world spawn effects.
+                boolean isEmptyState = savedState.getPlaytime() == 0 && gameState.isEmpty();
+                var spawnCheckpoint = world.getTag(ParkourMapWorld.SPAWN_CHECKPOINT_EFFECTS);
+                if (spawnCheckpoint != null && isEmptyState) spawnCheckpoint.actions().applyTo(player, gameState);
+                
                 gameState.set(SpectateHelper.GAME_STATE_SAVED, true);
             }
         }

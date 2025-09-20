@@ -72,6 +72,10 @@ public final class PlayState {
         this.actionData = new HashMap<>(Objects.requireNonNullElse(actionData, Map.of()));
     }
 
+    public boolean isEmpty() {
+        return history.isEmpty() && pos == null && ghostBlocks.isEmpty() && actionData.isEmpty();
+    }
+
     public @Nullable PlayState lastState() {
         return lastState;
     }
