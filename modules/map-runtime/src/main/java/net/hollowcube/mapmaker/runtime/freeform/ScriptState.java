@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 public class ScriptState {
 
     public static Codec<ScriptState> CODEC = StructCodec.struct(
-            "saveData", Codec.RAW_VALUE, ScriptState::saveData,
+            "saveData", Codec.RAW_VALUE.optional(), ScriptState::saveData,
             ScriptState::new);
     // Todo should not be a play state of course
     public static final SaveStateType.Serializer<ScriptState> SERIALIZER = SaveStateType.serializer("playState", CODEC, HCDataTypes.PLAY_STATE);
