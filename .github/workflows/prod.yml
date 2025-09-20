@@ -21,7 +21,7 @@ jobs:
           submodules: 'recursive'
       - uses: actions/setup-java@v5
         with:
-          java-version: '24'
+          java-version: '25'
           distribution: 'graalvm'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -62,7 +62,7 @@ jobs:
           submodules: 'recursive'
       - uses: actions/setup-java@v5
         with:
-          java-version: '24'
+          java-version: '25'
           distribution: 'graalvm'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -106,7 +106,7 @@ jobs:
           submodules: 'recursive'
       - uses: actions/setup-java@v5
         with:
-          java-version: '24'
+          java-version: '25'
           distribution: 'graalvm'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -150,7 +150,7 @@ jobs:
           submodules: 'recursive'
       - uses: actions/setup-java@v5
         with:
-          java-version: '24'
+          java-version: '25'
           distribution: 'graalvm'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4

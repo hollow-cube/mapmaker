@@ -1,6 +1,16 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("com.google.code.gson:gson:2.11.0")
+    }
+}
+
 plugins {
     // Settings plugins cannot be declared from the version catalog
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.9.0"
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
 rootProject.name = "mapmaker"

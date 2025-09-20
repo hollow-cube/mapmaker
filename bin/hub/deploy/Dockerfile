@@ -1,4 +1,4 @@
-FROM eclipse-temurin:24-alpine
+FROM azul/zulu-openjdk-alpine:25-latest
 
 WORKDIR /app
 COPY ./bin/hub/build/libs/hub-all.jar /app/server.jar

@@ -23,9 +23,13 @@ tasks.register<DefaultTask>("downloadMinecraft") {
     if (!minecraftCache.exists()) {
         minecraftCache.mkdirs()
         val manifest = getJson("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json")
-        val version = manifest["versions"].asJsonArray.first { element -> element.asJsonObject["id"].asString == mcVersion }
+        val version =
+            manifest["versions"].asJsonArray.first { element -> element.asJsonObject["id"].asString == mcVersion }
         val versionPackage = getJson(version.asJsonObject.get("url").asString)
-        val clientJar = copyTo(versionPackage["downloads"].asJsonObject["client"].asJsonObject["url"].asString, temporaryDir.resolve("client.jar"))
+        val clientJar = copyTo(
+            versionPackage["downloads"].asJsonObject["client"].asJsonObject["url"].asString,
+            temporaryDir.resolve("client.jar")
+        )
 
         project.copy {
             from(zipTree(clientJar))
@@ -47,7 +51,7 @@ tasks.register<JavaExec>("runPacker") {
     outputs.dir(packerOut)
 
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(24)
+        languageVersion = JavaLanguageVersion.of(25)
         vendor = JvmVendorSpec.GRAAL_VM
     }
 }
