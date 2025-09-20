@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.runtime.freeform.FreeformMapWorld;
 import net.hollowcube.mapmaker.runtime.freeform.bundle.LocalFsLoader;
+import net.hollowcube.mapmaker.runtime.freeform.bundle.ResourcesLoader;
 import net.hollowcube.mapmaker.runtime.freeform.bundle.ScriptBundle;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.session.Presence;
@@ -25,8 +26,8 @@ import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.UUID;
 
 import static net.hollowcube.mapmaker.map.MapPlayer.simpleMapPlayer;
@@ -49,15 +50,18 @@ public class MapIsolateServer extends AbstractMapServer {
         if (IsolateMain.args.length < 1)
             throw new IllegalArgumentException("Map ID must be provided as the last argument");
         this.mapId = UUID.fromString(IsolateMain.args[IsolateMain.args.length - 1]).toString();
-        System.out.println("Map ID: " + this.mapId);
-        System.out.println("Args: " + Arrays.toString(IsolateMain.args));
+        logger.info("Loading map {}", this.mapId);
 
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("map-init")
                 .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
                 .addListener(PlayerSpawnEvent.class, this::handleSpawn)
                 .addListener(PlayerDisconnectEvent.class, this::handleDisconnect));
 
-        this.scriptLoader = new LocalFsLoader(Path.of("../../scripts"));
+        var scriptsDirectory = Path.of("../../scripts");
+        this.scriptLoader = Files.exists(scriptsDirectory)
+                ? new LocalFsLoader(scriptsDirectory)
+                : new ResourcesLoader();
+        logger.info("Using script loader: {}", this.scriptLoader);
     }
 
     @Override
