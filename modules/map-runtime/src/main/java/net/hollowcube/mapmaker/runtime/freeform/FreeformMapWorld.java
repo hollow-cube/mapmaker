@@ -1,15 +1,17 @@
 package net.hollowcube.mapmaker.runtime.freeform;
 
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.compiler.LuauCompiler;
-import net.hollowcube.mapmaker.map.AbstractMapWorld;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapServer;
+import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.misc.BossBars;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.freeform.bundle.ScriptBundle;
+import net.hollowcube.mapmaker.runtime.freeform.lua.LuaEventSource;
 import net.hollowcube.mapmaker.runtime.freeform.lua.LuaGlobals;
 import net.hollowcube.mapmaker.runtime.freeform.lua.LuaTask;
 import net.hollowcube.mapmaker.runtime.freeform.lua.math.LuaVectorTypeImpl;
+import net.hollowcube.mapmaker.runtime.freeform.lua.player.LuaPlayer;
 import net.hollowcube.mapmaker.runtime.freeform.lua.world.LuaBlock;
 import net.hollowcube.mapmaker.runtime.freeform.lua.world.LuaWorld;
 import net.hollowcube.mapmaker.runtime.freeform.script.LuaScriptState;
@@ -22,10 +24,11 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class FreeformMapWorld extends AbstractMapWorld<FreeformState, FreeformMapWorld> {
 
-    private static final LuauCompiler LUAU_COMPILER = LuauCompiler.builder()
+    public static final LuauCompiler LUAU_COMPILER = LuauCompiler.builder()
             .userdataTypes() // todo
             .vectorType("vector")
             .vectorCtor("vec")
@@ -44,6 +47,10 @@ public class FreeformMapWorld extends AbstractMapWorld<FreeformState, FreeformMa
         this.scriptBundle = Objects.requireNonNull(scriptBundle, "Failed to load script bundle for map " + map.id());
 
         this.globalState = createGlobalState();
+    }
+
+    public ScriptBundle scriptBundle() {
+        return this.scriptBundle;
     }
 
     public LuaState globalState() {
@@ -100,11 +107,25 @@ public class FreeformMapWorld extends AbstractMapWorld<FreeformState, FreeformMa
 
     @Override
     protected FreeformState configurePlayer(Player player) {
+        final var playerData = PlayerData.fromPlayer(player);
+        SaveState saveState;
+        try {
+            saveState = server().mapService().getLatestSaveState(map().id(),
+                    playerData.id(), SaveStateType.PLAYING, ScriptState.SERIALIZER);
+        } catch (MapService.NotFoundError ignored) {
+            // No save state yet, create one locally.
+            // We do an upsert to save, so it will be created in the map service at that point.
+            saveState = new SaveState(UUID.randomUUID().toString(),
+                    map().id(), playerData.id(), SaveStateType.PLAYING,
+                    ScriptState.SERIALIZER, new ScriptState(null));
+            saveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
+        }
 
         player.setRespawnPoint(map().settings().getSpawnPoint());
 
-        return new FreeformState.Playing();
+        return new FreeformState.Playing(saveState, new ArrayList<>());
     }
+
 
     @Override
     protected @Nullable List<BossBar> createBossBars() {
@@ -126,12 +147,12 @@ public class FreeformMapWorld extends AbstractMapWorld<FreeformState, FreeformMa
 //        LuaColor.init(global);
 //        LuaText.init(global);
 
-//        LuaEventSource.init(global);
+        LuaEventSource.init(global);
         LuaBlock.init(global);
         LuaWorld.init(global);
 //        LuaParticle.init(global);
 //        LuaEntity.init(global);
-//        LuaPlayer.init(global);
+        LuaPlayer.init(global);
 
         global.sandbox();
         return global;

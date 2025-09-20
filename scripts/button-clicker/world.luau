@@ -1,3 +1,1 @@
-function abc()
-	print("hello, world!")
-end
+print("hello, world!")

@@ -4,6 +4,10 @@
     {
       "type": "world",
       "script": "world.luau"
+    },
+    {
+      "type": "player",
+      "script": "player.luau"
     }
   ]
 }

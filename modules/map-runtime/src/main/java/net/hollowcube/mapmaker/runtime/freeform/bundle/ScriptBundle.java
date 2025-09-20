@@ -12,7 +12,7 @@ public interface ScriptBundle {
 
     record Entrypoint(Type type, String script) {
         public enum Type {
-            WORLD
+            WORLD, PLAYER
         }
     }
 
