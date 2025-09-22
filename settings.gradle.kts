@@ -41,6 +41,8 @@ include(
 )
 
 include(
+    "tools:lua-slopgen:api",
+    "tools:lua-slopgen",
     "tools:native-image-helper",
 )
 

@@ -11,6 +11,9 @@ dependencies {
     implementation(project(":modules:datafix"))
     implementation(project(":modules:compat"))
 
+    implementation(project(":tools:lua-slopgen:api"))
+    annotationProcessor(project(":tools:lua-slopgen"))
+
     implementation(libs.minestom)
     implementation(libs.polar)
     implementation(libs.included.molang)

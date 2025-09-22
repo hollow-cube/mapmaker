@@ -30,6 +30,7 @@ classgraph = "4.8.179"
 included = "-INCLUDED"
 luau = "0.5.1"
 luau-natives = "0.5.1"
+javapoet = "0.7.0"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
@@ -52,6 +53,7 @@ jctools = { group = "org.jctools", name = "jctools-core", version.ref = "jctools
 caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
 json5 = { group = "de.marhali", name = "json5-java", version.ref = "json5" }
 velocity-api = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
+javapoet = { group = "com.palantir.javapoet", name = "javapoet", version.ref = "javapoet" }
 
 included-molang = { group = "dev.hollowcube", name = "molang", version.ref = "included" }
 included-schem = { group = "dev.hollowcube", name = "schem", version.ref = "included" }
