@@ -20,6 +20,16 @@ public class LuaHelpers {
         return 0; // Never reached, just to make java happy
     }
 
+    public static int fieldReadOnly(LuaState state, String typeName, String key) {
+        state.error(typeName + "." + key + " is read-only");
+        return 0;
+    }
+
+    public static int fieldWriteOnly(LuaState state, String typeName, String key) {
+        state.error(typeName + "." + key + " is write-only");
+        return 0;
+    }
+
     /// Iterates over a table (no checks to ensure its a table) and applies the given function for each key.
     /// During the callback, the value is always at index -1 (and the key at -2 if needed).
     ///

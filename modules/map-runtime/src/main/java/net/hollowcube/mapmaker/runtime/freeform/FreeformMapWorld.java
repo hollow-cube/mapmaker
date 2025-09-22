@@ -10,10 +10,13 @@ import net.hollowcube.mapmaker.runtime.freeform.bundle.ScriptBundle;
 import net.hollowcube.mapmaker.runtime.freeform.lua.LuaEventSource;
 import net.hollowcube.mapmaker.runtime.freeform.lua.LuaGlobals;
 import net.hollowcube.mapmaker.runtime.freeform.lua.LuaTask;
+import net.hollowcube.mapmaker.runtime.freeform.lua.base.LuaTextImpl$luau;
 import net.hollowcube.mapmaker.runtime.freeform.lua.math.LuaVectorTypeImpl;
-import net.hollowcube.mapmaker.runtime.freeform.lua.player.LuaPlayer;
-import net.hollowcube.mapmaker.runtime.freeform.lua.world.LuaBlock;
+import net.hollowcube.mapmaker.runtime.freeform.lua.player.LuaPlayer$luau;
+import net.hollowcube.mapmaker.runtime.freeform.lua.player.LuaSidebar$luau;
+import net.hollowcube.mapmaker.runtime.freeform.lua.world.LuaBlockImpl$luau;
 import net.hollowcube.mapmaker.runtime.freeform.lua.world.LuaWorld;
+import net.hollowcube.mapmaker.runtime.freeform.lua.world.LuaWorld$luau;
 import net.hollowcube.mapmaker.runtime.freeform.script.LuaScriptState;
 import net.kyori.adventure.bossbar.BossBar;
 import net.minestom.server.entity.Player;
@@ -145,14 +148,21 @@ public class FreeformMapWorld extends AbstractMapWorld<FreeformState, FreeformMa
         // Global APIs
         LuaVectorTypeImpl.init(global);
 //        LuaColor.init(global);
-//        LuaText.init(global);
+        LuaTextImpl$luau.init$luau(global);
 
         LuaEventSource.init(global);
-        LuaBlock.init(global);
-        LuaWorld.init(global);
+        LuaBlockImpl$luau.init$luau(global);
+        LuaWorld$luau.init$luau(global);
 //        LuaParticle.init(global);
 //        LuaEntity.init(global);
-        LuaPlayer.init(global);
+
+        // Player & friends
+        LuaPlayer$luau.init$luau(global);
+        LuaSidebar$luau.init$luau(global);
+
+        // TODO for gen
+        //  - use tagged user data (and a more generic way to add to state)
+        //  - use service files to discover impls and load them.
 
         global.sandbox();
         return global;

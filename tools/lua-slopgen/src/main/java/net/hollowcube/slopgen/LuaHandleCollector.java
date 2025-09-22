@@ -4,6 +4,7 @@ import com.palantir.javapoet.TypeName;
 import com.sun.source.util.DocTrees;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.annotation.LuaMeta;
+import net.hollowcube.luau.annotation.LuaProperty;
 import net.hollowcube.luau.annotation.LuaStatic;
 
 import javax.annotation.processing.Messager;
@@ -52,6 +53,7 @@ public class LuaHandleCollector extends SimpleElementVisitor14<Void, List<LuaHan
                 e.getSimpleName().toString(),
                 e.getAnnotation(LuaStatic.class) != null,
                 e.getModifiers().stream().anyMatch(m -> m == Modifier.STATIC),
+                e.getAnnotation(LuaProperty.class) != null,
                 luaMeta != null ? luaMeta.value() : null
         ));
 

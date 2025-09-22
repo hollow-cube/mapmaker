@@ -97,10 +97,11 @@ task.cancel(handle)
         * `#` to get length
         * `==` to compare
         * `~=` to compare
+        * `tostring` to serialize to plain text
     * Instance methods
-        * some way to serialize to plain text
 * `Direction` - `Direction.North`, `.South`, etc
 * `Slot` - Special slot constants, eg `Slot.MainHand`, `.Saddle`, etc
+    * Could probably be tagged light userdata constants
 
 ## Content Types
 
@@ -239,6 +240,8 @@ Movement
 Communication
 
 * `SendMessage(message: AnyText)`
+* `SendChatPrompt(message: AnyText, options: { [key: string]: AnyText }): string` -> sends the message and gives
+  clickable response options in the response.
 * `ShowTitle(title: AnyText, subtitle?: AnyText, { fadeIn?: number, stay?: number, fadeOut?: number }?)`
 * `ShowActionBar(message: AnyText, duration?: number)`
 * `Sidebar` - Sidebar object controls the sidebar

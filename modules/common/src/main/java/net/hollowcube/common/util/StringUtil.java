@@ -16,4 +16,17 @@ public final class StringUtil {
         }
         return pascalCase.toString();
     }
+
+    public static @NotNull String pascalToSnake(@NotNull String pascalCase) {
+        StringBuilder snakeCase = new StringBuilder();
+        for (int i = 0; i < pascalCase.length(); i++) {
+            char c = pascalCase.charAt(i);
+            if (Character.isUpperCase(c) && i > 0) {
+                snakeCase.append('_');
+            }
+            snakeCase.append(Character.toLowerCase(c));
+        }
+        return snakeCase.toString();
+    }
+
 }

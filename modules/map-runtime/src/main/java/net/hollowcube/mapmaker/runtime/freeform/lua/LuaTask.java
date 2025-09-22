@@ -10,6 +10,7 @@ import net.minestom.server.timer.TaskSchedule;
 import java.util.Map;
 import java.util.function.Supplier;
 
+// @LuaLib("task")
 public class LuaTask {
     private static final String NAME = "task";
 

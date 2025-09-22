@@ -43,7 +43,8 @@ public class LuaSlopgenProcessor extends AbstractProcessor {
 
             var packageName = elementUtils.getPackageOf(typeElement).getQualifiedName().toString();
             var glueTypeName = ClassName.get(packageName, typeElement.getSimpleName() + "$luau");
-            var glueTypeBuilder = TypeSpec.interfaceBuilder(glueTypeName);
+            var glueTypeBuilder = TypeSpec.interfaceBuilder(glueTypeName)
+                    .addModifiers(Modifier.PUBLIC);
 
             var annotatedType = TypeName.get(typeElement.asType());
             var targetType = luaTypeMirrorValues.containsKey("implFor")
@@ -53,8 +54,15 @@ public class LuaSlopgenProcessor extends AbstractProcessor {
                     ? (String) luaTypeMirrorValues.get("name").getValue()
                     : typeElement.getSimpleName().toString().replace("Lua", "");
 
+            var luaHelpersType = ClassName.get("net.hollowcube.mapmaker.runtime.freeform.script", "LuaHelpers");
+
             var handles = new ArrayList<LuaHandle>();
             new LuaHandleCollector(messager, docTrees).visit(typeElement, handles);
+            var getterSetterNames = handles.stream()
+                    .filter(h -> h.metaType() == null && !h.isLuaStatic() && h.isProperty())
+                    .filter(h -> h.methodName().startsWith("get") || h.methodName().startsWith("set"))
+                    .map(LuaHandle::methodName)
+                    .toList();
 
             // Add constant with metatable/type name
             glueTypeBuilder.addField(FieldSpec.builder(String.class, "TYPE_NAME",
@@ -156,28 +164,169 @@ public class LuaSlopgenProcessor extends AbstractProcessor {
                         .build());
             }
 
-            // Always generate __index, __newindex, and __namecall.
-            glueTypeBuilder.addMethod(MethodSpec.methodBuilder("luaIndex")
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .addParameter(LuaState.class, "state")
-                    .returns(TypeName.INT)
-                    .addStatement("state.error($S)", "Not implemented")
-                    .addStatement("return 0")
-                    .build());
-            glueTypeBuilder.addMethod(MethodSpec.methodBuilder("luaNewIndex")
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .addParameter(LuaState.class, "state")
-                    .returns(TypeName.INT)
-                    .addStatement("state.error($S)", "Not implemented")
-                    .addStatement("return 0")
-                    .build());
-            glueTypeBuilder.addMethod(MethodSpec.methodBuilder("luaNameCall")
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .addParameter(LuaState.class, "state")
-                    .returns(TypeName.INT)
-                    .addStatement("state.error($S)", "Not implemented")
-                    .addStatement("return 0")
-                    .build());
+            {   // Generate __index metamethod impl
+                var indexMethod = MethodSpec.methodBuilder("luaIndex")
+                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                        .addParameter(LuaState.class, "state")
+                        .returns(TypeName.INT);
+
+                indexMethod.addStatement("$T self = $T.checkArg(state, 1)", targetType, annotatedType);
+                indexMethod.addStatement("$T key = state.checkStringArg(2)", String.class);
+                indexMethod.beginControlFlow("return switch (key)");
+
+                for (var method : handles) {
+                    if (method.metaType() != null || method.isLuaStatic() || !method.isProperty())
+                        continue;
+                    if (method.methodName().startsWith("set")) {
+                        // Check for read-only properties
+                        var hasGetter = getterSetterNames.contains("get" + method.methodName().substring(3));
+                        if (!hasGetter) {
+                            indexMethod.addStatement("case $S -> $T.fieldWriteOnly(state, TYPE_NAME, key)",
+                                    method.methodName().substring(3), luaHelpersType);
+                        }
+                        continue;
+                    }
+                    if (!method.methodName().startsWith("get"))
+                        continue;
+
+                    indexMethod.addCode("case $S -> ", method.methodName().substring(3));
+                    if (method.isStatic()) {
+                        indexMethod.addStatement("$T.$L(state)", method.owningType(), method.methodName());
+                    } else {
+                        indexMethod.addStatement("self.$L(state)", method.methodName());
+                    }
+                }
+
+                // If the class provides its own index metamethod, call that as the default case
+                boolean foundIndexProxy = false;
+                for (var method : handles) {
+                    if (method.metaType() != MetaType.INDEX || method.isLuaStatic())
+                        continue;
+
+                    foundIndexProxy = true;
+                    indexMethod.addCode("default -> ");
+                    if (method.isStatic()) {
+                        indexMethod.addStatement("$T.$L(state)", method.owningType(), method.methodName());
+                    } else {
+                        indexMethod.addStatement("self.$L(state)", method.methodName());
+                    }
+                }
+                if (!foundIndexProxy) {
+                    indexMethod.addStatement("default -> $T.noSuchKey(state, TYPE_NAME, key)", luaHelpersType);
+                }
+
+                indexMethod.addCode("$<};");
+                glueTypeBuilder.addMethod(indexMethod.build());
+            }
+            {   // Generate __newindex metamethod impl
+                var newIndexMethod = MethodSpec.methodBuilder("luaNewIndex")
+                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                        .addParameter(LuaState.class, "state")
+                        .returns(TypeName.INT);
+
+                newIndexMethod.addStatement("$T self = $T.checkArg(state, 1)", targetType, annotatedType);
+                newIndexMethod.addStatement("$T key = state.checkStringArg(2)", String.class);
+                newIndexMethod.beginControlFlow("return switch (key)");
+
+                for (var method : handles) {
+                    if (method.metaType() != null || method.isLuaStatic() || !method.isProperty())
+                        continue;
+                    if (method.methodName().startsWith("get")) {
+                        // Check for read-only properties
+                        var hasSetter = getterSetterNames.contains("set" + method.methodName().substring(3));
+                        if (!hasSetter) {
+                            newIndexMethod.addStatement("case $S -> $T.fieldReadOnly(state, TYPE_NAME, key)",
+                                    method.methodName().substring(3), luaHelpersType);
+                        }
+                        continue;
+                    }
+                    if (!method.methodName().startsWith("set"))
+                        continue;
+
+                    newIndexMethod.addCode("case $S -> ", method.methodName().substring(3));
+                    if (method.isStatic()) {
+                        newIndexMethod.addStatement("$T.$L(state)", method.owningType(), method.methodName());
+                    } else {
+                        // In the non-static case we remove the self and key args from the stack so the first arg
+                        // is the key being set for setter methods.
+                        newIndexMethod.addCode("{$>\n");
+                        newIndexMethod.addStatement("state.remove(1)");
+                        newIndexMethod.addStatement("state.remove(1)");
+                        newIndexMethod.addStatement("yield self.$L(state)", method.methodName());
+                        newIndexMethod.addCode("$<}\n");
+                    }
+                }
+
+                // If the class provides its own index metamethod, call that as the default case
+                boolean foundNewIndexProxy = false;
+                for (var method : handles) {
+                    if (method.metaType() != MetaType.NEWINDEX || method.isLuaStatic())
+                        continue;
+
+                    foundNewIndexProxy = true;
+                    newIndexMethod.addCode("default -> ");
+                    if (method.isStatic()) {
+                        newIndexMethod.addStatement("$T.$L(state)", method.owningType(), method.methodName());
+                    } else {
+                        newIndexMethod.addStatement("self.$L(state)", method.methodName());
+                    }
+                }
+                if (!foundNewIndexProxy) {
+                    newIndexMethod.addStatement("default -> $T.noSuchKey(state, TYPE_NAME, key)", luaHelpersType);
+                }
+
+                newIndexMethod.addCode("$<};");
+                glueTypeBuilder.addMethod(newIndexMethod.build());
+            }
+            {   // Generate __namecall metamethod impl
+                var nameCallMethod = MethodSpec.methodBuilder("luaNameCall")
+                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                        .addParameter(LuaState.class, "state")
+                        .returns(TypeName.INT);
+
+                nameCallMethod.addStatement("$T self = $T.checkArg(state, 1)", targetType, annotatedType);
+                nameCallMethod.addStatement("$T methodName = state.nameCallAtom()", String.class);
+                nameCallMethod.beginControlFlow("return switch (methodName)");
+
+                // state.remove(1); // Remove the world userdata from the stack (so implementations can pretend they have no self)
+                for (var method : handles) {
+                    if (method.metaType() != null || method.isLuaStatic() || method.isProperty())
+                        continue;
+
+                    nameCallMethod.addCode("case $S -> ", method.methodName());
+                    if (method.isStatic()) {
+                        nameCallMethod.addStatement("$T.$L(state)", method.owningType(), method.methodName());
+                    } else {
+                        // In the non-static case we remove the self arg from the stack so the first arg
+                        // is the first parameter to the method.
+                        nameCallMethod.addCode("{$>\n");
+                        nameCallMethod.addStatement("state.remove(1)");
+                        nameCallMethod.addStatement("yield self.$L(state)", method.methodName());
+                        nameCallMethod.addCode("$<}\n");
+                    }
+                }
+
+                // If the class provides its own namecall metamethod, call that as the default case
+                boolean foundNameCallProxy = false;
+                for (var method : handles) {
+                    if (method.metaType() != MetaType.NAMECALL || method.isLuaStatic())
+                        continue;
+
+                    foundNameCallProxy = true;
+                    nameCallMethod.addCode("default -> ");
+                    if (method.isStatic()) {
+                        nameCallMethod.addStatement("$T.$L(state)", method.owningType(), method.methodName());
+                    } else {
+                        nameCallMethod.addStatement("self.$L(state)", method.methodName());
+                    }
+                }
+                if (!foundNameCallProxy) {
+                    nameCallMethod.addStatement("default -> $T.noSuchMethod(state, TYPE_NAME, methodName)", luaHelpersType);
+                }
+
+                nameCallMethod.addCode("$<};");
+                glueTypeBuilder.addMethod(nameCallMethod.build());
+            }
 
             try {
                 JavaFile.builder(packageName, glueTypeBuilder.build())

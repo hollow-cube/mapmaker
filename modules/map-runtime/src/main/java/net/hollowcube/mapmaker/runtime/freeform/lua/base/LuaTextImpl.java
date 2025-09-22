@@ -14,7 +14,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 //todo dont really need to inherit from the generated type. we just get TYPE_NAME from it.
 //     type name should also go away because we should be using tagged userdata.
 @LuaType(implFor = Component.class, name = "Text")
-public class LuaText implements LuaText$luau {
+public class LuaTextImpl implements LuaTextImpl$luau {
     private static final PlainTextComponentSerializer PLAIN_TEXT_SERIALIZER =
             PlainTextComponentSerializer.plainText();
     // Extremely limited mini message for now, likely will expand in the future.
@@ -39,6 +39,23 @@ public class LuaText implements LuaText$luau {
 
     public static Component checkArg(LuaState state, int index) {
         return (Component) state.checkUserDataArg(index, TYPE_NAME);
+    }
+
+    public static Component checkAnyTextArg(LuaState state, int index) {
+        state.checkAny(index); // Make sure they provided an arg
+        return switch (state.type(index)) {
+            case STRING -> Component.text(state.toString(index));
+            case NUMBER, BOOLEAN, VECTOR -> Component.text(state.toStringRepr(index));
+            case TABLE -> {
+                state.argError(index, "Table to text is not yet supported");
+                yield null;
+            }
+            case USERDATA -> checkArg(state, index);
+            default -> {
+                state.argError(index, "Expected a Text-able object");
+                yield null;
+            }
+        };
     }
 
     //region Static Methods
@@ -80,6 +97,21 @@ public class LuaText implements LuaText$luau {
     //endregion
 
     //region Meta Methods
+
+    @LuaMeta(MetaType.CONCAT)
+    public static int luaConcat(LuaState state) {
+        var lhs = checkArg(state, 1);
+        var rhs = checkAnyTextArg(state, 2);
+        push(state, Component.textOfChildren(lhs, rhs));
+        return 1;
+    }
+
+    @LuaMeta(MetaType.LEN)
+    public static int luaLen(LuaState state) {
+        var component = checkArg(state, 1);
+        state.pushInteger(PLAIN_TEXT_SERIALIZER.serialize(component).length());
+        return 1;
+    }
 
     @LuaMeta(MetaType.TOSTRING)
     public static int luaToString(LuaState state) {

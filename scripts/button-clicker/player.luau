@@ -10,6 +10,9 @@ function onButtonPress(blockPosition, block)
 	local buttonCount = player.SaveData.buttonCount or 0
 	player.SaveData.buttonCount = buttonCount + 1
 	print("Pressed", player.SaveData.buttonCount, "times")
+
+	player.Sidebar.Enabled = true
+	player.Sidebar.Title = Text.new("<rainbow>Button Clicker")
 end
 
 player.OnBlockInteract:Listen(onButtonPress)
