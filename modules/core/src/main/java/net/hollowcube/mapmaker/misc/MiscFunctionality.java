@@ -144,29 +144,23 @@ public final class MiscFunctionality {
     }
 
     public static void applyCosmetics(@NotNull Player player, @NotNull PlayerData playerData) {
-        for (var cosmeticType : CosmeticType.VALUES) {
-            var cosmetic = Cosmetic.byId(cosmeticType, playerData.getCosmetic(cosmeticType));
-            var itemStack = cosmetic == null ? cosmeticType.blankIcon() : cosmetic.impl().iconItem();
+        for (var type : CosmeticType.VALUES) {
+            type.reset(player); // Clear existing data for a cosmetic before applying
+
+            var cosmetic = Cosmetic.byId(type, playerData.getCosmetic(type));
+            var itemStack = cosmetic == null ? type.blankIcon() : cosmetic.impl().iconItem();
             // If the itemstack has a glider we need to preserve it.
-            if (player.getInventory().getItemStack(cosmeticType.iconSlot()).has(DataComponents.GLIDER)) {
+            if (player.getInventory().getItemStack(type.iconSlot()).has(DataComponents.GLIDER)) {
                 itemStack = itemStack.with(DataComponents.GLIDER);
                 var equippable = itemStack.get(DataComponents.EQUIPPABLE);
                 if (equippable != null) itemStack = itemStack.with(DataComponents.EQUIPPABLE,
                         equippable.withAssetId("minecraft:elytra"));
             }
-            player.getInventory().setItemStack(cosmeticType.iconSlot(), itemStack);
+            player.getInventory().setItemStack(type.iconSlot(), itemStack);
+
+            if (cosmetic != null) {
+                cosmetic.impl().apply(player);
+            }
         }
-//        var newDisplayedSkinParts = player.getSettings().getDisplayedSkinParts();
-//        newDisplayedSkinParts &= ~0x40;
-//        player.getSettings().refresh(
-//                player.getSettings().getLocale(),
-//                player.getSettings().getViewDistance(),
-//                player.getSettings().getChatMessageType(),
-//                player.getSettings().hasChatColors(),
-//                newDisplayedSkinParts,
-//                player.getSettings().getMainHand(),
-//                player.getSettings().enableTextFiltering(),
-//                player.getSettings().allowServerListings()
-//        );
     }
 }

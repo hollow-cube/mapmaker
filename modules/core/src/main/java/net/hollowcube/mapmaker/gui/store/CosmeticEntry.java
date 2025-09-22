@@ -83,6 +83,7 @@ public class CosmeticEntry extends View {
 //        costs.put("particle/cloud", 5);
 //        costs.put("particle/bubble", 5);
 //        costs.put("particle/note", 5);
+        costs.put("particle/cherry_leaves", 5);
 
         // Victory Effects
 //        costs.put("victory_effect/explosion", 5); // Intentionally not present, it does not work so should not be buyable

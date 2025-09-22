@@ -6,6 +6,8 @@ import net.hollowcube.mapmaker.editor.item.ExitTestModeItem;
 import net.hollowcube.mapmaker.editor.vanilla.DisplayEntityEditor;
 import net.hollowcube.mapmaker.map.PlayerState;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.misc.MiscFunctionality;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.parkour.item.ResetSaveStateItem;
 import net.hollowcube.mapmaker.runtime.parkour.item.ReturnToCheckpointItem;
 import net.hollowcube.mapmaker.runtime.parkour.item.SetSpectatorCheckpointItem;
@@ -38,6 +40,8 @@ public sealed interface EditorState extends PlayerState<EditorState, EditorMapWo
             editState.inventory().forEach(player.getInventory()::setItemStack);
             player.setHeldItemSlot((byte) editState.selectedSlot());
             player.setFlying(editState.isFlying());
+            MiscFunctionality.applyCosmetics(player, PlayerData.fromPlayer(player));
+
             if (editState.pos() == null) {
                 // If there is no position stored then this is a fresh edit state so add the builder menu
                 var itemStack = world.itemRegistry().getItemStack(BuilderMenuItem.ID, null);
@@ -60,7 +64,7 @@ public sealed interface EditorState extends PlayerState<EditorState, EditorMapWo
             editState.setPos(player.getPosition());
             editState.setFlying(player.isFlying());
             var inventory = new HashMap<Integer, ItemStack>();
-            for (int i = 0; i < player.getInventory().getSize(); i++) {
+            for (int i = 0; i < player.getInventory().getInnerSize(); i++) {
                 var itemStack = player.getInventory().getItemStack(i);
                 if (!itemStack.isAir()) inventory.put(i, itemStack);
             }

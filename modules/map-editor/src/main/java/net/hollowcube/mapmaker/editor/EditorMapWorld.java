@@ -361,7 +361,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
                     buildState.setPos(player.getPosition());
                     buildState.setFlying(player.isFlying());
                     var inventory = new HashMap<Integer, ItemStack>();
-                    for (int i = 0; i < player.getInventory().getSize(); i++) {
+                    for (int i = 0; i < player.getInventory().getInnerSize(); i++) {
                         var itemStack = player.getInventory().getItemStack(i);
                         if (!itemStack.isAir()) inventory.put(i, itemStack);
                     }
