@@ -6,6 +6,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.common.ConfirmAction;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
@@ -194,12 +195,12 @@ public class EditMap extends View {
                     // Unset handler to set the setting on click
                     addActionHandler(
                             String.format("map_settings_%s_unset", name),
-                            Label.ActionHandler.lmb(player -> settingClickHandler(mapSetting, true))
+                            Label.ActionHandler.lmb(_ -> settingClickHandler(mapSetting, true))
                     );
                     // Set handler to unset the setting on click
                     addActionHandler(
                             String.format("map_settings_%s_set", name),
-                            Label.ActionHandler.lmb(player -> settingClickHandler(mapSetting, false))
+                            Label.ActionHandler.lmb(_ -> settingClickHandler(mapSetting, false))
                     );
                 }
                 case ENUM -> {
@@ -207,7 +208,7 @@ public class EditMap extends View {
                     for (var value : enumClass.getEnumConstants()) {
                         addActionHandler(
                                 String.format("map_settings_%s_%s", name, value.name().toLowerCase(Locale.ROOT)),
-                                Label.ActionHandler.lmb(player -> settingClickHandler(mapSetting, true))
+                                Label.ActionHandler.lmb(_ -> settingClickHandler(mapSetting, true))
                         );
                     }
                 }
@@ -679,7 +680,7 @@ public class EditMap extends View {
         mapSettingsNoSprint.setOption(map.getSetting(MapSettings.NO_SPRINT) ? 1 : 0);
         mapSettingsNoJump.setOption(map.getSetting(MapSettings.NO_JUMP) ? 1 : 0);
         mapSettingsNoSneak.setOption(map.getSetting(MapSettings.NO_SNEAK) ? 1 : 0);
-        mapSettingsNoSpec.setOption(map.getSetting(MapSettings.NO_SPECTATOR) ? 1 : 0);
+        mapSettingsNoSpec.setOption(map.getSetting(MapSettings.NO_SPECTATOR) ? 1 : !CoreFeatureFlags.NO_SPEC_ACCESS.test(player()) ? 2 : 0);
         mapSettingsResetWater.setOption(map.getSetting(MapSettings.RESET_IN_WATER) ? 1 : 0);
         mapSettingsResetLava.setOption(map.getSetting(MapSettings.RESET_IN_LAVA) ? 1 : 0);
         mapSettingsNoTurn.setOption(map.getSetting(MapSettings.NO_TURN) ? 1 : 0);

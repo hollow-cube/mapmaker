@@ -485,6 +485,10 @@
                                     translationKey="gui.create_maps.map_settings_tab.gameplay.no_spec.selected"
                                     sprite="create_maps/tab_settings/tab_gameplay/setting_nospec_icon"
                                     backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nospec_selected"/>
+                            <button id="map_settings_nospec_unavailable"
+                                    translationKey="gui.create_maps.map_settings_tab.gameplay.no_spec.unavailable"
+                                    sprite="create_maps/tab_settings/tab_gameplay/setting_nospec_icon_unavailable"
+                                    backgroundSprite="create_maps/tab_settings/tab_gameplay/setting_nospec_bg"/>
                         </switch>
                         <switch id="map_settings_reset_water_switch">
                             <button id="map_settings_reset_water_unset"
