@@ -32,7 +32,7 @@ public record NoteBlockSong(
 ) {
 
     public record Instrument(
-            int layer, // The vertical layer index of this instrument
+            Layer layer,
             byte instrument,
             byte noteBlockKey,
             byte noteBlockVelocity,
@@ -42,7 +42,7 @@ public record NoteBlockSong(
     }
 
     public record Tick(
-            int t, // The time of this tick (in ticks)
+            int tickTime, // The time of this tick (in ticks)
             @NotNull List<Instrument> instruments
     ) implements Iterable<Instrument> {
 

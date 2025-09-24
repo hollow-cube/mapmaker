@@ -6,6 +6,7 @@ dependencies {
     api(project(":modules:command"))
     api(project(":modules:common"))
     api(project(":modules:core"))
+    api(project(":modules:nbs"))
     implementation(project(":modules:canvas:api"))
     implementation(project(":modules:compat"))
     implementation(project(":modules:datafix"))

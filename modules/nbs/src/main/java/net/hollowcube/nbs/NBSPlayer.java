@@ -2,7 +2,14 @@ package net.hollowcube.nbs;
 
 public interface NBSPlayer {
 
-    void play();
+    void start();
 
     void restart();
+
+    void stop();
+
+    void pause();
+
+    void resume();
+
 }
