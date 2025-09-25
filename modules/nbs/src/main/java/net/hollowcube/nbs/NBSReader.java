@@ -1,7 +1,6 @@
 package net.hollowcube.nbs;
 
 import net.minestom.server.network.NetworkBuffer;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +12,7 @@ public interface NBSReader {
     int MIN_VERSION = 1; // The min supported version (inclusive)
     int MAX_VERSION = 5; // The max supported version (inclusive)
 
-    static @NotNull NBSReader nbsReader() {
+    static NBSReader nbsReader() {
         return Impl.INSTANCE;
     }
 
@@ -29,7 +28,7 @@ public interface NBSReader {
      * @throws IllegalArgumentException      if the bytes are not a valid NBS file
      * @throws UnsupportedOperationException if the NBS version is not supported
      */
-    @NotNull NoteBlockSong read(byte @NotNull [] bytes);
+    NoteBlockSong read(byte[] bytes);
 
     final class Impl implements NBSReader {
         private static final NBSReader INSTANCE = new Impl();
@@ -38,7 +37,7 @@ public interface NBSReader {
         }
 
         @Override
-        public @NotNull NoteBlockSong read(byte @NotNull [] bytes) {
+        public NoteBlockSong read(byte[] bytes) {
             var buffer = NetworkBuffer.wrap(bytes, 0, bytes.length);
 
             short oldSongLength = buffer.read(SHORT);
@@ -117,7 +116,7 @@ public interface NBSReader {
                     byte instrument = buffer.read(BYTE);
                     byte noteBlockKey = buffer.read(BYTE);
                     byte noteBlockVelocity = isLegacy ? 100 : buffer.read(BYTE);
-                    short noteBlockPanning = isLegacy ? 0 : buffer.read(UNSIGNED_BYTE);
+                    short noteBlockPanning = isLegacy ? 100 : buffer.read(UNSIGNED_BYTE);
                     short noteBlockPitch = isLegacy ? 0 : buffer.read(SHORT);
 
                     int finalLayer = layer;
@@ -144,7 +143,7 @@ public interface NBSReader {
                 var layerName = buffer.read(STRING);
                 boolean layerLock = !isLegacy && buffer.read(BOOL);
                 byte layerVolume = buffer.read(BYTE);
-                short layerStereo = isLegacy ? 0 : buffer.read(UNSIGNED_BYTE);
+                short layerStereo = isLegacy ? 100 : buffer.read(UNSIGNED_BYTE);
                 layers.add(new NoteBlockSong.Layer(layerName, layerLock, layerVolume, layerStereo));
             }
 
