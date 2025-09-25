@@ -12,7 +12,7 @@ public final class Particles {
     public static Cosmetic NOTE = builder("note").rarity(Rarity.COMMON).build();
     public static Cosmetic CHERRY_LEAVES = builder("cherry_leaves")
             .rarity(Rarity.COMMON)
-            .impl(DefaultParticleImpl.of(Particle.CHERRY_LEAVES))
+            .impl(DefaultParticleImpl.of(Particle.CHERRY_LEAVES, 0.5f))
             .build();
 
     public static @NotNull Cosmetic.Builder builder(@NotNull String id) {
