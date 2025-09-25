@@ -12,6 +12,7 @@ import net.hollowcube.mapmaker.gui.common.ConfirmAction;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.map.setting.NoSpectateMode;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -586,7 +587,7 @@ public class EditMap extends View {
             } else if (setting.equals(MapSettings.Setting.NOSNEAK)) {
                 map.setSetting(MapSettings.NO_SNEAK, false);
             } else if (setting.equals(MapSettings.Setting.NOSPEC)) {
-                map.setSetting(MapSettings.NO_SPECTATOR, true);
+                map.setSetting(MapSettings.NO_SPECTATOR, NoSpectateMode.ON);
             } else if (setting.equals(MapSettings.Setting.RESET_WATER)) {
                 map.setSetting(MapSettings.RESET_IN_WATER, true);
             } else if (setting.equals(MapSettings.Setting.RESET_LAVA)) {
@@ -608,7 +609,7 @@ public class EditMap extends View {
             } else if (setting.equals(MapSettings.Setting.NOSNEAK)) {
                 map.setSetting(MapSettings.NO_SNEAK, false);
             } else if (setting.equals(MapSettings.Setting.NOSPEC)) {
-                map.setSetting(MapSettings.NO_SPECTATOR, false);
+                map.setSetting(MapSettings.NO_SPECTATOR, NoSpectateMode.OFF);
             } else if (setting.equals(MapSettings.Setting.RESET_WATER)) {
                 map.setSetting(MapSettings.RESET_IN_WATER, false);
             } else if (setting.equals(MapSettings.Setting.RESET_LAVA)) {
@@ -680,7 +681,7 @@ public class EditMap extends View {
         mapSettingsNoSprint.setOption(map.getSetting(MapSettings.NO_SPRINT) ? 1 : 0);
         mapSettingsNoJump.setOption(map.getSetting(MapSettings.NO_JUMP) ? 1 : 0);
         mapSettingsNoSneak.setOption(map.getSetting(MapSettings.NO_SNEAK) ? 1 : 0);
-        mapSettingsNoSpec.setOption(map.getSetting(MapSettings.NO_SPECTATOR) ? 1 : !CoreFeatureFlags.NO_SPEC_ACCESS.test(player()) ? 2 : 0);
+        mapSettingsNoSpec.setOption(map.getSetting(MapSettings.NO_SPECTATOR) != NoSpectateMode.OFF ? 1 : !CoreFeatureFlags.NO_SPEC_ACCESS.test(player()) ? 2 : 0);
         mapSettingsResetWater.setOption(map.getSetting(MapSettings.RESET_IN_WATER) ? 1 : 0);
         mapSettingsResetLava.setOption(map.getSetting(MapSettings.RESET_IN_LAVA) ? 1 : 0);
         mapSettingsNoTurn.setOption(map.getSetting(MapSettings.NO_TURN) ? 1 : 0);

@@ -77,7 +77,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     private static final Sound PLAYER_HURT_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_HURT, Sound.Source.PLAYER, 1, 1f);
     private static final Sound PLAYER_DEATH_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_DEATH, Sound.Source.PLAYER, 1, 1f);
 
-    private static final Tag<Future<@Nullable Long>> BEST_PLAYTIME = Tag.Transient("map:best_playtime");
+    private static final Tag<@Nullable Long> BEST_PLAYTIME = Tag.Transient("map:best_playtime");
 
     private static final List<ItemHandler> SILENT_ITEMS = List.of(
             // Hotbar items
@@ -275,11 +275,10 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             RateMapItem.initLastRating(server().mapService(), player, map());
         }
 
-        var future = MapService.VIRTUAL_EXECUTOR.submit(() -> OpUtils.map(
+        player.setTag(BEST_PLAYTIME, OpUtils.map(
                 server().mapService().getBestSaveState(map().id(), player.getUuid().toString()),
                 SaveState::getPlaytime
         ));
-        player.setTag(BEST_PLAYTIME, future);
 
         return createPlayingState(saveState);
     }
@@ -364,34 +363,28 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     public void performFinishEffects(Player player, SaveState finishState) {
         // Show the completed message after removing the player because it is theoretically possible to not have the savestate fetched yet.
-        Future<@Nullable Long> bestPlaytimeFuture = Objects.requireNonNullElseGet(
-                player.getTag(BEST_PLAYTIME),
-                () -> CompletableFuture.completedFuture(null)
-        );
-        if (bestPlaytimeFuture.state() == Future.State.SUCCESS) {
-            var bestPlaytime = bestPlaytimeFuture.resultNow();
-            if (bestPlaytime == null) {
-                player.setTag(BEST_PLAYTIME, CompletableFuture.completedFuture(finishState.getPlaytime()));
-                player.sendMessage(Component.translatable(
-                        "map.completed.first",
-                        Component.text(formatMapPlaytime(finishState.getPlaytime(), true))
-                ));
-            } else {
-                // Diff playtime rounded to ticks prior to subtracting for correct display.
-                var diffPlaytime = (bestPlaytime - bestPlaytime % MinecraftServer.TICK_MS) -
-                        (finishState.getPlaytime() - finishState.getPlaytime() % MinecraftServer.TICK_MS);
-                var diffColor = diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN;
-                var diffSymbol = diffPlaytime < 0 ? "+" : "-";
-                player.sendMessage(Component.translatable(
-                        "map.completed.with_prior",
-                        Component.text(formatMapPlaytime(finishState.getPlaytime(), true)),
-                        // Note: roundToTicks is not used here. We do the rounding above because we need to round prior to calculating the difference.
-                        Component.text(diffSymbol + formatMapPlaytime(Math.abs(diffPlaytime), false), diffColor)
-                ));
+        Long bestPlaytime = player.getTag(BEST_PLAYTIME);
+        if (bestPlaytime == null) {
+            player.setTag(BEST_PLAYTIME, finishState.getPlaytime());
+            player.sendMessage(Component.translatable(
+                    "map.completed.first",
+                    Component.text(formatMapPlaytime(finishState.getPlaytime(), true))
+            ));
+        } else {
+            // Diff playtime rounded to ticks prior to subtracting for correct display.
+            var diffPlaytime = (bestPlaytime - bestPlaytime % MinecraftServer.TICK_MS) -
+                    (finishState.getPlaytime() - finishState.getPlaytime() % MinecraftServer.TICK_MS);
+            var diffColor = diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN;
+            var diffSymbol = diffPlaytime < 0 ? "+" : "-";
+            player.sendMessage(Component.translatable(
+                    "map.completed.with_prior",
+                    Component.text(formatMapPlaytime(finishState.getPlaytime(), true)),
+                    // Note: roundToTicks is not used here. We do the rounding above because we need to round prior to calculating the difference.
+                    Component.text(diffSymbol + formatMapPlaytime(Math.abs(diffPlaytime), false), diffColor)
+            ));
 
-                if (finishState.getPlaytime() < bestPlaytime) {
-                    player.setTag(BEST_PLAYTIME, CompletableFuture.completedFuture(finishState.getPlaytime()));
-                }
+            if (finishState.getPlaytime() < bestPlaytime) {
+                player.setTag(BEST_PLAYTIME, finishState.getPlaytime());
             }
         }
 
@@ -430,6 +423,10 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
                 mp.updateVisibility();
         }
         return TaskSchedule.tick(5);
+    }
+
+    public @Nullable Long getPlayerBestPlaytime(Player player) {
+        return player.getTag(BEST_PLAYTIME);
     }
 
     // endregion

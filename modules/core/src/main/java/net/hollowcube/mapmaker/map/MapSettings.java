@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
+import net.hollowcube.mapmaker.map.setting.NoSpectateMode;
 import net.hollowcube.mapmaker.map.setting.TimeOfDay;
 import net.hollowcube.mapmaker.map.setting.WeatherType;
 import net.kyori.adventure.text.Component;
@@ -34,7 +35,7 @@ public class MapSettings {
     public static final MapSetting<Boolean> NO_JUMP = MapSetting.Bool("no_jump", false);
     public static final MapSetting<Boolean> NO_SNEAK = MapSetting.Bool("no_sneak", false);
 
-    public static final MapSetting<Boolean> NO_SPECTATOR = MapSetting.Bool("no_spectator", false);
+    public static final MapSetting<NoSpectateMode> NO_SPECTATOR = new MapSetting<>("no_spectator", NoSpectateMode.OFF, NoSpectateMode.CODEC);
     public static final MapSetting<Boolean> RESET_IN_WATER = MapSetting.Bool("reset_in_water", false);
     public static final MapSetting<Boolean> RESET_IN_LAVA = MapSetting.Bool("reset_in_lava", false);
     public static final MapSetting<Boolean> NO_RELOG = MapSetting.Bool("no_relog", false);

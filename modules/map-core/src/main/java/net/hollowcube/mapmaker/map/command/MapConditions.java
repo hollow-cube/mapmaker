@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import static net.hollowcube.command.CommandCondition.ALLOW;
@@ -25,10 +26,14 @@ public final class MapConditions {
     }
 
     public static @NotNull CommandCondition map(Predicate<MapWorld> predicate) {
+        return mapPlayer((world, _) -> predicate.test(world));
+    }
+
+    public static @NotNull CommandCondition mapPlayer(BiPredicate<MapWorld, Player> predicate) {
         return (sender, _) -> {
             if (!(sender instanceof Player player)) return HIDE;
             var world = MapWorld.forPlayer(player);
-            return world != null && predicate.test(world) ? ALLOW : HIDE;
+            return world != null && predicate.test(world, player) ? ALLOW : HIDE;
         };
     }
 

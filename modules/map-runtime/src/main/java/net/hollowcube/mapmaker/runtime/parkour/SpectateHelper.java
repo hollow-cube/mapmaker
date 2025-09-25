@@ -17,6 +17,15 @@ public class SpectateHelper {
     public static final PlayState.Attachment<Boolean> SPECTATOR_FLIGHT = PlayState.attachment(Key.key("mapmaker:spectator_flight"), Codec.BOOLEAN);
     public static final PlayState.Attachment<Boolean> GAME_STATE_SAVED = PlayState.attachment(Key.key("mapmaker:game_state_saved"), Codec.BOOLEAN);
 
+    public static boolean canSpectate(ParkourMapWorld world, Player player) {
+        var mode = world.map().getSetting(MapSettings.NO_SPECTATOR);
+        return switch (mode) {
+            case ON -> false;
+            case OFF -> true;
+            case AFTER_COMPLETION -> world.getPlayerBestPlaytime(player) != null;
+        };
+    }
+
     public static void changeSpecState(Player player, TriState nextSpecState) {
         var world = ParkourMapWorld.forPlayer(player);
         if (world == null) return;
@@ -33,7 +42,7 @@ public class SpectateHelper {
 
         // Map can't be no-spec
         if (nextState instanceof ParkourState.Spectating) {
-            if (world.map().getSetting(MapSettings.NO_SPECTATOR)) return;
+            if (!SpectateHelper.canSpectate(world, player)) return;
             world.changePlayerState(player, nextState, SpectateHelper::checkStateChange);
         } else if (nextState != null) {
             world.changePlayerState(player, nextState);

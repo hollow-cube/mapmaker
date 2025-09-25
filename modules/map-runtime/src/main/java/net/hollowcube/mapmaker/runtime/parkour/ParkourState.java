@@ -188,7 +188,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             AnyPlaying.super.configurePlayer(world, player, lastState);
 
             world.itemRegistry().setItemStack(player, ReturnToCheckpointItem.ID, 0);
-            if (!world.map().getSetting(MapSettings.NO_SPECTATOR))
+            if (SpectateHelper.canSpectate(world, player))
                 world.itemRegistry().setItemStack(player, ToggleSpectatorModeItem.ID_ON, 1);
             world.itemRegistry().setItemStack(player, ResetSaveStateItem.ID, 7);
             world.itemRegistry().setItemStack(player, MapDetailsItem.ID, 8);
