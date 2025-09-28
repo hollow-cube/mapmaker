@@ -21,4 +21,8 @@ public class Attachments {
     public static final PlayState.Attachment<SavedMapSettings> SETTINGS = PlayState.attachment(
             Key.key("mapmaker:settings"), SavedMapSettings.CODEC);
 
+    // If set, indicates that the start plate actions have been applied.
+    public static final PlayState.Attachment<Boolean> START_ACTIONS_APPLIED = PlayState.attachment(
+            Key.key("mapmaker:start_actions_applied"), Codec.BOOLEAN);
+
 }

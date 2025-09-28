@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.item.MapDetailsItem;
+import net.hollowcube.mapmaker.runtime.parkour.action.Attachments;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerStateUpdateEvent;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerUpdateStateEvent;
 import net.hollowcube.mapmaker.runtime.parkour.hud.*;
@@ -65,8 +66,12 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             boolean isFreshState = saveState().getPlaytime() == 0, isMapJoin = lastState == null;
 
             // Attempt to add base effect data if this is a fresh save state.
+            boolean hasAppliedSpawnActions = playState.get(Attachments.START_ACTIONS_APPLIED, false);
             var spawnCheckpoint = world.getTag(ParkourMapWorld.SPAWN_CHECKPOINT_EFFECTS);
-            if (spawnCheckpoint != null && isFreshState) spawnCheckpoint.actions().applyTo(player, playState);
+            if (spawnCheckpoint != null && !hasAppliedSpawnActions) {
+                spawnCheckpoint.actions().applyTo(player, playState);
+                playState.set(Attachments.START_ACTIONS_APPLIED, true);
+            }
 
             // If we are not exiting config for the first time, spawn at the save position.
             // For initial exit we use the player respawn point set during config, so this
@@ -269,10 +274,13 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
                 gameState.setFrom(saveState.state(PlayState.class));
 
                 // If we have an empty save state with no playtime, try to add world spawn effects.
-                boolean isEmptyState = savedState.getPlaytime() == 0 && gameState.isEmpty();
+                boolean hasAppliedSpawnActions = gameState.get(Attachments.START_ACTIONS_APPLIED, false);
                 var spawnCheckpoint = world.getTag(ParkourMapWorld.SPAWN_CHECKPOINT_EFFECTS);
-                if (spawnCheckpoint != null && isEmptyState) spawnCheckpoint.actions().applyTo(player, gameState);
-                
+                if (spawnCheckpoint != null && !hasAppliedSpawnActions) {
+                    spawnCheckpoint.actions().applyTo(player, gameState);
+                    gameState.set(Attachments.START_ACTIONS_APPLIED, true);
+                }
+
                 gameState.set(SpectateHelper.GAME_STATE_SAVED, true);
             }
         }
