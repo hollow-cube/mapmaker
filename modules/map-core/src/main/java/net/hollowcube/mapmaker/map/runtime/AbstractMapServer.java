@@ -97,8 +97,6 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
-import net.minestom.server.extras.MojangAuth;
-import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.server.common.ServerLinksPacket;
 import net.minestom.server.timer.Scheduler;
@@ -207,16 +205,6 @@ public abstract class AbstractMapServer implements MapServer {
 
     @Blocking
     public final void start() {
-        // Minestom init bits
-        var velocityConfig = config.get(VelocityConfig.class);
-        if (!velocityConfig.secret().isEmpty()) {
-            logger.info("Enabling modern forwarding...");
-            VelocityProxy.enable(velocityConfig.secret());
-        } else {
-            logger.info("Velocity not configured, using online mode...");
-            MojangAuth.init();
-        }
-
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
         MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProviderV2.translate(component);
 

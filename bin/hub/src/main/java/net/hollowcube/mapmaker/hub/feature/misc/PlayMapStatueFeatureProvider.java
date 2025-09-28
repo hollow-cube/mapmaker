@@ -129,7 +129,7 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
             @Override
             public void endHover(@NotNull Player player) {
                 // Disable glowing - See above for how/why this is functional.
-                if (player.getPlayerConnection().getConnectionState() == ConnectionState.PLAY) {
+                if (player.getPlayerConnection().getServerState() == ConnectionState.PLAY) {
                     player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(0, Metadata.Byte((byte) 0x0))));
                 }
             }

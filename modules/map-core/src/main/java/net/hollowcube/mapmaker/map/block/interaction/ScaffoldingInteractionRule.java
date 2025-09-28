@@ -52,7 +52,7 @@ public class ScaffoldingInteractionRule implements BlockInteractionRule {
 
                 // We found a non-scaffolding block. Place one there.
                 interaction.instance().placeBlock(new BlockHandler.PlayerPlacement(
-                        Block.SCAFFOLDING, interaction.instance(), blockPosition,
+                        Block.SCAFFOLDING, block, interaction.instance(), blockPosition,
                         interaction.player(), interaction.hand(), placeFace.getOppositeFace(),
                         0f, 0f, 0f
                 ));
@@ -79,7 +79,7 @@ public class ScaffoldingInteractionRule implements BlockInteractionRule {
 
                 // We found a non-scaffolding block. Place one there as a player placement because this is the real place position.
                 interaction.instance().placeBlock(new BlockHandler.PlayerPlacement(
-                        Block.SCAFFOLDING, interaction.instance(), blockPosition,
+                        Block.SCAFFOLDING, block, interaction.instance(), blockPosition,
                         interaction.player(), interaction.hand(), BlockFace.TOP,
                         0f, 0f, 0f
                 ));

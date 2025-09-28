@@ -41,11 +41,10 @@ import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.PlayerProvider;
 import net.minestom.server.network.packet.client.common.ClientPongPacket;
 import net.minestom.server.network.packet.server.SendablePacket;
+import net.minestom.server.network.packet.server.ServerPacket;
 import net.minestom.server.network.packet.server.common.PingPacket;
-import net.minestom.server.network.packet.server.play.BundlePacket;
-import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
-import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
-import net.minestom.server.network.packet.server.play.SetCooldownPacket;
+import net.minestom.server.network.packet.server.configuration.FinishConfigurationPacket;
+import net.minestom.server.network.packet.server.play.*;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.snapshot.PlayerSnapshot;
@@ -55,6 +54,8 @@ import net.minestom.server.utils.validate.Check;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -65,6 +66,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public abstract class MapPlayer extends CommandHandlingPlayer {
+
+    private static final Logger log = LoggerFactory.getLogger(MapPlayer.class);
 
     static {
         MinecraftServer.getPacketListenerManager().setPlayListener(ClientPongPacket.class, (packet, player) -> {
@@ -124,12 +127,9 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         super(playerConnection, gameProfile);
     }
 
-    private boolean afterConfigurationPhase = false;
-
     @Override
     public void startConfigurationPhase() {
         super.startConfigurationPhase();
-        afterConfigurationPhase = true;
 
         try {
             var mh = MethodHandles.privateLookupIn(Player.class, MethodHandles.lookup())
@@ -141,30 +141,44 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         }
     }
 
-    @Override
-    public void sendPacket(@NotNull SendablePacket packet) {
-        // In case it is sent from somewhere else
-        if (packet instanceof PingPacket(int id))
-            lastPingId.set(id);
-        // Don't send pose packets to self if we aren't supposed to
-        if (
-                packet instanceof EntityMetaDataPacket(var entity, var entries) &&
-                entity == this.getEntityId() &&
-                entries.containsKey(MetadataDef.POSE.index()) &&
-                !canSendPose
-        ) {
-            var newEntries = new HashMap<>(entries);
-            newEntries.remove(MetadataDef.POSE.index());
-            super.sendPacket(new EntityMetaDataPacket(entity, newEntries));
-            return;
-        }
-        super.sendPacket(packet);
-    }
+    private boolean clientInConfigPhase = false;
 
     @Override
-    public CompletableFuture<Void> UNSAFE_init() {
-        afterConfigurationPhase = false;
-        return super.UNSAFE_init();
+    public void sendPacket(@NotNull SendablePacket packet) {
+        switch (packet) {
+            // In case it is sent from somewhere we dont expect
+            case PingPacket(int id) -> lastPingId.set(id);
+
+            // Don't send pose packets to self if we aren't supposed to
+            case EntityMetaDataPacket(var entity, var entries) when entity == this.getEntityId()
+                    && entries.containsKey(MetadataDef.POSE.index())
+                    && !canSendPose -> {
+                var newEntries = new HashMap<>(entries);
+                newEntries.remove(MetadataDef.POSE.index());
+                super.sendPacket(new EntityMetaDataPacket(entity, newEntries));
+                return;
+            }
+
+            case StartConfigurationPacket _ -> {
+                clientInConfigPhase = true;
+            }
+            case FinishConfigurationPacket _ -> {
+                clientInConfigPhase = false;
+            }
+            case ServerPacket.Play _ when clientInConfigPhase && !(packet instanceof ServerPacket.Configuration) -> {
+                // We know about meta data, just checking for others.
+                if (!(packet instanceof EntityMetaDataPacket)) {
+                    log.error("Sending play packet while client will be in config phase! Packet: {}", packet,
+                            new RuntimeException("synthetic exception for stacktrace"));
+                }
+                return; // Don't send it, they would be kicked
+            }
+
+            default -> {  // Do nothing
+            }
+        }
+
+        super.sendPacket(packet);
     }
 
     @Override
@@ -422,7 +436,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         var infoEntry = new PlayerInfoUpdatePacket.Entry(
                 getUuid(), getUsername(), List.of(), false, 0,
                 gameMode, // This is the relevant one, we are only updating the gamemode
-                null, null, 0
+                null, null, 0, false
         );
         player.sendPacket(new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE, infoEntry));
     }
@@ -676,7 +690,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         PlayerSkin skin = getSkin();
         List<PlayerInfoUpdatePacket.Property> prop = skin != null ? List.of(new PlayerInfoUpdatePacket.Property("textures", skin.textures(), skin.signature())) : List.of();
         // Listed is always false. SessionManager manages the tab list for us.
-        return new PlayerInfoUpdatePacket.Entry(getUuid(), getUsername(), prop, false, getLatency(), getGameMode(), getDisplayName(), null, 0);
+        return new PlayerInfoUpdatePacket.Entry(getUuid(), getUsername(), prop, false, getLatency(), getGameMode(), getDisplayName(), null, 0, true);
     }
 
     //endregion

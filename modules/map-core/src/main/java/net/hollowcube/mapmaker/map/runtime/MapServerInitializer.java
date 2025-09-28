@@ -6,11 +6,13 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.HttpConfig;
 import net.hollowcube.mapmaker.config.MinestomConfig;
+import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
 import net.hollowcube.mapmaker.util.HttpServerWrapper;
 import net.hollowcube.mapmaker.util.MinestomPrometheus;
 import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
@@ -67,7 +69,17 @@ public final class MapServerInitializer {
 
         FutureUtil.markShutdown(true);
 
-        var minecraftServer = MinecraftServer.init();
+        Auth auth;
+        var velocityConfig = config.get(VelocityConfig.class);
+        if (!velocityConfig.secret().isEmpty()) {
+            logger.info("Enabling modern forwarding...");
+            auth = new Auth.Velocity(velocityConfig.secret());
+        } else {
+            logger.info("Velocity not configured, using online mode...");
+            auth = new Auth.Online();
+        }
+
+        var minecraftServer = MinecraftServer.init(auth);
         MinestomPrometheus.init();
         var ignored = DimensionTypes.FULL_BRIGHT; // Force initialization
         var server = serverFactory.apply(config);

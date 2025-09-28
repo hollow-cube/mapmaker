@@ -65,10 +65,11 @@ public class BlockItemHandler extends ItemHandler {
 
         var blockData = click.itemStack().get(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
         var block = this.block.withNbt(blockData.nbt());
+        var existingBlock = instance.getBlock(click.blockPosition());
         var event = new BlockItemPlaceEvent(click.player(), new BlockVec(click.placePosition()), block);
         EventDispatcher.callCancellable(event, () -> {
             instance.placeBlock(new BlockHandler.PlayerPlacement(
-                    block, instance, click.placePosition(),
+                    block, existingBlock, instance, click.placePosition(),
                     click.player(), click.hand(), click.face(),
                     0f, 0f, 0f
             ));
