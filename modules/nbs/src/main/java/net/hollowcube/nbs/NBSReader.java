@@ -1,9 +1,15 @@
 package net.hollowcube.nbs;
 
+import com.google.gson.JsonElement;
+import net.hollowcube.common.util.OpUtils;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.utils.json.JsonUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import static net.hollowcube.nbs.NBSTypes.*;
@@ -81,13 +87,32 @@ public interface NBSReader {
                 loopStartTick = buffer.read(SHORT);
             }
 
-            var ticks = readTicks(buffer, layerCount, isLegacy);
-            var layers = readLayers(buffer, layerCount, isLegacy);
+            var newLayerCount = new AtomicInteger();
+            var ticks = readTicks(buffer, newLayerCount, isLegacy);
+            var layers = readLayers(buffer, newLayerCount.get(), isLegacy);
             var customInstruments = readCustomInstruments(buffer);
+
+            final NoteBlockSong.Data data;
+            if (songDescription.startsWith("mapmaker:data")) {
+                var jsonData = JsonUtil.fromJson(songDescription.substring(13)).getAsJsonObject();
+
+                var actualDescription = OpUtils.mapOr(jsonData.get("description"), JsonElement::getAsString, "");
+                var link = OpUtils.map(jsonData.get("description"), JsonElement::getAsString);
+
+                var map = new HashMap<String, String>();
+                for (var entry : jsonData.entrySet()) {
+                    map.put(entry.getKey(), entry.getValue().getAsString());
+                }
+
+                data = new NoteBlockSong.Data(songName, songAuthor, songOriginalAuthor, actualDescription, link, map);
+            } else {
+                data = new NoteBlockSong.Data(songName, songAuthor, songOriginalAuthor, songDescription, null,
+                                              Map.of());
+            }
 
             return new NoteBlockSong(
                     vanillaInstrumentCount, songLengthTicks, layerCount,
-                    songName, songAuthor, songOriginalAuthor, songDescription,
+                    data,
                     tempo, autoSaving, autoSavingDuration, timeSignature,
                     minutesSpent, leftClicks, rightClicks, noteBlocksAdded,
                     noteBlocksRemoved, midiSchematicFileName, loop, maxLoopCount,
@@ -97,7 +122,7 @@ public interface NBSReader {
 
         private List<Function<List<NoteBlockSong.Layer>, NoteBlockSong.Tick>> readTicks(
                 NetworkBuffer buffer,
-                short layerCount,
+                AtomicInteger layerCount,
                 boolean isLegacy
         ) {
             var ticks = new ArrayList<Function<List<NoteBlockSong.Layer>, NoteBlockSong.Tick>>();
@@ -120,8 +145,11 @@ public interface NBSReader {
                     short noteBlockPitch = isLegacy ? 0 : buffer.read(SHORT);
 
                     int finalLayer = layer;
+                    if (finalLayer > layerCount.get()) {
+                        layerCount.set(finalLayer + 1);
+                    }
                     instruments.add((map) -> new NoteBlockSong.Instrument(
-                            map.get(finalLayer % layerCount), instrument, noteBlockKey,
+                            map.get(finalLayer), instrument, noteBlockKey,
                             noteBlockVelocity, noteBlockPanning, noteBlockPitch
                     ));
                 }
@@ -144,7 +172,7 @@ public interface NBSReader {
                 boolean layerLock = !isLegacy && buffer.read(BOOL);
                 byte layerVolume = buffer.read(BYTE);
                 short layerStereo = isLegacy ? 100 : buffer.read(UNSIGNED_BYTE);
-                layers.add(new NoteBlockSong.Layer(layerName, layerLock, layerVolume, layerStereo));
+                layers.add(new NoteBlockSong.Layer(i, layerName, layerLock, layerVolume, layerStereo));
             }
 
             return layers;

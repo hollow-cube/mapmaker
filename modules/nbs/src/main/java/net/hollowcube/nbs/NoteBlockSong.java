@@ -1,16 +1,16 @@
 package net.hollowcube.nbs;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public record NoteBlockSong(
         int vanillaInstrumentCount,
         short songLengthTicks,
         short layerCount,
-        String name,
-        String author,
-        String originalAuthor,
-        String description,
+        Data data,
         short tempo,
         boolean autoSaving,
         byte autoSavingDuration,
@@ -51,6 +51,7 @@ public record NoteBlockSong(
     }
 
     public record Layer(
+            int index,
             String name,
             boolean locked,
             byte volume, // Percentage 0-100
@@ -63,6 +64,19 @@ public record NoteBlockSong(
             String soundFile,
             byte soundKey,
             boolean pressPianoKey
+    ) {
+    }
+
+    /**
+     * IMPORTANT! This class is not in the nbs spec, we encode every data in the data map into the description as json. The link also gets loaded from there.
+     */
+    public record Data(
+            String name,
+            String author,
+            String originalAuthor,
+            String description,
+            @Nullable String link,
+            Map<String, String> data
     ) {
     }
 }

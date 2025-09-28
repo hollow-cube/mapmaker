@@ -6,13 +6,13 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.nbs.DefaultNbsPlayer;
 import net.hollowcube.nbs.NBSPlayer;
 import net.hollowcube.nbs.NBSReader;
+import net.hollowcube.nbs.NBSWriter;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -21,23 +21,25 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
-import java.util.zip.ZipFile;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.zip.ZipInputStream;
 
-public class PlayNbsSongCommand extends CommandDsl {
-    public static final PlayNbsSongCommand INSTANCE = new PlayNbsSongCommand();
+public class PlayNbsCommand extends CommandDsl {
+    public static final PlayNbsCommand INSTANCE = new PlayNbsCommand();
     private static final String NOTEBLOCK_WORLD_URL = "https://api.noteblock.world/api/v1/song/{songid}/open";
-    private static final Logger logger = LoggerFactory.getLogger(PlayNbsSongCommand.class);
+    private static final Logger logger = LoggerFactory.getLogger(PlayNbsCommand.class);
 
     private final Argument<String> url = Argument.GreedyString("url");
     private final Argument<String> id = Argument.Word("id");
+    private final Argument<String> save = Argument.Literal("save").defaultValue("save");
     private final HttpClient client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).build();
     private NBSPlayer player;
 
-    public PlayNbsSongCommand() {
+    public PlayNbsCommand() {
         super("play_nbs_song");
         addSyntax(playerOnly(this::execute), Argument.Literal("play"), url);
-        addSyntax(playerOnly(this::downloadNoteblockWorldSong), Argument.Literal("noteblock_world"), id);
+        addSyntax(playerOnly(this::downloadNoteblockWorldSong), Argument.Literal("noteblock_world"), id, save);
         addSyntax(playerOnly(this::pause), Argument.Literal("pause"));
         addSyntax(playerOnly(this::resume), Argument.Literal("resume"));
         addSyntax(playerOnly(this::stop), Argument.Literal("stop"));
@@ -64,6 +66,9 @@ public class PlayNbsSongCommand extends CommandDsl {
                     var nbs = NBSReader.nbsReader().read(file.readAllBytes());
                     this.player = new DefaultNbsPlayer(nbs, player);
                     this.player.start();
+                    if (commandContext.has(save)) {
+                        Files.write(Path.of(id + ".nbs"), NBSWriter.nbsWriter().write(nbs), StandardOpenOption.CREATE_NEW);
+                    }
                 }
             }
         } catch (IOException | InterruptedException e) {

@@ -15,13 +15,13 @@ final class NBSTypes {
 
     public static final NetworkBuffer.Type<String> STRING = new NetworkBuffer.Type<>() {
         @Override
-        public void write(@NotNull NetworkBuffer buffer, String value) {
+        public void write(NetworkBuffer buffer, String value) {
             buffer.write(INT, value.length());
             buffer.write(NetworkBuffer.RAW_BYTES, value.getBytes(StandardCharsets.UTF_8));
         }
 
         @Override
-        public String read(@NotNull NetworkBuffer buffer) {
+        public String read(NetworkBuffer buffer) {
             int length = buffer.read(INT);
             if (length > buffer.readableBytes())
                 throw new IndexOutOfBoundsException("String length " + length + " exceeds readable bytes " + buffer.readableBytes());

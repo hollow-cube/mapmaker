@@ -7,7 +7,7 @@ import net.hollowcube.common.util.MojangUtil;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
-import net.hollowcube.mapmaker.dev.commands.PlayNbsSongCommand;
+import net.hollowcube.mapmaker.dev.commands.PlayNbsCommand;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
 import net.hollowcube.mapmaker.editor.EditorState;
 import net.hollowcube.mapmaker.editor.hdb.HeadDatabase;
@@ -107,7 +107,7 @@ public class DevServer extends AbstractMultiMapServer {
         addBinding(HubMapWorld.class, hubWorld, "world", "hubWorld", "hubMapWorld");
 
         HubServer.registerCommands(this, hubCommandManager, hubWorld, MinecraftServer.getSchedulerManager());
-        hubCommandManager.register(PlayNbsSongCommand.INSTANCE);
+        hubCommandManager.register(PlayNbsCommand.INSTANCE);
         HubServer.loadHubFeatures(this, hubWorld);
     }
 
@@ -128,7 +128,7 @@ public class DevServer extends AbstractMultiMapServer {
 
         var hdb = new HeadDatabase(otel);
         addBinding(HeadDatabase.class, hdb, "headDatabase", "hdb");
-        mapCommandManager.register(PlayNbsSongCommand.INSTANCE);
+        mapCommandManager.register(PlayNbsCommand.INSTANCE);
         MapMapServer.registerCommands(this, mapCommandManager, hdb);
     }
 
