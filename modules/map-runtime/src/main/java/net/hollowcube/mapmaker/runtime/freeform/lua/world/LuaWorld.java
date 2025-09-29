@@ -3,8 +3,14 @@ package net.hollowcube.mapmaker.runtime.freeform.lua.world;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.annotation.LuaProperty;
 import net.hollowcube.luau.annotation.LuaType;
+import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.runtime.freeform.FreeformMapWorld;
+import net.hollowcube.mapmaker.runtime.freeform.lua.entity.LuaEntity;
+import net.hollowcube.mapmaker.runtime.freeform.lua.entity.LuaTextDisplayEntity;
 import net.hollowcube.mapmaker.runtime.freeform.lua.math.LuaVectorTypeImpl;
+import net.hollowcube.mapmaker.runtime.freeform.script.LuaHelpers;
+
+import java.util.UUID;
 
 @LuaType
 public class LuaWorld implements LuaWorld$luau {
@@ -51,6 +57,27 @@ public class LuaWorld implements LuaWorld$luau {
 
         delegate.instance().setBlock(blockPosition, block);
         return 0;
+    }
+
+    public int spawnEntity(LuaState state) {
+        var position = LuaVectorTypeImpl.checkArg(state, 1); // position
+        var typeName = state.checkStringArg(2); // entity type
+        if (!typeName.equals("text")) {
+            state.error("Only text entity is supported");
+        }
+
+        var entity = new DisplayEntity.Text(UUID.randomUUID());
+        entity.setInstance(delegate.instance(), position);
+        var luaEntity = new LuaTextDisplayEntity(entity);
+
+        LuaHelpers.tableForEach(state, 3, (key) -> {
+            if (!luaEntity.readField(state, key, -1)) {
+                state.argError(3, "Unknown property: " + key);
+            }
+        });
+
+        LuaEntity.push(state, luaEntity);
+        return 1;
     }
 
     //endregion

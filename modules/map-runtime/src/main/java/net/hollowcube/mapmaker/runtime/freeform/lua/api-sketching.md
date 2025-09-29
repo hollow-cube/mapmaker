@@ -196,14 +196,22 @@ You can spawn an entity with `world:SpawnEntity(position, type, initializer)`.
 For example:
 
 ```luau
-world:SpawnEntity(vec(1, 2, 3), "text", {
+local text = world:SpawnEntity(vec(1, 2, 3), "text", {
 	text = "<red>Hello, world!"
 })
+
+task.spawn(function()
+	task.wait(100)
+	text:Remove()
+end)
 ```
 
 #### API
 
 * `Uuid` - uuid of the entity
+* `Position`
+* `Yaw`
+* `Pitch`
 * `Remove()` - Removes the entity from the world
 
 #### Built-in Entities
@@ -212,6 +220,36 @@ world:SpawnEntity(vec(1, 2, 3), "text", {
     * Set item stack
     * Set pick up delay (per player?)
     * Disable pick up entirely
+* Text
+    * Init Properties
+        * Alignment
+        * Background
+        * DefaultBackground t/f
+        * LineWidth
+        * SeeThrough
+        * Shadow
+        * Text
+        * TextOpacity
+        * (all display)
+        * Billboard
+        * Block/Sky Light
+        * GlowColorOverride
+        * Width/Height
+        * InterpolationDuration
+        * ShadowRadius
+        * ShadowStrength
+        * Transformation
+
+```
+
+entity.TextOpacity = 0
+
+// later
+entity.Interpolate(20 * 60 * 5, {
+    TextOpacity = 5
+})
+
+```
 
 ### Player
 
@@ -248,12 +286,9 @@ Communication
     * `Enabled` - Get or set whether the sidebar is shown
     * `Title` - Get or set the sidebar title
     * `Clear()` - Remove all lines and reset title
-    * Not sure about below
-        * Should we support scores at all?
-        * Or just use fixed number format to show an arbitrary suffix and people can use it for score if they want?
     * `AddLine(line: AnyText, index: integer?)` - Appends a line at the index (or end)
-    * `SetLine(line: AnyText, index: integer)` - Updates the line at the given index
-    * `RemoveLine(index: integer)` - Removes the line at the given index
+    * `SetLine(index: integer, line: AnyText)` - Updates the line at the given index
+        * `RemoveLine(index: integer)` - Removes the line at the given index
 * `PlaySound(sound: string, { volume?: number, pitch?: number, category?: string }?)`
 * `PlaySoundAt(sound: string, position: vector, { volume?: number, pitch?: number, category?: string }?)`
 * `PlaySoundFrom(sound: string, source: Entity | Player, { volume?: number, pitch?: number, category?: string }?)`

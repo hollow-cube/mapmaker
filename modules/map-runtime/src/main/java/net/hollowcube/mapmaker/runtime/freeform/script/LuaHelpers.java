@@ -36,7 +36,7 @@ public class LuaHelpers {
     /// The state should be left _exactly_ as it was before the call (value at -1).
     public static void tableForEach(LuaState state, int tableIndex, Consumer<String> func) {
         state.pushNil();
-        while (state.next(tableIndex - 1)) {
+        while (state.next(tableIndex)) {
             // Key is at index -2, value is at index -1
             String key = state.toString(-2);
             func.accept(key);
@@ -129,7 +129,7 @@ public class LuaHelpers {
             case TABLE -> {
                 // TODO: support arrays.
                 var obj = new JsonObject();
-                tableForEach(state, index, key -> obj.add(key, readJsonElement(state, -1)));
+                tableForEach(state, index - 1, key -> obj.add(key, readJsonElement(state, -1)));
                 yield obj;
             }
             // todo support vector type, some userdata types, and buffer type (probably)

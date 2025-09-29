@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.freeform.bundle.ScriptBundle;
 import net.hollowcube.mapmaker.runtime.freeform.lua.player.LuaPlayer;
+import net.hollowcube.mapmaker.runtime.freeform.lua.world.LuaWorld;
 import net.hollowcube.mapmaker.runtime.freeform.script.LuaHelpers;
 import net.hollowcube.mapmaker.runtime.freeform.script.LuaScriptState;
 import net.minestom.server.codec.Codec;
@@ -55,6 +56,8 @@ public sealed interface FreeformState extends PlayerState<FreeformState, Freefor
                     thread.state().newTable();
                     LuaPlayer.push(thread.state(), new LuaPlayer(thread.state(), player, saveData));
                     thread.state().setField(-2, "Parent"); // Set the player as the parent
+                    LuaWorld.push(thread.state(), new LuaWorld(world));
+                    thread.state().setField(-2, "World"); // todo want to expose world on game object instead of script object
                     thread.state().setReadOnly(-1, true); // Make it read-only
                     thread.state().setGlobal("script");
 

@@ -11,6 +11,7 @@ import net.hollowcube.mapmaker.runtime.freeform.lua.LuaEventSource;
 import net.hollowcube.mapmaker.runtime.freeform.lua.LuaGlobals;
 import net.hollowcube.mapmaker.runtime.freeform.lua.LuaTask;
 import net.hollowcube.mapmaker.runtime.freeform.lua.base.LuaTextImpl$luau;
+import net.hollowcube.mapmaker.runtime.freeform.lua.entity.LuaEntity$luau;
 import net.hollowcube.mapmaker.runtime.freeform.lua.math.LuaVectorTypeImpl;
 import net.hollowcube.mapmaker.runtime.freeform.lua.player.LuaPlayer$luau;
 import net.hollowcube.mapmaker.runtime.freeform.lua.player.LuaSidebar$luau;
@@ -154,7 +155,7 @@ public class FreeformMapWorld extends AbstractMapWorld<FreeformState, FreeformMa
         LuaBlockImpl$luau.init$luau(global);
         LuaWorld$luau.init$luau(global);
 //        LuaParticle.init(global);
-//        LuaEntity.init(global);
+        LuaEntity$luau.init$luau(global);
 
         // Player & friends
         LuaPlayer$luau.init$luau(global);

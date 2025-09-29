@@ -43,6 +43,11 @@ public class LuaSidebar implements LuaSidebar$luau {
         boolean newValue = state.checkBooleanArg(1);
         if (newValue) sidebar.addViewer(player);
         else sidebar.removeViewer(player);
+
+        for (int i = 0; i < 15; i++) {
+            sidebar.createLine(new Sidebar.ScoreboardLine("myid" + i, Component.text("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"), i, Sidebar.NumberFormat.blank()));
+
+        }
         return 1;
     }
 
@@ -57,6 +62,26 @@ public class LuaSidebar implements LuaSidebar$luau {
         title = LuaTextImpl.checkAnyTextArg(state, 1);
         sidebar.setTitle(title);
         return 1;
+    }
+
+    // AddLine(text: AnyText, index: integer?) -> ()
+    public int addLine(LuaState state) {
+        return 0;
+    }
+
+    // SetLine(text: AnyText, index: integer) -> ()
+    public int setLine(LuaState state) {
+        return 0;
+    }
+
+    // RemoveLine(index: integer) -> ()
+    public int removeLine(LuaState state) {
+        return 0;
+    }
+
+    // Clear() -> ()
+    public int clear(LuaState state) {
+        return 0;
     }
 
 }
