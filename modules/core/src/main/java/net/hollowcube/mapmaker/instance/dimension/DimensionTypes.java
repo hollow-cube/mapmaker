@@ -18,10 +18,10 @@ public final class DimensionTypes {
     static {
         var registry = MinecraftServer.getDimensionTypeRegistry();
         FULL_BRIGHT = registry.register("mapmaker:bright_dim", DimensionType.builder()
-                .ambientLight(2.0f)
+                .ambientLight(1.0f)
                 .build());
         MAPMAKER_MAP = registry.register("mapmaker:map", DimensionType.builder()
-                .ambientLight(2.0f)
+                .ambientLight(1.0f)
                 .build());
     }
 
