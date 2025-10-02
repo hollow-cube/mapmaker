@@ -36,8 +36,8 @@ public record AxiomClientboundEnablePacket(
         public static final NetworkBuffer.Type<ServerConfig> SERIALIZER = NetworkBufferTemplate.template(
                 NetworkBuffer.INT, ServerConfig::maxBufferSize,
                 NetworkBuffer.VAR_INT, ServerConfig::blueprintVersion,
-                Block.NETWORK_TYPE.list(Short.MAX_VALUE), ServerConfig::blocksWithCustomData,
-                Block.NETWORK_TYPE.list(Short.MAX_VALUE), ServerConfig::ignoreRotationSet,
+                Block.ID_NETWORK_TYPE.list(Short.MAX_VALUE), ServerConfig::blocksWithCustomData,
+                Block.ID_NETWORK_TYPE.list(Short.MAX_VALUE), ServerConfig::ignoreRotationSet,
                 ServerConfig::new
         );
     }

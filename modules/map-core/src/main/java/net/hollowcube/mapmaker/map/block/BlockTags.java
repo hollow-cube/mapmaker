@@ -46,29 +46,11 @@ public final class BlockTags {
     public static final Collection<Key> CEILING_HANGING_SIGNS = builtin("minecraft:ceiling_hanging_signs");
     public static final Collection<Key> WALL_HANGING_SIGNS = builtin("minecraft:wall_hanging_signs");
     public static final Collection<Key> ANVILS = builtin("minecraft:anvil");
-    public static final Collection<Key> TRAPDOORS = extend(builtin("minecraft:trapdoors"),
-            Block.COPPER_TRAPDOOR,
-            Block.EXPOSED_COPPER_TRAPDOOR,
-            Block.WEATHERED_COPPER_TRAPDOOR,
-            Block.OXIDIZED_COPPER_TRAPDOOR,
-            Block.WAXED_COPPER_TRAPDOOR,
-            Block.WAXED_EXPOSED_COPPER_TRAPDOOR,
-            Block.WAXED_WEATHERED_COPPER_TRAPDOOR,
-            Block.WAXED_OXIDIZED_COPPER_TRAPDOOR
-    );
+    public static final Collection<Key> TRAPDOORS = extend(builtin("minecraft:trapdoors"));
     public static final Collection<Key> CANDLES = builtin("minecraft:candles");
     public static final Collection<Key> CANDLE_CAKES = builtin("minecraft:candle_cakes");
     public static final Collection<Key> BANNERS = builtin("minecraft:banners");
-    public static final Collection<Key> DOORS = extend(builtin("minecraft:doors"),
-            Block.COPPER_DOOR,
-            Block.EXPOSED_COPPER_DOOR,
-            Block.WEATHERED_COPPER_DOOR,
-            Block.OXIDIZED_COPPER_DOOR,
-            Block.WAXED_COPPER_DOOR,
-            Block.WAXED_EXPOSED_COPPER_DOOR,
-            Block.WAXED_WEATHERED_COPPER_DOOR,
-            Block.WAXED_OXIDIZED_COPPER_DOOR
-    );
+    public static final Collection<Key> DOORS = extend(builtin("minecraft:doors"));
     public static final Collection<Key> TERRACOTTA = builtin("minecraft:terracotta");
     public static final Collection<Key> GLAZED_TERRACOTTA = create(
             Block.WHITE_GLAZED_TERRACOTTA,
@@ -167,6 +149,11 @@ public final class BlockTags {
             Block.KELP, Block.KELP_PLANT
     );
     public static final Collection<Key> CAULDRONS = builtin("minecraft:cauldrons");
+    public static final Collection<Key> LANTERNS = extend(builtin("minecraft:lanterns"));
+    public static final Collection<Key> CHAINS = extend(builtin("minecraft:chains"));
+    public static final Collection<Key> BARS = extend(builtin("minecraft:bars"));
+    public static final Collection<Key> LIGHTNING_RODS = extend(builtin("minecraft:lightning_rods"));
+    public static final Collection<Key> COPPER_CHESTS = extend(builtin("minecraft:copper_chests"));
     public static final Collection<Key> UNRENDERABLE_DISPLAY_ENTITY_BLOCKS = group(
             SIGNS,
             ALL_HANGING_SIGNS,

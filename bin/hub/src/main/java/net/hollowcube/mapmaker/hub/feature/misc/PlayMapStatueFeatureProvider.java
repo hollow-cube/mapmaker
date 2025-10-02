@@ -15,6 +15,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Metadata;
+import net.minestom.server.entity.MetadataDef;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 import net.minestom.server.item.ItemStack;
@@ -123,14 +124,21 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
             public void beginHover(@NotNull Player player) {
                 // Enable glowing - This works because we never set any other flags in this set, otherwise
                 // it would be overridden when sending other metadata changes.
-                player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(0, Metadata.Byte((byte) 0x40))));
+                player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(
+                        MetadataDef.ENTITY_FLAGS.index(),
+                        Metadata.Byte((byte) 0x40)
+                )));
             }
 
             @Override
             public void endHover(@NotNull Player player) {
                 // Disable glowing - See above for how/why this is functional.
-                if (player.getPlayerConnection().getServerState() == ConnectionState.PLAY) {
-                    player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(0, Metadata.Byte((byte) 0x0))));
+                // TODO This used getServerState but that is a separate PR from 1.21.9
+                if (player.getPlayerConnection().getConnectionState() == ConnectionState.PLAY) {
+                    player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(
+                            MetadataDef.ENTITY_FLAGS.index(),
+                            Metadata.Byte((byte) 0x0)
+                    )));
                 }
             }
 

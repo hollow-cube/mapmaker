@@ -10,7 +10,8 @@ import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.component.HeadProfile;
+import net.minestom.server.network.player.GameProfile;
+import net.minestom.server.network.player.ResolvableProfile;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -40,13 +41,13 @@ public class HdbBase64Command extends CommandDsl {
                 return;
             }
 
-            var skin = itemStack.get(DataComponents.PROFILE, HeadProfile.EMPTY).skin();
-            if (skin == null || skin.textures() == null) {
+            var skin = extractProfileBase64(itemStack.get(DataComponents.PROFILE, ResolvableProfile.EMPTY));
+            if (skin.isEmpty()) {
                 player.sendMessage(HdbMessages.COMMAND_BASE64_NO_TEXTURE);
                 return;
             }
 
-            base64 = skin.textures();
+            base64 = skin;
         } else {
             var targetBlockPosition = PlayerUtil.getTargetBlock(player, PlayerUtil.DEFAULT_PLACEMENT_DISTANCE, true);
             if (targetBlockPosition == null) {
@@ -73,8 +74,18 @@ public class HdbBase64Command extends CommandDsl {
     private static @NotNull String extractBlockBase64(@NotNull Block block) {
         var profile = PlayerHeadBlockHandler.extractProfile(block);
         if (profile == null) return "";
-        var skin = profile.skin();
-        if (skin == null) return "";
-        return skin.textures();
+        return extractProfileBase64(profile);
+    }
+
+    private static @NotNull String extractProfileBase64(@NotNull ResolvableProfile profile) {
+        return profile.profile().unify(
+                _ -> "",
+                partial -> partial.properties()
+                        .stream()
+                        .filter(it -> it.name().equals("textures"))
+                        .findFirst()
+                        .map(GameProfile.Property::value)
+                        .orElse("")
+        );
     }
 }

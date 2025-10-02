@@ -9,15 +9,15 @@ import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.util.CoreSkulls;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.PlayerSkin;
-import net.minestom.server.item.component.HeadProfile;
+import net.minestom.server.network.player.ResolvableProfile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static net.kyori.adventure.text.Component.text;
@@ -25,7 +25,6 @@ import static net.kyori.adventure.text.Component.text;
 class MapDetailsTimesPanel extends Panel {
     private static final String MISSING_TIME = "--:--:---";
     private static final Component MISSING_PLAYER = text("Not set!");
-    private static final HeadProfile MISSING_TEXTURE = new HeadProfile(new PlayerSkin("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGE5OWIwNWI5YTFkYjRkMjliNWU2NzNkNzdhZTU0YTc3ZWFiNjY4MTg1ODYwMzVjOGEyMDA1YWViODEwNjAyYSJ9fX0=", null));
     private static final String MODEL_8X = "mapmaker:2d_player_head";
     private static final String MODEL_8X_OFFSET_1 = "mapmaker:2d_player_head_offset1";
     private static final String MODEL_8X_OFFSET_2 = "mapmaker:2d_player_head_offset2";
@@ -42,7 +41,8 @@ class MapDetailsTimesPanel extends Panel {
     private final Text playerTimeText;
     private final List<Button> playerButtons; // They need the same text :|
 
-    public MapDetailsTimesPanel(@NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull String mapId) {
+    public MapDetailsTimesPanel(
+            @NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull String mapId) {
         super(9, 4);
         this.playerService = playerService;
         this.mapService = mapService;
@@ -55,8 +55,8 @@ class MapDetailsTimesPanel extends Panel {
                 this.topTenPanel = new TopTenPanel()
         )));
         add(1, 3, tabs.toggleButton(1, 1,
-                "gui.map_details.top_times_tab.other_top_times",
-                "map_details/times/other_times", 2, 1));
+                                    "gui.map_details.top_times_tab.other_top_times",
+                                    "map_details/times/other_times", 2, 1));
 
         this.playerHeadBtn = add(2, 3, new Button(null, 1, 1));
         this.playerTimeText = add(3, 3, new Text("", 3, 1, MISSING_TIME)
@@ -79,7 +79,9 @@ class MapDetailsTimesPanel extends Panel {
             var playerId = PlayerData.fromPlayer(host.player()).id();
             var leaderboard = mapService.getPlaytimeLeaderboard(mapId, playerId);
             var displayNames = playerService.getPlayerDisplayNames(leaderboard.top()
-                    .stream().map(LeaderboardData.Entry::player).toList());
+                                                                           .stream()
+                                                                           .map(LeaderboardData.Entry::player)
+                                                                           .toList());
 
             sync(() -> {
                 this.topThreePanel.update(leaderboard.top(), displayNames);
@@ -99,17 +101,18 @@ class MapDetailsTimesPanel extends Panel {
     }
 
 
-    private static final Cache<String, HeadProfile> HEAD_CACHE = Caffeine.newBuilder()
+    private static final Cache<String, ResolvableProfile> HEAD_CACHE = Caffeine.newBuilder()
             .expireAfterWrite(60, TimeUnit.MINUTES)
             .maximumSize(1000)
             .build();
 
-    static @NotNull HeadProfile getPlayerHead2d(@Nullable String uuid) {
-        if (uuid == null) return MISSING_TEXTURE;
-        return HEAD_CACHE.get(uuid, key -> {
-            var profile = OpUtils.map(PlayerSkin.fromUuid(key), HeadProfile::new);
-            return Objects.requireNonNullElse(profile, HeadProfile.EMPTY);
-        });
+    static @NotNull ResolvableProfile getPlayerHead2d(@Nullable String uuid) {
+        if (uuid == null) return CoreSkulls.UNKNOWN_PLAYER;
+        return HEAD_CACHE.get(uuid, key -> OpUtils.mapOr(
+                PlayerSkin.fromUuid(key),
+                CoreSkulls::create,
+                ResolvableProfile.EMPTY
+        ));
     }
 
     private static class TopThreePanel extends Panel {
@@ -151,7 +154,7 @@ class MapDetailsTimesPanel extends Panel {
                 this.playerHeadBtn = add(1, 1, new Button(null, 1, 1)
                         .translationKey(translationKey, MISSING_PLAYER, MISSING_TIME)
                         .model(MODEL_8X, null)
-                        .profile(MISSING_TEXTURE));
+                        .profile(CoreSkulls.UNKNOWN_PLAYER));
                 this.timeText = add(0, 2, new Text(null, 3, 1, MISSING_TIME)
                         .align(Text.CENTER, 6));
             }
@@ -207,7 +210,7 @@ class MapDetailsTimesPanel extends Panel {
                 this.playerHeadBtn = add(0, 0, new Button(null, 1, 1)
                         .translationKey(translationKey, MISSING_PLAYER, MISSING_TIME)
                         .model(isRightColumn ? MODEL_8X_OFFSET_2 : MODEL_8X_OFFSET_1, null)
-                        .profile(MISSING_TEXTURE));
+                        .profile(CoreSkulls.UNKNOWN_PLAYER));
                 this.timeText = add(1, 0, new Text(null, 3, 1, MISSING_TIME)
                         .align(isRightColumn ? -1 : 5, 5));
                 this.timeText.translationKey(translationKey, MISSING_PLAYER, MISSING_TIME);
