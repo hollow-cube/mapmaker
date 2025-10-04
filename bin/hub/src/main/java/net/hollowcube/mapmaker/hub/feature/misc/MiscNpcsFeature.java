@@ -37,7 +37,7 @@ public class MiscNpcsFeature implements HubFeature {
         if (hand != PlayerHand.MAIN || isLeftClick) return;
 
         var playerData = PlayerData.fromPlayer(player);
-        player.sendMessage("You have played for " + NumberUtil.formatPlayerPlaytime(playerData.totalPlaytime()));
+        player.sendMessage("You have played for " + NumberUtil.formatPlayerPlaytime(playerData.totalPlaytime()).trim());
     }
 
 }
