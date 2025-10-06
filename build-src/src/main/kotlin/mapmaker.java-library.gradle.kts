@@ -13,6 +13,7 @@ repositories {
             content {
                 includeGroup("net.minestom")
                 includeGroup("dev.hollowcube")
+                includeGroup("net.kyori")
             }
         }
     }

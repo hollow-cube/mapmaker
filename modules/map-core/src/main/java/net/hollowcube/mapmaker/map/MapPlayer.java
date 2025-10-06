@@ -585,8 +585,8 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
     }
 
     @Override
-    protected void setPositionInternal(@NotNull Pos newPosition) {
-        super.setPositionInternal(newPosition);
+    protected void setPositionInternal(@NotNull Pos newPosition, float headRotation) {
+        super.setPositionInternal(newPosition, headRotation);
 
         // See note on pendingTeleports
         if (pendingTeleports.get() <= 0) {
