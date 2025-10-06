@@ -44,7 +44,7 @@ public record SignData(
 
     @Contract("-> new")
     public static SignData empty() {
-        return new SignData(false, "black", List.of());
+        return new SignData(false, "black", List.of(Component.empty(), Component.empty(), Component.empty(), Component.empty()));
     }
 
     @Contract("_ -> new")

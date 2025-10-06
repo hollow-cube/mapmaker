@@ -94,9 +94,12 @@ public class CampfireBlockHandler implements BlockHandler {
             var raw = tag.getTag(RAW);
             if (raw == null) return null;
 
-            var items = new ArrayList<ItemStack>();
+            var items = new ArrayList<>(List.of(ItemStack.AIR, ItemStack.AIR, ItemStack.AIR, ItemStack.AIR));
             for (var nbt : raw) {
-                items.add(ItemStack.fromItemNBT((CompoundBinaryTag) nbt));
+                var compound = (CompoundBinaryTag) nbt;
+                var slot = compound.getByte("Slot");
+                if (slot < 0 || slot >= 4) continue;
+                items.set(slot, ItemStack.fromItemNBT(compound));
             }
             return items;
         }
@@ -105,6 +108,8 @@ public class CampfireBlockHandler implements BlockHandler {
         public void write(@NotNull TagWritable tagWritable, @NotNull List<ItemStack> itemStacks) {
             var raw = new ArrayList<BinaryTag>();
             for (int i = 0; i < Math.min(itemStacks.size(), 4); i++) {
+                var stack = itemStacks.get(i);
+                if (stack.isAir()) continue;
                 raw.add(itemStacks.get(i).toItemNBT().putByte("Slot", (byte) i));
             }
             tagWritable.setTag(RAW, raw);
