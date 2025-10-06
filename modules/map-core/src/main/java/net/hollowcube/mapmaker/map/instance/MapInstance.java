@@ -11,10 +11,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
-import net.minestom.server.instance.Chunk;
-import net.minestom.server.instance.IChunkLoader;
-import net.minestom.server.instance.InstanceContainer;
-import net.minestom.server.instance.InstanceManager;
+import net.minestom.server.instance.*;
 import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.Blocking;
@@ -88,14 +85,14 @@ public class MapInstance extends InstanceContainer {
         FutureUtil.getUnchecked(CompletableFuture.allOf(loadingChunks.toArray(CompletableFuture[]::new)));
 
         // Delete the polar world to avoid the second copy of the world data
-        setChunkLoader(IChunkLoader.noop());
+        setChunkLoader(ChunkLoader.noop());
     }
 
     public void loadStream(@NotNull ReadableMapData data, @Nullable PolarWorldAccess worldAccess) {
         FutureUtil.getUnchecked(PolarLoader.streamLoad(this, data.data(), data.length(),
                 PolarDataFixer.INSTANCE, worldAccess, lightingMode != LightingMode.FULL_BRIGHT));
         setChunkSupplier(EmptyChunk::new);
-        setChunkLoader(IChunkLoader.noop());
+        setChunkLoader(ChunkLoader.noop());
     }
 
     @Blocking
@@ -112,7 +109,7 @@ public class MapInstance extends InstanceContainer {
         var worldData = PolarWriter.write(polarWorld, PolarDataFixer.INSTANCE);
 
         // Reset to noop
-        setChunkLoader(IChunkLoader.noop());
+        setChunkLoader(ChunkLoader.noop());
 
         return worldData;
     }
