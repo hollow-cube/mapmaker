@@ -2,6 +2,7 @@ package net.hollowcube.compat.noxesium;
 
 import com.noxcrew.noxesium.api.NoxesiumReferences;
 import com.noxcrew.noxesium.api.protocol.NoxesiumFeature;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
@@ -18,6 +19,8 @@ public class NoxesiumAPI {
     public static final Tag<Byte> NOXESIUM_VERSION = Tag.<Byte>Transient("noxesium:version")
             .defaultValue((byte) -1);
     public static final String CHANNEL = "noxesium-v2";
+    public static final int MIN_PROTOCOL_VERSION = ProtocolVersions.V1_21_7;
+    public static final int MAX_PROTOCOL_VERSION = ProtocolVersions.V1_21_7;
 
     private static final Tag<BinaryTag> BUKKIT_TAG = Tag.NBT(NoxesiumReferences.BUKKIT_COMPOUND_ID);
     private static final CompoundBinaryTag IMMUTABLE_TAG = CompoundBinaryTag.builder().putBoolean(NoxesiumReferences.IMMOVABLE_TAG, true).build();
