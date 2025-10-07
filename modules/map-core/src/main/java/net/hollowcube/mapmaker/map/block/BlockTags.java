@@ -154,6 +154,8 @@ public final class BlockTags {
     public static final Collection<Key> BARS = extend(builtin("minecraft:bars"));
     public static final Collection<Key> LIGHTNING_RODS = extend(builtin("minecraft:lightning_rods"));
     public static final Collection<Key> COPPER_CHESTS = extend(builtin("minecraft:copper_chests"));
+    public static final Collection<Key> COPPER_STATUES = extend(builtin("minecraft:copper_golem_statues"));
+    public static final Collection<Key> SHELVES = extend(builtin("minecraft:wooden_shelves"));
     public static final Collection<Key> UNRENDERABLE_DISPLAY_ENTITY_BLOCKS = group(
             SIGNS,
             ALL_HANGING_SIGNS,

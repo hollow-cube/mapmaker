@@ -26,6 +26,7 @@ public final class BlockHandlers {
     public static final BlockHandler DECORATED_POT = new DecoratedPotBlockHandler();
     public static final BlockHandler CAMPFIRE = new CampfireBlockHandler();
     public static final BlockHandler STRUCTURE = new StructureBlockHandler();
+    public static final BlockHandler SHELF = new ShelfBlockHandler();
 
     public static void init() {
         Consumer<BlockHandler> register = handler -> MinecraftServer.getBlockManager()
@@ -49,5 +50,6 @@ public final class BlockHandlers {
         register.accept(DECORATED_POT);
         register.accept(CAMPFIRE);
         register.accept(STRUCTURE);
+        register.accept(SHELF);
     }
 }

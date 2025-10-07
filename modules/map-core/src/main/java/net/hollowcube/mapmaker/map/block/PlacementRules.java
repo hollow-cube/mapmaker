@@ -113,6 +113,7 @@ public final class PlacementRules {
         register(Block.END_PORTAL_FRAME, b -> new FacingHorizontalPlacementRule(b, true));
         register(Block.VAULT, b -> new FacingHorizontalPlacementRule(b, true));
         register(Block.DRIED_GHAST, b -> new FacingHorizontalPlacementRule(b, true));
+        register(BlockTags.COPPER_STATUES, b -> new FacingHorizontalPlacementRule(b, true));
 
         register(Block.DISPENSER, b -> new FacingAllAxisPlacementRule(b, false));
         register(Block.DROPPER, b -> new FacingAllAxisPlacementRule(b, false));
@@ -213,6 +214,7 @@ public final class PlacementRules {
         register(Block.REDSTONE_WIRE, RedstoneWirePlacementRule::new);
         register(Block.PALE_HANGING_MOSS, PaleHangingMossPlacementRule::new);
         register(Block.PALE_MOSS_CARPET, PaleMossCarpetPlacementRule::new);
+        register(BlockTags.SHELVES, ShelfPlacementRule::new);
 
         //
         // ==== WARNING ====
