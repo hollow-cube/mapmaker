@@ -124,7 +124,7 @@ public class ClientBlockPlacementListener {
         // If we have a pending teleport out for the player, ignore any placements which occur during that time
         boolean outOfSync = player.getLastSentTeleportId() != player.getLastReceivedTeleportId();
 //                || ((MapPlayer) player).lastPingId() != ((MapPlayer) player).lastReceivedPingId();
-        if (outOfSync) {
+        if (outOfSync || placedBlock == null) {
             player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
             return true;
         }
