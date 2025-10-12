@@ -1,10 +1,16 @@
 package net.hollowcube.nbs;
 
+import com.google.gson.JsonElement;
+import net.hollowcube.common.util.OpUtils;
 import net.minestom.server.network.NetworkBuffer;
-import org.jetbrains.annotations.NotNull;
+import net.minestom.server.utils.json.JsonUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import static net.hollowcube.nbs.NBSTypes.*;
 
@@ -12,7 +18,7 @@ public interface NBSReader {
     int MIN_VERSION = 1; // The min supported version (inclusive)
     int MAX_VERSION = 5; // The max supported version (inclusive)
 
-    static @NotNull NBSReader nbsReader() {
+    static NBSReader nbsReader() {
         return Impl.INSTANCE;
     }
 
@@ -24,10 +30,11 @@ public interface NBSReader {
      *
      * @param bytes the bytes to read from
      * @return the read song
+     *
      * @throws IllegalArgumentException      if the bytes are not a valid NBS file
      * @throws UnsupportedOperationException if the NBS version is not supported
      */
-    @NotNull NoteBlockSong read(byte @NotNull [] bytes);
+    NoteBlockSong read(byte[] bytes);
 
     final class Impl implements NBSReader {
         private static final NBSReader INSTANCE = new Impl();
@@ -36,23 +43,25 @@ public interface NBSReader {
         }
 
         @Override
-        public @NotNull NoteBlockSong read(byte @NotNull [] bytes) {
+        public NoteBlockSong read(byte[] bytes) {
             var buffer = NetworkBuffer.wrap(bytes, 0, bytes.length);
 
-            int oldSongLength = buffer.read(SHORT);
+            short oldSongLength = buffer.read(SHORT);
+
+            int version;
             if (oldSongLength != 0) {
-                // Would be non-zero for the legacy note block studio format. Not currently supported.
-                var message = String.format("Only OpenNBS versions %d-%d are supported!", MIN_VERSION, MAX_VERSION);
-                throw new UnsupportedOperationException(message);
+                version = -1;
+            } else {
+                version = buffer.read(BYTE);
             }
-            int version = buffer.read(BYTE);
-            if (version < MIN_VERSION || version > MAX_VERSION) {
+            boolean isLegacy = version == -1;
+            if (!isLegacy && (version < MIN_VERSION || version > MAX_VERSION)) {
                 var message = String.format("Only OpenNBS versions %d-%d are supported!", MIN_VERSION, MAX_VERSION);
                 throw new UnsupportedOperationException(message);
             }
 
-            int vanillaInstrumentCount = buffer.read(BYTE);
-            short songLengthTicks = version >= 3 ? buffer.read(SHORT) : 0;
+            int vanillaInstrumentCount = isLegacy ? 9 : buffer.read(BYTE);
+            short songLengthTicks = isLegacy ? oldSongLength : (version >= 3 ? buffer.read(SHORT) : 0);
             short layerCount = buffer.read(SHORT);
             var songName = buffer.read(STRING);
             var songAuthor = buffer.read(STRING);
@@ -78,28 +87,51 @@ public interface NBSReader {
                 loopStartTick = buffer.read(SHORT);
             }
 
-            var ticks = readTicks(buffer);
-            var layers = readLayers(buffer, layerCount);
+            var newLayerCount = new AtomicInteger();
+            var ticks = readTicks(buffer, newLayerCount, isLegacy);
+            var layers = readLayers(buffer, newLayerCount.get(), isLegacy);
             var customInstruments = readCustomInstruments(buffer);
+
+            final NoteBlockSong.Data data;
+            if (songDescription.startsWith("mapmaker:data")) {
+                var jsonData = JsonUtil.fromJson(songDescription.substring(13)).getAsJsonObject();
+
+                var actualDescription = OpUtils.mapOr(jsonData.get("description"), JsonElement::getAsString, "");
+                var link = OpUtils.map(jsonData.get("description"), JsonElement::getAsString);
+
+                var map = new HashMap<String, String>();
+                for (var entry : jsonData.entrySet()) {
+                    map.put(entry.getKey(), entry.getValue().getAsString());
+                }
+
+                data = new NoteBlockSong.Data(songName, songAuthor, songOriginalAuthor, actualDescription, link, map);
+            } else {
+                data = new NoteBlockSong.Data(songName, songAuthor, songOriginalAuthor, songDescription, null,
+                                              Map.of());
+            }
 
             return new NoteBlockSong(
                     vanillaInstrumentCount, songLengthTicks, layerCount,
-                    songName, songAuthor, songOriginalAuthor, songDescription,
+                    data,
                     tempo, autoSaving, autoSavingDuration, timeSignature,
                     minutesSpent, leftClicks, rightClicks, noteBlocksAdded,
                     noteBlocksRemoved, midiSchematicFileName, loop, maxLoopCount,
-                    loopStartTick, ticks, layers, customInstruments
+                    loopStartTick, ticks.stream().map((func) -> func.apply(layers)).toList(), layers, customInstruments
             );
         }
 
-        private @NotNull List<NoteBlockSong.Tick> readTicks(@NotNull NetworkBuffer buffer) {
-            var ticks = new ArrayList<NoteBlockSong.Tick>();
+        private List<Function<List<NoteBlockSong.Layer>, NoteBlockSong.Tick>> readTicks(
+                NetworkBuffer buffer,
+                AtomicInteger layerCount,
+                boolean isLegacy
+        ) {
+            var ticks = new ArrayList<Function<List<NoteBlockSong.Layer>, NoteBlockSong.Tick>>();
 
             int t = -1;
             short jumpsToNextTick;
             while ((jumpsToNextTick = buffer.read(SHORT)) != 0) {
                 t += jumpsToNextTick;
-                var instruments = new ArrayList<NoteBlockSong.Instrument>();
+                var instruments = new ArrayList<Function<List<NoteBlockSong.Layer>, NoteBlockSong.Instrument>>();
 
                 int layer = -1;
                 short jumpsToNextLayer;
@@ -108,38 +140,45 @@ public interface NBSReader {
 
                     byte instrument = buffer.read(BYTE);
                     byte noteBlockKey = buffer.read(BYTE);
-                    byte noteBlockVelocity = buffer.read(BYTE);
-                    short noteBlockPanning = buffer.read(UNSIGNED_BYTE);
-                    short noteBlockPitch = buffer.read(SHORT);
+                    byte noteBlockVelocity = isLegacy ? 100 : buffer.read(BYTE);
+                    short noteBlockPanning = isLegacy ? 100 : buffer.read(UNSIGNED_BYTE);
+                    short noteBlockPitch = isLegacy ? 0 : buffer.read(SHORT);
 
-                    instruments.add(new NoteBlockSong.Instrument(
-                            layer, instrument, noteBlockKey,
+                    int finalLayer = layer;
+                    if (finalLayer > layerCount.get()) {
+                        layerCount.set(finalLayer + 1);
+                    }
+                    instruments.add((map) -> new NoteBlockSong.Instrument(
+                            map.get(finalLayer), instrument, noteBlockKey,
                             noteBlockVelocity, noteBlockPanning, noteBlockPitch
                     ));
                 }
 
-                ticks.add(new NoteBlockSong.Tick(t, instruments));
+                int finalT = t;
+                ticks.add((map) -> new NoteBlockSong.Tick(finalT, instruments.stream()
+                        .map((func) -> func.apply(map))
+                        .toList()));
             }
 
             return ticks;
         }
 
-        private @NotNull List<NoteBlockSong.Layer> readLayers(@NotNull NetworkBuffer buffer, int layerCount) {
+        private List<NoteBlockSong.Layer> readLayers(NetworkBuffer buffer, int layerCount, boolean isLegacy) {
             if (buffer.readableBytes() == 0) return List.of();
 
             var layers = new ArrayList<NoteBlockSong.Layer>(layerCount);
             for (int i = 0; i < layerCount; i++) {
                 var layerName = buffer.read(STRING);
-                boolean layerLock = buffer.read(BOOL);
+                boolean layerLock = !isLegacy && buffer.read(BOOL);
                 byte layerVolume = buffer.read(BYTE);
-                short layerStereo = buffer.read(UNSIGNED_BYTE);
-                layers.add(new NoteBlockSong.Layer(layerName, layerLock, layerVolume, layerStereo));
+                short layerStereo = isLegacy ? 100 : buffer.read(UNSIGNED_BYTE);
+                layers.add(new NoteBlockSong.Layer(i, layerName, layerLock, layerVolume, layerStereo));
             }
 
             return layers;
         }
 
-        private @NotNull List<NoteBlockSong.CustomInstrument> readCustomInstruments(@NotNull NetworkBuffer buffer) {
+        private List<NoteBlockSong.CustomInstrument> readCustomInstruments(NetworkBuffer buffer) {
             if (buffer.readableBytes() == 0) return List.of();
             short customInstrumentsCount = buffer.read(UNSIGNED_BYTE);
 
@@ -149,7 +188,8 @@ public interface NBSReader {
                 var soundFile = buffer.read(STRING);
                 byte pitch = buffer.read(BYTE);
                 boolean pressPianoKey = buffer.read(BOOL);
-                customInstruments.add(new NoteBlockSong.CustomInstrument(instrumentName, soundFile, pitch, pressPianoKey));
+                customInstruments.add(
+                        new NoteBlockSong.CustomInstrument(instrumentName, soundFile, pitch, pressPianoKey));
             }
 
             return customInstruments;
