@@ -85,7 +85,10 @@ public class NpcPlayer extends BaseNpcEntity {
         super.updateNewViewer(player);
 
         // Enable skin layers
-        player.sendPackets(new EntityMetaDataPacket(getEntityId(), Map.of(17, Metadata.Byte((byte) 127))));
+        player.sendPackets(new EntityMetaDataPacket(getEntityId(), Map.of(
+                MetadataDef.Avatar.DISPLAYED_MODEL_PARTS_FLAGS.index(),
+                Metadata.Byte((byte) 0b1111111))
+        ));
 
         if (equipment.containsKey(EquipmentSlot.HELMET)) {
             player.sendPacket(new TeamsPacket(NPC_TEAM.getTeamName(), new TeamsPacket.AddEntitiesToTeamAction(List.of(username))));

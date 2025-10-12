@@ -1,9 +1,8 @@
 package net.hollowcube.mapmaker.map.block.handler;
 
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.block.handler.base.ContainerSerializer;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.nbt.BinaryTag;
-import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.block.Block;
@@ -11,11 +10,7 @@ import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.tag.TagReadable;
-import net.minestom.server.tag.TagSerializer;
-import net.minestom.server.tag.TagWritable;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,7 +21,7 @@ public class CampfireBlockHandler implements BlockHandler {
     public static final Key ID = Key.key("minecraft:campfire");
 
     private static final List<ItemStack> DEFAULT_ITEMS = List.of(ItemStack.AIR, ItemStack.AIR, ItemStack.AIR, ItemStack.AIR);
-    private static final Tag<List<ItemStack>> ITEMS_TAG = Tag.View(new ItemListSerializer()).defaultValue(DEFAULT_ITEMS);
+    private static final Tag<List<ItemStack>> ITEMS_TAG = Tag.View(new ContainerSerializer(4)).defaultValue(DEFAULT_ITEMS);
 
     @Override
     public @NotNull Key getKey() {
@@ -83,31 +78,5 @@ public class CampfireBlockHandler implements BlockHandler {
             case WEST -> 1;
             default -> throw new IllegalArgumentException("unreachable");
         }) % 4;
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
-    private static final class ItemListSerializer implements TagSerializer<List<ItemStack>> {
-        private final Tag<List<BinaryTag>> RAW = Tag.NBT("Items").list();
-
-        @Override
-        public @Nullable List<ItemStack> read(@NotNull TagReadable tag) {
-            var raw = tag.getTag(RAW);
-            if (raw == null) return null;
-
-            var items = new ArrayList<ItemStack>();
-            for (var nbt : raw) {
-                items.add(ItemStack.fromItemNBT((CompoundBinaryTag) nbt));
-            }
-            return items;
-        }
-
-        @Override
-        public void write(@NotNull TagWritable tagWritable, @NotNull List<ItemStack> itemStacks) {
-            var raw = new ArrayList<BinaryTag>();
-            for (int i = 0; i < Math.min(itemStacks.size(), 4); i++) {
-                raw.add(itemStacks.get(i).toItemNBT().putByte("Slot", (byte) i));
-            }
-            tagWritable.setTag(RAW, raw);
-        }
     }
 }

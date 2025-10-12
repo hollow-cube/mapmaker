@@ -10,6 +10,7 @@ dependencies {
     implementation(project(":modules:datafix"))
 
     implementation(libs.minestom)
+    implementation(libs.fastutil)
     implementation(libs.polar)
     implementation(libs.completely)
     implementation(libs.bundles.adventure)

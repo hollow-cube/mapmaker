@@ -39,7 +39,7 @@ public abstract class AbstractLine extends Entity implements DefaultClientRender
         this.setNoGravity(true);
         this.collidesWithEntities = false;
         this.setGlowing(true);
-        this.setPositionInternal(player.getPosition().withView(0, 0));
+        this.setPositionInternal(player.getPosition().withView(0, 0), 0f);
 
         this.reshape(from, to);
         this.recolor(color);
@@ -90,7 +90,7 @@ public abstract class AbstractLine extends Entity implements DefaultClientRender
         var length = vec.length();
 
         var scale = new Vec(length + THICKNESS, THICKNESS, THICKNESS);
-        setPositionInternal(player.getPosition().withView(0, 0));
+        setPositionInternal(player.getPosition().withView(0, 0), 0f);
 
         //setPositionInternal(player.getPreviousPosition().withView(0,0).sub(player.getVelocity()));
         meta.setPosRotInterpolationDuration(2);

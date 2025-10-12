@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -25,6 +26,7 @@ public class PackContext {
 
     private final Path rpMinecraftBase;
     private final Path rpMapmakerBase;
+    private final Map<String, Path> rpMapmakerVersionsPaths = new HashMap<>();
     private final String mapmakerRefBase;
 
     private final Map<String, String> remapping = new HashMap<>();
@@ -36,7 +38,7 @@ public class PackContext {
     public final JsonObject dynamicData = new JsonObject();
 
 
-    public PackContext(Path resources, Path out, Path minecraft) throws IOException {
+    public PackContext(Path resources, Path out, Path minecraft, Map<String, String> mcVersions) throws IOException {
         this.resources = resources;
         this.out = out;
         this.minecraft = minecraft;
@@ -67,19 +69,26 @@ public class PackContext {
 
         copyStaticFiles();
 
-        this.rpMinecraftBase = out.resolve("client").resolve("assets").resolve("minecraft");
+        var mapmakerRef = minify ? "minecraft" : "mapmaker";
+        var clientDirectory = out.resolve("client");
+
+        this.rpMinecraftBase = clientDirectory.resolve("assets").resolve("minecraft");
         Files.createDirectories(rpMinecraftBase);
 
-        if (minify) {
-            this.rpMapmakerBase = rpMinecraftBase;
-            this.mapmakerRefBase = "minecraft:";
-        } else {
-            this.rpMapmakerBase = out.resolve("client").resolve("assets").resolve("mapmaker");
-            Files.createDirectories(rpMapmakerBase);
-            this.mapmakerRefBase = "mapmaker:";
+        this.rpMapmakerBase = clientDirectory.resolve("assets").resolve(mapmakerRef);
+        Files.createDirectories(rpMapmakerBase);
+
+        for (var entry : mcVersions.entrySet()) {
+            var mcVersion = entry.getKey();
+            var overlayPath = "pvn_%s".formatted(entry.getValue());
+            var path = clientDirectory.resolve(overlayPath).resolve("assets").resolve(mapmakerRef);
+            Files.createDirectories(path);
+
+            this.rpMapmakerVersionsPaths.put(mcVersion, path);
         }
 
-        fontFile = new Gson().fromJson(Files.readString(rpMinecraftBase.resolve("font").resolve("default.json")), JsonObject.class);
+        this.mapmakerRefBase = mapmakerRef + ":";
+        this.fontFile = new Gson().fromJson(Files.readString(rpMinecraftBase.resolve("font").resolve("default.json")), JsonObject.class);
     }
 
     public @NotNull Path resources() {
@@ -90,8 +99,12 @@ public class PackContext {
         return out;
     }
 
-    public @NotNull Path vanilla() {
-        return minecraft;
+    public @NotNull Path vanilla(@NotNull String version) {
+        return minecraft.resolve(version);
+    }
+
+    public @NotNull Collection<@NotNull String> versions() {
+        return rpMapmakerVersionsPaths.keySet();
     }
 
     // Resource pack methods
@@ -144,6 +157,21 @@ public class PackContext {
         Path path = rpMapmakerBase.resolve("items").resolve(minName + ".json");
         Files.createDirectories(path.getParent());
         Files.writeString(path, new Gson().toJson(model));
+
+        var clientPath = mapmakerRefBase + minName;
+        addServerSprite(new ServerSprite(name, clientPath));
+    }
+
+    public void addItemModels(@NotNull String name, Map<@NotNull String, @NotNull JsonObject> models) throws IOException {
+        var minName = minifyId(name);
+        var fileName = minName + ".json";
+
+        for (var entry : models.entrySet()) {
+            var path = this.rpMapmakerVersionsPaths.get(entry.getKey()).resolve("items").resolve(fileName);
+            var model = entry.getValue();
+            Files.createDirectories(path.getParent());
+            Files.writeString(path, new Gson().toJson(model));
+        }
 
         var clientPath = mapmakerRefBase + minName;
         addServerSprite(new ServerSprite(name, clientPath));

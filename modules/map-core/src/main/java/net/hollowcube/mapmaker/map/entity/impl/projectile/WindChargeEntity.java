@@ -16,6 +16,7 @@ import net.minestom.server.particle.Particle;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -88,7 +89,15 @@ public class WindChargeEntity extends AbstractProjectileEntity {
                 motion = new Vec($$10 * $$20, $$11 * $$20, $$12 * $$20);
             }
 
-            player.sendPacket(new ExplosionPacket(hitPos, motion, Particle.GUST_EMITTER_SMALL, SoundEvent.ENTITY_WIND_CHARGE_WIND_BURST));
+            player.sendPacket(new ExplosionPacket(
+                    hitPos,
+                    EXPLOSION_RADIUS,
+                    0,
+                    motion,
+                    Particle.GUST_EMITTER_SMALL,
+                    SoundEvent.ENTITY_WIND_CHARGE_WIND_BURST,
+                    List.of()
+            ));
         }
 
         remove();

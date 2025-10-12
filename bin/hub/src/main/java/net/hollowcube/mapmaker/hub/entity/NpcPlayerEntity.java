@@ -117,7 +117,10 @@ public class NpcPlayerEntity extends BaseNpcEntity {
         super.updateNewViewer(player);
 
         // Enable skin layers
-        player.sendPackets(new EntityMetaDataPacket(getEntityId(), Map.of(17, Metadata.Byte((byte) 127))));
+        player.sendPackets(new EntityMetaDataPacket(getEntityId(), Map.of(
+                MetadataDef.Avatar.DISPLAYED_MODEL_PARTS_FLAGS.index(),
+                Metadata.Byte((byte) 0b1111111))
+        ));
 
         // Put them on the NPC team to hide their name tag
         final TeamsPacket addPlayerPacket = new TeamsPacket(NPC_TEAM.getTeamName(),

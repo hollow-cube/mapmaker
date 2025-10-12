@@ -34,7 +34,7 @@ public record AxiomServerboundSetBlockPacket(
     public static final Type<AxiomServerboundSetBlockPacket> TYPE = Type.of(
             AxiomAPI.CHANNEL, "set_block",
             NetworkBufferTemplate.template(
-                    NetworkBuffer.BLOCK_POSITION.mapValue(Block.NETWORK_TYPE), AxiomServerboundSetBlockPacket::blocks,
+                    NetworkBuffer.BLOCK_POSITION.mapValue(Block.STATE_NETWORK_TYPE), AxiomServerboundSetBlockPacket::blocks,
                     NetworkBuffer.BLOCK_POSITION.set().optional(), AxiomServerboundSetBlockPacket::updateNeighbors,
                     NetworkBuffer.VAR_INT, AxiomServerboundSetBlockPacket::reason,
                     NetworkBuffer.BOOLEAN, AxiomServerboundSetBlockPacket::breaking,

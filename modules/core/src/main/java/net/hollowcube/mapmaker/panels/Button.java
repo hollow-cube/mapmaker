@@ -18,8 +18,8 @@ import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.component.CustomData;
 import net.minestom.server.item.component.CustomModelData;
-import net.minestom.server.item.component.HeadProfile;
 import net.minestom.server.item.component.TooltipDisplay;
+import net.minestom.server.network.player.ResolvableProfile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,7 +52,7 @@ public class Button extends Element implements ButtonClickAliases {
     protected List<Component> itemLorePostfix;
     protected String itemModel = "minecraft:stick";
     protected String itemOverlay = null;
-    protected HeadProfile itemProfile = null;
+    protected ResolvableProfile itemProfile = null;
     protected DataComponentMap extraComponents = null;
     protected Sprite sprite;
     protected boolean disableHoverSprite = false;
@@ -109,7 +109,7 @@ public class Button extends Element implements ButtonClickAliases {
         return this;
     }
 
-    public @NotNull Button profile(@NotNull HeadProfile profile) {
+    public @NotNull Button profile(@NotNull ResolvableProfile profile) {
         if (Objects.equals(this.itemProfile, profile)) return this;
         this.itemProfile = profile;
 

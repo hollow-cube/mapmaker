@@ -243,8 +243,9 @@ public class V3818_5 extends DataVersion {
         for (var enchantment : enchantments) {
             var id = enchantment.get("id").as(String.class, null);
             if (id == null) continue;
-            var level = enchantment.get("lvl").as(Number.class, 0).intValue();
-            levels.put(id, Math.clamp(level, 0, 255));
+            var level = Math.clamp(enchantment.get("lvl").as(Number.class, 0).intValue(), 0, 255);
+            if (level == 0) continue;
+            levels.put(id, level);
         }
         newEnchantments.put("levels", levels);
         if (isHidden)

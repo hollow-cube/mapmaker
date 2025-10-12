@@ -128,7 +128,8 @@ public class DataFixer {
         return relevantVersions;
     }
 
-    private static @NotNull Pair<Int2IntMap, DataFix[]> createFixSpans(List<Pair<Integer, DataFix>> allFixes) {
+    // for some reason annotating this with @NotNull causes the compiler to just explode
+    private static Pair<Int2IntMap, DataFix[]> createFixSpans(List<Pair<Integer, DataFix>> allFixes) {
         var sortedFixes = new ArrayList<>(allFixes);
         sortedFixes.sort(Comparator.comparingInt(Pair::first)); // Handles subversions by int natural order
 
@@ -504,7 +505,13 @@ public class DataFixer {
                 V4306::new,
                 V4307::new,
                 V4314::new,
-                V4321::new
+                V4321::new,
+                V4531::new,
+                V4532::new,
+                V4533::new,
+                V4535::new,
+                V4541::new,
+                V4543::new
         ));
     }
 }

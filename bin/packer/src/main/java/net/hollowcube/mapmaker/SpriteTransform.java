@@ -289,26 +289,30 @@ public class SpriteTransform {
             cases.put(name, entry);
         });
 
-        var mcPath = ctx.vanilla().resolve("assets/minecraft/items/");
-        try (var model = Files.walk(mcPath)) {
-            var vanillaModels = new JsonArray();
-            for (var path : model.toList()) {
-                var filename = path.getFileName().toString();
-                if (!filename.endsWith(".json")) continue;
-                var name = filename.replace(".json", "");
-                var json = FileUtil.getJson(path).getAsJsonObject();
-                json.addProperty("when", name);
-                vanillaModels.add(JsonUtil.stripMinecraftNamespace(json));
-            }
+        var overlaysJson = cases.values().stream().collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+        var versionedModels = new HashMap<String, JsonObject>();
 
-            ctx.addItemModel(
-                    "vanilla_item",
-                    Templates.applyObject("vanilla_overlay_model", Map.of(
-                            "cases", vanillaModels,
-                            "overlays", cases.values().stream().collect(JsonArray::new, JsonArray::add, JsonArray::addAll)
-                    ))
-            );
+        for (var version : ctx.versions()) {
+            var mcPath = ctx.vanilla(version).resolve("assets/minecraft/items/");
+            try (var model = Files.walk(mcPath)) {
+                var vanillaModels = new JsonArray();
+                for (var path : model.toList()) {
+                    var filename = path.getFileName().toString();
+                    if (!filename.endsWith(".json")) continue;
+                    var name = filename.replace(".json", "");
+                    var json = FileUtil.getJson(path).getAsJsonObject();
+                    json.addProperty("when", name);
+                    vanillaModels.add(JsonUtil.stripMinecraftNamespace(json));
+                }
+
+                versionedModels.put(version, Templates.applyObject("vanilla_overlay_model", Map.of(
+                        "cases", vanillaModels,
+                        "overlays", overlaysJson
+                )));
+            }
         }
+
+        ctx.addItemModels("vanilla_item", versionedModels);
 
         return cases;
     }

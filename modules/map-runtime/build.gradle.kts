@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":modules:compat"))
 
     implementation(libs.minestom)
+    implementation(libs.fastutil)
     implementation(libs.polar)
     implementation(libs.included.molang)
     implementation(libs.bundles.adventure)

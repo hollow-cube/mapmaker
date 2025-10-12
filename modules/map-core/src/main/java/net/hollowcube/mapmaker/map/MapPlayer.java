@@ -429,7 +429,10 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         byte metaFlags = Objects.requireNonNullElseGet((Metadata.Entry<Byte>) EntityMetadataStealer.steal(this).getEntries().get(0),
                 () -> Metadata.Byte((byte) 0)).value();
         if (invisible) metaFlags |= 0x20; // Ensure the invisible flag is set
-        player.sendPacket(new EntityMetaDataPacket(getEntityId(), Map.of(0, Metadata.Byte(metaFlags))));
+        player.sendPacket(new EntityMetaDataPacket(getEntityId(), Map.of(
+                MetadataDef.ENTITY_FLAGS.index(),
+                Metadata.Byte(metaFlags)
+        )));
     }
 
     private void sendGameModeUpdate(@NotNull Player player, @NotNull GameMode gameMode) {
@@ -582,8 +585,8 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
     }
 
     @Override
-    protected void setPositionInternal(@NotNull Pos newPosition) {
-        super.setPositionInternal(newPosition);
+    protected void setPositionInternal(@NotNull Pos newPosition, float headRotation) {
+        super.setPositionInternal(newPosition, headRotation);
 
         // See note on pendingTeleports
         if (pendingTeleports.get() <= 0) {

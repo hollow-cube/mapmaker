@@ -12,7 +12,6 @@ import net.hollowcube.compat.noxesium.packets.ClientboundServerInformationPacket
 import net.hollowcube.compat.noxesium.packets.ServerboundClientInformationPacket;
 import net.hollowcube.compat.noxesium.qib.QibDefinitionManager;
 import net.hollowcube.compat.noxesium.rules.NoxesiumServerRules;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerGameModeChangeEvent;
@@ -45,8 +44,11 @@ public class NoxesiumCompatProvider implements CompatProvider {
             // Disable Noxesium for people who arent on the latest version because it does not handle component
             // changes across versions properly. We could maybe fix this as an extension to ViaVersion but it
             // doesn't seem worth it.
-            if (event.getPlayerProtocolVersion() != MinecraftServer.PROTOCOL_VERSION)
+            if (event.getPlayerProtocolVersion() < NoxesiumAPI.MIN_PROTOCOL_VERSION) {
                 event.excludeNamespace(NoxesiumAPI.NAME, NoxesiumAPI.CHANNEL);
+            } else if (event.getPlayerProtocolVersion() > NoxesiumAPI.MAX_PROTOCOL_VERSION) {
+                event.excludeNamespace(NoxesiumAPI.CHANNEL);
+            }
         });
 
         events.addListener(PlayerSpawnEvent.class, event -> {
