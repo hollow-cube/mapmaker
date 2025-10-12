@@ -1,12 +1,15 @@
 package net.hollowcube.mapmaker.dev.commands;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.enbs.ENBSWriter;
+import net.hollowcube.enbs.ExtendedNoteBlockSong;
 import net.hollowcube.nbs.DefaultNbsPlayer;
 import net.hollowcube.nbs.NBSPlayer;
 import net.hollowcube.nbs.NBSReader;
-import net.hollowcube.nbs.NBSWriter;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -23,22 +26,25 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Map;
 import java.util.zip.ZipInputStream;
 
 public class PlayNbsCommand extends CommandDsl {
     public static final PlayNbsCommand INSTANCE = new PlayNbsCommand();
-    private static final String NOTEBLOCK_WORLD_URL = "https://api.noteblock.world/api/v1/song/{songid}/open";
+    private static final String NOTEBLOCK_WORLD_URL = "https://api.noteblock.world/api/v1/song/{songid}";
+    private static final String NOTEBLOCK_WORLD_DOWNLOAD_URL = NOTEBLOCK_WORLD_URL + "/open";
     private static final Logger logger = LoggerFactory.getLogger(PlayNbsCommand.class);
 
     private final Argument<String> url = Argument.GreedyString("url");
     private final Argument<String> id = Argument.Word("id");
-    private final Argument<String> save = Argument.Literal("save").defaultValue("save");
+    private final Argument<String> save = Argument.Literal("save");
     private final HttpClient client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).build();
     private NBSPlayer player;
 
     public PlayNbsCommand() {
         super("play_nbs_song");
         addSyntax(playerOnly(this::execute), Argument.Literal("play"), url);
+        addSyntax(playerOnly(this::downloadNoteblockWorldSong), Argument.Literal("noteblock_world"), id);
         addSyntax(playerOnly(this::downloadNoteblockWorldSong), Argument.Literal("noteblock_world"), id, save);
         addSyntax(playerOnly(this::pause), Argument.Literal("pause"));
         addSyntax(playerOnly(this::resume), Argument.Literal("resume"));
@@ -52,8 +58,14 @@ public class PlayNbsCommand extends CommandDsl {
         }
         var id = commandContext.get(this.id);
         try {
+            var songResponse = client.send(HttpRequest.newBuilder()
+                                                   .uri(URI.create(NOTEBLOCK_WORLD_URL.replace("{songid}", id)))
+                                                   .build(), HttpResponse.BodyHandlers.ofString());
+            if (songResponse.statusCode() != 200) return;
+            var data = new Gson().fromJson(songResponse.body(), JsonObject.class);
+
             var response = client.send(HttpRequest.newBuilder()
-                                               .uri(URI.create(NOTEBLOCK_WORLD_URL.replace("{songid}", id)))
+                                               .uri(URI.create(NOTEBLOCK_WORLD_DOWNLOAD_URL.replace("{songid}", id)))
                                                .header("src", "downloadButton")
                                                .build(), HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) return;
@@ -63,11 +75,22 @@ public class PlayNbsCommand extends CommandDsl {
                 var next = file.getNextEntry();
                 if (next.isDirectory()) continue;
                 if (next.getName().endsWith(".nbs")) {
-                    var nbs = NBSReader.nbsReader().read(file.readAllBytes());
-                    this.player = new DefaultNbsPlayer(nbs, player);
+                    var song = NBSReader.reader().read(file.readAllBytes());
+                    this.player = new DefaultNbsPlayer(song, player);
                     this.player.start();
                     if (commandContext.has(save)) {
-                        Files.write(Path.of(id + ".nbs"), NBSWriter.nbsWriter().write(nbs), StandardOpenOption.CREATE_NEW);
+                        var enbs = new ExtendedNoteBlockSong(
+                                song,
+                                Map.of(
+                                        "link", "https://noteblock.world/song/%s".formatted(id),
+                                        "license", data.get("license").getAsString()
+                                )
+                        );
+                        Files.write(
+                                Path.of(id + ".enbs"),
+                                ENBSWriter.writer().write(enbs),
+                                StandardOpenOption.CREATE_NEW
+                        );
                     }
                 }
             }
@@ -104,7 +127,7 @@ public class PlayNbsCommand extends CommandDsl {
 
     private void play(@NotNull Player player, @NotNull String url) {
         try {
-            var nbs = NBSReader.nbsReader().read(download(url));
+            var nbs = NBSReader.reader().read(download(url));
             this.player = new DefaultNbsPlayer(nbs, player);
             this.player.start();
         } catch (IOException | InterruptedException e) {

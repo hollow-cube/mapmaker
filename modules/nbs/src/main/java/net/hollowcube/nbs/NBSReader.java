@@ -1,32 +1,24 @@
 package net.hollowcube.nbs;
 
-import com.google.gson.JsonElement;
-import net.hollowcube.common.util.OpUtils;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.utils.json.JsonUtil;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import static net.hollowcube.nbs.NBSTypes.*;
 
 public interface NBSReader {
-    int MIN_VERSION = 1; // The min supported version (inclusive)
-    int MAX_VERSION = 5; // The max supported version (inclusive)
+    byte MIN_VERSION = 1; // The min supported version (inclusive)
+    byte MAX_VERSION = 5; // The max supported version (inclusive)
 
-    static NBSReader nbsReader() {
+    static NBSReader reader() {
         return Impl.INSTANCE;
     }
 
     /**
      * <p>Read a {@link NoteBlockSong} from the given bytes in NBS format.</p>
-     *
-     * <p>Supports reading OpenNBS versions 1-5, but NOT legacy Note Block Studio files at this time.</p>
-     * TODO for myself: old format is just all the green ones missing
      *
      * @param bytes the bytes to read from
      * @return the read song
@@ -34,7 +26,20 @@ public interface NBSReader {
      * @throws IllegalArgumentException      if the bytes are not a valid NBS file
      * @throws UnsupportedOperationException if the NBS version is not supported
      */
-    NoteBlockSong read(byte[] bytes);
+    default NoteBlockSong read(byte[] bytes) {
+        return read(NetworkBuffer.wrap(bytes, 0, bytes.length));
+    }
+
+    /**
+     * <p>Read a {@link NoteBlockSong} from the given bytes in NBS format.</p>
+     *
+     * @param buffer the buffer to read from
+     * @return the read song
+     *
+     * @throws IllegalArgumentException      if the bytes are not a valid NBS file
+     * @throws UnsupportedOperationException if the NBS version is not supported
+     */
+    NoteBlockSong read(NetworkBuffer buffer);
 
     final class Impl implements NBSReader {
         private static final NBSReader INSTANCE = new Impl();
@@ -43,9 +48,7 @@ public interface NBSReader {
         }
 
         @Override
-        public NoteBlockSong read(byte[] bytes) {
-            var buffer = NetworkBuffer.wrap(bytes, 0, bytes.length);
-
+        public NoteBlockSong read(NetworkBuffer buffer) {
             short oldSongLength = buffer.read(SHORT);
 
             int version;
@@ -89,30 +92,12 @@ public interface NBSReader {
 
             var newLayerCount = new AtomicInteger();
             var ticks = readTicks(buffer, newLayerCount, isLegacy);
-            var layers = readLayers(buffer, newLayerCount.get(), isLegacy);
+            var layers = readLayers(buffer, Math.max(newLayerCount.get(), layerCount), isLegacy);
             var customInstruments = readCustomInstruments(buffer);
-
-            final NoteBlockSong.Data data;
-            if (songDescription.startsWith("mapmaker:data")) {
-                var jsonData = JsonUtil.fromJson(songDescription.substring(13)).getAsJsonObject();
-
-                var actualDescription = OpUtils.mapOr(jsonData.get("description"), JsonElement::getAsString, "");
-                var link = OpUtils.map(jsonData.get("description"), JsonElement::getAsString);
-
-                var map = new HashMap<String, String>();
-                for (var entry : jsonData.entrySet()) {
-                    map.put(entry.getKey(), entry.getValue().getAsString());
-                }
-
-                data = new NoteBlockSong.Data(songName, songAuthor, songOriginalAuthor, actualDescription, link, map);
-            } else {
-                data = new NoteBlockSong.Data(songName, songAuthor, songOriginalAuthor, songDescription, null,
-                                              Map.of());
-            }
 
             return new NoteBlockSong(
                     vanillaInstrumentCount, songLengthTicks, layerCount,
-                    data,
+                    songName, songAuthor, songOriginalAuthor, songDescription,
                     tempo, autoSaving, autoSavingDuration, timeSignature,
                     minutesSpent, leftClicks, rightClicks, noteBlocksAdded,
                     noteBlocksRemoved, midiSchematicFileName, loop, maxLoopCount,

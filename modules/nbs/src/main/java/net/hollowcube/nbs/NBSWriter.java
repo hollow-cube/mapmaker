@@ -1,6 +1,5 @@
 package net.hollowcube.nbs;
 
-import com.google.gson.JsonObject;
 import net.minestom.server.network.NetworkBuffer;
 
 import static net.hollowcube.nbs.NBSTypes.*;
@@ -8,46 +7,48 @@ import static net.hollowcube.nbs.NBSTypes.*;
 public interface NBSWriter {
     byte CURRENT_VERSION = 5;
 
-    static NBSWriter nbsWriter() {
+    static NBSWriter writer() {
         return NBSWriter.Impl.INSTANCE;
     }
 
-    byte[] write(NoteBlockSong noteBlockSong);
+    default byte[] write(NoteBlockSong song) {
+        return NetworkBuffer.makeArray(buffer -> write(buffer, song));
+    }
+
+    void write(NetworkBuffer buffer, NoteBlockSong song);
 
     final class Impl implements NBSWriter {
         static final Impl INSTANCE = new Impl();
 
         @Override
-        public byte[] write(NoteBlockSong noteBlockSong) {
-            return NetworkBuffer.makeArray(buffer -> {
-                buffer.write(SHORT, (short) 0);
+        public void write(NetworkBuffer buffer, NoteBlockSong noteBlockSong) {
+            buffer.write(SHORT, (short) 0);
 
-                buffer.write(BYTE, CURRENT_VERSION);
-                buffer.write(BYTE, (byte) noteBlockSong.vanillaInstrumentCount());
-                buffer.write(SHORT, noteBlockSong.songLengthTicks());
-                buffer.write(SHORT, noteBlockSong.layerCount());
-                buffer.write(STRING, noteBlockSong.data().name());
-                buffer.write(STRING, noteBlockSong.data().author());
-                buffer.write(STRING, noteBlockSong.data().originalAuthor());
-                buffer.write(STRING, serializeData(noteBlockSong.data()));
-                buffer.write(SHORT, noteBlockSong.tempo());
-                buffer.write(BOOL, noteBlockSong.autoSaving());
-                buffer.write(BYTE, noteBlockSong.autoSavingDuration());
-                buffer.write(BYTE, noteBlockSong.timeSignature());
-                buffer.write(INT, noteBlockSong.minutesSpent());
-                buffer.write(INT, noteBlockSong.leftClicks());
-                buffer.write(INT, noteBlockSong.rightClicks());
-                buffer.write(INT, noteBlockSong.noteBlocksAdded());
-                buffer.write(INT, noteBlockSong.noteBlocksRemoved());
-                buffer.write(STRING, noteBlockSong.midiSchematicFileName());
-                buffer.write(BOOL, noteBlockSong.loop());
-                buffer.write(BYTE, noteBlockSong.maxLoopCount());
-                buffer.write(SHORT, noteBlockSong.loopStartTick());
+            buffer.write(BYTE, CURRENT_VERSION);
+            buffer.write(BYTE, (byte) noteBlockSong.vanillaInstrumentCount());
+            buffer.write(SHORT, noteBlockSong.songLengthTicks());
+            buffer.write(SHORT, noteBlockSong.layerCount());
+            buffer.write(STRING, noteBlockSong.name());
+            buffer.write(STRING, noteBlockSong.author());
+            buffer.write(STRING, noteBlockSong.originalAuthor());
+            buffer.write(STRING, noteBlockSong.description());
+            buffer.write(SHORT, noteBlockSong.tempo());
+            buffer.write(BOOL, noteBlockSong.autoSaving());
+            buffer.write(BYTE, noteBlockSong.autoSavingDuration());
+            buffer.write(BYTE, noteBlockSong.timeSignature());
+            buffer.write(INT, noteBlockSong.minutesSpent());
+            buffer.write(INT, noteBlockSong.leftClicks());
+            buffer.write(INT, noteBlockSong.rightClicks());
+            buffer.write(INT, noteBlockSong.noteBlocksAdded());
+            buffer.write(INT, noteBlockSong.noteBlocksRemoved());
+            buffer.write(STRING, noteBlockSong.midiSchematicFileName());
+            buffer.write(BOOL, noteBlockSong.loop());
+            buffer.write(BYTE, noteBlockSong.maxLoopCount());
+            buffer.write(SHORT, noteBlockSong.loopStartTick());
 
-                writeTicks(buffer, noteBlockSong);
-                writeLayers(buffer, noteBlockSong);
-                writeCustomInstruments(buffer, noteBlockSong);
-            });
+            writeTicks(buffer, noteBlockSong);
+            writeLayers(buffer, noteBlockSong);
+            writeCustomInstruments(buffer, noteBlockSong);
         }
 
         private void writeCustomInstruments(NetworkBuffer buffer, NoteBlockSong noteBlockSong) {
@@ -92,21 +93,6 @@ public interface NBSWriter {
                 buffer.write(SHORT, (short) 0);
             }
             buffer.write(SHORT, (short) 0);
-
-        }
-
-        private String serializeData(NoteBlockSong.Data data) {
-            if (data.data().isEmpty() && data.link() != null) {
-                return data.description();
-            }
-
-            var dataObject = new JsonObject();
-            data.data().forEach(dataObject::addProperty);
-
-            dataObject.addProperty("link", data.link());
-            dataObject.addProperty("description", data.description());
-
-            return "mapmaker:data" + dataObject.toString();
         }
     }
 }
