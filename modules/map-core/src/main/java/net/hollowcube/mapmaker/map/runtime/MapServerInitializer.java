@@ -41,7 +41,8 @@ public final class MapServerInitializer {
             "minestom.command.async-virtual", "true",
             "minestom.event.multiple-parents", "true",
             "minestom.experiment.pose-updates", "true",
-            "minestom.shutdown-on-signal", "false" // We have our own shutdown logic which will call stopCleanly
+            "minestom.shutdown-on-signal", "false", // We have our own shutdown logic which will call stopCleanly
+            "minestom.new-socket-write-lock", "true"
     );
 
     public static void run(@NotNull Function<ConfigLoaderV3, ? extends AbstractMapServer> serverFactory, @NotNull String[] args) {
