@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.entity.object;
 
+import net.hollowcube.common.util.ExtraTags;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.compat.axiom.AxiomAPI;
 import net.hollowcube.compat.axiom.events.AxiomEnabledEvent;
@@ -49,7 +50,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
             .map(n -> (CompoundBinaryTag) n, n -> n)
             .defaultValue(CompoundBinaryTag.empty());
     protected static final Tag<Key> TYPE_TAG = Tag.String("type").path("data")
-            .map(s -> Key.key(s.toLowerCase(Locale.ROOT)), Key::asString)
+            .map(ExtraTags::parseKey, Key::asString)
             .defaultValue(UNKNOWN_TYPE);
     protected static final Tag<@Nullable String> NAME_TAG = Tag.String("name").path("data");
     protected static final Tag<@Nullable Vec> REGION_MIN_TAG = VecAsList("min").path("data");
