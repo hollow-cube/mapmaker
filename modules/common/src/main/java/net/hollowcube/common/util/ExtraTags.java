@@ -25,7 +25,7 @@ public final class ExtraTags {
 
     public static @NotNull Tag<@NotNull Key> Key(@NotNull String key) {
         return Tag.String(key).map(
-                ExtraTags::parseKey,
+                str -> parseKey(str, null),
                 Key::asString
         );
     }
@@ -61,11 +61,11 @@ public final class ExtraTags {
         ));
     }
 
-    public static @Nullable Key parseKey(String str) {
+    public static @Nullable Key parseKey(String str, @Nullable Key defaultValue) {
         try {
             return Key.key(str.toLowerCase(Locale.ROOT));
         } catch (InvalidKeyException _) {
-            return null;
+            return defaultValue;
         }
     }
 }

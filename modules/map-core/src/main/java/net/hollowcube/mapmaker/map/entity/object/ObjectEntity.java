@@ -50,7 +50,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
             .map(n -> (CompoundBinaryTag) n, n -> n)
             .defaultValue(CompoundBinaryTag.empty());
     protected static final Tag<Key> TYPE_TAG = Tag.String("type").path("data")
-            .map(ExtraTags::parseKey, Key::asString)
+            .map(str -> ExtraTags.parseKey(str, UNKNOWN_TYPE), Key::asString)
             .defaultValue(UNKNOWN_TYPE);
     protected static final Tag<@Nullable String> NAME_TAG = Tag.String("name").path("data");
     protected static final Tag<@Nullable Vec> REGION_MIN_TAG = VecAsList("min").path("data");
@@ -81,11 +81,11 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
     }
 
     public @NotNull String getDisplayName() {
-        return Objects.requireNonNullElseGet(getTag(NAME_TAG), () -> getTag(TYPE_TAG).asString());
+        return Objects.requireNonNullElseGet(getTag(NAME_TAG), this::getType);
     }
 
     public @NotNull String getType() {
-        return getTag(TYPE_TAG).asString();
+        return OpUtils.mapOr(getTag(TYPE_TAG), Key::asString, UNKNOWN_TYPE.asString());
     }
 
     public @NotNull CompoundBinaryTag getData() {
