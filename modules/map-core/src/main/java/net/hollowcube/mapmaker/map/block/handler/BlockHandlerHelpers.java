@@ -40,17 +40,16 @@ public final class BlockHandlerHelpers {
      */
     public static void applyItemData(@NotNull BlockHandler.PlayerPlacement placement) {
         var itemStack = placement.getPlayer().getItemInHand(placement.getHand());
-        var blockData = itemStack.get(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).nbt();
-        if (blockData.size() == 0) return;
-        updateBlock(placement, blockData);
+        var data = itemStack.get(DataComponents.BLOCK_ENTITY_DATA);
+        if (data == null || data.nbt().isEmpty()) return;
+        updateBlock(placement, data.nbt());
     }
 
     public static @Nullable CompoundBinaryTag extractBlockData(@NotNull ItemStack itemStack) {
-        var blockData = itemStack.get(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).nbt();
-        if (blockData.size() == 0) return null;
+        var data = itemStack.get(DataComponents.BLOCK_ENTITY_DATA);
+        if (data == null || data.nbt().isEmpty()) return null;
         var builder = CompoundBinaryTag.builder();
-        builder.put(blockData);
-        builder.remove("id");
+        builder.put(data.nbt());
         builder.remove("x");
         builder.remove("y");
         builder.remove("z");
