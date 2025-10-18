@@ -138,7 +138,10 @@ public class SpongeSchematicReader implements SchematicReader {
             for (var entry : blockPaletteObject) {
                 assertTrue(entry.getValue().type() == BinaryTagTypes.INT, "expected palette entry to be an int");
                 var paletteId = ((IntBinaryTag) entry.getValue()).value();
-                var block = ArgumentBlockState.staticParse(entry.getKey());
+                var blockState = entry.getKey();
+                if (dataVersion < dataVersionMax)
+                    blockState = gameData.upgradeBlockState(dataVersion, dataVersionMax, blockState);
+                var block = ArgumentBlockState.staticParse(blockState);
 
                 // Increase the palette size if the input object has missing indices (dumb)
                 if (paletteId >= blockPalette.length) {
