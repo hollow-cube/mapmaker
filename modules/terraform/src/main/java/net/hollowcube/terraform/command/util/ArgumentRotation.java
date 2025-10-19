@@ -5,7 +5,7 @@ import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
-import net.hollowcube.schem.Rotation;
+import net.hollowcube.schem.util.Rotation;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,6 +14,7 @@ import java.util.*;
 public class ArgumentRotation extends Argument<Rotation> {
 
     private static final Map<String, Rotation> VALUES;
+
     static {
         Map<String, Rotation> values = new HashMap<>();
         List.of("0", "0.0").forEach(value -> values.put(value, Rotation.NONE));

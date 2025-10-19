@@ -9,4 +9,5 @@ dependencies {
     implementation(libs.posthog)
     implementation(libs.fastutil)
     implementation(libs.kafka)
+    implementation(libs.included.schem)
 }

@@ -1,8 +1,8 @@
 package net.hollowcube.terraform.buffer;
 
+import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.hollowcube.schem.Schematic;
 import net.hollowcube.schem.builder.SchematicBuilder;
-import net.hollowcube.schem.old.CoordinateUtil;
 import net.hollowcube.terraform.buffer.palette.Palette;
 import net.hollowcube.terraform.task.edit.WorldView;
 import net.minestom.server.coordinate.Point;

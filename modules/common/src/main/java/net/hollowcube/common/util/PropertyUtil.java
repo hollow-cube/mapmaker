@@ -1,6 +1,6 @@
 package net.hollowcube.common.util;
 
-import net.hollowcube.common.types.Axis;
+import net.hollowcube.schem.util.Axis;
 import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

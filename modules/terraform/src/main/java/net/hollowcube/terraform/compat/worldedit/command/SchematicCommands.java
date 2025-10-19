@@ -2,8 +2,8 @@ package net.hollowcube.terraform.compat.worldedit.command;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
-import net.hollowcube.common.types.Axis;
-import net.hollowcube.schem.Rotation;
+import net.hollowcube.schem.util.Axis;
+import net.hollowcube.schem.util.Rotation;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.command.util.ArgumentRotation;
 import net.hollowcube.terraform.command.util.CommandPreviewHelper;

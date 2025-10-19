@@ -1,9 +1,9 @@
 package net.hollowcube.terraform.util.transformations;
 
-import net.hollowcube.common.types.Axis;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.PropertyUtil;
-import net.hollowcube.schem.Rotation;
+import net.hollowcube.schem.util.Axis;
+import net.hollowcube.schem.util.Rotation;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
@@ -16,7 +16,8 @@ import java.util.Map;
 /**
  * Represents a transformation that rotates the schematic around a specified axis in 90-degree increments.
  */
-public record RotateSchematicTransformation(@NotNull Axis axis, @NotNull Rotation rotation) implements SchematicTransformation {
+public record RotateSchematicTransformation(@NotNull Axis axis,
+                                            @NotNull Rotation rotation) implements SchematicTransformation {
 
     @Override
     public @NotNull Block apply(@NotNull Block block) {

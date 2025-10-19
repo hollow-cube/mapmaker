@@ -15,6 +15,7 @@ dependencies {
     implementation(libs.completely)
     implementation(libs.bundles.adventure)
     implementation(libs.bundles.otel)
+    implementation(libs.included.schem)
 
     testImplementation(project(":modules:test"))
 

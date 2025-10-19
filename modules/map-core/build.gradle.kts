@@ -18,6 +18,7 @@ dependencies {
     implementation(libs.bundles.adventure)
     implementation(libs.gson)
     implementation(libs.included.molang)
+    implementation(libs.included.schem)
     implementation(libs.polar)
     implementation(libs.posthog)
     implementation(libs.bundles.otel)

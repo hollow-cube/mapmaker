@@ -13,6 +13,7 @@ dependencies {
     implementation(libs.bundles.adventure)
     implementation(libs.gson)
     implementation(libs.fastutil)
+    implementation(libs.included.schem)
 
     testImplementation(project(":modules:test"))
 }

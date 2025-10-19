@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.map.block.placement;
 
 import net.hollowcube.common.util.PropertyUtil;
 import net.hollowcube.mapmaker.map.block.BlockTags;
-import net.hollowcube.schem.Rotation;
+import net.hollowcube.schem.util.Rotation;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
