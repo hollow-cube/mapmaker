@@ -3,8 +3,8 @@ package net.hollowcube.mapmaker.editor.terraform;
 import com.google.gson.reflect.TypeToken;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.schem.Schematic;
-import net.hollowcube.schem.reader.DetectingSchematicReader;
-import net.hollowcube.schem.writer.SpongeSchematicWriter;
+import net.hollowcube.schem.reader.SchematicReader;
+import net.hollowcube.schem.writer.SchematicWriter;
 import net.hollowcube.terraform.schem.SchematicHeader;
 import net.hollowcube.terraform.storage.TerraformStorage;
 import org.jetbrains.annotations.Nullable;
@@ -98,7 +98,7 @@ public class TerraformStorageHttp extends AbstractHttpService implements Terrafo
         return switch (res.statusCode()) {
             case 200 -> {
                 try {
-                    yield new DetectingSchematicReader().read(res.body());
+                    yield SchematicReader.detecting().read(res.body());
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to read schem data: " + e.getMessage());
                 }
@@ -111,7 +111,7 @@ public class TerraformStorageHttp extends AbstractHttpService implements Terrafo
 
     @Override
     public SchematicCreateResult createSchematic(String playerId, String name, Schematic schematic, boolean overwrite) {
-        var schemData = new SpongeSchematicWriter().write(schematic);
+        var schemData = SchematicWriter.sponge().write(schematic);
         var endpoint = String.format("%s/schem/%s/%s?dimx=%d&dimy=%d&dimz=%d&size=%d&overwrite=%b",
                 this.url, playerId, name,
                 schematic.size().blockX(), schematic.size().blockY(), schematic.size().blockZ(),

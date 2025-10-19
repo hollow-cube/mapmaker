@@ -2,8 +2,8 @@ package net.hollowcube.terraform.session;
 
 import net.hollowcube.schem.Schematic;
 import net.hollowcube.schem.builder.SchematicBuilder;
-import net.hollowcube.schem.reader.SpongeSchematicReader;
-import net.hollowcube.schem.writer.SpongeSchematicWriter;
+import net.hollowcube.schem.reader.SchematicReader;
+import net.hollowcube.schem.writer.SchematicWriter;
 import net.hollowcube.terraform.util.transformations.SchematicTransformation;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
@@ -11,6 +11,7 @@ import org.intellij.lang.annotations.RegExp;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,8 +20,14 @@ public class Clipboard {
     public static final NetworkBuffer.Type<Clipboard> NETWORK_TYPE = NetworkBufferTemplate.template(
             NetworkBuffer.STRING, Clipboard::name,
             NetworkBuffer.BYTE_ARRAY.transform(
-                    bytes -> new SpongeSchematicReader().read(bytes),
-                    schematic -> new SpongeSchematicWriter().write(schematic)
+                    bytes -> {
+                        try {
+                            return SchematicReader.sponge().read(bytes);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    },
+                    schematic -> SchematicWriter.sponge().write(schematic)
             ).optional(), Clipboard::getInitialSchematic,
             Clipboard::new
     );
