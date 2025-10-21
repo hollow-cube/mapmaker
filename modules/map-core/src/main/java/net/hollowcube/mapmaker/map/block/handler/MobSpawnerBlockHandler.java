@@ -30,6 +30,8 @@ public class MobSpawnerBlockHandler implements BlockHandler {
 
     @Override
     public boolean onInteract(@NotNull BlockHandler.Interaction interaction) {
+        if (!BlockHandlerHelpers.canEdit(interaction)) return true;
+
         ItemStack itemStack = interaction.getPlayer().getItemInHand(interaction.getHand());
         EntityType entityType = itemStack.material().registry().spawnEntityType();
         if (entityType == null) return true;

@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.block.handler;
 
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
@@ -10,6 +11,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class BlockHandlerHelpers {
+
+    public static boolean canEdit(@NotNull BlockHandler.Interaction interaction) {
+        var player = interaction.getPlayer();
+        var world = MapWorld.forPlayer(player);
+        return world != null && world.canEdit(player);
+    }
 
     /**
      * @param placement

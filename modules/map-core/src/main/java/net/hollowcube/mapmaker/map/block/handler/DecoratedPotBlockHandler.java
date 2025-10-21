@@ -31,6 +31,8 @@ public class DecoratedPotBlockHandler implements BlockHandler {
 
     @Override
     public boolean onInteract(@NotNull Interaction interaction) {
+        if (!BlockHandlerHelpers.canEdit(interaction)) return true;
+
         var player = interaction.getPlayer();
         var stack = player.getItemInHand(interaction.getHand());
         var block = interaction.getBlock();

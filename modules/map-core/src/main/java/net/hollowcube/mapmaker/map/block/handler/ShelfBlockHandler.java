@@ -40,6 +40,8 @@ public class ShelfBlockHandler implements BlockHandler {
 
     @Override
     public boolean onInteract(@NotNull BlockHandler.Interaction interaction) {
+        if (!BlockHandlerHelpers.canEdit(interaction)) return true;
+
         var blockPos = interaction.getBlockPosition();
         var block = interaction.getBlock();
         var stack = interaction.getPlayer().getItemInHand(interaction.getHand());
