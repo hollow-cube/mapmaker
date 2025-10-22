@@ -585,7 +585,7 @@ public class EditMap extends View {
             } else if (setting.equals(MapSettings.Setting.NOJUMP)) {
                 map.setSetting(MapSettings.NO_JUMP, true);
             } else if (setting.equals(MapSettings.Setting.NOSNEAK)) {
-                map.setSetting(MapSettings.NO_SNEAK, false);
+                map.setSetting(MapSettings.NO_SNEAK, true);
             } else if (setting.equals(MapSettings.Setting.NOSPEC)) {
                 map.setSetting(MapSettings.NO_SPECTATOR, NoSpectateMode.ON);
             } else if (setting.equals(MapSettings.Setting.RESET_WATER)) {
