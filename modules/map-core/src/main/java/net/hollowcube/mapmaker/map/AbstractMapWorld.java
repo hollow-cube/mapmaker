@@ -25,6 +25,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
+import net.minestom.server.event.player.PlayerDeathEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.event.trait.PlayerInstanceEvent;
@@ -110,7 +111,8 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         instance.eventNode()
                 .addChild(eventNode)
                 .addChild(itemRegistry.eventNode())
-                .addListener(PlayerInstanceLeaveEvent.class, this::handlePlayerLeave);
+                .addListener(PlayerInstanceLeaveEvent.class, this::handlePlayerLeave)
+                .addListener(PlayerDeathEvent.class, this::handlePlayerDeath);
 
         configureInstance();
     }
@@ -340,6 +342,10 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         if (!players.contains(event.getPlayer())) return; // Sanity
 
         scheduleRemovePlayer(event.getPlayer());
+    }
+
+    private void handlePlayerDeath(PlayerDeathEvent event) {
+        event.setChatMessage(null);
     }
 
     // endregion

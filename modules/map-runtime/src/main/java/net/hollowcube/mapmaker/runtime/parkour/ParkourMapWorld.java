@@ -212,7 +212,8 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         // If you either: have no prior checkpoint, or have no more lives
         // then you will be hard reset instead (or lives special behavior potentially).
         var livesData = playState.get(EditLivesAction.SAVE_DATA);
-        var isOutOfLives = OpUtils.mapOr(livesData, EditLivesAction.Data::value, 0) == 1;
+        // We do less than or equals 1 because if an action subtracts lives to 0 or below, we will call softResetPlayer
+        var isOutOfLives = livesData != null && livesData.value() <= 1;
         var newPlayState = OpUtils.map(playState.lastState(), PlayState::copy);
         if (newPlayState == null || isOutOfLives) {
             if (isOutOfLives) {

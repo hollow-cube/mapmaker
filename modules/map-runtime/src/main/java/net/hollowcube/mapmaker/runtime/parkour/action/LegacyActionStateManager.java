@@ -55,7 +55,10 @@ public class LegacyActionStateManager {
 
         // Set the player health to the number of time they have (1 heart = 1 life)
         var lives = state.get(EditLivesAction.SAVE_DATA);
-        if (lives != null) {
+        if (lives != null && lives.value() <= 0) {
+            event.world().softResetPlayer(player);
+            return; // We should not continue as the reset will override other settings
+        } else if (lives != null) {
             player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(2 * lives.max());
             player.setHealth(2 * lives.value());
         } else {
