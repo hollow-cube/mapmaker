@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.runtime.parkour.item;
 
-import net.hollowcube.mapmaker.map.MapFeatureFlags;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.SpectateHelper;
@@ -37,9 +36,6 @@ public class ToggleGameplayItem extends ItemHandler {
         var player = click.player();
         var world = ParkourMapWorld.forPlayer(player);
         if (world == null) return;
-
-        if (!MapFeatureFlags.SPEC_GAMEPLAY_SETTINGS.test(player))
-            return;
 
         if (player.isSneaking()) {
             SpectateHelper.toggleSpectatorFlight(world, player);
