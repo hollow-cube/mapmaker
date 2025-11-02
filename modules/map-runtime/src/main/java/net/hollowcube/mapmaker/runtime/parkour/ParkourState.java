@@ -39,7 +39,7 @@ import java.util.concurrent.CompletableFuture;
 public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMapWorld> {
 
     sealed interface AnyPlaying extends ParkourState {
-        AttributeModifier NO_FALL_DAMAGE_MODIFIER = new AttributeModifier("mapmaker:play.no_fall_damage", 500, AttributeOperation.ADD_VALUE);
+        AttributeModifier NO_FALL_DAMAGE_MODIFIER = new AttributeModifier("mapmaker:play.no_fall_damage", 1024, AttributeOperation.ADD_MULTIPLIED_BASE);
         Instant NO_POSE_CHANGES_EPOCH = Instant.ofEpochMilli(1756771200000L); // 2025-09-02 12:00:00 GMT
 
         SaveState saveState();
@@ -257,11 +257,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             world.itemRegistry().setItemStack(player, ReturnToCheckpointItem.ID, 0);
             world.itemRegistry().setItemStack(player, ToggleSpectatorModeItem.ID_OFF, 1);
             world.itemRegistry().setItemStack(player, SetSpectatorCheckpointItem.ID, 2);
-            if (MapFeatureFlags.SPEC_GAMEPLAY_SETTINGS.test(player)) {
-                world.itemRegistry().setItemStack(player, ToggleGameplayItem.ID_ON, 7);
-            } else {
-                world.itemRegistry().setItemStack(player, ToggleFlightItem.ID_OFF, 7);
-            }
+            world.itemRegistry().setItemStack(player, ToggleGameplayItem.ID_ON, 7);
             world.itemRegistry().setItemStack(player, MapDetailsItem.ID, 8);
 
             // We encounter somewhat of a strange issue here - We create the Spectating instance part of the way

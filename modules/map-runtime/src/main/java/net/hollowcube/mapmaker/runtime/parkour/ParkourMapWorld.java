@@ -16,10 +16,7 @@ import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
-import net.hollowcube.mapmaker.map.item.vanilla.EnderPearlItem;
-import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
-import net.hollowcube.mapmaker.map.item.vanilla.TridentItem;
-import net.hollowcube.mapmaker.map.item.vanilla.WindChargeItem;
+import net.hollowcube.mapmaker.map.item.vanilla.*;
 import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.map.util.MapCompletionAnimation;
 import net.hollowcube.mapmaker.misc.BossBars;
@@ -89,7 +86,8 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             SetSpectatorCheckpointItem.INSTANCE,
             // Gameplay items
             FireworkRocketItem.INSTANCE, EnderPearlItem.INSTANCE,
-            WindChargeItem.INSTANCE, TridentItem.INSTANCE
+            WindChargeItem.INSTANCE, TridentItem.INSTANCE,
+            MaceItem.INSTANCE
     );
 
     // Holds the CheckpointEffectData applied to the player on first spawn.

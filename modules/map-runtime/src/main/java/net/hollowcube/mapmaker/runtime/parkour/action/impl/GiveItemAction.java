@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.runtime.parkour.action.impl;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
+import net.hollowcube.mapmaker.map.MapFeatureFlags;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Sprite;
@@ -16,6 +17,7 @@ import net.hollowcube.mapmaker.runtime.parkour.action.gui.ControlledTriStateInpu
 import net.hollowcube.mapmaker.runtime.parkour.item.checkpoint.BlockCheckpointItem;
 import net.hollowcube.mapmaker.runtime.parkour.item.checkpoint.CheckpointItem;
 import net.hollowcube.mapmaker.runtime.parkour.item.checkpoint.CheckpointItems;
+import net.hollowcube.mapmaker.runtime.parkour.item.checkpoint.MaceCheckpointItem;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -103,6 +105,9 @@ public record GiveItemAction(
 
             int i = 0;
             for (var itemType : CheckpointItems.keys()) {
+                if (MaceCheckpointItem.ID.equals(itemType) && !MapFeatureFlags.MACE_ITEM.test(host.player()))
+                    continue;
+
                 int x = i % 7, y = i / 7;
 
                 add(x + 1, y + 2, new Button("gui.action.give_item." + itemType.value(), 1, 1)

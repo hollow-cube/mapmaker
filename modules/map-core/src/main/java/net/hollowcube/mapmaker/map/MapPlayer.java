@@ -1,9 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
-import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2IntMap;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.longs.LongPriorityQueue;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -15,6 +12,7 @@ import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.compat.moulberrytweaks.debugrender.DebugShape;
 import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderAddPacket;
 import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderRemovePacket;
+import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.hollowcube.mapmaker.map.block.CollidableBlock;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.command.DebugRenderersCommand;
@@ -25,17 +23,22 @@ import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.util.PlayerVisibility;
 import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.collision.PhysicsUtils;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.BlockVec;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.*;
+import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.metadata.LivingEntityMeta;
+import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.PlayerProvider;
@@ -47,8 +50,12 @@ import net.minestom.server.network.packet.server.configuration.FinishConfigurati
 import net.minestom.server.network.packet.server.play.*;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
+import net.minestom.server.potion.PotionEffect;
+import net.minestom.server.registry.RegistryTag;
+import net.minestom.server.registry.TagKey;
 import net.minestom.server.snapshot.PlayerSnapshot;
 import net.minestom.server.snapshot.SnapshotUpdater;
+import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.utils.chunk.ChunkCache;
 import net.minestom.server.utils.validate.Check;
 import org.intellij.lang.annotations.MagicConstant;
@@ -61,6 +68,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -73,6 +81,11 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         MinecraftServer.getPacketListenerManager().setPlayListener(ClientPongPacket.class, (packet, player) -> {
             if (player instanceof MapPlayer mp) mp.lastReceivedPingId = packet.id();
         });
+        MinecraftServer.getGlobalEventHandler().addListener(PlayerMoveEvent.class, event -> {
+            if (event.getPlayer() instanceof MapPlayer mp) {
+                mp.handleMoveForFallDamage(event);
+            }
+        });
     }
 
     public static @NotNull PlayerProvider simpleMapPlayer(@NotNull CommandManager commandManager) {
@@ -82,6 +95,14 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
             }
         };
     }
+
+    private static final IntSet RESET_FALL_INSIDE_BLOCKS = IntSet.of(
+            // Bubble column, but only if its going up so its handled later.
+            Block.COBWEB.id(), Block.POWDER_SNOW.id(), Block.SWEET_BERRY_BUSH.id(), Block.HONEY_BLOCK.id());
+    private static final RegistryTag<@NotNull Block> TAG_CLIMBABLE = Block.staticRegistry()
+            .getTag(TagKey.ofHash("#minecraft:climbable"));
+    private static final RegistryTag<@NotNull Block> TAG_CAN_GLIDE_THROUGH = Block.staticRegistry()
+            .getTag(TagKey.ofHash("#minecraft:can_glide_through"));
 
     // This field solves a pretty gross ordering issue with teleports, should investigate a better solution
     // in the future. In a parkour map, you can teleport into an action trigger which has a teleport action.
@@ -110,6 +131,12 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
     private final Int2IntMap visibilityByEntity = new Int2IntArrayMap();
 
     private int riptideTicks = 0;
+
+    private double fallDistance = 0;
+    private boolean extraParticlesOnLanding = false;
+    private @Nullable Point impulsePosition = null;
+    private boolean ignoreFallDamageFromImpulse = false;
+    private int impulseGraceTicks = 0;
 
     // Only present sometimes (eg during riptide)
     private PhysicsResult nextPhysicsResult = null;
@@ -204,11 +231,12 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
     }
 
     @Override
-    public void tick(long time) {
-        super.tick(time);
+    public void update(long time) {
+        super.update(time);
 
         physicsTick();
         riptideTick();
+        fallTick();
     }
 
     @Override
@@ -217,7 +245,14 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         visibilityByEntity.clear();
     }
 
+    @Override
+    public boolean setGameMode(@NotNull GameMode gameMode) {
+        if (gameMode == GameMode.CREATIVE) resetImpulsePosition();
+        return super.setGameMode(gameMode);
+    }
+
     // region EXT: Pose
+
     public void setCanSendPose(boolean canSend) {
         this.canSendPose = canSend;
     }
@@ -572,6 +607,199 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
 
     //endregion
 
+    //region EXT: Fall Distance Tracking
+
+    /// Returns the current fall distance for the player.
+    public double fallDistance() {
+        return fallDistance;
+    }
+
+    public void resetFallDistance() {
+        fallDistance = 0;
+    }
+
+    public void trackImpulsePosition(Point position, boolean ignoreFallDamage) {
+        this.impulsePosition = position;
+        this.ignoreFallDamageFromImpulse = ignoreFallDamage;
+        this.impulseGraceTicks = ignoreFallDamage ? 40 : 0;
+    }
+
+    public void resetImpulsePosition() {
+        this.impulsePosition = null;
+        this.ignoreFallDamageFromImpulse = false;
+        this.impulseGraceTicks = 0;
+    }
+
+    private void handleMoveForFallDamage(PlayerMoveEvent event) {
+        if (isInWater()) resetFallDistance();
+        // todo need to check all the various conditions to not care about fall damage
+
+        // TODO: need to deal with player checkFallDamage and livingEntity checkFallDamage
+        var delta = event.getNewPosition().sub(getPosition());
+        if (!isInWater() && delta.y() < 0)
+            fallDistance -= delta.y();
+
+        if (event.isOnGround() && fallDistance > 0) {
+//            var blockFallingOn = getSupportingBlock(event.getNewPosition());
+//            if (!blockFallingOn.isAir())
+//                sendMessage("falling on " + blockFallingOn.name());
+            // todo other block types deal different damage
+
+            applyFallDamage(fallDistance, 1);
+            resetFallDistance();
+        } else if (event.isOnGround() && delta.y() > 0) {
+            resetFallDistance();
+        }
+
+        boolean shouldResetImpulse = event.isOnGround() || isInClimbable() || getGameMode() == GameMode.SPECTATOR
+                || getPose() == EntityPose.FALL_FLYING || getPose() == EntityPose.SPIN_ATTACK;
+        if (!shouldResetImpulse && delta.y() < 1e-5) {
+            updateBlockTouchState();
+            shouldResetImpulse = isInWater() || isInLava();
+        }
+        if (shouldResetImpulse && impulseGraceTicks == 0)
+            resetImpulsePosition();
+    }
+
+    private void fallTick() {
+        if (isInLava()) fallDistance *= 0.5;
+
+        if (impulseGraceTicks > 0) impulseGraceTicks--;
+
+        if (hasEffect(PotionEffect.SLOW_FALLING) || hasEffect(PotionEffect.LEVITATION) || isFlying())
+            resetFallDistance();
+    }
+
+    private void updateInsideBlocks() {
+        var instance = getInstance();
+        if (instance == null) return; // Sanity check not in an instance
+
+        var bb = this.getBoundingBox();
+        var iter = bb.getBlocks(getPosition());
+        var blocks = Objects.requireNonNullElse(GhostBlockHolder.forPlayerOptional(this), instance);
+
+        while (iter.hasNext()) {
+            var posMut = iter.next();
+            var pos = new Vec(posMut.x(), posMut.y(), posMut.z());
+            var block = blocks.getBlock(pos, Block.Getter.Condition.TYPE);
+
+            // This appears kind of cursed because we don't check collision shape, however
+            // in vanilla only a few blocks have relevant entityInsideCollisionShapes, powdered
+            // snow is the only relevant one to fall damage and that simply makes it solid if
+            // the player is falling/able to walk. However the falling bit is only relevant
+            // clientside (or when we process non-player entity fall damage). So we can
+            // just treat everything as full block for now.
+
+            boolean shouldResetFallDistance = RESET_FALL_INSIDE_BLOCKS.contains(block.id())
+                    || block.id() == Block.BUBBLE_COLUMN.id() && "false".equals(block.getProperty("drag"));
+            if (shouldResetFallDistance) {
+                resetFallDistance();
+                if (impulseGraceTicks == 0) resetImpulsePosition();
+                break; // only need to reset once
+            }
+        }
+
+        if (isInClimbable()) resetFallDistance();
+    }
+
+    private void applyFallDamage(double fallDistance, float damageMultiplier) {
+        if (isAllowFlying()) return;
+
+        double effectiveFallDistance = fallDistance;
+        if (impulsePosition != null && ignoreFallDamageFromImpulse) {
+            effectiveFallDistance = Math.min(fallDistance, impulsePosition.y() - getPosition().y());
+            if (effectiveFallDistance <= 0 || impulseGraceTicks == 0) {
+                resetImpulsePosition();
+            }
+        }
+
+        if (effectiveFallDistance <= 0) return;
+        int damage = calculateFallDamage(effectiveFallDistance, damageMultiplier);
+        if (damage <= 0) return;
+
+        resetImpulsePosition();
+
+        //todo need to send fall particles & extra fall particles also
+
+        // Don't really need to send sounds right now since we dont play sounds generally for nearby players.
+        // TODO: should only be playing for viewers anyway since the client predicts fall sounds
+        // Player fall sound
+//        playGlobalSound(damage > 4 ? SoundEvent.ENTITY_PLAYER_BIG_FALL : SoundEvent.ENTITY_PLAYER_SMALL_FALL);
+        // Block fall sound
+//        var block = instance.getBlock(getPosition().withY(y -> y - 0.2), Block.Getter.Condition.TYPE);
+//        if (!block.isAir()) {
+//            var blockSoundType = block.registry().getBlockSoundType();
+//            if (blockSoundType != null) playGlobalSound(blockSoundType.fallSound(),
+//                    blockSoundType.volume(), blockSoundType.pitch());
+//        }
+
+//        sendMessage("dealing " + damage + " damage...");
+    }
+
+    private int calculateFallDamage(double fallDistance, float damageMultiplier) {
+        return (int) Math.floor(calculateFallPower(fallDistance)
+                * damageMultiplier
+                * getAttributeValue(Attribute.FALL_DAMAGE_MULTIPLIER));
+    }
+
+    private double calculateFallPower(double fallDistance) {
+        double safeFallDistance = getAttributeValue(Attribute.SAFE_FALL_DISTANCE);
+        // The max value is +1024, so we treat that as disabling fall damage entirely (server side only)
+        if (safeFallDistance > 1023.0) return 0;
+
+        return fallDistance + 1.0E-6 - safeFallDistance;
+    }
+
+    private boolean isInClimbable() {
+        if (getGameMode() == GameMode.SPECTATOR || isFlying())
+            return false;
+
+        // Weirdly climbing specifically checks the block you are inside
+        var insideBlock = instance.getBlock(getPosition(), Block.Getter.Condition.TYPE);
+        if (getPose() == EntityPose.FALL_FLYING && TAG_CAN_GLIDE_THROUGH.contains(insideBlock))
+            return false;
+        return TAG_CLIMBABLE.contains(insideBlock) || isTrapdoorAndClimbable(insideBlock, getPosition());
+    }
+
+    private boolean isTrapdoorAndClimbable(Block block, Point blockPosition) {
+        if (!BlockTags.TRAPDOORS.contains(block.key()) || "true".equals(block.getProperty("open")))
+            return false;
+        var belowBlock = instance.getBlock(blockPosition.relative(BlockFace.BOTTOM), Block.Getter.Condition.TYPE);
+        return belowBlock.id() == Block.LADDER.id() && Objects.equals(belowBlock.getProperty("facing"), block.getProperty("facing"));
+    }
+
+    private Block getSupportingBlock(Point selfPos) {
+        var bb = getBoundingBox().grow(0, 1e-6, 0);
+
+        Point closestPosition = null;
+        double closestDistance = Double.MAX_VALUE;
+
+        var iter = bb.getBlocks(selfPos);
+        var blocks = Objects.requireNonNullElse(GhostBlockHolder.forPlayerOptional(this), instance);
+        while (iter.hasNext()) {
+            var posMut = iter.next();
+            var pos = new Vec(posMut.x(), posMut.y(), posMut.z());
+            var block = blocks.getBlock(pos, Block.Getter.Condition.TYPE);
+
+            if (posMut.y() >= selfPos.y()) continue;
+
+            var hit = block.registry().collisionShape().intersectBox(
+                    selfPos.sub(pos.blockX(), pos.blockY(), pos.blockZ()), bb);
+            if (hit) {
+                double distance = pos.add(0.5).distanceSquared(selfPos);
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestPosition = pos;
+                }
+            }
+        }
+
+        if (closestPosition == null) return Block.AIR;
+        return blocks.getBlock(closestPosition, Block.Getter.Condition.TYPE);
+    }
+
+    //endregion
+
     //region EXT: Collision Tree Handling
 
     public void resetTouchingState() {
@@ -592,6 +820,8 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         if (pendingTeleports.get() <= 0) {
             var world = MapWorld.forPlayer(this);
             if (world != null) updateTouchingState(world, true);
+
+            updateInsideBlocks();
         }
     }
 
@@ -770,5 +1000,17 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
     }
 
     //endregion
+
+    private void playGlobalSound(SoundEvent soundEvent) {
+        playGlobalSound(soundEvent, 1, 1);
+    }
+
+    private void playGlobalSound(SoundEvent soundEvent, float volume, float pitch) {
+        long seed = ThreadLocalRandom.current().nextLong();
+        sendPacketToViewersAndSelf(new SoundEffectPacket(
+                soundEvent, Sound.Source.PLAYER, getPosition(),
+                volume, pitch, seed
+        ));
+    }
 
 }

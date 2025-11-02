@@ -11,7 +11,7 @@ public final class MapFeatureFlags {
     public static final FeatureFlag MARKER_TOOL = FeatureFlag.of("map.marker_tool");
 
     // WIP Features
-    public static final FeatureFlag SPEC_GAMEPLAY_SETTINGS = FeatureFlag.of("map.spec_gameplay_settings");
+    public static final FeatureFlag MACE_ITEM = FeatureFlag.of("map.mace_item");
 
     // Internal
     public static final FeatureFlag DEBUG_PLAYING_OVERLAY = FeatureFlag.of("debug.playing_overlay");

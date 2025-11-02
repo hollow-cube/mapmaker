@@ -37,6 +37,7 @@ public final class CheckpointItems {
         register(EnderPearlCheckpointItem.ID, EnderPearlCheckpointItem.CODEC);
         register(FireworkRocketCheckpointItem.ID, FireworkRocketCheckpointItem.CODEC);
         register(TridentCheckpointItem.ID, TridentCheckpointItem.CODEC);
+        register(MaceCheckpointItem.ID, MaceCheckpointItem.CODEC);
         register(WindChargeCheckpointItem.ID, WindChargeCheckpointItem.CODEC);
         register(BlockCheckpointItem.ID, BlockCheckpointItem.CODEC);
     }
