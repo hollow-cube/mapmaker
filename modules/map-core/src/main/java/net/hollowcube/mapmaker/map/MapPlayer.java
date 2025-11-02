@@ -666,7 +666,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
 
         if (impulseGraceTicks > 0) impulseGraceTicks--;
 
-        if (hasEffect(PotionEffect.SLOW_FALLING) || hasEffect(PotionEffect.LEVITATION))
+        if (hasEffect(PotionEffect.SLOW_FALLING) || hasEffect(PotionEffect.LEVITATION) || isFlying())
             resetFallDistance();
     }
 
