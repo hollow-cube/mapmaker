@@ -39,7 +39,7 @@ import java.util.concurrent.CompletableFuture;
 public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMapWorld> {
 
     sealed interface AnyPlaying extends ParkourState {
-        AttributeModifier NO_FALL_DAMAGE_MODIFIER = new AttributeModifier("mapmaker:play.no_fall_damage", 500, AttributeOperation.ADD_VALUE);
+        AttributeModifier NO_FALL_DAMAGE_MODIFIER = new AttributeModifier("mapmaker:play.no_fall_damage", 1024, AttributeOperation.ADD_MULTIPLIED_BASE);
         Instant NO_POSE_CHANGES_EPOCH = Instant.ofEpochMilli(1756771200000L); // 2025-09-02 12:00:00 GMT
 
         SaveState saveState();

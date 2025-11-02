@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.entity.impl.projectile;
 
+import net.hollowcube.mapmaker.map.MapPlayer;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.ServerFlag;
 import net.minestom.server.collision.Aerodynamics;
@@ -8,6 +9,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.entity.EntityShootEvent;
 import net.minestom.server.instance.block.Block;
@@ -16,6 +18,7 @@ import net.minestom.server.particle.Particle;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -59,7 +62,24 @@ public class WindChargeEntity extends AbstractProjectileEntity {
     protected void handleBlockCollision(Block hitBlock, Point hitPos, Pos posBefore) {
         super.handlePossibleDripleafCollision(shooter, hitBlock, hitPos);
 
-        float diameter = EXPLOSION_RADIUS * 2.0f;
+        sendExplosion(getViewers(), hitPos, EXPLOSION_RADIUS, 1, SoundEvent.ENTITY_WIND_CHARGE_WIND_BURST,
+                Particle.GUST_EMITTER_SMALL, Particle.GUST_EMITTER_LARGE, true);
+
+        remove();
+    }
+
+    public static void sendExplosion(
+            Collection<Player> players,
+            Point hitPos,
+            float radius,
+            float knockbackMultiplier,
+            SoundEvent sound,
+            Particle smallParticle,
+            Particle bigParticle,
+            boolean forceSmall
+    ) {
+
+        float diameter = radius * 2.0f;
         // these values are the bounding box of the explosion aka only move those people ever.
         int $$1 = (int) Math.floor(hitPos.x() - diameter - 1.0);
         int $$2 = (int) Math.floor(hitPos.x() + diameter + 1.0);
@@ -68,7 +88,7 @@ public class WindChargeEntity extends AbstractProjectileEntity {
         int $$5 = (int) Math.floor(hitPos.z() - diameter - 1.0);
         int $$6 = (int) Math.floor(hitPos.z() + diameter + 1.0);
 
-        for (var player : getViewers()) {
+        for (var player : players) {
             double distance = Math.sqrt(player.getDistanceSquared(hitPos));
             double $$10 = player.getPosition().x() - hitPos.x();
             double $$11 = (player.getPosition().y() + player.getEyeHeight()) - hitPos.y();
@@ -81,26 +101,27 @@ public class WindChargeEntity extends AbstractProjectileEntity {
                 $$11 /= eyeDistance;
                 $$12 /= eyeDistance;
 
-                float knockbackMultiplier = player.isFlying() ? 0 : 1;
-                float $$16 = knockbackMultiplier != 0.0f ? getSeenPercent(hitPos, player) : 0.0f;
-                double $$17 = (1.0 - distance) * (double) $$16 * (double) knockbackMultiplier;
+                float kbMult = player.isFlying() ? 0 : knockbackMultiplier;
+                float $$16 = kbMult != 0.0f ? getSeenPercent(hitPos, player) : 0.0f;
+                double $$17 = (1.0 - distance) * (double) $$16 * (double) kbMult;
 
-                double $$20 = 1; //$$17 * (1.0 - player.getAttributeValue(Attribute.EXPLOSION_KNOCKBACK_RESISTANCE));
+                double $$20 = $$17 * (1.0 - player.getAttributeValue(Attribute.EXPLOSION_KNOCKBACK_RESISTANCE));
                 motion = new Vec($$10 * $$20, $$11 * $$20, $$12 * $$20);
             }
 
+            boolean isSmall = radius < 2f || forceSmall;
+            if (player instanceof MapPlayer mp)
+                mp.trackImpulsePosition(mp.getPosition(), true);
             player.sendPacket(new ExplosionPacket(
                     hitPos,
-                    EXPLOSION_RADIUS,
+                    radius,
                     0,
                     motion,
-                    Particle.GUST_EMITTER_SMALL,
-                    SoundEvent.ENTITY_WIND_CHARGE_WIND_BURST,
+                    isSmall ? smallParticle : bigParticle,
+                    sound,
                     List.of()
             ));
         }
-
-        remove();
     }
 
     public static float getSeenPercent(Point center, Player player) {
