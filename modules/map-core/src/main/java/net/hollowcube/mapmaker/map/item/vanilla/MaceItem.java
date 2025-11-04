@@ -13,6 +13,7 @@ import net.minestom.server.item.enchant.Enchantment;
 import net.minestom.server.item.enchant.LevelBasedValue;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.sound.SoundEvent;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -22,7 +23,14 @@ public class MaceItem extends VanillaItemHandler {
     private static final float EXPLOSION_RADIUS = 3.5f;
     private static final LevelBasedValue KNOCKBACK_MULTIPLIER = new LevelBasedValue.Lookup(
             List.of(1.2f, 1.75f, 2.2f), new LevelBasedValue.Linear(1.5f, 0.35f));
-    private static final Set<EntityType> ALLOWED_SMASHABLE_ENTITIES = Set.of(EntityType.SLIME, EntityType.INTERACTION);
+    private static final Set<EntityType> ALLOWED_SMASHABLE_ENTITIES = Set.of(
+            EntityType.SLIME, EntityType.INTERACTION, EntityType.ARMOR_STAND);
+
+    private record SmashedEntityInfo(int entityId, int ping) {
+    }
+
+    private static final Tag<@NotNull SmashedEntityInfo> SMASHED_ENTITY_INFO = Tag.<SmashedEntityInfo>Transient("mapmaker:play/smashed_entity_info")
+            .defaultValue(new SmashedEntityInfo(-1, -1));
 
     public static final MaceItem INSTANCE = new MaceItem();
 
@@ -55,6 +63,10 @@ public class MaceItem extends VanillaItemHandler {
         if (player.isFlying() || player.getPose() == EntityPose.FALL_FLYING || player.fallDistance() < 1.5)
             return; // Cannot do explosion
 
+        var lastSmash = player.getTag(SMASHED_ENTITY_INFO);
+        if (lastSmash.entityId == entity.getEntityId() && lastSmash.ping > player.lastReceivedPingId())
+            return; // They have not responded to smashing this entity, dont allow another one.
+
         player.setVelocity(player.getVelocity().withY(0.01));
 //        player.trackImpulsePosition(, true); todo
 
@@ -69,6 +81,7 @@ public class MaceItem extends VanillaItemHandler {
         float kbMult = KNOCKBACK_MULTIPLIER.calc(windBurstLevel);
         WindChargeEntity.sendExplosion(List.of(click.player()), player.getPosition(), EXPLOSION_RADIUS,
                 kbMult, SoundEvent.ENTITY_WIND_CHARGE_WIND_BURST, Particle.GUST_EMITTER_SMALL,
-                Particle.GUST_EMITTER_LARGE, false);
+                Particle.GUST_EMITTER_LARGE, false, false);
+        player.setTag(SMASHED_ENTITY_INFO, new SmashedEntityInfo(entity.getEntityId(), player.ping()));
     }
 }

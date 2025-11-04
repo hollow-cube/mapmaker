@@ -63,7 +63,7 @@ public class WindChargeEntity extends AbstractProjectileEntity {
         super.handlePossibleDripleafCollision(shooter, hitBlock, hitPos);
 
         sendExplosion(getViewers(), hitPos, EXPLOSION_RADIUS, 1, SoundEvent.ENTITY_WIND_CHARGE_WIND_BURST,
-                Particle.GUST_EMITTER_SMALL, Particle.GUST_EMITTER_LARGE, true);
+                Particle.GUST_EMITTER_SMALL, Particle.GUST_EMITTER_LARGE, true, true);
 
         remove();
     }
@@ -76,7 +76,8 @@ public class WindChargeEntity extends AbstractProjectileEntity {
             SoundEvent sound,
             Particle smallParticle,
             Particle bigParticle,
-            boolean forceSmall
+            boolean forceSmall,
+            boolean useLegacyWindChargeLogic
     ) {
 
         float diameter = radius * 2.0f;
@@ -105,7 +106,7 @@ public class WindChargeEntity extends AbstractProjectileEntity {
                 float $$16 = kbMult != 0.0f ? getSeenPercent(hitPos, player) : 0.0f;
                 double $$17 = (1.0 - distance) * (double) $$16 * (double) kbMult;
 
-                double $$20 = $$17 * (1.0 - player.getAttributeValue(Attribute.EXPLOSION_KNOCKBACK_RESISTANCE));
+                double $$20 = useLegacyWindChargeLogic ? 1 : $$17 * (1.0 - player.getAttributeValue(Attribute.EXPLOSION_KNOCKBACK_RESISTANCE));
                 motion = new Vec($$10 * $$20, $$11 * $$20, $$12 * $$20);
             }
 

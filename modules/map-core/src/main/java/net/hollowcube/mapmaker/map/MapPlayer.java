@@ -101,8 +101,11 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
             Block.COBWEB.id(), Block.POWDER_SNOW.id(), Block.SWEET_BERRY_BUSH.id(), Block.HONEY_BLOCK.id());
     private static final RegistryTag<@NotNull Block> TAG_CLIMBABLE = Block.staticRegistry()
             .getTag(TagKey.ofHash("#minecraft:climbable"));
-    private static final RegistryTag<@NotNull Block> TAG_CAN_GLIDE_THROUGH = Block.staticRegistry()
-            .getTag(TagKey.ofHash("#minecraft:can_glide_through"));
+    // TODO(1.21.11): this is an actual tag, use it.
+    private static final IntSet CAN_GLIDE_THROUGH = IntSet.of(
+            Block.VINE.id(), Block.TWISTING_VINES.id(), Block.TWISTING_VINES_PLANT.id(),
+            Block.WEEPING_VINES.id(), Block.WEEPING_VINES_PLANT.id()
+    );
 
     // This field solves a pretty gross ordering issue with teleports, should investigate a better solution
     // in the future. In a parkour map, you can teleport into an action trigger which has a teleport action.
@@ -350,8 +353,10 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         return lastReceivedPingId;
     }
 
-    public void ping() {
-        sendPacket(new PingPacket(lastPingId.incrementAndGet()));
+    public int ping() {
+        int id = lastPingId.incrementAndGet();
+        sendPacket(new PingPacket(id));
+        return id;
     }
 
     //endregion
@@ -756,7 +761,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
 
         // Weirdly climbing specifically checks the block you are inside
         var insideBlock = instance.getBlock(getPosition(), Block.Getter.Condition.TYPE);
-        if (getPose() == EntityPose.FALL_FLYING && TAG_CAN_GLIDE_THROUGH.contains(insideBlock))
+        if (getPose() == EntityPose.FALL_FLYING && CAN_GLIDE_THROUGH.contains(insideBlock.id()))
             return false;
         return TAG_CLIMBABLE.contains(insideBlock) || isTrapdoorAndClimbable(insideBlock, getPosition());
     }
@@ -962,7 +967,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
 
     @Override
     public void setAutoViewEntities(boolean autoViewer) {
-        if (playerConnection.getConnectionState() == ConnectionState.PLAY)
+        if (playerConnection.getServerState() == ConnectionState.PLAY)
             FutureUtil.assertTickThreadWarn(acquirable());
         super.setAutoViewEntities(autoViewer);
     }
