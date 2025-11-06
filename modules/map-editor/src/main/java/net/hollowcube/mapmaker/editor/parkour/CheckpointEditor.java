@@ -36,13 +36,14 @@ public class CheckpointEditor {
             .addListener(Map2PlayerBlockInteractEvent.class, CheckpointEditor::handleBlockInteract);
 
     public static final ObjectEntityEditor MARKER_EDITOR = (player, entity) -> {
-        var checkpointData = Objects.requireNonNullElseGet(entity.getTag(CheckpointPlateBlock.ENTITY_DATA_TAG), ActionTriggerData::new);
+        var checkpointData = Objects.requireNonNullElseGet(entity.getTag(CheckpointPlateBlock.ENTITY_DATA_TAG), ActionTriggerData::new).toMutable();
         var actionLocation = entity.getPosition().withY(y -> y + Objects.requireNonNullElse(entity.getMin(), Pos.ZERO).y());
-        var host = Panel.open(player, new ActionEditorView(checkpointData.actions(), Action.Type.CHECKPOINT, "Checkpoint"));
+
+        var host = Panel.open(player, new ActionEditorView(checkpointData, Action.Type.CHECKPOINT, "Checkpoint"));
         host.setTag(ActionEditorView.ACTION_LOCATION, actionLocation);
         host.setTag(CoordinateAction.SPC_TARGET_TAG, entity);
         host.onClose(() -> {
-            entity.setTag(CheckpointPlateBlock.ENTITY_DATA_TAG, checkpointData);
+            entity.setTag(CheckpointPlateBlock.ENTITY_DATA_TAG, checkpointData.toImmutable());
             entity.handleDataChange(player);
         });
         return true;
@@ -68,12 +69,12 @@ public class CheckpointEditor {
         if (world.itemRegistry().isOnCooldown(player))
             return;
 
-        var data = Objects.requireNonNullElseGet(event.block().getTag(CheckpointPlateBlock.DATA_TAG), ActionTriggerData::new);
-        var host = Panel.open(player, new ActionEditorView(data.actions(), Action.Type.CHECKPOINT, "Checkpoint"));
+        var data = Objects.requireNonNullElseGet(event.block().getTag(CheckpointPlateBlock.DATA_TAG), ActionTriggerData::new).toMutable();
+        var host = Panel.open(player, new ActionEditorView(data, Action.Type.CHECKPOINT, "Checkpoint"));
         host.setTag(ActionEditorView.ACTION_LOCATION, event.blockPosition());
         host.setTag(CoordinateAction.SPC_TARGET_TAG, event.blockPosition());
         host.onClose(() -> {
-            var newNbt = DFU.encodeNbt(ActionTriggerData.CODEC, data);
+            var newNbt = DFU.encodeNbt(ActionTriggerData.CODEC, data.toImmutable());
             world.instance().setBlock(event.blockPosition(), event.block().withNbt(newNbt));
         });
     }

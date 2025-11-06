@@ -7,11 +7,9 @@ import net.hollowcube.mapmaker.panels.Text;
 import net.hollowcube.mapmaker.runtime.parkour.action.Action;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionList;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionRegistry;
+import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.tag.Tag;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
 
@@ -20,16 +18,16 @@ public class ActionEditorView extends Panel {
 
     private static final int MAX_ACTIONS = 7 * 3;
 
-    private final ActionList actionList;
+    private final ActionTriggerData.Mutable data;
     private final Action.Type type;
 
-    public ActionEditorView(ActionList actions, Action.Type type, String title) {
-        this(actions, type, null, title);
+    public ActionEditorView(ActionTriggerData.Mutable data, Action.Type type, String title) {
+        this(data, type, false, title);
     }
 
-    public ActionEditorView(ActionList actions, Action.Type type, @Nullable AtomicBoolean repeatable, String title) {
+    public ActionEditorView(ActionTriggerData.Mutable data, Action.Type type, boolean isRepeatable, String title) {
         super(9, 10);
-        this.actionList = actions;
+        this.data = data;
         this.type = type;
 
         background("action/list/container", -10, -31);
@@ -41,35 +39,39 @@ public class ActionEditorView extends Panel {
                 .align(Text.CENTER, Text.CENTER)
                 .background("generic2/btn/default/5_1"));
 
-        if (repeatable != null) {
-            add(7, 0, new RepeatableButton(repeatable, 2, 1));
+
+        if (isRepeatable) {
+            add(7, 0, new Button("gui.action.condition", 1, 1)
+                    .background("generic2/btn/default/1_1")
+                    .sprite("action/icon/condition", 1, 2)
+                    .onLeftClick(() -> this.host.pushView(new ConditionEditorView(data)))
+            );
+            add(8, 0, new RepeatableButton(1, 1));
         } else {
-            add(7, 0, new Button("gui.action.custom_blocks", 2, 1)
+            add(7, 0, new Button("gui.action.condition", 2, 1)
                     .background("generic2/btn/default/2_1")
-                    .sprite("action/icon/cmd", 12, 3));
+                    .sprite("action/icon/condition", 10, 2)
+                    .onLeftClick(() -> this.host.pushView(new ConditionEditorView(data)))
+            );
         }
 
         add(1, 2, new ActionListPanel());
     }
 
-    private static class RepeatableButton extends Button {
+    private class RepeatableButton extends Button {
 
-        private final AtomicBoolean state;
-
-        public RepeatableButton(AtomicBoolean state, int width, int height) {
+        public RepeatableButton(int width, int height) {
             super(null, width, height);
 
             this.onLeftClick(() -> {
-                state.set(!state.get());
+                data.setRepeatable(!data.isRepeatable());
                 update();
             });
-
-            this.state = state;
             this.update();
         }
 
         private void update() {
-            var state = this.state.get();
+            var state = data.isRepeatable();
             this.translationKey(state ? "gui.status.repeatable.on" : "gui.status.repeatable.off");
             this.background(state ? "action/list/repeatable_on" : "action/list/repeatable_off");
         }
@@ -95,12 +97,14 @@ public class ActionEditorView extends Panel {
             // Remove old children (they may have changed)
             clear();
 
+            var actions = data.actions();
+
             // Re-add children
             int i = 0;
             for (; i < MAX_ACTIONS; i++) {
                 int x = i % 7, y = i / 7;
 
-                var ref = actionList.get(i);
+                var ref = actions.get(i);
                 if (ref == null) break;
 
                 var editor = (Action.Editor<Action>) ActionRegistry.getEditor(ref.key());
@@ -117,7 +121,7 @@ public class ActionEditorView extends Panel {
                 int x = i % 7, y = i / 7;
                 add(x, y, new Button("gui.action.add", 1, 1)
                         .sprite("generic2/icon/add", 3, 3)
-                        .onLeftClick(() -> host.pushTransientView(new ActionPickerView(actionList, type))));
+                        .onLeftClick(() -> host.pushTransientView(new ActionPickerView(actions, type))));
             }
         }
 
@@ -129,7 +133,7 @@ public class ActionEditorView extends Panel {
         }
 
         private void removeExistingAction(int index) {
-            actionList.remove(index);
+            data.actions().remove(index);
             updateContents();
         }
     }
