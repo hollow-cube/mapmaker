@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.runtime.parkour.action.impl;
 
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.runtime.PlayState;
@@ -17,6 +18,7 @@ import net.minestom.server.codec.StructCodec;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -71,13 +73,24 @@ public record EditVariableAction(
         if (this.expression.parsed() == null) return;
         if (!isValidVariableName()) return;
 
-        var variables = Objects.requireNonNullElseGet(state.get(Attachments.VARIABLES), VariableStorage::new);
-        VARIABLE_LOOKUP.setStorage(variables);
-        state.set(Attachments.VARIABLES, variables.with(this.variable, EVALUATOR.eval(this.expression.parsed())));
+        List<ContentError> errors;
+
+        try {
+            var variables = Objects.requireNonNullElseGet(state.get(Attachments.VARIABLES), VariableStorage::new);
+            VARIABLE_LOOKUP.setStorage(variables);
+            state.set(Attachments.VARIABLES, variables.with(this.variable, EVALUATOR.eval(this.expression.parsed())));
+            errors = EVALUATOR.getErrors();
+        } catch (ArithmeticException exception) {
+            errors = List.of(new ContentError(exception.getMessage()));
+        } catch (Exception exception) {
+            // Sanity check for unexpected errors, but molang should handle errors gracefully
+            ExceptionReporter.reportException(exception, player);
+            errors = List.of(new ContentError("Internal Server Error, please report to administrators if persistent."));
+        }
 
         var world = MapWorld.forPlayer(player);
-        if (world != null && !world.map().isPublished() && !EVALUATOR.getErrors().isEmpty()) {
-            var error = EVALUATOR.getErrors().stream().map(ContentError::message).collect(Collectors.joining("\n"));
+        if (world != null && !world.map().isPublished() && !errors.isEmpty()) {
+            var error = errors.stream().map(ContentError::message).collect(Collectors.joining("\n"));
             player.sendMessage(Component.text("Errors setting variable '" + this.variable + "':\n" + error));
         }
     }

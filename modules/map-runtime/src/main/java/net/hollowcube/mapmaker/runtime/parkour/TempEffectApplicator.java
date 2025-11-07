@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.runtime.parkour;
 
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.SaveState;
@@ -171,11 +172,23 @@ public class TempEffectApplicator {
         if (expression.error() != null) return true;
         if (expression.parsed() == null) return true;
 
-        VARIABLE_LOOKUP.setStorage(state.get(Attachments.VARIABLES));
-        boolean result = EVALUATOR.evalBool(expression.parsed());
+        List<ContentError> errors;
+        boolean result = false;
 
-        if (!map.isPublished() && !EVALUATOR.getErrors().isEmpty()) {
-            var error = EVALUATOR.getErrors().stream().map(ContentError::message).collect(Collectors.joining("\n"));
+        try {
+            VARIABLE_LOOKUP.setStorage(state.get(Attachments.VARIABLES));
+            result = EVALUATOR.evalBool(expression.parsed());
+            errors = EVALUATOR.getErrors();
+        } catch (ArithmeticException exception) {
+            errors = List.of(new ContentError(exception.getMessage()));
+        } catch (Exception exception) {
+            // Sanity check for unexpected errors, but molang should handle errors gracefully
+            ExceptionReporter.reportException(exception, player);
+            errors = List.of(new ContentError("Internal Server Error, please report to administrators if persistent."));
+        }
+
+        if (!map.isPublished() && !errors.isEmpty()) {
+            var error = errors.stream().map(ContentError::message).collect(Collectors.joining("\n"));
             player.sendMessage(Component.text("Errors evaluating condition:\n" + error));
         }
 
