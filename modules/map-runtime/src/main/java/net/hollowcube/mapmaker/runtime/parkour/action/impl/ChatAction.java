@@ -15,6 +15,7 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
+import net.kyori.adventure.text.minimessage.tag.resolver.ArgumentQueue;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.tag.standard.StandardTags;
@@ -79,27 +80,35 @@ public record ChatAction(String message) implements Action {
                 Placeholder.unparsed("player", player.getUsername()),
                 variable("progressindex", state.get(Attachments.PROGRESS_INDEX, 0)),
                 variable("resetheight", state.get(Attachments.RESET_HEIGHT, -69)),
+                TagResolver.resolver("variable", (args, _) -> {
+                    var variable = args.hasNext() ? args.pop().value() : null;
+                    if (variable == null) return createError("Expected a variable name, none provided");
+                    var variables = state.get(Attachments.VARIABLES);
+                    return parseTag(args, variables != null ? variables.getOrDefault(variable, 0) : 0.0);
+                }),
         };
     }
 
-    private static TagResolver variable(@Subst("") String id, long value) {
-        return TagResolver.resolver(id, (args, _) ->
-                switch (args.hasNext() ? args.pop().value() : null) {
-                    case "percent" -> {
-                        var max = args.hasNext() ? args.pop().asDouble() : OptionalDouble.empty();
-                        if (max.isEmpty()) yield createError("Expected a max value, none provided");
-                        int percent = (int) ((value / max.getAsDouble()) * 100);
-                        yield Tag.inserting(Component.text(percent + "%"));
-                    }
-                    case "choice" -> {
-                        var pattern = args.hasNext() ? args.pop().value() : null;
-                        if (pattern == null) yield createError("Expected a choice pattern, none provided");
-                        var format = new ChoiceFormat(pattern);
-                        yield Tag.inserting(Component.text(format.format(value)));
-                    }
-                    case null, default -> Tag.inserting(Component.text(value));
-                }
-        );
+    private static TagResolver variable(@Subst("") String id, double value) {
+        return TagResolver.resolver(id, (args, _) -> parseTag(args, value));
+    }
+
+    private static Tag parseTag(ArgumentQueue args, double value) {
+        return switch (args.hasNext() ? args.pop().value() : null) {
+            case "percent" -> {
+                var max = args.hasNext() ? args.pop().asDouble() : OptionalDouble.empty();
+                if (max.isEmpty()) yield createError("Expected a max value, none provided");
+                int percent = (int) ((value / max.getAsDouble()) * 100);
+                yield Tag.inserting(Component.text(percent + "%"));
+            }
+            case "choice" -> {
+                var pattern = args.hasNext() ? args.pop().value() : null;
+                if (pattern == null) yield createError("Expected a choice pattern, none provided");
+                var format = new ChoiceFormat(pattern);
+                yield Tag.inserting(Component.text(format.format(value)));
+            }
+            case null, default -> Tag.inserting(Component.text(value));
+        };
     }
 
     private static Tag createError(String message) {

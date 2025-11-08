@@ -1,19 +1,24 @@
 package net.hollowcube.mapmaker.runtime.parkour;
 
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionList;
+import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerCondition;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
 import net.hollowcube.mapmaker.runtime.parkour.action.Attachments;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.RespawnPosAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.SetProgressIndexAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.TeleportAction;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.variables.VariableStorage;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerStateUpdateEvent;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerUpdateStateEvent;
 import net.hollowcube.mapmaker.util.TagCooldown;
+import net.hollowcube.molang.eval.MolangEvaluator;
+import net.hollowcube.molang.runtime.ContentError;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.BlockVec;
@@ -24,6 +29,7 @@ import net.minestom.server.sound.SoundEvent;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static net.kyori.adventure.text.Component.translatable;
 
@@ -33,6 +39,11 @@ public class TempEffectApplicator {
     private static final TagCooldown PROGRESS_INDEX_WARNING = new TagCooldown("mapmaker:play/progress_index_warning", 5000);
 
     private static final Sound CHECKPOINT_SOUND = Sound.sound(SoundEvent.ENTITY_EXPERIENCE_ORB_PICKUP, Sound.Source.MASTER, 0.1f, 0f);
+    private static final VariableStorage.MolangLookup VARIABLE_LOOKUP = VariableStorage.lookup();
+    private static final MolangEvaluator EVALUATOR = new MolangEvaluator(Map.of(
+            "variable", VARIABLE_LOOKUP,
+            "v", VARIABLE_LOOKUP
+    ));
 
     public static void applyCheckpoint(ActionTriggerData data, Player player, String checkpointId, Point position) {
         var world = ParkourMapWorld.forPlayer(player);
@@ -51,6 +62,7 @@ public class TempEffectApplicator {
         if (checkProgressIndex(player, world.map(), playState, data.actions())) return;
         if (playState.lastState() != null && playState.lastState().hasStatus(checkpointId))
             return; // Player already has this checkpoint in their history (they are backtracking)
+        if (checkCondition(player, world.map(), playState, data.condition())) return;
 
         // Apply the checkpoint/effect changes
         world.callEvent(new ParkourMapPlayerStateUpdateEvent(world, player, saveState, playState));
@@ -115,6 +127,7 @@ public class TempEffectApplicator {
         if (!data.repeatable() && playState.hasStatus(statusId))
             return; // Player already has the status plate in this checkpoint.
         if (checkProgressIndex(player, world.map(), playState, data.actions())) return;
+        if (checkCondition(player, world.map(), playState, data.condition())) return;
 
         // Update the play state from the player's current view of the world.
         world.callEvent(new ParkourMapPlayerStateUpdateEvent(world, player, saveState, playState));
@@ -153,6 +166,50 @@ public class TempEffectApplicator {
         }
     }
 
+    private static boolean checkCondition(Player player, MapData map, PlayState state, ActionTriggerCondition condition) {
+        var expression = condition.expression();
+        if (expression == null) return false;
+        if (expression.error() != null) return true;
+        if (expression.parsed() == null) return true;
+
+        List<ContentError> errors;
+        boolean result = false;
+
+        try {
+            VARIABLE_LOOKUP.setStorage(state.get(Attachments.VARIABLES));
+            result = EVALUATOR.evalBool(expression.parsed());
+            errors = EVALUATOR.getErrors();
+        } catch (ArithmeticException exception) {
+            errors = List.of(new ContentError(exception.getMessage()));
+        } catch (Exception exception) {
+            // Sanity check for unexpected errors, but molang should handle errors gracefully
+            ExceptionReporter.reportException(exception, player);
+            errors = List.of(new ContentError("Internal Server Error, please report to administrators if persistent."));
+        }
+
+        if (!map.isPublished() && !errors.isEmpty()) {
+            var error = errors.stream().map(ContentError::message).collect(Collectors.joining("\n"));
+            player.sendMessage(Component.text("Errors evaluating condition:\n" + error));
+        }
+
+        if (result) return false;
+
+        if (condition.showMessage()) {
+            Component message;
+            if (condition.message().isBlank()) {
+                message = translatable("action.condition.not_acceptable");
+            } else {
+                message = translatable(
+                        "action.condition.not_acceptable.custom",
+                        List.of(Component.text(condition.message()))
+                );
+            }
+            player.sendMessage(message);
+        }
+
+        return true;
+    }
+
     private static boolean checkProgressIndex(Player player, MapData map, PlayState state, ActionList actionList) {
         int progressIndex = OpUtils.mapOr(actionList.findLast(SetProgressIndexAction.class), SetProgressIndexAction::value, -1);
         if (progressIndex > 0) {
@@ -164,7 +221,7 @@ public class TempEffectApplicator {
                     : (progressIndex - 1 > currentIndex);
             if (isFail) {
                 if (PROGRESS_INDEX_WARNING.test(player)) {
-                    player.sendMessage(translatable("checkpoint.progress_index.not_acceptable",
+                    player.sendMessage(translatable("action.progress_index.not_acceptable",
                             Component.text(currentIndex), Component.text(progressIndex - 1)));
                 }
                 return true;

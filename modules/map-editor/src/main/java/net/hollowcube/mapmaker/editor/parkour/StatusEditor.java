@@ -20,7 +20,6 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.TagHandler;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static net.hollowcube.mapmaker.map.util.EventUtil.playerEventNode;
@@ -34,14 +33,13 @@ public class StatusEditor {
             .addListener(Map2PlayerBlockInteractEvent.class, StatusEditor::handleBlockInteract);
 
     public static final ObjectEntityEditor MARKER_EDITOR = (player, entity) -> {
-        var data = Objects.requireNonNullElseGet(entity.getTag(StatusPlateBlock.ENTITY_DATA_TAG), ActionTriggerData::new);
-        var repeatable = new AtomicBoolean(data.repeatable());
+        var data = Objects.requireNonNullElseGet(entity.getTag(StatusPlateBlock.ENTITY_DATA_TAG), ActionTriggerData::new).toMutable();
         var actionLocation = entity.getPosition().withY(y -> y + Objects.requireNonNullElse(entity.getMin(), Pos.ZERO).y());
-        var host = Panel.open(player, new ActionEditorView(data.actions(), Action.Type.STATUS, repeatable, "Status"));
+        var host = Panel.open(player, new ActionEditorView(data, Action.Type.STATUS, true, "Status"));
         host.setTag(ActionEditorView.ACTION_LOCATION, actionLocation);
         host.setTag(CoordinateAction.SPC_TARGET_TAG, entity);
         host.onClose(() -> {
-            entity.setTag(StatusPlateBlock.ENTITY_DATA_TAG, data.withRepeatable(repeatable.get()));
+            entity.setTag(StatusPlateBlock.ENTITY_DATA_TAG, data.toImmutable());
             entity.handleDataChange(player);
         });
         return true;
@@ -67,13 +65,12 @@ public class StatusEditor {
             return;
 
         // Open checkpoint settings GUI
-        var data = Objects.requireNonNullElseGet(event.block().getTag(StatusPlateBlock.DATA_TAG), ActionTriggerData::new);
-        var repeatable = new AtomicBoolean(data.repeatable());
-        var host = Panel.open(player, new ActionEditorView(data.actions(), Action.Type.STATUS, repeatable, "Status"));
+        var data = Objects.requireNonNullElseGet(event.block().getTag(StatusPlateBlock.DATA_TAG), ActionTriggerData::new).toMutable();
+        var host = Panel.open(player, new ActionEditorView(data, Action.Type.STATUS, true, "Status"));
         host.setTag(ActionEditorView.ACTION_LOCATION, event.blockPosition());
         host.setTag(CoordinateAction.SPC_TARGET_TAG, event.blockPosition());
         host.onClose(() -> {
-            var newNbt = DFU.encodeNbt(ActionTriggerData.CODEC, data.withRepeatable(repeatable.get()));
+            var newNbt = DFU.encodeNbt(ActionTriggerData.CODEC, data.toImmutable());
             world.instance().setBlock(event.blockPosition(), event.block().withNbt(newNbt));
         });
     }

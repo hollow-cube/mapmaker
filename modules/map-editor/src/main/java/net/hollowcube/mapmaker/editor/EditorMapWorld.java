@@ -408,10 +408,10 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         }
 
         // Open checkpoint settings view
-        var checkpointData = getTag(SPAWN_CHECKPOINT_EFFECTS);
-        var host = Panel.open(player, new ActionEditorView(checkpointData.actions(), Action.Type.SPAWN, "Spawn"));
+        var checkpointData = getTag(SPAWN_CHECKPOINT_EFFECTS).toMutable();
+        var host = Panel.open(player, new ActionEditorView(checkpointData, Action.Type.SPAWN, "Spawn"));
         host.setTag(ActionEditorView.ACTION_LOCATION, entity.getPosition());
-        host.onClose(() -> instance().setTag(SPAWN_CHECKPOINT_EFFECTS, checkpointData));
+        host.onClose(() -> instance().setTag(SPAWN_CHECKPOINT_EFFECTS, checkpointData.toImmutable()));
     }
 
     @Override
