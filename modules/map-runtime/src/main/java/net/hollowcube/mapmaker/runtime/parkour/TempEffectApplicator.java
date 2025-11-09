@@ -39,6 +39,8 @@ public class TempEffectApplicator {
     private static final TagCooldown PROGRESS_INDEX_WARNING = new TagCooldown("mapmaker:play/progress_index_warning", 5000);
 
     private static final Sound CHECKPOINT_SOUND = Sound.sound(SoundEvent.ENTITY_EXPERIENCE_ORB_PICKUP, Sound.Source.MASTER, 0.1f, 0f);
+    private static final TagCooldown STATUS_APPLY_COOLDOWN = new TagCooldown("mapmaker:status_plate_cooldown", 250);
+
     private static final VariableStorage.MolangLookup VARIABLE_LOOKUP = VariableStorage.lookup();
     private static final MolangEvaluator EVALUATOR = new MolangEvaluator(Map.of(
             "variable", VARIABLE_LOOKUP,
@@ -128,6 +130,7 @@ public class TempEffectApplicator {
             return; // Player already has the status plate in this checkpoint.
         if (checkProgressIndex(player, world.map(), playState, data.actions())) return;
         if (checkCondition(player, world.map(), playState, data.condition())) return;
+        if (!STATUS_APPLY_COOLDOWN.test(player)) return;
 
         // Update the play state from the player's current view of the world.
         world.callEvent(new ParkourMapPlayerStateUpdateEvent(world, player, saveState, playState));

@@ -27,8 +27,6 @@ public class StatusMarkerHandler extends ObjectEntityHandler {
     @Override
     public void onPlayerEnter(Player player) {
         if (this.data == null) return;
-        if (!StatusPlateBlock.APPLY_COOLDOWN.test(player)) return;
-
         TempEffectApplicator.applyStatus(data, player, entity.getUuid().toString());
     }
 }

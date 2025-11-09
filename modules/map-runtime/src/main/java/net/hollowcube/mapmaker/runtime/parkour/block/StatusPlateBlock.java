@@ -21,8 +21,6 @@ public class StatusPlateBlock implements BlockHandler, PressurePlateBlock, Debug
     public static final Tag<ActionTriggerData> DATA_TAG = DFU.View(ActionTriggerData.CODEC);
     public static final Tag<ActionTriggerData> ENTITY_DATA_TAG = DFU.Tag(ActionTriggerData.CODEC, "status").path("data");
 
-    public static final TagCooldown APPLY_COOLDOWN = new TagCooldown("mapmaker:status_plate_cooldown", 250);
-
     private StatusPlateBlock() {
     }
 
@@ -34,8 +32,6 @@ public class StatusPlateBlock implements BlockHandler, PressurePlateBlock, Debug
     @Override
     public void onEnter(Collision collision) {
         final var player = collision.player();
-        if (!StatusPlateBlock.APPLY_COOLDOWN.test(player)) return;
-
         final var data = collision.block().getTag(DATA_TAG);
         TempEffectApplicator.applyStatus(data, player, createId(collision.blockPosition()));
     }
