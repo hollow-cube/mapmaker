@@ -4,7 +4,7 @@ plugins {
 
 repositories {
     // This code is duplicated in the java-binary configuration, should make any changes there also.
-    val centralLibs = listOf(libs.minestom, libs.polar, libs.posthog, libs.adventure.api)
+    val centralLibs = listOf(libs.minestom, libs.polar, libs.posthog, libs.adventure.api, libs.luau.core)
         .mapNotNull { it.get().version }
     if (centralLibs.any { it == "dev" })
         mavenLocal()

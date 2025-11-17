@@ -15,6 +15,9 @@ dependencies {
     implementation(project(":modules:canvas:impl-standalone"))
     implementation(project(":modules:map-core"))
 
+    implementation(libs.luau.core)
+    implementation(libs.luau.natives.macos.arm64)
+
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)
     implementation(libs.polar)
