@@ -113,8 +113,7 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
     private void handlePlayerSpawn(PlayerSpawnEvent event) {
         if (!event.isFirstSpawn()) return;
 
-        var playerScript = Objects.requireNonNull(TestingSlop.class.getResource("/scripts/player.luau"));
-
+        var playerScript = Objects.requireNonNull(HubMapWorld.class.getResource("/scripts/player.luau"));
         var state = scriptContext.createThread();
 
         try (var is = playerScript.openStream()) {
