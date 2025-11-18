@@ -11,24 +11,19 @@ import org.jetbrains.annotations.NotNull;
  * Like PlayerSpawnEvent, but implements InstanceEvent.
  */
 public record PlayerSpawnInInstanceEvent(
-    @NotNull Player player,
-    boolean isFirstSpawn
+        @NotNull Player player
 ) implements PlayerInstanceEvent {
 
     static {
         // Register a handler for this event globally, always.
         MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, event -> {
-            EventDispatcher.call(new PlayerSpawnInInstanceEvent(event.getPlayer(), event.isFirstSpawn()));
+            EventDispatcher.call(new PlayerSpawnInInstanceEvent(event.getPlayer()));
         });
     }
 
     @Override
     public @NotNull Player getPlayer() {
         return player;
-    }
-
-    public boolean isFirstSpawn() {
-        return isFirstSpawn;
     }
 
 }

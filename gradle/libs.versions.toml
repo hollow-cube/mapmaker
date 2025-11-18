@@ -20,13 +20,13 @@ completely = "0.9.0"
 jctools = "4.0.5"
 caffeine = "3.1.8"
 prometheus = "0.16.0"
+mql = "1.1.0"
 logback = "1.5.18"
 json5 = "2.0.0"
 graalvm = "25.0.0"
 blossom = "2.1.0"
 velocity = "3.4.0-SNAPSHOT"
 classgraph = "4.8.179"
-luau = "dev"
 included = "-INCLUDED"
 
 [libraries]
@@ -50,8 +50,6 @@ jctools = { group = "org.jctools", name = "jctools-core", version.ref = "jctools
 caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
 json5 = { group = "de.marhali", name = "json5-java", version.ref = "json5" }
 velocity-api = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
-luau-core = { group = "dev.hollowcube", name = "luau", version.ref = "luau" }
-luau-natives-macos-arm64 = { group = "dev.hollowcube", name = "luau-natives-macos-arm64", version.ref = "luau" }
 
 included-molang = { group = "dev.hollowcube", name = "molang", version.ref = "included" }
 included-schem = { group = "dev.hollowcube", name = "schem", version.ref = "included" }

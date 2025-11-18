@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub;
 
-import net.hollowcube.luau.compiler.LuauCompiler;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.hub.item.*;
 import net.hollowcube.mapmaker.hub.util.HubTransferData;
@@ -11,21 +10,15 @@ import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.scripting.TestingSlop;
-import net.hollowcube.mapmaker.scripting.WorldScriptContext;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerChangeHeldSlotEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.channels.Channels;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Random;
 
@@ -38,17 +31,15 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
     public static Pos spawnPointFor(Player player) {
         var seeded = new Random(player.getUuid().getLeastSignificantBits());
         return MIN_SPAWN_POINT.add(
-            (seeded.nextDouble() * 10) % 3,
-            0,
-            (seeded.nextDouble() * 10) % 3
+                (seeded.nextDouble() * 10) % 3,
+                0,
+                (seeded.nextDouble() * 10) % 3
         );
     }
 
-    private final WorldScriptContext scriptContext;
-
     public HubMapWorld(MapServer server, MapData map) {
         super(server, map, makeMapInstance(map, 'h', MapInstance.LightingMode.FULL_BRIGHT),
-            HubPlayerState.class);
+                HubPlayerState.class);
 
         itemRegistry().register(new PlayMapsItem(server.playerService(), server.mapService(), server.bridge()));
         itemRegistry().register(new CreateMapsItem(server.guiController()));
@@ -57,18 +48,8 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
         itemRegistry().register(OpenStoreItem.INSTANCE);
 
         eventNode().addChild(EventUtil.READ_ONLY_NODE)
-            .addListener(PlayerChangeHeldSlotEvent.class, this::handleSwitchSlot)
-            .addListener(PlayerMoveEvent.class, this::handlePlayerMove);
-        //todo
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn);
-
-        {
-            var playerScript = Objects.requireNonNull(TestingSlop.class.getResource("/scripts/player.luau"));
-
-            var baseUrl = URI.create(playerScript.toString().substring(0, playerScript.toString().lastIndexOf('/')));
-            this.scriptContext = new WorldScriptContext(baseUrl);
-        }
-
+                .addListener(PlayerChangeHeldSlotEvent.class, this::handleSwitchSlot)
+                .addListener(PlayerMoveEvent.class, this::handlePlayerMove);
     }
 
     @Override
@@ -110,24 +91,6 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
         instance().loadStream(mapWorldData, new ReadWorldAccess(this));
     }
 
-    private void handlePlayerSpawn(PlayerSpawnEvent event) {
-        if (!event.isFirstSpawn()) return;
-
-        var playerScript = Objects.requireNonNull(TestingSlop.class.getResource("/scripts/player.luau"));
-
-        var state = scriptContext.createThread();
-
-        try (var is = playerScript.openStream()) {
-            var source = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-            var bytecode = LuauCompiler.DEFAULT.compile(source);
-            state.load("/player.luau", bytecode);
-            state.call(0, 0);
-        } catch (Exception e) {
-            event.getPlayer().kick("Failed to spawn player");
-            throw new RuntimeException("failed to spawn player", e);
-        }
-    }
-
     private void handleSwitchSlot(PlayerChangeHeldSlotEvent event) {
         var playerData = PlayerData.fromPlayer(event.getPlayer());
         playerData.setSetting(PlayerSettings.HUB_SELECTED_SLOT, (int) event.getNewSlot());
@@ -136,8 +99,8 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
     private void handlePlayerMove(PlayerMoveEvent event) {
         Pos playerPos = event.getPlayer().getPosition();
         if (playerPos.x() < HUB_BB_MIN.x() || playerPos.x() > HUB_BB_MAX.x() ||
-            playerPos.y() < HUB_BB_MIN.y() || playerPos.y() > HUB_BB_MAX.y() ||
-            playerPos.z() < HUB_BB_MIN.z() || playerPos.z() > HUB_BB_MAX.z()) {
+                playerPos.y() < HUB_BB_MIN.y() || playerPos.y() > HUB_BB_MAX.y() ||
+                playerPos.z() < HUB_BB_MIN.z() || playerPos.z() > HUB_BB_MAX.z()) {
             event.getPlayer().teleport(spawnPointFor(event.getPlayer()));
         }
     }
