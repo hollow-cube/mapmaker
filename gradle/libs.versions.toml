@@ -26,6 +26,7 @@ graalvm = "25.0.0"
 blossom = "2.1.0"
 velocity = "3.4.0-SNAPSHOT"
 classgraph = "4.8.179"
+javapoet = "0.7.0"
 luau = "dev"
 included = "-INCLUDED"
 
@@ -52,6 +53,7 @@ json5 = { group = "de.marhali", name = "json5-java", version.ref = "json5" }
 velocity-api = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
 luau-core = { group = "dev.hollowcube", name = "luau", version.ref = "luau" }
 luau-natives-macos-arm64 = { group = "dev.hollowcube", name = "luau-natives-macos-arm64", version.ref = "luau" }
+javapoet = { group = "com.palantir.javapoet", name = "javapoet", version.ref = "javapoet" }
 
 included-molang = { group = "dev.hollowcube", name = "molang", version.ref = "included" }
 included-schem = { group = "dev.hollowcube", name = "schem", version.ref = "included" }

@@ -11,7 +11,6 @@ import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.scripting.TestingSlop;
 import net.hollowcube.mapmaker.scripting.WorldScriptContext;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -63,7 +62,7 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
         MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn);
 
         {
-            var playerScript = Objects.requireNonNull(TestingSlop.class.getResource("/scripts/player.luau"));
+            var playerScript = Objects.requireNonNull(HubMapWorld.class.getResource("/scripts/player.luau"));
 
             var baseUrl = URI.create(playerScript.toString().substring(0, playerScript.toString().lastIndexOf('/')));
             this.scriptContext = new WorldScriptContext(baseUrl);

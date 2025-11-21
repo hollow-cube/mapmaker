@@ -1,17 +1,10 @@
-local map = require("@mapmaker/map")
-local World = require("@mapmaker/world")
+local player = require("@mapmaker/env").Player
 
-local world = World.current
+local function onHitPlayer(): ()
+--	print("Another player was hit!!")
+	error("hit the method!!")
+end
 
-print(world.numberField)
--- world.numberField = 123
+player.onHitPlayer:listen(onHitPlayer)
 
-local entity = world:SpawnEntity("my-entity")
-
-
-local z: map.MapType = "abc"
-
-
-local other = require("./other")
-other.sayHello()
-other.explode()
+--error("the player is: " .. tostring(player.Name))

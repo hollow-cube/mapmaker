@@ -1,7 +1,7 @@
 --[=[
 	World type description blah blah blah
 ]=]
-type World = {
+export type World = {
 
 	--[=[
 		Number of milliseconds passed since the UNIX epoch.
