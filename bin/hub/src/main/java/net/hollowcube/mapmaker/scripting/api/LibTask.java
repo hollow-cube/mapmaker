@@ -15,19 +15,7 @@ public final class LibTask {
 
     @LuaMethod
     public static int spawn(LuaState state) {
-        LuaState thread = switch (state.type(1)) {
-            case THREAD -> {
-                state.pushValue(1); // push thread back for return
-                yield Objects.requireNonNull(state.toThread(1)); // checked above
-            }
-            case FUNCTION -> {
-                var newThread = state.newThread();
-                state.xpush(newThread, 1); // push f to thread
-                yield newThread;
-            }
-            // todo better error, also use argError
-            default -> throw state.error();
-        };
+        LuaState thread = toThread(state, 1);
 
         // Copy the args to the thread
         for (int i = 2; i < state.top(); i++) {
@@ -40,10 +28,12 @@ public final class LibTask {
 
     @LuaMethod
     public static int defer(LuaState state) {
+        LuaState thread = toThread(state, 1);
 
-        // todo: schedule to run `ticks` later, blah blah
-        //       then return the thread
+        // TODO: preserve the args!!!
 
+        // Schedule one tick later
+        scheduleLater(thread, 1);
         return 1;
     }
 
@@ -52,9 +42,11 @@ public final class LibTask {
         int ticks = state.optInteger(1, 0);
         if (ticks < 0) state.argError(1, "must be a non-negative");
 
-        // todo: schedule to run `ticks` later, blah blah
-        //       then return the thread
+        LuaState thread = toThread(state, 2);
 
+        // TODO: preserve the args!!!
+
+        scheduleLater(thread, ticks);
         return 1;
     }
 
@@ -67,19 +59,8 @@ public final class LibTask {
             state.error("thread is not in a yieldable state");
 
         state.pushThread(state);
-        int ref = state.ref(-1);
+        scheduleLater(state, ticks);
         state.pop(1); // remove thread
-
-        // TODO: this doesnt really work because the entire state may be destroyed
-        //       before this callback occurs. We need to store this in the script
-        //       context until it executes so that we can cancel early.
-        MinecraftServer.getSchedulerManager().scheduleTask(() -> {
-            state.getRef(1);
-            state.unref(ref);
-
-            resume(null, state);
-            return TaskSchedule.stop();
-        }, TaskSchedule.tick(ticks));
 
         return state.yield(0);
     }
@@ -92,6 +73,38 @@ public final class LibTask {
         // todo: try to stop thread from resuming if it is scheduled
 
         return 0;
+    }
+
+    // Leaves the thread on the stack at -1
+    private static LuaState toThread(LuaState state, int argIndex) {
+        return switch (state.type(argIndex)) {
+            case THREAD -> {
+                state.pushValue(argIndex); // push thread back for return
+                yield Objects.requireNonNull(state.toThread(argIndex)); // checked above
+            }
+            case FUNCTION -> {
+                var newThread = state.newThread();
+                state.xpush(newThread, argIndex); // push f to thread
+                yield newThread;
+            }
+            // todo better error, also use argError
+            default -> throw state.error();
+        };
+    }
+
+    /// Thread is expected to be on the stack at index 0, it will remain after the call.
+    private static void scheduleLater(LuaState state, int ticks) {
+        // TODO: this doesnt really work because the entire state may be destroyed
+        //       before this callback occurs. We need to store this in the script
+        //       context until it executes so that we can cancel early.
+        int ref = state.ref(-1);
+        MinecraftServer.getSchedulerManager().scheduleTask(() -> {
+            state.getRef(1);
+            state.unref(ref);
+
+            resume(null, state);
+            return TaskSchedule.stop();
+        }, TaskSchedule.tick(ticks));
     }
 
     private static int resume(@Nullable LuaState caller, LuaState thread) {
