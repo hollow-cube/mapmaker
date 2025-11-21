@@ -4,9 +4,14 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.Uuids;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
+import net.hollowcube.mapmaker.runtime.freeform.FreeformMapWorld;
+import net.hollowcube.mapmaker.runtime.freeform.bundle.LocalFsLoader;
+import net.hollowcube.mapmaker.runtime.freeform.bundle.ResourcesLoader;
+import net.hollowcube.mapmaker.runtime.freeform.bundle.ScriptBundle;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.session.Presence;
 import net.kyori.adventure.text.Component;
@@ -21,7 +26,8 @@ import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.UUID;
 
 import static net.hollowcube.mapmaker.map.MapPlayer.simpleMapPlayer;
@@ -29,12 +35,14 @@ import static net.hollowcube.mapmaker.map.MapPlayer.simpleMapPlayer;
 public class MapIsolateServer extends AbstractMapServer {
     private static final Logger logger = LoggerFactory.getLogger(MapIsolateServer.class);
 
+    private final ScriptBundle.Loader scriptLoader;
+
     private final String mapId;
 
     // Its only kinda unknown. it's not created in the constructor, but after prepareState
     // it is always not-null which should cover any reasonable logic.
     // TODO: pretty sure we could do init in constructor, should investigate.
-    private @UnknownNullability ParkourMapWorld world;
+    private @UnknownNullability AbstractMapWorld<?, ?> world;
 
     public MapIsolateServer(ConfigLoaderV3 config) {
         super(config);
@@ -42,13 +50,18 @@ public class MapIsolateServer extends AbstractMapServer {
         if (IsolateMain.args.length < 1)
             throw new IllegalArgumentException("Map ID must be provided as the last argument");
         this.mapId = UUID.fromString(IsolateMain.args[IsolateMain.args.length - 1]).toString();
-        System.out.println("Map ID: " + this.mapId);
-        System.out.println("Args: " + Arrays.toString(IsolateMain.args));
+        logger.info("Loading map {}", this.mapId);
 
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("map-init")
                 .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
                 .addListener(PlayerSpawnEvent.class, this::handleSpawn)
                 .addListener(PlayerDisconnectEvent.class, this::handleDisconnect));
+
+        var scriptsDirectory = Path.of("../../scripts");
+        this.scriptLoader = Files.exists(scriptsDirectory)
+                ? new LocalFsLoader(scriptsDirectory)
+                : new ResourcesLoader();
+        logger.info("Using script loader: {}", this.scriptLoader);
     }
 
     @Override
@@ -78,7 +91,7 @@ public class MapIsolateServer extends AbstractMapServer {
         try {
             var map = mapService().getMap(Uuids.ZERO, this.mapId);
 
-            world = new ParkourMapWorld(this, map);
+            world = new FreeformMapWorld(this, map, scriptLoader);
             world.loadWorld();
 
             // We schedule on first tick end because submitTask invokes the executor immediately to determine

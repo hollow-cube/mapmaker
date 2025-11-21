@@ -141,5 +141,10 @@
     "name": "net.hollowcube.mapmaker.runtime.parkour.ParkourState$AnyPlaying",
     "allDeclaredClasses": true,
     "allPermittedSubclasses": true
+  },
+  {
+    "name": "net.hollowcube.mapmaker.runtime.freeform.FreeformState",
+    "allDeclaredClasses": true,
+    "allPermittedSubclasses": true
   }
 ]

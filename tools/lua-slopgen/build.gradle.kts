@@ -3,7 +3,8 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.nativeimage)
-    implementation(libs.classgraph)
+    implementation(project(":tools:lua-slopgen:api"))
+
+    implementation(libs.javapoet)
     implementation(libs.luau.lib)
 }

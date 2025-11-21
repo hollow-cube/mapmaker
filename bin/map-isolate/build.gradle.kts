@@ -1,12 +1,7 @@
 plugins {
     id("mapmaker.java-binary")
     id("mapmaker.packer-data")
-    id("org.graalvm.buildtools.native") version "0.10.6"
-}
-
-repositories {
-    mavenLocal()
-    mavenCentral()
+    id("org.graalvm.buildtools.native") version "0.11.0"
 }
 
 dependencies {
@@ -50,6 +45,7 @@ tasks.nativeCompile {
 
 application {
     mainClass = "net.hollowcube.mapmaker.isolate.IsolateMain"
+    applicationDefaultJvmArgs = listOf("--enable-native-access=ALL-UNNAMED")
 }
 
 graalvmNative {
@@ -59,6 +55,11 @@ graalvmNative {
             buildArgs(
                 listOf(
                     "--enable-native-access=ALL-UNNAMED", "--enable-monitoring=jfr",
+                    "-H:+UnlockExperimentalVMOptions", "-H:+ForeignAPISupport",
+                    "-H:+MLProfileInferenceUseGNNModel",
+
+                    "-H:+UseCompressedReferences",
+
                     "--features=net.hollowcube.nativeimage.HCNativeImageFeature",
                     "--static-nolibc", "--no-fallback",
                     "--emit build-report",
