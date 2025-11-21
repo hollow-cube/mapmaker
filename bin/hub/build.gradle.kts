@@ -26,6 +26,7 @@ dependencies {
     implementation(libs.polar)
     implementation(libs.included.schem)
 
+    implementation(libs.slf4j)
     implementation(libs.slf4j.jul)
     implementation(libs.logback)
     implementation(libs.bundles.prometheus)

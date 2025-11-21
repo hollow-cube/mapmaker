@@ -111,10 +111,6 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
             messager.printError("Only non-static methods can be exported from exported type classes", e);
             return null;
         }
-        if (isMethod && luaTypeName == null) {
-            messager.printError("Library classes cannot have methods (yet)", e);
-            return null;
-        }
 
         if (isProperty) appendIndexCall(e, isStatic);
         else if (isMethod) appendNamecallCall(e);
@@ -140,12 +136,25 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
         var javaName = e.getSimpleName().toString();
         var luaName = LuaNames.toLuaMethod(javaName);
 
-        namecallMethod.beginControlFlow("case $L/*$L*/ -> ", atomizer.atomize(luaName), luaName);
-        // When calling a non-static method, we remove the self argument
-        // so that the callee can pretend its a 'normal' call.
-        namecallMethod.addStatement("state.remove(1)");
-        namecallMethod.addStatement("yield self.$L(state)", javaName);
-        namecallMethod.endControlFlow();
+        if (luaTypeName == null) {
+            // Ends up actually being an index to the direct function reference.
+            var luaFuncField = namespace(luaName, true);
+            glueTypeBuilder.addField(FieldSpec.builder(LuaFunc.class, luaFuncField)
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .initializer("$T.wrap($T::$L, $S)", LuaFunc.class, e.getEnclosingElement(), javaName, luaName)
+                .build());
+            indexMethod.beginControlFlow("case $L/*$L*/ -> ", atomizer.atomize(luaName), luaName);
+            indexMethod.addStatement("state.pushFunction($L)", luaFuncField);
+            indexMethod.addStatement("yield 1");
+            indexMethod.endControlFlow();
+        } else {
+            namecallMethod.beginControlFlow("case $L/*$L*/ -> ", atomizer.atomize(luaName), luaName);
+            // When calling a non-static method, we remove the self argument
+            // so that the callee can pretend its a 'normal' call.
+            namecallMethod.addStatement("state.remove(1)");
+            namecallMethod.addStatement("yield self.$L(state)", javaName);
+            namecallMethod.endControlFlow();
+        }
     }
 
     private MethodSpec.Builder beginRegisterMethod() {
@@ -297,7 +306,7 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
     }
 
     private String namespace(String key, boolean upper) {
-        if (luaTypeName == null) return key; // nothing needed
+        if (luaTypeName == null) return upper ? key.toUpperCase() : key; // nothing needed
         return upper
             ? luaTypeName.toUpperCase() + "_" + key.toUpperCase()
             : luaTypeName.toLowerCase() + "$" + key;

@@ -110,7 +110,7 @@ public class ResourceRequireResolver implements RequireResolver {
         thread.load(chunkName, bytecode); // throws on fail
         var status = thread.resume(state, 0); // todo deal with other states in resume its currently cooked
         if (status == LuaStatus.OK) {
-            if (thread.getTop() != 1)
+            if (thread.top() != 1)
                 state.error("module must return a single value");
         } else if (status == LuaStatus.YIELD) {
             state.error("module can not yield");
