@@ -1,7 +1,11 @@
 package net.hollowcube.mapmaker.scripting.util;
 
 import net.hollowcube.luau.LuaState;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 public final class LuaHelpers {
@@ -30,6 +34,31 @@ public final class LuaHelpers {
             return false;
         }
         return true;
+    }
+
+    public static @Nullable Key checkOptKey(LuaState state, int index) {
+        if (state.isNil(index)) return null;
+        return checkKey(state, index);
+    }
+
+    public static Key checkKey(LuaState state, int index) {
+        var key = state.checkString(index);
+        if (!Key.parseable(key)) throw state.error("Invalid key: " + key);
+        return Key.key(key);
+    }
+
+    public static @Nullable Sound.Source checkOptSoundCategory(LuaState state, int index) {
+        if (state.isNil(index)) return null;
+        return checkSoundCategory(state, index);
+    }
+
+    public static Sound.Source checkSoundCategory(LuaState state, int index) {
+        class Holder {
+            static final List<String> CATEGORIES = List.copyOf(Sound.Source.NAMES.keys());
+        }
+
+        var nameIndex = state.checkOption(index, Sound.Source.MASTER.name(), Holder.CATEGORIES);
+        return Sound.Source.NAMES.valueOr(Holder.CATEGORIES.get(nameIndex), Sound.Source.MASTER);
     }
 
 }

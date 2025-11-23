@@ -14,7 +14,9 @@ public final class LuaNames {
     }
 
     public static String toLuaMethod(String javaName) {
-        return javaName.substring(0, 1).toLowerCase() + javaName.substring(1);
+        var name = javaName.substring(0, 1).toLowerCase() + javaName.substring(1);
+        if (name.endsWith("_")) name = name.substring(0, name.length() - 1);
+        return name;
     }
 
 }

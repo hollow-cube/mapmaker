@@ -27,7 +27,8 @@ public final class LibTask {
         }
 
         // Resume the thread immediately
-        return resume(state, thread, nargs);
+        resume(state, thread, nargs);
+        return 1;
     }
 
     @LuaMethod
@@ -135,20 +136,14 @@ public final class LibTask {
         context.setTag(TaskRef.ACTIVE_TASK, disposable);
     }
 
-    private static int resume(@Nullable LuaState caller, LuaState thread, int nargs) {
-        var status = thread.resume(caller, nargs);
-        return switch (status) {
-            // 1: OK -> exit, no need to do anything
-            // 2: YIELD -> simply return the thread. One of two things happen
-            //    A: the caller takes the thread and resumes it again later
-            //    B: a task.wait happened, and we have already saved+scheduled the thread
-            case OK, YIELD -> 1;
-            // 3: ERROR -> propagate
-            default -> {
-                // todo better error
-                throw new RuntimeException(thread.unsafeToString(-1));
-            }
-        };
+    private static void resume(@Nullable LuaState caller, LuaState thread, int nargs) {
+        thread.resume(caller, nargs);
+        // dont care about the status because one of a new options occur:
+        // 1: OK -> exit, no need to do anything
+        // 2: YIELD -> simply return the thread. One of two things happen
+        //    A: the caller takes the thread and resumes it again later
+        //    B: a task.wait happened, and we have already saved+scheduled the thread
+        // 3: ERROR -> it has already been thrown :)
     }
 
     private static final class TaskRef implements Disposable {

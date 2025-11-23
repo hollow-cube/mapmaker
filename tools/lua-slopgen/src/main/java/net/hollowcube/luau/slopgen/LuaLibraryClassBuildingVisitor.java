@@ -6,6 +6,7 @@ import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.gen.LuaExport;
 import net.hollowcube.luau.gen.LuaMethod;
 import net.hollowcube.luau.gen.LuaProperty;
+import net.hollowcube.luau.gen.Meta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,6 +32,7 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
 
     private final TypeName glueTypeName;
     private final TypeSpec.Builder glueTypeBuilder;
+    private final boolean isGlobal;
 
     private final MethodSpec.Builder registerMethod;
 
@@ -50,13 +52,15 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
         StringAtomizer atomizer,
         TypeName typeName,
         TypeName glueTypeName,
-        TypeSpec.Builder glueTypeBuilder
+        TypeSpec.Builder glueTypeBuilder,
+        boolean isGlobal
     ) {
         this.messager = env.getMessager();
         this.atomizer = atomizer;
         this.typeName = typeName;
         this.glueTypeName = glueTypeName;
         this.glueTypeBuilder = glueTypeBuilder;
+        this.isGlobal = isGlobal;
 
         this.registerMethod = beginRegisterMethod();
         this.indexMethod = beginIndexMethod();
@@ -169,13 +173,14 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
             return null;
         }
 
-        if (e.getAnnotation(LuaExport.class) == null)
-            return null; // Not exported, continue
+        var export = e.getAnnotation(LuaExport.class);
+        if (export == null) return null; // Not exported, continue
 
         // We need to enter the inner type, process, then return
 
         var superType = ClassName.get(e.getSuperclass());
-        if (superType.equals(TypeName.get(Object.class))) superType = null;
+        if (superType.equals(TypeName.get(Object.class)) || superType.equals(TypeName.get(Record.class)))
+            superType = null;
         boolean isFinal = e.getModifiers().contains(Modifier.FINAL);
 
         TypeName lastTypeName = typeName;
@@ -191,9 +196,11 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
         MethodSpec.Builder lastNamecallMethod = namecallMethod;
         namecallMethod = beginNamecallMethod();
 
-        setupNamedType(superType);
+        enterNamedType(superType);
 
         super.visitType(e, unused);
+
+        endNamedType(superType);
 
         glueTypeBuilder.addMethod(endNamecallMethod(superType));
         namecallMethod = lastNamecallMethod;
@@ -273,6 +280,12 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
         var luaName = LuaNames.toLuaMethod(javaName);
         var isVoid = e.getReturnType().getKind() == TypeKind.VOID;
 
+        var methods = e.getAnnotationsByType(LuaMethod.class);
+        if (methods.length > 0 && methods[0].meta() != Meta.NONE) {
+            appendMetaMethod(e, methods[0].meta());
+            return;
+        }
+
         if (luaTypeName == null) {
             if (isVoid) {
                 // Doesnt work because we return the function reference. We could generate
@@ -306,6 +319,37 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
         }
     }
 
+    private void appendMetaMethod(ExecutableElement e, Meta meta) {
+        var name = e.getSimpleName().toString();
+        var glueName = namespace(name, false);
+        var isVoid = e.getReturnType().getKind() == TypeKind.VOID;
+
+        if (isDispatch && !dispatchTypes.contains(TypeName.get(e.getEnclosingElement().asType()))) {
+            messager.printError("Only base classes may define metamethods", e);
+            return;
+        }
+
+        // create the accessor
+        createLuaFunc(namespace(name, true), glueName, meta.methodName());
+
+        // create the wrapper method
+        var wrapper = MethodSpec.methodBuilder(glueName)
+            .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+            .addParameter(LuaState.class, "state")
+            .returns(int.class);
+        wrapper.addStatement("$T self = check$LArg(state, 1)", typeName, luaTypeName);
+        wrapper.addStatement("state.remove(1)"); // remove self arg (for nicer syntax)
+
+        if (!isVoid) wrapper.addCode("return ");
+        wrapper.addStatement("self.$L(state)", name);
+        if (isVoid) wrapper.addStatement("return 0");
+        glueTypeBuilder.addMethod(wrapper.build());
+
+        // register in metatable
+        registerMethod.addStatement("state.pushFunction($L)", namespace(name, true));
+        registerMethod.addStatement("state.setField(-2, $S)", meta.methodName());
+    }
+
     private MethodSpec.Builder beginRegisterMethod() {
         var method = MethodSpec.methodBuilder("register")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -317,6 +361,8 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
             method.addStatement("state.newUserData(new Object())");
             method.addStatement("state.newMetaTable(LIB_NAME)"); // metatable
 
+            method.addStatement("state.pushString(LIB_NAME)");
+            method.addStatement("state.setField(-2, $S)", "__type");
             method.addStatement("state.pushFunction(INDEX)");
             method.addStatement("state.setField(-2, $S)", LuaNames.INDEX_META_NAME);
             method.addStatement("state.pushFunction(NEWINDEX)");
@@ -327,8 +373,12 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
             method.addStatement("state.setReadOnly(-1, true)"); // metatable read only
             method.addStatement("state.setMetaTable(-2)"); // assign metatable to userdata
 
-            method.addStatement("state.requireRegisterModule(LIB_NAME)"); // register for require
-            // userdata is popped during register.
+            if (isGlobal) {
+                method.addStatement("state.setGlobal(LIB_NAME)");
+            } else {
+                method.addStatement("state.requireRegisterModule(LIB_NAME)"); // register for require
+                // userdata is popped during register.
+            }
         }
 
         return method;
@@ -497,7 +547,7 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
             .build());
     }
 
-    private void setupNamedType(@Nullable TypeName superType) {
+    private void enterNamedType(@Nullable TypeName superType) {
         if (isDispatch && superType != null) {
             //todo rename me
             var dispatchedIndex = dispatchIndexMethods.get(superType);
@@ -545,12 +595,20 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
 
         registerMethod.addStatement("state.newMetaTable(LIB_NAME + $S)", "." + luaTypeName); // metatable
 
+        registerMethod.addStatement("state.pushString($S)", luaTypeName);
+        registerMethod.addStatement("state.setField(-2, $S)", "__type");
         registerMethod.addStatement("state.pushFunction($L)", namespace("INDEX", true));
         registerMethod.addStatement("state.setField(-2, $S)", LuaNames.INDEX_META_NAME);
         registerMethod.addStatement("state.pushFunction($L)", namespace("NEWINDEX", true));
         registerMethod.addStatement("state.setField(-2, $S)", LuaNames.NEWINDEX_META_NAME);
         registerMethod.addStatement("state.pushFunction($L)", namespace("NAMECALL", true));
         registerMethod.addStatement("state.setField(-2, $S)", LuaNames.NAMECALL_META_NAME);
+    }
+
+    private void endNamedType(@Nullable TypeName superType) {
+        if (isDispatch && superType != null) return;
+
+        var tagName = namespace("TAG", true);
 
         registerMethod.addStatement("state.setReadOnly(-1, true)"); // metatable read only
         registerMethod.addStatement("state.setUserDataMetaTable($L)", tagName); // assign metatable to userdata

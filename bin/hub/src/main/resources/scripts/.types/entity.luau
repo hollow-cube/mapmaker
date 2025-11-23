@@ -31,11 +31,12 @@ export type Display<Self = Display, InterpolationFields = DisplayInterpolationFi
 
 export type TextDisplayInit = DisplayInit & TextDisplayInterpolationFields
 export type TextDisplayInterpolationFields = DisplayInterpolationFields & {
-	text: string?,
+	text: AnyText?,
 }
 
 export type TextDisplay<Self = TextDisplay, InterpolationFields = TextDisplayInterpolationFields> = Display<Self, InterpolationFields> & {
-	text: string,
+	read text: Text,
+	write text: AnyText,
 }
 
 return (nil :: any) :: {

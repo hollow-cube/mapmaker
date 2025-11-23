@@ -11,11 +11,15 @@ import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.scripting.Disposable;
 import net.hollowcube.mapmaker.scripting.ScriptContext;
 import net.hollowcube.mapmaker.scripting.util.LuaHelpers;
+import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.sound.SoundStop;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
-import org.jetbrains.annotations.Nullable;
+import net.minestom.server.event.entity.EntityAttackEvent;
 
 import java.util.UUID;
+
+import static net.hollowcube.mapmaker.scripting.util.LuaHelpers.*;
 
 @LuaLibrary(name = "@mapmaker/player")
 public final class LibPlayer {
@@ -25,11 +29,11 @@ public final class LibPlayer {
     public static final class Player {
         private final MapPlayer player;
 
-        private @Nullable LibBase.EventSource onHitPlayer; // lazy
-
         Player(MapPlayer player) {
             this.player = player;
         }
+
+        //region Properties
 
         @LuaProperty
         public int getUuid(LuaState state) {
@@ -68,14 +72,89 @@ public final class LibPlayer {
             return 1;
         }
 
+        //endregion
+
+        //region Events
+
         @LuaProperty
         public int getOnHitPlayer(LuaState state) {
-            if (onHitPlayer == null) {
-                onHitPlayer = new LibBase.EventSource();
+            class Impl {
+                static int pushArgs(LuaState state, EntityAttackEvent event) {
+                    if (!(event.getTarget() instanceof MapPlayer other))
+                        return -1;
+
+                    pushPlayer(state, other);
+                    return 1;
+                }
             }
-            LibBase$luau.pushEventSource(state, onHitPlayer);
+
+            LibBase.pushEventSource(state, EntityAttackEvent.class, Impl::pushArgs);
             return 1;
         }
+
+        //endregion
+
+        //region Instance Methods
+
+        // (self, sound: string, options: SoundOptions?) -> ()
+        @LuaMethod
+        public void playSound(LuaState state) {
+            var sound = Sound.sound();
+            sound.type(checkKey(state, 1));
+
+            readSoundOptions(state, sound, 2);
+
+            player.playSound(sound.build());
+        }
+
+        // (self, sound: string, position: vector, options: SoundOptions?) -> ()
+        @LuaMethod
+        public void playSoundAt(LuaState state) {
+            var sound = Sound.sound();
+            sound.type(checkKey(state, 1));
+            var pos = LuaVector.check(state, 2);
+            readSoundOptions(state, sound, 3);
+
+            player.playSound(sound.build(), pos);
+        }
+
+        // (self, sound: string?, category: SoundCategory?) -> ()
+        @LuaMethod
+        public void stopSound(LuaState state) {
+            int top = state.top();
+            var sound = top > 0 ? checkOptKey(state, 1) : null;
+            var source = top > 1 ? checkOptSoundCategory(state, 2) : null;
+
+            SoundStop stop;
+            if (sound != null && source != null)
+                stop = SoundStop.namedOnSource(sound, source);
+            else if (sound != null)
+                stop = SoundStop.named(sound);
+            else if (source != null)
+                stop = SoundStop.source(source);
+            else stop = SoundStop.all();
+            player.stopSound(stop);
+        }
+
+        private void readSoundOptions(LuaState state, Sound.Builder sound, int index) {
+            if (state.top() < index) return;
+
+            state.checkType(index, LuaType.TABLE);
+            if (tableGet(state, index, "volume")) {
+                sound.volume((float) Math.clamp(state.checkNumber(-1), 0, 1));
+                state.pop(1);
+            }
+            if (tableGet(state, index, "pitch")) {
+                sound.pitch((float) Math.clamp(state.checkNumber(-1), 0, 2));
+                state.pop(1);
+            }
+            if (tableGet(state, index, "category")) {
+                sound.source(checkSoundCategory(state, -1));
+                state.pop(1);
+            }
+        }
+
+        //endregion
     }
 
     @LuaExport
@@ -95,7 +174,8 @@ public final class LibPlayer {
                 throw state.error("Only text entity is supported");
 
             var entity = new DisplayEntity.Text(UUID.randomUUID());
-            entity.updateViewerRule(other -> other == player);
+            entity.setAutoViewable(false);
+//            entity.updateViewerRule(other -> other == player);
 
             var luaEntity = new LibEntity.TextDisplay(entity);
             LuaHelpers.tableForEach(state, 2, (key) -> {
@@ -121,6 +201,7 @@ public final class LibPlayer {
             }
 
             entity.setInstance(player.getInstance(), new Pos(point, yaw, pitch));
+            entity.addViewer(player);
             ScriptContext.get(state).track(new Disposable() {
                 @Override
                 public void dispose() {

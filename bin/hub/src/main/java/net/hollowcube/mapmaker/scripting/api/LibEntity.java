@@ -8,8 +8,6 @@ import net.hollowcube.luau.gen.LuaMethod;
 import net.hollowcube.luau.gen.LuaProperty;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.scripting.util.LuaHelpers;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 
 import java.util.Locale;
@@ -238,9 +236,8 @@ public final class LibEntity {
 
         @LuaProperty
         public int getText(LuaState state) {
-            //todo support text properly
-            var raw = PlainTextComponentSerializer.plainText().serialize(delegate().getEntityMeta().getText());
-            state.pushString(raw);
+            var text = delegate().getEntityMeta().getText();
+            LuaText.push(state, text);
             return 1;
         }
 
@@ -250,7 +247,7 @@ public final class LibEntity {
         }
 
         private void setText(LuaState state, int index) {
-            var text = Component.text(state.checkString(index));
+            var text = LuaText.checkAnyText(state, index);
             delegate().getEntityMeta().setText(text);
         }
 

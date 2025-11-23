@@ -4,6 +4,8 @@ import net.hollowcube.luau.LuaState;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import net.minestom.server.tag.TagReadable;
@@ -42,6 +44,9 @@ public sealed interface ScriptContext extends ThreadData, TagHandler {
     void track(Disposable disposable);
 
     Scheduler scheduler();
+
+    /// Kinda unsafe to use since it may actually be filtered more than is obvious.
+    EventNode<Event> eventNode();
 
     TagHandler tagHandler();
 

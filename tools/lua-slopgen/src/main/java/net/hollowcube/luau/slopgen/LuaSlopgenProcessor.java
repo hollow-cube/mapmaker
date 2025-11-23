@@ -57,13 +57,24 @@ public class LuaSlopgenProcessor extends AbstractProcessor {
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addOriginatingElement(annotatedElement);
 
+            var libNameString = luaLibraryValues.get("name").getValue().toString();
             glueTypeBuilder.addField(FieldSpec.builder(String.class, "LIB_NAME")
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                .initializer("$S", luaLibraryValues.get("name").getValue().toString())
+                .initializer("$S", libNameString)
                 .build());
 
+            boolean isGlobal = "GLOBAL".equals(String.valueOf(luaLibraryValues.get("scope")));
+            if (isGlobal && !libNameString.matches("^[a-zA-Z_][a-zA-Z0-9_]*$"))
+                messager.printError("Global-scoped LuaLibrary name must be a valid global identifier", annotatedElement);
+            if (!isGlobal && !libNameString.startsWith("@"))
+                messager.printError("Require-scoped LuaLibrary name must start with @", annotatedElement);
+
             var builder = new LuaLibraryClassBuildingVisitor(
-                processingEnv, atomizer, TypeName.get(typeElement.asType()), glueTypeName, glueTypeBuilder);
+                processingEnv, atomizer,
+                TypeName.get(typeElement.asType()),
+                glueTypeName, glueTypeBuilder,
+                isGlobal
+            );
             builder.visit(typeElement);
             builder.finish();
 

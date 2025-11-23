@@ -6,6 +6,8 @@ import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.scripting.api.*;
 import net.hollowcube.mapmaker.scripting.require.ResourceRequireResolver;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import net.minestom.server.timer.Scheduler;
@@ -38,6 +40,7 @@ public class WorldScriptContext {
 
         LuaGlobals.register(state);
         LuaVector.register(state);
+        LuaText$luau.register(state);
 
         LibBase$luau.register(state);
         LibTask$luau.register(state);
@@ -49,16 +52,57 @@ public class WorldScriptContext {
     }
 
     //todo move elsewhere
-    private record PlayerContextImpl(MapPlayer player, TagHandler tagHandler,
-                                     List<Disposable> disposables) implements ScriptContext.Player {
+    private static final class PlayerContextImpl implements ScriptContext.Player {
+        private final MapPlayer player;
+        private final TagHandler tagHandler;
+        private final List<Disposable> disposables;
+
+        private final long lastPurge = System.currentTimeMillis();
+
+        private PlayerContextImpl(
+            MapPlayer player, TagHandler tagHandler,
+            List<Disposable> disposables
+        ) {
+            this.player = player;
+            this.tagHandler = tagHandler;
+            this.disposables = disposables;
+        }
+
         @Override
         public void track(Disposable disposable) {
             disposables.add(disposable);
+
+            // probably a better time to do this idk, dnc for now
+            if (lastPurge + 10_000 < System.currentTimeMillis()) {
+                disposables.removeIf(Disposable::isDisposed);
+            }
         }
 
         @Override
         public Scheduler scheduler() {
             return player.scheduler();
+        }
+
+        @Override
+        public EventNode<Event> eventNode() {
+            System.out.println("returning event node for " + player.getUsername());
+            // Obviously unsafe, not sure a better option immediately.
+            //noinspection unchecked
+            return (EventNode<Event>) (Object) player.eventNode();
+        }
+
+        @Override
+        public MapPlayer player() {
+            return player;
+        }
+
+        @Override
+        public TagHandler tagHandler() {
+            return tagHandler;
+        }
+
+        public List<Disposable> disposables() {
+            return disposables;
         }
     }
 

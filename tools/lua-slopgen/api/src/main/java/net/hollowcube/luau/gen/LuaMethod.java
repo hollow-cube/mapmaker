@@ -8,4 +8,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.CLASS)
 public @interface LuaMethod {
+
+    Meta meta() default Meta.NONE;
+    
 }

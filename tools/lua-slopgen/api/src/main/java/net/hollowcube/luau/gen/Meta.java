@@ -1,6 +1,8 @@
-package net.hollowcube.luau.annotation.old;
+package net.hollowcube.luau.gen;
 
-public enum MetaType {
+public enum Meta {
+    NONE(""), // Used to indicate no metamethod (default)
+
     ADD("__add"),
     SUB("__sub"),
     MUL("__mul"),
@@ -20,14 +22,17 @@ public enum MetaType {
 
     ITER("__iter"),
     CALL("__call"),
-    NAMECALL("__namecall"),
-    INDEX("__index"),
-    NEWINDEX("__newindex"),
+
+    // These have special handling already, could add fallbacks to an override
+    // on the type but not implementing for now as there is no existing use case.
+    // NAMECALL("__namecall"),
+    // INDEX("__index"),
+    // NEWINDEX("__newindex"),
     ;
 
     private final String methodName;
 
-    MetaType(String methodName) {
+    Meta(String methodName) {
         this.methodName = methodName;
     }
 
