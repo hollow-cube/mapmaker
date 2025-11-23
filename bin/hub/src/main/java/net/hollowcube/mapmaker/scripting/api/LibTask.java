@@ -4,7 +4,10 @@ import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaType;
 import net.hollowcube.luau.gen.LuaLibrary;
 import net.hollowcube.luau.gen.LuaMethod;
-import net.minestom.server.MinecraftServer;
+import net.hollowcube.mapmaker.scripting.Disposable;
+import net.hollowcube.mapmaker.scripting.ScriptContext;
+import net.minestom.server.tag.Tag;
+import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,22 +21,27 @@ public final class LibTask {
         LuaState thread = toThread(state, 1);
 
         // Copy the args to the thread
-        for (int i = 2; i < state.top(); i++) {
-            state.xpush(thread, i);
+        int nargs = state.top() - 2;
+        for (int i = 0; i < nargs; i++) {
+            state.xpush(thread, i + 2);
         }
 
         // Resume the thread immediately
-        return resume(state, thread);
+        return resume(state, thread, nargs);
     }
 
     @LuaMethod
     public static int defer(LuaState state) {
         LuaState thread = toThread(state, 1);
 
-        // TODO: preserve the args!!!
+        // Preserve the args for callback
+        int[] argRefs = new int[state.top() - 2];
+        for (int i = 0; i < argRefs.length; i++) {
+            argRefs[i] = state.ref(i + 2);
+        }
 
         // Schedule one tick later
-        scheduleLater(thread, 1);
+        scheduleLater(thread, 1, argRefs);
         return 1;
     }
 
@@ -44,9 +52,13 @@ public final class LibTask {
 
         LuaState thread = toThread(state, 2);
 
-        // TODO: preserve the args!!!
+        // Preserve the args for callback
+        int[] argRefs = new int[state.top() - 2];
+        for (int i = 0; i < argRefs.length; i++) {
+            argRefs[i] = state.ref(i + 2);
+        }
 
-        scheduleLater(thread, ticks);
+        scheduleLater(thread, ticks, argRefs);
         return 1;
     }
 
@@ -56,10 +68,10 @@ public final class LibTask {
         if (ticks < 0) state.argError(1, "must be a non-negative");
 
         if (!state.isYieldable())
-            state.error("thread is not in a yieldable state");
+            throw state.error("thread is not in a yieldable state");
 
         state.pushThread(state);
-        scheduleLater(state, ticks);
+        scheduleLater(state, ticks, new int[0]);
         state.pop(1); // remove thread
 
         return state.yield(0);
@@ -68,11 +80,18 @@ public final class LibTask {
     @LuaMethod
     public static int cancel(LuaState state) {
         state.checkType(1, LuaType.THREAD);
-        var thread = state.toThread(1);
+        var thread = Objects.requireNonNull(state.toThread(1)); // checked above
 
-        // todo: try to stop thread from resuming if it is scheduled
+        var context = ScriptContext.get(thread);
+        var task = context.getTag(TaskRef.ACTIVE_TASK);
+        if (task == null || task.isDisposed()) {
+            state.pushBoolean(false);
+            return 1;
+        }
 
-        return 0;
+        task.dispose();
+        state.pushBoolean(true);
+        return 1;
     }
 
     // Leaves the thread on the stack at -1
@@ -92,23 +111,48 @@ public final class LibTask {
         };
     }
 
-    /// Thread is expected to be on the stack at index 0, it will remain after the call.
-    private static void scheduleLater(LuaState state, int ticks) {
-        // TODO: this doesnt really work because the entire state may be destroyed
-        //       before this callback occurs. We need to store this in the script
-        //       context until it executes so that we can cancel early.
+    /// Thread is expected to be on the stack at -1, it will remain after the call.
+    private static void scheduleLater(LuaState state, int ticks, int[] argRefs) {
         int ref = state.ref(-1);
-        MinecraftServer.getSchedulerManager().scheduleTask(() -> {
-            state.getRef(1);
+        var context = ScriptContext.get(state);
+        var disposable = new TaskRef();
+        disposable.state = state;
+        disposable.threadRef = ref;
+        disposable.argRefs = argRefs;
+        disposable.task = context.scheduler().scheduleTask(() -> {
+            state.getRef(ref);
             state.unref(ref);
 
-            resume(null, state);
+            for (int argRef : argRefs) {
+                state.getRef(argRef);
+                state.unref(ref);
+            }
+
+            resume(null, state, argRefs.length);
             return TaskSchedule.stop();
         }, TaskSchedule.tick(ticks));
+        context.track(disposable);
+        context.setTag(TaskRef.ACTIVE_TASK, disposable);
     }
 
-    private static int resume(@Nullable LuaState caller, LuaState thread) {
-        return switch (thread.resume(caller, 0)) {
+    private static int resume(@Nullable LuaState caller, LuaState thread, int nargs) {
+
+        int top = thread.top() - nargs;
+        var status = thread.resume(caller, nargs);
+
+        int newTop = thread.top();
+        if (top != newTop) {
+            System.err.println("top leaked during resume!!! " + top + " != " + newTop);
+            System.err.println("leaked " + (newTop - top) + " values");
+
+            // Inspect what was left on the stack
+            for (int i = top + 1; i <= newTop; i++) {
+                System.err.println("  slot " + i + ": " + thread.type(i));
+            }
+        }
+
+
+        return switch (status) {
             // 1: OK -> exit, no need to do anything
             // 2: YIELD -> simply return the thread. One of two things happen
             //    A: the caller takes the thread and resumes it again later
@@ -116,9 +160,40 @@ public final class LibTask {
             case OK, YIELD -> 1;
             // 3: ERROR -> propagate
             default -> {
-                // todo doesnt really work because state may not be present...
-                throw caller.error(thread.toStringRepr(-1));
+                System.err.println("BAD TASK RETURN!!! " + status);
+                System.err.flush();
+                System.err.println("TOS 1 is " + thread.unsafeToString(-1));
+                System.err.flush();
+                System.err.println("TOS 2 is " + thread.unsafeToString(thread.top() - 1));
+                System.err.flush();
+                // todo better error
+                throw new RuntimeException(thread.unsafeToString(-1));
             }
         };
+    }
+
+    private static final class TaskRef implements Disposable {
+        private static final Tag<TaskRef> ACTIVE_TASK = Tag.Transient("mapmaker/active_task");
+
+        public LuaState state;
+        public Task task;
+        public int threadRef;
+        public int[] argRefs;
+
+        @Override
+        public void dispose() {
+            if (!task.isAlive()) return;
+
+            task.cancel();
+            state.unref(threadRef);
+            for (int argRef : argRefs) {
+                state.unref(argRef);
+            }
+        }
+
+        @Override
+        public boolean isDisposed() {
+            return !task.isAlive();
+        }
     }
 }

@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.scripting.api;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.gen.LuaLibrary;
 import net.hollowcube.luau.gen.LuaProperty;
-import net.minestom.server.MinecraftServer;
+import net.hollowcube.mapmaker.scripting.ScriptContext;
 
 @LuaLibrary(name = "@mapmaker/env")
 public final class LibEnv {
@@ -15,8 +15,11 @@ public final class LibEnv {
     /// @luaReturn Player.Player
     @LuaProperty
     public static int getPlayer(LuaState state) {
-        var p = MinecraftServer.getConnectionManager().getOnlinePlayers().stream().findFirst().orElseThrow();
-        LibPlayer.pushPlayer(state, p);
+        var context = ScriptContext.get(state);
+        if (!(context instanceof ScriptContext.Player playerContext))
+            throw state.error("environment player is only available in player-bound scripts");
+
+        LibPlayer.pushPlayer(state, playerContext.player());
         return 1;
     }
 

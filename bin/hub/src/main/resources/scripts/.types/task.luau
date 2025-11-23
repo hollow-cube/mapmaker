@@ -16,7 +16,8 @@ function task.wait(ticks: number?): number
 	return nil :: any
 end
 
-function task.cancel(thread: thread)
+function task.cancel(thread: thread): boolean
+	return nil :: any
 end
 
 return task

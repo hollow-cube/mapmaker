@@ -1,0 +1,1 @@
+declare function vec(x: number, y: number, z: number): vector

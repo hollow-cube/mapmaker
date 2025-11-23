@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub;
 
-import net.hollowcube.luau.compiler.LuauCompiler;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.hub.item.*;
 import net.hollowcube.mapmaker.hub.util.HubTransferData;
@@ -12,19 +11,16 @@ import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.scripting.WorldScriptContext;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerChangeHeldSlotEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.channels.Channels;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Random;
 
@@ -58,8 +54,6 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
         eventNode().addChild(EventUtil.READ_ONLY_NODE)
             .addListener(PlayerChangeHeldSlotEvent.class, this::handleSwitchSlot)
             .addListener(PlayerMoveEvent.class, this::handlePlayerMove);
-        //todo
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn);
 
         {
             var playerScript = Objects.requireNonNull(HubMapWorld.class.getResource("/scripts/player.luau"));
@@ -67,7 +61,6 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
             var baseUrl = URI.create(playerScript.toString().substring(0, playerScript.toString().lastIndexOf('/')));
             this.scriptContext = new WorldScriptContext(baseUrl);
         }
-
     }
 
     @Override
@@ -109,21 +102,18 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
         instance().loadStream(mapWorldData, new ReadWorldAccess(this));
     }
 
-    private void handlePlayerSpawn(PlayerSpawnEvent event) {
-        if (!event.isFirstSpawn()) return;
+    @Override
+    public void spawnPlayer(Player player) {
+        super.spawnPlayer(player);
 
-        var playerScript = Objects.requireNonNull(HubMapWorld.class.getResource("/scripts/player.luau"));
-        var state = scriptContext.createThread();
+        scriptContext.initializePlayer((MapPlayer) player);
+    }
 
-        try (var is = playerScript.openStream()) {
-            var source = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-            var bytecode = LuauCompiler.DEFAULT.compile(source);
-            state.load("/player.luau", bytecode);
-            state.call(0, 0);
-        } catch (Exception e) {
-            event.getPlayer().kick("Failed to spawn player");
-            throw new RuntimeException("failed to spawn player", e);
-        }
+    @Override
+    public void removePlayer(Player player) {
+        super.removePlayer(player);
+
+        scriptContext.destroyPlayer((MapPlayer) player);
     }
 
     private void handleSwitchSlot(PlayerChangeHeldSlotEvent event) {

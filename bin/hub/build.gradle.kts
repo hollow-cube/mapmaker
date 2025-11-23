@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":modules:canvas:api"))
     implementation(project(":modules:canvas:impl-standalone"))
     implementation(project(":modules:map-core"))
+    implementation(project(":modules:terraform"))
 
     compileOnly(project(":tools:lua-slopgen:api"))
     annotationProcessor(project(":tools:lua-slopgen"))

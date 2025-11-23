@@ -1,0 +1,37 @@
+--!strict
+
+local task = require("@mapmaker/task")
+local Player = require("@mapmaker/player")
+
+function doBonkEffect(player: Player.Player, other: Player.Player)
+	local scale = 1 -- todo get other scale
+
+	local entity = player.world:spawnEntity("text", {
+		text = "INITIAL TEXT",
+		position = other.position + vec(
+			math.random(-1, 1),
+			math.random(2, 2.5),
+			math.random(-1, 1)
+		) * scale,
+		scale = vec(.75 * scale, .75 * scale, 1),
+		billboard = "center",
+		shadow = false,
+		background = 0,
+	})
+
+	task.wait(3)
+	-- entity.text = "BONK!" -- Text.new("<red>BONK!"),
+	entity:interpolate(3, {
+		scale = vec(1.5 * scale, 1.5 * scale, 1),
+	})
+
+	task.wait(4);
+	entity:interpolate(3, {
+		scale = vec(1.2 * scale, 1.2 * scale, 1),
+	})
+
+	task.wait(3)
+	entity:remove()
+end
+
+return doBonkEffect

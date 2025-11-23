@@ -6,5 +6,5 @@ return ({} :: any) :: {
 
 		Only available for player-bound scripts, otherwise will throw.
 	]=]
-	read Player: Player.Player,
+	read player: Player.Player,
 }

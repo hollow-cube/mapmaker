@@ -15,8 +15,10 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.ElementScanner14;
 import java.lang.foreign.Arena;
+import java.util.*;
 
 public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void> {
 
@@ -32,10 +34,15 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
 
     private final MethodSpec.Builder registerMethod;
 
+    private final Set<TypeName> dispatchTypes = new HashSet<>();
+    private final Map<TypeName, List<Map.Entry<TypeName, String>>> dispatchIndexMethods = new HashMap<>();
+
     // Reassigned as we traverse.
     private TypeName typeName;
     private @Nullable String luaTypeName = null;
+    private boolean isDispatch = false;
     private MethodSpec.Builder indexMethod;
+    private MethodSpec.Builder newIndexMethod;
     private MethodSpec.Builder namecallMethod;
 
     public LuaLibraryClassBuildingVisitor(
@@ -53,44 +60,149 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
 
         this.registerMethod = beginRegisterMethod();
         this.indexMethod = beginIndexMethod();
+        this.newIndexMethod = beginNewIndexMethod();
         this.namecallMethod = beginNamecallMethod();
     }
 
     public void finish() {
         glueTypeBuilder.addMethod(endRegisterMethod());
-        glueTypeBuilder.addMethod(endIndexMethod());
-        glueTypeBuilder.addMethod(endNamecallMethod());
+        glueTypeBuilder.addMethod(endIndexMethod(null));
+        glueTypeBuilder.addMethod(endNewIndexMethod(null));
+        glueTypeBuilder.addMethod(endNamecallMethod(null));
     }
 
     @Override
     public Void visitType(TypeElement e, Void unused) {
         // The top level class can be ignored
-        if (e.getEnclosingElement().getKind() == ElementKind.PACKAGE)
-            return super.visitType(e, unused);
+        if (e.getEnclosingElement().getKind() == ElementKind.PACKAGE) {
+            super.visitType(e, unused);
+
+            // Finalize inherited types
+
+            for (var type : dispatchTypes) {
+                var oldLuaTypeName = luaTypeName;
+                luaTypeName = ((ClassName) type).simpleName();
+
+                MethodSpec.Builder index, newindex, namecall;
+                {   // __index metamethod
+                    var glueName = namespace("index$meta", false);
+                    createLuaFunc(namespace("INDEX", true), glueName, LuaNames.INDEX_META_NAME);
+
+                    var method = MethodSpec.methodBuilder(glueName)
+                        .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                        .addParameter(LuaState.class, "state")
+                        .returns(int.class);
+
+                    method.addStatement("$T self = check$LArg(state, 1)", type, luaTypeName);
+                    method.addStatement("short atom = state.toStringAtomRaw(2)");
+
+                    method.beginControlFlow("return switch (self)");
+                    index = method;
+                }
+                {   // __newindex metamethod
+                    var glueName = namespace("newindex$meta", false);
+                    createLuaFunc(namespace("NEWINDEX", true), glueName, LuaNames.NEWINDEX_META_NAME);
+
+                    var method = MethodSpec.methodBuilder(glueName)
+                        .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                        .addParameter(LuaState.class, "state")
+                        .returns(int.class);
+
+                    method.addStatement("$T self = check$LArg(state, 1)", type, luaTypeName);
+                    method.addStatement("state.remove(1)");
+                    method.addStatement("short atom = state.toStringAtomRaw(1)");
+                    method.addStatement("state.remove(1)");
+
+                    method.beginControlFlow("return switch (self)");
+                    newindex = method;
+                }
+                {   // __namecall metamethod
+                    var glueName = namespace("namecall$meta", false);
+                    createLuaFunc(namespace("NAMECALL", true), glueName, LuaNames.NAMECALL_META_NAME);
+
+                    var method = MethodSpec.methodBuilder(glueName)
+                        .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                        .addParameter(LuaState.class, "state")
+                        .returns(int.class);
+
+                    method.addStatement("$T self = check$LArg(state, 1)", type, luaTypeName);
+                    method.addStatement("short atom = state.nameCallAtomRaw()");
+
+                    method.beginControlFlow("return switch (self)");
+                    namecall = method;
+                }
+
+                var seenIndexMethods = new HashSet<String>();
+                for (var entry : dispatchIndexMethods.entrySet()) {
+                    var list = entry.getValue();
+                    if (!seenIndexMethods.add(Objects.toIdentityString(list)))
+                        continue;
+
+                    for (var entry2 : list.reversed()) {
+                        var lastLuaTypeName = this.luaTypeName;
+                        luaTypeName = entry2.getValue();
+
+                        index.addStatement("case $T self1 -> $L(state, self1, atom)",
+                            entry2.getKey(), namespace("index$dispatch", false));
+                        newindex.addStatement("case $T self1 -> $L(state, self1, atom)",
+                            entry2.getKey(), namespace("newindex$dispatch", false));
+                        namecall.addStatement("case $T self1 -> $L(state, self1, atom)",
+                            entry2.getKey(), namespace("namecall$dispatch", false));
+
+                        luaTypeName = lastLuaTypeName;
+                    }
+                }
+
+                index.addStatement("default -> $L(state, self, atom)", namespace("index$dispatch", false));
+                index.addCode("$<};");
+                glueTypeBuilder.addMethod(index.build());
+                newindex.addStatement("default -> $L(state, self, atom)", namespace("newindex$dispatch", false));
+                newindex.addCode("$<};");
+                glueTypeBuilder.addMethod(newindex.build());
+                namecall.addStatement("default -> $L(state, self, atom)", namespace("namecall$dispatch", false));
+                namecall.addCode("$<};");
+                glueTypeBuilder.addMethod(namecall.build());
+
+                luaTypeName = oldLuaTypeName;
+            }
+
+            return null;
+        }
 
         if (e.getAnnotation(LuaExport.class) == null)
             return null; // Not exported, continue
 
         // We need to enter the inner type, process, then return
 
+        var superType = ClassName.get(e.getSuperclass());
+        if (superType.equals(TypeName.get(Object.class))) superType = null;
+        boolean isFinal = e.getModifiers().contains(Modifier.FINAL);
+
         TypeName lastTypeName = typeName;
         typeName = TypeName.get(e.asType());
+        boolean lastIsDispatch = isDispatch;
+        isDispatch = superType != null || !isFinal;
         String lastLuaTypeName = luaTypeName;
         luaTypeName = e.getSimpleName().toString();
         MethodSpec.Builder lastIndexMethod = indexMethod;
         indexMethod = beginIndexMethod();
+        MethodSpec.Builder lastNewIndexMethod = newIndexMethod;
+        newIndexMethod = beginNewIndexMethod();
         MethodSpec.Builder lastNamecallMethod = namecallMethod;
         namecallMethod = beginNamecallMethod();
 
-        setupNamedType();
+        setupNamedType(superType);
 
         super.visitType(e, unused);
 
-        glueTypeBuilder.addMethod(endNamecallMethod());
+        glueTypeBuilder.addMethod(endNamecallMethod(superType));
         namecallMethod = lastNamecallMethod;
-        glueTypeBuilder.addMethod(endIndexMethod());
+        glueTypeBuilder.addMethod(endNewIndexMethod(superType));
+        newIndexMethod = lastNewIndexMethod;
+        glueTypeBuilder.addMethod(endIndexMethod(superType));
         indexMethod = lastIndexMethod;
         luaTypeName = lastLuaTypeName;
+        isDispatch = lastIsDispatch;
         typeName = lastTypeName;
 
         return null;
@@ -112,9 +224,14 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
             return null;
         }
 
-        if (isProperty) appendIndexCall(e, isStatic);
+        boolean isGetter = isProperty && e.getSimpleName().toString().startsWith("get");
+        boolean isSetter = isProperty && e.getSimpleName().toString().startsWith("set");
+
+        if (isGetter) appendIndexCall(e, isStatic);
+        else if (isSetter) appendNewIndexCall(e, isStatic);
         else if (isMethod) appendNamecallCall(e);
-        else throw new IllegalStateException("not namecall or method");
+        else messager.printError("not namecall, getter, or setter isProperty=" +
+                                 isProperty + ", name=" + e.getSimpleName().toString(), e);
 
         return null;
     }
@@ -132,11 +249,38 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
         }
     }
 
+    private void appendNewIndexCall(ExecutableElement e, boolean isStatic) {
+        var javaName = e.getSimpleName().toString();
+        var luaName = LuaNames.toLuaProperty(javaName);
+        var isVoid = e.getReturnType().getKind() == TypeKind.VOID;
+
+        newIndexMethod.addCode("case $L/*$L*/ -> ", atomizer.atomize(luaName), luaName);
+        if (isVoid) newIndexMethod.beginControlFlow("");
+        if (isStatic) {
+            newIndexMethod.addStatement("$T.$L(state)",
+                TypeName.get(e.getEnclosingElement().asType()), javaName);
+        } else {
+            newIndexMethod.addStatement("self.$L(state)", javaName);
+        }
+        if (isVoid) {
+            newIndexMethod.addStatement("yield 0");
+            newIndexMethod.endControlFlow();
+        }
+    }
+
     private void appendNamecallCall(ExecutableElement e) {
         var javaName = e.getSimpleName().toString();
         var luaName = LuaNames.toLuaMethod(javaName);
+        var isVoid = e.getReturnType().getKind() == TypeKind.VOID;
 
         if (luaTypeName == null) {
+            if (isVoid) {
+                // Doesnt work because we return the function reference. We could generate
+                // a wrapper function here but i am lazy :-)
+                messager.printError("Cannot export void methods from library classes", e);
+                return;
+            }
+
             // Ends up actually being an index to the direct function reference.
             var luaFuncField = namespace(luaName, true);
             glueTypeBuilder.addField(FieldSpec.builder(LuaFunc.class, luaFuncField)
@@ -152,7 +296,12 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
             // When calling a non-static method, we remove the self argument
             // so that the callee can pretend its a 'normal' call.
             namecallMethod.addStatement("state.remove(1)");
-            namecallMethod.addStatement("yield self.$L(state)", javaName);
+            if (isVoid) {
+                namecallMethod.addStatement("self.$L(state)", javaName);
+                namecallMethod.addStatement("yield 0");
+            } else {
+                namecallMethod.addStatement("yield self.$L(state)", javaName);
+            }
             namecallMethod.endControlFlow();
         }
     }
@@ -166,10 +315,14 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
             // For the library object we dont actually care about the
             // userdata itself, none of the 'static' functions use it.
             method.addStatement("state.newUserData(new Object())");
-            method.addStatement("state.newTable()"); // metatable
+            method.addStatement("$T.newMetaTable(state, LIB_NAME)",
+                ClassName.get("net.hollowcube.mapmaker.scripting.api", "LuaVector"));
+//            method.addStatement("state.newTable()"); // metatable
 
             method.addStatement("state.pushFunction(INDEX)");
             method.addStatement("state.setField(-2, $S)", LuaNames.INDEX_META_NAME);
+            method.addStatement("state.pushFunction(NEWINDEX)");
+            method.addStatement("state.setField(-2, $S)", LuaNames.NEWINDEX_META_NAME);
             method.addStatement("state.pushFunction(NAMECALL)");
             method.addStatement("state.setField(-2, $S)", LuaNames.NAMECALL_META_NAME);
 
@@ -184,69 +337,155 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
     }
 
     private MethodSpec endRegisterMethod() {
-
         return registerMethod.build();
     }
 
     private MethodSpec.Builder beginIndexMethod() {
-        var glueName = namespace(LuaNames.INDEX_GLUE_NAME, false);
-        createLuaFunc(namespace("INDEX", true), glueName, LuaNames.INDEX_META_NAME);
+        var glueName = namespace(isDispatch ? "index$dispatch" : "index$meta", false);
 
         var method = MethodSpec.methodBuilder(glueName)
             .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
             .addParameter(LuaState.class, "state")
             .returns(int.class);
 
-        // If member, need to add read for self parameter
-        if (luaTypeName != null) {
-            method.addStatement("$T self = check$LArg(state, 1)", typeName, luaTypeName);
+        if (isDispatch) {
+            // For inheriting classes, we take self and atom as an input
+            method.addParameter(typeName, "self");
+            method.addParameter(int.class, "atom");
+        } else {
+            // Create the accessor
+            createLuaFunc(namespace("INDEX", true), glueName, LuaNames.INDEX_META_NAME);
+
+            // If member, need to add read for self parameter
+            if (luaTypeName != null) {
+                method.addStatement("$T self = check$LArg(state, 1)", typeName, luaTypeName);
+            }
+
+            method.addStatement("short atom = state.toStringAtomRaw(2)");
         }
 
-        method.addStatement("short indexAtom = state.toStringAtomRaw(2)");
-        method.beginControlFlow("return switch (indexAtom)");
-
+        method.beginControlFlow("return switch (atom)");
         return method;
     }
 
-    private MethodSpec endIndexMethod() {
+    private MethodSpec endIndexMethod(@Nullable TypeName superType) {
         // There are three remaining scenarios here:
         // 1. the atom is NO_ATOM in which case we dont need to do anything ever
         indexMethod.addStatement("case $T.NO_ATOM -> 0", LuaState.class);
 
-        // 2. if we have a superclass, delegate to that in default
-        // TODO: handle this case
-        // indexMethod.addStatement("default -> $T.super.index$meta(state)", glueSuperType);
+        if (superType != null) {
+            // 2. if we have a superclass, delegate to that in default
+            var oldLuaTypeName = luaTypeName;
+            luaTypeName = ((ClassName) superType).simpleName();
 
-        // 3. no superclass, just exit
-        indexMethod.addStatement("default -> 0");
+            indexMethod.addStatement("default -> $L(state, self, atom)", namespace("index$dispatch", false));
+
+            luaTypeName = oldLuaTypeName;
+        } else {
+            // 3. no superclass, just exit
+            indexMethod.addStatement("default -> 0");
+        }
+
         indexMethod.addCode("$<};");
-
         return indexMethod.build();
     }
 
-    private MethodSpec.Builder beginNamecallMethod() {
-        var glueName = namespace(LuaNames.NAMECALL_GLUE_NAME, false);
-        createLuaFunc(namespace("NAMECALL", true), glueName, LuaNames.NAMECALL_META_NAME);
+    private MethodSpec.Builder beginNewIndexMethod() {
+        var glueName = namespace(isDispatch ? "newindex$dispatch" : "newindex$meta", false);
 
         var method = MethodSpec.methodBuilder(glueName)
             .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
             .addParameter(LuaState.class, "state")
             .returns(int.class);
+        if (isDispatch) {
+            // For inheriting classes, we take self and namecall atom as an input
+            method.addParameter(typeName, "self");
+            method.addParameter(int.class, "atom");
+        } else {
+            // Create the accessor
+            createLuaFunc(namespace("NEWINDEX", true), glueName, LuaNames.NEWINDEX_META_NAME);
 
-        // If member, need to add read for self parameter
-        if (luaTypeName != null) {
-            method.addStatement("$T self = check$LArg(state, 1)", typeName, luaTypeName);
+            // If member, need to add read for self parameter
+            if (luaTypeName != null)
+                method.addStatement("$T self = check$LArg(state, 1)", typeName, luaTypeName);
+            method.addStatement("state.remove(1)"); // remove self arg (for nicer syntax)
+
+            method.addStatement("short atom = state.toStringAtomRaw(1)");
+            method.addStatement("state.remove(1)"); // remove self arg (for nicer syntax)
         }
 
-        method.addStatement("short namecallAtom = state.nameCallAtomRaw()");
-        method.beginControlFlow("return switch (namecallAtom)");
+        method.beginControlFlow("return switch (atom)");
 
         return method;
     }
 
-    private MethodSpec endNamecallMethod() {
-        // TODO: should be an error here i guess
-        namecallMethod.addStatement("default -> 0");
+    private MethodSpec endNewIndexMethod(@Nullable TypeName superType) {
+
+        // TODO: this exists to prevent java from getting mad about having no result expression cases
+        //       from a switch expression. Instead we should just not generate the switch if there are
+        //       no methods on a given type.
+        newIndexMethod.addStatement("case Short.MIN_VALUE -> 0");
+
+        if (superType != null) {
+            var oldLuaTypeName = luaTypeName;
+            luaTypeName = ((ClassName) superType).simpleName();
+
+            newIndexMethod.addStatement("default -> $L(state, self, atom)", namespace("newindex$dispatch", false));
+
+            luaTypeName = oldLuaTypeName;
+        } else {
+            newIndexMethod.addStatement("default -> throw state.error($S)", "Attempt to update nonexistent property");
+        }
+        newIndexMethod.addCode("$<};");
+
+        return newIndexMethod.build();
+    }
+
+    private MethodSpec.Builder beginNamecallMethod() {
+        var glueName = namespace(isDispatch ? "namecall$dispatch" : "namecall$meta", false);
+
+        var method = MethodSpec.methodBuilder(glueName)
+            .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+            .addParameter(LuaState.class, "state")
+            .returns(int.class);
+        if (isDispatch) {
+            // For inheriting classes, we take self and namecall atom as an input
+            method.addParameter(typeName, "self");
+            method.addParameter(int.class, "atom");
+        } else {
+            // Create the accessor
+            createLuaFunc(namespace("NAMECALL", true), glueName, LuaNames.NAMECALL_META_NAME);
+
+            // If member, need to add read for self parameter
+            if (luaTypeName != null) {
+                method.addStatement("$T self = check$LArg(state, 1)", typeName, luaTypeName);
+            }
+
+            method.addStatement("short atom = state.nameCallAtomRaw()");
+        }
+
+        method.beginControlFlow("return switch (atom)");
+
+        return method;
+    }
+
+    private MethodSpec endNamecallMethod(@Nullable TypeName superType) {
+
+        // TODO: this exists to prevent java from getting mad about having no result expression cases
+        //       from a switch expression. Instead we should just not generate the switch if there are
+        //       no methods on a given type.
+        namecallMethod.addStatement("case Short.MIN_VALUE -> 0");
+
+        if (superType != null) {
+            var oldLuaTypeName = luaTypeName;
+            luaTypeName = ((ClassName) superType).simpleName();
+
+            namecallMethod.addStatement("default -> $L(state, self, atom)", namespace("namecall$dispatch", false));
+
+            luaTypeName = oldLuaTypeName;
+        } else {
+            namecallMethod.addStatement("default -> throw state.error($S)", "Attempt to call nonexistent method");
+        }
         namecallMethod.addCode("$<};");
 
         return namecallMethod.build();
@@ -260,7 +499,19 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
             .build());
     }
 
-    private void setupNamedType() {
+    private void setupNamedType(@Nullable TypeName superType) {
+        if (isDispatch && superType != null) {
+            //todo rename me
+            var dispatchedIndex = dispatchIndexMethods.get(superType);
+            dispatchIndexMethods.put(typeName, dispatchedIndex);
+            dispatchedIndex.add(Map.entry(typeName, luaTypeName));
+            return;
+        }
+        if (isDispatch) {
+            dispatchTypes.add(typeName);
+            dispatchIndexMethods.put(typeName, new ArrayList<>());
+        }
+
         var tagName = namespace("TAG", true);
 
         glueTypeBuilder.addField(FieldSpec.builder(int.class, tagName)
@@ -294,10 +545,16 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
         registerMethod.addCode("\n");
         registerMethod.addComment("Type setup for $L", luaTypeName);
 
-        registerMethod.addStatement("state.newTable()"); // metatable
+//        registerMethod.addStatement("state.newTable()"); // metatable
+
+        registerMethod.addStatement("$T.newMetaTable(state, LIB_NAME + $S)",
+            ClassName.get("net.hollowcube.mapmaker.scripting.api", "LuaVector"),
+            "." + luaTypeName);
 
         registerMethod.addStatement("state.pushFunction($L)", namespace("INDEX", true));
         registerMethod.addStatement("state.setField(-2, $S)", LuaNames.INDEX_META_NAME);
+        registerMethod.addStatement("state.pushFunction($L)", namespace("NEWINDEX", true));
+        registerMethod.addStatement("state.setField(-2, $S)", LuaNames.NEWINDEX_META_NAME);
         registerMethod.addStatement("state.pushFunction($L)", namespace("NAMECALL", true));
         registerMethod.addStatement("state.setField(-2, $S)", LuaNames.NAMECALL_META_NAME);
 
