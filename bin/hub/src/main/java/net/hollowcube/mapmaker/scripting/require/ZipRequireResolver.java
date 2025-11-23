@@ -6,21 +6,25 @@ import net.hollowcube.luau.compiler.LuauCompileException;
 import net.hollowcube.luau.compiler.LuauCompiler;
 import net.hollowcube.luau.require.RequireResolver;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 // uses @/path as chunknames
-public class ResourceRequireResolver implements RequireResolver {
+public class ZipRequireResolver implements RequireResolver {
+    private static final Logger logger = LoggerFactory.getLogger(ZipRequireResolver.class);
+
     private static final List<String> SUFFIXES = List.of(".luau", ".lua", "/init.luau", "/init.lua");
 
     private record ResolvedPath(Result result, String realPath) {}
 
-    private final LuauCompiler compiler;
-    private final URI base;
+    private final Map<String, byte[]> vfs;
 
     private String realPath;
     private String absoluteRealPath;
@@ -29,9 +33,13 @@ public class ResourceRequireResolver implements RequireResolver {
     private String modulePath;
     private String absoluteModulePath;
 
-    public ResourceRequireResolver(LuauCompiler compiler, URI base) {
-        this.compiler = compiler;
-        this.base = base;
+    public ZipRequireResolver(LuauCompiler compiler, URI zip) throws IOException, LuauCompileException {
+        this.vfs = readAndCompileEntries(compiler, zip);
+    }
+
+    @Deprecated
+    public Map<String, byte[]> getVfsThisIsBadPleaseFix() {
+        return vfs;
     }
 
     @Override
@@ -99,13 +107,7 @@ public class ResourceRequireResolver implements RequireResolver {
         // new thread needs to have the globals sandboxed
         thread.sandboxThread();
 
-        byte[] bytecode;
-        try (var is = URI.create(base + loadName).toURL().openStream()) {
-            var contents = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-            bytecode = compiler.compile(contents);
-        } catch (IOException | LuauCompileException e) {
-            throw new RuntimeException(e);
-        }
+        var bytecode = Objects.requireNonNull(vfs.get(loadName), loadName);
 
         thread.load(chunkName, bytecode); // throws on fail
         var status = thread.resume(state, 0); // todo deal with other states in resume its currently cooked
@@ -203,14 +205,7 @@ public class ResourceRequireResolver implements RequireResolver {
     }
 
     private boolean isFile(String path) {
-        // filesystem read
-        try {
-            // erm
-            URI.create(base + path).toURL().openStream().close();
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
+        return vfs.containsKey(path);
     }
 
     private static String normalizePath(String path) {
@@ -244,4 +239,25 @@ public class ResourceRequireResolver implements RequireResolver {
         return path.startsWith("/");
     }
 
+    private static Map<String, byte[]> readAndCompileEntries(LuauCompiler compiler, URI zip) throws IOException, LuauCompileException {
+        var vfs = new HashMap<String, byte[]>();
+        try (var is = zip.toURL().openStream()) {
+            if (is == null) throw new IOException("Could not open zip stream for URI: " + zip);
+
+            var zis = new ZipInputStream(is);
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                if (entry.isDirectory()) continue;
+
+                if (!entry.getName().endsWith(".luau"))
+                    continue;
+
+                var path = normalizePath("/" + entry.getName());
+                var content = new String(zis.readAllBytes(), StandardCharsets.UTF_8);
+                vfs.put(path, compiler.compile(content));
+                logger.info("compiled script {} ({} bytes)", path, content.length());
+            }
+        }
+        return Map.copyOf(vfs);
+    }
 }

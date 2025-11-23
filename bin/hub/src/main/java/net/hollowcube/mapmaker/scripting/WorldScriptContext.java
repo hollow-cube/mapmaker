@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.scripting.api.*;
 import net.hollowcube.mapmaker.scripting.require.ResourceRequireResolver;
+import net.hollowcube.mapmaker.scripting.require.ZipRequireResolver;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.tag.Tag;
@@ -17,6 +18,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class WorldScriptContext {
@@ -29,13 +31,25 @@ public class WorldScriptContext {
         .build();
 
     private final LuaState state;
+    private final @Nullable Map<String, byte[]> vfs;
 
-    public WorldScriptContext(URI baseUrl) {
+    public WorldScriptContext(URI baseUrlOrZip, boolean isZip) {
         this.state = LuaState.newState();
         state.callbacks().userThread(WorldScriptContext::onThreadChange);
         state.openLibs();
 
-        state.openRequire(new ResourceRequireResolver(LUAU_COMPILER, baseUrl));
+        try {
+            if (isZip) {
+                var resolver = new ZipRequireResolver(LUAU_COMPILER, baseUrlOrZip);
+                this.vfs = resolver.getVfsThisIsBadPleaseFix();
+                state.openRequire(resolver);
+            } else {
+                this.vfs = null;
+                state.openRequire(new ResourceRequireResolver(LUAU_COMPILER, baseUrlOrZip));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         registerGeneratedStringAtoms(state);
 
         LuaGlobals.register(state);
@@ -87,7 +101,6 @@ public class WorldScriptContext {
 
         @Override
         public EventNode<Event> eventNode() {
-            System.out.println("returning event node for " + player.getUsername());
             // Obviously unsafe, not sure a better option immediately.
             //noinspection unchecked
             return (EventNode<Event>) (Object) player.eventNode();
@@ -120,15 +133,25 @@ public class WorldScriptContext {
 
         thread.sandboxThread(); // Create mutable env for script usage
 
-        var playerScript = Objects.requireNonNull(HubMapWorld.class.getResource("/scripts/player.luau"));
-        try (var is = playerScript.openStream()) {
-            var source = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-            var bytecode = LUAU_COMPILER.compile(source);
-            thread.load("/player.luau", bytecode);
-            thread.call(0, 0);
-        } catch (Exception e) {
-            player.kick("Failed to spawn player");
-            throw new RuntimeException("failed to spawn player", e);
+        if (vfs != null) {
+            try {
+                thread.load("/player.luau", Objects.requireNonNull(vfs.get("/player.luau")));
+                thread.call(0, 0);
+            } catch (Exception e) {
+                player.kick("Failed to spawn player");
+                throw new RuntimeException("failed to spawn player", e);
+            }
+        } else {
+            var playerScript = Objects.requireNonNull(HubMapWorld.class.getResource("/scripts/player.luau"));
+            try (var is = playerScript.openStream()) {
+                var source = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+                var bytecode = LUAU_COMPILER.compile(source);
+                thread.load("/player.luau", bytecode);
+                thread.call(0, 0);
+            } catch (Exception e) {
+                player.kick("Failed to spawn player");
+                throw new RuntimeException("failed to spawn player", e);
+            }
         }
     }
 

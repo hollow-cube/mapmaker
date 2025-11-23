@@ -33,6 +33,25 @@ dependencies {
     implementation(libs.bundles.prometheus)
 }
 
+val outPath = layout.buildDirectory.dir("resources/main/net.hollowcube.scripting")
+
+val zipHubScripts = tasks.register<Zip>("zipHubScripts") {
+    archiveFileName.set("hub.zip")
+    destinationDirectory.set(outPath)
+    from(project.projectDir.resolve("src/main/resources/scripts"))
+
+    include("**/*.luau")
+    include("**/.luaurc")
+    exclude(".types")
+    exclude(".vscode")
+
+    group = "scripting"
+}
+
+tasks.named("processResources") {
+    dependsOn(zipHubScripts)
+}
+
 application {
     mainClass = "net.hollowcube.mapmaker.hub.HubMain"
 }

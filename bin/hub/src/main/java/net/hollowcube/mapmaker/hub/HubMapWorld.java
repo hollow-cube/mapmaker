@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub;
 
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.hub.item.*;
 import net.hollowcube.mapmaker.hub.util.HubTransferData;
@@ -55,11 +56,14 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
             .addListener(PlayerChangeHeldSlotEvent.class, this::handleSwitchSlot)
             .addListener(PlayerMoveEvent.class, this::handlePlayerMove);
 
-        {
+        // Load scripting engine
+        if (ServerRuntime.getRuntime().isDevelopment() && false) {
             var playerScript = Objects.requireNonNull(HubMapWorld.class.getResource("/scripts/player.luau"));
-
             var baseUrl = URI.create(playerScript.toString().substring(0, playerScript.toString().lastIndexOf('/')));
-            this.scriptContext = new WorldScriptContext(baseUrl);
+            this.scriptContext = new WorldScriptContext(baseUrl, false);
+        } else {
+            var zipUrl = Objects.requireNonNull(HubMapWorld.class.getResource("/net.hollowcube.scripting/hub.zip"));
+            this.scriptContext = new WorldScriptContext(URI.create(zipUrl.toString()), true);
         }
     }
 

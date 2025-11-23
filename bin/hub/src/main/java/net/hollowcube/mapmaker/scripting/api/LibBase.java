@@ -45,7 +45,6 @@ public final class LibBase {
             handle.pusher = this.pusher;
             handle.state = state;
             handle.handlerRef = state.ref(1);
-            System.out.println("listening, func is " + state.toStringRepr(1) + " ref is " + handle.handlerRef);
 
             state.pushThread(state);
             handle.threadRef = state.ref(-1);
