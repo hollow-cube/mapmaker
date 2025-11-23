@@ -7,7 +7,6 @@ function doBonkEffect(player: Player.Player, other: Player.Player)
 	local scale = 1 -- todo get other scale
 
 	local entity = player.world:spawnEntity("text", {
-		text = "INITIAL TEXT",
 		position = other.position + vec(
 			math.random(-1, 1),
 			math.random(2, 2.5),
@@ -20,7 +19,7 @@ function doBonkEffect(player: Player.Player, other: Player.Player)
 	})
 
 	task.wait(3)
-	-- entity.text = "BONK!" -- Text.new("<red>BONK!"),
+	entity.text = "BONK!" -- Text.new("<red>BONK!"),
 	entity:interpolate(3, {
 		scale = vec(1.5 * scale, 1.5 * scale, 1),
 	})

@@ -176,10 +176,16 @@ public final class LibEntity {
             state.checkType(2, LuaType.TABLE);
 
             // TODO: actually set interpolation flags
-            LuaHelpers.tableForEach(state, 2, (key) -> {
-                if (!readInterpField(state, key, -1)) {
-                    throw state.error("Unknown interpolation property: " + key);
-                }
+            delegate().editEntityMeta(AbstractDisplayMeta.class, meta -> {
+                meta.setTransformationInterpolationStartDelta(0); // begin interpolation now
+                if (meta.getTransformationInterpolationDuration() != duration)
+                    meta.setTransformationInterpolationDuration(duration);
+
+                LuaHelpers.tableForEach(state, 2, (key) -> {
+                    if (!readInterpField(state, key, -1)) {
+                        throw state.error("Unknown interpolation property: " + key);
+                    }
+                });
             });
 
             return 0;
