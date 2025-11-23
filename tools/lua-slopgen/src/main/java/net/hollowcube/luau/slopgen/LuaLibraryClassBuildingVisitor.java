@@ -315,9 +315,7 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
             // For the library object we dont actually care about the
             // userdata itself, none of the 'static' functions use it.
             method.addStatement("state.newUserData(new Object())");
-            method.addStatement("$T.newMetaTable(state, LIB_NAME)",
-                ClassName.get("net.hollowcube.mapmaker.scripting.api", "LuaVector"));
-//            method.addStatement("state.newTable()"); // metatable
+            method.addStatement("state.newMetaTable(LIB_NAME)"); // metatable
 
             method.addStatement("state.pushFunction(INDEX)");
             method.addStatement("state.setField(-2, $S)", LuaNames.INDEX_META_NAME);
@@ -545,11 +543,7 @@ public class LuaLibraryClassBuildingVisitor extends ElementScanner14<Void, Void>
         registerMethod.addCode("\n");
         registerMethod.addComment("Type setup for $L", luaTypeName);
 
-//        registerMethod.addStatement("state.newTable()"); // metatable
-
-        registerMethod.addStatement("$T.newMetaTable(state, LIB_NAME + $S)",
-            ClassName.get("net.hollowcube.mapmaker.scripting.api", "LuaVector"),
-            "." + luaTypeName);
+        registerMethod.addStatement("state.newMetaTable(LIB_NAME + $S)", "." + luaTypeName); // metatable
 
         registerMethod.addStatement("state.pushFunction($L)", namespace("INDEX", true));
         registerMethod.addStatement("state.setField(-2, $S)", LuaNames.INDEX_META_NAME);

@@ -11,24 +11,12 @@ public final class LuaVector {
     private static final LuaFunc ADD = LuaFunc.wrap(LuaVector::luaAdd, "__add");
     private static final LuaFunc SUB = LuaFunc.wrap(LuaVector::luaSub, "__sub");
 
-    // TODO this is luaL_newmetatable inlined, this should just exist in luau-java.
-    public static boolean newMetaTable(LuaState state, String name) {
-        state.getField(LuaState.REGISTRY_INDEX, name); // get registry.name
-        if (!state.isNil(-1))                    // name already in use?
-            return false;                              // leave previous value on top, but return 0
-        state.pop(1);
-        state.newTable();
-        state.pushValue(-1);
-        state.setField(LuaState.REGISTRY_INDEX, name); // registry.name = metatable
-        return true;
-    }
-
     public static void register(LuaState state) {
         // Put a zero vector on the stack, we will eventually assign the metatable to it
         state.pushVector(0f, 0f, 0f);
 
         // Create metatable
-        newMetaTable(state, "vector");
+        state.newMetaTable("vector");
         state.pushFunction(INDEX);
         state.setField(-2, "__index");
         state.pushFunction(TOSTRING);

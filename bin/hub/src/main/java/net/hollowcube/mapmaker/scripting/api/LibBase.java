@@ -27,14 +27,8 @@ public final class LibBase {
                 .addListener(EntityAttackEvent.class, event -> {
 //                    var attacker = event.getEntity();
 
-                    int top = state.top();
-                    System.out.println("about to get handler ref");
                     state.getRef(handlerRef);
                     state.call(0, 0);
-                    int newTop = state.top();
-                    if (top != newTop) {
-                        throw new RuntimeException("top leaked during handler!!! " + top + " != " + newTop);
-                    }
                 });
 
             return 0;

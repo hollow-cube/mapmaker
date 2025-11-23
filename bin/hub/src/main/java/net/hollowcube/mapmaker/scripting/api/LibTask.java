@@ -136,22 +136,7 @@ public final class LibTask {
     }
 
     private static int resume(@Nullable LuaState caller, LuaState thread, int nargs) {
-
-        int top = thread.top() - nargs;
         var status = thread.resume(caller, nargs);
-
-        int newTop = thread.top();
-        if (top != newTop) {
-            System.err.println("top leaked during resume!!! " + top + " != " + newTop);
-            System.err.println("leaked " + (newTop - top) + " values");
-
-            // Inspect what was left on the stack
-            for (int i = top + 1; i <= newTop; i++) {
-                System.err.println("  slot " + i + ": " + thread.type(i));
-            }
-        }
-
-
         return switch (status) {
             // 1: OK -> exit, no need to do anything
             // 2: YIELD -> simply return the thread. One of two things happen
@@ -160,12 +145,6 @@ public final class LibTask {
             case OK, YIELD -> 1;
             // 3: ERROR -> propagate
             default -> {
-                System.err.println("BAD TASK RETURN!!! " + status);
-                System.err.flush();
-                System.err.println("TOS 1 is " + thread.unsafeToString(-1));
-                System.err.flush();
-                System.err.println("TOS 2 is " + thread.unsafeToString(thread.top() - 1));
-                System.err.flush();
                 // todo better error
                 throw new RuntimeException(thread.unsafeToString(-1));
             }

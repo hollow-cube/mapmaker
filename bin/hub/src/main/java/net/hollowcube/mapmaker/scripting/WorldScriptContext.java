@@ -97,10 +97,7 @@ public class WorldScriptContext {
     }
 
     private static void onThreadChange(@Nullable LuaState parent, LuaState thread) {
-        if (parent == null) {
-            System.out.println("thread destroy: " + thread);
-            return; // Destruction, dont care for now.
-        }
+        if (parent == null) return; // Destruction, dont care for now.
 
         // If our parent has a thread data, copy its context to our thread.
         // This will _not_ happen for any top level threads which is intentional
