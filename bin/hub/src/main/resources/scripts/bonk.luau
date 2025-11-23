@@ -6,7 +6,12 @@ local Player = require("@mapmaker/player")
 local BONK_SOUND = "item.toy.squeak"
 
 function doBonkEffect(player: Player.Player, other: Player.Player)
-	local scale = 1 -- todo get other scale
+	local scale = other.deprecated_scale
+
+	local item = player:getSlot(Slot.MAIN_HAND)
+	if not item or item.id ~= "mapmaker:create_maps" then
+		return
+	end
 
 	player:playSound(BONK_SOUND, { pitch = math.random() * 0.2 + 0.9 })
 	local entity = player.world:spawnEntity("text", {

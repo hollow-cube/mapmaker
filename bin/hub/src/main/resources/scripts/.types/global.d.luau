@@ -1,20 +1,22 @@
 declare function vec(x: number, y: number, z: number): vector
 
-	export type AnyText = Text | string
+declare class Slot end
+declare Slot: {
+	MAIN_HAND: Slot,
+}
 
-	declare class Text
-
+export type AnyText = Text | string
+declare class Text
 	function __len(self): number
-		function __concat(self, other: AnyText): Text
+	function __concat(self, other: AnyText): Text
 
-			function __eq(self, other: Text): boolean
+	function __eq(self, other: Text): boolean
 
-				function __tostring(self): string
+	function __tostring(self): string
+end
 
-				end
+declare Text: {
+	new: (raw: string) -> Text,
 
-				declare Text: {
-					new: (raw: string) -> Text,
-
-					sanitize: (raw: string) -> string,
-				}
+	sanitize: (raw: string) -> string,
+}

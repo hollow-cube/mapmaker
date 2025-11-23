@@ -41,12 +41,14 @@ public class WorldScriptContext {
         LuaGlobals.register(state);
         LuaVector.register(state);
         LuaText$luau.register(state);
+        LibItem.registerSlotGlobal(state);
 
         LibBase$luau.register(state);
         LibTask$luau.register(state);
         LibEnv$luau.register(state);
         LibPlayer$luau.register(state);
         LibEntity$luau.register(state);
+        LibItem$luau.register(state);
 
         state.sandbox();
     }

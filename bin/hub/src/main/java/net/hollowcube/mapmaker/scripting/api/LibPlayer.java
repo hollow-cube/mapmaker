@@ -15,6 +15,7 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.SoundStop;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.event.entity.EntityAttackEvent;
 
 import java.util.UUID;
@@ -69,6 +70,12 @@ public final class LibPlayer {
         @LuaProperty
         public int getWorld(LuaState state) {
             LibPlayer$luau.pushWorldView(state, new WorldView(player));
+            return 1;
+        }
+
+        @LuaProperty
+        public int getDeprecated_scale(LuaState state) {
+            state.pushNumber(player.getAttributeValue(Attribute.SCALE));
             return 1;
         }
 
@@ -152,6 +159,13 @@ public final class LibPlayer {
                 sound.source(checkSoundCategory(state, -1));
                 state.pop(1);
             }
+        }
+
+        @LuaMethod
+        public int getSlot(LuaState state) {
+            var slot = LibItem.checkSlot(state, 1);
+            LibItem.pushItem(state, player.getEquipment(slot));
+            return 1;
         }
 
         //endregion

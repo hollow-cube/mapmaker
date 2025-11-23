@@ -13,6 +13,7 @@ import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
+import java.util.Objects;
 import java.util.function.UnaryOperator;
 
 /// ScriptContext exists to manage resources associated with a given thread (group)
@@ -31,15 +32,19 @@ public sealed interface ScriptContext extends ThreadData, TagHandler {
 
     non-sealed interface World extends ScriptContext {
 
-        MapWorld world();
-
     }
 
     non-sealed interface Player extends ScriptContext {
 
         MapPlayer player();
 
+        @Override
+        default MapWorld world() {
+            return Objects.requireNonNull(MapWorld.forPlayer(player()));
+        }
     }
+
+    MapWorld world();
 
     void track(Disposable disposable);
 
