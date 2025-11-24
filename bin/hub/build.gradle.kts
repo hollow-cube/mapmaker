@@ -14,11 +14,14 @@ dependencies {
     implementation(project(":modules:canvas:api"))
     implementation(project(":modules:canvas:impl-standalone"))
     implementation(project(":modules:map-core"))
+    // Required because the ObjectEntity implements an interface for editing, very bad dependency need to be refactored.
+    implementation(project(":modules:terraform"))
 
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)
     implementation(libs.polar)
     implementation(libs.included.schem)
+    implementation(libs.fastutil)
 
     implementation(libs.slf4j.jul)
     implementation(libs.logback)

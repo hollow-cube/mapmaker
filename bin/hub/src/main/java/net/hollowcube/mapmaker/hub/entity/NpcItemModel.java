@@ -52,6 +52,10 @@ public class NpcItemModel extends BaseNpcEntity {
         getEntityMeta().setViewRange(isStatic ? 10 : 1);
     }
 
+    public void setModel(@NotNull BadSprite sprite) {
+        setModel(Material.STICK, sprite);
+    }
+
     public void setModel(@NotNull Material material, @NotNull BadSprite sprite) {
         var meta = getEntityMeta();
         meta.setDisplayContext(ItemDisplayMeta.DisplayContext.FIXED);

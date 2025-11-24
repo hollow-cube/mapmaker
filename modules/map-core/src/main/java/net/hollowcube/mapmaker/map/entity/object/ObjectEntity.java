@@ -32,7 +32,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -159,9 +158,13 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         tag.put("data", getTag(DATA_TAG));
     }
 
+    public boolean canSendToClient(@NotNull Player player) {
+        return sendToClient && this.handler != null && this.handler.canSendToPlayer(player);
+    }
+
     @Override
     public void updateNewViewer(@NotNull Player player) {
-        if (sendToClient) super.updateNewViewer(player);
+        if (canSendToClient(player)) super.updateNewViewer(player);
 
         var world = MapWorld.forPlayer(player);
         if (world == null) return;
@@ -177,7 +180,7 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
 
     @Override
     public void updateOldViewer(@NotNull Player player) {
-        if (sendToClient) super.updateOldViewer(player);
+        if (canSendToClient(player)) super.updateOldViewer(player);
 
         var world = MapWorld.forPlayer(player);
         if (world == null) return;

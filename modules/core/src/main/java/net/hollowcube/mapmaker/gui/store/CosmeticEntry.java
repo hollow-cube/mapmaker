@@ -89,7 +89,7 @@ public class CosmeticEntry extends View {
 //        costs.put("victory_effect/explosion", 5); // Intentionally not present, it does not work so should not be buyable
 //        costs.put("victory_effect/lightning", 5); // Intentionally not present, it does not work so should not be buyable
         costs.put("victory_effect/firework", 3);
-//        costs.put("victory_effect/omega", 15); // Intentionally not present, it does not work so should not be buyable
+        costs.put("victory_effect/omega", 15); // Intentionally not present, it does not work so should not be buyable
 
         var tempTrades = new HashMap<String, MerchantTrade>();
         for (var entry : costs.entrySet()) {

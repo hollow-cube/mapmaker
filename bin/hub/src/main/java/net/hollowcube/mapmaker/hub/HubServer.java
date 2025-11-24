@@ -17,10 +17,12 @@ import net.hollowcube.mapmaker.hub.command.util.HubTrainCommand;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.hub.util.HubTransferData;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapSize;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.NoopServerBridge;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.map.setting.TimeOfDay;
 import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.player.JoinHubRequest;
@@ -52,6 +54,8 @@ public class HubServer extends AbstractMapServer {
 
     static {
         HUB_MAP_DATA.settings().setSize(MapSize.UNLIMITED);
+        HUB_MAP_DATA.settings().set(MapSettings.TIME_OF_DAY, TimeOfDay.NIGHT);
+        HUB_MAP_DATA.settings().set(MapSettings.LIGHTING, true);
     }
 
     // Its only kinda unknown. it's not created in the constructor, but after prepareState

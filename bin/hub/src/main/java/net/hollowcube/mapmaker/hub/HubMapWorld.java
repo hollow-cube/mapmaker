@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub;
 
 import net.hollowcube.mapmaker.PlayerSettings;
+import net.hollowcube.mapmaker.hub.feature.event.christmas.PresentObjectHandler;
 import net.hollowcube.mapmaker.hub.item.*;
 import net.hollowcube.mapmaker.hub.util.HubTransferData;
 import net.hollowcube.mapmaker.map.*;
@@ -38,7 +39,7 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
     }
 
     public HubMapWorld(MapServer server, MapData map) {
-        super(server, map, makeMapInstance(map, 'h', MapInstance.LightingMode.FULL_BRIGHT),
+        super(server, map, makeMapInstance(map, 'h', null),
                 HubPlayerState.class);
 
         itemRegistry().register(new PlayMapsItem(server.playerService(), server.mapService(), server.bridge()));
@@ -46,6 +47,8 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
         itemRegistry().register(new OrgMapsItem(server.guiController()));
         itemRegistry().register(new OpenCosmeticsMenuItem(server.guiController()));
         itemRegistry().register(OpenStoreItem.INSTANCE);
+
+        objectEntityHandlers().registerForInteractions(PresentObjectHandler.ID, PresentObjectHandler::new);
 
         eventNode().addChild(EventUtil.READ_ONLY_NODE)
                 .addListener(PlayerChangeHeldSlotEvent.class, this::handleSwitchSlot)

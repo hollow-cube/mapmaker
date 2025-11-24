@@ -1,9 +1,6 @@
 package net.hollowcube.common.util;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.Transcoder;
@@ -30,5 +27,12 @@ public final class JsonUtil {
     public static <T> @Nullable T fromJson(@NotNull Codec<T> codec, @NotNull String json) throws JsonSyntaxException {
         JsonElement jsonElement = GSON.fromJson(json, JsonElement.class);
         return codec.decode(new RegistryTranscoder<>(Transcoder.JSON, MinecraftServer.process()), jsonElement).orElse(null);
+    }
+
+    public static boolean getAsBoolean(@NotNull JsonObject json, String key, boolean fallback) {
+        if (json.get(key) instanceof JsonPrimitive primitive && primitive.isBoolean()) {
+            return primitive.getAsBoolean();
+        }
+        return fallback;
     }
 }
