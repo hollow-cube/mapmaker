@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.scripting.api;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.gen.LuaExport;
 import net.hollowcube.luau.gen.LuaLibrary;
-import net.hollowcube.luau.gen.LuaMethod;
+import net.hollowcube.luau.gen.LuaProperty;
 import net.hollowcube.mapmaker.scripting.ScriptContext;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.item.ItemStack;
@@ -45,7 +45,7 @@ public final class LibItem {
     @LuaExport
     public record Item(ItemStack value) {
 
-        @LuaMethod
+        @LuaProperty
         public int getId(LuaState state) {
             var itemRegistry = ScriptContext.get(state).world().itemRegistry();
             var itemId = Objects.requireNonNullElse(itemRegistry.getItemId(value), value.material().name());

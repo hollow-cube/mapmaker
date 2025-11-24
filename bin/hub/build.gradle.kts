@@ -21,6 +21,8 @@ dependencies {
 
     implementation(libs.luau.core)
     implementation(libs.luau.natives.macos.arm64)
+    implementation(libs.luau.natives.linux.x64)
+    implementation(libs.luau.natives.windows.x64)
 
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)
