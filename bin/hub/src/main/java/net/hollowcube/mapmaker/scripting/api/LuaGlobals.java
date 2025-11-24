@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.scripting.api;
 
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.luau.LuaFunc;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.mapmaker.scripting.ScriptContext;
@@ -26,12 +27,13 @@ public final class LuaGlobals {
             builder.append(arg);
         }
 
-        // TODO: should include debug info in here later
-        var context = ScriptContext.get(state);
-        var world = ((ScriptContext.Player) context).player().getInstance();
-
         LOGGER.info("[SCRIPT] {}", builder);
-        world.sendMessage(Component.text("[SCRIPT] " + builder));
+
+        if (ServerRuntime.getRuntime().isDevelopment()) {
+            var context = ScriptContext.get(state);
+            var world = ((ScriptContext.Player) context).player().getInstance();
+            world.sendMessage(Component.text("[SCRIPT] " + builder));
+        }
 
         return 0;
     }

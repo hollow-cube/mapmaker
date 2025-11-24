@@ -57,7 +57,7 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
             .addListener(PlayerMoveEvent.class, this::handlePlayerMove);
 
         // Load scripting engine
-        if (ServerRuntime.getRuntime().isDevelopment() && false) {
+        if (ServerRuntime.getRuntime().isDevelopment()) {
             var playerScript = Objects.requireNonNull(HubMapWorld.class.getResource("/scripts/player.luau"));
             var baseUrl = URI.create(playerScript.toString().substring(0, playerScript.toString().lastIndexOf('/')));
             this.scriptContext = new WorldScriptContext(baseUrl, false);
