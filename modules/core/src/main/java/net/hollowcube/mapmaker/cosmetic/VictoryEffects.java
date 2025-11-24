@@ -10,11 +10,11 @@ public final class VictoryEffects {
     public static Cosmetic EXPLOSION = builder("explosion").rarity(Rarity.COMMON).build();
     public static Cosmetic LIGHTNING = builder("lightning").rarity(Rarity.COMMON).build();
     public static Cosmetic FIREWORK = builder("firework").rarity(Rarity.COMMON).impl(FireworkVictoryEffectImpl::new).build();
-//    public static Cosmetic OMEGA = builder("omega").rarity(Rarity.RARE).build();
-    public static Cosmetic OMEGA = builder("omega")
-        .rarity(Rarity.RARE)
-        .impl(ParticleVictoryEffects.ChristmasExplosion::new)
-        .build();
+    public static Cosmetic OMEGA = builder("omega").rarity(Rarity.RARE).build();
+//    public static Cosmetic OMEGA = builder("omega")
+//        .rarity(Rarity.RARE)
+//        .impl(ParticleVictoryEffects.ChristmasExplosion::new)
+//        .build();
 //    public static Cosmetic TRAIN = builder("train").rarity(Rarity.EPIC).build();
 
     public static @NotNull Cosmetic.Builder builder(@NotNull String id) {
