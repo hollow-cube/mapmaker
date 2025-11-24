@@ -3,18 +3,11 @@ package net.hollowcube.mapmaker.hub.command.util;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategories;
-import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
-import net.hollowcube.mapmaker.hub.feature.event.christmas.PresentTextures;
 import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
-import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
-import net.minestom.server.item.ItemStack;
-import net.minestom.server.network.packet.client.play.ClientPlayerRotationPacket;
 import org.jetbrains.annotations.NotNull;
 
 public class HubFlyCommand extends CommandDsl {
