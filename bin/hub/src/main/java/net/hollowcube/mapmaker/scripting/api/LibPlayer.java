@@ -111,7 +111,7 @@ public final class LibPlayer {
 
             readSoundOptions(state, sound, 2);
 
-            player.playSound(sound.build());
+            player.playSound(sound.build(), Sound.Emitter.self());
         }
 
         // (self, sound: string, position: vector, options: SoundOptions?) -> ()
