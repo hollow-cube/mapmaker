@@ -30,17 +30,10 @@ public class HubFlyCommand extends CommandDsl {
     }
 
     private void handleToggleFly(@NotNull Player player, @NotNull CommandContext context) {
-//        var newValue = !player.getTag(DoubleJumpFeature.TAG);
-//        player.sendMessage(Component.translatable("command.fly.hub", Component.translatable(newValue ? "off" : "on")));
-//        player.setTag(DoubleJumpFeature.TAG, newValue);
-//        player.setFlyingSpeed(newValue ? 0f : 0.05f);
-//        if (newValue) player.setFlying(false);
-
-        var model = new Entity(EntityType.ARMOR_STAND);
-        model.setInstance(player.getInstance(), player.getPosition())
-                .thenRun(() -> {
-                    player.addPassenger(model);
-                    model.setView(0f, 0f, 0f);
-                });
+        var newValue = !player.getTag(DoubleJumpFeature.TAG);
+        player.sendMessage(Component.translatable("command.fly.hub", Component.translatable(newValue ? "off" : "on")));
+        player.setTag(DoubleJumpFeature.TAG, newValue);
+        player.setFlyingSpeed(newValue ? 0f : 0.05f);
+        if (newValue) player.setFlying(false);
     }
 }
