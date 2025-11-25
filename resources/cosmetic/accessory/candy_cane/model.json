@@ -1,0 +1,67 @@
+{
+	"credit": "Made with Blockbench",
+	"texture_size": [64, 64],
+	"textures": {
+    "0": "mapmaker:item/candy_cane",
+    "particle": "mapmaker:item/candy_cane"
+	},
+	"elements": [
+		{
+			"from": [6.5, 0, 6.5],
+			"to": [9.5, 16, 9.5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 12.75, 4.5]},
+			"faces": {
+				"north": {"uv": [0.75, 4, 1.5, 8], "texture": "#0"},
+				"east": {"uv": [0, 4, 0.75, 8], "texture": "#0"},
+				"south": {"uv": [2.25, 4, 3, 8], "texture": "#0"},
+				"west": {"uv": [1.5, 4, 2.25, 8], "texture": "#0"},
+				"up": {"uv": [1.5, 4, 0.75, 3.25], "texture": "#0"},
+				"down": {"uv": [2.25, 3.25, 1.5, 4], "texture": "#0"}
+			}
+		},
+		{
+			"from": [6.5, 16, -0.5],
+			"to": [9.5, 19, 9.5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 12.75, 4.5]},
+			"faces": {
+				"north": {"uv": [2.5, 2.5, 3.25, 3.25], "texture": "#0"},
+				"east": {"uv": [0, 2.5, 2.5, 3.25], "texture": "#0"},
+				"south": {"uv": [5.75, 2.5, 6.5, 3.25], "texture": "#0"},
+				"west": {"uv": [3.25, 2.5, 5.75, 3.25], "texture": "#0"},
+				"up": {"uv": [3.25, 2.5, 2.5, 0], "texture": "#0"},
+				"down": {"uv": [4, 0, 3.25, 2.5], "texture": "#0"}
+			}
+		},
+		{
+			"from": [6.5, 12, -0.5],
+			"to": [9.5, 16, 2.5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 12.75, 4.5]},
+			"faces": {
+				"north": {"uv": [3.75, 4, 4.5, 5], "texture": "#0"},
+				"east": {"uv": [3, 4, 3.75, 5], "texture": "#0"},
+				"south": {"uv": [5.25, 4, 6, 5], "texture": "#0"},
+				"west": {"uv": [4.5, 4, 5.25, 5], "texture": "#0"},
+				"up": {"uv": [4.5, 4, 3.75, 3.25], "texture": "#0"},
+				"down": {"uv": [5.25, 3.25, 4.5, 4], "texture": "#0"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [45, 0, 0],
+			"translation": [0, -1.5, -1.5]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [45, 0, 0],
+			"translation": [0, -1.5, -1.5]
+		},
+		"firstperson_righthand": {
+			"rotation": [-5, 15, 0],
+			"translation": [8, 0, -5]
+		},
+		"firstperson_lefthand": {
+			"rotation": [-5, 15, 0],
+			"translation": [8, 0, -5]
+		}
+	}
+}

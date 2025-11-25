@@ -21,6 +21,13 @@ public final class Accessories {
             .impl(ShrinkingDeviceImpl::new).build();
     public static Cosmetic SHONK = builder("shonk").rarity(Rarity.RARE).build();
 
+    // Christmas Event
+    public static Cosmetic CANDY_CANE = builder("candy_cane")
+            .hidden()
+            .rarity(Rarity.LEGENDARY)
+            .tags(CosmeticTag.LIMITED_TIME)
+            .build();
+
     public static @NotNull Cosmetic.Builder builder(@NotNull String id) {
         return new Cosmetic.Builder(CosmeticType.ACCESSORY, id)
                 .impl(ModelCosmeticImpl::new);
