@@ -9,21 +9,15 @@ import net.hollowcube.mapmaker.map.entity.interaction.InteractionEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
-import net.minestom.server.ServerFlag;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.Metadata;
-import net.minestom.server.entity.MetadataDef;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.SendablePacket;
-import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Map;
 
 public class PresentObjectHandler extends ObjectEntityHandler {
 
@@ -49,7 +43,9 @@ public class PresentObjectHandler extends ObjectEntityHandler {
     @Override
     public boolean canSendToPlayer(Player player) {
         if (this.day <= 0) return false;
-        return HubTime.now().getDayOfMonth() >= this.day;
+        var now = HubTime.now();
+        if (now.getMonthValue() != 12) return false;
+        return now.getDayOfMonth() >= this.day;
     }
 
     @Override
@@ -71,6 +67,12 @@ public class PresentObjectHandler extends ObjectEntityHandler {
         } else {
             playerData.setSetting(EventData.SETTING, eventData.withPresent(day));
             FutureUtil.submitVirtual(() -> playerData.writeUpdatesUpstream(world.server().playerService()));
+
+            var reward = PresentConstants.getRewardForDay(eventData.getPresentCount() + 1);
+            if (reward != null) {
+                // TODO give reward to player
+                player.sendMessage("You have received your reward: " + reward.id() + "!");
+            }
 
             player.sendMessage("You have collected your present for day " + day + "! Merry Christmas!");
         }
@@ -96,7 +98,7 @@ public class PresentObjectHandler extends ObjectEntityHandler {
 
         public void setModel(int day) {
             this.day = day;
-            this.setModel(PresentTextures.getForDay(this.day));
+            this.setModel(PresentConstants.getTextureForDay(this.day));
         }
 
         private boolean hasPresent(Player player) {

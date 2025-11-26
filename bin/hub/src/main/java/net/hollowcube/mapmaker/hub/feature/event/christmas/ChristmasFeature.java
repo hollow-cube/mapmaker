@@ -1,12 +1,16 @@
 package net.hollowcube.mapmaker.hub.feature.event.christmas;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.command.dsl.SimpleCommand;
 import net.hollowcube.mapmaker.cosmetic.Hats;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.entity.NpcPlayer;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
+import net.hollowcube.mapmaker.hub.gui.event.AdventCalanderPanel;
 import net.hollowcube.mapmaker.map.MapServer;
+import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
+import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.ServerFlag;
@@ -33,28 +37,32 @@ public class ChristmasFeature implements HubFeature {
 
     @Override
     public void load(MapServer server, HubMapWorld world) {
-        PresentTextures.init();
+        PresentConstants.init();
 
         var npc = new NpcPlayer("Advent Calendar", NPC_SKIN);
         npc.setNameTag(Component.text(BadSprite.require("icon/mouse_right").fontChar() + " View Advent Calendar"));
-        npc.setEquipment(EquipmentSlot.HELMET, Hats.SUNGLASSES.impl().iconItem());
+        npc.setEquipment(EquipmentSlot.HELMET, Hats.SANTA_HAT.impl().iconItem());
         npc.setInstance(world.instance(), NPC_POS);
         npc.setInteractionBox(3, 3);
-        npc.setHandler((player, _, _, _) -> handleInteraction(player));
+        npc.setHandler((player, _, _, _) ->
+               Panel.open(player, new AdventCalanderPanel(player))
+        );
 
         var present = new NpcItemModel();
-        present.setModel(PresentTextures.RED_GOLD_GREEN);
+        present.setModel(PresentConstants.RED_GOLD_GREEN_TEXTURE);
         present.getEntityMeta().setScale(new Vec(5));
         present.setInstance(world.instance(), PRESENT_POS);
         present.setInteractionBox(5, 5, PRESENT_INTERACTION_OFFSET);
-        present.setHandler((player, _, _, _) -> handleInteraction(player));
+        present.setHandler((player, _, _, _) ->
+               Panel.open(player, new AdventCalanderPanel(player))
+        );
 
         server.scheduler().submitTask(() -> {
             var meta = present.getEntityMeta();
             meta.setNotifyAboutChanges(false);
             meta.setTransformationInterpolationStartDelta(0);
             meta.setTransformationInterpolationDuration(5 * ServerFlag.SERVER_TICKS_PER_SECOND);
-            meta.setLeftRotation(new float[] {
+            meta.setLeftRotation(new float[]{
                     0f,
                     (float) Math.sin(targetRotation / 2f),
                     0f,
@@ -65,10 +73,15 @@ public class ChristmasFeature implements HubFeature {
 
             return TaskSchedule.seconds(5);
         });
-    }
 
-    private void handleInteraction(Player player) {
-        player.sendMessage("Ho Ho Ho! Merry Christmas! You have talked to Santa.");
+        if (server instanceof AbstractMapServer hub) {
+            hub.commandManager().register(
+                    SimpleCommand.of("advent")
+                            .description("Open the advent calendar GUI")
+                            .callback(player -> Panel.open(player, new AdventCalanderPanel(player)))
+                            .build()
+            );
+        }
     }
 
 }
