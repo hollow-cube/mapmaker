@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub;
 
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.hub.feature.event.christmas.PresentObjectHandler;
 import net.hollowcube.mapmaker.hub.item.*;
@@ -11,6 +12,7 @@ import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.scripting.WorldScriptContext;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
@@ -19,6 +21,7 @@ import net.minestom.server.event.player.PlayerMoveEvent;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.channels.Channels;
 import java.util.Objects;
 import java.util.Random;
@@ -32,11 +35,13 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
     public static Pos spawnPointFor(Player player) {
         var seeded = new Random(player.getUuid().getLeastSignificantBits());
         return MIN_SPAWN_POINT.add(
-                (seeded.nextDouble() * 10) % 3,
-                0,
-                (seeded.nextDouble() * 10) % 3
+            (seeded.nextDouble() * 10) % 3,
+            0,
+            (seeded.nextDouble() * 10) % 3
         );
     }
+
+    private final WorldScriptContext scriptContext;
 
     public HubMapWorld(MapServer server, MapData map) {
         super(server, map, makeMapInstance(map, 'h', null),
@@ -51,8 +56,18 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
         objectEntityHandlers().registerForInteractions(PresentObjectHandler.ID, PresentObjectHandler::new);
 
         eventNode().addChild(EventUtil.READ_ONLY_NODE)
-                .addListener(PlayerChangeHeldSlotEvent.class, this::handleSwitchSlot)
-                .addListener(PlayerMoveEvent.class, this::handlePlayerMove);
+            .addListener(PlayerChangeHeldSlotEvent.class, this::handleSwitchSlot)
+            .addListener(PlayerMoveEvent.class, this::handlePlayerMove);
+
+        // Load scripting engine
+        if (ServerRuntime.getRuntime().isDevelopment()) {
+            var playerScript = Objects.requireNonNull(HubMapWorld.class.getResource("/scripts/player.luau"));
+            var baseUrl = URI.create(playerScript.toString().substring(0, playerScript.toString().lastIndexOf('/')));
+            this.scriptContext = new WorldScriptContext(baseUrl, false);
+        } else {
+            var zipUrl = Objects.requireNonNull(HubMapWorld.class.getResource("/net.hollowcube.scripting/hub.zip"));
+            this.scriptContext = new WorldScriptContext(URI.create(zipUrl.toString()), true);
+        }
     }
 
     @Override
@@ -94,6 +109,20 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
         instance().loadStream(mapWorldData, new ReadWorldAccess(this));
     }
 
+    @Override
+    public void spawnPlayer(Player player) {
+        super.spawnPlayer(player);
+
+        scriptContext.initializePlayer((MapPlayer) player);
+    }
+
+    @Override
+    public void removePlayer(Player player) {
+        super.removePlayer(player);
+
+        scriptContext.destroyPlayer((MapPlayer) player);
+    }
+
     private void handleSwitchSlot(PlayerChangeHeldSlotEvent event) {
         var playerData = PlayerData.fromPlayer(event.getPlayer());
         playerData.setSetting(PlayerSettings.HUB_SELECTED_SLOT, (int) event.getNewSlot());
@@ -102,8 +131,8 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
     private void handlePlayerMove(PlayerMoveEvent event) {
         Pos playerPos = event.getPlayer().getPosition();
         if (playerPos.x() < HUB_BB_MIN.x() || playerPos.x() > HUB_BB_MAX.x() ||
-                playerPos.y() < HUB_BB_MIN.y() || playerPos.y() > HUB_BB_MAX.y() ||
-                playerPos.z() < HUB_BB_MIN.z() || playerPos.z() > HUB_BB_MAX.z()) {
+            playerPos.y() < HUB_BB_MIN.y() || playerPos.y() > HUB_BB_MAX.y() ||
+            playerPos.z() < HUB_BB_MIN.z() || playerPos.z() > HUB_BB_MAX.z()) {
             event.getPlayer().teleport(spawnPointFor(event.getPlayer()));
         }
     }

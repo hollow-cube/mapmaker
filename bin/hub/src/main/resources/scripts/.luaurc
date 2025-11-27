@@ -1,0 +1,7 @@
+{
+  "languageMode": "strict",
+  "globals": [],
+  "aliases": {
+    "mapmaker": "./.types"
+  }
+}

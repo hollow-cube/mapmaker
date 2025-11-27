@@ -14,8 +14,15 @@ dependencies {
     implementation(project(":modules:canvas:api"))
     implementation(project(":modules:canvas:impl-standalone"))
     implementation(project(":modules:map-core"))
-    // Required because the ObjectEntity implements an interface for editing, very bad dependency need to be refactored.
     implementation(project(":modules:terraform"))
+
+    compileOnly(project(":tools:lua-slopgen:api"))
+    annotationProcessor(project(":tools:lua-slopgen"))
+
+    implementation(libs.luau.core)
+    implementation(libs.luau.natives.macos.arm64)
+    implementation(libs.luau.natives.linux.x64)
+    implementation(libs.luau.natives.windows.x64)
 
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)
@@ -23,9 +30,29 @@ dependencies {
     implementation(libs.included.schem)
     implementation(libs.fastutil)
 
+    implementation(libs.slf4j)
     implementation(libs.slf4j.jul)
     implementation(libs.logback)
     implementation(libs.bundles.prometheus)
+}
+
+val outPath = layout.buildDirectory.dir("resources/main/net.hollowcube.scripting")
+
+val zipHubScripts = tasks.register<Zip>("zipHubScripts") {
+    archiveFileName.set("hub.zip")
+    destinationDirectory.set(outPath)
+    from(project.projectDir.resolve("src/main/resources/scripts"))
+
+    include("**/*.luau")
+    include("**/.luaurc")
+    exclude(".types")
+    exclude(".vscode")
+
+    group = "scripting"
+}
+
+tasks.named("processResources") {
+    dependsOn(zipHubScripts)
 }
 
 application {

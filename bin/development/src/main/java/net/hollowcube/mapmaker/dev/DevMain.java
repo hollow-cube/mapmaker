@@ -4,7 +4,7 @@ import net.hollowcube.mapmaker.map.runtime.MapServerInitializer;
 
 public class DevMain {
 
-    public static void main(String[] args) throws Exception {
+    static void main(String[] args) throws Exception {
         MapServerInitializer.run(DevServer::new, args);
     }
 

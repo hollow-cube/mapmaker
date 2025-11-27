@@ -80,8 +80,8 @@ services:
 
   player-service:
     build:
-      context: ../player-service
-      dockerfile: ../player-service/deploy/Dockerfile
+      context: ../hc-services/services/player-service
+      dockerfile: deploy/Dockerfile
     restart: unless-stopped
     depends_on: [ postgres, spicedb, redpanda ]
     environment:
@@ -97,8 +97,8 @@ services:
       - "9126:9124"
   map-service:
     build:
-      context: ../map-service
-      dockerfile: ../map-service/deploy/Dockerfile
+      context: ../hc-services/services/map-service
+      dockerfile: deploy/Dockerfile
     restart: unless-stopped
     depends_on: [ postgres, spicedb, minio, redis, redpanda, player-service ]
     environment:
@@ -118,8 +118,8 @@ services:
       - "9125:9124"
   session-service:
     build:
-      context: ../session-service
-      dockerfile: ../session-service/deploy/Dockerfile
+      context: ../hc-services/services/session-service
+      dockerfile: deploy/Dockerfile
     restart: unless-stopped
     depends_on: [ postgres, spicedb, redis, redpanda, player-service ]
     environment:

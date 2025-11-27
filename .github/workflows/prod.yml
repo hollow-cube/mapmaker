@@ -65,17 +65,14 @@ jobs:
         with:
           java-version: '25'
           distribution: 'graalvm'
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-read-only: false
+          cache: 'gradle'
 
       # Build server
       - name: Build standalone binary
         env:
           MAPMAKER_VERSION: ${{ github.ref_name }}
           MAPMAKER_COMMIT_HASH: ${{ github.sha }}
-        run: ./gradlew :bin:map:shadowJar -PisRelease=true
+        run: ./gradlew :bin:map:shadowJar -PisRelease=true --no-daemon
 
       # Build and push docker image
       - name: Set up Docker Buildx
@@ -109,17 +106,14 @@ jobs:
         with:
           java-version: '25'
           distribution: 'graalvm'
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-read-only: false
+          cache: 'gradle'
 
       # Build server
       - name: Build standalone binary
         env:
           MAPMAKER_VERSION: ${{ github.ref_name }}
           MAPMAKER_COMMIT_HASH: ${{ github.sha }}
-        run: ./gradlew :bin:hub:shadowJar -PisRelease=true
+        run: ./gradlew :bin:hub:shadowJar -PisRelease=true --no-daemon
 
       # Build and push docker image
       - name: Set up Docker Buildx
@@ -153,17 +147,14 @@ jobs:
         with:
           java-version: '25'
           distribution: 'graalvm'
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-read-only: false
+          cache: 'gradle'
 
       # Build server
       - name: Build standalone binary
         env:
           MAPMAKER_VERSION: ${{ github.ref_name }}
           MAPMAKER_COMMIT_HASH: ${{ github.sha }}
-        run: ./gradlew :bin:map-isolate:nativeCompile -PisRelease=true --no-configuration-cache
+        run: ./gradlew :bin:map-isolate:nativeCompile -PisRelease=true --no-configuration-cache --no-daemon
 
       # Build and push docker image
       - name: Set up Docker Buildx

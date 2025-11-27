@@ -65,6 +65,7 @@ tasks.register<JavaExec>("runPacker") {
     javaLauncher = javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(25)
         vendor = JvmVendorSpec.GRAAL_VM
+        nativeImageCapable = true
     }
 }
 
