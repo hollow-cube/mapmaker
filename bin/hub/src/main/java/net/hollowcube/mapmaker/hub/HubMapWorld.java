@@ -26,7 +26,7 @@ import java.util.Random;
 public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
     private static final Pos MIN_SPAWN_POINT = new Pos(-1, 40, -1, 90, 0);
 
-    private static final Vec HUB_BB_MIN = new Vec(-250, -30, -100);
+    private static final Vec HUB_BB_MIN = new Vec(-250, -40, -100);
     private static final Vec HUB_BB_MAX = new Vec(60, 130, 150);
 
     public static Pos spawnPointFor(Player player) {

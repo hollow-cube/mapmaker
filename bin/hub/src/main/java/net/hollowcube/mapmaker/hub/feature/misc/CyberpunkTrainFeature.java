@@ -36,6 +36,7 @@ public class CyberpunkTrainFeature implements HubFeature {
     public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
         trainFront.setModel(Material.STICK, BadSprite.require("train_front"));
         trainFront.getEntityMeta().setScale(new Vec(4));
+        trainFront.getEntityMeta().setBrightness(15, 15);
         var metaFront = trainFront.getEntityMeta();
         metaFront.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),
                 Math.toRadians(-90)).into());
@@ -44,6 +45,7 @@ public class CyberpunkTrainFeature implements HubFeature {
 
         trainMiddle.setModel(Material.STICK, BadSprite.require("train_middle"));
         trainMiddle.getEntityMeta().setScale(new Vec(4));
+        trainMiddle.getEntityMeta().setBrightness(15, 15);
         var metaMiddle = trainMiddle.getEntityMeta();
         metaMiddle.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),
                 Math.toRadians(-90)).into());
@@ -51,6 +53,7 @@ public class CyberpunkTrainFeature implements HubFeature {
 
         trainBack.setModel(Material.STICK, BadSprite.require("train_front"));
         trainBack.getEntityMeta().setScale(new Vec(4));
+        trainBack.getEntityMeta().setBrightness(15, 15);
         var metaBack = trainBack.getEntityMeta();
         metaBack.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),
                 Math.toRadians(-90)).into());

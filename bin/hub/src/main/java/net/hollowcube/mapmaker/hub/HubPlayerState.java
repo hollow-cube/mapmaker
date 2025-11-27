@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
 import net.hollowcube.mapmaker.hub.item.*;
+import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.PlayerState;
 import net.hollowcube.mapmaker.misc.BossBars;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -51,6 +52,10 @@ public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMa
             world.itemRegistry().setItemStack(player, OpenCosmeticsMenuItem.ID, 8);
 
             BOSS_BARS.forEach(player::showBossBar);
+
+            if (player instanceof MapPlayer mp) {
+                mp.setCanSendPose(false);
+            }
         }
 
         @Override
