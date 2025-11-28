@@ -10,14 +10,12 @@ import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.hub.gui.event.AdventCalanderPanel;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
-import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.ServerFlag;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EquipmentSlot;
-import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.timer.TaskSchedule;
 
@@ -44,18 +42,14 @@ public class ChristmasFeature implements HubFeature {
         npc.setEquipment(EquipmentSlot.HELMET, Hats.SANTA_HAT.impl().iconItem());
         npc.setInstance(world.instance(), NPC_POS);
         npc.setInteractionBox(3, 3);
-        npc.setHandler((player, _, _, _) ->
-               Panel.open(player, new AdventCalanderPanel(player))
-        );
+        npc.setHandler((player, _, _, _) -> AdventCalanderPanel.open(player));
 
         var present = new NpcItemModel();
         present.setModel(PresentConstants.RED_GOLD_GREEN_TEXTURE);
         present.getEntityMeta().setScale(new Vec(5));
         present.setInstance(world.instance(), PRESENT_POS);
         present.setInteractionBox(5, 5, PRESENT_INTERACTION_OFFSET);
-        present.setHandler((player, _, _, _) ->
-               Panel.open(player, new AdventCalanderPanel(player))
-        );
+        present.setHandler((player, _, _, _) -> AdventCalanderPanel.open(player));
 
         server.scheduler().submitTask(() -> {
             var meta = present.getEntityMeta();
@@ -78,7 +72,7 @@ public class ChristmasFeature implements HubFeature {
             hub.commandManager().register(
                     SimpleCommand.of("advent")
                             .description("Open the advent calendar GUI")
-                            .callback(player -> Panel.open(player, new AdventCalanderPanel(player)))
+                            .callback(AdventCalanderPanel::open)
                             .build()
             );
         }

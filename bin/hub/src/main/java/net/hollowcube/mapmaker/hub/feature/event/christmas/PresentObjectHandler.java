@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.interaction.InteractionEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
@@ -15,6 +16,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -22,9 +24,9 @@ import java.util.List;
 public class PresentObjectHandler extends ObjectEntityHandler {
 
     public static final String ID = "hub:present";
+    private static final Tag<Thread> CLICK_TASK = Tag.Transient("hub/event/christmas/present/click_task");
 
     private final Present model;
-
     private int day = -1;
 
     public PresentObjectHandler(InteractionEntity entity) {
@@ -58,23 +60,31 @@ public class PresentObjectHandler extends ObjectEntityHandler {
     public void onPlayerInteract(Player player) {
         if (!canSendToPlayer(player)) return; // Sanity check
         var world = MapWorld.forPlayer(player);
+        if (world == null) return;
+
         var playerData = PlayerData.fromPlayer(player);
         var eventData = playerData.getSetting(EventData.SETTING);
+        var service = world.server().playerService();
+        var playerId = playerData.id();
 
-        if (world == null) return;
         if (eventData.hasPresent(day)) {
-            player.sendMessage("You have already collected this present!");
+            player.sendMessage(Component.translatable("advent.present.already_found"));
         } else {
-            playerData.setSetting(EventData.SETTING, eventData.withPresent(day));
-            FutureUtil.submitVirtual(() -> playerData.writeUpdatesUpstream(world.server().playerService()));
-
             var reward = PresentConstants.getRewardForDay(eventData.getPresentCount() + 1);
-            if (reward != null) {
-                // TODO give reward to player
-                player.sendMessage("You have received your reward: " + reward.id() + "!");
-            }
+            playerData.setSetting(EventData.SETTING, eventData.withPresent(day));
 
-            player.sendMessage("You have collected your present for day " + day + "! Merry Christmas!");
+            player.updateTag(CLICK_TASK, previous -> {
+                if (previous != null && previous.isAlive()) return previous;
+                return FutureUtil.createVirtual(() -> {
+                    playerData.writeUpdatesUpstream(service);
+                    if (reward != null && !service.getUnlockedCosmetics(playerId).contains(reward.path())) {
+                        service.buyCosmetic(playerId, reward, 0, 0, null);
+                        player.sendMessage(Component.translatable("advent.present.found_cosmetic", reward.displayName()));
+                    } else {
+                        player.sendMessage(Component.translatable("advent.present.found"));
+                    }
+                });
+            });
         }
     }
 

@@ -1,12 +1,14 @@
 package net.hollowcube.mapmaker.hub.util;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
+
 
 public class HubTime {
 
+    private static final ZoneOffset ZONE_OFFSET = ZoneOffset.ofHours(-17);
+
     public static LocalDateTime now() {
-        // TODO change timezone
-        return LocalDateTime.now(ZoneId.of("America/New_York"));
+        return LocalDateTime.now(ZONE_OFFSET);
     }
 }
