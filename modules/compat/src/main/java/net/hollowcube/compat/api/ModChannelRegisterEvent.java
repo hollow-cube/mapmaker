@@ -28,6 +28,10 @@ public class ModChannelRegisterEvent implements PlayerEvent {
         return disabledMods;
     }
 
+    public @NotNull List<String> getChannels() {
+        return channels;
+    }
+
     public int getPlayerProtocolVersion() {
         return ProtocolVersions.getProtocolVersion(player);
     }
