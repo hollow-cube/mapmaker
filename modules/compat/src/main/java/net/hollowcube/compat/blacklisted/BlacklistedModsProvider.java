@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class BlacklistedModsProvider implements CompatProvider {
 
     private static final Component KICK_MESSAGE = Component.text(
-            "You're using mod(s) which are disallowed on the server.\nPlease remove them to join."
+            "You've been kicked for using mod(s) which are disallowed on the server.\nPlease remove them to join."
     ).color(NamedTextColor.RED);
 
     @Override
