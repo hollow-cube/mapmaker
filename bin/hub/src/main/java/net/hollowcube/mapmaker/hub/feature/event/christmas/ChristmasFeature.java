@@ -7,7 +7,7 @@ import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.entity.NpcPlayer;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
-import net.hollowcube.mapmaker.hub.gui.event.AdventCalanderPanel;
+import net.hollowcube.mapmaker.hub.gui.event.AdventCalendarPanel;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -42,14 +42,14 @@ public class ChristmasFeature implements HubFeature {
         npc.setEquipment(EquipmentSlot.HELMET, Hats.SANTA_HAT.impl().iconItem());
         npc.setInstance(world.instance(), NPC_POS);
         npc.setInteractionBox(3, 3);
-        npc.setHandler((player, _, _, _) -> AdventCalanderPanel.open(player));
+        npc.setHandler((player, _, _, _) -> AdventCalendarPanel.open(player));
 
         var present = new NpcItemModel();
         present.setModel(PresentConstants.RED_GOLD_GREEN_TEXTURE);
         present.getEntityMeta().setScale(new Vec(5));
         present.setInstance(world.instance(), PRESENT_POS);
         present.setInteractionBox(5, 5, PRESENT_INTERACTION_OFFSET);
-        present.setHandler((player, _, _, _) -> AdventCalanderPanel.open(player));
+        present.setHandler((player, _, _, _) -> AdventCalendarPanel.open(player));
 
         server.scheduler().submitTask(() -> {
             var meta = present.getEntityMeta();
@@ -72,7 +72,7 @@ public class ChristmasFeature implements HubFeature {
             hub.commandManager().register(
                     SimpleCommand.of("advent")
                             .description("Open the advent calendar GUI")
-                            .callback(AdventCalanderPanel::open)
+                            .callback(AdventCalendarPanel::open)
                             .build()
             );
         }

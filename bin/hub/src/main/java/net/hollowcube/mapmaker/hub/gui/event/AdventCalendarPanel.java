@@ -15,15 +15,15 @@ import java.util.List;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.info;
 
-public class AdventCalanderPanel extends Panel {
+public class AdventCalendarPanel extends Panel {
 
     private final EventData data;
 
-    public AdventCalanderPanel(Player player) {
+    public AdventCalendarPanel(Player player) {
         this(EventData.fromPlayer(player));
     }
 
-    public AdventCalanderPanel(EventData data) {
+    public AdventCalendarPanel(EventData data) {
         super(9, 6);
 
         this.data = data;
@@ -110,7 +110,7 @@ public class AdventCalanderPanel extends Panel {
     public static void open(Player player) {
         var now = HubTime.now();
         if (now.getMonthValue() == 12) {
-            Panel.open(player, new AdventCalanderPanel(player));
+            Panel.open(player, new AdventCalendarPanel(player));
         } else {
             player.sendMessage(Component.translatable("advent.not_available"));
         }
