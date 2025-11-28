@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.hub.entity;
 
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.component.DataComponents;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
@@ -86,5 +87,13 @@ public class NpcItemModel extends BaseNpcEntity {
         if (isStatic) return;
 
         super.updateOldViewer(player);
+    }
+
+    public void updatePosition(Pos pos) {
+        super.setPositionInternal(pos, 0f);
+    }
+
+    public void synchronizePosition() {
+        super.synchronizePosition();
     }
 }

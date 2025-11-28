@@ -114,6 +114,27 @@ public final class Quaternion {
         );
     }
 
+    public double[] toRotationMatrix() {
+        var matrix = new double[9];
+
+        var s = Math.pow(Math.sqrt(x * x + y * y + z * z + w * w), -2);
+
+
+        matrix[0] = (1 - 2 * s * (Math.pow(y, 2) + Math.pow(z, 2)));
+        matrix[1] = 2 * s * (x * y - z * w);
+        matrix[2] = 2 * s * (x * z + y * w);
+
+        matrix[3] = 2 * s * (x * y + z * w);
+        matrix[4] = (1 - 2 * s * (Math.pow(x, 2) + Math.pow(z, 2)));
+        matrix[5] = 2 * s * (z * y - x * w);
+
+        matrix[6] = 2 * s * (x * z - y * w);
+        matrix[7] = 2 * s * (y * z + x * w);
+        matrix[8] = (1 - 2 * s * (Math.pow(x, 2) + Math.pow(y, 2)));
+
+        return matrix;
+    }
+
     public @NotNull Quaternion conjugate() {
         this.x = -this.x;
         this.y = -this.y;
