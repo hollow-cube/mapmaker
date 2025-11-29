@@ -49,6 +49,7 @@ public class ChristmasFeature implements HubFeature {
         present.getEntityMeta().setScale(new Vec(5));
         present.setInstance(world.instance(), PRESENT_POS);
         present.setInteractionBox(5, 5, PRESENT_INTERACTION_OFFSET);
+        present.setStatic(true);
         present.setHandler((player, _, _, _) -> AdventCalendarPanel.open(player));
 
         server.scheduler().submitTask(() -> {
