@@ -119,12 +119,15 @@ public final class Crane implements ConveyerPart {
                     .getEntityMeta()
                     .getTranslation()
                     .add(this.fromDirection.vec().mul(7).add(0, 0.5, 0));
-            this.currentGood.good().getEntityMeta().setPosRotInterpolationDuration(2);
-            this.currentGood.good().getEntityMeta().setTransformationInterpolationDuration(2);
-            this.currentGood.good().getEntityMeta().setTransformationInterpolationStartDelta(0);
-            this.currentGood.good().getEntityMeta().setTranslation(translation);
-            this.currentGood.good().updatePosition(this.craneCenter.asPos().add(0.5, 0, 0.5));
-            this.currentGood.good().synchronizePosition();
+            this.currentGood.good().sync(model -> {
+                var meta = model.getEntityMeta();
+                meta.setPosRotInterpolationDuration(2);
+                meta.setTransformationInterpolationDuration(2);
+                meta.setTransformationInterpolationStartDelta(0);
+                meta.setTranslation(translation);
+
+                model.updatePosition(this.craneCenter.asPos().add(0.5, 0, 0.5));
+            });
             return HandOverResult.ACCEPT;
         }
         good.good().remove();
@@ -148,13 +151,14 @@ public final class Crane implements ConveyerPart {
                     );
 
                     if (delta == 1) {
-                        this.currentGood.good().getEntityMeta().setTranslation(Vec.ZERO);
-                        this.currentGood.good().getEntityMeta().setTransformationInterpolationDuration(0);
-                        this.currentGood.good().getEntityMeta().setPosRotInterpolationDuration(0);
-                        var nextPart = children.getFirst();
-                        this.currentGood.good().updatePosition(nextPart.handOverPoint().asPos().add(0.5));
-                        this.currentGood.good().synchronizePosition();
+                        this.currentGood.good().sync(model -> {
+                            var meta = model.getEntityMeta();
+                            meta.setTranslation(Vec.ZERO);
+                            meta.setTransformationInterpolationDuration(0);
+                            meta.setPosRotInterpolationDuration(0);
 
+                            model.updatePosition(children.getFirst().handOverPoint().asPos().add(0.5));
+                        });
                     }
                     if (currentCooldown == 0) {
                         var nextPart = children.getFirst();

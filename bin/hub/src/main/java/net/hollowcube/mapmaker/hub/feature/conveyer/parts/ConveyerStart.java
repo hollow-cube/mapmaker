@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.conveyer.ConveyerGood;
+import net.hollowcube.mapmaker.hub.feature.conveyer.ConveyerItemModel;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
@@ -31,7 +32,7 @@ public class ConveyerStart implements ConveyerPart {
 
         var targets = getDestinations();
         for (var child : children) {
-            var goodDisplay = new NpcItemModel(UUID.randomUUID());
+            var goodDisplay = new ConveyerItemModel();
             var meta = goodDisplay.getEntityMeta();
             goodDisplay.setInstance(instance);
             meta.setItemStack(ItemStack.of(Material.DIRT));
