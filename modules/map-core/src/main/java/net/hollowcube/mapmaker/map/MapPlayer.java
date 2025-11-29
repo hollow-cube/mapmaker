@@ -963,7 +963,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
 
     private void createNameTagEntity(Player player) {
         var playerData = PlayerData.fromPlayer(this);
-        var displayName = playerData.displayName2().build(DisplayName.Context.DEFAULT);
+        var displayName = playerData.displayName2().build(DisplayName.Context.NAME_TAG);
         player.sendPackets(List.of(
             new BundlePacket(),
             new SpawnEntityPacket(nameTagEntityId, nameTagEntityUuid, EntityType.ARMOR_STAND,
