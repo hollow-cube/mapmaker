@@ -12,14 +12,15 @@ public final class Particles {
     public static Cosmetic BUBBLE = builder("bubble").rarity(Rarity.COMMON).build();
     public static Cosmetic NOTE = builder("note").rarity(Rarity.COMMON).build();
     public static Cosmetic CHERRY_LEAVES = builder("cherry_leaves")
-        .rarity(Rarity.COMMON)
-        .impl(DefaultParticleImpl.of(Particle.CHERRY_LEAVES, 0.5f))
-        .build();
+            .rarity(Rarity.COMMON)
+            .impl(DefaultParticleImpl.of(Particle.CHERRY_LEAVES, 0.5f))
+            .build();
     public static Cosmetic SNOWFALL = builder("snowfall")
-        .tags(CosmeticTag.LIMITED_TIME)
-        .rarity(Rarity.LEGENDARY)
-        .impl(SnowfallParticleImpl::new)
-        .build();
+            .hidden()
+            .tags(CosmeticTag.LIMITED_TIME)
+            .rarity(Rarity.EPIC)
+            .impl(SnowfallParticleImpl::new)
+            .build();
 
     public static @NotNull Cosmetic.Builder builder(@NotNull String id) {
         return new Cosmetic.Builder(CosmeticType.PARTICLE, id);

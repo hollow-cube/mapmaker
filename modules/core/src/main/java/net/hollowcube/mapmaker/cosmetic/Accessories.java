@@ -24,7 +24,7 @@ public final class Accessories {
     // Christmas Event
     public static Cosmetic CANDY_CANE = builder("candy_cane")
             .hidden()
-            .rarity(Rarity.LEGENDARY)
+            .rarity(Rarity.RARE)
             .tags(CosmeticTag.LIMITED_TIME)
             .build();
 

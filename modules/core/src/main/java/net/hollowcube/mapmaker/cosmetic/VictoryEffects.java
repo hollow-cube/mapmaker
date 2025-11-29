@@ -16,7 +16,7 @@ public final class VictoryEffects {
     // Christmas Event
     public static Cosmetic JOLLY = builder("jolly")
             .hidden()
-            .rarity(Rarity.LEGENDARY)
+            .rarity(Rarity.EPIC)
             .tags(CosmeticTag.LIMITED_TIME)
             .impl(ParticleVictoryEffects.ChristmasExplosion::new)
             .build();

@@ -28,7 +28,7 @@ public class PresentConstants {
 
     private final static Int2ObjectMap<Cosmetic> REWARDS = new Int2ObjectArrayMap<>(
             new int[]{1, 5, 10, 15, 20, 25},
-            new Cosmetic[]{Hats.ELF_HAT, Accessories.CANDY_CANE, VictoryEffects.JOLLY, Hats.CAKE_HAT, Particles.SNOWFALL, Hats.SANTA_HAT}
+            new Cosmetic[]{Hats.ELF_HAT, Accessories.CANDY_CANE, Hats.SNOWMAN_HEAD, VictoryEffects.JOLLY, Particles.SNOWFALL, Hats.SANTA_HAT}
     );
 
     public static BadSprite getTextureForDay(int day) {

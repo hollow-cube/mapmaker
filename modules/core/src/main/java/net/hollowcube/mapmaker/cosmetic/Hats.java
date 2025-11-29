@@ -33,12 +33,17 @@ public final class Hats {
     // Christmas Event
     public static Cosmetic ELF_HAT = builder("elf_hat")
             .hidden()
-            .rarity(Rarity.LEGENDARY)
+            .rarity(Rarity.COMMON)
+            .tags(CosmeticTag.LIMITED_TIME)
+            .build();
+    public static Cosmetic SNOWMAN_HEAD = builder("snowman_head")
+            .hidden()
+            .rarity(Rarity.RARE)
             .tags(CosmeticTag.LIMITED_TIME)
             .build();
     public static Cosmetic SANTA_HAT = builder("santa_hat")
             .hidden()
-            .rarity(Rarity.LEGENDARY)
+            .rarity(Rarity.EPIC)
             .tags(CosmeticTag.LIMITED_TIME)
             .build();
 
