@@ -3,6 +3,9 @@ package net.hollowcube.mapmaker;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
+import java.util.Objects;
+
 import net.hollowcube.mapmaker.util.ModelUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,6 +34,14 @@ public class Hub5x5Transform {
                 for (Path modelJson : files) {
                     var fileName = modelJson.getFileName().toString();
                     if (!fileName.endsWith(".json") || fileName.startsWith("_manifest")) continue;
+
+                    if (!manifest.has(fileName) && Objects.equals(typeName, "5x5")) {
+                        var array = new JsonArray();
+                        array.add(5);
+                        array.add(5);
+                        array.add(5);
+                        manifest.add(fileName.replace(".json", ""), array);
+                    }
 
                     String name = modelJson.getFileName().toString().replace(".json", "");
                     var size = manifest.getAsJsonArray(name);

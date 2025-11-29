@@ -6,6 +6,7 @@ import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.conveyer.ConveyerGood;
+import net.hollowcube.mapmaker.hub.feature.conveyer.ConveyerItemModel;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.coordinate.Point;
@@ -38,7 +39,7 @@ public final class Crane implements ConveyerPart {
     private CraneState state = CraneState.IDLE;
     private int currentCooldown = state.cooldown;
     private int currentAnimation = state.animationTime;
-    private ConveyerGood currentGood = null;
+    private WrappedGood currentGood = null;
 
     public Crane(
             List<ConveyerPart> children,
@@ -92,6 +93,15 @@ public final class Crane implements ConveyerPart {
         };
     }
 
+    private static Vec getRotationFromTrueNorth(Direction direction) {
+        return switch (direction) {
+            case Direction.SOUTH -> new Vec(0, -90, 0);
+            case Direction.WEST -> new Vec(0, 180, 0);
+            case Direction.NORTH -> new Vec(0, 270, 0);
+            default -> Vec.ZERO;
+        };
+    }
+
     public List<ConveyerPart> children() {
         return this.children;
     }
@@ -114,7 +124,10 @@ public final class Crane implements ConveyerPart {
     @Override public HandOverResult handOver(ConveyerGood good) {
         if (state == CraneState.IDLE) {
             this.swapToState(CraneState.GOING_DOWN);
-            this.currentGood = good;
+            this.currentGood = new WrappedGood(
+                    good,
+                    new Quaternion(good.good().getEntityMeta().getLeftRotation())
+            );
             var translation = this.currentGood.good()
                     .getEntityMeta()
                     .getTranslation()
@@ -153,26 +166,27 @@ public final class Crane implements ConveyerPart {
                     if (delta == 1) {
                         this.currentGood.good().sync(model -> {
                             var meta = model.getEntityMeta();
-                            meta.setTranslation(Vec.ZERO);
                             meta.setTransformationInterpolationDuration(0);
                             meta.setPosRotInterpolationDuration(0);
+                            meta.setTranslation(Vec.ZERO);
 
                             model.updatePosition(children.getFirst().handOverPoint().asPos().add(0.5));
                         });
-                    }
-                    if (currentCooldown == 0) {
-                        var nextPart = children.getFirst();
-                        this.currentGood.good().getEntityMeta().setTransformationInterpolationDuration(2);
-                        this.currentGood.good().getEntityMeta().setPosRotInterpolationDuration(2);
-                        nextPart.handOver(this.currentGood);
-                        this.currentGood = null;
                     }
                 }
             }
             case PICKING_UP, GOING_UP -> {
                 this.fork.getEntityMeta().setTranslation(new Vec(0, interpolateY(delta), 0));
 
-                if (this.currentGood != null) {
+
+                if (currentCooldown == 0 && this.state == CraneState.GOING_UP && this.currentGood != null) {
+                    var nextPart = children.getFirst();
+                    this.currentGood.good().getEntityMeta().setTransformationInterpolationDuration(2);
+                    this.currentGood.good().getEntityMeta().setPosRotInterpolationDuration(2);
+                    nextPart.handOver(this.currentGood.conveyerGood);
+                    this.currentGood = null;
+                }
+                if (this.currentGood != null && this.state != CraneState.GOING_UP) {
                     var currentTranslation = this.currentGood.good().getEntityMeta().getTranslation();
                     this.currentGood.good().getEntityMeta().setTranslation(
                             currentTranslation.withY(delta * 5 + 0.5)
@@ -181,7 +195,7 @@ public final class Crane implements ConveyerPart {
             }
             case TURNING -> {
                 var newQuaternion = from.interpolate(to, delta);
-                var newRotation = newQuaternion.into(); // (x,y,z,w)
+                var newRotation = newQuaternion.into();
 
 
                 this.fork.getEntityMeta().setLeftRotation(newRotation);
@@ -190,9 +204,15 @@ public final class Crane implements ConveyerPart {
 
                 if (this.currentGood != null) {
                     var fromVec = rotation.vec();
-                    var newVec = rotate(fromVec, from.interpolate(to, delta).toRotationMatrix());
+                    var offset = Quaternion.fromEulerAngles(getRotationFromTrueNorth(fromDirection));
 
-                    this.currentGood.good().getEntityMeta().setLeftRotation(newQuaternion.into());
+                    var newVec = rotate(fromVec, newQuaternion.toRotationMatrix());
+
+                    this.currentGood.good().getEntityMeta().setLeftRotation(
+                           newQuaternion
+                                   .mulThis(offset)
+                                   .mulThis(currentGood.rotation)
+                                    .normalizeThis().into());
                     this.currentGood.good().getEntityMeta().setTranslation(newVec.mul(7).add(0, 5.5, 0));
                 }
             }
@@ -254,5 +274,15 @@ public final class Crane implements ConveyerPart {
                 case GOING_UP -> RETURNING;
             };
         }
+    }
+
+    record WrappedGood(
+            ConveyerGood conveyerGood,
+            Quaternion rotation
+    ) {
+        public ConveyerItemModel good() {
+            return conveyerGood.good();
+        }
+
     }
 }

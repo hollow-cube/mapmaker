@@ -29,6 +29,10 @@ public final class Quaternion {
         this(q.x, q.y, q.z, q.w);
     }
 
+    public Quaternion(final float[] q) {
+        this(q[0], q[1], q[2], q[3]);
+    }
+
     public Quaternion(double x, double y, double z, double w) {
         this.x = x;
         this.y = y;
