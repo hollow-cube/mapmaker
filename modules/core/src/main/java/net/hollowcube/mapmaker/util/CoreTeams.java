@@ -11,43 +11,10 @@ public final class CoreTeams {
 
     // Default players
     public static final Team DEFAULT = TEAM_MANAGER.createBuilder("default")
-            .nameTagVisibility(TeamsPacket.NameTagVisibility.ALWAYS)
-            .collisionRule(TeamsPacket.CollisionRule.NEVER)
-            .allowFriendlyFire()
-            .seeInvisiblePlayers()
-//            .prefix(Component.text("PREFIX"))
-//            .suffix(Component.text("SUFFIX"))
-//            .prefix(Component.text("\uF833")) // Tab ordering
-            .build();
-
-//    // Green coloring rank
-//    public static final Team GREEN = TEAM_MANAGER.createBuilder("green")
-//            .nameTagVisibility(TeamsPacket.NameTagVisibility.ALWAYS)
-//            .collisionRule(TeamsPacket.CollisionRule.NEVER)
-//            .seeInvisiblePlayers()
-//            .prefix(Component.text("PREFIX"))
-//            .suffix(Component.text("SUFFIX"))
-////            .prefix(Component.text("\uF832")) // Tab ordering
-//            .build();
-//
-//    // Blue coloring rank
-//    public static final Team CYAN = TEAM_MANAGER.createBuilder("cyan")
-//            .nameTagVisibility(TeamsPacket.NameTagVisibility.ALWAYS)
-//            .collisionRule(TeamsPacket.CollisionRule.NEVER)
-//            .seeInvisiblePlayers()
-//            .prefix(Component.text("PREFIX"))
-//            .suffix(Component.text("SUFFIX"))
-////            .prefix(Component.text("\uF831")) // Tab ordering
-//            .build();
-//
-//    // Admin/red coloring in tab
-//    public static final Team RED = TEAM_MANAGER.createBuilder("red")
-//            .nameTagVisibility(TeamsPacket.NameTagVisibility.ALWAYS)
-//            .collisionRule(TeamsPacket.CollisionRule.NEVER)
-//            .seeInvisiblePlayers()
-//            .prefix(Component.text("PREFIX"))
-//            .suffix(Component.text("SUFFIX"))
-////            .prefix(Component.text("\uF830")) // Tab ordering
-//            .build();
+        .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER)
+        .collisionRule(TeamsPacket.CollisionRule.NEVER)
+        .allowFriendlyFire()
+        .seeInvisiblePlayers()
+        .build();
 
 }

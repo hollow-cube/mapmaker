@@ -12,6 +12,8 @@ import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.compat.moulberrytweaks.debugrender.DebugShape;
 import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderAddPacket;
 import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderRemovePacket;
+import net.hollowcube.mapmaker.cosmetic.Cosmetic;
+import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.hollowcube.mapmaker.map.block.CollidableBlock;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
@@ -22,6 +24,9 @@ import net.hollowcube.mapmaker.map.event.entity.Map2PlayerExitEntityEvent;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.util.PlayerVisibility;
 import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
+import net.hollowcube.mapmaker.misc.MiscFunctionality;
+import net.hollowcube.mapmaker.player.DisplayName;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
@@ -45,9 +50,7 @@ import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.PlayerProvider;
 import net.minestom.server.network.packet.client.common.ClientPongPacket;
 import net.minestom.server.network.packet.server.SendablePacket;
-import net.minestom.server.network.packet.server.ServerPacket;
 import net.minestom.server.network.packet.server.common.PingPacket;
-import net.minestom.server.network.packet.server.configuration.FinishConfigurationPacket;
 import net.minestom.server.network.packet.server.play.*;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
@@ -74,7 +77,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public abstract class MapPlayer extends CommandHandlingPlayer {
+public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFunctionality.CosmeticCallback {
 
     private static final Logger log = LoggerFactory.getLogger(MapPlayer.class);
 
@@ -172,8 +175,6 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         }
     }
 
-    private boolean clientInConfigPhase = false;
-
     @Override
     public void sendPacket(@NotNull SendablePacket packet) {
         switch (packet) {
@@ -181,30 +182,13 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
             case PingPacket(int id) -> lastPingId.set(id);
 
             // Don't send pose packets to self if we aren't supposed to
-            case EntityMetaDataPacket(var entity, var entries) when entity == this.getEntityId()
-                                                                    && entries.containsKey(MetadataDef.POSE.index())
-                                                                    && !canSendPose -> {
+            case EntityMetaDataPacket(var entity, var entries)
+                when entity == this.getEntityId() && entries.containsKey(MetadataDef.POSE.index()) && !canSendPose -> {
                 var newEntries = new HashMap<>(entries);
                 newEntries.remove(MetadataDef.POSE.index());
                 super.sendPacket(new EntityMetaDataPacket(entity, newEntries));
                 return;
             }
-
-            case StartConfigurationPacket _ -> {
-                clientInConfigPhase = true;
-            }
-            case FinishConfigurationPacket _ -> {
-                clientInConfigPhase = false;
-            }
-            case ServerPacket.Play _ when clientInConfigPhase && !(packet instanceof ServerPacket.Configuration) -> {
-                // We know about meta data, just checking for others.
-                if (!(packet instanceof EntityMetaDataPacket)) {
-                    log.error("Sending play packet while client will be in config phase! Packet: {}", packet,
-                        new RuntimeException("synthetic exception for stacktrace"));
-                }
-                return; // Don't send it, they would be kicked
-            }
-
             default -> {  // Do nothing
             }
         }
@@ -217,6 +201,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         FutureUtil.assertTickThreadWarn(acquirable());
         super.updateNewViewer(player);
         updateVisibility(player);
+        createNameTagEntity(player);
     }
 
     @Override
@@ -224,6 +209,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         FutureUtil.assertTickThreadWarn(acquirable());
         super.updateOldViewer(player);
         visibilityByEntity.remove(player.getEntityId());
+        destroyNameTagEntity(player);
     }
 
     @Override
@@ -324,6 +310,13 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
                 this.sendPacket(new BundlePacket());
             }
         }
+    }
+
+    @Override
+    public void setPose(@NotNull EntityPose pose) {
+        super.setPose(pose);
+
+        updateNameTagForPose(pose);
     }
 
     // endregion
@@ -956,6 +949,62 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         if (currentRainLevel == 0 && lastRainLevel != 0) {
             sendPacket(new ChangeGameStatePacket(ChangeGameStatePacket.Reason.END_RAINING, 0));
         }
+    }
+
+    //endregion
+
+    //region Name Tag
+
+    private static final byte META_FLAG_INVISIBLE = (byte) 0b100000;
+    private static final byte META_FLAG_SNEAKING = (byte) 0b10;
+
+    private final int nameTagEntityId = Entity.generateId(), nameTagOffsetEntityId = Entity.generateId();
+    private final UUID nameTagEntityUuid = UUID.randomUUID(), nameTagOffsetEntityUuid = UUID.randomUUID();
+
+    private void createNameTagEntity(Player player) {
+        var playerData = PlayerData.fromPlayer(this);
+        var displayName = playerData.displayName2().build(DisplayName.Context.DEFAULT);
+        player.sendPackets(List.of(
+            new BundlePacket(),
+            new SpawnEntityPacket(nameTagEntityId, nameTagEntityUuid, EntityType.ARMOR_STAND,
+                getPosition(), 0, 0, Vec.ZERO),
+            new EntityMetaDataPacket(nameTagEntityId, Map.of(
+                MetadataDef.ENTITY_FLAGS.index(), Metadata.Byte(META_FLAG_INVISIBLE),
+                MetadataDef.CUSTOM_NAME.index(), Metadata.OptComponent(displayName),
+                MetadataDef.CUSTOM_NAME_VISIBLE.index(), Metadata.Boolean(true),
+                MetadataDef.ArmorStand.ARMOR_STAND_FLAGS.index(), Metadata.Byte((byte) 0x10) // marker
+            )),
+            new SpawnEntityPacket(nameTagOffsetEntityId, nameTagOffsetEntityUuid, EntityType.INTERACTION,
+                getPosition(), 0, 0, Vec.ZERO),
+            new EntityMetaDataPacket(nameTagOffsetEntityId, Map.of(
+                MetadataDef.ENTITY_FLAGS.index(), Metadata.Byte(META_FLAG_INVISIBLE),
+                MetadataDef.Interaction.WIDTH.index(), Metadata.Float(0f),
+                MetadataDef.Interaction.HEIGHT.index(), Metadata.Float(0f)
+            )),
+            new SetPassengersPacket(getEntityId(), List.of(nameTagOffsetEntityId)),
+            new SetPassengersPacket(nameTagOffsetEntityId, List.of(nameTagEntityId)),
+            new BundlePacket()
+        ));
+    }
+
+    private void destroyNameTagEntity(Player player) {
+        player.sendPacket(new DestroyEntitiesPacket(nameTagEntityId));
+    }
+
+    private void updateNameTagForPose(@NotNull EntityPose pose) {
+        byte flag = pose == EntityPose.SNEAKING ? (META_FLAG_INVISIBLE | META_FLAG_SNEAKING) : META_FLAG_INVISIBLE;
+        sendPacketToViewers(new EntityMetaDataPacket(nameTagEntityId, Map.of(
+            MetadataDef.ENTITY_FLAGS.index(), Metadata.Byte(flag)
+        )));
+    }
+
+    @Override
+    public void onCosmeticChange(@NotNull CosmeticType type, @Nullable Cosmetic cosmetic) {
+        if (type != CosmeticType.HAT) return;
+
+        sendPacketToViewers(new EntityMetaDataPacket(nameTagOffsetEntityId, Map.of(
+            MetadataDef.Interaction.HEIGHT.index(), Metadata.Float(cosmetic != null ? 0.2f : 0f)
+        )));
     }
 
     //endregion
