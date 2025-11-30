@@ -67,7 +67,9 @@ public class PresentObjectHandler extends ObjectEntityHandler {
         var service = world.server().playerService();
         var playerId = playerData.id();
 
-        if (eventData.hasPresent(day)) {
+        if (player.getDistance(this.entity) > 6f) {
+            player.sendMessage(Component.translatable("advent.present.too_far"));
+        } else if (eventData.hasPresent(day)) {
             player.sendMessage(Component.translatable("advent.present.already_found"));
         } else {
             var reward = PresentConstants.getRewardForDay(eventData.getPresentCount() + 1);
