@@ -2,11 +2,11 @@ package net.hollowcube.mapmaker.hub;
 
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.PlayerSettings;
+import net.hollowcube.mapmaker.hub.feature.event.christmas.AdventCalendarItem;
 import net.hollowcube.mapmaker.hub.feature.event.christmas.PresentObjectHandler;
 import net.hollowcube.mapmaker.hub.item.*;
 import net.hollowcube.mapmaker.hub.util.HubTransferData;
 import net.hollowcube.mapmaker.map.*;
-import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
@@ -52,6 +52,7 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
         itemRegistry().register(new OrgMapsItem(server.guiController()));
         itemRegistry().register(new OpenCosmeticsMenuItem(server.guiController()));
         itemRegistry().register(OpenStoreItem.INSTANCE);
+        itemRegistry().register(new AdventCalendarItem());
 
         objectEntityHandlers().registerForInteractions(PresentObjectHandler.ID, PresentObjectHandler::new);
 

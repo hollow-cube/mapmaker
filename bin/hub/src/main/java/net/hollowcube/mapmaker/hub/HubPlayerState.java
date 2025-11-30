@@ -4,8 +4,10 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.PlayerSettings;
+import net.hollowcube.mapmaker.hub.feature.event.christmas.AdventCalendarItem;
 import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
 import net.hollowcube.mapmaker.hub.item.*;
+import net.hollowcube.mapmaker.hub.util.HubTime;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.PlayerState;
 import net.hollowcube.mapmaker.misc.BossBars;
@@ -48,6 +50,8 @@ public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMa
             world.itemRegistry().setItemStack(player, CreateMapsItem.ID, 1);
             if (CoreFeatureFlags.ORGANIZATIONS.test(player))
                 world.itemRegistry().setItemStack(player, OrgMapsItem.ID, 2);
+            if (HubTime.now().getMonthValue() == 12)
+                world.itemRegistry().setItemStack(player, AdventCalendarItem.ID, 4);
             world.itemRegistry().setItemStack(player, OpenStoreItem.ID, 7);
             world.itemRegistry().setItemStack(player, OpenCosmeticsMenuItem.ID, 8);
 
