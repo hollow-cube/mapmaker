@@ -9,11 +9,11 @@ import org.jetbrains.annotations.NotNull;
 public final class Quaternion {
     public static final float[] ZERO = new float[]{0, 0, 0, 1};
     public static final NetworkBuffer.Type<Quaternion> FLOAT_NETWORK_TYPE = NetworkBufferTemplate.template(
-            NetworkBuffer.FLOAT, i -> (float) i.getX(),
-            NetworkBuffer.FLOAT, i -> (float) i.getY(),
-            NetworkBuffer.FLOAT, i -> (float) i.getZ(),
-            NetworkBuffer.FLOAT, i -> (float) i.getW(),
-            Quaternion::new
+        NetworkBuffer.FLOAT, i -> (float) i.getX(),
+        NetworkBuffer.FLOAT, i -> (float) i.getY(),
+        NetworkBuffer.FLOAT, i -> (float) i.getZ(),
+        NetworkBuffer.FLOAT, i -> (float) i.getW(),
+        Quaternion::new
     );
 
     private double x;
@@ -107,10 +107,22 @@ public final class Quaternion {
 
     public Quaternion mul(Quaternion q) {
         return set(
-                (float) Math.fma(this.w, q.x(), Math.fma(this.x, q.w(), Math.fma(this.y, q.z(), -this.z * q.y()))),
-                (float) Math.fma(this.w, q.y(), Math.fma(-this.x, q.z(), Math.fma(this.y, q.w(), this.z * q.x()))),
-                (float) Math.fma(this.w, q.z(), Math.fma(this.x, q.y(), Math.fma(-this.y, q.x(), this.z * q.w()))),
-                (float) Math.fma(this.w, q.w(), Math.fma(-this.x, q.x(), Math.fma(-this.y, q.y(), -this.z * q.z())))
+            (float) Math.fma(this.w, q.x(), Math.fma(this.x, q.w(), Math.fma(this.y, q.z(), -this.z * q.y()))),
+            (float) Math.fma(this.w, q.y(), Math.fma(-this.x, q.z(), Math.fma(this.y, q.w(), this.z * q.x()))),
+            (float) Math.fma(this.w, q.z(), Math.fma(this.x, q.y(), Math.fma(-this.y, q.x(), this.z * q.w()))),
+            (float) Math.fma(this.w, q.w(), Math.fma(-this.x, q.x(), Math.fma(-this.y, q.y(), -this.z * q.z())))
+        );
+    }
+
+    public Vec transform(Vec v) {
+        double ix = w * v.x() + y * v.z() - z * v.y();
+        double iy = w * v.y() + z * v.x() - x * v.z();
+        double iz = w * v.z() + x * v.y() - y * v.x();
+        double iw = -x * v.x() - y * v.y() - z * v.z();
+        return new Vec(
+            ix * w + iw * -x + iy * -z - iz * -y,
+            iy * w + iw * -y + iz * -x - ix * -z,
+            iz * w + iw * -z + ix * -y - iy * -x
         );
     }
 
@@ -260,25 +272,32 @@ public final class Quaternion {
 
     public Point toEulerAngles() {
         return new Vec(
-                Math.toDegrees(Math.asin(-2 * (this.y * this.z - this.w * this.x))), // pitch
-                Math.toDegrees(Math.atan2(2 * (this.x * this.z + this.w * this.y), this.w * this.w - this.x * this.x - this.y * this.y + this.z * this.z)), // yaw
-                Math.toDegrees(Math.atan2(2 * (this.x * this.y + this.w * this.z), this.w * this.w - this.x * this.x + this.y * this.y - this.z * this.z)) // roll
+            Math.toDegrees(Math.asin(-2 * (this.y * this.z - this.w * this.x))), // pitch
+            Math.toDegrees(Math.atan2(2 * (this.x * this.z + this.w * this.y), this.w * this.w - this.x * this.x - this.y * this.y + this.z * this.z)), // yaw
+            Math.toDegrees(Math.atan2(2 * (this.x * this.y + this.w * this.z), this.w * this.w - this.x * this.x + this.y * this.y - this.z * this.z)) // roll
         );
     }
 
+    /// XYZ
     public static Quaternion fromEulerAngles(Point angles) {
         return new Quaternion(new Vec(1, 0, 0), Math.toRadians(angles.x()))
-                .mulThis(new Quaternion(new Vec(0, 1, 0), Math.toRadians(angles.y())))
-                .mulThis(new Quaternion(new Vec(0, 0, 1), Math.toRadians(angles.z())));
+            .mulThis(new Quaternion(new Vec(0, 1, 0), Math.toRadians(angles.y())))
+            .mulThis(new Quaternion(new Vec(0, 0, 1), Math.toRadians(angles.z())));
+    }
+
+    public static Quaternion fromEulerAnglesYXZ(Point angles) {
+        return new Quaternion(new Vec(0, 1, 0), Math.toRadians(angles.y()))
+            .mulThis(new Quaternion(new Vec(1, 0, 0), Math.toRadians(angles.x())))
+            .mulThis(new Quaternion(new Vec(0, 0, 1), Math.toRadians(angles.z())));
     }
 
     @Override
     public String toString() {
         return "Quaternion{" +
-                "x=" + x +
-                ", y=" + y +
-                ", z=" + z +
-                ", w=" + w +
-                '}';
+               "x=" + x +
+               ", y=" + y +
+               ", z=" + z +
+               ", w=" + w +
+               '}';
     }
 }
