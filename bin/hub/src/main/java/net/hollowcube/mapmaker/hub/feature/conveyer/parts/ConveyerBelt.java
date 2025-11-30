@@ -42,8 +42,8 @@ public final class ConveyerBelt implements ConveyerPart {
     }
 
     @Override
-    public HandOverResult handOver(ConveyerGood good) {
-        var wrappedGood = new WrappedGood(good);
+    public HandOverResult handOver(Point point, ConveyerGood good) {
+        var wrappedGood = new WrappedGood(good, point);
         this.wrappedGoods.add(wrappedGood);
         tick(wrappedGood);
         return HandOverResult.ACCEPT;
@@ -51,6 +51,9 @@ public final class ConveyerBelt implements ConveyerPart {
 
     @Override
     public void tick(MapInstance instance) {
+        if (this.shouldBePaused()) {
+            return;
+        }
         if (tick++ % 20 == 0) {
             final Block block;
             if ((tick / 20) % 2 == 0) block = Block.RED_CONCRETE;
@@ -99,13 +102,16 @@ public final class ConveyerBelt implements ConveyerPart {
     }
 
     final class WrappedGood {
+        final List<ConveyerPart> rejections = new ArrayList<>();
         private final ConveyerGood good;
-        private final ConveyerPart nextPart;
-        private final Point handOverPoint;
-        private final Vec maxOffset;
+        private ConveyerPart nextPart;
+        private Point handOverPoint;
+        private Vec maxOffset;
         private Vec offsetFromStart = Vec.ZERO;
+        private Point from;
+        private boolean scheduleForRemoval = false;
 
-        WrappedGood(ConveyerGood good) {
+        WrappedGood(ConveyerGood good, Point from) {
             this.good = good;
             this.nextPart = children.stream()
                     .filter((child) -> child.getDestinations().contains(this.good.destination()))
@@ -113,11 +119,13 @@ public final class ConveyerBelt implements ConveyerPart {
                     .orElseThrow();
             this.handOverPoint = nextPart.handOverPoint();
             this.maxOffset = this.handOverPoint.asVec().sub(from);
+            this.offsetFromStart = Vec.ZERO;
+            this.from = from;
         }
 
         public void updateProgress(Vec newOffset) {
             this.offsetFromStart = newOffset;
-            this.good.good().teleport(from.add(offsetFromStart).asPos().add(0.5, 0.5, 0.5));
+            this.good.good().teleport(this.from.add(offsetFromStart).asPos().add(0.5, 0.5, 0.5));
         }
 
         @Override

@@ -4,8 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import java.util.Objects;
-
 import net.hollowcube.mapmaker.util.ModelUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,7 +16,8 @@ import java.util.stream.Stream;
 
 public class Hub5x5Transform {
 
-    private static final List<String> NAMES = List.of("5x5", "materials", "extra");
+    private static final List<String> NAMES = List.of("5x5", "materials", "extra", "raw", "maps");
+    private static final List<String> LENIENT = List.of("raw", "maps");
 
     public void init(@NotNull PackContext ctx) throws IOException {
     }
@@ -27,7 +26,15 @@ public class Hub5x5Transform {
         for (var typeName : NAMES) {
             Path baseDir = ctx.resources().resolve("hub/" + typeName);
 
-            JsonObject manifest = new Gson().fromJson(Files.readString(baseDir.resolve("_manifest.json")), JsonObject.class);
+            JsonObject manifest;
+
+            try {
+                manifest = new Gson().fromJson(Files.readString(baseDir.resolve("_manifest.json")), JsonObject.class);
+            } catch (IOException exception) {
+                if (LENIENT.contains(typeName)) {
+                    manifest = new JsonObject();
+                } else throw exception;
+            }
 
             try (Stream<Path> fset = Files.walk(baseDir)) {
                 List<Path> files = fset.sorted(Comparator.comparing(Path::toString)).toList();
@@ -35,7 +42,7 @@ public class Hub5x5Transform {
                     var fileName = modelJson.getFileName().toString();
                     if (!fileName.endsWith(".json") || fileName.startsWith("_manifest")) continue;
 
-                    if (!manifest.has(fileName) && Objects.equals(typeName, "5x5")) {
+                    if (!manifest.has(fileName) && LENIENT.contains(typeName)) {
                         var array = new JsonArray();
                         array.add(5);
                         array.add(5);

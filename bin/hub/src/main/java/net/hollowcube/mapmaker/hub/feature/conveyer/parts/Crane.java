@@ -84,7 +84,7 @@ public final class Crane implements ConveyerPart {
         this.fork.getEntityMeta().setLeftRotation(this.from.into());
     }
 
-    private static Vec getRotationFromStructureNorth(Direction direction) {
+    static Vec getRotationFromStructureNorth(Direction direction) {
         return switch (direction) {
             case Direction.SOUTH -> new Vec(0, -90, 0);
             case Direction.WEST -> new Vec(0, 180, 0);
@@ -93,7 +93,7 @@ public final class Crane implements ConveyerPart {
         };
     }
 
-    private static Vec getRotationFromTrueNorth(Direction direction) {
+    static Vec getRotationFromTrueNorth(Direction direction) {
         return switch (direction) {
             case Direction.SOUTH -> new Vec(0, -90, 0);
             case Direction.WEST -> new Vec(0, 180, 0);
@@ -121,7 +121,7 @@ public final class Crane implements ConveyerPart {
         this.currentAnimation = this.state.animationTime;
     }
 
-    @Override public HandOverResult handOver(ConveyerGood good) {
+    @Override public HandOverResult handOver(Point point, ConveyerGood good) {
         if (state == CraneState.IDLE) {
             this.swapToState(CraneState.GOING_DOWN);
             this.currentGood = new WrappedGood(
@@ -143,7 +143,6 @@ public final class Crane implements ConveyerPart {
             });
             return HandOverResult.ACCEPT;
         }
-        good.good().remove();
         return HandOverResult.REJECT;
     }
 
@@ -166,6 +165,7 @@ public final class Crane implements ConveyerPart {
                     if (delta == 1) {
                         this.currentGood.good().sync(model -> {
                             var meta = model.getEntityMeta();
+                            meta.setTransformationInterpolationStartDelta(-4);
                             meta.setTransformationInterpolationDuration(0);
                             meta.setPosRotInterpolationDuration(0);
                             meta.setTranslation(Vec.ZERO);
@@ -222,6 +222,11 @@ public final class Crane implements ConveyerPart {
                 this.tower.getEntityMeta().setLeftRotation(newRotation);
             }
         }
+    }
+
+    @Override
+    public boolean shouldBePaused() {
+        return this.state == CraneState.GOING_DOWN || this.state == CraneState.PICKING_UP;
     }
 
     private Vec rotate(Vec input, double[] rotationMatrix) {

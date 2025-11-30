@@ -16,7 +16,7 @@ public final class ConveyerEnd implements ConveyerPart {
     public List<ConveyerEnd> end = List.of(this);
 
     @Override
-    public HandOverResult handOver(ConveyerGood good) {
+    public HandOverResult handOver(Point point, ConveyerGood good) {
         good.good().remove();
         return HandOverResult.ACCEPT;
     }

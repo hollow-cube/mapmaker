@@ -12,7 +12,10 @@ import net.minestom.server.coordinate.Point;
 
 public interface ConveyerPart {
 
-    HandOverResult handOver(ConveyerGood good);
+    default HandOverResult handOver(ConveyerGood good) {
+        return handOver(handOverPoint(), good);
+    }
+    HandOverResult handOver(Point handOverPoint, ConveyerGood good);
     void tick(MapInstance instance);
     List<ConveyerPart> children();
     Point handOverPoint();
@@ -30,8 +33,8 @@ public interface ConveyerPart {
         return parts;
     }
 
-    default boolean shouldParentBePaused() {
-        return false;
+    default boolean shouldBePaused() {
+        return children().stream().anyMatch(ConveyerPart::shouldBePaused);
     }
 
     enum HandOverResult {

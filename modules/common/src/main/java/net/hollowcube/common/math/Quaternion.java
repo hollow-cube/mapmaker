@@ -6,7 +6,7 @@ import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
 import org.jetbrains.annotations.NotNull;
 
-public final class Quaternion {
+public final class  Quaternion {
     public static final float[] ZERO = new float[]{0, 0, 0, 1};
     public static final NetworkBuffer.Type<Quaternion> FLOAT_NETWORK_TYPE = NetworkBufferTemplate.template(
             NetworkBuffer.FLOAT, i -> (float) i.getX(),

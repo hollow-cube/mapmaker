@@ -7,12 +7,17 @@ import java.util.HashSet;
 
 import java.util.Set;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.hub.feature.conveyer.parts.*;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
+import net.minestom.server.item.Material;
 import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.Direction;
 
@@ -29,6 +34,7 @@ public class ConveyerFeature implements HubFeature {
         this.conveyerParts.addAll(this.createFirstBelt().collectChildren());
         this.conveyerParts.addAll(this.createSecondBelt(world).collectChildren());
         this.conveyerParts.addAll(this.createThirdBelt(world).collectChildren());
+        this.conveyerParts.addAll(this.createRawBelt(world).collectChildren());
         server.scheduler().buildTask(() -> this.tick(world.instance())).repeat(TaskSchedule.tick(1)).schedule();
     }
 
@@ -198,6 +204,88 @@ public class ConveyerFeature implements HubFeature {
                 new Pos(-58, 34, -68),
                 start,
                 end
+        );
+
+        return start;
+    }
+
+    private ConveyerStart createRawBelt(HubMapWorld server) {
+        var blobEnd = new ConveyerEnd(Vec.ZERO);
+        var normalEnd = new ConveyerEnd(new Pos(-68, 40, -66));
+        var start = new ConveyerStart((instance, part) -> {
+            var number = ThreadLocalRandom.current().nextInt(1, 10);
+            if (number == 1) {
+                var cargo = ConveyerStart.CargoSupplier.createCargo(instance);
+                cargo.setModel(
+                        Material.LIGHT,
+                        BadSprite.require("hub/raw/the_creature")
+                );
+                cargo.setDefaultMeta();
+                return new ConveyerGood(cargo, part, blobEnd);
+            }
+
+            return ConveyerStart.CargoType.RAW.get(instance, part);
+        }, 50);
+
+        var firstBelt = new ConveyerBelt(
+                new Pos(-28, 39, -38),
+                new Pos(9, 39, -34),
+                Direction.WEST,
+                new Pos(15, 40, -36),
+                start
+        );
+
+        var secondBelt = new ConveyerBelt(
+                new Pos(-35, 39, -67),
+                new Pos(-30, 39, -36),
+                Direction.NORTH,
+                new Pos(-33, 40, -36),
+                firstBelt
+        );
+        var thirdBelt = new ConveyerBelt(
+                new Pos(-35, 39, -83),
+                new Pos(-31, 39, -72),
+                Direction.NORTH,
+                new Pos(-33, 40, -72),
+                secondBelt
+        );
+        var piston = new Piston(
+                Direction.EAST,
+                new Pos(-33, 40, -78),
+                new Pos(-33, 40, -78),
+                thirdBelt,
+                server
+        );
+        new ConveyerPit(
+                new Pos(-27, 40, -78),
+                piston,
+                100,
+                blobEnd
+        );
+
+        var fourthBelt = new ConveyerBelt(
+                new Pos(-63, 39, -90),
+                new Pos(-33, 39, -86),
+                Direction.WEST,
+                new Pos(-33, 40, -88),
+                thirdBelt
+        );
+        for (int i = 0; i < 5; i++) {
+            new Crusher(
+                    new Pos(-40 - i * 5, 49, -88),
+                    9,
+                    normalEnd,
+                    fourthBelt,
+                    server
+            );
+        }
+        new ConveyerBelt(
+                new Pos(-70, 39, -88),
+                new Pos(-65, 39, -71),
+                Direction.SOUTH,
+                new Pos(-68, 40, -88),
+                fourthBelt,
+                normalEnd
         );
 
         return start;

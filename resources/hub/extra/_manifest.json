@@ -5,5 +5,6 @@
   "crane": [4, 10, 3],
   "crane_main_part": [9, 6, 7],
   "crane_2": [1, 1, 1],
-  "crane_fork_2": [1, 1, 1]
+  "crane_fork_2": [1, 1, 1],
+  "crusher": [1, 1, 1]
 }
