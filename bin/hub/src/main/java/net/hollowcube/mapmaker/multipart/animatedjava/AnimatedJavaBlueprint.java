@@ -4,6 +4,7 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.Either;
 import org.jetbrains.annotations.Nullable;
@@ -111,6 +112,7 @@ public record AnimatedJavaBlueprint(
             Point origin,
             Point from,
             Point to,
+            Point rotation,
             int[] uvOffset,
             double inflate,
             Map<Direction, Face> faces,
@@ -126,6 +128,7 @@ public record AnimatedJavaBlueprint(
                 "origin", Codec.VECTOR3D, Cube::origin,
                 "from", Codec.VECTOR3D, Cube::from,
                 "to", Codec.VECTOR3D, Cube::to,
+                "rotation", Codec.VECTOR3D.optional(Vec.ZERO), Cube::rotation,
                 "uv_offset", Codec.INT_ARRAY.optional(new int[2]), Cube::uvOffset,
                 "inflate", Codec.DOUBLE.optional(0.0), Cube::inflate,
                 "faces", Codec.Enum(Direction.class).mapValue(Face.CODEC), Cube::faces,
@@ -134,10 +137,11 @@ public record AnimatedJavaBlueprint(
                 "box_uv", Codec.BOOLEAN, Cube::boxUv,
                 Cube::new);
 
-            public record Face(int[] uv, int texture) {
+            public record Face(int[] uv, int rotation, Codec.RawValue texture) {
                 public static final StructCodec<Face> CODEC = StructCodec.struct(
                     "uv", Codec.INT_ARRAY, Face::uv,
-                    "texture", Codec.INT, Face::texture,
+                    "rotation", Codec.INT.optional(0), Face::rotation,
+                    "texture", Codec.RAW_VALUE, Face::texture,
                     Face::new);
             }
         }
@@ -168,6 +172,7 @@ public record AnimatedJavaBlueprint(
         String uuid,
         String name,
         Point origin,
+        Point rotation,
         List<Either<String, OutlineElement>> children
     ) {
         public static final Codec<Either<String, OutlineElement>> CODEC = Codec.Recursive(self -> Codec.Either(
@@ -176,6 +181,7 @@ public record AnimatedJavaBlueprint(
                 "uuid", Codec.STRING, OutlineElement::uuid,
                 "name", Codec.STRING, OutlineElement::name,
                 "origin", Codec.VECTOR3D, OutlineElement::origin,
+                "rotation", Codec.VECTOR3D.optional(Vec.ZERO), OutlineElement::rotation,
                 "children", self.list().optional(List.of()), OutlineElement::children,
                 OutlineElement::new)
         ));
