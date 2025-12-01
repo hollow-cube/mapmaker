@@ -10,6 +10,7 @@ import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -18,8 +19,8 @@ public class Bone {
     private final String id;
     private final String name;
 
-    private Vec translation;
-    private Vec rotation;
+    private Vec translation, animationTranslation;
+    private Vec rotation, animationRotation;
 
     private List<Bone> children;
     private boolean hasItem = false;
@@ -34,37 +35,62 @@ public class Bone {
         this.rotation = rotation.asVec();
     }
 
+    public @Nullable Bone findById(String id) {
+        if (this.id.equals(id)) return this;
+        for (var child : children) {
+            var found = child.findById(id);
+            if (found != null) return found;
+        }
+        return null;
+    }
+
     public void setHasItem(boolean hasItem) {
         this.hasItem = hasItem;
     }
 
-    public void spawn(Instance instance, Pos position, Quaternion parentRotation, Vec parentTranslation) {
-        Quaternion localQuat = Quaternion.fromEulerAnglesYXZ(this.rotation);
+    public void setAnimationPosition(Vec position) {
+        animationTranslation = position;
+    }
 
+    public void setAnimationRotation(Vec rotation) {
+        animationRotation = rotation;
+    }
+
+    public void spawn(Instance instance, Pos position) {
+        for (var child : children)
+            child.spawn(instance, position);
+
+        if (!hasItem) return;
+
+        entity = new Entity(EntityType.ITEM_DISPLAY);
+        var meta = (ItemDisplayMeta) entity.getEntityMeta();
+        var scale = 4.0;
+
+        meta.setScale(new Vec(scale));
+        meta.setDisplayContext(ItemDisplayMeta.DisplayContext.HEAD);
+        meta.setItemStack(ItemStack.of(Material.STICK).withItemModel("aj:" + id));
+        meta.setTransformationInterpolationDuration(1);
+        entity.setNoGravity(true);
+        entity.setInstance(instance, position);
+    }
+
+    public void update(Quaternion parentRotation, Vec parentTranslation) {// R_base
+        Quaternion localQuat = Quaternion.fromEulerAnglesYXZ(this.rotation);
         Quaternion finalRotation = new Quaternion(parentRotation).mul(localQuat);
 
         Vec rotatedTranslation = parentRotation.transform(this.translation.asVec());
         Vec finalTranslation = parentTranslation.add(rotatedTranslation);
 
         for (var child : children)
-            child.spawn(instance, position, finalRotation, finalTranslation);
+            child.update(finalRotation, finalTranslation);
 
         if (!hasItem) return;
 
-        entity = new Entity(EntityType.ITEM_DISPLAY);
-        var meta = (ItemDisplayMeta) entity.getEntityMeta();
-
-        var scale = 4.0;
-
-        meta.setScale(new Vec(scale));
-        meta.setTranslation(finalTranslation);
-        meta.setDisplayContext(ItemDisplayMeta.DisplayContext.HEAD);
-        meta.setItemStack(ItemStack.of(Material.STICK).withItemModel("aj:" + id));
-
-        meta.setLeftRotation(finalRotation.into());
-
-        entity.setNoGravity(true);
-        entity.setInstance(instance, position);
+        entity.editEntityMeta(ItemDisplayMeta.class, meta -> {
+            meta.setTranslation(finalTranslation);
+            meta.setLeftRotation(finalRotation.into());
+            meta.setTransformationInterpolationStartDelta(0);
+        });
     }
 
     public void dump(int indent) {

@@ -18,7 +18,8 @@ public record AnimatedJavaBlueprint(
     Resolution resolution,
     List<Element> elements,
     List<Texture> textures,
-    List<Either<String, OutlineElement>> outliner
+    List<Either<String, OutlineElement>> outliner,
+    List<Animation> animations
 ) {
 
     public static final StructCodec<AnimatedJavaBlueprint> CODEC = StructCodec.struct(
@@ -27,6 +28,7 @@ public record AnimatedJavaBlueprint(
         "elements", Element.CODEC.list(), AnimatedJavaBlueprint::elements,
         "textures", Texture.CODEC.list(), AnimatedJavaBlueprint::textures,
         "outliner", OutlineElement.CODEC.list(), AnimatedJavaBlueprint::outliner,
+        "animations", Animation.CODEC.list(), AnimatedJavaBlueprint::animations,
         AnimatedJavaBlueprint::new);
 
     public record Meta(
@@ -185,6 +187,51 @@ public record AnimatedJavaBlueprint(
                 "children", self.list().optional(List.of()), OutlineElement::children,
                 OutlineElement::new)
         ));
+    }
+
+    public record Animation(
+        String uuid,
+        String name,
+        String loop,
+        double length,
+        Map<String, Animator> animators
+    ) {
+        public static final StructCodec<Animation> CODEC = StructCodec.struct(
+            "uuid", Codec.STRING, Animation::uuid,
+            "name", Codec.STRING, Animation::name,
+            "loop", Codec.STRING, Animation::loop,
+            "length", Codec.DOUBLE, Animation::length,
+            "animators", Codec.STRING.mapValue(Animator.CODEC), Animation::animators,
+            Animation::new);
+    }
+
+    public record Animator(
+        String name,
+        String type,
+        List<Keyframe> keyframes
+    ) {
+        public static final StructCodec<Animator> CODEC = StructCodec.struct(
+            "name", Codec.STRING, Animator::name,
+            "type", Codec.STRING, Animator::type,
+            "keyframes", Keyframe.CODEC.list(), Animator::keyframes,
+            Animator::new);
+    }
+
+    public record Keyframe(
+        String uuid,
+        String channel,
+        double time,
+        // color?
+        String interpolation,
+        List<Map<String, String>> dataPoints
+    ) {
+        public static final StructCodec<Keyframe> CODEC = StructCodec.struct(
+            "uuid", Codec.STRING, Keyframe::uuid,
+            "channel", Codec.STRING, Keyframe::channel,
+            "time", Codec.DOUBLE, Keyframe::time,
+            "interpolation", Codec.STRING, Keyframe::interpolation,
+            "data_points", Codec.STRING.mapValue(Codec.STRING).list(), Keyframe::dataPoints,
+            Keyframe::new);
     }
 
 }
