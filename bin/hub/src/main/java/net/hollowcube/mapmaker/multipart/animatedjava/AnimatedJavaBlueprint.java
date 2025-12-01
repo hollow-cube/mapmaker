@@ -34,12 +34,12 @@ public record AnimatedJavaBlueprint(
     public record Meta(
         String format,
         String formatVersion,
-        String uuid
+        @Nullable String uuid
     ) {
         public static final StructCodec<Meta> CODEC = StructCodec.struct(
-            "format", Codec.STRING, Meta::format,
+            "format", Codec.STRING.optional("unknown"), Meta::format, // not present in bbmodel
             "format_version", Codec.STRING, Meta::formatVersion,
-            "uuid", Codec.STRING, Meta::uuid,
+            "uuid", Codec.STRING.optional(), Meta::uuid, // not present in bbmodel
             Meta::new);
     }
 
@@ -139,11 +139,11 @@ public record AnimatedJavaBlueprint(
                 "box_uv", Codec.BOOLEAN, Cube::boxUv,
                 Cube::new);
 
-            public record Face(int[] uv, int rotation, Codec.RawValue texture) {
+            public record Face(int[] uv, int rotation, @Nullable Codec.RawValue texture) {
                 public static final StructCodec<Face> CODEC = StructCodec.struct(
                     "uv", Codec.INT_ARRAY, Face::uv,
                     "rotation", Codec.INT.optional(0), Face::rotation,
-                    "texture", Codec.RAW_VALUE, Face::texture,
+                    "texture", Codec.RAW_VALUE.optional(), Face::texture,
                     Face::new);
             }
         }
@@ -201,7 +201,7 @@ public record AnimatedJavaBlueprint(
             "name", Codec.STRING, Animation::name,
             "loop", Codec.STRING, Animation::loop,
             "length", Codec.DOUBLE, Animation::length,
-            "animators", Codec.STRING.mapValue(Animator.CODEC), Animation::animators,
+            "animators", Codec.STRING.mapValue(Animator.CODEC).optional(Map.of()), Animation::animators,
             Animation::new);
     }
 
