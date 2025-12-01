@@ -78,16 +78,8 @@
       "translation": [0, 5, 0]
     },
 		"head": {
-			"translation": [0, 16, -0.5],
+			"translation": [0, 16.5, -0.5],
 			"scale": [1.8, 1.8, 1.8]
 		}
-	},
-	"groups": [
-		{
-			"name": "group",
-			"origin": [8.25, 2.75, 8],
-			"color": 0,
-			"children": [0, 1, 2, 3, 4]
-		}
-	]
+	}
 }
