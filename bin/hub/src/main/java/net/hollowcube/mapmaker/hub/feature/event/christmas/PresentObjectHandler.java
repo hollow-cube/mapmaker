@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.interaction.InteractionEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Vec;
@@ -15,7 +16,9 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
+import net.minestom.server.network.packet.server.play.SoundEffectPacket;
 import net.minestom.server.particle.Particle;
+import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,6 +77,13 @@ public class PresentObjectHandler extends ObjectEntityHandler {
         } else {
             var reward = PresentConstants.getRewardForDay(eventData.getPresentCount() + 1);
             playerData.setSetting(EventData.SETTING, eventData.withPresent(day));
+            player.sendPacket(new SoundEffectPacket(
+                    SoundEvent.BLOCK_AMETHYST_BLOCK_CHIME,
+                    Sound.Source.PLAYER,
+                    entity.getPosition(),
+                    75f, 2f,
+                    entity.getEntityId()
+            ));
 
             player.updateTag(CLICK_TASK, previous -> {
                 if (previous != null && previous.isAlive()) return previous;
