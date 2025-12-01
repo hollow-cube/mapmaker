@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.entity.object;
 
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +18,10 @@ public abstract class ObjectEntityHandler {
 
     public @NotNull String id() {
         return id;
+    }
+
+    public @NotNull CompoundBinaryTag data() {
+        return entity.getData();
     }
 
     public void onDataChange(@Nullable Player player) {
@@ -38,6 +43,10 @@ public abstract class ObjectEntityHandler {
     }
 
     public void onPlayerExit(@NotNull Player player) {
+    }
+
+    public boolean canSendToPlayer(@NotNull Player player) {
+        return true;
     }
 
     public void addViewer(@NotNull MapWorld world, @NotNull Player player) {

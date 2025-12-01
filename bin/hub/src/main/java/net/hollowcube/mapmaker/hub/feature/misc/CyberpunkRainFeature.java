@@ -24,7 +24,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static java.util.function.Predicate.not;
 
-@AutoService(HubFeature.class)
+//@AutoService(HubFeature.class)
 public class CyberpunkRainFeature implements HubFeature {
     private static final Tag<Float> RAIN_LEVEL = Tag.Float("hub/rain_level").defaultValue(0.0f);
 

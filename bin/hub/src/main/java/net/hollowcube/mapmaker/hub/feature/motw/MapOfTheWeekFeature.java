@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-@AutoService(HubFeature.class)
+//@AutoService(HubFeature.class)
 public class MapOfTheWeekFeature implements HubFeature {
     private static final Logger logger = LoggerFactory.getLogger(MapOfTheWeekFeature.class);
 
