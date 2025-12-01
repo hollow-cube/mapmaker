@@ -119,9 +119,7 @@ public record AnimatedJavaBlueprint(
             double inflate,
             Map<Direction, Face> faces,
 
-            boolean rescale, // todo idk what these do
-            int autoUv, // todo idk what these do
-            boolean boxUv // todo idk what these do
+            boolean rescale // todo idk what these do
         ) implements Element {
             public static final StructCodec<Cube> CODEC = StructCodec.struct(
                 StructCodec.INLINE, Transform.CODEC.optional(), Cube::transform,
@@ -135,8 +133,6 @@ public record AnimatedJavaBlueprint(
                 "inflate", Codec.DOUBLE.optional(0.0), Cube::inflate,
                 "faces", Codec.Enum(Direction.class).mapValue(Face.CODEC), Cube::faces,
                 "rescale", Codec.BOOLEAN, Cube::rescale,
-                "autouv", Codec.INT, Cube::autoUv,
-                "box_uv", Codec.BOOLEAN, Cube::boxUv,
                 Cube::new);
 
             public record Face(int[] uv, int rotation, @Nullable Codec.RawValue texture) {
@@ -147,25 +143,17 @@ public record AnimatedJavaBlueprint(
                     Face::new);
             }
         }
-
     }
 
     public record Texture(
         String uuid,
         String name,
-        int width,
-        int height,
-        int uvWidth,
-        int uvHeight,
         String source
     ) {
+        // TODO: support animated textures
         public static final StructCodec<Texture> CODEC = StructCodec.struct(
             "uuid", Codec.STRING, Texture::uuid,
             "name", Codec.STRING, Texture::name,
-            "width", Codec.INT, Texture::width,
-            "height", Codec.INT, Texture::height,
-            "uv_width", Codec.INT, Texture::uvWidth,
-            "uv_height", Codec.INT, Texture::uvHeight,
             "source", Codec.STRING, Texture::source,
             Texture::new);
     }

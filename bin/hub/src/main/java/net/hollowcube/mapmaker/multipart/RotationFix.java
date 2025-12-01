@@ -39,9 +39,7 @@ public final class RotationFix {
                 cube.uvOffset(),
                 cube.inflate(),
                 cube.faces(),
-                cube.rescale(),
-                cube.autoUv(),
-                cube.boxUv()
+                cube.rescale()
             );
             newElements.add(newCube);
             badCubes.put(cube.uuid(), cube);
