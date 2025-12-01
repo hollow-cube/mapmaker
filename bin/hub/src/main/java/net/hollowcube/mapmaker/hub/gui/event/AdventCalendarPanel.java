@@ -51,7 +51,7 @@ public class AdventCalendarPanel extends Panel {
         var cosmetic = PresentConstants.getRewardForDay(day);
         var isAvailable = now.getMonthValue() == 12 && now.getDayOfMonth() >= day;
         var claimed = this.data.hasPresent(day);
-        var timeUntilAvailable = now.until(now.withMonth(12).withDayOfMonth(day), ChronoUnit.SECONDS);
+        var timeUntilAvailable = now.until(now.withMonth(12).withDayOfMonth(day + 1), ChronoUnit.SECONDS);
 
         var button = new Button(null, 1, 1);
         if (cosmetic != null && isAvailable) {
@@ -65,7 +65,7 @@ public class AdventCalendarPanel extends Panel {
 
         var dayTranslationKey = "gui.advent.day.%d".formatted(day);
 
-        var hintText = isAvailable ?
+        var hintText = timeUntilAvailable <= 0 ?
                 LanguageProviderV2.translateMultiMerged(dayTranslationKey + ".hint", List.of()) :
                 LanguageProviderV2.translateMultiMerged("gui.advent.day.hint", List.of(formatTime(timeUntilAvailable)));
         var cosmeticText = cosmetic != null && isAvailable ? cosmetic.displayName() : Component.text("???");
