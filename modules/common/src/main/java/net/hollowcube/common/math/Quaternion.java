@@ -291,6 +291,12 @@ public final class Quaternion {
             .mulThis(new Quaternion(new Vec(0, 0, 1), Math.toRadians(angles.z())));
     }
 
+    public static Quaternion fromEulerAnglesZYX(Point angles) {
+        return new Quaternion(new Vec(0, 0, 1), Math.toRadians(angles.z()))
+            .mulThis(new Quaternion(new Vec(0, 1, 0), Math.toRadians(angles.y())))
+            .mulThis(new Quaternion(new Vec(1, 0, 0), Math.toRadians(angles.x())));
+    }
+
     @Override
     public String toString() {
         return "Quaternion{" +

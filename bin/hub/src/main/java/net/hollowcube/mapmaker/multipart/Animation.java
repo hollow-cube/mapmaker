@@ -4,7 +4,6 @@ import net.minestom.server.ServerFlag;
 import net.minestom.server.coordinate.Vec;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.function.BiConsumer;
 
 public class Animation {
@@ -34,7 +33,9 @@ public class Animation {
 //        System.out.println(time);
 
         for (var animator : animators) {
-            var bone = Objects.requireNonNull(root.findById(animator.id), animator.id);
+            var bone = root.findById(animator.id);
+            // AJ allows having nonexistent bones, we just ignore them
+            if (bone == null) continue;
 
             int currentIndex = Math.max(0, findIndex(animator.keyframes, time));
             int nextIndex = Math.min(animator.keyframes.length - 1, currentIndex + 1);

@@ -19,8 +19,8 @@ public class Bone {
     private final String id;
     private final String name;
 
-    private Vec translation, animationTranslation;
-    private Vec rotation, animationRotation;
+    private Vec translation, animationTranslation = Vec.ZERO;
+    private Vec rotation, animationRotation = Vec.ZERO;
 
     private List<Bone> children;
     private boolean hasItem = false;
@@ -49,11 +49,11 @@ public class Bone {
     }
 
     public void setAnimationPosition(Vec position) {
-        animationTranslation = position;
+        animationTranslation = position.mul(-1, 1, 1);
     }
 
     public void setAnimationRotation(Vec rotation) {
-        animationRotation = rotation;
+        animationRotation = rotation.mul(-1, -1, 1);
     }
 
     public void spawn(Instance instance, Pos position) {
@@ -74,11 +74,16 @@ public class Bone {
         entity.setInstance(instance, position);
     }
 
-    public void update(Quaternion parentRotation, Vec parentTranslation) {// R_base
-        Quaternion localQuat = Quaternion.fromEulerAnglesYXZ(this.rotation);
+    public void update(Quaternion parentRotation, Vec parentTranslation) {
+        Quaternion localQuat = Quaternion.fromEulerAnglesZYX(this.rotation.add(animationRotation));
         Quaternion finalRotation = new Quaternion(parentRotation).mul(localQuat);
+        Vec combinedTranslation = this.translation.add(this.animationTranslation);
 
-        Vec rotatedTranslation = parentRotation.transform(this.translation.asVec());
+        // 3. Apply Parent's Rotation to the combined local Translation
+        // This rotates the bone's position (pivot point) relative to its parent.
+        Vec rotatedTranslation = parentRotation.transform(combinedTranslation);
+
+        // 4. Calculate the Final Translation (position in world space relative to root)
         Vec finalTranslation = parentTranslation.add(rotatedTranslation);
 
         for (var child : children)
