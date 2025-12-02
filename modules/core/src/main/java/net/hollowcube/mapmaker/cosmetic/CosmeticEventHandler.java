@@ -16,17 +16,24 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-public class CosmeticInventoryHandler {
+public class CosmeticEventHandler {
+
+    private static final Map<Short, CosmeticType> COSMETIC_SLOT_MAP = Map.ofEntries(
+            Map.entry((short) 5, CosmeticType.HAT),
+            Map.entry((short) 6, CosmeticType.BACKWEAR),
+            Map.entry((short) 7, CosmeticType.PET),
+            Map.entry((short) 8, CosmeticType.PARTICLE)
+            //            Map.entry((short) 45, CosmeticType.ACCESSORY)
+    );
 
     public static void init(@NotNull Controller guiController) {
         var globalEventHandler = MinecraftServer.getGlobalEventHandler();
         globalEventHandler.addListener(InventoryPreClickEvent.class, event -> handleInventoryCosmeticSelector(guiController, event));
-        globalEventHandler.addListener(PlayerGiveCreativeItemEvent.class, CosmeticInventoryHandler::creativeClickListener);
+        globalEventHandler.addListener(PlayerGiveCreativeItemEvent.class, CosmeticEventHandler::creativeClickListener);
     }
 
     private static void handleInventoryCosmeticSelector(@NotNull Controller guiController, @NotNull InventoryPreClickEvent event) {
-        if (!(event.getInventory() instanceof PlayerInventory inventory))
-            return; // Not the player inventory (e one, not just lower section)
+        if (!(event.getInventory() instanceof PlayerInventory)) return; // Not the player inventory (e one, not just lower section)
         if (!(event.getClick() instanceof Click.Left(int slot))) return;
 
         var cosmeticType = CosmeticType.byIconSlot(slot);
@@ -35,16 +42,6 @@ public class CosmeticInventoryHandler {
 
         guiController.show(event.getPlayer(), c -> new CosmeticView(c, cosmeticType));
     }
-
-    private static final Map<Short, CosmeticType> COSMETIC_SLOT_MAP = Map.ofEntries(
-            Map.entry((short) 5, CosmeticType.HAT),
-            Map.entry((short) 6, CosmeticType.BACKWEAR),
-            Map.entry((short) 7, CosmeticType.PET),
-            Map.entry((short) 8, CosmeticType.PARTICLE)
-//            Map.entry((short) 45, CosmeticType.ACCESSORY)
-    );
-
-    private static final Tag<Integer> CREATIVE_LAST_SLOT_WIPE_HACK = Tag.Integer("creative_last_slot_wipe_hack").defaultValue(0);
 
     private static void creativeClickListener(@NotNull PlayerGiveCreativeItemEvent event) {
         if (event.getPlayer().getGameMode() != GameMode.CREATIVE) return;

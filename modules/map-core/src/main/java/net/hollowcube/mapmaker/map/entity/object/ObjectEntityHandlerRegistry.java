@@ -18,7 +18,7 @@ public class ObjectEntityHandlerRegistry {
 
     public ObjectEntityHandlerRegistry() {
         registerForMarkers(ParticleEmitterMarkerHandler.ID, ParticleEmitterMarkerHandler::new);
-        registerForInteractions(TeleportObjectHandler.ID, TeleportObjectHandler::new);
+        register(TeleportObjectHandler.ID, TeleportObjectHandler::new);
     }
 
     public void registerForMarkers(String id, Function<MarkerEntity, ObjectEntityHandler> factory) {

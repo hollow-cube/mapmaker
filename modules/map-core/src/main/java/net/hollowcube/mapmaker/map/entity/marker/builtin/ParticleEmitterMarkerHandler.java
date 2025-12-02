@@ -16,6 +16,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
+import net.minestom.server.network.player.ClientSettings;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -55,10 +56,10 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
 
     private final Variables variables = new Variables();
     private final MolangEvaluator molangEval = new MolangEvaluator(Map.of(
-            "variable", variables,
-            "v", variables,
-            "query", Queries.INSTANCE,
-            "q", Queries.INSTANCE
+        "variable", variables,
+        "v", variables,
+        "query", Queries.INSTANCE,
+        "q", Queries.INSTANCE
     ));
     private double toSpawn = 0;
     private int age = -1; // Current loop age
@@ -113,9 +114,9 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
             Point position = entity.getPosition();
             if (positionX != null) {
                 position = position.add(
-                        molangEval.eval(positionX),
-                        molangEval.eval(positionY),
-                        molangEval.eval(positionZ)
+                    molangEval.eval(positionX),
+                    molangEval.eval(positionY),
+                    molangEval.eval(positionZ)
                 );
             }
 
@@ -127,15 +128,15 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
                 double evaledCount = count != null ? molangEval.eval(count) : 1;
                 computedCount = evaledCount < 1 ? 1 : (int) evaledCount;
                 computedOffset = new Vec(
-                        offsetX != null ? molangEval.eval(offsetX) : 0,
-                        offsetY != null ? molangEval.eval(offsetY) : 0,
-                        offsetZ != null ? molangEval.eval(offsetZ) : 0
+                    offsetX != null ? molangEval.eval(offsetX) : 0,
+                    offsetY != null ? molangEval.eval(offsetY) : 0,
+                    offsetZ != null ? molangEval.eval(offsetZ) : 0
                 );
             } else if (velocityX != null) {
                 var computedVelocity = new Vec(
-                        molangEval.eval(velocityX),
-                        molangEval.eval(velocityY),
-                        molangEval.eval(velocityZ)
+                    molangEval.eval(velocityX),
+                    molangEval.eval(velocityY),
+                    molangEval.eval(velocityZ)
                 );
                 computedSpeed = (float) computedVelocity.length();
                 computedCount = 0;
@@ -148,7 +149,13 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
 
             try {
                 var computedParticle = particle.get();
-                entity.sendPacketToViewers(new ParticlePacket(computedParticle, false, false, position, computedOffset, computedSpeed, computedCount));
+                var particlePacket = new ParticlePacket(computedParticle, false, false, position, computedOffset, computedSpeed, computedCount);
+                for (var viewer : entity.getViewers()) {
+                    if (viewer.getSettings().particleSetting() == ClientSettings.ParticleSetting.MINIMAL)
+                        continue;
+                    viewer.sendPacket(particlePacket);
+                }
+
             } catch (IllegalArgumentException e) {
                 logger.error("failed molang eval in particle spawn: {}", e.getMessage());
             }
@@ -259,7 +266,8 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
                     throw new IllegalArgumentException("Invalid block state: " + e.getMessage());
                 }
             }
-            case Particle.BlockMarker blockMarkerParticle when data.get("block") instanceof StringBinaryTag blockName -> {
+            case
+                Particle.BlockMarker blockMarkerParticle when data.get("block") instanceof StringBinaryTag blockName -> {
                 try {
                     particle = () -> blockMarkerParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
                 } catch (ArgumentSyntaxException e) {
@@ -278,9 +286,9 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
                 particle = () -> {
                     var p = dustParticle;
                     if (red != null && green != null && blue != null) p = p.withColor(new Color(
-                            (int) (molangEval.eval(red) * 255.),
-                            (int) (molangEval.eval(green) * 255.),
-                            (int) (molangEval.eval(blue) * 255.)
+                        (int) (molangEval.eval(red) * 255.),
+                        (int) (molangEval.eval(green) * 255.),
+                        (int) (molangEval.eval(blue) * 255.)
                     ));
                     if (scale != null) p = p.withScale((float) molangEval.eval(scale));
                     return p;
@@ -305,14 +313,14 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
                 particle = () -> {
                     var p = dustColorTransitionParticle;
                     if (red != null && green != null && blue != null) p = p.withColor(new Color(
-                            (int) (molangEval.eval(red) * 255.),
-                            (int) (molangEval.eval(green) * 255.),
-                            (int) (molangEval.eval(blue) * 255.)
+                        (int) (molangEval.eval(red) * 255.),
+                        (int) (molangEval.eval(green) * 255.),
+                        (int) (molangEval.eval(blue) * 255.)
                     ));
                     if (tRed != null && tGreen != null && tBlue != null) p = p.withTransitionColor(new Color(
-                            (int) (molangEval.eval(tRed) * 255.),
-                            (int) (molangEval.eval(tGreen) * 255.),
-                            (int) (molangEval.eval(tBlue) * 255.)
+                        (int) (molangEval.eval(tRed) * 255.),
+                        (int) (molangEval.eval(tGreen) * 255.),
+                        (int) (molangEval.eval(tBlue) * 255.)
                     ));
                     if (scale != null) p = p.withScale((float) molangEval.eval(scale));
                     return p;
@@ -326,7 +334,8 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
                 }
             }
             // EntityEffect
-            case Particle.FallingDust fallingDustParticle when data.get("block") instanceof StringBinaryTag blockName -> {
+            case
+                Particle.FallingDust fallingDustParticle when data.get("block") instanceof StringBinaryTag blockName -> {
                 try {
                     particle = () -> fallingDustParticle.withBlock(ArgumentBlockState.staticParse(blockName.value()));
                 } catch (ArgumentSyntaxException e) {
@@ -346,10 +355,10 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
                 var blue = loadValueScript("color.b", colorTag.get(2));
                 var alpha = loadValueScript("color.a", colorTag.get(3));
                 particle = () -> itemParticle.withColor(new AlphaColor(
-                        alpha != null ? (int) (molangEval.eval(alpha)) : 255,
-                        red != null ? (int) (molangEval.eval(red)) : 255,
-                        green != null ? (int) (molangEval.eval(green)) : 255,
-                        blue != null ? (int) (molangEval.eval(blue)) : 255
+                    alpha != null ? (int) (molangEval.eval(alpha)) : 255,
+                    red != null ? (int) (molangEval.eval(red)) : 255,
+                    green != null ? (int) (molangEval.eval(green)) : 255,
+                    blue != null ? (int) (molangEval.eval(blue)) : 255
                 ));
             }
             default -> {

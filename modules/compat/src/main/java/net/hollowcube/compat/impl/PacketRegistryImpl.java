@@ -52,6 +52,7 @@ public final class PacketRegistryImpl implements PacketRegistry {
             switch (id) {
                 case REGISTER_CHANNEL -> {
                     var channels = new ArrayList<>(Arrays.asList(event.getMessageString().split("\0")));
+                    log.info("Player {} is registering mod channels: {}", player.getUsername(), channels);
                     var registerEvent = new ModChannelRegisterEvent(player, channels);
                     EventDispatcher.call(registerEvent);
                     PacketQueue.get(player).registerChannels(player, channels);

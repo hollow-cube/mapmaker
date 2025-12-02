@@ -167,6 +167,10 @@ public class LanguageProviderV2 {
         return translatable("block." + block.key().namespace() + "." + block.key().value());
     }
 
+    public static boolean hasTranslationKey(@NotNull String key) {
+        return langData.has(key);
+    }
+
     // Use of a lot of internal Minimessage APIs below. May break in the future and need to write this ourselves.
 
     private static final PlainTextComponentSerializer PLAIN_TEXT = PlainTextComponentSerializer.plainText();

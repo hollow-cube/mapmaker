@@ -68,21 +68,49 @@ public class ItemModelTransform {
 
                 var images = Files.walk(itemModelFile)
                         .filter(path -> path.getFileName().toString().endsWith(".png"))
-                        .collect(Collectors.toMap(path -> path.getFileName().toString().replace(".png", ""),
+                        .collect(Collectors.toMap(
+                                path -> path.getFileName().toString().replace(".png", ""),
                                 path -> {
                                     try {
-                                        return ctx.writeTexture("item", name + "/" + path.getFileName().toString().replace(".png", ""), Files.readAllBytes(path));
+                                        return ctx.writeTexture(
+                                                "item",
+                                                name + "/" + path.getFileName().toString().replace(".png", ""),
+                                                Files.readAllBytes(path)
+                                        );
                                     } catch (IOException e) {
                                         throw new RuntimeException("Failed to read image: " + path, e);
                                     }
-                                }));
-                var newTextures = new JsonObject();
-                for (var entry : model.get("textures").getAsJsonObject().entrySet())
-                    newTextures.addProperty(entry.getKey(), images.getOrDefault(entry.getValue().getAsString(), entry.getValue().getAsString()));
-                model.add("textures", newTextures);
+                                }
+                        ));
 
-                var itemModelName = ctx.writeModel(name, model);
-                ctx.addItemModel(name, ModelUtil.createBasicItem(itemModelName));
+                if (type != null && type.getAsString().equals("mapmaker/variant/single")) {
+                    for (var entry : images.entrySet()) {
+                        var modelCopy = model.deepCopy();
+
+                        var key = entry.getKey();
+                        var image = entry.getValue();
+
+                        var newTextures = new JsonObject();
+                        newTextures.addProperty("texture", image);
+                        modelCopy.add("textures", newTextures);
+
+                        ctx.addItemModel(
+                                "%s_%s".formatted(name, key),
+                                ModelUtil.createBasicItem(ctx.writeModel("%s_%s".formatted(name, key), modelCopy))
+                        );
+                    }
+                } else {
+                    var newTextures = new JsonObject();
+                    for (var entry : model.get("textures").getAsJsonObject().entrySet())
+                        newTextures.addProperty(
+                                entry.getKey(),
+                                images.getOrDefault(entry.getValue().getAsString(), entry.getValue().getAsString())
+                        );
+                    model.add("textures", newTextures);
+
+                    var itemModelName = ctx.writeModel(name, model);
+                    ctx.addItemModel(name, ModelUtil.createBasicItem(itemModelName));
+                }
             }
         }
     }

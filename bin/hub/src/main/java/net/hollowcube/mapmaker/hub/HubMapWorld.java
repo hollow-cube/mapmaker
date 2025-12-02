@@ -2,10 +2,11 @@ package net.hollowcube.mapmaker.hub;
 
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.PlayerSettings;
+import net.hollowcube.mapmaker.hub.feature.event.christmas.AdventCalendarItem;
+import net.hollowcube.mapmaker.hub.feature.event.christmas.PresentObjectHandler;
 import net.hollowcube.mapmaker.hub.item.*;
 import net.hollowcube.mapmaker.hub.util.HubTransferData;
 import net.hollowcube.mapmaker.map.*;
-import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
@@ -28,7 +29,7 @@ import java.util.Random;
 public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
     private static final Pos MIN_SPAWN_POINT = new Pos(-1, 40, -1, 90, 0);
 
-    private static final Vec HUB_BB_MIN = new Vec(-250, -30, -100);
+    private static final Vec HUB_BB_MIN = new Vec(-250, -40, -150);
     private static final Vec HUB_BB_MAX = new Vec(60, 130, 150);
 
     public static Pos spawnPointFor(Player player) {
@@ -43,14 +44,17 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
     private final WorldScriptContext scriptContext;
 
     public HubMapWorld(MapServer server, MapData map) {
-        super(server, map, makeMapInstance(map, 'h', MapInstance.LightingMode.FULL_BRIGHT),
-            HubPlayerState.class);
+        super(server, map, makeMapInstance(map, 'h', null),
+                HubPlayerState.class);
 
         itemRegistry().register(new PlayMapsItem(server.playerService(), server.mapService(), server.bridge()));
         itemRegistry().register(new CreateMapsItem(server.guiController()));
         itemRegistry().register(new OrgMapsItem(server.guiController()));
         itemRegistry().register(new OpenCosmeticsMenuItem(server.guiController()));
         itemRegistry().register(OpenStoreItem.INSTANCE);
+        itemRegistry().register(new AdventCalendarItem());
+
+        objectEntityHandlers().registerForInteractions(PresentObjectHandler.ID, PresentObjectHandler::new);
 
         eventNode().addChild(EventUtil.READ_ONLY_NODE)
             .addListener(PlayerChangeHeldSlotEvent.class, this::handleSwitchSlot)

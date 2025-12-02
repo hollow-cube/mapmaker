@@ -60,21 +60,21 @@ public final class MiscFunctionality {
         var tabLogoSprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/tab/logo_outline"));
         var cubeOffset = FontUtil.computeOffset(tabLogoSprite.width() + FontUtil.measureText(" Hollow Cube") - 60); //todo where is the missing 2 coming from
         var tabHeader = Component.text()
-                .appendNewline()
-                .appendNewline()
-                .appendNewline()
-                .append(Component.empty()
-                        .append(Component.text(FontUtil.computeOffset(-15) + tabLogoSprite.fontChar()).shadowColor(ShadowColor.none()))
-                        .append(Component.text(" Hollow Cube", blueColor))).appendNewline()
-                .append(Component.text(cubeOffset + "ᴇᴀʀʟʏ ᴀᴄᴄᴇѕѕ", darkGrayColor))
-                .appendNewline()
-                .build();
+            .appendNewline()
+            .appendNewline()
+            .appendNewline()
+            .append(Component.empty()
+                .append(Component.text(FontUtil.computeOffset(-15) + tabLogoSprite.fontChar()).shadowColor(ShadowColor.none()))
+                .append(Component.text(" Hollow Cube", blueColor))).appendNewline()
+            .append(Component.text(cubeOffset + "ᴇᴀʀʟʏ ᴀᴄᴄᴇѕѕ", darkGrayColor))
+            .appendNewline()
+            .build();
         var tabFooter = Component.text()
-                .appendNewline()
-                .append(Component.text("ᴘʟᴀʏ.", lightGrayColor).append(Component.text("ʜᴏʟʟᴏᴡᴄᴜʙᴇ", goldColor)).append(Component.text(".ɴᴇᴛ", lightGrayColor))).appendNewline()
-                .append(Component.text(playerCountText, blueColor).append(Component.text(" " + playersText + " ᴏɴʟɪɴᴇ", darkGrayColor))).appendNewline()
-                .append(Component.text(FontUtil.computeOffset(125))) // Min width
-                .build();
+            .appendNewline()
+            .append(Component.text("ᴘʟᴀʏ.", lightGrayColor).append(Component.text("ʜᴏʟʟᴏᴡᴄᴜʙᴇ", goldColor)).append(Component.text(".ɴᴇᴛ", lightGrayColor))).appendNewline()
+            .append(Component.text(playerCountText, blueColor).append(Component.text(" " + playersText + " ᴏɴʟɪɴᴇ", darkGrayColor))).appendNewline()
+            .append(Component.text(FontUtil.computeOffset(125))) // Min width
+            .build();
 
         audience.sendPlayerListHeaderAndFooter(tabHeader, tabFooter);
     }
@@ -91,8 +91,8 @@ public final class MiscFunctionality {
         public int cacheKey(@NotNull Player player) {
             var playerData = PlayerData.fromPlayer(player);
             return Objects.hash(
-                    player.getGameMode() == GameMode.SPECTATOR,
-                    playerData.coins(), playerData.cubits()
+                player.getGameMode() == GameMode.SPECTATOR,
+                playerData.coins(), playerData.cubits()
             );
         }
 
@@ -154,13 +154,21 @@ public final class MiscFunctionality {
                 itemStack = itemStack.with(DataComponents.GLIDER);
                 var equippable = itemStack.get(DataComponents.EQUIPPABLE);
                 if (equippable != null) itemStack = itemStack.with(DataComponents.EQUIPPABLE,
-                        equippable.withAssetId("minecraft:elytra"));
+                    equippable.withAssetId("minecraft:elytra"));
             }
             player.getInventory().setItemStack(type.iconSlot(), itemStack);
 
             if (cosmetic != null) {
                 cosmetic.impl().apply(player);
             }
+
+            if (player instanceof CosmeticCallback cb)
+                cb.onCosmeticChange(type, cosmetic);
         }
+    }
+
+    public interface CosmeticCallback {
+        // pretty gross, oh well
+        void onCosmeticChange(@NotNull CosmeticType type, @Nullable Cosmetic cosmetic);
     }
 }

@@ -12,6 +12,8 @@ import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.compat.moulberrytweaks.debugrender.DebugShape;
 import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderAddPacket;
 import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderRemovePacket;
+import net.hollowcube.mapmaker.cosmetic.Cosmetic;
+import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.hollowcube.mapmaker.map.block.CollidableBlock;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
@@ -22,6 +24,9 @@ import net.hollowcube.mapmaker.map.event.entity.Map2PlayerExitEntityEvent;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.util.PlayerVisibility;
 import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
+import net.hollowcube.mapmaker.misc.MiscFunctionality;
+import net.hollowcube.mapmaker.player.DisplayName;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
@@ -37,6 +42,7 @@ import net.minestom.server.entity.*;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.metadata.LivingEntityMeta;
 import net.minestom.server.event.player.PlayerMoveEvent;
+import net.minestom.server.instance.Weather;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.ItemStack;
@@ -44,9 +50,7 @@ import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.PlayerProvider;
 import net.minestom.server.network.packet.client.common.ClientPongPacket;
 import net.minestom.server.network.packet.server.SendablePacket;
-import net.minestom.server.network.packet.server.ServerPacket;
 import net.minestom.server.network.packet.server.common.PingPacket;
-import net.minestom.server.network.packet.server.configuration.FinishConfigurationPacket;
 import net.minestom.server.network.packet.server.play.*;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
@@ -73,7 +77,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public abstract class MapPlayer extends CommandHandlingPlayer {
+public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFunctionality.CosmeticCallback {
 
     private static final Logger log = LoggerFactory.getLogger(MapPlayer.class);
 
@@ -97,14 +101,14 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
     }
 
     private static final IntSet RESET_FALL_INSIDE_BLOCKS = IntSet.of(
-            // Bubble column, but only if its going up so its handled later.
-            Block.COBWEB.id(), Block.POWDER_SNOW.id(), Block.SWEET_BERRY_BUSH.id(), Block.HONEY_BLOCK.id());
+        // Bubble column, but only if its going up so its handled later.
+        Block.COBWEB.id(), Block.POWDER_SNOW.id(), Block.SWEET_BERRY_BUSH.id(), Block.HONEY_BLOCK.id());
     private static final RegistryTag<@NotNull Block> TAG_CLIMBABLE = Block.staticRegistry()
-            .getTag(TagKey.ofHash("#minecraft:climbable"));
+        .getTag(TagKey.ofHash("#minecraft:climbable"));
     // TODO(1.21.11): this is an actual tag, use it.
     private static final IntSet CAN_GLIDE_THROUGH = IntSet.of(
-            Block.VINE.id(), Block.TWISTING_VINES.id(), Block.TWISTING_VINES_PLANT.id(),
-            Block.WEEPING_VINES.id(), Block.WEEPING_VINES_PLANT.id()
+        Block.VINE.id(), Block.TWISTING_VINES.id(), Block.TWISTING_VINES_PLANT.id(),
+        Block.WEEPING_VINES.id(), Block.WEEPING_VINES_PLANT.id()
     );
 
     // This field solves a pretty gross ordering issue with teleports, should investigate a better solution
@@ -163,15 +167,13 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
 
         try {
             var mh = MethodHandles.privateLookupIn(Player.class, MethodHandles.lookup())
-                    .findGetter(Player.class, "chunkQueue", LongPriorityQueue.class);
+                .findGetter(Player.class, "chunkQueue", LongPriorityQueue.class);
             var chunkQUeue = (LongPriorityQueue) mh.invoke(this);
             chunkQUeue.clear();
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
     }
-
-    private boolean clientInConfigPhase = false;
 
     @Override
     public void sendPacket(@NotNull SendablePacket packet) {
@@ -180,30 +182,13 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
             case PingPacket(int id) -> lastPingId.set(id);
 
             // Don't send pose packets to self if we aren't supposed to
-            case EntityMetaDataPacket(var entity, var entries) when entity == this.getEntityId()
-                    && entries.containsKey(MetadataDef.POSE.index())
-                    && !canSendPose -> {
+            case EntityMetaDataPacket(var entity, var entries)
+                when entity == this.getEntityId() && entries.containsKey(MetadataDef.POSE.index()) && !canSendPose -> {
                 var newEntries = new HashMap<>(entries);
                 newEntries.remove(MetadataDef.POSE.index());
                 super.sendPacket(new EntityMetaDataPacket(entity, newEntries));
                 return;
             }
-
-            case StartConfigurationPacket _ -> {
-                clientInConfigPhase = true;
-            }
-            case FinishConfigurationPacket _ -> {
-                clientInConfigPhase = false;
-            }
-            case ServerPacket.Play _ when clientInConfigPhase && !(packet instanceof ServerPacket.Configuration) -> {
-                // We know about meta data, just checking for others.
-                if (!(packet instanceof EntityMetaDataPacket)) {
-                    log.error("Sending play packet while client will be in config phase! Packet: {}", packet,
-                            new RuntimeException("synthetic exception for stacktrace"));
-                }
-                return; // Don't send it, they would be kicked
-            }
-
             default -> {  // Do nothing
             }
         }
@@ -216,6 +201,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         FutureUtil.assertTickThreadWarn(acquirable());
         super.updateNewViewer(player);
         updateVisibility(player);
+        createNameTagEntity(player);
     }
 
     @Override
@@ -223,6 +209,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         FutureUtil.assertTickThreadWarn(acquirable());
         super.updateOldViewer(player);
         visibilityByEntity.remove(player.getEntityId());
+        destroyNameTagEntity(player);
     }
 
     @Override
@@ -240,6 +227,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         physicsTick();
         riptideTick();
         fallTick();
+        weatherTick();
     }
 
     @Override
@@ -311,12 +299,12 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
                 this.sendPacket(new BundlePacket());
                 new ClientboundDebugRenderRemovePacket(id).send(this);
                 new ClientboundDebugRenderAddPacket(
-                        id,
-                        new DebugShape.Box(
-                                center, new Vec(box.width(), box.height(), box.depth()), Quaternion.ZERO,
-                                0, 0xFFFF0000, 5
-                        ),
-                        DebugShape.FLAG_WIREFRAME, 10
+                    id,
+                    new DebugShape.Box(
+                        center, new Vec(box.width(), box.height(), box.depth()), Quaternion.ZERO,
+                        0, 0xFFFF0000, 5
+                    ),
+                    DebugShape.FLAG_WIREFRAME, 10
                 ).send(this);
             } finally {
                 this.sendPacket(new BundlePacket());
@@ -324,20 +312,27 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         }
     }
 
+    @Override
+    public void setPose(@NotNull EntityPose pose) {
+        super.setPose(pose);
+
+        updateNameTagForPose(pose);
+    }
+
     // endregion
 
     public @NotNull CompletableFuture<Void> teleport(
-            @NotNull Pos position, @NotNull Vec velocity, long @Nullable [] chunks,
-            @MagicConstant(flagsFromClass = RelativeFlags.class) int flags,
-            boolean shouldConfirm) {
+        @NotNull Pos position, @NotNull Vec velocity, long @Nullable [] chunks,
+        @MagicConstant(flagsFromClass = RelativeFlags.class) int flags,
+        boolean shouldConfirm) {
         // See note on pendingTeleports
         pendingTeleports.incrementAndGet();
         return super.teleport(position, velocity, chunks, flags, shouldConfirm)
-                .thenRun(pendingTeleports::decrementAndGet)
-                .exceptionally(ex -> {
-                    pendingTeleports.decrementAndGet();
-                    throw new RuntimeException("Failed to teleport player " + getUsername(), ex);
-                });
+            .thenRun(pendingTeleports::decrementAndGet)
+            .exceptionally(ex -> {
+                pendingTeleports.decrementAndGet();
+                throw new RuntimeException("Failed to teleport player " + getUsername(), ex);
+            });
     }
 
     //region EXT: Ping
@@ -366,7 +361,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
     public void addOwnedEntity(@NotNull Entity entity) {
         FutureUtil.assertTickThread();
         Check.argCondition(entity.isAutoViewable() || entity.getViewers().size() != 1 || !entity.getViewers().contains(this),
-                "Owned entity must not be auto viewable and must be viewing only this player");
+            "Owned entity must not be auto viewable and must be viewing only this player");
 
         this.ownedEntities.add(entity.getEntityId());
     }
@@ -467,19 +462,19 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
 
     private void sendMetaInvisUpdate(@NotNull Player player, boolean invisible) {
         byte metaFlags = Objects.requireNonNullElseGet((Metadata.Entry<Byte>) EntityMetadataStealer.steal(this).getEntries().get(0),
-                () -> Metadata.Byte((byte) 0)).value();
+            () -> Metadata.Byte((byte) 0)).value();
         if (invisible) metaFlags |= 0x20; // Ensure the invisible flag is set
         player.sendPacket(new EntityMetaDataPacket(getEntityId(), Map.of(
-                MetadataDef.ENTITY_FLAGS.index(),
-                Metadata.Byte(metaFlags)
+            MetadataDef.ENTITY_FLAGS.index(),
+            Metadata.Byte(metaFlags)
         )));
     }
 
     private void sendGameModeUpdate(@NotNull Player player, @NotNull GameMode gameMode) {
         var infoEntry = new PlayerInfoUpdatePacket.Entry(
-                getUuid(), getUsername(), List.of(), false, 0,
-                gameMode, // This is the relevant one, we are only updating the gamemode
-                null, null, 0, false
+            getUuid(), getUsername(), List.of(), false, 0,
+            gameMode, // This is the relevant one, we are only updating the gamemode
+            null, null, 0, false
         );
         player.sendPacket(new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE, infoEntry));
     }
@@ -498,8 +493,8 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
 
             final Block.Getter chunkCache = new ChunkCache(instance, currentChunk, Block.STONE);
             nextPhysicsResult = PhysicsUtils.simulateMovement(position, velocity, boundingBox,
-                    instance.getWorldBorder(), chunkCache, getAerodynamics(), hasNoGravity(), hasPhysics,
-                    onGround, false, getLastPhysicsResult());
+                instance.getWorldBorder(), chunkCache, getAerodynamics(), hasNoGravity(), hasPhysics,
+                onGround, false, getLastPhysicsResult());
         } else {
             nextPhysicsResult = null;
         }
@@ -527,7 +522,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
 
             var collisionShape = block.registry().collisionShape();
             var hit = collisionShape != null && collisionShape.intersectBox(
-                    position.sub(pos.blockX(), pos.blockY(), pos.blockZ()), bb);
+                position.sub(pos.blockX(), pos.blockY(), pos.blockZ()), bb);
             if (hit) return false;
         }
 
@@ -556,7 +551,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
             }
             if (Holder.getter == null) {
                 Holder.getter = MethodHandles.privateLookupIn(Entity.class, MethodHandles.lookup())
-                        .findGetter(Entity.class, "previousPhysicsResult", PhysicsResult.class);
+                    .findGetter(Entity.class, "previousPhysicsResult", PhysicsResult.class);
             }
 
             return (PhysicsResult) Holder.getter.invokeExact((Entity) this);
@@ -657,7 +652,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         }
 
         boolean shouldResetImpulse = event.isOnGround() || isInClimbable() || getGameMode() == GameMode.SPECTATOR
-                || getPose() == EntityPose.FALL_FLYING || getPose() == EntityPose.SPIN_ATTACK;
+                                     || getPose() == EntityPose.FALL_FLYING || getPose() == EntityPose.SPIN_ATTACK;
         if (!shouldResetImpulse && delta.y() < 1e-5) {
             updateBlockTouchState();
             shouldResetImpulse = isInWater() || isInLava();
@@ -696,7 +691,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
             // just treat everything as full block for now.
 
             boolean shouldResetFallDistance = RESET_FALL_INSIDE_BLOCKS.contains(block.id())
-                    || block.id() == Block.BUBBLE_COLUMN.id() && "false".equals(block.getProperty("drag"));
+                                              || block.id() == Block.BUBBLE_COLUMN.id() && "false".equals(block.getProperty("drag"));
             if (shouldResetFallDistance) {
                 resetFallDistance();
                 if (impulseGraceTicks == 0) resetImpulsePosition();
@@ -743,8 +738,8 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
 
     private int calculateFallDamage(double fallDistance, float damageMultiplier) {
         return (int) Math.floor(calculateFallPower(fallDistance)
-                * damageMultiplier
-                * getAttributeValue(Attribute.FALL_DAMAGE_MULTIPLIER));
+                                * damageMultiplier
+                                * getAttributeValue(Attribute.FALL_DAMAGE_MULTIPLIER));
     }
 
     private double calculateFallPower(double fallDistance) {
@@ -789,7 +784,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
             if (posMut.y() >= selfPos.y()) continue;
 
             var hit = block.registry().collisionShape().intersectBox(
-                    selfPos.sub(pos.blockX(), pos.blockY(), pos.blockZ()), bb);
+                selfPos.sub(pos.blockX(), pos.blockY(), pos.blockZ()), bb);
             if (hit) {
                 double distance = pos.add(0.5).distanceSquared(selfPos);
                 if (distance < closestDistance) {
@@ -863,10 +858,10 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
                 continue;
 
             var hit = bb.intersectBox(position.sub(pos.blockX() + 0.5, pos.blockY(), pos.blockZ() + 0.5),
-                    collidableBlock.collisionBox());
+                collidableBlock.collisionBox());
             if (hit) newBlocks.put(
-                    new CollisionKey(collidableBlock, new BlockVec(pos)),
-                    new CollidableBlock.Collision(world, this, pos, block)
+                new CollisionKey(collidableBlock, new BlockVec(pos)),
+                new CollidableBlock.Collision(world, this, pos, block)
             );
         }
 
@@ -888,12 +883,12 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         var position = getPosition();
         var minestomBoundingBox = getBoundingBox();
         var physicsBoundingBox = new net.hollowcube.mapmaker.map.util.spatial.BoundingBox(
-                (float) (position.x() + minestomBoundingBox.minX()),
-                (float) (position.y() + minestomBoundingBox.minY()),
-                (float) (position.z() + minestomBoundingBox.minZ()),
-                (float) (position.x() + minestomBoundingBox.maxX()),
-                (float) (position.y() + minestomBoundingBox.maxY()),
-                (float) (position.z() + minestomBoundingBox.maxZ())
+            (float) (position.x() + minestomBoundingBox.minX()),
+            (float) (position.y() + minestomBoundingBox.minY()),
+            (float) (position.z() + minestomBoundingBox.minZ()),
+            (float) (position.x() + minestomBoundingBox.maxX()),
+            (float) (position.y() + minestomBoundingBox.maxY()),
+            (float) (position.z() + minestomBoundingBox.maxZ())
         );
 
         var newObjects = world.collisionTree().intersectingObjects(physicsBoundingBox);
@@ -913,6 +908,103 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
         }
         objectsTouching.clear();
         objectsTouching.addAll(newObjects);
+    }
+
+    //endregion
+
+    //region EXT: Weather
+
+    private float targetRainLevel = 0, targetThunderLevel = 0;
+    private float currentRainLevel = 0, currentThunderLevel = 0;
+    private float weatherTransitionRate = 0.04f; //todo get the vanilla value
+
+    public void setWeather(Weather weather) {
+        this.targetRainLevel = weather.rainLevel();
+        this.targetThunderLevel = weather.thunderLevel();
+    }
+
+    public void setWeather(Weather weather, float transitionRate) {
+        this.targetRainLevel = weather.rainLevel();
+        this.targetThunderLevel = weather.thunderLevel();
+        this.weatherTransitionRate = Math.abs(transitionRate);
+    }
+
+    private void weatherTick() {
+        if (currentRainLevel == targetRainLevel && currentThunderLevel == targetThunderLevel)
+            return; // Nothing to do
+
+        float lastRainLevel = currentRainLevel, lastThunderLevel = currentThunderLevel;
+        currentRainLevel = Math.clamp(currentRainLevel + Math.copySign(weatherTransitionRate, targetRainLevel - currentRainLevel), 0, 1);
+        currentThunderLevel = Math.clamp(currentThunderLevel + Math.copySign(weatherTransitionRate, targetThunderLevel - currentThunderLevel), 0, 1);
+
+        if (currentRainLevel > 0 && lastRainLevel == 0) {
+            sendPacket(new ChangeGameStatePacket(ChangeGameStatePacket.Reason.BEGIN_RAINING, 0));
+        }
+
+        if (lastRainLevel != currentRainLevel)
+            sendPacket(new ChangeGameStatePacket(ChangeGameStatePacket.Reason.RAIN_LEVEL_CHANGE, currentRainLevel));
+        if (lastThunderLevel != currentThunderLevel)
+            sendPacket(new ChangeGameStatePacket(ChangeGameStatePacket.Reason.THUNDER_LEVEL_CHANGE, currentThunderLevel));
+
+        if (currentRainLevel == 0 && lastRainLevel != 0) {
+            sendPacket(new ChangeGameStatePacket(ChangeGameStatePacket.Reason.END_RAINING, 0));
+        }
+    }
+
+    //endregion
+
+    //region Name Tag
+
+    private static final byte META_FLAG_INVISIBLE = (byte) 0b100000;
+    private static final byte META_FLAG_SNEAKING = (byte) 0b10;
+
+    private final int nameTagEntityId = Entity.generateId(), nameTagOffsetEntityId = Entity.generateId();
+    private final UUID nameTagEntityUuid = UUID.randomUUID(), nameTagOffsetEntityUuid = UUID.randomUUID();
+
+    private void createNameTagEntity(Player player) {
+        var playerData = PlayerData.fromPlayer(this);
+        var displayName = playerData.displayName2().build(DisplayName.Context.NAME_TAG);
+        player.sendPackets(List.of(
+            new BundlePacket(),
+            new SpawnEntityPacket(nameTagEntityId, nameTagEntityUuid, EntityType.ARMOR_STAND,
+                getPosition(), 0, 0, Vec.ZERO),
+            new EntityMetaDataPacket(nameTagEntityId, Map.of(
+                MetadataDef.ENTITY_FLAGS.index(), Metadata.Byte(META_FLAG_INVISIBLE),
+                MetadataDef.CUSTOM_NAME.index(), Metadata.OptComponent(displayName),
+                MetadataDef.CUSTOM_NAME_VISIBLE.index(), Metadata.Boolean(true),
+                MetadataDef.ArmorStand.ARMOR_STAND_FLAGS.index(), Metadata.Byte((byte) 0x10) // marker
+            )),
+            new SpawnEntityPacket(nameTagOffsetEntityId, nameTagOffsetEntityUuid, EntityType.INTERACTION,
+                getPosition(), 0, 0, Vec.ZERO),
+            new EntityMetaDataPacket(nameTagOffsetEntityId, Map.of(
+                MetadataDef.ENTITY_FLAGS.index(), Metadata.Byte(META_FLAG_INVISIBLE),
+                MetadataDef.Interaction.WIDTH.index(), Metadata.Float(0f),
+                MetadataDef.Interaction.HEIGHT.index(), Metadata.Float(0f)
+            )),
+            new SetPassengersPacket(getEntityId(), List.of(nameTagOffsetEntityId)),
+            new SetPassengersPacket(nameTagOffsetEntityId, List.of(nameTagEntityId)),
+            new BundlePacket()
+        ));
+    }
+
+    private void destroyNameTagEntity(Player player) {
+        player.sendPacket(new DestroyEntitiesPacket(nameTagEntityId));
+    }
+
+    private void updateNameTagForPose(@NotNull EntityPose pose) {
+        byte flag = pose == EntityPose.SNEAKING ? (META_FLAG_INVISIBLE | META_FLAG_SNEAKING) : META_FLAG_INVISIBLE;
+        sendPacketToViewers(new EntityMetaDataPacket(nameTagEntityId, Map.of(
+            MetadataDef.ENTITY_FLAGS.index(), Metadata.Byte(flag)
+        )));
+    }
+
+    @Override
+    public void onCosmeticChange(@NotNull CosmeticType type, @Nullable Cosmetic cosmetic) {
+        if (type != CosmeticType.HAT) return;
+
+        sendPacketToViewers(new EntityMetaDataPacket(nameTagOffsetEntityId, Map.of(
+            MetadataDef.Interaction.HEIGHT.index(), Metadata.Float(cosmetic != null ? 0.2f : 0f)
+        )));
     }
 
     //endregion
@@ -1013,8 +1105,8 @@ public abstract class MapPlayer extends CommandHandlingPlayer {
     private void playGlobalSound(SoundEvent soundEvent, float volume, float pitch) {
         long seed = ThreadLocalRandom.current().nextLong();
         sendPacketToViewersAndSelf(new SoundEffectPacket(
-                soundEvent, Sound.Source.PLAYER, getPosition(),
-                volume, pitch, seed
+            soundEvent, Sound.Source.PLAYER, getPosition(),
+            volume, pitch, seed
         ));
     }
 

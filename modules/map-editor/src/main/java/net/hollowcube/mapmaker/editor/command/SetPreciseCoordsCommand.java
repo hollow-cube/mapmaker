@@ -12,6 +12,8 @@ import net.hollowcube.mapmaker.runtime.parkour.action.impl.ResetHeightAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.base.CoordinateAction;
 import net.hollowcube.mapmaker.runtime.parkour.block.CheckpointPlateBlock;
 import net.hollowcube.mapmaker.runtime.parkour.block.StatusPlateBlock;
+import net.hollowcube.mapmaker.runtime.parkour.marker.CheckpointMarkerHandler;
+import net.hollowcube.mapmaker.runtime.parkour.marker.StatusMarkerHandler;
 import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -83,14 +85,23 @@ public class SetPreciseCoordsCommand extends CommandDsl {
             } else if (block.handler() instanceof StatusPlateBlock) {
                 StatusEditor.editBlock(player.getInstance(), targetBlockPosition, block,
                         data -> updater.accept(data.actions()));
-            } else return;
-        } else if (updateTarget.value() instanceof MarkerEntity marker) {
-            if ("mapmaker:checkpoint".equals(marker.getType())) {
-                var data = marker.getTag(CheckpointPlateBlock.ENTITY_DATA_TAG);
-                updater.accept(data.actions());
-                marker.setTag(CheckpointPlateBlock.ENTITY_DATA_TAG, data);
+            } else {
+                return;
             }
-        } else return;
+        } else if (updateTarget.value() instanceof MarkerEntity marker) {
+            var tag = switch (marker.getType()) {
+                case CheckpointMarkerHandler.ID -> CheckpointPlateBlock.ENTITY_DATA_TAG;
+                case StatusMarkerHandler.ID -> StatusPlateBlock.ENTITY_DATA_TAG;
+                default -> null;
+            };
+            if (tag == null) return;
+            marker.updateTag(tag, data -> {
+                updater.accept(data.actions());
+                return data;
+            });
+        } else {
+            return;
+        }
 
         if (updated.get()) {
             player.removeTag(CoordinateAction.SPC_EDIT_TAG);

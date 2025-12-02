@@ -28,6 +28,7 @@ dependencies {
     implementation(libs.bundles.adventure)
     implementation(libs.polar)
     implementation(libs.included.schem)
+    implementation(libs.fastutil)
 
     implementation(libs.slf4j)
     implementation(libs.slf4j.jul)

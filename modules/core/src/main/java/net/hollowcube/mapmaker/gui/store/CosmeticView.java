@@ -97,7 +97,7 @@ public class CosmeticView extends View {
         var entries = Cosmetic.values(selectedTab).stream()
                 .sorted(Cosmetic.comparingName())
                 .sorted(Cosmetic.comparingRarity())
-                .filter(cosmetic -> showLocked || unlockedCosmetics.contains(cosmetic.path()))
+                .filter(cosmetic -> (showLocked && !cosmetic.isHidden()) || unlockedCosmetics.contains(cosmetic.path()))
                 .toList();
 
         var results = new ArrayList<CosmeticEntry>(entries.size());

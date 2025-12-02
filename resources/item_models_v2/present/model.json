@@ -1,0 +1,75 @@
+{
+  "type": "mapmaker/variant/single",
+	"format_version": "1.21.6",
+	"texture_size": [64, 64],
+	"elements": [
+		{
+			"name": "Box",
+			"from": [2, 0, 2],
+			"to": [14, 12, 14],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 6, 8]},
+			"color": 8,
+			"faces": {
+				"north": {"uv": [3, 3, 6, 6], "texture": "#texture"},
+				"east": {"uv": [0, 3, 3, 6], "texture": "#texture"},
+				"south": {"uv": [9, 3, 12, 6], "texture": "#texture"},
+				"west": {"uv": [6, 3, 9, 6], "texture": "#texture"},
+				"up": {"uv": [6, 3, 3, 0], "texture": "#texture"},
+				"down": {"uv": [9, 0, 6, 3], "texture": "#texture"}
+			}
+		},
+		{
+			"name": "Lid",
+			"from": [1.5, -0.5, 1.5],
+			"to": [14.5, 12.5, 14.5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 6, 8]},
+			"color": 3,
+			"faces": {
+				"north": {"uv": [3, 9, 6, 12], "texture": "#texture"},
+				"east": {"uv": [0, 9, 3, 12], "texture": "#texture"},
+				"south": {"uv": [9, 9, 12, 12], "texture": "#texture"},
+				"west": {"uv": [6, 9, 9, 12], "texture": "#texture"},
+				"up": {"uv": [6, 9, 3, 6], "texture": "#texture"},
+				"down": {"uv": [9, 6, 6, 9], "texture": "#texture"}
+			}
+		},
+		{
+			"from": [2, 12, 8],
+			"to": [14, 24, 8],
+			"rotation": {"angle": 45, "axis": "y", "origin": [8, 18, 8]},
+			"color": 0,
+			"faces": {
+				"north": {"uv": [0, 13, 3, 16], "texture": "#texture"},
+				"east": {"uv": [0, 13, 0, 16], "texture": "#texture"},
+				"south": {"uv": [3, 13, 6, 16], "texture": "#texture"},
+				"west": {"uv": [3, 13, 3, 16], "texture": "#texture"},
+				"up": {"uv": [3, 13, 0, 13], "texture": "#texture"},
+				"down": {"uv": [6, 13, 3, 13], "texture": "#texture"}
+			}
+		},
+		{
+			"from": [8, 12, 2],
+			"to": [8, 24, 14],
+			"rotation": {"angle": 45, "axis": "y", "origin": [8, 18, 8]},
+			"color": 7,
+			"faces": {
+				"north": {"uv": [9, 13, 9, 16], "texture": "#texture"},
+				"east": {"uv": [6, 13, 9, 16], "texture": "#texture"},
+				"south": {"uv": [12, 13, 12, 16], "texture": "#texture"},
+				"west": {"uv": [9, 13, 12, 16], "texture": "#texture"},
+				"up": {"uv": [9, 13, 9, 10], "texture": "#texture"},
+				"down": {"uv": [9, 10, 9, 13], "texture": "#texture"}
+			}
+		}
+	],
+	"groups": [
+		0,
+		1,
+		{
+			"name": "Wrap",
+			"origin": [8, 17, 8],
+			"color": 0,
+			"children": [2, 3]
+		}
+	]
+}

@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub.feature.contest;
 
-import com.google.auto.service.AutoService;
 import net.hollowcube.mapmaker.cosmetic.Hats;
 import net.hollowcube.mapmaker.gui.map.browser.MapContestBrowserView;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
@@ -29,7 +28,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
-@AutoService(HubFeature.class)
+//@AutoService(HubFeature.class)
 public class MapContest implements HubFeature {
     public static final int MAP_CONTEST_SLOT = -1;
     public static final String CONTEST_ID = "c9354e33-96c2-414a-9f4a-8c2ff4669086";
