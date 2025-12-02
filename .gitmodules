@@ -4,3 +4,6 @@
 [submodule "modules/molang"]
 	path = modules/molang
 	url = git@github.com:hollow-cube/molang.git
+[submodule "modules/multipart"]
+	path = modules/multipart
+	url = git@github.com:hollow-cube/multipart.git
