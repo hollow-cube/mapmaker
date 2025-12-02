@@ -18,11 +18,11 @@ public class ConveyerItemModel extends NpcItemModel {
         this.sendPacketToViewersAndSelf(new BundlePacket());
         this.getEntityMeta().setNotifyAboutChanges(false);
         consumer.accept(this);
-        this.getEntityMeta().setNotifyAboutChanges(true);
         final var pos = this.position;
         final var delta = pos.sub(lastSyncedPosition);
         this.sendPacketToViewersAndSelf(new EntityPositionSyncPacket(getEntityId(), pos, delta, pos.yaw(), pos.pitch(), isOnGround()));
         this.lastSyncedPosition = pos;
+        this.getEntityMeta().setNotifyAboutChanges(true);
         this.sendPacketToViewersAndSelf(new BundlePacket());
     }
 
