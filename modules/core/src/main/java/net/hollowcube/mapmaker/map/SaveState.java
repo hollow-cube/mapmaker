@@ -14,6 +14,7 @@ public class SaveState {
     private SaveStateType type;
     private boolean completed;
     private long playtime;
+    private long ticks;
     private transient long playStartTime;
     int dataVersion;
     private int protocolVersion;
@@ -68,6 +69,10 @@ public class SaveState {
         return playtime;
     }
 
+    public long getTicks() {
+        return this.ticks;
+    }
+
     /**
      * Returns the current playtime to the millisecond at this moment, as opposed to {@link #getPlaytime()}
      * which returns the playtime at the last save.
@@ -86,6 +91,11 @@ public class SaveState {
 
     public void setPlayStartTime(long playStartTime) {
         this.playStartTime = playStartTime;
+    }
+
+    public void tick() {
+        if (playStartTime == 0) return;
+        ticks++;
     }
 
     public void updatePlaytime() {
@@ -119,6 +129,7 @@ public class SaveState {
                     "serializer", serializer,
                     "dataVersion", dataVersion,
                     "playtime", playtime,
+                    "ticks", ticks,
                     "completed", completed
             ));
         return stateType.cast(state);
@@ -139,6 +150,7 @@ public class SaveState {
     public @NotNull SaveStateUpdateRequest createUpdateRequest() {
         var req = new SaveStateUpdateRequest()
                 .setPlaytime(playtime)
+                .setTicks(ticks)
                 .setCompleted(completed)
                 .setProtocolVersion(protocolVersion);
         if (serializer != null && state != null) {
@@ -151,6 +163,7 @@ public class SaveState {
         var req = new SaveStateUpdateRequest()
                 .setType(type)
                 .setPlaytime(playtime)
+                .setTicks(ticks)
                 .setCompleted(completed)
                 .setProtocolVersion(protocolVersion);
         if (serializer != null && state != null) {
@@ -170,6 +183,7 @@ public class SaveState {
         copy.type = type;
         copy.completed = completed;
         copy.playtime = playtime;
+        copy.ticks = ticks;
         copy.playStartTime = playStartTime;
         copy.dataVersion = dataVersion;
         copy.protocolVersion = protocolVersion;

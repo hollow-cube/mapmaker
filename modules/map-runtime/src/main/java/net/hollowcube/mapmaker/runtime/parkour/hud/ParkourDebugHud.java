@@ -32,9 +32,13 @@ public class ParkourDebugHud implements ActionBar.Provider {
         var saveState = p.saveState();
 
         var sliced = slice(saveState.state(PlayState.class).toString(false));
-        builder.offset(-FontUtil.measureText(sliced) / 2)
-                .append("line_0", sliced);
+        builder.offset(-FontUtil.measureText(sliced) / 2).append("line_0", sliced);
         builder.offset(-FontUtil.measureText(sliced) / 2);
+
+        builder.pushColor(FontUtil.computeVerticalOffset(-50));
+        builder.append("line_0", "Ticks=%d".formatted(saveState.getTicks()));
+        builder.offset(-FontUtil.measureText("Ticks=%d".formatted(saveState.getTicks())));
+        builder.popColor();
 
         builder.offset(-300);
         int i = 0;

@@ -352,6 +352,10 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             player.sendMessage(translatable("playing.timer.run_out"));
             softResetPlayer(player);
         }
+
+        if (getPlayerState(player) instanceof ParkourState.AnyPlaying playing) {
+            playing.saveState().tick();
+        }
     }
 
     private void handleSpectatorMove(PlayerMoveEvent event) {
