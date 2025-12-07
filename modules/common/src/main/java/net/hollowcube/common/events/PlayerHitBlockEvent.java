@@ -8,8 +8,8 @@ import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.event.trait.PlayerInstanceEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.listener.PlayerDiggingListener;
-import net.minestom.server.network.packet.client.play.ClientPlayerDiggingPacket;
+import net.minestom.server.listener.PlayerActionListener;
+import net.minestom.server.network.packet.client.play.ClientPlayerActionPacket;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,10 +23,10 @@ public final class PlayerHitBlockEvent implements PlayerInstanceEvent, BlockEven
     private boolean cancelled = false;
 
     public PlayerHitBlockEvent(
-            @NotNull Player player,
-            @NotNull Block block,
-            @NotNull BlockVec vec,
-            @NotNull BlockFace face
+        @NotNull Player player,
+        @NotNull Block block,
+        @NotNull BlockVec vec,
+        @NotNull BlockFace face
     ) {
         this.player = player;
         this.block = block;
@@ -64,13 +64,13 @@ public final class PlayerHitBlockEvent implements PlayerInstanceEvent, BlockEven
     }
 
     @ApiStatus.Internal
-    public static void post(ClientPlayerDiggingPacket packet, Player player) {
+    public static void post(ClientPlayerActionPacket packet, Player player) {
         var block = player.getInstance().getBlock(packet.blockPosition());
         var event = new PlayerHitBlockEvent(player, block, new BlockVec(packet.blockPosition()), packet.blockFace());
         EventDispatcher.call(event);
 
         if (event.isCancelled()) return;
 
-        PlayerDiggingListener.playerDiggingListener(packet, player);
+        PlayerActionListener.playerActionListener(packet, player);
     }
 }

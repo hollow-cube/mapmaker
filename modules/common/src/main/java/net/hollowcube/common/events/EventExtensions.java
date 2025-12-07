@@ -15,6 +15,6 @@ public final class EventExtensions {
         packets.setPlayListener(ClientVehicleMovePacket.class, PlayerMoveVehicleEvent::post);
         packets.setPlayListener(ClientUpdateSignPacket.class, UpdateSignTextEvent::post);
         packets.setPlayListener(ClientStatusPacket.class, RequestStatsEvent::post);
-        packets.setPlayListener(ClientPlayerDiggingPacket.class, PlayerHitBlockEvent::post);
+        packets.setPlayListener(ClientPlayerActionPacket.class, PlayerHitBlockEvent::post);
     }
 }

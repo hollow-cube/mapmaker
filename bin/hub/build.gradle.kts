@@ -1,3 +1,5 @@
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
 plugins {
     id("mapmaker.java-binary")
     id("mapmaker.packer-data")
@@ -20,9 +22,15 @@ dependencies {
     annotationProcessor(project(":tools:lua-slopgen"))
 
     implementation(libs.luau.core)
-    implementation(libs.luau.natives.macos.arm64)
-    implementation(libs.luau.natives.linux.x64)
-    implementation(libs.luau.natives.windows.x64)
+    if (DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX) {
+        implementation(libs.luau.natives.macos.arm64)
+    }
+    if (DefaultNativePlatform.getCurrentOperatingSystem().isLinux) {
+        implementation(libs.luau.natives.linux.x64)
+    }
+    if (DefaultNativePlatform.getCurrentOperatingSystem().isWindows) {
+        implementation(libs.luau.natives.windows.x64)
+    }
 
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)
