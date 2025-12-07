@@ -36,7 +36,7 @@ public class FlyCommand extends CommandDsl {
             player.setAllowFlying(!canFly);
             player.setFlying(!canFly);
 
-            player.sendMessage(translatable(canFly ? "command.fly.enabled" : "command.fly.disabled"));
+            player.sendMessage(translatable(!canFly ? "command.fly.enabled" : "command.fly.disabled"));
         }
     }
 
