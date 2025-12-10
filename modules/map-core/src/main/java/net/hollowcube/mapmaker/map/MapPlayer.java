@@ -601,8 +601,12 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
 
     @Override
     public void setFlyingWithElytra(boolean isFlying) {
-        super.setFlyingWithElytra(isFlying);
+        super.setFlyingWithElytra(isFlying && this.canFlyWithElytra());
         if (!isFlying) FireworkRocketItem.removeRocket(this);
+    }
+
+    public boolean canFlyWithElytra() {
+        return this.getChestplate().has(DataComponents.GLIDER);
     }
 
     //endregion
