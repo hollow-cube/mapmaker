@@ -9,10 +9,13 @@ docker image rm --force mapmaker-session-service:latest && true
 
 export GOOS=linux
 export GOARCH=amd64
+if [[ "$(uname -m)" == "aarch64" || "$(uname -m)" == "arm64" ]]; then
+  export GOARCH=arm64
+fi
 export CGO_ENABLED=0
 
 cd ../hc-services/services
-cd map-service && CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o map-service cmd/map-service/*.go && true
-cd ../player-service && CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o player-service cmd/player-service/*.go && true
-cd ../session-service && CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o session-service cmd/session-service/*.go && true
+cd map-service && go build -o map-service cmd/map-service/*.go && true
+cd ../player-service && go build -o player-service cmd/player-service/*.go && true
+cd ../session-service && go build -o session-service cmd/session-service/*.go && true
 cd ${ORIGINAL_DIR}
