@@ -39,6 +39,7 @@ import net.hollowcube.mapmaker.runtime.parkour.marker.*;
 import net.hollowcube.mapmaker.runtime.parkour.marker.bouncepad.BouncePadMarkerHandler;
 import net.hollowcube.mapmaker.runtime.parkour.setting.*;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
+import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -375,8 +376,8 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             ));
         } else {
             // Diff playtime rounded to ticks prior to subtracting for correct display.
-            var diffPlaytime = (bestPlaytime - bestPlaytime % MinecraftServer.TICK_MS) -
-                    (finishState.getPlaytime() - finishState.getPlaytime() % MinecraftServer.TICK_MS);
+            var diffPlaytime = NumberUtil.roundMillisToTicks(bestPlaytime) -
+                    NumberUtil.roundMillisToTicks(finishState.getPlaytime());
             var diffColor = diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN;
             var diffSymbol = diffPlaytime < 0 ? "+" : "-";
             player.sendMessage(Component.translatable(
