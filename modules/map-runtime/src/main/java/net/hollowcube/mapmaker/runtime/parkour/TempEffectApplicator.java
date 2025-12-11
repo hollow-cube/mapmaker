@@ -150,15 +150,22 @@ public class TempEffectApplicator {
             return;
         var saveState = p.saveState();
         var state = saveState.state(PlayState.class);
+        var pos = state.pos();
 
         if (state.history().isEmpty()) return;
         if (state.lastState() == null) return;
         if (!state.history().getLast().equals(checkpointId)) return;
         if (data.actions().has(TeleportAction.KEY)) return;
-        var pos = state.pos();
         if (pos == null) return;
-        float yaw = player.getPosition().yaw();
-        float pitch = player.getPosition().pitch();
+
+        var respawnView = OpUtils.mapOr(
+                data.actions().findLast(RespawnPosAction.class),
+                action -> action.target().resolve(player.getPosition()),
+                player.getPosition()
+        );
+
+        float yaw = respawnView.yaw();
+        float pitch = respawnView.pitch();
 
         state.setPos(pos.withView(yaw, pitch));
         if (state.lastState() != null) {
