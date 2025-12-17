@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -42,19 +43,30 @@ public class ResetSaveStateItem extends ItemHandler {
 
         var currentState = world.getPlayerState(player);
         if (currentState == null) return;
-        if (currentState instanceof ParkourState.AnyPlaying parkourState) {
-            var saveState = parkourState.saveState();
-            var playtime = saveState.getRealPlaytime();
-            if (playtime > MIN_RESET_SCREEN_TIME) {
-                Panel.open(player, ExtraPanels.confirm("Reset Map Progress?", () -> world.hardResetPlayer(player)));
-                return;
-            } else if ((playtime > MIN_RESET_ITEM_TIME || saveState.state(PlayState.class).lastState() != null) && CONFIRM_COOLDOWN.test(player)) {
-                player.sendMessage(Component.translatable("item.mapmaker.reset_savestate.confirm"));
-                return;
-            }
+        if (tryConfirmation(player, currentState, CONFIRM_COOLDOWN, () -> world.hardResetPlayer(player))) {
+            return;
         }
 
         world.hardResetPlayer(player);
     }
 
+    public static boolean tryConfirmation(
+            Player player,
+            ParkourState currentState,
+            TagCooldown cooldown,
+            Runnable onConfirm
+    ) {
+        if (currentState instanceof ParkourState.AnyPlaying parkourState) {
+            var saveState = parkourState.saveState();
+            var playtime = saveState.getRealPlaytime();
+            if (playtime > MIN_RESET_SCREEN_TIME) {
+                Panel.open(player, ExtraPanels.confirm("Reset Map Progress?", onConfirm));
+                return true;
+            } else if ((playtime > MIN_RESET_ITEM_TIME || saveState.state(PlayState.class).lastState() != null) && cooldown.test(player)) {
+                player.sendMessage(Component.translatable("item.mapmaker.reset_savestate.confirm"));
+                return true;
+            }
+        }
+        return false;
+    }
 }
