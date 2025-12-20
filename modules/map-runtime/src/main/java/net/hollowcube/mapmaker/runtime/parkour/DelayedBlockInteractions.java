@@ -27,6 +27,7 @@ public class DelayedBlockInteractions {
     static {
         DELAYED_BLOCKS.addAll(BlockTags.TRAPDOORS);
         DELAYED_BLOCKS.addAll(BlockTags.DOORS);
+        DELAYED_BLOCKS.addAll(BlockTags.FENCE_GATES);
     }
 
     private static void handleBlockInteraction(PlayerBlockInteractEvent event) {
