@@ -183,10 +183,7 @@ public final class BiomeCommands {
                 .with(biomes.getName(key))
                 .with(key.key().asString())
                 .with(biome.hasPrecipitation() ? "true" : "false")
-                .with(biome.effects().skyColor().toString())
-                .with(biome.effects().fogColor().toString())
                 .with(biome.effects().waterColor().toString())
-                .with(biome.effects().waterFogColor().toString())
                 .with(Objects.requireNonNullElse(OpUtils.map(biome.effects().grassColor(), RGBLike::toString), "null"))
                 .with(Objects.requireNonNullElse(OpUtils.map(biome.effects().foliageColor(), RGBLike::toString), "null"))
                 .build();

@@ -16,10 +16,10 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.packet.server.play.ExplosionPacket;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.sound.SoundEvent;
+import net.minestom.server.utils.WeightedList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -29,7 +29,7 @@ public class WindChargeEntity extends AbstractProjectileEntity {
 
     public static @NotNull WindChargeEntity shootFromPlayerDirection(@NotNull Player shooter, boolean shooterOnly) {
         shooter.playSound(Sound.sound(SoundEvent.ENTITY_WIND_CHARGE_THROW, Sound.Source.NEUTRAL,
-                0.5f, 0.4f / (ThreadLocalRandom.current().nextFloat() * 0.4f + 0.8f)));
+            0.5f, 0.4f / (ThreadLocalRandom.current().nextFloat() * 0.4f + 0.8f)));
 
         var entity = new WindChargeEntity(shooter);
         if (shooterOnly) entity.setAutoViewable(false);
@@ -63,21 +63,21 @@ public class WindChargeEntity extends AbstractProjectileEntity {
         super.handlePossibleDripleafCollision(shooter, hitBlock, hitPos);
 
         sendExplosion(getViewers(), hitPos, EXPLOSION_RADIUS, 1, SoundEvent.ENTITY_WIND_CHARGE_WIND_BURST,
-                Particle.GUST_EMITTER_SMALL, Particle.GUST_EMITTER_LARGE, true, true);
+            Particle.GUST_EMITTER_SMALL, Particle.GUST_EMITTER_LARGE, true, true);
 
         remove();
     }
 
     public static void sendExplosion(
-            Collection<Player> players,
-            Point hitPos,
-            float radius,
-            float knockbackMultiplier,
-            SoundEvent sound,
-            Particle smallParticle,
-            Particle bigParticle,
-            boolean forceSmall,
-            boolean useLegacyWindChargeLogic
+        Collection<Player> players,
+        Point hitPos,
+        float radius,
+        float knockbackMultiplier,
+        SoundEvent sound,
+        Particle smallParticle,
+        Particle bigParticle,
+        boolean forceSmall,
+        boolean useLegacyWindChargeLogic
     ) {
 
         float diameter = radius * 2.0f;
@@ -114,13 +114,13 @@ public class WindChargeEntity extends AbstractProjectileEntity {
             if (player instanceof MapPlayer mp)
                 mp.trackImpulsePosition(mp.getPosition(), true);
             player.sendPacket(new ExplosionPacket(
-                    hitPos,
-                    radius,
-                    0,
-                    motion,
-                    isSmall ? smallParticle : bigParticle,
-                    sound,
-                    List.of()
+                hitPos,
+                radius,
+                0,
+                motion,
+                isSmall ? smallParticle : bigParticle,
+                sound,
+                WeightedList.of()
             ));
         }
     }
