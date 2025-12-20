@@ -24,7 +24,7 @@ public class SnowfallParticleImpl extends AbstractParticleImpl {
     }
 
     private @NotNull TaskSchedule particleTick(Player player) {
-        player.sendPacket(new ParticlePacket(
+        player.sendPacketToViewersAndSelf(new ParticlePacket(
             Particle.FALLING_DUST.withBlock(Block.SNOW_BLOCK),
             false, false,
             player.getPosition().withY(y -> y + 2.5),
