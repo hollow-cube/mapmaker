@@ -83,10 +83,10 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     private final ReentrantLock testWorldLock = new ReentrantLock();
     private @Nullable TestParkourMapWorld testWorld;
 
-    private final Terraform terraform;
-    private final TerraformInstanceStorage terraformInstanceStorage = new TerraformInstanceStorageImpl();
+    private final @Nullable Terraform terraform;
+    private final @Nullable TerraformInstanceStorage terraformInstanceStorage;
 
-    public EditorMapWorld(MapServer server, MapData map, Terraform terraform) {
+    public EditorMapWorld(MapServer server, MapData map, @Nullable Terraform terraform) {
         super(server, map, makeMapInstance(map, 'e'), EditorState.class);
 
         this.spawnEntity = new SpawnMarkerEntity();
@@ -110,24 +110,29 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         objectEntityHandlers().registerDefaultEditor(InteractionEntity.class, InteractionEditorScreen.MARKER_EDITOR);
 
         eventNode(EditorState.Building.class)
-                .addListener(PlayerTickEvent.class, this::handlePlayerTick)
-                .addListener(MapPlayerTeleportingEvent.class, this::handlePlayerSavedTeleport)
-                .addListener(PlayerEntityInteractEvent.class, this::handleSpawnEntityInteraction)
-                .addListener(PlayerPickBlockEvent.class, PickBlock::handlePickBlock)
-                .addChild(SignEditor.EVENT_NODE)
-                .addChild(CheckpointEditor.EVENT_NODE)
-                .addChild(StatusEditor.EVENT_NODE);
+            .addListener(PlayerTickEvent.class, this::handlePlayerTick)
+            .addListener(MapPlayerTeleportingEvent.class, this::handlePlayerSavedTeleport)
+            .addListener(PlayerEntityInteractEvent.class, this::handleSpawnEntityInteraction)
+            .addListener(PlayerPickBlockEvent.class, PickBlock::handlePickBlock)
+            .addChild(SignEditor.EVENT_NODE)
+            .addChild(CheckpointEditor.EVENT_NODE)
+            .addChild(StatusEditor.EVENT_NODE);
 
         eventNode().addChild(DisplayEntityEditor.EVENT_NODE);
 
         // Terraform initialization
         this.terraform = terraform;
-        instance().setTag(TerraformInstanceBiomes.BIOMES, biomes());
-        instance().setTag(TerraformInstanceStorage.TERRAFORM_INSTANCE_STORAGE_TAG, terraformInstanceStorage);
+        if (terraform != null) {
+            terraformInstanceStorage = new TerraformInstanceStorageImpl();
+            instance().setTag(TerraformInstanceBiomes.BIOMES, biomes());
+            instance().setTag(TerraformInstanceStorage.TERRAFORM_INSTANCE_STORAGE_TAG, terraformInstanceStorage);
+        } else {
+            terraformInstanceStorage = null;
+        }
     }
 
     public Terraform terraform() {
-        return terraform;
+        return Objects.requireNonNull(terraform);
     }
 
     @Override
@@ -153,8 +158,8 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
         // Warning distance creates the red border when nearby the world border.
         instance().setWorldBorder(instance().getWorldBorder()
-                .withWarningTime(WORLD_BORDER_WARNING_DISTANCE)
-                .withWarningDistance(WORLD_BORDER_WARNING_DISTANCE));
+            .withWarningTime(WORLD_BORDER_WARNING_DISTANCE)
+            .withWarningDistance(WORLD_BORDER_WARNING_DISTANCE));
     }
 
     @Override
@@ -164,9 +169,9 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         // Kick off autosave
         if (map().verification() == MapVerification.UNVERIFIED) {
             autoSaveTask = instance().scheduler().buildTask(FutureUtil.wrapVirtual(() -> save(true)))
-                    .delay(MAP_AUTOSAVE_INTERVAL_SEC, TimeUnit.SECOND)
-                    .repeat(MAP_AUTOSAVE_INTERVAL_SEC, TimeUnit.SECOND)
-                    .schedule();
+                .delay(MAP_AUTOSAVE_INTERVAL_SEC, TimeUnit.SECOND)
+                .repeat(MAP_AUTOSAVE_INTERVAL_SEC, TimeUnit.SECOND)
+                .schedule();
         }
     }
 
@@ -179,7 +184,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     public void loadWorldTag(TagReadable tag) {
         super.loadWorldTag(tag);
 
-        terraformInstanceStorage.load(tag);
+        if (terraformInstanceStorage != null) terraformInstanceStorage.load(tag);
         instance().setTag(SPAWN_CHECKPOINT_EFFECTS, tag.getTag(SPAWN_CHECKPOINT_EFFECTS));
     }
 
@@ -199,7 +204,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
             save(false);
 
             MinecraftServer.getSchedulerManager()
-                    .scheduleEndOfTick(super::close);
+                .scheduleEndOfTick(super::close);
         });
     }
 
@@ -257,7 +262,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     public void saveWorldTag(TagWritable tag) {
         super.saveWorldTag(tag);
 
-        terraformInstanceStorage.save(tag);
+        if (terraformInstanceStorage != null) terraformInstanceStorage.save(tag);
         tag.setTag(SPAWN_CHECKPOINT_EFFECTS, instance().getTag(SPAWN_CHECKPOINT_EFFECTS));
     }
 
@@ -304,22 +309,24 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         SaveState saveState;
         try {
             saveState = server().mapService().getLatestSaveState(map().id(), playerData.id(),
-                    SaveStateType.EDITING, EditState.SERIALIZER);
+                SaveStateType.EDITING, EditState.SERIALIZER);
         } catch (MapService.NotFoundError ignored) {
             // No save state yet, create one locally.
             // We do an upsert to save, so it will be created in the map service at that point.
             saveState = new SaveState(UUID.randomUUID().toString(),
-                    map().id(), playerData.id(), SaveStateType.EDITING,
-                    EditState.SERIALIZER, new EditState());
+                map().id(), playerData.id(), SaveStateType.EDITING,
+                EditState.SERIALIZER, new EditState());
             saveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
         }
 
-        terraform.initPlayerSession(player, playerData.id());
-        terraform.initLocalSession(player, instance(), playerData.id());
+        if (terraform != null) {
+            terraform.initPlayerSession(player, playerData.id());
+            terraform.initLocalSession(player, instance(), playerData.id());
+        }
 
         player.setRespawnPoint(Objects.requireNonNullElseGet(
-                saveState.state(EditState.class).pos(),
-                () -> map().settings().getSpawnPoint()
+            saveState.state(EditState.class).pos(),
+            () -> map().settings().getSpawnPoint()
         ));
 
         return new EditorState.Building(saveState);
@@ -388,8 +395,10 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
         try {
             // Save terraform state
-            terraform.saveLocalSession(player, instance(), remove);
-            terraform.savePlayerSession(player, remove);
+            if (terraform != null) {
+                terraform.saveLocalSession(player, instance(), remove);
+                terraform.savePlayerSession(player, remove);
+            }
         } catch (Exception e) {
             ExceptionReporter.reportException(new RuntimeException("Failed to save terraform state", e), player);
         }
