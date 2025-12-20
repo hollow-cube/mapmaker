@@ -33,6 +33,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +81,7 @@ public class MapMapServer extends AbstractMultiMapServer {
         super.prepareStart();
 
         MinecraftServer.getConnectionManager()
-                .setPlayerProvider(simpleMapPlayer(commandManager()));
+            .setPlayerProvider(simpleMapPlayer(commandManager()));
 
         var terraformEvents = EventNode.event("tf-events", EventFilter.INSTANCE, event -> {
             if (event instanceof PlayerEvent pe) {
@@ -109,23 +110,23 @@ public class MapMapServer extends AbstractMultiMapServer {
 
     // Static so it can be referenced from dev server runner
     public static @NotNull Terraform initBuildLogic(
-            @NotNull MapService mapService,
-            @NotNull CommandManager commandManager,
-            @NotNull EventNode<InstanceEvent> terraformEvents,
-            @NotNull EventNode<InstanceEvent> interactionEvents
+        @NotNull MapService mapService,
+        @NotNull CommandManager commandManager,
+        @NotNull EventNode<InstanceEvent> terraformEvents,
+        @NotNull EventNode<InstanceEvent> interactionEvents
     ) {
         // Create terraform instance
         var terraform = Terraform.builder()
-                .rootEventNode(terraformEvents)
-                .rootCommandManager(commandManager)
-                .globalCommandCondition(builderOnly())
-                .module(Terraform.BASE_MODULE)
-                .module(Terraform.AXIOM_MODULE)
-                .module(Terraform.WORLDEDIT_MODULE)
-                .module(Terraform.VANILLA_MODULE)
-                .module(MapServerModule::new)
-                .storage(mapService instanceof NoopMapService ? "TerraformStorageMemory" : "TerraformStorageHttp")
-                .build();
+            .rootEventNode(terraformEvents)
+            .rootCommandManager(commandManager)
+            .globalCommandCondition(builderOnly())
+            .module(Terraform.BASE_MODULE)
+            .module(Terraform.AXIOM_MODULE)
+            .module(Terraform.WORLDEDIT_MODULE)
+            .module(Terraform.VANILLA_MODULE)
+            .module(MapServerModule::new)
+            .storage(mapService instanceof NoopMapService ? "TerraformStorageMemory" : "TerraformStorageHttp")
+            .build();
 
         // Block/item rules
         PlacementRules.init(terraform);
@@ -136,18 +137,18 @@ public class MapMapServer extends AbstractMultiMapServer {
     }
 
     // Static so it can be referenced from dev server runner
-    public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager, @NotNull HeadDatabase hdb) {
+    public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager, @Nullable HeadDatabase hdb) {
         // Register two help commands. One for terraform commands, and one for regular.
         // We test terraform commands simply by checking if they start with / (eg // commands)
         commandManager.register(new HelpCommand(
-                "help", new String[]{"h"},
-                commandManager, CommandCategories.GLOBAL,
-                entry -> !entry.getKey().startsWith("/")
+            "help", new String[]{"h"},
+            commandManager, CommandCategories.GLOBAL,
+            entry -> !entry.getKey().startsWith("/")
         ));
         commandManager.register(new HelpCommand(
-                "/help", new String[]{"/h"},
-                commandManager, CommandCategories.GLOBAL,
-                entry -> entry.getKey().startsWith("/")
+            "/help", new String[]{"/h"},
+            commandManager, CommandCategories.GLOBAL,
+            entry -> entry.getKey().startsWith("/")
         ));
 
         commandManager.register(new HubCommand(server.bridge()));
@@ -180,7 +181,9 @@ public class MapMapServer extends AbstractMultiMapServer {
 
         commandManager.register(new BannerCommand());
         commandManager.register(new PHeadCommand());
-        commandManager.register(new HdbCommand(hdb, server.guiController()));
+        if (hdb != null) {
+            commandManager.register(new HdbCommand(hdb, server.guiController()));
+        }
 
         commandManager.register(new BiomesCommand());
 //        commandManager.register(new SetBiomeCommand());
