@@ -50,28 +50,29 @@ public class ProxyPlugin {
     private static final Key TRANSFER_DATA_COOKIE = Key.key("mapmaker", "transfer_data");
 
     private static final Set<ProtocolVersion> SUPPORTED_VERSIONS = Set.of(
-            ProtocolVersion.MINECRAFT_1_21_4,
-            ProtocolVersion.MINECRAFT_1_21_5,
-            ProtocolVersion.MINECRAFT_1_21_6,
-            ProtocolVersion.MINECRAFT_1_21_7,
-            ProtocolVersion.MINECRAFT_1_21_9
+        ProtocolVersion.MINECRAFT_1_21_4,
+        ProtocolVersion.MINECRAFT_1_21_5,
+        ProtocolVersion.MINECRAFT_1_21_6,
+        ProtocolVersion.MINECRAFT_1_21_7,
+        ProtocolVersion.MINECRAFT_1_21_9,
+        ProtocolVersion.MINECRAFT_1_21_11
     );
 
     public static final TextColor RED = TextColor.color(0xFA4141);
     public static final Component MAINTENANCE = Component.text()
-            .append(Component.text("The server is currently in maintenance!", RED, TextDecoration.BOLD))
-            .appendNewline().appendNewline()
-            .append(Component.text("Join the discord for updates!"))
-            .appendNewline()
-            .append(Component.text("discord.hollowcube.net", TextColor.color(0x3895FF)))
-            .build();
+        .append(Component.text("The server is currently in maintenance!", RED, TextDecoration.BOLD))
+        .appendNewline().appendNewline()
+        .append(Component.text("Join the discord for updates!"))
+        .appendNewline()
+        .append(Component.text("discord.hollowcube.net", TextColor.color(0x3895FF)))
+        .build();
     private static final Component WRONG_PROTOCOL = Component.text()
-            .append(Component.text("You are using an unsupported version of Minecraft!", RED))
-            .appendNewline().appendNewline()
-            .append(Component.text("Please try again on " + SUPPORTED_VERSIONS.stream()
-                    .flatMap(pv -> pv.getVersionsSupportedBy().stream())
-                    .collect(Collectors.joining(", ")), RED))
-            .build();
+        .append(Component.text("You are using an unsupported version of Minecraft!", RED))
+        .appendNewline().appendNewline()
+        .append(Component.text("Please try again on " + SUPPORTED_VERSIONS.stream()
+            .flatMap(pv -> pv.getVersionsSupportedBy().stream())
+            .collect(Collectors.joining(", ")), RED))
+        .build();
 
     private final Logger logger;
     private final ProxyServer proxy;
@@ -132,15 +133,15 @@ public class ProxyPlugin {
 
             var protocolVersion = player.getProtocolVersion();
             var pd = sessionService.createSession(
-                    player.getUniqueId().toString(),
-                    new SessionCreateRequest(
-                            ProxySessionService.hostname,
-                            player.getUsername(),
-                            player.getRemoteAddress().getAddress().getHostAddress(),
-                            new SessionCreateRequest.Skin(skinTexture, skinSignature),
-                            player.getRawVirtualHost().orElse(null),
-                            protocolVersion.getProtocol(), protocolVersion.getMostRecentSupportedVersion()
-                    )
+                player.getUniqueId().toString(),
+                new SessionCreateRequest(
+                    ProxySessionService.hostname,
+                    player.getUsername(),
+                    player.getRemoteAddress().getAddress().getHostAddress(),
+                    new SessionCreateRequest.Skin(skinTexture, skinSignature),
+                    player.getRawVirtualHost().orElse(null),
+                    protocolVersion.getProtocol(), protocolVersion.getMostRecentSupportedVersion()
+                )
             );
             playersJustJoined.add(player.getUniqueId());
             logger.info("created session (v2) for {}: {}", player.getUsername(), pd);
@@ -225,7 +226,7 @@ public class ProxyPlugin {
         player.createConnectionRequest(proxy.createRawRegisteredServer(si)).connect().thenAccept(result -> {
             switch (result.getStatus()) {
                 case SUCCESS, ALREADY_CONNECTED ->
-                        logger.info("transfer success: {} -> {}", player.getUsername(), serverName);
+                    logger.info("transfer success: {} -> {}", player.getUsername(), serverName);
                 case SERVER_DISCONNECTED, CONNECTION_CANCELLED -> {
                     logger.info("transfer failed: {} -> {}", player.getUsername(), serverName);
                     serverConn.sendPluginMessage(TRANSFER_MESSAGE_ID, "fail".getBytes(StandardCharsets.UTF_8));
