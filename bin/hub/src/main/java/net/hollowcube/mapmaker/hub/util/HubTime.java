@@ -22,7 +22,7 @@ public class HubTime {
 
         public static int getDay() {
             LocalDateTime now = now();
-            if (now.getMonthValue() == 1) {
+            if (now.getMonthValue() == 1 && now.getDayOfMonth() <= 10) {
                 return 31 + now.getDayOfMonth();
             } else if (now.getMonthValue() == 12) {
                 return now.getDayOfMonth();
