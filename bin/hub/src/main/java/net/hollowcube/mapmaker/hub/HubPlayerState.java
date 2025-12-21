@@ -50,7 +50,7 @@ public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMa
             world.itemRegistry().setItemStack(player, CreateMapsItem.ID, 1);
             if (CoreFeatureFlags.ORGANIZATIONS.test(player))
                 world.itemRegistry().setItemStack(player, OrgMapsItem.ID, 2);
-            if (HubTime.now().getMonthValue() == 12)
+            if (HubTime.Christmas.isActive())
                 world.itemRegistry().setItemStack(player, AdventCalendarItem.ID, 4);
             world.itemRegistry().setItemStack(player, OpenStoreItem.ID, 7);
             world.itemRegistry().setItemStack(player, OpenCosmeticsMenuItem.ID, 8);

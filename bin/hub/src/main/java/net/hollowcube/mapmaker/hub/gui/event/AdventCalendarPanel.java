@@ -9,9 +9,7 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
@@ -49,12 +47,12 @@ public class AdventCalendarPanel extends Panel {
     }
 
     private Button create(int day) {
-        var now = HubTime.now();
+        var eventDay = HubTime.Christmas.getDay();
         var cosmetic = PresentConstants.getRewardForDay(day);
-        var isAvailable = now.getMonthValue() == 12 && now.getDayOfMonth() >= day;
+        var isAvailable = eventDay >= day;
         var claimed = this.data.hasPresent(day);
-        var presentTimeAvailable = now.until(getDayDateTime(day), ChronoUnit.SECONDS);
-        var hintTimeAvailable = now.until(getDayDateTime(day + 1), ChronoUnit.SECONDS);
+        var presentTimeAvailable = HubTime.Christmas.getSecondsUntilDay(day);
+        var hintTimeAvailable = day == 25 ? presentTimeAvailable : HubTime.Christmas.getSecondsUntilDay(day + 1);
 
         var button = new Button(null, 1, 1);
         if (cosmetic != null && isAvailable) {
@@ -73,25 +71,26 @@ public class AdventCalendarPanel extends Panel {
                 LanguageProviderV2.translate(Component.translatable("gui.advent.day.name", Component.text(day)));
 
         if (isAvailable) {
-            var subtitle = hintTimeAvailable <= 0 ?
-                    LanguageProviderV2.translateMultiMerged(dayTranslationKey + ".hint", List.of()) :
-                    LanguageProviderV2.translateMultiMerged("gui.advent.day.hint", List.of(formatTime(hintTimeAvailable)));
+            var hint = hintTimeAvailable <= 0 ?
+                    LanguageProviderV2.translateMulti(dayTranslationKey + ".hint", List.of()) :
+                    LanguageProviderV2.translateMulti("gui.advent.day.hint", List.of(formatTime(hintTimeAvailable)));
 
-            var cosmeticText = cosmetic != null && isAvailable ? cosmetic.displayName() : Component.text("???");
+            var cosmeticText = cosmetic != null ? cosmetic.displayName() : Component.text("???");
+            var subtitle = hint.isEmpty() ? Component.empty() : hint.getFirst();
 
-            if (LanguageProviderV2.hasTranslationKey(dayTranslationKey + ".lore")) {
-                button.text(title, LanguageProviderV2.translateMulti(dayTranslationKey + ".lore", List.of(subtitle, cosmeticText)));
-            } else {
-                button.text(title, LanguageProviderV2.translateMulti("gui.advent.day.lore", List.of(subtitle, cosmeticText)));
+            var lore = new ArrayList<>(LanguageProviderV2.translateMulti("gui.advent.day.hint.lore", List.of(subtitle)));
+            if (hint.size() > 1) lore.addAll(hint.subList(1, hint.size()));
+
+            if (LanguageProviderV2.hasTranslationKey(dayTranslationKey + ".rewards.lore")) {
+                lore.add(Component.empty());
+                lore.addAll(LanguageProviderV2.translateMulti(dayTranslationKey + ".rewards.lore", List.of(cosmeticText)));
             }
+
+            button.text(title, lore);
         } else {
             button.text(title, LanguageProviderV2.translateMulti("gui.advent.day.locked", List.of(formatTime(presentTimeAvailable))));
         }
         return button;
-    }
-
-    private static LocalDateTime getDayDateTime(int day) {
-        return HubTime.now().with(LocalTime.MIDNIGHT).withDayOfMonth(day);
     }
 
     private static Component formatTime(long seconds) {
@@ -121,8 +120,7 @@ public class AdventCalendarPanel extends Panel {
     }
 
     public static void open(Player player) {
-        var now = HubTime.now();
-        if (now.getMonthValue() == 12) {
+        if (HubTime.Christmas.isActive()) {
             Panel.open(player, new AdventCalendarPanel(player));
         } else {
             player.sendMessage(Component.translatable("advent.not_available"));
