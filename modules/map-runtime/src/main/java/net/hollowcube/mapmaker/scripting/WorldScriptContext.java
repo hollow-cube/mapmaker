@@ -47,6 +47,7 @@ public class WorldScriptContext {
         try {
             this.fsModuleLoader = new FsModuleLoader(LUAU_COMPILER, scriptDirectory, this::onReload);
             this.state = newStateWithGlobals(fsModuleLoader);
+            fsModuleLoader.globalState = this.state;
             this.vfs = null;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -156,8 +157,17 @@ public class WorldScriptContext {
 
     private void onReload(String changedFile) {
         for (var player : world.players()) {
+            var context = (PlayerContextImpl) Objects.requireNonNull(player.getTag(PLAYER_SCRIPT_CONTEXT));
+            context.disposables.removeIf(disposable -> {
+                if (disposable.disposeOnReload()) {
+                    disposable.dispose();
+                    return true;
+                }
+                return false;
+            });
+            initPlayerThread(context);
+
             ActionBar.forPlayer(player).addProvider(new GenericTempActionBarProvider("File changed: " + changedFile, 1000));
-            initPlayerThread((PlayerContextImpl) Objects.requireNonNull(player.getTag(PLAYER_SCRIPT_CONTEXT)));
         }
     }
 
@@ -173,8 +183,8 @@ public class WorldScriptContext {
 
         if (fsModuleLoader != null) {
             try {
-                var bytecode = fsModuleLoader.readAndParseFile("/player.luau");
-                thread.load("/player.luau", bytecode);
+                var bytecode = fsModuleLoader.readAndParseFile("/player");
+                thread.load("/player", bytecode);
                 thread.call(0, 0);
             } catch (Exception e) {
                 context.player.kick("Failed to spawn player");

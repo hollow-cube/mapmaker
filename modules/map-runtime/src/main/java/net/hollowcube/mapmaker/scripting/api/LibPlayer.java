@@ -8,6 +8,7 @@ import net.hollowcube.luau.gen.LuaMethod;
 import net.hollowcube.luau.gen.LuaProperty;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
+import net.hollowcube.mapmaker.map.event.PlayerJumpEvent;
 import net.hollowcube.mapmaker.scripting.Disposable;
 import net.hollowcube.mapmaker.scripting.ScriptContext;
 import net.hollowcube.mapmaker.scripting.util.LuaHelpers;
@@ -96,6 +97,18 @@ public final class LibPlayer {
             }
 
             LibBase.pushEventSource(state, EntityAttackEvent.class, Impl::pushArgs);
+            return 1;
+        }
+
+        @LuaProperty
+        public int getOnJump(LuaState state) {
+            class Impl {
+                static int pushArgs(LuaState state, PlayerJumpEvent event) {
+                    return 0;
+                }
+            }
+
+            LibBase.pushEventSource(state, PlayerJumpEvent.class, Impl::pushArgs);
             return 1;
         }
 

@@ -23,6 +23,8 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
     protected String modulePath = "/";
     protected String absoluteModulePath = "/";
 
+    protected String importingChunk;
+
     protected abstract boolean isFile(String path);
 
     /// Implementations should return the luau bytecode for the file at the given path.
@@ -42,6 +44,7 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
 
     @Override
     public Result reset(LuaState luaState, String chunkName) {
+        importingChunk = chunkName;
         return resetToPath(chunkName);
     }
 

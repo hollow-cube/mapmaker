@@ -156,6 +156,11 @@ public final class LibBase {
             public boolean isDisposed() {
                 return expired;
             }
+
+            @Override
+            public boolean disposeOnReload() {
+                return true;
+            }
         }
     }
 

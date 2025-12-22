@@ -6,4 +6,9 @@ public interface Disposable {
 
     boolean isDisposed();
 
+    /// If true, this will dispose the object when a reload occurs.
+    default boolean disposeOnReload() {
+        return false;
+    }
+
 }
