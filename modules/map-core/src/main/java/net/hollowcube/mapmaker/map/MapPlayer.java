@@ -19,6 +19,7 @@ import net.hollowcube.mapmaker.map.block.CollidableBlock;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.command.DebugRenderersCommand;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
+import net.hollowcube.mapmaker.map.event.PlayerJumpEvent;
 import net.hollowcube.mapmaker.map.event.entity.Map2PlayerEnterEntityEvent;
 import net.hollowcube.mapmaker.map.event.entity.Map2PlayerExitEntityEvent;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
@@ -41,6 +42,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.*;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.metadata.LivingEntityMeta;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.instance.Weather;
 import net.minestom.server.instance.block.Block;
@@ -228,6 +230,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
         riptideTick();
         fallTick();
         weatherTick();
+        jumpTick();
     }
 
     @Override
@@ -957,7 +960,32 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
 
     //endregion
 
-    //region Name Tag
+    //region EXT: Jump Event
+
+    private boolean wasJumping = false;
+
+    private void jumpTick() {
+        if (inputs().jump() && !wasJumping) {
+            wasJumping = true;
+            EventDispatcher.call(new PlayerJumpEvent(this)); // todo: probably should just be part of minestom
+        }
+    }
+
+    @Override
+    public void refreshInput(boolean forward, boolean backward, boolean left, boolean right, boolean jump, boolean shift, boolean sprint) {
+        super.refreshInput(forward, backward, left, right, jump, shift, sprint);
+        jumpTick();
+    }
+
+    @Override
+    public void refreshOnGround(boolean onGround) {
+        super.refreshOnGround(onGround);
+        if (onGround) wasJumping = false;
+    }
+
+    //endregion
+
+    //region EXT: Name Tag
 
     private static final byte META_FLAG_INVISIBLE = (byte) 0b100000;
     private static final byte META_FLAG_SNEAKING = (byte) 0b10;
