@@ -4,6 +4,8 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
+import net.hollowcube.mapmaker.local.scripting.FreeformMapWorld;
+import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapMapServer;
 import net.hollowcube.mapmaker.map.MapService;
@@ -24,7 +26,6 @@ import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.Scheduler;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.nio.file.Path;
@@ -48,7 +49,7 @@ public class LocalMapServer extends AbstractMapServer {
     // it is always not-null which should cover any reasonable logic.
     private @UnknownNullability EditorMapWorld world;
 
-    LocalMapServer(@NotNull ConfigLoaderV3 config, Path mapDirectory) {
+    LocalMapServer(ConfigLoaderV3 config, Path mapDirectory) {
         super(config);
         this.mapDirectory = mapDirectory;
         this.mapService = new LocalMapService(mapDirectory);
@@ -60,32 +61,32 @@ public class LocalMapServer extends AbstractMapServer {
     }
 
     @Override
-    protected @NotNull String name() {
+    protected String name() {
         return "mapmaker-local";
     }
 
     @Override
-    protected @NotNull ServerBridge createBridge() {
+    protected ServerBridge createBridge() {
         return bridge;
     }
 
     @Override
-    public @NotNull SessionService sessionService() {
+    public SessionService sessionService() {
         return sessionService;
     }
 
     @Override
-    public @NotNull PlayerService playerService() {
+    public PlayerService playerService() {
         return playerService;
     }
 
     @Override
-    public @NotNull MapService mapService() {
+    public MapService mapService() {
         return mapService;
     }
 
     @Override
-    public @NotNull PermManager permManager() {
+    public PermManager permManager() {
         return permManager;
     }
 
@@ -96,7 +97,13 @@ public class LocalMapServer extends AbstractMapServer {
         MinecraftServer.getConnectionManager()
             .setPlayerProvider(simpleMapPlayer(commandManager()));
 
-        world = new EditorMapWorld(this, new MapData(), null);
+        var map = new MapData();
+        world = new EditorMapWorld(this, map, null) {
+            @Override
+            protected AbstractMapWorld<?, ?> createTestWorld() {
+                return new FreeformMapWorld(LocalMapServer.this, map, mapDirectory);
+            }
+        };
         world.loadWorld();
         shutdowner().queue("save", world::close);
 

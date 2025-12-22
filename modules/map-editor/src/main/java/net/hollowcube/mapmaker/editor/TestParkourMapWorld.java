@@ -12,14 +12,13 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.function.BiPredicate;
 
-public class TestParkourMapWorld extends ParkourMapWorld {
+public class TestParkourMapWorld extends ParkourMapWorld implements SubWorld {
 
     private final EditorMapWorld parent;
 
@@ -50,14 +49,7 @@ public class TestParkourMapWorld extends ParkourMapWorld {
         throw new UnsupportedOperationException("Test world may not be closed directly.");
     }
 
-    /// Directly adds the player to the map with the given state. The player
-    /// must already be in the instance and not in the map.
-    ///
-    /// Note that this should be used very much with caution. Without entering
-    /// the configuration state we cannot change things like registries.
-    ///
-    /// Currently, this is in use for entering testing mode.
-    @Blocking
+    @Override
     public final void addPlayerDirect(Player player, Runnable callback) {
         var initialState = configurePlayer(player);
         player.setTag(PLAYER_INITIAL_STATE, initialState);
@@ -74,8 +66,8 @@ public class TestParkourMapWorld extends ParkourMapWorld {
         // Always create a dummy play state for test mode players.
         final var playerData = PlayerData.fromPlayer(player);
         var saveState = new SaveState(UUID.randomUUID().toString(),
-                map().id(), playerData.id(), SaveStateType.PLAYING,
-                PlayState.SERIALIZER, new PlayState());
+            map().id(), playerData.id(), SaveStateType.PLAYING,
+            PlayState.SERIALIZER, new PlayState());
         // Additionally set up a checkpoint at the current position as the test cp.
         var playState = saveState.state(PlayState.class);
         playState.setPos(player.getPosition());

@@ -37,8 +37,16 @@ public final class StringAtomizer {
         return nextTag;
     }
 
+    public boolean isEmpty() {
+        return known.isEmpty();
+    }
+
+    public ClassName generatedTypeName() {
+        return ClassName.get(LuaNames.RUNTIME_PACKAGE_NAME, "GeneratedStringAtoms");
+    }
+
     public JavaFile build() {
-        var typeName = ClassName.get(LuaNames.RUNTIME_PACKAGE_NAME, "GeneratedStringAtoms");
+        var typeName = generatedTypeName();
         var typeBuilder = TypeSpec.classBuilder(typeName)
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 

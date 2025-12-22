@@ -81,7 +81,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     private @Nullable Task autoSaveTask = null;
 
     private final ReentrantLock testWorldLock = new ReentrantLock();
-    private @Nullable TestParkourMapWorld testWorld;
+    private @Nullable AbstractMapWorld<?, ?> testWorld;
 
     private final @Nullable Terraform terraform;
     private final @Nullable TerraformInstanceStorage terraformInstanceStorage;
@@ -271,25 +271,29 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     //region Test World Lifecycle
 
     @NonBlocking
-    public void testWorldOrCreate(@BlockingExecutor Consumer<TestParkourMapWorld> callback) {
+    public <World extends AbstractMapWorld<?, ?> & SubWorld> void testWorldOrCreate(@BlockingExecutor Consumer<World> callback) {
         FutureUtil.submitVirtual(() -> {
-            TestParkourMapWorld testWorld = this.testWorld;
+            AbstractMapWorld<?, ?> testWorld = this.testWorld;
             testWorldLock.lock();
             try {
                 if (this.testWorld == null) {
-                    this.testWorld = testWorld = new TestParkourMapWorld(this);
+                    this.testWorld = testWorld = createTestWorld();
                     this.testWorld.loadWorld();
                 }
             } finally {
                 testWorldLock.unlock();
             }
 
-            if (testWorld != null) callback.accept(testWorld);
+            if (testWorld != null) callback.accept((World) testWorld);
         });
     }
 
-    public @Nullable ParkourMapWorld testWorld() {
+    public @Nullable AbstractMapWorld<?, ?> testWorld() {
         return testWorld;
+    }
+
+    protected AbstractMapWorld<?, ?> createTestWorld() {
+        return new TestParkourMapWorld(this);
     }
 
     //endregion

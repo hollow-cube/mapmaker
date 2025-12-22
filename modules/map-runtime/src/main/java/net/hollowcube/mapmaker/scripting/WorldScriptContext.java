@@ -2,11 +2,15 @@ package net.hollowcube.mapmaker.scripting;
 
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.compiler.LuauCompiler;
-import net.hollowcube.mapmaker.hub.HubMapWorld;
+import net.hollowcube.luau.require.RequireResolver;
 import net.hollowcube.mapmaker.map.MapPlayer;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.scripting.api.*;
+import net.hollowcube.mapmaker.scripting.require.FsModuleLoader;
 import net.hollowcube.mapmaker.scripting.require.ResourceRequireResolver;
 import net.hollowcube.mapmaker.scripting.require.ZipRequireResolver;
+import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
+import net.hollowcube.mapmaker.util.GenericTempActionBarProvider;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.tag.Tag;
@@ -14,8 +18,10 @@ import net.minestom.server.tag.TagHandler;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,26 +36,46 @@ public class WorldScriptContext {
         .vectorCtor("vec")
         .build();
 
+    private final MapWorld world;
+
     private final LuaState state;
+    private final @Nullable FsModuleLoader fsModuleLoader;
     private final @Nullable Map<String, byte[]> vfs;
 
-    public WorldScriptContext(URI baseUrlOrZip, boolean isZip) {
-        this.state = LuaState.newState();
-        state.callbacks().userThread(WorldScriptContext::onThreadChange);
-        state.openLibs();
-
+    public WorldScriptContext(MapWorld world, Path scriptDirectory) {
+        this.world = world;
         try {
+            this.fsModuleLoader = new FsModuleLoader(LUAU_COMPILER, scriptDirectory, this::onReload);
+            this.state = newStateWithGlobals(fsModuleLoader);
+            this.vfs = null;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public WorldScriptContext(MapWorld world, URI baseUrlOrZip, boolean isZip) {
+        this.world = world;
+        try {
+            this.fsModuleLoader = null;
             if (isZip) {
                 var resolver = new ZipRequireResolver(LUAU_COMPILER, baseUrlOrZip);
                 this.vfs = resolver.getVfsThisIsBadPleaseFix();
-                state.openRequire(resolver);
+                this.state = newStateWithGlobals(resolver);
             } else {
                 this.vfs = null;
-                state.openRequire(new ResourceRequireResolver(LUAU_COMPILER, baseUrlOrZip));
+                this.state = newStateWithGlobals(new ResourceRequireResolver(LUAU_COMPILER, baseUrlOrZip));
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static LuaState newStateWithGlobals(RequireResolver resolver) {
+        var state = LuaState.newState();
+        state.callbacks().userThread(WorldScriptContext::onThreadChange);
+        state.openLibs();
+
+        state.openRequire(resolver);
         registerGeneratedStringAtoms(state);
 
         LuaGlobals.register(state);
@@ -65,6 +91,7 @@ public class WorldScriptContext {
         LibItem$luau.register(state);
 
         state.sandbox();
+        return state;
     }
 
     //todo move elsewhere
@@ -122,9 +149,20 @@ public class WorldScriptContext {
     }
 
     public void initializePlayer(MapPlayer player) {
-        var thread = state.newThread();
         var context = new PlayerContextImpl(player, TagHandler.newHandler(), new ArrayList<>());
         player.setTag(PLAYER_SCRIPT_CONTEXT, context);
+        initPlayerThread(context);
+    }
+
+    private void onReload(String changedFile) {
+        for (var player : world.players()) {
+            ActionBar.forPlayer(player).addProvider(new GenericTempActionBarProvider("File changed: " + changedFile, 1000));
+            initPlayerThread((PlayerContextImpl) Objects.requireNonNull(player.getTag(PLAYER_SCRIPT_CONTEXT)));
+        }
+    }
+
+    private void initPlayerThread(PlayerContextImpl context) {
+        var thread = state.newThread();
         thread.setThreadData(context);
 
         // we dont need to keep a ref to the main thread since we have the player script context.
@@ -133,23 +171,32 @@ public class WorldScriptContext {
 
         thread.sandboxThread(); // Create mutable env for script usage
 
-        if (vfs != null) {
+        if (fsModuleLoader != null) {
+            try {
+                var bytecode = fsModuleLoader.readAndParseFile("/player.luau");
+                thread.load("/player.luau", bytecode);
+                thread.call(0, 0);
+            } catch (Exception e) {
+                context.player.kick("Failed to spawn player");
+                throw new RuntimeException("failed to spawn player", e);
+            }
+        } else if (vfs != null) {
             try {
                 thread.load("/player.luau", Objects.requireNonNull(vfs.get("/player.luau")));
                 thread.call(0, 0);
             } catch (Exception e) {
-                player.kick("Failed to spawn player");
+                context.player.kick("Failed to spawn player");
                 throw new RuntimeException("failed to spawn player", e);
             }
         } else {
-            var playerScript = Objects.requireNonNull(HubMapWorld.class.getResource("/scripts/player.luau"));
+            var playerScript = Objects.requireNonNull(WorldScriptContext.class.getResource("/scripts/player.luau"));
             try (var is = playerScript.openStream()) {
                 var source = new String(is.readAllBytes(), StandardCharsets.UTF_8);
                 var bytecode = LUAU_COMPILER.compile(source);
                 thread.load("/player.luau", bytecode);
                 thread.call(0, 0);
             } catch (Exception e) {
-                player.kick("Failed to spawn player");
+                context.player.kick("Failed to spawn player");
                 throw new RuntimeException("failed to spawn player", e);
             }
         }
@@ -186,6 +233,5 @@ public class WorldScriptContext {
             throw new RuntimeException(e);
         }
     }
-
 
 }

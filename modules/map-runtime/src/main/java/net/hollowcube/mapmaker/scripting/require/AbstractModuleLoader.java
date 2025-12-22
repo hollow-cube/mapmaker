@@ -3,47 +3,40 @@ package net.hollowcube.mapmaker.scripting.require;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaStatus;
 import net.hollowcube.luau.compiler.LuauCompileException;
-import net.hollowcube.luau.compiler.LuauCompiler;
 import net.hollowcube.luau.require.RequireResolver;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
 import java.io.IOException;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.ArrayList;
+import java.util.List;
 
-// uses @/path as chunknames
-public class ZipRequireResolver implements RequireResolver {
-    private static final Logger logger = LoggerFactory.getLogger(ZipRequireResolver.class);
-
+public abstract class AbstractModuleLoader implements RequireResolver, Closeable {
     private static final List<String> SUFFIXES = List.of(".luau", ".lua", "/init.luau", "/init.lua");
 
-    private record ResolvedPath(Result result, String realPath) {}
-
-    private final Map<String, byte[]> vfs;
+    protected record ResolvedPath(Result result, String realPath) {}
 
     private String realPath;
     private String absoluteRealPath;
     private String absolutePathPrefix;
 
-    private String modulePath;
-    private String absoluteModulePath;
+    protected String modulePath = "/";
+    protected String absoluteModulePath = "/";
 
-    public ZipRequireResolver(LuauCompiler compiler, URI zip) throws IOException, LuauCompileException {
-        this.vfs = readAndCompileEntries(compiler, zip);
+    protected abstract boolean isFile(String path);
+
+    /// Implementations should return the luau bytecode for the file at the given path.
+    protected abstract byte[] readAndParseFile(String loadName) throws IOException, LuauCompileException;
+
+    @Override
+    public void close() throws IOException {
     }
 
-    @Deprecated
-    public Map<String, byte[]> getVfsThisIsBadPleaseFix() {
-        return vfs;
-    }
+    // RequireResolver impl
 
     @Override
     public boolean isRequireAllowed(LuaState state, String requirerChunkName) {
+        // Dont currently have any rules about which modules may require
         return true;
     }
 
@@ -107,7 +100,12 @@ public class ZipRequireResolver implements RequireResolver {
         // new thread needs to have the globals sandboxed
         thread.sandboxThread();
 
-        var bytecode = Objects.requireNonNull(vfs.get(loadName), loadName);
+        byte[] bytecode;
+        try {
+            bytecode = readAndParseFile(loadName);
+        } catch (IOException | LuauCompileException e) {
+            throw new RuntimeException(e);
+        }
 
         thread.load(chunkName, bytecode); // throws on fail
         var status = thread.resume(state, 0); // todo deal with other states in resume its currently cooked
@@ -128,7 +126,7 @@ public class ZipRequireResolver implements RequireResolver {
         return 1;
     }
 
-    private Result resetToPath(String path) {
+    protected Result resetToPath(String path) {
         var normalizedPath = normalizePath(path);
 
         if (isAbsolutePath(normalizedPath)) {
@@ -155,7 +153,7 @@ public class ZipRequireResolver implements RequireResolver {
         return updateRealPaths();
     }
 
-    private Result updateRealPaths() {
+    protected Result updateRealPaths() {
         ResolvedPath result = getRealPath(modulePath);
         ResolvedPath absoluteResult = getRealPath(absoluteModulePath);
         if (result.result != Result.PRESENT || absoluteResult.result != Result.PRESENT)
@@ -166,7 +164,7 @@ public class ZipRequireResolver implements RequireResolver {
         return Result.PRESENT;
     }
 
-    private ResolvedPath getRealPath(String modulePath) {
+    protected ResolvedPath getRealPath(String modulePath) {
         boolean found = false;
         String suffix = "";
 
@@ -186,7 +184,7 @@ public class ZipRequireResolver implements RequireResolver {
         return new ResolvedPath(Result.PRESENT, modulePath + suffix);
     }
 
-    private String getModulePath(String filePath) {
+    protected String getModulePath(String filePath) {
         filePath = filePath.replaceAll("\\\\", "/");
 
         if (isAbsolutePath(filePath)) {
@@ -204,11 +202,7 @@ public class ZipRequireResolver implements RequireResolver {
         return filePath;
     }
 
-    private boolean isFile(String path) {
-        return vfs.containsKey(path);
-    }
-
-    private static String normalizePath(String path) {
+    protected static String normalizePath(String path) {
         var components = path.split("/");
         var normalizedComponents = new ArrayList<String>();
 
@@ -235,29 +229,8 @@ public class ZipRequireResolver implements RequireResolver {
         return normalizedPath;
     }
 
-    private static boolean isAbsolutePath(String path) {
+    protected static boolean isAbsolutePath(String path) {
         return path.startsWith("/");
     }
 
-    private static Map<String, byte[]> readAndCompileEntries(LuauCompiler compiler, URI zip) throws IOException, LuauCompileException {
-        var vfs = new HashMap<String, byte[]>();
-        try (var is = zip.toURL().openStream()) {
-            if (is == null) throw new IOException("Could not open zip stream for URI: " + zip);
-
-            var zis = new ZipInputStream(is);
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                if (entry.isDirectory()) continue;
-
-                if (!entry.getName().endsWith(".luau"))
-                    continue;
-
-                var path = normalizePath("/" + entry.getName());
-                var content = new String(zis.readAllBytes(), StandardCharsets.UTF_8);
-                vfs.put(path, compiler.compile(content));
-                logger.info("compiled script {} ({} bytes)", path, content.length());
-            }
-        }
-        return Map.copyOf(vfs);
-    }
 }

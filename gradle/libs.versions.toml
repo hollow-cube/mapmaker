@@ -28,6 +28,7 @@ velocity = "3.4.0-SNAPSHOT"
 classgraph = "4.8.179"
 javapoet = "0.7.0"
 luau = "1.0.0"
+directory-watcher = "0.19.1"
 included = "-INCLUDED"
 
 [libraries]
@@ -56,6 +57,7 @@ luau-natives-macos-arm64 = { group = "dev.hollowcube", name = "luau-natives-maco
 luau-natives-linux-x64 = { group = "dev.hollowcube", name = "luau-natives-linux-x64", version.ref = "luau" }
 luau-natives-windows-x64 = { group = "dev.hollowcube", name = "luau-natives-windows-x64", version.ref = "luau" }
 javapoet = { group = "com.palantir.javapoet", name = "javapoet", version.ref = "javapoet" }
+directory-watcher = { group = "io.methvin", name = "directory-watcher", version.ref = "directory-watcher" }
 
 included-molang = { group = "dev.hollowcube", name = "molang", version.ref = "included" }
 included-schem = { group = "dev.hollowcube", name = "schem", version.ref = "included" }
