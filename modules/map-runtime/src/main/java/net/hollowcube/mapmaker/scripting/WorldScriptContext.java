@@ -81,6 +81,7 @@ public class WorldScriptContext {
 
         LuaGlobals.register(state);
         LuaVector.register(state);
+        LuaRuntime$luau.register(state);
         LuaText$luau.register(state);
         LibItem.registerSlotGlobal(state);
 
@@ -115,9 +116,6 @@ public class WorldScriptContext {
         @Override
         public void track(Disposable disposable) {
             disposables.add(disposable);
-            if (disposable.chunkName() != null) {
-                System.out.println("Tracked: " + disposable + " from " + disposable.chunkName());
-            }
 
             // probably a better time to do this idk, dnc for now
             if (lastPurge + 10_000 < System.currentTimeMillis()) {
