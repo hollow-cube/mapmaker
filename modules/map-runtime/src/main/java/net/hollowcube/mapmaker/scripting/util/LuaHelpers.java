@@ -1,14 +1,21 @@
 package net.hollowcube.mapmaker.scripting.util;
 
 import net.hollowcube.luau.LuaState;
+import net.hollowcube.luau.internal.vm.lua_Debug;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static net.hollowcube.luau.internal.vm.lua_h.lua_getinfo;
+
 public final class LuaHelpers {
+    private static final MemorySegment DEBUG_WHAT = Arena.global().allocateFrom("s");
 
     /// Iterates over a table (no checks to ensure its a table) and applies the given function for each key.
     /// During the callback, the value is always at index -1 (and the key at -2 if needed).
@@ -59,6 +66,20 @@ public final class LuaHelpers {
 
         var nameIndex = state.checkOption(index, Sound.Source.MASTER.name(), Holder.CATEGORIES);
         return Sound.Source.NAMES.valueOr(Holder.CATEGORIES.get(nameIndex), Sound.Source.MASTER);
+    }
+
+    // todo: should be a method on LuaState in luau-java probably, its useful
+    public static String currentChunkName(LuaState state) {
+        try (Arena arena = Arena.ofConfined()) {
+            final MemorySegment debug = lua_Debug.allocate(arena);
+            int level = 0;
+            do {
+                if (lua_getinfo(state.L(), level++, DEBUG_WHAT, debug) == 0)
+                    throw state.error("not supported in this context");
+            } while (lua_Debug.what(debug).get(ValueLayout.JAVA_BYTE, 0) != 'L');
+
+            return lua_Debug.source(debug).getString(0);
+        }
     }
 
 }

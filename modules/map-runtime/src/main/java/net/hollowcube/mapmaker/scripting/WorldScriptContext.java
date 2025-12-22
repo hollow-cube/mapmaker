@@ -115,6 +115,9 @@ public class WorldScriptContext {
         @Override
         public void track(Disposable disposable) {
             disposables.add(disposable);
+            if (disposable.chunkName() != null) {
+                System.out.println("Tracked: " + disposable + " from " + disposable.chunkName());
+            }
 
             // probably a better time to do this idk, dnc for now
             if (lastPurge + 10_000 < System.currentTimeMillis()) {
@@ -155,11 +158,12 @@ public class WorldScriptContext {
         initPlayerThread(context);
     }
 
-    private void onReload(String changedFile) {
+    private void onReload(FsModuleLoader.ReloadEvent event) {
         for (var player : world.players()) {
             var context = (PlayerContextImpl) Objects.requireNonNull(player.getTag(PLAYER_SCRIPT_CONTEXT));
             context.disposables.removeIf(disposable -> {
-                if (disposable.disposeOnReload()) {
+                if (disposable.isDisposed()) return true;
+                if (disposable.disposeOnReload() && disposable.chunkName() != null && event.invalidated().contains(disposable.chunkName())) {
                     disposable.dispose();
                     return true;
                 }
@@ -167,7 +171,7 @@ public class WorldScriptContext {
             });
             initPlayerThread(context);
 
-            ActionBar.forPlayer(player).addProvider(new GenericTempActionBarProvider("File changed: " + changedFile, 1000));
+            ActionBar.forPlayer(player).addProvider(new GenericTempActionBarProvider("File changed: " + event.changed(), 1000));
         }
     }
 

@@ -21,11 +21,12 @@ import java.util.function.Consumer;
 public class FsModuleLoader extends AbstractModuleLoader {
     // TODO: https://github.com/google/jimfs for development on the live server
 
+    public record ReloadEvent(String changed, Set<String> invalidated) {}
+
     private final LuauCompiler compiler;
     private final Path root;
 
-    // todo reload obv will need more info
-    private final Consumer<String> onReload;
+    private final Consumer<ReloadEvent> onReload;
     private final DirectoryWatcher watcher;
 
     // Map of module -> all the modules which require'd it
@@ -33,7 +34,7 @@ public class FsModuleLoader extends AbstractModuleLoader {
 
     public LuaState globalState; // kinda gross but has cycle issues.
 
-    public FsModuleLoader(LuauCompiler compiler, Path root, Consumer<String> reload) throws IOException {
+    public FsModuleLoader(LuauCompiler compiler, Path root, Consumer<ReloadEvent> reload) throws IOException {
         this.compiler = compiler;
         this.root = root;
 
@@ -72,21 +73,19 @@ public class FsModuleLoader extends AbstractModuleLoader {
         if (event.eventType() != DirectoryChangeEvent.EventType.MODIFY && event.eventType() != DirectoryChangeEvent.EventType.DELETE)
             return;
 
+        // todo need to sync on correct thread and dedup multiple reloads in the same tick/process all at once
         var changed = '/' + root.relativize(event.path()).toString().replace(".luau", "");
-        System.out.println("Module changed: " + changed);
-        invalidateModule(changed);
-        onReload.accept(changed); // todo need to sync on correct thread
+        var reloadEvent = new ReloadEvent(changed, new HashSet<>());
+        invalidateModule(reloadEvent, changed);
+        onReload.accept(reloadEvent);
     }
 
-    private void invalidateModule(String module) {
+    private void invalidateModule(ReloadEvent event, String module) {
+        event.invalidated.add(module);
         var requiredBy = depGraph.remove(module);
-        if (requiredBy == null) {
-            System.out.println("module root?: " + module);
-            return;
-        }
+        if (requiredBy == null) return;
 
         globalState.requireClearCacheEntry(module);
-        System.out.println("Invalidated: " + module);
-        requiredBy.forEach(this::invalidateModule);
+        requiredBy.forEach(dep -> invalidateModule(event, dep));
     }
 }

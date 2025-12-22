@@ -8,6 +8,7 @@ import net.hollowcube.luau.gen.LuaMethod;
 import net.hollowcube.mapmaker.scripting.Disposable;
 import net.hollowcube.mapmaker.scripting.ScriptContext;
 import net.hollowcube.mapmaker.scripting.api.LibBase.EventSource.EventPusher;
+import net.hollowcube.mapmaker.scripting.util.LuaHelpers;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.trait.EntityEvent;
@@ -41,6 +42,7 @@ public final class LibBase {
             state.checkType(1, LuaType.FUNCTION);
 
             EventHandle handle = new EventHandle();
+            handle.chunkName = LuaHelpers.currentChunkName(state);
             handle.eventType = this.eventClass;
             handle.pusher = this.pusher;
             handle.state = state;
@@ -103,6 +105,7 @@ public final class LibBase {
 
         @SuppressWarnings("NotNullFieldNotInitialized")
         private static final class EventHandle implements EventListener<Event>, Disposable {
+            public String chunkName;
             public Class<? extends Event> eventType;
             public EventPusher<? extends Event> pusher;
             public LuaState state;
@@ -155,6 +158,11 @@ public final class LibBase {
             @Override
             public boolean isDisposed() {
                 return expired;
+            }
+
+            @Override
+            public String chunkName() {
+                return chunkName;
             }
 
             @Override
