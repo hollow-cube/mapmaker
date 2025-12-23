@@ -173,7 +173,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
     }
 
     protected void handleDisconnect(@NotNull PlayerDisconnectEvent event) {
-        super.handlePlayerDisconnect(event.getPlayer());
+        handlePlayerDisconnect(event.getPlayer());
     }
 
     protected abstract @NotNull Future<AbstractMapWorld<?, ?>> createWorldForRequest(@NotNull MapJoinInfo joinInfo);
