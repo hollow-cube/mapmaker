@@ -61,6 +61,11 @@ public class Pagination<S> extends Panel {
         doPageFetch();
     }
 
+    public void goToPage(int page) {
+        this.page = Math.min(Math.max(page, 0), this.totalPages - 1);
+        doPageFetch();
+    }
+
     // DSL/builder
 
     public @NotNull Pagination<S> fetch(@NotNull PageFetcher<S> fetcher) {
@@ -90,7 +95,25 @@ public class Pagination<S> extends Panel {
     public @NotNull Element pageText(int width, int height) {
         var button = new Text("", width, height, "")
                 .align(Text.CENTER, 5);
-        button.onLeftClick(_ -> reset());
+        button.onLeftClick(_ -> {
+            if (totalPages == 0) {
+                reset();
+            } else {
+                host.pushView(AbstractAnvilView.simpleAnvil(
+                        "generic2/anvil/field_container",
+                        "action/anvil/search_icon",
+                        "Enter Page Number",
+                        input -> {
+                            try {
+                                goToPage(Integer.parseInt(input) - 1);
+                            } catch (NumberFormatException ignored) {
+                                // Ignore invalid input
+                            }
+                        },
+                        String.valueOf(this.page + 1)
+                ));
+            }
+        });
         onPageChange.add((page, totalPages) -> {
             button.text((page + 1) + "/" + (totalPages == 0 ? "-" : totalPages));
             button.translationKey(totalPages == 0 ? "gui.generic.page" : "gui.generic.page_and_max", page + 1, totalPages);
