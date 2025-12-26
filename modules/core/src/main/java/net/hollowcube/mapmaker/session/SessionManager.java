@@ -50,11 +50,11 @@ public class SessionManager {
     private final Predicate<String> hasSeeVanishedPerm;
 
     public SessionManager(
-            @NotNull SessionService sessionService,
-            @NotNull PlayerService playerService,
-            @NotNull PermManager permManager,
-            @NotNull KafkaConfig kafkaConfig,
-            boolean noop
+        @NotNull SessionService sessionService,
+        @NotNull PlayerService playerService,
+        @NotNull PermManager permManager,
+        @NotNull KafkaConfig kafkaConfig,
+        boolean noop
     ) {
         instance = this;
         this.sessionService = sessionService;
@@ -65,7 +65,7 @@ public class SessionManager {
 
         this.syntheticTab = new SyntheticTabListManager(this, playerService);
         MinecraftServer.getGlobalEventHandler()
-                .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn);
+            .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn);
 
         this.hasSeeVanishedPerm = permManager.createPrefetchedCondition(PlatformPerm.SEE_VANISHED);
     }
@@ -195,19 +195,35 @@ public class SessionManager {
         syntheticTab.addLocalPlayer(event.getPlayer());
     }
 
-    private @NotNull Component buildJoinMessage(@NotNull String playerId) {
+    private @Nullable Component buildJoinMessage(@NotNull String playerId) {
         var displayName = playerService.getPlayerDisplayName2(playerId);
+        if (!showJoinLeaveMessage(displayName)) return null;
+
         return Component.translatable("chat.player.join", displayName.build(DisplayName.Context.DEFAULT));
+    }
+
+    private @Nullable Component buildLeaveMessage(@NotNull String playerId) {
+        var displayName = playerService.getPlayerDisplayName2(playerId);
+        if (!showJoinLeaveMessage(displayName)) return null;
+
+        return Component.translatable("chat.player.leave", displayName.build(DisplayName.Context.DEFAULT));
+    }
+
+    private boolean showJoinLeaveMessage(@NotNull DisplayName displayName) {
+        return displayName.getBadgeName() != null; // Show anyone with a badge for now.
     }
 
     private void broadcastJoinMessage(@NotNull String playerId) {
         var joinMessage = buildJoinMessage(playerId);
+        if (joinMessage == null) return;
+
         Audiences.players().sendMessage(joinMessage);
     }
 
     private void broadcastLeaveMessage(@NotNull String playerId) {
-        var displayName = playerService.getPlayerDisplayName2(playerId);
-        var leaveMessage = Component.translatable("chat.player.leave", displayName.build(DisplayName.Context.DEFAULT));
+        var leaveMessage = buildLeaveMessage(playerId);
+        if (leaveMessage == null) return;
+
         Audiences.players().sendMessage(leaveMessage);
     }
 
