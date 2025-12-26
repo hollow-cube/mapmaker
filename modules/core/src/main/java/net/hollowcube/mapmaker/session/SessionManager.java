@@ -139,10 +139,12 @@ public class SessionManager {
         if (session.hidden()) return;
 
         var joinMessage = buildJoinMessage(session.playerId());
-        for (var player : CONNECTION_MANAGER.getOnlinePlayers()) {
-            // Do not send the join message to the player who joined, we send that to them immediately on join so that it feels better
-            if (player.getUuid().toString().equals(session.playerId())) continue;
-            player.sendMessage(joinMessage);
+        if (joinMessage != null) {
+            for (var player : CONNECTION_MANAGER.getOnlinePlayers()) {
+                // Do not send the join message to the player who joined, we send that to them immediately on join so that it feels better
+                if (player.getUuid().toString().equals(session.playerId())) continue;
+                player.sendMessage(joinMessage);
+            }
         }
 
         syntheticTab.addSession(session);
