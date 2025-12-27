@@ -65,10 +65,12 @@ public class MinestomPrometheus {
         var tickTimer = Histogram.build()
                 .name("minestom_tick_duration_milliseconds")
                 .help("Duration of each tick (mspt)")
+                .buckets(0.5, 1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 200)
                 .register();
         var acquisitionTimer = Histogram.build()
                 .name("minestom_acquisition_duration_milliseconds")
                 .help("Acq duration of each tick")
+                .buckets(0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10)
                 .register();
         globalEventHandler.addListener(ServerTickMonitorEvent.class, event -> {
             tickTimer.observe(event.getTickMonitor().getTickTime());
