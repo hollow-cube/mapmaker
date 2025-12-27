@@ -63,7 +63,7 @@ graalvmNative {
 
 //                    "--future-defaults=all",
                     "-H:+UseCompressedReferences", "-R:MaxHeapSize=200m",
-                    "--static-nolibc", "--no-fallback", "-march=native",
+                    "--static-nolibc", "--no-fallback",
                     "--emit build-report",
 
                     // TODO: https enabled because we fetch skins from the session service. Should proxy (with cache)
