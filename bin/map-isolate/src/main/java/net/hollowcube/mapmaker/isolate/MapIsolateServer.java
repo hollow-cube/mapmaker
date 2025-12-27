@@ -18,12 +18,14 @@ import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.Scheduler;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import static net.hollowcube.mapmaker.map.MapPlayer.simpleMapPlayer;
 
@@ -36,6 +38,8 @@ public class MapIsolateServer extends AbstractMapServer {
     // it is always not-null which should cover any reasonable logic.
     // TODO: pretty sure we could do init in constructor, should investigate.
     private @UnknownNullability ParkourMapWorld world;
+
+    private final CompletableFuture<@Nullable Void> worldLoadFuture = new CompletableFuture<>();
 
     public MapIsolateServer(ConfigLoaderV3 config) {
         super(config);
@@ -81,7 +85,13 @@ public class MapIsolateServer extends AbstractMapServer {
             var map = mapService().getMap(Uuids.ZERO, this.mapId);
 
             world = new ParkourMapWorld(this, map);
-            world.loadWorld();
+            FutureUtil.submitVirtual(() -> {
+                try {
+                    world.loadWorld();
+                } finally {
+                    worldLoadFuture.complete(null);
+                }
+            });
 
             // We schedule on first tick end because submitTask invokes the executor immediately to determine
             // the first schedule. If we executed it here, that would be on the wrong thread.
@@ -109,6 +119,7 @@ public class MapIsolateServer extends AbstractMapServer {
 
             // Ensure resource pack was applied before allowing the player in
             FutureUtil.getUnchecked(resourcePackFuture);
+            FutureUtil.getUnchecked(worldLoadFuture);
             if (!player.isOnline()) return;
 
             // Setup the player in the world
