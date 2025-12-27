@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.isolate;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.Uuids;
+import net.hollowcube.mapmaker.MapCommands;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -46,9 +47,9 @@ public class MapIsolateServer extends AbstractMapServer {
         System.out.println("Args: " + Arrays.toString(IsolateMain.args));
 
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("map-init")
-                .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
-                .addListener(PlayerSpawnEvent.class, this::handleSpawn)
-                .addListener(PlayerDisconnectEvent.class, this::handleDisconnect));
+            .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
+            .addListener(PlayerSpawnEvent.class, this::handleSpawn)
+            .addListener(PlayerDisconnectEvent.class, this::handleDisconnect));
     }
 
     @Override
@@ -71,7 +72,8 @@ public class MapIsolateServer extends AbstractMapServer {
         super.prepareStart();
 
         MinecraftServer.getConnectionManager()
-                .setPlayerProvider(simpleMapPlayer(commandManager()));
+            .setPlayerProvider(simpleMapPlayer(commandManager()));
+        MapCommands.registerPlayingCommands(this, commandManager());
 
         ParkourMapWorld.initGlobalReferences();
 

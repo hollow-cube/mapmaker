@@ -58,10 +58,15 @@ graalvmNative {
             fallback.set(false)
             buildArgs(
                 listOf(
-                    "--enable-native-access=ALL-UNNAMED", "--enable-monitoring=jfr",
+                    "--enable-native-access=ALL-UNNAMED", //"--enable-monitoring=jfr,nmt",
                     "--features=net.hollowcube.nativeimage.HCNativeImageFeature",
+                    "-H:+UseCompressedReferences", "-R:MaxHeapSize=200m",
                     "--static-nolibc", "--no-fallback",
                     "--emit build-report",
+
+                    // TODO: https enabled because we fetch skins from the session service. Should proxy (with cache)
+                    //  this on the servers, or just store skins ourselves on player data
+                    "--enable-url-protocols=http,https",
                 )
             )
         }

@@ -2,9 +2,8 @@ package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
+import net.hollowcube.mapmaker.MapCommands;
 import net.hollowcube.mapmaker.command.CommandCategories;
-import net.hollowcube.mapmaker.command.TopTimesCommand;
-import net.hollowcube.mapmaker.command.playerinfo.PlayerInfoCommand;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
 import net.hollowcube.mapmaker.editor.command.*;
@@ -15,16 +14,12 @@ import net.hollowcube.mapmaker.editor.hdb.command.HdbCommand;
 import net.hollowcube.mapmaker.editor.terraform.MapServerModule;
 import net.hollowcube.mapmaker.map.block.InteractionRules;
 import net.hollowcube.mapmaker.map.block.PlacementRules;
-import net.hollowcube.mapmaker.map.command.HubCommand;
-import net.hollowcube.mapmaker.map.command.SpawnCommand;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.NoopServerBridge;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.noop.NoopMapService;
 import net.hollowcube.mapmaker.runtime.building.BuildingMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
-import net.hollowcube.mapmaker.runtime.parkour.command.ShowHeightCommand;
-import net.hollowcube.mapmaker.runtime.parkour.command.SpectateCommand;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.terraform.Terraform;
 import net.minestom.server.MinecraftServer;
@@ -138,23 +133,15 @@ public class MapMapServer extends AbstractMultiMapServer {
 
     // Static so it can be referenced from dev server runner
     public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager, @Nullable HeadDatabase hdb) {
-        // Register two help commands. One for terraform commands, and one for regular.
+        // Register a second help command (regular is in registerPlayingCommands). One for terraform commands, and one for regular.
         // We test terraform commands simply by checking if they start with / (eg // commands)
-        commandManager.register(new HelpCommand(
-            "help", new String[]{"h"},
-            commandManager, CommandCategories.GLOBAL,
-            entry -> !entry.getKey().startsWith("/")
-        ));
         commandManager.register(new HelpCommand(
             "/help", new String[]{"/h"},
             commandManager, CommandCategories.GLOBAL,
             entry -> entry.getKey().startsWith("/")
         ));
 
-        commandManager.register(new HubCommand(server.bridge()));
-        commandManager.register(new PlayerInfoCommand(server.permManager(), server.playerService(), server.sessionManager()));
-
-        commandManager.register(new TopTimesCommand(server.mapService(), server.playerService(), server.sessionManager()));
+        MapCommands.registerPlayingCommands(server, commandManager);
 
         commandManager.register(new TestCommand());
         commandManager.register(new BuilderMenuCommand());
@@ -162,14 +149,11 @@ public class MapMapServer extends AbstractMultiMapServer {
         commandManager.register(new SetSpawnCommand());
         commandManager.register(new GameModeCommand());
 
-        commandManager.register(new SpectateCommand());
-        commandManager.register(new ShowHeightCommand());
+        commandManager.register(new ClearInventoryCommand());
+        commandManager.register(new GiveCommand());
 
         commandManager.register(new FlyCommand());
         commandManager.register(new FlySpeedCommand());
-        commandManager.register(new ClearInventoryCommand());
-        commandManager.register(new SpawnCommand());
-        commandManager.register(new GiveCommand());
 
         commandManager.register(new TeleportCommand());
         commandManager.register(new AscendCommand());
