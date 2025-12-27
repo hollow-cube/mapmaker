@@ -112,7 +112,7 @@ public class Pagination<S> extends Panel {
                                 // Ignore invalid input
                             }
                         },
-                        String.valueOf(this.page + 1)
+                        ""
                 ));
             }
         });
