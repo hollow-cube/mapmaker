@@ -37,13 +37,14 @@ import java.util.function.Supplier;
 public final class MapServerInitializer {
     private static final Logger logger = LoggerFactory.getLogger(MapServerInitializer.class);
     private static final Map<String, String> SYSTEM_PROPERTIES = Map.of(
-            "minestom.chunk-view-distance", "16",
-            "minestom.command.async-virtual", "true",
-            "minestom.event.multiple-parents", "true",
-            "minestom.experiment.pose-updates", "true",
-            "minestom.shutdown-on-signal", "false", // We have our own shutdown logic which will call stopCleanly
-            "minestom.new-socket-write-lock", "true"
+        "minestom.chunk-view-distance", "16",
+        "minestom.command.async-virtual", "true",
+        "minestom.event.multiple-parents", "true",
+        "minestom.shutdown-on-signal", "false", // We have our own shutdown logic which will call stopCleanly
+        "minestom.new-socket-write-lock", "true"
     );
+
+    public static MinecraftServer preInitializedServer;
 
     public static void run(@NotNull Function<ConfigLoaderV3, ? extends AbstractMapServer> serverFactory, @NotNull String[] args) {
         run(serverFactory, () -> ConfigLoaderV3.loadDefault(args));
@@ -70,17 +71,21 @@ public final class MapServerInitializer {
 
         FutureUtil.markShutdown(true);
 
-        Auth auth;
-        var velocityConfig = config.get(VelocityConfig.class);
-        if (!velocityConfig.secret().isEmpty()) {
-            logger.info("Enabling modern forwarding...");
-            auth = new Auth.Velocity(velocityConfig.secret());
-        } else {
-            logger.info("Velocity not configured, using online mode...");
-            auth = new Auth.Online();
+        MinecraftServer minecraftServer = preInitializedServer;
+        if (minecraftServer == null) {
+            Auth auth;
+            var velocityConfig = config.get(VelocityConfig.class);
+            if (!velocityConfig.secret().isEmpty()) {
+                logger.info("Enabling modern forwarding...");
+                auth = new Auth.Velocity(velocityConfig.secret());
+            } else {
+                logger.info("Velocity not configured, using online mode...");
+                auth = new Auth.Online();
+            }
+
+            minecraftServer = MinecraftServer.init(auth);
         }
 
-        var minecraftServer = MinecraftServer.init(auth);
         MinestomPrometheus.init();
         var ignored = DimensionTypes.FULL_BRIGHT; // Force initialization
         var server = serverFactory.apply(config);

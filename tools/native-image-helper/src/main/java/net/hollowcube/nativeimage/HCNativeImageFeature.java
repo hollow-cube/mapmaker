@@ -4,6 +4,7 @@ import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
 import org.graalvm.nativeimage.hosted.Feature;
+import org.graalvm.nativeimage.hosted.RuntimeClassInitialization;
 import org.graalvm.nativeimage.hosted.RuntimeReflection;
 import org.graalvm.nativeimage.hosted.RuntimeResourceAccess;
 import org.jetbrains.annotations.NotNull;
@@ -26,23 +27,48 @@ public class HCNativeImageFeature implements Feature {
         var canvasClasses = new CanvasClasses(access);
 
         try (ScanResult scanResult = new ClassGraph()
-                .overrideClasspath(access.getApplicationClassPath())
-                .enableClassInfo()
-                .enableFieldInfo()
-                .enableAnnotationInfo()
-                .acceptPackages("net.hollowcube.mapmaker", "net.hollowcube.posthog")
-                .scan()) {
+            .overrideClasspath(access.getApplicationClassPath())
+            .enableClassInfo()
+            .enableFieldInfo()
+            .enableAnnotationInfo()
+            .acceptPackages("net.hollowcube.mapmaker", "net.hollowcube.posthog")
+            .scan()) {
 
             scanResult.getSubclasses(Record.class)
-                    .forEach(ci -> processRecordClass(access, ci));
+                .forEach(ci -> processRecordClass(access, ci));
 
             scanResult.getClassesWithAnnotation("net.hollowcube.common.util.RuntimeGson")
-                    .forEach(ci -> processRuntimeGsonClass(access, ci));
+                .forEach(ci -> processRuntimeGsonClass(access, ci));
 
             scanResult.getSubclasses("net.hollowcube.canvas.View")
-                    .forEach(classInfo -> processViewClass(access, canvasClasses, classInfo));
+                .forEach(classInfo -> processViewClass(access, canvasClasses, classInfo));
 
             processMinestomMetadataDef(access);
+        }
+
+        try (ScanResult scanResult = new ClassGraph()
+            .overrideClasspath(access.getApplicationClassPath())
+            .enableClassInfo()
+            .acceptPackages("net.minestom", "net.kyori", "ch.qos.logback", "org.jctools", "it.unimi.dsi.fastutil", "com.google.gson")
+            .scan()) {
+            RuntimeClassInitialization.initializeAtBuildTime("net.hollowcube.mapmaker.isolate");
+            for (var packageInfo : scanResult.getPackageInfo()) {
+//                if ("net.minestom.server.network".equals(packageInfo.getName()))
+//                    continue;
+                if ("net.minestom.server.utils".equals(packageInfo.getName()))
+                    continue;
+                if ("net.minestom.server.network.packet".equals(packageInfo.getName()))
+                    continue;
+                System.out.println("PI: " + packageInfo.getName());
+                RuntimeClassInitialization.initializeAtBuildTime(packageInfo.getName());
+            }
+
+            RuntimeClassInitialization.initializeAtRunTime(access.findClassByName("net.minestom.server.network.NetworkBufferImpl"));
+            RuntimeClassInitialization.initializeAtRunTime(access.findClassByName("net.minestom.server.network.NetworkBufferImpl$CompressionHolder"));
+            RuntimeClassInitialization.initializeAtRunTime(access.findClassByName("net.minestom.server.utils.PacketViewableUtils$ViewableStorage"));
+            RuntimeClassInitialization.initializeAtRunTime(access.findClassByName("net.minestom.server.utils.ObjectPool"));
+            RuntimeClassInitialization.initializeAtRunTime(access.findClassByName("net.minestom.server.network.player.PlayerSocketConnection"));
+            RuntimeClassInitialization.initializeAtRunTime(access.findClassByName("net.minestom.server.network.packet.PacketVanilla"));
         }
     }
 
@@ -89,8 +115,8 @@ public class HCNativeImageFeature implements Feature {
         RuntimeReflection.registerAllDeclaredMethods(viewClass);
         for (var field : viewClass.getDeclaredFields()) {
             boolean isRelevantField = field.getAnnotation(classes.outlet) != null
-                    || field.getAnnotation(classes.outletGroup) != null
-                    || field.getAnnotation(classes.contextObject) != null;
+                                      || field.getAnnotation(classes.outletGroup) != null
+                                      || field.getAnnotation(classes.contextObject) != null;
             if (isRelevantField) {
                 RuntimeReflection.register(field);
             }
@@ -99,7 +125,7 @@ public class HCNativeImageFeature implements Feature {
         // 5. All action/signal methods have to be callable & discoverable
         for (var method : viewClass.getDeclaredMethods()) {
             boolean isRelevant = method.getAnnotation(classes.action) != null
-                    || method.getAnnotation(classes.signal) != null;
+                                 || method.getAnnotation(classes.signal) != null;
             if (isRelevant) {
                 RuntimeReflection.register(method);
             }
@@ -125,21 +151,21 @@ public class HCNativeImageFeature implements Feature {
     }
 
     private record CanvasClasses(
-            @NotNull Class<?> context,
-            @NotNull Class<? extends Annotation> contextObject,
-            @NotNull Class<? extends Annotation> outlet,
-            @NotNull Class<? extends Annotation> outletGroup,
-            @NotNull Class<? extends Annotation> action,
-            @NotNull Class<? extends Annotation> signal
+        @NotNull Class<?> context,
+        @NotNull Class<? extends Annotation> contextObject,
+        @NotNull Class<? extends Annotation> outlet,
+        @NotNull Class<? extends Annotation> outletGroup,
+        @NotNull Class<? extends Annotation> action,
+        @NotNull Class<? extends Annotation> signal
     ) {
         @SuppressWarnings("unchecked")
         public CanvasClasses(BeforeAnalysisAccess access) {
             this(access.findClassByName("net.hollowcube.canvas.internal.Context"),
-                    (Class<? extends Annotation>) access.findClassByName("net.hollowcube.canvas.annotation.ContextObject"),
-                    (Class<? extends Annotation>) access.findClassByName("net.hollowcube.canvas.annotation.Outlet"),
-                    (Class<? extends Annotation>) access.findClassByName("net.hollowcube.canvas.annotation.OutletGroup"),
-                    (Class<? extends Annotation>) access.findClassByName("net.hollowcube.canvas.annotation.Action"),
-                    (Class<? extends Annotation>) access.findClassByName("net.hollowcube.canvas.annotation.Signal"));
+                (Class<? extends Annotation>) access.findClassByName("net.hollowcube.canvas.annotation.ContextObject"),
+                (Class<? extends Annotation>) access.findClassByName("net.hollowcube.canvas.annotation.Outlet"),
+                (Class<? extends Annotation>) access.findClassByName("net.hollowcube.canvas.annotation.OutletGroup"),
+                (Class<? extends Annotation>) access.findClassByName("net.hollowcube.canvas.annotation.Action"),
+                (Class<? extends Annotation>) access.findClassByName("net.hollowcube.canvas.annotation.Signal"));
         }
     }
 
