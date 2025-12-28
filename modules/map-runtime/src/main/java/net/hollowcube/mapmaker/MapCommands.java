@@ -5,8 +5,7 @@ import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.TopTimesCommand;
 import net.hollowcube.mapmaker.command.playerinfo.PlayerInfoCommand;
-import net.hollowcube.mapmaker.map.command.HubCommand;
-import net.hollowcube.mapmaker.map.command.SpawnCommand;
+import net.hollowcube.mapmaker.map.command.*;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.runtime.parkour.command.ShowHeightCommand;
 import net.hollowcube.mapmaker.runtime.parkour.command.SpectateCommand;
@@ -30,7 +29,10 @@ public final class MapCommands {
 
         commandManager.register(new SpawnCommand());
         commandManager.register(new SpectateCommand());
-        //todo fly, flyspeed, teleport have to be here.
+
+        commandManager.register(new FlyCommand());
+        commandManager.register(new FlySpeedCommand());
+        commandManager.register(new TeleportCommand());
     }
 
 }

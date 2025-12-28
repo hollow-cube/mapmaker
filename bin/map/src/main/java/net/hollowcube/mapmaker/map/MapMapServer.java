@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Future;
 
+import static net.hollowcube.command.CommandCondition.or;
 import static net.hollowcube.mapmaker.editor.command.EditorConditions.builderOnly;
 import static net.hollowcube.mapmaker.map.MapPlayer.simpleMapPlayer;
 
@@ -152,10 +153,6 @@ public class MapMapServer extends AbstractMultiMapServer {
         commandManager.register(new ClearInventoryCommand());
         commandManager.register(new GiveCommand());
 
-        commandManager.register(new FlyCommand());
-        commandManager.register(new FlySpeedCommand());
-
-        commandManager.register(new TeleportCommand());
         commandManager.register(new AscendCommand());
         commandManager.register(new DescendCommand());
         commandManager.register(new JumpToCommand());
@@ -175,6 +172,15 @@ public class MapMapServer extends AbstractMultiMapServer {
         commandManager.register(new AddMarkerCommand());
         commandManager.register(new AddInteractionCommand());
         commandManager.register(new EntitiesCommand());
+
+        // Need to update the condition of some commands to allow during build mode.
+        var fly = commandManager.xpath("fly");
+        fly.setCondition(or(fly.condition(), builderOnly()));
+        var flyspeed = commandManager.xpath("flyspeed");
+        flyspeed.setCondition(or(flyspeed.condition(), builderOnly()));
+        var teleport = commandManager.xpath("tp");
+        teleport.setCondition(or(teleport.condition(), builderOnly()));
+
     }
 
 }

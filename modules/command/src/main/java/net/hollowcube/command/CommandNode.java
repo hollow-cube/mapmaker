@@ -137,7 +137,7 @@ public class CommandNode {
             var result = pair.argument().parse(sender, reader);
 
             // If we have more space to read and get an exact match we can suggest the child
-            if (result instanceof  ParseResult.Success<?>(var valueFunc)) {
+            if (result instanceof ParseResult.Success<?>(var valueFunc)) {
                 context.setArgValue(pair.argument.id(), reader.rawSince(mark).trim(), valueFunc.get());
                 if (node.onSuggestion != null) {
                     node.onSuggestion.executeNextTick(sender, context);
@@ -276,9 +276,10 @@ public class CommandNode {
         this.executor = Objects.requireNonNull(executor);
     }
 
-    void setCondition(@NotNull CommandCondition condition) {
+    // public for modification from a different module, not sure i love this would rather hide it in 'reflect' of a command.
+    public void setCondition(@NotNull CommandCondition condition) {
         Check.stateCondition(this.redirect != null, "Cannot add condition to a redirect node!");
-        Check.stateCondition(this.condition != null, "Command node already has a condition!");
+//        Check.stateCondition(this.condition != null, "Command node already has a condition!");
         this.condition = Objects.requireNonNull(condition);
     }
 

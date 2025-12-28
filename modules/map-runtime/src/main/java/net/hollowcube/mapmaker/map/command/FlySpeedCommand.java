@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.editor.command.utility;
+package net.hollowcube.mapmaker.map.command;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
@@ -8,14 +8,13 @@ import net.hollowcube.mapmaker.runtime.building.command.BuildingConditions;
 import net.minestom.server.entity.Player;
 
 import static net.hollowcube.command.CommandCondition.or;
-import static net.hollowcube.mapmaker.editor.command.EditorConditions.builderOnly;
-import static net.hollowcube.mapmaker.editor.command.utility.FlyCommand.playingOrSpectatingFilter;
+import static net.hollowcube.mapmaker.map.command.FlyCommand.playingOrSpectatingFilter;
 
 public class FlySpeedCommand extends CommandDsl {
     private static final float DEFAULT_SPEED = 0.05f;
 
     private final Argument<Float> speedArg = Argument.Float("flyspeed").clamp(0f, 10f)
-            .description("How fast to fly (from 0 to 10)");
+        .description("How fast to fly (from 0 to 10)");
 
     public FlySpeedCommand() {
         super("flyspeed");
@@ -23,9 +22,8 @@ public class FlySpeedCommand extends CommandDsl {
         description = "Changes how fast you fly when building";
 
         setCondition(or(
-                builderOnly(),
-                playingOrSpectatingFilter(),
-                BuildingConditions.buildingWorld()
+            playingOrSpectatingFilter(),
+            BuildingConditions.buildingWorld()
         ));
 
         addSyntax(playerOnly(this::handleSetFlySpeed), speedArg);
@@ -36,9 +34,9 @@ public class FlySpeedCommand extends CommandDsl {
 
         player.setFlyingSpeed(DEFAULT_SPEED * flySpeedArg);
         player.sendMessage(
-                TranslatableBuilder.of("command.flyspeed.changed")
-                        .with(formatSpeed(flySpeedArg))
-                        .build()
+            TranslatableBuilder.of("command.flyspeed.changed")
+                .with(formatSpeed(flySpeedArg))
+                .build()
         );
     }
 

@@ -1,16 +1,14 @@
-package net.hollowcube.mapmaker.editor.command.utility;
+package net.hollowcube.mapmaker.map.command;
 
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.editor.EditorMapWorld;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.hollowcube.mapmaker.runtime.parkour.SpectateHelper;
 import net.minestom.server.entity.Player;
 
-import static net.hollowcube.command.CommandCondition.or;
-import static net.hollowcube.mapmaker.editor.command.EditorConditions.builderOnly;
 import static net.kyori.adventure.text.Component.translatable;
 
 public class FlyCommand extends CommandDsl {
@@ -18,7 +16,7 @@ public class FlyCommand extends CommandDsl {
     public FlyCommand() {
         super("fly");
 
-        setCondition(or(builderOnly(), playingOrSpectatingFilter()));
+        setCondition(playingOrSpectatingFilter());
 
         addSyntax(playerOnly(this::handleToggleFly));
     }
@@ -30,8 +28,8 @@ public class FlyCommand extends CommandDsl {
             SpectateHelper.toggleSpectatorFlight(world, player);
             return;
         }
-        var editWorld = EditorMapWorld.forPlayer(player);
-        if (editWorld != null) {
+        var maybeEditWorld = MapWorld.forPlayer(player);
+        if (maybeEditWorld != null && maybeEditWorld.canEdit(player)) {
             boolean canFly = player.isAllowFlying();
             player.setAllowFlying(!canFly);
             player.setFlying(!canFly);
@@ -50,7 +48,7 @@ public class FlyCommand extends CommandDsl {
             if (world == null) return CommandCondition.HIDE;
 
             return world.getPlayerState(player) instanceof ParkourState.Spectating
-                    ? CommandCondition.ALLOW : CommandCondition.HIDE;
+                ? CommandCondition.ALLOW : CommandCondition.HIDE;
         };
     }
 }

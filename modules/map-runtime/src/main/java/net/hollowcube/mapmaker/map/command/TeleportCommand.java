@@ -1,6 +1,5 @@
-package net.hollowcube.mapmaker.editor.command.navigation;
+package net.hollowcube.mapmaker.map.command;
 
-import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -12,14 +11,13 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.entity.EntityFinder;
 
-import static net.hollowcube.mapmaker.editor.command.EditorConditions.builderOnly;
 import static net.hollowcube.mapmaker.runtime.parkour.command.ParkourConditions.spectatorOnly;
 
 public class TeleportCommand extends CommandDsl {
     private final Argument<EntityFinder> targetArg = Argument.Entity("target").singleEntity(true).onlyPlayers(true).sameWorld(true)
-            .description("The player to teleport to");
+        .description("The player to teleport to");
     private final Argument<Point> locArg = Argument.RelativeVec3("location")
-            .description("The location to teleport to");
+        .description("The location to teleport to");
 
     public TeleportCommand() {
         super("tp");
@@ -27,10 +25,8 @@ public class TeleportCommand extends CommandDsl {
         category = CommandCategories.MAP;
         description = "Teleports you to a location or player";
 
-        setCondition(CommandCondition.or(
-                builderOnly(), // Always allowed in editing maps for anyone
-                spectatorOnly(true) // Allowed in playing maps for people in spectator mode
-        ));
+        // Allowed in playing maps for people in spectator mode
+        setCondition(spectatorOnly(true));
 
         addSyntax(playerOnly(this::handleTeleportToLocation), locArg);
         addSyntax(playerOnly(this::handleTeleportToTarget), targetArg);
@@ -57,7 +53,7 @@ public class TeleportCommand extends CommandDsl {
 
         // Actually do the teleport
         MapWorldHelpers.teleportPlayer(player, target.getPosition()).thenRun(() ->
-                player.sendMessage(Component.translatable("teleport.target.success", Component.translatable(target.getUsername())))
+            player.sendMessage(Component.translatable("teleport.target.success", Component.translatable(target.getUsername())))
         );
     }
 
@@ -66,7 +62,7 @@ public class TeleportCommand extends CommandDsl {
         var instance = player.getInstance();
         if (instance.getWorldBorder().inBounds(loc)) {
             MapWorldHelpers.teleportPlayer(player, loc).thenRun(() ->
-                    player.sendMessage(Component.translatable("teleport.location.success", CoordinateUtil.asTranslationArgs(loc)))
+                player.sendMessage(Component.translatable("teleport.location.success", CoordinateUtil.asTranslationArgs(loc)))
             );
         } else {
             player.sendMessage(Component.translatable("teleport.out_of_bounds"));
