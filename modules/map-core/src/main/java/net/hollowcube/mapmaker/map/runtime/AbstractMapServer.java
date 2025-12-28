@@ -40,6 +40,9 @@ import net.hollowcube.mapmaker.command.chat.MsgCommand;
 import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.command.map.MapCommand;
 import net.hollowcube.mapmaker.command.punish.*;
+import net.hollowcube.mapmaker.command.relationship.BlockCommand;
+import net.hollowcube.mapmaker.command.relationship.friend.FriendCommand;
+import net.hollowcube.mapmaker.command.relationship.UnblockCommand;
 import net.hollowcube.mapmaker.command.staff.SFindCommand;
 import net.hollowcube.mapmaker.command.staff.UnvanishCommand;
 import net.hollowcube.mapmaker.command.staff.VanishCommand;
@@ -386,6 +389,12 @@ public abstract class AbstractMapServer implements MapServer {
         if (fullInstance) commandManager.register(new TotpCommand(playerService(), guiController()));
         commandManager.register(new NoobCommand(permManager()));
         commandManager.register(new HideCommand(playerService()));
+
+        if (fullInstance) {
+            commandManager.register(new UnblockCommand(playerService()));
+            commandManager.register(new BlockCommand(playerService()));
+            commandManager.register(new FriendCommand(playerService()));
+        }
 
         if (fullInstance) {
             commandManager.register(new PlayCommand(playerService(), mapService(), sessionManager(), bridge()));
