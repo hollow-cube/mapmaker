@@ -19,6 +19,7 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.validate.Check;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.TopicPartition;
 import org.jctools.queues.MpscArrayQueue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -77,6 +79,21 @@ public class SessionManager {
         }
 
         logger.info("synced session manager with {} sessions", sessions.size());
+    }
+
+    public void syncIncremental() {
+        var oldSessions = new HashSet<>(sessions.keySet());
+        for (var session : sessionService.sync()) {
+            if (oldSessions.remove(session.playerId())) {
+                handleSessionCreate(session);
+            } else {
+                handleSessionUpdate(session, new SessionStateUpdateRequest.Metadata());
+            }
+        }
+
+        for (var deleted : oldSessions) {
+            handleSessionDelete(new SessionUpdateMessage(SessionUpdateMessage.Action.DELETE, deleted, null, null));
+        }
     }
 
     public void close() {
@@ -132,6 +149,11 @@ public class SessionManager {
     }
 
     private void handleSessionCreate(@NotNull PlayerSession session) {
+        if (sessions.containsKey(session.playerId())) {
+            handleSessionUpdate(session, new SessionStateUpdateRequest.Metadata());
+            return;
+        }
+
         logger.debug("remote session created for {}", session.playerId());
         sessions.put(session.playerId(), session);
 
@@ -280,6 +302,11 @@ public class SessionManager {
                     }
                 });
             }
+        }
+
+        @Override
+        public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
+            syncIncremental();
         }
     }
 }
