@@ -13,7 +13,7 @@ public class CoreCommandCondition {
     public static @NotNull CommandCondition playerFeature(@NotNull FeatureFlag flag) {
         return (sender, _) -> {
             if (!(sender instanceof Player player)) return HIDE;
-            return flag.test(player.getUuid().toString()) ? ALLOW : HIDE;
+            return flag.test(player) ? ALLOW : HIDE;
         };
     }
 }
