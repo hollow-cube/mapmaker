@@ -28,7 +28,7 @@ public class FriendListCommand extends CommandDsl {
 
         TextComponent.Builder builder = Component.text().append(Component.translatable("command.friend.list.header"));
         for (PlayerFriend friend : friends) {
-            builder.appendNewline().append(Component.translatable("command.friend.list.line", friend.username()));
+            builder.appendNewline().append(Component.translatable("command.friend.list.line", Component.text(friend.username())));
         }
         player.sendMessage(builder.build());
     }
