@@ -36,7 +36,7 @@ import java.util.function.Supplier;
 
 public final class MapServerInitializer {
     private static final Logger logger = LoggerFactory.getLogger(MapServerInitializer.class);
-    private static final Map<String, String> SYSTEM_PROPERTIES = Map.of(
+    public static final Map<String, String> SYSTEM_PROPERTIES = Map.of(
         "minestom.chunk-view-distance", "16",
         "minestom.command.async-virtual", "true",
         "minestom.event.multiple-parents", "true",
