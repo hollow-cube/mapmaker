@@ -62,7 +62,7 @@ public class Pagination<S> extends Panel {
     }
 
     public void goToPage(int page) {
-        this.page = Math.min(Math.max(page, 0), this.totalPages - 1);
+        this.page = Math.max(Math.min(page, this.totalPages - 1), 0);
         doPageFetch();
     }
 
