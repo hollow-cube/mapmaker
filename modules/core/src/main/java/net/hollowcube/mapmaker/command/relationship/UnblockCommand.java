@@ -40,11 +40,13 @@ public class UnblockCommand extends CommandDsl {
             return;
         }
 
+        var targetRaw = context.getRaw(this.targetArg);
+
         try {
             this.playerService.unblockPlayer(player.getUuid().toString(), targetId);
-            player.sendMessage(Component.translatable("command.unblock.success", Component.text(targetId)));
+            player.sendMessage(Component.translatable("command.unblock.success", Component.text(targetRaw)));
         } catch (PlayerService.NotFoundError ex) {
-            player.sendMessage(Component.translatable("command.unblock.not_blocked", Component.text(targetId)));
+            player.sendMessage(Component.translatable("command.unblock.not_blocked", Component.text(targetRaw)));
         }
     }
 }

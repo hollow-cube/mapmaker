@@ -43,12 +43,15 @@ public class BlockCommand extends CommandDsl {
             player.sendMessage(Component.translatable("command.block.self"));
             return;
         }
+        var targetRaw = context.getRaw(this.targetArg);
 
         try {
             this.playerService.blockPlayer(player.getUuid().toString(), targetId);
-            player.sendMessage(Component.translatable("command.block.success", Component.text(targetId)));
+            player.sendMessage(Component.translatable("command.block.success", Component.text(targetRaw)));
         } catch (PlayerService.AlreadyExistsError ex) {
-            player.sendMessage(Component.translatable("command.block.already_blocked", Component.text(targetId)));
+            player.sendMessage(Component.translatable("command.block.already_blocked", Component.text(targetRaw)));
+        } catch (PlayerService.BadRequestError ex) {
+            player.sendMessage(Component.translatable("command.block.cannot_target_staff", Component.text(targetRaw)));
         }
     }
 

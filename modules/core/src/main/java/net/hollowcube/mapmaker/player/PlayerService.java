@@ -120,6 +120,7 @@ public interface PlayerService {
 
     void unblockPlayer(@NotNull String playerId, @NotNull String targetId);
 
+    class BadRequestError extends RuntimeException {}
 
     class NotFoundError extends RuntimeException {
 

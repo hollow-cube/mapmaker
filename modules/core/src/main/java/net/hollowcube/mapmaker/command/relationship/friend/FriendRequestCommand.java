@@ -54,13 +54,15 @@ public class FriendRequestCommand extends CommandDsl {
             return;
         }
 
+        var targetRaw = context.getRaw(this.targetArg);
+
         try {
             FriendRequest deletedReq = this.playerService.deleteFriendRequest(player.getUuid().toString(), targetId, true);
             // todo we can use deletedReq to indicate the direction
-            player.sendMessage(Component.translatable("command.friend.request.remove.success", Component.text(targetId)));
+            player.sendMessage(Component.translatable("command.friend.request.remove.success", Component.text(deletedReq.username())));
         } catch (PlayerService.NotFoundError ex) {
             player.sendMessage(
-                Component.translatable("command.friend.request.remove.not_requested", Component.text(targetId)));
+                Component.translatable("command.friend.request.remove.not_requested", Component.text(targetRaw)));
         }
     }
 }

@@ -394,11 +394,12 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         var req = HttpRequest.newBuilder()
             .uri(URI.create(url + "/players/" + playerId + "/blocks/" + targetId))
             .POST(HttpRequest.BodyPublishers.noBody());
-        var res = doRequest("blockPlayer", req, HttpResponse.BodyHandlers.discarding());
+        var res = doRequest("blockPlayer", req, HttpResponse.BodyHandlers.ofString());
 
         switch (res.statusCode()) {
             case 201 -> {
             } // do nothing, successful
+            case 400 -> throw new BadRequestError();
             case 409 -> throw new AlreadyExistsError();
             default -> throw new InternalError("Failed to block player (" + res.statusCode() + "): " + res.body());
         }
