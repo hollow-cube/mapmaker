@@ -76,10 +76,8 @@ public final class MapServerInitializer {
             Auth auth;
             var velocityConfig = config.get(VelocityConfig.class);
             if (!velocityConfig.secret().isEmpty()) {
-                logger.info("Enabling modern forwarding...");
                 auth = new Auth.Velocity(velocityConfig.secret());
             } else {
-                logger.info("Velocity not configured, using online mode...");
                 auth = new Auth.Online();
             }
 

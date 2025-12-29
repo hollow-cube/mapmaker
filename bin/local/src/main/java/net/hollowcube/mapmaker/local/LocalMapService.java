@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.map.SaveStateUpdateResponse;
 import net.hollowcube.mapmaker.misc.noop.NoopMapService;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -32,7 +31,7 @@ public class LocalMapService extends NoopMapService {
     }
 
     @Override
-    public byte @Nullable [] getMapWorld(@NotNull String id, boolean write) {
+    public byte @Nullable [] getMapWorld(String id, boolean write) {
         try {
             if (!Files.exists(worldFile)) return null;
             return Files.readAllBytes(worldFile);
@@ -42,7 +41,7 @@ public class LocalMapService extends NoopMapService {
     }
 
     @Override
-    public void updateMapWorld(@NotNull String id, byte @NotNull [] worldData) {
+    public void updateMapWorld(String id, byte[] worldData) {
         try {
             Files.write(mapDirectory.resolve("world.polar"), worldData);
         } catch (IOException e) {
@@ -51,8 +50,8 @@ public class LocalMapService extends NoopMapService {
     }
 
     @Override
-    public @NotNull SaveState getLatestSaveState(
-        @NotNull String mapId, @NotNull String playerId,
+    public SaveState getLatestSaveState(
+        String mapId, String playerId,
         @Nullable SaveStateType type, SaveStateType.@Nullable Serializer<?> serializer
     ) {
         Check.notNull(type, "type cannot be null");
@@ -77,8 +76,8 @@ public class LocalMapService extends NoopMapService {
 
     @Override
     public @Nullable SaveStateUpdateResponse updateSaveState(
-        @NotNull String mapId, @NotNull String playerId,
-        @NotNull String id, @NotNull SaveStateUpdateRequest update
+        String mapId, String playerId,
+        String id, SaveStateUpdateRequest update
     ) {
         var updates = update.updates();
         if (!updates.has("editState")) return null;

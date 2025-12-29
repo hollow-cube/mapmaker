@@ -152,8 +152,6 @@ public abstract class AbstractMapServer implements MapServer {
     private final Shutdowner shutdowner = new Shutdowner(this::awaitQuiescence);
 
     protected AbstractMapServer(@NotNull ConfigLoaderV3 config) {
-        config.dump();
-
         this.config = config;
         this.globalConfig = config.get(GlobalConfig.class);
 
@@ -224,10 +222,10 @@ public abstract class AbstractMapServer implements MapServer {
             logger.info("Posthog is enabled, loading feature flag provider");
             // project api key is not a secret.
             PostHog.init("phc_mK0jji1aC3hvMBGLOLjuVARqolDGPS9AiuNUOhMwVyA", config -> config
-                    .personalApiKey(unleashConfig.posthogPersonalApiKey())
-                    .endpoint("https://us.i.posthog.com")
-                    .featureFlagsPollingInterval(Duration.ofMinutes(10))
-                    .exceptionMiddleware(AbstractMapServer::posthogExceptionMiddleware));
+                .personalApiKey(unleashConfig.posthogPersonalApiKey())
+                .endpoint("https://us.i.posthog.com")
+                .featureFlagsPollingInterval(Duration.ofMinutes(10))
+                .exceptionMiddleware(AbstractMapServer::posthogExceptionMiddleware));
             shutdowner.queue("posthog", PostHog::shutdown);
 
             FeatureFlagProvider.replaceGlobals(new PostHogFeatureFlagProvider());
@@ -443,14 +441,14 @@ public abstract class AbstractMapServer implements MapServer {
 
     public @NotNull List<HttpServerWrapper.HealthCheck> healthChecks() {
         return List.of(
-                shutdowner(),
-                new AnonHealthCheck("minestom", MinecraftServer::isStarted),
-                new AnonHealthCheck("hub", () -> isReady),
-                new AnonHealthCheck("tick", () -> {
-                    var future = new CompletableFuture<Boolean>();
-                    MinecraftServer.getSchedulerManager().scheduleNextTick(() -> future.complete(true));
-                    return FutureUtil.getUnchecked(future);
-                })
+            shutdowner(),
+            new AnonHealthCheck("minestom", MinecraftServer::isStarted),
+            new AnonHealthCheck("hub", () -> isReady),
+            new AnonHealthCheck("tick", () -> {
+                var future = new CompletableFuture<Boolean>();
+                MinecraftServer.getSchedulerManager().scheduleNextTick(() -> future.complete(true));
+                return FutureUtil.getUnchecked(future);
+            })
         );
     }
 
@@ -510,16 +508,16 @@ public abstract class AbstractMapServer implements MapServer {
 
     private @NotNull OpenTelemetry initTracing(@NotNull ConfigLoaderV3 config) {
         Resource resource = Resource.getDefault().toBuilder()
-                .put(ResourceAttributes.SERVICE_NAME, name())
-                .put(ResourceAttributes.SERVICE_VERSION, ServerRuntime.getRuntime().version())
-                .build();
+            .put(ResourceAttributes.SERVICE_NAME, name())
+            .put(ResourceAttributes.SERVICE_VERSION, ServerRuntime.getRuntime().version())
+            .build();
 
         var tracingConfig = config.get(TracingConfig.class);
         SpanExporter spanExporter;
         if (tracingConfig.otlpEndpoint() != null && !tracingConfig.otlpEndpoint().isEmpty()) {
             spanExporter = OtlpHttpSpanExporter.builder()
-                    .setEndpoint(tracingConfig.otlpEndpoint())
-                    .build();
+                .setEndpoint(tracingConfig.otlpEndpoint())
+                .build();
         } else if (tracingConfig.noop()) {
             spanExporter = NoopSpanExporter.INSTANCE;
         } else {
@@ -527,15 +525,15 @@ public abstract class AbstractMapServer implements MapServer {
         }
 
         SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
-                .addSpanProcessor(SimpleSpanProcessor.create(spanExporter))
-                .setResource(resource)
-                .build();
+            .addSpanProcessor(SimpleSpanProcessor.create(spanExporter))
+            .setResource(resource)
+            .build();
 
         return OpenTelemetrySdk.builder()
-                .setTracerProvider(sdkTracerProvider)
-                .setPropagators(ContextPropagators.create(TextMapPropagator
-                        .composite(W3CTraceContextPropagator.getInstance(), W3CBaggagePropagator.getInstance())))
-                .buildAndRegisterGlobal();
+            .setTracerProvider(sdkTracerProvider)
+            .setPropagators(ContextPropagators.create(TextMapPropagator
+                .composite(W3CTraceContextPropagator.getInstance(), W3CBaggagePropagator.getInstance())))
+            .buildAndRegisterGlobal();
     }
 
     protected @NotNull DebugCommand createDebugCommand() {
@@ -554,8 +552,8 @@ public abstract class AbstractMapServer implements MapServer {
         var playerId = player.getUuid().toString();
         try {
             var transferReq = new SessionTransferRequest(
-                    presence.instanceId(), presence.type(),
-                    presence.state(), presence.mapId()
+                presence.instanceId(), presence.type(),
+                presence.state(), presence.mapId()
             );
             var sessionResponseFuture = FutureUtil.fork(() -> sessionService.transferSession(playerId, transferReq));
             var mapPlayerDataFuture = FutureUtil.fork(() -> mapService.getMapPlayerData(playerId));
@@ -581,8 +579,8 @@ public abstract class AbstractMapServer implements MapServer {
             return true;
         } catch (SessionService.UnauthorizedError ignored) {
             player.kick(Component.text("The server is currently in a closed beta.\nVisit ")
-                    .append(Component.text("hollowcube.net").clickEvent(ClickEvent.openUrl("https://hollowcube.net/")))
-                    .append(Component.text(" for more information.")));
+                .append(Component.text("hollowcube.net").clickEvent(ClickEvent.openUrl("https://hollowcube.net/")))
+                .append(Component.text(" for more information.")));
             return false;
         } catch (Exception e) {
             logger.error("failed to create session", e);
@@ -596,12 +594,12 @@ public abstract class AbstractMapServer implements MapServer {
         var playerData = PlayerData.fromPlayer(player);
 
         player.sendPacket(new ServerLinksPacket(List.of(
-                new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.WEBSITE, "https://hollowcube.net/"),
-                new ServerLinksPacket.Entry(Component.text("Store"), "https://hollowcube.net/store"),
-                new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.NEWS, "https://hollowcube.net/news"),
-                new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.COMMUNITY_GUIDELINES, "https://hollowcube.net/rules"),
-                new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.SUPPORT, "https://hollowcube.net/contact"),
-                new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.BUG_REPORT, "https://discord.hollowcube.net/")
+            new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.WEBSITE, "https://hollowcube.net/"),
+            new ServerLinksPacket.Entry(Component.text("Store"), "https://hollowcube.net/store"),
+            new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.NEWS, "https://hollowcube.net/news"),
+            new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.COMMUNITY_GUIDELINES, "https://hollowcube.net/rules"),
+            new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.SUPPORT, "https://hollowcube.net/contact"),
+            new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.BUG_REPORT, "https://discord.hollowcube.net/")
         )));
 
         // Player init
