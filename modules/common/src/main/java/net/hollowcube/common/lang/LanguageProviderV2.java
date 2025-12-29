@@ -238,7 +238,7 @@ public class LanguageProviderV2 {
                 .replaceAll(match -> {
                     var index = Integer.parseInt(match.group("index"));
                     if (index < 0 || index >= args.size()) {
-                        return "$$" + index;
+                        return "\\$\\$" + index;
                     } else {
                         var component = args.get(index);
                         var format = match.group("format");
