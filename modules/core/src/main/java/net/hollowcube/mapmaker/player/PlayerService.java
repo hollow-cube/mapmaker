@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.player;
 
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.player.responses.PlayerAlts;
 import net.hollowcube.mapmaker.player.responses.SendFriendRequestResult;
@@ -134,6 +135,7 @@ public interface PlayerService {
 
     record Pageable(int page, int pageSize) {}
 
+    @RuntimeGson
     record Page<T>(int page, int totalItems, @NotNull List<T> items) {
 
         public static <T> Page<T> fromJson(@NotNull String json, @NotNull Class<T> clazz) {
