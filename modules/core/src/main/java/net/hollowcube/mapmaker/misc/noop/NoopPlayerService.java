@@ -151,8 +151,8 @@ public class NoopPlayerService implements PlayerService {
     }
 
     @Override
-    public @NotNull List<BlockedPlayer> getBlockedPlayers(@NotNull String playerId) {
-        return List.of();
+    public @NotNull Page<BlockedPlayer> getBlockedPlayers(@NotNull String playerId, @NotNull Pageable pageable) {
+        return Page.empty();
     }
 
     @Override

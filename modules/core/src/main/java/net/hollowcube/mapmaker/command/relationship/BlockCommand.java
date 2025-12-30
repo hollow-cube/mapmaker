@@ -56,10 +56,11 @@ public class BlockCommand extends CommandDsl {
     }
 
     private void execListBlocks(@NotNull Player player, @NotNull CommandContext context) {
-        List<BlockedPlayer> blocks = this.playerService.getBlockedPlayers(player.getUuid().toString());
+        PlayerService.Page<BlockedPlayer> blocks = this.playerService.getBlockedPlayers(player.getUuid().toString(), new PlayerService.Pageable(1, 10));
+        int pageCount = Math.ceilDiv(blocks.totalItems(), 10);
 
-        TextComponent.Builder builder = Component.text().append(Component.translatable("command.block.list.header"));
-        for (BlockedPlayer block : blocks) {
+        TextComponent.Builder builder = Component.text().append(Component.translatable("command.block.list.header", Component.text(blocks.page()), Component.text(pageCount)));
+        for (BlockedPlayer block : blocks.items()) {
             builder.appendNewline().append(Component.translatable("command.block.list.line", Component.text(block.username())));
         }
         player.sendMessage(builder.build());

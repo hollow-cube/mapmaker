@@ -414,13 +414,12 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull List<BlockedPlayer> getBlockedPlayers(@NotNull String playerId) {
-        var req = HttpRequest.newBuilder().uri(URI.create(url + "/players/" + playerId + "/blocks")).GET();
+    public @NotNull Page<BlockedPlayer> getBlockedPlayers(@NotNull String playerId, @NotNull Pageable pageable) {
+        var req = HttpRequest.newBuilder().uri(URI.create(url + "/players/%S/blocks?page=%s&pageSize=%s".formatted(playerId, pageable.page(), pageable.pageSize()))).GET();
         var res = doRequest("getBlockedPlayers", req, HttpResponse.BodyHandlers.ofString());
 
         return switch (res.statusCode()) {
-            case 200 ->
-                GSON.fromJson(res.body(), TypeToken.getParameterized(List.class, BlockedPlayer.class).getType());
+            case 200 -> Page.fromJson(res.body(), BlockedPlayer.class);
             default ->
                 throw new InternalError("Failed to get blocked players (" + res.statusCode() + "): " + res.body());
         };

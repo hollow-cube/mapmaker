@@ -118,7 +118,7 @@ public interface PlayerService {
 
     void blockPlayer(@NotNull String playerId, @NotNull String targetId);
 
-    @NotNull List<BlockedPlayer> getBlockedPlayers(@NotNull String playerId);
+    @NotNull Page<BlockedPlayer> getBlockedPlayers(@NotNull String playerId, @NotNull Pageable pageable);
 
     void unblockPlayer(@NotNull String playerId, @NotNull String targetId);
 
