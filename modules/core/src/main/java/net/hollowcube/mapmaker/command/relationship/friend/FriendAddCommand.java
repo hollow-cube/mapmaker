@@ -39,10 +39,21 @@ public class FriendAddCommand extends CommandDsl {
                                                                               targetData.id());
         if (result.successful()) {
             if (result.isRequest()) {
-                player.sendMessage(Component.translatable("command.friend.add.request_sent", Component.text(targetData.username())));
+                player.sendMessage(
+                    Component.translatable("command.friend.add.request_sent", Component.text(targetData.username())));
             } else {
-                player.sendMessage(Component.translatable("command.friend.add.added", Component.text(targetData.username())));
+                player.sendMessage(
+                    Component.translatable("command.friend.add.added", Component.text(targetData.username())));
             }
+            return;
+        }
+
+        SendFriendRequestResult.LimitError limitError = result.limitError();
+        if (limitError != null) {
+            player.sendMessage(
+                Component.translatable("command.friend.add.limit_reached", Component.text(limitError.limit()),
+                                       Component.text(limitError.friendCount()),
+                                       Component.text(limitError.outgoingRequestCount())));
             return;
         }
 
@@ -52,14 +63,14 @@ public class FriendAddCommand extends CommandDsl {
         }
 
         switch (result.error().code()) {
-            case "already_friends" ->
-                player.sendMessage(Component.translatable("command.friend.add.already_friends", Component.text(targetData.username())));
-            case "player_blocked" ->
-                player.sendMessage(Component.translatable("command.friend.add.blocked_by_self", Component.text(targetData.username())));
-            case "blocked_by_player" ->
-                player.sendMessage(Component.translatable("command.friend.add.blocked_by_target", Component.text(targetData.username())));
-            case "friend_request_already_exists" ->
-                player.sendMessage(Component.translatable("command.friend.add.already_requested", Component.text(targetData.username())));
+            case "already_friends" -> player.sendMessage(
+                Component.translatable("command.friend.add.already_friends", Component.text(targetData.username())));
+            case "player_blocked" -> player.sendMessage(
+                Component.translatable("command.friend.add.blocked_by_self", Component.text(targetData.username())));
+            case "blocked_by_player" -> player.sendMessage(
+                Component.translatable("command.friend.add.blocked_by_target", Component.text(targetData.username())));
+            case "friend_request_already_exists" -> player.sendMessage(
+                Component.translatable("command.friend.add.already_requested", Component.text(targetData.username())));
             default -> player.sendMessage(Component.translatable("generic.unknown_error"));
         }
     }

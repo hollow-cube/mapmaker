@@ -1,10 +1,12 @@
 package net.hollowcube.mapmaker.player;
 
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.player.responses.PlayerAlts;
 import net.hollowcube.mapmaker.player.responses.SendFriendRequestResult;
 import net.hollowcube.mapmaker.player.responses.TotpSetupResponse;
+import net.hollowcube.mapmaker.util.AbstractHttpService;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -96,11 +98,11 @@ public interface PlayerService {
 
     // Friendships
 
-    @NotNull List<PlayerFriend> getPlayerFriends(@NotNull String playerId);
+    @NotNull Page<PlayerFriend> getPlayerFriends(@NotNull String playerId, @NotNull Pageable pageable);
 
     void removeFriend(@NotNull String playerId, @NotNull String targetId);
 
-    @NotNull List<FriendRequest> getFriendRequests(@NotNull String playerId, boolean incoming);
+    @NotNull Page<FriendRequest> getFriendRequests(@NotNull String playerId, boolean incoming, @NotNull Pageable pageable);
 
     /**
      * Sends a friend request or accepts a friend request if an inverted request already exists (one from the target)
@@ -127,6 +129,20 @@ public interface PlayerService {
     }
 
     class AlreadyExistsError extends RuntimeException {
+
+    }
+
+    record Pageable(int page, int pageSize) {}
+
+    record Page<T>(int page, int totalItems, @NotNull List<T> items) {
+
+        public static <T> Page<T> fromJson(@NotNull String json, @NotNull Class<T> clazz) {
+            return AbstractHttpService.GSON.fromJson(json, TypeToken.getParameterized(Page.class, clazz).getType());
+        }
+
+        public static <T> Page<T> empty() {
+            return new Page<>(0, 0, List.of());
+        }
 
     }
 

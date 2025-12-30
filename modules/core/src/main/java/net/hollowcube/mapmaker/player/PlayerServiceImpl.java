@@ -314,12 +314,13 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull List<PlayerFriend> getPlayerFriends(@NotNull String playerId) {
-        var req = HttpRequest.newBuilder().uri(URI.create(url + "/players/" + playerId + "/friends")).GET();
+    public @NotNull Page<PlayerFriend> getPlayerFriends(@NotNull String playerId, @NotNull Pageable pageable) {
+        var req = HttpRequest.newBuilder().uri(URI.create(url + "/players/%s/friends?page=%s&pageSize=%s".formatted(playerId, pageable.page(), pageable.pageSize()))).GET();
         var res = doRequest("getPlayerFriends", req, HttpResponse.BodyHandlers.ofString());
 
+        // todo correct type
         return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), TypeToken.getParameterized(List.class, PlayerFriend.class).getType());
+            case 200 -> Page.fromJson(res.body(), PlayerFriend.class);
             default -> throw new InternalError("Failed to get friends (" + res.statusCode() + "): " + res.body());
         };
     }
@@ -340,16 +341,16 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull List<FriendRequest> getFriendRequests(@NotNull String playerId, boolean incoming) {
+    public @NotNull Page<FriendRequest> getFriendRequests(@NotNull String playerId, boolean incoming, @NotNull Pageable pageable) {
         String direction = incoming ? "incoming" : "outgoing";
         var req = HttpRequest.newBuilder()
-            .uri(URI.create(url + "/players/" + playerId + "/friendRequests" + "?direction=" + direction))
+            .uri(URI.create(url + "/players/%s/friendRequests?direction=%s&page=%s&pageSize=%s".formatted(playerId, direction, pageable.page(), pageable.pageSize())))
             .GET();
         var res = doRequest("getFriendRequests", req, HttpResponse.BodyHandlers.ofString());
 
+        // todo correct type
         return switch (res.statusCode()) {
-            case 200 ->
-                GSON.fromJson(res.body(), TypeToken.getParameterized(List.class, FriendRequest.class).getType());
+            case 200 -> Page.fromJson(res.body(), FriendRequest.class);
             default ->
                 throw new InternalError("Failed to get friend requests (" + res.statusCode() + "): " + res.body());
         };
@@ -363,11 +364,16 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         var res = doRequest("sendFriendRequest", req, HttpResponse.BodyHandlers.ofString());
 
         return switch (res.statusCode()) {
-            case 201 -> new SendFriendRequestResult(true, GSON.fromJson(res.body(), SendFriendRequestResponse.class)
-                .isRequest(), null);
+            case 201 ->
+                new SendFriendRequestResult(GSON.fromJson(res.body(), SendFriendRequestResponse.class).isRequest(),
+                                            null, null);
+            case 401 -> {
+                SendFriendRequestResult.LimitError error = GSON.fromJson(res.body(), SendFriendRequestResult.LimitError.class);
+                yield new SendFriendRequestResult(false, null, error);
+            }
             case 409 -> {
                 PlayerServiceError error = GSON.fromJson(res.body(), PlayerServiceError.class);
-                yield new SendFriendRequestResult(false, false, error);
+                yield new SendFriendRequestResult(false, error, null);
             }
             default ->
                 throw new InternalError("Failed to send friend request (" + res.statusCode() + "): " + res.body());
@@ -375,13 +381,15 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull FriendRequest deleteFriendRequest(@NotNull String playerId, @NotNull String targetId, boolean bidirectional) {
+    public @NotNull FriendRequest deleteFriendRequest(
+        @NotNull String playerId, @NotNull String targetId, boolean bidirectional) {
         var req = HttpRequest.newBuilder()
-            .uri(URI.create(url + "/players/" + playerId + "/friendRequests/" + targetId + "?bidirectional=" + bidirectional))
+            .uri(URI.create(
+                url + "/players/" + playerId + "/friendRequests/" + targetId + "?bidirectional=" + bidirectional))
             .DELETE();
         var res = doRequest("deleteFriendRequest", req, HttpResponse.BodyHandlers.ofString());
 
-       return switch (res.statusCode()) {
+        return switch (res.statusCode()) {
             case 200 -> GSON.fromJson(res.body(), FriendRequest.class);
             case 404 -> throw new NotFoundError();
             default ->
@@ -426,7 +434,8 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         var res = doRequest("unblockPlayer", req, HttpResponse.BodyHandlers.discarding());
 
         switch (res.statusCode()) {
-            case 204 -> {} // do nothing, successful
+            case 204 -> {
+            } // do nothing, successful
             case 404 -> throw new NotFoundError();
             default -> throw new InternalError("Failed to unblock player (" + res.statusCode() + "): " + res.body());
         }

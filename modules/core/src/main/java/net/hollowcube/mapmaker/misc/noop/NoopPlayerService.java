@@ -121,8 +121,8 @@ public class NoopPlayerService implements PlayerService {
     }
 
     @Override
-    public @NotNull List<PlayerFriend> getPlayerFriends(@NotNull String playerId) {
-        return List.of();
+    public @NotNull Page<PlayerFriend> getPlayerFriends(@NotNull String playerId, @NotNull Pageable pageable) {
+        return Page.empty();
     }
 
     @Override
@@ -131,8 +131,8 @@ public class NoopPlayerService implements PlayerService {
     }
 
     @Override
-    public @NotNull List<FriendRequest> getFriendRequests(@NotNull String playerId, boolean incoming) {
-        return List.of();
+    public @NotNull Page<FriendRequest> getFriendRequests(@NotNull String playerId, boolean incoming, @NotNull Pageable pageable) {
+        return Page.empty();
     }
 
     @Override

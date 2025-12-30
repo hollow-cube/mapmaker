@@ -18,6 +18,7 @@ import java.util.List;
 public class FriendRequestCommand extends CommandDsl {
     private final Argument<String> targetArg;
     private final Argument<String> directionArg = Argument.Word("direction").with("outgoing", "incoming");
+    private final Argument<Integer> pageArg = Argument.Int("page").min(1).defaultValue(1);
 
     private final PlayerService playerService;
 
@@ -27,7 +28,7 @@ public class FriendRequestCommand extends CommandDsl {
 
         this.targetArg = CoreArgument.AnyPlayerId("target", playerService);
 
-        this.addSyntax(playerOnly(this::execList), new ArgumentLiteral("list"), this.directionArg);
+        this.addSyntax(playerOnly(this::execList), new ArgumentLiteral("list"), this.directionArg, this.pageArg);
         this.addSyntax(playerOnly(this::execRemove), new ArgumentLiteral("remove"),
                        this.targetArg); // removes a request bidirectionally
     }
@@ -35,11 +36,14 @@ public class FriendRequestCommand extends CommandDsl {
     private void execList(@NotNull Player player, @NotNull CommandContext context) {
         String directionValue = context.get(this.directionArg);
         boolean incoming = directionValue.equals("incoming");
+        int page = context.get(this.pageArg);
 
-        List<FriendRequest> requests = this.playerService.getFriendRequests(player.getUuid().toString(), incoming);
+        PlayerService.Page<FriendRequest> requests = this.playerService.getFriendRequests(player.getUuid().toString(), incoming, new PlayerService.Pageable(page, 10));
+        int pageCount = Math.ceilDiv(requests.totalItems(), 10);
+
         TextComponent.Builder builder = Component.text()
-            .append(Component.translatable("command.friend.request.list.header"));
-        for (FriendRequest request : requests) {
+            .append(Component.translatable("command.friend.request.list.header", Component.text(page), Component.text(pageCount)));
+        for (FriendRequest request : requests.items()) {
             builder.appendNewline().append(Component.translatable("command.friend.request.list.line", Component.text(request.username())));
         }
 
