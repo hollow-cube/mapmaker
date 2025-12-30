@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class FriendRequestCommand extends CommandDsl {
     private final Argument<String> targetArg;
-    private final Argument<String> directionArg = Argument.Word("direction").with("outgoing", "incoming");
+    private final Argument<String> directionArg = Argument.Word("direction").with("outgoing", "incoming").defaultValue("incoming");
     private final Argument<Integer> pageArg = Argument.Int("page").min(1).defaultValue(1);
 
     private final PlayerService playerService;
@@ -26,6 +26,7 @@ public class FriendRequestCommand extends CommandDsl {
 
         this.targetArg = CoreArgument.AnyPlayerId("target", playerService);
 
+        this.addSyntax(playerOnly(this::execList), new ArgumentLiteral("list"));
         this.addSyntax(playerOnly(this::execList), new ArgumentLiteral("list"), this.directionArg);
         this.addSyntax(playerOnly(this::execList), new ArgumentLiteral("list"), this.directionArg, this.pageArg);
         this.addSyntax(playerOnly(this::execRemove), new ArgumentLiteral("remove"),
