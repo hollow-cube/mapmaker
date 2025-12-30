@@ -23,7 +23,7 @@ public class FriendRemoveCommand extends CommandDsl {
         this.targetArg = CoreArgument.AnyPlayerData("target", playerService)
             .description("The friend to remove");
 
-        addSyntax(playerOnly(this::exec), this.targetArg);
+        this.addSyntax(playerOnly(this::exec), this.targetArg);
     }
 
     private void exec(@NotNull Player player, @NotNull CommandContext context) {

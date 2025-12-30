@@ -21,8 +21,8 @@ public class FriendListCommand extends CommandDsl {
         super("list");
         this.playerService = playerService;
 
-        addSyntax(playerOnly(this::exec));
-        addSyntax(playerOnly(this::exec), this.pageArg);
+        this.addSyntax(playerOnly(this::exec));
+        this.addSyntax(playerOnly(this::exec), this.pageArg);
     }
 
     private void exec(@NotNull Player player, @NotNull CommandContext context) {

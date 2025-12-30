@@ -13,8 +13,6 @@ import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 public class FriendRequestCommand extends CommandDsl {
     private final Argument<String> targetArg;
     private final Argument<String> directionArg = Argument.Word("direction").with("outgoing", "incoming");
@@ -28,6 +26,7 @@ public class FriendRequestCommand extends CommandDsl {
 
         this.targetArg = CoreArgument.AnyPlayerId("target", playerService);
 
+        this.addSyntax(playerOnly(this::execList), new ArgumentLiteral("list"), this.directionArg);
         this.addSyntax(playerOnly(this::execList), new ArgumentLiteral("list"), this.directionArg, this.pageArg);
         this.addSyntax(playerOnly(this::execRemove), new ArgumentLiteral("remove"),
                        this.targetArg); // removes a request bidirectionally
