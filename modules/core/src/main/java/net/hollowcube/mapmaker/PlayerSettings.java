@@ -32,4 +32,8 @@ public final class PlayerSettings {
 
     public static PlayerSetting<Boolean> ENABLE_WE_CUI = PlayerSetting.Bool("we_outline_cui", false);
 
+    // Social
+
+    public static PlayerSetting<Boolean> AUTO_REJECT_FRIEND_REQUESTS = PlayerSetting.Bool("auto_reject_friend_requests", false);
+
 }

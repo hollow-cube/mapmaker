@@ -11,7 +11,7 @@ import java.util.List;
 public class PlayerSettingsOptions {
 
     public static final Key SETTINGS_DIALOG_ID = Key.key("hollowcube:player_settings");
-    public static final int OPTION_WIDTH = 150;
+    public static final int OPTION_WIDTH = 225;
 
     public static final List<PlayerSettingsOption> OPTIONS = List.of(
             PlayerSettingsOption.forBool(
@@ -27,6 +27,10 @@ public class PlayerSettingsOptions {
                     PlayerSettings.NEARBY_PLAYER_VISIBILITY,
                     Component.translatable("dialog.settings.option.visibility"),
                     VisibilityRule.class
+            ),
+            PlayerSettingsOption.forBool(
+                PlayerSettings.AUTO_REJECT_FRIEND_REQUESTS,
+                Component.translatable("dialog.settings.option.auto_reject_friend_requests")
             )
     );
 }
