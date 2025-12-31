@@ -48,9 +48,9 @@ public class NewYearsFeature implements HubFeature {
     private static final Vec MIN_SPAWN_BOX = new Vec(-215, 95, -65);
     private static final Vec MAX_SPAWN_BOX = new Vec(-175, 96, 65);
     private static final FireworkExplosion.Shape[] FIREWORK_SHAPES = FireworkExplosion.Shape.values();
-    private static final int FIREWORKS_PER_CELEBRATION = 25;
+    private static final int FIREWORKS_PER_CELEBRATION = 300;
     private static final int FIREWORKS_SPAWN_DELAY_MIN = 0;
-    private static final int FIREWORKS_SPAWN_DELAY_MAX = 20;
+    private static final int FIREWORKS_SPAWN_DELAY_MAX = 60;
     private static final int FIREWORK_TICKS_MIN = 15;
     private static final int FIREWORK_TICKS_MAX = 25;
 
@@ -105,7 +105,7 @@ public class NewYearsFeature implements HubFeature {
                                 .withRotation(-90)
                                 .setInstance(world.instance(), new Vec(-200, 95, -4));
                         })
-                        .delay(TaskSchedule.tick(FIREWORKS_SPAWN_DELAY_MAX + 1))
+                        .delay(TaskSchedule.tick(FIREWORKS_SPAWN_DELAY_MAX + 5))
                         .schedule();
                 }
             })
