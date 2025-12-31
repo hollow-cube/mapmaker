@@ -86,10 +86,10 @@ public record Emoji(
     public static final Emoji GOAT = builder("goat").parent("misc").build();
     public static final Emoji MOUTH = builder("mouth").parent("misc").build();
     public static final Emoji PEPODUMB = builder("pepodumb").parent("misc").hypercube().build();
-    public static final Emoji BANANA = builder("banana").parent("misc").hypercube().build();
-    public static final Emoji EXCLAMATION = builder("!").path("misc/exclamation").build();
+    public static final Emoji BANANA = builder("banana").parent("misc").build();
+    public static final Emoji EXCLAMATION = builder("exclamation").parent("misc").build();
     public static final Emoji KNIFE = builder("knife").parent("misc").build();
-    public static final Emoji QUESTION = builder("?").path("misc/question").build();
+    public static final Emoji QUESTION = builder("question").parent("misc").build();
 
     public static final Emoji SUS_BLUE = builder("sus_blue").path("sus/blue").hideInHelp().hypercube().build();
     public static final Emoji SUS_BROWN = builder("sus_brown").path("sus/brown").hideInHelp().hypercube().build();
