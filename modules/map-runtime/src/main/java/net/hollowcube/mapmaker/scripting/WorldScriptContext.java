@@ -29,6 +29,7 @@ import java.util.Objects;
 
 public class WorldScriptContext {
     private static final Tag<ScriptContext.Player> PLAYER_SCRIPT_CONTEXT = Tag.Transient("hub/scripting-thread-ref");
+    private static final Tag<ScriptContext.World> WORLD_SCRIPT_CONTEXT = Tag.Transient("hub/scripting-thread-ref-world");
 
     private static final LuauCompiler LUAU_COMPILER = LuauCompiler.builder()
         .userdataTypes() // todo
@@ -88,6 +89,7 @@ public class WorldScriptContext {
         LibBase$luau.register(state);
         LibTask$luau.register(state);
         LibEnv$luau.register(state);
+        LibWorld$luau.register(state);
         LibPlayer$luau.register(state);
         LibEntity$luau.register(state);
         LibItem$luau.register(state);
@@ -150,6 +152,65 @@ public class WorldScriptContext {
         }
     }
 
+    private static final class WorldContextImpl implements ScriptContext.World {
+        private final MapWorld world;
+        private final TagHandler tagHandler;
+        private final List<Disposable> disposables;
+
+        private final long lastPurge = System.currentTimeMillis();
+
+        private WorldContextImpl(
+            MapWorld world, TagHandler tagHandler,
+            List<Disposable> disposables
+        ) {
+            this.world = world;
+            this.tagHandler = tagHandler;
+            this.disposables = disposables;
+        }
+
+        @Override
+        public void track(Disposable disposable) {
+            disposables.add(disposable);
+
+            // probably a better time to do this idk, dnc for now
+            if (lastPurge + 10_000 < System.currentTimeMillis()) {
+                disposables.removeIf(Disposable::isDisposed);
+            }
+        }
+
+        @Override
+        public Scheduler scheduler() {
+            return world.scheduler();
+        }
+
+        @Override
+        public EventNode<Event> eventNode() {
+            // Obviously unsafe, not sure a better option immediately.
+            //noinspection unchecked
+            return (EventNode<Event>) (Object) world.eventNode();
+        }
+
+        @Override
+        public MapWorld world() {
+            return world;
+        }
+
+        @Override
+        public TagHandler tagHandler() {
+            return tagHandler;
+        }
+
+        public List<Disposable> disposables() {
+            return disposables;
+        }
+    }
+
+    public void initializeWorld() {
+        var context = new WorldContextImpl(world, TagHandler.newHandler(), new ArrayList<>());
+        world.instance().setTag(WORLD_SCRIPT_CONTEXT, context);
+        initWorldThread(context);
+    }
+
     public void initializePlayer(MapPlayer player) {
         var context = new PlayerContextImpl(player, TagHandler.newHandler(), new ArrayList<>());
         player.setTag(PLAYER_SCRIPT_CONTEXT, context);
@@ -170,6 +231,27 @@ public class WorldScriptContext {
             initPlayerThread(context);
 
             ActionBar.forPlayer(player).addProvider(new GenericTempActionBarProvider("File changed: " + event.changed(), 1000));
+        }
+    }
+
+    private void initWorldThread(WorldContextImpl context) {
+        var thread = state.newThread();
+        thread.setThreadData(context);
+
+        // we dont need to keep a ref to the main thread since we have the player script context.
+        // The context will hold any references we need to clean up when destroying the player.
+        state.pop(1); // remove thread from main thread stack
+
+        thread.sandboxThread(); // Create mutable env for script usage
+
+        if (fsModuleLoader != null) {
+            try {
+                var bytecode = fsModuleLoader.readAndParseFile("/world");
+                thread.load("/world", bytecode);
+                thread.call(0, 0);
+            } catch (Exception e) {
+                throw new RuntimeException("failed to create world context", e);
+            }
         }
     }
 

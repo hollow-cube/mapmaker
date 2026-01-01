@@ -94,39 +94,48 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
 
     @Override
     public int load(LuaState state, String path, String chunkName, String loadName) {
-        // module needs to run in a new thread, isolated from the rest
-        // note: we create ML on main thread so that it doesn't inherit environment of L
-        LuaState main = state.mainThread();
-        LuaState thread = main.newThread();
-        main.xmove(state, 1);
+        // Keep a ref of the state so it can't be collected when we call down.
+        state.pushThread(state); // todo wrong call conv
+        int stateRef = state.ref(-1);
+        state.pop(1);
 
-        // new thread needs to have the globals sandboxed
-        thread.sandboxThread();
-
-        byte[] bytecode;
         try {
-            bytecode = readAndParseFile(loadName);
-        } catch (IOException | LuauCompileException e) {
-            throw new RuntimeException(e);
+            // module needs to run in a new thread, isolated from the rest
+            // note: we create ML on main thread so that it doesn't inherit environment of L
+            LuaState main = state.mainThread();
+            LuaState thread = main.newThread();
+            main.xmove(state, 1);
+
+            // new thread needs to have the globals sandboxed
+            thread.sandboxThread();
+
+            byte[] bytecode;
+            try {
+                bytecode = readAndParseFile(loadName);
+            } catch (IOException | LuauCompileException e) {
+                throw new RuntimeException(e);
+            }
+
+            thread.load(chunkName, bytecode); // throws on fail
+            var status = thread.resume(state, 0); // todo deal with other states in resume its currently cooked
+            if (status == LuaStatus.OK) {
+                if (thread.top() != 1)
+                    throw state.error("module must return a single value");
+            } else if (status == LuaStatus.YIELD) {
+                throw state.error("module can not yield");
+            }
+
+            // add ML result to L stack
+            thread.xmove(state, 1);
+
+            // remove ML thread from L stack
+            state.remove(-2);
+
+            // added one value to L stack: module result
+            return 1;
+        } finally {
+            state.unref(stateRef);
         }
-
-        thread.load(chunkName, bytecode); // throws on fail
-        var status = thread.resume(state, 0); // todo deal with other states in resume its currently cooked
-        if (status == LuaStatus.OK) {
-            if (thread.top() != 1)
-                throw state.error("module must return a single value");
-        } else if (status == LuaStatus.YIELD) {
-            throw state.error("module can not yield");
-        }
-
-        // add ML result to L stack
-        thread.xmove(state, 1);
-
-        // remove ML thread from L stack
-        state.remove(-2);
-
-        // added one value to L stack: module result
-        return 1;
     }
 
     protected Result resetToPath(String path) {

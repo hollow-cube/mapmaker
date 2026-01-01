@@ -2,10 +2,7 @@ package net.hollowcube.mapmaker.scripting.api;
 
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaType;
-import net.hollowcube.luau.gen.LuaExport;
-import net.hollowcube.luau.gen.LuaLibrary;
-import net.hollowcube.luau.gen.LuaMethod;
-import net.hollowcube.luau.gen.LuaProperty;
+import net.hollowcube.luau.gen.*;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.event.PlayerJumpEvent;
@@ -16,8 +13,10 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.SoundStop;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.event.entity.EntityAttackEvent;
+import net.minestom.server.event.player.PlayerBlockInteractEvent;
 
 import java.util.UUID;
 
@@ -28,12 +27,7 @@ public final class LibPlayer {
     // The player library only exports the type itself currently.
 
     @LuaExport
-    public static final class Player {
-        private final MapPlayer player;
-
-        Player(MapPlayer player) {
-            this.player = player;
-        }
+    public record Player(MapPlayer player) {
 
         //region Properties
 
@@ -101,6 +95,20 @@ public final class LibPlayer {
         }
 
         @LuaProperty
+        public int getOnInteractBlock(LuaState state) {
+            class Impl {
+                static int pushArgs(LuaState state, PlayerBlockInteractEvent event) {
+                    if (event.getHand() != PlayerHand.MAIN) return -1; // ignore
+                    LuaVector.push(state, event.getBlockPosition());
+                    return 1;
+                }
+            }
+
+            LibBase.pushEventSource(state, PlayerBlockInteractEvent.class, Impl::pushArgs);
+            return 1;
+        }
+
+        @LuaProperty
         public int getOnJump(LuaState state) {
             class Impl {
                 static int pushArgs(LuaState state, PlayerJumpEvent event) {
@@ -115,6 +123,12 @@ public final class LibPlayer {
         //endregion
 
         //region Instance Methods
+
+        @LuaMethod
+        public void sendMessage(LuaState state) {
+            var msg = LuaText.checkAnyText(state, 1);
+            player.sendMessage(msg);
+        }
 
         // (self, sound: string, options: SoundOptions?) -> ()
         @LuaMethod
@@ -178,6 +192,19 @@ public final class LibPlayer {
         public int getSlot(LuaState state) {
             var slot = LibItem.checkSlot(state, 1);
             LibItem.pushItem(state, player.getEquipment(slot));
+            return 1;
+        }
+
+        //endregion
+
+        //region Meta Methods
+
+        @LuaMethod(meta = Meta.EQ)
+        public int luaToString(LuaState state) {
+            var result = state.isUserData(1)
+                         && state.toUserData(1) instanceof Player(var mp)
+                         && mp.getUuid().equals(player.getUuid());
+            state.pushBoolean(result);
             return 1;
         }
 

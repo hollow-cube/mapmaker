@@ -23,4 +23,14 @@ public final class LibEnv {
         return 1;
     }
 
+    @LuaProperty
+    public static int getWorld(LuaState state) {
+        var context = ScriptContext.get(state);
+        if (!(context instanceof ScriptContext.World worldContext))
+            throw state.error("environment player is only available in player-bound scripts");
+
+        LibWorld.pushWorld(state, worldContext.world());
+        return 1;
+    }
+
 }

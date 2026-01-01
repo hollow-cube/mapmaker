@@ -30,8 +30,10 @@ public final class LuaGlobals {
         LOGGER.info("[SCRIPT] {}", builder);
 
         if (ServerRuntime.getRuntime().isDevelopment()) {
-            var context = ScriptContext.get(state);
-            var world = ((ScriptContext.Player) context).player().getInstance();
+            var world = switch (ScriptContext.get(state)) {
+                case ScriptContext.World w -> w.world().instance();
+                case ScriptContext.Player p -> p.player().getInstance();
+            };
             world.sendMessage(Component.text("[SCRIPT] " + builder));
         }
 

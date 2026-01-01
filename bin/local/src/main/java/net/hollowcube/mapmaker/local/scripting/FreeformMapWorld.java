@@ -30,6 +30,7 @@ public class FreeformMapWorld extends AbstractMapWorld<FreeformState, FreeformMa
             .addChild(EventUtil.READ_ONLY_NODE);
 
         this.scriptContext = new WorldScriptContext(this, dataDirectory.resolve("scripts"));
+//        this.scriptContext.initializeWorld();
     }
 
     @Override
