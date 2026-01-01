@@ -306,7 +306,7 @@ public class SessionManager {
 
         @Override
         public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-            syncIncremental();
+            FutureUtil.submitVirtual(SessionManager.this::syncIncremental);
         }
     }
 }
