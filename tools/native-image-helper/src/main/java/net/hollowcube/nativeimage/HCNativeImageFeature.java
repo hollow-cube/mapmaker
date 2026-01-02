@@ -31,6 +31,9 @@ public class HCNativeImageFeature implements Feature {
             .enableClassInfo()
             .enableFieldInfo()
             .enableAnnotationInfo()
+            .ignoreClassVisibility()
+            .ignoreMethodVisibility()
+            .ignoreFieldVisibility()
             .acceptPackages("net.hollowcube.mapmaker", "net.hollowcube.posthog")
             .scan()) {
 
@@ -49,6 +52,7 @@ public class HCNativeImageFeature implements Feature {
         try (ScanResult scanResult = new ClassGraph()
             .overrideClasspath(access.getApplicationClassPath())
             .enableClassInfo()
+            .ignoreClassVisibility()
             .acceptPackages("net.minestom", "net.kyori", "ch.qos.logback", "org.jctools", "it.unimi.dsi.fastutil", "com.google.gson")
             .scan()) {
             RuntimeClassInitialization.initializeAtBuildTime("net.hollowcube.mapmaker.isolate");
