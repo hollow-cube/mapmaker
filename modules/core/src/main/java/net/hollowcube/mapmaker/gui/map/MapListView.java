@@ -39,7 +39,7 @@ public abstract class MapListView extends Panel {
         this.mapService = mapService;
         this.bridge = bridge;
 
-        background("map_list/container", -10, -31);
+        background("generic2/containers/paginated/7x3", -10, -31);
         this.titleText = add(0, 0, title(title));
 
         add(0, 0, backOrClose());

@@ -5,10 +5,8 @@ import com.google.gson.reflect.TypeToken;
 import io.opentelemetry.api.OpenTelemetry;
 import io.prometheus.client.Summary;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
-import net.hollowcube.mapmaker.player.responses.PlayerAlts;
-import net.hollowcube.mapmaker.player.responses.SendFriendRequestResponse;
-import net.hollowcube.mapmaker.player.responses.SendFriendRequestResult;
-import net.hollowcube.mapmaker.player.responses.TotpSetupResponse;
+import net.hollowcube.mapmaker.player.requests.CreatePlayerNotificationRequest;
+import net.hollowcube.mapmaker.player.responses.*;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
@@ -437,6 +435,60 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
             } // do nothing, successful
             case 404 -> throw new NotFoundError();
             default -> throw new InternalError("Failed to unblock player (" + res.statusCode() + "): " + res.body());
+        }
+    }
+
+    @Override
+    public @NotNull PlayerNotificationResponse getNotifications(@NotNull String playerId, int page, boolean unread) {
+        var req = setupGet(url("%s/players/%s/notifications?page=%d&unread=%s", url, playerId, page, unread));
+        var res = doRequest("getNotifications", req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), PlayerNotificationResponse.class);
+            case 400 -> throw new IllegalArgumentException("Invalid page number");
+            default ->
+                    throw new SessionService.InternalError("Failed to get notifications (" + res.statusCode() + "): " + res.body());
+        };
+    }
+
+    @Override
+    public void deleteNotification(@NotNull String playerId, @NotNull String notificationId) {
+        var req = setupDelete(url("%s/players/%s/notifications?notificationId=%s", url, playerId, notificationId));
+        var res = doRequest("deleteNotification", req, HttpResponse.BodyHandlers.ofString());
+        switch (res.statusCode()) {
+            case 200 -> {}
+            case 404 -> throw new NotFoundError();
+            default ->
+                    throw new SessionService.InternalError("Failed to delete notification (" + res.statusCode() + "): " + res.body());
+        }
+    }
+
+    @Override
+    public void markNotificationRead(@NotNull String playerId, @NotNull String notificationId, boolean read) {
+        var data = Map.of("read", read);
+        var req = setupPatch(url("%s/players/%s/notifications?notificationId=%s", url, playerId, notificationId), GSON.toJson(data));
+        var res = doRequest("markNotificationRead", req, HttpResponse.BodyHandlers.ofString());
+        switch (res.statusCode()) {
+            case 200 -> {}
+            case 404 -> throw new NotFoundError();
+            default ->
+                    throw new SessionService.InternalError("Failed to mark notification read (" + res.statusCode() + "): " + res.body());
+        }
+    }
+
+    @Override
+    public void createNotification(
+        @NotNull String playerId,
+        @NotNull String type,
+        @NotNull String key,
+        @Nullable JsonObject data,
+        @Nullable Integer expiresInSeconds,
+        boolean replaceUnread
+    ) {
+        var request = new CreatePlayerNotificationRequest(type, key, data, expiresInSeconds);
+        var req = setupPost(url("%s/players/%s/notifications?replaceUnread=%s", url, playerId, replaceUnread), GSON.toJson(request));
+        var res = doRequest("createNotification", req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() != 201) {
+            throw new SessionService.InternalError("Failed to create notification (" + res.statusCode() + "): " + res.body());
         }
     }
 

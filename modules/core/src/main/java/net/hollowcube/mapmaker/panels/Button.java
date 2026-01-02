@@ -65,6 +65,10 @@ public class Button extends Element implements ButtonClickAliases {
     private OnClickTypeSlot onShiftLeftClick;
     private OnClickTypeSlot onShiftLeftClickAsync;
 
+    public Button(int width, int height) {
+        this(null, width, height);
+    }
+
     public Button(@Nullable String translationKey, int width, int height) {
         super(width, height);
         if (translationKey != null) translationKey(translationKey);

@@ -132,6 +132,18 @@ public class InventoryHost implements TagReadable, TagWritable {
         return viewStack.size() > 1;
     }
 
+    public void popOrClose() {
+        if (canPopView()) {
+            popView();
+        } else {
+            close();
+        }
+    }
+
+    public void close() {
+        player.closeInventory();
+    }
+
     public void onClose(@NotNull Runnable callback) {
         this.closeCallback = callback;
     }

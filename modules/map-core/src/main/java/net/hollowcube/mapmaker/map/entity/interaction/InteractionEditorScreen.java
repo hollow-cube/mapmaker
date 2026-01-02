@@ -5,7 +5,7 @@ import net.hollowcube.common.math.MathUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.Uuids;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.gui.notifications.NotificationManager;
+import net.hollowcube.mapmaker.gui.notifications.ToastManager;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityEditor;
 import net.kyori.adventure.key.Key;
@@ -88,11 +88,10 @@ public class InteractionEditorScreen {
             interaction.setData(data, event.getPlayer(), false);
             event.getPlayer().closeDialog();
         } else {
-            NotificationManager.showNotification(
+            ToastManager.showNotification(
                     event.getPlayer(),
-                    "Error",
-                    "Can't parse, make sure it's valid NBT.",
-                    NamedTextColor.RED
+                    Component.text("Error"),
+                    Component.text("Can't parse, make sure it's valid NBT.", NamedTextColor.RED)
             );
         }
         interaction.teleport(pos);
