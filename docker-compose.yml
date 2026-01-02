@@ -83,7 +83,7 @@ services:
       context: ../hc-services/services/player-service
       dockerfile: deploy/Dockerfile
     restart: unless-stopped
-    depends_on: [ postgres, spicedb, redpanda ]
+    depends_on: [ postgres, spicedb, redpanda, redis ]
     environment:
       PLAYERS_ENV: "tilt"
       PLAYERS_HTTP_ADDRESS: "0.0.0.0"
@@ -92,6 +92,7 @@ services:
       PLAYERS_SPICEDB_ENDPOINT: "spicedb:50051"
       PLAYERS_SPICEDB_TOKEN: "supersecretkey"
       PLAYERS_KAFKA_BROKERS: "redpanda:9092"
+      PLAYERS_REDIS_ADDRESS: "redis:6379"
       PLAYERS_TEBEX_SECRET: "explicit_ignore"
     ports:
       - "9126:9124"
