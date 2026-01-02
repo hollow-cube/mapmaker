@@ -249,11 +249,11 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     }
 
     @RuntimeGson
-    private record InviteError(int errorCode, @NotNull String errorText) {
+    public record InviteError(int errorCode, @NotNull String errorText) {
     }
 
     @RuntimeGson
-    private record SessionError(@NotNull String code, @NotNull String message) {
+    public record SessionError(@NotNull String code, @NotNull String message) {
     }
 
     private static final class ErrorCodes {
