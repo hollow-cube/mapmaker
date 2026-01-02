@@ -452,7 +452,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
 
     @Override
     public void deleteNotification(@NotNull String playerId, @NotNull String notificationId) {
-        var req = setupDelete(url("%s/players/%s/notifications?notificationId=%s", url, playerId, notificationId));
+        var req = setupDelete(url("%s/players/%s/notifications/%s", url, playerId, notificationId));
         var res = doRequest("deleteNotification", req, HttpResponse.BodyHandlers.ofString());
         switch (res.statusCode()) {
             case 200 -> {}
@@ -465,7 +465,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     @Override
     public void markNotificationRead(@NotNull String playerId, @NotNull String notificationId, boolean read) {
         var data = Map.of("read", read);
-        var req = setupPatch(url("%s/players/%s/notifications?notificationId=%s", url, playerId, notificationId), GSON.toJson(data));
+        var req = setupPatch(url("%s/players/%s/notifications/%s", url, playerId, notificationId), GSON.toJson(data));
         var res = doRequest("markNotificationRead", req, HttpResponse.BodyHandlers.ofString());
         switch (res.statusCode()) {
             case 200 -> {}

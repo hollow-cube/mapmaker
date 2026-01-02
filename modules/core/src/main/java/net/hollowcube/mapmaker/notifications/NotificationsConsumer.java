@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public class NotificationsConsumer extends BaseConsumer<PlayerNotificationResponse.SimpleEntry> {
 
-    private static final String TOPIC_NAME = "notification_created";
+    private static final String TOPIC_NAME = "notification_update";
     private static final String GROUP_ID = ServerRuntime.getRuntime().hostname();
     private static final ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
 
@@ -35,6 +35,7 @@ public class NotificationsConsumer extends BaseConsumer<PlayerNotificationRespon
             var uuid = UUID.fromString(record.key());
             var player = CONNECTION_MANAGER.getOnlinePlayerByUuid(uuid);
             if (player == null) return;
+            if (!entry.action().equals("create")) return;
 
             var type = PlayerNotificationType.Lookup.get(entry.type());
             if (type == null) return;

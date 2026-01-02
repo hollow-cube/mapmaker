@@ -32,6 +32,7 @@ public record PlayerNotificationResponse(
 
     @RuntimeGson
     public record SimpleEntry(
+        @NotNull String action,
         @NotNull String type,
         @NotNull String key,
         @Nullable JsonObject data
