@@ -67,13 +67,10 @@ public class FriendAddCommand extends CommandDsl {
                 Component.translatable("command.friend.add.already_friends", Component.text(targetData.username())));
             case "player_blocked" -> player.sendMessage(
                 Component.translatable("command.friend.add.blocked_by_self", Component.text(targetData.username())));
-            case "blocked_by_player" -> player.sendMessage(
-                Component.translatable("command.friend.add.blocked_by_target", Component.text(targetData.username())));
+            case "blocked_by_player", "target_auto_rejects_friend_requests" -> player.sendMessage(
+                Component.translatable("command.friend.add.auto_rejected", Component.text(targetData.username())));
             case "friend_request_already_exists" -> player.sendMessage(
                 Component.translatable("command.friend.add.already_requested", Component.text(targetData.username())));
-            case "target_auto_rejects_friend_requests" -> player.sendMessage(
-                Component.translatable("command.friend.add.auto_rejected", Component.text(targetData.username()))
-            );
             default -> player.sendMessage(Component.translatable("generic.unknown_error"));
         }
     }
