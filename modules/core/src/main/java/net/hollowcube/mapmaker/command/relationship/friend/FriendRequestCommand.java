@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.player.FriendRequest;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,11 +42,12 @@ public class FriendRequestCommand extends CommandDsl {
         PlayerService.Page<FriendRequest> requests = this.playerService.getFriendRequests(player.getUuid().toString(), incoming, new PlayerService.Pageable(page, 10));
         int pageCount = Math.max(1, Math.ceilDiv(requests.totalItems(), 10)); // ensure a min page of 1
 
-        String headerTranslationKey = "command.friend.request.list.header." + (incoming ? "incoming" : "outgoing");
         TextComponent.Builder builder = Component.text()
-            .append(Component.translatable(headerTranslationKey, Component.text(page), Component.text(pageCount)));
+            .append(Component.translatable("command.friend.request.list.header." + directionValue, Component.text(page), Component.text(pageCount)));
         for (FriendRequest request : requests.items()) {
-            builder.appendNewline().append(Component.translatable("command.friend.request.list.line", Component.text(request.username())));
+            builder.appendNewline().append(
+                Component.translatable("command.friend.request.list.line." + directionValue, Component.text(request.username()))
+            );
         }
 
         player.sendMessage(builder.build());
