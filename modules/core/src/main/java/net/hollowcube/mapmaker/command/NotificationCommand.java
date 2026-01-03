@@ -6,6 +6,7 @@ import net.hollowcube.command.arg.ArgumentBool;
 import net.hollowcube.command.arg.ArgumentInt;
 import net.hollowcube.command.arg.ArgumentWord;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.gui.notifications.NotificationListView;
 import net.hollowcube.mapmaker.panels.Panel;
@@ -17,8 +18,6 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class NotificationCommand extends CommandDsl {
-
-    private static final boolean DEBUG = false;
 
     private final ServiceContext services;
     private final PermManager permissions;
@@ -35,7 +34,7 @@ public class NotificationCommand extends CommandDsl {
         this.permissions = permissions;
 
         addSyntax(playerOnly(this::execute));
-        if (DEBUG) {
+        if (ServerRuntime.getRuntime().isDevelopment()) {
             addSubcommand(new Notify());
         }
     }

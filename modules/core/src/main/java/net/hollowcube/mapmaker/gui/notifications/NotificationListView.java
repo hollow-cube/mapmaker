@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.gui.notifications;
 
 import net.hollowcube.common.components.TranslatableBuilder;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.notifications.PlayerNotification;
 import net.hollowcube.mapmaker.panels.Button;
@@ -8,6 +9,8 @@ import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Pagination;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.ServiceContext;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.utils.Unit;
@@ -15,13 +18,13 @@ import org.jetbrains.annotations.Blocking;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
 
 public class NotificationListView extends Panel {
 
+    private static final BadSprite DEFAULT_ICON = BadSprite.require("notifications/types/unhandled");
     private static final List<String> ACTION_LORE = List.of(
         "gui.notifications.notification.lore.lmb",
         "gui.notifications.notification.lore.rmb"
@@ -61,15 +64,33 @@ public class NotificationListView extends Panel {
             pagination.totalPages(notifications.pageCount());
         }
 
-        // TODO show different element if notification is unhandled,
-        // likely due to extremely old notification or new notification type not handled by server yet
         return notifications
             .results()
             .stream()
-            .map(entry -> PlayerNotification.fromResponse(this.host.player(), this.context, entry))
-            .filter(Objects::nonNull)
-            .map(NotificationElement::new)
+            .map(entry -> {
+                var notification = PlayerNotification.fromResponse(this.host.player(), this.context, entry);
+                if (notification != null) {
+                    return new NotificationElement(notification);
+                }
+                return new UnhandledNotificationElement(entry);
+            })
             .toList();
+    }
+
+    private static class UnhandledNotificationElement extends Panel {
+
+        protected UnhandledNotificationElement(PlayerNotificationResponse.ComplexEntry entry) {
+            super(1, 1);
+
+            var button = new Button("gui.notification.unhandled", 1, 1)
+                .model(DEFAULT_ICON.model(), null)
+                .onLeftClick(() -> host.player().sendMessage(LanguageProviderV2.translateMultiMerged(
+                        "gui.notification.unhandled.message",
+                        List.of(Component.text(entry.id()))
+                )));
+
+            this.add(0, 0, button);
+        }
     }
 
     private class NotificationElement extends Panel {
