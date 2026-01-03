@@ -452,9 +452,15 @@ public class MapSettings {
         return this.tags;
     }
 
+    public boolean hasTag(@NotNull MapTags.Tag tag) {
+        return this.tags != null && this.tags.contains(tag);
+    }
+
     public boolean addTag(@NotNull MapTags.Tag tag) {
-        Check.stateCondition(variant == MapVariant.BUILDING && tag.type == MapTags.TagType.GAMEPLAY,
-            "building maps may not have gameplay tags");
+        if (tag.type != null) {
+            Check.stateCondition(variant == MapVariant.BUILDING && tag.type == MapTags.TagType.GAMEPLAY,
+                "building maps may not have gameplay tags");
+        }
 
         updateLock.lock();
         try {

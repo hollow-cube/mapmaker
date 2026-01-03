@@ -62,7 +62,7 @@ public class SpriteTransform {
                                          || relative.toString().startsWith("action" + File.separatorChar)
                                          || relative.toString().startsWith("event" + File.separatorChar)
                                          || relative.toString().startsWith("icon2" + File.separatorChar)
-                        || relative.toString().startsWith("rate_map" + File.separatorChar)
+                                         || relative.toString().startsWith("rate_map" + File.separatorChar)
                                          || relative.toString().startsWith("create_maps2" + File.separatorChar))
                                         && !relative.toString().contains("checkout");
                 boolean useConfig = Files.exists(configFile);

@@ -28,6 +28,8 @@ import java.util.regex.Pattern;
 public class MapData {
     public static final String DEFAULT_NAME = "Untitled Map";
 
+    public static final int MAX_NAME_LENGTH = 20;
+
     public enum Difficulty {
         UNKNOWN,
         EASY,

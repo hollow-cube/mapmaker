@@ -22,10 +22,10 @@ import java.util.concurrent.TimeUnit;
 
 import static net.kyori.adventure.text.Component.text;
 
-class MapDetailsTimesPanel extends Panel {
+public class MapDetailsTimesPanel extends Panel {
     private static final String MISSING_TIME = "--:--:---";
     private static final Component MISSING_PLAYER = text("Not set!");
-    private static final String MODEL_8X = "mapmaker:2d_player_head";
+    public static final String MODEL_8X = "mapmaker:2d_player_head";
     private static final String MODEL_8X_OFFSET_1 = "mapmaker:2d_player_head_offset1";
     private static final String MODEL_8X_OFFSET_2 = "mapmaker:2d_player_head_offset2";
 
@@ -42,7 +42,7 @@ class MapDetailsTimesPanel extends Panel {
     private final List<Button> playerButtons; // They need the same text :|
 
     public MapDetailsTimesPanel(
-            @NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull String mapId) {
+        @NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull String mapId) {
         super(9, 4);
         this.playerService = playerService;
         this.mapService = mapService;
@@ -51,16 +51,16 @@ class MapDetailsTimesPanel extends Panel {
         background("map_details/times/footer", 0, 54);
 
         this.tabs = add(0, 0, new Switch(9, 3, List.of(
-                this.topThreePanel = new TopThreePanel(),
-                this.topTenPanel = new TopTenPanel()
+            this.topThreePanel = new TopThreePanel(),
+            this.topTenPanel = new TopTenPanel()
         )));
         add(1, 3, tabs.toggleButton(1, 1,
-                                    "gui.map_details.top_times_tab.other_top_times",
-                                    "map_details/times/other_times", 2, 1));
+            "gui.map_details.top_times_tab.other_top_times",
+            "map_details/times/other_times", 2, 1));
 
         this.playerHeadBtn = add(2, 3, new Button(null, 1, 1));
         this.playerTimeText = add(3, 3, new Text("", 3, 1, MISSING_TIME)
-                .align(Text.CENTER, Text.CENTER));
+            .align(Text.CENTER, Text.CENTER));
         var playerTimeBtn = add(6, 3, new Button(null, 1, 1));
         this.playerButtons = List.of(playerHeadBtn, playerTimeText, playerTimeBtn);
 
@@ -79,9 +79,9 @@ class MapDetailsTimesPanel extends Panel {
             var playerId = PlayerData.fromPlayer(host.player()).id();
             var leaderboard = mapService.getPlaytimeLeaderboard(mapId, playerId);
             var displayNames = playerService.getPlayerDisplayNames(leaderboard.top()
-                                                                           .stream()
-                                                                           .map(LeaderboardData.Entry::player)
-                                                                           .toList());
+                .stream()
+                .map(LeaderboardData.Entry::player)
+                .toList());
 
             sync(() -> {
                 this.topThreePanel.update(leaderboard.top(), displayNames);
@@ -89,7 +89,7 @@ class MapDetailsTimesPanel extends Panel {
 
                 {   // Update the player entry
                     var time = (leaderboard.player() == null ? MISSING_TIME
-                            : NumberUtil.formatMapPlaytime(leaderboard.player().score(), true));
+                        : NumberUtil.formatMapPlaytime(leaderboard.player().score(), true));
                     for (var btn : playerButtons)
                         btn.translationKey("gui.map_details.top_times_tab.personal_best", text(time));
                     playerHeadBtn.profile(getPlayerHead2d(playerId));
@@ -102,16 +102,16 @@ class MapDetailsTimesPanel extends Panel {
 
 
     private static final Cache<String, ResolvableProfile> HEAD_CACHE = Caffeine.newBuilder()
-            .expireAfterWrite(60, TimeUnit.MINUTES)
-            .maximumSize(1000)
-            .build();
+        .expireAfterWrite(60, TimeUnit.MINUTES)
+        .maximumSize(1000)
+        .build();
 
-    static @NotNull ResolvableProfile getPlayerHead2d(@Nullable String uuid) {
+    public static @NotNull ResolvableProfile getPlayerHead2d(@Nullable String uuid) {
         if (uuid == null) return CoreSkulls.UNKNOWN_PLAYER;
         return HEAD_CACHE.get(uuid, key -> OpUtils.mapOr(
-                PlayerSkin.fromUuid(key),
-                CoreSkulls::create,
-                ResolvableProfile.EMPTY
+            PlayerSkin.fromUuid(key),
+            CoreSkulls::create,
+            ResolvableProfile.EMPTY
         ));
     }
 
@@ -150,13 +150,13 @@ class MapDetailsTimesPanel extends Panel {
 
                 // This abuses a bit of a hack that we set the entire area to a button then overlay the model and text
                 this.backgroundBtn = add(0, 0, new Button(null, 3, 3)
-                        .translationKey(translationKey, MISSING_PLAYER, MISSING_TIME));
+                    .translationKey(translationKey, MISSING_PLAYER, MISSING_TIME));
                 this.playerHeadBtn = add(1, 1, new Button(null, 1, 1)
-                        .translationKey(translationKey, MISSING_PLAYER, MISSING_TIME)
-                        .model(MODEL_8X, null)
-                        .profile(CoreSkulls.UNKNOWN_PLAYER));
+                    .translationKey(translationKey, MISSING_PLAYER, MISSING_TIME)
+                    .model(MODEL_8X, null)
+                    .profile(CoreSkulls.UNKNOWN_PLAYER));
                 this.timeText = add(0, 2, new Text(null, 3, 1, MISSING_TIME)
-                        .align(Text.CENTER, 6));
+                    .align(Text.CENTER, 6));
             }
 
             public void update(@NotNull LeaderboardData.Entry entry, @NotNull Component playerName) {
@@ -208,11 +208,11 @@ class MapDetailsTimesPanel extends Panel {
                 this.translationKey = "gui.map_details.top_times_tab." + number + "_place";
 
                 this.playerHeadBtn = add(0, 0, new Button(null, 1, 1)
-                        .translationKey(translationKey, MISSING_PLAYER, MISSING_TIME)
-                        .model(isRightColumn ? MODEL_8X_OFFSET_2 : MODEL_8X_OFFSET_1, null)
-                        .profile(CoreSkulls.UNKNOWN_PLAYER));
+                    .translationKey(translationKey, MISSING_PLAYER, MISSING_TIME)
+                    .model(isRightColumn ? MODEL_8X_OFFSET_2 : MODEL_8X_OFFSET_1, null)
+                    .profile(CoreSkulls.UNKNOWN_PLAYER));
                 this.timeText = add(1, 0, new Text(null, 3, 1, MISSING_TIME)
-                        .align(isRightColumn ? -1 : 5, 5));
+                    .align(isRightColumn ? -1 : 5, 5));
                 this.timeText.translationKey(translationKey, MISSING_PLAYER, MISSING_TIME);
             }
 

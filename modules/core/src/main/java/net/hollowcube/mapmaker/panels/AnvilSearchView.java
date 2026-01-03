@@ -12,6 +12,7 @@ import java.util.function.Function;
 
 public class AnvilSearchView<T> extends AbstractAnvilView {
     private final BiFunction<String, Integer, List<T>> searchFunction;
+    private final String defaultSearchTerm;
     private final Function<T, Button> buttonFactory;
     private final Consumer<T> onSubmit;
 
@@ -21,14 +22,26 @@ public class AnvilSearchView<T> extends AbstractAnvilView {
     private Task task = null;
 
     public AnvilSearchView(
-            @NotNull String icon, @NotNull String title,
-            @NotNull BiFunction<String, Integer, List<T>> searchFunction,
-            @NotNull Function<T, Button> buttonFactory,
-            @NotNull Consumer<T> onSubmit
+        @NotNull String icon, @NotNull String title,
+        @NotNull BiFunction<String, Integer, List<T>> searchFunction,
+        @NotNull Function<T, Button> buttonFactory,
+        @NotNull Consumer<T> onSubmit
+    ) {
+        // "s" is kinda of a weird default, but it was set for block inputs previously and works fine.
+        this(icon, title, searchFunction, "s", buttonFactory, onSubmit);
+    }
+
+    public AnvilSearchView(
+        @NotNull String icon, @NotNull String title,
+        @NotNull BiFunction<String, Integer, List<T>> searchFunction,
+        @NotNull String defaultSearchTerm,
+        @NotNull Function<T, Button> buttonFactory,
+        @NotNull Consumer<T> onSubmit
     ) {
         super("generic2/anvil/search_container", icon, title, "");
 
         this.searchFunction = searchFunction;
+        this.defaultSearchTerm = defaultSearchTerm;
         this.buttonFactory = buttonFactory;
         this.onSubmit = onSubmit;
 
@@ -61,17 +74,15 @@ public class AnvilSearchView<T> extends AbstractAnvilView {
 
         private void updateContents() {
             clear();
-            // Empty gives no results so we can just use "s" as a default search term.
-            // Its kinda gross, but its fine for the use cases we have now :)
-            var results = searchFunction.apply(text.isEmpty() ? "s" : text, 9 * 3);
+            var results = searchFunction.apply(text.isEmpty() ? defaultSearchTerm : text, 9 * 3);
             for (int i = 0; i < Math.min(results.size(), 9 * 3); i++) {
                 int x = i % 9, y = i / 9;
                 final T value = results.get(i);
                 add(x, y, buttonFactory.apply(value)
-                        .onLeftClick(() -> {
-                            onSubmit.accept(value);
-                            host.popView();
-                        }));
+                    .onLeftClick(() -> {
+                        onSubmit.accept(value);
+                        host.popView();
+                    }));
             }
         }
     }

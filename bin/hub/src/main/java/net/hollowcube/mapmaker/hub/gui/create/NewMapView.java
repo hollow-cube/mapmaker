@@ -34,15 +34,15 @@ public class NewMapView extends Panel {
         add(0, 0, backOrClose());
 
         sizeSelect = add(1, 2, new Select<>(4, MapSize.NORMAL));
-        sizeSelect.addOption(MapSize.NORMAL, "normal", "create_maps2/size/1", 4, 5);
-        sizeSelect.addOption(MapSize.LARGE, "large", "create_maps2/size/2", 3, 4);
-        sizeSelect.addOption(MapSize.MASSIVE, "massive", "create_maps2/size/3", 3, 3);
-        sizeSelect.addOption(MapSize.COLOSSAL, "colossal", "create_maps2/size/4", 2, 2);
+        sizeSelect.addOption(MapSize.NORMAL, "normal", "icon2/1_1/house_1", 4, 5);
+        sizeSelect.addOption(MapSize.LARGE, "large", "icon2/1_1/house_2", 3, 4);
+        sizeSelect.addOption(MapSize.MASSIVE, "massive", "icon2/1_1/house_3", 3, 3);
+        sizeSelect.addOption(MapSize.COLOSSAL, "colossal", "icon2/1_1/castle", 2, 2);
 
         add(2, 4, new Text("create", 5, 1, "Create")
             .align(Text.CENTER, Text.CENTER)
             .background("generic2/btn/success/5_1")
-            .onLeftClick(this::handleSubmit));
+            .onLeftClickAsync(this::handleSubmit));
     }
 
     private void handleSubmit() {
@@ -50,7 +50,9 @@ public class NewMapView extends Panel {
         var map = mapService.createMap(MapCreateRequest.forPlayerV2(
             playerId, sizeSelect.selected(),
             ProtocolVersions.getProtocolVersion(playerId)));
-        onNewMap.accept(new MapSlot(map, Instant.now(), -1));
-        host.popView();
+        sync(() -> {
+            onNewMap.accept(new MapSlot(map, Instant.now(), -1));
+            host.popView();
+        });
     }
 }

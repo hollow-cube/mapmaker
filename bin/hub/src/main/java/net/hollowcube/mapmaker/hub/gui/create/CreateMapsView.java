@@ -1,9 +1,14 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapSlot;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Button;
+import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
+import net.hollowcube.mapmaker.player.PlayerData;
+import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,11 +17,20 @@ import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
 
 public class CreateMapsView extends Panel {
+    public static final List<Component> LORE_POSTFIX_CLICKSELECT = LanguageProviderV2.translateMulti("gui.action.clickselect", List.of());
+
+    private final MapService mapService;
+    private final ServerBridge bridge;
+
+    private final Panel entryContainer;
 
     private final List<MapSlot> slots = new ArrayList<>();
+    private int page = 0;
 
-    public CreateMapsView(MapService mapService) {
+    public CreateMapsView(MapService mapService, ServerBridge bridge) {
         super(9, 10);
+        this.mapService = mapService;
+        this.bridge = bridge;
 
         background("create_maps2/container", -10, -31);
         add(0, 0, title("Create Map"));
@@ -26,23 +40,43 @@ public class CreateMapsView extends Panel {
         // todo + to add map
         add(8, 0, new Button("create", 1, 1)
             .background("generic2/btn/default/1_1")
-            .sprite("create_maps2/add", 4, 3)
+            .sprite("icon2/1_1/plus", 1, 1)
             .onLeftClick(() -> host.pushTransientView(new NewMapView(mapService, this::acceptNewMap))));
 
-        add(0, 1, new Button("todo", 9, 1)
-            .background("create_maps2/slot/blue", 1, 1));
-        add(0, 2, new Button("todo", 9, 1)
-            .background("create_maps2/slot/blue", 1, 1));
-        add(0, 3, new Button("todo", 9, 1)
-            .background("create_maps2/slot/blue", 1, 1));
-        add(0, 4, new Button("todo", 9, 1)
-            .background("create_maps2/slot/blue", 1, 1));
-        add(0, 5, new Button("todo", 9, 1)
-            .background("create_maps2/slot/blue", 1, 1));
+        this.entryContainer = add(0, 1, new Panel(9, 5) {});
+        update();
+    }
+
+    @Override
+    protected void mount(InventoryHost host, boolean isInitial) {
+        super.mount(host, isInitial);
+        if (!isInitial) return;
+
+        async(() -> {
+            var playerId = PlayerData.fromPlayer(host.player()).id();
+            var remoteSlots = mapService.getPlayerMapSlots(playerId);
+
+            sync(() -> {
+                slots.clear();
+                slots.addAll(remoteSlots);
+                slots.sort((MapSlot a, MapSlot b) -> b.createdAt().compareTo(a.createdAt()));
+                update();
+            });
+        });
     }
 
     private void acceptNewMap(MapSlot slot) {
         // No need to re-sort, we know this should be first in the list.
         slots.addFirst(slot);
+        update();
+    }
+
+    private void update() {
+        this.entryContainer.clear();
+        for (int i = 0; i < 5; i++) {
+            int index = i + page * 5;
+            if (index >= slots.size()) break;
+            this.entryContainer.add(0, i, new MapSlotEntry(bridge, slots.get(index)));
+        }
     }
 }
