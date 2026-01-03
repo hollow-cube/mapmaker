@@ -50,8 +50,10 @@ public class FriendAddCommand extends CommandDsl {
 
         SendFriendRequestResult.LimitError limitError = result.limitError();
         if (limitError != null) {
+            String translationKey = "command.friend.add.limit_reached.";
+            translationKey = translationKey +  (PlayerData.fromPlayer(player).isHypercube() ? "hypercube" : "non_hypercube");
             player.sendMessage(
-                Component.translatable("command.friend.add.limit_reached", Component.text(limitError.limit()),
+                Component.translatable(translationKey, Component.text(limitError.limit()),
                                        Component.text(limitError.friendCount()),
                                        Component.text(limitError.outgoingRequestCount())));
             return;
