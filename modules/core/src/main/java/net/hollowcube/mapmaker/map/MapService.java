@@ -95,6 +95,8 @@ public interface MapService {
 
     @NotNull MapPlayerData getMapPlayerData(@NotNull String playerId);
 
+    @NotNull List<MapSlot> getPlayerMapSlots(@NotNull String playerId);
+
     @NotNull MapHistory getPlayerMapHistory(@NotNull String playerId, int page, int amount);
 
     @NotNull PlayerTopTimesResponse getPlayerTopTimes(@NotNull String playerId, int page, int pageSize);

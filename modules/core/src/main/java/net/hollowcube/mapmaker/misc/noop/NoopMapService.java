@@ -191,6 +191,11 @@ public class NoopMapService implements MapService {
     }
 
     @Override
+    public @NotNull List<MapSlot> getPlayerMapSlots(@NotNull String playerId) {
+        return List.of();
+    }
+
+    @Override
     public @NotNull MapHistory getPlayerMapHistory(@NotNull String playerId, int page, int amount) {
         return new MapHistory(page, false, List.of(new MapHistory.Entry("62da0aaf-8cad-4c13-869c-02b07688988d")));
     }

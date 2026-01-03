@@ -55,21 +55,22 @@ public class SpriteTransform {
 
                 var relative = guiBaseDir.relativize(imageFile);
                 boolean canSkipConfig = (relative.toString().startsWith("store" + File.separatorChar)
-                        || relative.toString().startsWith("map_browser" + File.separatorChar)
-                        || relative.toString().startsWith("map_details" + File.separatorChar)
-                        || relative.toString().startsWith("report_map" + File.separatorChar)
-                        || relative.toString().startsWith("generic2" + File.separatorChar + "containers" + File.separatorChar)
-                        || relative.toString().startsWith("action" + File.separatorChar)
-                        || relative.toString().startsWith("event" + File.separatorChar)
-                        || relative.toString().startsWith("icon2" + File.separatorChar)
-                        || relative.toString().startsWith("rate_map" + File.separatorChar))
-                        && !relative.toString().contains("checkout");
+                                         || relative.toString().startsWith("map_browser" + File.separatorChar)
+                                         || relative.toString().startsWith("map_details" + File.separatorChar)
+                                         || relative.toString().startsWith("report_map" + File.separatorChar)
+                                         || relative.toString().startsWith("generic2" + File.separatorChar + "containers" + File.separatorChar)
+                                         || relative.toString().startsWith("action" + File.separatorChar)
+                                         || relative.toString().startsWith("event" + File.separatorChar)
+                                         || relative.toString().startsWith("icon2" + File.separatorChar)
+                        || relative.toString().startsWith("rate_map" + File.separatorChar)
+                                         || relative.toString().startsWith("create_maps2" + File.separatorChar))
+                                        && !relative.toString().contains("checkout");
                 boolean useConfig = Files.exists(configFile);
                 if (!canSkipConfig && !useConfig) continue;
 
                 String name = guiBaseDir.relativize(imageFile).toString()
-                        .replace(".png", "")
-                        .replace("\\", "/");
+                    .replace(".png", "")
+                    .replace("\\", "/");
                 try {
                     if (canSkipConfig && !useConfig) {
 
@@ -121,17 +122,17 @@ public class SpriteTransform {
 
                         if (config.get("overlays") instanceof Json5Array array) {
                             var cases = StreamSupport.stream(array.spliterator(), false)
-                                    .map(Json5Element::getAsString)
-                                    .map(overlayEntries::get)
-                                    .filter(Objects::nonNull)
-                                    .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+                                .map(Json5Element::getAsString)
+                                .map(overlayEntries::get)
+                                .filter(Objects::nonNull)
+                                .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
 
                             ctx.addItemModel(
-                                    name,
-                                    Templates.applyObject("overlay_model", Map.of(
-                                            "base", itemModel,
-                                            "overlays", cases
-                                    ))
+                                name,
+                                Templates.applyObject("overlay_model", Map.of(
+                                    "base", itemModel,
+                                    "overlays", cases
+                                ))
                             );
                         } else {
                             ctx.addItemModel(name, ModelUtil.createBasicItem(itemModel));
@@ -152,11 +153,11 @@ public class SpriteTransform {
                         }
 
                         ctx.addItemModel(
-                                name,
-                                Templates.applyObject("number_model", Map.of(
-                                        "base", baseItemModel,
-                                        "entries", entries
-                                ))
+                            name,
+                            Templates.applyObject("number_model", Map.of(
+                                "base", baseItemModel,
+                                "entries", entries
+                            ))
                         );
                     }
                 } catch (Exception e) {
@@ -275,18 +276,18 @@ public class SpriteTransform {
             var name = file.substring(file.lastIndexOf('/') + 1, file.lastIndexOf('.'));
             var id = ctx.writeTexture("item", "overlay_" + name, stream.readAllBytes());
             var entry = ModelUtil.createBasicItem(ctx.writeModel(
-                    "overlay_" + name,
-                    ModelUtil.createItemGenerated(id, model -> {
-                        var display = new JsonObject();
-                        var gui = new JsonObject();
-                        var translation = new JsonArray();
-                        translation.add(0);
-                        translation.add(0);
-                        translation.add(100);
-                        gui.add("translation", translation);
-                        display.add("gui", gui);
-                        model.add("display", display);
-                    })
+                "overlay_" + name,
+                ModelUtil.createItemGenerated(id, model -> {
+                    var display = new JsonObject();
+                    var gui = new JsonObject();
+                    var translation = new JsonArray();
+                    translation.add(0);
+                    translation.add(0);
+                    translation.add(100);
+                    gui.add("translation", translation);
+                    display.add("gui", gui);
+                    model.add("display", display);
+                })
             ));
             entry.addProperty("when", name);
             cases.put(name, entry);
@@ -309,8 +310,8 @@ public class SpriteTransform {
                 }
 
                 versionedModels.put(version, Templates.applyObject("vanilla_overlay_model", Map.of(
-                        "cases", vanillaModels,
-                        "overlays", overlaysJson
+                    "cases", vanillaModels,
+                    "overlays", overlaysJson
                 )));
             }
         }

@@ -543,6 +543,18 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
+    public @NotNull List<MapSlot> getPlayerMapSlots(@NotNull String playerId) {
+        var req = HttpRequest.newBuilder()
+            .uri(URI.create(urlV3 + "/map-players/" + playerId + "/slots"))
+            .header(AUTHORIZER_HEADER, playerId)
+            .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        if (res.statusCode() == 200) return GSON.fromJson(res.body(), new TypeToken<List<MapSlot>>() {
+        }); // Ok
+        throw new InternalError("Failed to get map slots: " + res.body());
+    }
+
+    @Override
     public @NotNull MapHistory getPlayerMapHistory(@NotNull String playerId, int page, int amount) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(urlV3 + "/map-players/" + playerId + "/history?page=" + page + "&pageSize=" + amount))
