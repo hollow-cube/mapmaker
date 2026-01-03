@@ -15,6 +15,8 @@ import net.hollowcube.datafix.versions.v4xxx.*;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Transcoder;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,6 +29,7 @@ public class DataFixer {
     // Building state
     private static final List<DataType> dataTypes = new ArrayList<>();
     private static final Int2ObjectMap<DataTypeBuilder> builders = new Int2ObjectOpenHashMap<>();
+    private static final Logger log = LoggerFactory.getLogger(DataFixer.class);
 
     // Built state
     private static int minVersion = 99, maxVersion = MinecraftServer.DATA_VERSION;
@@ -91,8 +94,10 @@ public class DataFixer {
         // Now we need to go OR the relevant versions of property types
         // This is a little tricky because types can be recursive.
         // Just brute force it by repeating until nothing changes...
+        long stepCount = 1, start = System.nanoTime();
         boolean changed;
         do {
+            stepCount++;
             changed = false;
             for (var schema : schemas) {
                 if (schema == null) continue;
@@ -118,6 +123,7 @@ public class DataFixer {
                 }
             }
         } while (changed);
+        log.debug("DataFixer ready after {} steps in {}ms", stepCount, (System.nanoTime() - start) / 1_000_000.0);
 
         state.set(2);
     }
@@ -159,9 +165,9 @@ public class DataFixer {
     }
 
     private static boolean orBitSets(BitSet a, BitSet b) {
-        int aSize = a.size();
+        int aSize = a.cardinality();
         a.or(b);
-        return aSize != a.size();
+        return aSize != a.cardinality();
     }
 
     // Upgrade methods

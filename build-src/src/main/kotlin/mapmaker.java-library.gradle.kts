@@ -37,6 +37,7 @@ dependencies {
     testImplementation(libs.junit.api)
     testImplementation(libs.junit.params)
     testImplementation(libs.junit.engine)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 java {
