@@ -124,13 +124,13 @@ public interface PlayerService {
 
     void unblockPlayer(@NotNull String playerId, @NotNull String targetId);
 
-    class BadRequestError extends RuntimeException {}
-
     // Notifications
     @NotNull PlayerNotificationResponse getNotifications(@NotNull String playerId, int page, boolean unread);
     void deleteNotification(@NotNull String playerId, @NotNull String notificationId);
     void markNotificationRead(@NotNull String playerId, @NotNull String notificationId, boolean read);
     void createNotification(@NotNull String playerId, @NotNull String type, @NotNull String key, @Nullable JsonObject data, @Nullable Integer expiresInSeconds, boolean replaceUnread);
+
+    class BadRequestError extends RuntimeException {}
 
     class NotFoundError extends RuntimeException {
 
