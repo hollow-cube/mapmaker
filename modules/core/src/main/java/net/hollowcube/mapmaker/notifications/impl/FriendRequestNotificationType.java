@@ -31,7 +31,6 @@ public class FriendRequestNotificationType implements PlayerNotificationType {
             ICON,
             "gui.notification.friend_request",
             List.of(username.asComponent()),
-            false,
             List.of(
                 PlayerNotification.Action.of(
                     CONFIRM_ICON,

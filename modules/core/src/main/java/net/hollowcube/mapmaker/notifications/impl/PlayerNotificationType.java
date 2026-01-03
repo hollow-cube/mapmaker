@@ -21,7 +21,7 @@ public interface PlayerNotificationType {
     PlayerNotification createNotification(Player player, ServiceContext context, PlayerNotificationResponse.ComplexEntry entry);
 
     @NonBlocking
-    Component createToast(Player player, ServiceContext context, PlayerNotificationResponse.SimpleEntry entry);
+    @Nullable Component createToast(Player player, ServiceContext context, PlayerNotificationResponse.SimpleEntry entry);
 
     final class Lookup {
 

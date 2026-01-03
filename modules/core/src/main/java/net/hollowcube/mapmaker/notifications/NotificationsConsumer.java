@@ -41,6 +41,7 @@ public class NotificationsConsumer extends BaseConsumer<PlayerNotificationRespon
             if (type == null) return;
 
             var toast = type.createToast(player, this.services, entry);
+            if (toast == null) return;
 
             ToastManager.showNotification(
                 player,

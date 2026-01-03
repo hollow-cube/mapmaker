@@ -22,8 +22,6 @@ public record PlayerNotification(
     Component title,
     List<Component> body,
 
-    boolean isDeletableByPlayer,
-
     List<Action> actions
 ) {
 
@@ -36,7 +34,6 @@ public record PlayerNotification(
         BadSprite icon,
         String translation,
         List<Component> args,
-        boolean isDeletableByPlayer,
         List<Action> actions
     ) {
         this(
@@ -44,7 +41,6 @@ public record PlayerNotification(
             icon,
             TranslatableBuilder.of(translation + ".name").withAll(args).toComponent(),
             TranslatableBuilder.of(translation + ".lore").withAll(args).toList(),
-            isDeletableByPlayer,
             actions
         );
     }
