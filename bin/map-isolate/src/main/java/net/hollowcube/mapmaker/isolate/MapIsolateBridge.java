@@ -41,13 +41,14 @@ public class MapIsolateBridge implements ServerBridge {
             var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
             if (playerProtocolVersion < map.protocolVersion()) {
                 player.sendMessage(Component.translatable("map_join.wrongversion",
-                        Component.text(map.name()), Component.text(ProtocolVersions.getProtocolName(map.protocolVersion()))));
+                    Component.text(map.name()), Component.text(ProtocolVersions.getProtocolName(map.protocolVersion()))));
                 return;
             }
 
             var targetState = switch (joinConfig.joinMapState()) {
                 case EDITING -> MapPresence.STATE_EDITING;
                 case PLAYING -> MapPresence.STATE_PLAYING;
+                case VERIFYING -> MapPresence.STATE_VERIFYING;
                 case SPECTATING -> MapPresence.STATE_SPECTATING;
             };
             var response = sessionService.joinMapV2(new JoinMapRequest(playerId, joinConfig.mapId(), targetState, joinConfig.source(), joinConfig.isolateOverride()));
