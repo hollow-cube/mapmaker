@@ -39,6 +39,7 @@ public interface ServerBridge {
     enum JoinMapState {
         EDITING,
         PLAYING,
+        VERIFYING,
         SPECTATING,
     }
 }
