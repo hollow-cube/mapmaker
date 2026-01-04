@@ -59,7 +59,14 @@ public class TopTimesCommand extends CommandDsl {
                     MiscFunctionality.getCurrentMap(sessions, maps, player),
                     () -> OpUtils.map(
                             MapPlayerData.fromPlayer(player).lastPlayedMap(),
-                            id -> maps.getMap(PlayerData.fromPlayer(player).id(), id)
+                            id -> {
+                                try {
+                                    return maps.getMap(PlayerData.fromPlayer(player).id(), id);
+                                } catch (MapService.NotFoundError | MapService.InternalError ignored) {
+                                    // Last played map no longer exists or there was an error fetching it
+                                    return null;
+                                }
+                            }
                     )
             );
 
