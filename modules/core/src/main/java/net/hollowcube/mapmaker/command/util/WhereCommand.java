@@ -66,6 +66,8 @@ public class WhereCommand extends CommandDsl {
                     var map = mapService.getMap(senderId, presence.mapId());
                     if (Presence.MAP_BUILDING_STATES.contains(presence.state())) {
                         player.sendMessage(Component.translatable("command.where.self.building", Component.text(map.name())));
+                    } else if (Presence.VERIFYING_STATE.equals(presence.state())) {
+                        player.sendMessage(Component.translatable("command.where.self.verifying", Component.text(map.name())));
                     } else {
                         player.sendMessage(Component.translatable("command.where.self.playing", Component.text(map.name())));
                     }
@@ -89,7 +91,9 @@ public class WhereCommand extends CommandDsl {
                 var map = mapService.getMap(senderId, presence.mapId());
                 if (Presence.MAP_BUILDING_STATES.contains(presence.state())) {
                     player.sendMessage(Component.translatable("command.where.building", targetName, Component.text(target), Component.text(map.name())));
-                } else {
+                } else if (Presence.VERIFYING_STATE.equals(presence.state())) {
+                    player.sendMessage(Component.translatable("command.where.verifying", targetName));
+                }  else {
                     player.sendMessage(Component.translatable("command.where.playing", targetName, Component.text(target), Component.text(map.name())));
                 }
             }

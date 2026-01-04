@@ -64,8 +64,12 @@ public class FriendListCommand extends CommandDsl {
                             if (Presence.MAP_BUILDING_STATES.contains(presence.state())) {
                                 yield Component.translatable("command.friend.list.line.building", username,
                                                              Component.text(map.name()));
+                            } else if (Presence.VERIFYING_STATE.equals(presence.state())) {
+                                yield Component.translatable("command.friend.list.line.verifying", username,
+                                                             Component.text(map.name()));
                             } else {
                                 yield Component.translatable("command.friend.list.line.playing", username,
+                                                             Component.text(friend.username()),
                                                              Component.text(map.name()));
                             }
                         }
