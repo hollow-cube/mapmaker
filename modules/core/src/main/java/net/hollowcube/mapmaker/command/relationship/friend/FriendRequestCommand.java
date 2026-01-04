@@ -40,7 +40,12 @@ public class FriendRequestCommand extends CommandDsl {
         int page = context.get(this.pageArg);
 
         PlayerService.Page<FriendRequest> requests = this.playerService.getFriendRequests(player.getUuid().toString(), incoming, new PlayerService.Pageable(page, 10));
-        int pageCount = Math.max(1, Math.ceilDiv(requests.totalItems(), 10)); // ensure a min page of 1
+        int pageCount = Math.ceilDiv(requests.totalItems(), 10);
+
+        if (pageCount == 0) {
+            player.sendMessage(Component.translatable("command.friend.request.list.empty." + directionValue));
+            return;
+        }
 
         TextComponent.Builder builder = Component.text()
             .append(Component.translatable("command.friend.request.list.header." + directionValue, Component.text(page), Component.text(pageCount)));

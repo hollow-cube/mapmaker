@@ -57,7 +57,12 @@ public class BlockCommand extends CommandDsl {
 
     private void execListBlocks(@NotNull Player player, @NotNull CommandContext context) {
         PlayerService.Page<BlockedPlayer> blocks = this.playerService.getBlockedPlayers(player.getUuid().toString(), new PlayerService.Pageable(1, 10));
-        int pageCount = Math.max(1, Math.ceilDiv(blocks.totalItems(), 10)); // ensure a min page of 1
+        int pageCount = Math.ceilDiv(blocks.totalItems(), 10);
+
+        if (pageCount == 0) {
+            player.sendMessage(Component.translatable("command.block.list.empty"));
+            return;
+        }
 
         TextComponent.Builder builder = Component.text().append(Component.translatable("command.block.list.header", Component.text(blocks.page()), Component.text(pageCount)));
         for (BlockedPlayer block : blocks.items()) {

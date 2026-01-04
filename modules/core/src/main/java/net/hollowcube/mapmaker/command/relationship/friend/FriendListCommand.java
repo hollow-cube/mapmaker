@@ -29,7 +29,12 @@ public class FriendListCommand extends CommandDsl {
         int page = context.get(this.pageArg);
 
         PlayerService.Page<PlayerFriend> friends = this.playerService.getPlayerFriends(player.getUuid().toString(), new PlayerService.Pageable(page, 10));
-        int pageCount = Math.max(1, Math.ceilDiv(friends.totalItems(), 10)); // ensure a min page of 1
+        int pageCount = Math.ceilDiv(friends.totalItems(), 10);
+
+        if (pageCount == 0) {
+            player.sendMessage(Component.translatable("command.friend.list.empty"));
+            return;
+        }
 
         TextComponent.Builder builder = Component.text().append(Component.translatable("command.friend.list.header", Component.text(page), Component.text(pageCount)));
         for (PlayerFriend friend : friends.items()) {
