@@ -90,6 +90,8 @@ public record RelativePos(
             flags |= flag;
             input = input.substring(1);
         }
-        return new RelativePos(updater.apply(Double.parseDouble(input)), flags);
+        double value = Double.parseDouble(input);
+        if (Double.isInfinite(value) || Double.isNaN(value)) throw new NumberFormatException("Infinite or NaN value");
+        return new RelativePos(updater.apply(value), flags);
     }
 }
