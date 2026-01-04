@@ -62,8 +62,8 @@ public class TopTimesCommand extends CommandDsl {
                             id -> {
                                 try {
                                     return maps.getMap(PlayerData.fromPlayer(player).id(), id);
-                                } catch (MapService.NotFoundError | MapService.InternalError ignored) {
-                                    // Last played map no longer exists or there was an error fetching it
+                                } catch (MapService.NotFoundError ignored) {
+                                    // Last played map no longer exists
                                     return null;
                                 }
                             }
