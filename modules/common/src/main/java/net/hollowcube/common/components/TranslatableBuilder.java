@@ -43,7 +43,26 @@ public class TranslatableBuilder {
         return this;
     }
 
+    @Contract("_ -> this")
+    public @NotNull TranslatableBuilder withAll(@NotNull List<Component> args) {
+        this.args.addAll(args);
+        return this;
+    }
+
+    @Contract("_ -> this")
+    public @NotNull TranslatableBuilder withTranslation(@NotNull String key) {
+        return with(Component.translatable(key));
+    }
+
     public @NotNull Component build() {
         return LanguageProviderV2.translateMultiMerged(this.key, this.args);
+    }
+
+    public @NotNull Component toComponent() {
+        return LanguageProviderV2.translateMultiMerged(this.key, this.args);
+    }
+
+    public @NotNull List<Component> toList() {
+        return LanguageProviderV2.translateMulti(this.key, this.args);
     }
 }

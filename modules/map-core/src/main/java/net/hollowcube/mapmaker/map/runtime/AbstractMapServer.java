@@ -73,6 +73,7 @@ import net.hollowcube.mapmaker.map.util.ServerStatsHud;
 import net.hollowcube.mapmaker.misc.ExpBarRenderer;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.misc.noop.*;
+import net.hollowcube.mapmaker.notifications.NotificationsConsumer;
 import net.hollowcube.mapmaker.obungus.ObungusService;
 import net.hollowcube.mapmaker.obungus.ObungusServiceImpl;
 import net.hollowcube.mapmaker.perm.PermManager;
@@ -86,10 +87,7 @@ import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
-import net.hollowcube.mapmaker.util.HttpServerWrapper;
-import net.hollowcube.mapmaker.util.NoopSpanExporter;
-import net.hollowcube.mapmaker.util.ServerBeginShutdownEvent;
-import net.hollowcube.mapmaker.util.Shutdowner;
+import net.hollowcube.mapmaker.util.*;
 import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -255,6 +253,8 @@ public abstract class AbstractMapServer implements MapServer {
         facets.put(FriendlyProducer.class, producer);
         shutdowner.queue("kafka-producer", producer::close);
 
+        var services = new ServiceContext(playerService(), sessionService(), mapService(), bridge());
+
         if (!globalConfig.noop()) {
             mapInviteListener = new MapInviteListener(mapService, playerService, sessionManager, kafkaConfig.bootstrapServers());
             shutdowner.queue("map-invite-listener", mapInviteListener::close);
@@ -272,6 +272,9 @@ public abstract class AbstractMapServer implements MapServer {
 
             playerDataUpdateConsumer = new PlayerDataUpdateConsumer(kafkaConfig.bootstrapServers(), playerService);
             shutdowner.queue("player-data-listener", playerDataUpdateConsumer::close);
+
+            var notificationsConsumer = new NotificationsConsumer(kafkaConfig.bootstrapServers(), services);
+            shutdowner.queue("notifications-consumer", notificationsConsumer::close);
         }
 
         ChatAnnouncer.setupAnnouncements(config, sessionManager(), shutdowner);
@@ -373,6 +376,13 @@ public abstract class AbstractMapServer implements MapServer {
         addBinding(SessionManager.class, sessionManager, "sessionManager");
         addBinding(ServerBridge.class, bridge(), "bridge");
 
+        var services = new ServiceContext(
+                playerService(),
+                sessionService(),
+                mapService(),
+                bridge()
+        );
+
         boolean fullInstance = !globalConfig.noop();
 
         commandManager.register(new MinestomCommand());
@@ -415,6 +425,8 @@ public abstract class AbstractMapServer implements MapServer {
         }
 
         commandManager.register(new MapCommand(guiController(), playerService(), mapService(), permManager(), bridge(), producer));
+
+        commandManager.register(new NotificationCommand(services, permManager()));
 
         if (fullInstance) {
             commandManager.register(new SFindCommand(mapService(), playerService(), sessionManager(), permManager()));

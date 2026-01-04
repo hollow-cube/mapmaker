@@ -49,6 +49,7 @@ public class HubServerBridge implements ServerBridge {
             var res = sessionService.joinMapV2(new JoinMapRequest(playerId, joinConfig.mapId(), switch (joinConfig.joinMapState()) {
                 case EDITING -> MapPresence.STATE_EDITING;
                 case PLAYING -> MapPresence.STATE_PLAYING;
+                case VERIFYING -> MapPresence.STATE_VERIFYING;
                 case SPECTATING -> MapPresence.STATE_SPECTATING;
             }, joinConfig.source(), joinConfig.isolateOverride()));
             logger.info("join map result: {}", res);

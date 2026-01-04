@@ -51,6 +51,7 @@ public class MapServerBridge implements ServerBridge {
             var targetState = switch (joinConfig.joinMapState()) {
                 case EDITING -> MapPresence.STATE_EDITING;
                 case PLAYING -> MapPresence.STATE_PLAYING;
+                case VERIFYING -> MapPresence.STATE_VERIFYING;
                 case SPECTATING -> MapPresence.STATE_SPECTATING;
             };
             var response = server.sessionService().joinMapV2(new JoinMapRequest(playerId, joinConfig.mapId(), targetState, joinConfig.source(), joinConfig.isolateOverride()));

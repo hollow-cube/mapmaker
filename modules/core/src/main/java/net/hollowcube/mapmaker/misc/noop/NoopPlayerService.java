@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.Hats;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.player.responses.PlayerAlts;
+import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
 import net.hollowcube.mapmaker.player.responses.SendFriendRequestResult;
 import net.hollowcube.mapmaker.player.responses.TotpSetupResponse;
 import net.minestom.server.MinecraftServer;
@@ -158,5 +159,27 @@ public class NoopPlayerService implements PlayerService {
     @Override
     public void unblockPlayer(@NotNull String playerId, @NotNull String targetId) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @NotNull PlayerNotificationResponse getNotifications(@NotNull String playerId, int page, boolean unread) {
+        return new PlayerNotificationResponse(0, 0, List.of());
+    }
+
+    @Override
+    public void deleteNotification(@NotNull String playerId, @NotNull String notificationId) {
+
+    }
+
+    @Override
+    public void markNotificationRead(@NotNull String playerId, @NotNull String notificationId, boolean read) {
+
+    }
+
+    @Override
+    public void createNotification(
+        @NotNull String playerId, @NotNull String type, @NotNull String key, @Nullable JsonObject data, @Nullable Integer expiresInSeconds, boolean replaceUnread
+    ) {
+
     }
 }

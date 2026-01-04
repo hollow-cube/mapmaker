@@ -283,7 +283,7 @@ public class EditMap extends View {
         // Send the player to the map
         try {
             player.closeInventory();
-            bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.PLAYING, "edit_maps_gui_verify");
+            bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.VERIFYING, "edit_maps_gui_verify");
         } catch (Exception e) {
             player.sendMessage(Component.translatable("map.verify.fail"));
             ExceptionReporter.reportException(e, player);
