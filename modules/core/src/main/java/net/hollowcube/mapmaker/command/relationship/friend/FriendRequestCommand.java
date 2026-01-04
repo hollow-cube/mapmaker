@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.player.FriendRequest;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
