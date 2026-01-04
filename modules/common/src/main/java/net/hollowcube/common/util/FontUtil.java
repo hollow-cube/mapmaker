@@ -358,6 +358,20 @@ public final class FontUtil {
         return width;
     }
 
+    public static @NotNull Component rewrite(@NotNull String font, @NotNull Component comp) {
+        if (font.equals("default")) return comp;
+        var charmap = fontmaps.get(font);
+        Check.notNull(charmap, "Unknown font: " + font);
+
+        if (comp instanceof TextComponent text) {
+            var content = rewrite(font, text.content());
+            var children = text.children().stream().map(it -> rewrite(font, it)).toList();
+            return text.content(content).children(children);
+        } else {
+            throw new UnsupportedOperationException("Cannot rewrite unsupported component type: " + comp.getClass().getName());
+        }
+    }
+
     public static @NotNull String rewrite(@NotNull String font, @NotNull String text) {
         if (font.equals("default")) return text;
         var charmap = fontmaps.get(font);

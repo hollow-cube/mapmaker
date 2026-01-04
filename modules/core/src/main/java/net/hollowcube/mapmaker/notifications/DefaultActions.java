@@ -1,0 +1,48 @@
+package net.hollowcube.mapmaker.notifications;
+
+import net.hollowcube.common.components.TranslatableBuilder;
+import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.hollowcube.mapmaker.util.ServiceContext;
+import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.Nullable;
+
+public final class DefaultActions {
+
+    private static final BadSprite DELETE_ICON = BadSprite.require("notifications/actions/delete");
+    private static final BadSprite LINK_ICON = BadSprite.require("notifications/actions/link");
+
+    public static PlayerNotification.Action delete(Player player, ServiceContext context, PlayerNotificationResponse.ComplexEntry entry) {
+        return PlayerNotification.Action.of(
+            DELETE_ICON,
+            "gui.notification.action.delete.interaction",
+            "gui.notification.action.delete",
+            PlayerNotification.ActionExecutor
+                .of(() -> context.players().deleteNotification(player.getUuid().toString(), entry.id()))
+                .withConfirmation()
+        );
+    }
+
+    @Nullable
+    public static PlayerNotification.Action link(Player player, ServiceContext context, PlayerNotificationResponse.ComplexEntry entry) {
+        var link = entry.data() != null ? entry.data().get("link").getAsString() : null;
+        if (link == null) return null;
+
+        return PlayerNotification.Action.of(
+            LINK_ICON,
+            "gui.notification.action.link.interaction",
+            "gui.notification.action.link",
+            PlayerNotification.ActionExecutor
+                .of(() -> {
+                    context.players().markNotificationRead(player.getUuid().toString(), entry.id(), true);
+                    player.sendMessage(
+                        TranslatableBuilder
+                            .of("gui.notification.action.link.message")
+                            .with(link)
+                            .toComponent()
+                    );
+                    player.closeInventory();
+                })
+        );
+    }
+}

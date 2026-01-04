@@ -26,6 +26,7 @@ import net.hollowcube.mapmaker.util.gson.*;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.item.Material;
+import org.intellij.lang.annotations.PrintFormat;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -191,7 +192,32 @@ public abstract class AbstractHttpService {
         }
     }
 
-    protected static @NotNull URI url(@NotNull String format, @NotNull String... args) {
-        return URI.create(String.format(format, (Object[]) args));
+    protected static @NotNull URI url(@NotNull @PrintFormat String format, @NotNull Object... args) {
+        return URI.create(String.format(format, args));
+    }
+
+    protected static HttpRequest.Builder setup(@NotNull URI uri) {
+        // TODO setup common headers
+        return HttpRequest.newBuilder(uri);
+    }
+
+    protected static HttpRequest.Builder setupGet(@NotNull URI uri) {
+        return setup(uri).GET();
+    }
+
+    protected static HttpRequest.Builder setupDelete(@NotNull URI uri) {
+        return setup(uri).DELETE();
+    }
+
+    protected static HttpRequest.Builder setupPost(@NotNull URI uri, @NotNull String body) {
+        return setup(uri)
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .header("Content-Type", "application/json");
+    }
+
+    protected static HttpRequest.Builder setupPatch(@NotNull URI uri, @NotNull String body) {
+        return setup(uri)
+                .method("PATCH", HttpRequest.BodyPublishers.ofString(body))
+                .header("Content-Type", "application/json");
     }
 }

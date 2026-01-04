@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.runtime.parkour.action.gui.editors.variables;
 
-import net.hollowcube.mapmaker.gui.notifications.NotificationManager;
+import net.hollowcube.mapmaker.gui.notifications.ToastManager;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionList;
 import net.hollowcube.mapmaker.runtime.parkour.action.gui.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.runtime.parkour.action.gui.ControlledStringInput;
@@ -62,20 +62,18 @@ public class VariableEditor extends AbstractActionEditorPanel<EditVariableAction
     protected void onChange() {
         if (ref.action() instanceof EditVariableAction data) {
             if (data.variable() != null && !data.isValidVariableName()) {
-                NotificationManager.showNotification(
-                        this.host.player(),
-                        "Invalid Variable Name",
-                        "Use 3-25 lowercase letters and underscores only.",
-                        NamedTextColor.RED
+                ToastManager.showNotification(
+                    this.host.player(),
+                    Component.text("Invalid Variable Name"),
+                    Component.text("Use 3-25 lowercase letters and underscores only.", NamedTextColor.RED)
                 );
             }
 
             if (data.expression().error() != null) {
-                NotificationManager.showNotification(
-                        this.host.player(),
-                        "Molang Expression Error",
-                        "Invalid expression, please check your syntax.",
-                        NamedTextColor.RED
+                ToastManager.showNotification(
+                    this.host.player(),
+                    Component.text("Molang Expression Error"),
+                    Component.text("Invalid expression, please check your syntax.", NamedTextColor.RED)
                 );
             }
         }
