@@ -162,6 +162,12 @@ public class NoopPlayerService implements PlayerService {
     }
 
     @Override
+    public List<BlockedPlayer> getBlocksBetween(
+        @NotNull String playerId, @NotNull String targetId, boolean bidirectional) {
+        return List.of();
+    }
+
+    @Override
     public @NotNull PlayerNotificationResponse getNotifications(@NotNull String playerId, int page, boolean unread) {
         return new PlayerNotificationResponse(0, 0, List.of());
     }

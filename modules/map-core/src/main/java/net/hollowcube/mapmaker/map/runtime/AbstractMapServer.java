@@ -408,7 +408,7 @@ public abstract class AbstractMapServer implements MapServer {
             commandManager.register(new PlayCommand(playerService(), mapService(), sessionManager(), bridge()));
             commandManager.register(new WhereCommand(sessionManager(), playerService(), mapService(), permManager()));
             commandManager.register(new ListCommand(sessionManager(), playerService()));
-            commandManager.register(new MsgCommand(sessionManager(), mapService(), chatMessageListener));
+            commandManager.register(new MsgCommand(sessionManager(), mapService(), chatMessageListener, playerService()));
             commandManager.register(new ChannelCommand.Global(sessionManager(), mapService(), chatMessageListener));
             commandManager.register(new ChannelCommand.Local(sessionManager(), mapService(), chatMessageListener));
             commandManager.register(new ChannelCommand.Reply(sessionManager(), mapService(), chatMessageListener));

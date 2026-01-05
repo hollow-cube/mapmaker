@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.player;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import io.opentelemetry.api.OpenTelemetry;
@@ -436,6 +437,21 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
             case 404 -> throw new NotFoundError();
             default -> throw new InternalError("Failed to unblock player (" + res.statusCode() + "): " + res.body());
         }
+    }
+
+    @Override
+    public List<BlockedPlayer> getBlocksBetween(
+        @NotNull String playerId, @NotNull String targetId, boolean bidirectional) {
+
+        var req = HttpRequest.newBuilder()
+            .uri(URI.create("%s/players/%s/blocks/player/%s?bidirectional=%s".formatted(url, playerId, targetId, bidirectional)))
+            .GET();
+        var res = doRequest("getBlocksBetween", req, HttpResponse.BodyHandlers.ofString());
+
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), TypeToken.getParameterized(List.class, BlockedPlayer.class).getType());
+            default -> throw new InternalError("Failed to get blocks between (" + res.statusCode() + "): " + res.body());
+        };
     }
 
     @Override

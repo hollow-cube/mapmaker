@@ -124,6 +124,8 @@ public interface PlayerService {
 
     void unblockPlayer(@NotNull String playerId, @NotNull String targetId);
 
+    List<BlockedPlayer> getBlocksBetween(@NotNull String playerId, @NotNull String targetId, boolean bidirectional);
+
     // Notifications
     @NotNull PlayerNotificationResponse getNotifications(@NotNull String playerId, int page, boolean unread);
     void deleteNotification(@NotNull String playerId, @NotNull String notificationId);
