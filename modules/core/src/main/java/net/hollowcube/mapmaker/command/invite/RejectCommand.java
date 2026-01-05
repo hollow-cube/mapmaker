@@ -11,7 +11,7 @@ public class RejectCommand extends AbstractInviteServiceCommand {
 
     public RejectCommand(@NotNull PlayerInviteService inviteService, @NotNull PlayerService playerService,
                          @NotNull SessionManager sessionManager) {
-        super("reject", inviteService, playerService, sessionManager, "The player to reject");
+        super("reject", inviteService, playerService, sessionManager, "The player to reject", false);
 
         description = "Denies any pending request or invite from a player";
 

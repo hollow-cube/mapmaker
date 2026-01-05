@@ -10,7 +10,7 @@ public class RequestCommand extends AbstractInviteServiceCommand {
 
     public RequestCommand(@NotNull PlayerInviteService inviteService, @NotNull PlayerService playerService,
                           @NotNull SessionManager sessionManager) {
-        super("request", inviteService, playerService, sessionManager, "The player to request to join");
+        super("request", inviteService, playerService, sessionManager, "The player to request to join", true);
 
         description = "Sends a request to a player for you to build with them";
     }

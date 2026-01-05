@@ -10,7 +10,7 @@ public class InviteCommand extends AbstractInviteServiceCommand {
 
     public InviteCommand(@NotNull PlayerInviteService inviteService, @NotNull PlayerService playerService,
                          @NotNull SessionManager sessionManager) {
-        super("invite", inviteService, playerService, sessionManager, "The player to invite");
+        super("invite", inviteService, playerService, sessionManager, "The player to invite", true);
 
         description = "Sends an invite to a player for them to build or play with you";
     }

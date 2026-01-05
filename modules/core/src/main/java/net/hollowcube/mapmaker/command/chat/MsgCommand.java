@@ -49,16 +49,7 @@ public class MsgCommand extends AbstractChatCommand {
             return;
         }
 
-        var blocks = this.playerService.getBlocksBetween(targetId, player.getUuid().toString(), true);
-        if (!blocks.isEmpty()) {
-            BlockedPlayer block = blocks.getFirst();
-            if (block.playerId().equals(player.getUuid().toString())) { // blocked by target
-                player.sendMessage(Component.translatable("chat.msg.blocked_by_target", Component.text(context.getRaw(this.targetArg))));
-            } else { // blocked by self
-                player.sendMessage(Component.translatable("chat.msg.blocked_by_self", Component.text(context.getRaw(this.targetArg))));
-            }
-            return;
-        }
+        if (this.playerService.failIfBlocked(player, targetId, context.getRaw(this.targetArg), true)) return;
 
         this.handle(player, targetId, message);
     }
