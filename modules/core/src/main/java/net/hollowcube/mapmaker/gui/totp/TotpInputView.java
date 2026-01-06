@@ -50,7 +50,7 @@ public class TotpInputView extends AbstractAnvilView {
     public static Book backupCodesBook(String[] codes) {
         var component = Component.text();
 
-        component.append(Component.text(BadSprite.require("totp/codes").fontChar()).shadowColor(ShadowColor.none()));
+        component.append(Component.text(BadSprite.require("totp/codes").fontChar()).color(NamedTextColor.WHITE).shadowColor(ShadowColor.none()));
 
         component.appendNewline().appendNewline().appendNewline().appendNewline().appendNewline();
 
