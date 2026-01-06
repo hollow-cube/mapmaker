@@ -61,6 +61,7 @@ public class SpriteTransform {
                         || relative.toString().startsWith("generic2" + File.separatorChar + "containers" + File.separatorChar)
                         || relative.toString().startsWith("action" + File.separatorChar)
                         || relative.toString().startsWith("event" + File.separatorChar)
+                        || relative.toString().startsWith("icon2" + File.separatorChar)
                         || relative.toString().startsWith("rate_map" + File.separatorChar))
                         && !relative.toString().contains("checkout");
                 if (!canSkipConfig && !Files.exists(configFile)) continue;

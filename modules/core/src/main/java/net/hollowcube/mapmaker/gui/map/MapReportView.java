@@ -52,12 +52,13 @@ public class MapReportView extends Panel {
                 .translationKey("gui.report_map.add_comment", getCommentText())
                 .onLeftClick(this::handleEditComment));
 
-        this.options = add(2, 2, new MultiSelect<ReportCategory>(5).onChange(this::updateSubmitButton));
-        options.addOption(ReportCategory.CHEATED, "gui.report_map.category.cheated", "report_map/cheating", 4, 4);
-        options.addOption(ReportCategory.DISCRIMINATION, "gui.report_map.category.discrimination", "report_map/hate", 4, 4);
-        options.addOption(ReportCategory.EXPLICIT_CONTENT, "gui.report_map.category.explicit_content", "report_map/sex", 4, 4);
-        options.addOption(ReportCategory.SPAM, "gui.report_map.category.spam", "report_map/spam", 3, 3);
-        options.addOption(ReportCategory.DCMA, "gui.report_map.category.dcma", "report_map/dmca", 2, 4);
+        this.options = add(1, 2, new MultiSelect<ReportCategory>(6).onChange(this::updateSubmitButton));
+        options.addOption(ReportCategory.CHEATED, "gui.report_map.category.cheated", "icon2/1_1/herobrine_face", 1, 1);
+        options.addOption(ReportCategory.DISCRIMINATION, "gui.report_map.category.discrimination", "icon2/1_1/angry_face", 1, 1);
+        options.addOption(ReportCategory.EXPLICIT_CONTENT, "gui.report_map.category.explicit_content", "icon2/1_1/denied", 1, 1);
+        options.addOption(ReportCategory.SPAM, "gui.report_map.category.spam", "icon2/1_1/trash_can", 1, 1);
+        options.addOption(ReportCategory.DCMA, "gui.report_map.category.dcma", "icon2/1_1/robber_running", 1, 1);
+        options.addOption(ReportCategory.UNPLAYABLE, "gui.report_map.category.unplayable", "icon2/1_1/broken_file", 1, 1);
 
         this.submitButton = add(2, 4, new Text("gui.report_map.submit.missing_categories", 5, 1, "Submit Report")
                 .align(Text.CENTER, Text.CENTER).background("generic2/btn/danger/5_1"))
@@ -95,7 +96,7 @@ public class MapReportView extends Panel {
             this.submitButton.text(title, lore);
         } else {
             this.submitButton.background("generic2/btn/danger/5_1");
-            this.submitButton.translationKey("gui.report_map.submit.missing_categories");
+            this.submitButton.translationKey("gui.report_map.submit.cannot_submit");
         }
     }
 
@@ -116,7 +117,14 @@ public class MapReportView extends Panel {
     }
 
     private boolean canSubmit() {
-        return !this.options.selectedItems().isEmpty();
+        var categories = options.selectedItems();
+        if (categories.isEmpty()) return false;
+        for (var category : categories) {
+            if (category.requiresComment() && comment.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private @NotNull Component getCommentText() {
