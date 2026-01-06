@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.gui.common.cartography;
+package net.hollowcube.mapmaker.util;
 
 import net.minestom.server.map.Framebuffer;
 import net.minestom.server.map.MapColors;
