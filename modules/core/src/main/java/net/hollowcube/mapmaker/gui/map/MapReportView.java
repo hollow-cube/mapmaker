@@ -48,7 +48,7 @@ public class MapReportView extends Panel {
                 .translationKey("gui.report_map.map_id", publishedId));
         this.commentButton = add(7, 0, new Button(null, 2, 1)
                 .background("generic2/btn/default/2_1")
-                .sprite("report_map/comment", 11, 3)
+                .sprite("icon2/1_1/speech_bubble", 10, 1)
                 .translationKey("gui.report_map.add_comment", getCommentText())
                 .onLeftClick(this::handleEditComment));
 
