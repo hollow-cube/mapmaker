@@ -4,8 +4,8 @@ import net.hollowcube.common.components.TranslatableBuilder;
 import net.hollowcube.mapmaker.gui.common.ExtraPanels;
 import net.hollowcube.mapmaker.notifications.impl.PlayerNotificationType;
 import net.hollowcube.mapmaker.panels.InventoryHost;
+import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
-import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.ServiceContext;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -18,7 +18,7 @@ import java.util.List;
 public record PlayerNotification(
     PlayerNotificationResponse.ComplexEntry entry,
 
-    BadSprite icon,
+    Sprite icon,
     Component title,
     List<Component> body,
 
@@ -31,7 +31,7 @@ public record PlayerNotification(
 
     public PlayerNotification(
         PlayerNotificationResponse.ComplexEntry entry,
-        BadSprite icon,
+        Sprite icon,
         String translation,
         List<Component> args,
         List<Action> actions
@@ -64,13 +64,13 @@ public record PlayerNotification(
     }
 
     public record Action(
-        BadSprite icon,
+        Sprite icon,
         String interaction,
         String tooltip,
         ActionExecutor executor
     ) {
 
-        public static Action of(BadSprite icon, String interaction, String tooltip, ActionExecutor executor) {
+        public static Action of(Sprite icon, String interaction, String tooltip, ActionExecutor executor) {
             return new Action(icon, interaction, tooltip, executor);
         }
 

@@ -35,12 +35,13 @@ public class NotificationActionsView extends Panel {
 
         add(0, 0, backOrClose());
         add(1, 0, info("notifications"));
-        add(2, 0, new Text(null, 5, 1, "Notification")
+        add(2, 0, new Text(null, 5, 1, "Actions")
             .background("generic2/btn/default/5_1")
             .align(Text.CENTER, Text.CENTER)
         );
         add(7, 0, new Button("gui.notification.unread", 1, 1)
-            .background("notifications/unread")
+            .background("generic2/btn/default/1_1")
+            .sprite("icon2/1_1/envelope", 1, 1)
             .onLeftClick(() -> services.players().markNotificationRead(
                 this.host.player().getUuid().toString(),
                 notification.entry().id(),
@@ -48,7 +49,8 @@ public class NotificationActionsView extends Panel {
             ))
         );
         add(8, 0, new Button(null, 1, 1)
-            .background("notifications/time")
+            .background("generic2/btn/default/1_1")
+            .sprite("icon2/1_1/clock", 1, 1)
             .text(Component.translatable("gui.notification.time.name"), times)
         );
     }
@@ -66,7 +68,7 @@ public class NotificationActionsView extends Panel {
             if (i < actions.size()) {
                 var action = actions.get(i);
                 button = new Button(action.tooltip(), 1, 1)
-                    .model(action.icon().model(), null)
+                    .sprite(action.icon().withOffset(1, 1))
                     .onLeftClick(() ->  action.executeForCompletion(this.host, host::popOrClose))
                     .background("generic2/btn/default/1_1ex");
             } else {

@@ -4,13 +4,9 @@ import net.hollowcube.common.components.TranslatableBuilder;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.notifications.PlayerNotification;
-import net.hollowcube.mapmaker.panels.Button;
-import net.hollowcube.mapmaker.panels.InventoryHost;
-import net.hollowcube.mapmaker.panels.Pagination;
-import net.hollowcube.mapmaker.panels.Panel;
+import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
-import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.ServiceContext;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.utils.Unit;
@@ -24,7 +20,7 @@ import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
 
 public class NotificationListView extends Panel {
 
-    private static final BadSprite DEFAULT_ICON = BadSprite.require("notifications/types/unhandled");
+    private static final Sprite DEFAULT_ICON = new Sprite("icon2/1_1/exclamation_mark", 1, 1);
     private static final List<String> ACTION_LORE = List.of(
         "gui.notifications.notification.lore.lmb",
         "gui.notifications.notification.lore.rmb"
@@ -83,7 +79,7 @@ public class NotificationListView extends Panel {
             super(1, 1);
 
             var button = new Button("gui.notification.unhandled", 1, 1)
-                .model(DEFAULT_ICON.model(), null)
+                .sprite(DEFAULT_ICON)
                 .onLeftClick(() -> host.player().sendMessage(LanguageProviderV2.translateMultiMerged(
                         "gui.notification.unhandled.message",
                         List.of(Component.text(entry.id()))
@@ -109,7 +105,7 @@ public class NotificationListView extends Panel {
             var actions = notification.actions();
 
             var button = new Button(1, 1)
-                .model(notification.icon().model(), null)
+                .sprite(notification.icon().withOffset(1, 1))
                 .text(notification.title(), OpUtils.build(
                     new ArrayList<>(notification.body()),
                     lore -> {

@@ -1,16 +1,16 @@
 package net.hollowcube.mapmaker.notifications;
 
 import net.hollowcube.common.components.TranslatableBuilder;
+import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
-import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.ServiceContext;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 public final class DefaultActions {
 
-    private static final BadSprite DELETE_ICON = BadSprite.require("notifications/actions/delete");
-    private static final BadSprite LINK_ICON = BadSprite.require("notifications/actions/link");
+    private static final Sprite DELETE_ICON = new Sprite("icon2/1_1/trash_can");
+    private static final Sprite LINK_ICON = new Sprite("icon2/1_1/external_link");
 
     public static PlayerNotification.Action delete(Player player, ServiceContext context, PlayerNotificationResponse.ComplexEntry entry) {
         return PlayerNotification.Action.of(
