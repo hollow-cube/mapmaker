@@ -43,6 +43,7 @@ public class HdbBrowserPanel extends Panel {
         add(0, 0, backOrClose());
 
         this.searchTextElement = add(1, 0, new Text(8, 1, "Search...").align(8, 5));
+        this.searchTextElement.text(this.params.query.isEmpty() ? "Search..." : this.params.query);
         this.searchTextElement.onLeftClick(() -> this.host.pushView(simpleAnvil(
             "generic2/anvil/field_container",
             "map_browser/search_anvil_icon",
