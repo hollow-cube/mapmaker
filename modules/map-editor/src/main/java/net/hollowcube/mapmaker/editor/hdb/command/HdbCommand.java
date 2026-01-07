@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.editor.hdb.command;
 
-import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.editor.hdb.HeadDatabase;
-import net.hollowcube.mapmaker.editor.hdb.gui.HdbBrowserView;
+import net.hollowcube.mapmaker.editor.hdb.gui.HdbBrowserPanel;
+import net.hollowcube.mapmaker.panels.Panel;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,15 +12,15 @@ import static net.hollowcube.mapmaker.editor.command.EditorConditions.builderOnl
 
 public class HdbCommand extends CommandDsl {
 
-    private final Controller guiController;
+    private final HeadDatabase hdb;
 
-    public HdbCommand(@NotNull HeadDatabase hdb, @NotNull Controller guiController) {
+    public HdbCommand(@NotNull HeadDatabase hdb) {
         super("headdb", "hdb");
-        this.guiController = guiController;
+        this.hdb = hdb;
 
         setCondition(builderOnly());
 
-        addSubcommand(new HdbSearchCommand(hdb, guiController));
+        addSubcommand(new HdbSearchCommand(hdb));
         addSubcommand(new HdbGiveCommand(hdb));
         addSubcommand(new HdbBase64Command());
 
@@ -28,7 +28,7 @@ public class HdbCommand extends CommandDsl {
     }
 
     private void handleOpenMainGui(@NotNull Player player, @NotNull CommandContext context) {
-        this.guiController.show(player, HdbBrowserView::new);
+        Panel.open(player, new HdbBrowserPanel(hdb));
     }
 
 }

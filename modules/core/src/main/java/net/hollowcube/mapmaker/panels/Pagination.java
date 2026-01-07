@@ -9,7 +9,7 @@ public class Pagination<S> extends Panel {
 
     @FunctionalInterface
     public interface PageFetcher<S> {
-        @NotNull List<? extends Panel> fetch(S search, int page, int pageSize);
+        @NotNull List<? extends Element> fetch(S search, int page, int pageSize);
     }
 
     @FunctionalInterface
