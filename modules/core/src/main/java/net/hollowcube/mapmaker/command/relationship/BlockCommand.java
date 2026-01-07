@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.CoreCommandCondition;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.BlockedPlayer;
+import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -66,7 +67,9 @@ public class BlockCommand extends CommandDsl {
 
         TextComponent.Builder builder = Component.text().append(Component.translatable("command.block.list.header", Component.text(blocks.page()), Component.text(pageCount)));
         for (BlockedPlayer block : blocks.items()) {
-            builder.appendNewline().append(Component.translatable("command.block.list.line", Component.text(block.username())));
+            DisplayName displayName = this.playerService.getPlayerDisplayName2(block.playerId());
+            Component username = displayName.asComponent();
+            builder.appendNewline().append(Component.translatable("command.block.list.line", username, Component.text(block.username())));
         }
         player.sendMessage(builder.build());
     }

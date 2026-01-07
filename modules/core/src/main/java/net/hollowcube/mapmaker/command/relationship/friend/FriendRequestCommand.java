@@ -6,6 +6,7 @@ import net.hollowcube.command.arg.ArgumentLiteral;
 import net.hollowcube.command.arg.ArgumentWord;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
+import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.FriendRequest;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
@@ -49,8 +50,10 @@ public class FriendRequestCommand extends CommandDsl {
         TextComponent.Builder builder = Component.text()
             .append(Component.translatable("command.friend.request.list.header." + directionValue, Component.text(page), Component.text(pageCount)));
         for (FriendRequest request : requests.items()) {
+            DisplayName displayName = this.playerService.getPlayerDisplayName2(request.playerId());
+            Component username = displayName.asComponent();
             builder.appendNewline().append(
-                Component.translatable("command.friend.request.list.line." + directionValue, Component.text(request.username()))
+                Component.translatable("command.friend.request.list.line." + directionValue, username, Component.text(request.username()))
             );
         }
 
@@ -66,10 +69,10 @@ public class FriendRequestCommand extends CommandDsl {
         }
 
         var targetRaw = context.getRaw(this.targetArg);
-
         try {
             FriendRequest deletedReq = this.playerService.deleteFriendRequest(player.getUuid().toString(), targetId, true);
             // todo we can use deletedReq to indicate the direction
+            // that should be done, with a different message for outgoing and incoming
             player.sendMessage(Component.translatable("command.friend.request.remove.success", Component.text(deletedReq.username())));
         } catch (PlayerService.NotFoundError ex) {
             player.sendMessage(
