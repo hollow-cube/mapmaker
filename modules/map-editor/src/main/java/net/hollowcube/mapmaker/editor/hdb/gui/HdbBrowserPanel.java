@@ -2,8 +2,8 @@ package net.hollowcube.mapmaker.editor.hdb.gui;
 
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.PlayerUtil;
-import net.hollowcube.mapmaker.editor.hdb.HeadDatabase;
-import net.hollowcube.mapmaker.editor.hdb.HeadInfo;
+import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.responses.HeadDbSearchResponse;
 import net.hollowcube.mapmaker.panels.*;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Blocking;
@@ -19,20 +19,21 @@ import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
 @NotNullByDefault
 public class HdbBrowserPanel extends Panel {
 
-    private final HeadDatabase hdb;
+    private final MapService maps;
     private final Pagination<SearchParams> pagination;
     private final Text searchTextElement;
     private final RadioSelect<String> categories;
 
+    private boolean initializing = true;
     private SearchParams params;
 
-    public HdbBrowserPanel(HeadDatabase hdb) {
-        this(hdb, "");
+    public HdbBrowserPanel(MapService maps) {
+        this(maps, "");
     }
 
-    public HdbBrowserPanel(HeadDatabase hdb, String initialQuery) {
+    public HdbBrowserPanel(MapService maps, String initialQuery) {
         super(9, 9);
-        this.hdb = hdb;
+        this.maps = maps;
         this.params = new SearchParams(initialQuery, null);
 
         background("generic2/containers/searchable/7x3e", -10, -31);
@@ -57,27 +58,32 @@ public class HdbBrowserPanel extends Panel {
 
         this.categories = this.add(2, 7, new RadioSelect<>(5, 2));
         this.categories.onChange(this::setCategory);
-        for (var category : hdb.categories()) {
+
+        HdbCategories.CATEGORIES.forEach((category, icon) -> {
             var button = this.categories.addOption(category, RadioSelect.ButtonUpdater.SQUARE_BACKGROUND);
-            button.from(hdb.categoryIcon(category));
+            button.from(icon);
             button.text(Component.translatable("hdb.category." + category + ".name"), List.of());
-        }
+        });
     }
 
     @Override
     protected void mount(InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
-        this.pagination.reset(this.params);
+        if (this.initializing) {
+            this.pagination.reset(this.params);
+            this.initializing = false;
+        }
     }
 
     @Blocking
     private List<? extends Element> onSearch(SearchParams params, int page, int pageSize) {
-        var heads = params.search(hdb, page, pageSize);
-        if (heads.size() > pageSize) {
-            this.pagination.totalPages(page + 2);
+        var heads = params.search(maps, page, pageSize);
+        if (heads.pages() != null && heads.pages() > 0) {
+            this.pagination.totalPages(heads.pages() + 1);
         }
 
         return heads
+            .results()
             .stream()
             .map(head -> new Button(1, 1)
                 .from(head.createItemStack())
@@ -108,14 +114,11 @@ public class HdbBrowserPanel extends Panel {
 
     public record SearchParams(String query, @Nullable String category) {
 
-        public List<HeadInfo> search(HeadDatabase hdb, int page, int pageSize) {
+        public HeadDbSearchResponse search(MapService maps, int page, int pageSize) {
             if (category != null) {
-                return hdb.getInCategory(category, page, pageSize);
-            } else if (query.isEmpty()) {
-                return hdb.getRandom(pageSize);
-            } else {
-                return hdb.getSuggestions(query, page, pageSize);
+                return maps.getHeadsWithCategory(category, page, pageSize);
             }
+            return maps.getHeadsWithSearch(query, page, pageSize);
         }
     }
 }
