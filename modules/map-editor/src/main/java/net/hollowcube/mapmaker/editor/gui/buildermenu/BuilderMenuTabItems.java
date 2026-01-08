@@ -4,14 +4,12 @@ import net.hollowcube.common.util.Either;
 import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
 import net.hollowcube.mapmaker.editor.EditorState;
-import net.hollowcube.mapmaker.editor.item.DisplayEntityItem;
 import net.hollowcube.mapmaker.editor.item.EnterTestModeItem;
 import net.hollowcube.mapmaker.editor.item.SpawnPointItem;
 import net.hollowcube.mapmaker.editor.parkour.CheckpointEditor;
 import net.hollowcube.mapmaker.editor.parkour.FinishEditor;
 import net.hollowcube.mapmaker.editor.parkour.StatusEditor;
 import net.hollowcube.mapmaker.feature.FeatureFlag;
-import net.hollowcube.mapmaker.map.MapFeatureFlags;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
@@ -90,12 +88,6 @@ public class BuilderMenuTabItems {
                     "hud/hotbar/spawn_point",
                     ALWAYS
             ),
-            Item.of(
-                    DisplayEntityItem.INSTANCE,
-                    "gui.builder_menu.custom_items.display_entity",
-                    "hud/hotbar/cosmetic_menu",
-                    featureFlag(MapFeatureFlags.DISPLAY_ENTITY_EDITOR)
-            )
     };
 
     private static ItemCondition featureFlag(FeatureFlag flag) {
