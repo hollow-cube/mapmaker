@@ -42,6 +42,7 @@ public class FriendListCommand extends CommandDsl {
                                                                                                                   10));
         int pageCount = Math.ceilDiv(friends.totalItems(), 10);
 
+        // TODO fix this so typing a page argument that doesn't exist responds with the latest page rather than saying you have no friends
         if (pageCount == 0) {
             player.sendMessage(Component.translatable("command.friend.list.empty"));
             return;
