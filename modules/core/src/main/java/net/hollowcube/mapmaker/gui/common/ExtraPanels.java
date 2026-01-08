@@ -1,10 +1,12 @@
 package net.hollowcube.mapmaker.gui.common;
 
 import net.hollowcube.mapmaker.panels.*;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public final class ExtraPanels {
 
@@ -31,6 +33,10 @@ public final class ExtraPanels {
     }
 
     public static Panel confirm(@Nullable String text, @NotNull Runnable onConfirm) {
+        return new ConfirmPanel(text, _ -> onConfirm.run());
+    }
+
+    public static Panel confirm(@Nullable String text, @NotNull Consumer<Player> onConfirm) {
         return new ConfirmPanel(text, onConfirm);
     }
 
@@ -68,7 +74,7 @@ public final class ExtraPanels {
     }
 
     private static class ConfirmPanel extends Panel {
-        public ConfirmPanel(@Nullable String text, @NotNull Runnable onConfirm) {
+        public ConfirmPanel(@Nullable String text, @NotNull Consumer<Player> onConfirm) {
             super(3, 1);
 
             background("generic2/confirm", -10, -13);
@@ -92,7 +98,7 @@ public final class ExtraPanels {
             add(5, 3,
                 new Button("gui.confirm2.yes", 3, 1)
                         .onLeftClick(() -> {
-                            onConfirm.run();
+                            onConfirm.accept(host.player());
                             if (host.canPopView()) {
                                 host.popView();
                             } else {

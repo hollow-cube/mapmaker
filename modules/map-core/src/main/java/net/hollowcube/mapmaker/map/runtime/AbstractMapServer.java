@@ -353,7 +353,7 @@ public abstract class AbstractMapServer implements MapServer {
 
         CompatProvider.load(globalEventHandler);
 
-        CosmeticEventHandler.init(guiController);
+        CosmeticEventHandler.init(playerService());
         AbstractAccessoryImpl.addListeners(globalEventHandler);
 
         PlayerSettingsScreen.init(playerService(), globalEventHandler);
@@ -387,7 +387,7 @@ public abstract class AbstractMapServer implements MapServer {
 
         commandManager.register(new MinestomCommand());
         commandManager.register(new EmojisCommand());
-        if (fullInstance) commandManager.register(new CosmeticsCommand(guiController()));
+        if (fullInstance) commandManager.register(new CosmeticsCommand(playerService()));
         if (fullInstance) commandManager.register(new RulesCommand());
         commandManager.register(createDebugCommand());
         commandManager.register(new StoreCommand(playerService(), permManager()));

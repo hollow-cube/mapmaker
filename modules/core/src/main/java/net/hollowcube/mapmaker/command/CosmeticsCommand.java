@@ -1,26 +1,27 @@
 package net.hollowcube.mapmaker.command;
 
-import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.gui.store.CosmeticView;
+import net.hollowcube.mapmaker.gui.store.CosmeticPanel;
+import net.hollowcube.mapmaker.panels.Panel;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class CosmeticsCommand extends CommandDsl {
 
-    private final Controller controller;
+    private final PlayerService players;
 
-    public CosmeticsCommand(@NotNull Controller controller) {
+    public CosmeticsCommand(@NotNull PlayerService players) {
         super("cosmetics", "cosmetic");
 
-        this.controller = controller;
+        this.players = players;
 
         addSyntax(playerOnly(this::handleOpenCosmeticMenu));
     }
 
     private void handleOpenCosmeticMenu(@NotNull Player player, @NotNull CommandContext context) {
-        controller.show(player, CosmeticView::new);
+        Panel.open(player, new CosmeticPanel(this.players));
     }
 
 }
