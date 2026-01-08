@@ -20,7 +20,7 @@ public class TeleportCommand extends CommandDsl {
         .description("The location to teleport to");
 
     public TeleportCommand() {
-        super("tp");
+        super("tp", "teleport");
 
         category = CommandCategories.MAP;
         description = "Teleports you to a location or player";

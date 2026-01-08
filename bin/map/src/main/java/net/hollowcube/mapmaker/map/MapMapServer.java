@@ -146,6 +146,7 @@ public class MapMapServer extends AbstractMultiMapServer {
 
         commandManager.register(new TestCommand());
         commandManager.register(new BuilderMenuCommand());
+        commandManager.register(new RemoveCommand(server.bridge()));
         commandManager.register(new SetPreciseCoordsCommand());
         commandManager.register(new SetSpawnCommand());
         commandManager.register(new GameModeCommand());
