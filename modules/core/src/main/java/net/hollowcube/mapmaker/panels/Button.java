@@ -135,14 +135,15 @@ public class Button extends Element implements ButtonClickAliases {
         var base = OverlayItem.getBaseModel(stack);
 
         this.model(OpUtils.or(base, () -> stack.get(DataComponents.ITEM_MODEL)), overlay);
-        this.text(Component.empty()
+        this.text(
+            Component.empty()
                 .decoration(TextDecoration.ITALIC, false)
                 .append(OpUtils.firstNonNull(
-                        stack.get(DataComponents.CUSTOM_NAME),
-                        stack.get(DataComponents.ITEM_NAME),
-                        Component.empty()
+                    stack.get(DataComponents.CUSTOM_NAME),
+                    stack.get(DataComponents.ITEM_NAME),
+                    Component.empty()
                 )),
-                List.of()
+            stack.get(DataComponents.LORE, List.of())
         );
         this.extraComponents(stack.componentPatch());
 
@@ -264,9 +265,16 @@ public class Button extends Element implements ButtonClickAliases {
 
         builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.CUSTOM_DATA, (Function<CustomData, CustomData>) NoxesiumAPI::setImmovable);
 
-        builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(
-                List.of(), List.of(), itemOverlay == null ? List.of(itemModel) : List.of(itemModel, itemOverlay), List.of()
-        ));
+        builder.editSlots(
+            0, 0, slotWidth, slotHeight, DataComponents.CUSTOM_MODEL_DATA,
+            (Function<CustomModelData, CustomModelData>) existing -> new CustomModelData(
+                OpUtils.mapOr(existing, CustomModelData::floats, List.of()),
+                OpUtils.mapOr(existing, CustomModelData::flags, List.of()),
+                itemOverlay == null ? List.of(itemModel) : List.of(itemModel, itemOverlay),
+                OpUtils.mapOr(existing, CustomModelData::colors, List.of())
+            )
+        );
+
         builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.CUSTOM_NAME, title);
         var lore = itemLore;
         if (itemLorePostfix != null) {

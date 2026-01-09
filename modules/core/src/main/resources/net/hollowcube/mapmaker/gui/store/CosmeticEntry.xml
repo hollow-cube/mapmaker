@@ -1,7 +1,0 @@
-<?xml version="1.0" ?>
-<component width="1" height="1" align="ltr">
-    <switch id="root">
-        <button id="off" translationKey="abc" sprite="minecraft:stone"/>
-        <button id="on" translationKey="abc" sprite="minecraft:stone"/>
-    </switch>
-</component>

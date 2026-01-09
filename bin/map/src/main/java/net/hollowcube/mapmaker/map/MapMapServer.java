@@ -9,7 +9,6 @@ import net.hollowcube.mapmaker.editor.EditorMapWorld;
 import net.hollowcube.mapmaker.editor.command.*;
 import net.hollowcube.mapmaker.editor.command.navigation.*;
 import net.hollowcube.mapmaker.editor.command.utility.*;
-import net.hollowcube.mapmaker.editor.hdb.HeadDatabase;
 import net.hollowcube.mapmaker.editor.hdb.command.HdbCommand;
 import net.hollowcube.mapmaker.editor.terraform.MapServerModule;
 import net.hollowcube.mapmaker.map.block.InteractionRules;
@@ -28,7 +27,6 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,10 +96,7 @@ public class MapMapServer extends AbstractMultiMapServer {
         this.terraform = initBuildLogic(mapService(), commandManager(), terraformEvents, interactionEvents);
         MinecraftServer.getGlobalEventHandler().addChild(terraformEvents).addChild(interactionEvents);
 
-        var hdb = new HeadDatabase(otel);
-        addBinding(HeadDatabase.class, hdb, "headDatabase", "hdb");
-
-        registerCommands(this, commandManager(), hdb);
+        registerCommands(this, commandManager(), mapService());
     }
 
     // Static so it can be referenced from dev server runner
@@ -133,7 +128,7 @@ public class MapMapServer extends AbstractMultiMapServer {
     }
 
     // Static so it can be referenced from dev server runner
-    public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager, @Nullable HeadDatabase hdb) {
+    public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager, @NotNull MapService maps) {
         // Register a second help command (regular is in registerPlayingCommands). One for terraform commands, and one for regular.
         // We test terraform commands simply by checking if they start with / (eg // commands)
         commandManager.register(new HelpCommand(
@@ -162,11 +157,8 @@ public class MapMapServer extends AbstractMultiMapServer {
 
         commandManager.register(new BannerCommand());
         commandManager.register(new PHeadCommand());
-        if (hdb != null) {
-            commandManager.register(new HdbCommand(hdb, server.guiController()));
-        }
+        commandManager.register(new HdbCommand(maps));
 
-        commandManager.register(new BiomesCommand());
 //        commandManager.register(new SetBiomeCommand());
 
         commandManager.register(new AddMarkerCommand());

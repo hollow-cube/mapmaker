@@ -5,7 +5,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.editor.hdb.HdbMessages;
-import net.hollowcube.mapmaker.editor.hdb.HeadDatabase;
+import net.hollowcube.mapmaker.map.MapService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
@@ -17,11 +17,11 @@ public class HdbGiveCommand extends CommandDsl {
     private final Argument<String> queryArg = Argument.GreedyString("query")
             .defaultValue("").description("The head to search for");
 
-    private final HeadDatabase hdb;
+    private final MapService maps;
 
-    public HdbGiveCommand(@NotNull HeadDatabase hdb) {
+    public HdbGiveCommand(@NotNull MapService maps) {
         super("give");
-        this.hdb = hdb;
+        this.maps = maps;
 
         addSyntax(playerOnly(this::handleGiveHead));
         addSyntax(playerOnly(this::handleGiveHead), queryArg);
@@ -30,7 +30,7 @@ public class HdbGiveCommand extends CommandDsl {
     private void handleGiveHead(@NotNull Player player, @NotNull CommandContext context) {
         var query = context.get(queryArg);
 
-        var results = hdb.getSuggestions(query.replace("_", " "), 1);
+        var results = maps.getHeadsWithSearch(query.replace("_", " "), 0, 1).results();
         if (results.isEmpty()) {
             player.sendMessage(HdbMessages.COMMAND_GIVE_NO_RESULT.with(query));
             return;

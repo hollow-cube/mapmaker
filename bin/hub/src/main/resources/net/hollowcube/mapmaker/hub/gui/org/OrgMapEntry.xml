@@ -1,7 +1,0 @@
-<?xml version="1.0" ?>
-<component align="ltr">
-    <switch id="switch">
-        <button id="select_map" translationKey="gui.org_maps.select_map" sprite="paper"/>
-        <button id="add_map" translationKey="gui.org_maps.add_map" sprite="minecraft:green_concrete"/>
-    </switch>
-</component>

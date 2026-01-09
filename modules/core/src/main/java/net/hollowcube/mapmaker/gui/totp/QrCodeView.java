@@ -1,47 +1,44 @@
 package net.hollowcube.mapmaker.gui.totp;
 
-import net.hollowcube.canvas.View;
-import net.hollowcube.canvas.annotation.Action;
-import net.hollowcube.canvas.annotation.Signal;
-import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.mapmaker.gui.common.cartography.AbstractImageView;
+import net.hollowcube.mapmaker.panels.AbstractImagePanel;
+import net.hollowcube.mapmaker.panels.InventoryHost;
+import net.hollowcube.mapmaker.panels.Panel;
 import net.minestom.server.map.Framebuffer;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.image.BufferedImage;
 import java.util.Base64;
 import java.util.BitSet;
-import java.util.function.Function;
 
-public class QrCodeView extends AbstractImageView {
+public class QrCodeView extends AbstractImagePanel {
 
     private static final int SIZE = Framebuffer.WIDTH;
 
     private final BufferedImage qrCode;
-    private final Function<Context, View> newView;
+    private final Panel toOpen;
 
     /**
-     * @param context The view context
      * @param base64  The base64 encoded QR code bits, 1 is black, 0 is white, must be a square
-     * @param newView The callback to run when the user confirms the QR code
+     * @param toOpen The panel to open when the user clicks the QR code
      */
-    public QrCodeView(@NotNull Context context, String base64, int size, Function<Context, View> newView) {
-        super(context);
+    public QrCodeView(String base64, int size, Panel toOpen) {
+        super("info");
         this.qrCode = createQrCode(base64, size);
-        this.newView = newView;
+        this.toOpen = toOpen;
     }
 
-    @Signal(View.SIG_MOUNT)
-    public void onMount() {
+    @Override
+    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+        super.mount(host, isInitial);
         this.updateImage(buffer -> {
             buffer.fill(0x00000000);
             buffer.draw(this.qrCode, true);
         });
     }
 
-    @Action("confirm")
-    public void onConfirm() {
-        this.pushTransientView(this.newView);
+    @Override
+    protected void onSubmit() {
+        this.host.pushTransientView(this.toOpen);
     }
 
     private static BufferedImage createQrCode(String base64Bits, int size) {

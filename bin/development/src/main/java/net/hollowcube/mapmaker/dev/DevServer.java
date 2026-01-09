@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.dev.commands.PlayNbsCommand;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
 import net.hollowcube.mapmaker.editor.EditorState;
-import net.hollowcube.mapmaker.editor.hdb.HeadDatabase;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.map.*;
@@ -26,7 +25,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
-import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
@@ -126,10 +124,8 @@ public class DevServer extends AbstractMultiMapServer {
 
         MinecraftServer.getGlobalEventHandler().addChild(terraformEvents).addChild(interactionEvents);
 
-        var hdb = new HeadDatabase(otel);
-        addBinding(HeadDatabase.class, hdb, "headDatabase", "hdb");
         mapCommandManager.register(PlayNbsCommand.INSTANCE);
-        MapMapServer.registerCommands(this, mapCommandManager, hdb);
+        MapMapServer.registerCommands(this, mapCommandManager, mapService());
     }
 
     protected void handlePreLogin(@NotNull AsyncPlayerPreLoginEvent event) {

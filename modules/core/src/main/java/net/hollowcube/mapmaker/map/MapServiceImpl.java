@@ -6,6 +6,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
+import net.hollowcube.mapmaker.map.responses.HeadDbSearchResponse;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Transcoder;
@@ -552,6 +553,32 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             case 200 -> GSON.fromJson(res.body(), MapHistory.class);
             case 404 -> new MapHistory(page, false, List.of());
             default -> throw new InternalError("Failed to get player map history: " + res.body());
+        };
+    }
+
+    @Override
+    public @NotNull HeadDbSearchResponse getHeadsWithSearch(@NotNull String query, int page, int amount) {
+        var req = HttpRequest.newBuilder()
+            .uri(URI.create(urlV3 + "/hdb/search?query=%s&page=%d&pageSize=%d".formatted(query, page, amount)))
+            .build();
+
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), HeadDbSearchResponse.class);
+            default -> throw new InternalError("Failed to search heads: " + res.body());
+        };
+    }
+
+    @Override
+    public @NotNull HeadDbSearchResponse getHeadsWithCategory(@NotNull String category, int page, int amount) {
+        var req = HttpRequest.newBuilder()
+            .uri(URI.create(urlV3 + "/hdb/%s?page=%d&pageSize=%d".formatted(category, page, amount)))
+            .build();
+
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), HeadDbSearchResponse.class);
+            default -> throw new InternalError("Failed to search heads: " + res.body());
         };
     }
 

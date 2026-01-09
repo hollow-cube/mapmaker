@@ -1,17 +1,17 @@
 package net.hollowcube.mapmaker.cosmetic;
 
-import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.common.events.PlayerGiveCreativeItemEvent;
-import net.hollowcube.mapmaker.gui.store.CosmeticView;
+import net.hollowcube.mapmaker.gui.store.CosmeticPanel;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
+import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.inventory.click.Click;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -26,21 +26,20 @@ public class CosmeticEventHandler {
             //            Map.entry((short) 45, CosmeticType.ACCESSORY)
     );
 
-    public static void init(@NotNull Controller guiController) {
+    public static void init(@NotNull PlayerService players) {
         var globalEventHandler = MinecraftServer.getGlobalEventHandler();
-        globalEventHandler.addListener(InventoryPreClickEvent.class, event -> handleInventoryCosmeticSelector(guiController, event));
+        globalEventHandler.addListener(InventoryPreClickEvent.class, event -> handleInventoryCosmeticSelector(players, event));
         globalEventHandler.addListener(PlayerGiveCreativeItemEvent.class, CosmeticEventHandler::creativeClickListener);
     }
 
-    private static void handleInventoryCosmeticSelector(@NotNull Controller guiController, @NotNull InventoryPreClickEvent event) {
+    private static void handleInventoryCosmeticSelector(@NotNull PlayerService players, @NotNull InventoryPreClickEvent event) {
         if (!(event.getInventory() instanceof PlayerInventory)) return; // Not the player inventory (e one, not just lower section)
         if (!(event.getClick() instanceof Click.Left(int slot))) return;
 
         var cosmeticType = CosmeticType.byIconSlot(slot);
         if (cosmeticType == null) return;
-        if (CosmeticView.DISABLED_TABS.contains(cosmeticType)) return;
-
-        guiController.show(event.getPlayer(), c -> new CosmeticView(c, cosmeticType));
+        if (CosmeticPanel.DISABLED_TABS.contains(cosmeticType)) return;
+        Panel.open(event.getPlayer(), new CosmeticPanel(players, cosmeticType));
     }
 
     private static void creativeClickListener(@NotNull PlayerGiveCreativeItemEvent event) {

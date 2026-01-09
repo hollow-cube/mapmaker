@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
+import net.hollowcube.mapmaker.map.responses.HeadDbSearchResponse;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.Material;
@@ -192,6 +193,16 @@ public class NoopMapService implements MapService {
     @Override
     public @NotNull MapHistory getPlayerMapHistory(@NotNull String playerId, int page, int amount) {
         return new MapHistory(page, false, List.of(new MapHistory.Entry("62da0aaf-8cad-4c13-869c-02b07688988d")));
+    }
+
+    @Override
+    public @NotNull HeadDbSearchResponse getHeadsWithSearch(@NotNull String query, int page, int amount) {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public @NotNull HeadDbSearchResponse getHeadsWithCategory(@NotNull String category, int page, int amount) {
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override

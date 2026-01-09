@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker.hub.item;
 
-import net.hollowcube.canvas.internal.Controller;
-import net.hollowcube.mapmaker.hub.gui.org.OrgMapsView;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
@@ -18,11 +16,8 @@ public class OrgMapsItem extends ItemHandler {
     private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("org_maps_hammer"));
     public static final Key ID = Key.key("mapmaker:org_maps");
 
-    private final Controller guiController;
-
-    public OrgMapsItem(@NotNull Controller guiController) {
+    public OrgMapsItem() {
         super(ID, RIGHT_CLICK_ANY);
-        this.guiController = guiController;
     }
 
     @Override
@@ -35,9 +30,7 @@ public class OrgMapsItem extends ItemHandler {
         var targetOrg = USER_ORGS.get(click.player().getUuid().toString());
         if (targetOrg == null) {
             click.player().sendMessage("oopsie woopsie, you dont have an org :(");
-            return;
         }
-        guiController.show(click.player(), context -> new OrgMapsView(context, targetOrg));
     }
 
     @Override

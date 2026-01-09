@@ -114,7 +114,7 @@ public class LocalMapServer extends AbstractMapServer {
 
         addBinding(Scheduler.class, scheduler());
 
-        MapMapServer.registerCommands(this, commandManager(), null);
+        MapMapServer.registerCommands(this, commandManager(), mapService());
     }
 
     protected void handleConfigPhase(AsyncPlayerConfigurationEvent event) {
