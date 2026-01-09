@@ -48,7 +48,7 @@ public class FriendRequestCommand extends CommandDsl {
         }
 
         TextComponent.Builder builder = Component.text()
-            .append(Component.translatable("command.friend.request.list.header." + directionValue, Component.text(page), Component.text(pageCount)));
+            .append(Component.translatable("command.friend.request.list.header." + directionValue, Component.text(requests.page()), Component.text(pageCount)));
         for (FriendRequest request : requests.items()) {
             DisplayName displayName = this.playerService.getPlayerDisplayName2(request.playerId());
             Component username = displayName.asComponent();

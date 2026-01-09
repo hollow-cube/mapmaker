@@ -19,6 +19,7 @@ import java.util.List;
 
 public class BlockCommand extends CommandDsl {
     private final Argument<String> targetArg;
+    private final Argument<Integer> pageArg = Argument.Int("page").min(1).defaultValue(1);
 
     private final PlayerService playerService;
 
@@ -34,6 +35,7 @@ public class BlockCommand extends CommandDsl {
         this.setCondition(CoreCommandCondition.playerFeature(RelationshipFeatureFlag.FLAG));
 
         this.addSyntax(playerOnly(this::execListBlocks), new ArgumentLiteral("list"));
+        this.addSyntax(playerOnly(this::execListBlocks), new ArgumentLiteral("list"), this.pageArg);
         this.addSyntax(playerOnly(this::execBlock), this.targetArg);
     }
 
@@ -57,7 +59,8 @@ public class BlockCommand extends CommandDsl {
     }
 
     private void execListBlocks(@NotNull Player player, @NotNull CommandContext context) {
-        PlayerService.Page<BlockedPlayer> blocks = this.playerService.getBlockedPlayers(player.getUuid().toString(), new PlayerService.Pageable(1, 10));
+        int page = context.get(this.pageArg);
+        PlayerService.Page<BlockedPlayer> blocks = this.playerService.getBlockedPlayers(player.getUuid().toString(), new PlayerService.Pageable(page, 10));
         int pageCount = Math.ceilDiv(blocks.totalItems(), 10);
 
         if (pageCount == 0) {
