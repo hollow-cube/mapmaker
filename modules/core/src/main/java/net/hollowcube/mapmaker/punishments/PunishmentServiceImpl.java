@@ -30,7 +30,7 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
             queryBuilder.add("executorId", executorId.toString());
         }
         if (type != null) {
-            queryBuilder.add("type", type.name().toLowerCase(Locale.ROOT));
+            queryBuilder.add("punishmentType", type.name().toLowerCase(Locale.ROOT));
         }
 
         var request = HttpRequest.newBuilder()
