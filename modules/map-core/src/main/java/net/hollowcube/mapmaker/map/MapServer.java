@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.session.SessionManager;
+import net.hollowcube.mapmaker.util.ServiceContext;
 import net.minestom.server.entity.Player;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +31,15 @@ public interface MapServer {
     @NotNull PunishmentService punishmentService();
 
     @NotNull PlayerInviteService inviteService();
+
+    default @NotNull ServiceContext createServiceContext() {
+        return new ServiceContext(
+            this.playerService(),
+            this.sessionService(),
+            this.mapService(),
+            this.bridge()
+        );
+    }
 
     // Higher level managers
 

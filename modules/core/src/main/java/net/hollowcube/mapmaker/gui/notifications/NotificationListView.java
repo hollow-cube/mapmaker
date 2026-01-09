@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.gui.notifications;
 
 import net.hollowcube.common.components.TranslatableBuilder;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.notifications.PlayerNotification;
 import net.hollowcube.mapmaker.panels.*;
@@ -149,7 +150,7 @@ public class NotificationListView extends Panel {
             if (host == null) return;
 
             var playerId = host.player().getUuid().toString();
-            context.players().markNotificationRead(playerId, notification.entry().id(), true);
+            FutureUtil.submitVirtual(() -> context.players().markNotificationRead(playerId, notification.entry().id(), true));
         }
     }
 }

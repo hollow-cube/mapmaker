@@ -3,12 +3,15 @@ package net.hollowcube.mapmaker.command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.components.TranslatableBuilder;
+import net.hollowcube.mapmaker.feature.FeatureFlag;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class RecapCommand extends CommandDsl {
+
+    public static FeatureFlag FLAG = FeatureFlag.of("hub.recaps");
 
     private final PlayerService players;
 
@@ -18,6 +21,8 @@ public class RecapCommand extends CommandDsl {
         this.players = players;
         this.description = "Get a link to your Hollow Cube 2025 recap";
         this.category = CommandCategories.GLOBAL;
+
+        this.setCondition(CoreCommandCondition.playerFeature(FLAG));
 
         addSyntax(playerOnly(this::invoke));
     }

@@ -53,6 +53,7 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
         itemRegistry().register(new OpenCosmeticsMenuItem(server.playerService()));
         itemRegistry().register(OpenStoreItem.INSTANCE);
         itemRegistry().register(new AdventCalendarItem());
+        itemRegistry().register(OpenNotificationsItem.INSTANCE);
 
         objectEntityHandlers().registerForInteractions(PresentObjectHandler.ID, PresentObjectHandler::new);
 
