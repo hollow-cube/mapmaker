@@ -16,8 +16,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -559,7 +561,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     @Override
     public @NotNull HeadDbSearchResponse getHeadsWithSearch(@NotNull String query, int page, int amount) {
         var req = HttpRequest.newBuilder()
-            .uri(URI.create(urlV3 + "/hdb/search?query=%s&page=%d&pageSize=%d".formatted(query, page, amount)))
+            .uri(URI.create(urlV3 + "/hdb/search?query=%s&page=%d&pageSize=%d".formatted(URLEncoder.encode(query, StandardCharsets.UTF_8), page, amount)))
             .build();
 
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
