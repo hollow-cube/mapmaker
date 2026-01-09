@@ -31,7 +31,9 @@ public record EnableSettingAction(
     static final List<MapSetting<Boolean>> BOOL_SETTINGS = List.of(
             MapSettings.ONLY_SPRINT, MapSettings.NO_SPRINT,
             MapSettings.NO_JUMP, MapSettings.NO_SNEAK,
-            MapSettings.RESET_IN_WATER, MapSettings.RESET_IN_LAVA);
+            MapSettings.RESET_IN_WATER, MapSettings.RESET_IN_LAVA,
+            MapSettings.NO_TURN
+    );
     // These maps are pretty gross should revisit. They must match the list above
     static final Map<MapSetting<Boolean>, String> SETTINGS_TRANSLATION_KEYS = Map.of(
             MapSettings.ONLY_SPRINT, "gui.create_maps.map_settings_tab.gameplay.only_sprint",
@@ -39,14 +41,18 @@ public record EnableSettingAction(
             MapSettings.NO_JUMP, "gui.create_maps.map_settings_tab.gameplay.no_jump",
             MapSettings.NO_SNEAK, "gui.create_maps.map_settings_tab.gameplay.no_sneak",
             MapSettings.RESET_IN_WATER, "gui.create_maps.map_settings_tab.gameplay.reset_water",
-            MapSettings.RESET_IN_LAVA, "gui.create_maps.map_settings_tab.gameplay.reset_lava");
+            MapSettings.RESET_IN_LAVA, "gui.create_maps.map_settings_tab.gameplay.reset_lava",
+            MapSettings.NO_TURN, "gui.create_maps.map_settings_tab.gameplay.no_turn"
+    );
     static final Map<MapSetting<Boolean>, String> SETTINGS_ICONS = Map.of(
             MapSettings.ONLY_SPRINT, BadSprite.require("create_maps/tab_settings/tab_gameplay/setting_onlysprint_icon").model(),
             MapSettings.NO_SPRINT, BadSprite.require("create_maps/tab_settings/tab_gameplay/setting_nosprint_icon").model(),
             MapSettings.NO_JUMP, BadSprite.require("create_maps/tab_settings/tab_gameplay/setting_nojump_icon").model(),
             MapSettings.NO_SNEAK, BadSprite.require("create_maps/tab_settings/tab_gameplay/setting_nosneak_icon").model(),
             MapSettings.RESET_IN_WATER, BadSprite.require("create_maps/tab_settings/tab_gameplay/setting_reset_water_icon").model(),
-            MapSettings.RESET_IN_LAVA, BadSprite.require("create_maps/tab_settings/tab_gameplay/setting_reset_lava_icon").model());
+            MapSettings.RESET_IN_LAVA, BadSprite.require("create_maps/tab_settings/tab_gameplay/setting_reset_lava_icon").model(),
+            MapSettings.NO_TURN, BadSprite.require("create_maps/tab_settings/tab_gameplay/setting_noturning_icon").model()
+    );
 
     private static final Sprite SPRITE = new Sprite("action/icon/setting_add", 2, 3);
 

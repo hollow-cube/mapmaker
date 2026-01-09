@@ -57,7 +57,7 @@ public class AdventCalendarPanel extends Panel {
         var button = new Button(null, 1, 1);
         if (cosmetic != null && isAvailable) {
             button.sprite(claimed ? "event/advent_claimed" : "event/advent_available");
-            button.from(cosmetic.iconLockedItem());
+            button.from(cosmetic.iconItem());
         } else if (cosmetic != null) {
             button.sprite("event/advent_locked");
         } else if (claimed) {
