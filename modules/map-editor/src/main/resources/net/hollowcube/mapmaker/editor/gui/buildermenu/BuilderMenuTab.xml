@@ -1,5 +1,0 @@
-<?xml version="1.0" ?>
-<?import net.hollowcube.mapmaker.editor.gui.buildermenu ?>
-<component width="7" height="1" align="ttb">
-    <pagination id="entries" width="7" height="1" child="BuilderMenuEntry"/>
-</component>

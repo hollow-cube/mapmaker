@@ -26,7 +26,7 @@ public class RadioSelect<T> extends Panel {
         return this.selected;
     }
 
-    public @NotNull RadioSelect<T> onChange(@NotNull Consumer<@Nullable T> onChange) {
+    public @NotNull RadioSelect<T> onChange(@NotNull Consumer<@NotNull T> onChange) {
         this.onChange.add(onChange);
         return this;
     }

@@ -1,8 +1,9 @@
 package net.hollowcube.mapmaker.editor.item;
 
-import net.hollowcube.mapmaker.editor.gui.buildermenu.BuilderMenuView;
+import net.hollowcube.mapmaker.editor.gui.BuilderMenuPanel;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
+import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.Nullable;
@@ -30,7 +31,7 @@ public class BuilderMenuItem extends ItemHandler {
         var world = MapWorld.forPlayer(player);
         if (world == null) return; // Sanity
 
-        world.server().showView(player, BuilderMenuView::new);
+        Panel.open(player, new BuilderMenuPanel(world.server().bridge()));
     }
 
 }

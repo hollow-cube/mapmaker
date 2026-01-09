@@ -36,7 +36,7 @@ public class HdbBrowserPanel extends Panel {
         this.maps = maps;
         this.params = new SearchParams(initialQuery, null);
 
-        background("generic2/containers/searchable/7x3e", -10, -31);
+        background("generic2/containers/searchable/extended/7x3", -10, -31);
         add(0, 0, title("Head Database"));
         add(0, 6, new Text(9, 1, FontUtil.rewrite("small", "categories")).align(Text.CENTER, 6));
 

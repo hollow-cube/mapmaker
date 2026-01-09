@@ -1,4 +1,4 @@
 @NotNullByDefault
-package net.hollowcube.mapmaker.editor.gui.buildermenu;
+package net.hollowcube.mapmaker.editor.gui;
 
 import org.jetbrains.annotations.NotNullByDefault;

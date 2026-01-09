@@ -57,7 +57,7 @@ public class CosmeticPanel extends Panel {
         this.selected = initial;
 
         add(0, 0, title("Cosmetics"));
-        background("generic2/containers/7x3ex1", -10, -31);
+        background("generic2/containers/extended/7x3x1", -10, -31);
 
         add(0, 0, backOrClose());
         this.title = add(1, 0, new Text(7, 1, "Cosmetics").background("generic2/btn/default/7_1")
