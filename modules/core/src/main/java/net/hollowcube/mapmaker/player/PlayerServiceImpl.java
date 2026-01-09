@@ -508,6 +508,20 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         }
     }
 
+    @Override
+    public @Nullable String getRecap(@NotNull String playerId, int year) {
+        var req = HttpRequest.newBuilder()
+            .uri(URI.create(url + "/recap/" + playerId + "/" + year))
+            .GET();
+        var res = doRequest("getRecap", req, HttpResponse.BodyHandlers.ofString());
+
+        return switch (res.statusCode()) {
+            case 200 -> res.body();
+            case 404 -> null;
+            default -> throw new InternalError("Failed to get recap (" + res.statusCode() + "): " + res.body());
+        };
+    }
+
     public record PlayerServiceError(@NotNull String code, @NotNull String message) {
     }
 }

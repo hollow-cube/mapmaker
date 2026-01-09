@@ -22,6 +22,7 @@ import net.minestom.server.entity.attribute.AttributeModifier;
 import net.minestom.server.entity.attribute.AttributeOperation;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMapWorld> {
@@ -50,10 +51,13 @@ public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMa
             world.itemRegistry().setItemStack(player, CreateMapsItem.ID, 1);
             if (CoreFeatureFlags.ORGANIZATIONS.test(player))
                 world.itemRegistry().setItemStack(player, OrgMapsItem.ID, 2);
+            world.itemRegistry().setItemStack(player, OpenNotificationsItem.ID, 4);
             if (HubTime.Christmas.isActive())
-                world.itemRegistry().setItemStack(player, AdventCalendarItem.ID, 4);
+                world.itemRegistry().setItemStack(player, AdventCalendarItem.ID, 5);
             world.itemRegistry().setItemStack(player, OpenStoreItem.ID, 7);
             world.itemRegistry().setItemStack(player, OpenCosmeticsMenuItem.ID, 8);
+
+            OpenNotificationsItem.checkForUnread(world, new WeakReference<>(player));
 
             BOSS_BARS.forEach(player::showBossBar);
 

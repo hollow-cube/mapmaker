@@ -448,6 +448,10 @@ public abstract class AbstractMapServer implements MapServer {
             commandManager.register(new KickCommand(punishmentService(), sessionManager(), permManager()));
         }
 
+        if (fullInstance) {
+            commandManager.register(new RecapCommand(playerService()));
+        }
+
         DataFixer.buildModel();
     }
 

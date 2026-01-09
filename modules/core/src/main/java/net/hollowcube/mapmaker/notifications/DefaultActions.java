@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.notifications;
 
 import net.hollowcube.common.components.TranslatableBuilder;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
 import net.hollowcube.mapmaker.util.ServiceContext;
@@ -18,7 +19,7 @@ public final class DefaultActions {
             "gui.notification.action.delete.interaction",
             "gui.notification.action.delete",
             PlayerNotification.ActionExecutor
-                .of(() -> context.players().deleteNotification(player.getUuid().toString(), entry.id()))
+                .ofAsync(() -> context.players().deleteNotification(player.getUuid().toString(), entry.id()))
                 .withConfirmation()
         );
     }
@@ -28,13 +29,17 @@ public final class DefaultActions {
         var link = entry.data() != null ? entry.data().get("link").getAsString() : null;
         if (link == null) return null;
 
+        return link(player, context, entry, link);
+    }
+
+    public static PlayerNotification.Action link(Player player, ServiceContext context, PlayerNotificationResponse.ComplexEntry entry, String link) {
         return PlayerNotification.Action.of(
             LINK_ICON,
             "gui.notification.action.link.interaction",
             "gui.notification.action.link",
             PlayerNotification.ActionExecutor
                 .of(() -> {
-                    context.players().markNotificationRead(player.getUuid().toString(), entry.id(), true);
+                    FutureUtil.submitVirtual(() -> context.players().markNotificationRead(player.getUuid().toString(), entry.id(), true));
                     player.sendMessage(
                         TranslatableBuilder
                             .of("gui.notification.action.link.message")

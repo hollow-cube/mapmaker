@@ -161,6 +161,10 @@ public interface PlayerService {
         @Nullable Integer expiresInSeconds, boolean replaceUnread
     );
 
+    // Recap
+
+    @Nullable String getRecap(@NotNull String playerId, int year);
+
     class BadRequestError extends RuntimeException {}
 
     class NotFoundError extends RuntimeException {

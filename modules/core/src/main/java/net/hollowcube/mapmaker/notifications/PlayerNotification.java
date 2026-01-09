@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.notifications;
 
 import net.hollowcube.common.components.TranslatableBuilder;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.gui.common.ExtraPanels;
 import net.hollowcube.mapmaker.notifications.impl.PlayerNotificationType;
 import net.hollowcube.mapmaker.panels.InventoryHost;
@@ -91,6 +92,10 @@ public record PlayerNotification(
 
         public static ActionExecutor of(Runnable executor) {
             return new ActionExecutor(false, false, executor);
+        }
+
+        public static ActionExecutor ofAsync(Runnable executor) {
+            return new ActionExecutor(false, false, () -> FutureUtil.submitVirtual(executor));
         }
 
         public ActionExecutor withConfirmation() {
