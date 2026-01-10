@@ -46,7 +46,7 @@ public class FriendListCommand extends CommandDsl {
             player.sendMessage(Component.translatable("command.friend.list.empty"));
             return;
         }
-        
+
         TextComponent.Builder builder = Component.text()
             .append(
                 Component.translatable("command.friend.list.header", Component.text(friends.page()), Component.text(pageCount)));
