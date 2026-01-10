@@ -8,6 +8,7 @@ import java.time.temporal.ChronoUnit;
 
 public class HubTime {
 
+    private static final ZoneOffset EST = ZoneOffset.ofHours(-5);
     private static final ZoneOffset ZONE_OFFSET = ZoneOffset.ofHours(-17);
 
     public static LocalDateTime now() {
@@ -22,7 +23,7 @@ public class HubTime {
 
         public static int getDay() {
             LocalDateTime now = now();
-            if (now.getMonthValue() == 1 && now.getDayOfMonth() <= 10) {
+            if (now.getMonthValue() == 1 && LocalDateTime.now(EST).getDayOfMonth() <= 10) {
                 return 31 + now.getDayOfMonth();
             } else if (now.getMonthValue() == 12) {
                 return now.getDayOfMonth();
