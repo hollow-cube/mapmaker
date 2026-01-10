@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.responses.SendFriendRequestResult;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,13 +38,16 @@ public class FriendAddCommand extends CommandDsl {
 
         SendFriendRequestResult result = this.playerService.sendFriendRequest(player.getUuid().toString(),
                                                                               targetData.id());
+        Component targetDisplayName = playerService.getPlayerDisplayName2(targetData.id()).build();
+
+        Audiences.all().sendMessage(Component.text("debug result %s".formatted(result.toString())));
         if (result.successful()) {
             if (result.isRequest()) {
                 player.sendMessage(
-                    Component.translatable("command.friend.add.request_sent", Component.text(targetData.username())));
+                    Component.translatable("command.friend.add.request_sent", targetDisplayName));
             } else {
                 player.sendMessage(
-                    Component.translatable("command.friend.add.added", Component.text(targetData.username())));
+                    Component.translatable("command.friend.add.added", targetDisplayName));
             }
             return;
         }
@@ -66,13 +70,14 @@ public class FriendAddCommand extends CommandDsl {
 
         switch (result.error().code()) {
             case "already_friends" -> player.sendMessage(
-                Component.translatable("command.friend.add.already_friends", Component.text(targetData.username())));
+                Component.translatable("command.friend.add.already_friends", targetDisplayName));
             case "player_blocked" -> player.sendMessage(
-                Component.translatable("command.friend.add.blocked_by_self", Component.text(targetData.username())));
+                Component.translatable("command.friend.add.blocked_by_self", targetDisplayName));
             case "blocked_by_player", "target_auto_rejects_friend_requests" -> player.sendMessage(
-                Component.translatable("command.friend.add.auto_rejected", Component.text(targetData.username())));
+                Component.translatable("command.friend.add.auto_rejected", targetDisplayName));
             case "friend_request_already_exists" -> player.sendMessage(
-                Component.translatable("command.friend.add.already_requested", Component.text(targetData.username())));
+                Component.translatable("command.friend.add.already_requested", targetDisplayName));
+            case "feature_disabled" -> player.sendMessage(Component.translatable("command.friend.add.feature_disabled_target", targetDisplayName));
             default -> player.sendMessage(Component.translatable("generic.unknown_error"));
         }
     }

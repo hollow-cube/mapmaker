@@ -12,7 +12,7 @@ public record SendFriendRequestResult(
 ) {
 
     public boolean successful() {
-        return this.error == null;
+        return this.error == null && this.limitError == null;
     }
 
     public record LimitError(

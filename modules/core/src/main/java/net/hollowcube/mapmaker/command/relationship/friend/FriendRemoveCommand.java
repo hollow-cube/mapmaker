@@ -34,11 +34,13 @@ public class FriendRemoveCommand extends CommandDsl {
             return;
         }
 
+        Component targetDisplayName = playerService.getPlayerDisplayName2(targetData.id()).build();
+
         try {
             this.playerService.removeFriend(player.getUuid().toString(), targetData.id());
-            player.sendMessage(Component.translatable("command.friend.remove.success", Component.text(targetData.username())));
+            player.sendMessage(Component.translatable("command.friend.remove.success", targetDisplayName));
         } catch (PlayerService.NotFoundError ex) {
-            player.sendMessage(Component.translatable("command.friend.remove.not_friends", Component.text(targetData.username())));
+            player.sendMessage(Component.translatable("command.friend.remove.not_friends", targetDisplayName));
         }
     }
 }

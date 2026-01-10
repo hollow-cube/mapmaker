@@ -71,9 +71,10 @@ public class FriendRequestCommand extends CommandDsl {
         var targetRaw = context.getRaw(this.targetArg);
         try {
             FriendRequest deletedReq = this.playerService.deleteFriendRequest(player.getUuid().toString(), targetId, true);
+            Component targetDisplayName = playerService.getPlayerDisplayName2(deletedReq.playerId()).build();
             // todo we can use deletedReq to indicate the direction
             // that should be done, with a different message for outgoing and incoming
-            player.sendMessage(Component.translatable("command.friend.request.remove.success", Component.text(deletedReq.username())));
+            player.sendMessage(Component.translatable("command.friend.request.remove.success", targetDisplayName));
         } catch (PlayerService.NotFoundError ex) {
             player.sendMessage(
                 Component.translatable("command.friend.request.remove.not_requested", Component.text(targetRaw)));
