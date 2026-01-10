@@ -21,6 +21,7 @@ public final class DefaultActions {
             PlayerNotification.ActionExecutor
                 .ofAsync(() -> context.players().deleteNotification(player.getUuid().toString(), entry.id()))
                 .withConfirmation()
+                .withRefresh()
         );
     }
 
