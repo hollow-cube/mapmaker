@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.editor.command.navigation;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.common.util.PlayerUtil;
+//import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -31,23 +31,16 @@ public class UpCommand extends CommandDsl {
     private void handleJumpToTarget(Player player, CommandContext context) {
         var instance = player.getInstance();
         int minY = instance.getCachedDimensionType().minY() + 1;
-        // so it actually places the block at the lowest height
         int maxY = instance.getCachedDimensionType().maxY();
 
-        var target = player.getPosition().add(0, context.get(distanceArg), 0);
+        var target = player.getPosition().withY(Math.clamp(player.getPosition().y() + context.get(distanceArg), minY, maxY));
 
         // Ensure they can actually get from the current position to the target without hitting anything
-        // commenting this out cause honestly what is the point? Just let someone go through a block if they want
+        // commenting this out but not deleting it in case someone wants to make it so when it goes through this logic it warns you that you'll be placed in a block and then says run this command again to confirm
 //        if (!PlayerUtil.canMoveTo(player, target)) {
 //            player.sendMessage(ERR_NO_SPACE);
 //            return;
 //        }
-
-        if (target.blockY() >= maxY) {
-            target = target.withY(maxY);
-        } else if (target.blockY() <= minY) {
-            target = target.withY(minY);
-        }
 
         if (instance.getBlock(target.sub(0, 1, 0)).isAir()) {
             instance.setBlock(target.sub(0, 1, 0), Block.GLASS);
