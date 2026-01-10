@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import io.opentelemetry.api.OpenTelemetry;
 import io.prometheus.client.Summary;
+import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.player.requests.CreatePlayerNotificationRequest;
 import net.hollowcube.mapmaker.player.responses.*;
@@ -522,6 +523,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         };
     }
 
+    @RuntimeGson
     public record PlayerServiceError(@NotNull String code, @NotNull String message) {
     }
 }

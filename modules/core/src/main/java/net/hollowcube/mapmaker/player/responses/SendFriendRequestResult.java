@@ -15,6 +15,7 @@ public record SendFriendRequestResult(
         return this.error == null && this.limitError == null;
     }
 
+    @RuntimeGson
     public record LimitError(
         @NotNull String code,
         @NotNull String message,

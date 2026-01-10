@@ -40,7 +40,6 @@ public class FriendAddCommand extends CommandDsl {
                                                                               targetData.id());
         Component targetDisplayName = playerService.getPlayerDisplayName2(targetData.id()).build();
 
-        Audiences.all().sendMessage(Component.text("debug result %s".formatted(result.toString())));
         if (result.successful()) {
             if (result.isRequest()) {
                 player.sendMessage(
