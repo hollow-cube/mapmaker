@@ -116,6 +116,21 @@ public class NoopMapService implements MapService {
     }
 
     @Override
+    public void inviteMapBuilder(@NotNull String mapId, @NotNull String playerId) {
+
+    }
+
+    @Override
+    public void approveMapBuilder(@NotNull String mapId, @NotNull String playerId) {
+
+    }
+
+    @Override
+    public void removeMapBuilder(@NotNull String mapId, @NotNull String playerId) {
+
+    }
+
+    @Override
     public @NotNull LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId) {
         return new LeaderboardData(List.of(), new LeaderboardData.Entry(UUID.randomUUID().toString(), 0, 1000));
     }

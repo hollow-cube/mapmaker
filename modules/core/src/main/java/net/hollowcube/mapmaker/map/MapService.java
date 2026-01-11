@@ -62,6 +62,12 @@ public interface MapService {
 
     void reportMap(@NotNull String mapId, @NotNull MapReportRequest req);
 
+    void inviteMapBuilder(@NotNull String mapId, @NotNull String playerId);
+
+    void approveMapBuilder(@NotNull String mapId, @NotNull String playerId);
+
+    void removeMapBuilder(@NotNull String mapId, @NotNull String playerId);
+
     @NotNull LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId);
 
     @NotNull LeaderboardData getPlaytimeLeaderboard(@NotNull String mapId, @Nullable String playerId);

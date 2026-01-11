@@ -34,10 +34,10 @@ public class NewMapView extends Panel {
         add(0, 0, backOrClose());
 
         sizeSelect = add(1, 2, new Select<>(4, MapSize.NORMAL));
-        sizeSelect.addOption(MapSize.NORMAL, "normal", "icon2/1_1/house_1", 4, 5);
-        sizeSelect.addOption(MapSize.LARGE, "large", "icon2/1_1/house_2", 3, 4);
-        sizeSelect.addOption(MapSize.MASSIVE, "massive", "icon2/1_1/house_3", 3, 3);
-        sizeSelect.addOption(MapSize.COLOSSAL, "colossal", "icon2/1_1/castle", 2, 2);
+        sizeSelect.addOption(MapSize.NORMAL, "normal", "icon2/1_1/house_1", 1, 1);
+        sizeSelect.addOption(MapSize.LARGE, "large", "icon2/1_1/house_2", 1, 1);
+        sizeSelect.addOption(MapSize.MASSIVE, "massive", "icon2/1_1/house_3", 1, 1);
+        sizeSelect.addOption(MapSize.COLOSSAL, "colossal", "icon2/1_1/castle", 1, 1);
 
         add(2, 4, new Text("create", 5, 1, "Create")
             .align(Text.CENTER, Text.CENTER)

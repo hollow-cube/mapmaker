@@ -1,17 +1,36 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
+import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.gui.common.ExtraPanels;
+import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
+import net.hollowcube.mapmaker.player.PlayerData;
+import net.kyori.adventure.text.Component;
 
+import java.util.Objects;
+
+import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
 
 public class EditMapActionsView extends Panel {
 
-    public EditMapActionsView() {
+    private final MapService mapService;
+    private final ServerBridge bridge;
+
+    private final String mapId;
+
+    public EditMapActionsView(MapService mapService, ServerBridge bridge, String mapId) {
         super(9, 10);
+        this.mapService = mapService;
+        this.bridge = bridge;
+        this.mapId = mapId;
 
         background("create_maps2/edit/actions_container", -10, -31);
         add(0, 0, title("Edit Map"));
+
+        add(0, 0, backOrClose());
 
         add(1, 2, new Button("copy", 3, 2));
 
@@ -19,6 +38,31 @@ public class EditMapActionsView extends Panel {
 
         add(1, 4, new Button("transfer", 3, 2));
 
-        add(5, 4, new Button("delete", 3, 2));
+        add(5, 4, new Button("delete", 3, 2)
+            .onLeftClick(this::beginDeleteMap));
+    }
+
+    private void beginDeleteMap() {
+        host.pushTransientView(ExtraPanels.confirm(
+            "delete or nah?",
+            this::confirmDeleteMap
+        ));
+    }
+
+    private void confirmDeleteMap() {
+        final var player = Objects.requireNonNull(host.player());
+        async(() -> {
+            try {
+                var playerId = PlayerData.fromPlayer(player).id();
+                mapService.deleteMap(playerId, mapId, null);
+
+                player.sendMessage(Component.translatable("command.map.delete.success"));
+                sync(() -> host.replaceView(new CreateMapsView(mapService, bridge)));
+            } catch (Exception e) {
+                ExceptionReporter.reportException(e, player);
+                player.sendMessage(Component.translatable("command.map.delete.failure"));
+                player.closeInventory();
+            }
+        });
     }
 }

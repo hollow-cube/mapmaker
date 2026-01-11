@@ -316,6 +316,51 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
+    public void inviteMapBuilder(@NotNull String mapId, @NotNull String playerId) {
+        var req2 = HttpRequest.newBuilder()
+            .method("POST", HttpRequest.BodyPublishers.noBody())
+            .uri(URI.create(urlV3 + "/maps/" + mapId + "/builders/" + playerId))
+            .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
+            .build();
+        var res = doRequest(req2, HttpResponse.BodyHandlers.ofString());
+        switch (res.statusCode()) {
+            case 200 -> {
+            }
+            default -> throw new InternalError("Failed to invite map builder: " + res.body());
+        }
+    }
+
+    @Override
+    public void approveMapBuilder(@NotNull String mapId, @NotNull String playerId) {
+        var req2 = HttpRequest.newBuilder()
+            .method("PATCH", HttpRequest.BodyPublishers.ofString("{\"approved\": true}"))
+            .uri(URI.create(urlV3 + "/maps/" + mapId + "/builders/" + playerId))
+            .header("Content-Type", "application/json")
+            .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
+            .build();
+        var res = doRequest(req2, HttpResponse.BodyHandlers.ofString());
+        switch (res.statusCode()) {
+            case 200 -> {
+            }
+            default -> throw new InternalError("Failed to approve map builder: " + res.body());
+        }
+    }
+
+    @Override
+    public void removeMapBuilder(@NotNull String mapId, @NotNull String playerId) {
+        var req2 = HttpRequest.newBuilder()
+            .DELETE().uri(URI.create(urlV3 + "/maps/" + mapId + "/builders/" + playerId))
+            .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
+            .build();
+        var res = doRequest(req2, HttpResponse.BodyHandlers.ofString());
+        switch (res.statusCode()) {
+            case 200 -> {
+            }
+            default -> throw new InternalError("Failed to remove map builder: " + res.body());
+        }
+    }
+    
+    @Override
     public @NotNull LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId) {
         var uri = urlV3 + "/maps/hub/leaderboard/" + name;
         if (playerId != null) uri += "?playerId=" + playerId;

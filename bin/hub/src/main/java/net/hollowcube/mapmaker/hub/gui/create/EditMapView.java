@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.hub.gui.create;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.util.Autocompletors;
@@ -32,6 +33,8 @@ public class EditMapView extends Panel {
         material != Material.RECOVERY_COMPASS &&
         !material.name().endsWith("glass_pane");
 
+    private final MapService mapService;
+
     private final MapData map;
 
     private final Text nameText;
@@ -39,8 +42,9 @@ public class EditMapView extends Panel {
 
     private final Button verifyPublishButton;
 
-    public EditMapView(ServerBridge bridge, MapData map) {
+    public EditMapView(MapService mapService, ServerBridge bridge, MapData map) {
         super(9, 10);
+        this.mapService = mapService;
         this.map = map;
 
         background("create_maps2/edit/container", -10, -31);
@@ -53,7 +57,7 @@ public class EditMapView extends Panel {
         add(8, 0, new Button("more", 1, 1)
             .background("generic2/btn/default/1_1")
             .sprite("icon2/1_1/ellipsis", 1, 1)
-            .onLeftClick(() -> host.pushView(new EditMapActionsView())));
+            .onLeftClick(() -> host.pushView(new EditMapActionsView(mapService, bridge, map.id()))));
 
         this.iconButton = add(1, 2, new Button("todo", 1, 1)
             .onLeftClick(this::beginIconEdit));
@@ -65,7 +69,10 @@ public class EditMapView extends Panel {
             .profile(getPlayerHead2d(map.owner())));
         for (int i = 0; i < 4; i++) {
             add(i + 4, 2, new Button("locked", 1, 1)
-                .sprite("icon2/1_1/lock", 1, 1));
+                .sprite("icon2/1_1/lock", 1, 1)
+                .onLeftClickAsync(() -> {
+                    mapService.inviteMapBuilder(map.id(), "d79d790a-8e90-4d78-958a-780c7fadeaab");
+                }));
         }
 
         add(1, 4, new EditableMapTagList(map));
@@ -75,6 +82,24 @@ public class EditMapView extends Panel {
             .onLeftClickAsync(() -> beginBuildingMap(bridge, map, host.player())));
         this.verifyPublishButton = add(5, 6, new Button("verify", 3, 3)
             .background("create_maps2/edit/verify_orange"));
+    }
+
+    @Override
+    protected void unmount() {
+        // Updating on unmount is kinda unnecessary since itll happen when opening the add tag
+        // menu for example. But at time of writing we dont have a "when really gone" callback.
+        final var player = host.player();
+        async(() -> map.settings().withUpdateRequest(req -> {
+            try {
+                mapService.updateMap(player.getUuid().toString(), map.id(), req);
+                return true;
+            } catch (Exception e) {
+                ExceptionReporter.reportException(e, player);
+                return false;
+            }
+        }));
+
+        super.unmount();
     }
 
     private void beginNameEdit() {

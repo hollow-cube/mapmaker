@@ -18,7 +18,7 @@ public abstract class AbstractAnvilView extends Panel {
     }
 
     public static @NotNull Panel simpleAnvil(@NotNull String container, @NotNull String icon, @NotNull String title, @NotNull Consumer<String> onSubmit, @NotNull String initialValue) {
-        return new AbstractAnvilView(container, icon, title, initialValue) {
+        return new AbstractAnvilView(container, icon, title, initialValue, true) {
             @Override
             protected void onSubmit(@NotNull String text) {
                 super.onSubmit(text);
@@ -31,7 +31,7 @@ public abstract class AbstractAnvilView extends Panel {
 
     protected Button inputButton;
 
-    public AbstractAnvilView(@NotNull String container, @NotNull String icon, @NotNull String title, @NotNull String initialInput) {
+    public AbstractAnvilView(@NotNull String container, @NotNull String icon, @NotNull String title, @NotNull String initialInput, boolean withSubmit) {
         super(InventoryType.ANVIL, 9, 5);
         this.input = initialInput;
 
@@ -46,13 +46,15 @@ public abstract class AbstractAnvilView extends Panel {
 
         this.inputButton = add(0, 0, new Button("", 1, 1)
             .disableTooltip()
-            .sprite("generic2/anvil/back", -33, 29)
+            .sprite("generic2/anvil/back", -32, 30)
             .onLeftClick(() -> host.popView())
             .text(Component.text(this.input), List.of()));
-        add(2, 0, new Button("gui.generic.empty", 1, 1)
-            .disableTooltip()
-            .sprite("generic2/anvil/checkmark", 34, 28)
-            .onLeftClick(() -> onSubmit(this.input)));
+        if (withSubmit) {
+            add(2, 0, new Button("gui.generic.empty", 1, 1)
+                .disableTooltip()
+                .sprite("generic2/anvil/checkmark", 34, 28)
+                .onLeftClick(() -> onSubmit(this.input)));
+        }
     }
 
     protected void onInputChange(@NotNull String text) {

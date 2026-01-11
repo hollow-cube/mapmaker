@@ -478,6 +478,29 @@ public class MapSettings {
         }
     }
 
+    public void setTag(int index, MapTags.Tag tag) {
+        updateLock.lock();
+        try {
+            if (this.tags == null) return;
+            this.tags.set(index, tag);
+            updates.setTags(this.tags);
+        } finally {
+            updateLock.unlock();
+        }
+    }
+
+    public boolean removeTag(int index) {
+        updateLock.lock();
+        try {
+            if (this.tags == null) return false;
+            this.tags.remove(index);
+            updates.setTags(this.tags);
+            return true;
+        } finally {
+            updateLock.unlock();
+        }
+    }
+
     public boolean removeTag(@NotNull MapTags.Tag tag) {
         updateLock.lock();
         try {

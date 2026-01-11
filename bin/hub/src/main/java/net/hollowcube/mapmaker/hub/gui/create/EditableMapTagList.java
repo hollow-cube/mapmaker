@@ -22,8 +22,12 @@ public class EditableMapTagList extends Panel {
         int i = 0;
         for (; i < 7 && i < tags.size(); i++) {
             var tag = tags.get(i);
+            final int index = i;
             add(i, 0, new Button("tag", 1, 1)
-                .sprite("icon2/1_1/" + tag.sprite(), 1, 1));
+                .sprite("icon2/1_1/" + tag.sprite(), 1, 1)
+                .onLeftClick(() -> host.pushTransientView(new SelectTagView(map,
+                    newTag -> handleReplaceTag(index, newTag))))
+                .onRightClick(() -> handleRemoveTag(index)));
         }
 
         if (i < 7) {
@@ -35,6 +39,21 @@ public class EditableMapTagList extends Panel {
 
     private void handleAddTag(MapTags.Tag tag) {
         map.settings().addTag(tag);
+        update();
+    }
+
+    private void handleReplaceTag(int index, MapTags.Tag tag) {
+        if (index >= map.settings().getTags().size()) {
+            handleAddTag(tag);
+            return;
+        }
+
+        map.settings().setTag(index, tag);
+        update();
+    }
+
+    private void handleRemoveTag(int index) {
+        map.settings().removeTag(index);
         update();
     }
 }

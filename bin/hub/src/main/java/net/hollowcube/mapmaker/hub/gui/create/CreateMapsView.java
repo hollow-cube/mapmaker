@@ -37,7 +37,6 @@ public class CreateMapsView extends Panel {
 
         add(0, 0, backOrClose());
         // todo search
-        // todo + to add map
         add(8, 0, new Button("create", 1, 1)
             .background("generic2/btn/default/1_1")
             .sprite("icon2/1_1/plus", 1, 1)
@@ -50,19 +49,23 @@ public class CreateMapsView extends Panel {
     @Override
     protected void mount(InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
-        if (!isInitial) return;
+        if (isInitial) {
+            // full load from server
+            async(() -> {
+                var playerId = PlayerData.fromPlayer(host.player()).id();
+                var remoteSlots = mapService.getPlayerMapSlots(playerId);
 
-        async(() -> {
-            var playerId = PlayerData.fromPlayer(host.player()).id();
-            var remoteSlots = mapService.getPlayerMapSlots(playerId);
-
-            sync(() -> {
-                slots.clear();
-                slots.addAll(remoteSlots);
-                slots.sort((MapSlot a, MapSlot b) -> b.createdAt().compareTo(a.createdAt()));
-                update();
+                sync(() -> {
+                    slots.clear();
+                    slots.addAll(remoteSlots);
+                    slots.sort((MapSlot a, MapSlot b) -> b.createdAt().compareTo(a.createdAt()));
+                    update();
+                });
             });
-        });
+        } else {
+            // Update from changes (name/icon generally)
+            update();
+        }
     }
 
     private void acceptNewMap(MapSlot slot) {
@@ -76,7 +79,7 @@ public class CreateMapsView extends Panel {
         for (int i = 0; i < 5; i++) {
             int index = i + page * 5;
             if (index >= slots.size()) break;
-            this.entryContainer.add(0, i, new MapSlotEntry(bridge, slots.get(index)));
+            this.entryContainer.add(0, i, new MapSlotEntry(mapService, bridge, slots.get(index)));
         }
     }
 }

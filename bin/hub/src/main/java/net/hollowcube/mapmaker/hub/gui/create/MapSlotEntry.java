@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
+import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapSlot;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Button;
@@ -10,11 +11,13 @@ import static net.hollowcube.mapmaker.hub.gui.create.EditMapView.beginBuildingMa
 
 public class MapSlotEntry extends Panel {
 
+    private final MapService mapService;
     private final ServerBridge bridge;
     private final MapSlot slot;
 
-    public MapSlotEntry(ServerBridge bridge, MapSlot slot) {
+    public MapSlotEntry(MapService mapService, ServerBridge bridge, MapSlot slot) {
         super(9, 1);
+        this.mapService = mapService;
         this.bridge = bridge;
         this.slot = slot;
 
@@ -40,7 +43,7 @@ public class MapSlotEntry extends Panel {
     }
 
     private void onEditMap() {
-        host.pushView(new EditMapView(bridge, slot.map()));
+        host.pushView(new EditMapView(mapService, bridge, slot.map()));
     }
 
 }

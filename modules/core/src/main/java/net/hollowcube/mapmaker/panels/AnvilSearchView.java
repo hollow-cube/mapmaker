@@ -38,7 +38,7 @@ public class AnvilSearchView<T> extends AbstractAnvilView {
         @NotNull Function<T, Button> buttonFactory,
         @NotNull Consumer<T> onSubmit
     ) {
-        super("generic2/anvil/search_container", icon, title, "");
+        super("generic2/anvil/search_container", icon, title, "", false);
 
         this.searchFunction = searchFunction;
         this.defaultSearchTerm = defaultSearchTerm;
