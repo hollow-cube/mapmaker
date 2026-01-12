@@ -314,11 +314,18 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull Page<PlayerFriend> getPlayerFriends(@NotNull String playerId, @NotNull Pageable pageable) {
-        var req = HttpRequest.newBuilder().uri(URI.create(url + "/players/%s/friends?page=%s&pageSize=%s".formatted(playerId, pageable.page(), pageable.pageSize()))).GET();
+    public @NotNull Page<PlayerFriend> getPlayerFriends(
+        @NotNull String playerId, @Nullable Boolean onlineState, @NotNull Pageable pageable) {
+        var builder = urlQueryBuilder()
+            .add("page", String.valueOf(pageable.page()))
+            .add("pageSize", String.valueOf(pageable.pageSize()));
+        if (onlineState != null) builder.add("onlineState", onlineState.toString());
+
+        var req = HttpRequest.newBuilder()
+            .uri(URI.create(url + "/players/%s/friends%s".formatted(playerId, builder.build())))
+            .GET();
         var res = doRequest("getPlayerFriends", req, HttpResponse.BodyHandlers.ofString());
 
-        // todo correct type
         return switch (res.statusCode()) {
             case 200 -> Page.fromJson(res.body(), PlayerFriend.class);
             default -> throw new InternalError("Failed to get friends (" + res.statusCode() + "): " + res.body());
@@ -341,10 +348,14 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull Page<FriendRequest> getFriendRequests(@NotNull String playerId, boolean incoming, @NotNull Pageable pageable) {
+    public @NotNull Page<FriendRequest> getFriendRequests(
+        @NotNull String playerId, boolean incoming, @NotNull Pageable pageable) {
         String direction = incoming ? "incoming" : "outgoing";
         var req = HttpRequest.newBuilder()
-            .uri(URI.create(url + "/players/%s/friendRequests?direction=%s&page=%s&pageSize=%s".formatted(playerId, direction, pageable.page(), pageable.pageSize())))
+            .uri(URI.create(
+                url + "/players/%s/friendRequests?direction=%s&page=%s&pageSize=%s".formatted(playerId, direction,
+                                                                                              pageable.page(),
+                                                                                              pageable.pageSize())))
             .GET();
         var res = doRequest("getFriendRequests", req, HttpResponse.BodyHandlers.ofString());
 
@@ -368,7 +379,8 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
                 new SendFriendRequestResult(GSON.fromJson(res.body(), SendFriendRequestResponse.class).isRequest(),
                                             null, null);
             case 401 -> {
-                SendFriendRequestResult.LimitError error = GSON.fromJson(res.body(), SendFriendRequestResult.LimitError.class);
+                SendFriendRequestResult.LimitError error = GSON.fromJson(res.body(),
+                                                                         SendFriendRequestResult.LimitError.class);
                 yield new SendFriendRequestResult(false, null, error);
             }
             case 409 -> {
@@ -415,7 +427,10 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
 
     @Override
     public @NotNull Page<BlockedPlayer> getBlockedPlayers(@NotNull String playerId, @NotNull Pageable pageable) {
-        var req = HttpRequest.newBuilder().uri(URI.create(url + "/players/%S/blocks?page=%s&pageSize=%s".formatted(playerId, pageable.page(), pageable.pageSize()))).GET();
+        var req = HttpRequest.newBuilder()
+            .uri(URI.create(url + "/players/%S/blocks?page=%s&pageSize=%s".formatted(playerId, pageable.page(),
+                                                                                     pageable.pageSize())))
+            .GET();
         var res = doRequest("getBlockedPlayers", req, HttpResponse.BodyHandlers.ofString());
 
         return switch (res.statusCode()) {
@@ -445,13 +460,16 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         @NotNull String playerId, @NotNull String targetId, boolean bidirectional) {
 
         var req = HttpRequest.newBuilder()
-            .uri(URI.create("%s/players/%s/blocks/player/%s?bidirectional=%s".formatted(url, playerId, targetId, bidirectional)))
+            .uri(URI.create(
+                "%s/players/%s/blocks/player/%s?bidirectional=%s".formatted(url, playerId, targetId, bidirectional)))
             .GET();
         var res = doRequest("getBlocksBetween", req, HttpResponse.BodyHandlers.ofString());
 
         return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), TypeToken.getParameterized(List.class, BlockedPlayer.class).getType());
-            default -> throw new InternalError("Failed to get blocks between (" + res.statusCode() + "): " + res.body());
+            case 200 ->
+                GSON.fromJson(res.body(), TypeToken.getParameterized(List.class, BlockedPlayer.class).getType());
+            default ->
+                throw new InternalError("Failed to get blocks between (" + res.statusCode() + "): " + res.body());
         };
     }
 
@@ -462,8 +480,8 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         return switch (res.statusCode()) {
             case 200 -> GSON.fromJson(res.body(), PlayerNotificationResponse.class);
             case 400 -> throw new IllegalArgumentException("Invalid page number");
-            default ->
-                    throw new SessionService.InternalError("Failed to get notifications (" + res.statusCode() + "): " + res.body());
+            default -> throw new SessionService.InternalError(
+                "Failed to get notifications (" + res.statusCode() + "): " + res.body());
         };
     }
 
@@ -472,10 +490,11 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         var req = setupDelete(url("%s/players/%s/notifications/%s", url, playerId, notificationId));
         var res = doRequest("deleteNotification", req, HttpResponse.BodyHandlers.ofString());
         switch (res.statusCode()) {
-            case 200 -> {}
+            case 200 -> {
+            }
             case 404 -> throw new NotFoundError();
-            default ->
-                    throw new SessionService.InternalError("Failed to delete notification (" + res.statusCode() + "): " + res.body());
+            default -> throw new SessionService.InternalError(
+                "Failed to delete notification (" + res.statusCode() + "): " + res.body());
         }
     }
 
@@ -485,10 +504,11 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         var req = setupPatch(url("%s/players/%s/notifications/%s", url, playerId, notificationId), GSON.toJson(data));
         var res = doRequest("markNotificationRead", req, HttpResponse.BodyHandlers.ofString());
         switch (res.statusCode()) {
-            case 200 -> {}
+            case 200 -> {
+            }
             case 404 -> throw new NotFoundError();
-            default ->
-                    throw new SessionService.InternalError("Failed to mark notification read (" + res.statusCode() + "): " + res.body());
+            default -> throw new SessionService.InternalError(
+                "Failed to mark notification read (" + res.statusCode() + "): " + res.body());
         }
     }
 
@@ -502,10 +522,12 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         boolean replaceUnread
     ) {
         var request = new CreatePlayerNotificationRequest(type, key, data, expiresInSeconds);
-        var req = setupPost(url("%s/players/%s/notifications?replaceUnread=%s", url, playerId, replaceUnread), GSON.toJson(request));
+        var req = setupPost(url("%s/players/%s/notifications?replaceUnread=%s", url, playerId, replaceUnread),
+                            GSON.toJson(request));
         var res = doRequest("createNotification", req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() != 201) {
-            throw new SessionService.InternalError("Failed to create notification (" + res.statusCode() + "): " + res.body());
+            throw new SessionService.InternalError(
+                "Failed to create notification (" + res.statusCode() + "): " + res.body());
         }
     }
 

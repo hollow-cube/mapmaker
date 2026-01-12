@@ -5,10 +5,7 @@ import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
-import net.hollowcube.mapmaker.player.DisplayName;
-import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.player.PlayerService;
-import net.hollowcube.mapmaker.player.SessionService;
+import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.to_be_refactored.SyntheticTabListManager;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
@@ -26,10 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Predicate;
@@ -160,15 +154,7 @@ public class SessionManager {
         // Do not send a join message/add to tab list if the player is hidden
         if (session.hidden()) return;
 
-        var joinMessage = buildJoinMessage(session.playerId());
-        if (joinMessage != null) {
-            for (var player : CONNECTION_MANAGER.getOnlinePlayers()) {
-                // Do not send the join message to the player who joined, we send that to them immediately on join so that it feels better
-                if (player.getUuid().toString().equals(session.playerId())) continue;
-                player.sendMessage(joinMessage);
-            }
-        }
-
+        this.broadcastJoinMessage(session.playerId());
         syntheticTab.addSession(session);
     }
 
@@ -219,36 +205,38 @@ public class SessionManager {
         syntheticTab.addLocalPlayer(event.getPlayer());
     }
 
-    private @Nullable Component buildJoinMessage(@NotNull String playerId) {
-        var displayName = playerService.getPlayerDisplayName2(playerId);
-        if (!showJoinLeaveMessage(displayName)) return null;
-
-        return Component.translatable("chat.player.join", displayName.build(DisplayName.Context.DEFAULT));
-    }
-
-    private @Nullable Component buildLeaveMessage(@NotNull String playerId) {
-        var displayName = playerService.getPlayerDisplayName2(playerId);
-        if (!showJoinLeaveMessage(displayName)) return null;
-
-        return Component.translatable("chat.player.leave", displayName.build(DisplayName.Context.DEFAULT));
-    }
-
     private boolean showJoinLeaveMessage(@NotNull DisplayName displayName) {
         return displayName.getBadgeName() != null; // Show anyone with a badge for now.
     }
 
     private void broadcastJoinMessage(@NotNull String playerId) {
-        var joinMessage = buildJoinMessage(playerId);
-        if (joinMessage == null) return;
+        List<String> friends = this.playerService.getPlayerFriends(playerId, true, new PlayerService.Pageable(1, 10_000)).items()
+            .stream().map(PlayerFriend::playerId).toList();
+        var displayName = this.playerService.getPlayerDisplayName2(playerId);
 
-        Audiences.players().sendMessage(joinMessage);
+        if (showJoinLeaveMessage(displayName)) {
+            // only send to non-friends
+            Audiences.players(lPlayer -> !friends.contains(lPlayer.getUuid().toString()))
+                .sendMessage(Component.translatable("chat.player.join", displayName.build(DisplayName.Context.DEFAULT)));
+        }
+
+        Audiences.players(lPlayer -> friends.contains(lPlayer.getUuid().toString()))
+            .sendMessage(Component.translatable("chat.friend.join", displayName.build(DisplayName.Context.DEFAULT)));
     }
 
     private void broadcastLeaveMessage(@NotNull String playerId) {
-        var leaveMessage = buildLeaveMessage(playerId);
-        if (leaveMessage == null) return;
+        List<String> friends = this.playerService.getPlayerFriends(playerId, true, new PlayerService.Pageable(1, 10_000)).items()
+            .stream().map(PlayerFriend::playerId).toList();
+        var displayName = this.playerService.getPlayerDisplayName2(playerId);
 
-        Audiences.players().sendMessage(leaveMessage);
+        if (showJoinLeaveMessage(displayName)) {
+            // only send to non-friends
+            Audiences.players(player -> !friends.contains(player.getUuid().toString()))
+                .sendMessage(Component.translatable("chat.player.leave", displayName.build(DisplayName.Context.DEFAULT)));
+        }
+
+        Audiences.players(player -> friends.contains(player.getUuid().toString()))
+            .sendMessage(Component.translatable("chat.friend.leave", displayName.build(DisplayName.Context.DEFAULT)));
     }
 
     public void configureVanishedPlayer(@NotNull Player player) {

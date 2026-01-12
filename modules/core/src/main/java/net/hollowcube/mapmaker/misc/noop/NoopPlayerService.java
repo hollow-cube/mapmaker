@@ -122,7 +122,7 @@ public class NoopPlayerService implements PlayerService {
     }
 
     @Override
-    public @NotNull Page<PlayerFriend> getPlayerFriends(@NotNull String playerId, @NotNull Pageable pageable) {
+    public @NotNull Page<PlayerFriend> getPlayerFriends(@NotNull String playerId, @Nullable Boolean onlineState, @NotNull Pageable pageable) {
         return Page.empty();
     }
 

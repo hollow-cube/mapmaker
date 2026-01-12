@@ -102,7 +102,11 @@ public interface PlayerService {
 
     // Friendships
 
-    @NotNull Page<PlayerFriend> getPlayerFriends(@NotNull String playerId, @NotNull Pageable pageable);
+    default @NotNull Page<PlayerFriend> getPlayerFriends(@NotNull String playerId, @NotNull Pageable pageable) {
+        return getPlayerFriends(playerId, null, pageable);
+    };
+
+    @NotNull Page<PlayerFriend> getPlayerFriends(@NotNull String playerId, @Nullable Boolean onlineState, @NotNull Pageable pageable);
 
     void removeFriend(@NotNull String playerId, @NotNull String targetId);
 
