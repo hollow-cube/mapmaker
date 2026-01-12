@@ -69,13 +69,11 @@
     "type": "sprite",
     "ref": "icon/plus",
     "no_shadow": true,
-    "trailing_space": 2
   },
   "MINUS": {
     "type": "sprite",
     "ref": "icon/minus",
     "no_shadow": true,
-    "trailing_space": 2
   },
   "NOTE": {
     "type": "sprite",

@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.command.relationship.friend;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.common.lang.TimeComponent;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerFriend;
@@ -78,7 +79,8 @@ public class FriendListCommand extends CommandDsl {
                     });
             } else {
                 builder.appendNewline()
-                    .append(Component.translatable("command.friend.list.line.offline", displayName.asComponent()));
+                    .append(Component.translatable("command.friend.list.line.offline", displayName.asComponent(),
+                                                   TimeComponent.of(friend.lastOnline())));
             }
         }
         player.sendMessage(builder.build());
