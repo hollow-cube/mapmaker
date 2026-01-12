@@ -51,6 +51,45 @@
     "interval": 1800,
     "messages": [
       {
+        "key": "announcement.global.map_list"
+      },
+      {
+        "key": "announcement.global.map_history"
+      },
+      {
+        "key": "announcement.global.staff"
+      },
+      {
+        "key": "announcement.play.versioned_maps"
+      },
+      {
+        "key": "announcement.play.map_hyperlink"
+      },
+      {
+        "key": "announcement.global.emojis"
+      },
+      {
+        "key": "announcement.global.chat_channels"
+      },
+      {
+        "key": "announcement.global.flyspeed"
+      },
+      {
+        "key": "announcement.play.hide"
+      },
+      {
+        "key": "announcement.play.showheight"
+      },
+      {
+        "key": "announcement.global.help"
+      },
+      {
+        "key": "announcement.build.banner"
+      },
+      {
+        "key": "announcement.build.hdb"
+      },
+      {
         "key": "announcement.global.omega_parkour"
       },
       {
@@ -73,9 +112,6 @@
       },
       {
         "key": "announcement.build.map_tags"
-      },
-      {
-        "key": "announcement.build.invite"
       },
       {
         "key": "announcement.build.give"

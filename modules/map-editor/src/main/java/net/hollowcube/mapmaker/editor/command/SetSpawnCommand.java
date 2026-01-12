@@ -44,6 +44,11 @@ public class SetSpawnCommand extends CommandDsl {
             return;
         }
 
+        if (!CoordinateUtil.withinYLimit(player.getInstance(), newSpawnPoint)) {
+            player.sendMessage(translatable("command.set_spawn.outside_height"));
+            return;
+        }
+
         var world = EditorMapWorld.forPlayer(player);
         if (world == null) return;
 

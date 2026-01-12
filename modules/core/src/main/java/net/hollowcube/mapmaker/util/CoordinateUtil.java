@@ -7,6 +7,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.WorldBorder;
 import org.jetbrains.annotations.NotNull;
 
@@ -112,5 +113,11 @@ public final class CoordinateUtil {
 
         return x >= cx - radius + padding && x <= cx + radius - padding &&
                 z >= cz - radius + padding && z <= cz + radius - padding;
+    }
+
+    public static boolean withinYLimit(@NotNull Instance instance, @NotNull Point point) {
+        int minY = instance.getCachedDimensionType().minY();
+        int maxY = instance.getCachedDimensionType().maxY();
+        return point.y() >= minY && point.y() <= maxY;
     }
 }

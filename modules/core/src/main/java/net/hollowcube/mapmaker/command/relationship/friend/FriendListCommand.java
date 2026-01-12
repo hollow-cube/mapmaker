@@ -41,7 +41,7 @@ public class FriendListCommand extends CommandDsl {
                                                                                        new PlayerService.Pageable(page,
                                                                                                                   10));
         int pageCount = Math.ceilDiv(friends.totalItems(), 10);
-
+        
         if (pageCount == 0) {
             player.sendMessage(Component.translatable("command.friend.list.empty"));
             return;
