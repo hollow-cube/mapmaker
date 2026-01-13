@@ -16,7 +16,7 @@ public class JoinCommand extends AbstractInviteServiceCommand {
     }
 
     @Override
-    void handle(@NotNull Player sender, @NotNull String targetId) {
+    void handle(@NotNull Player sender, @NotNull String targetId, @NotNull String targetName) {
         this.inviteService.join(sender, targetId);
     }
 }

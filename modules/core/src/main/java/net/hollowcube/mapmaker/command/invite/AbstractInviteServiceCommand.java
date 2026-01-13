@@ -36,7 +36,7 @@ abstract class AbstractInviteServiceCommand extends CommandDsl {
         this.addSyntax(playerOnly(this::handleCommand), this.targetArgument);
     }
 
-    abstract void handle(@NotNull Player sender, @NotNull String targetId);
+    abstract void handle(@NotNull Player sender, @NotNull String targetId, @NotNull String targetName);
 
     private void handleCommand(@NotNull Player player, @NotNull CommandContext context) {
         var targetName = context.getRaw(this.targetArgument);
@@ -60,6 +60,6 @@ abstract class AbstractInviteServiceCommand extends CommandDsl {
 
         if (this.preventBlocked && this.playerService.failIfBlocked(player, targetId, context.getRaw(this.targetArgument), true)) return;
 
-        this.handle(player, targetSession.playerId());
+        this.handle(player, targetSession.playerId(), targetName);
     }
 }
