@@ -9,7 +9,8 @@ import net.hollowcube.mapmaker.config.MinestomConfig;
 import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
 import net.hollowcube.mapmaker.util.HttpServerWrapper;
-import net.hollowcube.mapmaker.util.MinestomPrometheus;
+import net.hollowcube.mapmaker.util.telemetry.CustomJVMPrometheus;
+import net.hollowcube.mapmaker.util.telemetry.MinestomPrometheus;
 import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.Auth;
@@ -84,6 +85,7 @@ public final class MapServerInitializer {
             minecraftServer = MinecraftServer.init(auth);
         }
 
+        CustomJVMPrometheus.init();
         MinestomPrometheus.init();
         var ignored = DimensionTypes.FULL_BRIGHT; // Force initialization
         var server = serverFactory.apply(config);

@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.util;
+package net.hollowcube.mapmaker.util.telemetry;
 
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;

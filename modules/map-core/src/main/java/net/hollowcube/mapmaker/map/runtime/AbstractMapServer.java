@@ -88,6 +88,7 @@ import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.*;
+import net.hollowcube.mapmaker.util.telemetry.NoopSpanExporter;
 import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;

@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.util;
+package net.hollowcube.mapmaker.util.telemetry;
 
 import io.prometheus.client.Gauge;
 import io.prometheus.client.Histogram;
