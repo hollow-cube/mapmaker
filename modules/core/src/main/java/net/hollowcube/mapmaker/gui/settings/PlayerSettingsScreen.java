@@ -42,7 +42,7 @@ public class PlayerSettingsScreen {
         });
     }
 
-    private static void openSettingsDialog(@NotNull Player player) {
+    public static void openSettingsDialog(@NotNull Player player) {
         var data = PlayerData.fromPlayer(player);
         var dialog = DialogBuilder.create()
                 .title(Component.translatable("dialog.settings.title"))

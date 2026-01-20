@@ -398,6 +398,7 @@ public abstract class AbstractMapServer implements MapServer {
         if (fullInstance) commandManager.register(new TotpCommand(playerService()));
         commandManager.register(new NoobCommand(permManager()));
         commandManager.register(new HideCommand(playerService()));
+        commandManager.register(new SettingsCommand());
 
         if (fullInstance) {
             commandManager.register(new UnblockCommand(playerService()));
