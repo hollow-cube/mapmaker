@@ -152,7 +152,7 @@ jobs:
             -e MAPMAKER_VERSION=${{ github.ref_name }} \
             -e MAPMAKER_COMMIT_HASH=${{ github.sha }} \
             container-registry.oracle.com/graalvm/native-image:25 \
-            ./gradlew :bin:map-isolate:nativeCompile -PisRelease=true --no-configuration-cache --no-daemon
+            -c "./gradlew :bin:map-isolate:nativeCompile -PisRelease=true --no-configuration-cache --no-daemon"
 
       # Build and push docker image
       - name: Set up Docker Buildx
