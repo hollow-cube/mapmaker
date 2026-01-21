@@ -61,7 +61,7 @@ graalvmNative {
                 listOf(
                     "--enable-native-access=ALL-UNNAMED", "--enable-monitoring=jfr",
                     "--features=net.hollowcube.nativeimage.HCNativeImageFeature",
-                    "--gc=G1",
+//                    "--gc=G1",
 
 //                    "--future-defaults=all",
                     "-H:+UseCompressedReferences", "-R:MaxHeapSize=200m",
