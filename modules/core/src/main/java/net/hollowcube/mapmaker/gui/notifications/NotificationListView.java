@@ -54,6 +54,8 @@ public class NotificationListView extends Panel {
 
     @Blocking
     protected List<? extends Panel> onSearch(Unit ignored, int page, int pageSize) {
+        if (this.host == null) return List.of(); // This happens if the async task finishes after the panel is closed
+
         var playerId = PlayerData.fromPlayer(this.host.player()).id();
         var notifications = this.context.players().getNotifications(playerId, page, false);
 
