@@ -118,8 +118,8 @@ public class MapIsolateServer extends AbstractMapServer {
 
         var kafkaConfig = config.get(KafkaConfig.class);
         if (!globalConfig.noop()) {
-//            var mapMgmtConsumer = new MapIsolateMapMgmtConsumerImpl(kafkaConfig.bootstrapServers(), this);
-//            shutdowner().queue("map-mgmt-listener", mapMgmtConsumer::close);
+            var mapMgmtConsumer = new MapIsolateMapMgmtConsumerImpl(kafkaConfig.bootstrapServers(), this);
+            shutdowner().queue("map-mgmt-listener", mapMgmtConsumer::close);
         }
     }
 
