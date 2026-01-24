@@ -125,6 +125,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     /// ONLY returns published maps currently.
     @Override
     public @NotNull List<MapData> getMaps(@NotNull String authorizer, @NotNull List<String> mapIds) {
+        if (mapIds.isEmpty()) return List.of();
         var req = HttpRequest.newBuilder()
             .uri(URI.create(urlV3 + "/maps?mapIds=" + String.join(",", mapIds)))
             .header(AUTHORIZER_HEADER, authorizer)

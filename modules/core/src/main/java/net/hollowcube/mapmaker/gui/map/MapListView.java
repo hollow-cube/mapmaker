@@ -129,8 +129,6 @@ public abstract class MapListView extends Panel {
         protected Map.@NotNull Entry<List<MapData>, Integer> search(int page, int pageSize) {
             var playerId = PlayerData.fromPlayer(host.player()).id();
             var history = mapService.getPlayerMapHistory(playerId, page, pageSize);
-            if (history.results().isEmpty())
-                return Map.entry(List.of(), page);
             var mapIds = history.results().stream().map(MapHistory.Entry::mapId).toList();
             var maps = mapService.getMaps(playerId, mapIds);
             return Map.entry(maps, history.nextPage() ? page + 2 : page);
