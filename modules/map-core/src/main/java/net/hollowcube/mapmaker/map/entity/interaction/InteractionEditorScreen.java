@@ -27,10 +27,10 @@ public class InteractionEditorScreen {
     private static final Key EDITOR_SCREEN_ID = Key.key("hollowcube", "interaction_editor_screen");
     private static final Pattern POSITION_REGEX = Pattern.compile(" *(?<x>-?\\d+(?:\\.\\d+)?) +(?<y>-?\\d+(?:\\.\\d+)?) +(?<z>-?\\d+(?:\\.\\d+)?) *");
     private static final TagStringIO TAG_STRING_IO = TagStringIO.builder()
-            .acceptHeterogeneousLists(true)
-            .emitHeterogeneousLists(true)
-            .indent(4)
-            .build();
+        .acceptHeterogeneousLists(true)
+        .emitHeterogeneousLists(true)
+        .indent(4)
+        .build();
 
     public static final ObjectEntityEditor MARKER_EDITOR = (player, entity) -> {
         if (entity instanceof InteractionEntity interaction) {
@@ -46,9 +46,9 @@ public class InteractionEditorScreen {
         var match = POSITION_REGEX.matcher(data);
         if (!match.matches()) return interaction.getPosition();
         return new Pos(
-                MathUtil.parseFiniteDouble(match.group("x"), interaction.getPosition().x()),
-                MathUtil.parseFiniteDouble(match.group("y"), interaction.getPosition().y()),
-                MathUtil.parseFiniteDouble(match.group("z"), interaction.getPosition().z())
+            MathUtil.parseFiniteDouble(match.group("x"), interaction.getPosition().x()),
+            MathUtil.parseFiniteDouble(match.group("y"), interaction.getPosition().y()),
+            MathUtil.parseFiniteDouble(match.group("z"), interaction.getPosition().z())
         );
     }
 
@@ -89,9 +89,9 @@ public class InteractionEditorScreen {
             event.getPlayer().closeDialog();
         } else {
             ToastManager.showNotification(
-                    event.getPlayer(),
-                    Component.text("Error"),
-                    Component.text("Can't parse, make sure it's valid NBT.", NamedTextColor.RED)
+                event.getPlayer(),
+                Component.text("Error"),
+                Component.text("Can't parse, make sure it's valid NBT.", NamedTextColor.RED)
             );
         }
         interaction.teleport(pos);
@@ -110,14 +110,14 @@ public class InteractionEditorScreen {
 
 
                 var dialog = DialogBuilder.create()
-                        .closeOnEscape()
-                        .inputs(it -> it
-                                .text("width", Component.text("Width"), width, 10, 250)
-                                .text("height", Component.text("Height"), height, 10, 250)
-                                .text("position", Component.text("Position (X Y Z)"), position, 50, 250)
-                                .multiline("data", Component.text("Data"), nbt, -1, -1, 250, 150)
-                        )
-                        .buildConfirmation(EDITOR_SCREEN_ID, CompoundBinaryTag.builder().putString("uuid", entity.getUuid().toString()).build());
+                    .closeOnEscape()
+                    .inputs(it -> it
+                        .text("width", Component.text("Width"), width, 10, 250)
+                        .text("height", Component.text("Height"), height, 10, 250)
+                        .text("position", Component.text("Position (X Y Z)"), position, 50, 250)
+                        .multiline("data", Component.text("Data"), nbt, -1, -1, 250, 150)
+                    )
+                    .buildSaveConfirmation(EDITOR_SCREEN_ID, CompoundBinaryTag.builder().putString("uuid", entity.getUuid().toString()).build());
 
                 player.sendPacket(new ShowDialogPacket(dialog));
             } catch (Exception e) {

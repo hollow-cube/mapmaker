@@ -65,6 +65,7 @@ import net.hollowcube.mapmaker.kafka.FriendlyProducer;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
+import net.hollowcube.mapmaker.map.command.BugReportCommand;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.entity.MapEntities;
 import net.hollowcube.mapmaker.map.util.AnonHealthCheck;
@@ -403,6 +404,7 @@ public abstract class AbstractMapServer implements MapServer {
         commandManager.register(new NoobCommand(permManager()));
         commandManager.register(new HideCommand(playerService()));
         commandManager.register(new SettingsCommand());
+        commandManager.register(new BugReportCommand());
 
         if (fullInstance) {
             commandManager.register(new UnblockCommand(playerService()));
