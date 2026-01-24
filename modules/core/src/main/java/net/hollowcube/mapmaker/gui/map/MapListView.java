@@ -31,8 +31,8 @@ public abstract class MapListView extends Panel {
     private final Pagination<Unit> pagination;
 
     protected MapListView(
-            @NotNull PlayerService playerService, @NotNull MapService mapService,
-            @NotNull ServerBridge bridge, @NotNull String title
+        @NotNull PlayerService playerService, @NotNull MapService mapService,
+        @NotNull ServerBridge bridge, @NotNull String title
     ) {
         super(9, 10);
         this.playerService = playerService;
@@ -45,7 +45,7 @@ public abstract class MapListView extends Panel {
         add(0, 0, backOrClose());
 
         this.pagination = add(1, 1, new Pagination<Unit>(7, 3)
-                .fetchAsync(this::onSearch));
+            .fetchAsync(this::onSearch));
         add(2, 4, pagination.prevButton());
         add(3, 4, pagination.pageText(3, 1));
         add(6, 4, pagination.nextButton());
@@ -114,7 +114,7 @@ public abstract class MapListView extends Panel {
         @Override
         protected Map.@NotNull Entry<List<MapData>, Integer> search(int page, int pageSize) {
             var response = mapService.searchMaps(MapSearchParams.builder(host.player().getUuid().toString())
-                    .page(page).pageSize(pageSize).owner(this.targetId).build());
+                .page(page).pageSize(pageSize).owner(this.targetId).build());
             return Map.entry(response.results(), response.pageCount());
         }
     }
@@ -129,6 +129,8 @@ public abstract class MapListView extends Panel {
         protected Map.@NotNull Entry<List<MapData>, Integer> search(int page, int pageSize) {
             var playerId = PlayerData.fromPlayer(host.player()).id();
             var history = mapService.getPlayerMapHistory(playerId, page, pageSize);
+            if (history.results().isEmpty())
+                return Map.entry(List.of(), page);
             var mapIds = history.results().stream().map(MapHistory.Entry::mapId).toList();
             var maps = mapService.getMaps(playerId, mapIds);
             return Map.entry(maps, history.nextPage() ? page + 2 : page);
