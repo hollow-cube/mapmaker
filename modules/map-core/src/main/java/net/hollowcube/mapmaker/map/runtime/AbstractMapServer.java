@@ -696,6 +696,11 @@ public abstract class AbstractMapServer implements MapServer {
             return false;
 
         // todo fancier exception grouping
+
+        var runtime = ServerRuntime.getRuntime();
+        message.addProperty("$app_version", runtime.version());
+        message.addProperty("server", runtime.hostname());
+
         return true;
     }
 
