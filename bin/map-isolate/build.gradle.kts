@@ -25,7 +25,9 @@ dependencies {
     implementation(libs.slf4j.jul)
     implementation(libs.logback)
     implementation(libs.bundles.prometheus)
-    implementation(libs.bundles.otel)
+    implementation(libs.bundles.otel) {
+        exclude(group = "io.opentelemetry", module = "opentelemetry-exporter-sender-okhttp")
+    }
 
     nativeImageCompileOnly(project(":tools:native-image-helper"))
     configurations.named("nativeImageClasspath") {

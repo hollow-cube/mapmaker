@@ -19,7 +19,9 @@ dependencies {
 
     testImplementation(project(":modules:compat"))
     testImplementation(project(":modules:test"))
-    testImplementation(libs.bundles.otel)
+    testImplementation(libs.bundles.otel) {
+        exclude(group = "io.opentelemetry", module = "opentelemetry-exporter-sender-okhttp")
+    }
 
     compileOnly(project(":tools:lua-slopgen:api"))
     annotationProcessor(project(":tools:lua-slopgen"))
