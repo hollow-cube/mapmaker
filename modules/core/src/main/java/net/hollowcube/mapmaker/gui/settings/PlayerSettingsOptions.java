@@ -14,23 +14,31 @@ public class PlayerSettingsOptions {
     public static final int OPTION_WIDTH = 225;
 
     public static final List<PlayerSettingsOption> OPTIONS = List.of(
-            PlayerSettingsOption.forBool(
-                    PlayerSettings.ENABLE_WE_CUI,
-                    Component.translatable("dialog.settings.option.cui")
-            ),
-            PlayerSettingsOption.forSelect(
-                    PlayerSettings.CHAT_CHANNEL,
-                    Component.translatable("dialog.settings.option.chat"),
-                    ClientChatMessageData.CHANNEL_GLOBAL, ClientChatMessageData.CHANNEL_LOCAL
-            ),
-            PlayerSettingsOption.forEnum(
-                    PlayerSettings.NEARBY_PLAYER_VISIBILITY,
-                    Component.translatable("dialog.settings.option.visibility"),
-                    VisibilityRule.class
-            ),
-            PlayerSettingsOption.forBool(
-                PlayerSettings.AUTO_REJECT_FRIEND_REQUESTS,
-                Component.translatable("dialog.settings.option.auto_reject_friend_requests")
-            )
+        PlayerSettingsOption.forBool(
+            PlayerSettings.ENABLE_WE_CUI,
+            Component.translatable("dialog.settings.option.cui")
+        ),
+        PlayerSettingsOption.forSelect(
+            PlayerSettings.CHAT_CHANNEL,
+            Component.translatable("dialog.settings.option.chat"),
+            ClientChatMessageData.CHANNEL_GLOBAL, ClientChatMessageData.CHANNEL_LOCAL
+        ),
+        PlayerSettingsOption.forEnum(
+            PlayerSettings.NEARBY_PLAYER_VISIBILITY,
+            Component.translatable("dialog.settings.option.visibility"),
+            VisibilityRule.class
+        ),
+        PlayerSettingsOption.forBool(
+            PlayerSettings.AUTO_REJECT_FRIEND_REQUESTS,
+            Component.translatable("dialog.settings.option.auto_reject_friend_requests")
+        ),
+        PlayerSettingsOption.forBool(
+            PlayerSettings.ALLOW_DIRECT_MESSAGES,
+            Component.translatable("dialog.settings.option.allow_direct_messages")
+        ),
+        PlayerSettingsOption.forBool(
+            PlayerSettings.ENABLE_PING_SOUNDS,
+            Component.translatable("dialog.settings.option.enable_ping_sounds")
+        )
     );
 }

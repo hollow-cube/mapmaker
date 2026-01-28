@@ -61,10 +61,10 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
     private static final Gson GSON = AbstractHttpService.GSON;
 
     private static final Sound TAG_DING = Sound.sound()
-            .type(SoundEvent.ENTITY_EXPERIENCE_ORB_PICKUP)
-            .source(Sound.Source.PLAYER)
-            .volume(5)
-            .build();
+        .type(SoundEvent.ENTITY_EXPERIENCE_ORB_PICKUP)
+        .source(Sound.Source.PLAYER)
+        .volume(5)
+        .build();
 
     private static final Tag<Long> LAST_CHAT_MESSAGE = Tag.Long("last_chat_message").defaultValue(0L);
     private static final long CHAT_COOLDOWN = 500L;
@@ -81,10 +81,10 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
     private final MessageComponents components;
 
     public ChatMessageListener(
-            @NotNull SessionManager sessionManager, @NotNull PlayerService playerService,
-            @NotNull MapService mapService, @NotNull PunishmentService punishmentService,
-            @NotNull String kafkaBrokers, @NotNull FriendlyProducer producer,
-            @NotNull PermManager permissions
+        @NotNull SessionManager sessionManager, @NotNull PlayerService playerService,
+        @NotNull MapService mapService, @NotNull PunishmentService punishmentService,
+        @NotNull String kafkaBrokers, @NotNull FriendlyProducer producer,
+        @NotNull PermManager permissions
     ) {
         super(CHAT_OUT_TOPIC, "chat", ChatMessageListener::fromJson, kafkaBrokers);
         this.sessionManager = sessionManager;
@@ -95,15 +95,15 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
         this.permissions = permissions;
 
         this.playerMuteCache = Caffeine.newBuilder()
-                .expireAfterWrite(10, TimeUnit.MINUTES)
-                .executor(FutureUtil.VIRTUAL)
-                .buildAsync(this::fetchActiveMute);
+            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .executor(FutureUtil.VIRTUAL)
+            .buildAsync(this::fetchActiveMute);
 
         this.components = new MessageComponents(mapService, playerService);
 
         MinecraftServer.getGlobalEventHandler()
-                .addListener(PunishmentCreatedEvent.class, this::handlePunishmentCreated)
-                .addListener(PunishmentRevokedEvent.class, this::handlePunishmentRevoked);
+            .addListener(PunishmentCreatedEvent.class, this::handlePunishmentCreated)
+            .addListener(PunishmentRevokedEvent.class, this::handlePunishmentRevoked);
 
         setAutocommit(false);
     }
@@ -161,8 +161,8 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             }
 
             trySendChatMessage(
-                    player,
-                    new ClientChatMessageData(ClientChatMessageData.Type.CHAT_UNSIGNED, playerData.id(), message, channel, currentMapId, messageSeed)
+                player,
+                new ClientChatMessageData(ClientChatMessageData.Type.CHAT_UNSIGNED, playerData.id(), message, channel, currentMapId, messageSeed)
             );
         });
     }
@@ -204,8 +204,8 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             case CHAT_UNSIGNED -> FutureUtil.submitVirtual(() -> {
                 switch (message.channel()) {
                     case ClientChatMessageData.CHANNEL_GLOBAL -> handleUnsignedChat(
-                            message, "chat.channel.global",
-                            _ -> true
+                        message, "chat.channel.global",
+                        _ -> true
                     );
                     case ClientChatMessageData.CHANNEL_LOCAL -> {
                         var senderMap = OpUtils.map(sessionManager.getPresence(message.sender()), Presence::mapId);
@@ -216,8 +216,8 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                         });
                     }
                     case ClientChatMessageData.CHANNEL_STAFF -> handleUnsignedChat(
-                            message, "chat.channel.staff",
-                            recipient -> this.permissions.hasPlatformPermission(recipient, PlatformPerm.MAP_ADMIN)
+                        message, "chat.channel.staff",
+                        recipient -> this.permissions.hasPlatformPermission(recipient, PlatformPerm.MAP_ADMIN)
                     );
                     default -> handleDirectMessage(message);
                 }
@@ -231,16 +231,17 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
         logger.info("Received chat message: {}", message);
 
         try {
-            var senderDisplyName = playerService.getPlayerDisplayName2(message.sender());
-            var senderName = senderDisplyName.build(DisplayName.Context.DEFAULT);
-            var isColored = senderDisplyName.parts().size() > 1;
+            var senderDisplayName = playerService.getPlayerDisplayName2(message.sender());
+            var senderName = senderDisplayName.build(DisplayName.Context.DEFAULT);
+            var isColored = senderDisplayName.parts().size() > 1;
 
             for (var recipient : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                 var isSender = recipient.getUuid().toString().equals(message.sender());
                 if (!filter.test(recipient)) continue;
 
                 var data = this.components.createGlobalMessage(recipient, message);
-                if (data.ping()) recipient.playSound(TAG_DING);
+                var shouldPing = PlayerData.fromPlayer(recipient).getSetting(PlayerSettings.ENABLE_PING_SOUNDS);
+                if (data.ping() && shouldPing) recipient.playSound(TAG_DING);
 
                 var text = data.text().color(isColored ? NamedTextColor.WHITE : NamedTextColor.GRAY);
 
@@ -276,20 +277,20 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                 var data = this.components.createDirectMessage(target, message);
                 target.playSound(TAG_DING);
                 target.sendMessage(Component.translatable(
-                        "chat.channel.dm.receive", List.of(senderDisplayName, targetDisplayName, data.text())
+                    "chat.channel.dm.receive", List.of(senderDisplayName, targetDisplayName, data.text())
                 ));
             }
             if (sender != null) {
                 var data = this.components.createDirectMessage(sender, message);
                 sender.sendMessage(Component.translatable(
-                        "chat.channel.dm.send", List.of(senderDisplayName, targetDisplayName, data.text())
+                    "chat.channel.dm.send", List.of(senderDisplayName, targetDisplayName, data.text())
                 ));
                 data.extra().values().forEach(sender::sendMessage);
             }
             for (var spy : spies) {
                 var data = this.components.createDirectMessage(spy, message);
                 spy.sendMessage(Component.translatable(
-                        "chat.channel.dm.spy", List.of(senderDisplayName, targetDisplayName, data.text())
+                    "chat.channel.dm.spy", List.of(senderDisplayName, targetDisplayName, data.text())
                 ));
             }
         } catch (Exception e) {
@@ -297,14 +298,24 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
         }
     }
 
+    @Blocking
     protected void handleChatSystem(@NotNull ChatMessageData message) {
         var player = MinecraftServer.getConnectionManager()
-                .getOnlinePlayerByUuid(UUID.fromString(message.target()));
+            .getOnlinePlayerByUuid(UUID.fromString(message.target()));
         if (player == null) return; // Not relevant to this server
 
         try {
-            var parts = message.argsSafe().stream().map(Component::text).toList();
-            player.sendMessage(Component.translatable(message.key(), parts));
+            var args = new ArrayList<Component>();
+            for (var rawArg : message.argsSafe()) {
+                // Hacky way to send display name in arg, we should properly support a type field on arg to resolve it.
+                if (rawArg.startsWith("pdn::")) {
+                    var displayName = playerService.getPlayerDisplayName2(rawArg.substring(5));
+                    args.add(displayName.build());
+                    continue;
+                }
+                args.add(Component.text(rawArg));
+            }
+            player.sendMessage(Component.translatable(message.key(), args));
         } catch (Exception e) {
             ExceptionReporter.reportException(e, player);
         }
