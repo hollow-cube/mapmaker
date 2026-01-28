@@ -80,17 +80,18 @@ public class BugReportCommand extends CommandDsl {
         var session = world.server().sessionManager().getSession(playerId);
         if (session == null) return; // Sanity
 
+        var pvn = ProtocolVersions.getProtocolVersion(player);
         PostHog.capture(playerId, "bug_reported", Map.ofEntries(
             Map.entry("server", runtime.hostname()),
             Map.entry("server_version", runtime.version()),
             Map.entry("server_size", runtime.size()),
             Map.entry("location", String.format("%.2f %.2f %.2f", player.getPosition().x(), player.getPosition().y(), player.getPosition().z())),
             Map.entry("session_start", session.createdAt()),
-            Map.entry("game_version", ProtocolVersions.getProtocolName(session.protocolVersion())),
+            Map.entry("game_version", ProtocolVersions.getProtocolName(pvn)),
             Map.entry("proxy", session.proxyId()),
             Map.entry("presence_type", session.presence().type()),
             Map.entry("presence_state", session.presence().state()),
-            Map.entry("presence_instance", session.presence().instanceId()),
+            Map.entry("map_id", world.map().id()),
             Map.entry("message", message)
         ));
 
