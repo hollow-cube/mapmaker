@@ -29,6 +29,7 @@ public abstract class MapListView extends Panel {
 
     protected final Text titleText;
     private final Pagination<Unit> pagination;
+    private boolean initialized = false;
 
     protected MapListView(
         @NotNull PlayerService playerService, @NotNull MapService mapService,
@@ -55,7 +56,10 @@ public abstract class MapListView extends Panel {
     protected void mount(@NotNull InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
 
-        pagination.reset(Unit.INSTANCE);
+        if (!initialized) {
+            initialized = true;
+            pagination.reset(Unit.INSTANCE);
+        }
     }
 
     @Blocking
