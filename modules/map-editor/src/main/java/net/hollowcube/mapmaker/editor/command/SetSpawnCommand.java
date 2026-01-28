@@ -3,14 +3,12 @@ package net.hollowcube.mapmaker.editor.command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.editor.EditorMapWorld;
-import net.hollowcube.mapmaker.util.CoordinateUtil;
+import net.hollowcube.mapmaker.editor.CommonEditorActions;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 
 import static net.hollowcube.mapmaker.editor.command.EditorConditions.builderOnly;
-import static net.kyori.adventure.text.Component.translatable;
 
 public class SetSpawnCommand extends CommandDsl {
     private final Argument<Point> coordArgument = Argument.RelativeVec3("position")
@@ -31,28 +29,13 @@ public class SetSpawnCommand extends CommandDsl {
     }
 
     private void handleSetSpawnToPlayer(Player player, CommandContext context) {
-        updateMapPos(player, player.getPosition());
+        CommonEditorActions.trySetSpawn(player, player.getPosition());
     }
 
     private void handleSetSpawnToCoords(Player player, CommandContext context) {
-        updateMapPos(player, new Pos(context.get(coordArgument), context.get(yawArgument), context.get(pitchArgument)));
-    }
-
-    private void updateMapPos(Player player, Pos newSpawnPoint) {
-        if (!CoordinateUtil.inBorder(player.getInstance().getWorldBorder(), newSpawnPoint, 2)) {
-            player.sendMessage(translatable("command.set_spawn.out_of_world"));
-            return;
-        }
-
-        if (!CoordinateUtil.withinYLimit(player.getInstance(), newSpawnPoint)) {
-            player.sendMessage(translatable("command.set_spawn.outside_height"));
-            return;
-        }
-
-        var world = EditorMapWorld.forPlayer(player);
-        if (world == null) return;
-
-        world.setSpawnPoint(newSpawnPoint);
-        player.sendMessage(translatable("command.set_spawn.success", CoordinateUtil.asTranslationArgs(newSpawnPoint)));
+        CommonEditorActions.trySetSpawn(
+            player,
+            new Pos(context.get(coordArgument), context.get(yawArgument), context.get(pitchArgument))
+        );
     }
 }
