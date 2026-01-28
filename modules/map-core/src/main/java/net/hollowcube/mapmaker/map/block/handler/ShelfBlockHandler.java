@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map.block.handler;
 import net.hollowcube.common.util.PropertyUtil;
 import net.hollowcube.mapmaker.map.block.handler.base.ContainerSerializer;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemStack;
@@ -42,13 +43,15 @@ public class ShelfBlockHandler implements BlockHandler {
     public boolean onInteract(@NotNull BlockHandler.Interaction interaction) {
         if (!BlockHandlerHelpers.canEdit(interaction)) return true;
 
+        var player = interaction.getPlayer();
         var blockPos = interaction.getBlockPosition();
         var block = interaction.getBlock();
-        var stack = interaction.getPlayer().getItemInHand(interaction.getHand());
+        var stack = player.getItemInHand(interaction.getHand());
         var direction = PropertyUtil.getFacing(block.properties());
         var cursor = interaction.getCursorPosition();
 
-        if (direction != interaction.getBlockFace().toDirection()) return false;
+        if (interaction.getHand() != PlayerHand.MAIN || player.isSneaking()) return true;
+        if (direction != interaction.getBlockFace().toDirection()) return true;
 
         if (cursor.y() > 0.25f && cursor.y() < 0.75f) {
             var value = switch (direction) {
@@ -65,7 +68,7 @@ public class ShelfBlockHandler implements BlockHandler {
                 if (value >= start && value <= end) {
                     block = setItemStack(block, i, stack);
                     interaction.getInstance().setBlock(blockPos, block);
-                    return true;
+                    return false;
                 }
             }
         }
@@ -73,7 +76,7 @@ public class ShelfBlockHandler implements BlockHandler {
         if (stack.isAir()) {
             block = block.withTag(ALIGN_ITEMS_TO_BOTTOM, !block.getTag(ALIGN_ITEMS_TO_BOTTOM));
             interaction.getInstance().setBlock(blockPos, block);
-            return true;
+            return false;
         }
 
         return true;
