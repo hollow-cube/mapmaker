@@ -59,7 +59,13 @@ public class BannerCommand extends CommandDsl {
     private void handleGiveBanner(Player player, CommandContext context) {
         try {
             var url = URI.create(context.get(urlArg));
-            var query = url.getFragment().startsWith("?") ? url.getFragment().substring(1) : url.getFragment();
+            var urlFragment = url.getFragment();
+            if (urlFragment == null || urlFragment.isEmpty()) {
+                player.sendMessage(Component.translatable("commands.banner.malformed_url"));
+                return;
+            }
+
+            var query = urlFragment.startsWith("?") ? urlFragment.substring(1) : urlFragment;
             var queries = Arrays.stream(query.split("&"))
                     .map(s -> s.split("=", 2))
                     .filter(s -> s.length == 2)
