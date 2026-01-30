@@ -50,10 +50,27 @@ public class DialogInputsBuilder {
             int maxLength, int maxLines,
             int width, int height
     ) {
-        return input(new DialogInput.Text(
-                id, width, label, true, value, maxLength != -1 ? maxLength : Integer.MAX_VALUE,
-                new DialogInput.Text.Multiline(maxLines != -1 ? maxLines : null, height)
-        ));
+        return input(newMultilineText(id, label, true, value, maxLength, maxLines, width, height));
+    }
+
+    public DialogInputsBuilder multilineNoLabel(
+        @NotNull String id, @NotNull String value,
+        int maxLength, int maxLines,
+        int width, int height
+    ) {
+        return input(newMultilineText(id, Component.empty(), false, value, maxLength, maxLines, width, height));
+    }
+
+    private static DialogInput.Text newMultilineText(
+        @NotNull String id, @NotNull Component label,
+        boolean showLabel, @NotNull String value,
+        int maxLength, int maxLines,
+        int width, int height
+    ) {
+        return new DialogInput.Text(
+            id, width, label, showLabel, value, maxLength != -1 ? maxLength : Integer.MAX_VALUE,
+            new DialogInput.Text.Multiline(maxLines != -1 ? maxLines : null, height)
+        );
     }
 
     public List<DialogInput> build() {
