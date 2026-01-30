@@ -104,19 +104,10 @@ final class StoreHelpers {
     }
 
     private static @NotNull Book buildCheckoutBook(int productIndex, @NotNull String url) {
-        var component = Component.text();
+        var sprite = Component.text(SPRITE_MAP[productIndex].fontChar(), TextColor.color(78, 92, 38))
+            .hoverEvent(HoverEvent.showText(LanguageProviderV2.translateMultiMerged("store.checkout.open_in_browser", List.of())))
+            .clickEvent(ClickEvent.openUrl(url));
 
-        component.append(Component.text(SPRITE_MAP[productIndex].fontChar(), TextColor.color(78, 92, 38)));
-
-        component.appendNewline().appendNewline().appendNewline().appendNewline();
-
-        var line = Component.text(FontUtil.computeOffset(10)).append(Component.text(FontUtil.computeOffset(94))
-                .hoverEvent(HoverEvent.showText(LanguageProviderV2.translateMultiMerged("store.checkout.open_in_browser", List.of())))
-                .clickEvent(ClickEvent.openUrl(url)));
-        for (int i = 0; i < 9; i++) {
-            component.append(line).appendNewline();
-        }
-
-        return Book.builder().addPage(component.build()).build();
+        return Book.builder().addPage(sprite).build();
     }
 }
