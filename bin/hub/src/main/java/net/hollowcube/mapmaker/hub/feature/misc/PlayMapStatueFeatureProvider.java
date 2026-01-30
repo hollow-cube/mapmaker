@@ -114,6 +114,8 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
     private void handleSearchMapsClick(@NotNull Player player) {
         var browser = new MapBrowserView(server.playerService(), server.mapService(), server.bridge(), false);
         Panel.open(player, browser);
+        // Set initial sort preset to best, else pagination doesn't initialize properly
+        browser.simpleSort(MapBrowserView.SortPreset.BEST);
         browser.openSearchInput();
     }
 
