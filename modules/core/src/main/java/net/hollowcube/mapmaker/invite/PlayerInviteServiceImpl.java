@@ -212,11 +212,11 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
                 String inviteRequest = isInvite ? "invite" : "request";
                 String playBuild = inviteMap.isPublished() ? "play" : "build";
 
-                var inviteTargetId = isInvite ? invite.recipientId() : invite.senderId();
-                var targetDisplayName = playerService.getPlayerDisplayName2(inviteTargetId);
+                var inviteSenderId = isInvite ? invite.senderId() : invite.recipientId();
+                var senderDisplayName = playerService.getPlayerDisplayName2(inviteSenderId);
 
                 String translateString = "map." + playBuild + "." + inviteRequest + "." + acceptReject;
-                sender.sendMessage(Component.translatable(translateString, targetDisplayName, Component.text(inviteMap.name())));
+                sender.sendMessage(Component.translatable(translateString, senderDisplayName, Component.text(inviteMap.name())));
             }
             case 400 -> {
                 InviteError error = GSON.fromJson(response.body(), InviteError.class);
