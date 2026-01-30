@@ -33,6 +33,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.listener.manager.PacketPlayListenerConsumer;
+import net.minestom.server.message.ChatMessageType;
 import net.minestom.server.message.Messenger;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
@@ -236,6 +237,11 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
             var isColored = senderDisplayName.parts().size() > 1;
 
             for (var recipient : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+                if (recipient.getSettings().chatMessageType() != ChatMessageType.FULL) {
+                    // Recipient has disabled chat messages - they only want system messages
+                    continue;
+                }
+
                 var isSender = recipient.getUuid().toString().equals(message.sender());
                 if (!filter.test(recipient)) continue;
 
@@ -303,6 +309,10 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
         var player = MinecraftServer.getConnectionManager()
             .getOnlinePlayerByUuid(UUID.fromString(message.target()));
         if (player == null) return; // Not relevant to this server
+        if (message.respectClientSettings() && player.getSettings().chatMessageType() != ChatMessageType.FULL) {
+            // Recipient has disabled chat messages and this message is sent only on FULL
+            return;
+        }
 
         try {
             var args = new ArrayList<Component>();

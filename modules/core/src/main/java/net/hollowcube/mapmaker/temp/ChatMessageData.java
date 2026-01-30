@@ -22,6 +22,7 @@ public record ChatMessageData(
         @NotNull String target,
         @NotNull String key,
         @Nullable List<String> args,
+        boolean respectClientSettings,
 
         @Nullable ChatMessageData extra
 ) {
