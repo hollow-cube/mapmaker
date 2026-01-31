@@ -54,9 +54,10 @@ public class NotificationListView extends Panel {
 
     @Blocking
     protected List<? extends Panel> onSearch(Unit ignored, int page, int pageSize) {
-        if (this.host == null) return List.of(); // This happens if the async task finishes after the panel is closed
+        var host = this.host; // Capture host to avoid NPE in async context - this will hold on to the host reference
+        if (host == null) return List.of(); // This happens if the async task finishes after the panel is closed
 
-        var playerId = PlayerData.fromPlayer(this.host.player()).id();
+        var playerId = PlayerData.fromPlayer(host.player()).id();
         var notifications = this.context.players().getNotifications(playerId, page, false);
 
         if (notifications.page() == 0) {
@@ -67,7 +68,7 @@ public class NotificationListView extends Panel {
             .results()
             .stream()
             .map(entry -> {
-                var notification = PlayerNotification.fromResponse(this.host.player(), this.context, entry);
+                var notification = PlayerNotification.fromResponse(host.player(), this.context, entry);
                 if (notification != null) {
                     return new NotificationElement(notification);
                 }
