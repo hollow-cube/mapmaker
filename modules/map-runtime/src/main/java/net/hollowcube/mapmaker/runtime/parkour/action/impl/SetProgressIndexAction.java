@@ -60,7 +60,18 @@ public record SetProgressIndexAction(
     }
 
     private static Panel makeEditor(ActionList.Ref ref) {
-        return new ActionEditorAnvil<>(ref, SetProgressIndexAction::valueToString, SetProgressIndexAction::stringToValue);
+        return new ActionEditorAnvil<>(ref, SetProgressIndexAction::valueToString, SetProgressIndexAction::stringToValue) {
+            @Override
+            protected SetProgressIndexAction parse(SetProgressIndexAction data, String text) {
+                try {
+                    return super.parse(data, text);
+                } catch (NumberFormatException _) {
+                    host.player().sendMessage(Component.translatable("create_maps.checkpoint.progress_index.nan"));
+                    host.player().closeInventory();
+                    return data.withValue(0);
+                }
+            }
+        };
     }
 
     private static String valueToString(SetProgressIndexAction action) {
