@@ -72,29 +72,34 @@ public class Clipboard {
         this.transformations.clear();
     }
 
-    public @NotNull Schematic getTransformedSchematic() {
-        if (this.transformations.isEmpty()) {
-            return schematic;
-        } else {
-            var builder = SchematicBuilder.builder();
-
-            schematic.forEachBlock((pos, block) -> {
-                for (SchematicTransformation transformation : transformations) {
-                    pos = transformation.apply(pos, schematic.size(), schematic.offset());
-                    block = transformation.apply(block);
-                }
-                // Check why this needs its offset subtracted
-                builder.block(pos.sub(schematic.offset()), block);
-            });
-
-            var offset = schematic.offset();
-            for (SchematicTransformation transformation : transformations) {
-                offset = transformation.apply(offset, schematic.size());
-            }
-            builder.offset(offset);
-
-            return builder.build();
+    public @Nullable Schematic getTransformedSchematic() {
+        if (this.isEmpty()) {
+            // Nothing in the clipboard
+            return null;
         }
+        if (this.transformations.isEmpty()) {
+            // No transformations to apply
+            return this.schematic;
+        }
+
+        var builder = SchematicBuilder.builder();
+
+        schematic.forEachBlock((pos, block) -> {
+            for (SchematicTransformation transformation : transformations) {
+                pos = transformation.apply(pos, schematic.size(), schematic.offset());
+                block = transformation.apply(block);
+            }
+            // Check why this needs its offset subtracted
+            builder.block(pos.sub(schematic.offset()), block);
+        });
+
+        var offset = schematic.offset();
+        for (SchematicTransformation transformation : transformations) {
+            offset = transformation.apply(offset, schematic.size());
+        }
+        builder.offset(offset);
+
+        return builder.build();
     }
 
     public void transform(@NotNull SchematicTransformation transformation) {
