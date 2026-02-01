@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
-import java.util.Locale;
-
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.map.MapService;
@@ -13,11 +11,11 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Select;
 import net.hollowcube.mapmaker.panels.Text;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.kyori.adventure.text.Component;
 
 import java.time.Instant;
+import java.util.Locale;
 import java.util.function.Consumer;
-
-import net.kyori.adventure.text.Component;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;

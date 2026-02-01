@@ -1,11 +1,15 @@
 package net.hollowcube.mapmaker.panels;
 
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Pagination<S> extends Panel {
+
+    private static final Logger log = LoggerFactory.getLogger(Pagination.class);
 
     @FunctionalInterface
     public interface PageFetcher<S> {
@@ -144,7 +148,7 @@ public class Pagination<S> extends Panel {
             clear();
             for (int i = 0; i < results.size(); i++) {
                 var child = results.get(i);
-                add(i % this.slotWidth, i / this.slotWidth, child);
+                add(i / this.slotWidth, i % this.slotWidth, child);
             }
             onPageChange.forEach(c -> c.onPageChange(this.page, this.totalPages));
         });

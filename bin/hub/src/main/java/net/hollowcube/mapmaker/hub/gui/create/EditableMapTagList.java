@@ -1,12 +1,12 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
-import java.util.List;
-
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapTags;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.kyori.adventure.text.Component;
+
+import java.util.List;
 
 public class EditableMapTagList extends Panel {
     private final MapData map;
