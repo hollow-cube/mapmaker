@@ -108,22 +108,23 @@ public class CreateMaps extends View {
         for (int i = 0; i < slots.length; i++) {
             var slot = slots[i];
 
+            // There is a map, show the full icon even if they dont have it unlocked.
+            // It means they used to and have a map in that slot.
+            var mapId = playerData.getMapSlot(i);
+            if (mapId != null) {
+                slot.setState(playerData, EditMapIconBase.State.FULL, i, mapId);
+                if (firstSlot == -1) firstSlot = i;
+                continue;
+            }
+
             // If the slot is locked, show the lock icon
             if (i >= playerData.unlockedSlots()) {
                 slot.setState(playerData, EditMapIconBase.State.LOCKED, i, null);
                 continue;
             }
 
-            var mapId = playerData.getMapSlot(i);
             // If there is no map here, show the empty icon
-            if (mapId == null) {
-                slot.setState(playerData, EditMapIconBase.State.EMPTY, i, null);
-                continue;
-            }
-
-            // There is a map, show the full icon
-            slot.setState(playerData, EditMapIconBase.State.FULL, i, mapId);
-            if (firstSlot == -1) firstSlot = i;
+            slot.setState(playerData, EditMapIconBase.State.EMPTY, i, null);
         }
 
         // If there are no maps, set them to create the first one.
