@@ -523,7 +523,7 @@ public class EditMap extends View {
     private void fillTagsCounter(@NotNull MapTags.TagType tagType) {
         var typedMaxTags = map.settings().getVariant().maxTags(tagType);
         var currentTags = map.settings().getTags().stream()
-            .filter(tag -> tag.getType() == tagType)
+            .filter(tag -> tag.type() == tagType)
             .count();
         mapTagsMaxCounterText.setText(String.format("%d/%d Tags", currentTags, typedMaxTags));
     }
@@ -533,13 +533,13 @@ public class EditMap extends View {
     private boolean canAddAnotherTag(MapTags.TagType tagType) {
         var typedMaxTags = map.settings().getVariant().maxTags(tagType);
         return typedMaxTags > map.settings().getTags().stream()
-            .filter(tag -> tag.getType() == tagType)
+            .filter(tag -> tag.type() == tagType)
             .count();
     }
 
     private void tagClickHandler(MapTags.Tag tag, boolean set) {
         if (set) {
-            if (canAddAnotherTag(tag.getType())) {
+            if (canAddAnotherTag(tag.type())) {
                 map.settings().addTag(tag);
             }
         } else {

@@ -40,8 +40,6 @@ public class CreateMapsItem extends ItemHandler {
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
         if (CoreFeatureFlags.CREATE_MAPS_V2.test(player) && !player.isSneaking()) {
-            var playerId = PlayerData.fromPlayer(player).id();
-//            System.out.println("slots: " + mapService.getPlayerMapSlots(playerId));
             Panel.open(player, new CreateMapsView(mapService, bridge));
             return;
         }

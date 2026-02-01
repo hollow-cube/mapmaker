@@ -32,13 +32,13 @@ public class EditMapActionsView extends Panel {
 
         add(0, 0, backOrClose());
 
-        add(1, 2, new Button("copy", 3, 2));
+        add(1, 2, new Button("gui.create_maps.actions.copy_map", 3, 2));
 
-        add(5, 2, new Button("resize", 3, 2));
+        add(5, 2, new Button("gui.create_maps.actions.resize_map", 3, 2));
 
-        add(1, 4, new Button("transfer", 3, 2));
+        add(1, 4, new Button("gui.create_maps.actions.transfer_ownership", 3, 2));
 
-        add(5, 4, new Button("delete", 3, 2)
+        add(5, 4, new Button("gui.create_maps.actions.delete_map", 3, 2)
             .onLeftClick(this::beginDeleteMap));
     }
 

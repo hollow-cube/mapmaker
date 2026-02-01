@@ -524,7 +524,7 @@ public class MapSettings {
                 this.tags = new ArrayList<>();
             }
             this.tags = new ArrayList<>(this.tags.stream().filter(
-                tag -> tag.getType() == MapTags.TagType.VISUAL
+                tag -> tag.type() == MapTags.TagType.VISUAL
             ).toList());
         } finally {
             updateLock.unlock();
@@ -538,7 +538,7 @@ public class MapSettings {
                 this.tags = new ArrayList<>();
             }
             this.tags = new ArrayList<>(this.tags.stream().filter(
-                tag -> tag.getType() == MapTags.TagType.GAMEPLAY
+                tag -> tag.type() == MapTags.TagType.GAMEPLAY
             ).toList());
         } finally {
             updateLock.unlock();

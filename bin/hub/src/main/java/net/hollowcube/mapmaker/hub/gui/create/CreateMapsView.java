@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapSlot;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -22,6 +23,7 @@ public class CreateMapsView extends Panel {
     private final MapService mapService;
     private final ServerBridge bridge;
 
+    private final Button createButton;
     private final Panel entryContainer;
 
     private final List<MapSlot> slots = new ArrayList<>();
@@ -37,7 +39,7 @@ public class CreateMapsView extends Panel {
 
         add(0, 0, backOrClose());
         // todo search
-        add(8, 0, new Button("create", 1, 1)
+        this.createButton = add(8, 0, new Button(1, 1)
             .background("generic2/btn/default/1_1")
             .sprite("icon2/1_1/plus", 1, 1)
             .onLeftClick(() -> host.pushTransientView(new NewMapView(mapService, this::acceptNewMap))));
@@ -56,6 +58,8 @@ public class CreateMapsView extends Panel {
                 var remoteSlots = mapService.getPlayerMapSlots(playerId);
 
                 sync(() -> {
+                    this.updateCreateButton();
+
                     slots.clear();
                     slots.addAll(remoteSlots);
                     slots.sort((MapSlot a, MapSlot b) -> b.createdAt().compareTo(a.createdAt()));
@@ -81,5 +85,12 @@ public class CreateMapsView extends Panel {
             if (index >= slots.size()) break;
             this.entryContainer.add(0, i, new MapSlotEntry(mapService, bridge, slots.get(index)));
         }
+    }
+
+    private void updateCreateButton() {
+        // We have to lazy init this as host is not set until the view is mounted
+        var data = MapPlayerData.fromPlayer(this.host.player());
+        var unusedSlots = data.unlockedSlots() - this.slots.size();
+        this.createButton.translationKey("gui.create_maps.new", unusedSlots);
     }
 }

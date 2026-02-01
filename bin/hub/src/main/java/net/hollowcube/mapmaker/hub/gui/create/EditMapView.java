@@ -51,25 +51,26 @@ public class EditMapView extends Panel {
         add(0, 0, title("Edit Map"));
 
         add(0, 0, backOrClose());
-        this.nameText = add(1, 0, new Text("todo", 7, 1, map.settings().getNameSafe())
+        this.nameText = add(1, 0, new Text("gui.create_maps.edit.name", 7, 1, map.settings().getNameSafe())
             .align(8, 5));
         this.nameText.onLeftClick(this::beginNameEdit);
-        add(8, 0, new Button("more", 1, 1)
+        add(8, 0, new Button("gui.create_maps.edit.actions", 1, 1)
             .background("generic2/btn/default/1_1")
             .sprite("icon2/1_1/ellipsis", 1, 1)
             .onLeftClick(() -> host.pushView(new EditMapActionsView(mapService, bridge, map.id()))));
 
-        this.iconButton = add(1, 2, new Button("todo", 1, 1)
+        this.iconButton = add(1, 2, new Button("gui.create_maps.edit.icon", 1, 1)
             .onLeftClick(this::beginIconEdit));
         updateIcon();
 
-        add(3, 2, new Button("self", 1, 1)
+        add(3, 2, new Button("gui.create_maps.edit.builders.owner.self", 1, 1)
             .background("create_maps2/head_outline", 4, 4)
             .model(MODEL_8X, null)
             .profile(getPlayerHead2d(map.owner())));
         for (int i = 0; i < 4; i++) {
-            add(i + 4, 2, new Button("locked", 1, 1)
+            add(i + 4, 2, new Button("gui.create_maps.edit.builders.locked", 1, 1)
                 .sprite("icon2/1_1/lock", 1, 1)
+                // TODO: Remove before releasing
                 .onLeftClickAsync(() -> {
                     mapService.inviteMapBuilder(map.id(), "d79d790a-8e90-4d78-958a-780c7fadeaab");
                 }));
@@ -77,10 +78,10 @@ public class EditMapView extends Panel {
 
         add(1, 4, new EditableMapTagList(map));
 
-        add(1, 6, new Button("build", 3, 3)
+        add(1, 6, new Button("gui.create_maps.edit.build", 3, 3)
             .background("create_maps2/edit/build")
             .onLeftClickAsync(() -> beginBuildingMap(bridge, map, host.player())));
-        this.verifyPublishButton = add(5, 6, new Button("verify", 3, 3)
+        this.verifyPublishButton = add(5, 6, new Button("gui.create_maps.edit.verify", 3, 3)
             .background("create_maps2/edit/verify_orange"));
     }
 

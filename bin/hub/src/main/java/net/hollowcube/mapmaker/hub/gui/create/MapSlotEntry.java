@@ -23,7 +23,7 @@ public class MapSlotEntry extends Panel {
 
         background("create_maps2/slot/blue", 1, 1);
 
-        var iconButton = add(0, 0, new Button("todo", 1, 1)
+        var iconButton = add(0, 0, new Button("gui.create_maps.edit.icon", 1, 1)
             .onLeftClick(this::onEditMap));
         var userIcon = slot.map().settings().getIcon();
         if (userIcon != null) {
@@ -33,11 +33,12 @@ public class MapSlotEntry extends Panel {
         }
 
         var name = slot.map().settings().getNameSafe();
-        add(1, 0, new Text("todo", 7, 1, name)
+        add(1, 0, new Text(7, 1, name)
             .align(2, Text.CENTER)
-            .onLeftClick(this::onEditMap));
+            .onLeftClick(this::onEditMap))
+            .translationKey("gui.create_maps.slot.yours", name);
 
-        add(8, 0, new Button("edit", 1, 1)
+        add(8, 0, new Button("gui.create_maps.edit.build", 1, 1)
             .sprite("icon2/1_1/hammer", 1, 1)
             .onLeftClickAsync(() -> beginBuildingMap(bridge, slot.map(), host.player())));
     }

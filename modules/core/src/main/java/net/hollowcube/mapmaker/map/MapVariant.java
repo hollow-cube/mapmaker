@@ -27,6 +27,7 @@ public enum MapVariant {
         return switch (tagType) {
             case VISUAL -> maxVisualTags();
             case GAMEPLAY -> maxGameplayTags();
+            default -> throw new UnsupportedOperationException("variant will be removed so this doesn't matter");
         };
     }
 }
