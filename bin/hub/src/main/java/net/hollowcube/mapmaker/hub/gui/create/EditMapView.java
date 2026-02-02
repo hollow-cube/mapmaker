@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.common.ConfirmActionView;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
@@ -83,7 +84,8 @@ public class EditMapView extends Panel {
                 }));
         }
 
-        add(1, 4, new EditableMapTagList(map, () -> async(this.publisher::updateStage)));
+        // async doesn't work as host is null when this is called
+        add(1, 4, new EditableMapTagList(map, this::updatePublishStage));
 
         add(1, 6, new Button("gui.create_maps.edit.build", 3, 3)
             .background("create_maps2/edit/build")
@@ -122,7 +124,7 @@ public class EditMapView extends Panel {
 
                 map.settings().setName(limitedName);
                 nameText.text(limitedName);
-                async(this.publisher::updateStage);
+                updatePublishStage();
             },
             map.settings().getName()
         ));
@@ -151,7 +153,7 @@ public class EditMapView extends Panel {
             (icon) -> {
                 map.settings().setIcon(icon);
                 updateIcon();
-                async(this.publisher::updateStage);
+                updatePublishStage();
             }
         ));
     }
@@ -187,6 +189,11 @@ public class EditMapView extends Panel {
             ExceptionReporter.reportException(e, player);
             player.closeInventory();
         }
+    }
+
+    private void updatePublishStage() {
+        // This is often called from contexts where host is null so cannot use async here
+        FutureUtil.submitVirtual(this.publisher::updateStage);
     }
 
     private void onMapPublish(PlayerService playerService, MapService mapService, ServerBridge bridge, MapData publishedMap) {
