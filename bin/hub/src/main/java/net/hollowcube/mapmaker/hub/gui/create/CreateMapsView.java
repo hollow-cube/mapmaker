@@ -21,7 +21,6 @@ import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
 import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
 
 public class CreateMapsView extends Panel {
-
     private final PlayerService playerService;
     private final MapService mapService;
     private final ServerBridge bridge;
@@ -65,25 +64,24 @@ public class CreateMapsView extends Panel {
     @Override
     protected void mount(InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
-        if (isInitial) {
-            // full load from server
-            async(() -> {
-                var playerId = PlayerData.fromPlayer(host.player()).id();
-                var remoteSlots = this.mapService.getPlayerMapSlots(playerId);
+        async(this::rebuildSlots);
+    }
 
-                sync(() -> {
-                    this.updateCreateButton();
+    @Blocking
+    private void rebuildSlots() {
+        var playerId = PlayerData.fromPlayer(this.host.player()).id();
+        var remoteSlots = this.mapService.getPlayerMapSlots(playerId);
+        // For some reason, get map slots returns published maps as well
+        remoteSlots.removeIf(slot -> slot.map().isPublished());
 
-                    this.slots.clear();
-                    this.slots.addAll(remoteSlots);
-                    this.slots.sort((MapSlot a, MapSlot b) -> b.createdAt().compareTo(a.createdAt()));
-                    this.resetSearch();
-                });
-            });
-        } else {
-            // Update from changes (name/icon generally)
+        sync(() -> {
+            this.slots.clear();
+            this.slots.addAll(remoteSlots);
+            this.slots.sort((a, b) -> b.createdAt().compareTo(a.createdAt()));
             this.resetSearch();
-        }
+
+            this.updateCreateButton();
+        });
     }
 
     private void acceptNewMap(MapSlot slot) {
@@ -142,10 +140,10 @@ public class CreateMapsView extends Panel {
         var entries = new ArrayList<MapSlotEntry>();
         // Always put unpublished maps in slots first before published maps
         for (var slot : slotResults) {
-            entries.add(new MapSlotEntry(this.playerService, this.mapService, this.bridge, slot.map()));
+            entries.add(new MapSlotEntry(this.playerService, this.mapService, this.bridge, slot.map(), false));
         }
         for (var map : publishResults) {
-            entries.add(new MapSlotEntry(this.playerService, this.mapService, this.bridge, map));
+            entries.add(new MapSlotEntry(this.playerService, this.mapService, this.bridge, map, true));
         }
 
         return entries;

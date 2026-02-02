@@ -14,7 +14,6 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -52,7 +51,7 @@ public class EditMapView extends Panel {
         this.map = map;
 
         Consumer<MapData> publishCallback =
-            publishedMap -> this.showMapDetails(playerService, mapService, bridge, publishedMap);
+            publishedMap -> this.onMapPublish(playerService, mapService, bridge, publishedMap);
         this.publisher = new MapPublisher(mapService, bridge, map, () -> this.host, publishCallback);
 
         background("create_maps2/edit/container", -10, -31);
@@ -84,7 +83,7 @@ public class EditMapView extends Panel {
                 }));
         }
 
-        add(1, 4, new EditableMapTagList(map, this.publisher::updateStage));
+        add(1, 4, new EditableMapTagList(map, () -> async(this.publisher::updateStage)));
 
         add(1, 6, new Button("gui.create_maps.edit.build", 3, 3)
             .background("create_maps2/edit/build")
@@ -115,7 +114,7 @@ public class EditMapView extends Panel {
         host.pushView(simpleAnvil(
             "generic2/anvil/field_container",
             "icon2/anvil/planet",
-            LanguageProviderV2.translateToPlain("setnametodo"),
+            LanguageProviderV2.translateToPlain("Name Map"),
             message -> {
                 //TODO make this only update the display of the name in the GUI, appending ... to the end, and not messing with the actual name
                 String limitedName = message.length() > MapData.MAX_NAME_LENGTH
@@ -123,7 +122,7 @@ public class EditMapView extends Panel {
 
                 map.settings().setName(limitedName);
                 nameText.text(limitedName);
-                this.publisher.updateStage();
+                async(this.publisher::updateStage);
             },
             map.settings().getName()
         ));
@@ -132,7 +131,7 @@ public class EditMapView extends Panel {
     private void beginIconEdit() {
         host.pushView(new AnvilSearchView<>(
             "icon2/anvil/item_frame",
-            LanguageProviderV2.translateToPlain("seticontodo"),
+            LanguageProviderV2.translateToPlain("Set Map Icon"),
             (query, limit) -> {
                 // If input is empty return some random results
                 if (query.isEmpty()) {
@@ -152,7 +151,7 @@ public class EditMapView extends Panel {
             (icon) -> {
                 map.settings().setIcon(icon);
                 updateIcon();
-                this.publisher.updateStage();
+                async(this.publisher::updateStage);
             }
         ));
     }
@@ -190,7 +189,7 @@ public class EditMapView extends Panel {
         }
     }
 
-    private void showMapDetails(PlayerService playerService, MapService mapService, ServerBridge bridge, MapData publishedMap) {
+    private void onMapPublish(PlayerService playerService, MapService mapService, ServerBridge bridge, MapData publishedMap) {
         var authorName = playerService.getPlayerDisplayName2(publishedMap.owner());
         this.host.replaceView(new MapDetailsView(playerService, mapService, bridge, publishedMap, authorName, true));
     }

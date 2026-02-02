@@ -15,14 +15,18 @@ public class MapSlotEntry extends Panel {
     private final ServerBridge bridge;
     private final MapData map;
 
-    public MapSlotEntry(PlayerService playerService, MapService mapService, ServerBridge bridge, MapData map) {
+    public MapSlotEntry(PlayerService playerService, MapService mapService, ServerBridge bridge, MapData map, boolean published) {
         super(9, 1);
         this.playerService = playerService;
         this.mapService = mapService;
         this.bridge = bridge;
         this.map = map;
 
-        background("create_maps2/slot/blue", 1, 1);
+        if (published) {
+            background("create_maps2/slot/gray", 1, 1);
+        } else {
+            background("create_maps2/slot/blue", 1, 1);
+        }
 
         var iconButton = add(0, 0, new Button("gui.create_maps.edit.icon", 1, 1)
             .onLeftClick(this::onEditMap));

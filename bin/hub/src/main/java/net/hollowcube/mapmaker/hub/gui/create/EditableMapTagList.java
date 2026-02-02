@@ -40,7 +40,7 @@ public class EditableMapTagList extends Panel {
             var tag = tags.get(i);
             final int index = i;
             add(i, 0, new Button(1, 1)
-                .translationKey("gui.create_maps.tags.with_data", getTagTranslationArgs(tag))
+                .translationKey("gui.create_maps.edit.tags.with_data", getTagTranslationArgs(tag))
                 .sprite("icon2/1_1/" + tag.sprite(), 1, 1)
                 .onLeftClick(() -> host.pushTransientView(new SelectTagView(map,
                     newTag -> handleReplaceTag(index, newTag))))
