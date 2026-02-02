@@ -8,8 +8,6 @@ import net.hollowcube.mapmaker.panels.Panel;
 import java.util.List;
 import java.util.function.Consumer;
 
-import net.kyori.adventure.text.Component;
-
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
 

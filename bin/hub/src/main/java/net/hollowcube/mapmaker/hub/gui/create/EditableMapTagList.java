@@ -10,10 +10,12 @@ import java.util.List;
 
 public class EditableMapTagList extends Panel {
     private final MapData map;
+    private final Runnable onUpdate;
 
-    public EditableMapTagList(MapData map) {
+    public EditableMapTagList(MapData map, Runnable onUpdate) {
         super(7, 1);
         this.map = map;
+        this.onUpdate = onUpdate;
 
         update();
     }
@@ -62,6 +64,7 @@ public class EditableMapTagList extends Panel {
     private void handleAddTag(MapTags.Tag tag) {
         map.settings().addTag(tag);
         update();
+        this.onUpdate.run();
     }
 
     private void handleReplaceTag(int index, MapTags.Tag tag) {
@@ -72,10 +75,12 @@ public class EditableMapTagList extends Panel {
 
         map.settings().setTag(index, tag);
         update();
+        this.onUpdate.run();
     }
 
     private void handleRemoveTag(int index) {
         map.settings().removeTag(index);
         update();
+        this.onUpdate.run();
     }
 }

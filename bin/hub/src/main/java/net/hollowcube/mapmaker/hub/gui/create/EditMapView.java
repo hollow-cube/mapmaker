@@ -3,23 +3,23 @@ package net.hollowcube.mapmaker.hub.gui.create;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.common.ConfirmActionView;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.map.MapVerification;
+import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
+import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.Autocompletors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
@@ -36,21 +36,24 @@ public class EditMapView extends Panel {
         material != Material.CALIBRATED_SCULK_SENSOR &&
         material != Material.RECOVERY_COMPASS &&
         !material.name().endsWith("glass_pane");
-    private static final Logger log = LoggerFactory.getLogger(EditMapView.class);
 
     private final MapService mapService;
 
     private final MapData map;
+    private final MapPublisher publisher;
 
     private final Text nameText;
     private final Button iconButton;
 
-    private final Button verifyPublishButton;
-
-    public EditMapView(MapService mapService, ServerBridge bridge, MapData map) {
+    @Blocking
+    public EditMapView(PlayerService playerService, MapService mapService, ServerBridge bridge, MapData map) {
         super(9, 10);
         this.mapService = mapService;
         this.map = map;
+
+        Consumer<MapData> publishCallback =
+            publishedMap -> this.showMapDetails(playerService, mapService, bridge, publishedMap);
+        this.publisher = new MapPublisher(mapService, bridge, map, () -> this.host, publishCallback);
 
         background("create_maps2/edit/container", -10, -31);
         add(0, 0, title("Edit Map"));
@@ -62,7 +65,7 @@ public class EditMapView extends Panel {
         add(8, 0, new Button("gui.create_maps.edit.actions", 1, 1)
             .background("generic2/btn/default/1_1")
             .sprite("icon2/1_1/ellipsis", 1, 1)
-            .onLeftClick(() -> host.pushView(new EditMapActionsView(mapService, bridge, map.id()))));
+            .onLeftClick(() -> host.pushView(new EditMapActionsView(playerService, mapService, bridge, map.id()))));
 
         this.iconButton = add(1, 2, new Button("gui.create_maps.edit.icon", 1, 1)
             .onLeftClick(this::beginIconEdit));
@@ -81,13 +84,13 @@ public class EditMapView extends Panel {
                 }));
         }
 
-        add(1, 4, new EditableMapTagList(map));
+        add(1, 4, new EditableMapTagList(map, this.publisher::updateStage));
 
         add(1, 6, new Button("gui.create_maps.edit.build", 3, 3)
             .background("create_maps2/edit/build")
             .onLeftClickAsync(() -> editMap(map, this.host, bridge)));
-        this.verifyPublishButton = add(5, 6, new Button("gui.create_maps.edit.verify", 3, 3)
-            .background("create_maps2/edit/verify_orange"));
+
+        add(5, 6, this.publisher.getButton());
     }
 
     @Override
@@ -120,7 +123,7 @@ public class EditMapView extends Panel {
 
                 map.settings().setName(limitedName);
                 nameText.text(limitedName);
-                //todo update verify button
+                this.publisher.updateStage();
             },
             map.settings().getName()
         ));
@@ -133,7 +136,6 @@ public class EditMapView extends Panel {
             (query, limit) -> {
                 // If input is empty return some random results
                 if (query.isEmpty()) {
-                    //noinspection NullableProblems
                     return ThreadLocalRandom.current().ints(1, Material.values().size())
                         .mapToObj(Material::fromId)
                         .filter(ICON_SEARCH_PREDICATE)
@@ -150,7 +152,7 @@ public class EditMapView extends Panel {
             (icon) -> {
                 map.settings().setIcon(icon);
                 updateIcon();
-                //todo update verify button
+                this.publisher.updateStage();
             }
         ));
     }
@@ -186,5 +188,10 @@ public class EditMapView extends Panel {
             ExceptionReporter.reportException(e, player);
             player.closeInventory();
         }
+    }
+
+    private void showMapDetails(PlayerService playerService, MapService mapService, ServerBridge bridge, MapData publishedMap) {
+        var authorName = playerService.getPlayerDisplayName2(publishedMap.owner());
+        this.host.replaceView(new MapDetailsView(playerService, mapService, bridge, publishedMap, authorName, true));
     }
 }

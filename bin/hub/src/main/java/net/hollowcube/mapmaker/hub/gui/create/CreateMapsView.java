@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
-import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -9,12 +8,10 @@ import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.StringComparison;
-import net.kyori.adventure.text.Component;
 import net.minestom.server.utils.Unit;
 import org.jetbrains.annotations.Blocking;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +21,8 @@ import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
 import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
 
 public class CreateMapsView extends Panel {
-    public static final List<Component> LORE_POSTFIX_CLICKSELECT = LanguageProviderV2.translateMulti("gui.action.clickselect", List.of());
-    private static final Logger log = LoggerFactory.getLogger(CreateMapsView.class);
 
+    private final PlayerService playerService;
     private final MapService mapService;
     private final ServerBridge bridge;
 
@@ -38,8 +34,9 @@ public class CreateMapsView extends Panel {
 
     private String searchText = "";
 
-    public CreateMapsView(MapService mapService, ServerBridge bridge) {
+    public CreateMapsView(PlayerService playerService, MapService mapService, ServerBridge bridge) {
         super(9, 10);
+        this.playerService = playerService;
         this.mapService = mapService;
         this.bridge = bridge;
 
@@ -62,7 +59,7 @@ public class CreateMapsView extends Panel {
         this.createButton = add(8, 0, new Button(1, 1)
             .background("generic2/btn/default/1_1")
             .sprite("icon2/1_1/plus", 1, 1)
-            .onLeftClick(() -> host.pushTransientView(new NewMapView(mapService, this::acceptNewMap))));
+            .onLeftClick(() -> this.host.pushTransientView(new NewMapView(mapService, this::acceptNewMap))));
     }
 
     @Override
@@ -72,14 +69,14 @@ public class CreateMapsView extends Panel {
             // full load from server
             async(() -> {
                 var playerId = PlayerData.fromPlayer(host.player()).id();
-                var remoteSlots = mapService.getPlayerMapSlots(playerId);
+                var remoteSlots = this.mapService.getPlayerMapSlots(playerId);
 
                 sync(() -> {
                     this.updateCreateButton();
 
-                    slots.clear();
-                    slots.addAll(remoteSlots);
-                    slots.sort((MapSlot a, MapSlot b) -> b.createdAt().compareTo(a.createdAt()));
+                    this.slots.clear();
+                    this.slots.addAll(remoteSlots);
+                    this.slots.sort((MapSlot a, MapSlot b) -> b.createdAt().compareTo(a.createdAt()));
                     this.resetSearch();
                 });
             });
@@ -91,7 +88,7 @@ public class CreateMapsView extends Panel {
 
     private void acceptNewMap(MapSlot slot) {
         // No need to re-sort, we know this should be first in the list.
-        slots.addFirst(slot);
+        this.slots.addFirst(slot);
         this.resetSearch();
     }
 
@@ -107,7 +104,7 @@ public class CreateMapsView extends Panel {
     }
 
     private void openSearchInput() {
-        host.pushView(simpleAnvil(
+        this.host.pushView(simpleAnvil(
             "generic2/anvil/field_container",
             "map_browser/search_anvil_icon",
             "Search Created Maps",
@@ -145,10 +142,10 @@ public class CreateMapsView extends Panel {
         var entries = new ArrayList<MapSlotEntry>();
         // Always put unpublished maps in slots first before published maps
         for (var slot : slotResults) {
-            entries.add(new MapSlotEntry(this.mapService, this.bridge, slot.map()));
+            entries.add(new MapSlotEntry(this.playerService, this.mapService, this.bridge, slot.map()));
         }
         for (var map : publishResults) {
-            entries.add(new MapSlotEntry(this.mapService, this.bridge, map));
+            entries.add(new MapSlotEntry(this.playerService, this.mapService, this.bridge, map));
         }
 
         return entries;

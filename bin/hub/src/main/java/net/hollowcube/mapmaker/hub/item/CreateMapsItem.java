@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
@@ -20,12 +21,14 @@ public class CreateMapsItem extends ItemHandler {
     private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hammer"), "hammer");
     public static final Key ID = Key.key("mapmaker:create_maps");
 
+    private final PlayerService playerService;
     private final MapService mapService;
     private final ServerBridge bridge;
     private final Controller guiController;
 
-    public CreateMapsItem(MapService mapService, ServerBridge bridge, @NotNull Controller guiController) {
+    public CreateMapsItem(PlayerService playerService, MapService mapService, ServerBridge bridge, @NotNull Controller guiController) {
         super(ID, RIGHT_CLICK_ANY);
+        this.playerService = playerService;
         this.mapService = mapService;
         this.bridge = bridge;
         this.guiController = guiController;
@@ -40,7 +43,7 @@ public class CreateMapsItem extends ItemHandler {
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
         if (CoreFeatureFlags.CREATE_MAPS_V2.test(player) && !player.isSneaking()) {
-            Panel.open(player, new CreateMapsView(mapService, bridge));
+            Panel.open(player, new CreateMapsView(this.playerService, this.mapService, this.bridge));
             return;
         }
 
