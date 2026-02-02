@@ -2,8 +2,10 @@ package net.hollowcube.mapmaker.hub.gui.create;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.gui.common.ConfirmActionView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.util.Autocompletors;
@@ -13,6 +15,8 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -32,6 +36,7 @@ public class EditMapView extends Panel {
         material != Material.CALIBRATED_SCULK_SENSOR &&
         material != Material.RECOVERY_COMPASS &&
         !material.name().endsWith("glass_pane");
+    private static final Logger log = LoggerFactory.getLogger(EditMapView.class);
 
     private final MapService mapService;
 
@@ -80,7 +85,7 @@ public class EditMapView extends Panel {
 
         add(1, 6, new Button("gui.create_maps.edit.build", 3, 3)
             .background("create_maps2/edit/build")
-            .onLeftClickAsync(() -> beginBuildingMap(bridge, map, host.player())));
+            .onLeftClickAsync(() -> editMap(map, this.host, bridge)));
         this.verifyPublishButton = add(5, 6, new Button("gui.create_maps.edit.verify", 3, 3)
             .background("create_maps2/edit/verify_orange"));
     }
@@ -162,16 +167,18 @@ public class EditMapView extends Panel {
     }
 
     @Blocking
-    static void beginBuildingMap(ServerBridge bridge, MapData map, Player player) {
-        try {
-            // TODO: need to prompt for verification
-//            if (map.verification() != MapVerification.UNVERIFIED) {
-//                player.sendMessage(Component.translatable("progress.verification.lost"));
-//
-//                var playerData = PlayerData.fromPlayer(player);
-//                mapService.deleteVerification(playerData.id(), map.id());
-//            }
+    static void editMap(MapData map, InventoryHost host, ServerBridge bridge) {
+        if (map.verification() != MapVerification.UNVERIFIED) {
+            host.pushView(new ConfirmActionView(() -> beginBuildingMap(bridge, map, host.player()),
+                                                Component.translatable("edit.map.confirm")));
+        } else {
+            beginBuildingMap(bridge, map, host.player());
+        }
+    }
 
+    @Blocking
+    private static void beginBuildingMap(ServerBridge bridge, MapData map, Player player) {
+        try {
             player.closeInventory();
             bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.EDITING, "edit_maps_gui");
         } catch (Exception e) {

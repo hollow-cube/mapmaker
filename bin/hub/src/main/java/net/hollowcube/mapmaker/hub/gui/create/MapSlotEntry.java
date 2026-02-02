@@ -7,8 +7,6 @@ import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
 
-import static net.hollowcube.mapmaker.hub.gui.create.EditMapView.beginBuildingMap;
-
 public class MapSlotEntry extends Panel {
 
     private final MapService mapService;
@@ -40,7 +38,7 @@ public class MapSlotEntry extends Panel {
 
         add(8, 0, new Button("gui.create_maps.edit.build", 1, 1)
             .sprite("icon2/1_1/hammer", 1, 1)
-            .onLeftClickAsync(() -> beginBuildingMap(bridge, map, host.player())));
+            .onLeftClickAsync(() -> EditMapView.editMap(map, this.host, bridge)));
     }
 
     private void onEditMap() {
