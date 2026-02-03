@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.TimeComponent;
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerFriend;
@@ -57,7 +58,7 @@ public class FriendListCommand extends CommandDsl {
             if (friend.online()) {
                 Presence presence = this.sessionManager.getPresence(friend.playerId());
                 builder.appendNewline().append(
-                    switch (presence.type()) {
+                    switch (OpUtils.map(presence, Presence::type)) {
                         case Presence.TYPE_MAPMAKER_HUB ->
                             Component.translatable("command.friend.list.line.hub", username);
                         case Presence.TYPE_MAPMAKER_MAP -> {
@@ -75,7 +76,7 @@ public class FriendListCommand extends CommandDsl {
                                                              Component.text(map.name()));
                             }
                         }
-                        default -> Component.translatable("command.friend.list.line.online_unknown", username);
+                        case null, default -> Component.translatable("command.friend.list.line.online_unknown", username);
                     });
             } else {
                 builder.appendNewline()
