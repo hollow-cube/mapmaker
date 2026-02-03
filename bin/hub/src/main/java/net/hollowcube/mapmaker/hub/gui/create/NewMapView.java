@@ -6,14 +6,15 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapSize;
 import net.hollowcube.mapmaker.map.MapSlot;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
-import net.hollowcube.mapmaker.panels.Button;
-import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.panels.Select;
-import net.hollowcube.mapmaker.panels.Text;
+import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.store.ShopUpgrade;
+import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.kyori.adventure.text.Component;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
@@ -25,8 +26,10 @@ public class NewMapView extends Panel {
     private final MapService mapService;
     private final Consumer<MapSlot> onNewMap;
 
-    private final Select<MapSize> sizeSelect;
+    private final LockableSelect<MapSize> sizeSelect;
     private final Button confirmButton;
+
+    private final List<MapSize> unlockedSizes = new ArrayList<>();
 
     public NewMapView(MapService mapService, Consumer<MapSlot> onNewMap) {
         super(9, 10);
@@ -38,11 +41,11 @@ public class NewMapView extends Panel {
 
         add(0, 0, backOrClose());
 
-        sizeSelect = add(1, 2, new Select<>(4, MapSize.NORMAL));
-        sizeSelect.addOption(MapSize.NORMAL, "gui.create_maps.new.size.normal", "icon2/1_1/house_1", 1, 1);
-        sizeSelect.addOption(MapSize.LARGE, "gui.create_maps.new.size.large", "icon2/1_1/house_2", 1, 1);
-        sizeSelect.addOption(MapSize.MASSIVE, "gui.create_maps.new.size.massive", "icon2/1_1/house_3", 1, 1);
-        sizeSelect.addOption(MapSize.COLOSSAL, "gui.create_maps.new.size.colossal", "icon2/1_1/castle", 1, 1);
+        sizeSelect = add(1, 2, new LockableSelect<>(4, MapSize.NORMAL, this::isLocked));
+        sizeSelect.addLockableOption(MapSize.NORMAL, "gui.create_maps.new.size.normal", "icon2/1_1/house_1", 1, 1);
+        sizeSelect.addLockableOption(MapSize.LARGE, "gui.create_maps.new.size.large", "icon2/1_1/house_2", 1, 1);
+        sizeSelect.addLockableOption(MapSize.MASSIVE, "gui.create_maps.new.size.massive", "icon2/1_1/house_3", 1, 1);
+        sizeSelect.addLockedOption("gui.create_maps.new.size.colossal.on", "icon2/1_1/castle", 1, 1);
         sizeSelect.onChange(this::updateConfirmButton);
 
         confirmButton = add(2, 4, new Text(5, 1, "Create")
@@ -50,6 +53,24 @@ public class NewMapView extends Panel {
             .background("generic2/btn/success/5_1")
             .onLeftClickAsync(this::handleSubmit));
         updateConfirmButton();
+    }
+
+    @Override
+    protected void mount(InventoryHost host, boolean isInitial) {
+        super.mount(host, isInitial);
+
+        var playerId = PlayerData.fromPlayer(this.host.player()).id();
+        // TODO: The entire shop upgrade system is, as Matt would say, turbo garbage
+        //  Replace with something better when we have a better system in place
+        if (ShopUpgradeCache.has(playerId, ShopUpgrade.MAP_SIZE_2, false)) {
+            this.unlockedSizes.add(MapSize.LARGE);
+        }
+        if (ShopUpgradeCache.has(playerId, ShopUpgrade.MAP_SIZE_3, false)) {
+            this.unlockedSizes.add(MapSize.MASSIVE);
+        }
+        if (ShopUpgradeCache.has(playerId, ShopUpgrade.MAP_SIZE_4, false)) {
+            this.unlockedSizes.add(MapSize.COLOSSAL);
+        }
     }
 
     private void handleSubmit() {
@@ -70,5 +91,9 @@ public class NewMapView extends Panel {
         confirmButton.translationKey("gui.create_maps.new.confirm",
                                      Component.translatable(sizeNameKey),
                                      Component.translatable(actualSizeKey));
+    }
+
+    private boolean isLocked(MapSize size) {
+        return !this.unlockedSizes.contains(size);
     }
 }

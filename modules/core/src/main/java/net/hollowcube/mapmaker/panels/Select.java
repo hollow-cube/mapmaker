@@ -11,7 +11,7 @@ public class Select<T extends @UnknownNullability Object> extends Panel {
     private final List<Runnable> onChange = new ArrayList<>();
 
     private T value;
-    private int count = 0;
+    protected int count = 0;
 
     public Select(int slotWidth, T defaultValue) {
         super(slotWidth, 1);

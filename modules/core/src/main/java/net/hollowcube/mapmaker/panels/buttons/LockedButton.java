@@ -1,0 +1,21 @@
+package net.hollowcube.mapmaker.panels.buttons;
+
+import net.hollowcube.mapmaker.panels.Button;
+import net.hollowcube.mapmaker.panels.MenuBuilder;
+import net.hollowcube.mapmaker.panels.Sprite;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+public class LockedButton extends Button {
+    public LockedButton(@Nullable String translationKey, int width, int height) {
+        super(translationKey, width, height);
+    }
+
+    @Override
+    public void build(@NotNull MenuBuilder builder) {
+        super.build(builder);
+
+        var lockedSprite = new Sprite("icon2/1_1/lock_overlay", this.sprite.offsetX() + 1, this.sprite.offsetY() + 1);
+        builder.draw(lockedSprite.offsetX(), lockedSprite.offsetY(), lockedSprite.sprite());
+    }
+}
