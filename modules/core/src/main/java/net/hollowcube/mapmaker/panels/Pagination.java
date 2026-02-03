@@ -1,15 +1,11 @@
 package net.hollowcube.mapmaker.panels;
 
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Pagination<S> extends Panel {
-
-    private static final Logger log = LoggerFactory.getLogger(Pagination.class);
 
     @FunctionalInterface
     public interface PageFetcher<S> {
@@ -29,8 +25,15 @@ public class Pagination<S> extends Panel {
     private int totalPages = 0;
     private int page = 0;
 
-    public Pagination(int slotWidth, int slotHeight) {
+    private final boolean populateDown;
+
+    public Pagination(int slotWidth, int slotHeight, boolean populateDown) {
         super(slotWidth, slotHeight);
+        this.populateDown = populateDown;
+    }
+
+    public Pagination(int slotWidth, int slotHeight) {
+        this(slotWidth, slotHeight, false);
     }
 
     // Imperative api
@@ -148,7 +151,12 @@ public class Pagination<S> extends Panel {
             clear();
             for (int i = 0; i < results.size(); i++) {
                 var child = results.get(i);
-                add(i / this.slotWidth, i % this.slotWidth, child);
+                if (this.populateDown) {
+                    // Populate by row rather than by column - useful for types wider than 1x1
+                    add(i / this.slotWidth, i % this.slotWidth, child);
+                } else {
+                    add(i % this.slotWidth, i / this.slotWidth, child);
+                }
             }
             onPageChange.forEach(c -> c.onPageChange(this.page, this.totalPages));
         });
