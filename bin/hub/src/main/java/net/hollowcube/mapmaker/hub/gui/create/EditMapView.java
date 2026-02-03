@@ -46,13 +46,15 @@ public class EditMapView extends Panel {
     private final Button iconButton;
 
     @Blocking
-    public EditMapView(PlayerService playerService, MapService mapService, ServerBridge bridge, MapData map) {
+    public EditMapView(PlayerService playerService, MapService mapService, ServerBridge bridge, MapData map, Runnable onPublish) {
         super(9, 10);
         this.mapService = mapService;
         this.map = map;
 
-        Consumer<MapData> publishCallback =
-            publishedMap -> this.onMapPublish(playerService, mapService, bridge, publishedMap);
+        Consumer<MapData> publishCallback = publishedMap -> {
+            this.onMapPublish(playerService, mapService, bridge, publishedMap);
+            onPublish.run();
+        };
         this.publisher = new MapPublisher(mapService, bridge, map, () -> this.host, publishCallback);
 
         background("create_maps2/edit/container", -10, -31);

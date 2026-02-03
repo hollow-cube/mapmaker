@@ -14,13 +14,15 @@ public class MapSlotEntry extends Panel {
     private final MapService mapService;
     private final ServerBridge bridge;
     private final MapData map;
+    private final Runnable onPublish;
 
-    public MapSlotEntry(PlayerService playerService, MapService mapService, ServerBridge bridge, MapData map) {
+    public MapSlotEntry(PlayerService playerService, MapService mapService, ServerBridge bridge, MapData map, Runnable onPublish) {
         super(9, 1);
         this.playerService = playerService;
         this.mapService = mapService;
         this.bridge = bridge;
         this.map = map;
+        this.onPublish = onPublish;
 
         if (map.isPublished()) {
             background("create_maps2/slot/gray", 1, 1);
@@ -50,7 +52,7 @@ public class MapSlotEntry extends Panel {
 
     private void onEditMap() {
         async(() -> {
-            var view = new EditMapView(this.playerService, this.mapService, this.bridge, this.map);
+            var view = new EditMapView(this.playerService, this.mapService, this.bridge, this.map, this.onPublish);
             sync(() -> this.host.pushView(view));
         });
     }

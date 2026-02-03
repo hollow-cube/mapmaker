@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.StringComparison;
 import net.minestom.server.utils.Unit;
 import org.jetbrains.annotations.Blocking;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ public class CreateMapsView extends Panel {
     private final Text searchTextElement;
 
     private String searchText = "";
+    private @Nullable Runnable remountTask;
 
     public CreateMapsView(PlayerService playerService, MapService mapService, ServerBridge bridge) {
         super(9, 10);
@@ -64,21 +66,29 @@ public class CreateMapsView extends Panel {
     @Override
     protected void mount(InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
-        async(this::rebuildSlots);
+        if (isInitial) {
+            this.rebuildSlots();
+        } else {
+            if (this.remountTask != null) {
+                this.remountTask.run();
+            }
+            this.resetSearch();
+        }
     }
 
-    @Blocking
     private void rebuildSlots() {
-        var playerId = PlayerData.fromPlayer(this.host.player()).id();
-        var remoteSlots = this.mapService.getPlayerMapSlots(playerId);
+        async(() -> {
+            var playerId = PlayerData.fromPlayer(this.host.player()).id();
+            var remoteSlots = this.mapService.getPlayerMapSlots(playerId);
 
-        sync(() -> {
-            this.slots.clear();
-            this.slots.addAll(remoteSlots);
-            this.slots.sort((a, b) -> b.createdAt().compareTo(a.createdAt()));
-            this.resetSearch();
+            sync(() -> {
+                this.slots.clear();
+                this.slots.addAll(remoteSlots);
+                this.slots.sort((a, b) -> b.createdAt().compareTo(a.createdAt()));
+                this.resetSearch();
 
-            this.updateCreateButton();
+                this.updateCreateButton();
+            });
         });
     }
 
@@ -119,7 +129,8 @@ public class CreateMapsView extends Panel {
         var entries = new ArrayList<MapSlotEntry>();
         // Always put unpublished maps in slots first before published maps
         for (var slot : results) {
-            entries.add(new MapSlotEntry(this.playerService, this.mapService, this.bridge, slot.map()));
+            entries.add(new MapSlotEntry(this.playerService, this.mapService, this.bridge, slot.map(),
+                                         () -> this.remountTask = this::rebuildSlots));
         }
 
         return entries;
