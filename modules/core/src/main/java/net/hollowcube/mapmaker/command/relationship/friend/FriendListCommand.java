@@ -57,7 +57,7 @@ public class FriendListCommand extends CommandDsl {
             DisplayName displayName = this.playerService.getPlayerDisplayName2(friend.playerId());
             Component username = displayName.asComponent();
             PlayerSession session = this.sessionManager.getSession(friend.playerId());
-            if (friend.online() && session != null && !session.hidden()) {
+            if (session != null && !session.hidden()) {
                 Presence presence = session.presence();
                 builder.appendNewline().append(
                     switch (OpUtils.map(presence, Presence::type)) {
