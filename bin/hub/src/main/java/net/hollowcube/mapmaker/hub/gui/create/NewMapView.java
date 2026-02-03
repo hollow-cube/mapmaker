@@ -13,8 +13,7 @@ import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.kyori.adventure.text.Component;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.EnumSet;
 import java.util.Locale;
 import java.util.function.Consumer;
 
@@ -29,7 +28,7 @@ public class NewMapView extends Panel {
     private final LockableSelect<MapSize> sizeSelect;
     private final Button confirmButton;
 
-    private final List<MapSize> unlockedSizes = new ArrayList<>();
+    private final EnumSet<MapSize> unlockedSizes = EnumSet.of(MapSize.NORMAL);
 
     public NewMapView(MapService mapService, Consumer<MapSlot> onNewMap) {
         super(9, 10);
