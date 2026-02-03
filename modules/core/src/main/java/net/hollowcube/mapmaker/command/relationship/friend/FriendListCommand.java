@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerFriend;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.session.PlayerSession;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
@@ -55,8 +56,9 @@ public class FriendListCommand extends CommandDsl {
         for (PlayerFriend friend : friends.items()) {
             DisplayName displayName = this.playerService.getPlayerDisplayName2(friend.playerId());
             Component username = displayName.asComponent();
-            if (friend.online()) {
-                Presence presence = this.sessionManager.getPresence(friend.playerId());
+            PlayerSession session = this.sessionManager.getSession(friend.playerId());
+            if (friend.online() && session != null && !session.hidden()) {
+                Presence presence = session.presence();
                 builder.appendNewline().append(
                     switch (OpUtils.map(presence, Presence::type)) {
                         case Presence.TYPE_MAPMAKER_HUB ->
