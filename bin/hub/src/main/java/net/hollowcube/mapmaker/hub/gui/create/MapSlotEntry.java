@@ -15,14 +15,14 @@ public class MapSlotEntry extends Panel {
     private final ServerBridge bridge;
     private final MapData map;
 
-    public MapSlotEntry(PlayerService playerService, MapService mapService, ServerBridge bridge, MapData map, boolean published) {
+    public MapSlotEntry(PlayerService playerService, MapService mapService, ServerBridge bridge, MapData map) {
         super(9, 1);
         this.playerService = playerService;
         this.mapService = mapService;
         this.bridge = bridge;
         this.map = map;
 
-        if (published) {
+        if (map.isPublished()) {
             background("create_maps2/slot/gray", 1, 1);
         } else {
             background("create_maps2/slot/blue", 1, 1);
