@@ -1,6 +1,5 @@
 package net.hollowcube.compat.noxesium.packets;
 
-import com.noxcrew.noxesium.api.qib.QibDefinition;
 import net.hollowcube.compat.api.packet.ClientboundModPacket;
 import net.hollowcube.compat.noxesium.NoxesiumAPI;
 import net.hollowcube.compat.noxesium.rules.NoxesiumServerRule;
@@ -59,10 +58,6 @@ public record ClientboundChangeServerRulesPacket(
 
     public static ClientboundChangeServerRulesPacket creativeTab(List<ItemStack> items) {
         return new ClientboundChangeServerRulesPacket(Map.of(NoxesiumServerRules.CREATIVE_TAB, items));
-    }
-
-    public static ClientboundChangeServerRulesPacket qibs(Map<String, QibDefinition> qibs) {
-        return new ClientboundChangeServerRulesPacket(Map.of(NoxesiumServerRules.QIBS, qibs));
     }
 
     public static Builder builder() {

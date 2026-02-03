@@ -1,7 +1,5 @@
 package net.hollowcube.compat.noxesium.rules;
 
-import com.noxcrew.noxesium.api.protocol.rule.ServerRuleIndices;
-import com.noxcrew.noxesium.api.qib.QibDefinition;
 import net.minestom.server.component.DataComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.NetworkBuffer;
@@ -10,10 +8,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public record NoxesiumServerRule<T>(
-        @MagicConstant(valuesFromClass = ServerRuleIndices.class) int id,
+        @MagicConstant(valuesFromClass = NoxesiumRuleIds.Server.class) int id,
         NetworkBuffer.Type<T> codec
 ) {
 
@@ -22,24 +19,16 @@ public record NoxesiumServerRule<T>(
             NoxesiumServerRule::id
     );
 
-    public static NoxesiumServerRule<Boolean> Boolean(@MagicConstant(valuesFromClass = ServerRuleIndices.class) int id) {
+    public static NoxesiumServerRule<Boolean> Boolean(@MagicConstant(valuesFromClass = NoxesiumRuleIds.Server.class) int id) {
         return new NoxesiumServerRule<>(id, NetworkBuffer.BOOLEAN);
     }
 
-    public static NoxesiumServerRule<Integer> Integer(@MagicConstant(valuesFromClass = ServerRuleIndices.class) int id) {
+    public static NoxesiumServerRule<Integer> Integer(@MagicConstant(valuesFromClass = NoxesiumRuleIds.Server.class) int id) {
         return new NoxesiumServerRule<>(id, NetworkBuffer.VAR_INT);
     }
 
-    public static NoxesiumServerRule<List<ItemStack>> ItemStacks(@MagicConstant(valuesFromClass = ServerRuleIndices.class) int id) {
+    public static NoxesiumServerRule<List<ItemStack>> ItemStacks(@MagicConstant(valuesFromClass = NoxesiumRuleIds.Server.class) int id) {
         return new NoxesiumServerRule<>(id, NOXESIUM_ITEM_STACK_NETWORK_TYPE.list());
-    }
-
-    public static NoxesiumServerRule<Map<String, QibDefinition>> QibBehavior(@MagicConstant(valuesFromClass = ServerRuleIndices.class) int id) {
-        NetworkBuffer.Type<QibDefinition> codec = NetworkBuffer.STRING.transform(
-                it -> QibDefinition.QIB_GSON.fromJson(it, QibDefinition.class),
-                QibDefinition.QIB_GSON::toJson
-        );
-        return new NoxesiumServerRule<>(id, NetworkBuffer.STRING.mapValue(codec));
     }
 
     private static final NetworkBuffer.Type<ItemStack> NOXESIUM_ITEM_STACK_NETWORK_TYPE = new NetworkBuffer.Type<>() {
