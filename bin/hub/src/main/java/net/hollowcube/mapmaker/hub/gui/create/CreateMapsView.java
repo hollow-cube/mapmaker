@@ -113,6 +113,7 @@ public class CreateMapsView extends Panel {
         if (availableSlots <= 0) {
             // TODO: What do we display if they don't have enough slots?
             this.createButton.translationKey("gui.create_maps.new", 0);
+            this.createButton.removeLeftClick();
         } else {
             this.createButton.translationKey("gui.create_maps.new", availableSlots);
         }

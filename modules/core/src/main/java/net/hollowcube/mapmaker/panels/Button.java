@@ -163,6 +163,11 @@ public class Button extends Element implements ButtonClickAliases {
         return this;
     }
 
+    public @NotNull Button removeLeftClick() {
+        this.onLeftClick = null;
+        return this;
+    }
+
     @Override
     public @NotNull Button onLeftClickAsync(OnClickTypeSlot onClick) {
         this.onLeftClickAsync = onClick;
