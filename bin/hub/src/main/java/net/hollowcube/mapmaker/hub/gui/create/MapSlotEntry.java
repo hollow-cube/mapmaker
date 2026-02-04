@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
+import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -31,7 +32,7 @@ public class MapSlotEntry extends Panel {
         }
 
         var iconButton = add(0, 0, new Button("gui.create_maps.edit.icon", 1, 1)
-            .onLeftClick(this::onEditMap));
+            .onLeftClick(this::onClick));
         var userIcon = map.settings().getIcon();
         if (userIcon != null) {
             iconButton.model(userIcon.toString(), null);
@@ -40,21 +41,42 @@ public class MapSlotEntry extends Panel {
         }
 
         var name = map.settings().getNameSafe();
-        add(1, 0, new Text(7, 1, name)
+        var textTranslationKey = "gui.create_maps.slot." + (map.isPublished() ? "published" : "yours");
+        add(1, 0, new Text(map.isPublished() ? 8 : 7, 1, name)
             .align(2, Text.CENTER)
-            .onLeftClick(this::onEditMap))
-            .translationKey("gui.create_maps.slot.yours", name);
+            .onLeftClick(this::onClick))
+            .translationKey(textTranslationKey, name);
 
-        add(8, 0, new Button("gui.create_maps.edit.build", 1, 1)
-            .sprite("icon2/1_1/hammer", 1, 1)
-            .onLeftClickAsync(() -> EditMapView.editMap(map, this.host, bridge)));
+        if (!map.isPublished()) {
+            add(8, 0, new Button("gui.create_maps.edit.build", 1, 1)
+                .sprite("icon2/1_1/hammer", 1, 1)
+                .onLeftClickAsync(() -> EditMapView.editMap(map, this.host, bridge)));
+        }
     }
 
-    private void onEditMap() {
+    private void onClick() {
+        if (this.map.isPublished()) {
+            this.showDetails();
+        } else {
+            this.editMap();
+        }
+    }
+
+    private void showDetails() {
+        var playerId = this.host.player().getUuid().toString();
+        async(() -> {
+            var playerDisplayName = this.playerService.getPlayerDisplayName2(playerId);
+            sync(() -> {
+                var view = new MapDetailsView(this.playerService, this.mapService, this.bridge, this.map, playerDisplayName, false);
+                this.host.pushView(view);
+            });
+        });
+    }
+
+    private void editMap() {
         async(() -> {
             var view = new EditMapView(this.playerService, this.mapService, this.bridge, this.map, this.onPublish);
             sync(() -> this.host.pushView(view));
         });
     }
-
 }
