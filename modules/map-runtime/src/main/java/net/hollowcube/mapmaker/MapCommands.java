@@ -21,7 +21,7 @@ public final class MapCommands {
         ));
 
         commandManager.register(new HubCommand(server.bridge()));
-        commandManager.register(new PlayerInfoCommand(server.permManager(), server.playerService(), server.sessionManager()));
+        commandManager.register(new PlayerInfoCommand(server.permManager(), server.playerService(), server.mapService(), server.sessionManager()));
 
         commandManager.register(new TopTimesCommand(server.mapService(), server.playerService(), server.sessionManager()));
 

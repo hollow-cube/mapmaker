@@ -7,6 +7,7 @@ import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.map.responses.HeadDbSearchResponse;
+import net.hollowcube.mapmaker.map.responses.PlayerTopTimesResponse;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Transcoder;
@@ -582,6 +583,20 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         return switch (res.statusCode()) {
             case 200 -> GSON.fromJson(res.body(), HeadDbSearchResponse.class);
             default -> throw new InternalError("Failed to search heads: " + res.body());
+        };
+    }
+
+    @Override
+    public @NotNull PlayerTopTimesResponse getPlayerTopTimes(@NotNull String playerId, int page, int pageSize) {
+        var req = HttpRequest.newBuilder()
+            .uri(URI.create("%s/map-players/%s/topTimes?page=%s&pageSize=%s".formatted(urlV3, playerId, page, pageSize)))
+            .GET()
+            .build();
+
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), PlayerTopTimesResponse.class);
+            default -> throw new InternalError("Failed to get player top times: " + res.body());
         };
     }
 

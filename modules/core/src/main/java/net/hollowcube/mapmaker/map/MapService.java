@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.map.responses.HeadDbSearchResponse;
+import net.hollowcube.mapmaker.map.responses.PlayerTopTimesResponse;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -96,6 +97,8 @@ public interface MapService {
     @NotNull MapPlayerData getMapPlayerData(@NotNull String playerId);
 
     @NotNull MapHistory getPlayerMapHistory(@NotNull String playerId, int page, int amount);
+
+    @NotNull PlayerTopTimesResponse getPlayerTopTimes(@NotNull String playerId, int page, int pageSize);
 
     // Building
 
