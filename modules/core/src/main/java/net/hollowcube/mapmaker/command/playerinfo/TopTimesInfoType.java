@@ -6,11 +6,13 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.PlayerTopTimeEntry;
 import net.hollowcube.mapmaker.map.responses.PlayerTopTimesResponse;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
@@ -63,10 +65,12 @@ public class TopTimesInfoType extends CommandDsl {
             resp = this.mapService.getPlayerTopTimes(targetId, page, 15);
         }
 
-        sender.sendMessage(targetName.append(Component.text("'s Top Times (%s/%s):".formatted(page, Math.ceilDiv(resp.totalItems(), 15)))));
+        sender.sendMessage(targetName.append(
+            Component.text("'s Top Times (%s/%s):".formatted(page, Math.ceilDiv(resp.totalItems(), 15)))));
         List<LeaderboardData.Entry> entries = new ArrayList<>();
         for (PlayerTopTimeEntry entry : resp.items()) {
-            entries.add(new LeaderboardData.Entry(entry.mapName(), entry.completionTime(), entry.rank()));
+            entries.add(
+                new LeaderboardData.Entry(entry.mapName(), entry.publishedId(), entry.completionTime(), entry.rank()));
         }
         LeaderboardData leaderboardData = new LeaderboardData(entries);
         leaderboardData.toComponents().forEach(sender::sendMessage);
@@ -85,7 +89,7 @@ public class TopTimesInfoType extends CommandDsl {
         private static final TextColor COLOR_DEFAULT = TextColor.color(0x696969);
 
         @RuntimeGson
-        public record Entry(@NotNull String mapName, long completionTime, int rank) {
+        public record Entry(@NotNull String mapName, int publishedMapId, long completionTime, int rank) {
         }
 
         /**
@@ -108,11 +112,8 @@ public class TopTimesInfoType extends CommandDsl {
 
                 nameWidths[i] = FontUtil.measureText(entry.mapName());
                 maxNameWidth = Math.max(maxNameWidth, nameWidths[i] + FontUtil.measureText(" "));
-                //            var length = playerName.content().length();
-                //            if (length > maxWidth) maxWidth = length;
             }
 
-            var shouldShowSelf = true;
             for (var i = 0; i < top().size(); i++) {
                 var entry = top().get(i);
                 var comp = Component.text();
@@ -125,10 +126,13 @@ public class TopTimesInfoType extends CommandDsl {
                                                default -> COLOR_DEFAULT;
                                            }));
 
-                comp.append(Component.text(entry.mapName()))
-                    .append(Component.text(FontUtil.computeOffset(maxNameWidth - nameWidths[i])));
                 comp.append(
-                    Component.text(" " + formatMapPlaytime(entry.completionTime(), true), TextColor.color(0xf2f2f2)));
+                        Component.text(entry.mapName())
+                            .hoverEvent(Component.text("Click to copy published ID"))
+                            .clickEvent(ClickEvent.copyToClipboard(MapData.formatPublishedId(entry.publishedMapId())))
+                    ).append(Component.text(FontUtil.computeOffset(maxNameWidth - nameWidths[i])))
+                    .append(Component.text(" " + formatMapPlaytime(entry.completionTime(), true),
+                                           TextColor.color(0xf2f2f2)));
 
                 result.add(comp.build());
             }
