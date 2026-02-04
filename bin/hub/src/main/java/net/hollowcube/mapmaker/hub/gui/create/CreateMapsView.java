@@ -21,6 +21,8 @@ import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
 import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
 
 public class CreateMapsView extends Panel {
+    private static final int PAGE_SIZE = 5;
+
     private final PlayerService playerService;
     private final MapService mapService;
     private final ServerBridge bridge;
@@ -124,13 +126,13 @@ public class CreateMapsView extends Panel {
     @Blocking
     private List<? extends Panel> onSearch(Unit unused, int page, int pageSize) {
         var results = this.searchText.isEmpty() ? this.slots : this.searchAllSlots();
+        if (page == 0) this.pagination.totalPages((int) Math.ceil(((double) results.size()) / PAGE_SIZE));
 
         var entries = new ArrayList<MapSlotEntry>();
-        // Always put unpublished maps in slots first before published maps
-        for (var slot : results) {
+        // Keep as a stream to avoid collecting all to a list just to iterate over it
+        this.limitMapSlotsForPage(results.stream(), page).forEachOrdered(slot ->
             entries.add(new MapSlotEntry(this.playerService, this.mapService, this.bridge, slot.map(),
-                                         () -> this.remountTask = this::rebuildSlots));
-        }
+                                         () -> this.remountTask = this::rebuildSlots)));
 
         return entries;
     }
@@ -138,6 +140,11 @@ public class CreateMapsView extends Panel {
     private List<MapSlot> searchAllSlots() {
         // Always put unpublished slots first
         return Stream.concat(this.searchUnpublishedSlots(), this.searchPublishedSlots()).toList();
+    }
+
+    private Stream<MapSlot> limitMapSlotsForPage(Stream<MapSlot> slots, int page) {
+        // Page starts from 0
+        return slots.skip((long) page * PAGE_SIZE).limit(PAGE_SIZE);
     }
 
     private Stream<MapSlot> searchUnpublishedSlots() {

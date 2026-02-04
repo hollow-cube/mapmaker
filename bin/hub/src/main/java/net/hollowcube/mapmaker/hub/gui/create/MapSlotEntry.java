@@ -67,7 +67,7 @@ public class MapSlotEntry extends Panel {
         async(() -> {
             var playerDisplayName = this.playerService.getPlayerDisplayName2(playerId);
             sync(() -> {
-                var view = new MapDetailsView(this.playerService, this.mapService, this.bridge, this.map, playerDisplayName, false);
+                var view = new MapDetailsView(this.playerService, this.mapService, this.bridge, this.map, playerDisplayName, true);
                 this.host.pushView(view);
             });
         });
