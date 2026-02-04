@@ -73,6 +73,7 @@ public class CreateMapsView extends Panel {
             if (this.remountTask != null) {
                 this.remountTask.run();
             }
+            this.updateCreateButton();
             this.resetSearch();
         }
     }
@@ -107,7 +108,14 @@ public class CreateMapsView extends Panel {
         // We have to lazy init this as host is not set until the view is mounted
         var unlockedSlots = MapPlayerData.fromPlayer(this.host.player()).unlockedSlots();
         var usedSlots = this.slots.stream().filter(slot -> !slot.map().isPublished()).count();
-        this.createButton.translationKey("gui.create_maps.new", unlockedSlots - usedSlots);
+
+        var availableSlots = unlockedSlots - usedSlots;
+        if (availableSlots <= 0) {
+            // TODO: What do we display if they don't have enough slots?
+            this.createButton.translationKey("gui.create_maps.new", 0);
+        } else {
+            this.createButton.translationKey("gui.create_maps.new", availableSlots);
+        }
     }
 
     private void openSearchInput() {
