@@ -4,7 +4,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
-import net.hollowcube.compat.noxesium.packets.ClientboundChangeServerRulesPacket;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.Map2PlayerBlockInteractEvent;
@@ -88,7 +87,6 @@ public class ItemRegistry {
             .addListener(PlayerEntityInteractEvent.class, this::handleUseItemOnEntity)
             .addListener(EntityAttackEvent.class, this::handleHitEntity)
             .addListener(InstanceTickEvent.class, this::handleInstanceTick)
-            .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn)
             .addListener(PlayerBeginItemUseEvent.class, this::handleBeginItemUse)
             .addListener(PlayerCancelItemUseEvent.class, this::handleCancelItemUse)
             .addListener(EventListener.builder(InventoryPreClickEvent.class)
@@ -195,6 +193,16 @@ public class ItemRegistry {
     public @Nullable String getItemId(@NotNull ItemStack itemStack) {
         var itemHandler = getHandlerFromItemStack(itemStack);
         return itemHandler == null ? null : itemHandler.key().asString();
+    }
+
+    public List<ItemStack> getCustomPublicItemStacks() {
+        return this.idToItemHandler
+            .keySet()
+            .stream()
+            .map(Key::key)
+            .filter(this.publicItems::contains)
+            .map(it -> getItemStack(it, null))
+            .toList();
     }
 
     private @NotNull List<String> suggestItems(@Nullable String filter) {
@@ -395,15 +403,6 @@ public class ItemRegistry {
                 PlayerHand.MAIN, null, null, null, null);
         var result = handler.cancelConsume(click, event.getUseDuration());
         event.setRiptideSpinAttack(result == ItemHandler.ConsumeItemResult.RIPTIDE_SPIN);
-    }
-
-    private void handlePlayerSpawn(@NotNull PlayerSpawnEvent event) {
-        if (!event.isFirstSpawn()) return;
-        List<ItemStack> items = this.idToItemHandler.keySet().stream()
-                .map(Key::key)
-                .filter(this.publicItems::contains)
-                .map(it -> getItemStack(it, null)).toList();
-        ClientboundChangeServerRulesPacket.creativeTab(items).send(event.getPlayer());
     }
 
     private @Nullable ItemHandler getHandlerFromItemStack(@NotNull ItemStack itemStack) {

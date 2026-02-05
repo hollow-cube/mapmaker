@@ -2,6 +2,8 @@ package net.hollowcube.mapmaker.runtime.parkour;
 
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
+import net.hollowcube.compat.noxesium.components.NoxesiumGameComponents;
+import net.hollowcube.compat.noxesium.handshake.NoxesiumPlayer;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
@@ -57,6 +59,11 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             player.getAttribute(Attribute.SAFE_FALL_DISTANCE).addModifier(NO_FALL_DAMAGE_MODIFIER);
             player.updateViewerRule(new PlayerVisibility.ViewerRule(player, world));
             mp.setVisibilityFunc(new PlayerVisibility.VisibilityRule(player, world));
+
+            var noxesium = NoxesiumPlayer.get(player);
+            noxesium.clear();
+            noxesium.set(NoxesiumGameComponents.DISABLE_SPIN_ATTACK_COLLISIONS, true);
+            noxesium.set(NoxesiumGameComponents.CLIENT_AUTHORITATIVE_ELYTRA, true);
 
             // Timer is only added for scorable playing states.
             ActionBar.forPlayer(player).addProvider(ParkourTimerHud.INSTANCE);
