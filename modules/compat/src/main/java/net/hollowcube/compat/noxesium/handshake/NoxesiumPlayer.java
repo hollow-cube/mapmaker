@@ -44,7 +44,14 @@ public class NoxesiumPlayer implements NoxesiumComponentType.Holder {
             this.loggedMods = true;
 
             PostHog.capture(this.player.getUuid().toString(), "session_mods", Map.ofEntries(
-                Map.entry("mods", packet.mods().stream().map(ServerboundHandshakeAcknowledgePacket.Mod::id).toList())
+                Map.entry(
+                    "mods",
+                    packet.mods()
+                        .stream()
+                        .map(ServerboundHandshakeAcknowledgePacket.Mod::id)
+                        .sorted()
+                        .toList()
+                )
             ));
         }
     }
