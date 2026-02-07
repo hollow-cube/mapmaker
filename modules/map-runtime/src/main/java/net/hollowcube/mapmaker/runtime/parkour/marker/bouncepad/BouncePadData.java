@@ -4,6 +4,7 @@ import net.hollowcube.common.util.Either;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
+import net.hollowcube.mapmaker.util.TagCooldown;
 import net.hollowcube.molang.MolangExpr;
 import net.hollowcube.molang.eval.MolangEvaluator;
 import net.hollowcube.molang.eval.MolangValue;
@@ -19,8 +20,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 // TODO: Remove this class entirely and make it a status plate action (not checkpoint, would be a strange checkpoint action)
-@SuppressWarnings("UnstableApiUsage")
 public sealed interface BouncePadData extends DebugCommand.BlockDebug {
+
+    TagCooldown BOUNCE_PAD_APPLY_COOLDOWN = new TagCooldown("mapmaker:bounce_pad_plate_cooldown", 250);
 
     double DEFAULT_POWER = 25;
     double MAX_VELOCITY = 4096;
@@ -37,6 +39,18 @@ public sealed interface BouncePadData extends DebugCommand.BlockDebug {
             data -> data instanceof Molang molang ? Either.left(molang) : Either.right(data));
 
     @Nullable Vec getVelocity(@NotNull Player player);
+
+    default void applyVelocity(@NotNull Player player) {
+        if (!BOUNCE_PAD_APPLY_COOLDOWN.test(player)) return;
+
+        var newVelocity = this.getVelocity(player);
+        if (newVelocity == null) return;
+        player.setVelocity(new Vec(
+            Math.min(Math.max(newVelocity.x(), -BouncePadData.MAX_VELOCITY), BouncePadData.MAX_VELOCITY),
+            Math.min(Math.max(newVelocity.y(), -BouncePadData.MAX_VELOCITY), BouncePadData.MAX_VELOCITY),
+            Math.min(Math.max(newVelocity.z(), -BouncePadData.MAX_VELOCITY), BouncePadData.MAX_VELOCITY)
+        ));
+    }
 
     default void onUpdate(@Nullable Player player) {
 

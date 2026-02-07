@@ -5,7 +5,6 @@ import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.minestom.server.codec.Transcoder;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,12 +36,6 @@ public class BouncePadMarkerHandler extends ObjectEntityHandler {
         if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying))
             return;
 
-        var newVelocity = this.data.getVelocity(player);
-        if (newVelocity == null) return;
-        player.setVelocity(new Vec(
-                Math.min(Math.max(newVelocity.x(), -BouncePadData.MAX_VELOCITY), BouncePadData.MAX_VELOCITY),
-                Math.min(Math.max(newVelocity.y(), -BouncePadData.MAX_VELOCITY), BouncePadData.MAX_VELOCITY),
-                Math.min(Math.max(newVelocity.z(), -BouncePadData.MAX_VELOCITY), BouncePadData.MAX_VELOCITY)
-        ));
+        this.data.applyVelocity(player);
     }
 }
