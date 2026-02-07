@@ -17,8 +17,9 @@ public class V4442 extends DataVersion implements ExternalDataFix {
     public V4442() {
         super(4442);
 
-        addFix(DataTypes.BLOCK_STATE, new BlockStatePropertiesFix(
-                "minecraft:creaking_heart", V4442::fixCreakingHeartCreakingToState));
+        var fixer = new BlockStatePropertiesFix("minecraft:creaking_heart", V4442::fixCreakingHeartCreakingToState);
+        addFix(DataTypes.BLOCK_STATE, fixer);
+        addFix(DataTypes.FLAT_BLOCK_STATE, fixer);
     }
 
     private static void fixCreakingHeartCreakingToState(Value blockProperties) {
