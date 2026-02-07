@@ -27,7 +27,7 @@ public class FinishPlateBlock implements BlockHandler, PressurePlateBlock {
         var nextState = switch (world.getPlayerState(player)) {
             case ParkourState.Playing2(var saveState) -> {
                 var finishState = saveState.copy(saveState.state(PlayState.class));
-                finishState.complete(System.currentTimeMillis());
+                finishState.complete(System.nanoTime() / 1_000_000);
                 yield new ParkourState.Finished(finishState);
             }
             case ParkourState.Testing(var _, var parent) -> {

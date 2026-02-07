@@ -38,7 +38,7 @@ public sealed interface EditorState extends PlayerState<EditorState, EditorMapWo
             noxesium.set(NoxesiumGameComponents.CUSTOM_CREATIVE_ITEMS, world.itemRegistry().getCustomPublicItemStacks());
 
             if (lastState == null)
-                saveState.setPlayStartTime(System.currentTimeMillis());
+                saveState.setPlayStartTime(System.nanoTime() / 1_000_000);
 
             AxiomPlayer.setEnabled(player, true);
 

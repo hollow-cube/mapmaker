@@ -69,7 +69,7 @@ public class LegacyActionStateManager {
         // Update the countdown timer (time may have been added)
         var timeLimit = state.get(EditTimerAction.SAVE_DATA);
         if (timeLimit != null && !event.isFreshState()) {
-            player.setTag(EditTimerAction.COUNTDOWN_END, System.currentTimeMillis() + (timeLimit * 50));
+            player.setTag(EditTimerAction.COUNTDOWN_END, System.nanoTime() / 1_000_000 + (timeLimit * 50));
         } else {
             player.removeTag(EditTimerAction.COUNTDOWN_END);
         }
@@ -108,7 +108,7 @@ public class LegacyActionStateManager {
     private static void handleUpdateStateFromPlayer(ParkourMapPlayerStateUpdateEvent event) {
         final var player = event.player();
         final var playState = event.playState();
-        final var now = System.currentTimeMillis();
+        final var now = System.nanoTime() / 1_000_000;
 
         var countdownEnd = player.getTag(EditTimerAction.COUNTDOWN_END);
         if (countdownEnd != -1) {

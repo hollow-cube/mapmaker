@@ -93,7 +93,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             if (!isFreshState) {
                 // If the playtime is non-zero (ie they have played before) start timing immediately.
                 // Otherwise, we will start timing when they move the first time.
-                saveState().setPlayStartTime(System.currentTimeMillis());
+                saveState().setPlayStartTime(System.nanoTime() / 1_000_000);
             } else ((MapPlayer) player).resetTouchingState();
 
             if (lastState == null && MapFeatureFlags.DEBUG_PLAYING_OVERLAY.test(player)) {

@@ -317,13 +317,13 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         if (saveState.getPlayStartTime() != 0) return;
 
         // Start the timer.
-        saveState.setPlayStartTime(System.currentTimeMillis());
+        saveState.setPlayStartTime(System.nanoTime() / 1_000_000);
         // Reset touching state so you can begin touching
         ((MapPlayer) player).resetTouchingState();
 
         var timer = saveState.state(PlayState.class).get(EditTimerAction.SAVE_DATA);
         if (timer != null && timer > 0) {
-            player.setTag(EditTimerAction.COUNTDOWN_END, System.currentTimeMillis() + (timer * 50L));
+            player.setTag(EditTimerAction.COUNTDOWN_END, System.nanoTime() / 1_000_000 + (timer * 50L));
         }
     }
 
@@ -349,7 +349,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         final var player = event.getPlayer();
 
         var countdownEnd = player.getTag(EditTimerAction.COUNTDOWN_END);
-        if (countdownEnd != -1 && countdownEnd < System.currentTimeMillis()) {
+        if (countdownEnd != -1 && countdownEnd < System.nanoTime() / 1_000_000) {
             player.sendMessage(translatable("playing.timer.run_out"));
             softResetPlayer(player);
         }

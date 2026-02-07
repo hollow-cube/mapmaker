@@ -49,14 +49,14 @@ public class ParkourTimerHud implements ActionBar.Provider {
         // If the countdown is not and it's the start of the map show the time limit.
         var countdownEnd = player.getTag(EditTimerAction.COUNTDOWN_END);
         if (countdownEnd != -1) {
-            time = Math.max(countdownEnd - System.currentTimeMillis(), 0);
+            time = Math.max(countdownEnd - System.nanoTime() / 1_000_000, 0);
         } else if (time == 0 && startingTimer != null && startingTimer.time() > 0) {
             time = startingTimer.time() * 50L; // Ticks to milliseconds
         } else if (!(p instanceof ParkourState.Playing2)) {
             return; // Don't show the normal timer for testing, only playing
         }
 
-        var text = formatMapPlaytime(time, false);
+        var text = formatMapPlaytime(time, true);
         // Text + spacing of same size of the ends of the background + timer width
         var width = FontUtil.measureTextV2(text) + BACKGROUND_PADDING * 4 + TIMER.width();
 

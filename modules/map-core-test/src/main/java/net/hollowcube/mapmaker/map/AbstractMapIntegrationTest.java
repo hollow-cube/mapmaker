@@ -68,6 +68,6 @@ public abstract class AbstractMapIntegrationTest {
 
         ((PlayingMapWorld) world).preAddPlayer(new AsyncPlayerConfigurationEvent(player, true));
         world.addPlayer(player);
-        SaveState.fromPlayer(player).setPlayStartTime(System.currentTimeMillis());
+        SaveState.fromPlayer(player).setPlayStartTime(System.nanoTime() / 1_000_000);
     }
 }

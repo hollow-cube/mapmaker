@@ -78,7 +78,7 @@ public class SaveState {
      * which returns the playtime at the last save.
      */
     public long getRealPlaytime() {
-        return getPlayStartTime() != 0 ? getPlaytime() + System.currentTimeMillis() - getPlayStartTime() : getPlaytime();
+        return getPlayStartTime() != 0 ? getPlaytime() + System.nanoTime() / 1_000_000 - getPlayStartTime() : getPlaytime();
     }
 
     public void setPlaytime(long playtime) {
@@ -99,7 +99,7 @@ public class SaveState {
     }
 
     public void updatePlaytime() {
-        updatePlaytime(System.currentTimeMillis());
+        updatePlaytime(System.nanoTime() / 1_000_000);
     }
 
     public void updatePlaytime(long currentTime) {
