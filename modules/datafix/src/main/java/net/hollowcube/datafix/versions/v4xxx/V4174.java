@@ -18,7 +18,7 @@ public class V4174 extends DataVersion {
     private static void fixCreakingHeartBlockCreakingToActive(Value blockProperties) {
         var creaking = blockProperties.remove("creaking").as(String.class, "dormant");
         if ("disabled".equalsIgnoreCase(creaking)) {
-            blockProperties.put("neutral", "false");
+            blockProperties.put("neutral", "true");
         }
         blockProperties.put("active", "active".equals(creaking) ? "true" : "false");
     }
