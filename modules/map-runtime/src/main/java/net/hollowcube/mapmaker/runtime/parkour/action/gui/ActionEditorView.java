@@ -127,8 +127,9 @@ public class ActionEditorView extends Panel {
 
         private void editExistingAction(ActionList.Ref ref) {
             var editorFunc = ActionRegistry.getEditor(ref.key()).editor();
-            if (editorFunc != null) {
-                host.pushView(editorFunc.apply(ref));
+            var panel = editorFunc != null ? editorFunc.apply(ref) : null;
+            if (panel != null) {
+                host.pushView(panel);
             }
         }
 

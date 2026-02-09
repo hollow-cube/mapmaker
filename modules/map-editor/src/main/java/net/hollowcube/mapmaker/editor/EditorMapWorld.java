@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.editor.item.BuilderMenuItem;
 import net.hollowcube.mapmaker.editor.item.EnterTestModeItem;
 import net.hollowcube.mapmaker.editor.item.ExitTestModeItem;
 import net.hollowcube.mapmaker.editor.item.SpawnPointItem;
-import net.hollowcube.mapmaker.editor.parkour.BouncePadEditor;
 import net.hollowcube.mapmaker.editor.parkour.CheckpointEditor;
 import net.hollowcube.mapmaker.editor.parkour.FinishEditor;
 import net.hollowcube.mapmaker.editor.parkour.StatusEditor;
@@ -101,7 +100,6 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         itemRegistry().register(CheckpointEditor.PLATE_ITEM);
         itemRegistry().register(StatusEditor.PLATE_ITEM);
         itemRegistry().register(FinishEditor.PLATE_ITEM);
-        itemRegistry().register(BouncePadEditor.ITEM);
 
         ParkourMapWorld.registerMarkers(objectEntityHandlers());
         objectEntityHandlers().registerEditor(CheckpointMarkerHandler.ID, CheckpointEditor.MARKER_EDITOR);

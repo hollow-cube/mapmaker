@@ -65,6 +65,7 @@ public final class ActionRegistry {
         register(ChatAction.KEY, ChatAction.CODEC, ChatAction.EDITOR);
         register(RespawnPosAction.KEY, RespawnPosAction.CODEC, RespawnPosAction.EDITOR, Action.Type.CHECKPOINT);
         register(EditVariableAction.KEY, EditVariableAction.CODEC, EditVariableAction.EDITOR);
+        register(EditVelocityAction.KEY, EditVelocityAction.CODEC, EditVelocityAction.EDITOR, Action.Type.STATUS);
     }
 
     private static <T extends Action> RegistryKey<StructCodec<? extends Action>> register(Key name, StructCodec<T> codec, Action.Editor<T> editor, Action.Type... types) {
