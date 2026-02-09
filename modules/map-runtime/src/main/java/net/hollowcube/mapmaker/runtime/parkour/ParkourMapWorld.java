@@ -31,12 +31,14 @@ import net.hollowcube.mapmaker.runtime.parkour.action.HotbarItems;
 import net.hollowcube.mapmaker.runtime.parkour.action.LegacyActionStateManager;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditLivesAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditTimerAction;
-import net.hollowcube.mapmaker.runtime.parkour.block.*;
+import net.hollowcube.mapmaker.runtime.parkour.block.CheckpointPlateBlock;
+import net.hollowcube.mapmaker.runtime.parkour.block.ClientBlockPlacementListener;
+import net.hollowcube.mapmaker.runtime.parkour.block.FinishPlateBlock;
+import net.hollowcube.mapmaker.runtime.parkour.block.StatusPlateBlock;
 import net.hollowcube.mapmaker.runtime.parkour.hud.ParkourDebugHud;
 import net.hollowcube.mapmaker.runtime.parkour.hud.ResetHeightDisplay;
 import net.hollowcube.mapmaker.runtime.parkour.item.*;
 import net.hollowcube.mapmaker.runtime.parkour.marker.*;
-import net.hollowcube.mapmaker.runtime.parkour.marker.bouncepad.BouncePadMarkerHandler;
 import net.hollowcube.mapmaker.runtime.parkour.setting.*;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.NumberUtil;
@@ -114,7 +116,6 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
                 ClientPlayerBlockPlacementPacket.class,
                 ClientBlockPlacementListener::handleBlockPlacementPacket);
 
-        process.block().registerHandler(BouncePadBlock.KEY, BouncePadBlock::new); // Not stateless
         process.block().registerHandler(CheckpointPlateBlock.INSTANCE.getKey(), () -> CheckpointPlateBlock.INSTANCE);
         process.block().registerHandler(FinishPlateBlock.INSTANCE.getKey(), () -> FinishPlateBlock.INSTANCE);
         process.block().registerHandler(StatusPlateBlock.INSTANCE.getKey(), () -> StatusPlateBlock.INSTANCE);
@@ -126,7 +127,6 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     public static void registerMarkers(ObjectEntityHandlerRegistry objectEntityHandlers) {
         objectEntityHandlers.registerForMarkers(MapLeaderboardMarkerHandler.ID, MapLeaderboardMarkerHandler::new);
-        objectEntityHandlers.registerForMarkers(BouncePadMarkerHandler.ID, BouncePadMarkerHandler::new);
         objectEntityHandlers.registerForMarkers(HappyGhastMarkerHandler.ID, HappyGhastMarkerHandler::new);
         objectEntityHandlers.registerForMarkers(CheckpointMarkerHandler.ID, CheckpointMarkerHandler::new);
         objectEntityHandlers.registerForMarkers(StatusMarkerHandler.ID, StatusMarkerHandler::new);

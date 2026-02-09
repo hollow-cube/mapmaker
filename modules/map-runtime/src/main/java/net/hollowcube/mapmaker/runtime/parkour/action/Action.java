@@ -25,34 +25,34 @@ public interface Action {
     }
 
     record Editor<T extends Action>(
-            @Nullable Function<ActionList.Ref, Panel> editor,
+            @Nullable Function<ActionList.Ref, @Nullable Panel> editor,
             Function<@Nullable T, Sprite> sprite,
             @Nullable Function<@Nullable T, TranslatableComponent> thumbnail,
             Set<Key> exclusiveSet
     ) {
         private static final Sprite DEFAULT_SPRITE = new Sprite("map_details/action/report", 6, 3);
 
-        public Editor(@Nullable Function<ActionList.Ref, Panel> editor) {
+        public Editor(@Nullable Function<ActionList.Ref, @Nullable Panel> editor) {
             this(editor, _ -> DEFAULT_SPRITE, null, Set.of());
         }
 
-        public Editor(@Nullable Function<ActionList.Ref, Panel> editor,
+        public Editor(@Nullable Function<ActionList.Ref, @Nullable Panel> editor,
                       Sprite sprite) {
             this(editor, _ -> sprite, null, Set.of());
         }
 
-        public Editor(@Nullable Function<ActionList.Ref, Panel> editor,
+        public Editor(@Nullable Function<ActionList.Ref, @Nullable Panel> editor,
                       Function<@Nullable T, Sprite> sprite) {
             this(editor, sprite, null, Set.of());
         }
 
-        public Editor(@Nullable Function<ActionList.Ref, Panel> editor,
+        public Editor(@Nullable Function<ActionList.Ref, @Nullable Panel> editor,
                       Sprite sprite,
                       TranslatableComponent thumbnail) {
             this(editor, _ -> sprite, _ -> thumbnail, Set.of());
         }
 
-        public Editor(@Nullable Function<ActionList.Ref, Panel> editor,
+        public Editor(@Nullable Function<ActionList.Ref, @Nullable Panel> editor,
                       Sprite sprite, @Nullable Function<@Nullable T, TranslatableComponent> thumbnail) {
             this(editor, _ -> sprite, thumbnail, Set.of());
         }
