@@ -18,6 +18,7 @@ public class V4672 extends DataVersion implements ExternalDataFix {
 
             blockEntity.put("id", "mapmaker:status_plate");
             blockEntity.put("actions", actions);
+            blockEntity.put("repeatable", true);
 
             actions.put(action);
             action.put("type", "mapmaker:velocity");
@@ -39,6 +40,7 @@ public class V4672 extends DataVersion implements ExternalDataFix {
                 data.put("status", status);
 
                 status.put("actions", actions);
+                status.put("repeatable", true);
                 actions.put(action);
                 action.put("type", "mapmaker:velocity");
                 action.put("modifier", getModifier(data));
