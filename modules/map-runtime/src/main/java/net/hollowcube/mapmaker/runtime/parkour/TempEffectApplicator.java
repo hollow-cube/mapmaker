@@ -228,7 +228,7 @@ public class TempEffectApplicator {
                     // With additive index you can get anything <= current + 1
                     ? (progressIndex > currentIndex + 1)
                     // Without additive progress index you must be at the prior index or the current one
-                    : (progressIndex - 1 > currentIndex);
+                    : (progressIndex != currentIndex && progressIndex != currentIndex + 1);
             if (isFail) {
                 if (PROGRESS_INDEX_WARNING.test(player)) {
                     player.sendMessage(translatable("action.progress_index.not_acceptable",
