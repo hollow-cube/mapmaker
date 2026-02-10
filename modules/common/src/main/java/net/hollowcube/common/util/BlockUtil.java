@@ -2,6 +2,8 @@ package net.hollowcube.common.util;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
 import net.minestom.server.instance.block.Block;
@@ -30,9 +32,9 @@ public final class BlockUtil {
             return o1.compareTo(o2);
         }
     };
+
     private static final Int2ObjectMap<Map<String, String[]>> BLOCK_PROPERTIES;
     private static final Int2ObjectMap<Material> BLOCK_TO_ITEM;
-
     static {
         var blockmap = new Int2ObjectOpenHashMap<Map<String, String[]>>();
         for (var block : Block.values()) {
@@ -57,6 +59,15 @@ public final class BlockUtil {
             blockToItem.put(block.id(), material);
         }
         BLOCK_TO_ITEM = blockToItem;
+    }
+
+    private static final IntSet ALWAYS_WATERLOGGED_BLOCKS = new IntOpenHashSet();
+    static {
+        ALWAYS_WATERLOGGED_BLOCKS.add(Block.TALL_SEAGRASS.id());
+        ALWAYS_WATERLOGGED_BLOCKS.add(Block.SEAGRASS.id());
+        ALWAYS_WATERLOGGED_BLOCKS.add(Block.BUBBLE_COLUMN.id());
+        ALWAYS_WATERLOGGED_BLOCKS.add(Block.KELP.id());
+        ALWAYS_WATERLOGGED_BLOCKS.add(Block.KELP_PLANT.id());
     }
 
     /**
@@ -131,7 +142,7 @@ public final class BlockUtil {
     }
 
     public static boolean isWaterlogged(@NotNull Block block) {
-        return "true".equals(block.getProperty("waterlogged"));
+        return "true".equals(block.getProperty("waterlogged")) || ALWAYS_WATERLOGGED_BLOCKS.contains(block.id());
     }
 
     public static Block fromStateIdOrNull(int stateId) {
