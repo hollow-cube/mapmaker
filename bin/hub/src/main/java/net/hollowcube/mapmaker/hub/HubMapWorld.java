@@ -30,7 +30,7 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
     private static final Pos MIN_SPAWN_POINT = new Pos(-1, 40, -1, 90, 0);
 
     private static final Vec HUB_BB_MIN = new Vec(-250, -40, -150);
-    private static final Vec HUB_BB_MAX = new Vec(60, 130, 150);
+    private static final Vec HUB_BB_MAX = new Vec(60, 160, 150);
 
     public static Pos spawnPointFor(Player player) {
         var seeded = new Random(player.getUuid().getLeastSignificantBits());
@@ -45,14 +45,15 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
 
     public HubMapWorld(MapServer server, MapData map) {
         super(server, map, makeMapInstance(map, 'h', null),
-                HubPlayerState.class);
+            HubPlayerState.class);
 
         itemRegistry().register(new PlayMapsItem(server.playerService(), server.mapService(), server.bridge()));
         itemRegistry().register(new CreateMapsItem(server.guiController()));
-        itemRegistry().register(new OrgMapsItem(server.guiController()));
-        itemRegistry().register(new OpenCosmeticsMenuItem(server.guiController()));
+        itemRegistry().register(new OrgMapsItem());
+        itemRegistry().register(new OpenCosmeticsMenuItem(server.playerService()));
         itemRegistry().register(OpenStoreItem.INSTANCE);
         itemRegistry().register(new AdventCalendarItem());
+        itemRegistry().register(OpenNotificationsItem.INSTANCE);
 
         objectEntityHandlers().registerForInteractions(PresentObjectHandler.ID, PresentObjectHandler::new);
 
@@ -64,10 +65,10 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
         if (ServerRuntime.getRuntime().isDevelopment()) {
             var playerScript = Objects.requireNonNull(HubMapWorld.class.getResource("/scripts/player.luau"));
             var baseUrl = URI.create(playerScript.toString().substring(0, playerScript.toString().lastIndexOf('/')));
-            this.scriptContext = new WorldScriptContext(baseUrl, false);
+            this.scriptContext = new WorldScriptContext(this, baseUrl, false);
         } else {
             var zipUrl = Objects.requireNonNull(HubMapWorld.class.getResource("/net.hollowcube.scripting/hub.zip"));
-            this.scriptContext = new WorldScriptContext(URI.create(zipUrl.toString()), true);
+            this.scriptContext = new WorldScriptContext(this, URI.create(zipUrl.toString()), true);
         }
     }
 

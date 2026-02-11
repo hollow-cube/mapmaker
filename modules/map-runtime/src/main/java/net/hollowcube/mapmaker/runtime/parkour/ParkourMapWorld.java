@@ -31,14 +31,17 @@ import net.hollowcube.mapmaker.runtime.parkour.action.HotbarItems;
 import net.hollowcube.mapmaker.runtime.parkour.action.LegacyActionStateManager;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditLivesAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditTimerAction;
-import net.hollowcube.mapmaker.runtime.parkour.block.*;
+import net.hollowcube.mapmaker.runtime.parkour.block.CheckpointPlateBlock;
+import net.hollowcube.mapmaker.runtime.parkour.block.ClientBlockPlacementListener;
+import net.hollowcube.mapmaker.runtime.parkour.block.FinishPlateBlock;
+import net.hollowcube.mapmaker.runtime.parkour.block.StatusPlateBlock;
 import net.hollowcube.mapmaker.runtime.parkour.hud.ParkourDebugHud;
 import net.hollowcube.mapmaker.runtime.parkour.hud.ResetHeightDisplay;
 import net.hollowcube.mapmaker.runtime.parkour.item.*;
 import net.hollowcube.mapmaker.runtime.parkour.marker.*;
-import net.hollowcube.mapmaker.runtime.parkour.marker.bouncepad.BouncePadMarkerHandler;
 import net.hollowcube.mapmaker.runtime.parkour.setting.*;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
+import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -113,7 +116,6 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
                 ClientPlayerBlockPlacementPacket.class,
                 ClientBlockPlacementListener::handleBlockPlacementPacket);
 
-        process.block().registerHandler(BouncePadBlock.KEY, BouncePadBlock::new); // Not stateless
         process.block().registerHandler(CheckpointPlateBlock.INSTANCE.getKey(), () -> CheckpointPlateBlock.INSTANCE);
         process.block().registerHandler(FinishPlateBlock.INSTANCE.getKey(), () -> FinishPlateBlock.INSTANCE);
         process.block().registerHandler(StatusPlateBlock.INSTANCE.getKey(), () -> StatusPlateBlock.INSTANCE);
@@ -125,7 +127,6 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     public static void registerMarkers(ObjectEntityHandlerRegistry objectEntityHandlers) {
         objectEntityHandlers.registerForMarkers(MapLeaderboardMarkerHandler.ID, MapLeaderboardMarkerHandler::new);
-        objectEntityHandlers.registerForMarkers(BouncePadMarkerHandler.ID, BouncePadMarkerHandler::new);
         objectEntityHandlers.registerForMarkers(HappyGhastMarkerHandler.ID, HappyGhastMarkerHandler::new);
         objectEntityHandlers.registerForMarkers(CheckpointMarkerHandler.ID, CheckpointMarkerHandler::new);
         objectEntityHandlers.registerForMarkers(StatusMarkerHandler.ID, StatusMarkerHandler::new);
@@ -316,13 +317,13 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         if (saveState.getPlayStartTime() != 0) return;
 
         // Start the timer.
-        saveState.setPlayStartTime(System.currentTimeMillis());
+        saveState.setPlayStartTime(System.nanoTime() / 1_000_000);
         // Reset touching state so you can begin touching
         ((MapPlayer) player).resetTouchingState();
 
         var timer = saveState.state(PlayState.class).get(EditTimerAction.SAVE_DATA);
         if (timer != null && timer > 0) {
-            player.setTag(EditTimerAction.COUNTDOWN_END, System.currentTimeMillis() + (timer * 50L));
+            player.setTag(EditTimerAction.COUNTDOWN_END, System.nanoTime() / 1_000_000 + (timer * 50L));
         }
     }
 
@@ -348,9 +349,13 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         final var player = event.getPlayer();
 
         var countdownEnd = player.getTag(EditTimerAction.COUNTDOWN_END);
-        if (countdownEnd != -1 && countdownEnd < System.currentTimeMillis()) {
+        if (countdownEnd != -1 && countdownEnd < System.nanoTime() / 1_000_000) {
             player.sendMessage(translatable("playing.timer.run_out"));
             softResetPlayer(player);
+        }
+
+        if (getPlayerState(player) instanceof ParkourState.AnyPlaying playing) {
+            playing.saveState().tick();
         }
     }
 
@@ -371,8 +376,8 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             ));
         } else {
             // Diff playtime rounded to ticks prior to subtracting for correct display.
-            var diffPlaytime = (bestPlaytime - bestPlaytime % MinecraftServer.TICK_MS) -
-                    (finishState.getPlaytime() - finishState.getPlaytime() % MinecraftServer.TICK_MS);
+            var diffPlaytime = NumberUtil.roundMillisToTicks(bestPlaytime) -
+                    NumberUtil.roundMillisToTicks(finishState.getPlaytime());
             var diffColor = diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN;
             var diffSymbol = diffPlaytime < 0 ? "+" : "-";
             player.sendMessage(Component.translatable(

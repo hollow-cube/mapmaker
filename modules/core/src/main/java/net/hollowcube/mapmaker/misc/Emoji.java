@@ -51,6 +51,9 @@ public record Emoji(
     public static final Emoji BYEBYE = builder("byebye").parent("face").build();
     public static final Emoji DESOLATE = builder("desolate").parent("face").build();
     public static final Emoji HEARTEYES = builder("hearteyes").parent("face").build();
+    public static final Emoji AGA = builder("aga").parent("face").build();
+    public static final Emoji CLUELESS = builder("clueless").parent("face").build();
+    public static final Emoji GLORP = builder("glorp").parent("face").build();
 
     public static final Emoji THUMBS_UP = builder("thumbs_up").parent("misc").build(); //todo alias
     public static final Emoji THUMBS_DOWN = builder("thumbs_down").parent("misc").build();
@@ -83,6 +86,10 @@ public record Emoji(
     public static final Emoji GOAT = builder("goat").parent("misc").build();
     public static final Emoji MOUTH = builder("mouth").parent("misc").build();
     public static final Emoji PEPODUMB = builder("pepodumb").parent("misc").hypercube().build();
+    public static final Emoji BANANA = builder("banana").parent("misc").build();
+    public static final Emoji EXCLAMATION = builder("exclamation").parent("misc").build();
+    public static final Emoji KNIFE = builder("knife").parent("misc").build();
+    public static final Emoji QUESTION = builder("question").parent("misc").build();
 
     public static final Emoji SUS_BLUE = builder("sus_blue").path("sus/blue").hideInHelp().hypercube().build();
     public static final Emoji SUS_BROWN = builder("sus_brown").path("sus/brown").hideInHelp().hypercube().build();

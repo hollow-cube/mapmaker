@@ -40,7 +40,7 @@ public class ChannelCommand extends AbstractChatCommand {
 
     public static class Reply extends ChannelCommand {
         public Reply(@NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages) {
-            super(sessions, maps, messages, ClientChatMessageData.CHANNEL_REPLY, "replay", "r");
+            super(sessions, maps, messages, ClientChatMessageData.CHANNEL_REPLY, "reply", "r");
         }
     }
 

@@ -48,9 +48,7 @@ public class PresentObjectHandler extends ObjectEntityHandler {
     @Override
     public boolean canSendToPlayer(Player player) {
         if (this.day <= 0) return false;
-        var now = HubTime.now();
-        if (now.getMonthValue() != 12) return false;
-        return now.getDayOfMonth() >= this.day;
+        return HubTime.Christmas.getDay() >= this.day;
     }
 
     @Override

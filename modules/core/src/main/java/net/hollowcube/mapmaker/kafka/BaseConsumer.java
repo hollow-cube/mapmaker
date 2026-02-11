@@ -2,18 +2,21 @@ package net.hollowcube.mapmaker.kafka;
 
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public abstract class BaseConsumer<T> implements AutoCloseable {
+public abstract class BaseConsumer<T> implements AutoCloseable, ConsumerRebalanceListener {
 
     private final KafkaConsumer<String, String> consumer;
     private final Function<String, T> valueDeserializer;
@@ -40,7 +43,7 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
                 "bootstrap.servers", bootstrapServers,
                 "max.poll.interval.ms", "900000"
         ), new StringDeserializer(), new StringDeserializer());
-        consumer.subscribe(List.of(topic));
+        consumer.subscribe(List.of(topic), this);
 
         new Thread(this::pollLoop).start();
     }
@@ -50,6 +53,16 @@ public abstract class BaseConsumer<T> implements AutoCloseable {
     }
 
     protected abstract void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull T message);
+
+    @Override
+    public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
+        // nothing by default
+    }
+
+    @Override
+    public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
+        // nothing by default
+    }
 
     void pollLoop() {
         try {

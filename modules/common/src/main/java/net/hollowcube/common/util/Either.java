@@ -3,6 +3,7 @@ package net.hollowcube.common.util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public sealed interface Either<L, R> {
@@ -40,6 +41,8 @@ public sealed interface Either<L, R> {
 
     <T> T map(@NotNull Function<L, T> leftMapper, @NotNull Function<R, T> rightMapper);
 
+    void consume(@NotNull Consumer<L> leftConsumer, @NotNull Consumer<R> rightConsumer);
+
     record Left<L, R>(@Nullable L left) implements Either<L, R> {
         @Override
         public boolean isLeft() {
@@ -54,6 +57,11 @@ public sealed interface Either<L, R> {
         @Override
         public <T> T map(@NotNull Function<L, T> leftMapper, @NotNull Function<R, T> rightMapper) {
             return leftMapper.apply(left);
+        }
+
+        @Override
+        public void consume(@NotNull Consumer<L> leftConsumer, @NotNull Consumer<R> rightConsumer) {
+            leftConsumer.accept(left);
         }
     }
 
@@ -71,6 +79,11 @@ public sealed interface Either<L, R> {
         @Override
         public <T> T map(@NotNull Function<L, T> leftMapper, @NotNull Function<R, T> rightMapper) {
             return rightMapper.apply(right);
+        }
+
+        @Override
+        public void consume(@NotNull Consumer<L> leftConsumer, @NotNull Consumer<R> rightConsumer) {
+            rightConsumer.accept(right);
         }
     }
 

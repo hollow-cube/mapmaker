@@ -46,24 +46,32 @@ public class DialogBuilder {
 
     private DialogMetadata metadata(@NotNull DialogAfterAction action) {
         return new DialogMetadata(
-                this.title, this.title,
-                this.closeOnEscape, false, action,
-                this.body.build(), this.inputs.build()
+            this.title, this.title,
+            this.closeOnEscape, false, action,
+            this.body.build(), this.inputs.build()
         );
     }
 
-    public Dialog buildConfirmation(@NotNull Key key, @Nullable CompoundBinaryTag extra) {
+    public Dialog buildSaveConfirmation(@NotNull Key key, @Nullable CompoundBinaryTag extra) {
         return new Dialog.Confirmation(
-                this.metadata(DialogAfterAction.NONE),
-                DialogButtons.button(Component.translatable("dialog.generic.save"), 150, key, extra),
-                DialogButtons.close(Component.translatable("dialog.generic.close"), 150)
+            this.metadata(DialogAfterAction.NONE),
+            DialogButtons.close(Component.translatable("dialog.generic.close"), 150),
+            DialogButtons.button(Component.translatable("dialog.generic.save"), 150, key, extra)
+        );
+    }
+
+    public Dialog buildSubmitConfirmation(@NotNull Key key, @Nullable CompoundBinaryTag extra) {
+        return new Dialog.Confirmation(
+            this.metadata(DialogAfterAction.CLOSE),
+            DialogButtons.close(Component.translatable("dialog.generic.close"), 150),
+            DialogButtons.button(Component.translatable("dialog.generic.submit"), 150, key, extra)
         );
     }
 
     public Dialog buildNotice(@NotNull Key key, @Nullable CompoundBinaryTag extra) {
         return new Dialog.Notice(
-                this.metadata(DialogAfterAction.CLOSE),
-                DialogButtons.button(Component.translatable("dialog.generic.close"), 150, key, extra)
+            this.metadata(DialogAfterAction.CLOSE),
+            DialogButtons.button(Component.translatable("dialog.generic.close"), 150, key, extra)
         );
     }
 }

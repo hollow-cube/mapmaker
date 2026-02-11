@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.command.playerinfo;
 
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.util.CommandCategory;
+import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -10,7 +11,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class PlayerInfoCommand extends CommandDsl {
 
-    public PlayerInfoCommand(@NotNull PermManager permissions, @NotNull PlayerService players, @NotNull SessionManager sessionManager) {
+    public PlayerInfoCommand(
+        @NotNull PermManager permissions, @NotNull PlayerService players, @NotNull MapService mapService,
+        @NotNull SessionManager sessionManager
+    ) {
         super("playerinfo");
 
         category = CommandCategory.HIDDEN;
@@ -22,6 +26,8 @@ public class PlayerInfoCommand extends CommandDsl {
         addSubcommand(new SubCommand<>(permissions, "channel_namespaces", new ChannelsInfoType(true)));
         addSubcommand(new SubCommand<>(permissions, "info_reports", new ReportsInfoType()));
         addSubcommand(new SubCommand<>(permissions, "alts", new AltsInfoType(players)));
+
+        addSubcommand(new TopTimesInfoType(mapService, players));
     }
 
     private static class SubCommand<T> extends CommandDsl {

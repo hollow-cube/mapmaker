@@ -17,8 +17,10 @@ import net.minestom.server.event.player.PlayerPluginMessageEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerTickEndEvent;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +33,8 @@ import java.util.function.BiConsumer;
 
 @ApiStatus.Internal
 public final class PacketRegistryImpl implements PacketRegistry {
+
+    private static final @NotNull Tag<Boolean> HAS_SENT_WARNING = Tag.<Boolean>Transient("mod_compat:sent_unsupported_mods_warning").defaultValue(false);
 
     private static final String REGISTER_CHANNEL = "minecraft:register";
     private static final String UNREGISTER_CHANNEL = "minecraft:unregister";
@@ -52,11 +56,15 @@ public final class PacketRegistryImpl implements PacketRegistry {
             switch (id) {
                 case REGISTER_CHANNEL -> {
                     var channels = new ArrayList<>(Arrays.asList(event.getMessageString().split("\0")));
-                    log.info("Player {} is registering mod channels: {}", player.getUsername(), channels);
                     var registerEvent = new ModChannelRegisterEvent(player, channels);
                     EventDispatcher.call(registerEvent);
                     PacketQueue.get(player).registerChannels(player, channels);
-                    if (!registerEvent.getDisabledMods().isEmpty() && Boolean.TRUE.equals(player.getAndSetTag(CompatProvider.FIRST_JOIN_TAG, null))) {
+
+                    var hasDisabledMods = !registerEvent.getDisabledMods().isEmpty();
+                    var isFirstJoin = Boolean.TRUE.equals(player.getTag(CompatProvider.FIRST_JOIN_TAG));
+                    var hasSentWarning = Boolean.TRUE.equals(player.getTag(HAS_SENT_WARNING));
+                    if (hasDisabledMods && isFirstJoin && !hasSentWarning) {
+                        player.setTag(HAS_SENT_WARNING, true);
                         var pvnText = Component.text(ProtocolVersions.getProtocolName(MinecraftServer.PROTOCOL_VERSION));
                         var disabledModList = Component.join(JoinConfiguration.commas(true), registerEvent.getDisabledMods());
                         player.sendMessage(Component.translatable("join.unsupported_mods", pvnText, disabledModList));

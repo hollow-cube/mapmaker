@@ -103,7 +103,7 @@ public record EditTimerAction(Operation operation, int time) implements Action {
                             SPRITE_SUBTRACT.withOffset(2, 3)));
             this.valueInput = add(1, 3, new ControlledNumberInput("timer.value", update(EditTimerAction::withLives))
                     .formatted(i -> i == 0 ? "Disable Timer" : NumberUtil.formatDuration(i * 50L)) // Ticks to milliseconds
-                    .parsed(i -> i == 0 ? "" : String.valueOf(i / 50.0), NumberUtil::parseDurationToTicks)
+                    .parsed(i -> i == 0 ? "" : NumberUtil.formatDuration(i * 50L).trim(), NumberUtil::parseDurationToTicks)
                     .stepped(20, 5 * 20).range(NO_TIMER, MAX_TIMER));
         }
 

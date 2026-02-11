@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.runtime.parkour.action.gui;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.OpUtils;
-import net.hollowcube.mapmaker.gui.notifications.NotificationManager;
+import net.hollowcube.mapmaker.gui.notifications.ToastManager;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
@@ -63,11 +63,10 @@ public class ConditionEditorView extends Panel {
             data.setConditionExpression(expr.isBlank() ? null : expr);
             var expression = data.condition().expression();
             if (expression != null && expression.error() != null) {
-                NotificationManager.showNotification(
+                ToastManager.showNotification(
                         this.host.player(),
-                        "Molang Expression Error",
-                        "Invalid expression, please check your syntax.",
-                        NamedTextColor.RED
+                        Component.text("Molang Expression Error"),
+                        Component.text("Invalid expression, please check your syntax.", NamedTextColor.RED)
                 );
             }
             this.onChange();

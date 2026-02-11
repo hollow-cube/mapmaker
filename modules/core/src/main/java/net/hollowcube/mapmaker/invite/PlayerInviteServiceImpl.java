@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.invite;
 
 import io.opentelemetry.api.OpenTelemetry;
+import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.invite.types.MapInvite;
 import net.hollowcube.mapmaker.map.MapData;
@@ -36,13 +37,13 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     private final PermManager permManager;
 
     public PlayerInviteServiceImpl(
-            @NotNull OpenTelemetry otel,
-            @NotNull String url,
-            @NotNull PlayerService playerService,
-            @NotNull MapService mapService,
-            @NotNull SessionManager sessionManager,
-            @NotNull ServerBridge bridge,
-            @NotNull PermManager permManager
+        @NotNull OpenTelemetry otel,
+        @NotNull String url,
+        @NotNull PlayerService playerService,
+        @NotNull MapService mapService,
+        @NotNull SessionManager sessionManager,
+        @NotNull ServerBridge bridge,
+        @NotNull PermManager permManager
     ) {
         super(otel);
         this.url = String.format("%s/v3/internal/invites", url);
@@ -114,8 +115,8 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
 
         var body = GSON.toJson(new MapInvite(InviteType.INVITE, sender, targetId, senderMap));
         var request = HttpRequest.newBuilder()
-                .method("POST", HttpRequest.BodyPublishers.ofString(body))
-                .uri(URI.create(this.url + "/map/invite"));
+            .method("POST", HttpRequest.BodyPublishers.ofString(body))
+            .uri(URI.create(this.url + "/map/invite"));
         var response = doRequest("register_invite", request, HttpResponse.BodyHandlers.ofString());
 
         switch (response.statusCode()) {
@@ -149,8 +150,8 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
 
         var body = GSON.toJson(new MapInvite(InviteType.REQUEST, sender, targetId, targetMap));
         var request = HttpRequest.newBuilder()
-                .method("POST", HttpRequest.BodyPublishers.ofString(body))
-                .uri(URI.create(this.url + "/map/request"));
+            .method("POST", HttpRequest.BodyPublishers.ofString(body))
+            .uri(URI.create(this.url + "/map/request"));
         var response = doRequest("register_request", request, HttpResponse.BodyHandlers.ofString());
 
         switch (response.statusCode()) {
@@ -197,8 +198,8 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         }
 
         var request = HttpRequest.newBuilder()
-                .method("POST", HttpRequest.BodyPublishers.ofString(GSON.toJson(body)))
-                .uri(URI.create(this.url + "/map/" + acceptReject));
+            .method("POST", HttpRequest.BodyPublishers.ofString(GSON.toJson(body)))
+            .uri(URI.create(this.url + "/map/" + acceptReject));
         var response = doRequest("accept_or_reject", request, HttpResponse.BodyHandlers.ofString());
 
         var statusCode = response.statusCode();
@@ -211,11 +212,11 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
                 String inviteRequest = isInvite ? "invite" : "request";
                 String playBuild = inviteMap.isPublished() ? "play" : "build";
 
-                var inviteTargetId = isInvite ? invite.recipientId() : invite.senderId();
-                var targetDisplayName = playerService.getPlayerDisplayName2(inviteTargetId);
+                var inviteSenderId = isInvite ? invite.senderId() : invite.recipientId();
+                var senderDisplayName = playerService.getPlayerDisplayName2(inviteSenderId);
 
                 String translateString = "map." + playBuild + "." + inviteRequest + "." + acceptReject;
-                sender.sendMessage(Component.translatable(translateString, targetDisplayName, Component.text(inviteMap.name())));
+                sender.sendMessage(Component.translatable(translateString, senderDisplayName, Component.text(inviteMap.name())));
             }
             case 400 -> {
                 InviteError error = GSON.fromJson(response.body(), InviteError.class);
@@ -232,13 +233,13 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     private static void processAcceptOrRejectError(@NotNull InviteError error, @NotNull Player sender, String acceptReject) {
         String translationKey = switch (error.errorCode()) {
             case ErrorCodes.INVITE_NOT_FOUND, ErrorCodes.REQUEST_NOT_FOUND, ErrorCodes.NO_INVITES_OR_REQUESTS ->
-                    "map.invite_and_request.cant_" + acceptReject;
+                "map.invite_and_request.cant_" + acceptReject;
             case ErrorCodes.INVITE_SENDER_LEFT_MAP -> "map.invite.left_map";
             case ErrorCodes.INVITE_SENDER_OFFLINE -> "map.invite.offline";
             case ErrorCodes.REQUEST_TARGET_LEFT_MAP -> "map.request.left_map";
             case ErrorCodes.REQUEST_TARGET_OFFLINE -> "map.request.offline";
             default ->
-                    throw new IllegalStateException("Unexpected error code: " + error.errorCode() + " (message: " + error.errorText() + ")");
+                throw new IllegalStateException("Unexpected error code: " + error.errorCode() + " (message: " + error.errorText() + ")");
         };
         sender.sendMessage(Component.translatable(translationKey));
     }
@@ -247,10 +248,12 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         return player.getUuid().equals(UUID.fromString(map.owner()));
     }
 
-    private record InviteError(int errorCode, @NotNull String errorText) {
+    @RuntimeGson
+    public record InviteError(int errorCode, @NotNull String errorText) {
     }
 
-    private record SessionError(@NotNull String code, @NotNull String message) {
+    @RuntimeGson
+    public record SessionError(@NotNull String code, @NotNull String message) {
     }
 
     private static final class ErrorCodes {

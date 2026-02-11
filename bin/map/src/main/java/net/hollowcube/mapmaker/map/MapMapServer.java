@@ -2,29 +2,23 @@ package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
+import net.hollowcube.mapmaker.MapCommands;
 import net.hollowcube.mapmaker.command.CommandCategories;
-import net.hollowcube.mapmaker.command.TopTimesCommand;
-import net.hollowcube.mapmaker.command.playerinfo.PlayerInfoCommand;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
 import net.hollowcube.mapmaker.editor.command.*;
 import net.hollowcube.mapmaker.editor.command.navigation.*;
 import net.hollowcube.mapmaker.editor.command.utility.*;
-import net.hollowcube.mapmaker.editor.hdb.HeadDatabase;
 import net.hollowcube.mapmaker.editor.hdb.command.HdbCommand;
 import net.hollowcube.mapmaker.editor.terraform.MapServerModule;
 import net.hollowcube.mapmaker.map.block.InteractionRules;
 import net.hollowcube.mapmaker.map.block.PlacementRules;
-import net.hollowcube.mapmaker.map.command.HubCommand;
-import net.hollowcube.mapmaker.map.command.SpawnCommand;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.NoopServerBridge;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.noop.NoopMapService;
 import net.hollowcube.mapmaker.runtime.building.BuildingMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
-import net.hollowcube.mapmaker.runtime.parkour.command.ShowHeightCommand;
-import net.hollowcube.mapmaker.runtime.parkour.command.SpectateCommand;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.terraform.Terraform;
 import net.minestom.server.MinecraftServer;
@@ -38,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Future;
 
+import static net.hollowcube.command.CommandCondition.or;
 import static net.hollowcube.mapmaker.editor.command.EditorConditions.builderOnly;
 import static net.hollowcube.mapmaker.map.MapPlayer.simpleMapPlayer;
 
@@ -80,7 +75,7 @@ public class MapMapServer extends AbstractMultiMapServer {
         super.prepareStart();
 
         MinecraftServer.getConnectionManager()
-                .setPlayerProvider(simpleMapPlayer(commandManager()));
+            .setPlayerProvider(simpleMapPlayer(commandManager()));
 
         var terraformEvents = EventNode.event("tf-events", EventFilter.INSTANCE, event -> {
             if (event instanceof PlayerEvent pe) {
@@ -101,31 +96,28 @@ public class MapMapServer extends AbstractMultiMapServer {
         this.terraform = initBuildLogic(mapService(), commandManager(), terraformEvents, interactionEvents);
         MinecraftServer.getGlobalEventHandler().addChild(terraformEvents).addChild(interactionEvents);
 
-        var hdb = new HeadDatabase(otel);
-        addBinding(HeadDatabase.class, hdb, "headDatabase", "hdb");
-
-        registerCommands(this, commandManager(), hdb);
+        registerCommands(this, commandManager(), mapService());
     }
 
     // Static so it can be referenced from dev server runner
     public static @NotNull Terraform initBuildLogic(
-            @NotNull MapService mapService,
-            @NotNull CommandManager commandManager,
-            @NotNull EventNode<InstanceEvent> terraformEvents,
-            @NotNull EventNode<InstanceEvent> interactionEvents
+        @NotNull MapService mapService,
+        @NotNull CommandManager commandManager,
+        @NotNull EventNode<InstanceEvent> terraformEvents,
+        @NotNull EventNode<InstanceEvent> interactionEvents
     ) {
         // Create terraform instance
         var terraform = Terraform.builder()
-                .rootEventNode(terraformEvents)
-                .rootCommandManager(commandManager)
-                .globalCommandCondition(builderOnly())
-                .module(Terraform.BASE_MODULE)
-                .module(Terraform.AXIOM_MODULE)
-                .module(Terraform.WORLDEDIT_MODULE)
-                .module(Terraform.VANILLA_MODULE)
-                .module(MapServerModule::new)
-                .storage(mapService instanceof NoopMapService ? "TerraformStorageMemory" : "TerraformStorageHttp")
-                .build();
+            .rootEventNode(terraformEvents)
+            .rootCommandManager(commandManager)
+            .globalCommandCondition(builderOnly())
+            .module(Terraform.BASE_MODULE)
+            .module(Terraform.AXIOM_MODULE)
+            .module(Terraform.WORLDEDIT_MODULE)
+            .module(Terraform.VANILLA_MODULE)
+            .module(MapServerModule::new)
+            .storage(mapService instanceof NoopMapService ? "TerraformStorageMemory" : "TerraformStorageHttp")
+            .build();
 
         // Block/item rules
         PlacementRules.init(terraform);
@@ -136,41 +128,27 @@ public class MapMapServer extends AbstractMultiMapServer {
     }
 
     // Static so it can be referenced from dev server runner
-    public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager, @NotNull HeadDatabase hdb) {
-        // Register two help commands. One for terraform commands, and one for regular.
+    public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager, @NotNull MapService maps) {
+        // Register a second help command (regular is in registerPlayingCommands). One for terraform commands, and one for regular.
         // We test terraform commands simply by checking if they start with / (eg // commands)
         commandManager.register(new HelpCommand(
-                "help", new String[]{"h"},
-                commandManager, CommandCategories.GLOBAL,
-                entry -> !entry.getKey().startsWith("/")
-        ));
-        commandManager.register(new HelpCommand(
-                "/help", new String[]{"/h"},
-                commandManager, CommandCategories.GLOBAL,
-                entry -> entry.getKey().startsWith("/")
+            "/help", new String[]{"/h"},
+            commandManager, CommandCategories.GLOBAL,
+            entry -> entry.getKey().startsWith("/")
         ));
 
-        commandManager.register(new HubCommand(server.bridge()));
-        commandManager.register(new PlayerInfoCommand(server.permManager(), server.playerService(), server.sessionManager()));
-
-        commandManager.register(new TopTimesCommand(server.mapService(), server.playerService(), server.sessionManager()));
+        MapCommands.registerPlayingCommands(server, commandManager);
 
         commandManager.register(new TestCommand());
         commandManager.register(new BuilderMenuCommand());
+        //commandManager.register(new RemoveCommand(server.bridge()));
         commandManager.register(new SetPreciseCoordsCommand());
         commandManager.register(new SetSpawnCommand());
         commandManager.register(new GameModeCommand());
 
-        commandManager.register(new SpectateCommand());
-        commandManager.register(new ShowHeightCommand());
-
-        commandManager.register(new FlyCommand());
-        commandManager.register(new FlySpeedCommand());
         commandManager.register(new ClearInventoryCommand());
-        commandManager.register(new SpawnCommand());
         commandManager.register(new GiveCommand());
 
-        commandManager.register(new TeleportCommand());
         commandManager.register(new AscendCommand());
         commandManager.register(new DescendCommand());
         commandManager.register(new JumpToCommand());
@@ -180,14 +158,22 @@ public class MapMapServer extends AbstractMultiMapServer {
 
         commandManager.register(new BannerCommand());
         commandManager.register(new PHeadCommand());
-        commandManager.register(new HdbCommand(hdb, server.guiController()));
+        commandManager.register(new HdbCommand(maps));
 
-        commandManager.register(new BiomesCommand());
 //        commandManager.register(new SetBiomeCommand());
 
         commandManager.register(new AddMarkerCommand());
         commandManager.register(new AddInteractionCommand());
         commandManager.register(new EntitiesCommand());
+
+        // Need to update the condition of some commands to allow during build mode.
+        var fly = commandManager.xpath("fly");
+        fly.setCondition(or(fly.condition(), builderOnly()));
+        var flyspeed = commandManager.xpath("flyspeed");
+        flyspeed.setCondition(or(flyspeed.condition(), builderOnly()));
+        var teleport = commandManager.xpath("tp");
+        teleport.setCondition(or(teleport.condition(), builderOnly()));
+
     }
 
 }

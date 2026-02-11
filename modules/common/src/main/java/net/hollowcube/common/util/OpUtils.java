@@ -47,7 +47,7 @@ public class OpUtils {
      * Takes an input and returns a fallback value if the input is null, the fallback can also be null.
      */
     @UnknownNullability
-    public static <O, A extends O, B extends O> O or(@Nullable A input, @NotNull Supplier<B> fallback) {
+    public static <O, A extends O, B extends O> O or(@Nullable A input, @NotNull Supplier<@UnknownNullability B> fallback) {
         return input == null ? fallback.get() : input;
     }
 

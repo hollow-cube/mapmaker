@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.util.Shutdowner;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.message.ChatMessageType;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -92,6 +93,10 @@ public final class ChatAnnouncer {
     }
 
     private void announce(@NotNull Announcement announcement, @NotNull Player player) {
+        if (player.getSettings().chatMessageType() != ChatMessageType.FULL) {
+            // Don't send announcements to players with reduced chat settings
+            return;
+        }
         player.sendMessage(Component.translatable(announcement.key()));
     }
 

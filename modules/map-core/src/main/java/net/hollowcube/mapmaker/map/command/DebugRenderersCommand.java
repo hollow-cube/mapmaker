@@ -31,14 +31,12 @@ public final class DebugRenderersCommand {
             "mapmaker:checkpoint", 0xd5d5d5,
             "mapmaker:status", 0x7e7e7e,
             "mapmaker:finish", 0xfced59,
-            "mapmaker:bounce_pad", 0x5555ff,
             "mapmaker:reset", 0xff0000
     );
     private static final Map<String, Integer> BLOCK_COLORS = Map.of(
             "mapmaker:checkpoint_plate", 0xd5d5d5,
             "mapmaker:status_plate", 0x7e7e7e,
-            "mapmaker:finish_plate", 0xfced59,
-            "mapmaker:bounce_pad", 0x5555ff
+            "mapmaker:finish_plate", 0xfced59
     );
 
     private static boolean assertMoulberryTweaks(@NotNull Player player) {

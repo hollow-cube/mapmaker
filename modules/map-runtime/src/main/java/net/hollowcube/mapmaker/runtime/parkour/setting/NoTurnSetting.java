@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.runtime.parkour.setting;
 
-import net.hollowcube.compat.noxesium.packets.ClientboundChangeServerRulesPacket;
-import net.hollowcube.compat.noxesium.rules.NoxesiumServerRules;
+import net.hollowcube.compat.noxesium.components.NoxesiumGameComponents;
+import net.hollowcube.compat.noxesium.handshake.NoxesiumPlayer;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
@@ -43,9 +43,7 @@ public class NoTurnSetting {
             player.sendMessage(Component.translatable("map.join.warning.setting.no_turn"));
         }
 
-        ClientboundChangeServerRulesPacket.builder()
-                .add(NoxesiumServerRules.CAMERA_LOCKED, !canTurn)
-                .build().send(player);
+        NoxesiumPlayer.get(player).set(NoxesiumGameComponents.CAMERA_LOCKED, !canTurn);
     }
 
     private static void playerMoved(PlayerMoveEvent event) {

@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.editor;
 
 import net.hollowcube.compat.axiom.AxiomPlayer;
+import net.hollowcube.compat.noxesium.components.NoxesiumGameComponents;
+import net.hollowcube.compat.noxesium.handshake.NoxesiumPlayer;
 import net.hollowcube.mapmaker.editor.item.BuilderMenuItem;
 import net.hollowcube.mapmaker.editor.item.ExitTestModeItem;
 import net.hollowcube.mapmaker.editor.vanilla.DisplayEntityEditor;
@@ -31,8 +33,12 @@ public sealed interface EditorState extends PlayerState<EditorState, EditorMapWo
             player.setGameMode(GameMode.CREATIVE);
             player.setPermissionLevel(4);
 
+            var noxesium = NoxesiumPlayer.get(player);
+            noxesium.set(NoxesiumGameComponents.HELD_ITEM_NAME_OFFSET, 14);
+            noxesium.set(NoxesiumGameComponents.CUSTOM_CREATIVE_ITEMS, world.itemRegistry().getCustomPublicItemStacks());
+
             if (lastState == null)
-                saveState.setPlayStartTime(System.currentTimeMillis());
+                saveState.setPlayStartTime(System.nanoTime() / 1_000_000);
 
             AxiomPlayer.setEnabled(player, true);
 

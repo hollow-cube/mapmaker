@@ -9,7 +9,7 @@ public class Pagination<S> extends Panel {
 
     @FunctionalInterface
     public interface PageFetcher<S> {
-        @NotNull List<? extends Panel> fetch(S search, int page, int pageSize);
+        @NotNull List<? extends Element> fetch(S search, int page, int pageSize);
     }
 
     @FunctionalInterface
@@ -49,15 +49,20 @@ public class Pagination<S> extends Panel {
         resetSearch();
     }
 
-    public void prevPage() {
+    public void prevPage(int amount) {
         if (page <= 0) return;
-        page--;
+        page = Math.max(page - amount, 0);
         doPageFetch();
     }
 
-    public void nextPage() {
+    public void nextPage(int amount) {
         if (page >= totalPages - 1) return;
-        page++;
+        page = Math.min(page + amount, totalPages - 1);
+        doPageFetch();
+    }
+
+    public void goToPage(int page) {
+        this.page = Math.max(Math.min(page, this.totalPages - 1), 0);
         doPageFetch();
     }
 
@@ -76,21 +81,41 @@ public class Pagination<S> extends Panel {
     public @NotNull Element prevButton() {
         var button = new Button("gui.generic.previous_page", 1, 1)
                 .sprite("generic2/btn/page/prev", 5, 3);
-        button.onLeftClick(_ -> prevPage());
+        button.onLeftClick(_ -> prevPage(1));
+        button.onShiftLeftClick(_ -> prevPage(5));
         return button;
     }
 
     public @NotNull Element nextButton() {
         var button = new Button("gui.generic.next_page", 1, 1)
                 .sprite("generic2/btn/page/next", 5, 3);
-        button.onLeftClick(_ -> nextPage());
+        button.onLeftClick(_ -> nextPage(1));
+        button.onShiftLeftClick(_ -> nextPage(5));
         return button;
     }
 
     public @NotNull Element pageText(int width, int height) {
         var button = new Text("", width, height, "")
                 .align(Text.CENTER, 5);
-        button.onLeftClick(_ -> reset());
+        button.onLeftClick(_ -> {
+            if (totalPages == 0) {
+                reset();
+            } else {
+                host.pushView(AbstractAnvilView.simpleAnvil(
+                        "generic2/anvil/field_container",
+                        "action/anvil/search_icon",
+                        "Enter Page Number",
+                        input -> {
+                            try {
+                                goToPage(Integer.parseInt(input) - 1);
+                            } catch (NumberFormatException ignored) {
+                                // Ignore invalid input
+                            }
+                        },
+                        ""
+                ));
+            }
+        });
         onPageChange.add((page, totalPages) -> {
             button.text((page + 1) + "/" + (totalPages == 0 ? "-" : totalPages));
             button.translationKey(totalPages == 0 ? "gui.generic.page" : "gui.generic.page_and_max", page + 1, totalPages);

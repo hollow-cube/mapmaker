@@ -69,13 +69,11 @@
     "type": "sprite",
     "ref": "icon/plus",
     "no_shadow": true,
-    "trailing_space": 2
   },
   "MINUS": {
     "type": "sprite",
     "ref": "icon/minus",
     "no_shadow": true,
-    "trailing_space": 2
   },
   "NOTE": {
     "type": "sprite",
@@ -153,6 +151,11 @@
     "ref": "icon/store/cubits",
     "no_shadow": true,
     "trailing_space": 2
+  },
+  "SUS": {
+    "type": "sprite",
+    "ref": "icon/emoji/sus/red",
+    "no_shadow": true
   },
   // Standard Colors
   // #696969 - Dark Gray (Brackets, Double Arrow, Direct Messaging Commands Arrow, etc.)

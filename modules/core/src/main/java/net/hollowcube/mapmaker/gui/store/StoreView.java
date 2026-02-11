@@ -19,7 +19,7 @@ public class StoreView extends Panel {
     public static final int TAB_ADDONS = 2;
 
     public StoreView(@NotNull PlayerService playerService, @NotNull PermManager permManager) {
-        this(playerService, permManager, TAB_CUBITS);
+        this(playerService, permManager, TAB_HYPERCUBE);
     }
 
     public StoreView(@NotNull PlayerService playerService, @NotNull PermManager permManager, int defaultTab) {

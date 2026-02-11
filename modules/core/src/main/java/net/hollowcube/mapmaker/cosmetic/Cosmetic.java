@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.cosmetic;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.backpack.Rarity;
 import net.hollowcube.mapmaker.cosmetic.impl.CosmeticImpl;
+import net.hollowcube.mapmaker.cosmetic.impl.ModelCosmeticImpl;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -22,7 +23,6 @@ public class Cosmetic {
     private static final CustomModelData LOCKED_CMD = new CustomModelData(List.of(1f), List.of(), List.of(), List.of());
     private static final Map<CosmeticType, Map<String, Cosmetic>> COSMETICS = new HashMap<>();
 
-    @SuppressWarnings("UnstableApiUsage")
     public static final Codec<Cosmetic> CODEC = Codec.STRING.transform(Cosmetic::byPathRequired, Cosmetic::path);
     public static final Tag<Boolean> COSMETIC_TAG = Tag.Boolean("cosmetic");
 
@@ -142,8 +142,18 @@ public class Cosmetic {
         return iconLocked;
     }
 
+    public @NotNull ItemStack iconPreviewItem() {
+        return icon.builder()
+            .customModelData(List.of(2f), List.of(), List.of(), List.of())
+            .build();
+    }
+
     public @NotNull CosmeticImpl impl() {
         return impl;
+    }
+
+    public boolean canBePreviewed() {
+        return impl instanceof ModelCosmeticImpl;
     }
 
     public @NotNull Component displayName() {

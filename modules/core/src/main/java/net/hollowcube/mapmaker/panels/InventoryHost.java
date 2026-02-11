@@ -132,6 +132,18 @@ public class InventoryHost implements TagReadable, TagWritable {
         return viewStack.size() > 1;
     }
 
+    public void popOrClose() {
+        if (canPopView()) {
+            popView();
+        } else {
+            close();
+        }
+    }
+
+    public void close() {
+        player.closeInventory();
+    }
+
     public void onClose(@NotNull Runnable callback) {
         this.closeCallback = callback;
     }
@@ -178,9 +190,11 @@ public class InventoryHost implements TagReadable, TagWritable {
         if (this.viewStack.isEmpty()) return;
         final StackedView root = this.viewStack.getLast();
 
+        var slotOverrides = SpecialInventoryHosts.getSlotPositionOverrides(root.inventoryType);
+
         // Currently we always consume the player inventory so add 4 rows.
-        int containerSizeInRows = getInterpretedSize(root.inventoryType) / 9;
-        var menuBuilder = new MenuBuilder(9, containerSizeInRows + 4, containerSizeInRows);
+        int containerSizeInRows = SpecialInventoryHosts.getContainerSize(root.inventoryType) / 9;
+        var menuBuilder = new MenuBuilder(9, containerSizeInRows + 4, containerSizeInRows, slotOverrides);
         root.panel.build(menuBuilder);
 
         if (!handle.isViewer(player))
@@ -200,7 +214,7 @@ public class InventoryHost implements TagReadable, TagWritable {
 
             // Slot needs to be offset from the top of the main inventory
             int offsetSlot = event.getClick().slot();
-            int mainSize = getInterpretedSize(host.handle.getInventoryType());
+            int mainSize = SpecialInventoryHosts.getContainerSize(host.handle.getInventoryType());
 
             // We need to reorder the hotbar to come last
             slot = mainSize + offsetSlot + (offsetSlot < 9 ? 27 : -9);
@@ -228,22 +242,6 @@ public class InventoryHost implements TagReadable, TagWritable {
         if (host.pendingClick != null) {
             host.player.playSound(CLICK_SOUND);
         }
-    }
-
-    /**
-     * We have special handling for inventories that don't exactly match the expected grid/column layout we use
-     * for inventories. For example an anvil has its 3 special slots but we pretend it has 9 slots for the sake
-     * of the layout system. Slots 3-8 are skipped in that case.
-     *
-     * @return The size of the inventory as interpreted by the layout system.
-     */
-    private static int getInterpretedSize(@NotNull InventoryType type) {
-        return switch (type) {
-            case CHEST_1_ROW, CHEST_2_ROW, CHEST_3_ROW,
-                 CHEST_4_ROW, CHEST_5_ROW, CHEST_6_ROW -> type.getSize();
-            case ANVIL, CARTOGRAPHY -> 9;
-            default -> throw new IllegalStateException("Unsupported inventory type: " + type);
-        };
     }
 
     private static void handleAnvilInput(@NotNull PlayerAnvilInputEvent event) {
@@ -307,7 +305,7 @@ public class InventoryHost implements TagReadable, TagWritable {
         private void copyInventoryContents(@NotNull ItemStack[] items) {
             Check.argCondition(items.length < getSize(), "items length must be at least the size of the inventory");
             System.arraycopy(items, 0, itemStacks, 0, getSize());
-            var size = getInterpretedSize(getInventoryType());
+            var size = SpecialInventoryHosts.getContainerSize(getInventoryType());
             if (items.length > size) {
                 this.playerInventory = Arrays.copyOfRange(items, size, items.length);
             } else this.playerInventory = null;

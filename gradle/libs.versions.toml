@@ -1,14 +1,14 @@
 [versions]
-minecraft = "1.21.10"
+minecraft = "1.21.11"
 annotations = "26.0.2"
 fastutil = "8.5.15"
 gson = "2.12.1"
 adventure = "4.25.0"
-minestom = "2025.10.18-1.21.10"
-posthog = "0.1.9"
+minestom = "2026.01.01-1.21.11"
+posthog = "0.1.11"
 slf4j = "2.0.9"
 kafka = "3.9.0"
-junit = "5.11.4"
+junit = "6.1.0-M1"
 autoservice = "1.1.1"
 noxesium = "2.5.0"
 zstd = "1.5.7-2"
@@ -28,6 +28,7 @@ velocity = "3.4.0-SNAPSHOT"
 classgraph = "4.8.179"
 javapoet = "0.7.0"
 luau = "1.0.0"
+directory-watcher = "0.19.1"
 included = "-INCLUDED"
 
 [libraries]
@@ -56,6 +57,7 @@ luau-natives-macos-arm64 = { group = "dev.hollowcube", name = "luau-natives-maco
 luau-natives-linux-x64 = { group = "dev.hollowcube", name = "luau-natives-linux-x64", version.ref = "luau" }
 luau-natives-windows-x64 = { group = "dev.hollowcube", name = "luau-natives-windows-x64", version.ref = "luau" }
 javapoet = { group = "com.palantir.javapoet", name = "javapoet", version.ref = "javapoet" }
+directory-watcher = { group = "io.methvin", name = "directory-watcher", version.ref = "directory-watcher" }
 
 included-molang = { group = "dev.hollowcube", name = "molang", version.ref = "included" }
 included-schem = { group = "dev.hollowcube", name = "schem", version.ref = "included" }

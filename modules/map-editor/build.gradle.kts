@@ -14,7 +14,9 @@ dependencies {
     implementation(libs.polar)
     implementation(libs.completely)
     implementation(libs.bundles.adventure)
-    implementation(libs.bundles.otel)
+    implementation(libs.bundles.otel) {
+        exclude(group = "io.opentelemetry", module = "opentelemetry-exporter-sender-okhttp")
+    }
     implementation(libs.included.schem)
 
     testImplementation(project(":modules:test"))

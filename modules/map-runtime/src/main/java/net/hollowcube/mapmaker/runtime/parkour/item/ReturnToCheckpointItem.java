@@ -16,8 +16,6 @@ import java.util.Objects;
 
 public class ReturnToCheckpointItem extends ItemHandler {
     private static final TagCooldown CONFIRM_COOLDOWN = new TagCooldown("mapmaker:play/checkpoint_item_confirm", 2000);
-    private static final int MIN_RESET_TIME = 60 * 1000; // 1 minute
-
     private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/return_to_checkpoint"));
     public static final Key ID = Key.key("mapmaker:return_to_checkpoint");
     public static final ReturnToCheckpointItem INSTANCE = new ReturnToCheckpointItem();
@@ -39,15 +37,8 @@ public class ReturnToCheckpointItem extends ItemHandler {
 
         switch (world.getPlayerState(player)) {
             case ParkourState.AnyPlaying p -> {
-                boolean confirm = p.isScorable() // Never confirm for non-scorable runs
-                        // Must have been playing for longer than the minimum reset time
-                        && p.saveState().getRealPlaytime() > MIN_RESET_TIME
-                        // Must not have hit a checkpoint yet.
-                        && p.saveState().state(PlayState.class).lastState() == null;
-                if (confirm && CONFIRM_COOLDOWN.test(player)) {
-                    // This only happens without a checkpoint, so it acts as a full reset anyway
-                    // so its fine to use the same message as a full reset.
-                    player.sendMessage(Component.translatable("item.mapmaker.reset_savestate.confirm"));
+                boolean needsConfirmation = p.isScorable() && p.saveState().state(PlayState.class).lastState() == null;
+                if (needsConfirmation && ResetSaveStateItem.tryConfirmation(player, p, CONFIRM_COOLDOWN, () -> world.softResetPlayer(player))) {
                     return;
                 }
 

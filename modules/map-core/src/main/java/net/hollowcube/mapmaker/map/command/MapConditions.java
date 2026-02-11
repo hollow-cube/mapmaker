@@ -14,13 +14,6 @@ import static net.hollowcube.command.CommandCondition.HIDE;
 
 public final class MapConditions {
 
-    public static @NotNull CommandCondition playerFeature(@NotNull FeatureFlag flag) {
-        return (sender, _) -> {
-            if (!(sender instanceof Player player)) return HIDE;
-            return flag.test(player.getUuid().toString()) ? ALLOW : HIDE;
-        };
-    }
-
     public static @NotNull CommandCondition mapFeature(@NotNull FeatureFlag flag) {
         return map(world -> flag.test(world.map()));
     }

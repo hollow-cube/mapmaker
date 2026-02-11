@@ -24,7 +24,9 @@ dependencies {
 
     implementation(libs.slf4j.jul)
     implementation(libs.logback)
-    implementation(libs.bundles.otel)
+    implementation(libs.bundles.otel) {
+        exclude(group = "io.opentelemetry", module = "opentelemetry-exporter-sender-okhttp")
+    }
     implementation(libs.bundles.prometheus)
 }
 

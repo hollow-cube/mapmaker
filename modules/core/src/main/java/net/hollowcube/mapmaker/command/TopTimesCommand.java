@@ -55,13 +55,17 @@ public class TopTimesCommand extends CommandDsl {
                 return;
             }
         } else {
-            map = OpUtils.or(
+            try {
+                map = OpUtils.or(
                     MiscFunctionality.getCurrentMap(sessions, maps, player),
                     () -> OpUtils.map(
-                            MapPlayerData.fromPlayer(player).lastPlayedMap(),
-                            id -> maps.getMap(PlayerData.fromPlayer(player).id(), id)
+                        MapPlayerData.fromPlayer(player).lastPlayedMap(),
+                        id -> maps.getMap(PlayerData.fromPlayer(player).id(), id)
                     )
-            );
+                );
+            } catch (MapService.NotFoundError _) {
+                map = null;
+            }
 
             if (map == null) {
                 player.sendMessage(NO_MAP_PLAYED);

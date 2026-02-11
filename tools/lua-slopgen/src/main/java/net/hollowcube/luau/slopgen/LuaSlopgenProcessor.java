@@ -57,6 +57,9 @@ public class LuaSlopgenProcessor extends AbstractProcessor {
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addOriginatingElement(annotatedElement);
 
+            if (elementUtils.getTypeElement(glueTypeName.canonicalName()) != null)
+                continue; // Ensure type doesnt exist from previous round.
+
             var libNameString = luaLibraryValues.get("name").getValue().toString();
             glueTypeBuilder.addField(FieldSpec.builder(String.class, "LIB_NAME")
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
@@ -89,12 +92,11 @@ public class LuaSlopgenProcessor extends AbstractProcessor {
             }
         }
 
-        if (roundEnv.processingOver()) {
-            try {
+        try {
+            if (!atomizer.isEmpty() && elementUtils.getTypeElement(atomizer.generatedTypeName().canonicalName()) == null)
                 atomizer.build().writeTo(filer);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         return true;

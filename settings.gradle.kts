@@ -51,7 +51,7 @@ include(
     "bin:development",
     "bin:example",
     "bin:hub",
-//    "bin:local", TEMP DISABLED UNTIL UPDATED TO NEW WORLDS
+    "bin:local",
     "bin:map",
     "bin:map-isolate",
     "bin:packer",

@@ -1,0 +1,627 @@
+Afghanistan||Asia/Kabul
+Albania||Europe/Tirane
+Algeria||Africa/Algiers
+American Samoa||Pacific/Pago_Pago
+Andorra||Europe/Andorra
+Angola||Africa/Luanda
+Anguilla||America/Anguilla
+Antarctica||Antarctica/Casey
+Antigua and Barbuda||America/Antigua
+Argentina||America/Argentina/Buenos_Aires
+Armenia||Asia/Yerevan
+Aruba||America/Aruba
+Australia|Australian Capital Territory|Australia/Sydney
+Australia|New South Wales|Australia/Sydney
+Australia|Northern Territory|Australia/Darwin
+Australia|Queensland|Australia/Brisbane
+Australia|South Australia|Australia/Adelaide
+Australia|Tasmania|Australia/Hobart
+Australia|Victoria|Australia/Melbourne
+Australia|Western Australia|Australia/Perth
+Austria||Europe/Vienna
+Azerbaijan||Asia/Baku
+Bahamas||America/Nassau
+Bahrain||Asia/Bahrain
+Bangladesh||Asia/Dhaka
+Barbados||America/Barbados
+Belarus||Europe/Minsk
+Belgium||Europe/Brussels
+Belize||America/Belize
+Benin||Africa/Porto-Novo
+Bermuda||Atlantic/Bermuda
+Bhutan||Asia/Thimphu
+Bolivia||America/La_Paz
+Bonaire, Sint Eustatius and Saba||America/Kralendijk
+Bosnia and Herzegovina||Europe/Sarajevo
+Botswana||Africa/Gaborone
+Bouvet Island||Antarctica/Troll
+Brazil|Acre|America/Rio_Branco
+Brazil|Alagoas|America/Maceio
+Brazil|Amapá|America/Belem
+Brazil|Amazonas|America/Manaus
+Brazil|Bahia|America/Bahia
+Brazil|Ceará|America/Fortaleza
+Brazil|Distrito Federal|America/Sao_Paulo
+Brazil|Espírito Santo|America/Sao_Paulo
+Brazil|Goiás|America/Sao_Paulo
+Brazil|Maranhão|America/Fortaleza
+Brazil|Mato Grosso do Sul|America/Campo_Grande
+Brazil|Mato Grosso|America/Cuiaba
+Brazil|Minas Gerais|America/Sao_Paulo
+Brazil|Paraná|America/Sao_Paulo
+Brazil|Paraíba|America/Fortaleza
+Brazil|Pará|America/Belem
+Brazil|Pernambuco|America/Recife
+Brazil|Piauí|America/Fortaleza
+Brazil|Rio de Janeiro|America/Sao_Paulo
+Brazil|Rio Grande do Norte|America/Fortaleza
+Brazil|Rio Grande do Sul|America/Sao_Paulo
+Brazil|Rondônia|America/Porto_Velho
+Brazil|Roraima|America/Boa_Vista
+Brazil|Santa Catarina|America/Sao_Paulo
+Brazil|Sergipe|America/Maceio
+Brazil|São Paulo|America/Sao_Paulo
+Brazil|Tocantins|America/Araguaina
+British Indian Ocean Territory||Indian/Chagos
+Brunei Darussalam||Asia/Brunei
+Bulgaria||Europe/Sofia
+Burkina Faso||Africa/Ouagadougou
+Burundi||Africa/Bujumbura
+Cabo Verde||Atlantic/Cape_Verde
+Cambodia||Asia/Phnom_Penh
+Cameroon||Africa/Douala
+Canada|Alberta|America/Edmonton
+Canada|British Columbia|America/Vancouver
+Canada|Manitoba|America/Winnipeg
+Canada|New Brunswick|America/Moncton
+Canada|Newfoundland|America/St_Johns
+Canada|Northwest Territories|America/Yellowknife
+Canada|Nova Scotia|America/Halifax
+Canada|Labrador|America/Halifax
+Canada|Nunavut|America/Iqaluit
+Canada|Ontario|America/Toronto
+Canada|Prince Edward Island|America/Halifax
+Canada|Quebec|America/Toronto
+Canada|Saskatchewan|America/Regina
+Canada|Yukon|America/Whitehorse
+Cayman Islands||America/Cayman
+Central African Republic||Africa/Bangui
+Chad||Africa/Ndjamena
+Chile|Aisén del General Carlos Ibañez del Campo|America/Santiago
+Chile|Antofagasta|America/Santiago
+Chile|Arica y Parinacota|America/Santiago
+Chile|Atacama|America/Santiago
+Chile|Biobío|America/Santiago
+Chile|Coquimbo|America/Santiago
+Chile|La Araucanía|America/Santiago
+Chile|Libertador General Bernardo O'Higgins|America/Santiago
+Chile|Los Lagos|America/Santiago
+Chile|Los Ríos|America/Santiago
+Chile|Magallanes|America/Santiago
+Chile|Maule|America/Santiago
+Chile|Región Metropolitana de Santiago|America/Santiago
+Chile|Tarapacá|America/Santiago
+Chile|Valparaíso|Pacific/Easter
+Chile|Ñuble|America/Santiago
+China||Asia/Shanghai
+Christmas Island||Indian/Christmas
+Cocos (Keeling) Islands||Indian/Cocosc
+Colombia||America/Bogota
+Comoros||Indian/Comoro
+Congo||Africa/Brazzaville
+Cook Islands||Pacific/Rarotonga
+Costa Rica||America/Costa_Rica
+Croatia||Europe/Zagreb
+Cuba||America/Havana
+Curaçao||America/Curacao
+Cyprus||Asia/Nicosia
+Czechia||Europe/Prague
+Côte d'Ivoire||Africa/Abidjan
+Democratic Republic of the Congo|Kasaï Oriental|Africa/Kinshasa
+Democratic Republic of the Congo|Kinshasa|Africa/Kinshasa
+Democratic Republic of the Congo|Kongo Central|Africa/Kinshasa
+Democratic Republic of the Congo|Maniema|Africa/Lubumbashi
+Democratic Republic of the Congo|Nord-Kivu|Africa/Lubumbashi
+Democratic Republic of the Congo|Sud-Kivu|Africa/Lubumbashi
+Democratic Republic of the Congo|Équateur|Africa/Kinshasa
+Denmark||Europe/Copenhagen
+Djibouti||Africa/Djibouti
+Dominican Republic||America/Santo_Domingo
+Dominica||America/Dominica
+Ecuador|Azuay|America/Guayaquil
+Ecuador|Bolívar|America/Guayaquil
+Ecuador|Carchi|America/Guayaquil
+Ecuador|Cañar|America/Guayaquil
+Ecuador|Chimborazo|America/Guayaquil
+Ecuador|Cotopaxi|America/Guayaquil
+Ecuador|El Oro|America/Guayaquil
+Ecuador|Esmeraldas|America/Guayaquil
+Ecuador|Galápagos|Pacific/Galapagos
+Ecuador|Guayas|America/Guayaquil
+Ecuador|Imbabura|America/Guayaquil
+Ecuador|Loja|America/Guayaquil
+Ecuador|Los Ríos|America/Guayaquil
+Ecuador|Manabí|America/Guayaquil
+Ecuador|Morona-Santiago|America/Guayaquil
+Ecuador|Napo|America/Guayaquil
+Ecuador|Pastaza|America/Guayaquil
+Ecuador|Pichincha|America/Guayaquil
+Ecuador|Santa Elena|America/Guayaquil
+Ecuador|Santo Domingo de los Tsáchilas|America/Guayaquil
+Ecuador|Sucumbíos|America/Guayaquil
+Ecuador|Tungurahua|America/Guayaquil
+Ecuador|Zamora-Chinchipe|America/Guayaquil
+Egypt||Africa/Cairo
+El Salvador||America/El_Salvador
+Equatorial Guinea||Africa/Malabo
+Eritrea||Africa/Asmara
+Estonia||Europe/Tallinn
+Ethiopia||Africa/Addis_Ababa
+Falkland Islands||Atlantic/Stanley
+Faroe Islands||Atlantic/Faroe
+Fiji||Pacific/Fiji
+Finland||Europe/Helsinki
+France||Europe/Paris
+French Guiana||America/Cayenne
+French Polynesia||Pacific/Gambier
+French Polynesia||Pacific/Marquesas
+French Polynesia||Pacific/Tahiti
+French Southern Territories||Indian/Kerguelen
+Gabon||Africa/Libreville
+Gambia||Africa/Banjul
+Georgia||Asia/Tbilisi
+Germany||Europe/Berlin
+Ghana||Africa/Accra
+Gibraltar||Europe/Gibraltar
+Greece||Europe/Athens
+Greenland||America/Nuuk
+Grenada||America/Grenada
+Guadeloupe||America/Guadeloupe
+Guam||Pacific/Guam
+Guatemala||America/Guatemala
+Guernsey||Europe/Guernsey
+Guinea-Bissau||Africa/Bissau
+Guinea||Africa/Conakry
+Guyana||America/Guyana
+Haiti||America/Port-au-Prince
+Heard Island and McDonald Islands||Indian/Kerguelen
+Holy See||Europe/Vatican
+Honduras||America/Tegucigalpa
+Hong Kong||Asia/Hong_Kong
+Hungary||Europe/Budapest
+Iceland||Atlantic/Reykjavik
+India||Asia/Kolkata
+Indonesia|Jawa|Asia/Jakarta
+Indonesia|Kalimantan|Asia/Makassar
+Indonesia|Maluku|Asia/Makassar
+Indonesia|Nusa Tenggara|Asia/Makassar
+Indonesia|Sulawesi|Asia/Jakarta
+Indonesia|Sumatera|Asia/Jakarta
+Iran||Asia/Tehran
+Iraq||Asia/Baghdad
+Ireland||Europe/Dublin
+Isle of Man||Europe/Isle_of_Man
+Israel||Asia/Jerusalem
+Italy||Europe/Rome
+Jamaica||America/Jamaica
+Japan||Asia/Tokyo
+Jersey||Europe/Jersey
+Jordan||Asia/Amman
+Kazakhstan|Akmolinskaya Oblast'|Asia/Almaty
+Kazakhstan|Aktyubinskaya Oblast'|Asia/Aqtobe
+Kazakhstan|Almatinskaya Oblast'|Asia/Almaty
+Kazakhstan|Almaty|Asia/Almaty
+Kazakhstan|Astana|Asia/Almaty
+Kazakhstan|Atyraū oblysy|Asia/Almaty
+Kazakhstan|Batys Qazaqstan oblysy|Asia/Aqtau
+Kazakhstan|Karagandinskaya Oblast'|Asia/Almaty
+Kazakhstan|Kostanayskaya Oblast'|Asia/Aqtobe
+Kazakhstan|Kyzylordinskaya Oblast'|Asia/Almaty
+Kazakhstan|Mangghystaū oblysy|Asia/Aqtau
+Kazakhstan|Pavlodar oblysy|Asia/Almaty
+Kazakhstan|Severo-Kazakhstanskaya Oblast'|Asia/Almaty
+Kazakhstan|Shyghys Qazaqstan oblysy|Asia/Almaty
+Kazakhstan|Yuzhno-Kazakhstankaya Oblast'|Asia/Almaty
+Kazakhstan|Zhambylskaya Oblast'|Asia/Aqtobe
+Kenya||Africa/Nairobi
+Kiribati|Gilbert Islands|Pacific/Tarawa
+Kiribati|Line Islands|Pacific/Kanton
+Kiribati|Phoenix Islands|Pacific/Enderbury
+Kosovo||Europe/Belgrade
+Kuwait||Asia/Kuwait
+Kyrgyzstan||Asia/Bishkek
+Laos||Asia/Vientiane
+Latvia||Europe/Riga
+Lebanon||Asia/Beirut
+Lesotho||Africa/Maseru
+Liberia||Africa/Monrovia
+Libya||Africa/Tripoli
+Liechtenstein||Europe/Vaduz
+Lithuania||Europe/Vilnius
+Luxembourg||Europe/Luxembourg
+Macao||Asia/Macau
+Macedonia||Europe/Skopje
+Madagascar||Indian/Antananarivo
+Malawi||Africa/Blantyre
+Malaysia||Asia/Kuala_Lumpur
+Maldives||Indian/Maldives
+Mali||Africa/Bamako
+Malta||Europe/Malta
+Marshall Islands||Pacific/Majuro
+Martinique||America/Martinique
+Mauritania||Africa/Nouakchott
+Mauritius||Indian/Mauritius
+Mayotte||Indian/Mayotte
+Mexico|Aguascalientes|America/Mexico_City
+Mexico|Baja California Sur|America/Mazatlan
+Mexico|Baja California|America/Tijuana
+Mexico|Campeche|America/Merida
+Mexico|Chiapas|America/Mexico_City
+Mexico|Chihuahua|America/Chihuahua
+Mexico|Coahuila de Zaragoza|America/Monterrey
+Mexico|Colima|America/Mexico_City
+Mexico|Durango|America/Monterrey
+Mexico|Guanajuato|America/Mexico_City
+Mexico|Guerrero|America/Mexico_City
+Mexico|Hidalgo|America/Mexico_City
+Mexico|Jalisco|America/Mexico_City
+Mexico|Michoacán de Ocampo|America/Mexico_City
+Mexico|Morelos|America/Mexico_City
+Mexico|México|America/Mexico_City
+Mexico|Nayarit|America/Mazatlan
+Mexico|Nuevo León|America/Monterrey
+Mexico|Oaxaca|America/Mexico_City
+Mexico|Puebla|America/Mexico_City
+Mexico|Querétaro|America/Mexico_City
+Mexico|Quintana Roo|America/Cancun
+Mexico|San Luis Potosí|America/Mexico_City
+Mexico|Sinaloa|America/Mazatlan
+Mexico|Sonora|America/Hermosillo
+Mexico|Tabasco|America/Mexico_City
+Mexico|Tamaulipas|America/Monterrey
+Mexico|Tlaxcala|America/Mexico_City
+Mexico|Veracruz de Ignacio de la Llave|America/Mexico_City
+Mexico|Yucatán|America/Merida
+Mexico|Zacatecas|America/Mexico_City
+Micronesia|Chuuk|Pacific/Chuuk
+Micronesia|Kosrae|Pacific/Kosrae
+Micronesia|Pohnpei|Pacific/Pohnpei
+Micronesia|Yap|Pacific/Chuuk
+Moldova||Europe/Chisinau
+Monaco||Europe/Monaco
+Mongolia|Arhangay|Asia/Ulaanbaatar
+Mongolia|Bayan-Ölgiy|Asia/Hovd
+Mongolia|Bayanhongor|Asia/Ulaanbaatar
+Mongolia|Bulgan|Asia/Ulaanbaatar
+Mongolia|Darhan uul|Asia/Ulaanbaatar
+Mongolia|Dornod|Asia/Ulaanbaatar
+Mongolia|Dornogovĭ|Asia/Ulaanbaatar
+Mongolia|Dundgovĭ|Asia/Ulaanbaatar
+Mongolia|Dzavhan|Asia/Ulaanbaatar
+Mongolia|Govĭ-Altay|Asia/Ulaanbaatar
+Mongolia|Govĭ-Sümber|Asia/Ulaanbaatar
+Mongolia|Hentiy|Asia/Ulaanbaatar
+Mongolia|Hovd|Asia/Hovd
+Mongolia|Hövsgöl|Asia/Ulaanbaatar
+Mongolia|Orhon|Asia/Ulaanbaatar
+Mongolia|Selenge|Asia/Ulaanbaatar
+Mongolia|Sühbaatar|Asia/Ulaanbaatar
+Mongolia|Töv|Asia/Ulaanbaatar
+Mongolia|Ulaanbaatar|Asia/Ulaanbaatar
+Mongolia|Uvs|Asia/Hovd
+Mongolia|Ömnögovĭ|Asia/Ulaanbaatar
+Mongolia|Övörhangay|Asia/Ulaanbaatar
+Montenegro||Europe/Podgorica
+Montserrat||America/Montserrat
+Morocco||Africa/Casablanca
+Mozambique||Africa/Maputo
+Myanmar||Asia/Yangon
+Namibia||Africa/Windhoek
+Nauru||Pacific/Nauru
+Nepal||Asia/Kathmandu
+Netherlands||Europe/Amsterdam
+New Caledonia||Pacific/Noumea
+New Zealand|Auckland|Pacific/Auckland
+New Zealand|Bay of Plenty|Pacific/Auckland
+New Zealand|Canterbury|Pacific/Auckland
+New Zealand|Chatham Islands Territory|Pacific/Chatham
+New Zealand|Gisborne|Pacific/Auckland
+New Zealand|Hawke's Bay|Pacific/Auckland
+New Zealand|Manawatu-Wanganui|Pacific/Auckland
+New Zealand|Marlborough|Pacific/Auckland
+New Zealand|Nelson|Pacific/Auckland
+New Zealand|Northland|Pacific/Auckland
+New Zealand|Otago|Pacific/Auckland
+New Zealand|Southland|Pacific/Auckland
+New Zealand|Taranaki|Pacific/Auckland
+New Zealand|Tasman|Pacific/Auckland
+New Zealand|Waikato|Pacific/Auckland
+New Zealand|Wellington|Pacific/Auckland
+New Zealand|West Coast|Pacific/Auckland
+Nicaragua||America/Managua
+Nigeria||Africa/Lagos
+Niger||Africa/Niamey
+Niue||Pacific/Niue
+Norfolk Island||Pacific/Norfolk
+North Korea||Asia/Pyongyang
+Northern Mariana Islands||Pacific/Saipan
+Norway||Europe/Oslo
+Oman||Asia/Muscat
+Pakistan||Asia/Karachi
+Palau||Pacific/Palau
+Palestine||Asia/Gaza
+Panama||America/Panama
+Papua New Guinea|Bougainville|Pacific/Bougainville
+Papua New Guinea|Central|Pacific/Port_Moresby
+Papua New Guinea|Chimbu|Pacific/Port_Moresby
+Papua New Guinea|East New Britain|Pacific/Port_Moresby
+Papua New Guinea|East Sepik|Pacific/Port_Moresby
+Papua New Guinea|Eastern Highlands|Pacific/Port_Moresby
+Papua New Guinea|Enga|Pacific/Port_Moresby
+Papua New Guinea|Gulf|Pacific/Port_Moresby
+Papua New Guinea|Madang|Pacific/Port_Moresby
+Papua New Guinea|Manus|Pacific/Port_Moresby
+Papua New Guinea|Milne Bay|Pacific/Port_Moresby
+Papua New Guinea|Morobe|Pacific/Port_Moresby
+Papua New Guinea|National Capital District|Pacific/Port_Moresby
+Papua New Guinea|New Ireland|Pacific/Port_Moresby
+Papua New Guinea|Northern|Pacific/Port_Moresby
+Papua New Guinea|Southern Highlands|Pacific/Port_Moresby
+Papua New Guinea|West New Britain|Pacific/Port_Moresby
+Papua New Guinea|West Sepik|Pacific/Port_Moresby
+Papua New Guinea|Western Highlands|Pacific/Port_Moresby
+Papua New Guinea|Western|Pacific/Port_Moresby
+Paraguay||America/Asuncion
+Peru||America/Lima
+Philippines||Asia/Manila
+Pitcairn||Pacific/Pitcairn
+Poland||Europe/Warsaw
+Portugal|Aveiro|Europe/Lisbon
+Portugal|Beja|Europe/Lisbon
+Portugal|Bragança|Europe/Lisbon
+Portugal|Braga|Europe/Lisbon
+Portugal|Castelo Branco|Europe/Lisbon
+Portugal|Coimbra|Europe/Lisbon
+Portugal|Faro|Europe/Lisbon
+Portugal|Guarda|Europe/Lisbon
+Portugal|Leiria|Europe/Lisbon
+Portugal|Lisboa|Europe/Lisbon
+Portugal|Portalegre|Europe/Lisbon
+Portugal|Porto|Europe/Lisbon
+Portugal|Região Autónoma da Madeira|Europe/Lisbon
+Portugal|Região Autónoma dos Açores|Europe/Azores
+Portugal|Santarém|Europe/Lisbon
+Portugal|Setúbal|Europe/Lisbon
+Portugal|Viana do Castelo|Europe/Lisbon
+Portugal|Vila Real|Europe/Lisbon
+Portugal|Viseu|Europe/Lisbon
+Portugal|Évora|Europe/Lisbon
+Puerto Rico||America/Puerto_Rico
+Qatar||Asia/Qatar
+Romania||Europe/Bucharest
+Russian|Adygeya, Respublika|Europe/Moscow
+Russian|Altay, Respublika|Asia/Gorno-Altaysk
+Russian|Altayskiy kray|Asia/Barnaul
+Russian|Amurskaya Oblast'|Asia/Yakutsk
+Russian|Arkhangel'skaya Oblast'|Europe/Moscow
+Russian|Astrakhanskaya Oblast'|Europe/Astrakhan
+Russian|Baškortostan, Respublika|Asia/Ufa
+Russian|Belgorodskaya Oblast'|Europe/Moscow
+Russian|Bryanskaya Oblast'|Europe/Moscow
+Russian|Buryatiya, Respublika|Asia/Irkutsk
+Russian|Chechenskaya Respublika|Europe/Moscow
+Russian|Chelyabinskaya Oblast'|Asia/Yekaterinburg
+Russian|Dagestan, Respublika|Europe/Moscow
+Russian|Ingushetiya, Respublika|Europe/Moscow
+Russian|Irkutskaya Oblast'|Asia/Irkutsk
+Russian|Ivanovskaya Oblast'|Europe/Moscow
+Russian|Kabardino-Balkarskaya Respublika|Europe/Moscow
+Russian|Kaliningradskaya Oblast'|Europe/Kaliningrad
+Russian|Kalmykiya, Respublika|Europe/Moscow
+Russian|Kalužskaja Oblast'|Europe/Kaliningrad
+Russian|Kamchatskiy kray|Asia/Kamchatka
+Russian|Karachayevo-Cherkesskaya Respublika|Europe/Moscow
+Russian|Kareliya, Respublika|Europe/Moscow
+Russian|Kemerovskaya Oblast'|Asia/Novokuznetsk
+Russian|Khabarovskiy kray|Asia/Vladivostok
+Russian|Khakasiya, Respublika|Asia/Krasnoyarsk
+Russian|Khanty-Mansiyskiy avtonomnyy okrug|Asia/Yekaterinburg
+Russian|Kirovskaya Oblast'|Europe/Moscow
+Russian|Komi, Respublika|Europe/Moscow
+Russian|Kostromskaya Oblast'|Europe/Moscow
+Russian|Krasnodarskiy kray|Europe/Moscow
+Russian|Krasnoyarskiy kray|Asia/Krasnoyarsk
+Russian|Kurganskaya Oblast'|Asia/Yekaterinburg
+Russian|Kurskaya Oblast'|Europe/Moscow
+Russian|Leningradskaya Oblast'|Europe/Moscow
+Russian|Lipetskaya Oblast'|Europe/Moscow
+Russian|Magadanskaya Oblast'|Asia/Magadan
+Russian|Mariy El, Respublika|Europe/Moscow
+Russian|Mordoviya, Respublika|Europe/Moscow
+Russian|Moskovskaya Oblast'|Europe/Moscow
+Russian|Moskva|Europe/Moscow
+Russian|Murmanskaya Oblast'|Europe/Moscow
+Russian|Nenetskiy avtonomnyy okrug|Europe/Moscow
+Russian|Nizhegorodskaya Oblast'|Europe/Moscow
+Russian|Novgorodskaya Oblast'|Europe/Moscow
+Russian|Novosibirskaya Oblast'|Asia/Novosibirsk
+Russian|Omskaya Oblast'|Asia/Omsk
+Russian|Orenburgskaya Oblast'|Asia/Yekaterinburg
+Russian|Orlovskaya Oblast'|Europe/Moscow
+Russian|Penzenskaya Oblast'|Europe/Moscow
+Russian|Permskiy kray|Asia/Yekaterinburg
+Russian|Primorskij kraj|Asia/Vladivostok
+Russian|Pskovskaja Oblast'|Europe/Moscow
+Russian|Rostovskaja Oblast'|Europe/Moscow
+Russian|Ryazanskaya Oblast'|Europe/Moscow
+Russian|Sakha, Respublika|Asia/Yakutsk
+Russian|Sakhalinskaya Oblast'|Asia/Sakhalin
+Russian|Samarskaya Oblast'|Europe/Samara
+Russian|Sankt-Peterburg|Europe/Moscow
+Russian|Saratovskaya Oblast'|Europe/Moscow
+Russian|Severnaya Osetiya, Respublika|Europe/Moscow
+Russian|Smolenskaya Oblast'|Europe/Moscow
+Russian|Stavropol'skiy kray|Europe/Moscow
+Russian|Sverdlovskaya Oblast'|Asia/Yekaterinburg
+Russian|Tambovskaya Oblast'|Europe/Moscow
+Russian|Tatarstan, Respublika|Europe/Moscow
+Russian|Tomskaya Oblast'|Asia/Tomsk
+Russian|Tul'skaya Oblast'|Europe/Moscow
+Russian|Tverskaya Oblast'|Europe/Moscow
+Russian|Tyumenskaya Oblast'|Asia/Yekaterinburg
+Russian|Tyva, Respublika|Asia/Krasnoyarsk
+Russian|Udmurtskaya Respublika|Europe/Moscow
+Russian|Ul'yanovskaya Oblast'|Europe/Ulyanovsk
+Russian|Vladimirskaya Oblast'|Europe/Moscow
+Russian|Volgogradskaya Oblast'|Europe/Volgograd
+Russian|Vologodskaya Oblast'|Europe/Moscow
+Russian|Voronežskaja Oblast'|Europe/Moscow
+Russian|Yamalo-Nenetskiy avtonomnyy okrug|Asia/Yekaterinburg
+Russian|Yaroslavskaya Oblast'|Europe/Moscow
+Russian|Yevreyskaya avtonomnaya Oblast'|Asia/Vladivostok
+Russian|Čukotskij avtonomnyj okrug|Asia/Anadyr
+Russian|Čuvašskaja Respublika|Europe/Moscow
+Rwanda||Africa/Kigali
+Réunion||Indian/Reunion
+Saint Barthélemy||America/St_Barthelemy
+Saint Helena||Atlantic/St_Helena
+Saint Kitts and Nevis||America/St_Kitts
+Saint Lucia||America/St_Lucia
+Saint Martin||America/Marigot
+Saint Pierre and Miquelon||America/Miquelon
+Saint Vincent and the Grenadines||America/St_Vincent
+Samoa||Pacific/Apia
+San Marino||Europe/San_Marino
+Sao Tome and Principe||Africa/Sao_Tome
+Saudi Arabia||Asia/Riyadh
+Senegal||Africa/Dakar
+Serbia||Europe/Belgrade
+Seychelles||Indian/Mahe
+Sierra Leone||Africa/Freetown
+Singapore||Asia/Singapore
+Sint Maarten||America/Lower_Princes
+Slovakia||Europe/Bratislava
+Slovenia||Europe/Ljubljana
+Solomon Islands||Pacific/Guadalcanal
+Somalia||Africa/Mogadishu
+South Africa||Africa/Johannesburg
+South Georgia and the South Sandwich Islands||Atlantic/South_Georgia
+South Korea||Asia/Seoul
+South Sudan||Africa/Juba
+Spain|Andalucía|Europe/Madrid
+Spain|Aragón|Europe/Madrid
+Spain|Asturias, Principado de|Europe/Madrid
+Spain|Canarias|Atlantic/Canary
+Spain|Cantabria|Europe/Madrid
+Spain|Castilla y León|Europe/Madrid
+Spain|Castilla-La Mancha|Europe/Madrid
+Spain|Catalunya [Cataluña]|Europe/Madrid
+Spain|Ceuta|Europe/Madrid
+Spain|Euskal Herria|Europe/Madrid
+Spain|Extremadura|Europe/Madrid
+Spain|Galicia [Galicia]|Europe/Madrid
+Spain|Illes Balears [Islas Baleares]|Europe/Madrid
+Spain|La Rioja|Europe/Madrid
+Spain|Madrid, Comunidad de|Europe/Madrid
+Spain|Melilla|Europe/Madrid
+Spain|Murcia, Región de|Europe/Madrid
+Spain|Nafarroako Foru Komunitatea*|Europe/Madrid
+Spain|Valenciana, Comunidad|Europe/Madrid
+Sri Lanka||Asia/Colombo
+Sudan||Africa/Khartoum
+Suriname||America/Paramaribo
+Svalbard and Jan Mayen||Europe/Oslo
+Swaziland||Africa/Mbabane
+Sweden||Europe/Stockholm
+Switzerland||Europe/Zurich
+Syrian Arab Republic||Asia/Damascus
+Taiwan||Asia/Taipei
+Tajikistan||Asia/Dushanbe
+Tanzania, United Republic of||Africa/Dar_es_Salaam
+Thailand||Asia/Bangkok
+Timor-Leste||Asia/Dili
+Togo||Africa/Lome
+Tokelau||Pacific/Fakaofo
+Tonga||Pacific/Tongatapu
+Trinidad and Tobago||America/Port_of_Spain
+Tunisia||Africa/Tunis
+Turkey||Europe/Istanbul
+Turkmenistan||Asia/Ashgabat
+Turks and Caicos Islands||America/Grand_Turk
+Tuvalu||Pacific/Funafuti
+Uganda||Africa/Kampala
+UK and Ireland||Europe/London
+Ukraine||Europe/Kyiv
+United Arab Emirates||Asia/Dubai
+Uruguay||America/Montevideo
+USA|Alabama|America/Chicago
+USA|Alaska|America/Anchorage
+USA|Arizona|America/Phoenix
+USA|Arkansas|America/Chicago
+USA|Baker Island|Pacific/Johnston
+USA|California|America/Los_Angeles
+USA|Colorado|America/Denver
+USA|Connecticut|America/New_York
+USA|Delaware|America/New_York
+USA|District of Columbia|America/New_York
+USA|Florida|America/New_York
+USA|Georgia|America/New_York
+USA|Hawaii|Pacific/Honolulu
+USA|Howland Island|Pacific/Wake
+USA|Idaho|America/Boise
+USA|Illinois|America/Chicago
+USA|Indiana|America/Indiana/Indianapolis
+USA|Iowa|America/Chicago
+USA|Jarvis Island|Pacific/Palau
+USA|Johnston Atoll|Pacific/Pago_Pago
+USA|Kansas|America/Chicago
+USA|Kentucky|America/New_York
+USA|Kingman Reef|Pacific/Palau
+USA|Louisiana|America/Chicago
+USA|Maine|America/New_York
+USA|Maryland|America/New_York
+USA|Massachusetts|America/New_York
+USA|Michigan|America/Detroit
+USA|Midway Islands|Pacific/Pago_Pago
+USA|Minnesota|America/Chicago
+USA|Mississippi|America/Chicago
+USA|Missouri|America/Chicago
+USA|Montana|America/Denver
+USA|Navassa Island|Pacific/Pago_Pago
+USA|Nebraska|America/Chicago
+USA|Nevada|America/Los_Angeles
+USA|New Hampshire|America/New_York
+USA|New Jersey|America/New_York
+USA|New Mexico|America/Denver
+USA|New York|America/New_York
+USA|North Carolina|America/New_York
+USA|North Dakota|America/Chicago
+USA|Ohio|America/New_York
+USA|Oklahoma|America/Chicago
+USA|Oregon|America/Los_Angeles
+USA|Palmyra Atoll|Pacific/Kwajalein
+USA|Pennsylvania|America/New_York
+USA|Rhode Island|America/New_York
+USA|South Carolina|America/New_York
+USA|South Dakota|America/Chicago
+USA|Tennessee|America/Chicago
+USA|Texas|America/Chicago
+USA|Utah|America/Denver
+USA|Vermont|America/New_York
+USA|Virginia|America/New_York
+USA|Wake Island|Pacific/Pago_Pago
+USA|Washington|America/Los_Angeles
+USA|West Virginia|America/New_York
+USA|Wisconsin|America/Chicago
+USA|Wyoming|America/Denver
+Uzbekistan||Asia/Tashkent
+Vanuatu||Pacific/Efate
+Venezuela||America/Caracas
+Viet Nam||Asia/Ho_Chi_Minh
+Virgin Islands (British)||America/Tortola
+Virgin Islands (US)||America/St_Thomas
+Wallis and Futuna||Pacific/Wallis
+Western Sahara||Africa/El_Aaiun
+Yemen||Asia/Aden
+Zambia||Africa/Lusaka
+Zimbabwe||Africa/Harare

@@ -21,6 +21,8 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -95,15 +97,21 @@ public class MessageComponents {
     }
 
     private void link(@NotNull MessageComponent.Builder builder, @NotNull String url) {
-        url = url.replaceFirst("^https?://", "");
+        url = "https://%s".formatted(url.replaceFirst("^https?://", ""));
 
-        builder.append(
+        try {
+            var uri = new URI(url);
+
+            builder.append(
                 Component.text(url, NamedTextColor.BLUE)
-                        .append(Component.text(FontUtil.computeOffset(2)))
-                        .append(Component.text(BadSprite.require("icon/chat/external_link").fontChar(), NamedTextColor.BLUE))
-                        .hoverEvent(HoverEvent.showText(Component.text("Click to open link")))
-                        .clickEvent(ClickEvent.openUrl("https://%s".formatted(url)))
-        );
+                    .append(Component.text(FontUtil.computeOffset(2)))
+                    .append(Component.text(BadSprite.require("icon/chat/external_link").fontChar(), NamedTextColor.BLUE))
+                    .hoverEvent(HoverEvent.showText(Component.text("Click to open link")))
+                    .clickEvent(ClickEvent.openUrl(uri.toString()))
+            );
+        } catch (URISyntaxException e) {
+            builder.append(Component.text(url));
+        }
     }
 
     // endregion

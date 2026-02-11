@@ -5,10 +5,7 @@ import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
-import net.hollowcube.mapmaker.player.DisplayName;
-import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.player.PlayerService;
-import net.hollowcube.mapmaker.player.SessionService;
+import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.to_be_refactored.SyntheticTabListManager;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
@@ -19,15 +16,14 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.validate.Check;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.TopicPartition;
 import org.jctools.queues.MpscArrayQueue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Predicate;
@@ -50,11 +46,11 @@ public class SessionManager {
     private final Predicate<String> hasSeeVanishedPerm;
 
     public SessionManager(
-            @NotNull SessionService sessionService,
-            @NotNull PlayerService playerService,
-            @NotNull PermManager permManager,
-            @NotNull KafkaConfig kafkaConfig,
-            boolean noop
+        @NotNull SessionService sessionService,
+        @NotNull PlayerService playerService,
+        @NotNull PermManager permManager,
+        @NotNull KafkaConfig kafkaConfig,
+        boolean noop
     ) {
         instance = this;
         this.sessionService = sessionService;
@@ -65,7 +61,7 @@ public class SessionManager {
 
         this.syntheticTab = new SyntheticTabListManager(this, playerService);
         MinecraftServer.getGlobalEventHandler()
-                .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn);
+            .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn);
 
         this.hasSeeVanishedPerm = permManager.createPrefetchedCondition(PlatformPerm.SEE_VANISHED);
     }
@@ -77,6 +73,21 @@ public class SessionManager {
         }
 
         logger.info("synced session manager with {} sessions", sessions.size());
+    }
+
+    public void syncIncremental() {
+        var oldSessions = new HashSet<>(sessions.keySet());
+        for (var session : sessionService.sync()) {
+            if (oldSessions.remove(session.playerId())) {
+                handleSessionCreate(session);
+            } else {
+                handleSessionUpdate(session, new SessionStateUpdateRequest.Metadata());
+            }
+        }
+
+        for (var deleted : oldSessions) {
+            handleSessionDelete(new SessionUpdateMessage(SessionUpdateMessage.Action.DELETE, deleted, null, null));
+        }
     }
 
     public void close() {
@@ -132,19 +143,18 @@ public class SessionManager {
     }
 
     private void handleSessionCreate(@NotNull PlayerSession session) {
+        if (sessions.containsKey(session.playerId())) {
+            handleSessionUpdate(session, new SessionStateUpdateRequest.Metadata());
+            return;
+        }
+
         logger.debug("remote session created for {}", session.playerId());
         sessions.put(session.playerId(), session);
 
         // Do not send a join message/add to tab list if the player is hidden
         if (session.hidden()) return;
 
-        var joinMessage = buildJoinMessage(session.playerId());
-        for (var player : CONNECTION_MANAGER.getOnlinePlayers()) {
-            // Do not send the join message to the player who joined, we send that to them immediately on join so that it feels better
-            if (player.getUuid().toString().equals(session.playerId())) continue;
-            player.sendMessage(joinMessage);
-        }
-
+        this.broadcastJoinMessage(session.playerId());
         syntheticTab.addSession(session);
     }
 
@@ -195,20 +205,38 @@ public class SessionManager {
         syntheticTab.addLocalPlayer(event.getPlayer());
     }
 
-    private @NotNull Component buildJoinMessage(@NotNull String playerId) {
-        var displayName = playerService.getPlayerDisplayName2(playerId);
-        return Component.translatable("chat.player.join", displayName.build(DisplayName.Context.DEFAULT));
+    private boolean showJoinLeaveMessage(@NotNull DisplayName displayName) {
+        return displayName.getBadgeName() != null; // Show anyone with a badge for now.
     }
 
     private void broadcastJoinMessage(@NotNull String playerId) {
-        var joinMessage = buildJoinMessage(playerId);
-        Audiences.players().sendMessage(joinMessage);
+        List<String> friends = this.playerService.getPlayerFriends(playerId, true, new PlayerService.Pageable(1, 10_000)).items()
+            .stream().map(PlayerFriend::playerId).toList();
+        var displayName = this.playerService.getPlayerDisplayName2(playerId);
+
+        if (showJoinLeaveMessage(displayName)) {
+            // only send to non-friends
+            Audiences.players(lPlayer -> !friends.contains(lPlayer.getUuid().toString()))
+                .sendMessage(Component.translatable("chat.player.join", displayName.build(DisplayName.Context.DEFAULT)));
+        }
+
+        Audiences.players(lPlayer -> friends.contains(lPlayer.getUuid().toString()))
+            .sendMessage(Component.translatable("chat.friend.join", displayName.build(DisplayName.Context.DEFAULT)));
     }
 
     private void broadcastLeaveMessage(@NotNull String playerId) {
-        var displayName = playerService.getPlayerDisplayName2(playerId);
-        var leaveMessage = Component.translatable("chat.player.leave", displayName.build(DisplayName.Context.DEFAULT));
-        Audiences.players().sendMessage(leaveMessage);
+        List<String> friends = this.playerService.getPlayerFriends(playerId, true, new PlayerService.Pageable(1, 10_000)).items()
+            .stream().map(PlayerFriend::playerId).toList();
+        var displayName = this.playerService.getPlayerDisplayName2(playerId);
+
+        if (showJoinLeaveMessage(displayName)) {
+            // only send to non-friends
+            Audiences.players(player -> !friends.contains(player.getUuid().toString()))
+                .sendMessage(Component.translatable("chat.player.leave", displayName.build(DisplayName.Context.DEFAULT)));
+        }
+
+        Audiences.players(player -> friends.contains(player.getUuid().toString()))
+            .sendMessage(Component.translatable("chat.friend.leave", displayName.build(DisplayName.Context.DEFAULT)));
     }
 
     public void configureVanishedPlayer(@NotNull Player player) {
@@ -262,6 +290,11 @@ public class SessionManager {
                     }
                 });
             }
+        }
+
+        @Override
+        public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
+            FutureUtil.submitVirtual(SessionManager.this::syncIncremental);
         }
     }
 }

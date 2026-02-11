@@ -41,7 +41,7 @@ public class ExtendedPlayer extends Player {
     }
 
     protected void updateBlockTouchState() {
-        final BoundingBox bb = getBoundingBox().contract(0.001, 0.001, 0.001);
+        final BoundingBox bb = getBoundingBox().contract(0.002, 0.002, 0.002);
         var position = getPosition();
         var instance = getInstance();
         if (instance == null) return;

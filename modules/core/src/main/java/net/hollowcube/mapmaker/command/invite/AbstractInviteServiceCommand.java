@@ -18,14 +18,16 @@ abstract class AbstractInviteServiceCommand extends CommandDsl {
     protected final PlayerService playerService;
     protected final SessionManager sessionManager;
     private final Argument<String> targetArgument;
+    private final boolean preventBlocked;
 
     AbstractInviteServiceCommand(@NotNull String command, @NotNull PlayerInviteService inviteService,
                                  @NotNull PlayerService playerService, @NotNull SessionManager sessionManager,
-                                 @NotNull String playerArgDescription) {
+                                 @NotNull String playerArgDescription, boolean preventBlocked) {
         super(command);
         this.inviteService = inviteService;
         this.playerService = playerService;
         this.sessionManager = sessionManager;
+        this.preventBlocked = preventBlocked;
 
         this.targetArgument = CoreArgument.AnyOnlinePlayer("player", sessionManager)
                 .description(playerArgDescription);
@@ -34,7 +36,7 @@ abstract class AbstractInviteServiceCommand extends CommandDsl {
         this.addSyntax(playerOnly(this::handleCommand), this.targetArgument);
     }
 
-    abstract void handle(@NotNull Player sender, @NotNull String targetId);
+    abstract void handle(@NotNull Player sender, @NotNull String targetId, @NotNull String targetName);
 
     private void handleCommand(@NotNull Player player, @NotNull CommandContext context) {
         var targetName = context.getRaw(this.targetArgument);
@@ -56,6 +58,8 @@ abstract class AbstractInviteServiceCommand extends CommandDsl {
             return;
         }
 
-        this.handle(player, targetSession.playerId());
+        if (this.preventBlocked && this.playerService.failIfBlocked(player, targetId, context.getRaw(this.targetArgument), true)) return;
+
+        this.handle(player, targetSession.playerId(), targetName);
     }
 }

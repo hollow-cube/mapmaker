@@ -10,7 +10,6 @@ bazel-*
 
 .DS_Store
 
-.idea
 /bin/development/build/
 /bin/packer/build/
 /modules/canvas/build/
@@ -29,3 +28,5 @@ profile.jfr
 .bazelbsp
 # Ignore Gradle build output directory
 build
+
+workspace

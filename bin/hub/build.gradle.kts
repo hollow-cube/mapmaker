@@ -14,15 +14,8 @@ dependencies {
     implementation(project(":modules:canvas:api"))
     implementation(project(":modules:canvas:impl-standalone"))
     implementation(project(":modules:map-core"))
+    implementation(project(":modules:map-runtime"))
     implementation(project(":modules:terraform"))
-
-    compileOnly(project(":tools:lua-slopgen:api"))
-    annotationProcessor(project(":tools:lua-slopgen"))
-
-    implementation(libs.luau.core)
-    implementation(libs.luau.natives.macos.arm64)
-    implementation(libs.luau.natives.linux.x64)
-    implementation(libs.luau.natives.windows.x64)
 
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)

@@ -21,7 +21,9 @@ dependencies {
     implementation(libs.included.schem)
     implementation(libs.polar)
     implementation(libs.posthog)
-    implementation(libs.bundles.otel)
+    implementation(libs.bundles.otel) {
+        exclude(group = "io.opentelemetry", module = "opentelemetry-exporter-sender-okhttp")
+    }
     implementation(libs.bundles.prometheus)
     implementation(libs.fastutil)
     implementation(libs.kafka)

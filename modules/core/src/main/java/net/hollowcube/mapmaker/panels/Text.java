@@ -16,6 +16,10 @@ public class Text extends Button {
     private int xAlign = START;
     private int yAlign = START;
 
+    public Text(int slotWidth, int slotHeight, @NotNull String text) {
+        this(null, slotWidth, slotHeight, text);
+    }
+
     public Text(@Nullable String translationKey, int slotWidth, int slotHeight, @NotNull String text) {
         super(translationKey, slotWidth, slotHeight);
         this.text = text;

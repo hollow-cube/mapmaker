@@ -1,9 +1,0 @@
-<?xml version="1.0" ?>
-<component width="1" height="1" align="ltr">
-    <button
-            id="label"
-            translationKey="forced.input"
-            sprite="diamond_block"
-            backgroundSprite="displayentity/properties/property"
-    />
-</component>

@@ -26,6 +26,7 @@ import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.ChoiceFormat;
+import java.text.DecimalFormat;
 import java.util.OptionalDouble;
 import java.util.Set;
 
@@ -105,6 +106,12 @@ public record ChatAction(String message) implements Action {
                 var pattern = args.hasNext() ? args.pop().value() : null;
                 if (pattern == null) yield createError("Expected a choice pattern, none provided");
                 var format = new ChoiceFormat(pattern);
+                yield Tag.inserting(Component.text(format.format(value)));
+            }
+            case "format" -> {
+                var pattern = args.hasNext() ? args.pop().value() : null;
+                if (pattern == null) yield createError("Expected a format pattern, none provided");
+                var format = new DecimalFormat(pattern);
                 yield Tag.inserting(Component.text(format.format(value)));
             }
             case null, default -> Tag.inserting(Component.text(value));

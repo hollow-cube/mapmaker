@@ -11,6 +11,7 @@ public final class PlayerSettings {
     // General Settings
 
     public static final PlayerSetting<String> CHAT_CHANNEL = PlayerSetting.String("chat_channel", ClientChatMessageData.CHANNEL_GLOBAL);
+    public static final PlayerSetting<Boolean> COSMETICS_SHOW_LOCKED = PlayerSetting.Bool("cosmetics.show_locked", true);
 
     // Hub
 
@@ -31,5 +32,11 @@ public final class PlayerSettings {
     // Terraform
 
     public static PlayerSetting<Boolean> ENABLE_WE_CUI = PlayerSetting.Bool("we_outline_cui", false);
+
+    // Social
+
+    public static PlayerSetting<Boolean> AUTO_REJECT_FRIEND_REQUESTS = PlayerSetting.Bool("auto_reject_friend_requests", false);
+    public static PlayerSetting<Boolean> ALLOW_DIRECT_MESSAGES = PlayerSetting.Bool("allow_direct_messages", true);
+    public static PlayerSetting<Boolean> ENABLE_PING_SOUNDS = PlayerSetting.Bool("enable_ping_sounds", true);
 
 }

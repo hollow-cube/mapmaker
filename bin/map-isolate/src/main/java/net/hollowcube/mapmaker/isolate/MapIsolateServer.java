@@ -3,7 +3,10 @@ package net.hollowcube.mapmaker.isolate;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.Uuids;
+import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.MapCommands;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
@@ -17,12 +20,20 @@ import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.Scheduler;
+import org.jetbrains.annotations.Blocking;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static net.hollowcube.mapmaker.map.MapPlayer.simpleMapPlayer;
 
@@ -36,6 +47,8 @@ public class MapIsolateServer extends AbstractMapServer {
     // TODO: pretty sure we could do init in constructor, should investigate.
     private @UnknownNullability ParkourMapWorld world;
 
+    private final CompletableFuture<@Nullable Void> worldLoadFuture = new CompletableFuture<>();
+
     public MapIsolateServer(ConfigLoaderV3 config) {
         super(config);
 
@@ -46,14 +59,18 @@ public class MapIsolateServer extends AbstractMapServer {
         System.out.println("Args: " + Arrays.toString(IsolateMain.args));
 
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("map-init")
-                .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
-                .addListener(PlayerSpawnEvent.class, this::handleSpawn)
-                .addListener(PlayerDisconnectEvent.class, this::handleDisconnect));
+            .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
+            .addListener(PlayerSpawnEvent.class, this::handleSpawn)
+            .addListener(PlayerDisconnectEvent.class, this::handleDisconnect));
     }
 
     @Override
     protected String name() {
         return "mapmaker-map-isolate";
+    }
+
+    public String mapId() {
+        return mapId;
     }
 
     @Override
@@ -71,7 +88,8 @@ public class MapIsolateServer extends AbstractMapServer {
         super.prepareStart();
 
         MinecraftServer.getConnectionManager()
-                .setPlayerProvider(simpleMapPlayer(commandManager()));
+            .setPlayerProvider(simpleMapPlayer(commandManager()));
+        MapCommands.registerPlayingCommands(this, commandManager());
 
         ParkourMapWorld.initGlobalReferences();
 
@@ -79,7 +97,13 @@ public class MapIsolateServer extends AbstractMapServer {
             var map = mapService().getMap(Uuids.ZERO, this.mapId);
 
             world = new ParkourMapWorld(this, map);
-            world.loadWorld();
+            FutureUtil.submitVirtual(() -> {
+                try {
+                    world.loadWorld();
+                } finally {
+                    worldLoadFuture.complete(null);
+                }
+            });
 
             // We schedule on first tick end because submitTask invokes the executor immediately to determine
             // the first schedule. If we executed it here, that would be on the wrong thread.
@@ -91,6 +115,40 @@ public class MapIsolateServer extends AbstractMapServer {
         }
 
         addBinding(Scheduler.class, world.instance().scheduler());
+
+        var kafkaConfig = config.get(KafkaConfig.class);
+        if (!globalConfig.noop()) {
+            var mapMgmtConsumer = new MapIsolateMapMgmtConsumerImpl(kafkaConfig.bootstrapServers(), this);
+            shutdowner().queue("map-mgmt-listener", mapMgmtConsumer::close);
+        }
+    }
+
+    @Blocking
+    public void shutdown(@Nullable Component reason) {
+        FutureUtil.assertThread();
+
+        var players = List.copyOf(world.players());
+        var futures = new CompletableFuture[players.size()];
+        for (int i = 0; i < players.size(); i++) {
+            var player = players.get(i);
+            if (reason != null) player.sendMessage(reason);
+            futures[i] = world.scheduleRemovePlayer(player)
+                .thenRunAsync(() -> bridge().joinHub(player), FutureUtil.VIRUTAL_EXECUTOR)
+                .exceptionally(e -> {
+                    ExceptionReporter.reportException(new RuntimeException("failed to remove player", e), player);
+                    player.kick(Objects.requireNonNullElse(reason, Component.text("Server shutting down")));
+                    return null;
+                });
+        }
+        try {
+            CompletableFuture.allOf(futures).get(15, TimeUnit.SECONDS);
+        } catch (TimeoutException ignored) {
+            logger.error("failed to drain players in 15s, exiting.");
+        } catch (RuntimeException | InterruptedException | ExecutionException e) {
+            logger.error("failed to drain players", e);
+        }
+
+        shutdowner().performShutdown();
     }
 
     protected void handleConfigPhase(AsyncPlayerConfigurationEvent event) {
@@ -107,6 +165,7 @@ public class MapIsolateServer extends AbstractMapServer {
 
             // Ensure resource pack was applied before allowing the player in
             FutureUtil.getUnchecked(resourcePackFuture);
+            FutureUtil.getUnchecked(worldLoadFuture);
             if (!player.isOnline()) return;
 
             // Setup the player in the world

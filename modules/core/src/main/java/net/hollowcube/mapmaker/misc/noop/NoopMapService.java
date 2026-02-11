@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
+import net.hollowcube.mapmaker.map.responses.HeadDbSearchResponse;
+import net.hollowcube.mapmaker.map.responses.PlayerTopTimesResponse;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.Material;
@@ -195,6 +197,21 @@ public class NoopMapService implements MapService {
     }
 
     @Override
+    public @NotNull HeadDbSearchResponse getHeadsWithSearch(@NotNull String query, int page, int amount) {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public @NotNull HeadDbSearchResponse getHeadsWithCategory(@NotNull String category, int page, int amount) {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public @NotNull PlayerTopTimesResponse getPlayerTopTimes(@NotNull String playerId, int page, int pageSize) {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
     public @NotNull List<LegacyMapInfo> getLegacyMaps(@NotNull String authorizer, @NotNull String playerId) {
         throw new UnsupportedOperationException("not implemented");
     }
@@ -203,5 +220,4 @@ public class NoopMapService implements MapService {
     public @NotNull MapData.WithSlot importLegacyMap(@NotNull String authorizer, @NotNull String playerId, @NotNull String legacyMapId) {
         throw new UnsupportedOperationException("not implemented");
     }
-
 }

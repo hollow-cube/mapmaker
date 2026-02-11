@@ -391,6 +391,11 @@ public final class SchematicCommands {
 
             var playerSession = PlayerSession.forPlayer(player);
             var clipboard = playerSession.clipboard(Clipboard.DEFAULT);
+            if (clipboard.isEmpty()) {
+                player.sendMessage(Messages.GENERIC_NO_CLIPBOARD);
+                return;
+            }
+
             var schem = clipboard.getTransformedSchematic();
 
             var session = LocalSession.forPlayer(player);

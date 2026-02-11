@@ -98,17 +98,36 @@ definition mapmaker/player {}
 // Organization maps have some differences from normal maps, namely:
 // - They can only be accessed by platform/admin members
 // - They cannot be published
+//definition mapmaker/organization {
+//    relation platform: mapmaker/platform
+//    // platform_map_admin is required to do the "conditional"/subtraction logic inside of map admin permissions.
+//    // Check the comment above that logic for a more detailed explanation
+//    permission platform_map_admin = platform->global_map_admin
+//
+//    relation admin: mapmaker/player
+//    relation member: mapmaker/player
+//
+//    permission map_admin = admin
+//    permission map_write = member + admin
+//}
+
+// V2 Organizations
 definition mapmaker/organization {
     relation platform: mapmaker/platform
-    // platform_map_admin is required to do the "conditional"/subtraction logic inside of map admin permissions.
-    // Check the comment above that logic for a more detailed explanation
+    // platform_map_admin is required for conditional logic inside mapmaker/map.
     permission platform_map_admin = platform->global_map_admin
 
-    relation admin: mapmaker/player
-    relation member: mapmaker/player
+    relation owner: mapmaker/player
+    relation manager: mapmaker/player
+    relation builder: mapmaker/player
+    relation guest: mapmaker/player
 
-    permission map_admin = admin
-    permission map_write = member + admin
+    // manage_members is invite/kick/edit role
+    permission manage_members = owner + manager
+
+    permission map_admin = owner + manager;
+    permission map_write = map_admin + builder
+    permission map_read = map_write + guest
 }
 
 definition mapmaker/map {
@@ -117,7 +136,7 @@ definition mapmaker/map {
     relation owner: mapmaker/player | mapmaker/organization // Wiped on publish
     relation trusted: mapmaker/player // Wiped on publish
 
-    // Allow setting readership for anybody, will be done when the map is published.
+    // Allow setting readership for anybody (nobody/everybody), will be done when the map is published.
     relation viewer: mapmaker/player:*
 
     // global_elevated_perms will pass for a player with elevated perms (from the platform) which grant them
@@ -138,7 +157,7 @@ definition mapmaker/map {
     // THESE PERMISSIONS SHOULD NEVER BE CHECKED PROGRAMATICALLY, ONLY THE ONES BELOW
     permission admin = owner + owner->map_admin + global_elevated_perms
     permission write = trusted + owner->map_write + admin
-    permission read = viewer + write
+    permission read = viewer + owner->map_read + write // For an Organization, some permissions are managed in-app (not via SpiceDB) as it isn't possible to do full viewership permissions.
     // THESE PERMISSIONS SHOULD NEVER BE CHECKED PROGRAMATICALLY, ONLY THE ONES BELOW
 
     permission edit_settings = admin;

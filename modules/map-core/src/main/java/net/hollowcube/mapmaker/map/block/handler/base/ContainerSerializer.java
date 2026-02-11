@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.block.handler.base;
 
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
@@ -10,6 +11,7 @@ import net.minestom.server.tag.TagWritable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +36,17 @@ public final class ContainerSerializer implements TagSerializer<List<ItemStack>>
             var compound = (CompoundBinaryTag) nbt;
             var slot = compound.getByte("Slot");
             if (slot < 0 || slot >= this.maxSize) continue;
-            items.set(slot, ItemStack.fromItemNBT(compound));
+            try {
+                items.set(slot, ItemStack.fromItemNBT(compound));
+            } catch (Exception e) {
+                String str;
+                try {
+                    str = MinestomAdventure.tagStringIO().asString(compound);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+                throw new RuntimeException("failed to decode item in container at slot " + slot + ": " + str);
+            }
         }
         return items;
     }

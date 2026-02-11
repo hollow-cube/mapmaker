@@ -35,6 +35,11 @@ public class SaveStateUpdateRequest {
         return this;
     }
 
+    public @NotNull SaveStateUpdateRequest setTicks(long playtime) {
+        updates.addProperty("ticks", playtime);
+        return this;
+    }
+
     public @NotNull SaveStateUpdateRequest setProtocolVersion(int protocolVersion) {
         updates.addProperty("protocolVersion", protocolVersion);
         return this;

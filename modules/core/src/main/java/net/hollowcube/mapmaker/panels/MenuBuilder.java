@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.panels;
 
+import it.unimi.dsi.fastutil.ints.IntIntPair;
 import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -27,11 +28,15 @@ public class MenuBuilder {
             .build();
 
     private final int absWidth, absHeight, containerSlotHeight;
+    private final IntIntPair[] slotPosOverrides;
+
     private int slotX, slotY, slotWidth, slotHeight;
     private final FontUIBuilder title = new FontUIBuilder();
     private final ItemStack[] items;
 
-    public MenuBuilder(int slotWidth, int slotHeight, int containerSlotHeight) {
+    public MenuBuilder(int slotWidth, int slotHeight, int containerSlotHeight, IntIntPair[] slotPosOverrides) {
+        this.slotPosOverrides = slotPosOverrides;
+
         this.slotX = this.slotY = 0;
         this.slotWidth = this.absWidth = slotWidth;
         this.slotHeight = this.absHeight = slotHeight;
@@ -167,11 +172,20 @@ public class MenuBuilder {
     }
 
     private int computeAbsoluteX(int offset) {
+        var override = getPositionOverride();
+        if (override != null) {
+            return override.firstInt() + offset;
+        }
         // -1 accounts for the gui title offset
         return -1 + (this.slotX * 18) + offset;
     }
 
     private int computeAbsoluteY(int offset) {
+        var override = getPositionOverride();
+        if (override != null) {
+            return override.secondInt() + offset;
+        }
+
         // +4 accounts for the gui title offset
         int y = 4 + (this.slotY * 18) + offset;
         // If we are past the game container slots into player inv we have to account for that gap:
@@ -179,5 +193,11 @@ public class MenuBuilder {
         // If we are past the player inv we need to account for the player inv -> hotbar gap:
         if (this.slotY >= this.containerSlotHeight + 3) y += 4;
         return y;
+    }
+
+    private IntIntPair getPositionOverride() {
+        int index = this.slotY * this.absWidth + this.slotX;
+        if (index < 0 || index >= this.slotPosOverrides.length) return null;
+        return this.slotPosOverrides[index];
     }
 }

@@ -58,18 +58,20 @@ public class SpriteTransform {
                         || relative.toString().startsWith("map_browser" + File.separatorChar)
                         || relative.toString().startsWith("map_details" + File.separatorChar)
                         || relative.toString().startsWith("report_map" + File.separatorChar)
-                        || relative.toString().startsWith("map_list" + File.separatorChar)
+                        || relative.toString().startsWith("generic2" + File.separatorChar + "containers" + File.separatorChar)
                         || relative.toString().startsWith("action" + File.separatorChar)
                         || relative.toString().startsWith("event" + File.separatorChar)
+                        || relative.toString().startsWith("icon2" + File.separatorChar)
                         || relative.toString().startsWith("rate_map" + File.separatorChar))
                         && !relative.toString().contains("checkout");
-                if (!canSkipConfig && !Files.exists(configFile)) continue;
+                boolean useConfig = Files.exists(configFile);
+                if (!canSkipConfig && !useConfig) continue;
 
                 String name = guiBaseDir.relativize(imageFile).toString()
                         .replace(".png", "")
                         .replace("\\", "/");
                 try {
-                    if (canSkipConfig) {
+                    if (canSkipConfig && !useConfig) {
 
                         Json5Object config = new Json5Object();
                         int openIndex = name.indexOf("[");

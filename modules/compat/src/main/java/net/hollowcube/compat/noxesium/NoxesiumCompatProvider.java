@@ -1,39 +1,44 @@
 package net.hollowcube.compat.noxesium;
 
 import com.google.auto.service.AutoService;
-import com.noxcrew.noxesium.api.NoxesiumReferences;
-import com.noxcrew.noxesium.api.qib.QibDefinition;
 import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.compat.api.ModChannelRegisterEvent;
 import net.hollowcube.compat.api.packet.PacketRegistry;
-import net.hollowcube.compat.noxesium.packets.ClientboundChangeEntityRulesPacket;
-import net.hollowcube.compat.noxesium.packets.ClientboundChangeServerRulesPacket;
-import net.hollowcube.compat.noxesium.packets.ClientboundServerInformationPacket;
-import net.hollowcube.compat.noxesium.packets.ServerboundClientInformationPacket;
-import net.hollowcube.compat.noxesium.qib.QibDefinitionManager;
-import net.hollowcube.compat.noxesium.rules.NoxesiumServerRules;
-import net.minestom.server.entity.GameMode;
+import net.hollowcube.compat.api.packet.ServerboundModPacket;
+import net.hollowcube.compat.noxesium.components.NoxesiumGameComponents;
+import net.hollowcube.compat.noxesium.handshake.NoxesiumHandshakeAPI;
+import net.hollowcube.compat.noxesium.handshake.NoxesiumPlayer;
+import net.hollowcube.compat.noxesium.packets.v2.ServerboundClientInformationPacket;
+import net.hollowcube.compat.noxesium.packets.v3.*;
+import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.GlobalEventHandler;
-import net.minestom.server.event.player.PlayerGameModeChangeEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.player.PlayerStartFlyingWithElytraEvent;
 
-import java.util.Map;
+import java.util.function.BiConsumer;
 
 @AutoService(CompatProvider.class)
 public class NoxesiumCompatProvider implements CompatProvider {
 
     @Override
     public void registerPackets(PacketRegistry registry) {
-        registry.register(ClientboundServerInformationPacket.TYPE);
-        registry.register(ClientboundChangeServerRulesPacket.TYPE);
-        registry.register(ClientboundChangeEntityRulesPacket.TYPE);
+        // v2 (required for them to let us know so we can tell them to use v3)
+        registry.register(ServerboundClientInformationPacket.TYPE, (_, _) -> {});
 
-        registry.register(ServerboundClientInformationPacket.TYPE, (player, packet) -> {
-            new ClientboundServerInformationPacket(NoxesiumReferences.VERSION).send(player);
+        registry.register(ClientboundHandshakeAcknowledgePacket.TYPE);
+        registry.register(ClientboundRegistryIdsUpdatePacket.TYPE);
+        registry.register(ClientboundHandshakeCompletePacket.TYPE);
+        registry.register(ClientboundHandshakeCancelPacket.TYPE);
+        registry.register(ClientboundUpdateGameComponentsPacket.TYPE);
 
-            player.setTag(NoxesiumAPI.NOXESIUM_VERSION, packet.version());
-            if (packet.version() < NoxesiumReferences.VERSION) {
-                player.sendMessage("Your Noxesium version is outdated, please update.");
+        registry.register(ServerboundHandshakePacket.TYPE, NoxesiumHandshakeAPI::handleHandshake);
+        registry.register(ServerboundHandshakeAcknowledgePacket.TYPE, handle(NoxesiumPlayer::handle));
+        registry.register(ServerboundRegistryUpdateResultPacket.TYPE, handle(NoxesiumPlayer::handle));
+        registry.register(ServerboundGlidePacket.TYPE, (player, packet) -> {
+            var noxesium = NoxesiumPlayer.get(player);
+            if (noxesium.has(NoxesiumGameComponents.CLIENT_AUTHORITATIVE_ELYTRA)) {
+                player.setFlyingWithElytra(packet.isGliding());
+                EventDispatcher.call(new PlayerStartFlyingWithElytraEvent(player));
             }
         });
     }
@@ -41,33 +46,12 @@ public class NoxesiumCompatProvider implements CompatProvider {
     @Override
     public void registerListeners(GlobalEventHandler events) {
         events.addListener(ModChannelRegisterEvent.class, event -> {
-            // Disable Noxesium for people who arent on the latest version because it does not handle component
-            // changes across versions properly. We could maybe fix this as an extension to ViaVersion but it
-            // doesn't seem worth it.
-            if (event.getPlayerProtocolVersion() < NoxesiumAPI.MIN_PROTOCOL_VERSION) {
-                event.excludeNamespace(NoxesiumAPI.NAME, NoxesiumAPI.CHANNEL);
-            } else if (event.getPlayerProtocolVersion() > NoxesiumAPI.MAX_PROTOCOL_VERSION) {
-                event.excludeNamespace(NoxesiumAPI.CHANNEL);
-            }
+            // Disable Noxesium for V2 clients
+            event.excludeNamespace(NoxesiumAPI.NAME, "noxesium-v2");
         });
+    }
 
-        events.addListener(PlayerSpawnEvent.class, event -> {
-            Map<String, QibDefinition> defs = event.getInstance().getTag(QibDefinitionManager.QIB_DEFINITIONS);
-            if (defs != null) {
-                ClientboundChangeServerRulesPacket.qibs(defs).send(event.getPlayer());
-            }
-
-            ClientboundChangeServerRulesPacket.builder()
-                    .add(NoxesiumServerRules.DISABLE_SPIN_ATTACK_COLLISIONS, true)
-                    .build()
-                    .send(event.getPlayer());
-        });
-
-        events.addListener(PlayerGameModeChangeEvent.class, event -> {
-            var player = event.getPlayer();
-            if (!player.hasTag(NoxesiumAPI.NOXESIUM_VERSION)) return;
-            int offset = event.getNewGameMode() == GameMode.CREATIVE ? 8 : 0;
-            ClientboundChangeServerRulesPacket.itemNameOffset(offset).send(player);
-        });
+    public <T extends ServerboundModPacket<T>> BiConsumer<Player, T> handle(BiConsumer<NoxesiumPlayer, T> handler) {
+        return (player, packet) -> handler.accept(NoxesiumPlayer.get(player), packet);
     }
 }

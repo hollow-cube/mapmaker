@@ -7,6 +7,7 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.trait.PlayerInstanceEvent;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.packet.server.play.BlockChangePacket;
 
 import java.util.HashSet;
@@ -27,12 +28,17 @@ public class DelayedBlockInteractions {
     static {
         DELAYED_BLOCKS.addAll(BlockTags.TRAPDOORS);
         DELAYED_BLOCKS.addAll(BlockTags.DOORS);
+        DELAYED_BLOCKS.addAll(BlockTags.FENCE_GATES);
+
+        DELAYED_BLOCKS.remove(Block.IRON_DOOR.key());
+        DELAYED_BLOCKS.remove(Block.IRON_TRAPDOOR.key());
     }
 
     private static void handleBlockInteraction(PlayerBlockInteractEvent event) {
         var player = event.getPlayer();
         var world = MapWorld.forPlayer(player);
-        if (world == null || player.isSneaking()) return;
+        var holdingItems = !player.getItemInMainHand().isAir() || !player.getItemInOffHand().isAir();
+        if (world == null || (player.isSneaking() && holdingItems)) return;
         if (!DELAYED_BLOCKS.contains(event.getBlock().key())) return;
         if (!(player instanceof MapPlayer mp) || mp.canSendPose()) return;
 

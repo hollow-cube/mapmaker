@@ -60,8 +60,11 @@ public class ActionPickerView extends Panel {
     private void handleAddAction(Key actionKey, Action.Editor<?> editor) {
         var ref = this.actionList.addAction(actionKey);
         var editorFunc = editor.editor();
-        if (editorFunc != null) {
-            host.pushView(editorFunc.apply(ref));
-        } else host.popView();
+        var panel = editorFunc != null ? editorFunc.apply(ref) : null;
+        if (panel != null) {
+            host.pushView(panel);
+        } else {
+            host.popView();
+        }
     }
 }
