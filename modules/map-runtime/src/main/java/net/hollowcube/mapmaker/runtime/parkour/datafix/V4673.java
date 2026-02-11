@@ -15,8 +15,14 @@ public class V4673 extends DataVersion implements ExternalDataFix {
         addFix(DataTypes.ENTITY, "minecraft:marker", entity -> {
             var data = entity.get("data");
             var bouncePadData = data.get("bounce_pad");
+            var existingActions = data.get("status").get("actions");
+            var existingAction = existingActions.get(0);
 
-            if (bouncePadData.isMapLike()) {
+            if (
+                bouncePadData.isMapLike() &&
+                    existingActions.size(0) == 1 &&
+                    existingAction.get("type").as(String.class, "").equals("mapmaker:velocity")
+            ) {
                 var status = Value.emptyMap();
                 var actions = Value.emptyList();
                 var action = Value.emptyMap();
