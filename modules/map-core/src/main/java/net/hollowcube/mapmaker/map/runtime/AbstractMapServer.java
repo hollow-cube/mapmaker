@@ -223,6 +223,7 @@ public abstract class AbstractMapServer implements MapServer {
             // project api key is not a secret.
             PostHog.init("phc_mK0jji1aC3hvMBGLOLjuVARqolDGPS9AiuNUOhMwVyA", config -> config
                 .personalApiKey(unleashConfig.posthogPersonalApiKey())
+                .blockUntilLocalFlagsLoaded(Duration.ofSeconds(3)) // if it fails, it'll still get re-fetched, just it'll return DISABLED for initially joining players
                 .endpoint("https://us.i.posthog.com")
                 .featureFlagsPollingInterval(Duration.ofMinutes(10))
                 .allowRemoteFeatureFlagEvaluation(false)
