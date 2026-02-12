@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.util;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +30,25 @@ public final class ModelUtil {
         JsonObject model = new JsonObject();
         model.addProperty("type", "model");
         model.addProperty("model", modelPath);
+        root.add("model", model);
+        return root;
+    }
+
+    public static @NotNull JsonObject createBasicItem(@NotNull String modelPath, int[] colors) {
+        JsonObject root = new JsonObject();
+
+        JsonObject model = new JsonObject();
+        JsonArray tints = new JsonArray();
+        for (int color : colors) {
+            JsonObject tint = new JsonObject();
+            tint.addProperty("type", "constant");
+            tint.addProperty("value", color);
+            tints.add(tint);
+        }
+        model.addProperty("type", "model");
+        model.addProperty("model", modelPath);
+        model.add("tints", tints);
+
         root.add("model", model);
         return root;
     }

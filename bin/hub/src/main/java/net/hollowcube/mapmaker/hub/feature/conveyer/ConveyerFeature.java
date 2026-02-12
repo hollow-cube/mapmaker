@@ -24,6 +24,8 @@ import net.minestom.server.utils.Direction;
 @AutoService(HubFeature.class)
 public class ConveyerFeature implements HubFeature {
 
+    public static final int RATE = 4; // blocks per second
+
     private final Set<ConveyerPart> conveyerParts = new HashSet<>();
 
     public ConveyerFeature() {
@@ -69,8 +71,8 @@ public class ConveyerFeature implements HubFeature {
                 Direction.EAST,
                 Direction.NORTH,
                 Direction.EAST,
-                new Pos(-69, 37, -27),
-                new Pos(-75, 37, -27),
+                new Pos(-68, 37, -27),
+                new Pos(-76, 37, -27),
                 server
         );
 
@@ -78,7 +80,7 @@ public class ConveyerFeature implements HubFeature {
                 new Pos(-99, 36, -36),
                 new Pos(-75, 36, -32),
                 Direction.WEST,
-                new Pos(-75, 37, -34),
+                new Pos(-76, 37, -34),
                 firstCrane
         );
         var secondCrane = new Crane(
@@ -213,7 +215,7 @@ public class ConveyerFeature implements HubFeature {
         var blobEnd = new ConveyerEnd(Vec.ZERO);
         var normalEnd = new ConveyerEnd(new Pos(-68, 40, -66));
         var start = new ConveyerStart((instance, part) -> {
-            var number = ThreadLocalRandom.current().nextInt(1, 10);
+            var number = ThreadLocalRandom.current().nextInt(1, 100);
             if (number == 1) {
                 var cargo = ConveyerStart.CargoSupplier.createCargo(instance);
                 cargo.setModel(
@@ -226,6 +228,7 @@ public class ConveyerFeature implements HubFeature {
 
             return ConveyerStart.CargoType.RAW.get(instance, part);
         }, 50);
+        start.markNonRandom(blobEnd);
 
         var firstBelt = new ConveyerBelt(
                 new Pos(-28, 39, -38),

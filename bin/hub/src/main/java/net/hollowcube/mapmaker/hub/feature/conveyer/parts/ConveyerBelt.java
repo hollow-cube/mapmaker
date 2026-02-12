@@ -1,15 +1,16 @@
 package net.hollowcube.mapmaker.hub.feature.conveyer.parts;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import net.hollowcube.mapmaker.hub.feature.conveyer.ConveyerFeature;
 import net.hollowcube.mapmaker.hub.feature.conveyer.ConveyerGood;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.Direction;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public final class ConveyerBelt implements ConveyerPart {
     private final Point min;
@@ -38,7 +39,7 @@ public final class ConveyerBelt implements ConveyerPart {
         this.children = new ArrayList<>(Arrays.asList(children));
         this.parent = parent;
         this.wrappedGoods = new ArrayList<>();
-        this.movementVector = direction.vec().mul(4); // we move goods at 4 blocks/second
+        this.movementVector = direction.vec().mul(ConveyerFeature.RATE); // we move goods at 4 blocks/second
     }
 
     @Override

@@ -55,10 +55,23 @@ public class Hub5x5Transform {
                     var longSize = Math.max(Math.max(size.get(0).getAsInt(), size.get(1).getAsInt()), size.get(2).getAsInt());
 
                     var modelContent = new Gson().fromJson(Files.readString(modelJson), JsonObject.class);
+                    var tints = modelContent.getAsJsonArray("tints");
+
                     modelContent.add("display", createTransform(name, size));
+                    modelContent.remove("tints");
 
                     var itemModelName = ctx.writeModel("hub/" + typeName + "/" + name, modelContent);
-                    ctx.addItemModel("hub/" + typeName + "/" + name, ModelUtil.createBasicItem(itemModelName));
+                    var itemName = "hub/" + typeName + "/" + name;
+
+                    if (tints != null && !tints.isEmpty()) {
+                        var colors = new int[tints.size()];
+                        for (int i = 0; i < tints.size(); i++) {
+                            colors[i] = tints.get(i).getAsInt();
+                        }
+                        ctx.addItemModel(itemName, ModelUtil.createBasicItem(itemModelName, colors));
+                    } else {
+                        ctx.addItemModel(itemName, ModelUtil.createBasicItem(itemModelName));
+                    }
                 }
             }
         }

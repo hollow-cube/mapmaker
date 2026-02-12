@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import java.util.stream.Stream;
 
+import net.hollowcube.mapmaker.hub.feature.conveyer.ConveyerFeature;
 import net.hollowcube.mapmaker.hub.feature.conveyer.ConveyerGood;
 import net.hollowcube.mapmaker.hub.feature.conveyer.ConveyerItemModel;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
@@ -25,7 +26,7 @@ public class ConveyerStart implements ConveyerPart {
     private final Set<ConveyerEnd> nonRandomEndings = new HashSet<>();
 
     public ConveyerStart() {
-        this(CargoType.MAPS, 50);
+        this(CargoType.MAPS, ConveyerFeature.RATE * 5 * 5);
     }
 
     public ConveyerStart(CargoType cargoType, int delay) {
