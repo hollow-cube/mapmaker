@@ -24,7 +24,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
+import static net.hollowcube.command.CommandCondition.and;
 import static net.hollowcube.command.dsl.CommandDsl.playerOnly;
+import static net.hollowcube.mapmaker.command.staff.StaffCommand.IN_STAFF_MODE;
 
 /**
  * Notably not using {@link net.hollowcube.command.dsl.CommandDsl}, it doesn't support arguments followed by "subcommands" very well.
@@ -34,27 +36,27 @@ public class MapAlterCommand {
 
     private final Argument<@Nullable MapData> mapArg;
     private final Argument<MapVariant> typeArg = Argument.Enum("type", MapVariant.class)
-            .description("The new type for the map");
+        .description("The new type for the map");
     private final Argument<String> nameArg = Argument.GreedyString("name")
-            .description("The new name for the map");
+        .description("The new name for the map");
     private final Argument<Material> displayItemArg = Argument.Material("item")
-            .description("The new display item for the map");
+        .description("The new display item for the map");
     private final Argument<String> subvariantArg;
     private final Argument<MapSize> sizeArg = Argument.Enum("size", MapSize.class)
-            .description("The new world border size for the map");
+        .description("The new world border size for the map");
     private final Argument<MapTags.Tag> tagArg = Argument.Enum("tag", MapTags.Tag.class)
-            .description("The tag to modify");
+        .description("The tag to modify");
     private final Argument<MapQuality> qualityArg = Argument.Enum("quality", MapQuality.class)
-            .description("The new quality rating for the map");
+        .description("The new quality rating for the map");
     private final Argument<MapSetting<?>> settingsArg = CoreArgument.MapSetting("setting")
-            .description("The setting to modify");
+        .description("The setting to modify");
     private final Argument<JsonElement> settingDataArg = CoreArgument.Json("data")
-            .description("The new data for the setting");
+        .description("The new data for the setting");
     private final Argument<Boolean> listedArg = Argument.Bool("listed")
-            .description("Whether the map should be listed");
+        .description("Whether the map should be listed");
     private final Argument<String> versionArg = Argument.Word("version")
-            .with(ProtocolVersions.SUPPORTED_PROTOCOL_NAMES)
-            .description("The new minimum required version for the map");
+        .with(ProtocolVersions.SUPPORTED_PROTOCOL_NAMES)
+        .description("The new minimum required version for the map");
 
     private final MapService mapService;
     private final PermManager permManager;
@@ -64,7 +66,7 @@ public class MapAlterCommand {
         this.permManager = permManager;
 
         mapArg = CoreArgument.Map("map", mapService) //todo should be any map dependent on context.
-                .description("The ID of the map to edit");
+            .description("The ID of the map to edit");
 
         var subvariantTypes = new ArrayList<String>();
         for (var bsv : BuildingSubVariant.values())
@@ -72,60 +74,60 @@ public class MapAlterCommand {
         for (var psv : ParkourSubVariant.values())
             subvariantTypes.add(psv.name().toLowerCase());
         subvariantArg = Argument.Word("variant").with(subvariantTypes)
-                .description("The new variant for the map");
+            .description("The new variant for the map");
     }
 
     public void build(@NotNull CommandBuilder builder) {
         builder.child("alter", root -> root
-                .condition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN))
-                .description("Edit information related to a map")
-                .child(mapArg, alter -> alter
-                        .child("type", di -> di
-                                .executes(playerOnly(this::handleSetType), typeArg)
-                                .description("Change the type of a map")
-                                .examples("/map alter 123-456-789 type parkour"))
-                        .child("name", name -> name
-                                .executes(playerOnly(this::handleSetName), nameArg)
-                                .description("Change the name of a map")
-                                .examples("/map alter 123-456-789 name Floating Parkour"))
-                        .child("displayItem", di -> di
-                                .executes(playerOnly(this::handleSetDisplayItem), displayItemArg)
-                                .description("Change the display item of a map")
-                                .examples("/map alter 123-456-789 displayItem book"))
-                        .child("variant", sv -> sv
-                                .executes(playerOnly(this::handleSetSubVariant), subvariantArg)
-                                .description("Change the variant of a map")
-                                .examples("/map alter 123-456-789 variant speedrun"))
-                        .child("size", size -> size
-                                .executes(playerOnly(this::handleSetSize), sizeArg)
-                                .description("Change the world size of a map")
-                                .examples("/map alter 123-456-789 size large"))
-                        .child("tag", tag -> tag
-                                .description("Add or remove a tag from a map")
-                                .examples("/map alter 123-456-789 tag add puzzle", "/map alter 123-456-789 tag remove story")
-                                .child("add", add -> add
-                                        .executes(playerOnly(this::handleAddTag), tagArg)
-                                        .description("Add a tag to a map"))
-                                .child("remove", rem -> rem
-                                        .executes(playerOnly(this::handleRemoveTag), tagArg)
-                                        .description("Remove a tag from a map")))
-                        .child("quality", quality -> quality
-                                .executes(playerOnly(this::handleSetQuality), qualityArg)
-                                .description("Change the rating of a map")
-                                .examples("/map alter 123-456-789 quality unrated"))
-                        .child("setting", setting -> setting
-                                .description("Change a setting of a map")
-                                .executes(playerOnly(this::handleSetSetting), settingsArg, settingDataArg)
-                                .examples("/map alter 123-456-789 setting reset_in_water false"))
-                        .child("listed", unlisted -> unlisted
-                                .description("Set whether the map is listed")
-                                .executes(playerOnly(this::handleSetListed), listedArg)
-                                .examples("/map alter 123-456-789 listed true"))
-                        .child("version", version -> version
-                                .description("Set the minimum required version for the map")
-                                .executes(playerOnly(this::handleSetVersion), versionArg)
-                                .examples("/map alter 123-456-789 version 1.21.7"))
-                )
+            .condition(and(IN_STAFF_MODE, permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN)))
+            .description("Edit information related to a map")
+            .child(mapArg, alter -> alter
+                .child("type", di -> di
+                    .executes(playerOnly(this::handleSetType), typeArg)
+                    .description("Change the type of a map")
+                    .examples("/map alter 123-456-789 type parkour"))
+                .child("name", name -> name
+                    .executes(playerOnly(this::handleSetName), nameArg)
+                    .description("Change the name of a map")
+                    .examples("/map alter 123-456-789 name Floating Parkour"))
+                .child("displayItem", di -> di
+                    .executes(playerOnly(this::handleSetDisplayItem), displayItemArg)
+                    .description("Change the display item of a map")
+                    .examples("/map alter 123-456-789 displayItem book"))
+                .child("variant", sv -> sv
+                    .executes(playerOnly(this::handleSetSubVariant), subvariantArg)
+                    .description("Change the variant of a map")
+                    .examples("/map alter 123-456-789 variant speedrun"))
+                .child("size", size -> size
+                    .executes(playerOnly(this::handleSetSize), sizeArg)
+                    .description("Change the world size of a map")
+                    .examples("/map alter 123-456-789 size large"))
+                .child("tag", tag -> tag
+                    .description("Add or remove a tag from a map")
+                    .examples("/map alter 123-456-789 tag add puzzle", "/map alter 123-456-789 tag remove story")
+                    .child("add", add -> add
+                        .executes(playerOnly(this::handleAddTag), tagArg)
+                        .description("Add a tag to a map"))
+                    .child("remove", rem -> rem
+                        .executes(playerOnly(this::handleRemoveTag), tagArg)
+                        .description("Remove a tag from a map")))
+                .child("quality", quality -> quality
+                    .executes(playerOnly(this::handleSetQuality), qualityArg)
+                    .description("Change the rating of a map")
+                    .examples("/map alter 123-456-789 quality unrated"))
+                .child("setting", setting -> setting
+                    .description("Change a setting of a map")
+                    .executes(playerOnly(this::handleSetSetting), settingsArg, settingDataArg)
+                    .examples("/map alter 123-456-789 setting reset_in_water false"))
+                .child("listed", unlisted -> unlisted
+                    .description("Set whether the map is listed")
+                    .executes(playerOnly(this::handleSetListed), listedArg)
+                    .examples("/map alter 123-456-789 listed true"))
+                .child("version", version -> version
+                    .description("Set the minimum required version for the map")
+                    .executes(playerOnly(this::handleSetVersion), versionArg)
+                    .examples("/map alter 123-456-789 version 1.21.7"))
+            )
         );
     }
 
@@ -135,7 +137,7 @@ public class MapAlterCommand {
 
         if (map == null) {
             player.sendMessage(
-                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+                Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
         if (map.settings().getVariant() == newType) {
@@ -155,7 +157,7 @@ public class MapAlterCommand {
 
         if (map == null) {
             player.sendMessage(
-                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+                Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
         map.settings().setName(newName);
@@ -170,7 +172,7 @@ public class MapAlterCommand {
 
         if (map == null) {
             player.sendMessage(
-                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+                Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
         map.settings().setIcon(newDisplayItem);
@@ -185,7 +187,7 @@ public class MapAlterCommand {
 
         if (map == null) {
             player.sendMessage(
-                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+                Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
         try {
@@ -211,7 +213,7 @@ public class MapAlterCommand {
 
         if (map == null) {
             player.sendMessage(
-                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+                Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
         map.settings().setSize(newSize);
@@ -226,7 +228,7 @@ public class MapAlterCommand {
 
         if (map == null) {
             player.sendMessage(
-                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+                Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
         var added = map.settings().addTag(tag);
@@ -245,7 +247,7 @@ public class MapAlterCommand {
 
         if (map == null) {
             player.sendMessage(
-                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+                Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
         var removed = map.settings().removeTag(tag);
@@ -264,7 +266,7 @@ public class MapAlterCommand {
 
         if (map == null) {
             player.sendMessage(
-                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+                Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
         map.settings().modifyUpdateRequest(req -> req.setQualityOverride(newQuality));
@@ -280,7 +282,7 @@ public class MapAlterCommand {
 
         if (map == null) {
             player.sendMessage(
-                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+                Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
         var result = setting.codec().decode(Transcoder.JSON, json);
@@ -304,7 +306,7 @@ public class MapAlterCommand {
 
         if (map == null) {
             player.sendMessage(
-                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+                Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
         map.settings().modifyUpdateRequest(req -> req.setListed(listed));
@@ -319,7 +321,7 @@ public class MapAlterCommand {
 
         if (map == null) {
             player.sendMessage(
-                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+                Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
         var protocolVersion = ProtocolVersions.getProtocolVersion(version);

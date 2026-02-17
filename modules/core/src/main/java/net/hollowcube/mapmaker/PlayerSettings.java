@@ -28,6 +28,7 @@ public final class PlayerSettings {
     // Moderation
 
     public static PlayerSetting<Boolean> IS_VANISHED = PlayerSetting.Bool("is_hidden", false);
+    public static PlayerSetting<Boolean> STAFF_MODE = PlayerSetting.Bool("staff_mode", true);
 
     // Terraform
 

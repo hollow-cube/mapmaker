@@ -90,7 +90,10 @@ public class ChatCommand extends CommandDsl {
     private enum Channel {
         GLOBAL("commands.chat.switching.global"),
         LOCAL("commands.chat.switching.local"),
-        STAFF("commands.chat.switching.staff", (perms, player) -> perms.hasPlatformPermission(player, PlatformPerm.MAP_ADMIN)),
+        STAFF("commands.chat.switching.staff", (perms, player) -> {
+            var isStaffMode = PlayerData.fromPlayer(player).getSetting(PlayerSettings.STAFF_MODE);
+            return isStaffMode && perms.hasPlatformPermission(player, PlatformPerm.MAP_ADMIN);
+        }),
         ;
 
         public final String translation;

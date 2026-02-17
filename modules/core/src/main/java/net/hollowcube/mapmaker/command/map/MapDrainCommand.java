@@ -18,6 +18,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+import static net.hollowcube.command.CommandCondition.and;
+import static net.hollowcube.mapmaker.command.staff.StaffCommand.IN_STAFF_MODE;
+
 public class MapDrainCommand extends CommandDsl {
     private final Argument<@Nullable MapData> mapArg;
     private final Argument<String> reasonArg = Argument.GreedyString("reason")
@@ -35,7 +38,7 @@ public class MapDrainCommand extends CommandDsl {
         mapArg = CoreArgument.Map("map", mapService)
                 .description("The ID of the map to drain");
 
-        setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
+        setCondition(and(IN_STAFF_MODE, permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN)));
         addSyntax(playerOnly(this::handleDrainMap), mapArg);
         addSyntax(playerOnly(this::handleDrainMap), mapArg, reasonArg);
     }

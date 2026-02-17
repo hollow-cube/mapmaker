@@ -10,11 +10,14 @@ import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import org.jetbrains.annotations.NotNull;
 
+import static net.hollowcube.command.CommandCondition.and;
+import static net.hollowcube.mapmaker.command.staff.StaffCommand.IN_STAFF_MODE;
+
 public class ChannelCommand extends AbstractChatCommand {
 
     private ChannelCommand(
-            @NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages,
-            @NotNull String channel, @NotNull String name, @NotNull String... aliases
+        @NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages,
+        @NotNull String channel, @NotNull String name, @NotNull String... aliases
     ) {
         super(sessions, maps, messages, name, aliases);
 
@@ -48,7 +51,7 @@ public class ChannelCommand extends AbstractChatCommand {
         public Staff(@NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages, @NotNull PermManager permissions) {
             super(sessions, maps, messages, ClientChatMessageData.CHANNEL_STAFF, "sc");
 
-            setCondition(permissions.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
+            setCondition(and(IN_STAFF_MODE, permissions.createPlatformCondition2(PlatformPerm.MAP_ADMIN)));
         }
     }
 

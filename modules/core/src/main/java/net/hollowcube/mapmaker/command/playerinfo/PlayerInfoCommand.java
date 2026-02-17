@@ -9,6 +9,9 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import org.jetbrains.annotations.NotNull;
 
+import static net.hollowcube.command.CommandCondition.and;
+import static net.hollowcube.mapmaker.command.staff.StaffCommand.IN_STAFF_MODE;
+
 public class PlayerInfoCommand extends CommandDsl {
 
     public PlayerInfoCommand(
@@ -19,7 +22,7 @@ public class PlayerInfoCommand extends CommandDsl {
 
         category = CommandCategory.HIDDEN;
 
-        setCondition(permissions.createPlatformCondition2(PlatformPerm.BAN_PLAYER));
+        setCondition(and(IN_STAFF_MODE, permissions.createPlatformCondition2(PlatformPerm.BAN_PLAYER)));
 
         addSubcommand(new SubCommand<>(permissions, "general", new GeneralInfoType(sessionManager)));
         addSubcommand(new SubCommand<>(permissions, "channels", new ChannelsInfoType(false)));

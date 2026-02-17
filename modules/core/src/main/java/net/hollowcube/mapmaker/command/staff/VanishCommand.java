@@ -15,9 +15,12 @@ import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import static net.hollowcube.command.CommandCondition.and;
+import static net.hollowcube.mapmaker.command.staff.StaffCommand.IN_STAFF_MODE;
+
 public class VanishCommand extends CommandDsl {
     private final Argument<String> silentArg = Argument.Literal("silent")
-            .description("Do not send a disconnect message");
+        .description("Do not send a disconnect message");
 
     private final SessionManager sessionManager;
     private final PlayerService playerService;
@@ -30,7 +33,7 @@ public class VanishCommand extends CommandDsl {
         category = CommandCategories.STAFF;
         description = "Vanish from other players. Does nothing if you are already vanished";
 
-        setCondition(permManager.createPlatformCondition2(PlatformPerm.VANISH));
+        setCondition(and(IN_STAFF_MODE, permManager.createPlatformCondition2(PlatformPerm.VANISH)));
         addSyntax(playerOnly(this::handleVanish), silentArg);
         addSyntax(playerOnly(this::handleVanish));
     }

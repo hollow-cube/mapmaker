@@ -44,6 +44,7 @@ import net.hollowcube.mapmaker.command.relationship.BlockCommand;
 import net.hollowcube.mapmaker.command.relationship.UnblockCommand;
 import net.hollowcube.mapmaker.command.relationship.friend.FriendCommand;
 import net.hollowcube.mapmaker.command.staff.SFindCommand;
+import net.hollowcube.mapmaker.command.staff.StaffCommand;
 import net.hollowcube.mapmaker.command.staff.UnvanishCommand;
 import net.hollowcube.mapmaker.command.staff.VanishCommand;
 import net.hollowcube.mapmaker.command.store.HypercubeCommand;
@@ -439,6 +440,7 @@ public abstract class AbstractMapServer implements MapServer {
             commandManager.register(new SFindCommand(mapService(), playerService(), sessionManager(), permManager()));
             commandManager.register(new VanishCommand(sessionManager(), playerService(), permManager()));
             commandManager.register(new UnvanishCommand(sessionManager(), playerService(), permManager()));
+            commandManager.register(new StaffCommand(playerService(), permManager()));
         }
 
         if (fullInstance) {

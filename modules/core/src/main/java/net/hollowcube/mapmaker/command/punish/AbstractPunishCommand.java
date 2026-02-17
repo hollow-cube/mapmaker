@@ -19,6 +19,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.UUID;
 
+import static net.hollowcube.command.CommandCondition.and;
+import static net.hollowcube.mapmaker.command.staff.StaffCommand.IN_STAFF_MODE;
+
 abstract class AbstractPunishCommand extends CommandDsl {
 
     protected final PunishmentService service;
@@ -66,7 +69,7 @@ abstract class AbstractPunishCommand extends CommandDsl {
                 }
         );
 
-        setCondition(permManager.createPlatformCondition2(type == PunishmentType.BAN ? PlatformPerm.BAN_PLAYER : PlatformPerm.MUTE_PLAYER));
+        setCondition(and(IN_STAFF_MODE, permManager.createPlatformCondition2(type == PunishmentType.BAN ? PlatformPerm.BAN_PLAYER : PlatformPerm.MUTE_PLAYER)));
         this.addSyntax(playerOnly(this::execute), this.targetArgument, this.ladderArgument);
         this.addSyntax(playerOnly(this::execute), this.targetArgument, this.ladderArgument, this.commentArgument);
     }

@@ -218,7 +218,10 @@ public class ChatMessageListener extends BaseConsumer<ChatMessageData> implement
                     }
                     case ClientChatMessageData.CHANNEL_STAFF -> handleUnsignedChat(
                         message, "chat.channel.staff",
-                        recipient -> this.permissions.hasPlatformPermission(recipient, PlatformPerm.MAP_ADMIN)
+                        recipient -> {
+                            var isStaffMode = PlayerData.fromPlayer(recipient).getSetting(PlayerSettings.STAFF_MODE);
+                            return isStaffMode && this.permissions.hasPlatformPermission(recipient, PlatformPerm.MAP_ADMIN);
+                        }
                     );
                     default -> handleDirectMessage(message);
                 }

@@ -16,6 +16,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+import static net.hollowcube.command.CommandCondition.and;
+import static net.hollowcube.mapmaker.command.staff.StaffCommand.IN_STAFF_MODE;
+
 public class MapEditCommand extends CommandDsl {
     private final Argument<@Nullable MapData> mapArg;
 
@@ -30,9 +33,9 @@ public class MapEditCommand extends CommandDsl {
         description = "Edit a map world (forced)";
         examples = List.of("/map edit 123-456-789", "/map edit a12345bc-67de-8f91-ghij-2345k6l78912");
         mapArg = CoreArgument.Map("map", mapService)
-                .description("The ID of the map to edit");
+            .description("The ID of the map to edit");
 
-        setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
+        setCondition(and(IN_STAFF_MODE, permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN)));
         addSyntax(playerOnly(this::handleForceEditMap), mapArg);
     }
 
@@ -41,7 +44,7 @@ public class MapEditCommand extends CommandDsl {
 
         if (map == null) {
             player.sendMessage(
-                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+                Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
         bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.EDITING, "staff_edit_map");
