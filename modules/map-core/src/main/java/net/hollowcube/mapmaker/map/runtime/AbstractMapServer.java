@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.runtime;
 
 import com.google.gson.JsonObject;
+import io.nats.client.Nats;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
@@ -90,6 +91,8 @@ import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.*;
+import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
+import net.hollowcube.mapmaker.util.nats.NatsConfig;
 import net.hollowcube.mapmaker.util.telemetry.NoopSpanExporter;
 import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
@@ -259,6 +262,15 @@ public abstract class AbstractMapServer implements MapServer {
         facets.put(FriendlyProducer.class, producer);
         shutdowner.queue("kafka-producer", producer::close);
 
+        JetStreamWrapper jetStream;
+        try {
+            var nc = Nats.connect(config.get(NatsConfig.class).servers());
+            shutdowner.queue("nats", nc::close);
+            jetStream = new JetStreamWrapper(nc, otel);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         var services = new ServiceContext(playerService(), sessionService(), mapService(), bridge());
 
         if (!globalConfig.noop()) {
@@ -271,7 +283,7 @@ public abstract class AbstractMapServer implements MapServer {
             var punishmentCreatedListener = new PunishmentManagementListener(playerService, permManager, kafkaConfig.bootstrapServers());
             shutdowner.queue("punishment-listener", punishmentCreatedListener::close);
 
-            chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, kafkaConfig.bootstrapServers(), producer, permManager);
+            chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, permManager, jetStream);
             facets.put(ChatMessageListener.class, chatMessageListener);
             shutdowner.queue("chat-message-listener", chatMessageListener::close);
             MinecraftServer.getPacketListenerManager().setPlayListener(ClientChatMessagePacket.class, chatMessageListener);

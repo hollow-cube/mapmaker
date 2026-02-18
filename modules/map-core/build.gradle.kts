@@ -26,9 +26,11 @@ dependencies {
     }
     implementation(libs.bundles.prometheus)
     implementation(libs.fastutil)
-    implementation(libs.kafka)
     implementation(libs.slf4j.jul)
     implementation(libs.logback)
+
+    implementation(libs.nats)
+    implementation(libs.kafka)
 
     testImplementation(project(":modules:map-core-test"))
 }

@@ -53,7 +53,7 @@ public class HCNativeImageFeature implements Feature {
             .overrideClasspath(access.getApplicationClassPath())
             .enableClassInfo()
             .ignoreClassVisibility()
-            .acceptPackages("net.minestom", "net.kyori", "ch.qos.logback", "org.jctools", "it.unimi.dsi.fastutil", "com.google.gson")
+            .acceptPackages("net.minestom", "net.kyori", "ch.qos.logback", "org.jctools", "it.unimi.dsi.fastutil", "com.google.gson", "io.nats.client")
             .scan()) {
             RuntimeClassInitialization.initializeAtBuildTime("net.hollowcube.mapmaker.isolate");
             for (var packageInfo : scanResult.getPackageInfo()) {
@@ -73,6 +73,11 @@ public class HCNativeImageFeature implements Feature {
             RuntimeClassInitialization.initializeAtRunTime(access.findClassByName("net.minestom.server.utils.ObjectPool"));
             RuntimeClassInitialization.initializeAtRunTime(access.findClassByName("net.minestom.server.network.player.PlayerSocketConnection"));
             RuntimeClassInitialization.initializeAtRunTime(access.findClassByName("net.minestom.server.network.packet.PacketVanilla"));
+
+            // https://github.com/nats-io/nats.java#integration-with-graalvm
+            RuntimeClassInitialization.initializeAtRunTime(access.findClassByName("java.security.SecureRandom"));
+            RuntimeClassInitialization.initializeAtRunTime(access.findClassByName("io.nats.client.support.RandomUtils"));
+            RuntimeClassInitialization.initializeAtRunTime(access.findClassByName("io.nats.client.NUID"));
         }
     }
 
