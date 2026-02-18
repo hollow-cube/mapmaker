@@ -68,9 +68,9 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
         ParkourMapWorld.initGlobalReferences();
 
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("map-init")
-                .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
-                .addListener(PlayerSpawnEvent.class, this::handleSpawn)
-                .addListener(PlayerDisconnectEvent.class, this::handleDisconnect));
+            .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
+            .addListener(PlayerSpawnEvent.class, this::handleSpawn)
+            .addListener(PlayerDisconnectEvent.class, this::handleDisconnect));
 
         // We schedule on first tick end because submitTask invokes the executor immediately to determine
         // the first schedule. If we executed it here, that would be on the wrong thread.
@@ -87,7 +87,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
             var mapJoinConsumer = new MapJoinConsumer(kafkaConfig.bootstrapServers());
             shutdowner().queue("map-join-listener", mapJoinConsumer::close);
 
-            var mapMgmtConsumer = new MapMgmtConsumerImpl(kafkaConfig.bootstrapServers(), this);
+            var mapMgmtConsumer = new MapMgmtConsumerImpl(jetStream, this);
             shutdowner().queue("map-mgmt-listener", mapMgmtConsumer::close);
         }
 
@@ -184,9 +184,9 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
 
     @SuppressWarnings("unchecked")
     public <T extends AbstractMapWorld<?, ?>> Future<T> createWorld(
-            @NotNull MapData map, boolean editing,
-            @NotNull Function<MapData, T> worldFactory,
-            boolean tracked
+        @NotNull MapData map, boolean editing,
+        @NotNull Function<MapData, T> worldFactory,
+        boolean tracked
     ) {
         return FutureUtil.fork(() -> {
             Future<T> future;
@@ -217,7 +217,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
     }
 
     private <T extends AbstractMapWorld<?, ?>> @Nullable T createWorldInternal(
-            @NotNull MapKey key, @NotNull MapData map, @NotNull Function<MapData, T> worldFactory, boolean tracked
+        @NotNull MapKey key, @NotNull MapData map, @NotNull Function<MapData, T> worldFactory, boolean tracked
     ) {
         try {
             var createdWorld = worldFactory.apply(map);
@@ -231,7 +231,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                     var playerData = PlayerData.fromPlayer(event.getPlayer());
                     if (playerData.id().equals(world.map().owner()) && !world.map().isPublished()) {
                         world.instance().scheduleNextTick(ignored -> FutureUtil.submitVirtual(() ->
-                                destroy(key, Component.translatable("map.kicked"))));
+                            destroy(key, Component.translatable("map.kicked"))));
                         return;
                     }
 
@@ -299,12 +299,12 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                 var player = players.get(i);
                 player.sendMessage(reason);
                 futures[i] = world.scheduleRemovePlayer(player)
-                        .thenRunAsync(() -> bridge().joinHub(player), FutureUtil.VIRUTAL_EXECUTOR)
-                        .exceptionally(e -> {
-                            ExceptionReporter.reportException(new RuntimeException("failed to remove player", e), player);
-                            player.kick(reason);
-                            return null;
-                        });
+                    .thenRunAsync(() -> bridge().joinHub(player), FutureUtil.VIRUTAL_EXECUTOR)
+                    .exceptionally(e -> {
+                        ExceptionReporter.reportException(new RuntimeException("failed to remove player", e), player);
+                        player.kick(reason);
+                        return null;
+                    });
             }
             try {
                 CompletableFuture.allOf(futures).get(15, TimeUnit.SECONDS);
@@ -316,7 +316,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
 
             // Close the world itself
             MinecraftServer.getSchedulerManager()
-                    .scheduleEndOfTick(world::close);
+                .scheduleEndOfTick(world::close);
         } finally {
             closingWorlds.remove(world);
         }
@@ -382,8 +382,8 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
         }, "Shows information about the world you are in");
 
         cmd.createPermissionedSubcommand("worlds",
-                (player, _) -> sendWorldDebug(player),
-                "Show information about the currently loaded worlds.");
+            (player, _) -> sendWorldDebug(player),
+            "Show information about the currently loaded worlds.");
 
         cmd.createPermissionedSubcommand("enableprogressaddition", (player, context) -> {
             var world = MapWorld.forPlayer(player);
@@ -401,15 +401,15 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
         }, "Enables progress index add mode for the current map");
 
         cmd.createPermissionedSubcommand(
-                "boundingbox",
-                DebugRenderersCommand::handleDebugBoundingBox,
-                "Shows the bounding box of the player"
+            "boundingbox",
+            DebugRenderersCommand::handleDebugBoundingBox,
+            "Shows the bounding box of the player"
         );
 
         cmd.createPermissionlessSubcommand(
-                "poi",
-                DebugRenderersCommand::handleDebugRegions,
-                "Shows the location information about nearby pois"
+            "poi",
+            DebugRenderersCommand::handleDebugRegions,
+            "Shows the location information about nearby pois"
         );
 
         return cmd;
@@ -454,8 +454,8 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
 
     @RuntimeGson
     private record MapJoinInfoMessage(
-            @NotNull String serverId, @NotNull String playerId,
-            @NotNull String mapId, @NotNull String state) {
+        @NotNull String serverId, @NotNull String playerId,
+        @NotNull String mapId, @NotNull String state) {
     }
 
     private class MapJoinConsumer extends BaseConsumer<MapJoinInfoMessage> {

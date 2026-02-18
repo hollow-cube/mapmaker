@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.command.map;
 
-import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandBuilder;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.dsl.SimpleCommand;
@@ -13,6 +12,7 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import org.jetbrains.annotations.NotNull;
 
 public class MapCommand extends CommandDsl {
@@ -28,12 +28,12 @@ public class MapCommand extends CommandDsl {
     public final MapDrainCommand drain;
 
     public MapCommand(
-            @NotNull Controller guiController,
-            @NotNull PlayerService playerService,
-            @NotNull MapService mapService,
-            @NotNull PermManager permManager,
-            @NotNull ServerBridge bridge,
-            @NotNull FriendlyProducer producer
+        @NotNull PlayerService playerService,
+        @NotNull MapService mapService,
+        @NotNull PermManager permManager,
+        @NotNull ServerBridge bridge,
+        @NotNull JetStreamWrapper jetStream,
+        @NotNull FriendlyProducer producer
     ) {
         super("map");
 
@@ -46,9 +46,9 @@ public class MapCommand extends CommandDsl {
 
         addSubcommand(new MapLegacyCommand(mapService, permManager));
         addSubcommand(SimpleCommand.of("history")
-                .callback(player -> Panel.open(player, new MapListView.History(playerService, mapService, bridge)))
-                .description("View the history of a map")
-                .build()
+            .callback(player -> Panel.open(player, new MapListView.History(playerService, mapService, bridge)))
+            .description("View the history of a map")
+            .build()
         );
 
         // Permissioned commands
@@ -57,10 +57,7 @@ public class MapCommand extends CommandDsl {
         addSubcommand(this.play = new MapPlayCommand(mapService, permManager, bridge));
         addSubcommand(this.leaderboard = new MapLeaderboardCommand(playerService, mapService, permManager));
         this.alter = new MapAlterCommand(mapService, permManager);
-        addSubcommand(this.drain = new MapDrainCommand(mapService, permManager, producer));
-
-        // Testing
-//        addSubcommand(new MapLookupCommand(mapService));
+        addSubcommand(this.drain = new MapDrainCommand(mapService, permManager, jetStream, producer));
     }
 
     @Override

@@ -140,6 +140,7 @@ public abstract class AbstractMapServer implements MapServer {
     // Listeners for other features
     private ServerBridge bridge;
     private FriendlyProducer producer;
+    protected JetStreamWrapper jetStream;
 
     private SessionManager sessionManager;
     private ChatMessageListener chatMessageListener;
@@ -262,7 +263,6 @@ public abstract class AbstractMapServer implements MapServer {
         facets.put(FriendlyProducer.class, producer);
         shutdowner.queue("kafka-producer", producer::close);
 
-        JetStreamWrapper jetStream;
         try {
             var nc = Nats.connect(config.get(NatsConfig.class).servers());
             shutdowner.queue("nats", nc::close);
@@ -444,7 +444,7 @@ public abstract class AbstractMapServer implements MapServer {
             commandManager.register(new JoinCommand(inviteService(), playerService(), sessionManager()));
         }
 
-        commandManager.register(new MapCommand(guiController(), playerService(), mapService(), permManager(), bridge(), producer));
+        commandManager.register(new MapCommand(playerService(), mapService(), permManager(), bridge(), jetStream, producer));
 
         commandManager.register(new NotificationCommand(services, permManager()));
 

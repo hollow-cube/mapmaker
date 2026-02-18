@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.isolate;
 
 import net.hollowcube.mapmaker.map.MapMgmtConsumer;
+import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,8 +9,8 @@ class MapIsolateMapMgmtConsumerImpl extends MapMgmtConsumer {
 
     private final MapIsolateServer server;
 
-    public MapIsolateMapMgmtConsumerImpl(String bootstrapServers, MapIsolateServer server) {
-        super(bootstrapServers);
+    public MapIsolateMapMgmtConsumerImpl(JetStreamWrapper jetStream, MapIsolateServer server) {
+        super(jetStream);
         this.server = server;
     }
 

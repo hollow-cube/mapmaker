@@ -6,7 +6,6 @@ import net.hollowcube.common.util.Uuids;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.MapCommands;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
-import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
@@ -116,11 +115,8 @@ public class MapIsolateServer extends AbstractMapServer {
 
         addBinding(Scheduler.class, world.instance().scheduler());
 
-        var kafkaConfig = config.get(KafkaConfig.class);
-        if (!globalConfig.noop()) {
-            var mapMgmtConsumer = new MapIsolateMapMgmtConsumerImpl(kafkaConfig.bootstrapServers(), this);
-            shutdowner().queue("map-mgmt-listener", mapMgmtConsumer::close);
-        }
+        var mapMgmtConsumer = new MapIsolateMapMgmtConsumerImpl(jetStream, this);
+        shutdowner().queue("map-mgmt-listener", mapMgmtConsumer::close);
     }
 
     @Blocking

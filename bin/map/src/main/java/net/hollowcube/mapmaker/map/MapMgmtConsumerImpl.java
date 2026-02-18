@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -8,8 +9,8 @@ public class MapMgmtConsumerImpl extends MapMgmtConsumer {
 
     private final AbstractMultiMapServer server;
 
-    public MapMgmtConsumerImpl(@NotNull String bootstrapServers, @NotNull AbstractMultiMapServer server) {
-        super(bootstrapServers);
+    public MapMgmtConsumerImpl(@NotNull JetStreamWrapper jetStream, @NotNull AbstractMultiMapServer server) {
+        super(jetStream);
         this.server = server;
     }
 
