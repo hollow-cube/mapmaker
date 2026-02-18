@@ -143,12 +143,17 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
         FutureUtil.submitVirtual(() -> {
             String currentMapId = null;
             if (message.contains("[map]")) {
-                var currentMap = MiscFunctionality.getCurrentMap(sessionManager, mapService, player);
-                if (currentMap == null || !currentMap.isPublished()) {
+                try {
+                    var currentMap = MiscFunctionality.getCurrentMap(sessionManager, mapService, player);
+                    if (currentMap == null || !currentMap.isPublished()) {
+                        player.sendMessage(Component.translatable("chat.map.invalid"));
+                        return;
+                    }
+                    currentMapId = currentMap.id();
+                } catch (MapService.NotFoundError _) {
                     player.sendMessage(Component.translatable("chat.map.invalid"));
                     return;
                 }
-                currentMapId = currentMap.id();
             }
 
             trySendChatMessage(
