@@ -28,10 +28,15 @@ public class Shutdowner implements HttpServerWrapper.HealthCheck {
         }
     }
 
-    record Hook(@NotNull String name, @NotNull Runnable task) implements Runnable {
+    @FunctionalInterface
+    public interface HookFunction {
+        void run() throws Exception;
+    }
+
+    record Hook(@NotNull String name, @NotNull HookFunction task) implements HookFunction {
 
         @Override
-        public void run() {
+        public void run() throws Exception {
             task.run();
         }
     }
@@ -59,7 +64,7 @@ public class Shutdowner implements HttpServerWrapper.HealthCheck {
      *
      * <p>The last hook added will be the last one to be executed.</p>
      */
-    public void queue(@NotNull String name, @NotNull Runnable hook) {
+    public void queue(@NotNull String name, @NotNull HookFunction hook) {
         shutdownHooks.add(new Hook(name, hook));
     }
 

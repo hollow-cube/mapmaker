@@ -6,14 +6,14 @@ import org.jetbrains.annotations.Nullable;
 
 @RuntimeGson
 public record ClientChatMessageData(
-        @NotNull Type type,
+    @NotNull Type type,
 
-        // CHAT_UNSIGNED
-        @NotNull String sender,
-        @NotNull String message,
-        @NotNull String channel,
-        @Nullable String currentMap,
-        long seed
+    // CHAT_UNSIGNED
+    @NotNull String sender,
+    @NotNull String message,
+    @NotNull String channel,
+    @Nullable String currentMap,
+    long seed
 ) {
 
     public static final String CHANNEL_GLOBAL = "global";
