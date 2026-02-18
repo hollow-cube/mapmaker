@@ -19,7 +19,7 @@
     "noop": false
   },
   "nats": {
-    "servers": "nats://nats-0:4222,nats://nats-1:4222,nats://nats-2:4222"
+    "servers": "nats://nats:4222"
   },
   "kafka": {
     "bootstrap_servers": "localhost:9093"
