@@ -32,7 +32,7 @@ public abstract class MapMgmtConsumer implements Closeable {
         public static final int ACTION_DRAIN = 2;
 
         public @NotNull String subject() {
-            return "maps." + switch (action) {
+            return "map." + switch (action) {
                 case ACTION_CREATE -> "create";
                 case ACTION_DELETE -> "delete";
                 case ACTION_DRAIN -> "drain";
@@ -43,7 +43,7 @@ public abstract class MapMgmtConsumer implements Closeable {
 
     public static final String STREAM_NAME = "MAP_MANAGEMENT";
     private static final ConsumerConfiguration CONSUMER_CONFIG = ConsumerConfiguration.builder()
-        .filterSubjects("maps.>")
+        .filterSubjects("map.>")
         // Process anything 1m prior in case we are starting as the map is drained/deleted
         .deliverPolicy(DeliverPolicy.ByStartTime)
         .startTime(ZonedDateTime.now().minus(Duration.ofMinutes(1)))
