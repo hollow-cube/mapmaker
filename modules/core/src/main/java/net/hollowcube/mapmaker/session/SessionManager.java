@@ -254,7 +254,7 @@ public class SessionManager {
     }
 
     public void configureVanishedPlayer(@NotNull Player player) {
-        player.updateViewableRule(p -> hasSeeVanishedPerm.test(PlayerData.fromPlayer(p).id()));
+        player.scheduleNextTick(e -> e.updateViewableRule(p -> hasSeeVanishedPerm.test(PlayerData.fromPlayer(p).id())));
     }
 
     private void configureVisiblePlayer(@NotNull Player player) {
