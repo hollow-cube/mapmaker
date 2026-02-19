@@ -21,7 +21,6 @@ dependencies {
     implementation(libs.minestom)
     implementation(libs.polar)
     implementation(libs.bundles.adventure)
-    implementation(libs.kafka)
 
     implementation(libs.slf4j.jul)
     implementation(libs.logback)

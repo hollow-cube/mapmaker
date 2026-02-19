@@ -10,9 +10,9 @@ import java.util.List;
 
 @RuntimeGson
 public record PlayerNotificationResponse(
-        int page,
-        int pageCount,
-        List<ComplexEntry> results
+    int page,
+    int pageCount,
+    List<ComplexEntry> results
 ) {
 
     @RuntimeGson
@@ -32,6 +32,7 @@ public record PlayerNotificationResponse(
 
     @RuntimeGson
     public record SimpleEntry(
+        @NotNull String player,
         @NotNull String action,
         @NotNull String type,
         @NotNull String key,

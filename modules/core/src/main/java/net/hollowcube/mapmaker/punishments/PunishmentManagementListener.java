@@ -1,9 +1,12 @@
 package net.hollowcube.mapmaker.punishments;
 
-import com.google.gson.Gson;
+import io.nats.client.Message;
+import io.nats.client.MessageConsumer;
+import io.nats.client.api.AckPolicy;
+import io.nats.client.api.ConsumerConfiguration;
+import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.PlayerSettings;
-import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -13,50 +16,61 @@ import net.hollowcube.mapmaker.punishments.event.PunishmentRevokedEvent;
 import net.hollowcube.mapmaker.punishments.types.Punishment;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.hollowcube.mapmaker.punishments.types.PunishmentUpdateMessage;
-import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventDispatcher;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
+import java.time.Duration;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
-public class PunishmentManagementListener extends BaseConsumer<PunishmentUpdateMessage> {
+public class PunishmentManagementListener implements Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(PunishmentManagementListener.class);
 
-    private static final String PUNISHMENTS_TOPIC = "punishments";
-    private static final Gson GSON = AbstractHttpService.GSON;
+    private static final String STREAM = "PUNISHMENTS";
+    private static final ConsumerConfiguration CONSUMER_CONFIG = ConsumerConfiguration.builder()
+        .filterSubjects("punishment.>")
+        .deliverPolicy(DeliverPolicy.New)
+        .ackPolicy(AckPolicy.None)
+        .inactiveThreshold(Duration.ofMinutes(5))
+        .build();
 
     private final PlayerService playerService;
     private final PermManager permManager;
 
+    private final MessageConsumer consumer;
+
     public PunishmentManagementListener(
         @NotNull PlayerService playerService,
         @NotNull PermManager permManager,
-        @NotNull String kafkaBrokers
+        @NotNull JetStreamWrapper jetStream
     ) {
-        super(PUNISHMENTS_TOPIC, "punishments", PunishmentManagementListener::fromJson, kafkaBrokers);
         this.playerService = playerService;
         this.permManager = permManager;
-    }
 
-    private static @NotNull PunishmentUpdateMessage fromJson(@NotNull String json) {
-        return GSON.fromJson(json, PunishmentUpdateMessage.class);
+        this.consumer = jetStream.subscribe(STREAM, CONSUMER_CONFIG, PunishmentUpdateMessage.class, this::handlePunishmentUpdate);
     }
 
     @Override
-    protected void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull PunishmentUpdateMessage message) {
-        FutureUtil.submitVirtual(() -> {
-            switch (message.action()) {
-                case CREATE -> handlePunishmentCreated(message.punishment());
-                case REVOKE -> handlePunishmentRevoked(message.punishment());
-            }
-        });
+    public void close() {
+        try {
+            consumer.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void handlePunishmentUpdate(@NotNull Message msg, @NotNull PunishmentUpdateMessage message) {
+        switch (message.action()) {
+            case CREATE -> handlePunishmentCreated(message.punishment());
+            case REVOKE -> handlePunishmentRevoked(message.punishment());
+        }
     }
 
     private void handlePunishmentCreated(@NotNull Punishment punishment) {

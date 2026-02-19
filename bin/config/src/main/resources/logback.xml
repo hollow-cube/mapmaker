@@ -14,6 +14,5 @@
     <logger name="io.helidon" level="WARN"/>
     <logger name="jdk.event.security" level="WARN"/>
     <logger name="sun.net.www" level="WARN"/>
-    <logger name="org.apache.kafka" level="WARN"/>
     <logger name="com.github.benmanes.caffeine.cache" level="ERROR"/>
 </configuration>

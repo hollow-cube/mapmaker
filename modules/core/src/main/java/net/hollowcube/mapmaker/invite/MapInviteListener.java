@@ -1,73 +1,89 @@
 package net.hollowcube.mapmaker.invite;
 
-import com.google.gson.Gson;
+import io.nats.client.Message;
+import io.nats.client.MessageConsumer;
+import io.nats.client.api.AckPolicy;
+import io.nats.client.api.ConsumerConfiguration;
+import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.mapmaker.invite.types.CreatedMapInviteMessage;
 import net.hollowcube.mapmaker.invite.types.InviteType;
-import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
-import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
+import java.time.Duration;
 import java.util.UUID;
 
-public final class MapInviteListener extends BaseConsumer<CreatedMapInviteMessage> {
+public final class MapInviteListener implements Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(MapInviteListener.class);
 
-    private static final String INVITE_TOPIC = "invites";
-    private static final Gson GSON = AbstractHttpService.GSON;
+    private static final String STREAM = "INVITES";
+    private static final ConsumerConfiguration CONSUMER_CONFIG = ConsumerConfiguration.builder()
+        .filterSubjects("invite.created")
+        .deliverPolicy(DeliverPolicy.New)
+        .ackPolicy(AckPolicy.None)
+        .inactiveThreshold(Duration.ofMinutes(5))
+        .build();
 
     private final MapService mapService;
     private final PlayerService playerService;
     private final SessionManager sessionManager;
 
-    public MapInviteListener(@NotNull MapService mapService, @NotNull PlayerService playerService,
-                             @NotNull SessionManager sessionManager, @NotNull String kafkaBrokers) {
-        super(INVITE_TOPIC, "invites", MapInviteListener::fromJson, kafkaBrokers);
+    private final MessageConsumer consumer;
+
+    public MapInviteListener(
+        @NotNull MapService mapService, @NotNull PlayerService playerService,
+        @NotNull SessionManager sessionManager, @NotNull JetStreamWrapper jetStream
+    ) {
         this.mapService = mapService;
         this.playerService = playerService;
         this.sessionManager = sessionManager;
-    }
 
-    private static @NotNull CreatedMapInviteMessage fromJson(@NotNull String json) {
-        return GSON.fromJson(json, CreatedMapInviteMessage.class);
+        this.consumer = jetStream.subscribe(STREAM, CONSUMER_CONFIG, CreatedMapInviteMessage.class, this::handleInviteMessage);
     }
 
     @Override
-    protected void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull CreatedMapInviteMessage message) {
-        Thread.startVirtualThread(() -> {
-            LOGGER.info("Received invite created message: {}", message);
+    public void close() {
+        try {
+            consumer.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-            var recipientId = UUID.fromString(message.recipientId());
-            var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(recipientId);
-            if (player == null) {
-                // Recipient is not on this server - ignore
-                return;
-            }
+    private void handleInviteMessage(@NotNull Message msg, @NotNull CreatedMapInviteMessage message) {
+        LOGGER.info("Received invite created message: {}", message);
 
-            var map = this.mapService.getMap(message.senderId(), message.mapId());
-            var mapName = Component.text(map.name());
+        var recipientId = UUID.fromString(message.recipientId());
+        var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(recipientId);
+        if (player == null) {
+            // Recipient is not on this server - ignore
+            return;
+        }
 
-            var senderSession = this.sessionManager.getSession(message.senderId());
-            if (senderSession == null) {
-                LOGGER.error("Received invite message from unknown sender: {}", message.senderId());
-                return;
-            }
+        var map = this.mapService.getMap(message.senderId(), message.mapId());
+        var mapName = Component.text(map.name());
 
-            var senderName = Component.text(senderSession.username());
-            var senderDisplayName = this.playerService.getPlayerDisplayName2(message.senderId());
+        var senderSession = this.sessionManager.getSession(message.senderId());
+        if (senderSession == null) {
+            LOGGER.error("Received invite message from unknown sender: {}", message.senderId());
+            return;
+        }
 
-            var playBuild = map.isPublished() ? "play" : "build";
-            var inviteRequest = message.type() == InviteType.INVITE ? "invite" : "request";
+        var senderName = Component.text(senderSession.username());
+        var senderDisplayName = this.playerService.getPlayerDisplayName2(message.senderId());
 
-            var translationString = "map." + playBuild + "." + inviteRequest + ".pending";
-            player.sendMessage(Component.translatable(translationString, senderDisplayName, mapName, senderName));
-        });
+        var playBuild = map.isPublished() ? "play" : "build";
+        var inviteRequest = message.type() == InviteType.INVITE ? "invite" : "request";
+
+        var translationString = "map." + playBuild + "." + inviteRequest + ".pending";
+        player.sendMessage(Component.translatable(translationString, senderDisplayName, mapName, senderName));
     }
 }

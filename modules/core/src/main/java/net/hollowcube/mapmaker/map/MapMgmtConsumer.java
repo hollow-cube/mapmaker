@@ -42,19 +42,21 @@ public abstract class MapMgmtConsumer implements Closeable {
     }
 
     public static final String STREAM_NAME = "MAP_MANAGEMENT";
-    private static final ConsumerConfiguration CONSUMER_CONFIG = ConsumerConfiguration.builder()
-        .filterSubjects("map.>")
-        // Process anything 1m prior in case we are starting as the map is drained/deleted
-        .deliverPolicy(DeliverPolicy.ByStartTime)
-        .startTime(ZonedDateTime.now().minus(Duration.ofMinutes(1)))
-        .ackPolicy(AckPolicy.None)
-        .inactiveThreshold(Duration.ofMinutes(5))
-        .build();
 
     private final MessageConsumer consumer;
 
     public MapMgmtConsumer(@NotNull JetStreamWrapper jetStream) {
-        this.consumer = jetStream.subscribe(STREAM_NAME, CONSUMER_CONFIG, MapUpdateMessage.class, this::handleMapUpdate);
+        // We must initialize this at runtime so its not initialized in the graal build,
+        // aka giving us every message since build on start :)
+        var consumerConfig = ConsumerConfiguration.builder()
+            .filterSubjects("map.>")
+            // Process anything 1m prior in case we are starting as the map is drained/deleted
+            .deliverPolicy(DeliverPolicy.ByStartTime)
+            .startTime(ZonedDateTime.now().minus(Duration.ofMinutes(1)))
+            .ackPolicy(AckPolicy.None)
+            .inactiveThreshold(Duration.ofMinutes(5))
+            .build();
+        this.consumer = jetStream.subscribe(STREAM_NAME, consumerConfig, MapUpdateMessage.class, this::handleMapUpdate);
     }
 
     @Override

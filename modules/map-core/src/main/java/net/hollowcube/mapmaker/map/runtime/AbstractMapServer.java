@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.runtime;
 
 import com.google.gson.JsonObject;
 import io.nats.client.Nats;
+import io.nats.client.Options;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
@@ -63,8 +64,6 @@ import net.hollowcube.mapmaker.invite.MapInviteAcceptedOrRejectedListener;
 import net.hollowcube.mapmaker.invite.MapInviteListener;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.invite.PlayerInviteServiceImpl;
-import net.hollowcube.mapmaker.kafka.FriendlyProducer;
-import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
 import net.hollowcube.mapmaker.map.command.BugReportCommand;
@@ -119,6 +118,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -139,7 +139,6 @@ public abstract class AbstractMapServer implements MapServer {
 
     // Listeners for other features
     private ServerBridge bridge;
-    private FriendlyProducer producer;
     protected JetStreamWrapper jetStream;
 
     private SessionManager sessionManager;
@@ -244,8 +243,18 @@ public abstract class AbstractMapServer implements MapServer {
 
         bridge = createBridge();
 
-        var kafkaConfig = config.get(KafkaConfig.class);
-        sessionManager = new SessionManager(sessionService(), playerService(), permManager(), kafkaConfig, globalConfig.noop());
+        try {
+            var nc = Nats.connect(Options.builder()
+                .servers(config.get(NatsConfig.class).servers().split(","))
+                .executor(Executors.newVirtualThreadPerTaskExecutor())
+                .build());
+            shutdowner.queue("nats", nc::close);
+            jetStream = new JetStreamWrapper(nc, otel);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        sessionManager = new SessionManager(sessionService(), playerService(), permManager(), jetStream);
         shutdowner.queue("session-manager", sessionManager::close);
         FutureUtil.submitVirtual(sessionManager()::sync); // Sync existing sessions with remote
 
@@ -258,29 +267,16 @@ public abstract class AbstractMapServer implements MapServer {
             this.inviteService = new PlayerInviteServiceImpl(otel, "http://localhost:9127", playerService, mapService, sessionManager, bridge, permManager); // tilt
         }
 
-        // Create one producer to reuse.
-        producer = new FriendlyProducer(kafkaConfig.bootstrapServers(), globalConfig.noop());
-        facets.put(FriendlyProducer.class, producer);
-        shutdowner.queue("kafka-producer", producer::close);
-
-        try {
-            var nc = Nats.connect(config.get(NatsConfig.class).servers());
-            shutdowner.queue("nats", nc::close);
-            jetStream = new JetStreamWrapper(nc, otel);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
         var services = new ServiceContext(playerService(), sessionService(), mapService(), bridge());
 
         if (!globalConfig.noop()) {
-            mapInviteListener = new MapInviteListener(mapService, playerService, sessionManager, kafkaConfig.bootstrapServers());
+            mapInviteListener = new MapInviteListener(mapService, playerService, sessionManager, jetStream);
             shutdowner.queue("map-invite-listener", mapInviteListener::close);
 
-            mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(mapService, playerService, sessionManager, bridge(), kafkaConfig.bootstrapServers());
+            mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(mapService, playerService, sessionManager, bridge(), jetStream);
             shutdowner.queue("map-invite-acceptance-listener", mapInviteAcceptedOrRejectedListener::close);
 
-            var punishmentCreatedListener = new PunishmentManagementListener(playerService, permManager, kafkaConfig.bootstrapServers());
+            var punishmentCreatedListener = new PunishmentManagementListener(playerService, permManager, jetStream);
             shutdowner.queue("punishment-listener", punishmentCreatedListener::close);
 
             chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, permManager, jetStream);
@@ -288,10 +284,10 @@ public abstract class AbstractMapServer implements MapServer {
             shutdowner.queue("chat-message-listener", chatMessageListener::close);
             MinecraftServer.getPacketListenerManager().setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
 
-            playerDataUpdateConsumer = new PlayerDataUpdateConsumer(kafkaConfig.bootstrapServers(), playerService);
+            playerDataUpdateConsumer = new PlayerDataUpdateConsumer(playerService, jetStream);
             shutdowner.queue("player-data-listener", playerDataUpdateConsumer::close);
 
-            var notificationsConsumer = new NotificationsConsumer(kafkaConfig.bootstrapServers(), services);
+            var notificationsConsumer = new NotificationsConsumer(services, jetStream);
             shutdowner.queue("notifications-consumer", notificationsConsumer::close);
         }
 
@@ -444,7 +440,7 @@ public abstract class AbstractMapServer implements MapServer {
             commandManager.register(new JoinCommand(inviteService(), playerService(), sessionManager()));
         }
 
-        commandManager.register(new MapCommand(playerService(), mapService(), permManager(), bridge(), jetStream, producer));
+        commandManager.register(new MapCommand(playerService(), mapService(), permManager(), bridge(), jetStream));
 
         commandManager.register(new NotificationCommand(services, permManager()));
 

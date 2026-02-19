@@ -56,34 +56,13 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
-  redpanda:
-    image: redpandadata/redpanda:v23.3.10
-    container_name: redpanda
-    restart: unless-stopped
-    command:
-      - redpanda
-      - start
-      - --overprovisioned
-      - --smp=1
-      - --memory=512M
-      - --reserve-memory=0M
-      - --node-id=0
-      - --check=false
-      - --kafka-addr=INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:9093
-      - --advertise-kafka-addr=INSIDE://redpanda:9092,OUTSIDE://localhost:9093
-      - --set auto_create_topics_enabled=true
-    ports:
-      - "9092:9092"
-      - "9093:9093"
-    volumes:
-      - redpanda-data:/var/lib/redpanda/data
 
   player-service:
     build:
       context: ../hc-services/services/player-service
       dockerfile: deploy/Dockerfile
     restart: unless-stopped
-    depends_on: [ postgres, spicedb, redpanda, redis ]
+    depends_on: [ postgres, spicedb, redis ]
     environment:
       PLAYERS_ENV: "tilt"
       PLAYERS_HTTP_ADDRESS: "0.0.0.0"
@@ -91,7 +70,6 @@ services:
       PLAYERS_POSTGRES_URI: "postgres://postgres:postgres@postgres:5432/player-service?sslmode=disable"
       PLAYERS_SPICEDB_ENDPOINT: "spicedb:50051"
       PLAYERS_SPICEDB_TOKEN: "supersecretkey"
-      PLAYERS_KAFKA_BROKERS: "redpanda:9092"
       PLAYERS_REDIS_ADDRESS: "redis:6379"
       PLAYERS_TEBEX_SECRET: "explicit_ignore"
     ports:
@@ -101,7 +79,7 @@ services:
       context: ../hc-services/services/map-service
       dockerfile: deploy/Dockerfile
     restart: unless-stopped
-    depends_on: [ postgres, spicedb, minio, redis, redpanda, player-service ]
+    depends_on: [ postgres, spicedb, minio, redis, player-service ]
     environment:
       MAPS_ENV: "tilt"
       MAPS_HTTP_ADDRESS: "0.0.0.0"
@@ -113,7 +91,6 @@ services:
       MAPS_S3_ACCESS_KEY: "mapmaker"
       MAPS_S3_SECRET_KEY: "mapmaker"
       MAPS_REDIS_ADDRESS: "redis:6379"
-      MAPS_KAFKA_BROKERS: "redpanda:9092"
       MAPS_PLAYER_SERVICE_URL: "http://player-service:9124"
     ports:
       - "9125:9124"
@@ -122,7 +99,7 @@ services:
       context: ../hc-services/services/session-service
       dockerfile: deploy/Dockerfile
     restart: unless-stopped
-    depends_on: [ postgres, spicedb, redis, redpanda, player-service ]
+    depends_on: [ postgres, spicedb, redis, player-service ]
     environment:
       SESSION_ENV: "tilt"
       SESSION_HTTP_ADDRESS: "0.0.0.0"
@@ -130,7 +107,6 @@ services:
       SESSION_REDIS_ADDRESS: "redis:6379"
       SESSION_PLAYER_SERVICE_URL: "http://player-service:9124"
       SESSION_POSTGRES_URI: "postgres://postgres:postgres@postgres:5432/session-service?sslmode=disable"
-      SESSION_KAFKA_BROKERS: "redpanda:9092"
       SESSION_SPICEDB_ENDPOINT: "spicedb:50051"
       SESSION_SPICEDB_TOKEN: "supersecretkey"
       SESSION_KUBERNETES_NAMESPACE: "disabled"
@@ -141,4 +117,3 @@ volumes:
   postgres-data:
   minio-data:
   redis-data:
-  redpanda-data:

@@ -1,44 +1,60 @@
 package net.hollowcube.mapmaker.consumer;
 
-import net.hollowcube.common.ServerRuntime;
+import io.nats.client.Message;
+import io.nats.client.MessageConsumer;
+import io.nats.client.api.AckPolicy;
+import io.nats.client.api.ConsumerConfiguration;
+import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
-import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerDataUpdateMessage;
 import net.hollowcube.mapmaker.player.PlayerService;
-import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.Player;
-import net.minestom.server.network.ConnectionManager;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.UUID;
 
-public class PlayerDataUpdateConsumer extends BaseConsumer<PlayerDataUpdateMessage> {
+public class PlayerDataUpdateConsumer implements Closeable {
     private static final Logger logger = LoggerFactory.getLogger(PlayerDataUpdateConsumer.class);
 
-    private static final String TOPIC_NAME = "player_data_updates";
-    private static final String GROUP_ID = ServerRuntime.getRuntime().hostname();
-
-    private static final ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
+    private static final String STREAM = "PLAYER_DATA";
+    private static final ConsumerConfiguration CONSUMER_CONFIG = ConsumerConfiguration.builder()
+        .filterSubjects("player-data.>")
+        .deliverPolicy(DeliverPolicy.New)
+        .ackPolicy(AckPolicy.None)
+        .inactiveThreshold(Duration.ofMinutes(5))
+        .build();
 
     private final PlayerService playerService;
 
-    public PlayerDataUpdateConsumer(@NotNull String bootstrapServers, @NotNull PlayerService playerService) {
-        super(TOPIC_NAME, GROUP_ID, s -> AbstractHttpService.GSON.fromJson(s, PlayerDataUpdateMessage.class), bootstrapServers);
+    private final MessageConsumer consumer;
 
+    public PlayerDataUpdateConsumer(@NotNull PlayerService playerService, JetStreamWrapper jetStream) {
         this.playerService = playerService;
+
+        this.consumer = jetStream.subscribe(STREAM, CONSUMER_CONFIG, PlayerDataUpdateMessage.class, this::handlePlayerDataUpdate);
     }
 
     @Override
-    protected void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull PlayerDataUpdateMessage message) {
+    public void close() {
+        try {
+            consumer.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void handlePlayerDataUpdate(@NotNull Message msg, @NotNull PlayerDataUpdateMessage message) {
         logger.info("Received player data update message {} for {}", message.action(), message.id());
         switch (message.action()) {
             case MODIFY -> handlePlayerDataModify(message);
@@ -46,7 +62,7 @@ public class PlayerDataUpdateConsumer extends BaseConsumer<PlayerDataUpdateMessa
     }
 
     private void handlePlayerDataModify(@NotNull PlayerDataUpdateMessage message) {
-        var player = CONNECTION_MANAGER.getOnlinePlayerByUuid(UUID.fromString(message.id()));
+        var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(message.id()));
         if (player == null) return;
 
         if (message.backpack() != null) {
