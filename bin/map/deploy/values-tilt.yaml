@@ -19,6 +19,4 @@ env:
 
   MAPMAKER_SPICEDB_URL: "http://local:8443"
 
-  MAPMAKER_KAFKA_BOOTSTRAP_SERVERS: "kafka:9093"
-
 replicaCount: 1

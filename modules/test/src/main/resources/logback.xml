@@ -12,5 +12,4 @@
     <logger name="net.minestom.server.instance" level="INFO"/>
     <logger name="io.netty" level="WARN"/>
     <logger name="io.helidon" level="WARN"/>
-    <logger name="org.apache.kafka" level="WARN"/>
 </configuration>

@@ -10,7 +10,6 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
-import org.apache.kafka.common.utils.CopyOnWriteMap;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -24,6 +23,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -42,33 +42,33 @@ public class PermManagerImpl extends AbstractHttpService implements PermManager 
 
     // language=JSON
     private static final String PLATFORM_QUERY_TEMPLATE = """
-            {
-              "consistency": {
-                "minimizeLatency": true
-              },
-              "resource": {
-                "objectType": "mapmaker/platform",
-                "objectId": "0"
-              },
-              "permission": "%s",
-              "subject": {
-                "object": {
-                  "objectType": "mapmaker/player",
-                  "objectId": "%s"
-                }
-              },
-              "context": {
-                "never_set": true,
-                "current_time": "%s"
-              }
+        {
+          "consistency": {
+            "minimizeLatency": true
+          },
+          "resource": {
+            "objectType": "mapmaker/platform",
+            "objectId": "0"
+          },
+          "permission": "%s",
+          "subject": {
+            "object": {
+              "objectType": "mapmaker/player",
+              "objectId": "%s"
             }
-            """;
+          },
+          "context": {
+            "never_set": true,
+            "current_time": "%s"
+          }
+        }
+        """;
 
     private final String baseUrl;
     private final String token;
 
-    private final Map<String, Cache<String, Boolean>> platformPermissions = new CopyOnWriteMap<>();
-    private final Map<PlatformPermLike, PrefetchCondition> prefetchConditions = new CopyOnWriteMap<>();
+    private final Map<String, Cache<String, Boolean>> platformPermissions = new ConcurrentHashMap<>();
+    private final Map<PlatformPermLike, PrefetchCondition> prefetchConditions = new ConcurrentHashMap<>();
 
     public PermManagerImpl(@NotNull OpenTelemetry otel, @NotNull String address, @NotNull String token) {
         super(otel);
@@ -76,8 +76,8 @@ public class PermManagerImpl extends AbstractHttpService implements PermManager 
         this.token = token;
 
         MinecraftServer.getGlobalEventHandler()
-                .addListener(AsyncPlayerPreLoginEvent.class, event -> prefetchConditions.values().forEach(c -> c.addPlayer(event.getGameProfile().uuid().toString())))
-                .addListener(PlayerDisconnectEvent.class, event -> prefetchConditions.values().forEach(c -> c.removePlayer(event.getPlayer())));
+            .addListener(AsyncPlayerPreLoginEvent.class, event -> prefetchConditions.values().forEach(c -> c.addPlayer(event.getGameProfile().uuid().toString())))
+            .addListener(PlayerDisconnectEvent.class, event -> prefetchConditions.values().forEach(c -> c.removePlayer(event.getPlayer())));
     }
 
     @Override
@@ -111,8 +111,8 @@ public class PermManagerImpl extends AbstractHttpService implements PermManager 
     @Override
     public boolean hasPlatformPermission(@NotNull Player player, @NotNull PlatformPermLike perm) {
         var cache = platformPermissions.computeIfAbsent(perm.permName(), k -> Caffeine.newBuilder()
-                .expireAfterWrite(5, TimeUnit.MINUTES)
-                .build());
+            .expireAfterWrite(5, TimeUnit.MINUTES)
+            .build());
         return cache.get(player.getUuid().toString(), k -> hasPlatformPermission0(k, perm));
     }
 
@@ -131,10 +131,10 @@ public class PermManagerImpl extends AbstractHttpService implements PermManager 
 
         var body = PLATFORM_QUERY_TEMPLATE.formatted(perm.permName(), playerId, TIME_FORMAT.format(new Date()));
         var req = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/v1/permissions/check"))
-                .POST(HttpRequest.BodyPublishers.ofString(body))
-                .header("Authorization", "Bearer " + token)
-                .header("Content-Type", "application/json");
+            .uri(URI.create(baseUrl + "/v1/permissions/check"))
+            .POST(HttpRequest.BodyPublishers.ofString(body))
+            .header("Authorization", "Bearer " + token)
+            .header("Content-Type", "application/json");
         var res = doRequest("check_permission", req, HttpResponse.BodyHandlers.ofString());
         var result = GSON.fromJson(res.body(), JsonObject.class);
 
@@ -148,8 +148,8 @@ public class PermManagerImpl extends AbstractHttpService implements PermManager 
 
             var permissionship = Permissionship.valueOf(result.get("permissionship").getAsString());
             var state = permissionship == Permissionship.PERMISSIONSHIP_HAS_PERMISSION ||
-                    // Conditional is allowed here because of audit log hack.
-                    permissionship == Permissionship.PERMISSIONSHIP_CONDITIONAL_PERMISSION;
+                        // Conditional is allowed here because of audit log hack.
+                        permissionship == Permissionship.PERMISSIONSHIP_CONDITIONAL_PERMISSION;
 
             if (perm instanceof PlatformPerm) logger.debug("platform perm check: {} {} -> {}", playerId, perm, state);
             return state;

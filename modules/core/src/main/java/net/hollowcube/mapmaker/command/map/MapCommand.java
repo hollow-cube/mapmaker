@@ -6,7 +6,6 @@ import net.hollowcube.command.dsl.SimpleCommand;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.map.legacy.MapLegacyCommand;
 import net.hollowcube.mapmaker.gui.map.MapListView;
-import net.hollowcube.mapmaker.kafka.FriendlyProducer;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Panel;
@@ -32,8 +31,7 @@ public class MapCommand extends CommandDsl {
         @NotNull MapService mapService,
         @NotNull PermManager permManager,
         @NotNull ServerBridge bridge,
-        @NotNull JetStreamWrapper jetStream,
-        @NotNull FriendlyProducer producer
+        @NotNull JetStreamWrapper jetStream
     ) {
         super("map");
 
@@ -57,7 +55,7 @@ public class MapCommand extends CommandDsl {
         addSubcommand(this.play = new MapPlayCommand(mapService, permManager, bridge));
         addSubcommand(this.leaderboard = new MapLeaderboardCommand(playerService, mapService, permManager));
         this.alter = new MapAlterCommand(mapService, permManager);
-        addSubcommand(this.drain = new MapDrainCommand(mapService, permManager, jetStream, producer));
+        addSubcommand(this.drain = new MapDrainCommand(mapService, permManager, jetStream));
     }
 
     @Override

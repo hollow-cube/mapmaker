@@ -1,58 +1,74 @@
 package net.hollowcube.mapmaker.invite;
 
-import com.google.gson.Gson;
+import io.nats.client.Message;
+import io.nats.client.MessageConsumer;
+import io.nats.client.api.AckPolicy;
+import io.nats.client.api.ConsumerConfiguration;
+import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.invite.types.MapInviteAcceptedOrRejectedMessage;
-import net.hollowcube.mapmaker.kafka.BaseConsumer;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge.JoinMapState;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
-import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
+import java.time.Duration;
 import java.util.UUID;
 
-public final class MapInviteAcceptedOrRejectedListener extends BaseConsumer<MapInviteAcceptedOrRejectedMessage> {
+public final class MapInviteAcceptedOrRejectedListener implements Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(MapInviteAcceptedOrRejectedListener.class);
 
-    private static final String INVITE_ACCEPT_REJECT_TOPIC = "invite-accept-reject";
-    private static final Gson GSON = AbstractHttpService.GSON;
+    // TODO: this consumer can just be merged with InviteConsumer they listen to basically the same
+    private static final String STREAM = "INVITES";
+    private static final ConsumerConfiguration CONSUMER_CONFIG = ConsumerConfiguration.builder()
+        .filterSubjects("invite.accepted", "invite.rejected")
+        .deliverPolicy(DeliverPolicy.New)
+        .ackPolicy(AckPolicy.None)
+        .inactiveThreshold(Duration.ofMinutes(5))
+        .build();
 
     private final MapService mapService;
     private final PlayerService playerService;
     private final SessionManager sessionManager;
     private final ServerBridge serverBridge;
 
-    public MapInviteAcceptedOrRejectedListener(@NotNull MapService mapService, @NotNull PlayerService playerService,
-                                               @NotNull SessionManager sessionManager,
-                                               @NotNull ServerBridge serverBridge, @NotNull String kafkaBrokers) {
-        super(INVITE_ACCEPT_REJECT_TOPIC, "invites", MapInviteAcceptedOrRejectedListener::fromJson, kafkaBrokers);
+    private final MessageConsumer consumer;
+
+    public MapInviteAcceptedOrRejectedListener(
+        @NotNull MapService mapService, @NotNull PlayerService playerService,
+        @NotNull SessionManager sessionManager, @NotNull ServerBridge serverBridge,
+        @NotNull JetStreamWrapper jetStream
+    ) {
         this.mapService = mapService;
         this.playerService = playerService;
         this.sessionManager = sessionManager;
         this.serverBridge = serverBridge;
-    }
 
-    private static @NotNull MapInviteAcceptedOrRejectedMessage fromJson(@NotNull String json) {
-        return GSON.fromJson(json, MapInviteAcceptedOrRejectedMessage.class);
+        this.consumer = jetStream.subscribe(STREAM, CONSUMER_CONFIG, MapInviteAcceptedOrRejectedMessage.class, this::handleInviteMessage);
     }
 
     @Override
-    protected void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord,
-                             @NotNull MapInviteAcceptedOrRejectedMessage message) {
-        Thread.startVirtualThread(() -> {
-            LOGGER.info("Received invite accepted or rejected message: {}", message);
+    public void close() {
+        try {
+            consumer.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-            this.sendAcceptedOrRejectedMessageToRecipient(message);
-            this.sendCorrectPlayerToServer(message);
-        });
+    private void handleInviteMessage(@NotNull Message msg, @NotNull MapInviteAcceptedOrRejectedMessage message) {
+        LOGGER.info("Received invite accepted or rejected message: {}", message);
+
+        this.sendAcceptedOrRejectedMessageToRecipient(message);
+        this.sendCorrectPlayerToServer(message);
     }
 
     private void sendAcceptedOrRejectedMessageToRecipient(@NotNull MapInviteAcceptedOrRejectedMessage message) {

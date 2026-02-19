@@ -48,7 +48,7 @@ import static net.hollowcube.mapmaker.map.MapPlayer.simpleMapPlayer;
 public class HubServer extends AbstractMapServer {
     private static final Logger logger = LoggerFactory.getLogger(HubServer.class);
     private static final Presence HUB_PRESENCE = new Presence("mapmaker:hub",
-            "__hub_unused__", ServerRuntime.getRuntime().hostname(), "hub");
+        "__hub_unused__", ServerRuntime.getRuntime().hostname(), "hub");
 
     public static final MapData HUB_MAP_DATA = new MapData(MapData.SPAWN_MAP_ID, Uuids.ZERO);
 
@@ -66,10 +66,10 @@ public class HubServer extends AbstractMapServer {
         super(config);
 
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("hub-init")
-                .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
-                .addListener(PlayerSpawnEvent.class, this::handleSpawn)
-                .addListener(PlayerDisconnectEvent.class, this::handleDisconnect)
-                .addListener(ServerBeginShutdownEvent.class, this::handleServerShutdown));
+            .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
+            .addListener(PlayerSpawnEvent.class, this::handleSpawn)
+            .addListener(PlayerDisconnectEvent.class, this::handleDisconnect)
+            .addListener(ServerBeginShutdownEvent.class, this::handleServerShutdown));
     }
 
     @Override
@@ -92,7 +92,7 @@ public class HubServer extends AbstractMapServer {
         super.prepareStart();
 
         MinecraftServer.getConnectionManager()
-                .setPlayerProvider(simpleMapPlayer(commandManager()));
+            .setPlayerProvider(simpleMapPlayer(commandManager()));
 
         world = new HubMapWorld(this, HUB_MAP_DATA);
         world.loadWorld();
@@ -171,7 +171,7 @@ public class HubServer extends AbstractMapServer {
             for (var player : players) {
                 try {
                     var hub = sessionService().joinHubV2(new JoinHubRequest(
-                            player.getUuid().toString(), AbstractHttpService.hostname));
+                        player.getUuid().toString(), AbstractHttpService.hostname));
 
                     var state = new HubTransferData(player.getPosition(), player.getHeldSlot());
                     ProxySupport.transferWithData(player, hub.serverClusterIp(), state);

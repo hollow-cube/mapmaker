@@ -59,6 +59,13 @@ jobs:
           MAPMAKER_COMMIT_HASH: ${{ github.event.pull_request.head.sha || github.sha }}
           MAPMAKER_RESOURCE_PACK_HASH: ${{ steps.build-rp.outputs.resource_pack_sha }}
         run: ./gradlew :bin:map-isolate:nativeCompile -PisRelease=false --no-configuration-cache
+      - name: Upload build report
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-image-build-report
+          path: bin/map-isolate/build/native/nativeCompile/map-isolate-build-report.html
+      - name: Link build report in summary
+        run: echo "📊 [Native image build report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts) uploaded as artifact" >> "$GITHUB_STEP_SUMMARY"
       - name: Build & push docker image
         uses: docker/build-push-action@v3
         with:

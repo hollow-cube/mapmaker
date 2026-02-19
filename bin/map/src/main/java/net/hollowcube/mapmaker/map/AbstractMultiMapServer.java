@@ -1,5 +1,9 @@
 package net.hollowcube.mapmaker.map;
 
+import io.nats.client.Message;
+import io.nats.client.api.AckPolicy;
+import io.nats.client.api.ConsumerConfiguration;
+import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
@@ -8,8 +12,6 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
-import net.hollowcube.mapmaker.kafka.BaseConsumer;
-import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.command.DebugRenderersCommand;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
@@ -30,12 +32,12 @@ import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.validate.Check;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
@@ -49,6 +51,14 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
 
     private final ReentrantLock worldLock = new ReentrantLock();
     private final Map<MapKey, Future<AbstractMapWorld<?, ?>>> worlds = new HashMap<>();
+
+    private static final String MAP_JOIN_STREAM = "MAP_JOINS";
+    private static final ConsumerConfiguration MAP_JOIN_CONSUMER_CONFIG = ConsumerConfiguration.builder()
+        .filterSubjects("map-join.>")
+        .deliverPolicy(DeliverPolicy.New)
+        .ackPolicy(AckPolicy.None)
+        .inactiveThreshold(Duration.ofMinutes(5))
+        .build();
 
     // A pending join is a map of player id to a future that will be completed when the server has the join info.
     // The future returned will never complete with an exception, but may complete with null indicating that we
@@ -82,9 +92,8 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
     protected void prepareStart() {
         super.prepareStart();
 
-        var kafkaConfig = config.get(KafkaConfig.class);
         if (!globalConfig.noop()) {
-            var mapJoinConsumer = new MapJoinConsumer(kafkaConfig.bootstrapServers());
+            var mapJoinConsumer = jetStream.subscribe(MAP_JOIN_STREAM, MAP_JOIN_CONSUMER_CONFIG, MapJoinInfoMessage.class, this::onMapJoinMessage);
             shutdowner().queue("map-join-listener", mapJoinConsumer::close);
 
             var mapMgmtConsumer = new MapMgmtConsumerImpl(jetStream, this);
@@ -141,7 +150,8 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                 return;
             }
 
-            var instanceId = ServerRuntime.getRuntime().hostname();
+            var runtime = ServerRuntime.getRuntime();
+            var instanceId = runtime.isDevelopment() ? "devserver" : runtime.hostname();
             var presence = new Presence(Presence.TYPE_MAPMAKER_MAP, joinInfo.state(), instanceId, joinInfo.mapId());
             transferPlayerSession(player, presence);
             logger.info("transfered session {}", joinInfo);
@@ -458,20 +468,12 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
         @NotNull String mapId, @NotNull String state) {
     }
 
-    private class MapJoinConsumer extends BaseConsumer<MapJoinInfoMessage> {
+    private void onMapJoinMessage(@NotNull Message msg, @NotNull MapJoinInfoMessage message) {
+        if (!AbstractHttpService.hostname.equals(message.serverId())) return; // Not for this server, ignore.
 
-        protected MapJoinConsumer(@NotNull String bootstrapServers) {
-            super("map-join", AbstractHttpService.hostname, s -> AbstractHttpService.GSON.fromJson(s, MapJoinInfoMessage.class), bootstrapServers);
-        }
-
-        @Override
-        protected void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull MapJoinInfoMessage message) {
-            if (!AbstractHttpService.hostname.equals(message.serverId())) return; // Not for this server, ignore.
-
-            logger.info("received join info for {}: {}", message.playerId(), message);
-            var pendingJoin = getPendingJoin(message.playerId(), true);
-            pendingJoin.complete(new MapJoinInfo(message.playerId(), message.mapId(), message.state()));
-        }
+        logger.info("received join info for {}: {}", message.playerId(), message);
+        var pendingJoin = getPendingJoin(message.playerId(), true);
+        pendingJoin.complete(new MapJoinInfo(message.playerId(), message.mapId(), message.state()));
     }
 
 }

@@ -20,7 +20,6 @@ dependencies {
     implementation(project(":modules:map-runtime"))
 
     implementation(libs.minestom)
-    implementation(libs.kafka)
     implementation(libs.bundles.adventure)
     implementation(libs.slf4j.jul)
     implementation(libs.logback)

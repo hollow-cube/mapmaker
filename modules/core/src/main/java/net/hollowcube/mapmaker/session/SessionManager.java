@@ -1,13 +1,17 @@
 package net.hollowcube.mapmaker.session;
 
+import io.nats.client.Message;
+import io.nats.client.MessageConsumer;
+import io.nats.client.api.AckPolicy;
+import io.nats.client.api.ConsumerConfiguration;
+import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.kafka.BaseConsumer;
-import net.hollowcube.mapmaker.kafka.KafkaConfig;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.to_be_refactored.SyntheticTabListManager;
-import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.Audiences;
@@ -15,17 +19,15 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.validate.Check;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.common.TopicPartition;
-import org.jctools.queues.MpscArrayQueue;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.LockSupport;
 import java.util.function.Predicate;
 
 public class SessionManager {
@@ -36,34 +38,42 @@ public class SessionManager {
 
     private static final ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
 
+    private static final String STREAM = "SESSIONS";
+    private static final ConsumerConfiguration CONSUMER_CONFIG = ConsumerConfiguration.builder()
+        .filterSubjects("session.>")
+        .deliverPolicy(DeliverPolicy.New)
+        .ackPolicy(AckPolicy.None)
+        .inactiveThreshold(Duration.ofMinutes(5))
+        .build();
+
     private final SessionService sessionService;
     private final PlayerService playerService;
-    private final ConsumerImpl consumer;
 
     private final Map<String, PlayerSession> sessions = new ConcurrentHashMap<>(); // All sessions, including local ones
     private final SyntheticTabListManager syntheticTab;
 
     private final Predicate<String> hasSeeVanishedPerm;
 
+    private final MessageConsumer consumer;
+
     public SessionManager(
         @NotNull SessionService sessionService,
         @NotNull PlayerService playerService,
         @NotNull PermManager permManager,
-        @NotNull KafkaConfig kafkaConfig,
-        boolean noop
+        @NotNull JetStreamWrapper jetStream
     ) {
         instance = this;
         this.sessionService = sessionService;
         this.playerService = playerService;
-
-        if (!noop) this.consumer = new ConsumerImpl(String.join(",", kafkaConfig.bootstrapServerList()));
-        else this.consumer = null;
 
         this.syntheticTab = new SyntheticTabListManager(this, playerService);
         MinecraftServer.getGlobalEventHandler()
             .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn);
 
         this.hasSeeVanishedPerm = permManager.createPrefetchedCondition(PlatformPerm.SEE_VANISHED);
+
+        this.consumer = jetStream.subscribe(STREAM, CONSUMER_CONFIG, SessionUpdateMessage.class, this::handleSessionUpdateMessage);
+        Thread.startVirtualThread(this::incrementalSyncLoop); // begin doing incremental sync every few minutes to ensure we stay in sync.
     }
 
     public void sync() {
@@ -91,7 +101,11 @@ public class SessionManager {
     }
 
     public void close() {
-        if (consumer != null) consumer.close();
+        try {
+            consumer.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public boolean isHidden(@NotNull String playerId) {
@@ -240,61 +254,40 @@ public class SessionManager {
     }
 
     public void configureVanishedPlayer(@NotNull Player player) {
-        player.updateViewableRule(p -> hasSeeVanishedPerm.test(PlayerData.fromPlayer(p).id()));
+        player.scheduleNextTick(e -> e.updateViewableRule(p -> hasSeeVanishedPerm.test(PlayerData.fromPlayer(p).id())));
     }
 
     private void configureVisiblePlayer(@NotNull Player player) {
         player.updateViewableRule(null);
     }
 
-    private class ConsumerImpl extends BaseConsumer<SessionUpdateMessage> {
-        private final MpscArrayQueue<SessionUpdateMessage> queue = new MpscArrayQueue<>(512);
-        private final Thread thread = Thread.startVirtualThread(this::processQueue);
-
-        protected ConsumerImpl(@NotNull String bootstrapServers) {
-            super("session-updates", AbstractHttpService.hostname, s -> AbstractHttpService.GSON.fromJson(s, SessionUpdateMessage.class), bootstrapServers);
-        }
-
-        @Override
-        public void close() {
-            this.thread.interrupt();
-            super.close();
-        }
-
-        @Override
-        protected void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull SessionUpdateMessage message) {
-            while (!queue.relaxedOffer(message))
-                FutureUtil.sleep(1000);
-            LockSupport.unpark(thread);
-        }
-
-        private void processQueue() {
-            while (true) {
-                LockSupport.park();
-                if (this.thread.isInterrupted() || !this.thread.isAlive())
-                    return;
-
-                queue.drain(message -> {
-                    switch (message.action()) {
-                        case CREATE -> {
-                            // We have to check if the session exists here because its possible we did an optimistic update on the session before the message arrived.
-                            var oldSession = sessions.get(message.playerId());
-                            if (oldSession == null) {
-                                handleSessionCreate(message.session());
-                            } else {
-                                handleSessionUpdate(message.session(), message.metadata());
-                            }
-                        }
-                        case DELETE -> handleSessionDelete(message);
-                        case UPDATE -> handleSessionUpdate(message.session(), message.metadata());
-                    }
-                });
+    private void handleSessionUpdateMessage(@NotNull Message msg, @NotNull SessionUpdateMessage message) {
+        switch (message.action()) {
+            case CREATE -> {
+                // We have to check if the session exists here because its possible we did an optimistic update on the session before the message arrived.
+                var oldSession = sessions.get(message.playerId());
+                if (oldSession == null) {
+                    handleSessionCreate(message.session());
+                } else {
+                    handleSessionUpdate(message.session(), message.metadata());
+                }
             }
+            case DELETE -> handleSessionDelete(message);
+            case UPDATE -> handleSessionUpdate(message.session(), message.metadata());
         }
+    }
 
-        @Override
-        public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-            FutureUtil.submitVirtual(SessionManager.this::syncIncremental);
+    @Blocking
+    private void incrementalSyncLoop() {
+        FutureUtil.sleep(30_000);
+        while (true) {
+            try {
+                syncIncremental();
+            } catch (Exception e) {
+                ExceptionReporter.reportException(e);
+            }
+
+            FutureUtil.sleep(5 * 60 * 1000);
         }
     }
 }

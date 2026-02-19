@@ -21,9 +21,6 @@
   "nats": {
     "servers": "nats://localhost:4222"
   },
-  "kafka": {
-    "bootstrap_servers": "localhost:9093"
-  },
   "tracing": {
     "otlp_endpoint": "",
     "noop": false

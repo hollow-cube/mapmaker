@@ -27,9 +27,7 @@ dependencies {
     implementation(libs.jctools)
     implementation(libs.caffeine)
     implementation(libs.bundles.prometheus) // TODO: why is this a core module dependency
-
     implementation(libs.nats)
-    implementation(libs.kafka) // TODO: deprecated
 
     testImplementation(project(":modules:test"))
 }

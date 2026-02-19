@@ -28,7 +28,6 @@ dependencies {
     }
     implementation(libs.bundles.prometheus)
     implementation(libs.fastutil)
-    implementation(libs.kafka)
 }
 
 application {

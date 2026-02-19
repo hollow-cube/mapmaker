@@ -4,13 +4,11 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.kafka.FriendlyProducer;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapMgmtConsumer;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
-import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -28,12 +26,10 @@ public class MapDrainCommand extends CommandDsl {
         .description("The reason for draining the map");
 
     private final JetStreamWrapper jetStream;
-    private final FriendlyProducer producer;
 
-    public MapDrainCommand(@NotNull MapService mapService, @NotNull PermManager permManager, @NotNull JetStreamWrapper jetStream, @NotNull FriendlyProducer producer) {
+    public MapDrainCommand(@NotNull MapService mapService, @NotNull PermManager permManager, @NotNull JetStreamWrapper jetStream) {
         super("drain");
         this.jetStream = jetStream;
-        this.producer = producer;
 
         description = "Drains all active instances of a map";
         examples = List.of("/map drain 123-456-789", "/map drain a12345bc-67de-8f91-ghij-2345k6l78912");
@@ -58,9 +54,6 @@ public class MapDrainCommand extends CommandDsl {
         }
         var message = new MapMgmtConsumer.MapUpdateMessage(MapMgmtConsumer.MapUpdateMessage.ACTION_DRAIN, map.id(), reason);
         jetStream.publish(message.subject(), message);
-
-        // TODO: remove when no more usages exist.
-        producer.produceAndForget("map_mgmt", AbstractHttpService.GSON.toJson(message));
 
         player.sendMessage("trying to drain map: " + map.id());
     }
