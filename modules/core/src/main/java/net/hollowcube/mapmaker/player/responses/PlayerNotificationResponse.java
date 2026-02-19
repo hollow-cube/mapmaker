@@ -32,7 +32,7 @@ public record PlayerNotificationResponse(
 
     @RuntimeGson
     public record SimpleEntry(
-        @NotNull String player,
+        @NotNull String playerId,
         @NotNull String action,
         @NotNull String type,
         @NotNull String key,

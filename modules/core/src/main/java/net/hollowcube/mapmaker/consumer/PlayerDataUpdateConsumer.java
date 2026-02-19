@@ -27,7 +27,7 @@ import java.util.UUID;
 public class PlayerDataUpdateConsumer implements Closeable {
     private static final Logger logger = LoggerFactory.getLogger(PlayerDataUpdateConsumer.class);
 
-    private static final String STREAM = "PLAYER_DATA";
+    private static final String STREAM = "PLAYER_DATA_MANAGEMENT";
     private static final ConsumerConfiguration CONSUMER_CONFIG = ConsumerConfiguration.builder()
         .filterSubjects("player-data.>")
         .deliverPolicy(DeliverPolicy.New)

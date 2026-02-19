@@ -5,6 +5,8 @@ import io.nats.client.MessageConsumer;
 import io.nats.client.api.AckPolicy;
 import io.nats.client.api.ConsumerConfiguration;
 import io.nats.client.api.DeliverPolicy;
+import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.*;
@@ -17,6 +19,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.validate.Check;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -70,7 +73,7 @@ public class SessionManager {
         this.hasSeeVanishedPerm = permManager.createPrefetchedCondition(PlatformPerm.SEE_VANISHED);
 
         this.consumer = jetStream.subscribe(STREAM, CONSUMER_CONFIG, SessionUpdateMessage.class, this::handleSessionUpdateMessage);
-        // TODO: when to sync incremental?
+        Thread.startVirtualThread(this::incrementalSyncLoop); // begin doing incremental sync every few minutes to ensure we stay in sync.
     }
 
     public void sync() {
@@ -271,6 +274,20 @@ public class SessionManager {
             }
             case DELETE -> handleSessionDelete(message);
             case UPDATE -> handleSessionUpdate(message.session(), message.metadata());
+        }
+    }
+
+    @Blocking
+    private void incrementalSyncLoop() {
+        FutureUtil.sleep(30_000);
+        while (true) {
+            try {
+                syncIncremental();
+            } catch (Exception e) {
+                ExceptionReporter.reportException(e);
+            }
+
+            FutureUtil.sleep(5 * 60 * 1000);
         }
     }
 }

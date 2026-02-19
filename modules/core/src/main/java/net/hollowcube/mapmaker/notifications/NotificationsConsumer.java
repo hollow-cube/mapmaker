@@ -49,7 +49,7 @@ public class NotificationsConsumer implements Closeable {
     }
 
     private void handleNotification(Message msg, PlayerNotificationResponse.SimpleEntry entry) {
-        var uuid = UUID.fromString(entry.player());
+        var uuid = UUID.fromString(entry.playerId());
         var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uuid);
         if (player == null) return;
         if (!entry.action().equals("create")) return;
