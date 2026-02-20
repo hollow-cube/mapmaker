@@ -27,8 +27,6 @@ public class UnblockCommand extends CommandDsl {
 
         this.targetArg = CoreArgument.AnyPlayerId("target", playerService).description("The player to unblock");
 
-        this.setCondition(CoreCommandCondition.playerFeature(RelationshipFeatureFlag.FLAG));
-
         this.addSyntax(playerOnly(this::handleExec), this.targetArg);
     }
 

@@ -12,6 +12,7 @@ import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,8 +32,6 @@ public class BlockCommand extends CommandDsl {
         this.examples = List.of("/block SethPRG");
 
         this.targetArg = CoreArgument.AnyPlayerId("target", playerService).description("The player to block");
-
-        this.setCondition(CoreCommandCondition.playerFeature(RelationshipFeatureFlag.FLAG));
 
         this.addSyntax(playerOnly(this::execListBlocks), new ArgumentLiteral("list"));
         this.addSyntax(playerOnly(this::execListBlocks), new ArgumentLiteral("list"), this.pageArg);
