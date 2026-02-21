@@ -5,7 +5,6 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
@@ -21,7 +20,6 @@ public class MockMapServer implements MapServer {
     public SessionService sessionService;
     public PlayerService playerService;
     public MapService mapService;
-    public PermManager permManager;
     public PunishmentService punishmentService;
     public PlayerInviteService inviteService;
     public SessionManager sessionManager;
@@ -42,11 +40,6 @@ public class MockMapServer implements MapServer {
     @Override
     public @NotNull MapService mapService() {
         return Objects.requireNonNull(mapService, "MapService is not initialized");
-    }
-
-    @Override
-    public @NotNull PermManager permManager() {
-        return Objects.requireNonNull(permManager, "PermManager is not initialized");
     }
 
     @Override

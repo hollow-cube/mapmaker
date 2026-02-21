@@ -6,8 +6,7 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.command.CommandCategories;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.types.PunishmentLadder;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
@@ -20,20 +19,22 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
+
 public class PHelpCommand extends CommandDsl {
     private final Argument<PunishmentType> typeArg = Argument.Enum("type", PunishmentType.class)
-            .description("Show only entries for the given type");
+        .description("Show only entries for the given type");
 
     private final PunishmentService punishmentService;
 
-    public PHelpCommand(@NotNull PunishmentService punishmentService, @NotNull PermManager permManager) {
+    public PHelpCommand(@NotNull PunishmentService punishmentService) {
         super("phelp");
         this.punishmentService = punishmentService;
 
         category = CommandCategories.STAFF;
         description = "Show information about the punishment ladders";
 
-        setCondition(permManager.createPlatformCondition2(PlatformPerm.VIEW_PUNISHMENTS));
+        setCondition(staffPerm(Permission.GENERIC_STAFF));
         addSyntax(playerOnly(this::showLadderInfo));
         addSyntax(playerOnly(this::showLadderInfo), typeArg);
     }
@@ -53,8 +54,8 @@ public class PHelpCommand extends CommandDsl {
             // Name of ladder
             builder.appendNewline();
             builder.append(Component.translatable("punishment.help.ladder.name", List.of(
-                    Component.text(FontUtil.rewrite("small", ladder.type().name().toLowerCase(Locale.ROOT))),
-                    Component.translatable("punishment.ladder." + ladder.id()))
+                Component.text(FontUtil.rewrite("small", ladder.type().name().toLowerCase(Locale.ROOT))),
+                Component.translatable("punishment.ladder." + ladder.id()))
             ));
 
             // Duration track
@@ -62,7 +63,7 @@ public class PHelpCommand extends CommandDsl {
             for (int i = 0; i < ladder.entries().size(); i++) {
                 if (i > 0) track.append(Component.translatable("punishment.help.ladder.separator"));
                 track.append(Component.translatable("punishment.help.ladder.entry",
-                        Component.text(formatDuration(ladder.entries().get(i).duration()))));
+                    Component.text(formatDuration(ladder.entries().get(i).duration()))));
             }
             builder.appendSpace();
             builder.append(Component.translatable("punishment.help.ladder.entries", track));

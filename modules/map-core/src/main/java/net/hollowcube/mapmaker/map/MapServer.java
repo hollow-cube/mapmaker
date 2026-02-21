@@ -5,7 +5,6 @@ import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
@@ -25,8 +24,6 @@ public interface MapServer {
     @NotNull PlayerService playerService();
 
     @NotNull MapService mapService();
-
-    @NotNull PermManager permManager();
 
     @NotNull PunishmentService punishmentService();
 

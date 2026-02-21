@@ -18,8 +18,7 @@ import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.hollowcube.mapmaker.map.util.NbtUtil;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.ComponentUtil;
@@ -36,74 +35,76 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
+
 public class DebugCommand extends CommandDsl {
 
     private final CommandCondition adminCondition;
     private final CommandCondition localCondition;
 
     public DebugCommand(
-            @NotNull PlayerService playerService, @NotNull PermManager permManager, @NotNull MapService mapService
+        @NotNull PlayerService playerService, @NotNull MapService mapService
     ) {
         super("debug");
 
         description = "Debugging utilities for map maker";
         category = CommandCategory.HIDDEN;
 
-        adminCondition = permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN);
+        adminCondition = staffPerm(Permission.GENERIC_STAFF);
         localCondition = (_, _) -> ServerRuntime.getRuntime().isDevelopment() ? CommandCondition.ALLOW
-                : CommandCondition.DENY;
+            : CommandCondition.DENY;
 
         // Mapmaker stuff
         createPermissionlessSubcommand("rp", this::handleDebugResourcePack,
-                "Show information about the current resource pack version");
+            "Show information about the current resource pack version");
         createPermissionlessSubcommand("self", this::handleDebugSelf,
-                "Show information about yourself");
+            "Show information about yourself");
         createPermissionlessSubcommand("server", this::handleDebugServer,
-                "Show information about the current server");
+            "Show information about the current server");
         createPermissionedSubcommand("gc", (ignored1, ignored2) -> System.gc(),
-                "Force a garbage collection");
+            "Force a garbage collection");
 
         // Minestom stuff
         createPermissionlessSubcommand("commands", this::handleCommandsDebug,
-                "Reload the currently available commands");
+            "Reload the currently available commands");
         createPermissionlessSubcommand("block", this::handleBlockDebug,
-                "Show debug information about the block you're looking at");
+            "Show debug information about the block you're looking at");
         createPermissionlessSubcommand("heightmap", this::handleHeightmapDebug,
-                "Show debug information about the heightmaps at your location");
+            "Show debug information about the heightmaps at your location");
         createPermissionlessSubcommand("pvn", this::handlePvnDebug,
-                "Show your current protocol version");
+            "Show your current protocol version");
 
         createPermissionedSubcommand("relight", this::relightWorld,
-                "Relight the world");
+            "Relight the world");
         createPermissionedSubcommand("reheightmap", this::handleReHeightmapDebug,
-                "Rebuild the heightmap in the map");
+            "Rebuild the heightmap in the map");
         createPermissionedSubcommand("yndranth", this::handleYndranthDebug,
-                "dump block nbt directly");
+            "dump block nbt directly");
         createPermissionedSubcommand("tree", this::handleTreeDebug,
-                "show map octree");
+            "show map octree");
         createPermissionedSubcommand("fixthedripleaf", this::fixTheDripleaf,
-                "add dripleaf block handlers to relevant blocks");
+            "add dripleaf block handlers to relevant blocks");
     }
 
     public @NotNull CommandDsl createPermissionlessSubcommand(
-            @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
+        @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
         return createSubcommand(name, handler, null, description);
     }
 
     public @NotNull CommandDsl createPermissionedSubcommand(
-            @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
+        @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
         return createSubcommand(name, handler, adminCondition, description);
     }
 
     public @NotNull CommandDsl createLocalSubcommand(
-            @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
+        @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
         return createSubcommand(name, handler, localCondition, description);
     }
 
     private void handleDebugResourcePack(@NotNull Player player, @NotNull CommandContext context) {
         var packHash = ServerRuntime.getRuntime().resourcePackSha1();
         player.sendMessage(Component.text("Resource pack: ")
-                .append(ComponentUtil.createBasicCopy(packHash)));
+            .append(ComponentUtil.createBasicCopy(packHash)));
     }
 
     private void handleDebugSelf(@NotNull Player player, @NotNull CommandContext context) {
@@ -130,8 +131,8 @@ public class DebugCommand extends CommandDsl {
     }
 
     private @NotNull CommandDsl createSubcommand(
-            @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @Nullable CommandCondition condition,
-            @NotNull String description
+        @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @Nullable CommandCondition condition,
+        @NotNull String description
     ) {
         var cmd = new CommandDsl(name);
         cmd.setDescription(description);
@@ -164,7 +165,7 @@ public class DebugCommand extends CommandDsl {
         } else {
             if (block.handler() != null) {
                 player.sendMessage(
-                        "Block: " + block.handler().getKey() + "@" + block.handler().getClass().getSimpleName());
+                    "Block: " + block.handler().getKey() + "@" + block.handler().getClass().getSimpleName());
             } else {
                 player.sendMessage("Block: " + "no handler");
             }
@@ -241,10 +242,10 @@ public class DebugCommand extends CommandDsl {
                     size = new Vec(0.5);
                 }
                 new ClientboundDebugRenderAddPacket(
-                        Key.key("octree", String.valueOf(i++)),
-                        new DebugShape.Box(bb.boundingBox().center(), size, Quaternion.ZERO,
-                                0, color | 0xFF000000, 5),
-                        0, 20 * 20).send(player); // 20s
+                    Key.key("octree", String.valueOf(i++)),
+                    new DebugShape.Box(bb.boundingBox().center(), size, Quaternion.ZERO,
+                        0, color | 0xFF000000, 5),
+                    0, 20 * 20).send(player); // 20s
             }
         });
 
@@ -279,7 +280,7 @@ public class DebugCommand extends CommandDsl {
     }
 
     private void queueRateLimitedWorldUpdate(
-            @NotNull Player player, @NotNull String name, @NotNull Consumer<List<Chunk>> action, int rate) {
+        @NotNull Player player, @NotNull String name, @NotNull Consumer<List<Chunk>> action, int rate) {
         FutureUtil.submitVirtual(() -> {
             var chunks = List.copyOf(player.getInstance().getChunks());
             int nBatches = (chunks.size() + rate - 1) / rate;

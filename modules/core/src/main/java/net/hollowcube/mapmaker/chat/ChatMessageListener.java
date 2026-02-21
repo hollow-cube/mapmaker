@@ -14,9 +14,8 @@ import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.chat.components.MessageComponents;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.DisplayName;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
@@ -80,7 +79,6 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
     private final PlayerService playerService;
     private final MapService mapService;
     private final PunishmentService punishmentService;
-    private final PermManager permissions;
     private final JetStreamWrapper jetStream;
 
     private final AsyncLoadingCache<String, Optional<Punishment>> playerMuteCache;
@@ -91,13 +89,12 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
     public ChatMessageListener(
         SessionManager sessionManager, PlayerService playerService,
         MapService mapService, PunishmentService punishmentService,
-        PermManager permissions, JetStreamWrapper jetStream
+        JetStreamWrapper jetStream
     ) {
         this.sessionManager = sessionManager;
         this.playerService = playerService;
         this.mapService = mapService;
         this.punishmentService = punishmentService;
-        this.permissions = permissions;
         this.jetStream = jetStream;
 
         this.playerMuteCache = Caffeine.newBuilder()
@@ -216,8 +213,9 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
                     case ClientChatMessageData.CHANNEL_STAFF -> handleUnsignedChat(
                         message, "chat.channel.staff",
                         recipient -> {
-                            var isStaffMode = PlayerData.fromPlayer(recipient).getSetting(PlayerSettings.STAFF_MODE);
-                            return isStaffMode && this.permissions.hasPlatformPermission(recipient, PlatformPerm.MAP_ADMIN);
+                            var playerData = PlayerData.fromPlayer(recipient);
+                            var isStaffMode = playerData.getSetting(PlayerSettings.STAFF_MODE);
+                            return isStaffMode && playerData.has(Permission.GENERIC_STAFF);
                         }
                     );
                     default -> handleDirectMessage(message);

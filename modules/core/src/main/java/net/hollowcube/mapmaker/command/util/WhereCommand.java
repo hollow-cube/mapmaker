@@ -6,7 +6,6 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
@@ -24,10 +23,9 @@ public class WhereCommand extends CommandDsl {
     private final MapService mapService;
 
     public WhereCommand(
-            @NotNull SessionManager sessionManager,
-            @NotNull PlayerService playerService,
-            @NotNull MapService mapService,
-            @NotNull PermManager permManager
+        @NotNull SessionManager sessionManager,
+        @NotNull PlayerService playerService,
+        @NotNull MapService mapService
     ) {
         super("where", "find");
         this.sessionManager = sessionManager;
@@ -38,7 +36,7 @@ public class WhereCommand extends CommandDsl {
         this.category = CommandCategories.SOCIAL;
 
         targetArg = CoreArgument.AnyOnlinePlayer("player", sessionManager)
-                .description("The player you want to find");
+            .description("The player you want to find");
 
         addSyntax(playerOnly(this::handleFindPlayer), targetArg);
     }
@@ -80,7 +78,7 @@ public class WhereCommand extends CommandDsl {
         var targetName = playerService.getPlayerDisplayName2(target).build();
         switch (presence.type()) {
             case Presence.TYPE_MAPMAKER_HUB ->
-                    player.sendMessage(Component.translatable("command.where.hub", targetName));
+                player.sendMessage(Component.translatable("command.where.hub", targetName));
             case Presence.TYPE_MAPMAKER_MAP -> {
                 var senderPresence = Objects.requireNonNull(sessionManager.getPresence(senderId));
                 if (senderPresence.mapId().equals(presence.mapId())) {
@@ -93,7 +91,7 @@ public class WhereCommand extends CommandDsl {
                     player.sendMessage(Component.translatable("command.where.building", targetName, Component.text(target), Component.text(map.name())));
                 } else if (Presence.VERIFYING_STATE.equals(presence.state())) {
                     player.sendMessage(Component.translatable("command.where.verifying", targetName));
-                }  else {
+                } else {
                     player.sendMessage(Component.translatable("command.where.playing", targetName, Component.text(target), Component.text(map.name())));
                 }
             }

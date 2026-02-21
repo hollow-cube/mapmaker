@@ -8,8 +8,7 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -26,20 +25,22 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
+
 public class HubTrainCommand extends CommandDsl {
 
     private final ArgumentWord type = Argument.Word("type").with("kick", "test");
     private final ArgumentEntity players = Argument.Entity("player").onlyPlayers(true);
     private final Scheduler scheduler;
 
-    public HubTrainCommand(@NotNull PermManager permManager, @NotNull Scheduler scheduler) {
+    public HubTrainCommand(@NotNull Scheduler scheduler) {
         super("train");
         this.scheduler = scheduler;
 
         category = CommandCategories.STAFF;
         description = "Hits a player with a train, optionally kicking them from the server";
 
-        setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
+        setCondition(staffPerm(Permission.GENERIC_STAFF));
         addSyntax(playerOnly(this::handleTrainAttack), type, players);
     }
 

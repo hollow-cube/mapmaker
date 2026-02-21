@@ -7,8 +7,7 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
@@ -24,18 +23,19 @@ import java.util.Comparator;
 import java.util.Locale;
 import java.util.Objects;
 
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
+
 public class PHistoryCommand extends CommandDsl {
     private final Argument<String> playerArg;
     private final Argument<PunishmentType> typeArg = Argument.Enum("type", PunishmentType.class)
-            .description("The type of punishment to check");
+        .description("The type of punishment to check");
 
     private final PlayerService playerService;
     private final PunishmentService punishmentService;
 
     public PHistoryCommand(
-            @NotNull PlayerService playerService,
-            @NotNull PunishmentService punishmentService,
-            @NotNull PermManager permManager
+        @NotNull PlayerService playerService,
+        @NotNull PunishmentService punishmentService
     ) {
         super("phistory");
         this.playerService = playerService;
@@ -44,9 +44,9 @@ public class PHistoryCommand extends CommandDsl {
         category = CommandCategories.STAFF;
         description = "Check the punishment history of a player";
         playerArg = CoreArgument.AnyPlayerId("player", playerService)
-                .description("The player to check the history of");
+            .description("The player to check the history of");
 
-        setCondition(permManager.createPlatformCondition2(PlatformPerm.VIEW_PUNISHMENTS));
+        setCondition(staffPerm(Permission.GENERIC_STAFF));
         addSyntax(playerOnly(this::showPlayerHistory), playerArg);
         addSyntax(playerOnly(this::showPlayerHistory), playerArg, typeArg);
     }
@@ -78,7 +78,7 @@ public class PHistoryCommand extends CommandDsl {
 
             if (punishment.ladderId() != null) {
                 builder.append(Component.text(punishment.ladderId())
-                        .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT, Component.text(punishment.comment()))));
+                    .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT, Component.text(punishment.comment()))));
             } else {
                 builder.append(Component.text("'" + punishment.comment() + "'"));
             }
@@ -89,7 +89,7 @@ public class PHistoryCommand extends CommandDsl {
             if (punishment.revokedAt() != null) {
                 builder.append(Component.text(" ("));
                 builder.append(Component.text("revoked").hoverEvent(HoverEvent.showText(
-                        Component.text(Objects.requireNonNullElse(punishment.revokedReason(), "no reason given")))));
+                    Component.text(Objects.requireNonNullElse(punishment.revokedReason(), "no reason given")))));
                 builder.append(Component.text(" by "));
                 builder.append(OpUtils.mapOr(punishment.revokedBy(), it -> playerService.getPlayerDisplayName2(it).build(), Component.text("Unknown")));
                 builder.append(Component.text(" " + NumberUtil.formatTimeSince(punishment.revokedAt())));

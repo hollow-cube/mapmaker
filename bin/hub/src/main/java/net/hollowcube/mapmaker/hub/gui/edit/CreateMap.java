@@ -17,7 +17,6 @@ import net.hollowcube.mapmaker.map.MapSize;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
-import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +40,7 @@ public class CreateMap extends View {
     public CreateMap(@NotNull Context context) {
         super(context);
 
-        final String playerId = PlayerData.fromPlayer(player).id();
+        final var playerData = PlayerData.fromPlayer(player);
         for (int i = 0; i < sizeSwitches.length; i++) {
             final MapSize size = MapSize.values()[i];
             final ShopUpgrade upgrade = switch (size) {
@@ -51,10 +50,10 @@ public class CreateMap extends View {
                 case COLOSSAL -> ShopUpgrade.MAP_SIZE_4;
             };
 
-            if (upgrade == null || ShopUpgradeCache.has(playerId, upgrade, false)) {
+            if (upgrade == null || upgrade.has(playerData)) {
                 addActionHandler(
-                        sizeSwitches[i].id().replace("_switch", "_unset"),
-                        Label.ActionHandler.lmb(player -> selectSize(size))
+                    sizeSwitches[i].id().replace("_switch", "_unset"),
+                    Label.ActionHandler.lmb(player -> selectSize(size))
                 );
             } else {
                 sizeSwitches[i].setOption(LOCKED);

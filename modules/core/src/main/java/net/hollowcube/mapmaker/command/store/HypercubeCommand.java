@@ -5,7 +5,6 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.entity.Player;
@@ -21,12 +20,10 @@ import static net.hollowcube.mapmaker.gui.store.StoreView.TAB_HYPERCUBE;
 
 public class HypercubeCommand extends CommandDsl {
     private final PlayerService playerService;
-    private final PermManager permManager;
 
-    public HypercubeCommand(@NotNull PlayerService playerService, @NotNull PermManager permManager) {
+    public HypercubeCommand(@NotNull PlayerService playerService) {
         super("hypercube");
         this.playerService = playerService;
-        this.permManager = permManager;
 
         addSyntax(playerOnly(this::handleHypercubeInfo));
     }
@@ -36,12 +33,12 @@ public class HypercubeCommand extends CommandDsl {
             var playerId = PlayerData.fromPlayer(player).id();
             var status = playerService.getHypercubeStatus(playerId);
             if (status == null) {
-                Panel.open(player, new StoreView(playerService, permManager, TAB_HYPERCUBE));
+                Panel.open(player, new StoreView(playerService, TAB_HYPERCUBE));
                 return;
             }
 
             player.sendMessage(GenericMessages.COMMAND_HYPERCUBE_SUBSCRIPTION_INFO.with(
-                    formatInstant(status.since()), formatInstant(status.until())
+                formatInstant(status.since()), formatInstant(status.until())
             ));
         } catch (Exception e) {
             player.sendMessage(GenericMessages.COMMAND_UNKNOWN_ERROR);

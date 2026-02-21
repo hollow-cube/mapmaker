@@ -1,34 +1,30 @@
 package net.hollowcube.mapmaker.command.staff;
 
-import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.command.CommandCategories;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class StaffCommand extends CommandDsl {
-    public static final CommandCondition IN_STAFF_MODE = (sender, _) ->
-        sender instanceof Player p && PlayerData.fromPlayer(p).getSetting(PlayerSettings.STAFF_MODE)
-            ? CommandCondition.ALLOW : CommandCondition.HIDE;
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 
+public class StaffCommand extends CommandDsl {
     private final PlayerService playerService;
 
-    public StaffCommand(@NotNull PlayerService playerService, @NotNull PermManager permManager) {
+    public StaffCommand(@NotNull PlayerService playerService) {
         super("staff");
         this.playerService = playerService;
 
         category = CommandCategories.STAFF;
         description = "Toggles staff mode on or off (hides staff-related commands/messages/etc)";
 
-        setCondition(permManager.createPlatformCondition2(PlatformPerm.VANISH));
+        setCondition(staffPerm(Permission.GENERIC_STAFF));
         addSyntax(playerOnly(this::handleToggleStaffMode));
     }
 

@@ -78,8 +78,6 @@ import net.hollowcube.mapmaker.misc.noop.*;
 import net.hollowcube.mapmaker.notifications.NotificationsConsumer;
 import net.hollowcube.mapmaker.obungus.ObungusService;
 import net.hollowcube.mapmaker.obungus.ObungusServiceImpl;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PermManagerImpl;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.punishments.PunishmentManagementListener;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
@@ -87,7 +85,6 @@ import net.hollowcube.mapmaker.punishments.PunishmentServiceImpl;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
-import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.*;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
@@ -133,7 +130,6 @@ public abstract class AbstractMapServer implements MapServer {
     private final SessionService sessionService;
     private final PlayerService playerService;
     private final MapService mapService;
-    private final PermManager permManager;
     private final PunishmentService punishmentService;
     private PlayerInviteService inviteService; // So many dependencies very yikes
 
@@ -184,21 +180,8 @@ public abstract class AbstractMapServer implements MapServer {
         else if (globalConfig.noop()) mapService = new NoopMapService();
         else mapService = new MapServiceImpl("http://localhost:9125"); // tilt
 
-        if (globalConfig.noop()) {
-            permManager = new NoopPermManager();
-        } else {
-            var spicedbConfig = config.get(SpiceDBConfig.class);
-            var spicedbUrl = spicedbConfig.url();
-            if (spicedbUrl.isEmpty()) spicedbUrl = "http://localhost:8443";
-            var spicedbToken = spicedbConfig.token();
-            if (spicedbToken.isEmpty()) spicedbToken = "supersecretkey";
-            permManager = new PermManagerImpl(otel, spicedbUrl, spicedbToken);
-        }
-
         var obungusService = new ObungusServiceImpl(otel, "http://localhost:9125");
         addBinding(ObungusService.class, obungusService, "obungus", "obungusService");
-
-        ShopUpgradeCache.init(permManager);
     }
 
     protected abstract @NotNull String name();
@@ -254,17 +237,17 @@ public abstract class AbstractMapServer implements MapServer {
             throw new RuntimeException(e);
         }
 
-        sessionManager = new SessionManager(sessionService(), playerService(), permManager(), jetStream);
+        sessionManager = new SessionManager(sessionService(), playerService(), jetStream);
         shutdowner.queue("session-manager", sessionManager::close);
         FutureUtil.submitVirtual(sessionManager()::sync); // Sync existing sessions with remote
 
         // Must be initialized this late because of all its dependencies. this is pretty yikes im not a big fan
         var inviteServiceUrl = System.getenv("MAPMAKER_PLAYER_INVITE_SERVICE_URL");
         if (inviteServiceUrl != null)
-            this.inviteService = new PlayerInviteServiceImpl(otel, inviteServiceUrl, playerService, mapService, sessionManager, bridge, permManager);
+            this.inviteService = new PlayerInviteServiceImpl(otel, inviteServiceUrl, playerService, mapService, sessionManager, bridge);
         else if (globalConfig.noop()) this.inviteService = new NoopPlayerInviteService();
         else {
-            this.inviteService = new PlayerInviteServiceImpl(otel, "http://localhost:9127", playerService, mapService, sessionManager, bridge, permManager); // tilt
+            this.inviteService = new PlayerInviteServiceImpl(otel, "http://localhost:9127", playerService, mapService, sessionManager, bridge); // tilt
         }
 
         var services = new ServiceContext(playerService(), sessionService(), mapService(), bridge());
@@ -276,10 +259,10 @@ public abstract class AbstractMapServer implements MapServer {
             mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(mapService, playerService, sessionManager, bridge(), jetStream);
             shutdowner.queue("map-invite-acceptance-listener", mapInviteAcceptedOrRejectedListener::close);
 
-            var punishmentCreatedListener = new PunishmentManagementListener(playerService, permManager, jetStream);
+            var punishmentCreatedListener = new PunishmentManagementListener(playerService, jetStream);
             shutdowner.queue("punishment-listener", punishmentCreatedListener::close);
 
-            chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, permManager, jetStream);
+            chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, jetStream);
             facets.put(ChatMessageListener.class, chatMessageListener);
             shutdowner.queue("chat-message-listener", chatMessageListener::close);
             MinecraftServer.getPacketListenerManager().setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
@@ -316,11 +299,6 @@ public abstract class AbstractMapServer implements MapServer {
     @Override
     public @NotNull MapService mapService() {
         return mapService;
-    }
-
-    @Override
-    public @NotNull PermManager permManager() {
-        return permManager;
     }
 
     @Override
@@ -383,7 +361,6 @@ public abstract class AbstractMapServer implements MapServer {
         addBinding(SessionService.class, sessionService, "sessionService");
         addBinding(PlayerService.class, playerService, "playerService");
         addBinding(MapService.class, mapService, "mapService");
-        addBinding(PermManager.class, permManager, "permManager");
         addBinding(PunishmentService.class, punishmentService, "punishmentService");
         addBinding(PlayerInviteService.class, inviteService, "playerInviteService");
 
@@ -404,12 +381,12 @@ public abstract class AbstractMapServer implements MapServer {
         if (fullInstance) commandManager.register(new CosmeticsCommand(playerService()));
         if (fullInstance) commandManager.register(new RulesCommand());
         commandManager.register(createDebugCommand());
-        commandManager.register(new StoreCommand(playerService(), permManager()));
-        commandManager.register(new HypercubeCommand(playerService(), permManager()));
+        commandManager.register(new StoreCommand(playerService()));
+        commandManager.register(new HypercubeCommand(playerService()));
         commandManager.register(new DiscordCommand());
         if (fullInstance) commandManager.register(new LinkCommand(playerService()));
         if (fullInstance) commandManager.register(new TotpCommand(playerService()));
-        commandManager.register(new NoobCommand(permManager()));
+        commandManager.register(new NoobCommand());
         commandManager.register(new HideCommand(playerService()));
         commandManager.register(new SettingsCommand());
         commandManager.register(new BugReportCommand());
@@ -422,14 +399,14 @@ public abstract class AbstractMapServer implements MapServer {
 
         if (fullInstance) {
             commandManager.register(new PlayCommand(playerService(), mapService(), sessionManager(), bridge()));
-            commandManager.register(new WhereCommand(sessionManager(), playerService(), mapService(), permManager()));
+            commandManager.register(new WhereCommand(sessionManager(), playerService(), mapService()));
             commandManager.register(new ListCommand(sessionManager(), playerService()));
             commandManager.register(new MsgCommand(sessionManager(), mapService(), chatMessageListener, playerService()));
             commandManager.register(new ChannelCommand.Global(sessionManager(), mapService(), chatMessageListener));
             commandManager.register(new ChannelCommand.Local(sessionManager(), mapService(), chatMessageListener));
             commandManager.register(new ChannelCommand.Reply(sessionManager(), mapService(), chatMessageListener));
-            commandManager.register(new ChannelCommand.Staff(sessionManager(), mapService(), chatMessageListener, permManager()));
-            commandManager.register(new ChatCommand(playerService(), permManager()));
+            commandManager.register(new ChannelCommand.Staff(sessionManager(), mapService(), chatMessageListener));
+            commandManager.register(new ChatCommand(playerService()));
         }
 
         if (fullInstance) {
@@ -440,29 +417,29 @@ public abstract class AbstractMapServer implements MapServer {
             commandManager.register(new JoinCommand(inviteService(), playerService(), sessionManager()));
         }
 
-        commandManager.register(new MapCommand(playerService(), mapService(), permManager(), bridge(), jetStream));
+        commandManager.register(new MapCommand(playerService(), mapService(), bridge(), jetStream));
 
-        commandManager.register(new NotificationCommand(services, permManager()));
+        commandManager.register(new NotificationCommand(services));
 
         if (fullInstance) {
-            commandManager.register(new SFindCommand(mapService(), playerService(), sessionManager(), permManager()));
-            commandManager.register(new VanishCommand(sessionManager(), playerService(), permManager()));
-            commandManager.register(new UnvanishCommand(sessionManager(), playerService(), permManager()));
-            commandManager.register(new StaffCommand(playerService(), permManager()));
+            commandManager.register(new SFindCommand(mapService(), playerService(), sessionManager()));
+            commandManager.register(new VanishCommand(sessionManager(), playerService()));
+            commandManager.register(new UnvanishCommand(sessionManager(), playerService()));
+            commandManager.register(new StaffCommand(playerService()));
         }
 
         if (fullInstance) {
-            commandManager.register(new PHelpCommand(punishmentService(), permManager()));
-            commandManager.register(new PStatusCommand(playerService(), punishmentService(), permManager()));
-            commandManager.register(new PHistoryCommand(playerService(), punishmentService(), permManager()));
+            commandManager.register(new PHelpCommand(punishmentService()));
+            commandManager.register(new PStatusCommand(playerService(), punishmentService()));
+            commandManager.register(new PHistoryCommand(playerService(), punishmentService()));
         }
 
         if (fullInstance) {
-            FutureUtil.submitVirtual(() -> commandManager.register(new BanCommand(punishmentService(), playerService(), permManager())));
-            commandManager.register(new UnbanCommand(punishmentService(), playerService(), permManager()));
-            FutureUtil.submitVirtual(() -> commandManager.register(new MuteCommand(punishmentService(), playerService(), permManager())));
-            commandManager.register(new UnmuteCommand(punishmentService(), playerService(), permManager()));
-            commandManager.register(new KickCommand(punishmentService(), sessionManager(), permManager()));
+            FutureUtil.submitVirtual(() -> commandManager.register(new BanCommand(punishmentService(), playerService())));
+            commandManager.register(new UnbanCommand(punishmentService(), playerService()));
+            FutureUtil.submitVirtual(() -> commandManager.register(new MuteCommand(punishmentService(), playerService())));
+            commandManager.register(new UnmuteCommand(punishmentService(), playerService()));
+            commandManager.register(new KickCommand(punishmentService(), sessionManager()));
         }
 
         if (fullInstance) {
@@ -570,7 +547,7 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     protected @NotNull DebugCommand createDebugCommand() {
-        return new DebugCommand(playerService(), permManager(), mapService());
+        return new DebugCommand(playerService(), mapService());
     }
 
     /**

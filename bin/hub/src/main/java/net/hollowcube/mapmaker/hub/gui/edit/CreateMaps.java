@@ -79,7 +79,7 @@ public class CreateMaps extends View {
 
         // Need to 'predict' that the map will now be in the slot since we likely haven't received an update from remote.
         var pd = MapPlayerData.fromPlayer(player);
-        pd.mapSlots()[slot] = map.id();
+        pd.mapSlots(playerData)[slot] = map.id();
 
         // Also update GUI to reflect the change
         slots[slot].setToSelected(map);
@@ -110,7 +110,7 @@ public class CreateMaps extends View {
 
             // There is a map, show the full icon even if they dont have it unlocked.
             // It means they used to and have a map in that slot.
-            var mapId = playerData.getMapSlot(i);
+            var mapId = playerData.getMapSlot(this.playerData, i);
             if (mapId != null) {
                 slot.setState(playerData, EditMapIconBase.State.FULL, i, mapId);
                 if (firstSlot == -1) firstSlot = i;
@@ -118,7 +118,7 @@ public class CreateMaps extends View {
             }
 
             // If the slot is locked, show the lock icon
-            if (i >= playerData.unlockedSlots()) {
+            if (i >= this.playerData.mapSlots()) {
                 slot.setState(playerData, EditMapIconBase.State.LOCKED, i, null);
                 continue;
             }

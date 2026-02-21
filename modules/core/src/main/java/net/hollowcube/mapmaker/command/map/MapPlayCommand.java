@@ -7,14 +7,15 @@ import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 
 public class MapPlayCommand extends CommandDsl {
     private final Argument<@Nullable MapData> mapArg;
@@ -23,7 +24,7 @@ public class MapPlayCommand extends CommandDsl {
     private final MapService mapService;
     private final ServerBridge bridge;
 
-    public MapPlayCommand(@NotNull MapService mapService, @NotNull PermManager permManager, @NotNull ServerBridge bridge) {
+    public MapPlayCommand(@NotNull MapService mapService, @NotNull ServerBridge bridge) {
         super("play");
         this.mapService = mapService;
         this.bridge = bridge;
@@ -31,10 +32,10 @@ public class MapPlayCommand extends CommandDsl {
         description = "Play a map (forced)";
         examples = List.of("/map play 123-456-789", "/map play a12345bc-67de-8f91-ghij-2345k6l78912");
         mapArg = CoreArgument.Map("map", mapService)
-                .description("The ID of the map to play");
+            .description("The ID of the map to play");
         isolateArg = Argument.GreedyString("isolate");
 
-        setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
+        setCondition(staffPerm(Permission.GENERIC_STAFF));
         addSyntax(playerOnly(this::handleForcePlayMap), mapArg);
         addSyntax(playerOnly(this::handleForcePlayMap), mapArg, isolateArg);
     }
@@ -45,7 +46,7 @@ public class MapPlayCommand extends CommandDsl {
 
         if (map == null) {
             player.sendMessage(
-                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+                Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
 

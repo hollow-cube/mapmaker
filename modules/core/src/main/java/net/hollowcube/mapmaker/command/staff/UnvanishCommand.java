@@ -6,8 +6,7 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.command.CommandCategories;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
@@ -15,8 +14,7 @@ import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import static net.hollowcube.command.CommandCondition.and;
-import static net.hollowcube.mapmaker.command.staff.StaffCommand.IN_STAFF_MODE;
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 
 public class UnvanishCommand extends CommandDsl {
     private final Argument<String> silentArg = Argument.Literal("silent")
@@ -25,7 +23,7 @@ public class UnvanishCommand extends CommandDsl {
     private final SessionManager sessionManager;
     private final PlayerService playerService;
 
-    public UnvanishCommand(@NotNull SessionManager sessionManager, @NotNull PlayerService playerService, @NotNull PermManager permManager) {
+    public UnvanishCommand(@NotNull SessionManager sessionManager, @NotNull PlayerService playerService) {
         super("unvanish");
         this.sessionManager = sessionManager;
         this.playerService = playerService;
@@ -33,7 +31,7 @@ public class UnvanishCommand extends CommandDsl {
         category = CommandCategories.STAFF;
         description = "Show yourself to other players. Does nothing if you are not vanished";
 
-        setCondition(and(IN_STAFF_MODE, permManager.createPlatformCondition2(PlatformPerm.VANISH)));
+        setCondition(staffPerm(Permission.GENERIC_STAFF));
         addSyntax(playerOnly(this::handleVanish), silentArg);
         addSyntax(playerOnly(this::handleVanish));
     }

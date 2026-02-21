@@ -7,8 +7,7 @@ import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapMgmtConsumer;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -17,8 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-import static net.hollowcube.command.CommandCondition.and;
-import static net.hollowcube.mapmaker.command.staff.StaffCommand.IN_STAFF_MODE;
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 
 public class MapDrainCommand extends CommandDsl {
     private final Argument<@Nullable MapData> mapArg;
@@ -27,7 +25,7 @@ public class MapDrainCommand extends CommandDsl {
 
     private final JetStreamWrapper jetStream;
 
-    public MapDrainCommand(@NotNull MapService mapService, @NotNull PermManager permManager, @NotNull JetStreamWrapper jetStream) {
+    public MapDrainCommand(@NotNull MapService mapService, @NotNull JetStreamWrapper jetStream) {
         super("drain");
         this.jetStream = jetStream;
 
@@ -37,7 +35,8 @@ public class MapDrainCommand extends CommandDsl {
         mapArg = CoreArgument.Map("map", mapService)
             .description("The ID of the map to drain");
 
-        setCondition(and(IN_STAFF_MODE, permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN)));
+        setCondition(staffPerm(Permission.GENERIC_STAFF));
+
         addSyntax(playerOnly(this::handleDrainMap), mapArg);
         addSyntax(playerOnly(this::handleDrainMap), mapArg, reasonArg);
     }

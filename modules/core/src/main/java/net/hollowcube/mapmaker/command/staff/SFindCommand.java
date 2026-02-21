@@ -7,8 +7,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
@@ -18,8 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-import static net.hollowcube.command.CommandCondition.and;
-import static net.hollowcube.mapmaker.command.staff.StaffCommand.IN_STAFF_MODE;
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 
 public class SFindCommand extends CommandDsl {
     private final Argument<String> targetArg;
@@ -31,8 +29,7 @@ public class SFindCommand extends CommandDsl {
     public SFindCommand(
         @NotNull MapService mapService,
         @NotNull PlayerService playerService,
-        @NotNull SessionManager sessionManager,
-        @NotNull PermManager permManager
+        @NotNull SessionManager sessionManager
     ) {
         super("sfind");
         this.mapService = mapService;
@@ -44,7 +41,7 @@ public class SFindCommand extends CommandDsl {
         targetArg = CoreArgument.AnyOnlinePlayer("player", sessionManager)
             .description("The player you want to find");
 
-        setCondition(and(IN_STAFF_MODE, permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN)));
+        setCondition(staffPerm(Permission.GENERIC_STAFF));
         addSyntax(playerOnly(this::handleFindPlayer), targetArg);
     }
 

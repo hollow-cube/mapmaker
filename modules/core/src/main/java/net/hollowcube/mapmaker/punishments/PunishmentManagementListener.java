@@ -7,8 +7,7 @@ import io.nats.client.api.ConsumerConfiguration;
 import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.PlayerSettings;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.punishments.event.PunishmentCreatedEvent;
@@ -42,17 +41,14 @@ public class PunishmentManagementListener implements Closeable {
         .build();
 
     private final PlayerService playerService;
-    private final PermManager permManager;
 
     private final MessageConsumer consumer;
 
     public PunishmentManagementListener(
         @NotNull PlayerService playerService,
-        @NotNull PermManager permManager,
         @NotNull JetStreamWrapper jetStream
     ) {
         this.playerService = playerService;
-        this.permManager = permManager;
 
         this.consumer = jetStream.subscribe(STREAM, CONSUMER_CONFIG, PunishmentUpdateMessage.class, this::handlePunishmentUpdate);
     }
@@ -113,14 +109,10 @@ public class PunishmentManagementListener implements Closeable {
             playerService.getPlayerDisplayName2(punishment.executorId()),
             Component.text(Objects.requireNonNullElse(punishment.ladderId(), punishment.comment()))
         );
-        var permission = switch (punishment.type()) {
-            case BAN -> PlatformPerm.BAN_PLAYER;
-            case MUTE -> PlatformPerm.MUTE_PLAYER;
-            case KICK -> PlatformPerm.KICK_PLAYER;
-        };
         for (var player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-            var staffMode = PlayerData.fromPlayer(player).getSetting(PlayerSettings.STAFF_MODE);
-            if (!staffMode || !permManager.hasPlatformPermission(player, permission)) continue;
+            var playerData = PlayerData.fromPlayer(player);
+            var staffMode = playerData.getSetting(PlayerSettings.STAFF_MODE);
+            if (!staffMode || !playerData.has(Permission.GENERIC_STAFF)) continue;
 
             player.sendMessage(announcement);
         }

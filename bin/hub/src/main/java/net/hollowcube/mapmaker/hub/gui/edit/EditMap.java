@@ -123,22 +123,22 @@ public class EditMap extends View {
 
             // Unset handler to set the subvariant on click
             addActionHandler(
-                    String.format("parkour_subvariant_%s_unset", name),
-                    Label.ActionHandler.lmb(player -> {
-                        map.settings().setParkourSubVariant(subvariant);
-                        updateElementsFromMap();
-                        updateRequest();
-                    })
+                String.format("parkour_subvariant_%s_unset", name),
+                Label.ActionHandler.lmb(player -> {
+                    map.settings().setParkourSubVariant(subvariant);
+                    updateElementsFromMap();
+                    updateRequest();
+                })
             );
 
             // Set handler to unset the subvariant on click
             addActionHandler(
-                    String.format("parkour_subvariant_%s_set", name),
-                    Label.ActionHandler.lmb(player -> {
-                        map.settings().setParkourSubVariant(null);
-                        updateElementsFromMap();
-                        updateRequest();
-                    })
+                String.format("parkour_subvariant_%s_set", name),
+                Label.ActionHandler.lmb(player -> {
+                    map.settings().setParkourSubVariant(null);
+                    updateElementsFromMap();
+                    updateRequest();
+                })
             );
         }
 
@@ -148,22 +148,22 @@ public class EditMap extends View {
 
             // Unset handler to set the subvariant on click
             addActionHandler(
-                    String.format("building_subvariant_%s_unset", name),
-                    Label.ActionHandler.lmb(player -> {
-                        map.settings().setBuildingSubVariant(subvariant);
-                        updateElementsFromMap();
-                        updateRequest();
-                    })
+                String.format("building_subvariant_%s_unset", name),
+                Label.ActionHandler.lmb(player -> {
+                    map.settings().setBuildingSubVariant(subvariant);
+                    updateElementsFromMap();
+                    updateRequest();
+                })
             );
 
             // Set handler to unset the subvariant on click
             addActionHandler(
-                    String.format("building_subvariant_%s_set", name),
-                    Label.ActionHandler.lmb(player -> {
-                        map.settings().setBuildingSubVariant(null);
-                        updateElementsFromMap();
-                        updateRequest();
-                    })
+                String.format("building_subvariant_%s_set", name),
+                Label.ActionHandler.lmb(player -> {
+                    map.settings().setBuildingSubVariant(null);
+                    updateElementsFromMap();
+                    updateRequest();
+                })
             );
         }
     }
@@ -175,14 +175,14 @@ public class EditMap extends View {
 
             // Unset handler to set the tag on click
             addActionHandler(
-                    String.format("map_tag_%s_unset", name),
-                    Label.ActionHandler.lmb(player -> tagClickHandler(mapTag, true))
+                String.format("map_tag_%s_unset", name),
+                Label.ActionHandler.lmb(player -> tagClickHandler(mapTag, true))
             );
 
             // Set handler to unset the tag on click
             addActionHandler(
-                    String.format("map_tag_%s_set", name),
-                    Label.ActionHandler.lmb(player -> tagClickHandler(mapTag, false))
+                String.format("map_tag_%s_set", name),
+                Label.ActionHandler.lmb(player -> tagClickHandler(mapTag, false))
             );
         }
     }
@@ -195,21 +195,21 @@ public class EditMap extends View {
                 case BOOLEAN -> {
                     // Unset handler to set the setting on click
                     addActionHandler(
-                            String.format("map_settings_%s_unset", name),
-                            Label.ActionHandler.lmb(_ -> settingClickHandler(mapSetting, true))
+                        String.format("map_settings_%s_unset", name),
+                        Label.ActionHandler.lmb(_ -> settingClickHandler(mapSetting, true))
                     );
                     // Set handler to unset the setting on click
                     addActionHandler(
-                            String.format("map_settings_%s_set", name),
-                            Label.ActionHandler.lmb(_ -> settingClickHandler(mapSetting, false))
+                        String.format("map_settings_%s_set", name),
+                        Label.ActionHandler.lmb(_ -> settingClickHandler(mapSetting, false))
                     );
                 }
                 case ENUM -> {
                     var enumClass = Objects.requireNonNull(mapSetting.getValueClass(), "enum settings must have a value class");
                     for (var value : enumClass.getEnumConstants()) {
                         addActionHandler(
-                                String.format("map_settings_%s_%s", name, value.name().toLowerCase(Locale.ROOT)),
-                                Label.ActionHandler.lmb(_ -> settingClickHandler(mapSetting, true))
+                            String.format("map_settings_%s_%s", name, value.name().toLowerCase(Locale.ROOT)),
+                            Label.ActionHandler.lmb(_ -> settingClickHandler(mapSetting, true))
                         );
                     }
                 }
@@ -240,9 +240,9 @@ public class EditMap extends View {
     private @Blocking void editMap(@NotNull Player player) {
         if (map.verification() != MapVerification.UNVERIFIED) {
             pushView(context -> new ConfirmAction(
-                    context,
-                    () -> actuallyEditMap(player),
-                    Component.translatable("edit.map.confirm")
+                context,
+                () -> actuallyEditMap(player),
+                Component.translatable("edit.map.confirm")
             ));
         } else {
             actuallyEditMap(player);
@@ -293,15 +293,15 @@ public class EditMap extends View {
     @Action(value = "publish")
     private void publishMap(@NotNull Player player) {
         pushView(context -> new ConfirmAction(context,
-                () -> popView("publish_sig", player),
-                Component.translatable("Publish your map " + map.name())));
+            () -> popView("publish_sig", player),
+            Component.translatable("Publish your map " + map.name())));
     }
 
     @Action(value = "publish_contest")
     private void publishContestMap(@NotNull Player player) {
         pushView(context -> new ConfirmAction(context,
-                () -> popView("publish_sig_contest", player),
-                Component.translatable("gui.create_maps.slot.comp.submit.confirm")));
+            () -> popView("publish_sig_contest", player),
+            Component.translatable("gui.create_maps.slot.comp.submit.confirm")));
     }
 
     @Signal("publish_sig")
@@ -323,7 +323,7 @@ public class EditMap extends View {
             // In case back is used, we need to reset the map details view
             // We have to "predict" that the map will be removed by the async update sent over Kafka,
             // which has most likely not arrived yet.
-            MapPlayerData.fromPlayer(player).mapSlots()[slot] = null;
+            MapPlayerData.fromPlayer(player).mapSlots(playerData)[slot] = null;
             performSignal(CreateMaps.SIG_RESET);
 
             // Open the map details view for the newly published map
@@ -523,8 +523,8 @@ public class EditMap extends View {
     private void fillTagsCounter(@NotNull MapTags.TagType tagType) {
         var typedMaxTags = map.settings().getVariant().maxTags(tagType);
         var currentTags = map.settings().getTags().stream()
-                .filter(tag -> tag.getType() == tagType)
-                .count();
+            .filter(tag -> tag.getType() == tagType)
+            .count();
         mapTagsMaxCounterText.setText(String.format("%d/%d Tags", currentTags, typedMaxTags));
     }
 
@@ -533,8 +533,8 @@ public class EditMap extends View {
     private boolean canAddAnotherTag(MapTags.TagType tagType) {
         var typedMaxTags = map.settings().getVariant().maxTags(tagType);
         return typedMaxTags > map.settings().getTags().stream()
-                .filter(tag -> tag.getType() == tagType)
-                .count();
+            .filter(tag -> tag.getType() == tagType)
+            .count();
     }
 
     private void tagClickHandler(MapTags.Tag tag, boolean set) {
@@ -638,10 +638,10 @@ public class EditMap extends View {
         var icon = map.settings().getIcon();
         if (icon != null) {
             var translationKey = String.format(
-                    "%s.%s.%s",
-                    icon.isBlock() ? "block" : "item",
-                    icon.key().namespace(),
-                    icon.key().value()
+                "%s.%s.%s",
+                icon.isBlock() ? "block" : "item",
+                icon.key().namespace(),
+                icon.key().value()
             );
             setMapIconSetLabel.setArgs(Component.translatable(translationKey));
             setMapIconSwitch.setOption(1);
@@ -689,7 +689,7 @@ public class EditMap extends View {
         mapSettingsWeatherType.setOption(map.getSetting(MapSettings.WEATHER_TYPE).ordinal());
 
         contestBuildLockIcon.setState(
-                tabSwitch.getOption() != 0 || map.contest() == null ? State.HIDDEN : State.ACTIVE);
+            tabSwitch.getOption() != 0 || map.contest() == null ? State.HIDDEN : State.ACTIVE);
         tabActionsContestSwitch.setOption(map.contest() != null);
         contestBuildingLockSwitch.setOption(map.contest() != null);
         contestPublishSwitch.setOption(map.contest() != null);
@@ -705,7 +705,7 @@ public class EditMap extends View {
     @Action(value = "delete_map", async = true)
     private void deleteMap(@NotNull Player player) {
         pushView(context -> new ConfirmAction(context, () -> deleteMapLogic(player),
-                Component.translatable("Delete your map " + map.name())));
+            Component.translatable("Delete your map " + map.name())));
     }
 
     private void deleteMapLogic(@NotNull Player player) {
@@ -715,14 +715,14 @@ public class EditMap extends View {
 
             // Remove the map from the player as a "prediction", we will get
             // the actual update from the service later.
-            var newMapSlots = mapPlayerData.mapSlots();
+            var newMapSlots = mapPlayerData.mapSlots(PlayerData.fromPlayer(player));
             newMapSlots[slot] = null;
             mapPlayerData.update(new MapPlayerData(
-                    mapPlayerData.id(),
-                    newMapSlots,
-                    mapPlayerData.getContestSlot(),
-                    mapPlayerData.lastPlayedMap(),
-                    mapPlayerData.lastEditedMap()
+                mapPlayerData.id(),
+                newMapSlots,
+                mapPlayerData.getContestSlot(),
+                mapPlayerData.lastPlayedMap(),
+                mapPlayerData.lastEditedMap()
             ));
 
             performSignal(CreateMaps.SIG_RESET);
@@ -781,7 +781,7 @@ public class EditMap extends View {
         }
         tabActionsContestSwitch.setOption(map != null && map.contest() != null);
         contestBuildLockIcon.setState(
-                tabSwitch.getOption() != 0 || map == null || map.contest() == null ? State.HIDDEN : State.ACTIVE);
+            tabSwitch.getOption() != 0 || map == null || map.contest() == null ? State.HIDDEN : State.ACTIVE);
     }
 
     public void showInformation(@NotNull Player player) {
@@ -789,11 +789,11 @@ public class EditMap extends View {
 
         var authorName = playerService.getPlayerDisplayName2(map.owner()).build(DisplayName.Context.DEFAULT);
         player.sendMessage(LanguageProviderV2.translateMultiMerged("gui.map_details.map_info_tab.published_id", List.of(
-                Component.text(map.id()),
-                Component.text("None/Not Published"),
-                Component.text(map.name()),
-                authorName,
-                Component.text("in the future")
+            Component.text(map.id()),
+            Component.text("None/Not Published"),
+            Component.text(map.name()),
+            authorName,
+            Component.text("in the future")
         )));
     }
 

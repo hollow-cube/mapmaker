@@ -1,8 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.util.RuntimeGson;
-import net.hollowcube.mapmaker.store.ShopUpgrade;
-import net.hollowcube.mapmaker.store.ShopUpgradeCache;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -32,8 +31,8 @@ public class MapPlayerData {
     }
 
     public MapPlayerData(
-            @NotNull String id, String[] mapSlots, @Nullable String contestSlot, @Nullable String lastPlayedMap,
-            @Nullable String lastEditedMap
+        @NotNull String id, String[] mapSlots, @Nullable String contestSlot, @Nullable String lastPlayedMap,
+        @Nullable String lastEditedMap
     ) {
         this.id = id;
         this.mapSlots = mapSlots;
@@ -46,21 +45,8 @@ public class MapPlayerData {
         return id;
     }
 
-    public int unlockedSlots() {
-        // Direct == false here because having hypercube automatically gives all of these.
-        if (!ShopUpgradeCache.has(id, ShopUpgrade.MAP_SLOT_3, false)) {
-            return 2;
-        } else if (!ShopUpgradeCache.has(id, ShopUpgrade.MAP_SLOT_4, false)) {
-            return 3;
-        } else if (!ShopUpgradeCache.has(id, ShopUpgrade.MAP_SLOT_5, false)) {
-            return 4;
-        } else {
-            return 5;
-        }
-    }
-
-    public String[] mapSlots() {
-        int unlockedSlots = unlockedSlots();
+    public String[] mapSlots(PlayerData playerData) {
+        int unlockedSlots = playerData.mapSlots();
         if (mapSlots == null)
             mapSlots = new String[unlockedSlots];
         if (mapSlots.length < unlockedSlots)
@@ -83,16 +69,16 @@ public class MapPlayerData {
         this.contestSlot = other.contestSlot;
     }
 
-    public @NotNull SlotState getSlotState(int slot) {
-        if (slot < 0 || slot >= unlockedSlots())
+    public @NotNull SlotState getSlotState(PlayerData playerData, int slot) {
+        if (slot < 0 || slot >= playerData.mapSlots())
             return SlotState.LOCKED;
         if (slot >= mapSlots.length || mapSlots[slot] == null || mapSlots[slot].isEmpty())
             return SlotState.EMPTY;
         return SlotState.FILLED;
     }
 
-    public @Nullable String getMapSlot(int slot) {
-        if (slot < 0 || slot >= unlockedSlots() || slot >= mapSlots.length)
+    public @Nullable String getMapSlot(PlayerData playerData, int slot) {
+        if (slot < 0 || slot >= playerData.mapSlots() || slot >= mapSlots.length)
             return null;
         var mapId = mapSlots[slot];
         return mapId == null || mapId.isEmpty() ? null : mapId;
@@ -109,11 +95,10 @@ public class MapPlayerData {
     @Override
     public String toString() {
         return "MapPlayerData[" +
-                "id='" + id + '\'' +
-                ", unlockedSlots=" + unlockedSlots() +
-                ", mapSlots=" + Arrays.toString(mapSlots) +
-                ", lastPlayedMap='" + lastPlayedMap + '\'' +
-                ", lastEditedMap='" + lastEditedMap + '\'' +
-                ']';
+               "id='" + id + '\'' +
+               ", mapSlots=" + Arrays.toString(mapSlots) +
+               ", lastPlayedMap='" + lastPlayedMap + '\'' +
+               ", lastEditedMap='" + lastEditedMap + '\'' +
+               ']';
     }
 }
