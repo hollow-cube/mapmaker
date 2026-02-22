@@ -51,6 +51,7 @@ import net.minestom.server.ServerProcess;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerMoveEvent;
+import net.minestom.server.event.player.PlayerTickEndEvent;
 import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.network.packet.client.play.ClientPlayerBlockPlacementPacket;
 import net.minestom.server.sound.SoundEvent;
@@ -158,6 +159,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
                 .addListener(PlayerMoveEvent.class, event -> handlePlayerOrVehicleMove(event.getPlayer(), event.getNewPosition()))
                 .addListener(PlayerMoveVehicleEvent.class, event -> handlePlayerOrVehicleMove(event.getPlayer(), event.getNewPosition()))
                 .addListener(PlayerTickEvent.class, this::handlePlayerTick)
+                .addListener(PlayerTickEndEvent.class, this::handleClientPlayerTick)
                 .addChild(DelayedBlockInteractions.EVENT_NODE)
                 .addChild(LegacyActionStateManager.EVENT_NODE)
                 .addChild(ResetHeightDisplay.EVENT_NODE)
@@ -356,8 +358,10 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             player.sendMessage(translatable("playing.timer.run_out"));
             softResetPlayer(player);
         }
+    }
 
-        if (getPlayerState(player) instanceof ParkourState.AnyPlaying playing) {
+    private void handleClientPlayerTick(PlayerTickEndEvent event) {
+        if (getPlayerState(event.getPlayer()) instanceof ParkourState.AnyPlaying playing) {
             playing.saveState().tick();
         }
     }
