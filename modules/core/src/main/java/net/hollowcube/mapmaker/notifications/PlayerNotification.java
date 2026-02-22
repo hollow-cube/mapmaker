@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.notifications;
 
 import net.hollowcube.common.components.TranslatableBuilder;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.common.ExtraPanels;
 import net.hollowcube.mapmaker.notifications.impl.PlayerNotificationType;
 import net.hollowcube.mapmaker.panels.InventoryHost;
@@ -49,7 +50,12 @@ public record PlayerNotification(
     @NonBlocking
     public static @Nullable PlayerNotification fromResponse(Player player, ServiceContext context, PlayerNotificationResponse.ComplexEntry entry) {
         var type = PlayerNotificationType.Lookup.get(entry.type());
-        return type == null ? null : type.createNotification(player, context, entry);
+        try {
+            return type == null ? null : type.createNotification(player, context, entry);
+        } catch (Exception e) {
+            ExceptionReporter.reportException(e, player);
+            return null;
+        }
     }
 
     public Instant createdAt() {

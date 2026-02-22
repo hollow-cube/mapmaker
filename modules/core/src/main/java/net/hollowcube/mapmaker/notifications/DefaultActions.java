@@ -2,6 +2,8 @@ package net.hollowcube.mapmaker.notifications;
 
 import net.hollowcube.common.components.TranslatableBuilder;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
 import net.hollowcube.mapmaker.util.ServiceContext;
@@ -12,6 +14,7 @@ public final class DefaultActions {
 
     private static final Sprite DELETE_ICON = new Sprite("icon2/1_1/trash_can");
     private static final Sprite LINK_ICON = new Sprite("icon2/1_1/external_link");
+    private static final Sprite JOIN_ICON = new Sprite("icon2/1_1/joy_stick");
 
     public static PlayerNotification.Action delete(Player player, ServiceContext context, PlayerNotificationResponse.ComplexEntry entry) {
         return PlayerNotification.Action.of(
@@ -48,6 +51,27 @@ public final class DefaultActions {
                             .toComponent()
                     );
                     player.closeInventory();
+                })
+        );
+    }
+
+    public static PlayerNotification.Action join(Player player, ServiceContext context, PlayerNotificationResponse.ComplexEntry entry, MapData map) {
+        return PlayerNotification.Action.of(
+            JOIN_ICON,
+            "gui.notification.action.join.interaction",
+            "gui.notification.action.join",
+            PlayerNotification.ActionExecutor
+                .of(() -> {
+                    FutureUtil.submitVirtual(() -> context.players().markNotificationRead(player.getUuid().toString(), entry.id(), true));
+                    FutureUtil.submitVirtual(() -> context.bridge().joinMap(
+                        player,
+                        new ServerBridge.JoinConfig(
+                            map.id(),
+                            ServerBridge.JoinMapState.PLAYING,
+                            "notification_join_map",
+                            null
+                        )
+                    ));
                 })
         );
     }
