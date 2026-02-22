@@ -36,13 +36,11 @@ env:
 
   MAPMAKER_VELOCITY_SECRET: "AsmMzWkjyrNvu5DprZWupQXy79mKFHK7d5Aj662YmVq4zEQns3RWb7NFpxvcTzgV"
 
-  MAPMAKER_MAP_SERVICE_URL: "http://map-service.mapmaker.svc.cluster.local:9124"
+  MAPMAKER_MAP_SERVICE_URL: "http://player-service.mapmaker.svc.cluster.local:9124"
   MAPMAKER_PLAYER_SERVICE_URL: "http://player-service.mapmaker.svc.cluster.local:9124"
   MAPMAKER_SESSION_SERVICE_URL: "http://session-service.mapmaker.svc.cluster.local:9124"
   MAPMAKER_PLAYER_INVITE_SERVICE_URL: "http://session-service.mapmaker.svc.cluster.local:9124"
 
-  MAPMAKER_SPICEDB_URL: "http://spicedb:8443"
-  MAPMAKER_SPICEDB_TOKEN: "${SPICEDB_SECRET_KEY}"
   MAPMAKER_NATS_SERVERS: "nats://nats:4222"
 
   MAPMAKER_UNLEASH_ENABLED: "false"

@@ -20,7 +20,7 @@ public class TerraformStorageHttp extends AbstractHttpService implements Terrafo
 
     public TerraformStorageHttp() {
         var mapServiceUrl = System.getenv("MAPMAKER_MAP_SERVICE_URL");
-        if (mapServiceUrl == null) mapServiceUrl = "http://localhost:9125";
+        if (mapServiceUrl == null) mapServiceUrl = "http://localhost:9126";
 
         this.url = mapServiceUrl + "/v3/internal/terraform";
     }

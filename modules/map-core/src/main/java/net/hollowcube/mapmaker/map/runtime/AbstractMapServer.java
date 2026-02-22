@@ -178,9 +178,9 @@ public abstract class AbstractMapServer implements MapServer {
         var mapServiceUrl = config.get(Map_ServiceConfig.class).url();
         if (!mapServiceUrl.isEmpty()) mapService = new MapServiceImpl(mapServiceUrl);
         else if (globalConfig.noop()) mapService = new NoopMapService();
-        else mapService = new MapServiceImpl("http://localhost:9125"); // tilt
+        else mapService = new MapServiceImpl("http://localhost:9126"); // tilt
 
-        var obungusService = new ObungusServiceImpl(otel, "http://localhost:9125");
+        var obungusService = new ObungusServiceImpl(otel, "http://localhost:9126");
         addBinding(ObungusService.class, obungusService, "obungus", "obungusService");
     }
 
