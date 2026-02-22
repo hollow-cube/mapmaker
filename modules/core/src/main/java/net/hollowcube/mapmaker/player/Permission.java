@@ -5,6 +5,6 @@ public final class Permission {
 
     public static final long MAP_DELETE = 1 << 1;
 
-    public static final long GENERIC_STAFF = 1L << 62;
+    public static final long GENERIC_STAFF = 1L << 63;
 
 }

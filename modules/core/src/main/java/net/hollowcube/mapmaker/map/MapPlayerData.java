@@ -78,7 +78,7 @@ public class MapPlayerData {
     }
 
     public @Nullable String getMapSlot(PlayerData playerData, int slot) {
-        if (slot < 0 || slot >= playerData.mapSlots() || slot >= mapSlots.length)
+        if (slot < 0 || slot >= mapSlots.length)
             return null;
         var mapId = mapSlots[slot];
         return mapId == null || mapId.isEmpty() ? null : mapId;
