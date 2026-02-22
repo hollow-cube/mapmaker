@@ -13,7 +13,9 @@ import net.hollowcube.mapmaker.runtime.parkour.action.Attachments;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.RespawnPosAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.SetProgressIndexAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.TeleportAction;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.variables.VariableQueries;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.variables.VariableStorage;
+import net.hollowcube.mapmaker.runtime.parkour.action.util.MolangResolver;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerStateUpdateEvent;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerUpdateStateEvent;
 import net.hollowcube.mapmaker.util.TagCooldown;
@@ -42,9 +44,12 @@ public class TempEffectApplicator {
     private static final TagCooldown STATUS_APPLY_COOLDOWN = new TagCooldown("mapmaker:status_plate_cooldown", 250);
 
     private static final VariableStorage.MolangLookup VARIABLE_LOOKUP = VariableStorage.lookup();
+    private static final MolangResolver<Player> QUERY = new MolangResolver<>(VariableQueries::resolve);
     private static final MolangEvaluator EVALUATOR = new MolangEvaluator(Map.of(
             "variable", VARIABLE_LOOKUP,
-            "v", VARIABLE_LOOKUP
+            "v", VARIABLE_LOOKUP,
+            "query", QUERY,
+            "q", QUERY
     ));
 
     public static void applyCheckpoint(ActionTriggerData data, Player player, String checkpointId, Point position) {
@@ -187,6 +192,7 @@ public class TempEffectApplicator {
 
         try {
             VARIABLE_LOOKUP.setStorage(state.get(Attachments.VARIABLES));
+            QUERY.setContext(player);
             result = EVALUATOR.evalBool(expression.parsed());
             errors = EVALUATOR.getErrors();
         } catch (ArithmeticException exception) {

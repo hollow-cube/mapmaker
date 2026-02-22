@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.runtime.parkour.action.impl.velocity;
+package net.hollowcube.mapmaker.runtime.parkour.action.util;
 
 import net.hollowcube.molang.eval.MolangValue;
 import org.jetbrains.annotations.Nullable;

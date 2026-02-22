@@ -8,7 +8,9 @@ import net.hollowcube.mapmaker.runtime.parkour.action.Action;
 import net.hollowcube.mapmaker.runtime.parkour.action.Attachments;
 import net.hollowcube.mapmaker.runtime.parkour.action.MolangExpression;
 import net.hollowcube.mapmaker.runtime.parkour.action.gui.editors.variables.VariableEditor;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.variables.VariableQueries;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.variables.VariableStorage;
+import net.hollowcube.mapmaker.runtime.parkour.action.util.MolangResolver;
 import net.hollowcube.molang.eval.MolangEvaluator;
 import net.hollowcube.molang.runtime.ContentError;
 import net.kyori.adventure.key.Key;
@@ -40,9 +42,12 @@ public record EditVariableAction(
     private static final Sprite SPRITE = new Sprite("action/icon/variable", 1, 2);
 
     private static final VariableStorage.MolangLookup VARIABLE_LOOKUP = VariableStorage.lookup();
+    private static final MolangResolver<Player> QUERY = new MolangResolver<>(VariableQueries::resolve);
     private static final MolangEvaluator EVALUATOR = new MolangEvaluator(Map.of(
             "variable", VARIABLE_LOOKUP,
-            "v", VARIABLE_LOOKUP
+            "v", VARIABLE_LOOKUP,
+            "query", QUERY,
+            "q", QUERY
     ));
 
     public static final Editor<EditVariableAction> EDITOR = new Editor<>(
@@ -78,6 +83,7 @@ public record EditVariableAction(
         try {
             var variables = Objects.requireNonNullElseGet(state.get(Attachments.VARIABLES), VariableStorage::new);
             VARIABLE_LOOKUP.setStorage(variables);
+            QUERY.setContext(player);
             state.set(Attachments.VARIABLES, variables.with(this.variable, EVALUATOR.eval(this.expression.parsed())));
             errors = EVALUATOR.getErrors();
         } catch (ArithmeticException exception) {

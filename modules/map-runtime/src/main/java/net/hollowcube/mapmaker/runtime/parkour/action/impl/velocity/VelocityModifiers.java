@@ -4,6 +4,7 @@ import net.hollowcube.common.math.relative.RelativeField;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.action.MolangExpression;
+import net.hollowcube.mapmaker.runtime.parkour.action.util.MolangResolver;
 import net.hollowcube.molang.eval.MolangEvaluator;
 import net.hollowcube.molang.runtime.ContentError;
 import net.kyori.adventure.text.Component;
