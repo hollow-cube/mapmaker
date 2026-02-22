@@ -74,6 +74,7 @@ public abstract class AbstractHttpService {
             .registerTypeAdapter(PlayerDataUpdateMessage.ReasonType.class, new EnumOrdinalTypeAdapter<>(PlayerDataUpdateMessage.ReasonType.class))
             .registerTypeAdapter(PunishmentType.class, new EnumTypeAdapter<>(PunishmentType.class))
             .registerTypeAdapter(PunishmentUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(PunishmentUpdateMessage.Action.class))
+            .registerTypeAdapter(UnsignedLongAdapter.class, new UnsignedLongAdapter.Creator())
             .disableJdkUnsafe()
             .create();
     public static final TextMapSetter<HttpRequest.Builder> CONTEXT_PROPAGATOR = (carrier, key, value) -> {

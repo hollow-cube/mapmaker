@@ -1,10 +1,12 @@
 package net.hollowcube.mapmaker.util.gson;
 
+import com.google.gson.InstanceCreator;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 public class UnsignedLongAdapter extends TypeAdapter<Long> {
 
@@ -23,5 +25,13 @@ public class UnsignedLongAdapter extends TypeAdapter<Long> {
     @Override
     public Long read(JsonReader in) throws IOException {
         return Long.parseUnsignedLong(in.nextString());
+    }
+
+    public static class Creator implements InstanceCreator<UnsignedLongAdapter> {
+
+        @Override
+        public UnsignedLongAdapter createInstance(Type type) {
+            return new UnsignedLongAdapter();
+        }
     }
 }
