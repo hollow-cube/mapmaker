@@ -230,24 +230,4 @@ public class PlayerData {
             XP_FOR_LEVELS[i] = (long) (i == 0 ? 0 : XP_FOR_LEVELS[i - 1] + ((BASE_XP * Math.pow(GROWTH_FACTOR, i - 1)) + 100));
         }
     }
-
-    @Override public String toString() {
-        return "PlayerData{" +
-               "updates=" + updates +
-               ", id='" + id + '\'' +
-               ", username='" + username + '\'' +
-               ", displayNameV2=" + displayNameV2 +
-               ", settings=" + settings +
-               ", sessionStart=" + sessionStart +
-               ", playtime=" + playtime +
-               ", experience=" + experience +
-               ", coins=" + coins +
-               ", cubits=" + cubits +
-               ", hypercubeUntil=" + hypercubeUntil +
-               ", permissions=" + permissions +
-               ", mapSlots=" + mapSlots +
-               ", maxMapSize=" + tempMaxMapSize +
-               ", abc=" + has(Permission.GENERIC_STAFF) +
-               '}';
-    }
 }

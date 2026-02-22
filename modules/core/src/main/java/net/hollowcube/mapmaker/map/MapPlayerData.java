@@ -77,7 +77,7 @@ public class MapPlayerData {
         return SlotState.FILLED;
     }
 
-    public @Nullable String getMapSlot(PlayerData playerData, int slot) {
+    public @Nullable String getMapSlot(int slot) {
         if (slot < 0 || slot >= mapSlots.length)
             return null;
         var mapId = mapSlots[slot];

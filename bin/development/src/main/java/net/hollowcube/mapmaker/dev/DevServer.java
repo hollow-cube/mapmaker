@@ -152,7 +152,6 @@ public class DevServer extends AbstractMultiMapServer {
                 ProtocolVersions.getProtocolName(event.getConnection().getProtocolVersion()),
                 event.getConnection().getProtocolVersion()
             );
-            System.out.println(pd);
 
             addPendingJoin(playerId, HubServer.HUB_MAP_DATA.id(), "playing");
         } catch (SessionService.UnauthorizedError _) {

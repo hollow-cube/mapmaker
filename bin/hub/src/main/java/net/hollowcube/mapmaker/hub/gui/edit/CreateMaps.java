@@ -110,7 +110,7 @@ public class CreateMaps extends View {
 
             // There is a map, show the full icon even if they dont have it unlocked.
             // It means they used to and have a map in that slot.
-            var mapId = playerData.getMapSlot(this.playerData, i);
+            var mapId = playerData.getMapSlot(i);
             if (mapId != null) {
                 slot.setState(playerData, EditMapIconBase.State.FULL, i, mapId);
                 if (firstSlot == -1) firstSlot = i;
