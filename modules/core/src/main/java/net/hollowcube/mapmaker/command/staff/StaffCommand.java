@@ -12,7 +12,7 @@ import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.perm;
 
 public class StaffCommand extends CommandDsl {
     private final PlayerService playerService;
@@ -24,7 +24,7 @@ public class StaffCommand extends CommandDsl {
         category = CommandCategories.STAFF;
         description = "Toggles staff mode on or off (hides staff-related commands/messages/etc)";
 
-        setCondition(staffPerm(Permission.GENERIC_STAFF));
+        setCondition(perm(Permission.GENERIC_STAFF));
         addSyntax(playerOnly(this::handleToggleStaffMode));
     }
 
