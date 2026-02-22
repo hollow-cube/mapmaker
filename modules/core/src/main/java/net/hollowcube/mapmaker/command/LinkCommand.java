@@ -39,7 +39,7 @@ public class LinkCommand extends CommandDsl {
             case ALREADY_LINKED -> "command.link.already_linked";
             case INVALID_SECRET -> "command.link.invalid_secret";
             case EXPIRED_SECRET -> "command.link.expired_secret";
-            case INTERNAL_ERROR -> "command.link.internal_error";
+            case INTERNAL_ERROR -> "command.generic.unknown_error";
         }));
     }
 
