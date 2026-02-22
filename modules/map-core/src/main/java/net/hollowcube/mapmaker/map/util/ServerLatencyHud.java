@@ -42,7 +42,7 @@ public class ServerLatencyHud implements ActionBar.Provider {
                 builder.popColor();
 
                 builder.tempReset();
-                builder.offset(300);
+                builder.offset(250);
 
                 y += 12;
             }
