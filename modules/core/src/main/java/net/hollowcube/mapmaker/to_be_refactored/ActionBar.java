@@ -63,6 +63,13 @@ public final class ActionBar {
         providers.remove(provider);
     }
 
+    public void toggleProvider(@NotNull Provider provider) {
+        FutureUtil.assertTickThreadWarn();
+        if (!providers.remove(provider)) {
+            providers.add(provider);
+        }
+    }
+
     private @NotNull TaskSchedule update() {
         if (player.getPlayerConnection().getConnectionState() != ConnectionState.PLAY)
             return TaskSchedule.tick(2);

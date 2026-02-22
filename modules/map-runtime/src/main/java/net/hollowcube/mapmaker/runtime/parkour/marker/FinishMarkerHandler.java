@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.runtime.parkour.marker;
 
+import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
 import net.hollowcube.mapmaker.runtime.PlayState;
@@ -25,6 +26,7 @@ public class FinishMarkerHandler extends ObjectEntityHandler {
 
         var finishState = saveState.copy(saveState.state(PlayState.class));
         finishState.complete(System.nanoTime() / 1_000_000);
+        finishState.setEndLatency(((MapPlayer) player).averageLatency());
         world.changePlayerState(player, new ParkourState.Finished(finishState));
     }
 

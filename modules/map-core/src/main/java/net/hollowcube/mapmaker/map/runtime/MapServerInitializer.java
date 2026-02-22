@@ -42,7 +42,8 @@ public final class MapServerInitializer {
         "minestom.command.async-virtual", "true",
         "minestom.event.multiple-parents", "true",
         "minestom.shutdown-on-signal", "false", // We have our own shutdown logic which will call stopCleanly
-        "minestom.new-socket-write-lock", "true"
+        "minestom.new-socket-write-lock", "true",
+        "minestom.keep-alive-delay", "500"
     );
 
     public static MinecraftServer preInitializedServer;

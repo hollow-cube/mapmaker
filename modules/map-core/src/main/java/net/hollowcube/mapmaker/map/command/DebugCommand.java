@@ -18,9 +18,11 @@ import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.hollowcube.mapmaker.map.util.NbtUtil;
+import net.hollowcube.mapmaker.map.util.ServerLatencyHud;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.ComponentUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -84,6 +86,8 @@ public class DebugCommand extends CommandDsl {
             "show map octree");
         createPermissionedSubcommand("fixthedripleaf", this::fixTheDripleaf,
             "add dripleaf block handlers to relevant blocks");
+        createPermissionedSubcommand("latency", this::handleLatency,
+                                     "show latency to other players");
     }
 
     public @NotNull CommandDsl createPermissionlessSubcommand(
@@ -277,6 +281,10 @@ public class DebugCommand extends CommandDsl {
             }
         }
         player.sendMessage("Fixed " + fixed + " dripleaf blocks!");
+    }
+
+    private void handleLatency(@NotNull Player player, @NotNull CommandContext context) {
+        player.scheduleNextTick(_ -> ActionBar.forPlayer(player).toggleProvider(new ServerLatencyHud()));
     }
 
     private void queueRateLimitedWorldUpdate(

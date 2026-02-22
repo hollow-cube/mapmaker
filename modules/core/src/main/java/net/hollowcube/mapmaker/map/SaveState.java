@@ -19,6 +19,9 @@ public class SaveState {
     int dataVersion;
     private int protocolVersion;
 
+    private Double startLatency;
+    private Double endLatency;
+
     SaveStateType.Serializer<?> serializer;
     Object state;
 
@@ -108,6 +111,14 @@ public class SaveState {
         playStartTime = currentTime;
     }
 
+    public void setStartLatency(double latency) {
+        this.startLatency = latency;
+    }
+
+    public void setEndLatency(double latency) {
+        this.endLatency = latency;
+    }
+
     public int protocolVersion() {
         return protocolVersion;
     }
@@ -164,6 +175,7 @@ public class SaveState {
                 .setType(type)
                 .setPlaytime(playtime)
                 .setTicks(ticks)
+                .setLatency(startLatency, endLatency)
                 .setCompleted(completed)
                 .setProtocolVersion(protocolVersion);
         if (serializer != null && state != null) {
@@ -187,6 +199,8 @@ public class SaveState {
         copy.playStartTime = playStartTime;
         copy.dataVersion = dataVersion;
         copy.protocolVersion = protocolVersion;
+        copy.startLatency = startLatency;
+        copy.endLatency = endLatency;
         copy.serializer = serializer;
         copy.state = newState;
 

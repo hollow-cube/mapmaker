@@ -45,6 +45,13 @@ public class SaveStateUpdateRequest {
         return this;
     }
 
+    public @NotNull SaveStateUpdateRequest setLatency(Double start, Double end) {
+        if (start == null || end == null || start < 0 || end < 0) return this;
+        updates.addProperty("startLatency", start);
+        updates.addProperty("endLatency", end);
+        return this;
+    }
+
     public @NotNull SaveStateUpdateRequest setState(@NotNull Object state, @NotNull SaveStateType.Serializer<?> serializer) {
         var coder = new RegistryTranscoder<>(Transcoder.JSON, MinecraftServer.process());
         updates.add(serializer.name(), ((Codec<Object>) serializer.codec()).encode(coder, state).orElseThrow());

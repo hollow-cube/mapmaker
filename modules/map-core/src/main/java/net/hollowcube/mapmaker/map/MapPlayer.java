@@ -359,6 +359,31 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
 
     //endregion
 
+    //region EXT: Latency
+
+    private static final int LATENCY_SAMPLE_SIZE = 5;
+    private final int[] latencySamples = new int[LATENCY_SAMPLE_SIZE];
+    private int latencySampleIndex = 0;
+
+    public double averageLatency() {
+        long sum = 0;
+        int count = 0;
+        for (long sample : this.latencySamples) {
+            if (sample <= 0) continue;
+            sum += sample;
+            count++;
+        }
+        return count > 0 ? (double) sum / (double) count : 0;
+    }
+
+    @Override
+    public void refreshLatency(int latency) {
+        this.latencySamples[this.latencySampleIndex] = latency;
+        this.latencySampleIndex = (this.latencySampleIndex + 1) % LATENCY_SAMPLE_SIZE;
+
+        super.refreshLatency(latency);
+    }
+
     //region EXT: Owned Entities
 
     public void addOwnedEntity(@NotNull Entity entity) {

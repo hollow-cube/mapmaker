@@ -315,11 +315,14 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     /// for example moving or placing a block
     public void initTimerFromAction(Player player, SaveState saveState) {
         if (saveState.getPlayStartTime() != 0) return;
+        var mp = (MapPlayer) player;
 
         // Start the timer.
         saveState.setPlayStartTime(System.nanoTime() / 1_000_000);
         // Reset touching state so you can begin touching
-        ((MapPlayer) player).resetTouchingState();
+        mp.resetTouchingState();
+        // Set starting latency
+        saveState.setStartLatency(mp.averageLatency());
 
         var timer = saveState.state(PlayState.class).get(EditTimerAction.SAVE_DATA);
         if (timer != null && timer > 0) {
