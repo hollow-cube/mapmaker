@@ -4,14 +4,12 @@ import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import org.jetbrains.annotations.NotNull;
 
-import static net.hollowcube.command.CommandCondition.and;
-import static net.hollowcube.mapmaker.command.staff.StaffCommand.IN_STAFF_MODE;
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 
 public class ChannelCommand extends AbstractChatCommand {
 
@@ -48,10 +46,10 @@ public class ChannelCommand extends AbstractChatCommand {
     }
 
     public static class Staff extends ChannelCommand {
-        public Staff(@NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages, @NotNull PermManager permissions) {
+        public Staff(@NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages) {
             super(sessions, maps, messages, ClientChatMessageData.CHANNEL_STAFF, "sc");
 
-            setCondition(and(IN_STAFF_MODE, permissions.createPlatformCondition2(PlatformPerm.MAP_ADMIN)));
+            setCondition(staffPerm(Permission.GENERIC_STAFF));
         }
     }
 

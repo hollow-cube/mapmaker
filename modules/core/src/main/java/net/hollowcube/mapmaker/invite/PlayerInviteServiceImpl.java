@@ -8,9 +8,9 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.DisplayName;
+import net.hollowcube.mapmaker.player.Permission;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
@@ -34,7 +34,6 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     private final MapService mapService;
     private final SessionManager sessionManager;
     private final ServerBridge bridge;
-    private final PermManager permManager;
 
     public PlayerInviteServiceImpl(
         @NotNull OpenTelemetry otel,
@@ -42,8 +41,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         @NotNull PlayerService playerService,
         @NotNull MapService mapService,
         @NotNull SessionManager sessionManager,
-        @NotNull ServerBridge bridge,
-        @NotNull PermManager permManager
+        @NotNull ServerBridge bridge
     ) {
         super(otel);
         this.url = String.format("%s/v3/internal/invites", url);
@@ -51,7 +49,6 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         this.mapService = mapService;
         this.sessionManager = sessionManager;
         this.bridge = bridge;
-        this.permManager = permManager;
     }
 
     @Override
@@ -82,8 +79,9 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         }
 
         var targetMap = mapService.getMap(targetId, targetPresence.mapId());
+        var senderData = PlayerData.fromPlayer(sender);
         // TODO: When trusted members exist for maps, check if the player is a trusted member
-        if (!targetMap.isPublished() && !permManager.hasPlatformPermission(sender, PlatformPerm.MAP_ADMIN)) {
+        if (!targetMap.isPublished() && !senderData.has(Permission.GENERIC_STAFF)) {
             sender.sendMessage(Component.translatable("map.join.no_permission", targetDisplayName));
             return;
         }

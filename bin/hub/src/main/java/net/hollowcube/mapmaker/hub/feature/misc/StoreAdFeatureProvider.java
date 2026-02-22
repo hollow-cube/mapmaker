@@ -9,7 +9,6 @@ import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Pos;
@@ -32,7 +31,6 @@ public class StoreAdFeatureProvider implements HubFeature {
     private static final int GOLD_BLOCK_ENTITY_UPDATE_INTERVAL = 5; // Seconds
 
     private PlayerService playerService;
-    private PermManager permManager;
 
     private final NpcItemModel goldBlockEntity = new NpcItemModel();
     private int goldBlockEntityRotationTarget = 0;
@@ -40,14 +38,13 @@ public class StoreAdFeatureProvider implements HubFeature {
     @Override
     public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
         this.playerService = server.playerService();
-        this.permManager = server.permManager();
 
         var viewStoreEntity = BaseNpcEntity.createInteractionEntity(
-                3, 4, this::handleStoreClick);
+            3, 4, this::handleStoreClick);
         viewStoreEntity.setInstance(world.instance(), STORE_AD_POS);
 
         goldBlockEntity.getEntityMeta().setItemStack(ItemStack.of(Material.GOLD_BLOCK)
-                .with(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
+            .with(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
         goldBlockEntity.getEntityMeta().setScale(new Vec(1));
         goldBlockEntity.setInstance(world.instance(), GOLD_BLOCK_ENTITY_POS);
         server.scheduler().submitTask(this::mapEntityUpdate, ExecutionType.TICK_START);
@@ -56,7 +53,7 @@ public class StoreAdFeatureProvider implements HubFeature {
     private void handleStoreClick(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {
         if (hand != PlayerHand.MAIN) return;
 
-        Panel.open(player, new StoreView(playerService, permManager, StoreView.TAB_HYPERCUBE));
+        Panel.open(player, new StoreView(playerService, StoreView.TAB_HYPERCUBE));
     }
 
     private @NotNull TaskSchedule mapEntityUpdate() {
@@ -72,8 +69,8 @@ public class StoreAdFeatureProvider implements HubFeature {
         goldBlockEntityRotationTarget += 90;
 
         goldBlockEntity.sendPacketToViewers(new ParticlePacket(
-                Particle.FIREWORK, goldBlockEntity.getPosition().add(0, verticalOffset, 0),
-                new Vec(0.1), 0.1f, 5
+            Particle.FIREWORK, goldBlockEntity.getPosition().add(0, verticalOffset, 0),
+            new Vec(0.1), 0.1f, 5
         ));
 
         meta.setNotifyAboutChanges(true);

@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.hollowcube.mapmaker.util.GenericServiceError;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -12,13 +13,13 @@ import java.util.List;
 public interface SessionService {
 
     @NotNull PlayerData createSession(
-            @NotNull String id,
-            @NotNull String proxy,
-            @NotNull String username,
-            @NotNull String ip,
-            @NotNull PlayerSkin skin,
-            @NotNull String version,
-            int protocolVersion
+        @NotNull String id,
+        @NotNull String proxy,
+        @NotNull String username,
+        @NotNull String ip,
+        @NotNull PlayerSkin skin,
+        @NotNull String version,
+        int protocolVersion
     );
 
     @NotNull TransferSessionResponse transferSession(@NotNull String id, @NotNull SessionTransferRequest req);
@@ -53,8 +54,8 @@ public interface SessionService {
 
         private final GenericServiceError error;
 
-        public UnauthorizedError(@NotNull GenericServiceError error) {
-            super(error.message());
+        public UnauthorizedError(@Nullable GenericServiceError error) {
+            super(error != null ? error.message() : null);
             this.error = error;
         }
 

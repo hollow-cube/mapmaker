@@ -4,21 +4,22 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.perm;
+
 public class HubFlyCommand extends CommandDsl {
 
-    public HubFlyCommand(@NotNull PermManager permManager) {
+    public HubFlyCommand() {
         super("fly");
 
         category = CommandCategories.STAFF;
         description = "Toggles your flight on or off";
 
-        setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
+        setCondition(perm(Permission.GENERIC_STAFF));
         addSyntax(playerOnly(this::handleToggleFly));
     }
 

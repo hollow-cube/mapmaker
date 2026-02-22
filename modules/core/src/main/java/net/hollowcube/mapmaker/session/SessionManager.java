@@ -7,8 +7,6 @@ import io.nats.client.api.ConsumerConfiguration;
 import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.to_be_refactored.SyntheticTabListManager;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
@@ -28,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
 
 public class SessionManager {
     private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
@@ -52,14 +49,11 @@ public class SessionManager {
     private final Map<String, PlayerSession> sessions = new ConcurrentHashMap<>(); // All sessions, including local ones
     private final SyntheticTabListManager syntheticTab;
 
-    private final Predicate<String> hasSeeVanishedPerm;
-
     private final MessageConsumer consumer;
 
     public SessionManager(
         @NotNull SessionService sessionService,
         @NotNull PlayerService playerService,
-        @NotNull PermManager permManager,
         @NotNull JetStreamWrapper jetStream
     ) {
         instance = this;
@@ -69,8 +63,6 @@ public class SessionManager {
         this.syntheticTab = new SyntheticTabListManager(this, playerService);
         MinecraftServer.getGlobalEventHandler()
             .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn);
-
-        this.hasSeeVanishedPerm = permManager.createPrefetchedCondition(PlatformPerm.SEE_VANISHED);
 
         this.consumer = jetStream.subscribe(STREAM, CONSUMER_CONFIG, SessionUpdateMessage.class, this::handleSessionUpdateMessage);
         Thread.startVirtualThread(this::incrementalSyncLoop); // begin doing incremental sync every few minutes to ensure we stay in sync.
@@ -254,7 +246,7 @@ public class SessionManager {
     }
 
     public void configureVanishedPlayer(@NotNull Player player) {
-        player.scheduleNextTick(e -> e.updateViewableRule(p -> hasSeeVanishedPerm.test(PlayerData.fromPlayer(p).id())));
+        player.scheduleNextTick(e -> e.updateViewableRule(p -> PlayerData.fromPlayer(p).has(Permission.GENERIC_STAFF)));
     }
 
     private void configureVisiblePlayer(@NotNull Player player) {

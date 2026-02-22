@@ -3,14 +3,11 @@ package net.hollowcube.mapmaker.gui.store;
 import com.google.gson.JsonObject;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
-import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
-import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
@@ -49,7 +46,7 @@ final class StoreHelpers {
         try {
             var playerData = PlayerData.fromPlayer(player);
             var resp = playerService.createCheckoutLink(
-                    PURCHASE_SOURCE, playerData.username(), packageName.name().toLowerCase(Locale.ROOT));
+                PURCHASE_SOURCE, playerData.username(), packageName.name().toLowerCase(Locale.ROOT));
 
             var url = resp.url();
             if (ServerRuntime.getRuntime().isDevelopment()) {
@@ -66,11 +63,11 @@ final class StoreHelpers {
     }
 
     static boolean isUpgradeOwned(@NotNull Player player, @NotNull ShopUpgrade upgrade) {
-        return ShopUpgradeCache.has(player, upgrade, true);
+        return upgrade.has(PlayerData.fromPlayer(player));
     }
 
-    static void buyUpgrade(@NotNull PlayerService playerService, @NotNull PermManager permManager, @NotNull Player player, @NotNull ShopUpgrade upgrade) {
-        if (ShopUpgradeCache.has(player, upgrade, true))
+    static void buyUpgrade(@NotNull PlayerService playerService, @NotNull Player player, @NotNull ShopUpgrade upgrade) {
+        if (isUpgradeOwned(player, upgrade))
             return; // Sanity check
 
         // Ensure the player has enough cubits to buy the upgrade.
@@ -91,8 +88,7 @@ final class StoreHelpers {
 
             // Success! Preempt the update message by updating locally
             playerData.setCubits(playerData.cubits() - upgrade.cubits());
-            permManager.overwrite(upgrade.directPerm(), playerData.id(), true);
-            permManager.overwrite(upgrade.indirectPerm(), playerData.id(), true);
+            playerData.updateFromMapUpgrade(upgrade.mapSlots(), upgrade.maxMapSize());
 
             player.sendMessage(Component.translatable("store.add-ons.buy", Component.text(upgrade.name())));
         } catch (PlayerService.NotFoundError e) {

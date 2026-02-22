@@ -8,10 +8,12 @@ import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
+import net.hollowcube.mapmaker.map.MapSize;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
+import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -47,6 +49,11 @@ public class PlayerData {
     private int cubits = 0;
     private @Nullable Instant hypercubeUntil;
 
+    @MagicConstant(flagsFromClass = Permission.class)
+    private long permissions;
+    private int mapSlots;
+    private MapSize tempMaxMapSize;
+
     public PlayerData() {
     }
 
@@ -68,9 +75,9 @@ public class PlayerData {
     @VisibleForTesting
     public PlayerData(@NotNull Player player) {
         this(player.getUuid().toString(),
-                player.getUsername(),
-                new DisplayName(List.of(new DisplayName.Part("username", player.getUsername(), null))),
-                new JsonObject(), 0, 0, 0
+            player.getUsername(),
+            new DisplayName(List.of(new DisplayName.Part("username", player.getUsername(), null))),
+            new JsonObject(), 0, 0, 0
         );
     }
 
@@ -184,8 +191,26 @@ public class PlayerData {
         this.cubits = cubits;
     }
 
+    @Deprecated
+    public void updateFromMapUpgrade(int mapSlots, MapSize maxMapSize) {
+        this.mapSlots += mapSlots;
+        this.tempMaxMapSize = MapSize.values()[Math.max(this.tempMaxMapSize.id(), maxMapSize.id())];
+    }
+
     public boolean isHypercube() {
         return hypercubeUntil != null && hypercubeUntil.isAfter(Instant.now());
+    }
+
+    public boolean has(@MagicConstant(flagsFromClass = Permission.class) long perms) {
+        return (permissions & perms) == perms;
+    }
+
+    public int mapSlots() {
+        return mapSlots;
+    }
+
+    public MapSize maxMapSize() {
+        return tempMaxMapSize;
     }
 
     public @Nullable String getCosmetic(@NotNull CosmeticType type) {
@@ -205,5 +230,4 @@ public class PlayerData {
             XP_FOR_LEVELS[i] = (long) (i == 0 ? 0 : XP_FOR_LEVELS[i - 1] + ((BASE_XP * Math.pow(GROWTH_FACTOR, i - 1)) + 100));
         }
     }
-
 }

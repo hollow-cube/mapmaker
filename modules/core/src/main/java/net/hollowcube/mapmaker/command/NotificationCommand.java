@@ -10,28 +10,24 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.gui.notifications.NotificationListView;
 import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.util.ServiceContext;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
+
 public class NotificationCommand extends CommandDsl {
 
     private final ServiceContext services;
-    private final PermManager permissions;
 
-    public NotificationCommand(
-            @NotNull ServiceContext services,
-            @NotNull PermManager permissions
-    ) {
+    public NotificationCommand(@NotNull ServiceContext services) {
         super("notifications");
         this.category = CommandCategories.GLOBAL;
         this.description = "View your notifications";
 
         this.services = services;
-        this.permissions = permissions;
 
         addSyntax(playerOnly(this::execute));
         if (ServerRuntime.getRuntime().isDevelopment()) {
@@ -55,7 +51,7 @@ public class NotificationCommand extends CommandDsl {
         public Notify() {
             super("notify");
 
-            this.setCondition(permissions.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
+            this.setCondition(staffPerm(Permission.GENERIC_STAFF));
 
             this.category = CommandCategories.GLOBAL;
             this.description = "Send a notification to a player";

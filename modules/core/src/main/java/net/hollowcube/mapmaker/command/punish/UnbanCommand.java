@@ -5,8 +5,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
@@ -16,17 +15,18 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
+
 public class UnbanCommand extends CommandDsl {
     private final Argument<String> targetArgument;
     private final Argument<String> reasonArgument = Argument.GreedyString("reason")
-            .description("The reason for the unban");
+        .description("The reason for the unban");
 
     private final PunishmentService punishmentService;
 
     public UnbanCommand(
-            @NotNull PunishmentService punishmentService,
-            @NotNull PlayerService playerService,
-            @NotNull PermManager permManager
+        @NotNull PunishmentService punishmentService,
+        @NotNull PlayerService playerService
     ) {
         super("unban");
         this.punishmentService = punishmentService;
@@ -34,9 +34,9 @@ public class UnbanCommand extends CommandDsl {
         category = CommandCategories.STAFF;
         description = "Unban a player from the server";
         this.targetArgument = CoreArgument.AnyPlayerId("target", playerService)
-                .description("The player to unban");
+            .description("The player to unban");
 
-        setCondition(permManager.createPlatformCondition2(PlatformPerm.BAN_PLAYER));
+        setCondition(staffPerm(Permission.GENERIC_STAFF));
         this.addSyntax(playerOnly(this::execute), this.targetArgument, this.reasonArgument);
     }
 

@@ -10,8 +10,7 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.codec.Result;
@@ -24,9 +23,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
-import static net.hollowcube.command.CommandCondition.and;
 import static net.hollowcube.command.dsl.CommandDsl.playerOnly;
-import static net.hollowcube.mapmaker.command.staff.StaffCommand.IN_STAFF_MODE;
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 
 /**
  * Notably not using {@link net.hollowcube.command.dsl.CommandDsl}, it doesn't support arguments followed by "subcommands" very well.
@@ -59,11 +57,9 @@ public class MapAlterCommand {
         .description("The new minimum required version for the map");
 
     private final MapService mapService;
-    private final PermManager permManager;
 
-    public MapAlterCommand(@NotNull MapService mapService, PermManager permManager) {
+    public MapAlterCommand(@NotNull MapService mapService) {
         this.mapService = mapService;
-        this.permManager = permManager;
 
         mapArg = CoreArgument.Map("map", mapService) //todo should be any map dependent on context.
             .description("The ID of the map to edit");
@@ -79,7 +75,7 @@ public class MapAlterCommand {
 
     public void build(@NotNull CommandBuilder builder) {
         builder.child("alter", root -> root
-            .condition(and(IN_STAFF_MODE, permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN)))
+            .condition(staffPerm(Permission.GENERIC_STAFF))
             .description("Edit information related to a map")
             .child(mapArg, alter -> alter
                 .child("type", di -> di
