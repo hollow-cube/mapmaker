@@ -4,11 +4,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.JsonAdapter;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.map.MapSize;
+import net.hollowcube.mapmaker.util.gson.UnsignedLongAdapter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.entity.Player;
@@ -50,6 +52,7 @@ public class PlayerData {
     private @Nullable Instant hypercubeUntil;
 
     @MagicConstant(flagsFromClass = Permission.class)
+    @JsonAdapter(UnsignedLongAdapter.class)
     private long permissions;
     private int mapSlots;
     private MapSize tempMaxMapSize;
