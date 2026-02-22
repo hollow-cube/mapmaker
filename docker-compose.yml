@@ -12,30 +12,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-  spicedb-migrate:
-    image: ghcr.io/authzed/spicedb:v1.35.3
-    restart: no
-    depends_on:
-      - postgres
-    environment:
-      SPICEDB_DATASTORE_ENGINE: postgres
-      SPICEDB_DATASTORE_CONN_URI: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
-    entrypoint: [ "spicedb", "migrate", "head" ]
-  spicedb:
-    image: ghcr.io/authzed/spicedb:v1.35.3
-    restart: unless-stopped
-    depends_on:
-      - postgres
-      - spicedb-migrate
-    environment:
-      SPICEDB_DATASTORE_ENGINE: postgres
-      SPICEDB_DATASTORE_CONN_URI: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
-      SPICEDB_GRPC_PRESHARED_KEY: supersecretkey
-      SPICEDB_HTTP_ENABLED: "true"
-    command: "serve"
-    ports:
-      - "50051:50051"
-      - "8443:8443"
   minio:
     image: minio/minio:latest
     restart: unless-stopped
@@ -56,20 +32,27 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
+  nats:
+    image: nats:2.12.4
+    restart: unless-stopped
+    command: "--jetstream --store_dir /data"
+    ports:
+      - "4222:4222"
+    volumes:
+      - nats-data:/data
 
   player-service:
     build:
       context: ../hc-services/services/player-service
       dockerfile: deploy/Dockerfile
     restart: unless-stopped
-    depends_on: [ postgres, spicedb, redis ]
+    depends_on: [ postgres, nats, redis ]
     environment:
       PLAYERS_ENV: "tilt"
       PLAYERS_HTTP_ADDRESS: "0.0.0.0"
       PLAYERS_HTTP_PORT: "9124"
       PLAYERS_POSTGRES_URI: "postgres://postgres:postgres@postgres:5432/player-service?sslmode=disable"
-      PLAYERS_SPICEDB_ENDPOINT: "spicedb:50051"
-      PLAYERS_SPICEDB_TOKEN: "supersecretkey"
+      PLAYERS_NATS_SERVERS: "nats://nats:4222"
       PLAYERS_REDIS_ADDRESS: "redis:6379"
       PLAYERS_TEBEX_SECRET: "explicit_ignore"
     ports:
@@ -79,14 +62,13 @@ services:
       context: ../hc-services/services/map-service
       dockerfile: deploy/Dockerfile
     restart: unless-stopped
-    depends_on: [ postgres, spicedb, minio, redis, player-service ]
+    depends_on: [ postgres, nats, minio, redis, player-service ]
     environment:
       MAPS_ENV: "tilt"
       MAPS_HTTP_ADDRESS: "0.0.0.0"
       MAPS_HTTP_PORT: "9124"
       MAPS_POSTGRES_URI: "postgres://postgres:postgres@postgres:5432/map-service?sslmode=disable"
-      MAPS_SPICEDB_ENDPOINT: "spicedb:50051"
-      MAPS_SPICEDB_TOKEN: "supersecretkey"
+      MAPS_NATS_SERVERS: "nats://nats:4222"
       MAPS_S3_ENDPOINT: "http://minio:9000"
       MAPS_S3_ACCESS_KEY: "mapmaker"
       MAPS_S3_SECRET_KEY: "mapmaker"
@@ -99,7 +81,7 @@ services:
       context: ../hc-services/services/session-service
       dockerfile: deploy/Dockerfile
     restart: unless-stopped
-    depends_on: [ postgres, spicedb, redis, player-service ]
+    depends_on: [ postgres, nats, redis, player-service ]
     environment:
       SESSION_ENV: "tilt"
       SESSION_HTTP_ADDRESS: "0.0.0.0"
@@ -107,8 +89,7 @@ services:
       SESSION_REDIS_ADDRESS: "redis:6379"
       SESSION_PLAYER_SERVICE_URL: "http://player-service:9124"
       SESSION_POSTGRES_URI: "postgres://postgres:postgres@postgres:5432/session-service?sslmode=disable"
-      SESSION_SPICEDB_ENDPOINT: "spicedb:50051"
-      SESSION_SPICEDB_TOKEN: "supersecretkey"
+      SESSION_NATS_SERVERS: "nats://nats:4222"
       SESSION_KUBERNETES_NAMESPACE: "disabled"
     ports:
       - "9127:9124"
@@ -117,3 +98,4 @@ volumes:
   postgres-data:
   minio-data:
   redis-data:
+  nats-data:
