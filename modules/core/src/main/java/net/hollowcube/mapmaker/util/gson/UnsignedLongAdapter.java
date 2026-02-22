@@ -8,6 +8,9 @@ import java.io.IOException;
 
 public class UnsignedLongAdapter extends TypeAdapter<Long> {
 
+    public UnsignedLongAdapter() {
+    }
+
     @Override
     public void write(JsonWriter out, Long value) throws IOException {
         if (value == null) {
