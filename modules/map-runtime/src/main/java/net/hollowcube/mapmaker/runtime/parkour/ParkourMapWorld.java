@@ -279,7 +279,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
         player.setTag(BEST_PLAYTIME, OpUtils.map(
                 server().mapService().getBestSaveState(map().id(), player.getUuid().toString()),
-                SaveState::getPlaytime
+                SaveState::getEffectivePlaytime
         ));
 
         return createPlayingState(saveState);
@@ -376,26 +376,26 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         // Show the completed message after removing the player because it is theoretically possible to not have the savestate fetched yet.
         Long bestPlaytime = player.getTag(BEST_PLAYTIME);
         if (bestPlaytime == null) {
-            player.setTag(BEST_PLAYTIME, finishState.getPlaytime());
+            player.setTag(BEST_PLAYTIME, finishState.getEffectivePlaytime());
             player.sendMessage(Component.translatable(
                     "map.completed.first",
-                    Component.text(formatMapPlaytime(finishState.getPlaytime(), true))
+                    Component.text(formatMapPlaytime(finishState.getEffectivePlaytime(), true))
             ));
         } else {
             // Diff playtime rounded to ticks prior to subtracting for correct display.
             var diffPlaytime = NumberUtil.roundMillisToTicks(bestPlaytime) -
-                    NumberUtil.roundMillisToTicks(finishState.getPlaytime());
+                    NumberUtil.roundMillisToTicks(finishState.getEffectivePlaytime());
             var diffColor = diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN;
             var diffSymbol = diffPlaytime < 0 ? "+" : "-";
             player.sendMessage(Component.translatable(
                     "map.completed.with_prior",
-                    Component.text(formatMapPlaytime(finishState.getPlaytime(), true)),
+                    Component.text(formatMapPlaytime(finishState.getEffectivePlaytime(), true)),
                     // Note: roundToTicks is not used here. We do the rounding above because we need to round prior to calculating the difference.
                     Component.text(diffSymbol + formatMapPlaytime(Math.abs(diffPlaytime), false), diffColor)
             ));
 
-            if (finishState.getPlaytime() < bestPlaytime) {
-                player.setTag(BEST_PLAYTIME, finishState.getPlaytime());
+            if (finishState.getEffectivePlaytime() < bestPlaytime) {
+                player.setTag(BEST_PLAYTIME, finishState.getEffectivePlaytime());
             }
         }
 

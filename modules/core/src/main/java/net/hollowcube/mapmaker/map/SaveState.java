@@ -76,6 +76,10 @@ public class SaveState {
         return this.ticks;
     }
 
+    public long getEffectivePlaytime() {
+        return Math.max(playtime, ticks * 50);
+    }
+
     /**
      * Returns the current playtime to the millisecond at this moment, as opposed to {@link #getPlaytime()}
      * which returns the playtime at the last save.
