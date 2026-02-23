@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.store;
 
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.map.MapSize;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -63,6 +64,8 @@ public enum ShopUpgrade {
     }
 
     public boolean has(PlayerData playerData) {
+        if ((this == MAP_SIZE_2 || this == MAP_SIZE_3) && playerData.has(Permission.EXTENDED_LIMITS))
+            return true;
         return switch (this) {
             case BUILD_TOOLS -> false;
             case MAP_SLOT_3, MAP_SLOT_4, MAP_SLOT_5 -> {
