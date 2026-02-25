@@ -19,6 +19,7 @@ import net.hollowcube.mapmaker.runtime.parkour.hud.*;
 import net.hollowcube.mapmaker.runtime.parkour.item.*;
 import net.hollowcube.mapmaker.runtime.parkour.setting.OnlySprintSetting;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Metadata;
@@ -36,6 +37,8 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+
+import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
 
 public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMapWorld> {
@@ -314,6 +317,11 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
 
             // If this is a verification, immediately remove them from the world and send them back to the hub
             if (world.map().verification() == MapVerification.PENDING) {
+                player.sendMessage(Component.translatable(
+                    "map.completed.first",
+                    Component.text(formatMapPlaytime(saveState.getEffectivePlaytime(), true))
+                ));
+
                 FutureUtil.submitVirtual(() -> world.server().bridge().joinHub(player));
                 return;
             }
