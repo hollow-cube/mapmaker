@@ -165,7 +165,7 @@ public abstract class AbstractMapServer implements MapServer {
             playerService = new NoopPlayerService();
             punishmentService = new NoopPunishmentService();
         } else {
-            var localUrl = "http://localhost:9126"; // tilt
+            var localUrl = "http://localhost:9127"; // tilt
             playerService = new PlayerServiceImpl(otel, localUrl);
             punishmentService = new PunishmentServiceImpl(localUrl);
         }
@@ -178,9 +178,9 @@ public abstract class AbstractMapServer implements MapServer {
         var mapServiceUrl = config.get(Map_ServiceConfig.class).url();
         if (!mapServiceUrl.isEmpty()) mapService = new MapServiceImpl(mapServiceUrl);
         else if (globalConfig.noop()) mapService = new NoopMapService();
-        else mapService = new MapServiceImpl("http://localhost:9126"); // tilt
+        else mapService = new MapServiceImpl("http://localhost:9127"); // tilt
 
-        var obungusService = new ObungusServiceImpl(otel, "http://localhost:9126");
+        var obungusService = new ObungusServiceImpl(otel, "http://localhost:9127");
         addBinding(ObungusService.class, obungusService, "obungus", "obungusService");
     }
 
