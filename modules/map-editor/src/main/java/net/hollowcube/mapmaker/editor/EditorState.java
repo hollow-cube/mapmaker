@@ -43,7 +43,10 @@ public sealed interface EditorState extends PlayerState<EditorState, EditorMapWo
             AxiomPlayer.setEnabled(player, true);
 
             var editState = saveState.state(EditState.class);
-            editState.inventory().forEach(player.getInventory()::setItemStack);
+            editState.inventory().forEach((slot, stack) -> player.getInventory().setItemStack(
+                slot,
+                world.itemRegistry().getItemStack(stack)
+            ));
             player.setHeldItemSlot((byte) editState.selectedSlot());
             player.setFlying(editState.isFlying());
             MiscFunctionality.applyCosmetics(player, PlayerData.fromPlayer(player));

@@ -195,6 +195,16 @@ public class ItemRegistry {
         return itemHandler == null ? null : itemHandler.key().asString();
     }
 
+    /**
+     * Gets an itemstack for the given itemstack, returning the same stack if it does not have a handler.
+     * But if it does have a handler will return a new stack as to make sure things like the lore and display name are correct.
+     */
+    public ItemStack getItemStack(@NotNull ItemStack itemStack) {
+        var itemHandler = getHandlerFromItemStack(itemStack);
+        if (itemHandler == null) return itemStack;
+        return itemHandler.getItemStack();
+    }
+
     public List<ItemStack> getCustomPublicItemStacks() {
         return this.idToItemHandler
             .keySet()
