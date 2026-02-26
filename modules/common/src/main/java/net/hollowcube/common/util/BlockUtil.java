@@ -8,6 +8,7 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
+import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.block.BlockUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -143,6 +144,19 @@ public final class BlockUtil {
 
     public static boolean isWaterlogged(@NotNull Block block) {
         return "true".equals(block.getProperty("waterlogged")) || ALWAYS_WATERLOGGED_BLOCKS.contains(block.id());
+    }
+
+    public static @Nullable Direction getFacing(@NotNull Block block) {
+        var facing = block.getProperty("facing");
+        if (facing == null) return null;
+
+        return switch (facing.toLowerCase(Locale.ROOT)) {
+            case "north" -> Direction.NORTH;
+            case "east" -> Direction.EAST;
+            case "south" -> Direction.SOUTH;
+            case "west" -> Direction.WEST;
+            default -> null;
+        };
     }
 
     public static Block fromStateIdOrNull(int stateId) {
