@@ -424,6 +424,29 @@ public final class FontUtil {
         return ShadowColor.shadowColor(computeVerticalOffset(offset), 80);
     }
 
+    public static String shorten(String text, int maxWidth, int defaultCharWidth) {
+        if (measureText(text) <= maxWidth) return text;
+
+        String ellipsis = "...";
+        int ellipsisWidth = measureText(ellipsis);
+        int availableWidth = maxWidth - ellipsisWidth;
+
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < text.length(); i++) {
+            int codePoint = text.codePointAt(i);
+            int glyphWidth = ALL_GLYPH_WIDTHS.getOrDefault(codePoint, -1);
+            if (glyphWidth == -1) glyphWidth = defaultCharWidth;
+            if (glyphWidth == -1) throw new RuntimeException("Unknown glyph: " + codePoint + " (" + (char) codePoint + ")");
+            if (availableWidth - glyphWidth < 0) {
+                break;
+            }
+            result.append((char) codePoint);
+            availableWidth -= glyphWidth;
+        }
+        result.append(ellipsis);
+        return result.toString();
+    }
+
     // This enum must match exactly the values in the text shader.
     // May only have 8 values.
     public enum Size {
