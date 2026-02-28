@@ -61,9 +61,9 @@ services:
       PLAYERS_TEBEX_SECRET: "explicit_ignore"
     ports:
       - "9126:9124"
-  session-service:
+  api-server:
     build:
-      context: ../hc-services/services/session-service
+      context: ../api-server
       dockerfile: deploy/Dockerfile
     restart: unless-stopped
     depends_on: [ postgres, nats, redis, player-service ]

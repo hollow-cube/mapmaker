@@ -8,10 +8,10 @@ mapmaker:
 
 env:
   MAPMAKER_NATS_SERVERS: "nats://nats:4222"
-  MAPMAKER_MAP_SERVICE_URL: "http://session-service.mapmaker.svc.cluster.local:9124"
-  MAPMAKER_PLAYER_INVITE_SERVICE_URL: "http://session-service.mapmaker.svc.cluster.local:9124"
-  MAPMAKER_PLAYER_SERVICE_URL: "http://session-service.mapmaker.svc.cluster.local:9124"
-  MAPMAKER_SESSION_SERVICE_URL: "http://session-service.mapmaker.svc.cluster.local:9124"
+  MAPMAKER_MAP_SERVICE_URL: "http://api-server:9124"
+  MAPMAKER_PLAYER_INVITE_SERVICE_URL: "http://api-server:9124"
+  MAPMAKER_PLAYER_SERVICE_URL: "http://api-server:9124"
+  MAPMAKER_SESSION_SERVICE_URL: "http://api-server:9124"
   MAPMAKER_UNLEASH_ENABLED: false
   MAPMAKER_UNLEASH_USE_POSTHOG: true
   MAPMAKER_UNLEASH_POSTHOG_PERSONAL_API_KEY: ${MAPMAKER_UNLEASH_POSTHOG_PERSONAL_API_KEY}
