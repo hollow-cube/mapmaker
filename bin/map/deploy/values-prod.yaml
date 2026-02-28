@@ -1,8 +1,5 @@
 fullnameOverride: mapmaker-map
 
-nodeSelector:
-  kubernetes.io/hostname: ovh-02
-
 mapmaker:
   role: map
 
