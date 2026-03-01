@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -18,7 +19,8 @@ import java.util.function.Function;
 
 public interface MapServer {
 
-    // Core services
+    @NotNull ApiClient api();
+
     @NotNull SessionService sessionService();
 
     @NotNull PlayerService playerService();

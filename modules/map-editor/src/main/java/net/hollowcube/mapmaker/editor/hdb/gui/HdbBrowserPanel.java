@@ -2,8 +2,9 @@ package net.hollowcube.mapmaker.editor.hdb.gui;
 
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.PlayerUtil;
-import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.map.responses.HeadDbSearchResponse;
+import net.hollowcube.mapmaker.api.PaginatedList;
+import net.hollowcube.mapmaker.api.hdb.HeadDatabaseClient;
+import net.hollowcube.mapmaker.api.hdb.HeadInfo;
 import net.hollowcube.mapmaker.panels.*;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Blocking;
@@ -19,7 +20,7 @@ import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
 @NotNullByDefault
 public class HdbBrowserPanel extends Panel {
 
-    private final MapService maps;
+    private final HeadDatabaseClient hdb;
     private final Pagination<SearchParams> pagination;
     private final Text searchTextElement;
     private final RadioSelect<String> categories;
@@ -27,13 +28,13 @@ public class HdbBrowserPanel extends Panel {
     private boolean initializing = true;
     private SearchParams params;
 
-    public HdbBrowserPanel(MapService maps) {
-        this(maps, "");
+    public HdbBrowserPanel(HeadDatabaseClient hdb) {
+        this(hdb, "");
     }
 
-    public HdbBrowserPanel(MapService maps, String initialQuery) {
+    public HdbBrowserPanel(HeadDatabaseClient hdb, String initialQuery) {
         super(9, 9);
-        this.maps = maps;
+        this.hdb = hdb;
         this.params = new SearchParams(initialQuery, null);
 
         background("generic2/containers/searchable/extended/7x3", -10, -31);
@@ -78,10 +79,8 @@ public class HdbBrowserPanel extends Panel {
 
     @Blocking
     private List<? extends Element> onSearch(SearchParams params, int page, int pageSize) {
-        var heads = params.search(maps, page, pageSize);
-        if (heads.pages() != null && heads.pages() > 0) {
-            this.pagination.totalPages(heads.pages() + 1);
-        }
+        var heads = params.search(hdb, page, pageSize);
+        this.pagination.totalPages(heads.totalPages(pageSize));
 
         return heads
             .results()
@@ -115,11 +114,11 @@ public class HdbBrowserPanel extends Panel {
 
     public record SearchParams(String query, @Nullable String category) {
 
-        public HeadDbSearchResponse search(MapService maps, int page, int pageSize) {
+        public PaginatedList<HeadInfo> search(HeadDatabaseClient hdb, int page, int pageSize) {
             if (category != null) {
-                return maps.getHeadsWithCategory(category, page, pageSize);
+                return hdb.getHeadsInCategory(category, page, pageSize);
             }
-            return maps.getHeadsWithSearch(query, page, pageSize);
+            return hdb.getHeads(query, page, pageSize);
         }
     }
 }

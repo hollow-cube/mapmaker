@@ -6,7 +6,6 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
-import net.hollowcube.mapmaker.map.responses.HeadDbSearchResponse;
 import net.hollowcube.mapmaker.map.responses.PlayerTopTimesResponse;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.MinecraftServer;
@@ -17,10 +16,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -561,32 +558,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull HeadDbSearchResponse getHeadsWithSearch(@NotNull String query, int page, int amount) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(urlV3 + "/hdb/search?query=%s&page=%d&pageSize=%d".formatted(URLEncoder.encode(query, StandardCharsets.UTF_8), page, amount)))
-            .build();
-
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), HeadDbSearchResponse.class);
-            default -> throw new InternalError("Failed to search heads: " + res.body());
-        };
-    }
-
-    @Override
-    public @NotNull HeadDbSearchResponse getHeadsWithCategory(@NotNull String category, int page, int amount) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(urlV3 + "/hdb/%s?page=%d&pageSize=%d".formatted(category, page, amount)))
-            .build();
-
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), HeadDbSearchResponse.class);
-            default -> throw new InternalError("Failed to search heads: " + res.body());
-        };
-    }
-
-    @Override
     public @NotNull PlayerTopTimesResponse getPlayerTopTimes(@NotNull String playerId, int page, int pageSize) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create("%s/map-players/%s/topTimes?page=%s&pageSize=%s".formatted(urlV3, playerId, page, pageSize)))
@@ -600,40 +571,4 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         };
     }
 
-    @Override
-    public @NotNull List<LegacyMapInfo> getLegacyMaps(@NotNull String authorizer, @NotNull String playerId) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(legacyUrl + "/" + playerId))
-            .header(AUTHORIZER_HEADER, authorizer)
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), new TypeToken<List<LegacyMapInfo>>() {
-            });
-            case 404 -> List.of();
-            default -> throw new InternalError("Failed to get legacy maps: " + res.body());
-        };
-    }
-
-    @Override
-    public @NotNull MapData.WithSlot importLegacyMap(@NotNull String authorizer, @NotNull String playerId, @NotNull String legacyMapId) {
-        var req = HttpRequest.newBuilder()
-            .method("POST", HttpRequest.BodyPublishers.noBody())
-            .uri(URI.create(legacyUrl + "/" + playerId + "/" + legacyMapId + "/import"))
-            .header(AUTHORIZER_HEADER, authorizer)
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), MapData.WithSlot.class);
-            case 404 -> throw new MapService.NotFoundError(legacyMapId);
-            case 403 -> throw new MapService.NoPermissionError();
-            case 400 -> {
-                var err = GSON.fromJson(res.body(), ErrorRes.class);
-                if ("slot_in_use".equals(err.code))
-                    throw new SlotInUseError();
-                throw new InternalError("Failed to create map: " + err);
-            }
-            default -> throw new InternalError("Failed to import legacy map: " + res.body());
-        };
-    }
 }

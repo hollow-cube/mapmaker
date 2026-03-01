@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
-import net.hollowcube.mapmaker.map.responses.HeadDbSearchResponse;
 import net.hollowcube.mapmaker.map.responses.PlayerTopTimesResponse;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -99,18 +98,6 @@ public interface MapService {
     @NotNull MapHistory getPlayerMapHistory(@NotNull String playerId, int page, int amount);
 
     @NotNull PlayerTopTimesResponse getPlayerTopTimes(@NotNull String playerId, int page, int pageSize);
-
-    // Building
-
-    @NotNull HeadDbSearchResponse getHeadsWithSearch(@NotNull String query, int page, int amount);
-    @NotNull HeadDbSearchResponse getHeadsWithCategory(@NotNull String category, int page, int amount);
-
-    // Legacy
-
-    @NotNull List<LegacyMapInfo> getLegacyMaps(@NotNull String authorizer, @NotNull String playerId);
-
-    @NotNull
-    MapData.WithSlot importLegacyMap(@NotNull String authorizer, @NotNull String playerId, @NotNull String legacyMapId);
 
     class NotFoundError extends RuntimeException {
         public NotFoundError(@NotNull String id) {
