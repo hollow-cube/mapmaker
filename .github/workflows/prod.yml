@@ -3,8 +3,7 @@ concurrency: Prod
 
 on:
   push:
-    branches: [ no-player-service ]
-#    tags: [ '\d+\.\d+\.\d+' ]
+    tags: [ '\d+\.\d+\.\d+' ]
 
 jobs:
   resource-pack-build:
@@ -71,7 +70,7 @@ jobs:
       # Build server
       - name: Build standalone binary
         env:
-          MAPMAKER_VERSION: ${{ github.sha }}
+          MAPMAKER_VERSION: ${{ github.ref_name }}
           MAPMAKER_COMMIT_HASH: ${{ github.sha }}
         run: ./gradlew :bin:map:shadowJar -PisRelease=true --no-daemon
 
@@ -112,7 +111,7 @@ jobs:
       # Build server
       - name: Build standalone binary
         env:
-          MAPMAKER_VERSION: ${{ github.sha }}
+          MAPMAKER_VERSION: ${{ github.ref_name }}
           MAPMAKER_COMMIT_HASH: ${{ github.sha }}
         run: ./gradlew :bin:hub:shadowJar -PisRelease=true --no-daemon
 
@@ -150,7 +149,7 @@ jobs:
           docker run --rm \
             -v "${{ github.workspace }}:/work" \
             -w /work \
-            -e MAPMAKER_VERSION=${{ github.sha }} \
+            -e MAPMAKER_VERSION=${{ github.ref_name }} \
             -e MAPMAKER_COMMIT_HASH=${{ github.sha }} \
             --entrypoint /bin/bash \
             container-registry.oracle.com/graalvm/native-image:25 \

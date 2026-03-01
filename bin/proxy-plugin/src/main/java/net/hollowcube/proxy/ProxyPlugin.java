@@ -199,6 +199,11 @@ public class ProxyPlugin {
         transferData.remove(event.player().getUniqueId());
     }
 
+//    @Subscribe
+//    public void handleConfigStart(@NotNull PlayerEnteredConfigurationEvent event) {
+//        event.player().transferToHost(new InetSocketAddress("ovh-02.hollowcube.dev", 30565));
+//    }
+
     private void handleResourcePack(@NotNull PluginMessageEvent event) {
         event.setResult(PluginMessageEvent.ForwardResult.handled());
         if (!(event.getSource() instanceof ServerConnection serverConn)) return;
