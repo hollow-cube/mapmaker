@@ -10,6 +10,9 @@ import io.opentelemetry.context.propagation.TextMapSetter;
 import io.opentelemetry.semconv.SemanticAttributes;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.api.interaction.Command;
+import net.hollowcube.mapmaker.api.interaction.Interaction;
+import net.hollowcube.mapmaker.api.interaction.InteractionResponse;
 import net.hollowcube.mapmaker.backpack.BackpackItem;
 import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.map.*;
@@ -48,35 +51,38 @@ public abstract class AbstractHttpService {
     private static final System.Logger logger = System.getLogger(MapServiceImpl.class.getName());
 
     public static final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(MapVariant.class, new EnumTypeAdapter<>(MapVariant.class))
-            .registerTypeAdapter(SaveStateType.class, new EnumTypeAdapter<>(SaveStateType.class))
-            .registerTypeAdapter(BackpackItem.class, new EnumTypeAdapter<>(BackpackItem.class))
-            .registerTypeAdapter(RewardType.class, new EnumTypeAdapter<>(RewardType.class))
-            .registerTypeAdapter(MapTags.Tag.class, new EnumTypeAdapter<>(MapTags.Tag.class))
-            .registerTypeAdapter(InviteType.class, new EnumTypeAdapter<>(InviteType.class))
-            .registerTypeAdapter(MapVerification.class, new LenientEnumTypeAdapter<>(MapVerification.class))
-            .registerTypeAdapter(MapSize.class, new LenientEnumTypeAdapter<>(MapSize.class))
-            .registerTypeAdapter(PersonalizedMapData.Progress.class, new EnumTypeAdapter<>(PersonalizedMapData.Progress.class))
-            .registerTypeAdapter(ClientChatMessageData.Type.class, new EnumOrdinalTypeAdapter<>(ClientChatMessageData.Type.class))
-            .registerTypeAdapter(ChatMessageData.Part.Type.class, new EnumOrdinalTypeAdapter<>(ChatMessageData.Part.Type.class))
-            .registerTypeAdapter(SessionUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(SessionUpdateMessage.Action.class))
-            .registerTypeAdapter(MapRating.State.class, new LenientEnumTypeAdapter<>(MapRating.State.class))
-            .registerTypeAdapter(MapQuality.class, new LenientEnumTypeAdapter<>(MapQuality.class))
-            .registerTypeAdapter(ReportCategory.class, new EnumTypeAdapter<>(ReportCategory.class))
-            .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
-            .registerTypeAdapter(Material.class, new MaterialTypeAdapter())
-            .registerTypeAdapter(Component.class, new ComponentTypeAdapter())
-            .registerTypeAdapter(ObjectType.class, new ObjectTypeTypeAdapter())
-            .registerTypeAdapter(Point.class, new PointTypeAdapter())
-            .registerTypeAdapter(DisplayName.class, new DisplayNameTypeAdapter())
-            .registerTypeAdapter(Optional.class, new OptionalTypeAdapter())
-            .registerTypeAdapter(PlayerDataUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(PlayerDataUpdateMessage.Action.class))
-            .registerTypeAdapter(PlayerDataUpdateMessage.ReasonType.class, new EnumOrdinalTypeAdapter<>(PlayerDataUpdateMessage.ReasonType.class))
-            .registerTypeAdapter(PunishmentType.class, new EnumTypeAdapter<>(PunishmentType.class))
-            .registerTypeAdapter(PunishmentUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(PunishmentUpdateMessage.Action.class))
-            .registerTypeAdapter(UnsignedLongAdapter.class, new UnsignedLongAdapter.Creator())
-            .disableJdkUnsafe()
-            .create();
+        .registerTypeAdapter(MapVariant.class, new EnumTypeAdapter<>(MapVariant.class))
+        .registerTypeAdapter(SaveStateType.class, new EnumTypeAdapter<>(SaveStateType.class))
+        .registerTypeAdapter(BackpackItem.class, new EnumTypeAdapter<>(BackpackItem.class))
+        .registerTypeAdapter(RewardType.class, new EnumTypeAdapter<>(RewardType.class))
+        .registerTypeAdapter(MapTags.Tag.class, new EnumTypeAdapter<>(MapTags.Tag.class))
+        .registerTypeAdapter(InviteType.class, new EnumTypeAdapter<>(InviteType.class))
+        .registerTypeAdapter(MapVerification.class, new LenientEnumTypeAdapter<>(MapVerification.class))
+        .registerTypeAdapter(MapSize.class, new LenientEnumTypeAdapter<>(MapSize.class))
+        .registerTypeAdapter(Command.Argument.Type.class, new LenientEnumTypeAdapter<>(Command.Argument.Type.class))
+        .registerTypeAdapter(Interaction.Type.class, new LenientEnumTypeAdapter<>(Interaction.Type.class))
+        .registerTypeAdapter(InteractionResponse.Type.class, new LenientEnumTypeAdapter<>(InteractionResponse.Type.class))
+        .registerTypeAdapter(PersonalizedMapData.Progress.class, new EnumTypeAdapter<>(PersonalizedMapData.Progress.class))
+        .registerTypeAdapter(ClientChatMessageData.Type.class, new EnumOrdinalTypeAdapter<>(ClientChatMessageData.Type.class))
+        .registerTypeAdapter(ChatMessageData.Part.Type.class, new EnumOrdinalTypeAdapter<>(ChatMessageData.Part.Type.class))
+        .registerTypeAdapter(SessionUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(SessionUpdateMessage.Action.class))
+        .registerTypeAdapter(MapRating.State.class, new LenientEnumTypeAdapter<>(MapRating.State.class))
+        .registerTypeAdapter(MapQuality.class, new LenientEnumTypeAdapter<>(MapQuality.class))
+        .registerTypeAdapter(ReportCategory.class, new EnumTypeAdapter<>(ReportCategory.class))
+        .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
+        .registerTypeAdapter(Material.class, new MaterialTypeAdapter())
+        .registerTypeAdapter(Component.class, new ComponentTypeAdapter())
+        .registerTypeAdapter(ObjectType.class, new ObjectTypeTypeAdapter())
+        .registerTypeAdapter(Point.class, new PointTypeAdapter())
+        .registerTypeAdapter(DisplayName.class, new DisplayNameTypeAdapter())
+        .registerTypeAdapter(Optional.class, new OptionalTypeAdapter())
+        .registerTypeAdapter(PlayerDataUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(PlayerDataUpdateMessage.Action.class))
+        .registerTypeAdapter(PlayerDataUpdateMessage.ReasonType.class, new EnumOrdinalTypeAdapter<>(PlayerDataUpdateMessage.ReasonType.class))
+        .registerTypeAdapter(PunishmentType.class, new EnumTypeAdapter<>(PunishmentType.class))
+        .registerTypeAdapter(PunishmentUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(PunishmentUpdateMessage.Action.class))
+        .registerTypeAdapter(UnsignedLongAdapter.class, new UnsignedLongAdapter.Creator())
+        .disableJdkUnsafe()
+        .create();
     public static final TextMapSetter<HttpRequest.Builder> CONTEXT_PROPAGATOR = (carrier, key, value) -> {
         if (carrier == null) return;
         carrier.header(key, value);
@@ -212,13 +218,13 @@ public abstract class AbstractHttpService {
 
     protected static HttpRequest.Builder setupPost(@NotNull URI uri, @NotNull String body) {
         return setup(uri)
-                .POST(HttpRequest.BodyPublishers.ofString(body))
-                .header("Content-Type", "application/json");
+            .POST(HttpRequest.BodyPublishers.ofString(body))
+            .header("Content-Type", "application/json");
     }
 
     protected static HttpRequest.Builder setupPatch(@NotNull URI uri, @NotNull String body) {
         return setup(uri)
-                .method("PATCH", HttpRequest.BodyPublishers.ofString(body))
-                .header("Content-Type", "application/json");
+            .method("PATCH", HttpRequest.BodyPublishers.ofString(body))
+            .header("Content-Type", "application/json");
     }
 }

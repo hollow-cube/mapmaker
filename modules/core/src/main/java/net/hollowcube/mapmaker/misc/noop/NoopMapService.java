@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
-import net.hollowcube.mapmaker.map.responses.HeadDbSearchResponse;
 import net.hollowcube.mapmaker.map.responses.PlayerTopTimesResponse;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
@@ -20,18 +19,18 @@ import java.util.UUID;
 
 public class NoopMapService implements MapService {
     private final Map<String, MapData> staticMaps = Map.of(
-            "62da0aaf-8cad-4c13-869c-02b07688988d", new MapData("62da0aaf-8cad-4c13-869c-02b07688988d", UUID.randomUUID().toString(), new MapSettings(
-                    "Test Map", Material.ACACIA_BOAT, MapSize.NORMAL, MapVariant.PARKOUR, new Pos(0.5, 40, 0.5), List.of(MapTags.Tag.STRUCTURE)
-            ), 0, null),
-            "3b9540fb-9100-484d-8bc6-5c3d61eff3a1", new MapData("3b9540fb-9100-484d-8bc6-5c3d61eff3a1", "597481a0-02fb-441c-9188-c407bec05084", new MapSettings(
-                    "Published 1", Material.DIAMOND, MapSize.NORMAL, MapVariant.PARKOUR, Pos.ZERO, List.of(MapTags.Tag.STRUCTURE)
-            ), 1, Instant.now()),
-            "fd5771c0-c545-4d30-94fc-47e574e0fb64", new MapData("fd5771c0-c545-4d30-94fc-47e574e0fb64", "597481a0-02fb-441c-9188-c407bec05084", new MapSettings(
-                    "Published 2", Material.STICK, MapSize.NORMAL, MapVariant.PARKOUR, Pos.ZERO, List.of(MapTags.Tag.STRUCTURE)
-            ), 2, Instant.now()),
-            "5b1e433c-7b98-4ff1-bab1-053e83eab939", new MapData("5b1e433c-7b98-4ff1-bab1-053e83eab939", "597481a0-02fb-441c-9188-c407bec05084", new MapSettings(
-                    "Published 3", Material.MAGENTA_DYE, MapSize.NORMAL, MapVariant.PARKOUR, Pos.ZERO, List.of(MapTags.Tag.STRUCTURE)
-            ), 3, Instant.now())
+        "62da0aaf-8cad-4c13-869c-02b07688988d", new MapData("62da0aaf-8cad-4c13-869c-02b07688988d", UUID.randomUUID().toString(), new MapSettings(
+            "Test Map", Material.ACACIA_BOAT, MapSize.NORMAL, MapVariant.PARKOUR, new Pos(0.5, 40, 0.5), List.of(MapTags.Tag.STRUCTURE)
+        ), 0, null),
+        "3b9540fb-9100-484d-8bc6-5c3d61eff3a1", new MapData("3b9540fb-9100-484d-8bc6-5c3d61eff3a1", "597481a0-02fb-441c-9188-c407bec05084", new MapSettings(
+            "Published 1", Material.DIAMOND, MapSize.NORMAL, MapVariant.PARKOUR, Pos.ZERO, List.of(MapTags.Tag.STRUCTURE)
+        ), 1, Instant.now()),
+        "fd5771c0-c545-4d30-94fc-47e574e0fb64", new MapData("fd5771c0-c545-4d30-94fc-47e574e0fb64", "597481a0-02fb-441c-9188-c407bec05084", new MapSettings(
+            "Published 2", Material.STICK, MapSize.NORMAL, MapVariant.PARKOUR, Pos.ZERO, List.of(MapTags.Tag.STRUCTURE)
+        ), 2, Instant.now()),
+        "5b1e433c-7b98-4ff1-bab1-053e83eab939", new MapData("5b1e433c-7b98-4ff1-bab1-053e83eab939", "597481a0-02fb-441c-9188-c407bec05084", new MapSettings(
+            "Published 3", Material.MAGENTA_DYE, MapSize.NORMAL, MapVariant.PARKOUR, Pos.ZERO, List.of(MapTags.Tag.STRUCTURE)
+        ), 3, Instant.now())
     );
 
     @Override
@@ -42,8 +41,8 @@ public class NoopMapService implements MapService {
     @Override
     public @NotNull net.hollowcube.mapmaker.map.responses.MapSearchResponse searchMaps(@NotNull MapSearchParams request) {
         return new net.hollowcube.mapmaker.map.responses.MapSearchResponse(
-                0, 1,
-                staticMaps.values().stream().filter(m -> m instanceof PersonalizedMapData && m.publishedAt() != null).toList()
+            0, 1,
+            staticMaps.values().stream().filter(m -> m instanceof PersonalizedMapData && m.publishedAt() != null).toList()
         );
     }
 
@@ -185,9 +184,9 @@ public class NoopMapService implements MapService {
     @Override
     public @NotNull MapPlayerData getMapPlayerData(@NotNull String playerId) {
         return new MapPlayerData(
-                playerId,
-                new String[]{null, "62da0aaf-8cad-4c13-869c-02b07688988d", null, null},
-                null, null, null
+            playerId,
+            new String[]{null, "62da0aaf-8cad-4c13-869c-02b07688988d", null, null},
+            null, null, null
         );
     }
 
@@ -197,27 +196,8 @@ public class NoopMapService implements MapService {
     }
 
     @Override
-    public @NotNull HeadDbSearchResponse getHeadsWithSearch(@NotNull String query, int page, int amount) {
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
-    public @NotNull HeadDbSearchResponse getHeadsWithCategory(@NotNull String category, int page, int amount) {
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
     public @NotNull PlayerTopTimesResponse getPlayerTopTimes(@NotNull String playerId, int page, int pageSize) {
         throw new UnsupportedOperationException("not implemented");
     }
 
-    @Override
-    public @NotNull List<LegacyMapInfo> getLegacyMaps(@NotNull String authorizer, @NotNull String playerId) {
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
-    public @NotNull MapData.WithSlot importLegacyMap(@NotNull String authorizer, @NotNull String playerId, @NotNull String legacyMapId) {
-        throw new UnsupportedOperationException("not implemented");
-    }
 }

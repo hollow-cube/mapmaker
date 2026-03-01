@@ -158,7 +158,7 @@ public class MapMapServer extends AbstractMultiMapServer {
 
         commandManager.register(new BannerCommand());
         commandManager.register(new PHeadCommand());
-        commandManager.register(new HdbCommand(maps));
+        commandManager.register(new HdbCommand(server.api().headDatabase));
 
 //        commandManager.register(new SetBiomeCommand());
 

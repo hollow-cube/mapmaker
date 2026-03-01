@@ -36,7 +36,7 @@ jobs:
         id: build-rp
         run: |
           ./gradlew :bin:packer:buildClient
-          
+
           export RESOURCE_PACK_SHA=$(sha1sum build/client.zip | cut -d ' ' -f1)
           echo "resource_pack_sha=${RESOURCE_PACK_SHA}" >> "$GITHUB_OUTPUT"
           echo "Resource Pack Hash: ${RESOURCE_PACK_SHA}" >> "$GITHUB_STEP_SUMMARY"

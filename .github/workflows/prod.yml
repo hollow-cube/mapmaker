@@ -228,7 +228,7 @@ jobs:
           RESOURCE_PACK_HASH: ${{ needs.resource-pack-build.outputs.resource_pack_sha }}
         run: |
           # Setup Kubernetes
-          tailscale configure kubeconfig prod-v2
+          tailscale configure kubeconfig prod-v3
           kubectl cluster-info
 
           # Deploy the chart
@@ -282,7 +282,7 @@ jobs:
           RESOURCE_PACK_HASH: ${{ needs.resource-pack-build.outputs.resource_pack_sha }}
         run: |
           # Setup Kubernetes
-          tailscale configure kubeconfig prod-v2
+          tailscale configure kubeconfig prod-v3
           kubectl cluster-info
 
           # Deploy the chart
@@ -335,7 +335,7 @@ jobs:
           RESOURCE_PACK_HASH: ${{ needs.resource-pack-build.outputs.resource_pack_sha }}
         run: |
           # Setup Kubernetes
-          tailscale configure kubeconfig prod-v2
+          tailscale configure kubeconfig prod-v3
           kubectl cluster-info
 
           # Deploy the chart

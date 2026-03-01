@@ -38,18 +38,18 @@ public class TestServer {
         var commandManager = new CommandManagerImpl();
 
         MinecraftServer.getConnectionManager().setPlayerProvider((connection, gameProfile) ->
-                new MapPlayer(connection, gameProfile) {
-                    @Override
-                    public CommandManager getCommandManager() {
-                        return commandManager;
-                    }
-                });
+            new MapPlayer(connection, gameProfile) {
+                @Override
+                public CommandManager getCommandManager() {
+                    return commandManager;
+                }
+            });
 
         ParkourMapWorld.initGlobalReferences();
 
         var map = AbstractHttpService.GSON.fromJson("""
-                {"clearRate":0.5602294,"createdAt":"2025-03-04T01:06:57.25622Z","difficulty":"medium","id":"65d42cdd-d044-432e-981f-e320e997f63b","lastModified":"2025-03-05T01:12:49.7626Z","likes":251,"objects":null,"owner":"503450fc-72c2-4e87-8243-94e264977437","protocolVersion":769,"publishedAt":"2025-03-05T01:12:49.7626Z","publishedId":749416779,"quality":"outstanding","settings":{"extra":{"boat":false,"no_jump":false,"no_sneak":false,"no_sprint":false,"only_sprint":true,"reset_in_water":true},"icon":"minecraft:dead_bush","name":"Glide: Canyon","size":"colossal","spawnPoint":{"pitch":-4.799709,"x":-22.531082,"y":172,"yaw":0.45348036,"z":-351.61002},"subvariant":"speedrun","tags":["exploration"],"variant":"parkour"},"uniquePlays":523,"verification":"verified"}
-                """, MapData.class);
+            {"clearRate":0.5602294,"createdAt":"2025-03-04T01:06:57.25622Z","difficulty":"medium","id":"65d42cdd-d044-432e-981f-e320e997f63b","lastModified":"2025-03-05T01:12:49.7626Z","likes":251,"objects":null,"owner":"503450fc-72c2-4e87-8243-94e264977437","protocolVersion":769,"publishedAt":"2025-03-05T01:12:49.7626Z","publishedId":749416779,"quality":"outstanding","settings":{"extra":{"boat":false,"no_jump":false,"no_sneak":false,"no_sprint":false,"only_sprint":true,"reset_in_water":true},"icon":"minecraft:dead_bush","name":"Glide: Canyon","size":"colossal","spawnPoint":{"pitch":-4.799709,"x":-22.531082,"y":172,"yaw":0.45348036,"z":-351.61002},"subvariant":"speedrun","tags":["exploration"],"variant":"parkour"},"uniquePlays":523,"verification":"verified"}
+            """, MapData.class);
 
 
         var mapServer = new MockMapServer();
@@ -63,40 +63,40 @@ public class TestServer {
                 }
             }
         };
-        mapServer.playerService = new PlayerServiceImpl(io.opentelemetry.api.OpenTelemetry.noop(), "http://localhost:9126");
+        mapServer.playerService = new PlayerServiceImpl(io.opentelemetry.api.OpenTelemetry.noop(), "http://localhost:9127");
         mapServer.bridge = new NoopServerBridge();
 
         var world = new ParkourMapWorld(mapServer, map);
         world.loadWorld();
 
         MinecraftServer.getGlobalEventHandler()
-                .addListener(AsyncPlayerConfigurationEvent.class, event -> {
-                    final var player = event.getPlayer();
-                    player.setTag(PlayerData.TAG, new PlayerData(player));
+            .addListener(AsyncPlayerConfigurationEvent.class, event -> {
+                final var player = event.getPlayer();
+                player.setTag(PlayerData.TAG, new PlayerData(player));
 
-                    world.configurePlayer(event);
-                })
-                .addListener(PlayerSpawnEvent.class, event -> {
-                    if (!event.isFirstSpawn()) return;
-                    world.spawnPlayer(event.getPlayer());
-                })
-                .addListener(PlayerDisconnectEvent.class, event -> {
-                    var exitWorld = MapWorld.forPlayer(event.getPlayer());
-                    if (exitWorld == null) return;
+                world.configurePlayer(event);
+            })
+            .addListener(PlayerSpawnEvent.class, event -> {
+                if (!event.isFirstSpawn()) return;
+                world.spawnPlayer(event.getPlayer());
+            })
+            .addListener(PlayerDisconnectEvent.class, event -> {
+                var exitWorld = MapWorld.forPlayer(event.getPlayer());
+                if (exitWorld == null) return;
 
-                    exitWorld.removePlayer(event.getPlayer());
-                });
+                exitWorld.removePlayer(event.getPlayer());
+            });
 
         MinecraftServer.getSchedulerManager()
-                .scheduleEndOfTick(new Runnable() {
-                    @Override
-                    public void run() {
-                        world.safePointTick();
-                        MinecraftServer.getSchedulerManager()
-                                .scheduleEndOfTick(this);
+            .scheduleEndOfTick(new Runnable() {
+                @Override
+                public void run() {
+                    world.safePointTick();
+                    MinecraftServer.getSchedulerManager()
+                        .scheduleEndOfTick(this);
 
-                    }
-                });
+                }
+            });
 //        MinecraftServer.getSchedulerManager()
 //                .buildTask(world::safePointTick)
 //                .repeat(TaskSchedule.tick(1))

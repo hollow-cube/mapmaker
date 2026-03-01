@@ -38,60 +38,60 @@ public class TestServer {
         commandManager.register(new TestCommand());
 
         MinecraftServer.getConnectionManager().setPlayerProvider((connection, gameProfile) ->
-                new MapPlayer(connection, gameProfile) {
-                    @Override
-                    public CommandManager getCommandManager() {
-                        return commandManager;
-                    }
-                });
+            new MapPlayer(connection, gameProfile) {
+                @Override
+                public CommandManager getCommandManager() {
+                    return commandManager;
+                }
+            });
 
         ParkourMapWorld.initGlobalReferences();
 
         var mapServer = new MockMapServer();
         mapServer.mapService = new MapServiceImpl("http://localhost:9125");
-        mapServer.playerService = new PlayerServiceImpl(io.opentelemetry.api.OpenTelemetry.noop(), "http://localhost:9126");
+        mapServer.playerService = new PlayerServiceImpl(io.opentelemetry.api.OpenTelemetry.noop(), "http://localhost:9127");
         mapServer.bridge = new NoopServerBridge();
 
         var map = new MapData("fe048ae8-8d46-475f-ba6b-d2e87c83e649",
-                "aceb326f-da15-45bc-bf2f-11940c21780c");
+            "aceb326f-da15-45bc-bf2f-11940c21780c");
 
         var world = new EditorMapWorld(mapServer, map);
         world.loadWorld();
 
         MinecraftServer.getGlobalEventHandler()
-                .addListener(AsyncPlayerConfigurationEvent.class, event -> {
-                    final var player = event.getPlayer();
-                    player.setTag(PlayerData.TAG, new PlayerData(player));
+            .addListener(AsyncPlayerConfigurationEvent.class, event -> {
+                final var player = event.getPlayer();
+                player.setTag(PlayerData.TAG, new PlayerData(player));
 
-                    world.configurePlayer(event);
-                })
-                .addListener(PlayerSpawnEvent.class, event -> {
-                    if (!event.isFirstSpawn()) return;
+                world.configurePlayer(event);
+            })
+            .addListener(PlayerSpawnEvent.class, event -> {
+                if (!event.isFirstSpawn()) return;
 
-                    MiscFunctionality.assignTeam(event.getPlayer());
+                MiscFunctionality.assignTeam(event.getPlayer());
 
-                    ActionBar.forPlayer(event.getPlayer())
-                            .addProvider(new ServerStatsHud());
+                ActionBar.forPlayer(event.getPlayer())
+                    .addProvider(new ServerStatsHud());
 
-                    world.spawnPlayer(event.getPlayer());
-                })
-                .addListener(PlayerDisconnectEvent.class, event -> {
-                    var exitWorld = MapWorld.forPlayer(event.getPlayer());
-                    if (exitWorld == null) return;
+                world.spawnPlayer(event.getPlayer());
+            })
+            .addListener(PlayerDisconnectEvent.class, event -> {
+                var exitWorld = MapWorld.forPlayer(event.getPlayer());
+                if (exitWorld == null) return;
 
-                    exitWorld.removePlayer(event.getPlayer());
-                });
+                exitWorld.removePlayer(event.getPlayer());
+            });
 
         MinecraftServer.getSchedulerManager()
-                .scheduleEndOfTick(new Runnable() {
-                    @Override
-                    public void run() {
-                        world.safePointTick();
-                        MinecraftServer.getSchedulerManager()
-                                .scheduleEndOfTick(this);
+            .scheduleEndOfTick(new Runnable() {
+                @Override
+                public void run() {
+                    world.safePointTick();
+                    MinecraftServer.getSchedulerManager()
+                        .scheduleEndOfTick(this);
 
-                    }
-                });
+                }
+            });
 
         server.start("0.0.0.0", 25565);
     }

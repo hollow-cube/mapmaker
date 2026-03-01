@@ -40,6 +40,7 @@ public class PlayerData {
     private String id;
     private String username;
     private DisplayName displayNameV2 = new DisplayName(List.of());
+    private DisplayName displayName; // v4
     private JsonObject settings = new JsonObject();
 
     @Expose(serialize = false, deserialize = false)
@@ -112,11 +113,11 @@ public class PlayerData {
     }
 
     public @NotNull Component displayName() {
-        return displayNameV2.asComponent();
+        return displayName2().asComponent();
     }
 
     public @NotNull DisplayName displayName2() {
-        return displayNameV2;
+        return displayName != null ? displayName : displayNameV2;
     }
 
     public <T> @NotNull T getSetting(@NotNull PlayerSetting<T> setting) {

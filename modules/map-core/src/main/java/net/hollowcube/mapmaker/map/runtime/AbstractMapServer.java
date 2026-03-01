@@ -30,6 +30,8 @@ import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.ApiClient;
+import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.chat.ChatAutoCompleter;
 import net.hollowcube.mapmaker.chat.ChatChannelDisplay;
@@ -127,6 +129,7 @@ public abstract class AbstractMapServer implements MapServer {
     protected final GlobalConfig globalConfig;
 
     protected final OpenTelemetry otel;
+    private final ApiClient api;
     private final SessionService sessionService;
     private final PlayerService playerService;
     private final MapService mapService;
@@ -157,6 +160,11 @@ public abstract class AbstractMapServer implements MapServer {
 
         this.otel = initTracing(config);
 
+        var apiUrl = config.get(Player_ServiceConfig.class).url();
+        if (apiUrl.isEmpty()) apiUrl = "http://localhost:9127";
+        var http = new HttpClientWrapper(otel, apiUrl);
+        this.api = new ApiClient(http);
+
         var playerServiceUrl = config.get(Player_ServiceConfig.class).url();
         if (!playerServiceUrl.isEmpty()) {
             playerService = new PlayerServiceImpl(otel, playerServiceUrl);
@@ -165,7 +173,7 @@ public abstract class AbstractMapServer implements MapServer {
             playerService = new NoopPlayerService();
             punishmentService = new NoopPunishmentService();
         } else {
-            var localUrl = "http://localhost:9126"; // tilt
+            var localUrl = "http://localhost:9127"; // tilt
             playerService = new PlayerServiceImpl(otel, localUrl);
             punishmentService = new PunishmentServiceImpl(localUrl);
         }
@@ -178,9 +186,9 @@ public abstract class AbstractMapServer implements MapServer {
         var mapServiceUrl = config.get(Map_ServiceConfig.class).url();
         if (!mapServiceUrl.isEmpty()) mapService = new MapServiceImpl(mapServiceUrl);
         else if (globalConfig.noop()) mapService = new NoopMapService();
-        else mapService = new MapServiceImpl("http://localhost:9126"); // tilt
+        else mapService = new MapServiceImpl("http://localhost:9127"); // tilt
 
-        var obungusService = new ObungusServiceImpl(otel, "http://localhost:9126");
+        var obungusService = new ObungusServiceImpl(otel, "http://localhost:9127");
         addBinding(ObungusService.class, obungusService, "obungus", "obungusService");
     }
 
@@ -284,6 +292,11 @@ public abstract class AbstractMapServer implements MapServer {
 
         // Finally, mark the service as ready for Kubernetes
         isReady = true;
+    }
+
+    @Override
+    public @NotNull ApiClient api() {
+        return api;
     }
 
     @Override
@@ -435,7 +448,6 @@ public abstract class AbstractMapServer implements MapServer {
         }
 
         if (fullInstance) {
-            FutureUtil.submitVirtual(() -> commandManager.register(new BanCommand(punishmentService(), playerService())));
             commandManager.register(new UnbanCommand(punishmentService(), playerService()));
             FutureUtil.submitVirtual(() -> commandManager.register(new MuteCommand(punishmentService(), playerService())));
             commandManager.register(new UnmuteCommand(punishmentService(), playerService()));
@@ -444,6 +456,11 @@ public abstract class AbstractMapServer implements MapServer {
 
         if (fullInstance) {
             commandManager.register(new RecapCommand(playerService()));
+
+            var interactions = api().interactions.getCommands();
+            for (var interaction : interactions) {
+                commandManager.register(new RemoteCommand(api(), playerService(), interaction));
+            }
         }
 
         DataFixer.buildModel();

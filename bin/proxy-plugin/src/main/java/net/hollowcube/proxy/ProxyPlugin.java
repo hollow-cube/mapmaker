@@ -95,7 +95,7 @@ public class ProxyPlugin {
 
         var sessionServiceUrl = System.getenv("SESSION_SERVICE_URL");
         if (sessionServiceUrl != null) sessionService = new ProxySessionService(logger, sessionServiceUrl);
-        else sessionService = new ProxySessionService(logger, "http://session-service:9124"); // tilt
+        else sessionService = new ProxySessionService(logger, "http://api-server:9124"); // tilt
 
         proxy.getChannelRegistrar().register(TRANSFER_MESSAGE_ID);
         proxy.getChannelRegistrar().register(RESOURCE_PACK_MESSAGE_ID);
@@ -198,6 +198,11 @@ public class ProxyPlugin {
     public void handleConfigEnd(@NotNull PlayerFinishedConfigurationEvent event) {
         transferData.remove(event.player().getUniqueId());
     }
+
+//    @Subscribe
+//    public void handleConfigStart(@NotNull PlayerEnteredConfigurationEvent event) {
+//        event.player().transferToHost(new InetSocketAddress("ovh-02.hollowcube.dev", 30565));
+//    }
 
     private void handleResourcePack(@NotNull PluginMessageEvent event) {
         event.setResult(PluginMessageEvent.ForwardResult.handled());
