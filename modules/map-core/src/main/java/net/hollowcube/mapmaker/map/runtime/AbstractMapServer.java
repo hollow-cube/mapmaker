@@ -448,7 +448,6 @@ public abstract class AbstractMapServer implements MapServer {
         }
 
         if (fullInstance) {
-            FutureUtil.submitVirtual(() -> commandManager.register(new BanCommand(punishmentService(), playerService())));
             commandManager.register(new UnbanCommand(punishmentService(), playerService()));
             FutureUtil.submitVirtual(() -> commandManager.register(new MuteCommand(punishmentService(), playerService())));
             commandManager.register(new UnmuteCommand(punishmentService(), playerService()));
@@ -457,6 +456,11 @@ public abstract class AbstractMapServer implements MapServer {
 
         if (fullInstance) {
             commandManager.register(new RecapCommand(playerService()));
+
+            var interactions = api().interactions.getCommands();
+            for (var interaction : interactions) {
+                commandManager.register(new RemoteCommand(api(), playerService(), interaction));
+            }
         }
 
         DataFixer.buildModel();
