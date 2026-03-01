@@ -30,6 +30,8 @@ import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.ApiClient;
+import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.chat.ChatAutoCompleter;
 import net.hollowcube.mapmaker.chat.ChatChannelDisplay;
@@ -127,6 +129,7 @@ public abstract class AbstractMapServer implements MapServer {
     protected final GlobalConfig globalConfig;
 
     protected final OpenTelemetry otel;
+    private final ApiClient api;
     private final SessionService sessionService;
     private final PlayerService playerService;
     private final MapService mapService;
@@ -156,6 +159,11 @@ public abstract class AbstractMapServer implements MapServer {
         this.globalConfig = config.get(GlobalConfig.class);
 
         this.otel = initTracing(config);
+
+        var apiUrl = config.get(Player_ServiceConfig.class).url();
+        if (apiUrl.isEmpty()) apiUrl = "http://localhost:9127";
+        var http = new HttpClientWrapper(otel, apiUrl);
+        this.api = new ApiClient(http);
 
         var playerServiceUrl = config.get(Player_ServiceConfig.class).url();
         if (!playerServiceUrl.isEmpty()) {
@@ -284,6 +292,11 @@ public abstract class AbstractMapServer implements MapServer {
 
         // Finally, mark the service as ready for Kubernetes
         isReady = true;
+    }
+
+    @Override
+    public @NotNull ApiClient api() {
+        return api;
     }
 
     @Override
