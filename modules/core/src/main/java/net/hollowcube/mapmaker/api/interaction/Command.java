@@ -10,9 +10,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 @RuntimeGson
-public record RemoteInteraction(
-    Type type,
+public record Command(
     String name,
+    @Nullable String description,
     @MagicConstant(flagsFromClass = Permission.class)
     @JsonAdapter(UnsignedLongAdapter.class)
     long permissions,
@@ -20,14 +20,11 @@ public record RemoteInteraction(
     List<Argument> arguments
 ) {
 
-    public enum Type {
-        COMMAND
-    }
-
     @RuntimeGson
     public record Argument(
         Type type,
         String name,
+        boolean optional,
 
         @Nullable List<String> choices
     ) {
@@ -35,8 +32,7 @@ public record RemoteInteraction(
             WORD,
             STRING,
             CHOICE,
-            PLAYER,
-            DYNAMIC
+            PLAYER
         }
     }
 

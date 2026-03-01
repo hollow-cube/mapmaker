@@ -10,7 +10,9 @@ import io.opentelemetry.context.propagation.TextMapSetter;
 import io.opentelemetry.semconv.SemanticAttributes;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.api.interaction.RemoteInteraction;
+import net.hollowcube.mapmaker.api.interaction.Command;
+import net.hollowcube.mapmaker.api.interaction.Interaction;
+import net.hollowcube.mapmaker.api.interaction.InteractionResponse;
 import net.hollowcube.mapmaker.backpack.BackpackItem;
 import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.map.*;
@@ -57,8 +59,9 @@ public abstract class AbstractHttpService {
         .registerTypeAdapter(InviteType.class, new EnumTypeAdapter<>(InviteType.class))
         .registerTypeAdapter(MapVerification.class, new LenientEnumTypeAdapter<>(MapVerification.class))
         .registerTypeAdapter(MapSize.class, new LenientEnumTypeAdapter<>(MapSize.class))
-        .registerTypeAdapter(RemoteInteraction.Type.class, new LenientEnumTypeAdapter<>(RemoteInteraction.Type.class))
-        .registerTypeAdapter(RemoteInteraction.Argument.Type.class, new LenientEnumTypeAdapter<>(RemoteInteraction.Argument.Type.class))
+        .registerTypeAdapter(Command.Argument.Type.class, new LenientEnumTypeAdapter<>(Command.Argument.Type.class))
+        .registerTypeAdapter(Interaction.Type.class, new LenientEnumTypeAdapter<>(Interaction.Type.class))
+        .registerTypeAdapter(InteractionResponse.Type.class, new LenientEnumTypeAdapter<>(InteractionResponse.Type.class))
         .registerTypeAdapter(PersonalizedMapData.Progress.class, new EnumTypeAdapter<>(PersonalizedMapData.Progress.class))
         .registerTypeAdapter(ClientChatMessageData.Type.class, new EnumOrdinalTypeAdapter<>(ClientChatMessageData.Type.class))
         .registerTypeAdapter(ChatMessageData.Part.Type.class, new EnumOrdinalTypeAdapter<>(ChatMessageData.Part.Type.class))

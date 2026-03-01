@@ -7,9 +7,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.Uuids;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.api.interaction.RemoteInteraction;
 import net.hollowcube.mapmaker.command.CommandCategories;
-import net.hollowcube.mapmaker.command.RemoteCommand;
 import net.hollowcube.mapmaker.command.playerinfo.PlayerInfoCommand;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.VelocityConfig;
@@ -43,7 +41,6 @@ import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.ServiceLoader;
 
 import static net.hollowcube.mapmaker.map.MapPlayer.simpleMapPlayer;
@@ -120,15 +117,6 @@ public class HubServer extends AbstractMapServer {
         commandManager.register(new HubFlyCommand());
         commandManager.register(new HubSpawnCommand());
         commandManager.register(new HubTrainCommand(scheduler));
-
-        var interaction = new RemoteInteraction(
-            RemoteInteraction.Type.COMMAND, "remote",
-            0, List.of(
-            new RemoteInteraction.Argument(RemoteInteraction.Argument.Type.PLAYER, "target", null),
-            new RemoteInteraction.Argument(RemoteInteraction.Argument.Type.CHOICE, "ladder", List.of("gameplay-major", "gameplay-minor")),
-            new RemoteInteraction.Argument(RemoteInteraction.Argument.Type.STRING, "reason", null)
-        ));
-        commandManager.register(new RemoteCommand(server.playerService(), interaction));
     }
 
     // Static so it can be referenced from DevHubServer

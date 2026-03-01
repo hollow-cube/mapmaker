@@ -37,9 +37,7 @@ public interface PlayerClient {
             http.patch(
                 "updatePlayerSettings",
                 V4_PREFIX + "/" + playerId,
-                Map.of("settingsUpdates", settings)
-            );
+                Map.of("settingsUpdates", settings));
         }
     }
-
 }
