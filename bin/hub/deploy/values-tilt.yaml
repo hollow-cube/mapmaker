@@ -17,4 +17,6 @@ env:
   MAPMAKER_SESSION_SERVICE_URL: "http://api-server:9124"
   MAPMAKER_PLAYER_INVITE_SERVICE_URL: "http://api-server:9124"
 
+  MAPMAKER_NATS_SERVERS: "nats://nats:4222"
+
 replicaCount: 1

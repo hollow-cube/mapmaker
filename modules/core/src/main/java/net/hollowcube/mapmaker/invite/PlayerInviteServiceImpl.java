@@ -105,8 +105,13 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
             return;
         }
 
-        var targetMap = MiscFunctionality.getCurrentMap(sessionManager, mapService, targetId);
-        if (targetMap == senderMap) {
+        var targetSession = sessionManager.getSession(targetId);
+        if (targetSession == null) {
+            // This should've been checked outside this method
+            return;
+        }
+
+        if (senderMap.id().equals(targetSession.presence().mapId())) {
             sender.sendMessage(Component.translatable("map.invite.same_map"));
             return;
         }
@@ -134,17 +139,25 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     public void registerRequest(@NotNull Player sender, @NotNull String targetId) {
         var targetDisplayName = playerService.getPlayerDisplayName2(targetId);
 
-        var targetMap = MiscFunctionality.getCurrentMap(sessionManager, mapService, targetId);
-        if (targetMap == null) {
+        var targetSession = sessionManager.getSession(targetId);
+        if (targetSession == null) {
+            // This should've been checked outside this method
+            return;
+        }
+
+        var targetPresence = targetSession.presence();
+        if (targetPresence == null || targetPresence.type().equals(Presence.TYPE_MAPMAKER_HUB)) {
             sender.sendMessage(Component.translatable("map.play.request.cant_send", targetDisplayName));
             return;
         }
 
-        var senderMap = MiscFunctionality.getCurrentMap(sessionManager, mapService, sender);
-        if (senderMap == targetMap) {
+        var senderPresence = sessionManager.getSession(PlayerData.fromPlayer(sender).id()).presence();
+        if (senderPresence.mapId().equals(targetPresence.mapId())) {
             sender.sendMessage(Component.translatable("map.request.same_map", targetDisplayName));
             return;
         }
+
+        var targetMap = mapService.getMap(targetId, targetPresence.mapId());
 
         var body = GSON.toJson(new MapInvite(InviteType.REQUEST, sender, targetId, targetMap));
         var request = HttpRequest.newBuilder()
@@ -210,8 +223,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
                 String inviteRequest = isInvite ? "invite" : "request";
                 String playBuild = inviteMap.isPublished() ? "play" : "build";
 
-                var inviteSenderId = isInvite ? invite.senderId() : invite.recipientId();
-                var senderDisplayName = playerService.getPlayerDisplayName2(inviteSenderId);
+                var senderDisplayName = playerService.getPlayerDisplayName2(invite.senderId());
 
                 String translateString = "map." + playBuild + "." + inviteRequest + "." + acceptReject;
                 sender.sendMessage(Component.translatable(translateString, senderDisplayName, Component.text(inviteMap.name())));

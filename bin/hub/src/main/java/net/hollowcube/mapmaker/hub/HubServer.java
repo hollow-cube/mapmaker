@@ -47,7 +47,7 @@ import static net.hollowcube.mapmaker.map.MapPlayer.simpleMapPlayer;
 
 public class HubServer extends AbstractMapServer {
     private static final Logger logger = LoggerFactory.getLogger(HubServer.class);
-    private static final Presence HUB_PRESENCE = new Presence("mapmaker:hub",
+    private static final Presence HUB_PRESENCE = new Presence(Presence.TYPE_MAPMAKER_HUB,
         "__hub_unused__", ServerRuntime.getRuntime().hostname(), "hub");
 
     public static final MapData HUB_MAP_DATA = new MapData(MapData.SPAWN_MAP_ID, Uuids.ZERO);

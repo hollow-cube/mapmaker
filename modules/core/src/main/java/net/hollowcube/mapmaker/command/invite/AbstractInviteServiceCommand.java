@@ -46,6 +46,9 @@ abstract class AbstractInviteServiceCommand extends CommandDsl {
             player.sendMessage(Component.translatable("generic.player.offline", Component.text(targetName)));
             return;
         }
+        if (this.preventBlocked && this.playerService.failIfBlocked(player, targetId, targetName, true)) {
+            return;
+        }
 
         var targetSession = this.sessionManager.getSession(targetId);
         var targetDisplayName = this.playerService.getPlayerDisplayName2(targetId);
@@ -57,8 +60,6 @@ abstract class AbstractInviteServiceCommand extends CommandDsl {
             player.sendMessage(Component.translatable("generic.other_players_only"));
             return;
         }
-
-        if (this.preventBlocked && this.playerService.failIfBlocked(player, targetId, context.getRaw(this.targetArgument), true)) return;
 
         this.handle(player, targetSession.playerId(), targetName);
     }
