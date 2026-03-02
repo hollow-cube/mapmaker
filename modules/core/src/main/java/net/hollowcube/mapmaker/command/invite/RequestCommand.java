@@ -17,10 +17,6 @@ public class RequestCommand extends AbstractInviteServiceCommand {
 
     @Override
     void handle(@NotNull Player sender, @NotNull String targetId, @NotNull String targetName) {
-        if (this.playerService.failIfBlocked(sender, targetId, targetName, true)) {
-            return;
-        }
-
         this.inviteService.registerRequest(sender, targetId);
     }
 }

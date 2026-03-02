@@ -15,8 +15,8 @@ import org.jetbrains.annotations.NotNull;
 abstract class AbstractInviteServiceCommand extends CommandDsl {
 
     protected final PlayerInviteService inviteService;
-    protected final PlayerService playerService;
-    protected final SessionManager sessionManager;
+    private final PlayerService playerService;
+    private final SessionManager sessionManager;
     private final Argument<String> targetArgument;
     private final boolean preventBlocked;
 
