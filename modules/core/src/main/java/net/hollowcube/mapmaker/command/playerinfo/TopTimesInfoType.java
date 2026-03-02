@@ -48,7 +48,7 @@ public class TopTimesInfoType extends CommandDsl {
         int page = commandContext.get(this.pageArgument);
 
         if (targetId == null) {
-            sender.sendMessage(Component.translatable("command.top_times.target_not_found"));
+            sender.sendMessage(Component.text("Player not found"));
             return;
         }
         Component targetName = this.playerService.getPlayerDisplayName2(targetId).asComponent();
@@ -56,7 +56,7 @@ public class TopTimesInfoType extends CommandDsl {
         PlayerTopTimesResponse resp = this.mapService.getPlayerTopTimes(targetId, page, 15);
         int maxPage = Math.ceilDiv(resp.totalItems(), 15);
         if (maxPage == 0) {
-            sender.sendMessage(Component.translatable("command.top_times.empty"));
+            sender.sendMessage(targetName.append(Component.text(" has no top times")));
             return;
         }
 
