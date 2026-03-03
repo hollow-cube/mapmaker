@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.command.store;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.GenericMessages;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -41,6 +42,7 @@ public class HypercubeCommand extends CommandDsl {
                 formatInstant(status.since()), formatInstant(status.until())
             ));
         } catch (Exception e) {
+            ExceptionReporter.reportException(e, player);
             player.sendMessage(GenericMessages.COMMAND_UNKNOWN_ERROR);
         }
     }
