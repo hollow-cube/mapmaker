@@ -3,10 +3,12 @@ package net.hollowcube.mapmaker.scripting.api;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.gen.LuaExport;
 import net.hollowcube.luau.gen.LuaLibrary;
+import net.hollowcube.luau.gen.LuaMethod;
 import net.hollowcube.luau.gen.LuaProperty;
 import net.hollowcube.mapmaker.scripting.ScriptContext;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 
 import java.util.Objects;
 
@@ -40,6 +42,20 @@ public final class LibItem {
         } else {
             LibItem$luau.pushItem(state, new Item(itemStack));
         }
+    }
+
+    public static ItemStack checkItemArg(LuaState state, int argIndex) {
+        return LibItem$luau.checkItemArg(state, argIndex).value;
+    }
+
+    @LuaMethod
+    public static int deprecated_makeItemFromMaterial(LuaState state) {
+        var name = state.checkString(1);
+        var material = Material.fromKey(name);
+        if (material == null) throw state.error("Invalid material: " + name);
+
+        pushItem(state, ItemStack.of(material));
+        return 1;
     }
 
     @LuaExport

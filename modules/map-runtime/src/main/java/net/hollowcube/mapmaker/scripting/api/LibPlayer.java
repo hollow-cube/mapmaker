@@ -4,6 +4,7 @@ import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaType;
 import net.hollowcube.luau.gen.*;
 import net.hollowcube.mapmaker.map.MapPlayer;
+import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.event.PlayerJumpEvent;
 import net.hollowcube.mapmaker.scripting.Disposable;
@@ -13,10 +14,14 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.SoundStop;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.PlayerHand;
+import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.player.PlayerBlockInteractEvent;
+import net.minestom.server.event.player.PlayerUseItemEvent;
+import net.minestom.server.instance.block.Block;
 
 import java.util.UUID;
 
@@ -120,6 +125,19 @@ public final class LibPlayer {
             return 1;
         }
 
+        @LuaProperty
+        public int getOnUseItem(LuaState state) {
+            class Impl {
+                static int pushArgs(LuaState state, PlayerUseItemEvent event) {
+                    if (event.getHand() != PlayerHand.MAIN) return -1; // Ignore
+                    return 0;
+                }
+            }
+
+            LibBase.pushEventSource(state, PlayerUseItemEvent.class, Impl::pushArgs);
+            return 1;
+        }
+
         //endregion
 
         //region Instance Methods
@@ -188,11 +206,53 @@ public final class LibPlayer {
             }
         }
 
+        // (self, position: vector, yaw: number?, pitch: number?, relativeFlags: 'xyzrw'?)
+        @LuaMethod
+        public void teleport(LuaState state) {
+            int top = state.top();
+            var position = LuaVector.check(state, 1);
+            boolean hasYaw = top > 1, hasPitch = top > 2;
+            float yaw = hasYaw ? (float) state.checkNumber(2) : 0;
+            float pitch = hasPitch ? (float) state.checkNumber(3) : 0;
+            String flagString = top > 3 ? state.checkString(4) : "";
+
+            int relativeFlags = RelativeFlags.DELTA_COORD; // Dont affect velocity
+            for (char c : flagString.toCharArray()) {
+                switch (c) {
+                    case 'x' -> relativeFlags |= RelativeFlags.X;
+                    case 'y' -> relativeFlags |= RelativeFlags.Y;
+                    case 'z' -> relativeFlags |= RelativeFlags.Z;
+                    case 'r' -> relativeFlags |= RelativeFlags.YAW;
+                    case 'w' -> relativeFlags |= RelativeFlags.PITCH;
+                    default -> throw state.error("Invalid relative flag '" + c + "', expected 'xyzrw'");
+                }
+            }
+            // If yaw or pitch were provided, dont change them (aka 0 relative to current)
+            if (!hasYaw) relativeFlags |= RelativeFlags.YAW;
+            if (!hasPitch) relativeFlags |= RelativeFlags.PITCH;
+
+            player.teleport(new Pos(position, yaw, pitch), Vec.ZERO, null, relativeFlags);
+        }
+
         @LuaMethod
         public int getSlot(LuaState state) {
             var slot = LibItem.checkSlot(state, 1);
             LibItem.pushItem(state, player.getEquipment(slot));
             return 1;
+        }
+
+        @LuaMethod
+        public void setSlot(LuaState state) {
+            var slot = LibItem.checkSlot(state, 1);
+            var item = LibItem.checkItemArg(state, 2);
+            player.setEquipment(slot, item);
+        }
+
+        @LuaMethod
+        public void setItem(LuaState state) {
+            var slot = state.checkInteger(1);
+            var item = LibItem.checkItemArg(state, 2);
+            player.getInventory().setItemStack(slot, item);
         }
 
         //endregion
@@ -270,6 +330,15 @@ public final class LibPlayer {
 
             LibEntity.pushEntity(state, luaEntity);
             return 1;
+        }
+
+        @LuaMethod
+        public void setBlock(LuaState state) {
+            var position = LuaVector.check(state, 1);
+            var blockState = state.checkString(2);
+            var block = Block.fromState(blockState);
+
+            GhostBlockHolder.forPlayer(player).setBlock(position, block);
         }
 
     }

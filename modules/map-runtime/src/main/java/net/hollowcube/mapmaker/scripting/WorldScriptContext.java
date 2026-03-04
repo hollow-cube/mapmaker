@@ -17,6 +17,8 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -36,12 +38,14 @@ public class WorldScriptContext {
         .vectorType("vector")
         .vectorCtor("vec")
         .build();
+    private static final Logger logger = LoggerFactory.getLogger(WorldScriptContext.class);
 
     private final MapWorld world;
 
     private final LuaState state;
     private final @Nullable FsModuleLoader fsModuleLoader;
     private final @Nullable Map<String, byte[]> vfs;
+    private final @Nullable URI baseUrl;
 
     public WorldScriptContext(MapWorld world, Path scriptDirectory) {
         this.world = world;
@@ -50,6 +54,7 @@ public class WorldScriptContext {
             this.state = newStateWithGlobals(fsModuleLoader);
             fsModuleLoader.globalState = this.state;
             this.vfs = null;
+            this.baseUrl = null;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -63,9 +68,11 @@ public class WorldScriptContext {
                 var resolver = new ZipRequireResolver(LUAU_COMPILER, baseUrlOrZip);
                 this.vfs = resolver.getVfsThisIsBadPleaseFix();
                 this.state = newStateWithGlobals(resolver);
+                this.baseUrl = null;
             } else {
                 this.vfs = null;
                 this.state = newStateWithGlobals(new ResourceRequireResolver(LUAU_COMPILER, baseUrlOrZip));
+                this.baseUrl = baseUrlOrZip;
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -283,8 +290,8 @@ public class WorldScriptContext {
                 throw new RuntimeException("failed to spawn player", e);
             }
         } else {
-            var playerScript = Objects.requireNonNull(WorldScriptContext.class.getResource("/scripts/player.luau"));
-            try (var is = playerScript.openStream()) {
+            var playerScript = URI.create(Objects.requireNonNull(baseUrl) + "/player.luau");
+            try (var is = playerScript.toURL().openStream()) {
                 var source = new String(is.readAllBytes(), StandardCharsets.UTF_8);
                 var bytecode = LUAU_COMPILER.compile(source);
                 thread.load("/player.luau", bytecode);

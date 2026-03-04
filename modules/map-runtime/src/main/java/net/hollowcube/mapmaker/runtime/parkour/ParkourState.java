@@ -100,6 +100,9 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
                 saveState().setStartLatency(mp.averageLatency());
             } else ((MapPlayer) player).resetTouchingState();
 
+            var scriptContext = world.scriptContext();
+            if (scriptContext != null) scriptContext.initializePlayer((MapPlayer) player);
+
             if (lastState == null && MapFeatureFlags.DEBUG_PLAYING_OVERLAY.test(player)) {
                 ActionBar.forPlayer(player).addProvider(ParkourDebugHud.INSTANCE);
             }
@@ -115,6 +118,9 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
 
         @Override
         default void resetPlayer(ParkourMapWorld world, Player player, @Nullable ParkourState nextState) {
+            var scriptContext = world.scriptContext();
+            if (scriptContext != null) scriptContext.destroyPlayer((MapPlayer) player);
+
             player.updateViewerRule(null);
 
             // Any time we switch away from playing we attempt to save the current state.
