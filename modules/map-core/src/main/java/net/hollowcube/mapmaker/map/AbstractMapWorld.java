@@ -230,7 +230,6 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         var stateChangeEvent = new MapCoreJFR.StateChange(getClass(), null, initialState.getClass());
         stateChangeEvent.begin();
         try {
-            System.out.println("putting player state (SPAWN): " + initialState);
             playerStates.put(player, initialState);
             playersByState[stateIndex(initialState)].add(player);
             //noinspection unchecked
@@ -324,11 +323,9 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
 
                     // todo what should we do if theres a failure here?
 
-                    System.out.println("putting player state (TICK): " + nextState);
                     playerStates.put(player, nextState);
                     playersByState[stateIndex(nextState)].add(player);
                     nextState.configurePlayer((W) this, player, lastState);
-                    System.out.println("succeeded putting player state (TICK)");
                 }
             } finally {
                 stateChangeEvent.commit();
