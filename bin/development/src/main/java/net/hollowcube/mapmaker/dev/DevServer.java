@@ -20,7 +20,6 @@ import net.hollowcube.mapmaker.runtime.building.BuildingMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.terraform.Terraform;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -140,7 +139,7 @@ public class DevServer extends AbstractMultiMapServer {
         net.minestom.server.entity.PlayerSkin skin = MojangUtil.getSkinFromUuid(playerId);
 
         try {
-            var pd = sessionService().createSession(
+            sessionService().createSession(
                 playerId,
                 "devserver-integrated",
                 profile.name(),
@@ -154,8 +153,9 @@ public class DevServer extends AbstractMultiMapServer {
             );
 
             addPendingJoin(playerId, HubServer.HUB_MAP_DATA.id(), "playing");
-        } catch (SessionService.UnauthorizedError _) {
-            event.getConnection().kick(Component.text("no perm to join"));
+        } catch (SessionService.SessionCreationDeniedError error) {
+            // no need to use PlayerUtil.disconnect since this won't be behind velocity.
+            event.getConnection().kick(error.reason());
         }
     }
 

@@ -3,6 +3,8 @@ package net.hollowcube.mapmaker.player;
 import net.hollowcube.mapmaker.session.PlayerSession;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.hollowcube.mapmaker.util.GenericServiceError;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -61,6 +63,26 @@ public interface SessionService {
 
         public @NotNull GenericServiceError getError() {
             return error;
+        }
+    }
+
+    class SessionCreationDeniedError extends RuntimeException {
+
+        private final String type;
+        private final Component reason;
+
+        public SessionCreationDeniedError(@NotNull String type, @NotNull String reason) {
+            super(reason);
+            this.type = type;
+            this.reason = MiniMessage.miniMessage().deserialize(reason);
+        }
+
+        public @NotNull String type() {
+            return type;
+        }
+
+        public @NotNull Component reason() {
+            return reason;
         }
     }
 

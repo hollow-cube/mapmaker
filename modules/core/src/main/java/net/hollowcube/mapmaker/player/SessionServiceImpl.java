@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.player;
 
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import io.opentelemetry.api.OpenTelemetry;
 import net.hollowcube.mapmaker.session.PlayerSession;
@@ -51,7 +52,10 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
             case 201 -> GSON.fromJson(res.body(), PlayerData.class);
-            case 401 -> throw createUnauthorizedError(res);
+            case 403 -> {
+                var error = GSON.fromJson(res.body(), JsonObject.class);
+                throw new SessionCreationDeniedError(error.get("type").getAsString(), error.get("message").getAsString());
+            }
             default -> throw new InternalError("Failed to create session (" + res.statusCode() + "): " + res.body());
         };
     }
