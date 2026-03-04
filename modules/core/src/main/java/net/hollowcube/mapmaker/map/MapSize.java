@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
+import org.jetbrains.annotations.NotNull;
+
 public enum MapSize {
     NORMAL(0, 150),
     LARGE(1, 300),
@@ -22,5 +24,9 @@ public enum MapSize {
 
     public int size() {
         return size;
+    }
+
+    public boolean unlocks(@NotNull MapSize other) {
+        return this.ordinal() >= other.ordinal();
     }
 }

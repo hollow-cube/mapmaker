@@ -1,10 +1,13 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
-import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapSlot;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.panels.*;
+import net.hollowcube.mapmaker.panels.Button;
+import net.hollowcube.mapmaker.panels.InventoryHost;
+import net.hollowcube.mapmaker.panels.Pagination;
+import net.hollowcube.mapmaker.panels.Panel;
+import net.hollowcube.mapmaker.panels.Text;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.StringComparison;
@@ -106,7 +109,7 @@ public class CreateMapsView extends Panel {
 
     private void updateCreateButton() {
         // We have to lazy init this as host is not set until the view is mounted
-        var unlockedSlots = MapPlayerData.fromPlayer(this.host.player()).unlockedSlots();
+        var unlockedSlots = PlayerData.fromPlayer(this.host.player()).mapSlots();
         var usedSlots = this.slots.stream().filter(slot -> !slot.map().isPublished()).count();
 
         var availableSlots = unlockedSlots - usedSlots;

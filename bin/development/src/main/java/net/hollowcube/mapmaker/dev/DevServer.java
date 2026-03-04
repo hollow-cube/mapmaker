@@ -140,12 +140,7 @@ public class DevServer extends AbstractMultiMapServer {
 
         var profile = event.getGameProfile();
         var playerId = profile.uuid().toString();
-        net.minestom.server.entity.PlayerSkin skin = null;
-        try {
-            skin = MojangUtil.getSkinFromUuid(playerId);
-        } catch (Exception e) {
-            log.warn("failed to get skin for player, are the auth servers down?", e);
-        }
+        net.minestom.server.entity.PlayerSkin skin = MojangUtil.getSkinFromUuid(playerId);
 
         try {
             var pd = sessionService().createSession(

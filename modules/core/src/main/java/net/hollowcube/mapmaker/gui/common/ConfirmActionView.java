@@ -18,6 +18,6 @@ public class ConfirmActionView extends Panel {
             .onLeftClick(() -> this.host.popView());
         add(5, 1, new Button(3, 1)
             .translationKey("gui.confirm.yes", confirmationText)
-            .onLeftClick(confirmationCallback::run));
+            .onLeftClickAsync(confirmationCallback::run));
     }
 }
