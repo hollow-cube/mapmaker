@@ -244,7 +244,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
                     continue;
                 }
 
-                savePlayerState(player, false);
+                savePlayerState(player, getPlayerState(player), false);
             }
 
             if (isAutoSave) instance().sendMessage(Component.translatable("build.world.save.success"));
@@ -336,7 +336,11 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
     @Override
     public void removePlayer(Player player) {
-        FutureUtil.submitVirtual(() -> savePlayerState(player, true));
+        // Capture the state here beforehand to avoid a potential race condition between
+        // removing the state in super.removePlayer and saving the state async with the line
+        // below this one
+        var playerState = getPlayerState(player);
+        FutureUtil.submitVirtual(() -> savePlayerState(player, playerState, true));
 
         super.removePlayer(player);
     }
@@ -360,9 +364,9 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     }
 
     @Blocking
-    private void savePlayerState(Player player, boolean remove) {
+    private void savePlayerState(Player player, @Nullable EditorState state, boolean remove) {
         try {
-            var saveState = switch (getPlayerState(player)) {
+            var saveState = switch (state) {
                 case EditorState.Building(var ss) -> {
                     // Save building state as it is now, for testing state we don't need to
                     // save because it was saved when entering test mode.
