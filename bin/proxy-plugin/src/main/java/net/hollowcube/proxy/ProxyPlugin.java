@@ -197,7 +197,6 @@ public class ProxyPlugin {
         var player = serverConn.getPlayer();
 
         var reason = new String(event.getData(), StandardCharsets.UTF_8);
-        logger.info("disconnecting {}: {}", player.getUsername(), reason);
         player.disconnect(GsonComponentSerializer.gson().deserialize(reason));
     }
 

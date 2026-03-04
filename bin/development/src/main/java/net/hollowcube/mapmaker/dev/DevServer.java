@@ -2,10 +2,7 @@ package net.hollowcube.mapmaker.dev;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
-import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.common.util.MojangUtil;
-import net.hollowcube.common.util.OpUtils;
-import net.hollowcube.common.util.ProtocolVersions;
+import net.hollowcube.common.util.*;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.dev.commands.PlayNbsCommand;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
@@ -154,8 +151,7 @@ public class DevServer extends AbstractMultiMapServer {
 
             addPendingJoin(playerId, HubServer.HUB_MAP_DATA.id(), "playing");
         } catch (SessionService.SessionCreationDeniedError error) {
-            // no need to use PlayerUtil.disconnect since this won't be behind velocity.
-            event.getConnection().kick(error.reason());
+            PlayerUtil.disconnect(event.getConnection(), error.reason());
         }
     }
 

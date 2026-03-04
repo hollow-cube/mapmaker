@@ -13,10 +13,13 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.network.packet.server.common.PluginMessagePacket;
+import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.utils.block.BlockIterator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
 /**
@@ -88,8 +91,15 @@ public final class PlayerUtil {
     }
 
     public static void disconnect(@NotNull Player player, @NotNull Component message) {
+        disconnect(player.getPlayerConnection(), message);
+    }
+
+    public static void disconnect(@NotNull PlayerConnection player, @NotNull Component message) {
         if (MinecraftServer.process().auth() instanceof Auth.Velocity) {
-            player.sendPluginMessage(DISCONNECT_CHANNEL, GsonComponentSerializer.gson().serialize(message));
+            player.sendPacket(new PluginMessagePacket(
+                DISCONNECT_CHANNEL,
+                GsonComponentSerializer.gson().serialize(message).getBytes(StandardCharsets.UTF_8)
+            ));
         } else {
             player.kick(message);
         }
