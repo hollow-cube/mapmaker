@@ -15,13 +15,17 @@ import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.panels.Text;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.TabCompleteResponse;
+import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.Autocompletors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -44,6 +48,7 @@ public class EditMapView extends Panel {
         material != Material.RECOVERY_COMPASS &&
         !material.name().endsWith("glass_pane");
 
+    private final PlayerService playerService;
     private final MapService mapService;
 
     private final MapData map;
@@ -53,8 +58,10 @@ public class EditMapView extends Panel {
     private final Button iconButton;
 
     @Blocking
-    public EditMapView(PlayerService playerService, MapService mapService, ServerBridge bridge, MapData map, Runnable onPublish) {
+    public EditMapView(PlayerService playerService, MapService mapService,
+                       ServerBridge bridge, MapData map, Runnable onPublish) {
         super(9, 10);
+        this.playerService = playerService;
         this.mapService = mapService;
         this.map = map;
 
@@ -87,10 +94,11 @@ public class EditMapView extends Panel {
         for (int i = 0; i < 4; i++) {
             add(i + 4, 2, new Button("gui.create_maps.edit.builders.locked", 1, 1)
                 .sprite("icon2/1_1/lock", 1, 1)
-                // TODO: Remove before releasing
-                .onLeftClickAsync(() -> {
-                    mapService.inviteMapBuilder(map.id(), "d79d790a-8e90-4d78-958a-780c7fadeaab");
-                }));
+                .onLeftClick(this::beginAddMapBuilder));
+//                // TODO: Remove before releasing
+//                .onLeftClickAsync(() -> {
+//                    mapService.inviteMapBuilder(map.id(), "d79d790a-8e90-4d78-958a-780c7fadeaab");
+//                }));
         }
 
         // async doesn't work as host is null when this is called
@@ -140,10 +148,10 @@ public class EditMapView extends Panel {
     }
 
     private void beginIconEdit() {
-        host.pushView(new AnvilSearchView<>(
-            "icon2/anvil/item_frame",
-            LanguageProviderV2.translateToPlain("Set Map Icon"),
-            (query, limit) -> {
+        var view = AnvilSearchView.<Material>builder()
+            .icon("icon2/anvil/item_frame")
+            .title(LanguageProviderV2.translateToPlain("Set Map Icon"))
+            .searchFunction((query, limit) -> {
                 // If input is empty return some random results
                 if (query.isEmpty()) {
                     return ThreadLocalRandom.current().ints(1, Material.values().size())
@@ -153,18 +161,19 @@ public class EditMapView extends Panel {
                         .toList();
                 }
                 return Autocompletors.searchMaterials(query, limit, ICON_SEARCH_PREDICATE);
-            },
-            "",
-            (icon) -> new Button(null, 1, 1)
+            })
+            .defaultSearchTerm("")
+            .buttonFactory(icon -> new Button(null, 1, 1)
                 .text(LanguageProviderV2.getVanillaTranslation(icon)
-                    .decoration(TextDecoration.ITALIC, false), List.of())
-                .model(icon.key().asString(), null),
-            (icon) -> {
+                          .decoration(TextDecoration.ITALIC, false), List.of())
+                .model(icon.key().asString(), null))
+            .onSubmit(icon -> {
                 map.settings().setIcon(icon);
                 updateIcon();
                 updatePublishStage();
-            }
-        ));
+            })
+            .build();
+        host.pushView(view);
     }
 
     private void updateIcon() {
@@ -176,6 +185,35 @@ public class EditMapView extends Panel {
             iconButton.model("minecraft:air", null);
             iconButton.sprite("icon2/1_1/plus", 1, 1);
         }
+    }
+
+    private void beginAddMapBuilder() {
+        var view = AnvilSearchView.<TabCompleteResponse.Entry>builder()
+            // TODO: Make this the hammer icon
+            .icon("icon2/anvil/item_frame")
+            .title(LanguageProviderV2.translateToPlain("Add Map Builder"))
+            .searchFunction(this::getTabCompletionsNotOwner)
+            .defaultSearchTerm(".*")
+            .buttonFactory(icon -> new Button(null, 1, 1)
+                .text(this.getPlayerDisplayNameItemName(icon.id()), List.of())
+                .model(MODEL_8X, null)
+                .profile(getPlayerHead2d(icon.id())))
+            .onSubmit(icon -> this.mapService.inviteMapBuilder(this.map.id(), icon.id()))
+            .async()
+            .build();
+        this.host.pushView(view);
+    }
+
+    private Component getPlayerDisplayNameItemName(String uuid) {
+        return this.playerService.getPlayerDisplayName2(uuid)
+            .asComponent()
+            .style(style -> style.decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+    }
+
+    private List<TabCompleteResponse.Entry> getTabCompletionsNotOwner(String query, int limit) {
+        var results = this.playerService.getUsernameTabCompletions(query, limit).result();
+        results.removeIf(result -> result.id().equals(this.map.owner()));
+        return results;
     }
 
     @Blocking
