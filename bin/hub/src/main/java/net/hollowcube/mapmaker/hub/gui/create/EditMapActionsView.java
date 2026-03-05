@@ -46,10 +46,7 @@ public class EditMapActionsView extends Panel {
     }
 
     private void beginDeleteMap() {
-        host.pushTransientView(ExtraPanels.confirm(
-            "delete or nah?",
-            this::confirmDeleteMap
-        ));
+        host.pushTransientView(ExtraPanels.confirm(null, this::confirmDeleteMap));
     }
 
     private void confirmDeleteMap() {

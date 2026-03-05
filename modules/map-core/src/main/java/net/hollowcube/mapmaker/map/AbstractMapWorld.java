@@ -59,8 +59,8 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     private final Set<Player> players = new HashSet<>();
     private final Set<Player> playersImmutable = Collections.unmodifiableSet(players);
     private final EventNode<InstanceEvent> eventNode = EventNode.event(
-            UUID.randomUUID().toString(), EventFilter.INSTANCE,
-            event -> !(event instanceof PlayerEvent playerEvent) || players.contains(playerEvent.getPlayer())
+        UUID.randomUUID().toString(), EventFilter.INSTANCE,
+        event -> !(event instanceof PlayerEvent playerEvent) || players.contains(playerEvent.getPlayer())
     );
 
     private final Class<S> stateClass;
@@ -97,22 +97,22 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
             this.playersByState[i] = new HashSet<>();
             final var stateSubclass = stateSubclasses.get(i);
             this.eventNodesByState[i] = OpUtils.build(EventNode.event(
-                    UUID.randomUUID().toString(),
-                    EventUtil.PLAYER_INSTANCE_FILTER,
-                    (e) -> stateSubclass.isInstance(getPlayerState(e.getPlayer()))
+                UUID.randomUUID().toString(),
+                EventUtil.PLAYER_INSTANCE_FILTER,
+                (e) -> stateSubclass.isInstance(getPlayerState(e.getPlayer()))
             ), eventNode()::addChild);
         }
 
         // Only set the root tag if this is the root, otherwise we rely on the parent to
         // return this world in canonicalWorld implementations.
         instance.updateTag(ROOT_MAP_WORLD_TAG, existing ->
-                Objects.requireNonNullElse(existing, this));
+            Objects.requireNonNullElse(existing, this));
 
         instance.eventNode()
-                .addChild(eventNode)
-                .addChild(itemRegistry.eventNode())
-                .addListener(PlayerInstanceLeaveEvent.class, this::handlePlayerLeave)
-                .addListener(PlayerDeathEvent.class, this::handlePlayerDeath);
+            .addChild(eventNode)
+            .addChild(itemRegistry.eventNode())
+            .addListener(PlayerInstanceLeaveEvent.class, this::handlePlayerLeave)
+            .addListener(PlayerDeathEvent.class, this::handlePlayerDeath);
 
         configureInstance();
     }
@@ -187,9 +187,9 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
 
     public void changePlayerState(Player player, S nextState, BiPredicate<Player, S> predicate) {
         pendingStateChanges.merge(
-                player,
-                new PlayerStateChange<>(nextState, predicate),
-                PlayerStateChange::handleConflict
+            player,
+            new PlayerStateChange<>(nextState, predicate),
+            PlayerStateChange::handleConflict
         );
     }
 
@@ -230,7 +230,6 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         var stateChangeEvent = new MapCoreJFR.StateChange(getClass(), null, initialState.getClass());
         stateChangeEvent.begin();
         try {
-            System.out.println("putting player state (SPAWN): " + initialState);
             playerStates.put(player, initialState);
             playersByState[stateIndex(initialState)].add(player);
             //noinspection unchecked
@@ -292,7 +291,7 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
             }
 
             var size = OpUtils.mapOr(map().settings().getSize(),
-                    MapSize::size, MapSize.NORMAL.size());
+                MapSize::size, MapSize.NORMAL.size());
             var powerOfTwo = (int) Math.ceil(Math.log(Math.min(size, 4096)) / Math.log(2));
             this.octree = simpleOctree(powerOfTwo, allObjects);
             this.octreeDirty = false;
@@ -324,11 +323,9 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
 
                     // todo what should we do if theres a failure here?
 
-                    System.out.println("putting player state (TICK): " + nextState);
                     playerStates.put(player, nextState);
                     playersByState[stateIndex(nextState)].add(player);
                     nextState.configurePlayer((W) this, player, lastState);
-                    System.out.println("succeeded putting player state (TICK)");
                 }
             } finally {
                 stateChangeEvent.commit();
@@ -360,8 +357,8 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
 
         var diameter = map().settings().getSize().size();
         instance().setWorldBorder(new WorldBorder(diameter,
-                0f, 0f, 0,
-                0, ServerFlag.WORLD_BORDER_SIZE
+            0f, 0f, 0,
+            0, ServerFlag.WORLD_BORDER_SIZE
         ));
 
         instance().setTime(switch (map().getSetting(MapSettings.TIME_OF_DAY)) {
@@ -394,7 +391,7 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
 
         // At the beginning of the _next_ tick (as in, after this safe point tick), unregister the instance.
         MinecraftServer.getSchedulerManager().scheduleNextTick(() ->
-                MinecraftServer.getInstanceManager().unregisterInstance(instance()));
+            MinecraftServer.getInstanceManager().unregisterInstance(instance()));
     }
 
     protected @Nullable List<BossBar> createBossBars() {
@@ -433,11 +430,11 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     }
 
     protected static MapInstance makeMapInstance(
-            MapData map, char classifier,
-            @Nullable MapInstance.LightingMode lightingOverride
+        MapData map, char classifier,
+        @Nullable MapInstance.LightingMode lightingOverride
     ) {
         var lightingMode = Objects.requireNonNullElseGet(lightingOverride,
-                () -> map.getSetting(MapSettings.LIGHTING) ? MapInstance.LightingMode.GENERATED : MapInstance.LightingMode.FULL_BRIGHT);
+            () -> map.getSetting(MapSettings.LIGHTING) ? MapInstance.LightingMode.GENERATED : MapInstance.LightingMode.FULL_BRIGHT);
         return new MapInstance(map.createDimensionName(classifier), lightingMode);
     }
 
@@ -459,7 +456,7 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     public void appendDebugText(TextComponent.Builder builder) {
         builder.appendNewline().append(Component.text("  ᴀɢᴇ: " + NumberUtil.formatDuration(instance().getWorldAge() * 50)));
         builder.appendNewline()
-                .append(Component.text("  ᴘʟᴀʏᴇʀѕ: " + players().size()))
-                .append(Component.text(" ɪɴꜱᴛᴀɴᴄᴇ: " + instance().getPlayers().size()));
+            .append(Component.text("  ᴘʟᴀʏᴇʀѕ: " + players().size()))
+            .append(Component.text(" ɪɴꜱᴛᴀɴᴄᴇ: " + instance().getPlayers().size()));
     }
 }

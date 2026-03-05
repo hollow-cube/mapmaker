@@ -32,8 +32,6 @@ import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.ping.Status;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Base64;
 import java.util.concurrent.Future;
@@ -41,7 +39,6 @@ import java.util.function.Predicate;
 
 public class DevServer extends AbstractMultiMapServer {
 
-    private static final Logger log = LoggerFactory.getLogger(DevServer.class);
     // Hub stuff
     private HubMapWorld hubWorld;
 
