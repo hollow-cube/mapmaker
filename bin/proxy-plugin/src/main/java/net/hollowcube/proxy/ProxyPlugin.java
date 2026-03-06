@@ -12,6 +12,7 @@ import com.velocitypowered.api.event.player.CookieStoreEvent;
 import com.velocitypowered.api.event.player.KickedFromServerEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.event.player.configuration.PlayerFinishedConfigurationEvent;
+import com.velocitypowered.api.event.proxy.ProxyPingEvent;
 import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.plugin.Plugin;
@@ -21,10 +22,10 @@ import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import com.velocitypowered.api.proxy.server.ServerPing;
 import com.velocitypowered.api.util.GameProfile;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,7 +38,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.stream.Collectors;
 
 @Plugin(id = "hc-proxy", name = "hollowcube proxy plugin", version = "1.0", authors = "hollow cube")
 public class ProxyPlugin {
@@ -55,15 +55,8 @@ public class ProxyPlugin {
         ProtocolVersion.MINECRAFT_1_21_9,
         ProtocolVersion.MINECRAFT_1_21_11
     );
-
-    public static final TextColor RED = TextColor.color(0xFA4141);
-    private static final Component WRONG_PROTOCOL = Component.text()
-        .append(Component.text("You are using an unsupported version of Minecraft!", RED))
-        .appendNewline().appendNewline()
-        .append(Component.text("Please try again on " + SUPPORTED_VERSIONS.stream()
-            .flatMap(pv -> pv.getVersionsSupportedBy().stream())
-            .collect(Collectors.joining(", ")), RED))
-        .build();
+    private static final ProtocolVersion RECOMMEND_VERSION = ProtocolVersion.MINECRAFT_1_21_11;
+    private static final String PROTOCOL_VERSION_STRING = "1.21.4-1.21.11";
 
     private final Logger logger;
     private final ProxyServer proxy;
@@ -108,12 +101,6 @@ public class ProxyPlugin {
     public void handleLogin(@NotNull LoginEvent event) {
         var player = event.getPlayer();
 
-        // Disconnect if not on a supported version
-        if (!SUPPORTED_VERSIONS.contains(event.getPlayer().getProtocolVersion())) {
-            event.getPlayer().disconnect(WRONG_PROTOCOL);
-            return;
-        }
-
         try {
             String skinTexture = null, skinSignature = null;
             var texProp = getGPProperty(player.getGameProfile(), "textures");
@@ -142,6 +129,16 @@ public class ProxyPlugin {
             logger.error("failed to create session (v2) for {}", player.getUsername(), e);
             event.setResult(LoginEvent.ComponentResult.denied(Component.text("failed to create session")));
         }
+    }
+
+    @Subscribe
+    public void handleStatusMessage(@NotNull ProxyPingEvent event) {
+        var builder = event.getPing().asBuilder();
+        var version = event.getConnection().getProtocolVersion();
+        var protocol = SUPPORTED_VERSIONS.contains(version) ? version : RECOMMEND_VERSION;
+
+        builder.version(new ServerPing.Version(protocol.getProtocol(), PROTOCOL_VERSION_STRING));
+        event.setPing(builder.build());
     }
 
     @Subscribe
