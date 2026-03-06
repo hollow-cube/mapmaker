@@ -3,6 +3,8 @@ package net.hollowcube.proxy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
@@ -28,7 +30,7 @@ public class ProxySessionService {
         this.url = String.format("%s/v3/internal/session", url);
     }
 
-    public @NotNull JsonObject createSession(@NotNull String id, @NotNull SessionCreateRequest body) throws BannedException, MaintenanceException {
+    public @NotNull JsonObject createSession(@NotNull String id, @NotNull SessionCreateRequest body) throws SessionCreationDeniedError {
         logger.info("creating new session for {} ({}) from {}", id, body.username(), body.ip());
         var reqBody = GSON.toJson(body);
         var req = HttpRequest.newBuilder()
@@ -39,8 +41,10 @@ public class ProxySessionService {
             var res = CLIENT.send(req, HttpResponse.BodyHandlers.ofString());
             return switch (res.statusCode()) {
                 case 201 -> GSON.fromJson(res.body(), JsonObject.class);
-                case 401 -> throw new MaintenanceException();
-                case 403 -> throw new BannedException(GSON.fromJson(res.body(), JsonObject.class));
+                case 403 -> {
+                    var error = GSON.fromJson(res.body(), JsonObject.class);
+                    throw new SessionCreationDeniedError(error.get("type").getAsString(), error.get("message").getAsString());
+                }
                 default ->
                         throw new RuntimeException("Failed to create session (" + res.statusCode() + "): " + res.body());
             };
@@ -68,19 +72,23 @@ public class ProxySessionService {
         }
     }
 
-    public static final class MaintenanceException extends Exception {
+    public static final class SessionCreationDeniedError extends RuntimeException {
 
-    }
+        private final String type;
+        private final Component reason;
 
-    public static final class BannedException extends Exception {
-        private final JsonObject content;
-
-        public BannedException(@NotNull JsonObject content) {
-            this.content = content;
+        public SessionCreationDeniedError(@NotNull String type, @NotNull String reason) {
+            super(reason);
+            this.type = type;
+            this.reason = MiniMessage.miniMessage().deserialize(reason);
         }
 
-        public @NotNull JsonObject getContent() {
-            return content;
+        public @NotNull String type() {
+            return type;
+        }
+
+        public @NotNull Component reason() {
+            return reason;
         }
     }
 

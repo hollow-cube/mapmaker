@@ -2,10 +2,7 @@ package net.hollowcube.mapmaker.dev;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
-import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.common.util.MojangUtil;
-import net.hollowcube.common.util.OpUtils;
-import net.hollowcube.common.util.ProtocolVersions;
+import net.hollowcube.common.util.*;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.dev.commands.PlayNbsCommand;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
@@ -20,7 +17,6 @@ import net.hollowcube.mapmaker.runtime.building.BuildingMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.terraform.Terraform;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -140,7 +136,7 @@ public class DevServer extends AbstractMultiMapServer {
         net.minestom.server.entity.PlayerSkin skin = MojangUtil.getSkinFromUuid(playerId);
 
         try {
-            var pd = sessionService().createSession(
+            sessionService().createSession(
                 playerId,
                 "devserver-integrated",
                 profile.name(),
@@ -154,8 +150,8 @@ public class DevServer extends AbstractMultiMapServer {
             );
 
             addPendingJoin(playerId, HubServer.HUB_MAP_DATA.id(), "playing");
-        } catch (SessionService.UnauthorizedError _) {
-            event.getConnection().kick(Component.text("no perm to join"));
+        } catch (SessionService.SessionCreationDeniedError error) {
+            PlayerUtil.disconnect(event.getConnection(), error.reason());
         }
     }
 

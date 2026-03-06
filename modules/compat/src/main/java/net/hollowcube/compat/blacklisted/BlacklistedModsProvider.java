@@ -1,6 +1,7 @@
 package net.hollowcube.compat.blacklisted;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.compat.api.ModChannelRegisterEvent;
 import net.kyori.adventure.text.Component;
@@ -27,7 +28,7 @@ public class BlacklistedModsProvider implements CompatProvider {
             }
 
             if (!bannedMods.isEmpty()) {
-                player.kick(KICK_MESSAGE);
+                PlayerUtil.disconnect(player, KICK_MESSAGE);
             }
         });
     }

@@ -1,5 +1,9 @@
 package net.hollowcube.common.util;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.minestom.server.Auth;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.coordinate.Point;
@@ -9,10 +13,13 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.network.packet.server.common.PluginMessagePacket;
+import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.utils.block.BlockIterator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
 /**
@@ -22,6 +29,7 @@ public final class PlayerUtil {
 
     public static final double DEFAULT_PLACEMENT_DISTANCE = 4.5;
     private static final BoundingBox PLAYER_STANDING_BB = EntityType.PLAYER.registry().boundingBox();
+    private static final String DISCONNECT_CHANNEL = "velocity:disconnect";
 
     public static @Nullable Point getTargetBlock(@NotNull Player player, double maxDistance, boolean includeLiquids) {
         try {
@@ -80,5 +88,20 @@ public final class PlayerUtil {
                 null, true
         );
         return !result.collisionX() && !result.collisionY() && !result.collisionZ();
+    }
+
+    public static void disconnect(@NotNull Player player, @NotNull Component message) {
+        disconnect(player.getPlayerConnection(), message);
+    }
+
+    public static void disconnect(@NotNull PlayerConnection player, @NotNull Component message) {
+        if (MinecraftServer.process().auth() instanceof Auth.Velocity) {
+            player.sendPacket(new PluginMessagePacket(
+                DISCONNECT_CHANNEL,
+                GsonComponentSerializer.gson().serialize(message).getBytes(StandardCharsets.UTF_8)
+            ));
+        } else {
+            player.kick(message);
+        }
     }
 }

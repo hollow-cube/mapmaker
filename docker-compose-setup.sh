@@ -3,9 +3,7 @@
 set -e
 ORIGINAL_DIR=$(pwd)
 
-docker image rm --force mapmaker-map-service:latest && true
-docker image rm --force mapmaker-player-service:latest && true
-docker image rm --force mapmaker-session-service:latest && true
+docker image rm --force mapmaker-api-server:latest && true
 
 export GOOS=linux
 export GOARCH=amd64
@@ -14,8 +12,6 @@ if [[ "$(uname -m)" == "aarch64" || "$(uname -m)" == "arm64" ]]; then
 fi
 export CGO_ENABLED=0
 
-cd ../hc-services/services
-cd map-service && go build -o map-service cmd/map-service/*.go && true
-cd ../player-service && go build -o player-service cmd/player-service/*.go && true
-cd ../session-service && go build -o session-service cmd/session-service/*.go && true
+cd ../hc-services
+go build -o api-server cmd/api-server/*.go && true
 cd ${ORIGINAL_DIR}

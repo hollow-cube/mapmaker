@@ -8,8 +8,5 @@ repositories {
 
 dependencies {
     annotationProcessor(libs.velocity.api)
-    implementation(libs.velocity.api) {
-        exclude(group = "net.kyori")
-    }
-    implementation(libs.bundles.adventure)
+    implementation(libs.velocity.api)
 }

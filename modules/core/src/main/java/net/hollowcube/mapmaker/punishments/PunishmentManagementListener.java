@@ -6,6 +6,7 @@ import io.nats.client.api.AckPolicy;
 import io.nats.client.api.ConsumerConfiguration;
 import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -64,16 +65,17 @@ public class PunishmentManagementListener implements Closeable {
 
     private void handlePunishmentUpdate(@NotNull Message msg, @NotNull PunishmentUpdateMessage message) {
         switch (message.action()) {
-            case CREATE -> handlePunishmentCreated(message.punishment());
+            case CREATE -> handlePunishmentCreated(message.punishment(), message.component());
             case REVOKE -> handlePunishmentRevoked(message.punishment());
         }
     }
 
-    private void handlePunishmentCreated(@NotNull Punishment punishment) {
+    private void handlePunishmentCreated(@NotNull Punishment punishment, @NotNull Component message) {
         LOGGER.info("Received punishment created message: {}", punishment);
 
         MinecraftServer.getSchedulerManager().scheduleNextTick(
-            () -> EventDispatcher.call(new PunishmentCreatedEvent(punishment)));
+            () -> EventDispatcher.call(new PunishmentCreatedEvent(punishment))
+        );
 
         // Announce async to kick as quick as possible
         FutureUtil.submitVirtual(() -> announcePunishmentUpdate(true, punishment));
@@ -90,8 +92,7 @@ public class PunishmentManagementListener implements Closeable {
             // Player is not on this server - ignore
             return;
         }
-
-        player.kick(Component.text("You have been " + (type == PunishmentType.BAN ? "banned" : "kicked") + " from the server. Reason: " + punishment.comment()));
+        PlayerUtil.disconnect(player, message);
     }
 
     private void handlePunishmentRevoked(@NotNull Punishment punishment) {
