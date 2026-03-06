@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.runtime.parkour.action.ActionList;
 import net.hollowcube.mapmaker.runtime.parkour.action.gui.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.runtime.parkour.action.gui.ControlledNumberInput;
 import net.hollowcube.mapmaker.runtime.parkour.action.gui.ControlledTriStateInput;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.base.TimerData;
 import net.hollowcube.mapmaker.runtime.parkour.action.util.Operation;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.key.Key;
@@ -42,7 +43,7 @@ public record EditTimerAction(Operation operation, int time) implements Action {
     public static final Action.Editor<EditTimerAction> EDITOR = new Action.Editor<>(
             EditTimerAction.Editor::new, EditTimerAction::makeSprite,
             EditTimerAction::makeThumbnail, Set.of());
-    public static final PlayState.Attachment<Integer> SAVE_DATA = PlayState.attachment(KEY, ExtraCodecs.clamppedInt(NO_TIMER, MAX_TIMER));
+    public static final PlayState.Attachment<TimerData> SAVE_DATA = PlayState.attachment(KEY, TimerData.CODEC);
 
     // This tag is present when the player has an active countdown and holds the time at which
     // the countdown will end, in ms since epoch.
@@ -64,9 +65,9 @@ public record EditTimerAction(Operation operation, int time) implements Action {
     @Override
     public void applyTo(Player player, PlayState state) {
         switch (operation) {
-            case SET -> state.set(SAVE_DATA, time > NO_TIMER ? time : null);
-            case ADD -> state.set(SAVE_DATA, state.get(SAVE_DATA, 0) + time);
-            case SUBTRACT -> state.update(SAVE_DATA, value -> Math.max(value - time, 0));
+            case SET -> state.set(SAVE_DATA, time > NO_TIMER ? TimerData.fixed(time) : null);
+            case ADD -> state.set(SAVE_DATA, state.get(SAVE_DATA, TimerData.ZERO).add(time));
+            case SUBTRACT -> state.update(SAVE_DATA, data -> data.sub(time));
         }
     }
 

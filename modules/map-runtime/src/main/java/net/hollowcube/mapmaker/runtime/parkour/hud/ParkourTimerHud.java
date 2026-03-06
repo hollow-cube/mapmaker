@@ -4,6 +4,7 @@ import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.misc.BackgroundSpriteSet;
+import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditTimerAction;
@@ -52,7 +53,10 @@ public class ParkourTimerHud implements ActionBar.Provider {
             time = Math.max(countdownEnd - System.nanoTime() / 1_000_000, 0);
         } else if (time == 0 && startingTimer != null && startingTimer.time() > 0) {
             time = startingTimer.time() * 50L; // Ticks to milliseconds
-        } else if (!(p instanceof ParkourState.Playing2)) {
+        } else if (p instanceof ParkourState.Playing2) {
+            var timer = p.saveState().state(PlayState.class).get(EditTimerAction.SAVE_DATA);
+            if (timer != null) time = timer.toMillis();
+        } else {
             return; // Don't show the normal timer for testing, only playing
         }
 

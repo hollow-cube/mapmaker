@@ -3,12 +3,15 @@ package net.hollowcube.mapmaker.runtime.parkour.action;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
+import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditAttributeAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditLivesAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditTimerAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.attributes.ActionAttributes;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.attributes.AttributeMap;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.base.TimerData;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerStateUpdateEvent;
+import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerTookActionEvent;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerUpdateStateEvent;
 import net.hollowcube.mapmaker.runtime.parkour.item.checkpoint.CheckpointItem;
 import net.minestom.server.MinecraftServer;
@@ -39,7 +42,8 @@ public class LegacyActionStateManager {
 
     public static final EventNode<PlayerInstanceEvent> EVENT_NODE = playerEventNode()
             .addListener(ParkourMapPlayerUpdateStateEvent.class, LegacyActionStateManager::handleUpdatePlayerFromState)
-            .addListener(ParkourMapPlayerStateUpdateEvent.class, LegacyActionStateManager::handleUpdateStateFromPlayer);
+            .addListener(ParkourMapPlayerStateUpdateEvent.class, LegacyActionStateManager::handleUpdateStateFromPlayer)
+            .addListener(ParkourMapPlayerTookActionEvent.class, LegacyActionStateManager::handlePlayerTookAction);
 
     private static void handleUpdatePlayerFromState(ParkourMapPlayerUpdateStateEvent event) {
         final var player = event.player();
@@ -66,10 +70,10 @@ public class LegacyActionStateManager {
             player.setHealth((float) Attribute.MAX_HEALTH.defaultValue());
         }
 
-        // Update the countdown timer (time may have been added)
+        // Update the timer right away if it's partial (aka the player switched states or left while the timer is running)
         var timeLimit = state.get(EditTimerAction.SAVE_DATA);
-        if (timeLimit != null && !event.isFreshState()) {
-            player.setTag(EditTimerAction.COUNTDOWN_END, System.nanoTime() / 1_000_000 + (timeLimit * 50));
+        if (timeLimit != null && !event.isFreshState() && timeLimit.isPartial()) {
+            player.setTag(EditTimerAction.COUNTDOWN_END, System.nanoTime() / 1_000_000 + timeLimit.toMillis());
         } else {
             player.removeTag(EditTimerAction.COUNTDOWN_END);
         }
@@ -114,7 +118,7 @@ public class LegacyActionStateManager {
         if (countdownEnd != -1) {
             // We have to clamp it to 1 because if we don't when they rejoin their time limit will
             // be less than or equal to 0 meaning it will allow them to play forever due tp <= 0 being infinite time.
-            playState.set(EditTimerAction.SAVE_DATA, (int) Math.max((countdownEnd - now) / 50, 1));
+            playState.set(EditTimerAction.SAVE_DATA, TimerData.partial((int) Math.max((countdownEnd - now) / 50, 1)));
         }
 
         // Update remaining time for the remaining effects (and remove if expired)
@@ -144,6 +148,20 @@ public class LegacyActionStateManager {
                 OpUtils.map(items.item1(), item -> updateItemStack(player, item, 4)),
                 OpUtils.map(items.item2(), item -> updateItemStack(player, item, 5))
         ));
+    }
+
+    private static void handlePlayerTookAction(ParkourMapPlayerTookActionEvent event) {
+        var player = event.player();
+        var state = event.saveState();
+
+        if (player.getTag(EditTimerAction.COUNTDOWN_END) != -1L) return;
+
+        var timer = state.state(PlayState.class).get(EditTimerAction.SAVE_DATA);
+        if (timer != null && timer.ticks() > 0) {
+            player.setTag(EditTimerAction.COUNTDOWN_END, System.nanoTime() / 1_000_000 + timer.toMillis());
+        } else {
+            player.removeTag(EditTimerAction.COUNTDOWN_END);
+        }
     }
 
     private static @Nullable CheckpointItem updateItemStack(Player player, CheckpointItem item, int slot) {

@@ -36,6 +36,7 @@ import net.hollowcube.mapmaker.runtime.parkour.block.CheckpointPlateBlock;
 import net.hollowcube.mapmaker.runtime.parkour.block.ClientBlockPlacementListener;
 import net.hollowcube.mapmaker.runtime.parkour.block.FinishPlateBlock;
 import net.hollowcube.mapmaker.runtime.parkour.block.StatusPlateBlock;
+import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerTookActionEvent;
 import net.hollowcube.mapmaker.runtime.parkour.hud.ParkourDebugHud;
 import net.hollowcube.mapmaker.runtime.parkour.hud.ResetHeightDisplay;
 import net.hollowcube.mapmaker.runtime.parkour.item.*;
@@ -52,6 +53,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerTickEndEvent;
 import net.minestom.server.event.player.PlayerTickEvent;
@@ -339,20 +341,18 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     /// Initializes the parkour timer from some action the player took
     /// for example moving or placing a block
     public void initTimerFromAction(Player player, SaveState saveState) {
-        if (saveState.getPlayStartTime() != 0) return;
-        var mp = (MapPlayer) player;
+        if (saveState.getPlayStartTime() == 0) {
+            var mp = (MapPlayer) player;
 
-        // Start the timer.
-        saveState.setPlayStartTime(System.nanoTime() / 1_000_000);
-        // Reset touching state so you can begin touching
-        mp.resetTouchingState();
-        // Set starting latency
-        saveState.setStartLatency(mp.averageLatency());
-
-        var timer = saveState.state(PlayState.class).get(EditTimerAction.SAVE_DATA);
-        if (timer != null && timer > 0) {
-            player.setTag(EditTimerAction.COUNTDOWN_END, System.nanoTime() / 1_000_000 + (timer * 50L));
+            // Start the timer.
+            saveState.setPlayStartTime(System.nanoTime() / 1_000_000);
+            // Reset touching state so you can begin touching
+            mp.resetTouchingState();
+            // Set starting latency
+            saveState.setStartLatency(mp.averageLatency());
         }
+
+        EventDispatcher.call(new ParkourMapPlayerTookActionEvent(this, player, saveState));
     }
 
     private void handlePlayerOrVehicleMove(Player player, Pos newPos) {
