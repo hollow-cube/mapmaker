@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.panels;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,29 +8,34 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class RadioSelect<T> extends Panel {
+public class RadioSelect<T extends @UnknownNullability Object> extends Panel {
 
     private final List<Runnable> buttonUpdaters = new ArrayList<>();
-    private final List<Consumer<@Nullable T>> onChange = new ArrayList<>();
+    private final List<Consumer<T>> onChange = new ArrayList<>();
     private final Set<T> options = new HashSet<>();
 
-    private T selected = null;
+    private T selected;
     private int index = 0;
 
     public RadioSelect(int slotWidth, int slotHeight) {
-        super(slotWidth, slotHeight);
+        this(slotWidth, slotHeight, null);
     }
 
-    public @Nullable T selected() {
+    public RadioSelect(int slotWidth, int slotHeight, T defaultValue) {
+        super(slotWidth, slotHeight);
+        this.selected = defaultValue;
+    }
+
+    public T selected() {
         return this.selected;
     }
 
-    public @NotNull RadioSelect<T> onChange(@NotNull Consumer<@NotNull T> onChange) {
+    public RadioSelect<T> onChange(Consumer<T> onChange) {
         this.onChange.add(onChange);
         return this;
     }
 
-    public Button addOption(@NotNull T item, @NotNull ButtonUpdater updater) {
+    public Button addOption(T item, ButtonUpdater updater) {
         this.options.add(item);
 
         int x = this.index % this.slotWidth;
@@ -52,7 +56,7 @@ public class RadioSelect<T> extends Panel {
         return button;
     }
 
-    public void setSelected(@Nullable T item) {
+    public void setSelected(T item) {
         if (item == null || this.options.contains(item)) {
             this.selected = item;
             this.buttonUpdaters.forEach(Runnable::run);
@@ -70,6 +74,6 @@ public class RadioSelect<T> extends Panel {
             button.background(key);
         };
 
-        void update(@NotNull Button button, boolean selected);
+        void update(Button button, boolean selected);
     }
 }

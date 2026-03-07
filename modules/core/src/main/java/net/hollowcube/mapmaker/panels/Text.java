@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.panels;
 
 import net.hollowcube.common.util.FontUtil;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class Text extends Button {
@@ -12,32 +11,32 @@ public class Text extends Button {
     public static final int END = 1 << 31;
 
     private String text;
-    private String font = null;
+    private @Nullable String font = null;
     private int xAlign = START;
     private int yAlign = START;
 
-    public Text(int slotWidth, int slotHeight, @NotNull String text) {
+    public Text(int slotWidth, int slotHeight, String text) {
         this(null, slotWidth, slotHeight, text);
     }
 
-    public Text(@Nullable String translationKey, int slotWidth, int slotHeight, @NotNull String text) {
+    public Text(@Nullable String translationKey, int slotWidth, int slotHeight, String text) {
         super(translationKey, slotWidth, slotHeight);
         this.text = text;
     }
 
-    public @NotNull Text text(@NotNull String text) {
+    public Text text(String text) {
         this.text = text;
         if (host != null) host.queueRedraw();
         return this;
     }
 
-    public @NotNull Text font(@Nullable String font) {
+    public Text font(@Nullable String font) {
         this.font = font;
         if (host != null) host.queueRedraw();
         return this;
     }
 
-    public @NotNull Text align(int x, int y) {
+    public Text align(int x, int y) {
         this.xAlign = x;
         this.yAlign = y;
         if (host != null) host.queueRedraw();
@@ -45,7 +44,7 @@ public class Text extends Button {
     }
 
     @Override
-    public void build(@NotNull MenuBuilder builder) {
+    public void build(MenuBuilder builder) {
         super.build(builder);
 
         if (text.isEmpty()) return;
@@ -74,12 +73,12 @@ public class Text extends Button {
     // DSL overrides
 
     @Override
-    public @NotNull Text background(@Nullable String sprite) {
+    public Text background(@Nullable String sprite) {
         return background(sprite, 0, 0);
     }
 
     @Override
-    public @NotNull Text background(@Nullable String sprite, int x, int y) {
+    public Text background(@Nullable String sprite, int x, int y) {
         super.background(sprite, x, y);
         return this;
     }

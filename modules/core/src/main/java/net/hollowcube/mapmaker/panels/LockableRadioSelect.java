@@ -5,11 +5,11 @@ import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.function.Predicate;
 
-public class LockableSelect<T extends @UnknownNullability Object> extends Select<T> {
+public class LockableRadioSelect<T extends @UnknownNullability Object> extends RadioSelect<T> {
     private final Predicate<T> isLocked;
 
-    public LockableSelect(int slotWidth, T defaultValue, Predicate<T> isLocked) {
-        super(slotWidth, defaultValue);
+    public LockableRadioSelect(int slotWidth, int slotHeight, T defaultValue, Predicate<T> isLocked) {
+        super(slotWidth, slotHeight, defaultValue);
         this.isLocked = isLocked;
     }
 

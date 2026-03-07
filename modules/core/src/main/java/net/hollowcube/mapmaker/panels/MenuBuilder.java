@@ -11,21 +11,22 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.TooltipDisplay;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
 public class MenuBuilder {
     @TestOnly
     public static final ItemStack EMPTY_ITEM = ItemStack.builder(Material.STICK)
-            .set(DataComponents.ITEM_MODEL, "minecraft:air")
-            .set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, Set.of()))
-            // Need to remove the name because the item can appear on the hotbar.
-            .set(DataComponents.CUSTOM_NAME, Component.empty())
-            .build();
+        .set(DataComponents.ITEM_MODEL, "minecraft:air")
+        .set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, Set.of()))
+        // Need to remove the name because the item can appear on the hotbar.
+        .set(DataComponents.CUSTOM_NAME, Component.empty())
+        .build();
 
     private final int absWidth, absHeight, containerSlotHeight;
     private final IntIntPair[] slotPosOverrides;
@@ -103,7 +104,7 @@ public class MenuBuilder {
         this.slotHeight = this.slotY + height;
     }
 
-    public <T> void editSlotsWithout(int x, int y, int width, int height, @NotNull DataComponent<T> component) {
+    public <T> void editSlotsWithout(int x, int y, int width, int height, DataComponent<T> component) {
         int startX = this.slotX + x;
         int startY = this.slotY + y;
         int endX = startX + width;
@@ -119,11 +120,11 @@ public class MenuBuilder {
         }
     }
 
-    public <T> void editSlots(int x, int y, int width, int height, @NotNull DataComponent<T> component, @NotNull T data) {
+    public <T> void editSlots(int x, int y, int width, int height, DataComponent<T> component, T data) {
         editSlots(x, y, width, height, component, (Function<T, T>) _ -> data);
     }
 
-    public <T> void editSlots(int x, int y, int width, int height, @NotNull DataComponent<T> component, @NotNull Function<T, T> editor) {
+    public <T> void editSlots(int x, int y, int width, int height, DataComponent<T> component, Function<T, T> editor) {
         int startX = this.slotX + x;
         int startY = this.slotY + y;
         int endX = startX + width;
@@ -135,12 +136,12 @@ public class MenuBuilder {
         for (int i = startY; i < endY; i++) {
             for (int j = startX; j < endX; j++) {
                 var item = this.items[i * this.absWidth + j];
-                this.items[i * this.absWidth + j] = item.with(component, editor.apply(item.get(component)));
+                this.items[i * this.absWidth + j] = item.with(component, editor.apply(Objects.requireNonNull(item.get(component))));
             }
         }
     }
 
-    public void draw(int x, int y, @NotNull BadSprite sprite) {
+    public void draw(int x, int y, BadSprite sprite) {
         int startX = computeAbsoluteX(x), startY = computeAbsoluteY(y);
 
         title.pushColor(FontUtil.computeVerticalOffset(startY));
@@ -149,7 +150,7 @@ public class MenuBuilder {
         title.popColor();
     }
 
-    public void drawText(int x, int y, @NotNull String text, int width) {
+    public void drawText(int x, int y, String text, int width) {
         int startX = computeAbsoluteX(x), startY = computeAbsoluteY(y);
 
         // Account for font height. Not sure this is the solution i want for that.
@@ -195,7 +196,7 @@ public class MenuBuilder {
         return y;
     }
 
-    private IntIntPair getPositionOverride() {
+    private @Nullable IntIntPair getPositionOverride() {
         int index = this.slotY * this.absWidth + this.slotX;
         if (index < 0 || index >= this.slotPosOverrides.length) return null;
         return this.slotPosOverrides[index];

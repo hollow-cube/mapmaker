@@ -4,7 +4,6 @@ import net.hollowcube.common.util.FutureUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.timer.Task;
 import net.minestom.server.utils.time.TimeUnit;
-import org.jetbrains.annotations.NotNullByDefault;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -12,7 +11,6 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-@NotNullByDefault
 public class AnvilSearchView<T> extends AbstractAnvilView {
     public static <T> Builder<T> builder() {
         return new Builder<>();
@@ -23,7 +21,7 @@ public class AnvilSearchView<T> extends AbstractAnvilView {
     }
 
     public static <T> AnvilSearchView<T> simple(String icon, String title, SearchFunction<T> searchFunction,
-                             Function<T, Button> buttonFactory, Consumer<T> onSubmit) {
+                                                Function<T, Button> buttonFactory, Consumer<T> onSubmit) {
         return AnvilSearchView.<T>builder(icon, title)
             .searchFunction(searchFunction)
             .buttonFactory(buttonFactory)
@@ -166,7 +164,7 @@ public class AnvilSearchView<T> extends AbstractAnvilView {
             Objects.requireNonNull(this.buttonFactory, "buttonFactory");
             Objects.requireNonNull(this.onSubmit, "onSubmit");
             return new AnvilSearchView<>(this.icon, this.title, this.searchFunction, this.defaultSearchTerm,
-                                         this.buttonFactory, this.onSubmit, this.async);
+                this.buttonFactory, this.onSubmit, this.async);
         }
     }
 }

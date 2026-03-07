@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.panels;
 
 import net.hollowcube.canvas.ClickType;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -15,11 +14,11 @@ public class Switch extends Element {
 
     private final List<Element> children;
     private int selectedIndex = 0;
-    private BitSet mountMask = new BitSet(MAX_CHILDREN);
+    private final BitSet mountMask = new BitSet(MAX_CHILDREN);
 
     private final List<IntConsumer> onSelect = new ArrayList<>();
 
-    public Switch(int slotWidth, int slotHeight, @NotNull List<Element> children) {
+    public Switch(int slotWidth, int slotHeight, List<Element> children) {
         super(slotWidth, slotHeight);
         this.children = children;
 
@@ -51,7 +50,7 @@ public class Switch extends Element {
         onSelect.add(consumer);
     }
 
-    public @NotNull Element button(int index, int width, int height, @NotNull String translationKey, @NotNull String sprite) {
+    public Element button(int index, int width, int height, String translationKey, String sprite) {
         var button = new Button(translationKey + (index == 0 ? ".on" : ".off"), width, height);
         button.sprite(sprite + (index == 0 ? "_on" : "_off"));
         button.onLeftClick(_ -> select(index));
@@ -62,7 +61,7 @@ public class Switch extends Element {
         return button;
     }
 
-    public @NotNull Element toggleButton(int width, int height, @NotNull String translationKey, @NotNull String sprite, int spriteX, int spriteY) {
+    public Element toggleButton(int width, int height, String translationKey, String sprite, int spriteX, int spriteY) {
         var button = new Button(translationKey + ".off", width, height);
         button.sprite(sprite + "_off", spriteX, spriteY);
         button.onLeftClick(_ -> select(selectedIndex == 0 ? 1 : 0));
@@ -74,18 +73,18 @@ public class Switch extends Element {
     }
 
     @Override
-    public void build(@NotNull MenuBuilder builder) {
+    public void build(MenuBuilder builder) {
         super.build(builder);
         children.get(selectedIndex).build(builder);
     }
 
     @Override
-    public @Nullable CompletableFuture<Void> handleClick(@NotNull ClickType clickType, int x, int y) {
+    public @Nullable CompletableFuture<Void> handleClick(ClickType clickType, int x, int y) {
         return children.get(selectedIndex).handleClick(clickType, x, y);
     }
 
     @Override
-    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+    protected void mount(InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
         children.get(selectedIndex).mount(host, isInitial);
         if (isInitial) mountMask.clear();

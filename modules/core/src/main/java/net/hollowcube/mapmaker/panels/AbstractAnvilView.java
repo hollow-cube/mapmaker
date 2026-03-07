@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.panels;
 import net.hollowcube.common.util.FontUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.inventory.InventoryType;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -13,14 +12,14 @@ public abstract class AbstractAnvilView extends Panel {
     /**
      * Simple anvil view with an input and submit. The callback is called _after_ popping the view.
      */
-    public static @NotNull Panel simpleAnvil(@NotNull String container, @NotNull String icon, @NotNull String title, @NotNull Consumer<String> onSubmit) {
+    public static Panel simpleAnvil(String container, String icon, String title, Consumer<String> onSubmit) {
         return simpleAnvil(container, icon, title, onSubmit, "");
     }
 
-    public static @NotNull Panel simpleAnvil(@NotNull String container, @NotNull String icon, @NotNull String title, @NotNull Consumer<String> onSubmit, @NotNull String initialValue) {
+    public static Panel simpleAnvil(String container, String icon, String title, Consumer<String> onSubmit, String initialValue) {
         return new AbstractAnvilView(container, icon, title, initialValue, true) {
             @Override
-            protected void onSubmit(@NotNull String text) {
+            protected void onSubmit(String text) {
                 super.onSubmit(text);
                 onSubmit.accept(text);
             }
@@ -31,7 +30,7 @@ public abstract class AbstractAnvilView extends Panel {
 
     protected Button inputButton;
 
-    public AbstractAnvilView(@NotNull String container, @NotNull String icon, @NotNull String title, @NotNull String initialInput, boolean withSubmit) {
+    public AbstractAnvilView(String container, String icon, String title, String initialInput, boolean withSubmit) {
         super(InventoryType.ANVIL, 9, 5);
         this.input = initialInput;
 
@@ -57,16 +56,16 @@ public abstract class AbstractAnvilView extends Panel {
         }
     }
 
-    protected void onInputChange(@NotNull String text) {
+    protected void onInputChange(String text) {
         // Nothing by default
     }
 
-    protected void onSubmit(@NotNull String text) {
+    protected void onSubmit(String text) {
         if (this.host != null) this.host.popView();
     }
 
     // This is a special case called by InventoryHost if this is the active view.
-    final void handleAnvilInput(@NotNull String anvilInput) {
+    final void handleAnvilInput(String anvilInput) {
         anvilInput = FontUtil.stripInvalidChars(anvilInput).trim();
         if (anvilInput.equals(this.input)) return;
 

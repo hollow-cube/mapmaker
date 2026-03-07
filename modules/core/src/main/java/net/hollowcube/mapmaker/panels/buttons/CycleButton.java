@@ -5,7 +5,6 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,18 +39,18 @@ public class CycleButton<T> extends Button {
         });
     }
 
-    public @NotNull CycleButton<T> onChange(@NotNull Consumer<T> onChange) {
+    public CycleButton<T> onChange(Consumer<T> onChange) {
         this.onChange.add(onChange);
         return this;
     }
 
-    public @NotNull CycleButton<T> addOption(@NotNull T value, @NotNull String translation, @NotNull String icon) {
+    public CycleButton<T> addOption(T value, String translation, String icon) {
         this.entries.add(new Entry<>(value, new Sprite(icon, 1, 1), Component.translatable(translation)));
         this.updateDisplay();
         return this;
     }
 
-    public @NotNull T selected() {
+    public T selected() {
         return this.selected;
     }
 

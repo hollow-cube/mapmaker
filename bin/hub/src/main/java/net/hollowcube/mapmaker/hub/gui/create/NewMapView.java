@@ -21,7 +21,7 @@ public class NewMapView extends Panel {
     private final MapService mapService;
     private final Consumer<MapData> onNewMap;
 
-    private final LockableSelect<MapSize> sizeSelect;
+    private final LockableRadioSelect<MapSize> sizeSelect;
     private final Button confirmButton;
 
     public NewMapView(MapService mapService, Consumer<MapData> onNewMap) {
@@ -34,7 +34,7 @@ public class NewMapView extends Panel {
 
         add(0, 0, backOrClose());
 
-        sizeSelect = add(1, 2, new LockableSelect<>(4, MapSize.NORMAL, this::isLocked));
+        sizeSelect = add(1, 2, new LockableRadioSelect<>(4, 1, MapSize.NORMAL, this::isLocked));
 
         confirmButton = add(2, 4, new Text(5, 1, "Create")
             .align(Text.CENTER, Text.CENTER)

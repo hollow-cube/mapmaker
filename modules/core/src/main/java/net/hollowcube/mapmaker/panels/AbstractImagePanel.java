@@ -5,7 +5,6 @@ import net.hollowcube.mapmaker.util.ImageBuffer;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.component.TooltipDisplay;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 import java.util.function.Consumer;
@@ -16,7 +15,7 @@ public abstract class AbstractImagePanel extends Panel {
 
     private final ImageBuffer buffer = new ImageBuffer();
 
-    public AbstractImagePanel(@NotNull String infoKey) {
+    public AbstractImagePanel(String infoKey) {
         super(InventoryType.CARTOGRAPHY, 9, 5);
 
         background("generic2/image/container", -20, -37);
@@ -47,7 +46,7 @@ public abstract class AbstractImagePanel extends Panel {
         }
 
         @Override
-        public void build(@NotNull MenuBuilder builder) {
+        public void build(MenuBuilder builder) {
             super.build(builder);
             builder.editSlots(0, 0, this.slotWidth, this.slotHeight, DataComponents.MAP_ID, MAP_ID);
             builder.editSlots(
