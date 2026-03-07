@@ -316,6 +316,32 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
+    public @NotNull List<MapBuilder> getMapBuilders(@NotNull String mapId) {
+        var req = HttpRequest.newBuilder()
+            .uri(URI.create(urlV3 + "/maps/" + mapId + "/builders"))
+            .header(AUTHORIZER_HEADER, UUID.randomUUID().toString())
+            .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), new TypeToken<List<MapBuilder>>() {});
+            default -> throw new InternalError("Failed to get map builders: " + res.body());
+        };
+    }
+
+    @Override
+    public @NotNull List<MapData> getMapsPlayerIsBuilderOn(@NotNull String playerId) {
+        var req = HttpRequest.newBuilder()
+            .uri(URI.create(urlV3 + "/map-players/" + playerId + "/builder"))
+            .header(AUTHORIZER_HEADER, UUID.randomUUID().toString())
+            .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> GSON.fromJson(res.body(), new TypeToken<List<MapData>>() {});
+            default -> throw new InternalError("Failed to get maps player is builder on: " + res.body());
+        };
+    }
+
+    @Override
     public void inviteMapBuilder(@NotNull String mapId, @NotNull String playerId) {
         var req2 = HttpRequest.newBuilder()
             .method("POST", HttpRequest.BodyPublishers.noBody())
@@ -326,23 +352,34 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         switch (res.statusCode()) {
             case 200 -> {
             }
+            case 409 -> throw new AlreadyExistsError();
             default -> throw new InternalError("Failed to invite map builder: " + res.body());
         }
     }
 
     @Override
-    public void approveMapBuilder(@NotNull String mapId, @NotNull String playerId) {
-        var req2 = HttpRequest.newBuilder()
-            .method("PATCH", HttpRequest.BodyPublishers.ofString("{\"approved\": true}"))
-            .uri(URI.create(urlV3 + "/maps/" + mapId + "/builders/" + playerId))
+    public void acceptMapBuilderRequest(@NotNull String mapId, @NotNull String playerId) {
+        this.mapBuilderAcceptReject(mapId, playerId, true);
+    }
+
+    @Override
+    public void rejectMapBuilderRequest(@NotNull String mapId, @NotNull String playerId) {
+        this.mapBuilderAcceptReject(mapId, playerId, false);
+    }
+
+    private void mapBuilderAcceptReject(@NotNull String mapId, @NotNull String playerId, boolean accepted) {
+        var req = HttpRequest.newBuilder()
+            .method("POST", HttpRequest.BodyPublishers.noBody()) // isn't this why the skeleton didn't go to the ball?
+            .uri(URI.create(urlV3 + "/maps/" + mapId + "/builders/" + playerId + "/" + (accepted ? "accept" : "reject")))
             .header("Content-Type", "application/json")
-            .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
+            .header(AUTHORIZER_HEADER, UUID.randomUUID().toString())
             .build();
-        var res = doRequest(req2, HttpResponse.BodyHandlers.ofString());
+        var res = super.doRequest(req, HttpResponse.BodyHandlers.ofString());
         switch (res.statusCode()) {
             case 200 -> {
             }
-            default -> throw new InternalError("Failed to approve map builder: " + res.body());
+            case 402 -> throw new MapBuilderNoSlotsError();
+            default -> throw new InternalError("Failed to accept/reject map builder: " + res.body());
         }
     }
 
@@ -359,7 +396,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             default -> throw new InternalError("Failed to remove map builder: " + res.body());
         }
     }
-    
+
     @Override
     public @NotNull LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId) {
         var uri = urlV3 + "/maps/hub/leaderboard/" + name;
@@ -588,13 +625,13 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull List<MapSlot> getPlayerMapSlots(@NotNull String playerId) {
+    public @NotNull List<MapData> getPlayerMapSlots(@NotNull String playerId) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(urlV3 + "/map-players/" + playerId + "/slots"))
             .header(AUTHORIZER_HEADER, playerId)
             .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        if (res.statusCode() == 200) return GSON.fromJson(res.body(), new TypeToken<List<MapSlot>>() {
+        if (res.statusCode() == 200) return GSON.fromJson(res.body(), new TypeToken<List<MapData>>() {
         }); // Ok
         throw new InternalError("Failed to get map slots: " + res.body());
     }

@@ -116,12 +116,27 @@ public class NoopMapService implements MapService {
     }
 
     @Override
+    public @NotNull List<MapBuilder> getMapBuilders(@NotNull String mapId) {
+        return List.of();
+    }
+
+    @Override
+    public @NotNull List<MapData> getMapsPlayerIsBuilderOn(@NotNull String playerId) {
+        return List.of();
+    }
+
+    @Override
     public void inviteMapBuilder(@NotNull String mapId, @NotNull String playerId) {
 
     }
 
     @Override
-    public void approveMapBuilder(@NotNull String mapId, @NotNull String playerId) {
+    public void acceptMapBuilderRequest(@NotNull String mapId, @NotNull String playerId) {
+
+    }
+
+    @Override
+    public void rejectMapBuilderRequest(@NotNull String mapId, @NotNull String playerId) {
 
     }
 
@@ -206,7 +221,7 @@ public class NoopMapService implements MapService {
     }
 
     @Override
-    public @NotNull List<MapSlot> getPlayerMapSlots(@NotNull String playerId) {
+    public @NotNull List<MapData> getPlayerMapSlots(@NotNull String playerId) {
         return List.of();
     }
 

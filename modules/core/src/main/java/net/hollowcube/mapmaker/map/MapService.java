@@ -25,21 +25,26 @@ public interface MapService {
     String LEADERBOARD_MAPS_BEATEN = "maps_beaten";
 
 
-    @NotNull MapData createMap(@NotNull MapCreateRequest request);
+    @NotNull
+    MapData createMap(@NotNull MapCreateRequest request);
 
     @NotNull
     net.hollowcube.mapmaker.map.responses.MapSearchResponse searchMaps(@NotNull MapSearchParams request);
 
-    @NotNull MapProgressBatchResponse getMapProgress(@NotNull String playerId, @NotNull List<String> mapIds);
+    @NotNull
+    MapProgressBatchResponse getMapProgress(@NotNull String playerId, @NotNull List<String> mapIds);
 
     @NotNull
     MapSearchResponse<MapData> searchOrgMaps(@NotNull String authorizer, int page, int pageSize, @NotNull String orgId);
 
-    @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id);
+    @NotNull
+    MapData getMap(@NotNull String authorizer, @NotNull String id);
 
-    @NotNull List<MapData> getMaps(@NotNull String authorizer, @NotNull List<String> mapIds);
+    @NotNull
+    List<MapData> getMaps(@NotNull String authorizer, @NotNull List<String> mapIds);
 
-    @NotNull MapData getMapByPublishedId(@NotNull String authorizer, long publishedId);
+    @NotNull
+    MapData getMapByPublishedId(@NotNull String authorizer, long publishedId);
 
     void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update);
 
@@ -49,7 +54,8 @@ public interface MapService {
 
     void deleteVerification(@NotNull String authorizer, @NotNull String mapId);
 
-    @NotNull MapData publishMap(@NotNull String authorizer, @NotNull String id);
+    @NotNull
+    MapData publishMap(@NotNull String authorizer, @NotNull String id);
 
     byte @Nullable [] getMapWorld(@NotNull String id, boolean write);
 
@@ -62,15 +68,25 @@ public interface MapService {
 
     void reportMap(@NotNull String mapId, @NotNull MapReportRequest req);
 
+    @NotNull
+    List<MapBuilder> getMapBuilders(@NotNull String mapId);
+
+    @NotNull
+    List<MapData> getMapsPlayerIsBuilderOn(@NotNull String playerId);
+
     void inviteMapBuilder(@NotNull String mapId, @NotNull String playerId);
 
-    void approveMapBuilder(@NotNull String mapId, @NotNull String playerId);
+    void acceptMapBuilderRequest(@NotNull String mapId, @NotNull String playerId);
+
+    void rejectMapBuilderRequest(@NotNull String mapId, @NotNull String playerId);
 
     void removeMapBuilder(@NotNull String mapId, @NotNull String playerId);
 
-    @NotNull LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId);
+    @NotNull
+    LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId);
 
-    @NotNull LeaderboardData getPlaytimeLeaderboard(@NotNull String mapId, @Nullable String playerId);
+    @NotNull
+    LeaderboardData getPlaytimeLeaderboard(@NotNull String mapId, @Nullable String playerId);
 
     void deletePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId, @Nullable String playerId);
 
@@ -83,7 +99,8 @@ public interface MapService {
     @NotNull
     SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer);
 
-    @Nullable SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId);
+    @Nullable
+    SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId);
 
     @Nullable
     SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update);
@@ -99,13 +116,17 @@ public interface MapService {
 
     void setMapRating(@NotNull String mapId, @NotNull String playerId, @NotNull MapRating rating);
 
-    @NotNull MapPlayerData getMapPlayerData(@NotNull String playerId);
+    @NotNull
+    MapPlayerData getMapPlayerData(@NotNull String playerId);
 
-    @NotNull List<MapSlot> getPlayerMapSlots(@NotNull String playerId);
+    @NotNull
+    List<MapData> getPlayerMapSlots(@NotNull String playerId);
 
-    @NotNull MapHistory getPlayerMapHistory(@NotNull String playerId, int page, int amount);
+    @NotNull
+    MapHistory getPlayerMapHistory(@NotNull String playerId, int page, int amount);
 
-    @NotNull PlayerTopTimesResponse getPlayerTopTimes(@NotNull String playerId, int page, int pageSize);
+    @NotNull
+    PlayerTopTimesResponse getPlayerTopTimes(@NotNull String playerId, int page, int pageSize);
 
     class NotFoundError extends RuntimeException {
         public NotFoundError(@NotNull String id) {
@@ -129,6 +150,18 @@ public interface MapService {
 
         public InternalError(Throwable cause) {
             super(cause);
+        }
+    }
+
+    class AlreadyExistsError extends RuntimeException {
+        public AlreadyExistsError() {
+            super("Already exists");
+        }
+    }
+
+    class MapBuilderNoSlotsError extends RuntimeException {
+        public MapBuilderNoSlotsError() {
+            super("No slots remaining");
         }
     }
 }

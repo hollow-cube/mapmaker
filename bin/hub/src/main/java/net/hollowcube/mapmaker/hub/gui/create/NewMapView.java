@@ -2,19 +2,14 @@ package net.hollowcube.mapmaker.hub.gui.create;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.ProtocolVersions;
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapSize;
-import net.hollowcube.mapmaker.map.MapSlot;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
-import net.hollowcube.mapmaker.panels.Button;
-import net.hollowcube.mapmaker.panels.InventoryHost;
-import net.hollowcube.mapmaker.panels.LockableSelect;
-import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.panels.Text;
+import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 
-import java.time.Instant;
 import java.util.Locale;
 import java.util.function.Consumer;
 
@@ -24,12 +19,12 @@ import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
 public class NewMapView extends Panel {
 
     private final MapService mapService;
-    private final Consumer<MapSlot> onNewMap;
+    private final Consumer<MapData> onNewMap;
 
     private final LockableSelect<MapSize> sizeSelect;
     private final Button confirmButton;
 
-    public NewMapView(MapService mapService, Consumer<MapSlot> onNewMap) {
+    public NewMapView(MapService mapService, Consumer<MapData> onNewMap) {
         super(9, 10);
         this.mapService = mapService;
         this.onNewMap = onNewMap;
@@ -66,7 +61,7 @@ public class NewMapView extends Panel {
             playerId, sizeSelect.selected(),
             ProtocolVersions.getProtocolVersion(playerId)));
         sync(() -> {
-            onNewMap.accept(new MapSlot(map, Instant.now(), -1));
+            onNewMap.accept(map);
             host.popView();
         });
     }
@@ -76,8 +71,8 @@ public class NewMapView extends Panel {
         var sizeNameKey = "gui.create_maps.new.size." + size + ".on.name";
         var actualSizeKey = "gui.create_maps.new.size." + size + ".size";
         confirmButton.translationKey("gui.create_maps.new.confirm",
-                                     Component.translatable(sizeNameKey),
-                                     Component.translatable(actualSizeKey));
+            Component.translatable(sizeNameKey),
+            Component.translatable(actualSizeKey));
     }
 
     private boolean isLocked(MapSize size) {

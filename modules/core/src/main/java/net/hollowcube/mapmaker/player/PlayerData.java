@@ -57,6 +57,7 @@ public class PlayerData {
     private long permissions;
     private int mapSlots;
     private MapSize tempMaxMapSize;
+    private int mapBuilders;
 
     public PlayerData() {
     }
@@ -215,6 +216,10 @@ public class PlayerData {
 
     public MapSize maxMapSize() {
         return tempMaxMapSize;
+    }
+
+    public int mapBuilders() {
+        return mapBuilders;
     }
 
     public @Nullable String getCosmetic(@NotNull CosmeticType type) {

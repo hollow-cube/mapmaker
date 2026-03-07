@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
+import net.hollowcube.common.components.ExtraComponents;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
@@ -9,23 +10,16 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.panels.AnvilSearchView;
-import net.hollowcube.mapmaker.panels.Button;
-import net.hollowcube.mapmaker.panels.InventoryHost;
-import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.panels.Sprite;
-import net.hollowcube.mapmaker.panels.Text;
+import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.TabCompleteResponse;
-import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.Autocompletors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -57,6 +51,8 @@ public class EditMapView extends Panel {
     private final Text nameText;
     private final Button iconButton;
 
+    private final Button[] mapBuilderButtons = new Button[4];
+
     @Blocking
     public EditMapView(PlayerService playerService, MapService mapService,
                        ServerBridge bridge, MapData map, Runnable onPublish) {
@@ -75,8 +71,7 @@ public class EditMapView extends Panel {
         add(0, 0, title("Edit Map"));
 
         add(0, 0, backOrClose());
-        this.nameText = add(1, 0, new Text("gui.create_maps.edit.name", 7, 1, map.settings().getNameSafe())
-            .align(8, 5));
+        this.nameText = add(1, 0, new Text("gui.create_maps.edit.name", 7, 1, map.settings().getNameSafe()).align(8, 5));
         this.nameText.onLeftClick(this::beginNameEdit);
         add(8, 0, new Button("gui.create_maps.edit.actions", 1, 1)
             .background("generic2/btn/default/1_1")
@@ -91,24 +86,74 @@ public class EditMapView extends Panel {
             .background("create_maps2/head_outline", 4, 4)
             .model(MODEL_8X, null)
             .profile(getPlayerHead2d(map.owner())));
-        for (int i = 0; i < 4; i++) {
-            add(i + 4, 2, new Button("gui.create_maps.edit.builders.locked", 1, 1)
-                .sprite("icon2/1_1/lock", 1, 1)
-                .onLeftClick(this::beginAddMapBuilder));
-//                // TODO: Remove before releasing
-//                .onLeftClickAsync(() -> {
-//                    mapService.inviteMapBuilder(map.id(), "d79d790a-8e90-4d78-958a-780c7fadeaab");
-//                }));
-        }
 
         // async doesn't work as host is null when this is called
         add(1, 4, new EditableMapTagList(map, this::updatePublishStage));
 
         add(1, 6, new Button("gui.create_maps.edit.build", 3, 3)
             .background("create_maps2/edit/build")
-            .onLeftClickAsync(() -> editMap(map, this.host, bridge)));
+            .onLeftClickAsync(() -> editMap(mapService, map, this.host, bridge)));
 
         add(5, 6, this.publisher.getButton());
+    }
+
+    @Override
+    protected void mount(InventoryHost host, boolean isInitial) {
+        super.mount(host, isInitial);
+
+        FutureUtil.submitVirtual(this::initMapBuilderEntries);
+    }
+
+    @Blocking
+    private void initMapBuilderEntries() {
+        var mapBuilders = this.mapService.getMapBuilders(this.map.id());
+
+        var builderSlots = this.playerService.getPlayerData(this.map.owner()).mapBuilders();
+        // if this is ever false, something has gone horrifically wrong
+        assert builderSlots >= mapBuilders.size();
+
+        for (int i = 0; i < 4; i++) {
+            Button button;
+            if (i >= mapBuilders.size()) {
+                button = this.createNoBuilderButton(i, builderSlots);
+            } else {
+                var builder = mapBuilders.get(i);
+                button = this.createBuilderButton(i, builder.playerId(), builder.pending());
+            }
+
+            this.mapBuilderButtons[i] = add(i + 4, 2, button);
+        }
+    }
+
+    private Button createNoBuilderButton(final int index, int builderSlots) {
+        var button = new Button(null, 1, 1);
+        if (index >= builderSlots) {
+            return button.translationKey("gui.create_maps.edit.builders.locked").sprite("icon2/1_1/lock");
+        } else {
+            // an unlocked builder slot that has no assigned builder
+            return button.translationKey("gui.create_maps.edit.builders.add")
+                .sprite("icon2/1_1/plus", 1, 1)
+                .onLeftClick(() -> this.beginAddMapBuilder(index));
+        }
+    }
+
+    private Button createBuilderButton(int index, String builderId, boolean pending) {
+        var displayName = this.playerService.getPlayerDisplayName2(builderId);
+        return new Button(null, 1, 1)
+            .background("create_maps2/head_outline" + (pending ? "_pending" : ""), 4, 4)
+            .model(MODEL_8X, null)
+            .profile(getPlayerHead2d(builderId))
+            .translationKey("gui.create_maps.edit.builders." + (pending ? "pending" : "entry"), displayName.asComponent())
+            .onRightClick(() -> {
+                var player = this.host.player();
+                Runnable callback = () -> FutureUtil.submitVirtual(() -> this.removeMapBuilder(player, builderId, index));
+                this.host.pushView(new ConfirmActionView(callback, Component.translatable("remove map builder"), true));
+            });
+    }
+
+    private void replaceBuilderButton(int index, Button newButton) {
+        this.mapBuilderButtons[index] = newButton;
+        replace(index + 4, 2, newButton);
     }
 
     @Override
@@ -165,7 +210,7 @@ public class EditMapView extends Panel {
             .defaultSearchTerm("")
             .buttonFactory(icon -> new Button(null, 1, 1)
                 .text(LanguageProviderV2.getVanillaTranslation(icon)
-                          .decoration(TextDecoration.ITALIC, false), List.of())
+                    .decoration(TextDecoration.ITALIC, false), List.of())
                 .model(icon.key().asString(), null))
             .onSubmit(icon -> {
                 map.settings().setIcon(icon);
@@ -187,47 +232,68 @@ public class EditMapView extends Panel {
         }
     }
 
-    private void beginAddMapBuilder() {
+    private void beginAddMapBuilder(int index) {
         var view = AnvilSearchView.<TabCompleteResponse.Entry>builder()
-            // TODO: Make this the hammer icon
-            .icon("icon2/anvil/item_frame")
+            .icon("icon2/1_1/hammer")
             .title(LanguageProviderV2.translateToPlain("Add Map Builder"))
             .searchFunction(this::getTabCompletionsNotOwner)
             .defaultSearchTerm(".*")
             .buttonFactory(icon -> new Button(null, 1, 1)
-                .text(this.getPlayerDisplayNameItemName(icon.id()), List.of())
+                .text(ExtraComponents.noItalic(this.playerService.getPlayerDisplayName2(icon.id())), List.of())
                 .model(MODEL_8X, null)
                 .profile(getPlayerHead2d(icon.id())))
-            .onSubmit(icon -> this.mapService.inviteMapBuilder(this.map.id(), icon.id()))
+            .onSubmitWithPlayer((icon, player) -> this.addMapBuilder(index, icon, player))
             .async()
             .build();
         this.host.pushView(view);
     }
 
-    private Component getPlayerDisplayNameItemName(String uuid) {
-        return this.playerService.getPlayerDisplayName2(uuid)
-            .asComponent()
-            .style(style -> style.decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+    @Blocking
+    private void addMapBuilder(int index, TabCompleteResponse.Entry icon, Player player) {
+        try {
+            this.mapService.inviteMapBuilder(this.map.id(), icon.id());
+            player.sendMessage(Component.text("map builder invited")); // todo
+        } catch (MapService.AlreadyExistsError _) {
+            player.sendMessage(Component.text("map builder already invited!")); // todo
+        }
+
+        this.replaceBuilderButton(index, this.createBuilderButton(index, icon.id(), true));
     }
 
     private List<TabCompleteResponse.Entry> getTabCompletionsNotOwner(String query, int limit) {
         var results = this.playerService.getUsernameTabCompletions(query, limit).result();
-        results.removeIf(result -> result.id().equals(this.map.owner()));
+        results.removeIf(result -> this.map.owner().equals(result.id()));
         return results;
     }
 
+    private void removeMapBuilder(Player player, String builderId, int index) {
+        FutureUtil.submitVirtual(() -> this.mapService.removeMapBuilder(this.map.id(), builderId));
+
+        var builderSlots = PlayerData.fromPlayer(player).mapBuilders();
+        this.replaceBuilderButton(index, this.createNoBuilderButton(index, builderSlots));
+    }
+
     @Blocking
-    static void editMap(MapData map, InventoryHost host, ServerBridge bridge) {
+    static void editMap(MapService mapService, MapData map, InventoryHost host, ServerBridge bridge) {
         if (map.verification() != MapVerification.UNVERIFIED) {
-            host.pushView(new ConfirmActionView(() -> beginBuildingMap(bridge, map, host.player()),
-                                                Component.translatable("edit.map.confirm")));
+            host.pushView(new ConfirmActionView(() -> buildMapAfterVerify(mapService, bridge, map, host.player()),
+                Component.translatable("edit.map.confirm"), false));
         } else {
             beginBuildingMap(bridge, map, host.player());
         }
     }
 
+    private static void buildMapAfterVerify(MapService mapService, ServerBridge bridge, MapData map, Player player) {
+        player.sendMessage(Component.translatable("progress.verification.lost"));
+
+        var playerData = PlayerData.fromPlayer(player);
+        mapService.deleteVerification(playerData.id(), map.id());
+
+        beginBuildingMap(bridge, map, player);
+    }
+
     @Blocking
-    private static void beginBuildingMap(ServerBridge bridge, MapData map, Player player) {
+    static void beginBuildingMap(ServerBridge bridge, MapData map, Player player) {
         try {
             player.closeInventory();
             bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.EDITING, "edit_maps_gui");

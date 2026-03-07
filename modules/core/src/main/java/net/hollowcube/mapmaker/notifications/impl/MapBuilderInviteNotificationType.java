@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.notifications.impl;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.notifications.PlayerNotification;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
@@ -12,10 +13,10 @@ import java.util.List;
 import java.util.Objects;
 
 @AutoService(PlayerNotificationType.class)
-public class MapBuilderInviteNotificationType implements PlayerNotificationType {
+public final class MapBuilderInviteNotificationType implements PlayerNotificationType {
 
-    private static final Sprite ICON = new Sprite("icon2/1_1/hammer");
-    private static final Sprite CONFIRM_ICON = new Sprite("icon2/1_1/checkmark");
+    static final Sprite ICON = new Sprite("icon2/1_1/hammer");
+    private static final Sprite ACCEPT_ICON = new Sprite("icon2/1_1/checkmark");
     private static final Sprite REJECT_ICON = new Sprite("icon2/1_1/cross");
 
     @Override
@@ -23,42 +24,56 @@ public class MapBuilderInviteNotificationType implements PlayerNotificationType 
         return "map_builder_invite";
     }
 
-    @Override
-    public PlayerNotification createNotification(Player player, ServiceContext context, PlayerNotificationResponse.ComplexEntry entry) {
+    private record EntryData(String mapId, Component mapName, Component inviterDisplayName) {
+    }
+
+    private static EntryData dataFromEntry(ServiceContext context, PlayerNotificationResponse.Entry entry) {
         var inviterId = Objects.requireNonNull(entry.data()).get("inviterId").getAsString();
         var mapId = Objects.requireNonNull(entry.data()).get("mapId").getAsString();
 
         var inviterDisplayName = context.players().getPlayerDisplayName2(inviterId);
         var map = context.maps().getMap(inviterId, mapId);
 
-        // TODO: you should only be able to confirm if you have an available slot
+        return new EntryData(map.id(), Component.text(map.name()), inviterDisplayName.asComponent());
+    }
 
+    @Override
+    public PlayerNotification createNotification(Player player, ServiceContext context, PlayerNotificationResponse.ComplexEntry entry) {
+        var data = dataFromEntry(context, entry);
+
+        var playerId = player.getUuid().toString();
         return new PlayerNotification(
             entry,
             ICON,
-            "gui.notification.map_builder_invite",
-            List.of(inviterDisplayName.asComponent(), Component.text(map.settings().getNameSafe())),
+            "gui.notification.map_builder.invite",
+            List.of(data.inviterDisplayName(), data.mapName()),
             List.of(
                 PlayerNotification.Action.of(
-                    CONFIRM_ICON,
-                    "gui.notification.map_builder_invite.action.confirm.interaction",
-                    "gui.notification.map_builder_invite.action.confirm",
+                    ACCEPT_ICON,
+                    "gui.notification.map_builder.invite.action.accept",
+                    "gui.notification.map_builder.invite.action.accept.tooltip",
                     PlayerNotification.ActionExecutor
-                        .of(() -> {
-                            context.maps().approveMapBuilder(mapId, player.getUuid().toString());
+                        .ofAsync(() -> {
+                            try {
+                                context.maps().acceptMapBuilderRequest(data.mapId(), playerId);
+                                context.players().deleteNotification(playerId, entry.id());
+                            } catch (MapService.MapBuilderNoSlotsError _) {
+                                player.sendMessage(Component.translatable("gui.notification.map_builder_invite.accept.error.no_slots"));
+                            }
                         })
+                        .withConfirmation()
                         .withRefresh()
                 ),
                 PlayerNotification.Action.of(
                     REJECT_ICON,
-                    "gui.notification.map_builder_invite.action.reject.interaction",
-                    "gui.notification.map_builder_invite.action.reject",
+                    "gui.notification.map_builder.invite.action.reject",
+                    "gui.notification.map_builder.invite.action.reject.tooltip",
                     PlayerNotification.ActionExecutor
-                        .of(() -> {
-                            // TODO: reject endpoint
-//                            context.players().deleteFriendRequest(player.getUuid().toString(), entry.key(), true);
-//                            context.players().deleteNotification(player.getUuid().toString(), entry.id());
+                        .ofAsync(() -> {
+                            context.maps().rejectMapBuilderRequest(data.mapId(), playerId);
+                            context.players().deleteNotification(playerId, entry.id());
                         })
+                        .withConfirmation()
                         .withRefresh()
                 )
             )
@@ -67,6 +82,7 @@ public class MapBuilderInviteNotificationType implements PlayerNotificationType 
 
     @Override
     public Component createToast(Player player, ServiceContext context, PlayerNotificationResponse.SimpleEntry entry) {
-        return Component.translatable("gui.notification.map_builder_invite.toast"); //todo
+        var data = dataFromEntry(context, entry);
+        return Component.translatable("gui.notification.map_builder.invite.toast", data.inviterDisplayName(), data.mapName());
     }
 }

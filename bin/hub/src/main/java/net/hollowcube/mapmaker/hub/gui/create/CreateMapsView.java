@@ -1,13 +1,9 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
+import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.map.MapSlot;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.panels.Button;
-import net.hollowcube.mapmaker.panels.InventoryHost;
-import net.hollowcube.mapmaker.panels.Pagination;
-import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.panels.Text;
+import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.StringComparison;
@@ -33,7 +29,7 @@ public class CreateMapsView extends Panel {
     private final Button createButton;
 
     // Contains all map slots, including published maps
-    private final List<MapSlot> slots = new ArrayList<>();
+    private final List<Slot> slots = new ArrayList<>();
     private final Pagination<Unit> pagination;
     private final Text searchTextElement;
 
@@ -84,12 +80,14 @@ public class CreateMapsView extends Panel {
     private void rebuildSlots() {
         async(() -> {
             var playerId = PlayerData.fromPlayer(this.host.player()).id();
+
             var remoteSlots = this.mapService.getPlayerMapSlots(playerId);
+            var mapBuilderSlots = this.mapService.getMapsPlayerIsBuilderOn(playerId);
+            var sortedSlots = this.splitAndSortMaps(remoteSlots, mapBuilderSlots);
 
             sync(() -> {
                 this.slots.clear();
-                this.slots.addAll(remoteSlots);
-                this.slots.sort((a, b) -> b.createdAt().compareTo(a.createdAt()));
+                this.slots.addAll(sortedSlots);
                 this.resetSearch();
 
                 this.updateCreateButton();
@@ -97,9 +95,31 @@ public class CreateMapsView extends Panel {
         });
     }
 
-    private void acceptNewMap(MapSlot slot) {
+    private List<Slot> splitAndSortMaps(List<MapData> maps, List<MapData> builderSlots) {
+        var unpublished = new ArrayList<Slot>();
+        var published = new ArrayList<Slot>();
+
+        for (var map : maps) {
+            if (map.isPublished()) {
+                published.add(Slot.owned(map));
+            } else {
+                unpublished.add(Slot.owned(map));
+            }
+        }
+
+        var result = new ArrayList<>(unpublished);
+
+        for (var map : builderSlots) {
+            result.add(Slot.builder(map));
+        }
+
+        result.addAll(published);
+        return result;
+    }
+
+    private void acceptNewMap(MapData slot) {
         // No need to re-sort, we know this should be first in the list.
-        this.slots.addFirst(slot);
+        this.slots.addFirst(Slot.owned(slot));
         this.resetSearch();
     }
 
@@ -110,7 +130,7 @@ public class CreateMapsView extends Panel {
     private void updateCreateButton() {
         // We have to lazy init this as host is not set until the view is mounted
         var unlockedSlots = PlayerData.fromPlayer(this.host.player()).mapSlots();
-        var usedSlots = this.slots.stream().filter(slot -> !slot.map().isPublished()).count();
+        var usedSlots = this.getUsedSlots();
 
         var availableSlots = unlockedSlots - usedSlots;
         if (availableSlots <= 0) {
@@ -120,6 +140,14 @@ public class CreateMapsView extends Panel {
         } else {
             this.createButton.translationKey("gui.create_maps.new", availableSlots);
         }
+    }
+
+    private int getUsedSlots() {
+        int count = 0;
+        for (var slot : this.slots) {
+            if (slot.unpublished()) count++;
+        }
+        return count;
     }
 
     private void openSearchInput() {
@@ -142,35 +170,49 @@ public class CreateMapsView extends Panel {
 
         var entries = new ArrayList<MapSlotEntry>();
         // Keep as a stream to avoid collecting all to a list just to iterate over it
-        this.limitMapSlotsForPage(results.stream(), page).forEachOrdered(slot ->
-            entries.add(new MapSlotEntry(this.playerService, this.mapService, this.bridge, slot.map(),
-                                         () -> this.remountTask = this::rebuildSlots)));
+        for (var slot : this.limitMapSlotsForPage(results, page)) {
+            entries.add(new MapSlotEntry(this.playerService, this.mapService, this.bridge, slot.map(), slot.isOwned(),
+                () -> this.remountTask = this::rebuildSlots));
+        }
 
         return entries;
     }
 
-    private List<MapSlot> searchAllSlots() {
+    private List<Slot> searchAllSlots() {
         // Always put unpublished slots first
-        return Stream.concat(this.searchUnpublishedSlots(), this.searchPublishedSlots()).toList();
+        return Stream.concat(
+            Stream.concat(this.searchUnpublishedSlots(), this.searchBuilderSlots()),
+            this.searchPublishedSlots()
+        ).toList();
     }
 
-    private Stream<MapSlot> limitMapSlotsForPage(Stream<MapSlot> slots, int page) {
+    private List<Slot> limitMapSlotsForPage(List<Slot> slots, int page) {
         // Page starts from 0
-        return slots.skip((long) page * PAGE_SIZE).limit(PAGE_SIZE);
+        return slots.stream()
+            .skip((long) page * PAGE_SIZE)
+            .limit(PAGE_SIZE)
+            .toList();
     }
 
-    private Stream<MapSlot> searchUnpublishedSlots() {
+    private Stream<Slot> searchUnpublishedSlots() {
         return this.slots.stream()
-            .filter(slot -> !slot.map().isPublished())
-            .filter(slot -> slot.map().name().contains(this.searchText))
-            .sorted(StringComparison.jaroWinkler(this.searchText, slot -> slot.map().name()));
+            .filter(Slot::unpublished)
+            .filter(slot -> slot.name().contains(this.searchText))
+            .sorted(StringComparison.jaroWinkler(this.searchText, Slot::name));
     }
 
-    private Stream<MapSlot> searchPublishedSlots() {
+    private Stream<Slot> searchBuilderSlots() {
         return this.slots.stream()
-            .filter(slot -> slot.map().isPublished())
-            .filter(slot -> slot.map().name().contains(this.searchText))
-            .sorted(StringComparison.jaroWinkler(this.searchText, slot -> slot.map().name()));
+            .filter(Slot::isOwned)
+            .filter(slot -> slot.name().contains(this.searchText))
+            .sorted(StringComparison.jaroWinkler(this.searchText, Slot::name));
+    }
+
+    private Stream<Slot> searchPublishedSlots() {
+        return this.slots.stream()
+            .filter(Slot::published)
+            .filter(slot -> slot.name().contains(this.searchText))
+            .sorted(StringComparison.jaroWinkler(this.searchText, Slot::name));
     }
 
     private void handleSearchTextChange(String newValue) {
@@ -182,5 +224,27 @@ public class CreateMapsView extends Panel {
         this.searchTextElement.translationKey(translationKey);
         this.searchTextElement.text(this.searchText.isEmpty() ? "Search..." : this.searchText);
         this.pagination.reset();
+    }
+
+    private record Slot(MapData map, boolean isOwned) {
+        static Slot owned(MapData map) {
+            return new Slot(map, true);
+        }
+
+        static Slot builder(MapData map) {
+            return new Slot(map, false);
+        }
+
+        boolean published() {
+            return this.map.isPublished();
+        }
+
+        boolean unpublished() {
+            return !this.map.isPublished();
+        }
+
+        String name() {
+            return this.map.name();
+        }
     }
 }
