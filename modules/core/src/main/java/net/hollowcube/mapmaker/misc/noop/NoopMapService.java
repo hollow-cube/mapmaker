@@ -116,11 +116,6 @@ public class NoopMapService implements MapService {
     }
 
     @Override
-    public @NotNull List<MapBuilder> getMapBuilders(@NotNull String mapId) {
-        return List.of();
-    }
-
-    @Override
     public void inviteMapBuilder(@NotNull String mapId, @NotNull String playerId) {
 
     }

@@ -68,9 +68,6 @@ public interface MapService {
 
     void reportMap(@NotNull String mapId, @NotNull MapReportRequest req);
 
-    @NotNull
-    List<MapBuilder> getMapBuilders(@NotNull String mapId);
-
     void inviteMapBuilder(@NotNull String mapId, @NotNull String playerId);
 
     void acceptMapBuilderRequest(@NotNull String mapId, @NotNull String playerId);

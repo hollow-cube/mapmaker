@@ -316,19 +316,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull List<MapBuilder> getMapBuilders(@NotNull String mapId) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(urlV3 + "/maps/" + mapId + "/builders"))
-            .header(AUTHORIZER_HEADER, UUID.randomUUID().toString())
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), new TypeToken<List<MapBuilder>>() {});
-            default -> throw new InternalError("Failed to get map builders: " + res.body());
-        };
-    }
-
-    @Override
     public void inviteMapBuilder(@NotNull String mapId, @NotNull String playerId) {
         var req2 = HttpRequest.newBuilder()
             .method("POST", HttpRequest.BodyPublishers.noBody())

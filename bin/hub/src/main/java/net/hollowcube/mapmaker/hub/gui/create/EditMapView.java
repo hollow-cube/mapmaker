@@ -4,6 +4,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
+import net.hollowcube.mapmaker.api.maps.MapSlot;
 import net.hollowcube.mapmaker.gui.common.ConfirmActionView;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.map.MapData;
@@ -44,7 +45,7 @@ public class EditMapView extends Panel {
     private final ApiClient api;
     private final MapService mapService;
 
-    private final MapData map;
+    private final MapSlot slot;
     private final MapPublisher publisher;
 
     private final Text nameText;
@@ -54,28 +55,28 @@ public class EditMapView extends Panel {
 
     @Blocking
     public EditMapView(ApiClient api, MapService mapService,
-                       ServerBridge bridge, MapData map, Runnable onPublish) {
+                       ServerBridge bridge, MapSlot slot, Runnable onPublish) {
         super(9, 10);
         this.api = api;
         this.mapService = mapService;
-        this.map = map;
+        this.slot = slot;
 
         Consumer<MapData> publishCallback = publishedMap -> {
             this.host.replaceView(new MapDetailsView(api, mapService, bridge, publishedMap, true));
             onPublish.run();
         };
-        this.publisher = new MapPublisher(mapService, bridge, map, () -> this.host, publishCallback);
+        this.publisher = new MapPublisher(mapService, bridge, slot.map(), () -> this.host, publishCallback);
 
         background("create_maps2/edit/container", -10, -31);
         add(0, 0, title("Edit Map"));
 
         add(0, 0, backOrClose());
-        this.nameText = add(1, 0, new Text("gui.create_maps.edit.name", 7, 1, map.settings().getNameSafe()).align(8, 5));
+        this.nameText = add(1, 0, new Text("gui.create_maps.edit.name", 7, 1, slot.map().settings().getNameSafe()).align(8, 5));
         this.nameText.onLeftClick(this::beginNameEdit);
         add(8, 0, new Button("gui.create_maps.edit.actions", 1, 1)
             .background("generic2/btn/default/1_1")
             .sprite("icon2/1_1/ellipsis", 1, 1)
-            .onLeftClick(() -> host.pushView(new EditMapActionsView(api, mapService, bridge, map.id()))));
+            .onLeftClick(() -> host.pushView(new EditMapActionsView(api, mapService, bridge, slot.map().id()))));
 
         this.iconButton = add(1, 2, new Button("gui.create_maps.edit.icon", 1, 1)
             .onLeftClick(this::beginIconEdit));
@@ -84,14 +85,14 @@ public class EditMapView extends Panel {
         add(3, 2, new Button("gui.create_maps.edit.builders.owner.self", 1, 1)
             .background("create_maps2/head_outline", 4, 4)
             .model(MODEL_8X, null)
-            .profile(getPlayerHead2d(map.owner())));
+            .profile(getPlayerHead2d(slot.map().owner())));
 
         // async doesn't work as host is null when this is called
-        add(1, 4, new EditableMapTagList(map, this::updatePublishStage));
+        add(1, 4, new EditableMapTagList(slot.map(), this::updatePublishStage));
 
         add(1, 6, new Button("gui.create_maps.edit.build", 3, 3)
             .background("create_maps2/edit/build")
-            .onLeftClickAsync(() -> editMap(mapService, map, this.host, bridge)));
+            .onLeftClickAsync(() -> editMap(mapService, slot.map(), this.host, bridge)));
 
         add(5, 6, this.publisher.getButton());
     }
@@ -105,19 +106,15 @@ public class EditMapView extends Panel {
 
     @Blocking
     private void initMapBuilderEntries() {
-        var mapBuilders = this.mapService.getMapBuilders(this.map.id());
-
-        var builderSlots = this.api.players.getPlayerData(this.map.owner()).mapBuilders();
-        // if this is ever false, something has gone horrifically wrong
-        assert builderSlots >= mapBuilders.size();
+        var builderSlots = this.api.players.getPlayerData(slot.map().owner()).mapBuilders();
 
         for (int i = 0; i < 4; i++) {
             Button button;
-            if (i >= mapBuilders.size()) {
+            if (i >= slot.builders().size()) {
                 button = this.createNoBuilderButton(i, builderSlots);
             } else {
-                var builder = mapBuilders.get(i);
-                button = this.createBuilderButton(i, builder.playerId(), builder.pending());
+                var builder = slot.builders().get(i);
+                button = this.createBuilderButton(i, builder.id(), builder.pending());
             }
 
             this.mapBuilderButtons[i] = add(i + 4, 2, button);
@@ -164,9 +161,9 @@ public class EditMapView extends Panel {
         // Updating on unmount is kinda unnecessary since itll happen when opening the add tag
         // menu for example. But at time of writing we dont have a "when really gone" callback.
         final var player = host.player();
-        async(() -> map.settings().withUpdateRequest(req -> {
+        async(() -> slot.map().settings().withUpdateRequest(req -> {
             try {
-                mapService.updateMap(player.getUuid().toString(), map.id(), req);
+                mapService.updateMap(player.getUuid().toString(), slot.map().id(), req);
                 return true;
             } catch (Exception e) {
                 ExceptionReporter.reportException(e, player);
@@ -187,11 +184,11 @@ public class EditMapView extends Panel {
                 String limitedName = message.length() > MapData.MAX_NAME_LENGTH
                     ? message.substring(0, MapData.MAX_NAME_LENGTH) : message;
 
-                map.settings().setName(limitedName);
+                slot.map().settings().setName(limitedName);
                 nameText.text(limitedName);
                 updatePublishStage();
             },
-            map.settings().getName()
+            slot.map().settings().getName()
         ));
     }
 
@@ -216,7 +213,7 @@ public class EditMapView extends Panel {
                     .decoration(TextDecoration.ITALIC, false), List.of())
                 .model(icon.key().asString(), null))
             .onSubmit(icon -> {
-                map.settings().setIcon(icon);
+                slot.map().settings().setIcon(icon);
                 updateIcon();
                 updatePublishStage();
             })
@@ -225,7 +222,7 @@ public class EditMapView extends Panel {
     }
 
     private void updateIcon() {
-        var userIcon = map.settings().getIcon();
+        var userIcon = slot.map().settings().getIcon();
         if (userIcon != null) {
             iconButton.sprite((Sprite) null);
             iconButton.model(userIcon.toString(), null);
@@ -255,7 +252,7 @@ public class EditMapView extends Panel {
     @Blocking
     private void addMapBuilder(int index, TabCompleteResponse.Entry icon, Player player) {
         try {
-            this.mapService.inviteMapBuilder(this.map.id(), icon.id());
+            this.mapService.inviteMapBuilder(slot.map().id(), icon.id());
             player.sendMessage(Component.text("map builder invited")); // todo
         } catch (MapService.AlreadyExistsError _) {
             player.sendMessage(Component.text("map builder already invited!")); // todo
@@ -272,7 +269,7 @@ public class EditMapView extends Panel {
     }
 
     private void removeMapBuilder(Player player, String builderId, int index) {
-        FutureUtil.submitVirtual(() -> this.mapService.removeMapBuilder(this.map.id(), builderId));
+        FutureUtil.submitVirtual(() -> this.mapService.removeMapBuilder(slot.map().id(), builderId));
 
         var builderSlots = PlayerData.fromPlayer(player).mapBuilders();
         this.replaceBuilderButton(index, this.createNoBuilderButton(index, builderSlots));

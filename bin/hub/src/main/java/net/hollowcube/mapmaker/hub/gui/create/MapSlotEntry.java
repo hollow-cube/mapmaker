@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.hub.gui.create;
 
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.api.ApiClient;
+import net.hollowcube.mapmaker.api.maps.MapSlot;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -22,20 +23,21 @@ public class MapSlotEntry extends Panel {
     private final ApiClient api;
     private final MapService mapService;
     private final ServerBridge bridge;
-    private final MapData map;
+    private final MapSlot slot;
     private final Runnable onPublish;
 
     public MapSlotEntry(
         ApiClient api, MapService mapService, ServerBridge bridge,
-        MapData map, boolean isOwned, Runnable onPublish
+        MapSlot slot, boolean isOwned, Runnable onPublish
     ) {
         super(9, 1);
         this.api = api;
         this.mapService = mapService;
         this.bridge = bridge;
-        this.map = map;
+        this.slot = slot;
         this.onPublish = onPublish;
 
+        var map = slot.map();
         if (map.isPublished()) {
             background("create_maps2/slot/gray", 1, 1);
         } else {
@@ -102,12 +104,12 @@ public class MapSlotEntry extends Panel {
     }
 
     private void onClick() {
-        if (this.map.isPublished()) {
+        if (slot.map().isPublished()) {
             this.showDetails();
-        } else if (isOwner(this.map, this.host.player())) {
+        } else if (isOwner(slot.map(), this.host.player())) {
             this.editMap();
         } else {
-            FutureUtil.submitVirtual(() -> buildMap(this.map, this.host.player(), this.bridge));
+            FutureUtil.submitVirtual(() -> buildMap(slot.map(), this.host.player(), this.bridge));
         }
     }
 
@@ -118,9 +120,9 @@ public class MapSlotEntry extends Panel {
     private void showDetails() {
         var playerId = this.host.player().getUuid().toString();
         async(() -> {
-            var playerDisplayName = api.players.getDisplayName(map.owner());
+            var playerDisplayName = api.players.getDisplayName(slot.map().owner());
             sync(() -> {
-                var view = new MapDetailsView(api, mapService, bridge, map, playerDisplayName, true);
+                var view = new MapDetailsView(api, mapService, bridge, slot.map(), playerDisplayName, true);
                 this.host.pushView(view);
             });
         });
@@ -128,7 +130,7 @@ public class MapSlotEntry extends Panel {
 
     private void editMap() {
         async(() -> {
-            var view = new EditMapView(this.api, this.mapService, this.bridge, this.map, this.onPublish);
+            var view = new EditMapView(this.api, this.mapService, this.bridge, slot, this.onPublish);
             sync(() -> this.host.pushView(view));
         });
     }

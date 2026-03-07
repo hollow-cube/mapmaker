@@ -95,7 +95,7 @@ public class CreateMapsView extends Panel {
 
     private void acceptNewMap(MapData map) {
         // No need to re-sort, we know this should be first in the list.
-        this.slots.addFirst(new MapSlot(map, Instant.now()));
+        this.slots.addFirst(new MapSlot(map, Instant.now(), List.of()));
         this.resetSearch();
     }
 
@@ -152,7 +152,7 @@ public class CreateMapsView extends Panel {
         var entries = new ArrayList<MapSlotEntry>();
         for (int i = page * PAGE_SIZE; i < PAGE_SIZE && i < results.size(); i++) {
             final var slot = results.get(i);
-            entries.add(new MapSlotEntry(this.api, this.mapService, this.bridge, slot.map(),
+            entries.add(new MapSlotEntry(this.api, this.mapService, this.bridge, slot,
                 slot.map().owner().equals(PlayerData.fromPlayer(host.player()).id()),
                 () -> this.remountTask = this::rebuildSlots));
         }
