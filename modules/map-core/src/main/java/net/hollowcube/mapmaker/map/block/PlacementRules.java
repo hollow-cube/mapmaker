@@ -65,6 +65,7 @@ public final class PlacementRules {
         register(Block.VINE, b -> new VinePlacementRule(b, false));
         register(Block.GLOW_LICHEN, b -> new VinePlacementRule(b, true));
         register(Block.SCULK_VEIN, b -> new VinePlacementRule(b, true));
+        register(Block.RESIN_CLUMP, b -> new VinePlacementRule(b, true));
         register(Block.BIG_DRIPLEAF, BigDripleafPlacementRule::new);
         register(Block.SMALL_DRIPLEAF, SmallDripleafPlacementRule::new);
         register(Block.KELP, KelpPlacementRule::new);
