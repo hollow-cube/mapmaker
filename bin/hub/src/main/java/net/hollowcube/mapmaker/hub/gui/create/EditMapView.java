@@ -12,7 +12,6 @@ import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.TabCompleteResponse;
 import net.hollowcube.mapmaker.util.Autocompletors;
 import net.kyori.adventure.text.Component;
@@ -43,7 +42,6 @@ public class EditMapView extends Panel {
         !material.name().endsWith("glass_pane");
 
     private final ApiClient api;
-    private final PlayerService playerService;
     private final MapService mapService;
 
     private final MapData map;
@@ -55,16 +53,15 @@ public class EditMapView extends Panel {
     private final Button[] mapBuilderButtons = new Button[4];
 
     @Blocking
-    public EditMapView(ApiClient api, PlayerService playerService, MapService mapService,
+    public EditMapView(ApiClient api, MapService mapService,
                        ServerBridge bridge, MapData map, Runnable onPublish) {
         super(9, 10);
         this.api = api;
-        this.playerService = playerService;
         this.mapService = mapService;
         this.map = map;
 
         Consumer<MapData> publishCallback = publishedMap -> {
-            this.onMapPublish(playerService, mapService, bridge, publishedMap);
+            this.host.replaceView(new MapDetailsView(api, mapService, bridge, publishedMap, true));
             onPublish.run();
         };
         this.publisher = new MapPublisher(mapService, bridge, map, () -> this.host, publishCallback);
@@ -78,7 +75,7 @@ public class EditMapView extends Panel {
         add(8, 0, new Button("gui.create_maps.edit.actions", 1, 1)
             .background("generic2/btn/default/1_1")
             .sprite("icon2/1_1/ellipsis", 1, 1)
-            .onLeftClick(() -> host.pushView(new EditMapActionsView(api, playerService, mapService, bridge, map.id()))));
+            .onLeftClick(() -> host.pushView(new EditMapActionsView(api, mapService, bridge, map.id()))));
 
         this.iconButton = add(1, 2, new Button("gui.create_maps.edit.icon", 1, 1)
             .onLeftClick(this::beginIconEdit));
@@ -110,7 +107,7 @@ public class EditMapView extends Panel {
     private void initMapBuilderEntries() {
         var mapBuilders = this.mapService.getMapBuilders(this.map.id());
 
-        var builderSlots = this.playerService.getPlayerData(this.map.owner()).mapBuilders();
+        var builderSlots = this.api.players.getPlayerData(this.map.owner()).mapBuilders();
         // if this is ever false, something has gone horrifically wrong
         assert builderSlots >= mapBuilders.size();
 
@@ -140,7 +137,7 @@ public class EditMapView extends Panel {
     }
 
     private Button createBuilderButton(int index, String builderId, boolean pending) {
-        var displayName = this.playerService.getPlayerDisplayName2(builderId);
+        var displayName = api.players.getDisplayName(builderId);
         return new Button(null, 1, 1)
             .background("create_maps2/head_outline" + (pending ? "_pending" : ""), 4, 4)
             .model(MODEL_8X, null)
@@ -268,9 +265,10 @@ public class EditMapView extends Panel {
     }
 
     private List<TabCompleteResponse.Entry> getTabCompletionsNotOwner(String query, int limit) {
-        var results = this.playerService.getUsernameTabCompletions(query, limit).result();
-        results.removeIf(result -> this.map.owner().equals(result.id()));
-        return results;
+//        var results = this.playerService.getUsernameTabCompletions(query, limit).result();
+//        results.removeIf(result -> this.map.owner().equals(result.id()));
+//        return results;
+        return List.of(); // TODO
     }
 
     private void removeMapBuilder(Player player, String builderId, int index) {
@@ -315,10 +313,5 @@ public class EditMapView extends Panel {
     private void updatePublishStage() {
         // This is often called from contexts where host is null so cannot use async here
         FutureUtil.submitVirtual(this.publisher::updateStage);
-    }
-
-    private void onMapPublish(PlayerService playerService, MapService mapService, ServerBridge bridge, MapData publishedMap) {
-        var authorName = playerService.getPlayerDisplayName2(publishedMap.owner());
-        this.host.replaceView(new MapDetailsView(playerService, mapService, bridge, publishedMap, authorName, true));
     }
 }

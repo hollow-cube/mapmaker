@@ -371,6 +371,7 @@ public abstract class AbstractMapServer implements MapServer {
         addBinding(MapServer.class, this, "mapServer", "server");
         addBinding(ConfigLoaderV3.class, config);
 
+        addBinding(ApiClient.class, api, "api");
         addBinding(SessionService.class, sessionService, "sessionService");
         addBinding(PlayerService.class, playerService, "playerService");
         addBinding(MapService.class, mapService, "mapService");
@@ -411,7 +412,7 @@ public abstract class AbstractMapServer implements MapServer {
         }
 
         if (fullInstance) {
-            commandManager.register(new PlayCommand(playerService(), mapService(), sessionManager(), bridge()));
+            commandManager.register(new PlayCommand(api(), mapService(), sessionManager(), bridge()));
             commandManager.register(new WhereCommand(sessionManager(), playerService(), mapService()));
             commandManager.register(new ListCommand(sessionManager(), playerService()));
             commandManager.register(new MsgCommand(sessionManager(), mapService(), chatMessageListener, playerService()));
@@ -430,7 +431,7 @@ public abstract class AbstractMapServer implements MapServer {
             commandManager.register(new JoinCommand(inviteService(), playerService(), sessionManager()));
         }
 
-        commandManager.register(new MapCommand(playerService(), mapService(), bridge(), jetStream));
+        commandManager.register(new MapCommand(api(), playerService(), mapService(), bridge(), jetStream));
 
         commandManager.register(new NotificationCommand(services));
 

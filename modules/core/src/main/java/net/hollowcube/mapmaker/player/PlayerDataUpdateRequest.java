@@ -59,4 +59,8 @@ public class PlayerDataUpdateRequest {
         return this;
     }
 
+    public @Nullable JsonObject settings() {
+        return settings == null || settings.isEmpty() ? null : settings;
+    }
+
 }

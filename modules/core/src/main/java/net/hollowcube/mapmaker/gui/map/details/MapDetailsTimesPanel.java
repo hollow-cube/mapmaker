@@ -3,12 +3,12 @@ package net.hollowcube.mapmaker.gui.map.details;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.LeaderboardData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.CoreSkulls;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
@@ -29,7 +29,7 @@ public class MapDetailsTimesPanel extends Panel {
     private static final String MODEL_8X_OFFSET_1 = "mapmaker:2d_player_head_offset1";
     private static final String MODEL_8X_OFFSET_2 = "mapmaker:2d_player_head_offset2";
 
-    private final PlayerService playerService;
+    private final ApiClient api;
     private final MapService mapService;
     private final String mapId;
 
@@ -42,9 +42,9 @@ public class MapDetailsTimesPanel extends Panel {
     private final List<Button> playerButtons; // They need the same text :|
 
     public MapDetailsTimesPanel(
-        @NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull String mapId) {
+        @NotNull ApiClient api, @NotNull MapService mapService, @NotNull String mapId) {
         super(9, 4);
-        this.playerService = playerService;
+        this.api = api;
         this.mapService = mapService;
         this.mapId = mapId;
 
@@ -78,10 +78,11 @@ public class MapDetailsTimesPanel extends Panel {
         async(() -> {
             var playerId = PlayerData.fromPlayer(host.player()).id();
             var leaderboard = mapService.getPlaytimeLeaderboard(mapId, playerId);
-            var displayNames = playerService.getPlayerDisplayNames(leaderboard.top()
-                .stream()
+            // TODO: bulk endpoint?
+            var displayNames = leaderboard.top().stream()
                 .map(LeaderboardData.Entry::player)
-                .toList());
+                .map(api.players::getDisplayName)
+                .toList();
 
             sync(() -> {
                 this.topThreePanel.update(leaderboard.top(), displayNames);

@@ -11,7 +11,6 @@ import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.panels.Text;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 
@@ -21,19 +20,17 @@ import static net.hollowcube.mapmaker.gui.map.details.MapDetailsTimesPanel.getPl
 public class MapSlotEntry extends Panel {
 
     private final ApiClient api;
-    private final PlayerService playerService;
     private final MapService mapService;
     private final ServerBridge bridge;
     private final MapData map;
     private final Runnable onPublish;
 
     public MapSlotEntry(
-        ApiClient api, PlayerService playerService, MapService mapService, ServerBridge bridge,
+        ApiClient api, MapService mapService, ServerBridge bridge,
         MapData map, boolean isOwned, Runnable onPublish
     ) {
         super(9, 1);
         this.api = api;
-        this.playerService = playerService;
         this.mapService = mapService;
         this.bridge = bridge;
         this.map = map;
@@ -61,9 +58,9 @@ public class MapSlotEntry extends Panel {
                 .model(MODEL_8X, null)
                 .profile(getPlayerHead2d(map.owner()));
 
-            FutureUtil.submitVirtual(() -> {
-                var ownerDisplayName = this.playerService.getPlayerDisplayName2(map.owner());
-                iconButton.translationKey("gui.create_maps.slot.builder", name, ownerDisplayName.asComponent());
+            async(() -> {
+                var ownerDisplayName = api.players.getDisplayName(map.owner()).asComponent();
+                iconButton.translationKey("gui.create_maps.slot.builder", name, ownerDisplayName);
             });
         }
 
@@ -90,9 +87,9 @@ public class MapSlotEntry extends Panel {
         } else {
             final var translationKey = textTranslationKey;
 
-            FutureUtil.submitVirtual(() -> {
-                var ownerDisplayName = this.playerService.getPlayerDisplayName2(map.owner());
-                nameText.translationKey(translationKey, name, ownerDisplayName.asComponent());
+            async(() -> {
+                var ownerDisplayName = api.players.getDisplayName(map.owner()).asComponent();
+                nameText.translationKey(translationKey, name, ownerDisplayName);
             });
         }
         add(1, 0, nameText);
@@ -121,9 +118,9 @@ public class MapSlotEntry extends Panel {
     private void showDetails() {
         var playerId = this.host.player().getUuid().toString();
         async(() -> {
-            var playerDisplayName = this.playerService.getPlayerDisplayName2(playerId);
+            var playerDisplayName = api.players.getDisplayName(map.owner());
             sync(() -> {
-                var view = new MapDetailsView(this.playerService, this.mapService, this.bridge, this.map, playerDisplayName, true);
+                var view = new MapDetailsView(api, mapService, bridge, map, playerDisplayName, true);
                 this.host.pushView(view);
             });
         });
@@ -131,7 +128,7 @@ public class MapSlotEntry extends Panel {
 
     private void editMap() {
         async(() -> {
-            var view = new EditMapView(this.api, this.playerService, this.mapService, this.bridge, this.map, this.onPublish);
+            var view = new EditMapView(this.api, this.mapService, this.bridge, this.map, this.onPublish);
             sync(() -> this.host.pushView(view));
         });
     }

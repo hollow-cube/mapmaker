@@ -49,8 +49,8 @@ public class MapDetailsItem extends ItemHandler {
             }
             DisplayName finalAuthorName = authorName;
 
-            Panel.open(player, new MapDetailsView(world.server().playerService(), world.server().mapService(),
-                    world.server().bridge(), world.map(), finalAuthorName, false));
+            Panel.open(player, new MapDetailsView(world.server().api(), world.server().mapService(),
+                world.server().bridge(), world.map(), finalAuthorName, false));
         });
     }
 

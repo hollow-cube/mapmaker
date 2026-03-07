@@ -7,6 +7,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.JsonAdapter;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.map.MapSize;
@@ -97,6 +98,20 @@ public class PlayerData {
         if (!updates.hasChanges()) return true;
         try {
             playerService.updatePlayerData(id, updates);
+            updates = new PlayerDataUpdateRequest();
+            return true;
+        } catch (Exception e) {
+            ExceptionReporter.reportException(e); // Dont associate with the user, we don't know if they are the initiator
+            return false;
+        }
+    }
+
+    public boolean writeUpdatesUpstream(@NotNull PlayerClient players) {
+        //todo need to add a lock here
+        var settingChanges = updates.settings();
+        if (settingChanges == null) return true;
+        try {
+            players.updatePlayerSettings(id, settingChanges);
             updates = new PlayerDataUpdateRequest();
             return true;
         } catch (Exception e) {

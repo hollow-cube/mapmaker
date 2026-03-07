@@ -45,7 +45,7 @@ public class CreateMapsItem extends ItemHandler {
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
         if (CoreFeatureFlags.CREATE_MAPS_V2.test(player) && !player.isSneaking()) {
-            Panel.open(player, new CreateMapsView(this.api, this.playerService, this.mapService, this.bridge));
+            Panel.open(player, new CreateMapsView(this.api, this.mapService, this.bridge));
             return;
         }
 

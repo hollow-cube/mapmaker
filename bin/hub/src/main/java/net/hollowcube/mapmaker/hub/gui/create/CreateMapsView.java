@@ -7,7 +7,6 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.StringComparison;
 import net.minestom.server.utils.Unit;
 import org.jetbrains.annotations.Blocking;
@@ -25,7 +24,6 @@ public class CreateMapsView extends Panel {
     private static final int PAGE_SIZE = 5;
 
     private final ApiClient api;
-    private final PlayerService playerService;
     private final MapService mapService;
     private final ServerBridge bridge;
 
@@ -39,10 +37,9 @@ public class CreateMapsView extends Panel {
     private String searchText = "";
     private @Nullable Runnable remountTask;
 
-    public CreateMapsView(ApiClient api, PlayerService playerService, MapService mapService, ServerBridge bridge) {
+    public CreateMapsView(ApiClient api, MapService mapService, ServerBridge bridge) {
         super(9, 10);
         this.api = api;
-        this.playerService = playerService;
         this.mapService = mapService;
         this.bridge = bridge;
 
@@ -155,7 +152,7 @@ public class CreateMapsView extends Panel {
         var entries = new ArrayList<MapSlotEntry>();
         for (int i = page * PAGE_SIZE; i < PAGE_SIZE && i < results.size(); i++) {
             final var slot = results.get(i);
-            entries.add(new MapSlotEntry(this.api, this.playerService, this.mapService, this.bridge, slot.map(),
+            entries.add(new MapSlotEntry(this.api, this.mapService, this.bridge, slot.map(),
                 slot.map().owner().equals(PlayerData.fromPlayer(host.player()).id()),
                 () -> this.remountTask = this::rebuildSlots));
         }
