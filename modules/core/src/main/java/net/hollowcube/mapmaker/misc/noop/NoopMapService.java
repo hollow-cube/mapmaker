@@ -121,11 +121,6 @@ public class NoopMapService implements MapService {
     }
 
     @Override
-    public @NotNull List<MapData> getMapsPlayerIsBuilderOn(@NotNull String playerId) {
-        return List.of();
-    }
-
-    @Override
     public void inviteMapBuilder(@NotNull String mapId, @NotNull String playerId) {
 
     }
@@ -218,11 +213,6 @@ public class NoopMapService implements MapService {
             new String[]{null, "62da0aaf-8cad-4c13-869c-02b07688988d", null, null},
             null, null, null
         );
-    }
-
-    @Override
-    public @NotNull List<MapData> getPlayerMapSlots(@NotNull String playerId) {
-        return List.of();
     }
 
     @Override

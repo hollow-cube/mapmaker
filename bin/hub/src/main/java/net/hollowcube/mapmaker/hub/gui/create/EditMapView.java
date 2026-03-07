@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
-import net.hollowcube.common.components.ExtraComponents;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.common.ConfirmActionView;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.map.MapData;
@@ -42,6 +42,7 @@ public class EditMapView extends Panel {
         material != Material.RECOVERY_COMPASS &&
         !material.name().endsWith("glass_pane");
 
+    private final ApiClient api;
     private final PlayerService playerService;
     private final MapService mapService;
 
@@ -54,9 +55,10 @@ public class EditMapView extends Panel {
     private final Button[] mapBuilderButtons = new Button[4];
 
     @Blocking
-    public EditMapView(PlayerService playerService, MapService mapService,
+    public EditMapView(ApiClient api, PlayerService playerService, MapService mapService,
                        ServerBridge bridge, MapData map, Runnable onPublish) {
         super(9, 10);
+        this.api = api;
         this.playerService = playerService;
         this.mapService = mapService;
         this.map = map;
@@ -76,7 +78,7 @@ public class EditMapView extends Panel {
         add(8, 0, new Button("gui.create_maps.edit.actions", 1, 1)
             .background("generic2/btn/default/1_1")
             .sprite("icon2/1_1/ellipsis", 1, 1)
-            .onLeftClick(() -> host.pushView(new EditMapActionsView(playerService, mapService, bridge, map.id()))));
+            .onLeftClick(() -> host.pushView(new EditMapActionsView(api, playerService, mapService, bridge, map.id()))));
 
         this.iconButton = add(1, 2, new Button("gui.create_maps.edit.icon", 1, 1)
             .onLeftClick(this::beginIconEdit));
@@ -145,15 +147,19 @@ public class EditMapView extends Panel {
             .profile(getPlayerHead2d(builderId))
             .translationKey("gui.create_maps.edit.builders." + (pending ? "pending" : "entry"), displayName.asComponent())
             .onRightClick(() -> {
-                var player = this.host.player();
-                Runnable callback = () -> FutureUtil.submitVirtual(() -> this.removeMapBuilder(player, builderId, index));
-                this.host.pushView(new ConfirmActionView(callback, Component.translatable("remove map builder"), true));
+                final var host = this.host;
+                Runnable callback = () -> {
+                    this.removeMapBuilder(host.player(), builderId, index);
+                    sync(host::popView);
+                };
+                this.host.pushView(new ConfirmActionView(callback, Component.translatable("remove map builder")));
             });
     }
 
     private void replaceBuilderButton(int index, Button newButton) {
         this.mapBuilderButtons[index] = newButton;
-        replace(index + 4, 2, newButton);
+        // TODO
+//        replace(index + 4, 2, newButton);
     }
 
     @Override
@@ -233,19 +239,20 @@ public class EditMapView extends Panel {
     }
 
     private void beginAddMapBuilder(int index) {
-        var view = AnvilSearchView.<TabCompleteResponse.Entry>builder()
-            .icon("icon2/1_1/hammer")
-            .title(LanguageProviderV2.translateToPlain("Add Map Builder"))
-            .searchFunction(this::getTabCompletionsNotOwner)
-            .defaultSearchTerm(".*")
-            .buttonFactory(icon -> new Button(null, 1, 1)
-                .text(ExtraComponents.noItalic(this.playerService.getPlayerDisplayName2(icon.id())), List.of())
-                .model(MODEL_8X, null)
-                .profile(getPlayerHead2d(icon.id())))
-            .onSubmitWithPlayer((icon, player) -> this.addMapBuilder(index, icon, player))
-            .async()
-            .build();
-        this.host.pushView(view);
+        // TODO
+//        var view = AnvilSearchView.<TabCompleteResponse.Entry>builder()
+//            .icon("icon2/1_1/hammer")
+//            .title(LanguageProviderV2.translateToPlain("Add Map Builder"))
+//            .searchFunction(this::getTabCompletionsNotOwner)
+//            .defaultSearchTerm(".*")
+//            .buttonFactory(icon -> new Button(null, 1, 1)
+//                .text(ExtraComponents.noItalic(this.playerService.getPlayerDisplayName2(icon.id())), List.of())
+//                .model(MODEL_8X, null)
+//                .profile(getPlayerHead2d(icon.id())))
+//            .onSubmitWithPlayer((icon, player) -> this.addMapBuilder(index, icon, player))
+//            .async()
+//            .build();
+//        this.host.pushView(view);
     }
 
     @Blocking
@@ -276,8 +283,9 @@ public class EditMapView extends Panel {
     @Blocking
     static void editMap(MapService mapService, MapData map, InventoryHost host, ServerBridge bridge) {
         if (map.verification() != MapVerification.UNVERIFIED) {
-            host.pushView(new ConfirmActionView(() -> buildMapAfterVerify(mapService, bridge, map, host.player()),
-                Component.translatable("edit.map.confirm"), false));
+            host.pushView(new ConfirmActionView(
+                () -> buildMapAfterVerify(mapService, bridge, map, host.player()),
+                Component.translatable("edit.map.confirm")));
         } else {
             beginBuildingMap(bridge, map, host.player());
         }

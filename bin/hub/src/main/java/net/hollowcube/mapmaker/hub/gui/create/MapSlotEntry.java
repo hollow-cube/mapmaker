@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -19,15 +20,19 @@ import static net.hollowcube.mapmaker.gui.map.details.MapDetailsTimesPanel.getPl
 
 public class MapSlotEntry extends Panel {
 
+    private final ApiClient api;
     private final PlayerService playerService;
     private final MapService mapService;
     private final ServerBridge bridge;
     private final MapData map;
     private final Runnable onPublish;
 
-    public MapSlotEntry(PlayerService playerService, MapService mapService, ServerBridge bridge,
-                        MapData map, boolean isOwned, Runnable onPublish) {
+    public MapSlotEntry(
+        ApiClient api, PlayerService playerService, MapService mapService, ServerBridge bridge,
+        MapData map, boolean isOwned, Runnable onPublish
+    ) {
         super(9, 1);
+        this.api = api;
         this.playerService = playerService;
         this.mapService = mapService;
         this.bridge = bridge;
@@ -126,7 +131,7 @@ public class MapSlotEntry extends Panel {
 
     private void editMap() {
         async(() -> {
-            var view = new EditMapView(this.playerService, this.mapService, this.bridge, this.map, this.onPublish);
+            var view = new EditMapView(this.api, this.playerService, this.mapService, this.bridge, this.map, this.onPublish);
             sync(() -> this.host.pushView(view));
         });
     }

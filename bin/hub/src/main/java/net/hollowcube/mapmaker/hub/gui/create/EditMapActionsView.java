@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.common.ExtraPanels;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -17,14 +18,16 @@ import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
 
 public class EditMapActionsView extends Panel {
 
+    private final ApiClient api;
     private final PlayerService playerService;
     private final MapService mapService;
     private final ServerBridge bridge;
 
     private final String mapId;
 
-    public EditMapActionsView(PlayerService playerService, MapService mapService, ServerBridge bridge, String mapId) {
+    public EditMapActionsView(ApiClient api, PlayerService playerService, MapService mapService, ServerBridge bridge, String mapId) {
         super(9, 10);
+        this.api = api;
         this.playerService = playerService;
         this.mapService = mapService;
         this.bridge = bridge;
@@ -57,7 +60,7 @@ public class EditMapActionsView extends Panel {
                 mapService.deleteMap(playerId, mapId, null);
 
                 player.sendMessage(Component.translatable("command.map.delete.success"));
-                sync(() -> this.host.replaceView(new CreateMapsView(this.playerService, this.mapService, this.bridge)));
+                sync(() -> this.host.replaceView(new CreateMapsView(this.api, this.playerService, this.mapService, this.bridge)));
             } catch (Exception e) {
                 ExceptionReporter.reportException(e, player);
                 player.sendMessage(Component.translatable("command.map.delete.failure"));

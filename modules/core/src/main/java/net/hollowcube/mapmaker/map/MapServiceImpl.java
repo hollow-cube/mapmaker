@@ -329,19 +329,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull List<MapData> getMapsPlayerIsBuilderOn(@NotNull String playerId) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(urlV3 + "/map-players/" + playerId + "/builder"))
-            .header(AUTHORIZER_HEADER, UUID.randomUUID().toString())
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), new TypeToken<List<MapData>>() {});
-            default -> throw new InternalError("Failed to get maps player is builder on: " + res.body());
-        };
-    }
-
-    @Override
     public void inviteMapBuilder(@NotNull String mapId, @NotNull String playerId) {
         var req2 = HttpRequest.newBuilder()
             .method("POST", HttpRequest.BodyPublishers.noBody())
@@ -622,18 +609,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() == 200) return GSON.fromJson(res.body(), MapPlayerData.class); // Ok
         throw new InternalError("Failed to get map player data: " + res.body());
-    }
-
-    @Override
-    public @NotNull List<MapData> getPlayerMapSlots(@NotNull String playerId) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(urlV3 + "/map-players/" + playerId + "/slots"))
-            .header(AUTHORIZER_HEADER, playerId)
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        if (res.statusCode() == 200) return GSON.fromJson(res.body(), new TypeToken<List<MapData>>() {
-        }); // Ok
-        throw new InternalError("Failed to get map slots: " + res.body());
     }
 
     @Override

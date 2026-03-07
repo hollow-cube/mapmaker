@@ -71,9 +71,6 @@ public interface MapService {
     @NotNull
     List<MapBuilder> getMapBuilders(@NotNull String mapId);
 
-    @NotNull
-    List<MapData> getMapsPlayerIsBuilderOn(@NotNull String playerId);
-
     void inviteMapBuilder(@NotNull String mapId, @NotNull String playerId);
 
     void acceptMapBuilderRequest(@NotNull String mapId, @NotNull String playerId);
@@ -118,9 +115,6 @@ public interface MapService {
 
     @NotNull
     MapPlayerData getMapPlayerData(@NotNull String playerId);
-
-    @NotNull
-    List<MapData> getPlayerMapSlots(@NotNull String playerId);
 
     @NotNull
     MapHistory getPlayerMapHistory(@NotNull String playerId, int page, int amount);
