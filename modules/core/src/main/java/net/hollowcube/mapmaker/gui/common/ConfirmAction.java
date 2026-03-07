@@ -8,6 +8,8 @@ import net.hollowcube.canvas.internal.Context;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.jetbrains.annotations.NotNull;
 
+// Replaced by ExtraPanels helpers i think.
+@Deprecated
 public class ConfirmAction extends View {
     private @NotNull Runnable confirmationCallback;
 

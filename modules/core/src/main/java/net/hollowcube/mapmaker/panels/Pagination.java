@@ -148,14 +148,19 @@ public class Pagination<S extends @UnknownNullability Object> extends Panel {
 
         sync(() -> {
             clear();
-            for (int i = 0; i < results.size(); i++) {
-                var child = results.get(i);
-                if (this.populateDown) {
-                    // Populate by row rather than by column - useful for types wider than 1x1
-                    add(i / this.slotWidth, i % this.slotWidth, child);
-                } else {
-                    add(i % this.slotWidth, i / this.slotWidth, child);
+
+            // We layout left-to-right, top-to-bottom based on the child sizes
+            int x = 0, y = 0, rowHeight = 0;
+            for (Element child : results) {
+                if (x + child.slotWidth > this.slotWidth) {
+                    x = 0;
+                    y += rowHeight;
+                    rowHeight = 0;
                 }
+
+                add(x, y, child);
+                x += child.slotWidth;
+                rowHeight = Math.max(rowHeight, child.slotHeight);
             }
             onPageChange.forEach(c -> c.onPageChange(this.page, this.totalPages));
         });

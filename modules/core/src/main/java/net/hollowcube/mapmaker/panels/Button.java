@@ -46,6 +46,11 @@ public class Button extends Element implements ButtonClickAliases {
         void onClick(ClickType clickType, int slot);
     }
 
+    @FunctionalInterface
+    public interface Constructor {
+        Button construct(@Nullable String translationKey, int width, int height);
+    }
+
     protected @Nullable Component itemTitle;
     protected @Nullable List<Component> itemLore;
     protected @Nullable List<Component> itemLorePostfix;
@@ -158,37 +163,43 @@ public class Button extends Element implements ButtonClickAliases {
     // Click handling
 
     @Override
-    public Button onLeftClick(@Nullable OnClickTypeSlot onClick) {
+    public Button onLeftClick() {
+        this.onLeftClick = null;
+        return this;
+    }
+
+    @Override
+    public Button onLeftClick(OnClickTypeSlot onClick) {
         this.onLeftClick = onClick;
         return this;
     }
 
     @Override
-    public Button onLeftClickAsync(@Nullable OnClickTypeSlot onClick) {
+    public Button onLeftClickAsync(OnClickTypeSlot onClick) {
         this.onLeftClickAsync = onClick;
         return this;
     }
 
     @Override
-    public Button onRightClick(@Nullable OnClickTypeSlot onClick) {
+    public Button onRightClick(OnClickTypeSlot onClick) {
         this.onRightClick = onClick;
         return this;
     }
 
     @Override
-    public Button onRightClickAsync(@Nullable OnClickTypeSlot onClick) {
+    public Button onRightClickAsync(OnClickTypeSlot onClick) {
         this.onRightClickAsync = onClick;
         return this;
     }
 
     @Override
-    public Button onShiftLeftClick(@Nullable OnClickTypeSlot onClick) {
+    public Button onShiftLeftClick(OnClickTypeSlot onClick) {
         this.onShiftLeftClick = onClick;
         return this;
     }
 
     @Override
-    public Button onShiftLeftClickAsync(@Nullable OnClickTypeSlot onClick) {
+    public Button onShiftLeftClickAsync(OnClickTypeSlot onClick) {
         this.onShiftLeftClickAsync = onClick;
         return this;
     }

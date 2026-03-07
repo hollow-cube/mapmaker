@@ -114,6 +114,7 @@ public class AnvilSearchView<T> extends AbstractAnvilView {
         List<T> search(String query, int limit);
     }
 
+    // TODO: remove probably, essentially everything is required so weird use case for builder
     public static final class Builder<T> {
         private String icon;
         private String title;

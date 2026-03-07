@@ -5,7 +5,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapSlot;
-import net.hollowcube.mapmaker.gui.common.ConfirmActionView;
+import net.hollowcube.mapmaker.gui.common.ExtraPanels;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -27,8 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
-import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
+import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
 import static net.hollowcube.mapmaker.gui.map.details.MapDetailsTimesPanel.MODEL_8X;
 import static net.hollowcube.mapmaker.gui.map.details.MapDetailsTimesPanel.getPlayerHead2d;
 import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
@@ -78,16 +77,19 @@ public class EditMapView extends Panel {
             .sprite("icon2/1_1/ellipsis", 1, 1)
             .onLeftClick(() -> host.pushView(new EditMapActionsView(api, mapService, bridge, slot.map().id()))));
 
+        add(1, 1, infoText(1, "icon", -2));
         this.iconButton = add(1, 2, new Button("gui.create_maps.edit.icon", 1, 1)
             .onLeftClick(this::beginIconEdit));
         updateIcon();
 
+        add(3, 1, infoText(5, "builders", -2));
         add(3, 2, new Button("gui.create_maps.edit.builders.owner.self", 1, 1)
             .background("create_maps2/head_outline", 4, 4)
             .model(MODEL_8X, null)
             .profile(getPlayerHead2d(slot.map().owner())));
 
         // async doesn't work as host is null when this is called
+        add(1, 3, infoText(1, "tags", -2));
         add(1, 4, new EditableMapTagList(slot.map(), this::updatePublishStage));
 
         add(1, 6, new Button("gui.create_maps.edit.build", 3, 3)
@@ -142,11 +144,10 @@ public class EditMapView extends Panel {
             .translationKey("gui.create_maps.edit.builders." + (pending ? "pending" : "entry"), displayName.asComponent())
             .onRightClick(() -> {
                 final var host = this.host;
-                Runnable callback = () -> {
+                this.host.pushView(ExtraPanels.confirm("Remove " + displayName.getUsername() + "?", () -> {
                     this.removeMapBuilder(host.player(), builderId, index);
                     sync(host::popView);
-                };
-                this.host.pushView(new ConfirmActionView(callback, Component.translatable("remove map builder")));
+                }));
             });
     }
 
@@ -278,9 +279,8 @@ public class EditMapView extends Panel {
     @Blocking
     static void editMap(MapService mapService, MapData map, InventoryHost host, ServerBridge bridge) {
         if (map.verification() != MapVerification.UNVERIFIED) {
-            host.pushView(new ConfirmActionView(
-                () -> buildMapAfterVerify(mapService, bridge, map, host.player()),
-                Component.translatable("edit.map.confirm")));
+            host.pushView(ExtraPanels.confirm("Reset verification progress?",
+                () -> buildMapAfterVerify(mapService, bridge, map, host.player())));
         } else {
             beginBuildingMap(bridge, map, host.player());
         }

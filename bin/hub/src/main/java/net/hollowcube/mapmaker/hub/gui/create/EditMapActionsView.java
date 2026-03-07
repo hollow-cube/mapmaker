@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
+import net.hollowcube.mapmaker.panels.Text;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 
@@ -35,6 +36,9 @@ public class EditMapActionsView extends Panel {
 
         add(0, 0, backOrClose());
 
+        add(1, 1, new Text(null, 7, 1, "map actions")
+            .font("small").align(Text.CENTER, Text.CENTER));
+
         add(1, 2, new Button("gui.create_maps.actions.copy_map", 3, 2));
 
         add(5, 2, new Button("gui.create_maps.actions.resize_map", 3, 2));
@@ -46,7 +50,7 @@ public class EditMapActionsView extends Panel {
     }
 
     private void beginDeleteMap() {
-        host.pushTransientView(ExtraPanels.confirm(null, this::confirmDeleteMap));
+        host.pushTransientView(ExtraPanels.confirm("Delete map?", this::confirmDeleteMap));
     }
 
     private void confirmDeleteMap() {

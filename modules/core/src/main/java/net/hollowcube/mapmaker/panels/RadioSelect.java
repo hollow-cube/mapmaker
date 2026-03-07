@@ -15,7 +15,8 @@ public class RadioSelect<T extends @UnknownNullability Object> extends Panel {
     private final Set<T> options = new HashSet<>();
 
     private T selected;
-    private int index = 0;
+    // TODO: should not be public, need to fix the cursed stuff in NewMapView
+    public int index = 0;
 
     public RadioSelect(int slotWidth, int slotHeight) {
         this(slotWidth, slotHeight, null);
@@ -36,12 +37,16 @@ public class RadioSelect<T extends @UnknownNullability Object> extends Panel {
     }
 
     public Button addOption(T item, ButtonUpdater updater) {
+        return this.addOption(item, updater, Button::new);
+    }
+
+    public Button addOption(T item, ButtonUpdater updater, Button.Constructor buttonCtor) {
         this.options.add(item);
 
         int x = this.index % this.slotWidth;
         int y = this.index / this.slotWidth;
 
-        var button = add(x, y, new Button(null, 1, 1));
+        var button = add(x, y, buttonCtor.construct(null, 1, 1));
         Runnable update = () -> updater.update(button, item.equals(this.selected));
         this.buttonUpdaters.add(update);
         button.onLeftClick(() -> {
@@ -72,6 +77,17 @@ public class RadioSelect<T extends @UnknownNullability Object> extends Panel {
         ButtonUpdater SQUARE_BACKGROUND = (button, selected) -> {
             var key = selected ? "generic2/btn/selected/1_1" : "generic2/btn/default/1_1";
             button.background(key);
+        };
+
+        ButtonUpdater SQUARE_BACKGROUND_EX = (button, selected) -> {
+            var key = selected ? "generic2/btn/selected/1_1ex" : "generic2/btn/default/1_1ex";
+            button.background(key);
+
+            final var sprite = button.sprite;
+            if (sprite != null) {
+                // This assumes that all icons are 16x16, which is fine for now.
+                button.sprite(sprite.withOffset(sprite.offsetX(), selected ? 3 : 1));
+            }
         };
 
         void update(Button button, boolean selected);

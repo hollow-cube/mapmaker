@@ -15,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -124,7 +123,7 @@ public class MenuBuilder {
         editSlots(x, y, width, height, component, (Function<T, T>) _ -> data);
     }
 
-    public <T> void editSlots(int x, int y, int width, int height, DataComponent<T> component, Function<T, T> editor) {
+    public <T> void editSlots(int x, int y, int width, int height, DataComponent<T> component, Function<@Nullable T, T> editor) {
         int startX = this.slotX + x;
         int startY = this.slotY + y;
         int endX = startX + width;
@@ -136,7 +135,7 @@ public class MenuBuilder {
         for (int i = startY; i < endY; i++) {
             for (int j = startX; j < endX; j++) {
                 var item = this.items[i * this.absWidth + j];
-                this.items[i * this.absWidth + j] = item.with(component, editor.apply(Objects.requireNonNull(item.get(component))));
+                this.items[i * this.absWidth + j] = item.with(component, editor.apply(item.get(component)));
             }
         }
     }

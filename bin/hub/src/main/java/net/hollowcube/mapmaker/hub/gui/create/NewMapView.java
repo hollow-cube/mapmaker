@@ -7,21 +7,21 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapSize;
 import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.panels.*;
+import net.hollowcube.mapmaker.panels.buttons.LockedButton;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 
-import java.util.Locale;
 import java.util.function.Consumer;
 
-import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
-import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
+import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
+import static net.hollowcube.mapmaker.panels.RadioSelect.ButtonUpdater.SQUARE_BACKGROUND_EX;
 
 public class NewMapView extends Panel {
 
     private final MapService mapService;
     private final Consumer<MapData> onNewMap;
 
-    private final LockableRadioSelect<MapSize> sizeSelect;
+    private final RadioSelect<MapSize> sizeSelect;
     private final Button confirmButton;
 
     public NewMapView(MapService mapService, Consumer<MapData> onNewMap) {
@@ -34,25 +34,43 @@ public class NewMapView extends Panel {
 
         add(0, 0, backOrClose());
 
-        sizeSelect = add(1, 2, new LockableRadioSelect<>(4, 1, MapSize.NORMAL, this::isLocked));
+        add(1, 1, infoText(4, "normal sizes"));
+        sizeSelect = add(1, 2, new RadioSelect<>(4, 1, MapSize.NORMAL))
+            .onChange(this::updateConfirmButton);
 
         confirmButton = add(2, 4, new Text(5, 1, "Create")
             .align(Text.CENTER, Text.CENTER)
             .background("generic2/btn/success/5_1")
             .onLeftClickAsync(this::handleSubmit));
-        updateConfirmButton();
     }
 
     @Override
     protected void mount(InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
 
-        // Init on mount so we know the host is bound for isLocked
-        sizeSelect.addLockableOption(MapSize.NORMAL, "gui.create_maps.new.size.normal", "icon2/1_1/house_1", 1, 1);
-        sizeSelect.addLockableOption(MapSize.LARGE, "gui.create_maps.new.size.large", "icon2/1_1/house_2", 1, 1);
-        sizeSelect.addLockableOption(MapSize.MASSIVE, "gui.create_maps.new.size.massive", "icon2/1_1/house_3", 1, 1);
-        sizeSelect.addLockedOption("gui.create_maps.new.size.colossal.on", "icon2/1_1/castle", 1, 1);
-        sizeSelect.onChange(this::updateConfirmButton);
+        for (var mapSize : MapSize.GUI_SIZES) {
+            boolean locked = isLocked(mapSize);
+            Button.Constructor makeButton = (tk, slotWidth, slotHeight) -> {
+                var button = locked
+                    ? new LockedButton(tk, slotWidth, slotHeight)
+                    : new Button(tk, slotWidth, slotHeight);
+                return button
+                    .translationKey("gui.create_maps.new.size." + mapSize.name().toLowerCase() + ".off" + (locked ? ".locked" : ""))
+                    .sprite("icon2/1_1/" + mapSize.icon(), 1, 1);
+            };
+            RadioSelect.ButtonUpdater updateButton = (button, selected) -> {
+                SQUARE_BACKGROUND_EX.update(button, selected);
+                button.translationKey("gui.create_maps.new.size." + mapSize.name().toLowerCase() + (selected ? ".on" : ".off"));
+            };
+
+            if (locked) {
+                var button = makeButton.construct(null, 1, 1);
+                updateButton.update(button, false);
+                sizeSelect.add(sizeSelect.index++, 0, button);
+            } else {
+                sizeSelect.addOption(mapSize, updateButton, makeButton);
+            }
+        }
     }
 
     private void handleSubmit() {
@@ -66,8 +84,7 @@ public class NewMapView extends Panel {
         });
     }
 
-    private void updateConfirmButton() {
-        var size = sizeSelect.selected().name().toLowerCase(Locale.ROOT);
+    private void updateConfirmButton(MapSize size) {
         var sizeNameKey = "gui.create_maps.new.size." + size + ".on.name";
         var actualSizeKey = "gui.create_maps.new.size." + size + ".size";
         confirmButton.translationKey("gui.create_maps.new.confirm",

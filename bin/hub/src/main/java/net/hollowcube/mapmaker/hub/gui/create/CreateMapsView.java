@@ -53,7 +53,7 @@ public class CreateMapsView extends Panel {
         this.searchTextElement.onLeftClick(this::openSearchInput);
         this.searchTextElement.onShiftLeftClick(this::clearSearch);
 
-        this.pagination = add(0, 1, new Pagination<Unit>(9, 5, true).fetchAsync(this::onSearch));
+        this.pagination = add(0, 1, new Pagination<Unit>(9, 5, Unit.INSTANCE).fetchAsync(this::onSearch));
         add(2, 6, this.pagination.prevButton());
         add(3, 6, this.pagination.pageText(3, 1));
         add(6, 6, this.pagination.nextButton());
@@ -112,7 +112,7 @@ public class CreateMapsView extends Panel {
         if (availableSlots <= 0) {
             // TODO: What do we display if they don't have enough slots?
             this.createButton.translationKey("gui.create_maps.new", 0);
-            this.createButton.removeLeftClick();
+            this.createButton.onLeftClick();
         } else {
             this.createButton.translationKey("gui.create_maps.new", availableSlots);
         }

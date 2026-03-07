@@ -28,6 +28,15 @@ public final class ExtraPanels {
             .sprite("generic2/btn/common/info", 4, 2);
     }
 
+    public static Text infoText(int width, String text) {
+        return infoText(width, text, 1);
+    }
+
+    public static Text infoText(int width, String text, int xOffset) {
+        return new Text(null, width, 1, text)
+            .font("small").align(xOffset, 6);
+    }
+
     public static Panel confirm(@NotNull Runnable onConfirm) {
         return confirm(null, onConfirm);
     }
@@ -93,8 +102,8 @@ public final class ExtraPanels {
                 new Button("gui.confirm2.yes", 3, 1)
                     .onLeftClick(() -> {
                         final Player player = host.player();
-                        host.popOrClose();
                         onConfirm.accept(player);
+                        host.popOrClose();
                     })
             );
         }

@@ -279,7 +279,10 @@ public class InventoryHost implements TagReadable, TagWritable {
 
         @Override
         public int getSize() {
-            return this.inventoryType.getSize();
+            // This needs a null check because the Inventory constructor calls getSize before the inventoryType field
+            // is initialized. Pretty gross and sneaky :(
+            //noinspection DataFlowIssue
+            return Objects.requireNonNullElse(this.inventoryType, InventoryType.CHEST_6_ROW).getSize();
         }
 
         @Override
