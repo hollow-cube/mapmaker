@@ -14,7 +14,6 @@ import net.minestom.server.registry.RegistryTranscoder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -532,32 +531,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() == 204) return; // Ok
         throw new InternalError("Failed to delete savestate: " + res.body());
-    }
-
-    @Override
-    public @Nullable InputStream getSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId) {
-        throw new UnsupportedOperationException("todo: reimplement in v3 api");
-//        var req = HttpRequest.newBuilder()
-//                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + saveStateId + "/replay"))
-//                .header(AUTHORIZER_HEADER, playerId)
-//                .build();
-//        var res = doRequest(req, HttpResponse.BodyHandlers.ofInputStream());
-//        if (res.statusCode() == 200) return res.body(); // Ok
-//        if (res.statusCode() == 404) return null; // Not found
-//        throw new InternalError("Failed to get savestate replay: " + res.statusCode());
-    }
-
-    @Override
-    public void updateSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId, @NotNull InputStream dataStream) {
-        throw new UnsupportedOperationException("todo: reimplement in v3 api");
-//        var req = HttpRequest.newBuilder()
-//                .method("PUT", HttpRequest.BodyPublishers.ofInputStream(() -> dataStream))
-//                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + saveStateId + "/replay"))
-//                .header(AUTHORIZER_HEADER, playerId)
-//                .build();
-//        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-//        if (res.statusCode() == 200) return; // Ok
-//        throw new InternalError("Failed to update savestate replay: " + res.body());
     }
 
     @Override

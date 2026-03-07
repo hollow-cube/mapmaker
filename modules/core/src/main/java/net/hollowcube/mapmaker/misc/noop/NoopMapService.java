@@ -11,7 +11,6 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.InputStream;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -178,16 +177,6 @@ public class NoopMapService implements MapService {
 
     @Override
     public void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id) {
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
-    public @Nullable InputStream getSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId) {
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
-    public void updateSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId, @NotNull InputStream dataStream) {
         throw new UnsupportedOperationException("not implemented");
     }
 

@@ -4,6 +4,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.lang.TimeComponent;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
+import net.hollowcube.mapmaker.gui.map.MapListView;
 import net.hollowcube.mapmaker.gui.map.MapReportView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -67,7 +68,8 @@ public class MapDetailsView extends Panel {
         add(2, 0, new Text("", 5, 1, authorUsername)
             .align(Text.CENTER, Text.CENTER)
             .background("generic2/btn/default/5_1")
-            .translationKey("gui.map_details.creator_profile", authorName.build()));
+            .translationKey("gui.map_details.creator_profile", authorName.build()))
+            .onLeftClick(() -> host.pushView(new MapListView.Player(api, mapService, bridge, map.owner())));
         add(7, 0, new Button("gui.map_rating.report_map", 2, 1)
             .background("generic2/btn/default/2_1")
             .sprite("map_details/action/report", 15, 3)

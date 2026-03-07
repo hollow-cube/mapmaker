@@ -8,16 +8,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.nio.channels.Channels;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Blocking
 public interface MapService {
-    @NotNull
-    ExecutorService VIRTUAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
     @NotNull
     String LEADERBOARD_TOP_TIMES = "top_times";
@@ -100,11 +95,6 @@ public interface MapService {
     SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update);
 
     void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id);
-
-    @Nullable
-    InputStream getSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId);
-
-    void updateSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId, @NotNull InputStream dataStream);
 
     @NotNull MapRating getMapRating(@NotNull String mapId, @NotNull String playerId);
 
