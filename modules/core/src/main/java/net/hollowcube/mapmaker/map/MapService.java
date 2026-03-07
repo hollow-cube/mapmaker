@@ -63,14 +63,6 @@ public interface MapService {
 
     void reportMap(@NotNull String mapId, @NotNull MapReportRequest req);
 
-    void inviteMapBuilder(@NotNull String mapId, @NotNull String playerId);
-
-    void acceptMapBuilderRequest(@NotNull String mapId, @NotNull String playerId);
-
-    void rejectMapBuilderRequest(@NotNull String mapId, @NotNull String playerId);
-
-    void removeMapBuilder(@NotNull String mapId, @NotNull String playerId);
-
     @NotNull
     LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId);
 
@@ -137,12 +129,6 @@ public interface MapService {
     class AlreadyExistsError extends RuntimeException {
         public AlreadyExistsError() {
             super("Already exists");
-        }
-    }
-
-    class MapBuilderNoSlotsError extends RuntimeException {
-        public MapBuilderNoSlotsError() {
-            super("No slots remaining");
         }
     }
 }

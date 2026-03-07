@@ -21,7 +21,7 @@ public class AnvilSearchView<T> extends AbstractAnvilView {
     }
 
     public static <T> AnvilSearchView<T> simple(String icon, String title, SearchFunction<T> searchFunction,
-                                                Function<T, Button> buttonFactory, Consumer<T> onSubmit) {
+                                                Function<T, Button> buttonFactory, Function<T, Boolean> onSubmit) {
         return AnvilSearchView.<T>builder(icon, title)
             .searchFunction(searchFunction)
             .buttonFactory(buttonFactory)
@@ -29,10 +29,22 @@ public class AnvilSearchView<T> extends AbstractAnvilView {
             .build();
     }
 
+    public static <T> AnvilSearchView<T> simple(String icon, String title, SearchFunction<T> searchFunction,
+                                                Function<T, Button> buttonFactory, Consumer<T> onSubmit) {
+        return AnvilSearchView.<T>builder(icon, title)
+            .searchFunction(searchFunction)
+            .buttonFactory(buttonFactory)
+            .onSubmit(value -> {
+                onSubmit.accept(value);
+                return true;
+            })
+            .build();
+    }
+
     private final SearchFunction<T> searchFunction;
     private final String defaultSearchTerm;
     private final Function<T, Button> buttonFactory;
-    private final Consumer<T> onSubmit;
+    private final Function<T, Boolean> onSubmit;
     private final boolean async;
 
     private final ItemContainer itemContainer;
@@ -41,7 +53,7 @@ public class AnvilSearchView<T> extends AbstractAnvilView {
     private @Nullable Task task = null;
 
     private AnvilSearchView(String icon, String title, SearchFunction<T> searchFunction, String defaultSearchTerm,
-                            Function<T, Button> buttonFactory, Consumer<T> onSubmit, boolean async) {
+                            Function<T, Button> buttonFactory, Function<T, Boolean> onSubmit, boolean async) {
         super("generic2/anvil/search_container", icon, title, "", false);
 
         this.searchFunction = searchFunction;
@@ -103,8 +115,8 @@ public class AnvilSearchView<T> extends AbstractAnvilView {
         }
 
         private void leftClick(T value) {
-            onSubmit.accept(value);
-            host.popView();
+            if (onSubmit.apply(value))
+                host.popView();
         }
     }
 
@@ -120,7 +132,7 @@ public class AnvilSearchView<T> extends AbstractAnvilView {
         private String title;
         private SearchFunction<T> searchFunction;
         private Function<T, Button> buttonFactory;
-        private Consumer<T> onSubmit;
+        private Function<T, Boolean> onSubmit;
         // "s" is kinda of a weird default, but it was set for block inputs previously and works fine.
         private String defaultSearchTerm = "s";
         private boolean async = false;
@@ -145,7 +157,7 @@ public class AnvilSearchView<T> extends AbstractAnvilView {
             return this;
         }
 
-        public Builder<T> onSubmit(Consumer<T> onSubmit) {
+        public Builder<T> onSubmit(Function<T, Boolean> onSubmit) {
             this.onSubmit = Objects.requireNonNull(onSubmit, "onSubmit");
             return this;
         }

@@ -48,6 +48,15 @@ public class HttpClientWrapper {
         return parseOrThrowResponse(res, responseType);
     }
 
+    public void post(String operation, String url) {
+        var res = doRequest(operation,
+            HttpRequest.newBuilder()
+                .uri(java.net.URI.create(baseUrl + url))
+                .POST(HttpRequest.BodyPublishers.noBody()),
+            HttpResponse.BodyHandlers.ofString());
+        maybeThrowResponse(res);
+    }
+
     public void post(String operation, String url, Object requestBody) {
         var body = AbstractHttpService.GSON.toJson(requestBody);
         var res = doRequest(operation,
@@ -86,6 +95,14 @@ public class HttpClientWrapper {
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(body)),
             HttpResponse.BodyHandlers.ofString());
         return parseOrThrowResponse(res, responseType);
+    }
+
+    public void delete(String operation, String url) {
+        var res = doRequest(operation,
+            HttpRequest.newBuilder()
+                .DELETE().uri(java.net.URI.create(baseUrl + url)),
+            HttpResponse.BodyHandlers.ofString());
+        maybeThrowResponse(res);
     }
 
     public <T> HttpResponse<T> doRequest(String name, HttpRequest.Builder reqBuilder, HttpResponse.BodyHandler<T> handler) {

@@ -141,14 +141,7 @@ public abstract class AbstractHttpService {
         FutureUtil.assertThreadWarn();
         try {
             logger.log(System.Logger.Level.INFO, "{0} {1}", req.method(), req.uri());
-            var res = httpClient.send(req, handler);
-            // TODO figure out why this exists, as it currently stands session creation will throw this 404 instead
-            if (res.statusCode() == 403) {
-                // We simply convert auth issues to 404s
-                logger.log(System.Logger.Level.ERROR, "auth failed for request: " + req.method() + " " + req.uri());
-                throw new MapService.NotFoundError("???");
-            }
-            return res;
+            return httpClient.send(req, handler);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new MapService.InternalError(e);
