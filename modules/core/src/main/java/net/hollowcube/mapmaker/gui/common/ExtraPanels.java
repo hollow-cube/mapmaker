@@ -24,8 +24,17 @@ public final class ExtraPanels {
 
     public static Button infoWithKey(@NotNull String translationKey) {
         return new Button(translationKey, 1, 1)
-                .background("generic2/btn/default/1_1")
-                .sprite("generic2/btn/common/info", 4, 2);
+            .background("generic2/btn/default/1_1")
+            .sprite("generic2/btn/common/info", 4, 2);
+    }
+
+    public static Text infoText(int width, String text) {
+        return infoText(width, text, 1);
+    }
+
+    public static Text infoText(int width, String text, int xOffset) {
+        return new Text(null, width, 1, text)
+            .font("small").align(xOffset, 6);
     }
 
     public static Panel confirm(@NotNull Runnable onConfirm) {
@@ -47,8 +56,8 @@ public final class ExtraPanels {
             super(1, 1);
 
             this.button = add(0, 0, new Button(null, 1, 1)
-                    .background("generic2/btn/danger/1_1")
-                    .onLeftClick(this::handleClick));
+                .background("generic2/btn/danger/1_1")
+                .onLeftClick(this::handleClick));
         }
 
         private void handleClick() {
@@ -81,30 +90,21 @@ public final class ExtraPanels {
 
             add(4, 2,
                 new Text(null, 1, 0, Objects.requireNonNullElse(text, ""))
-                        .align(Text.CENTER, 4)
+                    .align(Text.CENTER, 4)
             );
 
             add(1, 3,
                 new Button("gui.confirm2.no", 3, 1)
-                        .onLeftClick(() -> {
-                            if (host.canPopView()) {
-                                host.popView();
-                            } else {
-                                host.player().closeInventory();
-                            }
-                        })
+                    .onLeftClick(() -> host.popOrClose())
             );
 
             add(5, 3,
                 new Button("gui.confirm2.yes", 3, 1)
-                        .onLeftClick(() -> {
-                            onConfirm.accept(host.player());
-                            if (host.canPopView()) {
-                                host.popView();
-                            } else {
-                                host.player().closeInventory();
-                            }
-                        })
+                    .onLeftClick(() -> {
+                        final Player player = host.player();
+                        onConfirm.accept(player);
+                        host.popOrClose();
+                    })
             );
         }
     }

@@ -20,6 +20,7 @@ import java.util.Set;
 
 @Blocking
 public interface PlayerService {
+    int DEFAULT_TAB_COMPLETE_LIMIT = 25;
 
     @NotNull
     DisplayName getPlayerDisplayName2(@NotNull String id);
@@ -54,7 +55,11 @@ public interface PlayerService {
     JsonObject getPlayerBackpack(@NotNull String id);
 
     @NotNull
-    TabCompleteResponse getUsernameTabCompletions(@NotNull String query);
+    TabCompleteResponse getUsernameTabCompletions(@NotNull String query, int limit);
+
+    default @NotNull TabCompleteResponse getUsernameTabCompletions(@NotNull String query) {
+        return this.getUsernameTabCompletions(query, DEFAULT_TAB_COMPLETE_LIMIT);
+    }
 
     record CreateCheckoutLinkResponse(@NotNull String url) {
     }

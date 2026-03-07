@@ -8,6 +8,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.common.ConfirmAction;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.map.*;
@@ -32,6 +33,7 @@ import java.util.Objects;
 public class EditMap extends View {
     private static final System.Logger logger = System.getLogger(EditMap.class.getSimpleName());
 
+    private @ContextObject ApiClient api;
     private @ContextObject ServerBridge bridge;
     private @ContextObject MapService mapService;
     private @ContextObject PlayerService playerService;
@@ -328,7 +330,7 @@ public class EditMap extends View {
 
             // Open the map details view for the newly published map
             var authorName = playerService.getPlayerDisplayName2(publishedMap.owner());
-            Panel.open(player, new MapDetailsView(playerService, mapService, bridge, map, authorName, true));
+            Panel.open(player, new MapDetailsView(api, mapService, bridge, map, authorName, true));
         });
     }
 
@@ -523,7 +525,7 @@ public class EditMap extends View {
     private void fillTagsCounter(@NotNull MapTags.TagType tagType) {
         var typedMaxTags = map.settings().getVariant().maxTags(tagType);
         var currentTags = map.settings().getTags().stream()
-            .filter(tag -> tag.getType() == tagType)
+            .filter(tag -> tag.type() == tagType)
             .count();
         mapTagsMaxCounterText.setText(String.format("%d/%d Tags", currentTags, typedMaxTags));
     }
@@ -533,13 +535,13 @@ public class EditMap extends View {
     private boolean canAddAnotherTag(MapTags.TagType tagType) {
         var typedMaxTags = map.settings().getVariant().maxTags(tagType);
         return typedMaxTags > map.settings().getTags().stream()
-            .filter(tag -> tag.getType() == tagType)
+            .filter(tag -> tag.type() == tagType)
             .count();
     }
 
     private void tagClickHandler(MapTags.Tag tag, boolean set) {
         if (set) {
-            if (canAddAnotherTag(tag.getType())) {
+            if (canAddAnotherTag(tag.type())) {
                 map.settings().addTag(tag);
             }
         } else {

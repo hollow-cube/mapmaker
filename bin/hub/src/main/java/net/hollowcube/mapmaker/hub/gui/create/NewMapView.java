@@ -1,0 +1,98 @@
+package net.hollowcube.mapmaker.hub.gui.create;
+
+import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.util.ProtocolVersions;
+import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.MapSize;
+import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
+import net.hollowcube.mapmaker.panels.*;
+import net.hollowcube.mapmaker.panels.buttons.LockedButton;
+import net.hollowcube.mapmaker.player.PlayerData;
+import net.kyori.adventure.text.Component;
+
+import java.util.function.Consumer;
+
+import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
+import static net.hollowcube.mapmaker.panels.RadioSelect.ButtonUpdater.SQUARE_BACKGROUND_EX;
+
+public class NewMapView extends Panel {
+
+    private final MapService mapService;
+    private final Consumer<MapData> onNewMap;
+
+    private final RadioSelect<MapSize> sizeSelect;
+    private final Button confirmButton;
+
+    public NewMapView(MapService mapService, Consumer<MapData> onNewMap) {
+        super(9, 10);
+        this.mapService = mapService;
+        this.onNewMap = onNewMap;
+
+        background("create_maps2/new/container", -10, -31);
+        add(0, 0, title(LanguageProviderV2.translateToPlain("gui.create_maps.new.name")));
+
+        add(0, 0, backOrClose());
+
+        add(1, 1, infoText(4, "normal sizes"));
+        sizeSelect = add(1, 2, new RadioSelect<>(4, 1, MapSize.NORMAL))
+            .onChange(this::updateConfirmButton);
+
+        confirmButton = add(2, 4, new Text(5, 1, "Create")
+            .align(Text.CENTER, Text.CENTER)
+            .background("generic2/btn/success/5_1")
+            .onLeftClickAsync(this::handleSubmit));
+    }
+
+    @Override
+    protected void mount(InventoryHost host, boolean isInitial) {
+        super.mount(host, isInitial);
+
+        for (var mapSize : MapSize.GUI_SIZES) {
+            boolean locked = isLocked(mapSize);
+            Button.Constructor makeButton = (tk, slotWidth, slotHeight) -> {
+                var button = locked
+                    ? new LockedButton(tk, slotWidth, slotHeight)
+                    : new Button(tk, slotWidth, slotHeight);
+                return button
+                    .translationKey("gui.create_maps.new.size." + mapSize.name().toLowerCase() + ".off" + (locked ? ".locked" : ""))
+                    .sprite("icon2/1_1/" + mapSize.icon(), 1, 1);
+            };
+            RadioSelect.ButtonUpdater updateButton = (button, selected) -> {
+                SQUARE_BACKGROUND_EX.update(button, selected);
+                button.translationKey("gui.create_maps.new.size." + mapSize.name().toLowerCase() + (selected ? ".on" : ".off"));
+            };
+
+            if (locked) {
+                var button = makeButton.construct(null, 1, 1);
+                updateButton.update(button, false);
+                sizeSelect.add(sizeSelect.index++, 0, button);
+            } else {
+                sizeSelect.addOption(mapSize, updateButton, makeButton);
+            }
+        }
+    }
+
+    private void handleSubmit() {
+        var playerId = PlayerData.fromPlayer(host.player()).id();
+        var map = mapService.createMap(MapCreateRequest.forPlayerV2(
+            playerId, sizeSelect.selected(),
+            ProtocolVersions.getProtocolVersion(playerId)));
+        sync(() -> {
+            onNewMap.accept(map);
+            host.popView();
+        });
+    }
+
+    private void updateConfirmButton(MapSize size) {
+        var sizeNameKey = "gui.create_maps.new.size." + size + ".on.name";
+        var actualSizeKey = "gui.create_maps.new.size." + size + ".size";
+        confirmButton.translationKey("gui.create_maps.new.confirm",
+            Component.translatable(sizeNameKey),
+            Component.translatable(actualSizeKey));
+    }
+
+    private boolean isLocked(MapSize size) {
+        return !PlayerData.fromPlayer(this.host.player()).maxMapSize().unlocks(size);
+    }
+}

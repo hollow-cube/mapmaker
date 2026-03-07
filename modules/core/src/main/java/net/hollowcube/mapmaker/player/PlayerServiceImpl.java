@@ -162,10 +162,23 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull TabCompleteResponse getUsernameTabCompletions(@NotNull String query) {
-        if (query.isEmpty()) return new TabCompleteResponse(List.of());
+    public @NotNull TabCompleteResponse getUsernameTabCompletions(@NotNull String query, int limit) {
+        return this.getTabCompletions(TabCompleteBody.forUsernames(query, limit));
+    }
 
-        var reqBody = GSON.toJson(Map.of("query", query));
+    // This is designed so other tab completions could be added in future if wanted
+    private record TabCompleteBody(@NotNull String query, int limit) {
+        static TabCompleteBody forUsernames(@NotNull String query, int limit) {
+            return new TabCompleteBody(query, limit);
+        }
+    }
+
+    private @NotNull TabCompleteResponse getTabCompletions(@NotNull TabCompleteBody body) {
+        if (body.query().isEmpty()) {
+            return new TabCompleteResponse(List.of());
+        }
+
+        var reqBody = GSON.toJson(body);
         var req = HttpRequest.newBuilder()
             .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
             .uri(URI.create(url + "/tab_complete"));

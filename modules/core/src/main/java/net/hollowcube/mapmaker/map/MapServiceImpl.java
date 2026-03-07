@@ -14,7 +14,6 @@ import net.minestom.server.registry.RegistryTranscoder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -36,12 +35,10 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     private final String url;
     private final String urlV3;
-    private final String legacyUrl;
 
     public MapServiceImpl(String url) {
         this.url = String.format("%s/v1/internal/maps", url);
         this.urlV3 = String.format("%s/v3/internal", url);
-        this.legacyUrl = String.format("%s/v1/internal/maps/legacy", url);
     }
 
     @Override
@@ -316,6 +313,62 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
+    public void inviteMapBuilder(@NotNull String mapId, @NotNull String playerId) {
+        var req2 = HttpRequest.newBuilder()
+            .method("POST", HttpRequest.BodyPublishers.noBody())
+            .uri(URI.create(urlV3 + "/maps/" + mapId + "/builders/" + playerId))
+            .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
+            .build();
+        var res = doRequest(req2, HttpResponse.BodyHandlers.ofString());
+        switch (res.statusCode()) {
+            case 200 -> {
+            }
+            case 409 -> throw new AlreadyExistsError();
+            default -> throw new InternalError("Failed to invite map builder: " + res.body());
+        }
+    }
+
+    @Override
+    public void acceptMapBuilderRequest(@NotNull String mapId, @NotNull String playerId) {
+        this.mapBuilderAcceptReject(mapId, playerId, true);
+    }
+
+    @Override
+    public void rejectMapBuilderRequest(@NotNull String mapId, @NotNull String playerId) {
+        this.mapBuilderAcceptReject(mapId, playerId, false);
+    }
+
+    private void mapBuilderAcceptReject(@NotNull String mapId, @NotNull String playerId, boolean accepted) {
+        var req = HttpRequest.newBuilder()
+            .method("POST", HttpRequest.BodyPublishers.noBody()) // isn't this why the skeleton didn't go to the ball?
+            .uri(URI.create(urlV3 + "/maps/" + mapId + "/builders/" + playerId + "/" + (accepted ? "accept" : "reject")))
+            .header("Content-Type", "application/json")
+            .header(AUTHORIZER_HEADER, UUID.randomUUID().toString())
+            .build();
+        var res = super.doRequest(req, HttpResponse.BodyHandlers.ofString());
+        switch (res.statusCode()) {
+            case 200 -> {
+            }
+            case 402 -> throw new MapBuilderNoSlotsError();
+            default -> throw new InternalError("Failed to accept/reject map builder: " + res.body());
+        }
+    }
+
+    @Override
+    public void removeMapBuilder(@NotNull String mapId, @NotNull String playerId) {
+        var req2 = HttpRequest.newBuilder()
+            .DELETE().uri(URI.create(urlV3 + "/maps/" + mapId + "/builders/" + playerId))
+            .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
+            .build();
+        var res = doRequest(req2, HttpResponse.BodyHandlers.ofString());
+        switch (res.statusCode()) {
+            case 200 -> {
+            }
+            default -> throw new InternalError("Failed to remove map builder: " + res.body());
+        }
+    }
+
+    @Override
     public @NotNull LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId) {
         var uri = urlV3 + "/maps/hub/leaderboard/" + name;
         if (playerId != null) uri += "?playerId=" + playerId;
@@ -476,32 +529,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() == 204) return; // Ok
         throw new InternalError("Failed to delete savestate: " + res.body());
-    }
-
-    @Override
-    public @Nullable InputStream getSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId) {
-        throw new UnsupportedOperationException("todo: reimplement in v3 api");
-//        var req = HttpRequest.newBuilder()
-//                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + saveStateId + "/replay"))
-//                .header(AUTHORIZER_HEADER, playerId)
-//                .build();
-//        var res = doRequest(req, HttpResponse.BodyHandlers.ofInputStream());
-//        if (res.statusCode() == 200) return res.body(); // Ok
-//        if (res.statusCode() == 404) return null; // Not found
-//        throw new InternalError("Failed to get savestate replay: " + res.statusCode());
-    }
-
-    @Override
-    public void updateSaveStateReplay(@NotNull String mapId, @NotNull String playerId, @NotNull String saveStateId, @NotNull InputStream dataStream) {
-        throw new UnsupportedOperationException("todo: reimplement in v3 api");
-//        var req = HttpRequest.newBuilder()
-//                .method("PUT", HttpRequest.BodyPublishers.ofInputStream(() -> dataStream))
-//                .uri(URI.create(url + "/" + mapId + "/savestates/" + playerId + "/" + saveStateId + "/replay"))
-//                .header(AUTHORIZER_HEADER, playerId)
-//                .build();
-//        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-//        if (res.statusCode() == 200) return; // Ok
-//        throw new InternalError("Failed to update savestate replay: " + res.body());
     }
 
     @Override

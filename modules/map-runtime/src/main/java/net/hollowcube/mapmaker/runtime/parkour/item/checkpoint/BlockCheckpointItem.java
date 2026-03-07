@@ -111,7 +111,7 @@ public record BlockCheckpointItem(Block block, int amount, List<Block> placeable
 
             this.slotInput.iconButton()
                     .onLeftClick(() -> {
-                        host.pushView(new AnvilSearchView<>("action/anvil/search_icon", "Search Blocks",
+                        host.pushView(AnvilSearchView.simple("action/anvil/search_icon", "Search Blocks",
                                 Autocompletors::searchBlocks, ControlledBlockListInput::makeBlockButton, block -> {
                             updateItem(BlockCheckpointItem::withBlock).accept(block);
                         }));

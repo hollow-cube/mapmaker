@@ -14,13 +14,13 @@ public class ActionEditorAnvil<T extends Action> extends AbstractAnvilView {
     private final BiFunction<T, String, T> fromString;
 
     public ActionEditorAnvil(
-            ActionList.Ref ref,
-            Function<T, String> toString,
-            BiFunction<T, String, T> fromString
+        ActionList.Ref ref,
+        Function<T, String> toString,
+        BiFunction<T, String, T> fromString
     ) {
         super("generic2/anvil/field_container", "action/anvil/" + ref.key().value().replace(".", "_") + "_icon",
-                LanguageProviderV2.translateToPlain("gui.action." + ref.key().value().replace(".", "_") + ".title"),
-                toString.apply(ref.cast()));
+            LanguageProviderV2.translateToPlain("gui.action." + ref.key().value().replace(".", "_") + ".title"),
+            toString.apply(ref.cast()), true);
         this.ref = ref;
         this.fromString = fromString;
     }

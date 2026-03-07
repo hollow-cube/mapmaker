@@ -15,6 +15,14 @@ public record PlayerNotificationResponse(
     List<ComplexEntry> results
 ) {
 
+    public sealed interface Entry {
+        @NotNull String type();
+
+        @NotNull String key();
+
+        @Nullable JsonObject data();
+    }
+
     @RuntimeGson
     public record ComplexEntry(
         @NotNull String id,
@@ -27,7 +35,7 @@ public record PlayerNotificationResponse(
         @NotNull Instant createdAt,
         @Nullable Instant readAt,
         @Nullable Instant expiresAt
-    ) {
+    ) implements Entry {
     }
 
     @RuntimeGson
@@ -37,6 +45,6 @@ public record PlayerNotificationResponse(
         @NotNull String type,
         @NotNull String key,
         @Nullable JsonObject data
-    ) {
+    ) implements Entry {
     }
 }

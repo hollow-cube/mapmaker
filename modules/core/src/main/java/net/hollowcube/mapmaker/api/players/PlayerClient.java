@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.api.players;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
+import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerData;
 
 import java.util.Map;
@@ -12,6 +13,10 @@ import static net.hollowcube.mapmaker.api.ApiClient.notImplemented;
 public interface PlayerClient {
 
     default PlayerData getPlayerData(String playerId) {
+        throw notImplemented();
+    }
+
+    default DisplayName getDisplayName(String playerId) {
         throw notImplemented();
     }
 
@@ -29,6 +34,14 @@ public interface PlayerClient {
             return http.get(
                 "getPlayerData",
                 V4_PREFIX + "/" + playerId,
+                new TypeToken<>() {});
+        }
+
+        @Override
+        public DisplayName getDisplayName(String playerId) {
+            return http.get(
+                "getDisplayName",
+                V4_PREFIX + "/" + playerId + "/display-name",
                 new TypeToken<>() {});
         }
 

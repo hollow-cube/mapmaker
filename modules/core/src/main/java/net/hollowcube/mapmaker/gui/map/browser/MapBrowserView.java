@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.gui.map.browser;
 
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.map.MapIconPanel;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -11,7 +12,6 @@ import net.hollowcube.mapmaker.panels.Pagination;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.StringComparison;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +29,7 @@ public class MapBrowserView extends Panel {
         BEST, QUALITY, NEW
     }
 
-    private final PlayerService playerService;
+    private final ApiClient api;
     private final MapService mapService;
     private final ServerBridge bridge;
     private final boolean fetchOnMount;
@@ -43,13 +43,13 @@ public class MapBrowserView extends Panel {
 
     private volatile String searchText = "";
 
-    public MapBrowserView(@NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
-        this(playerService, mapService, bridge, true);
+    public MapBrowserView(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
+        this(api, mapService, bridge, true);
     }
 
-    public MapBrowserView(@NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull ServerBridge bridge, boolean fetchOnMount) {
+    public MapBrowserView(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge, boolean fetchOnMount) {
         super(9, 10);
-        this.playerService = playerService;
+        this.api = api;
         this.mapService = mapService;
         this.bridge = bridge;
         this.fetchOnMount = fetchOnMount;
@@ -59,12 +59,12 @@ public class MapBrowserView extends Panel {
 
         add(0, 0, backOrClose());
         this.searchTextElement = add(1, 0, new Text("gui.map_browser.search_maps.empty", 8, 1, "Search...")
-                .align(8, 5));
+            .align(8, 5));
         this.searchTextElement.onLeftClick(this::openSearchInput);
         this.searchTextElement.onShiftLeftClick(this::handleSearchClear);
 
         this.pagination = add(1, 2, new Pagination<MapSearchParams.Builder>(7, 3)
-                .fetchAsync(this::onSearch));
+            .fetchAsync(this::onSearch));
         add(2, 5, pagination.prevButton());
         add(3, 5, pagination.pageText(3, 1));
         add(6, 5, pagination.nextButton());
@@ -87,10 +87,10 @@ public class MapBrowserView extends Panel {
 
     public void openSearchInput() {
         host.pushView(simpleAnvil(
-                "generic2/anvil/field_container",
-                "map_browser/search_anvil_icon",
-                "Search Maps by Name",
-                this::handleSearchTextChange
+            "generic2/anvil/field_container",
+            "map_browser/search_anvil_icon",
+            "Search Maps by Name",
+            this::handleSearchTextChange
         ));
     }
 
@@ -99,7 +99,7 @@ public class MapBrowserView extends Panel {
         // If we have a search query, ignore the given params.
         if (ignoreParamsOnSearch && !this.searchText.isEmpty()) {
             params = MapSearchParams.builder(host.player().getUuid().toString())
-                    .query(searchText);
+                .query(searchText);
         } else params = params.query(searchText);
 
         var response = mapService.searchMaps(params.page(page).pageSize(pageSize).build());
@@ -116,7 +116,7 @@ public class MapBrowserView extends Panel {
         var entries = new ArrayList<MapIconPanel>();
         for (var map : results) {
             if (map.isCompletable()) mapIds.add(map.id());
-            entries.add(new MapIconPanel(playerService, mapService, bridge, map));
+            entries.add(new MapIconPanel(api, mapService, bridge, map));
         }
 
         // Fetch the player's current progress on the maps
@@ -136,7 +136,7 @@ public class MapBrowserView extends Panel {
     @Override
     protected void unmount() {
         var playerData = PlayerData.fromPlayer(host.player());
-        FutureUtil.submitVirtual(() -> playerData.writeUpdatesUpstream(playerService));
+        FutureUtil.submitVirtual(() -> playerData.writeUpdatesUpstream(api.players));
 
         super.unmount();
     }
@@ -157,7 +157,7 @@ public class MapBrowserView extends Panel {
         if (searchText.equals(oldValue)) return;
 
         this.searchTextElement.translationKey(searchText.isEmpty() ? "gui.map_browser.search_maps.empty"
-                : "gui.map_browser.search_maps", searchText);
+            : "gui.map_browser.search_maps", searchText);
         this.searchTextElement.text(searchText.isEmpty() ? "Search..." : searchText);
         this.pagination.reset();
     }

@@ -13,4 +13,6 @@ public final class CoreFeatureFlags {
 
     public static FeatureFlag NO_SPEC_ACCESS = FeatureFlag.of("no_spec_access");
 
+    public static FeatureFlag CREATE_MAPS_V2 = FeatureFlag.of("create_maps_v2");
+
 }

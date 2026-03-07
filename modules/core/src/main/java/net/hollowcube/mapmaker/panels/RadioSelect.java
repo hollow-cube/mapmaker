@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.panels;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,35 +8,45 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class RadioSelect<T> extends Panel {
+public class RadioSelect<T extends @UnknownNullability Object> extends Panel {
 
     private final List<Runnable> buttonUpdaters = new ArrayList<>();
-    private final List<Consumer<@Nullable T>> onChange = new ArrayList<>();
+    private final List<Consumer<T>> onChange = new ArrayList<>();
     private final Set<T> options = new HashSet<>();
 
-    private T selected = null;
-    private int index = 0;
+    private T selected;
+    // TODO: should not be public, need to fix the cursed stuff in NewMapView
+    public int index = 0;
 
     public RadioSelect(int slotWidth, int slotHeight) {
-        super(slotWidth, slotHeight);
+        this(slotWidth, slotHeight, null);
     }
 
-    public @Nullable T selected() {
+    public RadioSelect(int slotWidth, int slotHeight, T defaultValue) {
+        super(slotWidth, slotHeight);
+        this.selected = defaultValue;
+    }
+
+    public T selected() {
         return this.selected;
     }
 
-    public @NotNull RadioSelect<T> onChange(@NotNull Consumer<@NotNull T> onChange) {
+    public RadioSelect<T> onChange(Consumer<T> onChange) {
         this.onChange.add(onChange);
         return this;
     }
 
-    public Button addOption(@NotNull T item, @NotNull ButtonUpdater updater) {
+    public Button addOption(T item, ButtonUpdater updater) {
+        return this.addOption(item, updater, Button::new);
+    }
+
+    public Button addOption(T item, ButtonUpdater updater, Button.Constructor buttonCtor) {
         this.options.add(item);
 
         int x = this.index % this.slotWidth;
         int y = this.index / this.slotWidth;
 
-        var button = add(x, y, new Button(null, 1, 1));
+        var button = add(x, y, buttonCtor.construct(null, 1, 1));
         Runnable update = () -> updater.update(button, item.equals(this.selected));
         this.buttonUpdaters.add(update);
         button.onLeftClick(() -> {
@@ -52,7 +61,7 @@ public class RadioSelect<T> extends Panel {
         return button;
     }
 
-    public void setSelected(@Nullable T item) {
+    public void setSelected(T item) {
         if (item == null || this.options.contains(item)) {
             this.selected = item;
             this.buttonUpdaters.forEach(Runnable::run);
@@ -70,6 +79,17 @@ public class RadioSelect<T> extends Panel {
             button.background(key);
         };
 
-        void update(@NotNull Button button, boolean selected);
+        ButtonUpdater SQUARE_BACKGROUND_EX = (button, selected) -> {
+            var key = selected ? "generic2/btn/selected/1_1ex" : "generic2/btn/default/1_1ex";
+            button.background(key);
+
+            final var sprite = button.sprite;
+            if (sprite != null) {
+                // This assumes that all icons are 16x16, which is fine for now.
+                button.sprite(sprite.withOffset(sprite.offsetX(), selected ? 3 : 1));
+            }
+        };
+
+        void update(Button button, boolean selected);
     }
 }

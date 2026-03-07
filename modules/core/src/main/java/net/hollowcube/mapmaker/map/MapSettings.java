@@ -452,9 +452,15 @@ public class MapSettings {
         return this.tags;
     }
 
+    public boolean hasTag(@NotNull MapTags.Tag tag) {
+        return this.tags != null && this.tags.contains(tag);
+    }
+
     public boolean addTag(@NotNull MapTags.Tag tag) {
-        Check.stateCondition(variant == MapVariant.BUILDING && tag.type == MapTags.TagType.GAMEPLAY,
-            "building maps may not have gameplay tags");
+        if (tag.type != null) {
+            Check.stateCondition(variant == MapVariant.BUILDING && tag.type == MapTags.TagType.GAMEPLAY,
+                "building maps may not have gameplay tags");
+        }
 
         updateLock.lock();
         try {
@@ -465,6 +471,29 @@ public class MapSettings {
             }
 
             this.tags.add(tag);
+            updates.setTags(this.tags);
+            return true;
+        } finally {
+            updateLock.unlock();
+        }
+    }
+
+    public void setTag(int index, MapTags.Tag tag) {
+        updateLock.lock();
+        try {
+            if (this.tags == null) return;
+            this.tags.set(index, tag);
+            updates.setTags(this.tags);
+        } finally {
+            updateLock.unlock();
+        }
+    }
+
+    public boolean removeTag(int index) {
+        updateLock.lock();
+        try {
+            if (this.tags == null) return false;
+            this.tags.remove(index);
             updates.setTags(this.tags);
             return true;
         } finally {
@@ -495,7 +524,7 @@ public class MapSettings {
                 this.tags = new ArrayList<>();
             }
             this.tags = new ArrayList<>(this.tags.stream().filter(
-                tag -> tag.getType() == MapTags.TagType.VISUAL
+                tag -> tag.type() == MapTags.TagType.VISUAL
             ).toList());
         } finally {
             updateLock.unlock();
@@ -509,7 +538,7 @@ public class MapSettings {
                 this.tags = new ArrayList<>();
             }
             this.tags = new ArrayList<>(this.tags.stream().filter(
-                tag -> tag.getType() == MapTags.TagType.GAMEPLAY
+                tag -> tag.type() == MapTags.TagType.GAMEPLAY
             ).toList());
         } finally {
             updateLock.unlock();

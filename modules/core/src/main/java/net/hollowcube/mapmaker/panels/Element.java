@@ -7,20 +7,20 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.component.DataComponents;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class Element {
-    protected InventoryHost host; // Set after construction, should be careful with use.
+    protected @UnknownNullability InventoryHost host; // Set after construction, should be careful with use.
 
     protected int slotWidth = 0, slotHeight = 0;
     protected int x = 0, y = 0;
 
-    private final Sprite[] sprites = new Sprite[2]; // 0=background, 1=foreground
+    private final @Nullable Sprite[] sprites = new Sprite[2]; // 0=background, 1=foreground
 
     public Element(int slotWidth, int slotHeight) {
         this.slotWidth = slotWidth;
@@ -37,15 +37,15 @@ public class Element {
 
     // Builder
 
-    public @NotNull Element background(@Nullable String sprite) {
+    public Element background(@Nullable String sprite) {
         return background(sprite, 0, 0);
     }
 
-    public @NotNull Element background(@Nullable String sprite, int x, int y) {
+    public Element background(@Nullable String sprite, int x, int y) {
         return background(sprite == null ? null : new Sprite(sprite, BadSprite.require(sprite), null, x, y));
     }
 
-    public @NotNull Element background(@Nullable Sprite sprite) {
+    public Element background(@Nullable Sprite sprite) {
         sprites[0] = sprite;
         if (host != null) host.queueRedraw();
         return this;
@@ -59,28 +59,28 @@ public class Element {
 
     // Impl
 
-    public void build(@NotNull MenuBuilder builder) {
+    public void build(MenuBuilder builder) {
         for (var sprite : sprites) {
             if (sprite == null) continue;
             builder.draw(sprite.offsetX(), sprite.offsetY(), sprite.sprite());
 
             if (sprite.hoverSprite() != null) {
                 var withHoverIcon = Component.text(sprite.hoverSprite().fontChar())
-                        .color(FontUtil.computeShadowPos(FontUtil.Size.S3X3, builder.absoluteX(), builder.absoluteY()))
-                        .shadowColor(ShadowColor.none())
-                        .decoration(TextDecoration.ITALIC, false)
-                        .append(Component.text(FontUtil.computeOffset(-sprite.hoverSprite().width() - 1)));
+                    .color(FontUtil.computeShadowPos(FontUtil.Size.S3X3, builder.absoluteX(), builder.absoluteY()))
+                    .shadowColor(ShadowColor.none())
+                    .decoration(TextDecoration.ITALIC, false)
+                    .append(Component.text(FontUtil.computeOffset(-sprite.hoverSprite().width() - 1)));
                 builder.editSlots(0, 0, builder.availWidth(), builder.availHeight(), DataComponents.CUSTOM_NAME, (Function<Component, Component>)
-                        old -> withHoverIcon.append(Objects.requireNonNullElse(old, Component.empty())));
+                    old -> withHoverIcon.append(Objects.requireNonNullElse(old, Component.empty())));
             }
         }
     }
 
-    public @Nullable CompletableFuture<Void> handleClick(@NotNull ClickType clickType, int x, int y) {
+    public @Nullable CompletableFuture<Void> handleClick(ClickType clickType, int x, int y) {
         return null;
     }
 
-    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+    protected void mount(InventoryHost host, boolean isInitial) {
         if (this.host != null) throw new IllegalStateException("Element already mounted");
         this.host = host;
     }

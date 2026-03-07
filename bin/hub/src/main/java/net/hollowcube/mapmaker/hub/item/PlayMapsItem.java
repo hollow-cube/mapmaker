@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.hub.item;
 
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.map.browser.MapBrowserView;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
@@ -17,13 +17,13 @@ public class PlayMapsItem extends ItemHandler {
     private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("tablet"), "tablet");
     public static final Key ID = Key.key("mapmaker:play_maps");
 
-    private final PlayerService playerService;
+    private final ApiClient api;
     private final MapService mapService;
     private final ServerBridge bridge;
 
-    public PlayMapsItem(@NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
+    public PlayMapsItem(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
         super(ID, RIGHT_CLICK_ANY);
-        this.playerService = playerService;
+        this.api = api;
         this.mapService = mapService;
         this.bridge = bridge;
     }
@@ -36,7 +36,7 @@ public class PlayMapsItem extends ItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
-        Panel.open(player, new MapBrowserView(playerService, mapService, bridge));
+        Panel.open(player, new MapBrowserView(api, mapService, bridge));
     }
 
 }

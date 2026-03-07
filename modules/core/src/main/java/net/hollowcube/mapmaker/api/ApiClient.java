@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.api;
 
 import net.hollowcube.mapmaker.api.hdb.HeadDatabaseClient;
 import net.hollowcube.mapmaker.api.interaction.InteractionClient;
+import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.api.players.PlayerClient;
 
 import java.net.http.HttpResponse;
@@ -9,20 +10,25 @@ import java.net.http.HttpResponse;
 public final class ApiClient {
 
     public final PlayerClient players;
+    public final MapClient maps;
     public final HeadDatabaseClient headDatabase;
     public final InteractionClient interactions;
 
     public ApiClient(
-        PlayerClient players, HeadDatabaseClient headDatabase,
+        PlayerClient players,
+        MapClient maps,
+        HeadDatabaseClient headDatabase,
         InteractionClient interactions
     ) {
         this.players = players;
+        this.maps = maps;
         this.headDatabase = headDatabase;
         this.interactions = interactions;
     }
 
     public ApiClient(HttpClientWrapper http) {
         this.players = new PlayerClient.Http(http);
+        this.maps = new MapClient.Http(http);
         this.headDatabase = new HeadDatabaseClient.Http(http);
         this.interactions = new InteractionClient.Http(http);
     }

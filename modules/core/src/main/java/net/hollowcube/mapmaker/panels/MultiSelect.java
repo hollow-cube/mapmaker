@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker.panels;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,16 +13,16 @@ public class MultiSelect<T> extends Panel {
         super(slotWidth, 1);
     }
 
-    public @NotNull MultiSelect<T> onChange(@NotNull Runnable onChange) {
+    public MultiSelect<T> onChange(Runnable onChange) {
         this.onChange.add(onChange);
         return this;
     }
 
-    public @NotNull List<T> selectedItems() {
+    public List<T> selectedItems() {
         return items;
     }
 
-    public void addOption(@NotNull T t, @NotNull String translationKey, @NotNull String icon, int iconX, int iconY) {
+    public void addOption(T t, String translationKey, String icon, int iconX, int iconY) {
         var button = add(count++, 0, new Button(null, 1, 1));
         Runnable update = () -> {
             if (!items.contains(t)) {

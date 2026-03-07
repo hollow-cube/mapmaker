@@ -62,7 +62,7 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
 
         edgeEntities[4] = new NpcItemModel();
         edgeEntities[4].getEntityMeta().setItemStack(ItemStack.of(Material.STICK)
-                .with(DataComponents.ITEM_MODEL, BadSprite.require("hub/5x5/blossom_itmg").model()));
+            .with(DataComponents.ITEM_MODEL, BadSprite.require("hub/5x5/blossom_itmg").model()));
         edgeEntities[4].getEntityMeta().setScale(new Vec(5)); // 5x because its 5x5x5
         edgeEntities[4].getEntityMeta().setTranslation(new Vec(0, 1 + BASE_OFFSET, 0));
         edgeEntities[4].setInstance(world.instance(), MIDDLE.withView(90, 0));
@@ -94,25 +94,25 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
     }
 
     private void handleBestMapsClick(@NotNull Player player) {
-        var browser = new MapBrowserView(server.playerService(), server.mapService(), server.bridge(), false);
+        var browser = new MapBrowserView(server.api(), server.mapService(), server.bridge(), false);
         Panel.open(player, browser);
         browser.simpleSort(MapBrowserView.SortPreset.BEST);
     }
 
     private void handleQualityClick(@NotNull Player player) {
-        var browser = new MapBrowserView(server.playerService(), server.mapService(), server.bridge(), false);
+        var browser = new MapBrowserView(server.api(), server.mapService(), server.bridge(), false);
         Panel.open(player, browser);
         browser.simpleSort(MapBrowserView.SortPreset.QUALITY);
     }
 
     private void handleNewMapsClick(@NotNull Player player) {
-        var browser = new MapBrowserView(server.playerService(), server.mapService(), server.bridge(), false);
+        var browser = new MapBrowserView(server.api(), server.mapService(), server.bridge(), false);
         Panel.open(player, browser);
         browser.simpleSort(MapBrowserView.SortPreset.NEW);
     }
 
     private void handleSearchMapsClick(@NotNull Player player) {
-        var browser = new MapBrowserView(server.playerService(), server.mapService(), server.bridge(), false);
+        var browser = new MapBrowserView(server.api(), server.mapService(), server.bridge(), false);
         Panel.open(player, browser);
         // Set initial sort preset to best, else pagination doesn't initialize properly
         browser.simpleSort(MapBrowserView.SortPreset.BEST);
@@ -127,8 +127,8 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
                 // Enable glowing - This works because we never set any other flags in this set, otherwise
                 // it would be overridden when sending other metadata changes.
                 player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(
-                        MetadataDef.ENTITY_FLAGS.index(),
-                        Metadata.Byte((byte) 0x40)
+                    MetadataDef.ENTITY_FLAGS.index(),
+                    Metadata.Byte((byte) 0x40)
                 )));
             }
 
@@ -137,8 +137,8 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
                 // Disable glowing - See above for how/why this is functional.
                 if (player.getPlayerConnection().getServerState() == ConnectionState.PLAY) {
                     player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(
-                            MetadataDef.ENTITY_FLAGS.index(),
-                            Metadata.Byte((byte) 0x0)
+                        MetadataDef.ENTITY_FLAGS.index(),
+                        Metadata.Byte((byte) 0x0)
                     )));
                 }
             }

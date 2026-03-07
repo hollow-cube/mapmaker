@@ -6,6 +6,7 @@ import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.object.ObjectData;
+import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
@@ -27,6 +28,8 @@ import java.util.regex.Pattern;
 @RuntimeGson
 public class MapData {
     public static final String DEFAULT_NAME = "Untitled Map";
+
+    public static final int MAX_NAME_LENGTH = 20;
 
     public enum Difficulty {
         UNKNOWN,

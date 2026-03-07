@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.command.map;
 import net.hollowcube.command.CommandBuilder;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.dsl.SimpleCommand;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.gui.map.MapListView;
 import net.hollowcube.mapmaker.map.MapService;
@@ -24,6 +25,7 @@ public class MapCommand extends CommandDsl {
     public final MapDrainCommand drain;
 
     public MapCommand(
+        @NotNull ApiClient api,
         @NotNull PlayerService playerService,
         @NotNull MapService mapService,
         @NotNull ServerBridge bridge,
@@ -35,10 +37,10 @@ public class MapCommand extends CommandDsl {
         category = CommandCategories.GLOBAL;
 
         // Default commands
-        addSubcommand(this.list = new MapListCommand(playerService, mapService, bridge));
+        addSubcommand(this.list = new MapListCommand(api, playerService, mapService, bridge));
 
         addSubcommand(SimpleCommand.of("history")
-            .callback(player -> Panel.open(player, new MapListView.History(playerService, mapService, bridge)))
+            .callback(player -> Panel.open(player, new MapListView.History(api, mapService, bridge)))
             .description("View the history of a map")
             .build()
         );

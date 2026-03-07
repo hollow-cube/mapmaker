@@ -25,7 +25,7 @@ public class TotpInputView extends AbstractAnvilView {
     private final Consumer<PlayerService.TotpResult> callback;
 
     public TotpInputView(String title, BiFunction<String, String, PlayerService.TotpResult> checker, Consumer<PlayerService.TotpResult> callback) {
-        super("generic2/anvil/field_container", "map_browser/search_anvil_icon", title, "");
+        super("generic2/anvil/field_container", "map_browser/search_anvil_icon", title, "", true);
 
         this.checker = checker;
         this.callback = callback;
@@ -39,7 +39,8 @@ public class TotpInputView extends AbstractAnvilView {
         FutureUtil.submitVirtual(() -> {
             switch (checker.apply(playerId, truncatedCode)) {
                 case SUCCESS -> callback.accept(PlayerService.TotpResult.SUCCESS);
-                case INVALID_FORMAT -> this.host.pushTransientView(new TotpInputView("Invalid format", checker, callback));
+                case INVALID_FORMAT ->
+                    this.host.pushTransientView(new TotpInputView("Invalid format", checker, callback));
                 case INVALID_CODE -> this.host.pushTransientView(new TotpInputView("Invalid code", checker, callback));
                 case NOT_ENABLED -> callback.accept(PlayerService.TotpResult.NOT_ENABLED);
                 case ALREADY_ENABLED -> callback.accept(PlayerService.TotpResult.ALREADY_ENABLED);
@@ -57,9 +58,9 @@ public class TotpInputView extends AbstractAnvilView {
         for (String code : codes) {
             int offset = 22 + (90 - FontUtil.measureText(code)) / 2;
             component.append(Component.text(FontUtil.computeOffset(offset))
-                                 .append(Component.text(code, NamedTextColor.WHITE))
-                                 .hoverEvent(HoverEvent.showText(CLICK_TO_COPY))
-                                 .clickEvent(ClickEvent.copyToClipboard(String.join("\n", codes))));
+                .append(Component.text(code, NamedTextColor.WHITE))
+                .hoverEvent(HoverEvent.showText(CLICK_TO_COPY))
+                .clickEvent(ClickEvent.copyToClipboard(String.join("\n", codes))));
             component.appendNewline();
         }
 

@@ -1,15 +1,16 @@
 package net.hollowcube.mapmaker.panels;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Pagination<S> extends Panel {
+public class Pagination<S extends @UnknownNullability Object> extends Panel {
 
     @FunctionalInterface
-    public interface PageFetcher<S> {
-        @NotNull List<? extends Element> fetch(S search, int page, int pageSize);
+    public interface PageFetcher<S extends @UnknownNullability Object> {
+        List<? extends Element> fetch(S search, int page, int pageSize);
     }
 
     @FunctionalInterface
@@ -18,15 +19,20 @@ public class Pagination<S> extends Panel {
     }
 
     private final List<PageListener> onPageChange = new ArrayList<>();
-    private PageFetcher<S> pageFetcher;
-    private PageFetcher<S> pageFetcherAsync;
+    private @Nullable PageFetcher<S> pageFetcher;
+    private @Nullable PageFetcher<S> pageFetcherAsync;
 
-    private S query = null;
-    private int totalPages = 0;
-    private int page = 0;
+    private S query;
+    private int totalPages;
+    private int page;
 
     public Pagination(int slotWidth, int slotHeight) {
+        this(slotWidth, slotHeight, null);
+    }
+
+    public Pagination(int slotWidth, int slotHeight, S defaultQuery) {
         super(slotWidth, slotHeight);
+        this.query = defaultQuery;
     }
 
     // Imperative api
@@ -44,7 +50,7 @@ public class Pagination<S> extends Panel {
         resetSearch();
     }
 
-    public void reset(@NotNull S search) {
+    public void reset(S search) {
         this.query = search;
         resetSearch();
     }
@@ -68,51 +74,51 @@ public class Pagination<S> extends Panel {
 
     // DSL/builder
 
-    public @NotNull Pagination<S> fetch(@NotNull PageFetcher<S> fetcher) {
+    public Pagination<S> fetch(PageFetcher<S> fetcher) {
         this.pageFetcher = fetcher;
         return this;
     }
 
-    public @NotNull Pagination<S> fetchAsync(@NotNull PageFetcher<S> fetcher) {
+    public Pagination<S> fetchAsync(PageFetcher<S> fetcher) {
         this.pageFetcherAsync = fetcher;
         return this;
     }
 
-    public @NotNull Element prevButton() {
+    public Element prevButton() {
         var button = new Button("gui.generic.previous_page", 1, 1)
-                .sprite("generic2/btn/page/prev", 5, 3);
+            .sprite("generic2/btn/page/prev", 5, 3);
         button.onLeftClick(_ -> prevPage(1));
         button.onShiftLeftClick(_ -> prevPage(5));
         return button;
     }
 
-    public @NotNull Element nextButton() {
+    public Element nextButton() {
         var button = new Button("gui.generic.next_page", 1, 1)
-                .sprite("generic2/btn/page/next", 5, 3);
+            .sprite("generic2/btn/page/next", 5, 3);
         button.onLeftClick(_ -> nextPage(1));
         button.onShiftLeftClick(_ -> nextPage(5));
         return button;
     }
 
-    public @NotNull Element pageText(int width, int height) {
+    public Element pageText(int width, int height) {
         var button = new Text("", width, height, "")
-                .align(Text.CENTER, 5);
+            .align(Text.CENTER, 5);
         button.onLeftClick(_ -> {
             if (totalPages == 0) {
                 reset();
             } else {
                 host.pushView(AbstractAnvilView.simpleAnvil(
-                        "generic2/anvil/field_container",
-                        "action/anvil/search_icon",
-                        "Enter Page Number",
-                        input -> {
-                            try {
-                                goToPage(Integer.parseInt(input) - 1);
-                            } catch (NumberFormatException ignored) {
-                                // Ignore invalid input
-                            }
-                        },
-                        ""
+                    "generic2/anvil/field_container",
+                    "action/anvil/search_icon",
+                    "Enter Page Number",
+                    input -> {
+                        try {
+                            goToPage(Integer.parseInt(input) - 1);
+                        } catch (NumberFormatException ignored) {
+                            // Ignore invalid input
+                        }
+                    },
+                    ""
                 ));
             }
         });
@@ -136,15 +142,25 @@ public class Pagination<S> extends Panel {
         else if (this.pageFetcherAsync != null) async(() -> doPageFetch0(pageFetcherAsync));
     }
 
-    private void doPageFetch0(@NotNull PageFetcher<S> fetcher) {
+    private void doPageFetch0(PageFetcher<S> fetcher) {
         if (this.query == null) return;
         var results = fetcher.fetch(query, this.page, this.slotWidth * this.slotHeight);
 
         sync(() -> {
             clear();
-            for (int i = 0; i < results.size(); i++) {
-                var child = results.get(i);
-                add(i % this.slotWidth, i / this.slotWidth, child);
+
+            // We layout left-to-right, top-to-bottom based on the child sizes
+            int x = 0, y = 0, rowHeight = 0;
+            for (Element child : results) {
+                if (x + child.slotWidth > this.slotWidth) {
+                    x = 0;
+                    y += rowHeight;
+                    rowHeight = 0;
+                }
+
+                add(x, y, child);
+                x += child.slotWidth;
+                rowHeight = Math.max(rowHeight, child.slotHeight);
             }
             onPageChange.forEach(c -> c.onPageChange(this.page, this.totalPages));
         });

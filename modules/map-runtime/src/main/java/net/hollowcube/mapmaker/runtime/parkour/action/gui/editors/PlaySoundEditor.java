@@ -38,7 +38,7 @@ public class PlaySoundEditor extends AbstractActionEditorPanel<@NotNull PlaySoun
         this.soundInput.background("generic2/input/7_1_shadow");
         this.soundInput.lorePostfix(AbstractActionEditorPanel.LORE_POSTFIX_CLICKEDIT);
         this.soundInput.onLeftClick(() ->
-            host.pushView(new AnvilSearchView<>(
+            host.pushView(AnvilSearchView.simple(
                 "action/anvil/search_icon", "Search Sounds",
                 Autocompletors::searchSounds,
                 PlaySoundEditor::makeSoundButton,
