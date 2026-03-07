@@ -35,7 +35,7 @@ public abstract class AbstractAnvilView extends Panel {
         super(InventoryType.ANVIL, 9, 5);
         this.input = initialInput;
 
-        background(container, -66, -40);
+        background(container, -65, -39);
         add(0, 0, new Button(null, 0, 0)
             .disableTooltip()
             .background(icon, -46, -1)); // kinda gross
@@ -52,7 +52,7 @@ public abstract class AbstractAnvilView extends Panel {
         if (withSubmit) {
             add(2, 0, new Button("gui.generic.empty", 1, 1)
                 .disableTooltip()
-                .sprite("generic2/anvil/checkmark", 34, 28)
+                .sprite("generic2/anvil/checkmark", 35, 29)
                 .onLeftClick(() -> onSubmit(this.input)));
         }
     }
