@@ -219,28 +219,6 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull LinkResult attemptVerify(@NotNull String playerId, @NotNull String secret) {
-        var body = GSON.toJson(Map.of(
-            "verificationType", "discord",
-            "playerId", playerId,
-            "userSecret", secret
-        ));
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(url + "/players/verify/attempt"))
-            .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8));
-        var response = doRequest("attemptVerify", req, HttpResponse.BodyHandlers.ofString());
-
-        return switch (response.statusCode()) {
-            case 200 -> LinkResult.SUCCESS;
-            case 404 -> LinkResult.INVALID_SECRET;
-            case 204 -> LinkResult.EXPIRED_SECRET;
-            case 409 -> LinkResult.ALREADY_LINKED;
-            default -> throw new InternalError(
-                "Verification attempt failed: (" + response.statusCode() + "): " + response.body());
-        };
-    }
-
-    @Override
     public @NotNull TotpResult checkTotp(@NotNull String playerId, @Nullable String code) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(url + "/players/" + playerId + "/totp" + (code != null ? "?code=" + code : "")))

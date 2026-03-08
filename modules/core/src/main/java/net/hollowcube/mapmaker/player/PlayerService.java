@@ -5,8 +5,8 @@ import com.google.gson.reflect.TypeToken;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.player.responses.PlayerAlts;
-import net.hollowcube.mapmaker.player.responses.SendFriendRequestResult;
 import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
+import net.hollowcube.mapmaker.player.responses.SendFriendRequestResult;
 import net.hollowcube.mapmaker.player.responses.TotpSetupResponse;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
@@ -77,16 +77,6 @@ public interface PlayerService {
 
     @Nullable HypercubeStatus getHypercubeStatus(@NotNull String playerId);
 
-    enum LinkResult {
-        SUCCESS,
-        INVALID_SECRET,
-        EXPIRED_SECRET,
-        ALREADY_LINKED,
-        INTERNAL_ERROR
-    }
-
-    @NotNull LinkResult attemptVerify(@NotNull String playerId, @NotNull String secret);
-
     enum TotpResult {
         SUCCESS,
         INVALID_FORMAT,
@@ -109,7 +99,7 @@ public interface PlayerService {
 
     default @NotNull Page<PlayerFriend> getPlayerFriends(@NotNull String playerId, @NotNull Pageable pageable) {
         return getPlayerFriends(playerId, null, pageable);
-    };
+    }
 
     @NotNull Page<PlayerFriend> getPlayerFriends(@NotNull String playerId, @Nullable Boolean onlineState, @NotNull Pageable pageable);
 
@@ -163,8 +153,11 @@ public interface PlayerService {
 
     // Notifications
     @NotNull PlayerNotificationResponse getNotifications(@NotNull String playerId, int page, boolean unread);
+
     void deleteNotification(@NotNull String playerId, @NotNull String notificationId);
+
     void markNotificationRead(@NotNull String playerId, @NotNull String notificationId, boolean read);
+
     void createNotification(
         @NotNull String playerId, @NotNull String type, @NotNull String key, @Nullable JsonObject data,
         @Nullable Integer expiresInSeconds, boolean replaceUnread

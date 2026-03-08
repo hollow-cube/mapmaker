@@ -75,9 +75,9 @@ public class NoopPlayerService implements PlayerService {
     @Override
     public @NotNull TabCompleteResponse getUsernameTabCompletions(@NotNull String query, int limit) {
         return new TabCompleteResponse(MinecraftServer.getConnectionManager().getOnlinePlayers().stream()
-                                           .map(p -> new TabCompleteResponse.Entry(p.getUuid().toString(),
-                                                                                   p.getUsername()))
-                                           .toList());
+            .map(p -> new TabCompleteResponse.Entry(p.getUuid().toString(),
+                p.getUsername()))
+            .toList());
     }
 
     @Override
@@ -89,11 +89,6 @@ public class NoopPlayerService implements PlayerService {
     @Override
     public @Nullable HypercubeStatus getHypercubeStatus(@NotNull String playerId) {
         return null;
-    }
-
-    @Override
-    public @NotNull LinkResult attemptVerify(@NotNull String playerId, @NotNull String secret) {
-        throw new UnsupportedOperationException("");
     }
 
     @Override

@@ -6,7 +6,10 @@ import net.hollowcube.command.util.CommandReflection;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Blocking;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.function.Consumer;
 
@@ -31,6 +34,8 @@ public interface CommandManager {
     void register(@NotNull String name, @NotNull Consumer<CommandBuilder> func);
 
     void register(@NotNull CommandDsl command);
+
+    void unregister(@NotNull String name);
 
     /**
      * Returns suggestions for the given command input. The cursor position is always assumed to be

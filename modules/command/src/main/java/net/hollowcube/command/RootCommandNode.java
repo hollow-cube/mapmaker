@@ -25,4 +25,17 @@ final class RootCommandNode extends CommandNode {
 
         this.children.add(new ArgumentPair(Argument.Literal(name), node));
     }
+
+    void unregister(@NotNull String name) {
+        if (this.children == null) return;
+
+        var iter = this.children.iterator();
+        while (iter.hasNext()) {
+            var pair = iter.next();
+            if (pair.argument().id().equalsIgnoreCase(name)) {
+                iter.remove();
+                return;
+            }
+        }
+    }
 }

@@ -24,7 +24,8 @@ public class UnsignedLongAdapter extends TypeAdapter<Long> {
 
     @Override
     public Long read(JsonReader in) throws IOException {
-        return Long.parseUnsignedLong(in.nextString());
+        final var input = in.nextString();
+        return input.isBlank() ? 0 : Long.parseUnsignedLong(input);
     }
 
     public static class Creator implements InstanceCreator<UnsignedLongAdapter> {

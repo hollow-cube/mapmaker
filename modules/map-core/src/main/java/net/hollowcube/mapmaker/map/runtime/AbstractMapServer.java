@@ -112,10 +112,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
@@ -153,6 +150,8 @@ public abstract class AbstractMapServer implements MapServer {
 
     private volatile boolean isReady = false; // Corresponds to the associated health check
     private final Shutdowner shutdowner = new Shutdowner(this::awaitQuiescence);
+
+    private final List<String> remoteCommandNames = new ArrayList<>();
 
     protected AbstractMapServer(@NotNull ConfigLoaderV3 config) {
         this.config = config;
@@ -399,7 +398,6 @@ public abstract class AbstractMapServer implements MapServer {
         commandManager.register(new StoreCommand(playerService()));
         commandManager.register(new HypercubeCommand(playerService()));
         commandManager.register(new DiscordCommand());
-        if (fullInstance) commandManager.register(new LinkCommand(playerService()));
         if (fullInstance) commandManager.register(new TotpCommand(playerService()));
         commandManager.register(new NoobCommand());
         commandManager.register(new HideCommand(playerService()));
@@ -459,13 +457,23 @@ public abstract class AbstractMapServer implements MapServer {
         if (fullInstance) {
             commandManager.register(new RecapCommand(playerService()));
 
-            var interactions = api().interactions.getCommands();
-            for (var interaction : interactions) {
-                commandManager.register(new RemoteCommand(api(), playerService(), interaction));
-            }
+            loadRemoteCommands();
         }
 
         DataFixer.buildModel();
+    }
+
+    private void loadRemoteCommands() {
+        for (var commandName : remoteCommandNames)
+            commandManager().unregister(commandName);
+        remoteCommandNames.clear();
+
+        var interactions = api().interactions.getCommands();
+        for (var interaction : interactions) {
+            var cmd = new RemoteCommand(api(), playerService(), interaction);
+            remoteCommandNames.add(cmd.name());
+            commandManager.register(cmd);
+        }
     }
 
     public @NotNull List<HttpServerWrapper.HealthCheck> healthChecks() {
@@ -566,7 +574,12 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     protected @NotNull DebugCommand createDebugCommand() {
-        return new DebugCommand(playerService(), mapService());
+        var cmd = new DebugCommand(playerService(), mapService());
+        cmd.createPermissionedSubcommand("reload-commands", (player, _) -> {
+            loadRemoteCommands();
+            player.sendMessage(Component.text("Reloaded commands"));
+        }, "reload remote commands");
+        return cmd;
     }
 
     /**
