@@ -4,12 +4,12 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapTags;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
+import net.hollowcube.mapmaker.panels.Text;
 
 import java.util.List;
 import java.util.function.Consumer;
 
-import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
-import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
+import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
 
 public class SelectTagView extends Panel {
     private static final List<MapTags.Tag> GAMEPLAY_TAGS = MapTags.allOfType(MapTags.TagType.GAMEPLAY);
@@ -27,8 +27,12 @@ public class SelectTagView extends Panel {
 
         add(0, 0, backOrClose());
 
+        add(1, 1, infoText(7, "gameplay"));
         appendTagList(map, GAMEPLAY_TAGS, 2);
+        add(1, 4, infoText(7, "items"));
         appendTagList(map, ITEM_TAGS, 5);
+        add(1, 6, new Text(null, 7, 0, "settings")
+            .font("small").align(1, -11));
         appendTagList(map, SETTINGS_TAGS, 6);
     }
 

@@ -60,8 +60,8 @@ public class EditMapActionsView extends Panel {
                 var playerId = PlayerData.fromPlayer(player).id();
                 mapService.deleteMap(playerId, mapId, null);
 
+                player.closeInventory();
                 player.sendMessage(Component.translatable("command.map.delete.success"));
-                sync(() -> this.host.replaceView(new CreateMapsView(this.api, this.mapService, this.bridge)));
             } catch (Exception e) {
                 ExceptionReporter.reportException(e, player);
                 player.sendMessage(Component.translatable("command.map.delete.failure"));

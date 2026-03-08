@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static net.hollowcube.mapmaker.gui.common.ExtraPanels.LORE_POSTFIX_CLICKREMOVE;
+
 public class ControlledBlockListInput extends Panel {
     private final Consumer<List<Block>> onChange;
 
@@ -26,47 +28,47 @@ public class ControlledBlockListInput extends Panel {
     public void update(List<Block> blocks) {
         clear();
         add(0, 0, new Text(null, 7, 0, "placeable on")
-                .font("small").align(1, -11));
+            .font("small").align(1, -11));
 
         int i = 0;
         for (; i < Math.min(7, blocks.size()); i++) {
             final int blockIndex = i;
             var block = blocks.get(i);
             var button = makeBlockButton(block)
-                    .lorePostfix(AbstractActionEditorPanel.LORE_POSTFIX_CLICKREMOVE)
-                    .onLeftClick(() -> {
-                        host.pushView(AnvilSearchView.simple("action/anvil/search_icon", "Search Blocks",
-                                Autocompletors::searchBlocks, ControlledBlockListInput::makeBlockButton, block2 -> {
+                .lorePostfix(LORE_POSTFIX_CLICKREMOVE)
+                .onLeftClick(() -> {
+                    host.pushView(AnvilSearchView.simple("action/anvil/search_icon", "Search Blocks",
+                        Autocompletors::searchBlocks, ControlledBlockListInput::makeBlockButton, block2 -> {
                             onChange.accept(new ArrayList<>(blocks) {{
                                 set(blockIndex, block2);
                             }});
                         }));
-                    })
-                    .onRightClick(() -> {
-                        var newBlocks = new ArrayList<>(blocks);
-                        newBlocks.remove(blockIndex);
-                        this.onChange.accept(newBlocks);
-                    });
+                })
+                .onRightClick(() -> {
+                    var newBlocks = new ArrayList<>(blocks);
+                    newBlocks.remove(blockIndex);
+                    this.onChange.accept(newBlocks);
+                });
             add(i, 0, button);
         }
         if (i < slotWidth) {
             add(i, 0, new Button("gui.action.add", 1, 1)
-                    .sprite("generic2/icon/add", 3, 3)
-                    .onLeftClick(() -> {
-                        host.pushView(AnvilSearchView.simple("action/anvil/search_icon", "Search Blocks",
-                                Autocompletors::searchBlocks, ControlledBlockListInput::makeBlockButton, block -> {
+                .sprite("generic2/icon/add", 3, 3)
+                .onLeftClick(() -> {
+                    host.pushView(AnvilSearchView.simple("action/anvil/search_icon", "Search Blocks",
+                        Autocompletors::searchBlocks, ControlledBlockListInput::makeBlockButton, block -> {
                             onChange.accept(new ArrayList<>(blocks) {{
                                 add(block);
                             }});
                         }));
-                    }));
+                }));
         }
     }
 
     public static Button makeBlockButton(Block block) {
         return new Button(null, 1, 1)
-                .text(LanguageProviderV2.getVanillaTranslation(block)
-                        .decoration(TextDecoration.ITALIC, false), List.of())
-                .model(block.key().asString(), null);
+            .text(LanguageProviderV2.getVanillaTranslation(block)
+                .decoration(TextDecoration.ITALIC, false), List.of())
+            .model(block.key().asString(), null);
     }
 }

@@ -41,7 +41,10 @@ public class NewMapView extends Panel {
         confirmButton = add(2, 4, new Text(5, 1, "Create")
             .align(Text.CENTER, Text.CENTER)
             .background("generic2/btn/success/5_1")
+            .lorePostfix(LORE_POSTFIX_CLICKCREATE)
             .onLeftClickAsync(this::handleSubmit));
+
+        updateConfirmButton(sizeSelect.selected()); // Update to initial
     }
 
     @Override
@@ -79,14 +82,15 @@ public class NewMapView extends Panel {
             playerId, sizeSelect.selected(),
             ProtocolVersions.getProtocolVersion(playerId)));
         sync(() -> {
+            var host = this.host;
             onNewMap.accept(map);
-            host.popView();
+            if (host.canPopView()) host.popView();
         });
     }
 
     private void updateConfirmButton(MapSize size) {
-        var sizeNameKey = "gui.create_maps.new.size." + size + ".on.name";
-        var actualSizeKey = "gui.create_maps.new.size." + size + ".size";
+        var sizeNameKey = "gui.create_maps.new.size." + size.name().toLowerCase() + ".on.name";
+        var actualSizeKey = "gui.create_maps.new.size." + size.name().toLowerCase() + ".size";
         confirmButton.translationKey("gui.create_maps.new.confirm",
             Component.translatable(sizeNameKey),
             Component.translatable(actualSizeKey));

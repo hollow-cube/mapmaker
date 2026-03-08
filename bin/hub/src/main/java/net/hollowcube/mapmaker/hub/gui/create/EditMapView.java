@@ -16,6 +16,7 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.util.Autocompletors;
+import net.hollowcube.mapmaker.util.Sanity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.entity.Player;
@@ -75,7 +76,8 @@ public class EditMapView extends Panel {
 
         add(0, 0, backOrClose());
         this.nameText = add(1, 0, new Text("gui.create_maps.edit.name", 7, 1, slot.map().settings().getNameSafe()).align(8, 5));
-        this.nameText.onLeftClick(this::beginNameEdit);
+        this.nameText.lorePostfix(LORE_POSTFIX_CLICKEDIT)
+            .onLeftClick(this::beginNameEdit);
         add(8, 0, new Button("gui.create_maps.edit.actions", 1, 1)
             .background("generic2/btn/default/1_1")
             .sprite("icon2/1_1/ellipsis", 1, 1)
@@ -83,6 +85,7 @@ public class EditMapView extends Panel {
 
         add(1, 1, infoText(1, "icon", -2));
         this.iconButton = add(1, 2, new Button("gui.create_maps.edit.icon", 1, 1)
+            .lorePostfix(LORE_POSTFIX_CLICKCHOOSE)
             .onLeftClick(this::beginIconEdit));
         updateIcon();
 
@@ -113,54 +116,46 @@ public class EditMapView extends Panel {
 
     private void drawBuilderButtons() {
         var pd = PlayerData.fromPlayer(host.player());
-        if (!pd.id().equals(slot.map().owner())) {
-            // When we want to show a read-only view we will need to change this, for now not necessary.
-            throw new UnsupportedOperationException("can only view your own maps right now");
-        }
+        // When we want to show a read-only view we will need to change this, for now not necessary.
+        Sanity.check(pd.id().equals(slot.map().owner()), "can only view your own maps right now");
 
 //        var builderSlots = pd.mapBuilders();
-        var builderSlots = 4; // TODO: missing slots in old endpoint
+        var builderSlots = 3; // TODO: missing slots in old endpoint
 
-        // the async-yness of this is gross, should improve later.
         builderButtons.clear();
+        boolean addedAddButton = false;
         for (int i = 0; i < 4; i++) {
-            final int fi = i;
-            async(() -> {
-                Button button;
-                if (fi >= slot.builders().size()) {
-                    button = this.createNoBuilderButton(fi, builderSlots);
-                } else {
-                    var builder = slot.builders().get(fi);
-                    button = this.createBuilderButton(fi, builder.id(), builder.pending());
-                }
+            Button button;
+            if (i < slot.builders().size()) {
+                // If there is a builder, always show them (even if over unlocked count)
+                var builder = slot.builders().get(i);
 
-                sync(() -> builderButtons.add(fi, 0, button));
-            });
+                button = new Button(null, 1, 1)
+                    .background("create_maps2/head_outline" + (builder.pending() ? "_pending" : ""), 4, 4)
+                    .model(MODEL_8X, null)
+                    .profile(getPlayerHead2d(builder.id()));
+
+                async(() -> {
+                    var displayName = api.players.getDisplayName(builder.id());
+                    button.translationKey("gui.create_maps.edit.builders." + (builder.pending() ? "pending" : "entry"), displayName.asComponent())
+                        .onRightClick(() -> host.pushView(ExtraPanels.confirm(
+                            "Remove " + displayName.getUsername() + "?",
+                            () -> FutureUtil.submitVirtual(() -> removeMapBuilder(builder.id())))));
+                });
+            } else if (i < builderSlots) {
+                if (addedAddButton) continue;
+                addedAddButton = true;
+
+                button = new Button("gui.create_maps.edit.builders.add", 1, 1)
+                    .sprite("icon2/1_1/plus", 1, 1)
+                    .onLeftClick(this::beginAddMapBuilder);
+            } else {
+                button = new Button("gui.create_maps.edit.builders.locked", 1, 1)
+                    .sprite("icon2/1_1/lock", 1, 1);
+            }
+
+            builderButtons.add(i, 0, button);
         }
-    }
-
-    private Button createNoBuilderButton(final int index, int builderSlots) {
-        var button = new Button(null, 1, 1);
-        if (index >= builderSlots) {
-            return button.translationKey("gui.create_maps.edit.builders.locked").sprite("icon2/1_1/lock");
-        } else {
-            // an unlocked builder slot that has no assigned builder
-            return button.translationKey("gui.create_maps.edit.builders.add")
-                .sprite("icon2/1_1/plus", 1, 1)
-                .onLeftClick(() -> this.beginAddMapBuilder(index));
-        }
-    }
-
-    private Button createBuilderButton(int index, String builderId, boolean pending) {
-        var displayName = api.players.getDisplayName(builderId);
-        return new Button(null, 1, 1)
-            .background("create_maps2/head_outline" + (pending ? "_pending" : ""), 4, 4)
-            .model(MODEL_8X, null)
-            .profile(getPlayerHead2d(builderId))
-            .translationKey("gui.create_maps.edit.builders." + (pending ? "pending" : "entry"), displayName.asComponent())
-            .onRightClick(() -> host.pushView(ExtraPanels.confirm(
-                "Remove " + displayName.getUsername() + "?",
-                () -> FutureUtil.submitVirtual(() -> removeMapBuilder(builderId)))));
     }
 
     @Override
@@ -240,7 +235,7 @@ public class EditMapView extends Panel {
         }
     }
 
-    private void beginAddMapBuilder(int index) {
+    private void beginAddMapBuilder() {
         host.pushView(AnvilSearchView.<PlayerDataStub>builder()
             .icon("icon2/anvil/construction_hat")
             .title("Add Map Builder")

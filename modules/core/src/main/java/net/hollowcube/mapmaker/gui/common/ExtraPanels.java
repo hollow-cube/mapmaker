@@ -1,14 +1,24 @@
 package net.hollowcube.mapmaker.gui.common;
 
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.panels.*;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
 public final class ExtraPanels {
+    public static final List<Component> LORE_POSTFIX_CLICKSELECT = LanguageProviderV2.translateMulti("gui.action.clickselect", List.of());
+    public static final List<Component> LORE_POSTFIX_CLICKEDIT = LanguageProviderV2.translateMulti("gui.action.clickedit", List.of());
+    public static final List<Component> LORE_POSTFIX_CLICKCHOOSE = LanguageProviderV2.translateMulti("gui.action.clickchoose", List.of());
+    public static final List<Component> LORE_POSTFIX_CLICKEDITORREMOVE = LanguageProviderV2.translateMulti("gui.action.clickeditorremove", List.of());
+    public static final List<Component> LORE_POSTFIX_CLICKREMOVE = LanguageProviderV2.translateMulti("gui.action.clickremove", List.of());
+    public static final List<Component> LORE_POSTFIX_CLICKCREATE = LanguageProviderV2.translateMulti("gui.action.clickcreate", List.of());
+    public static final List<Component> LORE_POSTFIX_NOT_AVAILABLE = LanguageProviderV2.translateMulti("gui.action.unavailable", List.of());
 
     public static Text title(@NotNull String text) {
         return new Text("", 9, 0, text).align(Text.CENTER, -23);
@@ -102,8 +112,8 @@ public final class ExtraPanels {
                 new Button("gui.confirm2.yes", 3, 1)
                     .onLeftClick(() -> {
                         final Player player = host.player();
-                        onConfirm.accept(player);
                         host.popOrClose();
+                        onConfirm.accept(player);
                     })
             );
         }

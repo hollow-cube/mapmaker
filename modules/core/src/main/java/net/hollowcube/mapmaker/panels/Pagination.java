@@ -129,6 +129,14 @@ public class Pagination<S extends @UnknownNullability Object> extends Panel {
         return button;
     }
 
+    public void renderSync() {
+        if (this.query == null || pageFetcher == null)
+            throw new IllegalStateException("Cannot render sync without a default query and a page fetcher");
+
+        // Only valid if we have a default query and have a sync page fetcher
+        syncRenderResults(pageFetcher.fetch(query, 0, this.slotWidth * this.slotHeight));
+    }
+
     // Impl
 
     private void resetSearch() {
@@ -146,23 +154,25 @@ public class Pagination<S extends @UnknownNullability Object> extends Panel {
         if (this.query == null) return;
         var results = fetcher.fetch(query, this.page, this.slotWidth * this.slotHeight);
 
-        sync(() -> {
-            clear();
+        sync(() -> syncRenderResults(results));
+    }
 
-            // We layout left-to-right, top-to-bottom based on the child sizes
-            int x = 0, y = 0, rowHeight = 0;
-            for (Element child : results) {
-                if (x + child.slotWidth > this.slotWidth) {
-                    x = 0;
-                    y += rowHeight;
-                    rowHeight = 0;
-                }
+    private void syncRenderResults(List<? extends Element> results) {
+        clear();
 
-                add(x, y, child);
-                x += child.slotWidth;
-                rowHeight = Math.max(rowHeight, child.slotHeight);
+        // We layout left-to-right, top-to-bottom based on the child sizes
+        int x = 0, y = 0, rowHeight = 0;
+        for (Element child : results) {
+            if (x + child.slotWidth > this.slotWidth) {
+                x = 0;
+                y += rowHeight;
+                rowHeight = 0;
             }
-            onPageChange.forEach(c -> c.onPageChange(this.page, this.totalPages));
-        });
+
+            add(x, y, child);
+            x += child.slotWidth;
+            rowHeight = Math.max(rowHeight, child.slotHeight);
+        }
+        onPageChange.forEach(c -> c.onPageChange(this.page, this.totalPages));
     }
 }

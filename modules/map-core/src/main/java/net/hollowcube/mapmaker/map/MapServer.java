@@ -33,6 +33,7 @@ public interface MapServer {
 
     default @NotNull ServiceContext createServiceContext() {
         return new ServiceContext(
+            this.api(),
             this.playerService(),
             this.sessionService(),
             this.mapService(),

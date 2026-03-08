@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.api.ApiClient;
+import net.hollowcube.mapmaker.api.maps.MapRole;
 import net.hollowcube.mapmaker.api.maps.MapSlot;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -8,8 +10,8 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.util.StringComparison;
+import net.minestom.server.entity.Player;
 import net.minestom.server.utils.Unit;
-import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
@@ -22,6 +24,17 @@ import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
 
 public class CreateMapsView extends Panel {
     private static final int PAGE_SIZE = 5;
+
+    public static void open(Player player, ApiClient api, MapService mapService, ServerBridge bridge) {
+        var playerId = PlayerData.fromPlayer(player).id();
+        var slots = api.maps.getPlayerSlots(playerId).results();
+
+        if (slots.isEmpty()) {
+            Panel.open(player, new NewMapView(mapService, _ -> FutureUtil.submitVirtual(() -> open(player, api, mapService, bridge))));
+        } else {
+            Panel.open(player, new CreateMapsView(api, mapService, bridge, slots));
+        }
+    }
 
     private final ApiClient api;
     private final MapService mapService;
@@ -37,11 +50,12 @@ public class CreateMapsView extends Panel {
     private String searchText = "";
     private @Nullable Runnable remountTask;
 
-    public CreateMapsView(ApiClient api, MapService mapService, ServerBridge bridge) {
+    public CreateMapsView(ApiClient api, MapService mapService, ServerBridge bridge, List<MapSlot> initialSlots) {
         super(9, 10);
         this.api = api;
         this.mapService = mapService;
         this.bridge = bridge;
+        this.slots.addAll(initialSlots);
 
         background("create_maps2/container", -10, -31);
         add(0, 0, title("Create Map"));
@@ -53,7 +67,8 @@ public class CreateMapsView extends Panel {
         this.searchTextElement.onLeftClick(this::openSearchInput);
         this.searchTextElement.onShiftLeftClick(this::clearSearch);
 
-        this.pagination = add(0, 1, new Pagination<Unit>(9, 5, Unit.INSTANCE).fetchAsync(this::onSearch));
+        this.pagination = add(0, 1, new Pagination<>(9, 5, Unit.INSTANCE)
+            .fetch(this::onSearch));
         add(2, 6, this.pagination.prevButton());
         add(3, 6, this.pagination.pageText(3, 1));
         add(6, 6, this.pagination.nextButton());
@@ -62,19 +77,21 @@ public class CreateMapsView extends Panel {
             .background("generic2/btn/default/1_1")
             .sprite("icon2/1_1/plus", 1, 1)
             .onLeftClick(() -> this.host.pushTransientView(new NewMapView(mapService, this::acceptNewMap))));
+
+        pagination.renderSync();
     }
 
     @Override
     protected void mount(InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
+
         if (isInitial) {
-            this.rebuildSlots();
+            this.updateCreateButton();
         } else {
             if (this.remountTask != null) {
                 this.remountTask.run();
             }
             this.updateCreateButton();
-            this.resetSearch();
         }
     }
 
@@ -95,7 +112,7 @@ public class CreateMapsView extends Panel {
 
     private void acceptNewMap(MapData map) {
         // No need to re-sort, we know this should be first in the list.
-        this.slots.addFirst(new MapSlot(map, Instant.now(), List.of()));
+        this.slots.addFirst(new MapSlot(map, Instant.now(), MapRole.OWNER, List.of()));
         this.resetSearch();
     }
 
@@ -141,7 +158,6 @@ public class CreateMapsView extends Panel {
         handleSearchTextChange("");
     }
 
-    @Blocking
     private List<? extends Panel> onSearch(Unit unused, int page, int pageSize) {
         final var results = new ArrayList<>(slots);
 
@@ -150,11 +166,17 @@ public class CreateMapsView extends Panel {
         this.pagination.totalPages((int) Math.ceil(((double) results.size()) / PAGE_SIZE));
 
         var entries = new ArrayList<MapSlotEntry>();
-        for (int i = page * PAGE_SIZE; i < PAGE_SIZE && i < results.size(); i++) {
+        for (int i = page * PAGE_SIZE; i < (page + 1) * PAGE_SIZE && i < results.size(); i++) {
             final var slot = results.get(i);
-            entries.add(new MapSlotEntry(this.api, this.mapService, this.bridge, slot,
-                slot.map().owner().equals(PlayerData.fromPlayer(host.player()).id()),
-                () -> this.remountTask = this::rebuildSlots));
+            Runnable onPublish = () -> this.remountTask = this::rebuildSlots;
+
+            if (slot.map().isPublished()) {
+                entries.add(new MapSlotEntry.Published(this.api, this.mapService, this.bridge, slot, onPublish));
+            } else if (slot.role() == MapRole.OWNER) {
+                entries.add(new MapSlotEntry.Owner(this.api, this.mapService, this.bridge, slot, onPublish));
+            } else {
+                entries.add(new MapSlotEntry.Builder(this.api, this.mapService, this.bridge, slot, onPublish));
+            }
         }
 
         return entries;

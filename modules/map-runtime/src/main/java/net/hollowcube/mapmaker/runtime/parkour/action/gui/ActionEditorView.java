@@ -36,22 +36,22 @@ public class ActionEditorView extends Panel {
         add(0, 0, backOrClose());
         add(1, 0, info("action"));
         add(2, 0, new Text(null, 5, 1, "Current Actions")
-                .align(Text.CENTER, Text.CENTER)
-                .background("generic2/btn/default/5_1"));
+            .align(Text.CENTER, Text.CENTER)
+            .background("generic2/btn/default/5_1"));
 
 
         if (isRepeatable) {
             add(7, 0, new Button("gui.action.condition", 1, 1)
-                    .background("generic2/btn/default/1_1")
-                    .sprite("action/icon/condition", 1, 2)
-                    .onLeftClick(() -> this.host.pushView(new ConditionEditorView(data)))
+                .background("generic2/btn/default/1_1")
+                .sprite("action/icon/condition", 1, 2)
+                .onLeftClick(() -> this.host.pushView(new ConditionEditorView(data)))
             );
             add(8, 0, new RepeatableButton(1, 1));
         } else {
             add(7, 0, new Button("gui.action.condition", 2, 1)
-                    .background("generic2/btn/default/2_1")
-                    .sprite("action/icon/condition", 10, 2)
-                    .onLeftClick(() -> this.host.pushView(new ConditionEditorView(data)))
+                .background("generic2/btn/default/2_1")
+                .sprite("action/icon/condition", 10, 2)
+                .onLeftClick(() -> this.host.pushView(new ConditionEditorView(data)))
             );
         }
 
@@ -111,17 +111,17 @@ public class ActionEditorView extends Panel {
 
                 var translation = editor.thumbnail().apply(ref.action());
                 add(x, y, new Button(null, 1, 1)
-                        .sprite(editor.sprite().apply(ref.action()))
-                        .translationKey(translation.key(), translation.arguments())
-                        .lorePostfix(AbstractActionEditorPanel.LORE_POSTFIX_CLICKEDITORREMOVE)
-                        .onLeftClick(() -> editExistingAction(ref))
-                        .onRightClick(() -> removeExistingAction(y * 7 + x)));
+                    .sprite(editor.sprite().apply(ref.action()))
+                    .translationKey(translation.key(), translation.arguments())
+                    .lorePostfix(LORE_POSTFIX_CLICKEDITORREMOVE)
+                    .onLeftClick(() -> editExistingAction(ref))
+                    .onRightClick(() -> removeExistingAction(y * 7 + x)));
             }
             if (i < MAX_ACTIONS) {
                 int x = i % 7, y = i / 7;
                 add(x, y, new Button("gui.action.add", 1, 1)
-                        .sprite("generic2/icon/add", 3, 3)
-                        .onLeftClick(() -> host.pushTransientView(new ActionPickerView(actions, type))));
+                    .sprite("generic2/icon/add", 3, 3)
+                    .onLeftClick(() -> host.pushTransientView(new ActionPickerView(actions, type))));
             }
         }
 

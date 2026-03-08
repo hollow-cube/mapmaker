@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.util;
 
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -8,6 +9,7 @@ import org.jetbrains.annotations.NotNullByDefault;
 
 @NotNullByDefault
 public record ServiceContext(
+    ApiClient api,
     PlayerService players,
     SessionService sessions,
     MapService maps,

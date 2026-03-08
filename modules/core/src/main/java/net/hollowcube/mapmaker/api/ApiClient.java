@@ -47,6 +47,12 @@ public final class ApiClient {
         }
     }
 
+    public static class BadRequestError extends Error {
+        public BadRequestError(HttpResponse<String> response) {
+            super(response);
+        }
+    }
+
     public static class InternalServerError extends Error {
         public InternalServerError(HttpResponse<String> response) {
             super(response);

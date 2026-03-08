@@ -31,7 +31,7 @@ public class ActionPickerView extends Panel {
         add(0, 0, backOrClose());
         add(1, 0, info("action"));
         add(2, 0, new Text("gui.action.search.empty", 7, 1, "Search...")
-                .align(8, 5).background("action/editor/search_bar")); // TODO: search support
+            .align(8, 5).background("action/editor/search_bar")); // TODO: search support
     }
 
     @Override
@@ -48,11 +48,11 @@ public class ActionPickerView extends Panel {
             if (editor.exclusiveSet().stream().anyMatch(actionList::has))
                 continue; // skip if any exclusive action is already present
             add(x + 1, y + 2, new Button(null, 1, 1)
-                    .text(Component.translatable("gui.action." + actionKey.value() + ".title"),
-                            LanguageProviderV2.translateMulti("gui.action." + actionKey.value() + ".info.lore", List.of()))
-                    .lorePostfix(AbstractActionEditorPanel.LORE_POSTFIX_CLICKSELECT)
-                    .sprite(editor.sprite().apply(null))
-                    .onLeftClick(() -> this.handleAddAction(actionKey, editor)));
+                .text(Component.translatable("gui.action." + actionKey.value() + ".title"),
+                    LanguageProviderV2.translateMulti("gui.action." + actionKey.value() + ".info.lore", List.of()))
+                .lorePostfix(LORE_POSTFIX_CLICKSELECT)
+                .sprite(editor.sprite().apply(null))
+                .onLeftClick(() -> this.handleAddAction(actionKey, editor)));
             i++;
         }
     }

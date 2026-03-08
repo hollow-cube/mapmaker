@@ -65,8 +65,8 @@ public final class MapTags {
         BLOCK_PLACING(TagType.ITEM, "grass_block"),
         ELYTRA(TagType.ITEM, "elytra"),
         TRIDENT(TagType.ITEM, "trident"),
-        MACE(TagType.ITEM, "mace"),
-        SPEAR(TagType.ITEM, "spear"),
+        // MACE(TagType.ITEM, "mace"),
+        // SPEAR(TagType.ITEM, "spear"),
         ENDER_PEARL(TagType.ITEM, "ender_pearl"),
         WIND_CHARGE(TagType.ITEM, "wind_charge"),
 

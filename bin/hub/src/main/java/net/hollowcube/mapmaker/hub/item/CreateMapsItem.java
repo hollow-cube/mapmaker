@@ -1,14 +1,15 @@
 package net.hollowcube.mapmaker.hub.item;
 
 import net.hollowcube.canvas.internal.Controller;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.hub.gui.create.CreateMapsView;
 import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
@@ -45,7 +46,13 @@ public class CreateMapsItem extends ItemHandler {
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
         if (CoreFeatureFlags.CREATE_MAPS_V2.test(player) && !player.isSneaking()) {
-            Panel.open(player, new CreateMapsView(this.api, this.mapService, this.bridge));
+            FutureUtil.submitVirtual(() -> {
+                try {
+                    CreateMapsView.open(player, api, mapService, bridge);
+                } catch (Exception e) {
+                    ExceptionReporter.reportException(e, player);
+                }
+            });
             return;
         }
 

@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import java.util.function.ToIntFunction;
 
+import static net.hollowcube.mapmaker.gui.common.ExtraPanels.LORE_POSTFIX_CLICKEDIT;
 import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
 
 public class ControlledNumberInput extends Panel {
@@ -40,30 +41,30 @@ public class ControlledNumberInput extends Panel {
 
         if (oneSlotHack) {
             this.labelText = add(0, 0, new Text(null, 7, 0,
-                    LanguageProviderV2.translateToPlain("gui.action." + key))
-                    .font("small").align(1, -11));
+                LanguageProviderV2.translateToPlain("gui.action." + key))
+                .font("small").align(1, -11));
         } else {
             this.labelText = add(0, 0, AbstractActionEditorPanel.groupText(7,
-                    LanguageProviderV2.translateToPlain("gui.action." + key)));
+                LanguageProviderV2.translateToPlain("gui.action." + key)));
             this.labelText.translationKey("gui.action." + key);
         }
 
         this.inputText = add(0, oneSlotHack ? 0 : 1, new Text("gui.action." + key, 5, 1, "")
-                .align(6, 5).background("generic2/input/5_1_shadow"));
+            .align(6, 5).background("generic2/input/5_1_shadow"));
         this.inputText
-                .lorePostfix(AbstractActionEditorPanel.LORE_POSTFIX_CLICKEDIT)
-                .onLeftClick(this::beginAnvilEdit);
+            .lorePostfix(LORE_POSTFIX_CLICKEDIT)
+            .onLeftClick(this::beginAnvilEdit);
 
         this.minusButton = add(5, oneSlotHack ? 0 : 1, new Button("gui.action." + key + ".minus", 1, 1)
-                .background("generic2/btn/default/1_1_shadow")
-                .sprite("generic2/icon/minus", 4, 8)
-                .onLeftClick(() -> handleNewValue(value - smallStep))
-                .onShiftLeftClick(() -> handleNewValue(value - bigStep)));
+            .background("generic2/btn/default/1_1_shadow")
+            .sprite("generic2/icon/minus", 4, 8)
+            .onLeftClick(() -> handleNewValue(value - smallStep))
+            .onShiftLeftClick(() -> handleNewValue(value - bigStep)));
         this.plusButton = add(6, oneSlotHack ? 0 : 1, new Button("gui.action." + key + ".plus", 1, 1)
-                .background("generic2/btn/default/1_1_shadow")
-                .sprite("generic2/icon/plus", 4, 4)
-                .onLeftClick(() -> handleNewValue(value + smallStep))
-                .onShiftLeftClick(() -> handleNewValue(value + bigStep)));
+            .background("generic2/btn/default/1_1_shadow")
+            .sprite("generic2/icon/plus", 4, 4)
+            .onLeftClick(() -> handleNewValue(value + smallStep))
+            .onShiftLeftClick(() -> handleNewValue(value + bigStep)));
     }
 
     public ControlledNumberInput label(String text) {
@@ -109,10 +110,10 @@ public class ControlledNumberInput extends Panel {
 
     private void beginAnvilEdit() {
         host.pushView(simpleAnvil(
-                "generic2/anvil/field_container",
-                "action/anvil/" + this.key.replace(".", "_") + "_icon",
-                LanguageProviderV2.translateToPlain("gui.action." + key + ".name"),
-                this::receiveAnvilEdit, this.toString.apply(this.value)
+            "generic2/anvil/field_container",
+            "action/anvil/" + this.key.replace(".", "_") + "_icon",
+            LanguageProviderV2.translateToPlain("gui.action." + key + ".name"),
+            this::receiveAnvilEdit, this.toString.apply(this.value)
         ));
     }
 

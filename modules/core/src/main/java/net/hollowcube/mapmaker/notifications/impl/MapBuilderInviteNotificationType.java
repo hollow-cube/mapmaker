@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.notifications.impl;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.notifications.PlayerNotification;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
@@ -47,34 +48,34 @@ public final class MapBuilderInviteNotificationType implements PlayerNotificatio
             "gui.notification.map_builder.invite",
             List.of(data.inviterDisplayName(), data.mapName()),
             List.of(
-//                PlayerNotification.Action.of(
-//                    ACCEPT_ICON,
-//                    "gui.notification.map_builder.invite.action.accept",
-//                    "gui.notification.map_builder.invite.action.accept.tooltip",
-//                    PlayerNotification.ActionExecutor
-//                        .ofAsync(() -> {
-//                            try {
-//                                context.maps().acceptMapBuilderRequest(data.mapId(), playerId);
-//                                context.players().deleteNotification(playerId, entry.id());
-//                            } catch (MapService.MapBuilderNoSlotsError _) {
-//                                player.sendMessage(Component.translatable("gui.notification.map_builder_invite.accept.error.no_slots"));
-//                            }
-//                        })
-//                        .withConfirmation()
-//                        .withRefresh()
-//                ),
-//                PlayerNotification.Action.of(
-//                    REJECT_ICON,
-//                    "gui.notification.map_builder.invite.action.reject",
-//                    "gui.notification.map_builder.invite.action.reject.tooltip",
-//                    PlayerNotification.ActionExecutor
-//                        .ofAsync(() -> {
-//                            context.maps().rejectMapBuilderRequest(data.mapId(), playerId);
-//                            context.players().deleteNotification(playerId, entry.id());
-//                        })
-//                        .withConfirmation()
-//                        .withRefresh()
-//                )
+                PlayerNotification.Action.of(
+                    ACCEPT_ICON,
+                    "gui.notification.map_builder.invite.action.accept",
+                    "gui.notification.map_builder.invite.action.accept.tooltip",
+                    PlayerNotification.ActionExecutor
+                        .ofAsync(() -> {
+                            try {
+                                context.api().maps.acceptMapBuilderInvite(data.mapId(), playerId);
+                                context.players().deleteNotification(playerId, entry.id());
+                            } catch (ApiClient.BadRequestError _) {
+                                player.sendMessage(Component.translatable("gui.notification.map_builder_invite.accept.error.no_slots"));
+                            }
+                        })
+                        .withConfirmation()
+                        .withRefresh()
+                ),
+                PlayerNotification.Action.of(
+                    REJECT_ICON,
+                    "gui.notification.map_builder.invite.action.reject",
+                    "gui.notification.map_builder.invite.action.reject.tooltip",
+                    PlayerNotification.ActionExecutor
+                        .ofAsync(() -> {
+                            context.api().maps.rejectMapBuilderInvite(data.mapId(), playerId);
+                            context.players().deleteNotification(playerId, entry.id());
+                        })
+                        .withConfirmation()
+                        .withRefresh()
+                )
             )
         );
     }

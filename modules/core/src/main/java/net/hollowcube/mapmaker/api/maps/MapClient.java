@@ -22,6 +22,7 @@ public interface MapClient {
         throw notImplemented();
     }
 
+    /// TODO: returns 400 if you dont have a slot, should have more specific handling for this.
     default void acceptMapBuilderInvite(String mapId, String playerId) {
         throw notImplemented();
     }

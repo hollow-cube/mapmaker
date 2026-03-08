@@ -258,7 +258,7 @@ public abstract class AbstractMapServer implements MapServer {
             this.inviteService = new PlayerInviteServiceImpl(otel, "http://localhost:9127", playerService, mapService, sessionManager, bridge); // tilt
         }
 
-        var services = new ServiceContext(playerService(), sessionService(), mapService(), bridge());
+        var services = new ServiceContext(api(), playerService(), sessionService(), mapService(), bridge());
 
         if (!globalConfig.noop()) {
             mapInviteListener = new MapInviteListener(mapService, playerService, sessionManager, jetStream);
@@ -382,6 +382,7 @@ public abstract class AbstractMapServer implements MapServer {
         addBinding(ServerBridge.class, bridge(), "bridge");
 
         var services = new ServiceContext(
+            api(),
             playerService(),
             sessionService(),
             mapService(),

@@ -7,17 +7,16 @@ import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
 import net.hollowcube.mapmaker.util.ServiceContext;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
 
 @AutoService(PlayerNotificationType.class)
-public final class MapBuilderAcceptRejectNotificationType implements PlayerNotificationType {
+public final class MapBuilderAcceptedNotificationType implements PlayerNotificationType {
 
     @Override
     public String type() {
-        return "map_builder_accept_reject";
+        return "map_builder_accepted";
     }
 
     private record EntryData(boolean accepted, Component builderDisplayName, Component mapName) {
@@ -41,17 +40,17 @@ public final class MapBuilderAcceptRejectNotificationType implements PlayerNotif
         return new PlayerNotification(
             entry,
             MapBuilderInviteNotificationType.ICON,
-            "gui.notification.map_builder.invite." + (data.accepted() ? "accept" : "reject"),
+            "gui.notification.map_builder.invite.accept",
             List.of(data.builderDisplayName(), data.mapName()),
             List.of(DefaultActions.delete(player, context, entry))
         );
     }
 
     @Override
-    public @Nullable Component createToast(Player player, ServiceContext context, PlayerNotificationResponse.SimpleEntry entry) {
+    public Component createToast(Player player, ServiceContext context, PlayerNotificationResponse.SimpleEntry entry) {
         var data = dataFromEntry(player, context, entry);
         return Component.translatable(
-            "gui.notification.map_builder.invite." + (data.accepted() ? "accept" : "reject") + ".toast",
+            "gui.notification.map_builder.invite.accept.toast",
             data.builderDisplayName(),
             data.mapName()
         );

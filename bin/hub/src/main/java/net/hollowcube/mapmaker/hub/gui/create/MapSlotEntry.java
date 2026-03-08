@@ -1,20 +1,23 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapSlot;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.panels.Text;
+import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.util.Sanity;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.Blocking;
 
+import static net.hollowcube.mapmaker.gui.common.ExtraPanels.confirm;
 import static net.hollowcube.mapmaker.gui.map.details.MapDetailsTimesPanel.MODEL_8X;
 import static net.hollowcube.mapmaker.gui.map.details.MapDetailsTimesPanel.getPlayerHead2d;
 
@@ -26,9 +29,9 @@ public class MapSlotEntry extends Panel {
     private final MapSlot slot;
     private final Runnable onPublish;
 
-    public MapSlotEntry(
+    private MapSlotEntry(
         ApiClient api, MapService mapService, ServerBridge bridge,
-        MapSlot slot, boolean isOwned, Runnable onPublish
+        MapSlot slot, Runnable onPublish
     ) {
         super(9, 1);
         this.api = api;
@@ -36,110 +39,175 @@ public class MapSlotEntry extends Panel {
         this.bridge = bridge;
         this.slot = slot;
         this.onPublish = onPublish;
+    }
 
-        var map = slot.map();
-        if (map.isPublished()) {
-            background("create_maps2/slot/gray", 1, 1);
-        } else {
+    @Blocking
+    protected void buildInWorld() {
+        if (isOwner(host.player())) {
+            EditMapView.editMap(mapService, slot.map(), this.host, bridge);
+            return;
+        }
+
+        // If you arent the owner, we need to check the latest version to make sure its not in a verifying state
+        // TODO: this is still a race, we need to check elsewhere to prevent editing a map during/after verification
+        var map = mapService.getMap(host.player().getUuid().toString(), slot.map().id());
+        if (map.verification() != MapVerification.UNVERIFIED) {
+            // TODO: translation key
+            host.player().sendMessage(Component.translatable("cant edit during verification"));
+            return;
+        }
+
+        EditMapView.beginBuildingMap(bridge, map, host.player());
+    }
+
+    protected void editMapDetails() {
+        Sanity.check(isOwner(host.player()), "cannot edit details for someone else's map");
+
+        async(() -> {
+            // TODO: this constructor is blocking, which is kinda confusing and im not a fan overall.
+            var view = new EditMapView(this.api, this.mapService, this.bridge, slot, this.onPublish);
+            sync(() -> host.pushView(view));
+        });
+    }
+
+    protected void viewMapDetails() {
+        // We only show this for the player themselves anyway so its fine to just get it from them.
+        Sanity.check(isOwner(host.player()), "cannot show details for someone else's map");
+
+        var displayName = PlayerData.fromPlayer(host.player()).displayName2();
+        var view = new MapDetailsView(api, mapService, bridge, slot.map(), displayName, true);
+        this.host.pushView(view);
+    }
+
+    protected void removeFromMap() {
+        var player = host.player();
+        var playerId = PlayerData.fromPlayer(player).id();
+        host.pushView(confirm("Leave map?", () -> FutureUtil.submitVirtual(() -> {
+            try {
+                api.maps.removeMapBuilder(slot.map().id(), playerId);
+                // TODO: translation key
+                player.sendMessage("removed from map");
+            } catch (RuntimeException e) {
+                ExceptionReporter.reportException(e, playerId);
+                player.sendMessage(Component.translatable("generic.unknown_error"));
+            }
+        })));
+    }
+
+    private boolean isOwner(Player player) {
+        return player.getUuid().toString().equals(slot.map().owner());
+    }
+
+    public static final class Owner extends MapSlotEntry {
+        public Owner(
+            ApiClient api, MapService mapService, ServerBridge bridge,
+            MapSlot slot, Runnable onPublish
+        ) {
+            super(api, mapService, bridge, slot, onPublish);
+
+            var map = slot.map();
+            var translationKey = "gui.create_maps.slot.yours";
+            var mapName = map.settings().getNameSafe();
+
+            // TODO: If ready to publish, green background
             background("create_maps2/slot/blue", 1, 1);
-        }
 
-        var name = map.settings().getNameSafe();
+            var iconButton = add(0, 0, new Button(null, 1, 1)
+                .translationKey(translationKey, mapName)
+                .onLeftClick(this::editMapDetails));
+            var userIcon = map.settings().getIcon();
+            if (userIcon != null) iconButton.model(userIcon.toString(), null);
+            else iconButton.sprite("icon2/1_1/item_frame", 1, 1);
 
-        var iconButton = add(0, 0, new Button(null, 1, 1).onLeftClick(this::onClick));
-        var userIcon = map.settings().getIcon();
-        if (isOwned) {
-            iconButton.translationKey("gui.create_maps.edit.icon");
-            if (userIcon != null) {
-                iconButton.model(userIcon.toString(), null);
-            } else {
-                iconButton.sprite("icon2/1_1/item_frame", 1, 1);
-            }
-        } else {
-            iconButton.sprite((Sprite) null)
-                .model(MODEL_8X, null)
-                .profile(getPlayerHead2d(map.owner()));
+            add(1, 0, new Text(7, 1, mapName)
+                .align(2, Text.CENTER)
+                .translationKey(translationKey, mapName)
+                .onLeftClick(this::editMapDetails));
 
-            async(() -> {
-                var ownerDisplayName = api.players.getDisplayName(map.owner()).asComponent();
-                iconButton.translationKey("gui.create_maps.slot.builder", name, ownerDisplayName);
-            });
-        }
-
-        var textTranslationKey = "gui.create_maps.slot.";
-        if (isOwned) {
-            if (map.isPublished()) {
-                textTranslationKey += "published";
-            } else {
-                textTranslationKey += "yours";
-            }
-        } else {
-            if (map.verification() != MapVerification.UNVERIFIED) {
-                textTranslationKey += "builder.verified";
-            } else {
-                textTranslationKey += "builder";
-            }
-        }
-
-        var nameText = new Text(map.isPublished() ? 8 : 7, 1, name)
-            .align(2, Text.CENTER)
-            .onLeftClick(this::onClick);
-        if (isOwned) {
-            nameText.translationKey(textTranslationKey, name);
-        } else {
-            final var translationKey = textTranslationKey;
-
-            async(() -> {
-                var ownerDisplayName = api.players.getDisplayName(map.owner()).asComponent();
-                nameText.translationKey(translationKey, name, ownerDisplayName);
-            });
-        }
-        add(1, 0, nameText);
-
-        if (!map.isPublished()) {
             add(8, 0, new Button("gui.create_maps.edit.build", 1, 1)
                 .sprite("icon2/1_1/hammer", 1, 1)
-                .onLeftClickAsync(() -> EditMapView.editMap(mapService, map, this.host, bridge)));
+                .onLeftClickAsync(this::buildInWorld));
         }
     }
 
-    private void onClick() {
-        if (slot.map().isPublished()) {
-            this.showDetails();
-        } else if (isOwner(slot.map(), this.host.player())) {
-            this.editMap();
-        } else {
-            FutureUtil.submitVirtual(() -> buildMap(slot.map(), this.host.player(), this.bridge));
+    public static final class Builder extends MapSlotEntry {
+        public Builder(
+            ApiClient api, MapService mapService, ServerBridge bridge,
+            MapSlot slot, Runnable onPublish
+        ) {
+            super(api, mapService, bridge, slot, onPublish);
+
+            var map = slot.map();
+            var translationKey = "gui.create_maps.slot.yours";
+            var mapName = map.settings().getNameSafe();
+
+            // TODO: Different background for builder maps
+            background("create_maps2/slot/blue", 1, 1);
+
+            add(0, 0, new Button(null, 1, 1)
+                .translationKey(translationKey, mapName)
+                .background("create_maps2/head_outline", 4, 4)
+                .profile(getPlayerHead2d(map.owner()))
+                .model(MODEL_8X, null)
+                .onLeftClickAsync(this::buildInWorld));
+////            new Button(null, 1, 1)
+////                .background("create_maps2/head_outline" + (pending ? "_pending" : ""), 4, 4)
+////                .model(MODEL_8X, null)
+////                .profile(getPlayerHead2d(builderId))
+////                .translationKey("gui.create_maps.edit.builders." + (pending ? "pending" : "entry"), displayName.asComponent())
+//            iconButton
+//                .background("create_maps2/head_outline", 4, 4)
+//                .model(MODEL_8X, null)
+//                .profile(getPlayerHead2d(map.owner()));
+//
+//            async(() -> {
+//                var ownerDisplayName = api.players.getDisplayName(map.owner()).asComponent();
+//                iconButton.translationKey("gui.create_maps.slot.builder", name, ownerDisplayName);
+//            });
+
+//            var iconButton = add(0, 0, new Button(null, 1, 1)
+//                .background("create_maps2/head_outline" + (pending ? "_pending" : ""), 4, 4)
+//                .translationKey(translationKey, mapName)
+//                .onLeftClick(this::editMapDetails));
+//            var userIcon = map.settings().getIcon();
+//            if (userIcon != null) iconButton.model(userIcon.toString(), null);
+//            else iconButton.sprite("icon2/1_1/item_frame", 1, 1);
+
+            add(1, 0, new Text(7, 1, mapName)
+                .align(2, Text.CENTER)
+                .translationKey(translationKey, mapName)
+                .onLeftClickAsync(this::buildInWorld));
+
+            add(8, 0, new Button("gui.create_maps.edit.remove_self", 1, 1)
+                .sprite("icon2/1_1/running_out_door", 1, 1)
+                .onLeftClick(this::removeFromMap));
         }
     }
 
-    private static boolean isOwner(MapData map, Player player) {
-        return player.getUuid().toString().equals(map.owner());
-    }
+    public static final class Published extends MapSlotEntry {
+        public Published(
+            ApiClient api, MapService mapService, ServerBridge bridge,
+            MapSlot slot, Runnable onPublish
+        ) {
+            super(api, mapService, bridge, slot, onPublish);
 
-    private void showDetails() {
-        var playerId = this.host.player().getUuid().toString();
-        async(() -> {
-            var playerDisplayName = api.players.getDisplayName(slot.map().owner());
-            sync(() -> {
-                var view = new MapDetailsView(api, mapService, bridge, slot.map(), playerDisplayName, true);
-                this.host.pushView(view);
-            });
-        });
-    }
+            var map = slot.map();
+            var translationKey = "gui.create_maps.slot.published";
+            var mapName = map.settings().getNameSafe();
 
-    private void editMap() {
-        async(() -> {
-            var view = new EditMapView(this.api, this.mapService, this.bridge, slot, this.onPublish);
-            sync(() -> this.host.pushView(view));
-        });
-    }
+            background("create_maps2/slot/gray", 1, 1);
 
-    private static void buildMap(MapData map, Player player, ServerBridge bridge) {
-        if (map.verification() != MapVerification.UNVERIFIED) {
-            player.sendMessage(Component.text("cannot join as map is verified/pending verification"));
-        } else {
-            EditMapView.beginBuildingMap(bridge, map, player);
+            var iconButton = add(0, 0, new Button(null, 1, 1)
+                .translationKey(translationKey, mapName)
+                .onLeftClick(this::viewMapDetails));
+            var userIcon = map.settings().getIcon();
+            if (userIcon != null) iconButton.model(userIcon.toString(), null);
+            else iconButton.sprite("icon2/1_1/item_frame", 1, 1);
+
+            add(1, 0, new Text(8, 1, mapName)
+                .align(2, Text.CENTER)
+                .translationKey(translationKey, mapName)
+                .onLeftClick(this::viewMapDetails));
         }
     }
 }

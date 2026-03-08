@@ -22,6 +22,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+import static net.hollowcube.mapmaker.gui.common.ExtraPanels.LORE_POSTFIX_CLICKEDIT;
+
 public class PlaySoundEditor extends AbstractActionEditorPanel<@NotNull PlaySoundAction> {
 
     private final ControlledNumberInput volumeInput;
@@ -36,7 +38,7 @@ public class PlaySoundEditor extends AbstractActionEditorPanel<@NotNull PlaySoun
         this.soundInput = add(1, 2, new Text("gui.action.play_sound.sound", 7, 1, ""));
         this.soundInput.align(6, 5);
         this.soundInput.background("generic2/input/7_1_shadow");
-        this.soundInput.lorePostfix(AbstractActionEditorPanel.LORE_POSTFIX_CLICKEDIT);
+        this.soundInput.lorePostfix(LORE_POSTFIX_CLICKEDIT);
         this.soundInput.onLeftClick(() ->
             host.pushView(AnvilSearchView.simple(
                 "action/anvil/search_icon", "Search Sounds",

@@ -8,10 +8,8 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
 import net.hollowcube.mapmaker.runtime.parkour.action.Action;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionList;
-import net.kyori.adventure.text.Component;
 import net.minestom.server.inventory.InventoryType;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -20,12 +18,6 @@ import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
 import static net.kyori.adventure.text.Component.translatable;
 
 public abstract class AbstractActionEditorPanel<T extends Action> extends Panel {
-    public static final List<Component> LORE_POSTFIX_CLICKSELECT = LanguageProviderV2.translateMulti("gui.action.clickselect", List.of());
-    public static final List<Component> LORE_POSTFIX_CLICKEDIT = LanguageProviderV2.translateMulti("gui.action.clickedit", List.of());
-    public static final List<Component> LORE_POSTFIX_CLICKEDITORREMOVE = LanguageProviderV2.translateMulti("gui.action.clickeditorremove", List.of());
-    public static final List<Component> LORE_POSTFIX_CLICKREMOVE = LanguageProviderV2.translateMulti("gui.action.clickremove", List.of());
-    public static final List<Component> LORE_POSTFIX_NOT_AVAILABLE = LanguageProviderV2.translateMulti("gui.action.unavailable", List.of());
-
     protected final ActionList.Ref ref;
 
     protected final Text subtitleText;
@@ -44,12 +36,12 @@ public abstract class AbstractActionEditorPanel<T extends Action> extends Panel 
         add(0, 0, backOrClose());
         add(1, 0, infoWithKey(translationKey("info")));
         this.subtitleText = add(2, 0, new Text(null, 5, 1, "")
-                .align(Text.CENTER, Text.CENTER)
-                .background("generic2/btn/default/5_1"));
+            .align(Text.CENTER, Text.CENTER)
+            .background("generic2/btn/default/5_1"));
         add(7, 0, new Button("gui.action.remove", 2, 1)
-                .background("generic2/btn/default/2_1")
-                .sprite("action/icon/trash", 11, 3)
-                .onLeftClick(this::removeAction));
+            .background("generic2/btn/default/2_1")
+            .sprite("action/icon/trash", 11, 3)
+            .onLeftClick(this::removeAction));
     }
 
     protected abstract void update(T data);
@@ -87,6 +79,6 @@ public abstract class AbstractActionEditorPanel<T extends Action> extends Panel 
 
     public static Text groupText(int width, String text) {
         return new Text(null, width, 1, text)
-                .font("small").align(1, 6);
+            .font("small").align(1, 6);
     }
 }
