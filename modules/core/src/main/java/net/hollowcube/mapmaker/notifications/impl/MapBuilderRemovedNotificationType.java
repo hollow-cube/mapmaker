@@ -12,7 +12,7 @@ import java.util.List;
 
 @AutoService(PlayerNotificationType.class)
 public final class MapBuilderRemovedNotificationType implements PlayerNotificationType {
-
+// probably keep unused. I removed the translation keys for it for now
     @Override
     public String type() {
         return "map_builder_removed";
