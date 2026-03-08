@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.player;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import io.opentelemetry.api.OpenTelemetry;
@@ -167,6 +166,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     // This is designed so other tab completions could be added in future if wanted
+    @RuntimeGson
     private record TabCompleteBody(@NotNull String query, int limit) {
         static TabCompleteBody forUsernames(@NotNull String query, int limit) {
             return new TabCompleteBody(query, limit);
@@ -367,8 +367,8 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         var req = HttpRequest.newBuilder()
             .uri(URI.create(
                 url + "/players/%s/friendRequests?direction=%s&page=%s&pageSize=%s".formatted(playerId, direction,
-                                                                                              pageable.page(),
-                                                                                              pageable.pageSize())))
+                    pageable.page(),
+                    pageable.pageSize())))
             .GET();
         var res = doRequest("getFriendRequests", req, HttpResponse.BodyHandlers.ofString());
 
@@ -390,10 +390,10 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         return switch (res.statusCode()) {
             case 201 ->
                 new SendFriendRequestResult(GSON.fromJson(res.body(), SendFriendRequestResponse.class).isRequest(),
-                                            null, null);
+                    null, null);
             case 401 -> {
                 SendFriendRequestResult.LimitError error = GSON.fromJson(res.body(),
-                                                                         SendFriendRequestResult.LimitError.class);
+                    SendFriendRequestResult.LimitError.class);
                 yield new SendFriendRequestResult(false, null, error);
             }
             case 409 -> {
@@ -442,7 +442,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     public @NotNull Page<BlockedPlayer> getBlockedPlayers(@NotNull String playerId, @NotNull Pageable pageable) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(url + "/players/%S/blocks?page=%s&pageSize=%s".formatted(playerId, pageable.page(),
-                                                                                     pageable.pageSize())))
+                pageable.pageSize())))
             .GET();
         var res = doRequest("getBlockedPlayers", req, HttpResponse.BodyHandlers.ofString());
 
@@ -536,7 +536,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     ) {
         var request = new CreatePlayerNotificationRequest(type, key, data, expiresInSeconds);
         var req = setupPost(url("%s/players/%s/notifications?replaceUnread=%s", url, playerId, replaceUnread),
-                            GSON.toJson(request));
+            GSON.toJson(request));
         var res = doRequest("createNotification", req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() != 201) {
             throw new SessionService.InternalError(
