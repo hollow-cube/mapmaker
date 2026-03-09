@@ -4,18 +4,28 @@ import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.compat.api.ModChannelRegisterEvent;
+import net.hollowcube.compat.api.packet.PacketRegistry;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.GlobalEventHandler;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @AutoService(CompatProvider.class)
 public class BlacklistedModsProvider implements CompatProvider {
 
     private static final Component KICK_MESSAGE = Component.text(
-            "You've been kicked for using mod(s) which are disallowed on the server.\nPlease remove them to join."
+        "You've been kicked for using mod(s) which are disallowed on the server.\nPlease remove them to join."
     ).color(NamedTextColor.RED);
+
+    @Override
+    public void registerPackets(PacketRegistry registry) {
+        registry.registerNamespaceHandler("jumpoverfences", (player, _) ->
+            disconnectWithMods(player, List.of(Component.text("Jump Over Fences")))
+        );
+    }
 
     @Override
     public void registerListeners(GlobalEventHandler events) {
@@ -23,13 +33,15 @@ public class BlacklistedModsProvider implements CompatProvider {
             var player = event.getPlayer();
             var channels = event.getChannels();
             var bannedMods = new ArrayList<Component>();
-            if (channels.contains("servux:tweaks")) {
-                bannedMods.add(Component.text("Servux Tweaks"));
-            }
+            if (channels.contains("servux:tweaks")) bannedMods.add(Component.text("Tweakeroo"));
 
-            if (!bannedMods.isEmpty()) {
-                PlayerUtil.disconnect(player, KICK_MESSAGE);
-            }
+            disconnectWithMods(player, bannedMods);
         });
+    }
+
+    private static void disconnectWithMods(Player player, List<Component> mods) {
+        if (mods.isEmpty()) return;
+
+        PlayerUtil.disconnect(player, KICK_MESSAGE);
     }
 }
