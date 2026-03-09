@@ -49,7 +49,9 @@ public class EditableMapTagList extends Panel {
 
         if (i < 7) {
             final String tagCategory;
-            if (i <= 3) {
+            if (i == 0) {
+                tagCategory = "main";
+            } else if (i <= 2) {
                 tagCategory = "primary";
             } else {
                 tagCategory = "secondary";
