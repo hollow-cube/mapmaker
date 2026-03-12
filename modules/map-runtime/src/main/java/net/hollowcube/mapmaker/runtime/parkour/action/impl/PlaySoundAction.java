@@ -20,7 +20,7 @@ public record PlaySoundAction(
     float volume
 ) implements Action {
 
-    private static final Sprite SPRITE = new Sprite("icon2/1_1/music_disc", 1, 1);
+    private static final Sprite SPRITE = new Sprite("icon2/1_1/volume_max", 1, 1);
 
     public static final Key KEY = Key.key("mapmaker:play_sound");
     public static final StructCodec<PlaySoundAction> CODEC = StructCodec.struct(
