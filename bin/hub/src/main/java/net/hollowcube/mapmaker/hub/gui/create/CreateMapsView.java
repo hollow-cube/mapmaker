@@ -92,6 +92,7 @@ public class CreateMapsView extends Panel {
                 this.remountTask.run();
             }
             this.updateCreateButton();
+            this.resetSearch();
         }
     }
 
@@ -117,7 +118,7 @@ public class CreateMapsView extends Panel {
     }
 
     private void resetSearch() {
-        this.pagination.reset(Unit.INSTANCE);
+        this.pagination.reset();
     }
 
     private void updateCreateButton() {
