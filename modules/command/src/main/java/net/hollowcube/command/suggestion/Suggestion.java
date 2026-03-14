@@ -2,7 +2,6 @@ package net.hollowcube.command.suggestion;
 
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -43,11 +42,11 @@ public final class Suggestion {
         this.length = length;
     }
 
-    public void add(@NotNull String suggestion) {
+    public void add(String suggestion) {
         add(suggestion, null);
     }
 
-    public void add(@NotNull String suggestion, @Nullable Component tooltip) {
+    public void add(String suggestion, @Nullable Component tooltip) {
         entries.add(new SuggestionEntry(suggestion, tooltip));
     }
 
@@ -59,17 +58,17 @@ public final class Suggestion {
         return entries.isEmpty();
     }
 
-    public @NotNull List<SuggestionEntry> getEntries() {
+    public List<SuggestionEntry> getEntries() {
         return entries;
     }
 
-    public void addAll(@NotNull Iterable<String> suggestions) {
+    public void addAll(Iterable<String> suggestions) {
         for (var suggestion : suggestions) {
             add(suggestion);
         }
     }
 
-    public void addAll(@NotNull Suggestion other) {
+    public void addAll(Suggestion other) {
         entries.addAll(other.entries);
     }
 }

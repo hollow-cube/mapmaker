@@ -19,7 +19,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -45,10 +44,10 @@ public class MessageComponents {
             .expireAfterWrite(1, TimeUnit.HOURS)
             .build();
 
-    private final @NotNull MapService mapService;
-    private final @NotNull PlayerService playerService;
+    private final MapService mapService;
+    private final PlayerService playerService;
 
-    public MessageComponents(@NotNull MapService mapService, @NotNull PlayerService playerService) {
+    public MessageComponents(MapService mapService, PlayerService playerService) {
         this.mapService = mapService;
         this.playerService = playerService;
     }
@@ -56,7 +55,7 @@ public class MessageComponents {
     // region Component Parts
 
     @Blocking
-    private void map(@NotNull MessageComponent.Builder builder, @NotNull String mapid, @NotNull Player player) {
+    private void map(MessageComponent.Builder builder, String mapid, Player player) {
         var uuid = player.getUuid().toString();
         var map = mapDataCache.get(mapid, id -> mapService.getMap(uuid, id));
         var author = usernameCache.get(map.owner(), id -> playerService.getPlayerDisplayName2(id).build());
@@ -82,7 +81,7 @@ public class MessageComponents {
         );
     }
 
-    private void emoji(@NotNull MessageComponent.Builder builder, boolean hasHypercube, @NotNull String name, @NotNull Random random) {
+    private void emoji(MessageComponent.Builder builder, boolean hasHypercube, String name, Random random) {
         var emoji = Emoji.findByName(name);
         if (emoji == null) {
             builder.append(Component.text(":%s:".formatted(name)));
@@ -96,7 +95,7 @@ public class MessageComponents {
         }
     }
 
-    private void link(@NotNull MessageComponent.Builder builder, @NotNull String url) {
+    private void link(MessageComponent.Builder builder, String url) {
         url = "https://%s".formatted(url.replaceFirst("^https?://", ""));
 
         try {
@@ -116,7 +115,7 @@ public class MessageComponents {
 
     // endregion
 
-    public @NotNull MessageComponent createGlobalMessage(@NotNull Player player, @NotNull ChatMessageData message) {
+    public MessageComponent createGlobalMessage(Player player, ChatMessageData message) {
         Random random = new Random(message.seed());
 
         var builder = MessageComponent.builder();
@@ -147,7 +146,7 @@ public class MessageComponents {
         return builder.build();
     }
 
-    public @NotNull MessageComponent createDirectMessage(@NotNull Player player, @NotNull ChatMessageData message) {
+    public MessageComponent createDirectMessage(Player player, ChatMessageData message) {
         Random random = new Random(message.seed());
 
         var builder = MessageComponent.builder();

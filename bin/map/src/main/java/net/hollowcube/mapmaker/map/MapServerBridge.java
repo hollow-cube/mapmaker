@@ -15,7 +15,6 @@ import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,12 +23,12 @@ public class MapServerBridge implements ServerBridge {
 
     private final MapMapServer server;
 
-    public MapServerBridge(@NotNull MapMapServer server) {
+    public MapServerBridge(MapMapServer server) {
         this.server = server;
     }
 
     @Override
-    public void joinMap(@NotNull Player player, @NotNull JoinConfig joinConfig) {
+    public void joinMap(Player player, JoinConfig joinConfig) {
         if (CoreFeatureFlags.MAP_DISABLE_ALL.test()) {
             player.sendMessage(Component.translatable("ff.maps_disabled"));
             return;
@@ -72,7 +71,7 @@ public class MapServerBridge implements ServerBridge {
     }
 
     @Override
-    public void joinHub(@NotNull Player player) {
+    public void joinHub(Player player) {
         try {
             var playerData = PlayerData.fromPlayer(player);
             var res = server.sessionService().joinHubV2(new JoinHubRequest(playerData.id()));
@@ -86,7 +85,7 @@ public class MapServerBridge implements ServerBridge {
         }
     }
 
-    private void moveBetweenMapsOnThisServer(@NotNull Player player, @NotNull String mapId, @NotNull String state) {
+    private void moveBetweenMapsOnThisServer(Player player, String mapId, String state) {
         FutureUtil.assertThread();
 
         try {

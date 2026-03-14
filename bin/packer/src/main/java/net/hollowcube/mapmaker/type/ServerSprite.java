@@ -1,11 +1,10 @@
 package net.hollowcube.mapmaker.type;
 
 import com.google.gson.JsonObject;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public record ServerSprite(
-        @NotNull String name,
+        String name,
         @Nullable String model,
         int fontChar,
         int width,
@@ -13,15 +12,15 @@ public record ServerSprite(
         int rightOffset
 ) {
 
-    public ServerSprite(@NotNull String name, @Nullable String model) {
+    public ServerSprite(String name, @Nullable String model) {
         this(name, model, 0, 0, 0, 0);
     }
 
-    public ServerSprite(@NotNull String name, int fontChar, int width, int offsetX, int rightOffset) {
+    public ServerSprite(String name, int fontChar, int width, int offsetX, int rightOffset) {
         this(name, null, fontChar, width, offsetX, rightOffset);
     }
 
-    public @NotNull JsonObject toJson() {
+    public JsonObject toJson() {
         var obj = new JsonObject();
         obj.addProperty("name", name);
         if (model != null) obj.addProperty("model", model);

@@ -4,7 +4,6 @@ import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -16,20 +15,20 @@ import java.util.UUID;
  */
 public final class AxiomTrySpawnEntityEvent implements AxiomEvent {
 
-    private final @NotNull Player player;
-    private final @NotNull UUID uuid;
+    private final Player player;
+    private final UUID uuid;
     private final @Nullable Entity copyFrom;
-    private final @NotNull Pos pos;
+    private final Pos pos;
     private final @Nullable CompoundBinaryTag nbt;
 
     private boolean handled;
 
     public AxiomTrySpawnEntityEvent(
-            @NotNull Player player,
-            @NotNull UUID uuid,
-            @Nullable Entity copyFrom,
-            @NotNull Pos pos,
-            @Nullable CompoundBinaryTag nbt
+        Player player,
+        UUID uuid,
+        @Nullable Entity copyFrom,
+        Pos pos,
+        @Nullable CompoundBinaryTag nbt
     ) {
         this.player = player;
         this.uuid = uuid;
@@ -39,21 +38,21 @@ public final class AxiomTrySpawnEntityEvent implements AxiomEvent {
     }
 
     public AxiomTrySpawnEntityEvent(
-            @NotNull Player player,
-            @NotNull UUID uuid,
-            @Nullable UUID copyFrom,
-            @NotNull Pos pos,
-            @Nullable CompoundBinaryTag nbt
+        Player player,
+        UUID uuid,
+        @Nullable UUID copyFrom,
+        Pos pos,
+        @Nullable CompoundBinaryTag nbt
     ) {
         this(player, uuid, copyFrom != null ? player.getInstance().getEntityByUuid(copyFrom) : null, pos, nbt);
     }
 
     @Override
-    public @NotNull Player player() {
+    public Player player() {
         return player;
     }
 
-    public @NotNull UUID uuid() {
+    public UUID uuid() {
         return uuid;
     }
 
@@ -61,7 +60,7 @@ public final class AxiomTrySpawnEntityEvent implements AxiomEvent {
         return copyFrom;
     }
 
-    public @NotNull Pos pos() {
+    public Pos pos() {
         return pos;
     }
 

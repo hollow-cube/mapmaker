@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.hub.entity;
 
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.display.TextDisplayMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
@@ -12,7 +11,7 @@ public class NpcTextModel extends BaseNpcEntity {
         this(UUID.randomUUID());
     }
 
-    public NpcTextModel(@NotNull UUID uuid) {
+    public NpcTextModel(UUID uuid) {
         super(EntityType.TEXT_DISPLAY, uuid);
 
         hasPhysics = false;
@@ -25,7 +24,7 @@ public class NpcTextModel extends BaseNpcEntity {
     }
 
     @Override
-    public @NotNull TextDisplayMeta getEntityMeta() {
+    public TextDisplayMeta getEntityMeta() {
         return (TextDisplayMeta) super.getEntityMeta();
     }
 }

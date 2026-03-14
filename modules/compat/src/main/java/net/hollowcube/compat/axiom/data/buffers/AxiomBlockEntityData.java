@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 public record AxiomBlockEntityData(
-        int size, byte dict, byte[] data
+    int size, byte dict, byte[] data
 ) {
 
     private static final ZstdDictDecompress DECOMPRESSOR;

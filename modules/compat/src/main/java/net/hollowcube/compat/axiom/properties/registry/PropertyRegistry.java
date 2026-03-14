@@ -29,7 +29,14 @@ public final class PropertyRegistry implements PropertyRegistrar {
     }
 
     @Override
-    public <T> WorldProperty<T> register(PropertyCategory category, Key id, String name, boolean localized, WidgetType<T> widget, T initialValue, PropertyDispatcher dispatcher) {
+    public <T> WorldProperty<T> register(
+        PropertyCategory category,
+        Key id,
+        String name, boolean localized,
+        WidgetType<T> widget,
+        T initialValue,
+        PropertyDispatcher dispatcher
+    ) {
         var property = new WorldProperty<>(id, name, localized, widget, initialValue, dispatcher);
         PROPERTIES.put(property.id(), property);
         CATEGORIES.computeIfAbsent(category, c -> new ArrayList<>()).add(property);

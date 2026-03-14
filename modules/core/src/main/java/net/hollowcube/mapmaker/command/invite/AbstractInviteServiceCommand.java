@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 abstract class AbstractInviteServiceCommand extends CommandDsl {
 
@@ -20,9 +19,11 @@ abstract class AbstractInviteServiceCommand extends CommandDsl {
     private final Argument<String> targetArgument;
     private final boolean preventBlocked;
 
-    AbstractInviteServiceCommand(@NotNull String command, @NotNull PlayerInviteService inviteService,
-                                 @NotNull PlayerService playerService, @NotNull SessionManager sessionManager,
-                                 @NotNull String playerArgDescription, boolean preventBlocked) {
+    AbstractInviteServiceCommand(
+        String command, PlayerInviteService inviteService,
+        PlayerService playerService, SessionManager sessionManager,
+        String playerArgDescription, boolean preventBlocked
+    ) {
         super(command);
         this.inviteService = inviteService;
         this.playerService = playerService;
@@ -36,9 +37,9 @@ abstract class AbstractInviteServiceCommand extends CommandDsl {
         this.addSyntax(playerOnly(this::handleCommand), this.targetArgument);
     }
 
-    abstract void handle(@NotNull Player sender, @NotNull String targetId, @NotNull String targetName);
+    abstract void handle(Player sender, String targetId, String targetName);
 
-    private void handleCommand(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleCommand(Player player, CommandContext context) {
         var targetName = context.getRaw(this.targetArgument);
 
         var targetId = context.get(this.targetArgument);

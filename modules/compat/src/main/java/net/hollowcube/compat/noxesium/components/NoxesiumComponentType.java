@@ -3,13 +3,12 @@ package net.hollowcube.compat.noxesium.components;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.Unit;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public record NoxesiumComponentType<T>(
     int networkId,
     Key key,
-    NetworkBuffer.Type<@NotNull T> networkType
+    NetworkBuffer.Type<T> networkType
 ) {
 
     public interface Holder {

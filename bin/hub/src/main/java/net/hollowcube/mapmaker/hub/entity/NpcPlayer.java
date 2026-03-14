@@ -9,7 +9,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.server.play.*;
 import net.minestom.server.scoreboard.Team;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -22,17 +21,17 @@ public class NpcPlayer extends BaseNpcEntity {
             .build();
 
     private final String username;
-    private final PlayerSkin skin;
+    private final @Nullable PlayerSkin skin;
 
     private final NpcTextModel nameTag = new NpcTextModel();
 
     private final Map<EquipmentSlot, ItemStack> equipment = new HashMap<>();
 
-    public NpcPlayer(@NotNull String username, @Nullable PlayerSkin skin) {
+    public NpcPlayer(String username, @Nullable PlayerSkin skin) {
         this(UUID.randomUUID(), username, skin);
     }
 
-    public NpcPlayer(@NotNull UUID uuid, @NotNull String username, @Nullable PlayerSkin skin) {
+    public NpcPlayer(UUID uuid, String username, @Nullable PlayerSkin skin) {
         super(EntityType.PLAYER, uuid);
         this.username = username;
         this.skin = skin;
@@ -42,11 +41,11 @@ public class NpcPlayer extends BaseNpcEntity {
         this.nameTag.getEntityMeta().setText(Component.text(username));
     }
 
-    public void setNameTag(@NotNull Component name) {
+    public void setNameTag(Component name) {
         this.nameTag.getEntityMeta().setText(name);
     }
 
-    public void setEquipment(@NotNull EquipmentSlot slot, @NotNull ItemStack itemStack) {
+    public void setEquipment(EquipmentSlot slot, ItemStack itemStack) {
         this.equipment.put(slot, itemStack);
     }
 
@@ -73,7 +72,7 @@ public class NpcPlayer extends BaseNpcEntity {
     }
 
     @Override
-    public void updateNewViewer(@NotNull Player player) {
+    public void updateNewViewer(Player player) {
         var properties = new ArrayList<PlayerInfoUpdatePacket.Property>();
         if (this.skin != null) {
             properties.add(new PlayerInfoUpdatePacket.Property("textures", skin.textures(), skin.signature()));
@@ -100,7 +99,7 @@ public class NpcPlayer extends BaseNpcEntity {
     }
 
     @Override
-    public void updateOldViewer(@NotNull Player player) {
+    public void updateOldViewer(Player player) {
         super.updateOldViewer(player);
 
         if (equipment.containsKey(EquipmentSlot.HELMET))
@@ -109,7 +108,7 @@ public class NpcPlayer extends BaseNpcEntity {
     }
 
     @Override
-    public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
+    public CompletableFuture<Void> setInstance(Instance instance, Pos spawnPosition) {
         if (equipment.containsKey(EquipmentSlot.HELMET))
             this.nameTag.setInstance(instance, spawnPosition.add(0, 2.4, 0));
         return super.setInstance(instance, spawnPosition);

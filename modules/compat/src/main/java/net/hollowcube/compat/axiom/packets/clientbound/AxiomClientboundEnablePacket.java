@@ -5,7 +5,6 @@ import net.hollowcube.compat.axiom.AxiomAPI;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -15,11 +14,11 @@ public record AxiomClientboundEnablePacket(
 ) implements ClientboundModPacket<AxiomClientboundEnablePacket> {
 
     public static final Type<AxiomClientboundEnablePacket> TYPE = Type.of(
-            AxiomAPI.CHANNEL, "enable",
-            NetworkBufferTemplate.template(
-                    ServerConfig.SERIALIZER.optional(), AxiomClientboundEnablePacket::config,
-                    AxiomClientboundEnablePacket::new
-            )
+        AxiomAPI.CHANNEL, "enable",
+        NetworkBufferTemplate.template(
+            ServerConfig.SERIALIZER.optional(), AxiomClientboundEnablePacket::config,
+            AxiomClientboundEnablePacket::new
+        )
     );
 
     @Override
@@ -28,10 +27,10 @@ public record AxiomClientboundEnablePacket(
     }
 
     public record ServerConfig(
-            int maxBufferSize,
-            int blueprintVersion,
-            @NotNull List<Block> blocksWithCustomData,
-            @NotNull List<Block> ignoreRotationSet
+        int maxBufferSize,
+        int blueprintVersion,
+        List<Block> blocksWithCustomData,
+        List<Block> ignoreRotationSet
     ) {
         public static final NetworkBuffer.Type<ServerConfig> SERIALIZER = NetworkBufferTemplate.template(
                 NetworkBuffer.INT, ServerConfig::maxBufferSize,

@@ -24,7 +24,6 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,11 +88,11 @@ public class LanguageProviderV2 {
         .maximumSize(1000)
         .build();
 
-    public static @NotNull String translateToPlain(@NotNull String translationKey) {
+    public static String translateToPlain(String translationKey) {
         return PLAIN_TEXT.serialize(translate(translatable(translationKey)));
     }
 
-    public static @NotNull String translateToPlain(@NotNull Component component) {
+    public static String translateToPlain(Component component) {
         if (!(component instanceof TranslatableComponent translatable))
             return PLAIN_TEXT.serialize(Objects.requireNonNull(component));
         return PLAIN_TEXT.serialize(translate(translatable));
@@ -135,7 +134,7 @@ public class LanguageProviderV2 {
         return result;
     }
 
-    public static @NotNull List<Component> translateMulti(@NotNull String key, @NotNull List<? extends ComponentLike> args) {
+    public static List<Component> translateMulti(String key, List<? extends ComponentLike> args) {
         var partials = multiComponentCache.computeIfAbsent(key, LanguageProviderV2::parseMultiComponent);
         if (partials == null) return List.of(); // Must return empty because we use it for lore which is not required.
 
@@ -149,7 +148,7 @@ public class LanguageProviderV2 {
             .toList();
     }
 
-    public static @NotNull Component translateMultiMerged(@NotNull String key, @NotNull List<? extends ComponentLike> args) {
+    public static Component translateMultiMerged(String key, List<? extends ComponentLike> args) {
         var partials = translateMulti(key, args);
         if (partials.isEmpty()) return Component.empty();
         if (partials.size() == 1) return partials.get(0);
@@ -161,16 +160,16 @@ public class LanguageProviderV2 {
         return result.build();
     }
 
-    public static @NotNull Component getVanillaTranslation(@NotNull Material material) {
-        if (material.isBlock()) return getVanillaTranslation(material.registry().block());
+    public static Component getVanillaTranslation(Material material) {
+        if (material.isBlock()) return getVanillaTranslation(Objects.requireNonNull(material.registry().block()));
         return translatable("item." + material.key().namespace() + "." + material.key().value());
     }
 
-    public static @NotNull Component getVanillaTranslation(@NotNull Block block) {
+    public static Component getVanillaTranslation(Block block) {
         return translatable("block." + block.key().namespace() + "." + block.key().value());
     }
 
-    public static boolean hasTranslationKey(@NotNull String key) {
+    public static boolean hasTranslationKey(String key) {
         return langData.has(key);
     }
 
@@ -185,7 +184,7 @@ public class LanguageProviderV2 {
     private record PlaceholderTag(int index, @Nullable NumberFormat formatter) implements Tag {
         private static final TagResolver RESOLVER = new TagResolver() {
             @Override
-            public @Nullable Tag resolve(@NotNull String name, @NotNull ArgumentQueue arguments, @NotNull Context ctx) throws ParsingException {
+            public @Nullable Tag resolve(String name, ArgumentQueue arguments, Context ctx) throws ParsingException {
                 try {
                     var index = Integer.parseInt(name);
                     if (index < 0) return null;
@@ -196,7 +195,7 @@ public class LanguageProviderV2 {
             }
 
             @Override
-            public boolean has(@NotNull String name) {
+            public boolean has(String name) {
                 try {
                     return Integer.parseInt(name) >= 0;
                 } catch (NumberFormatException ignored) {
@@ -206,7 +205,7 @@ public class LanguageProviderV2 {
         };
     }
 
-    static @Nullable ElementNode parseComponent(@NotNull String id) {
+    static @Nullable ElementNode parseComponent(String id) {
         var raw = langData.get(id);
         if (raw == null) return null;
 
@@ -232,11 +231,11 @@ public class LanguageProviderV2 {
         return result;
     }
 
-    static @NotNull ElementNode deserializeToTree(@NotNull String value) {
+    static ElementNode deserializeToTree(String value) {
         return (ElementNode) MINI_MESSAGE.deserializeToTree(value, PlaceholderTag.RESOLVER, MyHoverTag.RESOLVER, MyClickTag.RESOLVER);
     }
 
-    static @NotNull String replaceInString(@NotNull String value, @NotNull List<Component> args) {
+    static String replaceInString(String value, List<Component> args) {
         return ARG_PATTERN.matcher(value)
             .replaceAll(match -> {
                 var index = Integer.parseInt(match.group("index"));
@@ -256,7 +255,7 @@ public class LanguageProviderV2 {
 
     // The following are taken directly from MiniMessageParser inside minimessage. It is an internal API.
 
-    static @NotNull Component treeToComponent(final @NotNull ElementNode node, @NotNull List<Component> args) {
+    static Component treeToComponent(final ElementNode node, List<Component> args) {
         Component comp = Component.empty();
         Tag tag = null;
         if (node instanceof ValueNode) {
@@ -280,12 +279,12 @@ public class LanguageProviderV2 {
                 comp = insertingTag.value(args);
             }
 
-            if (tag instanceof PlaceholderTag placeholderTag) {
-                if (placeholderTag.index >= args.size()) {
-                    comp = Component.text("$$" + placeholderTag.index);
+            if (tag instanceof PlaceholderTag(int index, NumberFormat formatter)) {
+                if (index >= args.size()) {
+                    comp = Component.text("$$" + index);
                 } else {
-                    comp = args.get(placeholderTag.index);
-                    if (placeholderTag.formatter != null) {
+                    comp = args.get(index);
+                    if (formatter != null) {
                         // We need to parse the number from the component and format it being changed to Component.text()
                         Number number = switch (comp) {
                             case TranslationArgument argument -> {
@@ -301,7 +300,7 @@ public class LanguageProviderV2 {
                             }
                             default -> null;
                         };
-                        if (number != null) comp = Component.text(placeholderTag.formatter.format(number));
+                        if (number != null) comp = Component.text(formatter.format(number));
                     }
                 }
             }

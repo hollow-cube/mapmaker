@@ -6,23 +6,21 @@ import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.player.BlockedPlayer;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 public class MsgCommand extends AbstractChatCommand {
 
     private final Argument<String> targetArg;
     private final Argument<String> messageArg = CoreArgument.Message("message")
-            .description("The message content to send");
+        .description("The message content to send");
 
-    private final @NotNull PlayerService playerService;
+    private final PlayerService playerService;
 
-    public MsgCommand(@NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages, @NotNull PlayerService playerService) {
+    public MsgCommand(SessionManager sessions, MapService maps, ChatMessageListener messages, PlayerService playerService) {
         super(sessions, maps, messages, "msg");
 
         this.targetArg = CoreArgument.AnyOnlinePlayer("player", sessions)
@@ -36,7 +34,7 @@ public class MsgCommand extends AbstractChatCommand {
         addSyntax(playerOnly(this::handleSendDirectMessage), targetArg, messageArg);
     }
 
-    private void handleSendDirectMessage(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleSendDirectMessage(Player player, CommandContext context) {
         var targetId = context.get(targetArg);
         var message = context.get(messageArg);
 

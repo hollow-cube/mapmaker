@@ -12,7 +12,6 @@ import net.hollowcube.mapmaker.util.FileUtil;
 import net.hollowcube.mapmaker.util.JsonUtil;
 import net.hollowcube.mapmaker.util.ModelUtil;
 import net.hollowcube.mapmaker.util.Templates;
-import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -42,7 +41,7 @@ public class SpriteTransform {
         return nextChar;
     }
 
-    public void process(@NotNull PackContext ctx) throws IOException {
+    public void process(PackContext ctx) throws IOException {
         final var numberModels = setupNumberModels(ctx);
         final var overlayEntries = createOverlayEntries(ctx);
 
@@ -167,7 +166,7 @@ public class SpriteTransform {
         }
     }
 
-    private @NotNull ServerSprite processImage(@NotNull PackContext ctx, @NotNull String name, byte[] data, @NotNull Json5Object conf, @NotNull JsonObject fontConf) throws IOException {
+    private ServerSprite processImage(PackContext ctx, String name, byte[] data, Json5Object conf, JsonObject fontConf) throws IOException {
         BufferedImage image = ImageIO.read(new ByteArrayInputStream(data));
 
         int width = image.getWidth();
@@ -238,7 +237,7 @@ public class SpriteTransform {
         return new ServerSprite(name, rawFontChar, width, offX, right);
     }
 
-    private static String[] setupNumberModels(@NotNull PackContext ctx) throws IOException {
+    private static String[] setupNumberModels(PackContext ctx) throws IOException {
         String[] numberModels = new String[32];
         for (int i = 0; i < numberModels.length; i++) {
             try (var img = SpriteTransform.class.getResourceAsStream("/numbers/" + (i + 1) + ".png")) {
@@ -270,7 +269,7 @@ public class SpriteTransform {
         return numberModels;
     }
 
-    private static Map<String, JsonElement> createOverlayEntries(@NotNull PackContext ctx) throws IOException {
+    private static Map<String, JsonElement> createOverlayEntries(PackContext ctx) throws IOException {
         var cases = new HashMap<String, JsonElement>();
         FileUtil.walkResourcesDirectory("/overlays/", (file, stream) -> {
             var name = file.substring(file.lastIndexOf('/') + 1, file.lastIndexOf('.'));

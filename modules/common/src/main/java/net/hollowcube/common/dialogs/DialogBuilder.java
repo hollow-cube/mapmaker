@@ -7,7 +7,6 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.dialog.Dialog;
 import net.minestom.server.dialog.DialogAfterAction;
 import net.minestom.server.dialog.DialogMetadata;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
@@ -44,7 +43,7 @@ public class DialogBuilder {
         return this;
     }
 
-    private DialogMetadata metadata(@NotNull DialogAfterAction action) {
+    private DialogMetadata metadata(DialogAfterAction action) {
         return new DialogMetadata(
             this.title, this.title,
             this.closeOnEscape, false, action,
@@ -52,7 +51,7 @@ public class DialogBuilder {
         );
     }
 
-    public Dialog buildSaveConfirmation(@NotNull Key key, @Nullable CompoundBinaryTag extra) {
+    public Dialog buildSaveConfirmation(Key key, @Nullable CompoundBinaryTag extra) {
         return new Dialog.Confirmation(
             this.metadata(DialogAfterAction.NONE),
             DialogButtons.close(Component.translatable("dialog.generic.close"), 150),
@@ -60,7 +59,7 @@ public class DialogBuilder {
         );
     }
 
-    public Dialog buildSubmitConfirmation(@NotNull Key key, @Nullable CompoundBinaryTag extra) {
+    public Dialog buildSubmitConfirmation(Key key, @Nullable CompoundBinaryTag extra) {
         return new Dialog.Confirmation(
             this.metadata(DialogAfterAction.CLOSE),
             DialogButtons.close(Component.translatable("dialog.generic.close"), 150),
@@ -68,7 +67,7 @@ public class DialogBuilder {
         );
     }
 
-    public Dialog buildNotice(@NotNull Key key, @Nullable CompoundBinaryTag extra) {
+    public Dialog buildNotice(Key key, @Nullable CompoundBinaryTag extra) {
         return new Dialog.Notice(
             this.metadata(DialogAfterAction.CLOSE),
             DialogButtons.button(Component.translatable("dialog.generic.close"), 150, key, extra)

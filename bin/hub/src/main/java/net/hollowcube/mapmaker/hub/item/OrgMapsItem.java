@@ -6,7 +6,6 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -26,7 +25,7 @@ public class OrgMapsItem extends ItemHandler {
     }
 
     @Override
-    protected void rightClicked(@NotNull Click click) {
+    protected void rightClicked(Click click) {
         var targetOrg = USER_ORGS.get(click.player().getUuid().toString());
         if (targetOrg == null) {
             click.player().sendMessage("oopsie woopsie, you dont have an org :(");
@@ -34,7 +33,7 @@ public class OrgMapsItem extends ItemHandler {
     }
 
     @Override
-    public void build(ItemStack.@NotNull Builder builder, @Nullable CompoundBinaryTag tag) {
+    public void build(ItemStack.Builder builder, @Nullable CompoundBinaryTag tag) {
         super.build(builder, tag);
 
         builder.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);

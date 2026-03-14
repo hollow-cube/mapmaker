@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.hub.feature.motw;
 import net.hollowcube.mapmaker.hub.feature.contest.MapContest;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.timer.TaskSchedule;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -15,7 +14,7 @@ public class CountdownTimer implements Supplier<TaskSchedule> {
 
     private final int[] digits = new int[]{-1, -1, -1, -1, -1};
 
-    public CountdownTimer(@NotNull Instance instance) {
+    public CountdownTimer(Instance instance) {
         this.instance = instance;
     }
 

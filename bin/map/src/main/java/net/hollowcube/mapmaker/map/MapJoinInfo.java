@@ -5,8 +5,8 @@ import org.jetbrains.annotations.NotNull;
 
 @RuntimeGson
 public record MapJoinInfo(
-        @NotNull String playerId,
-        @NotNull String mapId,
-        @NotNull String state // building, etc
+    String playerId,
+    String mapId,
+    String state // building, etc
 ) {
 }

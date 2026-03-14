@@ -7,7 +7,7 @@ import com.google.gson.JsonObject;
 import de.marhali.json5.Json5;
 import net.hollowcube.mapmaker.util.ModelUtil;
 import net.hollowcube.mapmaker.util.Templates;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -30,16 +30,16 @@ public class CosmeticV2Transform {
     private static final Gson GSON = new Gson();
     private static final Json5 json5 = new Json5();
 
-    private BufferedImage lockOverlay;
+    private @UnknownNullability BufferedImage lockOverlay; // lateinit
 
-    public void init(@NotNull PackContext ctx) throws IOException {
+    public void init(PackContext ctx) throws IOException {
         try (var lockOverlay = getClass().getResourceAsStream("/lock_overlay_16x.png")) {
             if (lockOverlay == null) throw new IllegalStateException("lock_overlay_16x.png not found");
             this.lockOverlay = ImageIO.read(lockOverlay);
         }
     }
 
-    public void process(@NotNull PackContext ctx) throws IOException {
+    public void process(PackContext ctx) throws IOException {
         Path baseDirectory = ctx.resources().resolve("cosmetic");
         var types = new ArrayList<>(COSMETIC_TYPES.keySet());
         types.sort(Comparator.naturalOrder());
@@ -102,7 +102,7 @@ public class CosmeticV2Transform {
         }
     }
 
-    private void fixModelTextures(@NotNull JsonObject model, @NotNull String texId) {
+    private void fixModelTextures(JsonObject model, String texId) {
         JsonObject textures = model.getAsJsonObject("textures");
         String oldTextureName = findReplaceableTexture(textures);
 
@@ -121,7 +121,7 @@ public class CosmeticV2Transform {
         }
     }
 
-    private String findReplaceableTexture(@NotNull JsonObject textures) {
+    private String findReplaceableTexture(JsonObject textures) {
         if (textures.size() > 2)
             throw new IllegalArgumentException("textures must have exactly <=2 entries");
         if (textures.size() > 1 && !textures.has("particle"))

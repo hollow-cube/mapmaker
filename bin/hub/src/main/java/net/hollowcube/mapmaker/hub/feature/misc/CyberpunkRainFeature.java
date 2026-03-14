@@ -15,7 +15,8 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.Weather;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.TaskSchedule;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.HashSet;
 import java.util.List;
@@ -43,25 +44,26 @@ public class CyberpunkRainFeature implements HubFeature {
         new Vec(-109, 94, -63)
     );
 
-    private Instance instance;
+    private @UnknownNullability Instance instance; // lateinit
     private final Set<Player> rainyPlayers = new HashSet<>();
 
-    private Entity lightningEntity = null;
+    private @Nullable Entity lightningEntity = null;
 
     @Override
-    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
+    public void load(MapServer server, HubMapWorld world) {
         this.instance = world.instance();
 
         server.scheduler().submitTask(this::updateCollision);
         server.scheduler().submitTask(this::lightningTask);
     }
 
-    private @NotNull TaskSchedule lightningTask() {
+    private TaskSchedule lightningTask() {
         var point = LIGHTNING_POINTS.get(ThreadLocalRandom.current().nextInt(LIGHTNING_POINTS.size()));
 
         if (lightningEntity != null) lightningEntity.remove();
         lightningEntity = new Entity(EntityType.LIGHTNING_BOLT) {
-            @Override protected void movementTick() {
+            @Override
+            protected void movementTick() {
                 // Intentionally do nothing
             }
         };
@@ -74,7 +76,7 @@ public class CyberpunkRainFeature implements HubFeature {
         return TaskSchedule.tick(20 * 15);
     }
 
-    private @NotNull TaskSchedule updateCollision() {
+    private TaskSchedule updateCollision() {
         var instancePlayers = instance.getPlayers();
         rainyPlayers.removeIf(not(instancePlayers::contains));
         for (var player : instancePlayers) {
@@ -92,12 +94,12 @@ public class CyberpunkRainFeature implements HubFeature {
         return TaskSchedule.tick(2);
     }
 
-    private void onEnterRain(@NotNull Player player) {
+    private void onEnterRain(Player player) {
         if (!(player instanceof MapPlayer mp)) return;
         mp.setWeather(Weather.THUNDER, 0.02f);
     }
 
-    private void onExitRain(@NotNull Player player) {
+    private void onExitRain(Player player) {
         if (!(player instanceof MapPlayer mp)) return;
         mp.setWeather(Weather.CLEAR, 0.03f);
     }

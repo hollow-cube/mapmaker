@@ -9,7 +9,6 @@ import net.hollowcube.command.util.StringReader;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -24,20 +23,22 @@ import java.util.function.Consumer;
  * <p>It may be executable, and it may have child nodes which are again just command nodes.
  * It also may have an associated argument which must parse correctly to enter that node.</p>
  */
+// TODO: Could this be refactored into an interface with record implementations to
+//  avoid everything having to be nullable when half of it is only nullable for redirect?
 public class CommandNode {
 
-    protected CommandNode redirect = null; // May not be used with executor, children, condition.
+    protected @Nullable CommandNode redirect = null; // May not be used with executor, children, condition.
     protected boolean shouldSuggest = true;
 
-    protected CommandExecutor executor = null; // May not be used with redirect
-    protected CommandExecutor onSuggestion = null; // May not be used with redirect
-    protected List<ArgumentPair> children = null; // May not be used with redirect
-    protected CommandCondition condition = null; // May not be used with redirect
+    protected @Nullable CommandExecutor executor = null; // May not be used with redirect
+    protected @Nullable CommandExecutor onSuggestion = null; // May not be used with redirect
+    protected @Nullable List<ArgumentPair> children = null; // May not be used with redirect
+    protected @Nullable CommandCondition condition = null; // May not be used with redirect
 
     // Metadata
-    protected CommandCategory category = CommandCategory.DEFAULT;
-    protected String description = null;
-    protected List<String> examples = null;
+    protected @Nullable CommandCategory category = CommandCategory.DEFAULT;
+    protected @Nullable String description = null;
+    protected @Nullable List<String> examples = null;
 
     public CommandNode() {
 
@@ -76,7 +77,7 @@ public class CommandNode {
         return condition;
     }
 
-    public @UnknownNullability CommandNode xpath(@NotNull String path, boolean followRedirects) {
+    public @UnknownNullability CommandNode xpath(String path, boolean followRedirects) {
         // If its a redirect always defer to the directed node.
         if (followRedirects && redirect != null) {
             return redirect.xpath(path, true);
@@ -105,7 +106,7 @@ public class CommandNode {
         return null;
     }
 
-    public @NotNull Suggestion suggest(@NotNull CommandSender sender, @NotNull StringReader reader, @NotNull SuggestionContext context) {
+    public Suggestion suggest(CommandSender sender, StringReader reader, SuggestionContext context) {
         // If this is a redirect, completely defer handling
         if (redirect != null) {
             if (redirect.condition != null) {
@@ -166,7 +167,7 @@ public class CommandNode {
         return suggestion;
     }
 
-    public @NotNull CommandResult execute(@NotNull CommandSender sender, @NotNull StringReader reader, @NotNull CommandContextImpl context) {
+    public CommandResult execute(CommandSender sender, StringReader reader, CommandContextImpl context) {
         // If this is a redirect, completely defer handling
         if (redirect != null) {
             if (redirect.condition != null) {
@@ -263,27 +264,27 @@ public class CommandNode {
 
     // Modification
 
-    void setRedirect(@NotNull CommandNode node) {
+    void setRedirect(CommandNode node) {
         Check.stateCondition(this.executor != null, "Cannot add redirect to an executable node!");
         Check.stateCondition(this.children != null, "Cannot add redirect to a node with children!");
         Check.stateCondition(this.condition != null, "Cannot add redirect to a conditional node!");
         this.redirect = Objects.requireNonNull(node);
     }
 
-    void setExecutor(@NotNull CommandExecutor executor) {
+    void setExecutor(CommandExecutor executor) {
         Check.stateCondition(this.redirect != null, "Cannot add an executor to a redirect node!");
         Check.stateCondition(this.executor != null, "Command node already has an executor!");
         this.executor = Objects.requireNonNull(executor);
     }
 
     // public for modification from a different module, not sure i love this would rather hide it in 'reflect' of a command.
-    public void setCondition(@NotNull CommandCondition condition) {
+    public void setCondition(CommandCondition condition) {
         Check.stateCondition(this.redirect != null, "Cannot add condition to a redirect node!");
 //        Check.stateCondition(this.condition != null, "Command node already has a condition!");
         this.condition = Objects.requireNonNull(condition);
     }
 
-    void setOnSuggestion(@NotNull CommandExecutor onSuggestion) {
+    void setOnSuggestion(CommandExecutor onSuggestion) {
         this.onSuggestion = onSuggestion;
     }
 
@@ -292,8 +293,7 @@ public class CommandNode {
      *
      * <p>Arguments are matched by id, and must be equal if the argument already exists.</p>
      */
-    @NotNull
-    CommandNode nodeFor(@NotNull Argument<?> argument) {
+    CommandNode nodeFor(Argument<?> argument) {
         Check.stateCondition(this.redirect != null, "Cannot add child to a redirect node!");
         if (children == null) children = new ArrayList<>();
         for (var pair : children) {
@@ -312,7 +312,7 @@ public class CommandNode {
         return node;
     }
 
-    public void visitChildren(@NotNull Consumer<@NotNull ArgumentPair> visitor) {
+    public void visitChildren(Consumer<ArgumentPair> visitor) {
         if (this.children != null) {
             this.children.forEach(argumentPair -> {
                 visitor.accept(argumentPair);
@@ -321,22 +321,22 @@ public class CommandNode {
         }
     }
 
-    public record ArgumentPair(@NotNull Argument<?> argument, @NotNull CommandNode node) {
+    public record ArgumentPair(Argument<?> argument, CommandNode node) {
     }
 
-    protected record ConditionContext(@NotNull CommandSender sender, @NotNull Pass pass) implements CommandContext {
+    protected record ConditionContext(CommandSender sender, Pass pass) implements CommandContext {
         @Override
-        public @UnknownNullability String getRaw(@NotNull Argument<?> arg) {
+        public @Nullable String getRaw(Argument<?> arg) {
             return null;
         }
 
         @Override
-        public <T> @UnknownNullability T get(@NotNull Argument<T> arg) {
+        public <T> @Nullable T get(Argument<T> arg) {
             return null;
         }
 
         @Override
-        public boolean has(@NotNull Argument<?> arg) {
+        public boolean has(Argument<?> arg) {
             return false;
         }
     }

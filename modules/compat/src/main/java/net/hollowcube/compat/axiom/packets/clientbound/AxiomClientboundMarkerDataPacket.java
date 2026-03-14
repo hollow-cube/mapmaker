@@ -7,15 +7,14 @@ import net.minestom.server.color.Color;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
 
 public record AxiomClientboundMarkerDataPacket(
-    @NotNull List<Entry> entries,
-    @NotNull List<UUID> removed
+    List<Entry> entries,
+    List<UUID> removed
 ) implements AxiomClientboundModPacket<AxiomClientboundMarkerDataPacket> {
 
     public static final Type<AxiomClientboundMarkerDataPacket> TYPE = Type.of(
@@ -48,8 +47,8 @@ public record AxiomClientboundMarkerDataPacket(
     }
 
     public record Entry(
-        @NotNull UUID id,
-        @NotNull Point pos,
+        UUID id,
+        Point pos,
         @Nullable String name,
 
         @Nullable Point min,
@@ -62,7 +61,7 @@ public record AxiomClientboundMarkerDataPacket(
 
         public static final NetworkBuffer.Type<Entry> CODEC = new NetworkBuffer.Type<>() {
             @Override
-            public void write(@NotNull NetworkBuffer buffer, Entry entry) {
+            public void write(NetworkBuffer buffer, Entry entry) {
                 buffer.write(NetworkBuffer.UUID, entry.id);
                 buffer.write(NetworkBuffer.VECTOR3D, entry.pos);
                 buffer.write(NetworkBuffer.STRING.optional(), entry.name);
@@ -86,7 +85,7 @@ public record AxiomClientboundMarkerDataPacket(
             }
 
             @Override
-            public Entry read(@NotNull NetworkBuffer buffer) {
+            public Entry read(NetworkBuffer buffer) {
                 UUID id = buffer.read(NetworkBuffer.UUID);
                 Point pos = buffer.read(NetworkBuffer.VECTOR3D);
                 String name = buffer.read(NetworkBuffer.STRING.optional());

@@ -3,11 +3,12 @@ package net.hollowcube.common.physics;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
-import org.jetbrains.annotations.NotNull;
 
 public final class RayUtils2 {
+    private RayUtils2() {
+    }
 
-    public static boolean boundingBoxContainsPoint(@NotNull BoundingBox bb, @NotNull Point bbRelative, @NotNull Point other) {
+    public static boolean boundingBoxContainsPoint(BoundingBox bb, Point bbRelative, Point other) {
         return other.x() >= bb.minX() + bbRelative.x() && other.x() <= bb.maxX() + bbRelative.x()
                 && other.y() >= bb.minY() + bbRelative.y() && other.y() <= bb.maxY() + bbRelative.y()
                 && other.z() >= bb.minZ() + bbRelative.z() && other.z() <= bb.maxZ() + bbRelative.z();

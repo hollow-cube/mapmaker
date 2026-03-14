@@ -18,7 +18,6 @@ import net.minestom.server.codec.Transcoder;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -29,7 +28,6 @@ import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 /**
  * Notably not using {@link net.hollowcube.command.dsl.CommandDsl}, it doesn't support arguments followed by "subcommands" very well.
  */
-@SuppressWarnings("UnstableApiUsage")
 public class MapAlterCommand {
 
     private final Argument<@Nullable MapData> mapArg;
@@ -58,7 +56,7 @@ public class MapAlterCommand {
 
     private final MapService mapService;
 
-    public MapAlterCommand(@NotNull MapService mapService) {
+    public MapAlterCommand(MapService mapService) {
         this.mapService = mapService;
 
         mapArg = CoreArgument.Map("map", mapService) //todo should be any map dependent on context.
@@ -73,7 +71,7 @@ public class MapAlterCommand {
             .description("The new variant for the map");
     }
 
-    public void build(@NotNull CommandBuilder builder) {
+    public void build(CommandBuilder builder) {
         builder.child("alter", root -> root
             .condition(staffPerm(Permission.GENERIC_STAFF))
             .description("Edit information related to a map")
@@ -127,7 +125,7 @@ public class MapAlterCommand {
         );
     }
 
-    private void handleSetType(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleSetType(Player player, CommandContext context) {
         var map = context.get(mapArg);
         var newType = context.get(typeArg);
 
@@ -147,7 +145,7 @@ public class MapAlterCommand {
         }
     }
 
-    private void handleSetName(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleSetName(Player player, CommandContext context) {
         var map = context.get(mapArg);
         var newName = context.get(nameArg);
 
@@ -162,7 +160,7 @@ public class MapAlterCommand {
         }
     }
 
-    private void handleSetDisplayItem(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleSetDisplayItem(Player player, CommandContext context) {
         var map = context.get(mapArg);
         var newDisplayItem = context.get(displayItemArg);
 
@@ -177,7 +175,7 @@ public class MapAlterCommand {
         }
     }
 
-    private void handleSetSubVariant(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleSetSubVariant(Player player, CommandContext context) {
         var map = context.get(mapArg);
         var newSubVariant = context.get(subvariantArg);
 
@@ -203,7 +201,7 @@ public class MapAlterCommand {
         }
     }
 
-    private void handleSetSize(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleSetSize(Player player, CommandContext context) {
         var map = context.get(mapArg);
         var newSize = context.get(sizeArg);
 
@@ -218,7 +216,7 @@ public class MapAlterCommand {
         }
     }
 
-    private void handleAddTag(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleAddTag(Player player, CommandContext context) {
         var map = context.get(mapArg);
         var tag = context.get(tagArg);
 
@@ -237,7 +235,7 @@ public class MapAlterCommand {
         }
     }
 
-    private void handleRemoveTag(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleRemoveTag(Player player, CommandContext context) {
         var map = context.get(mapArg);
         var tag = context.get(tagArg);
 
@@ -256,7 +254,7 @@ public class MapAlterCommand {
         }
     }
 
-    private void handleSetQuality(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleSetQuality(Player player, CommandContext context) {
         var map = context.get(mapArg);
         var newQuality = context.get(qualityArg);
 
@@ -271,7 +269,7 @@ public class MapAlterCommand {
         }
     }
 
-    private void handleSetSetting(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleSetSetting(Player player, CommandContext context) {
         var map = context.get(mapArg);
         var setting = context.get(settingsArg);
         var json = context.get(settingDataArg);
@@ -296,7 +294,7 @@ public class MapAlterCommand {
         }
     }
 
-    private void handleSetListed(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleSetListed(Player player, CommandContext context) {
         var map = context.get(mapArg);
         var listed = context.get(listedArg);
 
@@ -311,7 +309,7 @@ public class MapAlterCommand {
         }
     }
 
-    private void handleSetVersion(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleSetVersion(Player player, CommandContext context) {
         var map = context.get(mapArg);
         var version = context.get(versionArg);
 
@@ -331,7 +329,7 @@ public class MapAlterCommand {
         }
     }
 
-    private <T> void writeSetting(@NotNull MapSettings settings, @NotNull MapSetting<T> setting, @NotNull Object data) {
+    private <T> void writeSetting(MapSettings settings, MapSetting<T> setting, Object data) {
         //noinspection unchecked
         settings.set(setting, (T) data);
     }
@@ -341,7 +339,7 @@ public class MapAlterCommand {
      * If not, the error will be handled and a relevant message will be sent to the player.
      */
     @Blocking
-    private boolean doMapUpdate(@NotNull Player player, @NotNull MapData map) {
+    private boolean doMapUpdate(Player player, MapData map) {
         try {
             var playerId = PlayerData.fromPlayer(player).id();
             map.settings().withUpdateRequest(req -> {

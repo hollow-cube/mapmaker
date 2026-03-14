@@ -5,34 +5,33 @@ import net.hollowcube.command.util.WordType;
 import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.network.NetworkBuffer;
-import org.jetbrains.annotations.NotNull;
 
 public class ArgumentFloat extends Argument<Float> {
     private float min = -Float.MAX_VALUE;
     private float max = Float.MAX_VALUE;
 
-    ArgumentFloat(@NotNull String id) {
+    ArgumentFloat(String id) {
         super(id);
     }
 
-    public @NotNull ArgumentFloat min(float min) {
+    public ArgumentFloat min(float min) {
         this.min = min;
         return this;
     }
 
-    public @NotNull ArgumentFloat max(float max) {
+    public ArgumentFloat max(float max) {
         this.max = max;
         return this;
     }
 
-    public @NotNull ArgumentFloat clamp(float min, float max) {
+    public ArgumentFloat clamp(float min, float max) {
         this.min = min;
         this.max = max;
         return this;
     }
 
     @Override
-    public @NotNull ParseResult<Float> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public ParseResult<Float> parse(CommandSender sender, StringReader reader) {
         var word = reader.readWord(WordType.BRIGADIER);
         try {
             var value = Float.parseFloat(word);
@@ -46,7 +45,7 @@ public class ArgumentFloat extends Argument<Float> {
     }
 
    @Override
-   public void properties(@NotNull NetworkBuffer buffer) {
+   public void properties(NetworkBuffer buffer) {
        boolean hasMax = this.max != Float.MAX_VALUE, hasMin = this.min != -Float.MAX_VALUE;
        buffer.write(NetworkBuffer.BYTE, ArgumentUtils.createNumberFlags(hasMin, hasMax));
        if (hasMin) {
@@ -58,7 +57,7 @@ public class ArgumentFloat extends Argument<Float> {
    }
 
    @Override
-   public @NotNull ArgumentParserType argumentType() {
+   public ArgumentParserType argumentType() {
        return ArgumentParserType.FLOAT;
    }
 

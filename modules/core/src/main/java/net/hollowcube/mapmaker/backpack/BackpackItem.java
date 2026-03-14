@@ -13,7 +13,6 @@ import net.minestom.server.recipe.RecipeBookCategory;
 import net.minestom.server.recipe.display.RecipeDisplay;
 import net.minestom.server.recipe.display.SlotDisplay;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -64,7 +63,7 @@ public enum BackpackItem {
     private final Rarity rarity;
     private final BadSprite sprite;
 
-    BackpackItem(@NotNull BackpackCategory category, @NotNull Rarity rarity) {
+    BackpackItem(BackpackCategory category, Rarity rarity) {
         class IdHolder {
             static final AtomicInteger NEXT_ID = new AtomicInteger(0);
         }
@@ -77,7 +76,7 @@ public enum BackpackItem {
         this.sprite = Objects.requireNonNull(BadSprite.SPRITE_MAP.get(spriteName), spriteName);
     }
 
-    public static @Nullable BackpackItem byId(@NotNull String item) {
+    public static @Nullable BackpackItem byId(String item) {
         try {
             return BackpackItem.valueOf(item.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
@@ -85,15 +84,15 @@ public enum BackpackItem {
         }
     }
 
-    public @NotNull String id() {
+    public String id() {
         return name().toLowerCase(Locale.ROOT);
     }
 
-    public @NotNull BackpackCategory category() {
+    public BackpackCategory category() {
         return category;
     }
 
-    public @NotNull Rarity rarity() {
+    public Rarity rarity() {
         return rarity;
     }
 
@@ -110,24 +109,24 @@ public enum BackpackItem {
         return recipeBookId;
     }
 
-    public @NotNull Component displayName() {
+    public Component displayName() {
         var translationKey = "item.mapmaker." + name().toLowerCase() + ".name";
         return Objects.requireNonNullElse(
-                LanguageProviderV2.translate(Component.translatable(translationKey)),
-                Component.text("item.mapmaker." + name().toLowerCase() + ".name"));
+            LanguageProviderV2.translate(Component.translatable(translationKey)),
+            Component.text("item.mapmaker." + name().toLowerCase() + ".name"));
     }
 
-    public @NotNull BadSprite iconSprite() {
+    public BadSprite iconSprite() {
         return BadSprite.require("icon/material/" + name().toLowerCase());
     }
 
-    public @NotNull Component iconComponent() {
+    public Component iconComponent() {
         //todo the base sprite should also contain this sprite
         var iconSprite = "icon/material/" + name().toLowerCase();
         return Component.text(Objects.requireNonNull(BadSprite.SPRITE_MAP.get(iconSprite), iconSprite).fontChar()).shadowColor(ShadowColor.none());
     }
 
-    public @NotNull ItemStack getItemStack(int amount) {
+    public ItemStack getItemStack(int amount) {
         Check.argCondition(amount < 0 || amount > maxStackSize(), "amount must be between 1 and " + maxStackSize() + ", inclusive");
         var translationKeyBase = "item.mapmaker." + name().toLowerCase();
         var lore = new ArrayList<Component>();
@@ -135,33 +134,32 @@ public enum BackpackItem {
         lore.add(Component.empty());
         lore.addAll(LanguageProviderV2.translateMulti(translationKeyBase + ".lore", List.of()));
         return ItemStack.builder(Material.STICK)
-                .set(DataComponents.ITEM_MODEL, sprite.model())
-                .set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of((float) amount), List.of(), List.of(), List.of()))
-                .set(DataComponents.CUSTOM_NAME, displayName())
-                .set(DataComponents.LORE, lore)
-                .build();
+            .set(DataComponents.ITEM_MODEL, sprite.model())
+            .set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of((float) amount), List.of(), List.of(), List.of()))
+            .set(DataComponents.CUSTOM_NAME, displayName())
+            .set(DataComponents.LORE, lore)
+            .build();
     }
 
-    @NotNull RecipeBookAddPacket.Entry getRecipeBookEntry(int amount) {
+    RecipeBookAddPacket.Entry getRecipeBookEntry(int amount) {
         RecipeDisplay display = new RecipeDisplay.CraftingShapeless(
-                List.of(amount == 0 ? UNCRAFTABLE : CRAFTABLE),
-                new SlotDisplay.ItemStack(getItemStack(amount)),
-                new SlotDisplay.Item(Material.CRAFTING_TABLE)
+            List.of(amount == 0 ? UNCRAFTABLE : CRAFTABLE),
+            new SlotDisplay.ItemStack(getItemStack(amount)),
+            new SlotDisplay.Item(Material.CRAFTING_TABLE)
         );
         return new RecipeBookAddPacket.Entry(
-                recipeBookId(), display, null,
-                RecipeBookCategory.CRAFTING_REDSTONE,
-                null, (byte) 0
+            recipeBookId(), display, null,
+            RecipeBookCategory.CRAFTING_REDSTONE,
+            null, (byte) 0
         );
     }
 
-//    @NotNull
 //    DeclareRecipesPacket.DeclaredRecipe getRecipePlaceholder(int amount) {
 //        return new DeclareRecipesPacket.DeclaredShapelessCraftingRecipe(
-//                recipeBookId, "",
-//                RecipeCategory.Crafting.REDSTONE,
-//                amount == 0 ? UNCRAFTABLE : CRAFTABLE,
-//                getItemStack(amount)
+//            recipeBookId, "",
+//            RecipeCategory.Crafting.REDSTONE,
+//            amount == 0 ? UNCRAFTABLE : CRAFTABLE,
+//            getItemStack(amount)
 //        );
 //    }
 }

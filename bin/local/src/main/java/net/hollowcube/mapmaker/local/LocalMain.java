@@ -3,8 +3,6 @@ package net.hollowcube.mapmaker.local;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.GlobalConfig;
 import net.hollowcube.mapmaker.map.runtime.MapServerInitializer;
-import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,9 +23,12 @@ public class LocalMain {
         var realPath = mapDirectory.toRealPath();
         MapServerInitializer.run(c -> new LocalMapServer(new ConfigLoaderV3() {
             @Override
-            public @NonNull <C> C get(@NotNull Class<C> clazz) {
-                if (clazz.equals(GlobalConfig.class))
-                    return (C) new GlobalConfig(true);
+            public <C> C get(Class<C> clazz) {
+                if (clazz.equals(GlobalConfig.class)) {
+                    @SuppressWarnings("unchecked")
+                    C config = (C) new GlobalConfig(true);
+                    return config;
+                }
                 return c.get(clazz);
             }
 

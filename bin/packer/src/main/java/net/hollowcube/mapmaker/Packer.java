@@ -21,7 +21,7 @@ public class Packer {
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    static void main(String[] args) throws Exception {
         System.setProperty("java.awt.headless", "true");
 
         var minecraftPath = Path.of(args[1]).toRealPath();

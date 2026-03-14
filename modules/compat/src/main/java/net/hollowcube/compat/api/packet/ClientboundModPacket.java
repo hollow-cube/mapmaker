@@ -7,7 +7,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.function.BiConsumer;
@@ -49,12 +48,12 @@ public interface ClientboundModPacket<T extends ClientboundModPacket<T>>  {
         public static <T extends ClientboundModPacket<T>> Type<T> of(String namespace, String path, BiConsumer<NetworkBuffer, T> writer) {
             var type = new NetworkBuffer.Type<T>() {
                 @Override
-                public void write(@NotNull NetworkBuffer buffer, T value) {
+                public void write(NetworkBuffer buffer, T value) {
                     writer.accept(buffer, value);
                 }
 
                 @Override
-                public T read(@NotNull NetworkBuffer buffer) {
+                public T read(NetworkBuffer buffer) {
                     throw new UnsupportedOperationException("You cannot read a write-only packet type");
                 }
             };

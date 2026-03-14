@@ -6,19 +6,15 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
-import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
-import java.util.UUID;
 
 public final class CoreArgument {
 
     // Player stuff
 
-    public static @NotNull Argument<PlayerData> AnyPlayerData(
-        @NotNull String id, @NotNull PlayerService playerService) {
+    public static Argument<PlayerData> AnyPlayerData(String id, PlayerService playerService) {
         return Argument.Word(id).map(
             /* Mapper */ (sender, raw) -> new ParseResult.Success<>(() -> {
                 if (raw.trim().isEmpty()) return null;
@@ -38,8 +34,7 @@ public final class CoreArgument {
         );
     }
 
-    public static @NotNull Argument<@Nullable String> AnyPlayerId(
-        @NotNull String id, @NotNull PlayerService playerService) {
+    public static Argument<@Nullable String> AnyPlayerId(String id, PlayerService playerService) {
         return Argument.Word(id).map(
             /* Mapper */ (sender, raw) -> new ParseResult.Success<>(() -> {
                 if (raw.trim().isEmpty()) return null;
@@ -57,8 +52,7 @@ public final class CoreArgument {
         );
     }
 
-    public static @NotNull Argument<@Nullable String> AnyOnlinePlayer(
-        @NotNull String id, @NotNull SessionManager sessionManager) {
+    public static Argument<@Nullable String> AnyOnlinePlayer(String id, SessionManager sessionManager) {
         return Argument.Word(id).map(
             /* Mapper */ (sender, raw) -> new ParseResult.Success<>(() -> {
                 for (var session : sessionManager.sessions(false)) {
@@ -81,19 +75,19 @@ public final class CoreArgument {
 
     // Map Stuff
 
-    public static MapArgument Map(@NotNull String id, @NotNull MapService mapService) {
+    public static MapArgument Map(String id, MapService mapService) {
         return new MapArgument(id, mapService);
     }
 
-    public static MessageArgument Message(@NotNull String id) {
+    public static MessageArgument Message(String id) {
         return new MessageArgument(id);
     }
 
-    public static MapSettingArgument MapSetting(@NotNull String id) {
+    public static MapSettingArgument MapSetting(String id) {
         return new MapSettingArgument(id);
     }
 
-    public static JsonArgument Json(@NotNull String id) {
+    public static JsonArgument Json(String id) {
         return new JsonArgument(id);
     }
 

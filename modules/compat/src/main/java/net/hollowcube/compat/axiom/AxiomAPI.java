@@ -1,6 +1,5 @@
 package net.hollowcube.compat.axiom;
 
-import net.kyori.adventure.nbt.BinaryTagTypes;
 import net.kyori.adventure.nbt.ListBinaryTag;
 import net.kyori.adventure.nbt.StringBinaryTag;
 import net.kyori.adventure.text.Component;
@@ -24,5 +23,8 @@ public class AxiomAPI {
             .add(HIDDEN_MARKER_KEYS.stream().map(StringBinaryTag::stringBinaryTag).toList())
             .build();
     public static final List<String> RESERVED_MARKER_DATA = List.of("line_argb", "line_thickness", "face_argb", "axiom:hide", "axiom:modify");
+
+    private AxiomAPI() {
+    }
 
 }

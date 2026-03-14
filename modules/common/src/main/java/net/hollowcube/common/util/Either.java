@@ -1,17 +1,16 @@
 package net.hollowcube.common.util;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public sealed interface Either<L, R> {
-    static <L, R> Either<L, R> left(L left) {
+    static <L, R> Either<L, R> left(@Nullable L left) {
         return new Either.Left<>(left);
     }
 
-    static <L, R> Either<L, R> right(R right) {
+    static <L, R> Either<L, R> right(@Nullable R right) {
         return new Either.Right<>(right);
     }
 
@@ -31,17 +30,17 @@ public sealed interface Either<L, R> {
         throw new IllegalStateException("Either is not right");
     }
 
-    default L leftOr(L defaultValue) {
+    default @Nullable L leftOr(L defaultValue) {
         return defaultValue;
     }
 
-    default R rightOr(R defaultValue) {
+    default @Nullable R rightOr(R defaultValue) {
         return defaultValue;
     }
 
-    <T> T map(@NotNull Function<L, T> leftMapper, @NotNull Function<R, T> rightMapper);
+    <T> T map(Function<@Nullable L, T> leftMapper, Function<@Nullable R, T> rightMapper);
 
-    void consume(@NotNull Consumer<L> leftConsumer, @NotNull Consumer<R> rightConsumer);
+    void consume(Consumer<@Nullable L> leftConsumer, Consumer<@Nullable R> rightConsumer);
 
     record Left<L, R>(@Nullable L left) implements Either<L, R> {
         @Override
@@ -50,17 +49,17 @@ public sealed interface Either<L, R> {
         }
 
         @Override
-        public L leftOr(L defaultValue) {
+        public @Nullable L leftOr(L defaultValue) {
             return left;
         }
 
         @Override
-        public <T> T map(@NotNull Function<L, T> leftMapper, @NotNull Function<R, T> rightMapper) {
+        public <T> T map(Function<@Nullable L, T> leftMapper, Function<@Nullable R, T> rightMapper) {
             return leftMapper.apply(left);
         }
 
         @Override
-        public void consume(@NotNull Consumer<L> leftConsumer, @NotNull Consumer<R> rightConsumer) {
+        public void consume(Consumer<@Nullable L> leftConsumer, Consumer<@Nullable R> rightConsumer) {
             leftConsumer.accept(left);
         }
     }
@@ -72,17 +71,17 @@ public sealed interface Either<L, R> {
         }
 
         @Override
-        public R rightOr(R defaultValue) {
+        public @Nullable R rightOr(R defaultValue) {
             return right;
         }
 
         @Override
-        public <T> T map(@NotNull Function<L, T> leftMapper, @NotNull Function<R, T> rightMapper) {
+        public <T> T map(Function<@Nullable L, T> leftMapper, Function<@Nullable R, T> rightMapper) {
             return rightMapper.apply(right);
         }
 
         @Override
-        public void consume(@NotNull Consumer<L> leftConsumer, @NotNull Consumer<R> rightConsumer) {
+        public void consume(Consumer<@Nullable L> leftConsumer, Consumer<@Nullable R> rightConsumer) {
             rightConsumer.accept(right);
         }
     }

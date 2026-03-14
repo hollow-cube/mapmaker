@@ -13,7 +13,6 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -28,7 +27,7 @@ public class CreateMapsItem extends ItemHandler {
     private final ServerBridge bridge;
     private final Controller guiController;
 
-    public CreateMapsItem(ApiClient api, PlayerService playerService, MapService mapService, ServerBridge bridge, @NotNull Controller guiController) {
+    public CreateMapsItem(ApiClient api, PlayerService playerService, MapService mapService, ServerBridge bridge, Controller guiController) {
         super(ID, RIGHT_CLICK_ANY);
         this.api = api;
         this.playerService = playerService;
@@ -43,7 +42,7 @@ public class CreateMapsItem extends ItemHandler {
     }
 
     @Override
-    protected void rightClicked(@NotNull Click click) {
+    protected void rightClicked(Click click) {
         var player = click.player();
         if (CoreFeatureFlags.CREATE_MAPS_V2.test(player) && !player.isSneaking()) {
             FutureUtil.submitVirtual(() -> {

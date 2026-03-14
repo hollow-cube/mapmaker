@@ -11,7 +11,7 @@ import net.hollowcube.nbs.DefaultNbsPlayer;
 import net.hollowcube.nbs.NBSPlayer;
 import net.hollowcube.nbs.NBSReader;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +39,7 @@ public class PlayNbsCommand extends CommandDsl {
     private final Argument<String> id = Argument.Word("id");
     private final Argument<String> save = Argument.Literal("save");
     private final HttpClient client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).build();
-    private NBSPlayer player;
+    private @Nullable NBSPlayer player;
 
     public PlayNbsCommand() {
         super("play_nbs_song");
@@ -52,7 +52,7 @@ public class PlayNbsCommand extends CommandDsl {
         addSyntax(playerOnly(this::restart), Argument.Literal("restart"));
     }
 
-    private void downloadNoteblockWorldSong(@NotNull Player player, @NotNull CommandContext commandContext) {
+    private void downloadNoteblockWorldSong(Player player, CommandContext commandContext) {
         if (this.player != null) {
             this.player.stop();
         }
@@ -101,23 +101,23 @@ public class PlayNbsCommand extends CommandDsl {
         }
     }
 
-    private void pause(@NotNull Player player, @NotNull CommandContext commandContext) {
+    private void pause(Player player, CommandContext commandContext) {
         this.player.pause();
     }
 
-    private void resume(@NotNull Player player, @NotNull CommandContext commandContext) {
+    private void resume(Player player, CommandContext commandContext) {
         this.player.resume();
     }
 
-    private void stop(@NotNull Player player, @NotNull CommandContext commandContext) {
+    private void stop(Player player, CommandContext commandContext) {
         this.player.stop();
     }
 
-    private void restart(@NotNull Player player, @NotNull CommandContext commandContext) {
+    private void restart(Player player, CommandContext commandContext) {
         this.player.restart();
     }
 
-    private void execute(@NotNull Player player, @NotNull CommandContext commandContext) {
+    private void execute(Player player, CommandContext commandContext) {
         if (this.player != null) {
             this.player.stop();
         }
@@ -125,7 +125,7 @@ public class PlayNbsCommand extends CommandDsl {
         play(player, url);
     }
 
-    private void play(@NotNull Player player, @NotNull String url) {
+    private void play(Player player, String url) {
         try {
             var nbs = NBSReader.reader().read(download(url));
             this.player = new DefaultNbsPlayer(nbs, player);
@@ -142,6 +142,4 @@ public class PlayNbsCommand extends CommandDsl {
         if (response.statusCode() != 200) throw new RuntimeException("meow");
         return response.body();
     }
-
-
 }

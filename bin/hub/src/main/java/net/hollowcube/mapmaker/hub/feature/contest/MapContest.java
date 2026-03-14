@@ -21,7 +21,6 @@ import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -45,14 +44,14 @@ public class MapContest implements HubFeature {
     private static final Pos NPC_SPAWN_POS = new Pos(-37.5, 40, 47.5, 180, 10);
 
     @Override
-    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
+    public void load(MapServer server, HubMapWorld world) {
         scheduleAtStart(world, () -> {
             spawnText(world);
             spawnNpc(world);
         });
     }
 
-    public static void scheduleAtStart(@NotNull HubMapWorld world, @NotNull Runnable task) {
+    public static void scheduleAtStart(HubMapWorld world, Runnable task) {
         var millisToStart = ChronoUnit.MILLIS.between(LocalDateTime.now(), MapContest.START_DATE);
         if (millisToStart <= 0) {
             task.run();
@@ -63,7 +62,7 @@ public class MapContest implements HubFeature {
             .schedule();
     }
 
-    private void spawnText(@NotNull HubMapWorld world) {
+    private void spawnText(HubMapWorld world) {
         NpcTextModel text = new NpcTextModel();
         text.getEntityMeta().setText(Component.text("ɪᴛᴇᴍ ᴍᴀᴘ ᴄᴏᴍᴘᴇᴛɪᴛɪᴏɴ"));
         text.getEntityMeta().setBillboardRenderConstraints(AbstractDisplayMeta.BillboardConstraints.VERTICAL);
@@ -71,7 +70,7 @@ public class MapContest implements HubFeature {
         text.setInstance(world.instance(), TEXT_SPAWN_POS);
     }
 
-    private void spawnNpc(@NotNull HubMapWorld world) {
+    private void spawnNpc(HubMapWorld world) {
         var skin = new PlayerSkin(
             "ewogICJ0aW1lc3RhbXAiIDogMTc1MjkzMDYwNzY0MywKICAicHJvZmlsZUlkIiA6ICJkYmUyMTA1OTViMGI0MzEyYWExMjgzMGRjNTQwYWQwNCIsCiAgInByb2ZpbGVOYW1lIiA6ICJTZXRoMjgiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGQwY2M1NWY3ZDlhOTZjZDZjMDJlNjA3Mjc2YzQ1OWJlZmNhMzM5NTJhMWQyMjJjN2U2NDlhNTRkYTY0ZTY4MyIKICAgIH0KICB9Cn0=",
             "ICiJEHabrK7GTdEQvmidVvzQgJ8dlD8yjgpPVuLYrDC/A4ku4UQPraX54NCTTsfAfJ5VW4v5+31OwF1nseJHOqxPoyWN5YxSStT5cdxAs6joHBovv6X5DOQ5IPeOtZ+gVqYUb0LevvMPlZK8YORYrspYGokPNZ0MWjbWQkpAInb1oPGI1VAl/1zPHvHXYeN9RQGgGCFFhyzdFg0q+YmNJtATc9iTfxfWn4trgtA7pNXCfDWl/EHguelR8jspZWBxNGx5qSlN5HqAEHfkSRix1Mn17eA4PkIljJ5LHyN68q+wF5N3RFPAf2Upzzh5rJ930ExGdXXKvmr/vk9Yqp4e9f+nqCi2GU+yTsJkTgy/uUMprc8/+RtAJRZK4hMk1C2wjdJgGmz9Q7Efj58tj840L9UXc6e3YHC2cs5RY0eu1oPRoTrtOXKW5O54EUKLZc+UhZFnhtSSiK2fOw/RUsWjLy26A3THenpq2fAU2CCuMgPCH2f+UnfF+IfUYMLqUm43qDFFp5lNDwA/pdXn6OyH5G/PB/CzDPRzCzNqDysEWxEd+07lOKe5Xi59ASX9JMRgTMEdoD/+b3Wd5vsNsLulygoji+FJwonqwHZlB0glLTYTl8TTpIMQQS6zFkpT1hlZysxF1VpHBHL1v3RR6k/8+63zpEhJ1qLiYZE1FG5sDas="
@@ -87,13 +86,12 @@ public class MapContest implements HubFeature {
         playtimeNpc.setHandler(MapContest::handleNpcClick);
     }
 
-    private static void handleNpcClick(
-        @NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {
+    private static void handleNpcClick(Player player, BaseNpcEntity npc, PlayerHand hand, boolean isLeftClick) {
         if (isLeftClick) return;
         openSubmissionMenu(player);
     }
 
-    public static void openSubmissionMenu(@NotNull Player player) {
+    public static void openSubmissionMenu(Player player) {
         var world = MapWorld.forPlayer(player);
         if (world == null) return;
 

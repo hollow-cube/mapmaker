@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.minimessage.tag.Tag;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -12,13 +11,13 @@ public class MyClickTagImpl implements Tag, InsertingWithArgs {
     private final ClickEvent.Action action;
     private final String text;
 
-    MyClickTagImpl(@NotNull ClickEvent.Action action, @NotNull String text) {
+    MyClickTagImpl(ClickEvent.Action action, String text) {
         this.action = action;
         this.text = text;
     }
 
     @Override
-    public @NotNull Component value(@NotNull List<Component> args) {
+    public Component value(List<Component> args) {
         var replacedText = LanguageProviderV2.replaceInString(this.text, args);
         return Component.text("", Style.style(ClickEvent.clickEvent(action, replacedText)));
     }

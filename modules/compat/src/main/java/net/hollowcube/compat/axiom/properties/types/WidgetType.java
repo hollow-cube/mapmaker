@@ -2,15 +2,14 @@ package net.hollowcube.compat.axiom.properties.types;
 
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.Unit;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 public record WidgetType<T>(
-        int id,
-        DataType<T> type,
-        Consumer<NetworkBuffer> extraData
+    int id,
+    DataType<T> type,
+    Consumer<NetworkBuffer> extraData
 ) {
 
     public static WidgetType<Boolean> Checkbox() {
@@ -40,7 +39,7 @@ public record WidgetType<T>(
         return new WidgetType<>(5, DataType.INTEGER, buffer -> buffer.write(NetworkBuffer.STRING.list(), options));
     }
 
-    public void write(@NotNull NetworkBuffer buffer) {
+    public void write(NetworkBuffer buffer) {
         buffer.write(NetworkBuffer.VAR_INT, this.id);
         this.extraData.accept(buffer);
     }

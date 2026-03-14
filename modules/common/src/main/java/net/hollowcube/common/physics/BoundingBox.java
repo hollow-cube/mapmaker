@@ -2,7 +2,7 @@ package net.hollowcube.common.physics;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,14 +10,14 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * See https://wiki.vg/Entity_metadata#Mobs_2
+ * See https://minecraft.wiki/w/Java_Edition_protocol/Entity_metadata
  */
 public final class BoundingBox {
     public final static BoundingBox ZERO = new BoundingBox(0, 0, 0);
 
     private final double width, height, depth;
     private final Point offset;
-    private Point relativeEnd;
+    private @Nullable Point relativeEnd; // lazily initialized only when required
 
     public BoundingBox(double width, double height, double depth, Point offset) {
         this.width = width;
@@ -30,23 +30,23 @@ public final class BoundingBox {
         this(width, height, depth, new Vec(-width / 2, 0, -depth / 2));
     }
 
-    public boolean intersectBox(@NotNull Point positionRelative, @NotNull BoundingBox boundingBox) {
+    public boolean intersectBox(Point positionRelative, BoundingBox boundingBox) {
         return (minX() + positionRelative.x() <= boundingBox.maxX() - Vec.EPSILON / 2 && maxX() + positionRelative.x() >= boundingBox.minX() + Vec.EPSILON / 2) &&
                 (minY() + positionRelative.y() <= boundingBox.maxY() - Vec.EPSILON / 2 && maxY() + positionRelative.y() >= boundingBox.minY() + Vec.EPSILON / 2) &&
                 (minZ() + positionRelative.z() <= boundingBox.maxZ() - Vec.EPSILON / 2 && maxZ() + positionRelative.z() >= boundingBox.minZ() + Vec.EPSILON / 2);
     }
 
-    public boolean intersectBox(@NotNull Point positionRelative, @NotNull net.minestom.server.collision.BoundingBox boundingBox) {
+    public boolean intersectBox(Point positionRelative, net.minestom.server.collision.BoundingBox boundingBox) {
         return (minX() + positionRelative.x() <= boundingBox.maxX() - Vec.EPSILON / 2 && maxX() + positionRelative.x() >= boundingBox.minX() + Vec.EPSILON / 2) &&
                 (minY() + positionRelative.y() <= boundingBox.maxY() - Vec.EPSILON / 2 && maxY() + positionRelative.y() >= boundingBox.minY() + Vec.EPSILON / 2) &&
                 (minZ() + positionRelative.z() <= boundingBox.maxZ() - Vec.EPSILON / 2 && maxZ() + positionRelative.z() >= boundingBox.minZ() + Vec.EPSILON / 2);
     }
 
-    public @NotNull Point relativeStart() {
+    public Point relativeStart() {
         return offset;
     }
 
-    public @NotNull Point relativeEnd() {
+    public Point relativeEnd() {
         Point relativeEnd = this.relativeEnd;
         if (relativeEnd == null) this.relativeEnd = relativeEnd = offset.add(width, height, depth);
         return relativeEnd;
@@ -70,7 +70,7 @@ public final class BoundingBox {
      * @param z the Z offset
      * @return a new {@link BoundingBox} expanded
      */
-    public @NotNull BoundingBox expand(double x, double y, double z) {
+    public BoundingBox expand(double x, double y, double z) {
         return new BoundingBox(this.width + x, this.height + y, this.depth + z);
     }
 
@@ -80,7 +80,7 @@ public final class BoundingBox {
      * @param z the Z offset
      * @return a new bounding box contracted
      */
-    public @NotNull BoundingBox contract(double x, double y, double z) {
+    public BoundingBox contract(double x, double y, double z) {
         return new BoundingBox(this.width - x, this.height - y, this.depth - z);
     }
 

@@ -2,9 +2,10 @@ package net.hollowcube.mapmaker.util;
 
 import com.google.gson.*;
 import de.marhali.json5.*;
-import org.jetbrains.annotations.NotNull;
 
 public class JsonUtil {
+    private JsonUtil() {
+    }
 
     public static JsonElement toGson(Json5Element element) {
         return switch (element) {
@@ -30,7 +31,7 @@ public class JsonUtil {
         };
     }
 
-    public static @NotNull JsonElement stripMinecraftNamespace(@NotNull JsonElement element) {
+    public static JsonElement stripMinecraftNamespace(JsonElement element) {
         if (element instanceof JsonArray array) {
             return array.asList()
                     .stream()

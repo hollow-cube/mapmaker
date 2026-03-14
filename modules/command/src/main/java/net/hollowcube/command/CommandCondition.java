@@ -2,7 +2,6 @@ package net.hollowcube.command;
 
 import net.minestom.server.command.CommandSender;
 import org.intellij.lang.annotations.MagicConstant;
-import org.jetbrains.annotations.NotNull;
 
 @FunctionalInterface
 public interface CommandCondition {
@@ -21,15 +20,15 @@ public interface CommandCondition {
      */
     int HIDE = 2;
 
-    static @NotNull CommandCondition nosuggestion() {
+    static CommandCondition nosuggestion() {
         return (_, context) -> context.pass() == CommandContext.Pass.SUGGEST ? HIDE : ALLOW;
     }
 
-    static @NotNull CommandCondition hideOnClient() {
+    static CommandCondition hideOnClient() {
         return (_, context) -> context.pass() == CommandContext.Pass.BUILD ? HIDE : ALLOW;
     }
 
-    static @NotNull CommandCondition and(@NotNull CommandCondition... conditions) {
+    static CommandCondition and(CommandCondition... conditions) {
         return (sender, context) -> {
             for (var condition : conditions) {
                 var result = condition.test(sender, context);
@@ -41,7 +40,7 @@ public interface CommandCondition {
         };
     }
 
-    static @NotNull CommandCondition or(@NotNull CommandCondition... conditions) {
+    static CommandCondition or(CommandCondition... conditions) {
         return (sender, context) -> {
             for (var condition : conditions) {
                 var result = condition.test(sender, context);
@@ -54,5 +53,5 @@ public interface CommandCondition {
     }
 
     @MagicConstant(valuesFromClass = CommandCondition.class)
-    int test(@NotNull CommandSender sender, @NotNull CommandContext context);
+    int test(CommandSender sender, CommandContext context);
 }

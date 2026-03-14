@@ -22,6 +22,7 @@ import net.minestom.server.particle.Particle;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 @AutoService(HubFeature.class)
 public class StoreAdFeatureProvider implements HubFeature {
@@ -30,13 +31,13 @@ public class StoreAdFeatureProvider implements HubFeature {
     private static final Pos GOLD_BLOCK_ENTITY_POS = new Pos(-4.5, 45, -29.5, 0, -90);
     private static final int GOLD_BLOCK_ENTITY_UPDATE_INTERVAL = 5; // Seconds
 
-    private PlayerService playerService;
+    private @UnknownNullability PlayerService playerService; // lateinit
 
     private final NpcItemModel goldBlockEntity = new NpcItemModel();
     private int goldBlockEntityRotationTarget = 0;
 
     @Override
-    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
+    public void load(MapServer server, HubMapWorld world) {
         this.playerService = server.playerService();
 
         var viewStoreEntity = BaseNpcEntity.createInteractionEntity(
@@ -50,13 +51,13 @@ public class StoreAdFeatureProvider implements HubFeature {
         server.scheduler().submitTask(this::mapEntityUpdate, ExecutionType.TICK_START);
     }
 
-    private void handleStoreClick(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {
+    private void handleStoreClick(Player player, BaseNpcEntity npc, PlayerHand hand, boolean isLeftClick) {
         if (hand != PlayerHand.MAIN) return;
 
         Panel.open(player, new StoreView(playerService, StoreView.TAB_HYPERCUBE));
     }
 
-    private @NotNull TaskSchedule mapEntityUpdate() {
+    private TaskSchedule mapEntityUpdate() {
         var meta = goldBlockEntity.getEntityMeta();
         meta.setNotifyAboutChanges(false);
 

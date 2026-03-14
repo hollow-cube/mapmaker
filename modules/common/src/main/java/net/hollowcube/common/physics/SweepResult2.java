@@ -2,7 +2,6 @@ package net.hollowcube.common.physics;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
-import org.jetbrains.annotations.NotNull;
 
 public final class SweepResult2 {
 
@@ -44,7 +43,7 @@ public final class SweepResult2 {
         return collidedPositionZ;
     }
 
-    public @NotNull Point getCollidedPosition() {
+    public Point getCollidedPosition() {
         return new Vec(collidedPositionX, collidedPositionY, collidedPositionZ);
     }
 }

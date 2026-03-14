@@ -4,7 +4,6 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
@@ -28,7 +27,7 @@ public final class FutureUtil {
 
     public static final Executor VIRTUAL = Executors.newVirtualThreadPerTaskExecutor();
 
-    public static <T> @NotNull Future<T> callNow(@NotNull Callable<T> callable) {
+    public static <T> Future<@Nullable T> callNow(Callable<@Nullable T> callable) {
         try {
             return CompletableFuture.completedFuture(callable.call());
         } catch (Exception e) {
@@ -36,10 +35,13 @@ public final class FutureUtil {
         }
     }
 
-    public static <T> @NotNull CompletableFuture<T> fork(@NotNull Callable<T> callable) {
+    // the contract here is that if
+    public static <T> CompletableFuture<@Nullable T> fork(Callable<@Nullable T> callable) {
         var future = new CompletableFuture<T>();
         submitVirtual(() -> {
             try {
+                // For some reason, IntelliJ seems to think `complete` takes a non-null argument
+                //noinspection DataFlowIssue
                 future.complete(callable.call());
             } catch (Throwable e) {
                 future.completeExceptionally(e);
@@ -48,18 +50,18 @@ public final class FutureUtil {
         return future;
     }
 
-    public static @NotNull CompletableFuture<Void> fork(@NotNull Runnable runnable) {
+    public static CompletableFuture<@Nullable Void> fork(Runnable runnable) {
         return fork(() -> {
             runnable.run();
             return null;
         });
     }
 
-    public static <T> @NotNull Consumer<T> virtual(@NotNull Consumer<T> consumer) {
+    public static <T> Consumer<T> virtual(Consumer<T> consumer) {
         return value -> Thread.startVirtualThread(() -> consumer.accept(value));
     }
 
-    public static @NotNull Callable<Void> call(@NotNull Runnable runnable) {
+    public static Callable<Void> call(Runnable runnable) {
         return () -> {
             try {
                 runnable.run();
@@ -70,7 +72,7 @@ public final class FutureUtil {
         };
     }
 
-    public static <T> @NotNull Callable<T> wrap(@NotNull Callable<T> callable) {
+    public static <T> Callable<T> wrap(Callable<T> callable) {
         return () -> {
             try {
                 return callable.call();
@@ -81,15 +83,17 @@ public final class FutureUtil {
         };
     }
 
-    public static @NotNull Runnable wrapVirtual(@NotNull Runnable runnable) {
+    public static Runnable wrapVirtual(Runnable runnable) {
         return () -> submitVirtual(runnable);
     }
 
-    public static void submitVirtual(@NotNull Runnable runnable) {
+    public static void submitVirtual(Runnable runnable) {
         createVirtual(runnable);
     }
 
-    public static Thread createVirtual(@NotNull Runnable runnable) {
+    // this is non-null 99% of the time - putting @Nullable on this I think would
+    // just throw up more warnings than it's worth
+    public static @UnknownNullability Thread createVirtual(Runnable runnable) {
         if (isShuttingDown) {
             runnable.run();
             return null;
@@ -113,6 +117,7 @@ public final class FutureUtil {
         }
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private static boolean isUnsafeThread(@Nullable Acquirable<?> acquirable) {
         if (isShuttingDown) return false;
         var thread = Thread.currentThread();
@@ -142,6 +147,7 @@ public final class FutureUtil {
         assertTickThread(null);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static void assertTickThread(@Nullable Acquirable<?> acquirable) {
         if (isUnsafeThread(acquirable)) return;
         throw new IllegalStateException("Unsafe tick thread only call on '" + Thread.currentThread().getName() + "'");
@@ -151,6 +157,7 @@ public final class FutureUtil {
         assertTickThreadWarn(null);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static void assertTickThreadWarn(@Nullable Acquirable<?> acquirable) {
         if (isUnsafeThread(acquirable)) return;
         logger.error("Unsafe tick thread only call on '{}'", Thread.currentThread().getName(), new RuntimeException("dummy exception for stacktrace"));
@@ -181,7 +188,7 @@ public final class FutureUtil {
     }
 
     /// Blocks until the end of the current tick for the entity, then runs the task _on the tick thread_ and returns.
-    public static void waitForEndOfTick(@NotNull Entity entity, @NotNull Runnable task) {
+    public static void waitForEndOfTick(Entity entity, Runnable task) {
         if (entity.isRemoved()) {
             task.run(); // Player isnt ticking, run immediately.
             return;
@@ -190,6 +197,8 @@ public final class FutureUtil {
         entity.scheduler().scheduleEndOfTick(() -> {
             try {
                 task.run();
+                // Again, for some reason, IntelliJ thinks `complete` has a not-null argument
+                //noinspection DataFlowIssue
                 future.complete(null);
             } catch (Throwable e) {
                 future.completeExceptionally(e);

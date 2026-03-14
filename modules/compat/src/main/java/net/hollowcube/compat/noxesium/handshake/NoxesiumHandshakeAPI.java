@@ -5,6 +5,7 @@ import net.hollowcube.compat.noxesium.packets.v3.ClientboundHandshakeCancelPacke
 import net.hollowcube.compat.noxesium.packets.v3.ServerboundHandshakePacket;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -13,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
 
-public class NoxesiumHandshakeAPI {
+public final class NoxesiumHandshakeAPI {
 
     private static final String ENCRYPTION_KEY = "gd2sWBVZNlpuN/iL26fS5CbEOsqVQJlY0lu8lL/8K8A=";
     private static final String ID = "noxesium-common";
@@ -32,7 +33,7 @@ public class NoxesiumHandshakeAPI {
         new ClientboundHandshakeCancelPacket(ClientboundHandshakeCancelPacket.NO_MATCHING_ENTRYPOINTS).send(player);
     }
 
-    private static String decryptSecret(String encryptedSecret) {
+    private static @Nullable String decryptSecret(String encryptedSecret) {
         try {
             var bytes = Base64.getDecoder().decode(ENCRYPTION_KEY);
             var key = new SecretKeySpec(bytes, "AES");
@@ -43,5 +44,8 @@ public class NoxesiumHandshakeAPI {
             MinecraftServer.getExceptionManager().handleException(e);
         }
         return null;
+    }
+
+    private NoxesiumHandshakeAPI() {
     }
 }

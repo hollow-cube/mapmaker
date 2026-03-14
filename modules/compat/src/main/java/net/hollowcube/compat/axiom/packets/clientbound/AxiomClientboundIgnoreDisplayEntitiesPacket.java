@@ -14,11 +14,11 @@ public record AxiomClientboundIgnoreDisplayEntitiesPacket(
 ) implements AxiomClientboundModPacket<AxiomClientboundIgnoreDisplayEntitiesPacket> {
 
     public static final Type<AxiomClientboundIgnoreDisplayEntitiesPacket> TYPE = Type.of(
-            AxiomAPI.CHANNEL, "ignore_display_entities",
-            NetworkBufferTemplate.template(
-                    ExtraNetworkBuffers.collection(NetworkBuffer.UUID, HashSet::new), AxiomClientboundIgnoreDisplayEntitiesPacket::entities,
-                    AxiomClientboundIgnoreDisplayEntitiesPacket::new
-            )
+        AxiomAPI.CHANNEL, "ignore_display_entities",
+        NetworkBufferTemplate.template(
+            ExtraNetworkBuffers.collection(NetworkBuffer.UUID, HashSet::new), AxiomClientboundIgnoreDisplayEntitiesPacket::entities,
+            AxiomClientboundIgnoreDisplayEntitiesPacket::new
+        )
     );
 
     @Override

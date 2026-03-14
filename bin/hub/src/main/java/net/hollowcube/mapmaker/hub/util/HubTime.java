@@ -5,7 +5,6 @@ import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 
-
 public class HubTime {
 
     private static final ZoneOffset EST = ZoneOffset.ofHours(-5);

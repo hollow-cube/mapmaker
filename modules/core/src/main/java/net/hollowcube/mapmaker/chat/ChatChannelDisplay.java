@@ -8,7 +8,6 @@ import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 public class ChatChannelDisplay implements ActionBar.Provider {
 
@@ -25,14 +24,14 @@ public class ChatChannelDisplay implements ActionBar.Provider {
     }
 
     @Override
-    public int cacheKey(@NotNull Player player) {
+    public int cacheKey(Player player) {
         var channel = PlayerData.fromPlayer(player).getSetting(PlayerSettings.CHAT_CHANNEL);
         var offset = player.getItemInOffHand().isAir() ? NORMAL_OFFSET : OFF_HAND_OFFSET;
         return channel.hashCode() * 31 + offset;
     }
 
     @Override
-    public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
+    public void provide(Player player, FontUIBuilder builder) {
         var channel = PlayerData.fromPlayer(player).getSetting(PlayerSettings.CHAT_CHANNEL);
         var sprite = switch (channel) {
             case ClientChatMessageData.CHANNEL_LOCAL -> LOCAL;

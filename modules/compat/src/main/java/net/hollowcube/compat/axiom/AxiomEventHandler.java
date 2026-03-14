@@ -7,14 +7,12 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.entity.EntitySpawnEvent;
 import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
 import net.minestom.server.event.player.PlayerTickEndEvent;
-import net.minestom.server.event.player.PlayerTickEvent;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
 public final class AxiomEventHandler {
 
-    static void onEntityRemoved(@NotNull RemoveEntityFromInstanceEvent event) {
+    static void onEntityRemoved(RemoveEntityFromInstanceEvent event) {
         var entity = event.getEntity();
 
         if (event.getEntity() instanceof Player player) {
@@ -26,7 +24,7 @@ public final class AxiomEventHandler {
         }
     }
 
-    static void onEntitySpawned(@NotNull EntitySpawnEvent event) {
+    static void onEntitySpawned(EntitySpawnEvent event) {
         var entity = event.getEntity();
 
         if (entity.getEntityType().equals(EntityType.MARKER)) {
@@ -34,9 +32,12 @@ public final class AxiomEventHandler {
         }
     }
 
-    static void onPlayerTick(@NotNull PlayerTickEndEvent event) {
+    static void onPlayerTick(PlayerTickEndEvent event) {
         if (AxiomPlayer.isEnabled(event.getPlayer())) {
             new AxiomClientboundUpdateAvailableDispatchesPacket(1024, 1024).send(event.getPlayer());
         }
+    }
+
+    private AxiomEventHandler() {
     }
 }

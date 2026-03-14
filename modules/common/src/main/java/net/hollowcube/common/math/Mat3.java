@@ -1,7 +1,5 @@
 package net.hollowcube.common.math;
 
-import org.jetbrains.annotations.NotNull;
-
 public class Mat3 {
     private float m00;
     private float m01;
@@ -19,7 +17,7 @@ public class Mat3 {
         this.m22 = 1.0F;
     }
 
-    public Mat3(@NotNull Mat3 mat) {
+    public Mat3(Mat3 mat) {
         this.m00 = mat.m00;
         this.m01 = mat.m01;
         this.m02 = mat.m02;
@@ -31,7 +29,7 @@ public class Mat3 {
         this.m22 = mat.m22;
     }
 
-    public Mat3(@NotNull Mat4 mat) {
+    public Mat3(Mat4 mat) {
         this.m00 = mat.m00();
         this.m01 = mat.m01();
         this.m02 = mat.m02();
@@ -79,59 +77,59 @@ public class Mat3 {
         return this.m22;
     }
 
-    public @NotNull Mat3 m00(float m00) {
+    public Mat3 m00(float m00) {
         this.m00 = m00;
         return this;
     }
 
-    public @NotNull Mat3 m01(float m01) {
+    public Mat3 m01(float m01) {
         this.m01 = m01;
         return this;
     }
 
-    public @NotNull Mat3 m02(float m02) {
+    public Mat3 m02(float m02) {
         this.m02 = m02;
         return this;
     }
 
-    public @NotNull Mat3 m10(float m10) {
+    public Mat3 m10(float m10) {
         this.m10 = m10;
         return this;
     }
 
-    public @NotNull Mat3 m11(float m11) {
+    public Mat3 m11(float m11) {
         this.m11 = m11;
         return this;
     }
 
-    public @NotNull Mat3 m12(float m12) {
+    public Mat3 m12(float m12) {
         this.m12 = m12;
         return this;
     }
 
-    public @NotNull Mat3 m20(float m20) {
+    public Mat3 m20(float m20) {
         this.m20 = m20;
         return this;
     }
 
-    public @NotNull Mat3 m21(float m21) {
+    public Mat3 m21(float m21) {
         this.m21 = m21;
         return this;
     }
 
-    public @NotNull Mat3 m22(float m22) {
+    public Mat3 m22(float m22) {
         this.m22 = m22;
         return this;
     }
 
-    public @NotNull Mat3 set(Mat3 m) {
+    public Mat3 set(Mat3 m) {
         return m == this ? this : this
                 .m00(m.m00()).m01(m.m01()).m02(m.m02())
                 .m10(m.m10()).m11(m.m11()).m12(m.m12())
                 .m20(m.m20()).m21(m.m21()).m22(m.m22());
     }
 
-    public @NotNull Mat3 set(
+    public Mat3 set(
             float m00, float m01, float m02,
             float m10, float m11, float m12,
             float m20, float m21, float m22) {
@@ -147,7 +145,7 @@ public class Mat3 {
         return this;
     }
 
-    public @NotNull Mat3 mul(Mat3 right) {
+    public Mat3 mul(Mat3 right) {
         float nm00 = Math.fma(m00, right.m00(), Math.fma(m10, right.m01(), m20 * right.m02()));
         float nm01 = Math.fma(m01, right.m00(), Math.fma(m11, right.m01(), m21 * right.m02()));
         float nm02 = Math.fma(m02, right.m00(), Math.fma(m12, right.m01(), m22 * right.m02()));
@@ -160,7 +158,7 @@ public class Mat3 {
         return this.set(nm00, nm01, nm02, nm10, nm11, nm12, nm20, nm21, nm22);
     }
 
-    public @NotNull Mat3 rotate(@NotNull Quaternion quat) {
+    public Mat3 rotate(Quaternion quat) {
         float w2 = (float) (quat.w() * quat.w());
         float x2 = (float) (quat.x() * quat.x());
         float y2 = (float) (quat.y() * quat.y());
@@ -204,11 +202,11 @@ public class Mat3 {
         return this;
     }
 
-    public @NotNull Mat3 scale(float xyz) {
+    public Mat3 scale(float xyz) {
         return scale(xyz, xyz, xyz);
     }
 
-    public @NotNull Mat3 scale(float x, float y, float z) {
+    public Mat3 scale(float x, float y, float z) {
         m00 *= x;
         m01 *= x;
         m02 *= x;
@@ -221,7 +219,7 @@ public class Mat3 {
         return this;
     }
 
-    public @NotNull Mat3 transpose() {
+    public Mat3 transpose() {
         return this.set(m00, m10, m20,
                 m01, m11, m21,
                 m02, m12, m22);

@@ -6,24 +6,23 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.trait.PlayerInstanceEvent;
 import net.minestom.server.network.packet.client.play.ClientUpdateSignPacket;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public record UpdateSignTextEvent(
-        @NotNull Player player,
-        @NotNull Point position,
+        Player player,
+        Point position,
         boolean isFrontText,
-        @NotNull List<String> lines
+        List<String> lines
 ) implements PlayerInstanceEvent {
 
     @Override
-    public @NotNull Player getPlayer() {
+    public Player getPlayer() {
         return player;
     }
 
     @ApiStatus.Internal
-    public static void post(@NotNull ClientUpdateSignPacket packet, @NotNull Player player) {
+    public static void post(ClientUpdateSignPacket packet, Player player) {
         EventDispatcher.call(new UpdateSignTextEvent(player, packet.blockPosition(), packet.isFrontText(), packet.lines()));
     }
 

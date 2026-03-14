@@ -12,4 +12,6 @@ public final class CommandCategories {
 
     public static final CommandCategory STAFF = new CommandCategory(999, "ѕᴛᴀꜰꜰ");
 
+    private CommandCategories() {
+    }
 }

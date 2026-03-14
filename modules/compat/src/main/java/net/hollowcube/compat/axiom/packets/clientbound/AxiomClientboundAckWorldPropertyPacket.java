@@ -9,11 +9,11 @@ public record AxiomClientboundAckWorldPropertyPacket(
 ) implements AxiomClientboundModPacket<AxiomClientboundAckWorldPropertyPacket> {
 
     public static final Type<AxiomClientboundAckWorldPropertyPacket> TYPE = Type.of(
-            AxiomAPI.CHANNEL, "ack_world_properties",
-            NetworkBufferTemplate.template(
-                    NetworkBuffer.VAR_INT, AxiomClientboundAckWorldPropertyPacket::sequence,
-                    AxiomClientboundAckWorldPropertyPacket::new
-            )
+        AxiomAPI.CHANNEL, "ack_world_properties",
+        NetworkBufferTemplate.template(
+            NetworkBuffer.VAR_INT, AxiomClientboundAckWorldPropertyPacket::sequence,
+            AxiomClientboundAckWorldPropertyPacket::new
+        )
     );
 
     @Override

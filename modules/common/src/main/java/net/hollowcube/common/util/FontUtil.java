@@ -14,7 +14,6 @@ import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,7 +109,7 @@ public final class FontUtil {
         result.put("addons_tab_line2", currencyGlyphs);
 
         var smallGlyphs = new Int2IntArrayMap();
-        smallGlyphs.putAll(Map.<Integer, Integer>ofEntries(
+        smallGlyphs.putAll(Map.ofEntries(
                 Map.entry((int) 'a', 6), Map.entry((int) 'b', 6),
                 Map.entry((int) 'c', 6), Map.entry((int) 'd', 6),
                 Map.entry((int) 'e', 6), Map.entry((int) 'f', 6),
@@ -126,7 +125,7 @@ public final class FontUtil {
                 Map.entry((int) 'y', 6), Map.entry((int) 'z', 6)
         ));
         var smallTallGlyphs = new Int2IntArrayMap();
-        smallTallGlyphs.putAll(Map.<Integer, Integer>ofEntries(
+        smallTallGlyphs.putAll(Map.ofEntries(
                 Map.entry((int) 'a', 6), Map.entry((int) 'b', 6),
                 Map.entry((int) 'c', 6), Map.entry((int) 'd', 6),
                 Map.entry((int) 'e', 6), Map.entry((int) 'f', 6),
@@ -188,7 +187,7 @@ public final class FontUtil {
     public static final Int2IntArrayMap ALL_GLYPH_WIDTHS = new Int2IntArrayMap();
 
     // Represents -2^index pixels of space
-    public static final @NotNull List<String> NEGATIVE_SPACE = List.of(
+    public static final List<String> NEGATIVE_SPACE = List.of(
             "\uF801", // -1
             "\uF802", // -2
             "\uF804", // -4
@@ -203,7 +202,7 @@ public final class FontUtil {
     );
 
     // Represents 2^index pixels of space
-    public static final @NotNull List<String> POSITIVE_SPACE = List.of(
+    public static final List<String> POSITIVE_SPACE = List.of(
             "\uF821", // 1
             "\uF822", // 2
             "\uF824", // 4
@@ -302,7 +301,7 @@ public final class FontUtil {
 
     public static final int DEFAULT_HEIGHT = 9;
 
-    public static int measureText(@NotNull String text) {
+    public static int measureText(String text) {
         int width = 0;
         for (int i = 0; i < text.length(); i++) {
             int codePoint = text.codePointAt(i);
@@ -315,7 +314,7 @@ public final class FontUtil {
         return width;
     }
 
-    public static int measureTextV2(@NotNull String text) {
+    public static int measureTextV2(String text) {
         int width = 0;
         for (char c : text.toCharArray()) {
             int charWidth = ALL_GLYPH_WIDTHS_V2.getOrDefault(c, Integer.MAX_VALUE);
@@ -327,7 +326,7 @@ public final class FontUtil {
         return width;
     }
 
-    public static int measureTextV2(@NotNull Component comp) {
+    public static int measureTextV2(Component comp) {
         int width = 0;
         if (comp instanceof TextComponent text) {
             width += measureTextV2(text.content());
@@ -342,7 +341,7 @@ public final class FontUtil {
         return width;
     }
 
-    public static int measureText(@NotNull String font, @NotNull String text) {
+    public static int measureText(String font, String text) {
         var glyphWidths = GLYPH_WIDTHS_V2.get(font);
         Check.notNull(glyphWidths, "Unknown font: " + font);
 
@@ -358,7 +357,7 @@ public final class FontUtil {
         return width;
     }
 
-    public static @NotNull Component rewrite(@NotNull String font, @NotNull Component comp) {
+    public static Component rewrite(String font, Component comp) {
         if (font.equals("default")) return comp;
         var charmap = fontmaps.get(font);
         Check.notNull(charmap, "Unknown font: " + font);
@@ -372,7 +371,7 @@ public final class FontUtil {
         }
     }
 
-    public static @NotNull String rewrite(@NotNull String font, @NotNull String text) {
+    public static String rewrite(String font, String text) {
         if (font.equals("default")) return text;
         var charmap = fontmaps.get(font);
         Check.notNull(charmap, "Unknown font: " + font);
@@ -396,7 +395,7 @@ public final class FontUtil {
         return result.toString();
     }
 
-    public static @NotNull String computeOffset(int offset) {
+    public static String computeOffset(int offset) {
         if (offset == 0) return "";
 
         var chars = offset > 0 ? POSITIVE_SPACE : NEGATIVE_SPACE;
@@ -413,14 +412,14 @@ public final class FontUtil {
         return sb.toString();
     }
 
-    public static @NotNull TextColor computeVerticalOffset(int offset) {
+    public static TextColor computeVerticalOffset(int offset) {
         if (offset < -50 || offset > 205)
             throw new IllegalArgumentException("Offset out of range: " + offset);
 
         return TextColor.color(0x4E5A00 | ((offset + 50) & 0xFF));
     }
 
-    public static @NotNull ShadowColor computeVerticalOffsetShadow(int offset) {
+    public static ShadowColor computeVerticalOffsetShadow(int offset) {
         return ShadowColor.shadowColor(computeVerticalOffset(offset), 80);
     }
 
@@ -470,7 +469,7 @@ public final class FontUtil {
         }
     }
 
-    public static @NotNull TextColor computeShadowPos(@NotNull Size size, int slotX, int slotY) {
+    public static TextColor computeShadowPos(Size size, int slotX, int slotY) {
         int slotIndex = slotX + slotY * 9;
         return TextColor.color(78, (11 << 2) | (size.ordinal() >> 1),
                 ((size.ordinal() & 1) << 7) | (slotIndex & 0x7F));
@@ -486,13 +485,13 @@ public final class FontUtil {
      * @param input The string to sanitize
      * @return The sanitized string
      */
-    public static @NotNull String stripInvalidChars(@NotNull String input) {
+    public static String stripInvalidChars(String input) {
         return input.codePoints().filter(i -> i >= 0x20 && i <= 0x7E)
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
     }
 
-    public static @NotNull String stripNonAlphanumeric(@NotNull String input) {
+    public static String stripNonAlphanumeric(String input) {
         return input.codePoints().filter(i -> (i >= 0x30 && i <= 0x39) || (i >= 0x41 && i <= 0x5A) || (i >= 0x61 && i <= 0x7A))
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString().toLowerCase(Locale.ROOT);

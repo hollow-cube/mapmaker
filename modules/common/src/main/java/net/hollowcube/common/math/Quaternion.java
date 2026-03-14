@@ -4,7 +4,6 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
-import org.jetbrains.annotations.NotNull;
 
 public final class Quaternion {
     public static final float[] ZERO = new float[]{0, 0, 0, 1};
@@ -25,7 +24,7 @@ public final class Quaternion {
         this(0, 0, 0, 1);
     }
 
-    public Quaternion(final Quaternion q) {
+    public Quaternion(Quaternion q) {
         this(q.x, q.y, q.z, q.w);
     }
 
@@ -36,14 +35,14 @@ public final class Quaternion {
         this.w = w;
     }
 
-    public void set(final Quaternion q) {
+    public void set(Quaternion q) {
         this.x = q.x;
         this.y = q.y;
         this.z = q.z;
         this.w = q.w;
     }
 
-    public @NotNull Quaternion set(float x, float y, float z, float w) {
+    public Quaternion set(float x, float y, float z, float w) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -114,7 +113,7 @@ public final class Quaternion {
         );
     }
 
-    public @NotNull Quaternion conjugate() {
+    public Quaternion conjugate() {
         this.x = -this.x;
         this.y = -this.y;
         this.z = -this.z;
@@ -236,7 +235,7 @@ public final class Quaternion {
      *
      * @param matrixs 16-length float array.
      */
-    public final void toMatrix(float[] matrixs) {
+    public void toMatrix(float[] matrixs) {
         matrixs[3] = 0.0f;
         matrixs[7] = 0.0f;
         matrixs[11] = 0.0f;

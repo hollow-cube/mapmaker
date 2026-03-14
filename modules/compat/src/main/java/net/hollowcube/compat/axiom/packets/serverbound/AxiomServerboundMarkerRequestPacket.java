@@ -13,12 +13,12 @@ public record AxiomServerboundMarkerRequestPacket(
 ) implements ServerboundModPacket<AxiomServerboundMarkerRequestPacket> {
 
     public static final Type<AxiomServerboundMarkerRequestPacket> TYPE = Type.of(
-            AxiomAPI.CHANNEL, "marker_nbt_request",
-            NetworkBufferTemplate.template(
-                    NetworkBuffer.UUID, AxiomServerboundMarkerRequestPacket::id,
-                    NetworkBuffer.VAR_INT.transform(Reason::fromId, Reason::id), AxiomServerboundMarkerRequestPacket::reason,
-                    AxiomServerboundMarkerRequestPacket::new
-            )
+        AxiomAPI.CHANNEL, "marker_nbt_request",
+        NetworkBufferTemplate.template(
+            NetworkBuffer.UUID, AxiomServerboundMarkerRequestPacket::id,
+            NetworkBuffer.VAR_INT.transform(Reason::fromId, Reason::id), AxiomServerboundMarkerRequestPacket::reason,
+            AxiomServerboundMarkerRequestPacket::new
+        )
     );
 
     @Override

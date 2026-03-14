@@ -16,12 +16,12 @@ public record AxiomServerboundEntityRequestPacket(
 ) implements ServerboundModPacket<AxiomServerboundEntityRequestPacket> {
 
     public static final Type<AxiomServerboundEntityRequestPacket> TYPE = Type.of(
-            AxiomAPI.CHANNEL, "request_entity_data",
-            NetworkBufferTemplate.template(
-                    NetworkBuffer.LONG, AxiomServerboundEntityRequestPacket::sequence,
-                    ExtraNetworkBuffers.collection(NetworkBuffer.UUID, HashSet::new), AxiomServerboundEntityRequestPacket::ids,
-                    AxiomServerboundEntityRequestPacket::new
-            )
+        AxiomAPI.CHANNEL, "request_entity_data",
+        NetworkBufferTemplate.template(
+            NetworkBuffer.LONG, AxiomServerboundEntityRequestPacket::sequence,
+            ExtraNetworkBuffers.collection(NetworkBuffer.UUID, HashSet::new), AxiomServerboundEntityRequestPacket::ids,
+            AxiomServerboundEntityRequestPacket::new
+        )
     );
 
     @Override

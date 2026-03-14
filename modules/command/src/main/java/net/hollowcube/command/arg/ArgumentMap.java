@@ -5,7 +5,6 @@ import net.hollowcube.command.util.StringReader;
 import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.network.NetworkBuffer;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -13,23 +12,22 @@ public class ArgumentMap<S, T> extends Argument<T> {
 
     @FunctionalInterface
     public interface ParseFunc<S, T> {
-        @NotNull
-        ParseResult<T> parse(@NotNull CommandSender sender, @UnknownNullability S raw);
+        ParseResult<T> parse(CommandSender sender, @UnknownNullability S raw);
     }
 
     @FunctionalInterface
     public interface SuggestFunc {
-        void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion);
+        void suggest(CommandSender sender, String raw, Suggestion suggestion);
     }
 
 
     private final Argument<S> source;
     private final ParseFunc<S, T> parseFunc;
-    private final SuggestFunc suggestFunc;
+    private final @Nullable SuggestFunc suggestFunc;
 
     ArgumentMap(
-            @NotNull String id, @NotNull Argument<S> source,
-            @NotNull ParseFunc<S, T> parseFunc, @Nullable SuggestFunc suggestFunc
+            String id, Argument<S> source,
+            ParseFunc<S, T> parseFunc, @Nullable SuggestFunc suggestFunc
     ) {
         super(id);
         this.source = source;
@@ -38,7 +36,7 @@ public class ArgumentMap<S, T> extends Argument<T> {
     }
 
     @Override
-    public @NotNull ParseResult<T> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public ParseResult<T> parse(CommandSender sender, StringReader reader) {
         return switch (source.parse(sender, reader)) {
             //todo it is probably not great to have the get call here in case the prior argument is a deferred success
             case ParseResult.Success<S> success -> parseFunc.parse(sender, success.valueFunc().get());
@@ -48,7 +46,7 @@ public class ArgumentMap<S, T> extends Argument<T> {
     }
 
     @Override
-    public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
+    public void suggest(CommandSender sender, String raw, Suggestion suggestion) {
         if (suggestFunc == null) {
             source.suggest(sender, raw, suggestion);
             return;
@@ -58,12 +56,12 @@ public class ArgumentMap<S, T> extends Argument<T> {
     }
 
     @Override
-    public void properties(@NotNull NetworkBuffer buffer) {
+    public void properties(NetworkBuffer buffer) {
         source.properties(buffer);
     }
 
     @Override
-    public @NotNull ArgumentParserType argumentType() {
+    public ArgumentParserType argumentType() {
         return source.argumentType();
     }
 

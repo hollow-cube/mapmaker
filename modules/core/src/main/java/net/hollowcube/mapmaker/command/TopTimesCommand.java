@@ -15,7 +15,6 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TopTimesCommand extends CommandDsl {
@@ -31,7 +30,7 @@ public class TopTimesCommand extends CommandDsl {
     private final PlayerService players;
     private final SessionManager sessions;
 
-    public TopTimesCommand(@NotNull MapService maps, @NotNull PlayerService players, @NotNull SessionManager sessions) {
+    public TopTimesCommand(MapService maps, PlayerService players, SessionManager sessions) {
         super("toptimes", "tt");
         this.maps = maps;
         this.players = players;
@@ -46,7 +45,7 @@ public class TopTimesCommand extends CommandDsl {
         addSyntax(playerOnly(this::showTopTimes), mapArg);
     }
 
-    private void showTopTimes(@NotNull Player player, @NotNull CommandContext context) {
+    private void showTopTimes(Player player, CommandContext context) {
         MapData map;
         if (context.has(mapArg)) {
             map = context.get(mapArg);

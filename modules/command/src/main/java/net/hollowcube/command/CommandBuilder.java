@@ -2,13 +2,12 @@ package net.hollowcube.command;
 
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.util.CommandCategory;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
 
-public class CommandBuilder {
+public final class CommandBuilder {
 
     private final CommandNode node;
 
@@ -16,33 +15,32 @@ public class CommandBuilder {
         this(new CommandNode());
     }
 
-    private CommandBuilder(@NotNull CommandNode node) {
+    private CommandBuilder(CommandNode node) {
         this.node = node;
     }
 
-
     // Children
 
-    public CommandBuilder child(@NotNull String name, @NotNull Consumer<CommandBuilder> consumer) {
+    public CommandBuilder child(String name, Consumer<CommandBuilder> consumer) {
         var childNode = node.nodeFor(Argument.Literal(name));
         consumer.accept(new CommandBuilder(childNode));
         return this;
     }
 
-    public CommandBuilder child(@NotNull Argument<?> argument, @NotNull Consumer<CommandBuilder> consumer) {
+    public CommandBuilder child(Argument<?> argument, Consumer<CommandBuilder> consumer) {
         var childNode = node.nodeFor(argument);
         consumer.accept(new CommandBuilder(childNode));
         return this;
     }
 
-    public CommandBuilder redirect(@NotNull CommandNode target) {
+    public CommandBuilder redirect(CommandNode target) {
         node.setRedirect(target);
         return this;
     }
 
     // Execution
 
-    public @NotNull CommandBuilder executes(CommandExecutor executor, Argument<?>... args) {
+    public CommandBuilder executes(CommandExecutor executor, Argument<?>... args) {
         var executableNode = this.node;
         for (var arg : args) {
             executableNode = executableNode.nodeFor(arg);
@@ -54,7 +52,7 @@ public class CommandBuilder {
 
     // Suggestions
 
-    public @NotNull CommandBuilder suggestion(@NotNull CommandExecutor onSuggestion, @NotNull Argument<?>... args) {
+    public CommandBuilder suggestion(CommandExecutor onSuggestion, Argument<?>... args) {
         var node = this.node;
         for (var arg : args) {
             node.setOnSuggestion(onSuggestion);
@@ -67,34 +65,34 @@ public class CommandBuilder {
 
     // Condition
 
-    public @NotNull CommandBuilder condition(@NotNull CommandCondition condition) {
+    public CommandBuilder condition(CommandCondition condition) {
         node.setCondition(condition);
         return this;
     }
 
     // Metadata
 
-    public @NotNull CommandBuilder category(@Nullable CommandCategory category) {
+    public CommandBuilder category(@Nullable CommandCategory category) {
         node.category = category;
         return this;
     }
 
-    public @NotNull CommandBuilder description(@Nullable String description) {
+    public CommandBuilder description(@Nullable String description) {
         node.description = description;
         return this;
     }
 
-    public @NotNull CommandBuilder examples(@NotNull String... examples) {
+    public CommandBuilder examples(String... examples) {
         node.examples = List.of(examples);
         return this;
     }
 
-    public @NotNull CommandBuilder examples(@Nullable List<String> examples) {
+    public CommandBuilder examples(@Nullable List<String> examples) {
         node.examples = examples;
         return this;
     }
 
-    public @NotNull CommandNode node() {
+    public CommandNode node() {
         return node;
     }
 

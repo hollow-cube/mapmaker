@@ -1,7 +1,5 @@
 package net.hollowcube.common.spi;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +16,7 @@ import java.util.List;
  */
 public class ClassServiceLoader {
 
-    public static @NotNull List<Class<?>> load(@NotNull Class<?> service) {
+    public static List<Class<?>> load(Class<?> service) {
         List<Class<?>> serviceClasses = new ArrayList<>();
         String serviceFile = "META-INF/services/" + service.getName();
 

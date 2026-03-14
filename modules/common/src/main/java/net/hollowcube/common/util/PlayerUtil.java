@@ -31,7 +31,7 @@ public final class PlayerUtil {
     private static final BoundingBox PLAYER_STANDING_BB = EntityType.PLAYER.registry().boundingBox();
     private static final String DISCONNECT_CHANNEL = "velocity:disconnect";
 
-    public static @Nullable Point getTargetBlock(@NotNull Player player, double maxDistance, boolean includeLiquids) {
+    public static @Nullable Point getTargetBlock(Player player, double maxDistance, boolean includeLiquids) {
         try {
             var instance = player.getInstance();
             if (instance == null) return null;
@@ -55,19 +55,19 @@ public final class PlayerUtil {
         return null;
     }
 
-    public static void giveItem(@NotNull Player player, @NotNull ItemStack itemStack) {
+    public static void giveItem(Player player, ItemStack itemStack) {
         if (!player.getInventory().addItemStack(itemStack)) {
             player.setItemInHand(PlayerHand.MAIN, itemStack);
         }
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    public static void swing(@NotNull Player player, @NotNull PlayerHand hand, boolean includeSelf) {
+    public static void swing(Player player, PlayerHand hand, boolean includeSelf) {
         if (hand == PlayerHand.MAIN) player.swingMainHand(includeSelf);
         else player.swingOffHand(includeSelf);
     }
 
-    public static boolean canFit(@NotNull Player player, @NotNull Point position) {
+    public static boolean canFit(Player player, Point position) {
         var instance = player.getInstance();
         var iter = PLAYER_STANDING_BB.getBlocks(position);
         while (iter.hasNext()) {
@@ -80,21 +80,21 @@ public final class PlayerUtil {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    public static boolean canMoveTo(@NotNull Player player, @NotNull Point position) {
+    public static boolean canMoveTo(Player player, Point position) {
         var result = CollisionUtils.handlePhysics(
                 player.getInstance(), player.getChunk(),
                 PLAYER_STANDING_BB, player.getPosition(),
-                Vec.fromPoint(position.sub(player.getPosition())),
+                position.sub(player.getPosition()).asVec(),
                 null, true
         );
         return !result.collisionX() && !result.collisionY() && !result.collisionZ();
     }
 
-    public static void disconnect(@NotNull Player player, @NotNull Component message) {
+    public static void disconnect(Player player, Component message) {
         disconnect(player.getPlayerConnection(), message);
     }
 
-    public static void disconnect(@NotNull PlayerConnection player, @NotNull Component message) {
+    public static void disconnect(PlayerConnection player, Component message) {
         if (MinecraftServer.process().auth() instanceof Auth.Velocity) {
             player.sendPacket(new PluginMessagePacket(
                 DISCONNECT_CHANNEL,

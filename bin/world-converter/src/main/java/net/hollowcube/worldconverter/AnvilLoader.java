@@ -1,6 +1,5 @@
 package net.hollowcube.worldconverter;
 
-
 import net.kyori.adventure.nbt.*;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
@@ -15,8 +14,6 @@ import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.utils.MathUtils;
 import net.minestom.server.utils.validate.Check;
 import net.minestom.server.world.biome.Biome;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,15 +23,15 @@ import java.util.Map;
 import java.util.Objects;
 
 public class AnvilLoader {
-    private final static Logger LOGGER = LoggerFactory.getLogger(net.minestom.server.instance.anvil.AnvilLoader.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(AnvilLoader.class);
     private static final DynamicRegistry<Biome> BIOME_REGISTRY = MinecraftServer.getBiomeRegistry();
     private final static int PLAINS_ID = BIOME_REGISTRY.getId(RegistryKey.unsafeOf("minecraft:plains"));
 
-    public static @Nullable Chunk loadChunk(@NotNull Instance instance, int chunkX, int chunkZ, @NotNull CompoundBinaryTag chunkData) throws Exception {
+    public static Chunk loadChunk(Instance instance, int chunkX, int chunkZ, CompoundBinaryTag chunkData) throws Exception {
         return loadMCA(instance, chunkX, chunkZ, chunkData);
     }
 
-    private static @Nullable Chunk loadMCA(Instance instance, int chunkX, int chunkZ, @NotNull CompoundBinaryTag chunkData) throws IOException {
+    private static Chunk loadMCA(Instance instance, int chunkX, int chunkZ, CompoundBinaryTag chunkData) throws IOException {
         // Load the chunk data (assuming it is fully generated)
         final Chunk chunk = instance.getChunkSupplier().createChunk(instance, chunkX, chunkZ);
         synchronized (chunk) { // todo: boo, synchronized
@@ -57,7 +54,7 @@ public class AnvilLoader {
         return chunk;
     }
 
-    private static void loadSections(@NotNull Chunk chunk, @NotNull CompoundBinaryTag chunkData) {
+    private static void loadSections(Chunk chunk, CompoundBinaryTag chunkData) {
         for (BinaryTag sectionTag : chunkData.getList("sections", BinaryTagTypes.COMPOUND)) {
             final CompoundBinaryTag sectionData = (CompoundBinaryTag) sectionTag;
 
@@ -93,6 +90,7 @@ public class AnvilLoader {
                     Check.stateCondition(packedIndices.length == 0, "Missing packed biomes data");
                     int[] biomeIndices = new int[64];
 
+                    @SuppressWarnings("UnstableApiUsage")
                     int bitsPerEntry = MathUtils.bitsToRepresent(convertedBiomePalette.length - 1);
                     Palettes.unpack(biomeIndices, packedIndices, bitsPerEntry);
 
@@ -141,7 +139,7 @@ public class AnvilLoader {
         }
     }
 
-    private static Block[] loadBlockPalette(@NotNull ListBinaryTag paletteTag) {
+    private static Block[] loadBlockPalette(ListBinaryTag paletteTag) {
         Block[] convertedPalette = new Block[paletteTag.size()];
         for (int i = 0; i < convertedPalette.length; i++) {
             CompoundBinaryTag paletteEntry = paletteTag.getCompound(i);
@@ -177,7 +175,7 @@ public class AnvilLoader {
         return convertedPalette;
     }
 
-    private static int[] loadBiomePalette(@NotNull ListBinaryTag paletteTag) {
+    private static int[] loadBiomePalette(ListBinaryTag paletteTag) {
         int[] convertedPalette = new int[paletteTag.size()];
         for (int i = 0; i < convertedPalette.length; i++) {
             final String name = paletteTag.getString(i);
@@ -188,7 +186,7 @@ public class AnvilLoader {
         return convertedPalette;
     }
 
-    private static void loadBlockEntities(@NotNull Chunk loadedChunk, @NotNull CompoundBinaryTag chunkData) {
+    private static void loadBlockEntities(Chunk loadedChunk, CompoundBinaryTag chunkData) {
         for (BinaryTag blockEntityTag : chunkData.getList("block_entities", BinaryTagTypes.COMPOUND)) {
             final CompoundBinaryTag blockEntity = (CompoundBinaryTag) blockEntityTag;
 
@@ -210,7 +208,7 @@ public class AnvilLoader {
                     .build();
 
             // Place block
-            final var finalBlock = trimmedTag.size() > 0 ? block.withNbt(trimmedTag) : block;
+            final var finalBlock = !trimmedTag.isEmpty() ? block.withNbt(trimmedTag) : block;
             loadedChunk.setBlock(x, y, z, finalBlock);
         }
     }

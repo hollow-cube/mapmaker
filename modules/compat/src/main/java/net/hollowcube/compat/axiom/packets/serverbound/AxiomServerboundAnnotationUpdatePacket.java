@@ -12,11 +12,11 @@ public record AxiomServerboundAnnotationUpdatePacket(
 ) implements ServerboundModPacket<AxiomServerboundAnnotationUpdatePacket> {
 
     public static final Type<AxiomServerboundAnnotationUpdatePacket> TYPE = Type.of(
-            AxiomAPI.CHANNEL, "annotation_update",
-            NetworkBufferTemplate.template(
-                    AnnotationAction.SERIALIZER.list(), AxiomServerboundAnnotationUpdatePacket::actions,
-                    AxiomServerboundAnnotationUpdatePacket::new
-            )
+        AxiomAPI.CHANNEL, "annotation_update",
+        NetworkBufferTemplate.template(
+            AnnotationAction.SERIALIZER.list(), AxiomServerboundAnnotationUpdatePacket::actions,
+            AxiomServerboundAnnotationUpdatePacket::new
+        )
     );
 
     @Override

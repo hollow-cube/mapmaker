@@ -12,7 +12,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-@SuppressWarnings("UnstableApiUsage")
 public abstract class RelativePointArrayCodec<P extends Point, T extends RelativePoint<P>> implements Codec<T> {
 
     public static final Codec<RelativeVec> VEC = new VecImpl();

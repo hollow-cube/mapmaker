@@ -1,16 +1,14 @@
 package net.hollowcube.command.util;
 
-import org.jetbrains.annotations.NotNull;
-
 public final class StringReader {
     private final String string;
     private int pos = 0;
 
-    public StringReader(@NotNull String string) {
+    public StringReader(String string) {
         this.string = string;
     }
 
-    public @NotNull String raw() {
+    public String raw() {
         return string;
     }
 
@@ -47,7 +45,7 @@ public final class StringReader {
         return string.charAt(pos++);
     }
 
-    public @NotNull String readWord(@NotNull WordType type) {
+    public String readWord(WordType type) {
         skipWhitespace();
 
         int end = pos;
@@ -60,7 +58,7 @@ public final class StringReader {
         return word;
     }
 
-    public @NotNull String readRemaining() {
+    public String readRemaining() {
         skipWhitespace();
         var remaining = string.substring(pos);
         pos = string.length();

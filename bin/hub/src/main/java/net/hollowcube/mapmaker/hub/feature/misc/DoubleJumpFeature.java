@@ -20,12 +20,13 @@ public class DoubleJumpFeature implements HubFeature {
     private static final Tag<Boolean> COOLDOWN_TAG = Tag.Boolean("mapmaker:hub-double-jump-cooldown");
 
     @Override
-    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
-        world.eventNode().addListener(PlayerStartFlyingEvent.class, this::handleStartFlying)
-                .addListener(PlayerMoveEvent.class, this::handleMovement);
+    public void load(MapServer server, HubMapWorld world) {
+        world.eventNode()
+            .addListener(PlayerStartFlyingEvent.class, this::handleStartFlying)
+            .addListener(PlayerMoveEvent.class, this::handleMovement);
     }
 
-    private void handleStartFlying(@NotNull PlayerStartFlyingEvent event) {
+    private void handleStartFlying(PlayerStartFlyingEvent event) {
         var player = event.getPlayer();
         if (player.getGameMode() != GameMode.SURVIVAL && player.getGameMode() != GameMode.ADVENTURE) return;
         if (!player.getTag(TAG)) return; // Explicitly disabled to allow normal flight
@@ -41,7 +42,7 @@ public class DoubleJumpFeature implements HubFeature {
         player.playSound(Sound.sound(SoundEvent.ENTITY_BAT_TAKEOFF, Sound.Source.PLAYER, 0.4f, randomPitch), Sound.Emitter.self());
     }
 
-    private void handleMovement(@NotNull PlayerMoveEvent event) {
+    private void handleMovement(PlayerMoveEvent event) {
         if (event.isOnGround() && event.getPlayer().hasTag(COOLDOWN_TAG)) {
             event.getPlayer().removeTag(COOLDOWN_TAG);
             event.getPlayer().setAllowFlying(true);

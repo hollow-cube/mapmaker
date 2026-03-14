@@ -15,18 +15,16 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 import java.util.function.Predicate;
 
 public class ChatCommand extends CommandDsl {
 
-
     private final PlayerService players;
     private final Argument<Channel> channelArg;
 
-    public ChatCommand(@NotNull PlayerService players) {
+    public ChatCommand(PlayerService players) {
         super("chat");
         this.players = players;
         this.channelArg = new ChannelArgument();
@@ -37,7 +35,7 @@ public class ChatCommand extends CommandDsl {
         addSyntax(playerOnly(this::handle), this.channelArg);
     }
 
-    private void handle(@NotNull Player player, @NotNull CommandContext context) {
+    private void handle(Player player, CommandContext context) {
         var channel = context.get(channelArg);
         var playerData = PlayerData.fromPlayer(player);
         if (!channel.available.test(player)) return;
@@ -48,14 +46,14 @@ public class ChatCommand extends CommandDsl {
         player.sendMessage(Component.translatable(channel.translation));
     }
 
-    private class ChannelArgument extends Argument<Channel> {
+    private static class ChannelArgument extends Argument<Channel> {
 
         protected ChannelArgument() {
             super("channel");
         }
 
         @Override
-        public @NotNull ParseResult<Channel> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+        public ParseResult<Channel> parse(CommandSender sender, StringReader reader) {
             var word = reader.readWord(WordType.BRIGADIER).toLowerCase(Locale.ROOT);
 
             boolean isPartial = false;
@@ -72,7 +70,7 @@ public class ChatCommand extends CommandDsl {
         }
 
         @Override
-        public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
+        public void suggest(CommandSender sender, String raw, Suggestion suggestion) {
             raw = raw.toLowerCase(Locale.ROOT);
             for (var value : Channel.values()) {
                 if (!(sender instanceof Player player) || !value.available.test(player))

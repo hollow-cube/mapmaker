@@ -8,7 +8,6 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -21,7 +20,7 @@ public class PlayMapsItem extends ItemHandler {
     private final MapService mapService;
     private final ServerBridge bridge;
 
-    public PlayMapsItem(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
+    public PlayMapsItem(ApiClient api, MapService mapService, ServerBridge bridge) {
         super(ID, RIGHT_CLICK_ANY);
         this.api = api;
         this.mapService = mapService;
@@ -34,7 +33,7 @@ public class PlayMapsItem extends ItemHandler {
     }
 
     @Override
-    protected void rightClicked(@NotNull Click click) {
+    protected void rightClicked(Click click) {
         var player = click.player();
         Panel.open(player, new MapBrowserView(api, mapService, bridge));
     }

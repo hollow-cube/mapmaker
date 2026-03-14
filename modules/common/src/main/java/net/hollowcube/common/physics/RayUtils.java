@@ -4,6 +4,9 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 
 public class RayUtils {
+    private RayUtils() {
+    }
+
     public static boolean BoundingBoxIntersectionCheck(BoundingBox moving, Point rayStart, Point rayDirection, BoundingBox collidableStatic, Point staticCollidableOffset, SweepResult finalResult, Object obj) {
         Point bbCentre = new Vec(moving.minX() + moving.width() / 2, moving.minY() + moving.height() / 2 + Vec.EPSILON, moving.minZ() + moving.depth() / 2);
         Point rayCentre = rayStart.add(bbCentre);

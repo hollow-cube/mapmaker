@@ -9,7 +9,7 @@ import net.minestom.server.item.component.CustomData;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Nullable;
 
-public class NoxesiumAPI {
+public final class NoxesiumAPI {
 
     public static final String NAMESPACE = "noxesium";
     public static final Component NAME = Component.text("Noxesium", NamedTextColor.WHITE);
@@ -28,5 +28,8 @@ public class NoxesiumAPI {
     public static CustomData setImmovable(@Nullable CustomData data) {
         data = data == null ? CustomData.EMPTY : data;
         return data.withTag(BUKKIT_TAG, IMMUTABLE_TAG);
+    }
+
+    private NoxesiumAPI() {
     }
 }

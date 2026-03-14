@@ -11,6 +11,7 @@ import net.minestom.server.instance.anvil.AnvilLoader;
 import java.util.List;
 
 public class IsolateMain {
+    @SuppressWarnings("NotNullFieldNotInitialized") // this will always be initialized by the time it is used
     public static String[] args;
 
     static {
@@ -21,7 +22,7 @@ public class IsolateMain {
         var ignoredTheClasses = List.of(AnvilLoader.class, DynamicChunk.class, Player.class, InstanceContainer.class);
     }
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         if (args.length > 0 && "noop".equals(args[0])) {
             System.out.println("Exiting because of noop argument.");
             System.exit(0);

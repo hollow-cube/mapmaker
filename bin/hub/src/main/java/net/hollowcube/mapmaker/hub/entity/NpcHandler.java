@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 public interface NpcHandler {
     Tag<NpcHandler> TAG = Tag.Transient("mapmaker:hub/npc_handler");
 
-    void handlePlayerInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick);
+    void handlePlayerInteract(Player player, BaseNpcEntity npc, PlayerHand hand, boolean isLeftClick);
 
     EventNode<InstanceEvent> EVENT_NODE = EventNode.type("mapmaker:hub/npc_handler", EventFilter.INSTANCE)
             .addListener(PlayerEntityInteractEvent.class, event -> {

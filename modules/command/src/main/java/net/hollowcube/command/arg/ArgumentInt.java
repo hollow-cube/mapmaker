@@ -5,20 +5,19 @@ import net.hollowcube.command.util.WordType;
 import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.network.NetworkBuffer;
-import org.jetbrains.annotations.NotNull;
 
 public class ArgumentInt extends Argument<Integer> {
     private int min = Integer.MIN_VALUE;
     private int max = Integer.MAX_VALUE;
 
-    ArgumentInt(@NotNull String id) {
+    ArgumentInt(String id) {
         super(id);
     }
 
     /**
      * inclusive
      */
-    public @NotNull ArgumentInt min(int min) {
+    public ArgumentInt min(int min) {
         this.min = min;
         return this;
     }
@@ -26,7 +25,7 @@ public class ArgumentInt extends Argument<Integer> {
     /**
      * inclusive
      */
-    public @NotNull ArgumentInt max(int max) {
+    public ArgumentInt max(int max) {
         this.max = max;
         return this;
     }
@@ -34,14 +33,14 @@ public class ArgumentInt extends Argument<Integer> {
     /**
      * both inclusive
      */
-    public @NotNull ArgumentInt clamp(int min, int max) {
+    public ArgumentInt clamp(int min, int max) {
         this.min = min;
         this.max = max;
         return this;
     }
 
     @Override
-    public @NotNull ParseResult<Integer> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public ParseResult<Integer> parse(CommandSender sender, StringReader reader) {
         var word = reader.readWord(WordType.BRIGADIER);
         try {
             var value = Integer.parseInt(word.trim());
@@ -54,7 +53,7 @@ public class ArgumentInt extends Argument<Integer> {
     }
 
     @Override
-    public void properties(@NotNull NetworkBuffer buffer) {
+    public void properties(NetworkBuffer buffer) {
         boolean hasMax = this.max != Integer.MAX_VALUE, hasMin = this.min != Integer.MIN_VALUE;
         buffer.write(NetworkBuffer.BYTE, ArgumentUtils.createNumberFlags(hasMin, hasMax));
         if (hasMin) {
@@ -66,7 +65,7 @@ public class ArgumentInt extends Argument<Integer> {
     }
 
     @Override
-    public @NotNull ArgumentParserType argumentType() {
+    public ArgumentParserType argumentType() {
         return ArgumentParserType.INTEGER;
     }
 

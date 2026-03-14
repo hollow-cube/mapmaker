@@ -11,23 +11,17 @@ import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.listener.PlayerActionListener;
 import net.minestom.server.network.packet.client.play.ClientPlayerActionPacket;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 public final class PlayerHitBlockEvent implements PlayerInstanceEvent, BlockEvent, CancellableEvent {
 
-    private final @NotNull Player player;
-    private final @NotNull Block block;
-    private final @NotNull BlockVec vec;
-    private final @NotNull BlockFace face;
+    private final Player player;
+    private final Block block;
+    private final BlockVec vec;
+    private final BlockFace face;
 
     private boolean cancelled = false;
 
-    public PlayerHitBlockEvent(
-        @NotNull Player player,
-        @NotNull Block block,
-        @NotNull BlockVec vec,
-        @NotNull BlockFace face
-    ) {
+    public PlayerHitBlockEvent(Player player, Block block, BlockVec vec, BlockFace face) {
         this.player = player;
         this.block = block;
         this.vec = vec;
@@ -35,21 +29,21 @@ public final class PlayerHitBlockEvent implements PlayerInstanceEvent, BlockEven
     }
 
     @Override
-    public @NotNull Block getBlock() {
+    public Block getBlock() {
         return block;
     }
 
     @Override
-    public @NotNull BlockVec getBlockPosition() {
+    public BlockVec getBlockPosition() {
         return vec;
     }
 
     @Override
-    public @NotNull Player getPlayer() {
+    public Player getPlayer() {
         return player;
     }
 
-    public @NotNull BlockFace getFace() {
+    public BlockFace getFace() {
         return face;
     }
 

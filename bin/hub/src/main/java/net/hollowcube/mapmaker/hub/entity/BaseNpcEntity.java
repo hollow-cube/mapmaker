@@ -5,15 +5,17 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.other.InteractionMeta;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class BaseNpcEntity extends Entity {
 
-    public static @NotNull BaseNpcEntity createInteractionEntity(int width, int height, @NotNull NpcHandler handler) {
+    public static BaseNpcEntity createInteractionEntity(int width, int height, NpcHandler handler) {
         var storeEntity = new BaseNpcEntity(EntityType.INTERACTION, UUID.randomUUID()) {
-            @Override protected void movementTick() {
+            @Override
+            protected void movementTick() {
                 // Intentionally do nothing
             }
         };
@@ -25,21 +27,21 @@ public class BaseNpcEntity extends Entity {
         return storeEntity;
     }
 
-    private Entity interactionEntity = null;
+    private @Nullable Entity interactionEntity = null;
 
-    public BaseNpcEntity(@NotNull EntityType entityType, @NotNull UUID uuid) {
+    public BaseNpcEntity(EntityType entityType, UUID uuid) {
         super(entityType, uuid);
     }
 
-    public void setHandler(@NotNull NpcHandler handler) {
+    public void setHandler(NpcHandler handler) {
         this.setTag(NpcHandler.TAG, handler);
     }
 
-    public @NotNull CompletableFuture<Void> setInteractionBox(int width, int height) {
+    public CompletableFuture<Void> setInteractionBox(int width, int height) {
         return setInteractionBox(width, height, Pos.ZERO);
     }
 
-    public @NotNull CompletableFuture<Void> setInteractionBox(int width, int height, @NotNull Pos offset) { //todo move along with the npc
+    public CompletableFuture<Void> setInteractionBox(int width, int height, Pos offset) { //todo move along with the npc
         if (this.interactionEntity != null) this.interactionEntity.remove();
 
         this.interactionEntity = new BaseNpcEntity(EntityType.INTERACTION, UUID.randomUUID()) {

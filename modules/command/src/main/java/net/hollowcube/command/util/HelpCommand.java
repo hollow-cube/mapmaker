@@ -16,7 +16,6 @@ import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.network.NetworkBuffer;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -32,15 +31,15 @@ public class HelpCommand extends CommandDsl {
     private final CommandReflection reflect;
     private final Predicate<Map.Entry<String, CommandNode>> filter;
 
-    public HelpCommand(@NotNull CommandManager commandManager, @Nullable CommandCategory category) {
+    public HelpCommand(CommandManager commandManager, @Nullable CommandCategory category) {
         this("help", new String[]{"h"}, commandManager, category, _ -> true);
     }
 
     public HelpCommand(
-            @NotNull String name, @NotNull String[] aliases,
-            @NotNull CommandManager commandManager,
+            String name, String[] aliases,
+            CommandManager commandManager,
             @Nullable CommandCategory category,
-            @NotNull Predicate<Map.Entry<String, CommandNode>> filter
+            Predicate<Map.Entry<String, CommandNode>> filter
     ) {
         super(name, aliases);
         this.reflect = commandManager.reflect();
@@ -54,7 +53,7 @@ public class HelpCommand extends CommandDsl {
         addSyntax(this::handleShowCommandDetail, commandArg);
     }
 
-    private void handleShowCommandList(@NotNull CommandSender sender, @NotNull CommandContext context) {
+    private void handleShowCommandList(CommandSender sender, CommandContext context) {
         var rootCommands = new ArrayList<>(reflect.commands(sender, false));
         if (rootCommands.isEmpty()) { // Sanity
             sender.sendMessage(Component.text("No commands available"));
@@ -109,7 +108,7 @@ public class HelpCommand extends CommandDsl {
         sender.sendMessage(message.build());
     }
 
-    private void handleShowCommandDetail(@NotNull CommandSender sender, @NotNull CommandContext context) {
+    private void handleShowCommandDetail(CommandSender sender, CommandContext context) {
         var resolved = context.get(commandArg);
         var command = resolved.node;
 
@@ -120,7 +119,7 @@ public class HelpCommand extends CommandDsl {
         sender.sendMessage(createDetail(resolved.path, command, sender));
     }
 
-    private @NotNull Component createDetail(@NotNull List<Object> path, @NotNull CommandNode node, @NotNull CommandSender sender) {
+    private Component createDetail(List<Object> path, CommandNode node, CommandSender sender) {
         var args = new ArrayList<List<Map.Entry<Argument<?>, CommandNode>>>();
         collectChildren(args, node, sender, path.size());
 
@@ -205,7 +204,10 @@ public class HelpCommand extends CommandDsl {
         return builder.build();
     }
 
-    private void collectChildren(@NotNull List<List<Map.Entry<Argument<?>, CommandNode>>> args, @NotNull CommandNode node, @NotNull CommandSender sender, int depth) {
+    private void collectChildren(
+        List<List<Map.Entry<Argument<?>, CommandNode>>> args,
+        CommandNode node, CommandSender sender, int depth
+    ) {
         var children = reflect.children(node, sender);
         if (children.isEmpty()) return;
 
@@ -232,8 +234,8 @@ public class HelpCommand extends CommandDsl {
     private record ResolvedCommand(
             // Entries are ALWAYS a string or Argument<?>. Not just Argument<?>s
             // because we dont have arguments at the root, only strings.
-            @NotNull List<Object> path,
-            @NotNull CommandNode node
+            List<Object> path,
+            CommandNode node
     ) {
     }
 
@@ -244,18 +246,18 @@ public class HelpCommand extends CommandDsl {
         }
 
         @Override
-        public void properties(@NotNull NetworkBuffer buffer) {
+        public void properties(NetworkBuffer buffer) {
             // should probably be changed to be literals and not just greedy string but im too lazy to change the whole command
             buffer.write(NetworkBuffer.VAR_INT, 2);
         }
 
         @Override
-        public @NotNull ArgumentParserType argumentType() {
+        public ArgumentParserType argumentType() {
             return ArgumentParserType.STRING;
         }
 
         @Override
-        public @NotNull ParseResult<ResolvedCommand> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+        public ParseResult<ResolvedCommand> parse(CommandSender sender, StringReader reader) {
             reader = new StringReader(reader.readRemaining());
             var word = reader.readWord(WordType.GREEDY).toLowerCase(Locale.ROOT);
 
@@ -303,7 +305,7 @@ public class HelpCommand extends CommandDsl {
         }
 
         @Override
-        public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
+        public void suggest(CommandSender sender, String raw, Suggestion suggestion) {
             // This is definitely a hack.
             // Basically we get a trimmed version of raw but need to know if there is a space at the end (which should suggest the next command)
             // So we look if the suggestion length (which goes to the end) is longer than the raw length, and if so we add a space.
@@ -366,7 +368,8 @@ public class HelpCommand extends CommandDsl {
             }
         }
 
-        private @NotNull Collection<Map.Entry<Argument<?>, CommandNode>> collectPossibleNext(@Nullable List<Object> path, @NotNull CommandNode target, @NotNull CommandSender sender) {
+        private Collection<Map.Entry<Argument<?>, CommandNode>> collectPossibleNext(
+            @Nullable List<Object> path, CommandNode target, CommandSender sender) {
             var children = reflect.children(target, sender);
             if (children.isEmpty()) return List.of();
 

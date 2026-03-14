@@ -9,22 +9,21 @@ import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
 import org.intellij.lang.annotations.MagicConstant;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
 
 public record AxiomServerboundModifyEntitiesPacket(
-        @NotNull List<Entry> entries
+    List<Entry> entries
 ) implements ServerboundModPacket<AxiomServerboundModifyEntitiesPacket> {
 
     public static final Type<AxiomServerboundModifyEntitiesPacket> TYPE = Type.of(
-            AxiomAPI.CHANNEL, "manipulate_entity",
-            NetworkBufferTemplate.template(
-                    Entry.CODEC.list(), AxiomServerboundModifyEntitiesPacket::entries,
-                    AxiomServerboundModifyEntitiesPacket::new
-            )
+        AxiomAPI.CHANNEL, "manipulate_entity",
+        NetworkBufferTemplate.template(
+            Entry.CODEC.list(), AxiomServerboundModifyEntitiesPacket::entries,
+            AxiomServerboundModifyEntitiesPacket::new
+        )
     );
 
     @Override
@@ -34,19 +33,19 @@ public record AxiomServerboundModifyEntitiesPacket(
 
 
     public record Entry(
-            @NotNull UUID id,
-            @MagicConstant(flagsFromClass = RelativeFlags.class) byte flags,
-            @Nullable Pos pos,
-            @Nullable CompoundBinaryTag nbt,
-            @NotNull PassengerChange passengerChange,
-            @NotNull List<UUID> passengers
+        UUID id,
+        @MagicConstant(flagsFromClass = RelativeFlags.class) byte flags,
+        @Nullable Pos pos,
+        @Nullable CompoundBinaryTag nbt,
+        PassengerChange passengerChange,
+        List<UUID> passengers
     ) {
 
         private static final NetworkBuffer.Type<PassengerChange> PASSENGER_CHANGE = NetworkBuffer.Enum(PassengerChange.class);
         private static final NetworkBuffer.Type<List<UUID>> PASSENGERS = NetworkBuffer.UUID.list(512);
         private static final NetworkBuffer.Type<Entry> CODEC = new NetworkBuffer.Type<>() {
             @Override
-            public void write(@NotNull NetworkBuffer buffer, Entry value) {
+            public void write(NetworkBuffer buffer, Entry value) {
                 buffer.write(NetworkBuffer.UUID, value.id());
                 if (value.pos != null && value.flags != -1) {
                     buffer.write(NetworkBuffer.BYTE, value.flags());
@@ -63,7 +62,7 @@ public record AxiomServerboundModifyEntitiesPacket(
             }
 
             @Override
-            public Entry read(@NotNull NetworkBuffer buffer) {
+            public Entry read(NetworkBuffer buffer) {
                 UUID id = buffer.read(NetworkBuffer.UUID);
                 byte flags = buffer.read(NetworkBuffer.BYTE);
                 Pos pos = flags != -1 ? buffer.read(NetworkBuffer.POS) : null;

@@ -1,25 +1,24 @@
 package net.hollowcube.common.math;
 
 import net.minestom.server.coordinate.Vec;
-import org.jetbrains.annotations.NotNull;
 
 public record SVD(
-        @NotNull Vec translation,
-        @NotNull Quaternion leftRotation,
-        @NotNull Vec scale,
-        @NotNull Quaternion rightRotation
+        Vec translation,
+        Quaternion leftRotation,
+        Vec scale,
+        Quaternion rightRotation
 ) {
     private static final float G = (float) (3.0F + 2.0F * Math.sqrt(2.0F));
     private static final GivensParameters PI_4 = GivensParameters.fromPositiveAngle((float) (java.lang.Math.PI / 4));
 
-    static @NotNull SVD decompose(@NotNull Mat4 transform) {
+    static SVD decompose(Mat4 transform) {
         float scale = 1.0F / transform.m33();
         var translation = transform.translation().mul(scale);
         var result = decomposeInternal(new Mat3(transform).scale(scale));
         return new SVD(translation, result.leftRotation, result.scale, result.rightRotation);
     }
 
-    static @NotNull SVD decomposeInternal(@NotNull Mat3 mat) {
+    static SVD decomposeInternal(Mat3 mat) {
         Mat3 copy = new Mat3(mat);
         copy.transpose();
         copy.mul(mat);
@@ -67,7 +66,7 @@ public record SVD(
         return new SVD(Vec.ZERO, quaternionf2, vector3f, quaternion.conjugate());
     }
 
-    private static @NotNull Quaternion eigenvalueJacobi(@NotNull Mat3 matrix3f, int i) {
+    private static Quaternion eigenvalueJacobi(Mat3 matrix3f, int i) {
         Quaternion quaternionf = new Quaternion();
         Mat3 matrix3f2 = new Mat3();
         Quaternion quaternionf2 = new Quaternion();
@@ -80,7 +79,7 @@ public record SVD(
         return quaternionf;
     }
 
-    private static void stepJacobi(@NotNull Mat3 matrix3f, @NotNull Mat3 matrix3f2, @NotNull Quaternion quaternionf, @NotNull Quaternion quaternionf2) {
+    private static void stepJacobi(Mat3 matrix3f, Mat3 matrix3f2, Quaternion quaternionf, Quaternion quaternionf2) {
         if (matrix3f.m01() * matrix3f.m01() + matrix3f.m10() * matrix3f.m10() > 1.0E-6F) {
             GivensParameters givensParameters = approxGivensQuat(matrix3f.m00(), 0.5F * (matrix3f.m01() + matrix3f.m10()), matrix3f.m11());
             Quaternion quaternionf3 = givensParameters.aroundZ(quaternionf);
@@ -106,7 +105,7 @@ public record SVD(
         }
     }
 
-    private static void similarityTransform(@NotNull Mat3 matrix3f, @NotNull Mat3 matrix3f2) {
+    private static void similarityTransform(Mat3 matrix3f, Mat3 matrix3f2) {
         matrix3f.mul(matrix3f2);
         matrix3f2.transpose();
         matrix3f2.mul(matrix3f);
@@ -132,30 +131,30 @@ public record SVD(
     }
 
     private record GivensParameters(float sinHalf, float cosHalf) {
-        public static @NotNull GivensParameters fromUnnormalized(float f, float g) {
+        public static GivensParameters fromUnnormalized(float f, float g) {
             float h = MathUtil.invsqrt(f * f + g * g);
             return new GivensParameters(h * f, h * g);
         }
 
-        public static @NotNull GivensParameters fromPositiveAngle(float f) {
+        public static GivensParameters fromPositiveAngle(float f) {
             float g = (float) Math.sin(f / 2.0F);
             float h = MathUtil.cosFromSin(g, f / 2.0F);
             return new GivensParameters(g, h);
         }
 
-        public @NotNull GivensParameters inverse() {
+        public GivensParameters inverse() {
             return new GivensParameters(-this.sinHalf, this.cosHalf);
         }
 
-        public @NotNull Quaternion aroundX(@NotNull Quaternion quaternion) {
+        public Quaternion aroundX(Quaternion quaternion) {
             return quaternion.set(this.sinHalf, 0.0F, 0.0F, this.cosHalf);
         }
 
-        public @NotNull Quaternion aroundY(@NotNull Quaternion quaternion) {
+        public Quaternion aroundY(Quaternion quaternion) {
             return quaternion.set(0.0F, this.sinHalf, 0.0F, this.cosHalf);
         }
 
-        public @NotNull Quaternion aroundZ(@NotNull Quaternion quaternion) {
+        public Quaternion aroundZ(Quaternion quaternion) {
             return quaternion.set(0.0F, 0.0F, this.sinHalf, this.cosHalf);
         }
 
@@ -167,7 +166,7 @@ public record SVD(
             return 2.0F * this.sinHalf * this.cosHalf;
         }
 
-        public @NotNull Mat3 aroundX(@NotNull Mat3 mat) {
+        public Mat3 aroundX(Mat3 mat) {
             mat.m01(0.0F);
             mat.m02(0.0F);
             mat.m10(0.0F);
@@ -182,7 +181,7 @@ public record SVD(
             return mat;
         }
 
-        public @NotNull Mat3 aroundY(@NotNull Mat3 mat) {
+        public Mat3 aroundY(Mat3 mat) {
             mat.m01(0.0F);
             mat.m10(0.0F);
             mat.m12(0.0F);
@@ -197,7 +196,7 @@ public record SVD(
             return mat;
         }
 
-        public @NotNull Mat3 aroundZ(@NotNull Mat3 mat) {
+        public Mat3 aroundZ(Mat3 mat) {
             mat.m02(0.0F);
             mat.m12(0.0F);
             mat.m20(0.0F);

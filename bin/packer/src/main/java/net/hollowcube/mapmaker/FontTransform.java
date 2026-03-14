@@ -7,7 +7,6 @@ import de.marhali.json5.Json5;
 import de.marhali.json5.Json5Array;
 import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +24,7 @@ public class FontTransform {
 
     private int nextChar = 0;
 
-    public void init(@NotNull PackContext ctx, @NotNull SpriteTransform spriteTransform) throws IOException {
+    public void init(PackContext ctx, SpriteTransform spriteTransform) throws IOException {
         nextChar = spriteTransform.getNextChar();
 
         try (InputStream is = getClass().getResourceAsStream("/minecraft_font_default.json")) {
@@ -97,7 +96,7 @@ public class FontTransform {
         return nextChar;
     }
 
-    public void process(@NotNull PackContext ctx) throws IOException {
+    public void process(PackContext ctx) throws IOException {
         JsonObject output = new JsonObject();
 
         Path fontBaseDir = ctx.resources().resolve("font");

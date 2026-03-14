@@ -6,7 +6,6 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -17,7 +16,7 @@ public class OpenCosmeticsMenuItem extends ItemHandler {
 
     private final PlayerService players;
 
-    public OpenCosmeticsMenuItem(@NotNull PlayerService players) {
+    public OpenCosmeticsMenuItem(PlayerService players) {
         super(ID, RIGHT_CLICK_ANY);
         this.players = players;
     }
@@ -28,7 +27,7 @@ public class OpenCosmeticsMenuItem extends ItemHandler {
     }
 
     @Override
-    protected void rightClicked(@NotNull Click click) {
+    protected void rightClicked(Click click) {
         Panel.open(click.player(), new CosmeticPanel(this.players));
     }
 

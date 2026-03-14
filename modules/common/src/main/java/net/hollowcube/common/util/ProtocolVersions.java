@@ -7,7 +7,6 @@ import net.minestom.server.event.EventListener;
 import net.minestom.server.event.player.PlayerPluginMessageEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,24 +30,24 @@ public final class ProtocolVersions {
     public static final int CURRENT = MinecraftServer.PROTOCOL_VERSION;
     private static final Logger logger = LoggerFactory.getLogger(ProtocolVersions.class);
 
-    public static int getProtocolVersion(@NotNull String name) {
+    public static int getProtocolVersion(String name) {
         return ID_TO_NAME.getOrDefault(name, -1);
     }
 
-    public static @NotNull String getProtocolName(int version) {
+    public static String getProtocolName(int version) {
         return NAME_TO_ID.getOrDefault(version, "unknown");
     }
 
-    public static int getProtocolVersion(@NotNull Player player) {
+    public static int getProtocolVersion(Player player) {
         return player.getTag(PROTOCOL_VERSION_TAG);
     }
 
-    public static boolean hasProtocolVersion(@NotNull Player player, int version) {
+    public static boolean hasProtocolVersion(Player player, int version) {
         return getProtocolVersion(player) >= version;
     }
 
     @Blocking
-    public static void requestProtocolVersionFromProxy(@NotNull Player player) {
+    public static void requestProtocolVersionFromProxy(Player player) {
         var future = new CompletableFuture<Integer>();
         MinecraftServer.getGlobalEventHandler().addListener(EventListener.builder(PlayerPluginMessageEvent.class)
             .filter(event -> event.getPlayer() == player && "mapmaker:pvn".equals(event.getIdentifier()))
@@ -76,7 +75,7 @@ public final class ProtocolVersions {
         player.setTag(PROTOCOL_VERSION_TAG, pvn);
     }
 
-    public static void unsafeSetProtocolVersion(@NotNull Player player, int protocolVersion) {
+    public static void unsafeSetProtocolVersion(Player player, int protocolVersion) {
         player.setTag(PROTOCOL_VERSION_TAG, protocolVersion);
     }
 

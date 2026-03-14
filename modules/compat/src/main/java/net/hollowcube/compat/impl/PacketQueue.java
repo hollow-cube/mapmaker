@@ -3,7 +3,6 @@ package net.hollowcube.compat.impl;
 import net.hollowcube.compat.api.packet.ClientboundModPacket;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +19,7 @@ public final class PacketQueue {
 
     private int flushCount = 0;
 
-    public void registerChannels(@NotNull Player player, @NotNull List<String> channels) {
+    public void registerChannels(Player player, List<String> channels) {
         this.channels.addAll(channels);
         for (String channel : channels) {
             queue.removeIf(packet -> {
@@ -33,7 +32,7 @@ public final class PacketQueue {
         }
     }
 
-    public void unregisterChannels(@NotNull List<String> channels) {
+    public void unregisterChannels(List<String> channels) {
         List.of(channels).forEach(this.channels::remove);
 
         for (String channel : channels) {
@@ -46,7 +45,7 @@ public final class PacketQueue {
      * If it can be handled by default behavior, it will return true for that to be handled by the caller.
      * ie. send the packet
      */
-    public boolean send(@NotNull ClientboundModPacket<?> packet) {
+    public boolean send(ClientboundModPacket<?> packet) {
         if (!this.channels.contains(packet.getType().id())) {
             if (this.flushCount < MAX_RETRIES) {
                 this.queue.add(packet);
@@ -70,7 +69,7 @@ public final class PacketQueue {
         return this.channels;
     }
 
-    public static PacketQueue get(@NotNull Player player) {
+    public static PacketQueue get(Player player) {
         return player.updateAndGetTag(TAG, queue -> queue != null ? queue : new PacketQueue());
     }
 }

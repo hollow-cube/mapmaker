@@ -2,19 +2,18 @@ package net.hollowcube.mapmaker.chat.announcements;
 
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.session.PlayerSession;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RuntimeGson
 public record AnnouncementFilters(
-        @Nullable String sessionType,
-        @Nullable String sessionState
+    @Nullable String sessionType,
+    @Nullable String sessionState
 ) {
     private static final Logger logger = LoggerFactory.getLogger(AnnouncementFilters.class);
 
-    public boolean matches(@NotNull PlayerSession session) {
+    public boolean matches(PlayerSession session) {
         var presence = session.presence();
 
         var result = true;

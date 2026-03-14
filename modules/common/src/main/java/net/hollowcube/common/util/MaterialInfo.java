@@ -29,6 +29,8 @@ public final class MaterialInfo {
         adder.accept(Material.PINK_DYE, "pink");
     });
 
+    private MaterialInfo() {
+    }
 
     public record MaterialMap<T>(Int2ObjectMap<T> map) {
 

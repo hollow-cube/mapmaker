@@ -2,7 +2,6 @@ package net.hollowcube.compat.noxesium.components;
 
 import net.hollowcube.common.util.NetworkBufferTypes;
 import net.minestom.server.network.NetworkBuffer;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -11,7 +10,7 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class NoxesiumComponentMap implements NoxesiumComponentType.Holder {
 
-    public static final NetworkBuffer.Type<@NotNull NoxesiumComponentMap> NETWORK_TYPE = NetworkBufferTypes.writeOnly(
+    public static final NetworkBuffer.Type<NoxesiumComponentMap> NETWORK_TYPE = NetworkBufferTypes.writeOnly(
         (buffer, components) -> {
             // We don't support removing components we send the entire map if we need to update it since we only send them on state changes.
             // So the second var int is always 0

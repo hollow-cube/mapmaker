@@ -4,19 +4,18 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.other.InteractionMeta;
-import org.jetbrains.annotations.NotNull;
 
 public class InteractionEntity extends Entity {
 
     public interface Target {
 
-        default void beginHover(@NotNull Player player) {
+        default void beginHover(Player player) {
         }
 
-        default void endHover(@NotNull Player player) {
+        default void endHover(Player player) {
         }
 
-        default void onRightClick(@NotNull Player player) {
+        default void onRightClick(Player player) {
         }
 
     }
@@ -24,7 +23,7 @@ public class InteractionEntity extends Entity {
     private final Target target;
     private final double interactionDistance;
 
-    public InteractionEntity(int width, int height, double interactionDistance, @NotNull Target target) {
+    public InteractionEntity(int width, int height, double interactionDistance, Target target) {
         super(EntityType.INTERACTION);
         this.target = target;
         this.interactionDistance = interactionDistance;
@@ -44,12 +43,12 @@ public class InteractionEntity extends Entity {
         return interactionDistance;
     }
 
-    public @NotNull Target target() {
+    public Target target() {
         return target;
     }
 
     @Override
-    public @NotNull InteractionMeta getEntityMeta() {
+    public InteractionMeta getEntityMeta() {
         return (InteractionMeta) super.getEntityMeta();
     }
 

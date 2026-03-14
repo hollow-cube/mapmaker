@@ -8,7 +8,6 @@ import org.intellij.lang.annotations.MagicConstant;
 
 import java.util.function.DoubleFunction;
 
-@SuppressWarnings("UnstableApiUsage")
 public record RelativeVec(
         Vec vec,
         @MagicConstant(flagsFromClass = RelativeFlags.class) int flags

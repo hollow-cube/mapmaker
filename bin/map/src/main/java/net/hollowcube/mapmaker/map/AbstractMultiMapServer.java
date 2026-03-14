@@ -32,7 +32,6 @@ import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +71,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
 
     private volatile boolean isClosed = false;
 
-    public AbstractMultiMapServer(@NotNull ConfigLoaderV3 config) {
+    public AbstractMultiMapServer(ConfigLoaderV3 config) {
         super(config);
 
         ParkourMapWorld.initGlobalReferences();
@@ -107,11 +106,11 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
 
     //region Player Lifecycle
 
-    public void addPendingJoin(@NotNull String playerId, @NotNull String mapId, @NotNull String state) {
+    public void addPendingJoin(String playerId, String mapId, String state) {
         pendingPlayerJoins.put(playerId, CompletableFuture.completedFuture(new MapJoinInfo(playerId, mapId, state)));
     }
 
-    protected @NotNull CompletableFuture<@Nullable MapJoinInfo> getPendingJoin(@NotNull String playerId, boolean deleteCompleted) {
+    protected CompletableFuture<@Nullable MapJoinInfo> getPendingJoin(String playerId, boolean deleteCompleted) {
         var pendingJoin = pendingPlayerJoins.computeIfAbsent(playerId, id -> {
             var future = new CompletableFuture<MapJoinInfo>();
             //todo the futures are never actually removed from the map.
@@ -127,7 +126,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
         return pendingJoin;
     }
 
-    protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
+    protected void handleConfigPhase(AsyncPlayerConfigurationEvent event) {
         try {
             var player = event.getPlayer();
             if (config.get(VelocityConfig.class).secret().isEmpty()) {
@@ -177,25 +176,25 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
         }
     }
 
-    protected void handleSpawn(@NotNull PlayerSpawnEvent event) {
+    protected void handleSpawn(PlayerSpawnEvent event) {
         if (!event.isFirstSpawn()) return;
         super.handleFirstSpawn(event.getPlayer());
     }
 
-    protected void handleDisconnect(@NotNull PlayerDisconnectEvent event) {
+    protected void handleDisconnect(PlayerDisconnectEvent event) {
         handlePlayerDisconnect(event.getPlayer());
     }
 
-    protected abstract @NotNull Future<AbstractMapWorld<?, ?>> createWorldForRequest(@NotNull MapJoinInfo joinInfo);
+    protected abstract Future<AbstractMapWorld<?, ?>> createWorldForRequest(MapJoinInfo joinInfo);
 
     //endregion
 
     //region World Lifecycle
 
     @SuppressWarnings("unchecked")
-    public <T extends AbstractMapWorld<?, ?>> Future<T> createWorld(
-        @NotNull MapData map, boolean editing,
-        @NotNull Function<MapData, T> worldFactory,
+    public <T extends AbstractMapWorld<?, ?>> Future<@Nullable T> createWorld(
+        MapData map, boolean editing,
+        Function<MapData, T> worldFactory,
         boolean tracked
     ) {
         return FutureUtil.fork(() -> {
@@ -227,12 +226,14 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
     }
 
     private <T extends AbstractMapWorld<?, ?>> @Nullable T createWorldInternal(
-        @NotNull MapKey key, @NotNull MapData map, @NotNull Function<MapData, T> worldFactory, boolean tracked
+        MapKey key, MapData map, Function<MapData, T> worldFactory, boolean tracked
     ) {
         try {
             var createdWorld = worldFactory.apply(map);
             if (tracked) {
-                createdWorld.instance().eventNode().addListener(PlayerInstanceLeaveEvent.class, event -> {
+                @SuppressWarnings("UnstableApiUsage")
+                var eventNode = createdWorld.instance().eventNode();
+                eventNode.addListener(PlayerInstanceLeaveEvent.class, event -> {
                     // Get the world from the instance because 1: the player is no longer in a world, and 2: we care about the root world (editing, not testing)
                     var world = MapWorld.forInstance(event.getInstance());
                     if (world == null) return;
@@ -256,7 +257,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
 
             return createdWorld;
         } catch (Exception e) {
-            logger.error("Failed to allocate map " + map.id(), e);
+            logger.error("Failed to allocate map {}", map.id(), e);
             ExceptionReporter.reportException(e);
 
             worldLock.lock();
@@ -270,7 +271,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
         }
     }
 
-    public void destroyMapWorlds(@NotNull String mapId, @NotNull Component reason) {
+    public void destroyMapWorlds(String mapId, Component reason) {
         List<MapKey> keys = new ArrayList<>();
         worldLock.lock();
         try {
@@ -287,7 +288,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
         }
     }
 
-    private void destroy(@NotNull MapKey key, @NotNull Component reason) {
+    private void destroy(MapKey key, Component reason) {
         FutureUtil.assertThread();
         final Future<AbstractMapWorld<?, ?>> worldFuture;
         worldLock.lock();
@@ -349,7 +350,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
         }
     }
 
-    private @NotNull TaskSchedule safePointTick() {
+    private TaskSchedule safePointTick() {
         try {
             final List<Future<AbstractMapWorld<?, ?>>> worldsToTick;
             worldLock.lock();
@@ -377,7 +378,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
     //endregion
 
     @Override
-    protected @NotNull DebugCommand createDebugCommand() {
+    protected DebugCommand createDebugCommand() {
         var cmd = super.createDebugCommand();
 
         cmd.createPermissionlessSubcommand("world", (player, _) -> {
@@ -425,7 +426,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
         return cmd;
     }
 
-    private void sendWorldDebug(@NotNull Player player) {
+    private void sendWorldDebug(Player player) {
         worldLock.lock();
         try {
             var builder = Component.text();
@@ -464,11 +465,12 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
 
     @RuntimeGson
     private record MapJoinInfoMessage(
-        @NotNull String serverId, @NotNull String playerId,
-        @NotNull String mapId, @NotNull String state) {
+        String serverId, String playerId,
+        String mapId, String state
+    ) {
     }
 
-    private void onMapJoinMessage(@NotNull Message msg, @NotNull MapJoinInfoMessage message) {
+    private void onMapJoinMessage(Message msg, MapJoinInfoMessage message) {
         if (!AbstractHttpService.hostname.equals(message.serverId())) return; // Not for this server, ignore.
 
         logger.info("received join info for {}: {}", message.playerId(), message);

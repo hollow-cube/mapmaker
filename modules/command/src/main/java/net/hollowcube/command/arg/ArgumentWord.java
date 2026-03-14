@@ -4,29 +4,29 @@ import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
 import net.minestom.server.command.CommandSender;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class ArgumentWord extends Argument<String> {
-    private List<String> values = null;
+    private @Nullable List<String> values = null;
 
-    ArgumentWord(@NotNull String id) {
+    ArgumentWord(String id) {
         super(id);
     }
 
-    public @NotNull ArgumentWord with(@NotNull String... values) {
+    public ArgumentWord with(String... values) {
         this.values = List.of(values);
         return this;
     }
 
-    public @NotNull ArgumentWord with(@NotNull List<String> values) {
+    public ArgumentWord with(List<String> values) {
         this.values = List.copyOf(values);
         return this;
     }
 
     @Override
-    public @NotNull ParseResult<String> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public ParseResult<String> parse(CommandSender sender, StringReader reader) {
         var start = reader.pos();
         var word = reader.readWord(WordType.BRIGADIER);
         if (values == null) return success(word);
@@ -41,7 +41,7 @@ public class ArgumentWord extends Argument<String> {
     }
 
     @Override
-    public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
+    public void suggest(CommandSender sender, String raw, Suggestion suggestion) {
         if (values == null) return;
 
         for (var value : values) {

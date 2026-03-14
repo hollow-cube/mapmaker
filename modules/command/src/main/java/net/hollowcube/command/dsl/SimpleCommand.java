@@ -2,14 +2,15 @@ package net.hollowcube.command.dsl;
 
 import net.hollowcube.command.util.CommandCategory;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
 public class SimpleCommand {
 
     private final String name;
-    private CommandCategory category = CommandCategory.DEFAULT;
-    private String description = null;
+    private @Nullable CommandCategory category = CommandCategory.DEFAULT;
+    private @Nullable String description = null;
     private Consumer<Player> callback = player -> {};
 
     public SimpleCommand(String name) {

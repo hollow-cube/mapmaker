@@ -3,12 +3,10 @@ package net.hollowcube.compat.axiom.data.annotations.data;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.network.NetworkBuffer;
-import org.jetbrains.annotations.NotNull;
 
-@SuppressWarnings("UnstableApiUsage")
 public interface AnnotationData {
-    @NotNull NetworkBuffer.Type<AnnotationData> SERIALIZER = NetworkBuffer.BYTE.unionType(AnnotationData::getNetworkType, AnnotationData::getNetworkId);
-    @NotNull Codec<AnnotationData> CODEC = Codec.STRING.unionType("type", AnnotationData::getCodecType, net.hollowcube.compat.axiom.data.annotations.data.AnnotationData::getCodecId);
+    NetworkBuffer.Type<AnnotationData> SERIALIZER = NetworkBuffer.BYTE.unionType(AnnotationData::getNetworkType, AnnotationData::getNetworkId);
+    Codec<AnnotationData> CODEC = Codec.STRING.unionType("type", AnnotationData::getCodecType, net.hollowcube.compat.axiom.data.annotations.data.AnnotationData::getCodecId);
 
     default AnnotationData withPosition(float x, float y, float z) {
         return this;

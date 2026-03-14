@@ -14,7 +14,6 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -28,12 +27,7 @@ public class PlayCommand extends CommandDsl {
     private final SessionManager sessionManager;
     private final ServerBridge bridge;
 
-    public PlayCommand(
-        @NotNull ApiClient api,
-        @NotNull MapService mapService,
-        @NotNull SessionManager sessionManager,
-        @NotNull ServerBridge bridge
-    ) {
+    public PlayCommand(ApiClient api, MapService mapService, SessionManager sessionManager, ServerBridge bridge) {
         super("play");
         this.api = api;
         this.mapService = mapService;
@@ -51,11 +45,11 @@ public class PlayCommand extends CommandDsl {
         addSyntax(playerOnly(this::joinTargetMap), mapArg);
     }
 
-    private void handleDefault(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleDefault(Player player, CommandContext context) {
         Panel.open(player, new MapBrowserView(api, mapService, bridge));
     }
 
-    private void joinTargetMap(@NotNull Player player, @NotNull CommandContext context) {
+    private void joinTargetMap(Player player, CommandContext context) {
         var map = context.get(mapArg);
         if (map == null) {
             player.sendMessage(Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));

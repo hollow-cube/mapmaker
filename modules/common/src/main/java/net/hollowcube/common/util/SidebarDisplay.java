@@ -7,7 +7,7 @@ import net.kyori.adventure.text.TranslationArgument;
 import net.minestom.server.Viewable;
 import net.minestom.server.entity.Player;
 import net.minestom.server.scoreboard.Sidebar;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -111,17 +111,17 @@ public class SidebarDisplay implements Viewable {
     }
 
     @Override
-    public boolean addViewer(@NotNull Player viewer) {
+    public boolean addViewer(Player viewer) {
         return this.sidebar.addViewer(viewer);
     }
 
     @Override
-    public boolean removeViewer(@NotNull Player viewer) {
+    public boolean removeViewer(Player viewer) {
         return this.sidebar.removeViewer(viewer);
     }
 
     @Override
-    public @NotNull Set<@NotNull Player> getViewers() {
+    public Set<Player> getViewers() {
         return this.sidebar.getViewers();
     }
 
@@ -130,7 +130,7 @@ public class SidebarDisplay implements Viewable {
         return (previous.length == properties.length && previous.length == 0) || !Arrays.equals(previous, properties);
     }
 
-    private static ComponentLike[] transformArgs(Object[] args) {
+    private static ComponentLike[] transformArgs(@Nullable Object[] args) {
         ComponentLike[] components = new ComponentLike[args.length];
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {

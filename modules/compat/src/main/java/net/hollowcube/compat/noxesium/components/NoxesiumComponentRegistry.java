@@ -4,7 +4,6 @@ import net.hollowcube.compat.noxesium.NoxesiumAPI;
 import net.hollowcube.compat.noxesium.packets.v3.ClientboundRegistryIdsUpdatePacket;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.network.NetworkBuffer;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +25,7 @@ public class NoxesiumComponentRegistry {
         this.id = REGISTRY_ID.getAndIncrement();
     }
 
-    public <T> NoxesiumComponentType<T> register(String id, NetworkBuffer.Type<@NotNull T> networkType) {
+    public <T> NoxesiumComponentType<T> register(String id, NetworkBuffer.Type<T> networkType) {
         var component = new NoxesiumComponentType<>(COMPONENT_ID.getAndIncrement(), Key.key(NoxesiumAPI.NAMESPACE, id), networkType);
         this.components.add(component);
         return component;

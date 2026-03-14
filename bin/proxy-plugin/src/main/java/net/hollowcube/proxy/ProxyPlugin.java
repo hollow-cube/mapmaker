@@ -27,7 +27,6 @@ import com.velocitypowered.api.util.GameProfile;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -61,7 +60,7 @@ public class ProxyPlugin {
     private final Logger logger;
     private final ProxyServer proxy;
 
-    private ProxySessionService sessionService;
+    private final ProxySessionService sessionService;
 
     private final RegisteredServer anyhubServer;
 
@@ -73,7 +72,7 @@ public class ProxyPlugin {
     private final Map<UUID, Integer> playerConnectAttempts = new ConcurrentHashMap<>();
 
     @Inject
-    public ProxyPlugin(@NotNull Logger logger, @NotNull ProxyServer proxy) {
+    public ProxyPlugin(Logger logger, ProxyServer proxy) {
         this.logger = logger;
         this.proxy = proxy;
 
@@ -92,13 +91,13 @@ public class ProxyPlugin {
     }
 
     @Subscribe
-    public void handlePermissionSetup(@NotNull PermissionsSetupEvent event) {
+    public void handlePermissionSetup(PermissionsSetupEvent event) {
         // Always deny all permissions
         event.setProvider(s -> p -> Tristate.FALSE);
     }
 
     @Subscribe
-    public void handleLogin(@NotNull LoginEvent event) {
+    public void handleLogin(LoginEvent event) {
         var player = event.getPlayer();
 
         try {
@@ -132,7 +131,7 @@ public class ProxyPlugin {
     }
 
     @Subscribe
-    public void handleStatusMessage(@NotNull ProxyPingEvent event) {
+    public void handleStatusMessage(ProxyPingEvent event) {
         var builder = event.getPing().asBuilder();
         var version = event.getConnection().getProtocolVersion();
         var protocol = SUPPORTED_VERSIONS.contains(version) ? version : RECOMMEND_VERSION;
@@ -142,7 +141,7 @@ public class ProxyPlugin {
     }
 
     @Subscribe
-    public void handlePluginMessage(@NotNull PluginMessageEvent event) {
+    public void handlePluginMessage(PluginMessageEvent event) {
         logger.info("plugin message: {}", event.getIdentifier());
         if (TRANSFER_MESSAGE_ID.equals(event.getIdentifier())) {
             handleTransfer(event);
@@ -156,7 +155,7 @@ public class ProxyPlugin {
     }
 
     @Subscribe
-    public void handleCookieStore(@NotNull CookieStoreEvent event) {
+    public void handleCookieStore(CookieStoreEvent event) {
         if (!event.getOriginalKey().equals(TRANSFER_DATA_COOKIE))
             return;
 
@@ -170,7 +169,7 @@ public class ProxyPlugin {
     // reply, thus exposing a detail about what we do and making a useless req/res down to the client.
     // AWESOME JOB GUYS YOU ARE DOING GREAT!!!
     @Subscribe
-    public void handleCookieResponse(@NotNull CookieReceiveEvent event) {
+    public void handleCookieResponse(CookieReceiveEvent event) {
         if (!event.getOriginalKey().equals(TRANSFER_DATA_COOKIE))
             return;
 
@@ -179,7 +178,7 @@ public class ProxyPlugin {
     }
 
     @Subscribe
-    public void handleConfigEnd(@NotNull PlayerFinishedConfigurationEvent event) {
+    public void handleConfigEnd(PlayerFinishedConfigurationEvent event) {
         transferData.remove(event.player().getUniqueId());
     }
 
@@ -188,7 +187,7 @@ public class ProxyPlugin {
 //        event.player().transferToHost(new InetSocketAddress("ovh-02.hollowcube.dev", 30565));
 //    }
 
-    private void handleDisconnectMessage(@NotNull PluginMessageEvent event) {
+    private void handleDisconnectMessage(PluginMessageEvent event) {
         event.setResult(PluginMessageEvent.ForwardResult.handled());
         if (!(event.getSource() instanceof ServerConnection serverConn)) return;
         var player = serverConn.getPlayer();
@@ -197,7 +196,7 @@ public class ProxyPlugin {
         player.disconnect(GsonComponentSerializer.gson().deserialize(reason));
     }
 
-    private void handleResourcePack(@NotNull PluginMessageEvent event) {
+    private void handleResourcePack(PluginMessageEvent event) {
         event.setResult(PluginMessageEvent.ForwardResult.handled());
         if (!(event.getSource() instanceof ServerConnection serverConn)) return;
         var player = serverConn.getPlayer();
@@ -212,7 +211,7 @@ public class ProxyPlugin {
         }
     }
 
-    private void handleTransfer(@NotNull PluginMessageEvent event) {
+    private void handleTransfer(PluginMessageEvent event) {
         event.setResult(PluginMessageEvent.ForwardResult.handled());
         if (!(event.getSource() instanceof ServerConnection serverConn)) return;
         var player = serverConn.getPlayer();
@@ -233,7 +232,7 @@ public class ProxyPlugin {
         });
     }
 
-    private void handleProtocolVersionRequest(@NotNull PluginMessageEvent event) {
+    private void handleProtocolVersionRequest(PluginMessageEvent event) {
         event.setResult(PluginMessageEvent.ForwardResult.handled());
         if (!(event.getSource() instanceof ServerConnection serverConn)) return;
         var player = serverConn.getPlayer();
@@ -246,7 +245,7 @@ public class ProxyPlugin {
     }
 
     @Subscribe
-    public void handlePostConnect(@NotNull ServerPostConnectEvent event) {
+    public void handlePostConnect(ServerPostConnectEvent event) {
         var playerId = event.getPlayer().getUniqueId();
         if (!playersJustJoined.contains(playerId)) return;
 
@@ -255,7 +254,7 @@ public class ProxyPlugin {
     }
 
     @Subscribe
-    public void handleDisconnect(@NotNull DisconnectEvent event) {
+    public void handleDisconnect(DisconnectEvent event) {
         var playerId = event.getPlayer().getUniqueId();
         try {
             sessionService.deleteSession(playerId.toString());
@@ -269,7 +268,7 @@ public class ProxyPlugin {
     }
 
     @Subscribe
-    public void handleKickedFromServer(@NotNull KickedFromServerEvent event) {
+    public void handleKickedFromServer(KickedFromServerEvent event) {
         if (event.kickedDuringServerConnect()) return;
 
         // If they were leaving the limbo, they should be disconnected completely no redirect.
@@ -291,7 +290,7 @@ public class ProxyPlugin {
 
     }
 
-    private @Nullable GameProfile.Property getGPProperty(@NotNull GameProfile gp, @NotNull String name) {
+    private @Nullable GameProfile.Property getGPProperty(GameProfile gp, String name) {
         return gp.getProperties().stream().filter(p -> p.getName().equals(name)).findFirst().orElse(null);
     }
 

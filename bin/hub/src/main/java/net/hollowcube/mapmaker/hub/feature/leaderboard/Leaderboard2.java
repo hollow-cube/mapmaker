@@ -14,7 +14,6 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.Material;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
@@ -34,8 +33,8 @@ public class Leaderboard2 {
     private final NpcItemModel screenModel = new NpcItemModel();
     private final LeaderboardDisplay.TextDisplay updatedTextEntity = new LeaderboardDisplay.TextDisplay();
 
-    public final LeaderboardDisplay left;
-    public final LeaderboardDisplay right;
+    public final @Nullable LeaderboardDisplay left;
+    public final @Nullable LeaderboardDisplay right;
 
     private long refreshInterval = 15 * 60 * 1000; // 15 minutes
     private long lastRefresh = -1;
@@ -45,7 +44,7 @@ public class Leaderboard2 {
             @Nullable Function<String, Long> leftPlayerScoreSupplier,
             @Nullable Supplier<LeaderboardData> rightGlobalLeaderboardSupplier,
             @Nullable Function<String, Long> rightPlayerScoreSupplier,
-            @NotNull Function<String, Component> displayNameSupplier,
+            Function<String, Component> displayNameSupplier,
             double screenAngle
     ) {
         screenModel.setModel(Material.STICK, BadSprite.require("lb_screen"));
@@ -70,7 +69,7 @@ public class Leaderboard2 {
         } else right = null;
     }
 
-    public void setInstance(@NotNull Instance instance, @NotNull Pos pos) {
+    public void setInstance(Instance instance, Pos pos) {
         screenModel.setInstance(instance, pos);
         updatedTextEntity.setInstance(instance, pos);
         if (left != null) left.setInstance(instance, pos);
@@ -93,7 +92,7 @@ public class Leaderboard2 {
         }
     }
 
-    public void addViewerHook(@NotNull Consumer<Player> superFunc, @NotNull Player player) {
+    public void addViewerHook(Consumer<Player> superFunc, Player player) {
         superFunc.accept(player);
 
         FutureUtil.submitVirtual(() -> {

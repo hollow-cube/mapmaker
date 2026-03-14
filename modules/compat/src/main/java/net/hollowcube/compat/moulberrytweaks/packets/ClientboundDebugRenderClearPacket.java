@@ -6,8 +6,8 @@ import net.minestom.server.network.NetworkBufferTemplate;
 
 public record ClientboundDebugRenderClearPacket() implements ClientboundModPacket<ClientboundDebugRenderClearPacket> {
     public static final Type<ClientboundDebugRenderClearPacket> TYPE = Type.of(
-            MoulberryTweaksAPI.DEBUG_RENDER_CHANNEL, "clear",
-            NetworkBufferTemplate.template(ClientboundDebugRenderClearPacket::new)
+        MoulberryTweaksAPI.DEBUG_RENDER_CHANNEL, "clear",
+        NetworkBufferTemplate.template(ClientboundDebugRenderClearPacket::new)
     );
 
     @Override

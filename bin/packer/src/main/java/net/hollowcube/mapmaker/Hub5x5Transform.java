@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.hollowcube.mapmaker.util.ModelUtil;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,10 +16,10 @@ public class Hub5x5Transform {
 
     private static final List<String> NAMES = List.of("5x5", "materials", "extra");
 
-    public void init(@NotNull PackContext ctx) throws IOException {
+    public void init(PackContext ctx) throws IOException {
     }
 
-    public void process(@NotNull PackContext ctx) throws IOException {
+    public void process(PackContext ctx) throws IOException {
         for (var typeName : NAMES) {
             Path baseDir = ctx.resources().resolve("hub/" + typeName);
 
@@ -46,7 +45,7 @@ public class Hub5x5Transform {
         }
     }
 
-    private @NotNull JsonObject createTransform(@NotNull String name, @NotNull JsonArray size) {
+    private JsonObject createTransform(String name, JsonArray size) {
         var longSize = Math.max(Math.max(size.get(0).getAsInt(), size.get(1).getAsInt()), size.get(2).getAsInt());
         // for 5x4x5, this would be 5.
 

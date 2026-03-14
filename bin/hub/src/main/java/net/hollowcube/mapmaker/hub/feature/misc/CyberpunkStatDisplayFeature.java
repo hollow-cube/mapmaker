@@ -23,7 +23,8 @@ import net.minestom.server.monitoring.TickMonitor;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.MathUtils;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -37,14 +38,14 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
     private static final double MAX_MEMORY_MB = 1024 * 3;
     private static final double MAX_WIDTH = 2.48;
 
-    private final AtomicReference<TickMonitor> LAST_TICK = new AtomicReference<>();
-    private TextDisplayMeta leftText;
-    private TextDisplayMeta rightText;
-    private BlockDisplayMeta tickTimeBar;
-    private BlockDisplayMeta memoryUsageBar;
+    private final AtomicReference<@Nullable TickMonitor> LAST_TICK = new AtomicReference<>();
+    private @UnknownNullability TextDisplayMeta leftText; // lateinit
+    private @UnknownNullability TextDisplayMeta rightText; // lateinit
+    private @UnknownNullability BlockDisplayMeta tickTimeBar; // lateinit
+    private @UnknownNullability BlockDisplayMeta memoryUsageBar; // lateinit
 
     @Override
-    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
+    public void load(MapServer server, HubMapWorld world) {
         EVENT_HANDLER.addListener(ServerTickMonitorEvent.class, event -> LAST_TICK.set(event.getTickMonitor()));
 
         // Nice positions for toying locally
@@ -122,7 +123,7 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
         }
     }
 
-    private @NotNull TextDisplayMeta createTextEntity(@NotNull Instance instance, @NotNull Pos pos) {
+    private TextDisplayMeta createTextEntity(Instance instance, Pos pos) {
         var entity = new Entity(EntityType.TEXT_DISPLAY) {
             {
                 hasPhysics = false;
@@ -142,7 +143,7 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
         return meta;
     }
 
-    private @NotNull BlockDisplayMeta createBarEntity(@NotNull Instance instance, @NotNull Pos pos) {
+    private BlockDisplayMeta createBarEntity(Instance instance, Pos pos) {
         var entity = new Entity(EntityType.BLOCK_DISPLAY) {
             {
                 hasPhysics = false;

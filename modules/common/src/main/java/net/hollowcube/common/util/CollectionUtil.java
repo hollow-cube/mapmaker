@@ -1,14 +1,16 @@
 package net.hollowcube.common.util;
 
 import net.minestom.server.codec.Codec;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class CollectionUtil {
+public final class CollectionUtil {
+    private CollectionUtil() {
+    }
 
     @SafeVarargs
     public static <T> List<T> copyWithMinSize(int minSize, Supplier<T> fallback, T... elements) {
@@ -21,7 +23,7 @@ public class CollectionUtil {
         return List.copyOf(list);
     }
 
-    public static <T> @NotNull Codec<List<T>> minSizeList(Codec<T> codec, int minSize, Supplier<T> fallback) {
+    public static <T> Codec<List<T>> minSizeList(Codec<T> codec, int minSize, Supplier<T> fallback) {
         return codec.list().transform(
                 list -> {
                     if (list.size() >= minSize) return list;
@@ -35,4 +37,5 @@ public class CollectionUtil {
                 list -> list
         );
     }
+
 }

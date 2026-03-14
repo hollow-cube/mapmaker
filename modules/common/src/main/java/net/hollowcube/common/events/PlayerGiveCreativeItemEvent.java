@@ -8,28 +8,23 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.listener.CreativeInventoryActionListener;
 import net.minestom.server.network.packet.client.play.ClientCreativeInventoryActionPacket;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 public final class PlayerGiveCreativeItemEvent implements PlayerInstanceEvent, CancellableEvent {
 
-    private final @NotNull Player player;
-    private final @NotNull ItemStack item;
+    private final Player player;
+    private final ItemStack item;
     private final short slot;
 
     private boolean cancelled;
 
-    public PlayerGiveCreativeItemEvent(
-            @NotNull Player player,
-            @NotNull ItemStack item,
-            short slot
-    ) {
+    public PlayerGiveCreativeItemEvent(Player player, ItemStack item, short slot) {
         this.player = player;
         this.item = item;
         this.slot = slot;
     }
 
     @Override
-    public @NotNull Player getPlayer() {
+    public Player getPlayer() {
         return player;
     }
 
@@ -43,7 +38,7 @@ public final class PlayerGiveCreativeItemEvent implements PlayerInstanceEvent, C
         this.cancelled = cancel;
     }
 
-    public @NotNull ItemStack item() {
+    public ItemStack item() {
         return item;
     }
 
@@ -60,6 +55,5 @@ public final class PlayerGiveCreativeItemEvent implements PlayerInstanceEvent, C
             CreativeInventoryActionListener.listener(packet, player);
         }
     }
-
 
 }

@@ -1,6 +1,8 @@
 package net.hollowcube.common.math;
 
 public final class MathUtil {
+    private MathUtil() {
+    }
 
     public static float invsqrt(float r) {
         return 1.0F / (float) java.lang.Math.sqrt((double) r);

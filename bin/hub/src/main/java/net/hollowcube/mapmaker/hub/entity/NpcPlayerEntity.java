@@ -14,7 +14,7 @@ import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.play.*;
 import net.minestom.server.scoreboard.Team;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -41,13 +41,13 @@ public class NpcPlayerEntity extends BaseNpcEntity {
     private final NpcTextModel subtitleEntity = new NpcTextModel();
 
     private final CompoundBinaryTag nbt;
-    protected PlayerSkin skin = null;
+    protected @Nullable PlayerSkin skin = null;
 
-    public NpcPlayerEntity(@NotNull CompoundBinaryTag nbt) {
+    public NpcPlayerEntity(CompoundBinaryTag nbt) {
         this(UUID.randomUUID(), nbt);
     }
 
-    public NpcPlayerEntity(@NotNull UUID uuid, @NotNull CompoundBinaryTag nbt) {
+    public NpcPlayerEntity(UUID uuid, CompoundBinaryTag nbt) {
         super(EntityType.PLAYER, uuid);
         this.nbt = nbt;
         // TODO: this is set because minestom doesnt set correct entity attachment heights. In 1.20.5 this can be data generated so should be done.
@@ -68,7 +68,7 @@ public class NpcPlayerEntity extends BaseNpcEntity {
 
         titleEntity.getEntityMeta().setText(Component.text(name()));
         var prompt = nbt.getString("prompt");
-        if (prompt != null) subtitleEntity.getEntityMeta().setText(PROMPT_BASE.append(Component.text(prompt)));
+        subtitleEntity.getEntityMeta().setText(PROMPT_BASE.append(Component.text(prompt)));
     }
 
     @Override
@@ -76,12 +76,12 @@ public class NpcPlayerEntity extends BaseNpcEntity {
         // Intentionally do nothing
     }
 
-    public @NotNull String name() {
+    public String name() {
         return Objects.requireNonNullElseGet(nbt.getString("name"), () -> Objects.requireNonNullElse(nbt.getString("type"), "mapmaker:unknown"));
     }
 
     @Override
-    public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
+    public CompletableFuture<Void> setInstance(Instance instance, Pos spawnPosition) {
         return super.setInstance(instance, spawnPosition).thenRun(() -> {
             titleEntity.setInstance(instance, spawnPosition).thenRun(() -> addPassenger(titleEntity));
             subtitleEntity.setInstance(instance, spawnPosition).thenRun(() -> addPassenger(subtitleEntity));
@@ -106,7 +106,7 @@ public class NpcPlayerEntity extends BaseNpcEntity {
     }
 
     @Override
-    public void updateNewViewer(@NotNull Player player) {
+    public void updateNewViewer(Player player) {
         var properties = new ArrayList<PlayerInfoUpdatePacket.Property>();
         if (skin != null)
             properties.add(new PlayerInfoUpdatePacket.Property("textures", skin.textures(), skin.signature()));
@@ -129,7 +129,7 @@ public class NpcPlayerEntity extends BaseNpcEntity {
     }
 
     @Override
-    public void updateOldViewer(@NotNull Player player) {
+    public void updateOldViewer(Player player) {
         super.updateOldViewer(player);
 
         player.sendPacket(new PlayerInfoRemovePacket(getUuid()));

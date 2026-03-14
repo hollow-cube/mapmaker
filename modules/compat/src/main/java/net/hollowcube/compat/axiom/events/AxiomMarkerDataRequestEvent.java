@@ -6,30 +6,30 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.event.trait.RecursiveEvent;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
+@SuppressWarnings("UnstableApiUsage")
 public class AxiomMarkerDataRequestEvent implements AxiomEvent, RecursiveEvent, CancellableEvent {
 
     private final Player player;
-    private final Entity marker;
+    private final @Nullable Entity marker;
 
-    private CompoundBinaryTag data;
+    private @Nullable CompoundBinaryTag data;
     private boolean cancelled;
 
-    public AxiomMarkerDataRequestEvent(@NotNull Player player, @NotNull UUID uuid) {
+    public AxiomMarkerDataRequestEvent(Player player, UUID uuid) {
         this(player, player.getInstance().getEntityByUuid(uuid));
     }
 
-    public AxiomMarkerDataRequestEvent(@NotNull Player player, @Nullable Entity marker) {
+    public AxiomMarkerDataRequestEvent(Player player, @Nullable Entity marker) {
         this.player = player;
         this.marker = marker;
     }
 
     @Contract(pure = true)
-    public @NotNull Player player() {
+    public Player player() {
         return player;
     }
 
@@ -57,13 +57,13 @@ public class AxiomMarkerDataRequestEvent implements AxiomEvent, RecursiveEvent, 
     }
 
     public static class RightClick extends AxiomMarkerDataRequestEvent {
-        public RightClick(@NotNull Player player, @NotNull UUID uuid) {
+        public RightClick(Player player, UUID uuid) {
             super(player, uuid);
         }
     }
 
     public static class Copying extends AxiomMarkerDataRequestEvent {
-        public Copying(@NotNull Player player, @NotNull UUID uuid) {
+        public Copying(Player player, UUID uuid) {
             super(player, uuid);
         }
     }

@@ -5,7 +5,9 @@ import net.kyori.adventure.util.RGBLike;
 import net.minestom.server.color.Color;
 import org.jetbrains.annotations.Nullable;
 
-public class ColorUtil {
+public final class ColorUtil {
+    private ColorUtil() {
+    }
 
     public static @Nullable Color fromHex(String hex) {
         return OpUtils.map(TextColor.fromCSSHexString(hex), Color::new);
@@ -27,4 +29,5 @@ public class ColorUtil {
         var color = java.awt.Color.getHSBColor(h, s, v);
         return fromRgb(color.getRGB());
     }
+
 }

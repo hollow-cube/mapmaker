@@ -8,14 +8,14 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.function.Consumer;
 
 public interface CommandManager {
 
-    default @UnknownNullability CommandNode xpath(@NotNull String path) {
+    default @UnknownNullability CommandNode xpath(String path) {
         return xpath(path, true);
     }
 
@@ -27,15 +27,15 @@ public interface CommandManager {
      * @param path The path to search for
      * @return The command node, or null if not found
      */
-    @UnknownNullability CommandNode xpath(@NotNull String path, boolean followRedirects);
+    @UnknownNullability CommandNode xpath(String path, boolean followRedirects);
 
-    void register(@NotNull String name, @NotNull CommandNode node);
+    void register(String name, CommandNode node);
 
-    void register(@NotNull String name, @NotNull Consumer<CommandBuilder> func);
+    void register(String name, Consumer<CommandBuilder> func);
 
-    void register(@NotNull CommandDsl command);
+    void register(CommandDsl command);
 
-    void unregister(@NotNull String name);
+    void unregister(String name);
 
     /**
      * Returns suggestions for the given command input. The cursor position is always assumed to be
@@ -45,8 +45,7 @@ public interface CommandManager {
      * @param input  The input text to provide suggestions for
      * @return The command suggestions
      */
-    @NotNull
-    Suggestion suggest(@NotNull CommandSender sender, @NotNull String input);
+    Suggestion suggest(CommandSender sender, String input);
 
     /**
      * Executes the given command input for the given sender. This function does not indicate success and will not
@@ -59,11 +58,9 @@ public interface CommandManager {
      * @param input  The input text to execute
      */
     @Blocking
-    @NotNull
-    CommandResult execute(@NotNull CommandSender sender, @NotNull String input);
+    CommandResult execute(CommandSender sender, String input);
 
-    @NotNull
-    DeclareCommandsPacket createCommandPacket(@NotNull Player player);
+    DeclareCommandsPacket createCommandPacket(Player player);
 
     /**
      * Provides access to the command manager's reflection API, which can be used to inspect the command graph.
@@ -74,6 +71,6 @@ public interface CommandManager {
      * @return The command reflection API
      */
     @ApiStatus.Experimental
-    @NotNull CommandReflection reflect();
+    CommandReflection reflect();
 
 }

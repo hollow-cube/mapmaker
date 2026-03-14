@@ -5,20 +5,19 @@ import net.hollowcube.compat.axiom.AxiomAPI;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
-import org.jetbrains.annotations.NotNull;
 
 public record AxiomServerboundTeleportPacket(
-        @NotNull String dimension,
-        @NotNull Pos position
+    String dimension,
+    Pos position
 ) implements ServerboundModPacket<AxiomServerboundTeleportPacket> {
 
     public static final Type<AxiomServerboundTeleportPacket> TYPE = Type.of(
-            AxiomAPI.CHANNEL, "teleport",
-            NetworkBufferTemplate.template(
-                    NetworkBuffer.STRING, AxiomServerboundTeleportPacket::dimension,
-                    NetworkBuffer.POS, AxiomServerboundTeleportPacket::position,
-                    AxiomServerboundTeleportPacket::new
-            )
+        AxiomAPI.CHANNEL, "teleport",
+        NetworkBufferTemplate.template(
+            NetworkBuffer.STRING, AxiomServerboundTeleportPacket::dimension,
+            NetworkBuffer.POS, AxiomServerboundTeleportPacket::position,
+            AxiomServerboundTeleportPacket::new
+        )
     );
 
     @Override

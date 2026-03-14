@@ -10,7 +10,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.timer.TaskSchedule;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,11 +20,11 @@ public class MainLeaderboardFeature implements HubFeature {
 
     private static final TaskSchedule SCHEDULE = TaskSchedule.tick(60 * 20); // 1 minute
 
-    private Leaderboard2 parkourLeaderboard;
-    private Leaderboard2 buildingLeaderboard;
+    private @UnknownNullability Leaderboard2 parkourLeaderboard;
+    private @UnknownNullability Leaderboard2 buildingLeaderboard;
 
     @Override
-    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
+    public void load(MapServer server, HubMapWorld world) {
         var mapService = server.mapService();
         var playerService = server.playerService();
         parkourLeaderboard = new Leaderboard2(

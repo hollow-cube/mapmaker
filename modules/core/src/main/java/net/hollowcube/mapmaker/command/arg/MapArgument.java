@@ -9,7 +9,6 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -19,13 +18,13 @@ public class MapArgument extends Argument<@Nullable MapData> {
 
     private final MapService mapService;
 
-    protected MapArgument(@NotNull String id, MapService mapService) {
+    protected MapArgument(String id, MapService mapService) {
         super(id);
         this.mapService = mapService;
     }
 
     @Override
-    public @NotNull ParseResult<@Nullable MapData> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public ParseResult<@Nullable MapData> parse(CommandSender sender, StringReader reader) {
         String mapId = reader.readWord(WordType.BRIGADIER);
         if (!(sender instanceof Player player)) return syntaxError(-1);
 

@@ -18,7 +18,7 @@ import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.item.Material;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.TaskSchedule;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,13 +32,13 @@ public class MapOfTheWeekFeature implements HubFeature {
     private static final Pos MAP_ENTITY_POS = new Pos(-38 + 0.5, 43, 54 + 0.5, 0, -90);
     private static final int MAP_ENTITY_UPDATE_INTERVAL = 5; // Seconds
 
-    private ServerBridge bridge;
+    private @UnknownNullability ServerBridge bridge; // lateinit
 
     private final NpcItemModel mapEntity = new NpcItemModel();
     private int mapEntityRotationTarget = 0;
 
     @Override
-    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
+    public void load(MapServer server, HubMapWorld world) {
         this.bridge = server.bridge();
 
         // Timer init (the big countdown above the map)
@@ -60,7 +60,7 @@ public class MapOfTheWeekFeature implements HubFeature {
         server.scheduler().submitTask(this::mapEntityUpdate, ExecutionType.TICK_START);
     }
 
-    private void handleMapInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {
+    private void handleMapInteract(Player player, BaseNpcEntity npc, PlayerHand hand, boolean isLeftClick) {
         if (isLeftClick) return;
         var millisToStart = ChronoUnit.MILLIS.between(LocalDateTime.now(), MapContest.START_DATE);
         if (millisToStart > 0) {
@@ -71,7 +71,7 @@ public class MapOfTheWeekFeature implements HubFeature {
         MapContest.openSubmissionMenu(player);
     }
 
-    private @NotNull TaskSchedule mapEntityUpdate() {
+    private TaskSchedule mapEntityUpdate() {
         var meta = mapEntity.getEntityMeta();
         meta.setNotifyAboutChanges(false);
 

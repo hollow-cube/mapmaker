@@ -14,7 +14,6 @@ import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.util.ServiceContext;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 
@@ -22,7 +21,7 @@ public class NotificationCommand extends CommandDsl {
 
     private final ServiceContext services;
 
-    public NotificationCommand(@NotNull ServiceContext services) {
+    public NotificationCommand(ServiceContext services) {
         super("notifications");
         this.category = CommandCategories.GLOBAL;
         this.description = "View your notifications";
@@ -35,10 +34,9 @@ public class NotificationCommand extends CommandDsl {
         }
     }
 
-    public void execute(@NotNull Player player, @NotNull CommandContext context) {
+    public void execute(Player player, CommandContext context) {
         Panel.open(player, new NotificationListView(this.services));
     }
-
 
     private class Notify extends CommandDsl {
 
@@ -59,7 +57,7 @@ public class NotificationCommand extends CommandDsl {
             this.addSyntax(this::execute, playerArg, categoryArg, keyArg, expiresInt, replaceUnreadArg);
         }
 
-        public void execute(@NotNull CommandSender sender, @NotNull CommandContext context) {
+        public void execute(CommandSender sender, CommandContext context) {
             var target = context.get(playerArg);
             var category = context.get(categoryArg);
             var key = context.get(keyArg);

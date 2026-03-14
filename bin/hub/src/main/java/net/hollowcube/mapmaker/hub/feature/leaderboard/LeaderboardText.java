@@ -11,6 +11,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ public class LeaderboardText {
     private final NpcTextModel subtitleEntity = new NpcTextModel();
     private final NpcTextModel updatedEntity = new NpcTextModel();
 
-    private LeaderboardData data = null;
+    private @Nullable LeaderboardData data = null;
 
     public LeaderboardText(double horizontalOffset, double screenAngle) {
         initTextEntity(entriesEntity, horizontalOffset, TEXT_SCALE, TEXT_SHIFT, screenAngle);
@@ -41,19 +42,19 @@ public class LeaderboardText {
         initTextEntity(updatedEntity, horizontalOffset, SUBTITLE_SCALE, TEXT_SHIFT + 0.5, screenAngle);
     }
 
-    public void setTitle(@NotNull Component title) {
+    public void setTitle(Component title) {
         titleEntity.getEntityMeta().setText(title);
     }
 
-    public void setSubtitle(@NotNull Component subtitle) {
+    public void setSubtitle(Component subtitle) {
         subtitleEntity.getEntityMeta().setText(subtitle);
     }
 
-    public void setUpdated(@NotNull Component updated) {
+    public void setUpdated(Component updated) {
         updatedEntity.getEntityMeta().setText(updated);
     }
 
-    public void setData(@NotNull Function<String, DisplayName> nameFunc, @NotNull LeaderboardData data) {
+    public void setData(Function<String, DisplayName> nameFunc, LeaderboardData data) {
         this.data = data;
 
         entriesEntity.getEntityMeta().setText(buildTop10(nameFunc, data)
@@ -61,11 +62,11 @@ public class LeaderboardText {
                 .append(Component.text("Your Score: ---")));
     }
 
-    public void setEntriesRaw(@NotNull Component entriesText) {
+    public void setEntriesRaw(Component entriesText) {
         entriesEntity.getEntityMeta().setText(entriesText);
     }
 
-    public @NotNull CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos pos) {
+    public CompletableFuture<Void> setInstance(Instance instance, Pos pos) {
         return CompletableFuture.allOf(
                 entriesEntity.setInstance(instance, pos),
                 titleEntity.setInstance(instance, pos),
@@ -74,7 +75,7 @@ public class LeaderboardText {
         );
     }
 
-    private void initTextEntity(@NotNull NpcTextModel entity, double horizontalOffset, double scale, double shift, double screenAngle) {
+    private void initTextEntity(NpcTextModel entity, double horizontalOffset, double scale, double shift, double screenAngle) {
         var meta = entity.getEntityMeta();
         meta.setBackgroundColor(0);
         meta.setScale(new Vec(scale));
@@ -92,7 +93,7 @@ public class LeaderboardText {
         ));
     }
 
-    private @NotNull Component buildTop10(@NotNull Function<String, DisplayName> nameFunc, @NotNull LeaderboardData data) {
+    private Component buildTop10(Function<String, DisplayName> nameFunc, LeaderboardData data) {
         List<Component> names = new ArrayList<>();
 
         // Compute the target width of each line
@@ -114,12 +115,12 @@ public class LeaderboardText {
         return result.build();
     }
 
-    private int measureLine(@NotNull Component playerName, @NotNull LeaderboardData.Entry entry) {
+    private int measureLine(Component playerName, LeaderboardData.Entry entry) {
         var plainName = PlainTextComponentSerializer.plainText().serialize(playerName);
         return FontUtil.measureText(String.format("#%d%s%d", entry.rank(), plainName, entry.score()));
     }
 
-    private @NotNull Component buildLine(@NotNull Component playerName, @NotNull LeaderboardData.Entry entry, int targetSize, boolean trueCenter) {
+    private Component buildLine(Component playerName, LeaderboardData.Entry entry, int targetSize, boolean trueCenter) {
         var plainName = PlainTextComponentSerializer.plainText().serialize(playerName);
         var padding = (targetSize - measureLine(playerName, entry));
 

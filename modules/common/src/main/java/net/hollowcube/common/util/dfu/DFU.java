@@ -7,7 +7,6 @@ import net.minestom.server.codec.Transcoder;
 import net.minestom.server.registry.RegistryTranscoder;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagSerializer;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
@@ -26,15 +25,15 @@ public final class DFU {
      * @param <T>   the type of the codec
      * @return a tag for the given codec
      */
-    public static <T> @NotNull Tag<T> Tag(@NotNull Codec<T> codec, @NotNull String key) {
+    public static <T> Tag<T> Tag(Codec<T> codec, String key) {
         return Tag.Structure(key, codecTagSerializer(codec)).defaultValue(codecEmptySupplier(codec));
     }
 
-    public static <T> @NotNull Tag<T> View(@NotNull Codec<T> codec) {
+    public static <T> Tag<T> View(Codec<T> codec) {
         return Tag.View(codecTagSerializer(codec)).defaultValue(codecEmptySupplier(codec));
     }
 
-    public static <T> @NotNull TagSerializer<T> codecTagSerializer(@NotNull Codec<T> codec) {
+    public static <T> TagSerializer<T> codecTagSerializer(Codec<T> codec) {
         var coder = new RegistryTranscoder<>(Transcoder.NBT, MinecraftServer.process());
         return TagSerializer.fromCompound(
                 compound -> codec.decode(coder, compound).orElseThrow(),
@@ -46,12 +45,12 @@ public final class DFU {
         );
     }
 
-    public static <T> @NotNull CompoundBinaryTag encodeNbt(@NotNull Codec<T> codec, @NotNull T value) {
+    public static <T> CompoundBinaryTag encodeNbt(Codec<T> codec, T value) {
         var coder = new RegistryTranscoder<>(Transcoder.NBT, MinecraftServer.process());
         return (CompoundBinaryTag) codec.encode(coder, value).orElseThrow();
     }
 
-    private static <T> @NotNull Supplier<T> codecEmptySupplier(@NotNull Codec<T> codec) {
+    private static <T> Supplier<T> codecEmptySupplier(Codec<T> codec) {
         return () -> codec.decode(Transcoder.NBT, CompoundBinaryTag.empty()).orElseThrow();
     }
 }

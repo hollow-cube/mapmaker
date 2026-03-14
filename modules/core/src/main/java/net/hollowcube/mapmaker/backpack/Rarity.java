@@ -6,7 +6,6 @@ import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
@@ -24,9 +23,9 @@ public enum Rarity implements ComponentLike {
     }
 
     @Override
-    public @NotNull Component asComponent() {
+    public Component asComponent() {
         return Component.text(iconSprite.fontChar(), NamedTextColor.WHITE)
-                .decoration(TextDecoration.ITALIC, false)
-                .shadowColor(ShadowColor.none());
+            .decoration(TextDecoration.ITALIC, false)
+            .shadowColor(ShadowColor.none());
     }
 }

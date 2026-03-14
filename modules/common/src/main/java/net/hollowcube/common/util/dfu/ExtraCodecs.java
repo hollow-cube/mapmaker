@@ -13,14 +13,12 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.registry.RegistryKey;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-@SuppressWarnings("UnstableApiUsage")
 public final class ExtraCodecs {
     public static final Codec<Integer> INT_STRING = Codec.STRING.transform(Integer::parseInt, String::valueOf);
     public static final Codec<Long> LONG_STRING = Codec.STRING.transform(Long::parseLong, String::valueOf);
@@ -41,10 +39,10 @@ public final class ExtraCodecs {
     public static final Codec<Block> BLOCK_NAME_STRING = Codec.STRING
             .transform(Block::fromKey, Block::name);
 
-    public static <L, R> @NotNull Codec<Either<L, R>> either(@NotNull Codec<L> leftCodec, @NotNull Codec<R> rightCodec) {
+    public static <L, R> Codec<Either<L, R>> either(Codec<L> leftCodec, Codec<R> rightCodec) {
         return new Codec<>() {
             @Override
-            public @NotNull <D> Result<Either<L, R>> decode(@NotNull Transcoder<D> coder, @NotNull D value) {
+            public <D> Result<Either<L, R>> decode(Transcoder<D> coder, D value) {
                 if (leftCodec.decode(coder, value) instanceof Result.Ok(L left))
                     return new Result.Ok<>(Either.left(left));
                 if (rightCodec.decode(coder, value) instanceof Result.Ok(R right))
@@ -53,7 +51,7 @@ public final class ExtraCodecs {
             }
 
             @Override
-            public @NotNull <D> Result<D> encode(@NotNull Transcoder<D> coder, @Nullable Either<L, R> value) {
+            public <D> Result<D> encode(Transcoder<D> coder, @Nullable Either<L, R> value) {
                 if (value == null) return new Result.Error<>("null");
                 if (value.isLeft()) return leftCodec.encode(coder, value.left());
                 if (value.isRight()) return rightCodec.encode(coder, value.right());
@@ -103,13 +101,13 @@ public final class ExtraCodecs {
 //
 //    // Enum as ordinal integer
 //    @Deprecated
-//    public static <T extends Enum<T>> @NotNull Codec<T> EnumI(@NotNull Class<T> enumClass) {
+//    public static <T extends Enum<T>> Codec<T> EnumI(Class<T> enumClass) {
 //        var values = enumClass.getEnumConstants();
 //        return Codec.INT.xmap(ord -> values[ord], Enum::ordinal);
 //    }
 //
 //    // Enum as string
-//    public static <T extends Enum<T>> @NotNull Codec<T> Enum(@NotNull Class<T> enumClass) {
+//    public static <T extends Enum<T>> Codec<T> Enum(Class<T> enumClass) {
 //        var values = enumClass.getEnumConstants();
 //        final Codec<T> stringCodec = Codec.STRING.comapFlatMap(
 //                name -> {
@@ -144,18 +142,18 @@ public final class ExtraCodecs {
         );
     }
 
-//    public static <T> @NotNull DataResult<T> result(@Nullable T value, @NotNull String message) {
+//    public static <T> DataResult<T> result(@Nullable T value, String message) {
 //        return value == null ? DataResult.error(() -> message) : DataResult.success(value);
 //    }
 //
-//    public static <I, O> @NotNull Function<I, Optional<O>> optional(@NotNull Function<I, O> mapper) {
+//    public static <I, O> Function<I, Optional<O>> optional(Function<I, O> mapper) {
 //        return input -> Optional.ofNullable(mapper.apply(input));
 //    }
 
-    public static <K, V> @NotNull StructCodec<Map<K, V>> dispatchedMap(@NotNull Codec<K> keyCodec, @NotNull Function<K, Codec<V>> valueCodec) {
+    public static <K, V> StructCodec<Map<K, V>> dispatchedMap(Codec<K> keyCodec, Function<K, Codec<V>> valueCodec) {
         return new StructCodec<>() {
             @Override
-            public @NotNull <D> Result<Map<K, V>> decodeFromMap(@NotNull Transcoder<D> coder, Transcoder.@NotNull MapLike<D> map) {
+            public <D> Result<Map<K, V>> decodeFromMap(Transcoder<D> coder, Transcoder.MapLike<D> map) {
                 if (map.isEmpty()) return new Result.Ok<>(Map.of());
 
                 final Map<K, V> decodedMap = new HashMap<>(map.size());
@@ -173,7 +171,7 @@ public final class ExtraCodecs {
             }
 
             @Override
-            public @NotNull <D> Result<D> encodeToMap(@NotNull Transcoder<D> coder, @NotNull Map<K, V> value, Transcoder.@NotNull MapBuilder<D> map) {
+            public <D> Result<D> encodeToMap(Transcoder<D> coder, Map<K, V> value, Transcoder.MapBuilder<D> map) {
                 if (value.isEmpty()) return new Result.Ok<>(map.build());
 
                 for (final Map.Entry<K, V> entry : value.entrySet()) {
@@ -192,14 +190,14 @@ public final class ExtraCodecs {
     }
 
     /// Behaves like Minestom RegistryTaggedUnion, but does not require registries to be present in the codec.
-    public static <T> @NotNull StructCodec<T> ExtRegistryCodec(
-            @NotNull DynamicRegistry<StructCodec<? extends T>> registry,
-            @NotNull Function<T, StructCodec<? extends T>> serializerGetter,
-            @NotNull String key
+    public static <T> StructCodec<T> ExtRegistryCodec(
+            DynamicRegistry<StructCodec<? extends T>> registry,
+            Function<T, StructCodec<? extends T>> serializerGetter,
+            String key
     ) {
         return new StructCodec<T>() {
             @Override
-            public @NotNull <D> Result<T> decodeFromMap(@NotNull Transcoder<D> coder, Transcoder.@NotNull MapLike<D> map) {
+            public <D> Result<T> decodeFromMap(Transcoder<D> coder, Transcoder.MapLike<D> map) {
                 final Result<String> type = map.getValue(key).map(coder::getString);
                 if (!(type instanceof Result.Ok(@KeyPattern String tag)))
                     return type.mapError(e -> key + ": " + e).cast();
@@ -210,7 +208,7 @@ public final class ExtraCodecs {
             }
 
             @Override
-            public @NotNull <D> Result<D> encodeToMap(@NotNull Transcoder<D> coder, @NotNull T value, Transcoder.@NotNull MapBuilder<D> map) {
+            public <D> Result<D> encodeToMap(Transcoder<D> coder, T value, Transcoder.MapBuilder<D> map) {
                 //noinspection unchecked
                 final StructCodec<T> innerCodec = (StructCodec<T>) serializerGetter.apply(value);
                 final RegistryKey<StructCodec<? extends T>> type = registry.getKey(innerCodec);

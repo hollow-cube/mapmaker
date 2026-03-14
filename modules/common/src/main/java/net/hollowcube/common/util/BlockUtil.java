@@ -10,7 +10,6 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.block.BlockUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -71,25 +70,30 @@ public final class BlockUtil {
         ALWAYS_WATERLOGGED_BLOCKS.add(Block.KELP_PLANT.id());
     }
 
+    private BlockUtil() {
+    }
+
     /**
      * Get the possible properties for a block.
      *
      * @param block The block to get the properties of.
      * @return Returns a map with the key being the property and the value being a list of possible values.
      */
-    public static @NotNull @Unmodifiable Map<String, String[]> getBlockProperties(@NotNull Block block) {
+    public static @Unmodifiable Map<String, String[]> getBlockProperties(Block block) {
         return Objects.requireNonNull(BLOCK_PROPERTIES.get(block.id()), "Block was not found in the valid properties map");
     }
 
-    public static @Nullable Material getItem(@NotNull Block block) {
+    // No IntelliJ, get from a map that returns an object CAN return null
+    @SuppressWarnings("DataFlowIssue")
+    public static @Nullable Material getItem(Block block) {
         return BLOCK_TO_ITEM.get(block.id());
     }
 
-    public static @NotNull Block fromStringOld(@NotNull String blockState) {
+    public static Block fromStringOld(String blockState) {
         return ArgumentBlockState.staticParse(blockState);
     }
 
-    public static @NotNull Either<Block, BlockParseResult> fromString(@NotNull String input) {
+    public static Either<Block, BlockParseResult> fromString(String input) {
         final int nbtIndex = input.indexOf("[");
         if (nbtIndex == 0) {
             return Either.right(BlockParseResult.NO_BLOCK_TYPE);
@@ -125,7 +129,7 @@ public final class BlockUtil {
         }
     }
 
-    public static @NotNull String toString(@NotNull Block block) {
+    public static String toString(Block block) {
         var builder = new StringBuilder(block.name());
         if (block.properties().isEmpty()) return builder.toString();
 
@@ -142,11 +146,11 @@ public final class BlockUtil {
         return builder.toString();
     }
 
-    public static boolean isWaterlogged(@NotNull Block block) {
+    public static boolean isWaterlogged(Block block) {
         return "true".equals(block.getProperty("waterlogged")) || ALWAYS_WATERLOGGED_BLOCKS.contains(block.id());
     }
 
-    public static @Nullable Direction getFacing(@NotNull Block block) {
+    public static @Nullable Direction getFacing(Block block) {
         var facing = block.getProperty("facing");
         if (facing == null) return null;
 
@@ -159,7 +163,7 @@ public final class BlockUtil {
         };
     }
 
-    public static Block fromStateIdOrNull(int stateId) {
+    public static @Nullable Block fromStateIdOrNull(int stateId) {
         try {
             return Block.fromStateId(stateId);
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -167,7 +171,7 @@ public final class BlockUtil {
         }
     }
 
-    public static Block fromBlockIdOrNull(int blockId) {
+    public static @Nullable Block fromBlockIdOrNull(int blockId) {
         try {
             return Block.fromBlockId(blockId);
         } catch (ArrayIndexOutOfBoundsException e) {

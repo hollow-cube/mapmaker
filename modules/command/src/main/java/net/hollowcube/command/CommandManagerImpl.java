@@ -14,7 +14,6 @@ import net.hollowcube.command.util.StringReader;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -23,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class CommandManagerImpl implements CommandManager {
-    private final CommandManagerImpl parent;
+    private final @Nullable CommandManagerImpl parent;
     private final RootCommandNode root = new RootCommandNode();
     private final ReflectionImpl reflection = new ReflectionImpl();
 
@@ -36,26 +35,26 @@ public class CommandManagerImpl implements CommandManager {
     }
 
     @Override
-    public @UnknownNullability CommandNode xpath(@NotNull String path, boolean followRedirects) {
+    public @UnknownNullability CommandNode xpath(String path, boolean followRedirects) {
         var result = root.xpath(path, followRedirects);
         if (result != null) return result;
         return parent == null ? null : parent.xpath(path, followRedirects);
     }
 
     @Override
-    public void register(@NotNull String name, @NotNull CommandNode node) {
+    public void register(String name, CommandNode node) {
         root.register(name, node);
     }
 
     @Override
-    public void register(@NotNull String name, @NotNull Consumer<CommandBuilder> func) {
+    public void register(String name, Consumer<CommandBuilder> func) {
         var builder = new CommandBuilder();
         func.accept(builder);
         root.register(name, builder.node());
     }
 
     @Override
-    public void register(@NotNull CommandDsl command) {
+    public void register(CommandDsl command) {
         var builder = new CommandBuilder();
         command.build(builder);
         var node = builder.node();
@@ -67,12 +66,12 @@ public class CommandManagerImpl implements CommandManager {
     }
 
     @Override
-    public void unregister(@NotNull String name) {
+    public void unregister(String name) {
         root.unregister(name);
     }
 
     @Override
-    public @NotNull Suggestion suggest(@NotNull CommandSender sender, @NotNull String input) {
+    public Suggestion suggest(CommandSender sender, String input) {
         var reader = new StringReader(input);
         var context = new SuggestionContext(sender);
         var result = root.suggest(sender, reader, context);
@@ -85,7 +84,7 @@ public class CommandManagerImpl implements CommandManager {
     }
 
     @Override
-    public @NotNull CommandResult execute(@NotNull CommandSender sender, @NotNull String input) {
+    public CommandResult execute(CommandSender sender, String input) {
         var reader = new StringReader(input);
         var context = new CommandContextImpl(sender);
         var result = root.execute(sender, reader, context);
@@ -94,14 +93,14 @@ public class CommandManagerImpl implements CommandManager {
         return result;
     }
 
-    private boolean shouldHide(@NotNull CommandNode node, @NotNull Player player) {
+    private boolean shouldHide(CommandNode node, Player player) {
         if (!node.isConditional()) return false;
 
         return CommandCondition.HIDE == node.condition.test(player, new CommandNode.ConditionContext(player, CommandContext.Pass.BUILD));
     }
 
     @Override
-    public @NotNull DeclareCommandsPacket createCommandPacket(@NotNull Player player) {
+    public DeclareCommandsPacket createCommandPacket(Player player) {
         var nodes = new ArrayList<DeclareCommandsPacket.Node>();
         var root = new DeclareCommandsPacket.Node();
         nodes.add(root);
@@ -145,19 +144,19 @@ public class CommandManagerImpl implements CommandManager {
     }
 
     @Override
-    public @NotNull CommandReflection reflect() {
+    public CommandReflection reflect() {
         return reflection;
     }
 
     private class ReflectionImpl implements CommandReflection {
 
         @Override
-        public @UnknownNullability CommandNode xpath(@NotNull String path, boolean followRedirects) {
+        public @UnknownNullability CommandNode xpath(String path, boolean followRedirects) {
             return root.xpath(path, followRedirects);
         }
 
         @Override
-        public @NotNull Collection<Map.Entry<String, CommandNode>> commands(@NotNull CommandSender sender, boolean includeAliases) {
+        public Collection<Map.Entry<String, CommandNode>> commands(CommandSender sender, boolean includeAliases) {
             var allCommands = new ArrayList<CommandNode.ArgumentPair>();
             if (root.children != null) allCommands.addAll(root.children);
             if (parent != null && parent.root.children != null) allCommands.addAll(parent.root.children);
@@ -179,7 +178,7 @@ public class CommandManagerImpl implements CommandManager {
         }
 
         @Override
-        public @NotNull Collection<Map.Entry<Argument<?>, CommandNode>> children(@NotNull CommandNode node, @NotNull CommandSender sender) {
+        public Collection<Map.Entry<Argument<?>, CommandNode>> children(CommandNode node, CommandSender sender) {
             if (node.children == null) return List.of();
             var commands = new ArrayList<Map.Entry<Argument<?>, CommandNode>>();
             for (var pair : node.children) {

@@ -7,7 +7,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 
 @SuppressWarnings("UnstableApiUsage")
 public class NpcItemModel extends BaseNpcEntity {
-    private BiConsumer<Consumer<Player>, Player> addViewerHook;
+    private @Nullable BiConsumer<Consumer<Player>, Player> addViewerHook;
 
     private boolean isStatic = false;
 
@@ -24,7 +24,7 @@ public class NpcItemModel extends BaseNpcEntity {
         this(UUID.randomUUID());
     }
 
-    public NpcItemModel(@NotNull UUID uuid) {
+    public NpcItemModel(UUID uuid) {
         super(EntityType.ITEM_DISPLAY, uuid);
 
         // Minestom doesnt handle entity sync correctly for display entities, it resets interpolation
@@ -52,11 +52,11 @@ public class NpcItemModel extends BaseNpcEntity {
         getEntityMeta().setViewRange(isStatic ? 10 : 1);
     }
 
-    public void setModel(@NotNull BadSprite sprite) {
+    public void setModel(BadSprite sprite) {
         setModel(Material.STICK, sprite);
     }
 
-    public void setModel(@NotNull Material material, @NotNull BadSprite sprite) {
+    public void setModel(Material material, BadSprite sprite) {
         var meta = getEntityMeta();
         meta.setDisplayContext(ItemDisplayMeta.DisplayContext.FIXED);
         var model = Objects.requireNonNull(sprite.model(), "sprite must have a model");
@@ -64,7 +64,7 @@ public class NpcItemModel extends BaseNpcEntity {
     }
 
     @Override
-    public @NotNull ItemDisplayMeta getEntityMeta() {
+    public ItemDisplayMeta getEntityMeta() {
         return (ItemDisplayMeta) super.getEntityMeta();
     }
 
@@ -77,7 +77,7 @@ public class NpcItemModel extends BaseNpcEntity {
     }
 
     @Override
-    public void updateNewViewer(@NotNull Player player) {
+    public void updateNewViewer(Player player) {
         if (addViewerHook != null) {
             addViewerHook.accept(super::updateNewViewer, player);
         } else {
@@ -86,7 +86,7 @@ public class NpcItemModel extends BaseNpcEntity {
     }
 
     @Override
-    public void updateOldViewer(@NotNull Player player) {
+    public void updateOldViewer(Player player) {
         if (isStatic) return;
 
         super.updateOldViewer(player);

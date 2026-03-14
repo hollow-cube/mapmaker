@@ -9,7 +9,6 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.message.ChatMessageType;
 import net.minestom.server.tag.Tag;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +27,12 @@ public final class ChatAnnouncer {
     private final SessionManager sessionManager;
     private final AnnouncementsConfig config;
 
-    public static void setupAnnouncements(@NotNull ConfigLoaderV3 configLoader, @NotNull SessionManager sessionManager, Shutdowner shutdowner) {
+    public static void setupAnnouncements(ConfigLoaderV3 configLoader, SessionManager sessionManager, Shutdowner shutdowner) {
         var announcer = new ChatAnnouncer(configLoader, sessionManager);
         shutdowner.queue("ChatAnnouncer", announcer::shutdown);
     }
 
-    private ChatAnnouncer(@NotNull ConfigLoaderV3 configLoader, @NotNull SessionManager sessionManager) {
+    private ChatAnnouncer(ConfigLoaderV3 configLoader, SessionManager sessionManager) {
         this.sessionManager = sessionManager;
         this.config = configLoader.get(AnnouncementsConfig.class);
 
@@ -61,9 +60,9 @@ public final class ChatAnnouncer {
         scheduler.scheduleAtFixedRate(announceTask, interval, interval, TimeUnit.SECONDS);
     }
 
-    private @Nullable Announcement selectRandomAnnouncement(@NotNull Player player) {
+    private @Nullable Announcement selectRandomAnnouncement(Player player) {
         var messages = this.config.messages();
-        if (messages.size() == 1) return messages.get(0);
+        if (messages.size() == 1) return messages.getFirst();
 
         var session = this.sessionManager.getSession(player.getUuid().toString());
         if (session == null) {
@@ -92,7 +91,7 @@ public final class ChatAnnouncer {
         return ThreadLocalRandom.current().nextInt(this.config.messages().size());
     }
 
-    private void announce(@NotNull Announcement announcement, @NotNull Player player) {
+    private void announce(Announcement announcement, Player player) {
         if (player.getSettings().chatMessageType() != ChatMessageType.FULL) {
             // Don't send announcements to players with reduced chat settings
             return;
@@ -100,7 +99,7 @@ public final class ChatAnnouncer {
         player.sendMessage(Component.translatable(announcement.key()));
     }
 
-    private boolean isAnnouncementValidForSession(@NotNull Announcement announcement, @NotNull PlayerSession session) {
+    private boolean isAnnouncementValidForSession(Announcement announcement, PlayerSession session) {
         var filters = announcement.filters();
         return filters == null || filters.matches(session);
     }

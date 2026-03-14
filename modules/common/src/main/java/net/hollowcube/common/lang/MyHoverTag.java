@@ -1,6 +1,5 @@
 package net.hollowcube.common.lang;
 
-
 import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.api.BinaryTagHolder;
@@ -12,11 +11,11 @@ import net.kyori.adventure.text.minimessage.internal.parser.node.ElementNode;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.ArgumentQueue;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
+@SuppressWarnings("UnstableApiUsage")
 final class MyHoverTag {
     private static final String HOVER = "hover";
 
@@ -56,7 +55,7 @@ final class MyHoverTag {
     }
 
     interface ActionHandler<V> {
-        @NotNull V parse(final @NotNull ArgumentQueue args, final @NotNull Context ctx) throws ParsingException;
+        V parse(ArgumentQueue args, Context ctx) throws ParsingException;
     }
 
     static final class ShowText implements MyHoverTag.ActionHandler<ElementNode> {
@@ -66,7 +65,7 @@ final class MyHoverTag {
         }
 
         @Override
-        public @NotNull ElementNode parse(final @NotNull ArgumentQueue args, final @NotNull Context ctx) throws ParsingException {
+        public ElementNode parse(ArgumentQueue args, Context ctx) throws ParsingException {
             return LanguageProviderV2.deserializeToTree(args.popOr("show_text action requires a message").value());
         }
     }
@@ -78,7 +77,7 @@ final class MyHoverTag {
         }
 
         @Override
-        public HoverEvent.@NotNull ShowItem parse(final @NotNull ArgumentQueue args, final @NotNull Context ctx) throws ParsingException {
+        public HoverEvent.ShowItem parse(ArgumentQueue args, Context ctx) throws ParsingException {
             try {
                 final Key key = Key.key(args.popOr("Show item hover needs at least an item ID").value());
                 final int count = args.hasNext() ? args.pop().asInt().orElseThrow(() -> ctx.newException("The count argument was not a valid integer")) : 1;
@@ -100,7 +99,7 @@ final class MyHoverTag {
         }
 
         @Override
-        public HoverEvent.@NotNull ShowEntity parse(final @NotNull ArgumentQueue args, final @NotNull Context ctx) throws ParsingException {
+        public HoverEvent.ShowEntity parse(ArgumentQueue args, Context ctx) throws ParsingException {
             try {
                 final Key key = Key.key(args.popOr("Show entity needs a type argument").value());
                 final UUID id = UUID.fromString(args.popOr("Show entity needs an entity UUID").value());

@@ -6,19 +6,19 @@ import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
 
 public record AxiomServerboundHelloPacket(
-        int apiVersion,
-        int dataVersion,
-        int protocolVersion
+    int apiVersion,
+    int dataVersion,
+    int protocolVersion
 ) implements ServerboundModPacket<AxiomServerboundHelloPacket> {
 
     public static final Type<AxiomServerboundHelloPacket> TYPE = Type.of(
-            AxiomAPI.CHANNEL, "hello",
-            NetworkBufferTemplate.template(
-                    NetworkBuffer.VAR_INT, AxiomServerboundHelloPacket::apiVersion,
-                    NetworkBuffer.VAR_INT, AxiomServerboundHelloPacket::dataVersion,
-                    NetworkBuffer.VAR_INT, AxiomServerboundHelloPacket::protocolVersion,
-                    AxiomServerboundHelloPacket::new
-            )
+        AxiomAPI.CHANNEL, "hello",
+        NetworkBufferTemplate.template(
+            NetworkBuffer.VAR_INT, AxiomServerboundHelloPacket::apiVersion,
+            NetworkBuffer.VAR_INT, AxiomServerboundHelloPacket::dataVersion,
+            NetworkBuffer.VAR_INT, AxiomServerboundHelloPacket::protocolVersion,
+            AxiomServerboundHelloPacket::new
+        )
     );
 
     @Override

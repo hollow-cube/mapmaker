@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.hollowcube.mapmaker.type.ServerSprite;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -45,23 +44,23 @@ public class PackContext {
 
         Files.walkFileTree(out.resolve("client"), new FileVisitor<>() {
             @Override
-            public @NotNull FileVisitResult preVisitDirectory(Path dir, @NotNull BasicFileAttributes attrs) throws IOException {
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                 return FileVisitResult.CONTINUE;
             }
 
             @Override
-            public @NotNull FileVisitResult visitFile(Path file, @NotNull BasicFileAttributes attrs) throws IOException {
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 Files.deleteIfExists(file);
                 return FileVisitResult.CONTINUE;
             }
 
             @Override
-            public @NotNull FileVisitResult visitFileFailed(Path file, @NotNull IOException exc) throws IOException {
+            public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
                 return FileVisitResult.CONTINUE;
             }
 
             @Override
-            public @NotNull FileVisitResult postVisitDirectory(Path dir, @Nullable IOException exc) throws IOException {
+            public FileVisitResult postVisitDirectory(Path dir, @Nullable IOException exc) throws IOException {
                 Files.deleteIfExists(dir);
                 return FileVisitResult.CONTINUE;
             }
@@ -91,19 +90,19 @@ public class PackContext {
         this.fontFile = new Gson().fromJson(Files.readString(rpMinecraftBase.resolve("font").resolve("default.json")), JsonObject.class);
     }
 
-    public @NotNull Path resources() {
+    public Path resources() {
         return resources;
     }
 
-    public @NotNull Path out() {
+    public Path out() {
         return out;
     }
 
-    public @NotNull Path vanilla(@NotNull String version) {
+    public Path vanilla(String version) {
         return minecraft.resolve(version);
     }
 
-    public @NotNull Collection<@NotNull String> versions() {
+    public Collection<String> versions() {
         return rpMapmakerVersionsPaths.keySet();
     }
 
@@ -112,7 +111,7 @@ public class PackContext {
     /**
      * Writes a texture and returns a reference to it.
      */
-    public @NotNull String writeTexture(@Nullable String type, @NotNull String name, byte[] data, byte @Nullable [] mcmeta) {
+    public String writeTexture(@Nullable String type, String name, byte[] data, byte @Nullable [] mcmeta) {
         try {
             if (name.endsWith(".png")) name = name.substring(0, name.length() - 4);
             name = minifyId(name);
@@ -133,11 +132,11 @@ public class PackContext {
     /**
      * Writes a texture and returns a reference to it.
      */
-    public @NotNull String writeTexture(@Nullable String type, @NotNull String name, byte[] data) {
+    public String writeTexture(@Nullable String type, String name, byte[] data) {
         return writeTexture(type, name, data, null);
     }
 
-    public @NotNull String writeModel(@NotNull String name, @NotNull JsonObject model) throws IOException {
+    public String writeModel(String name, JsonObject model) throws IOException {
         name = minifyId(name);
 
         Path path = rpMapmakerBase.resolve("models").resolve("item").resolve(name + ".json");
@@ -147,11 +146,11 @@ public class PackContext {
         return mapmakerRefBase + "item/" + name;
     }
 
-    public void addFontCharacter(@NotNull JsonObject definition) {
+    public void addFontCharacter(JsonObject definition) {
         fontFile.getAsJsonArray("providers").add(definition);
     }
 
-    public void addItemModel(@NotNull String name, @NotNull JsonObject model) throws IOException {
+    public void addItemModel(String name, JsonObject model) throws IOException {
         var minName = minifyId(name);
 
         Path path = rpMapmakerBase.resolve("items").resolve(minName + ".json");
@@ -162,7 +161,7 @@ public class PackContext {
         addServerSprite(new ServerSprite(name, clientPath));
     }
 
-    public void addItemModels(@NotNull String name, Map<@NotNull String, @NotNull JsonObject> models) throws IOException {
+    public void addItemModels(String name, Map<String, JsonObject> models) throws IOException {
         var minName = minifyId(name);
         var fileName = minName + ".json";
 
@@ -177,7 +176,7 @@ public class PackContext {
         addServerSprite(new ServerSprite(name, clientPath));
     }
 
-    public void addServerSprite(@NotNull ServerSprite sprite) {
+    public void addServerSprite(ServerSprite sprite) {
         serverSprites.add(sprite.toJson());
     }
 
@@ -210,7 +209,7 @@ public class PackContext {
         return rpMinecraftBase;
     }
 
-    private @NotNull String minifyId(@NotNull String id) {
+    private String minifyId(String id) {
         if (!minify) {
             // Need to flatten to avoid issues with atlases
             return id.replace("/", "_");

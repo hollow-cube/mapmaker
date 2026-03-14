@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.util;
 
 import com.google.gson.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -10,11 +9,14 @@ import java.util.Map;
 public final class Templates {
     private static final Map<String, JsonElement> TEMPLATES = new HashMap<>();
 
-    public static @NotNull JsonObject applyObject(@NotNull String name, @NotNull Map<String, Object> context) {
+    private Templates() {
+    }
+
+    public static JsonObject applyObject(String name, Map<String, Object> context) {
         return apply(loadTemplate(name), context).getAsJsonObject();
     }
 
-    private static @NotNull JsonElement apply(@NotNull JsonElement template, @NotNull Map<String, Object> context) {
+    private static JsonElement apply(JsonElement template, Map<String, Object> context) {
         return switch (template) {
             case JsonObject obj -> {
                 var result = new JsonObject();
@@ -50,7 +52,7 @@ public final class Templates {
         };
     }
 
-    private static @NotNull JsonElement loadTemplate(@NotNull String name) {
+    private static JsonElement loadTemplate(String name) {
         return TEMPLATES.computeIfAbsent(name, _ -> {
             try (var is = Templates.class.getResourceAsStream("/templates/" + name + ".json")) {
                 if (is == null) throw new IllegalArgumentException("Template not found: " + name);

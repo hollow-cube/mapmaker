@@ -7,7 +7,6 @@ import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.RelativeFlags;
-import org.jetbrains.annotations.NotNull;
 
 public class HubSpawnCommand extends CommandDsl {
 
@@ -19,7 +18,7 @@ public class HubSpawnCommand extends CommandDsl {
         addSyntax(playerOnly(this::handleSpawn));
     }
 
-    private void handleSpawn(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleSpawn(Player player, CommandContext context) {
         player.teleport(HubMapWorld.spawnPointFor(player), Vec.ZERO, null, RelativeFlags.NONE);
     }
 }

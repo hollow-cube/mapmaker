@@ -7,15 +7,14 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
-import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 
 public class ChannelCommand extends AbstractChatCommand {
 
     private ChannelCommand(
-        @NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages,
-        @NotNull String channel, @NotNull String name, @NotNull String... aliases
+        SessionManager sessions, MapService maps, ChatMessageListener messages,
+        String channel, String name, String... aliases
     ) {
         super(sessions, maps, messages, name, aliases);
 
@@ -28,30 +27,29 @@ public class ChannelCommand extends AbstractChatCommand {
     }
 
     public static class Global extends ChannelCommand {
-        public Global(@NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages) {
+        public Global(SessionManager sessions, MapService maps, ChatMessageListener messages) {
             super(sessions, maps, messages, ClientChatMessageData.CHANNEL_GLOBAL, "gc");
         }
     }
 
     public static class Local extends ChannelCommand {
-        public Local(@NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages) {
+        public Local(SessionManager sessions, MapService maps, ChatMessageListener messages) {
             super(sessions, maps, messages, ClientChatMessageData.CHANNEL_LOCAL, "lc");
         }
     }
 
     public static class Reply extends ChannelCommand {
-        public Reply(@NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages) {
+        public Reply(SessionManager sessions, MapService maps, ChatMessageListener messages) {
             super(sessions, maps, messages, ClientChatMessageData.CHANNEL_REPLY, "reply", "r");
         }
     }
 
     public static class Staff extends ChannelCommand {
-        public Staff(@NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages) {
+        public Staff(SessionManager sessions, MapService maps, ChatMessageListener messages) {
             super(sessions, maps, messages, ClientChatMessageData.CHANNEL_STAFF, "sc");
 
             setCondition(staffPerm(Permission.GENERIC_STAFF));
         }
     }
-
 
 }

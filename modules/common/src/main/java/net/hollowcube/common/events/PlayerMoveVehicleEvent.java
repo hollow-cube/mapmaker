@@ -8,16 +8,15 @@ import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.event.trait.PlayerInstanceEvent;
 import net.minestom.server.network.packet.client.play.ClientVehicleMovePacket;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 public class PlayerMoveVehicleEvent implements PlayerInstanceEvent, CancellableEvent {
 
-    private final @NotNull Player player;
+    private final Player player;
     private Pos newPosition;
 
     private boolean cancelled;
 
-    public PlayerMoveVehicleEvent(@NotNull Player player, @NotNull Pos newPosition) {
+    public PlayerMoveVehicleEvent(Player player, Pos newPosition) {
         this.player = player;
         this.newPosition = newPosition;
     }
@@ -27,7 +26,7 @@ public class PlayerMoveVehicleEvent implements PlayerInstanceEvent, CancellableE
      *
      * @return the new position
      */
-    public @NotNull Pos getNewPosition() {
+    public Pos getNewPosition() {
         return newPosition;
     }
 
@@ -36,7 +35,7 @@ public class PlayerMoveVehicleEvent implements PlayerInstanceEvent, CancellableE
      *
      * @param newPosition the new target position
      */
-    public void setNewPosition(@NotNull Pos newPosition) {
+    public void setNewPosition(Pos newPosition) {
         this.newPosition = newPosition;
     }
 
@@ -51,13 +50,13 @@ public class PlayerMoveVehicleEvent implements PlayerInstanceEvent, CancellableE
     }
 
     @Override
-    public @NotNull Player getPlayer() {
+    public Player getPlayer() {
         return this.player;
     }
 
     @ApiStatus.Internal
     @SuppressWarnings("UnstableApiUsage")
-    public static void post(@NotNull ClientVehicleMovePacket packet, @NotNull Player player) {
+    public static void post(ClientVehicleMovePacket packet, Player player) {
         var event = new PlayerMoveVehicleEvent(player, packet.position());
         EventDispatcher.call(event);
         if (event.isCancelled()) return;

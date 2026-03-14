@@ -5,7 +5,6 @@ import net.hollowcube.schem.reader.SchematicReader;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Instance;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -31,7 +30,7 @@ public class CountdownUtil {
         }
     }
 
-    public static void applySchematic(@NotNull Instance instance, int position, int number) {
+    public static void applySchematic(Instance instance, int position, int number) {
         var schematic = NUMBER_SCHEMATICS[number];
         var offset = NUMBER_POSITIONS[position];
         schematic.forEachBlock((pos, block) -> instance.setBlock(offset.add(pos), block));

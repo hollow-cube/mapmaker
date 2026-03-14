@@ -10,12 +10,12 @@ public record AxiomClientboundUpdateAvailableDispatchesPacket(
 ) implements AxiomClientboundModPacket<AxiomClientboundUpdateAvailableDispatchesPacket> {
 
     public static final Type<AxiomClientboundUpdateAvailableDispatchesPacket> TYPE = Type.of(
-            AxiomAPI.CHANNEL, "update_available_dispatch_sends",
-            NetworkBufferTemplate.template(
-                    NetworkBuffer.VAR_INT, AxiomClientboundUpdateAvailableDispatchesPacket::add,
-                    NetworkBuffer.VAR_INT, AxiomClientboundUpdateAvailableDispatchesPacket::max,
-                    AxiomClientboundUpdateAvailableDispatchesPacket::new
-            )
+        AxiomAPI.CHANNEL, "update_available_dispatch_sends",
+        NetworkBufferTemplate.template(
+            NetworkBuffer.VAR_INT, AxiomClientboundUpdateAvailableDispatchesPacket::add,
+            NetworkBuffer.VAR_INT, AxiomClientboundUpdateAvailableDispatchesPacket::max,
+            AxiomClientboundUpdateAvailableDispatchesPacket::new
+        )
     );
 
     @Override

@@ -6,7 +6,6 @@ import net.hollowcube.command.CommandExecutor;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.util.CommandCategory;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -16,19 +15,19 @@ public class CommandDsl {
     private final String name;
     private final List<String> aliases;
     // Documentation bits
-    protected CommandCategory category = CommandCategory.DEFAULT;
-    protected String description = null;
-    protected List<String> examples = null;
-    private CommandCondition condition = null;
-    private List<CommandDsl> subcommands = null;
-    private List<Syntax> syntaxes = null;
+    protected @Nullable CommandCategory category = CommandCategory.DEFAULT;
+    protected @Nullable String description = null;
+    protected @Nullable List<String> examples = null;
+    private @Nullable CommandCondition condition = null;
+    private @Nullable List<CommandDsl> subcommands = null;
+    private @Nullable List<Syntax> syntaxes = null;
 
-    public CommandDsl(@NotNull String name, @NotNull String... aliases) {
+    public CommandDsl(String name, String... aliases) {
         this.name = name;
         this.aliases = List.of(aliases);
     }
 
-    public static @NotNull CommandExecutor playerOnly(@NotNull CommandExecutor.PlayerOnly executor) {
+    public static CommandExecutor playerOnly(CommandExecutor.PlayerOnly executor) {
         return (sender, context) -> {
             if (!(sender instanceof Player player)) {
                 sender.sendMessage("Only players can execute this command."); //todo pluggable message I guess
@@ -39,15 +38,15 @@ public class CommandDsl {
         };
     }
 
-    public @NotNull String name() {
+    public String name() {
         return name;
     }
 
-    public @NotNull List<String> aliases() {
+    public List<String> aliases() {
         return aliases;
     }
 
-    public void build(@NotNull CommandBuilder builder) {
+    public void build(CommandBuilder builder) {
         builder.category(category);
         builder.description(description);
         builder.examples(examples);
@@ -84,7 +83,7 @@ public class CommandDsl {
         }
     }
 
-    public void setDescription(@NotNull String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
@@ -96,20 +95,20 @@ public class CommandDsl {
         this.condition = condition;
     }
 
-    public void addSubcommand(@NotNull CommandDsl command) {
+    public void addSubcommand(CommandDsl command) {
         if (subcommands == null) subcommands = new ArrayList<>();
         subcommands.add(command);
     }
 
-    public void addSuggestionSyntax(@NotNull CommandExecutor onSuggestion, @NotNull Argument<?>... args) {
+    public void addSuggestionSyntax(CommandExecutor onSuggestion, Argument<?>... args) {
         addSyntax(null, onSuggestion, args);
     }
 
-    public void addSyntax(@NotNull CommandExecutor executor, @NotNull Argument<?>... args) {
+    public void addSyntax(CommandExecutor executor, Argument<?>... args) {
         addSyntax(executor, null, args);
     }
 
-    public void addSyntax(@Nullable CommandExecutor executor, @Nullable CommandExecutor onSuggestion, @NotNull Argument<?>... args) {
+    public void addSyntax(@Nullable CommandExecutor executor, @Nullable CommandExecutor onSuggestion, Argument<?>... args) {
         if (syntaxes == null) syntaxes = new ArrayList<>();
         syntaxes.add(new Syntax(null, executor, onSuggestion, args));
         syntaxes.sort((a, b) -> Integer.compare(b.args.length, a.args.length));
@@ -117,7 +116,7 @@ public class CommandDsl {
 
     private record Syntax(@Nullable CommandCondition condition, @Nullable CommandExecutor executor,
                           @Nullable CommandExecutor onSuggestion,
-                          @NotNull Argument<?>[] args) {
+                          Argument<?>[] args) {
     }
 
 }

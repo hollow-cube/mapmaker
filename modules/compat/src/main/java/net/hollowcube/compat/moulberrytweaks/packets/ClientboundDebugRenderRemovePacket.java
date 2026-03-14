@@ -5,16 +5,15 @@ import net.hollowcube.compat.moulberrytweaks.MoulberryTweaksAPI;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
-import org.jetbrains.annotations.NotNull;
 
 public record ClientboundDebugRenderRemovePacket(
-        @NotNull Key key
+    Key key
 ) implements ClientboundModPacket<ClientboundDebugRenderRemovePacket> {
     public static final Type<ClientboundDebugRenderRemovePacket> TYPE = Type.of(
-            MoulberryTweaksAPI.DEBUG_RENDER_CHANNEL, "remove",
-            NetworkBufferTemplate.template(
-                    NetworkBuffer.KEY, ClientboundDebugRenderRemovePacket::key,
-                    ClientboundDebugRenderRemovePacket::new)
+        MoulberryTweaksAPI.DEBUG_RENDER_CHANNEL, "remove",
+        NetworkBufferTemplate.template(
+            NetworkBuffer.KEY, ClientboundDebugRenderRemovePacket::key,
+            ClientboundDebugRenderRemovePacket::new)
     );
 
     @Override

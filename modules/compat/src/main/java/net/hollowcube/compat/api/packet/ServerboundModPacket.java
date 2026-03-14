@@ -1,7 +1,6 @@
 package net.hollowcube.compat.api.packet;
 
 import net.minestom.server.network.NetworkBuffer;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
@@ -18,12 +17,12 @@ public interface ServerboundModPacket<T extends ServerboundModPacket<T>>  {
         public static <T extends ServerboundModPacket<T>> ServerboundModPacket.Type<T> of(String namespace, String path, Function<NetworkBuffer, T> reader) {
             var type = new NetworkBuffer.Type<T>() {
                 @Override
-                public void write(@NotNull NetworkBuffer buffer, T value) {
+                public void write(NetworkBuffer buffer, T value) {
                     throw new UnsupportedOperationException("You cannot read a read-only packet type");
                 }
 
                 @Override
-                public T read(@NotNull NetworkBuffer buffer) {
+                public T read(NetworkBuffer buffer) {
                     return reader.apply(buffer);
                 }
             };

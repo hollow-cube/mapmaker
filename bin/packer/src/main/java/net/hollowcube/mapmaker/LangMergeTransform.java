@@ -4,7 +4,6 @@ import com.google.gson.*;
 import de.marhali.json5.Json5;
 import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -26,7 +25,7 @@ public class LangMergeTransform {
     // For example, for a sprite, the value will be the unicode font character of the sprite.
     private final Map<String, String> replacements = new HashMap<>();
 
-    public void init(@NotNull PackContext ctx, @NotNull SpriteTransform sprites) throws IOException {
+    public void init(PackContext ctx, SpriteTransform sprites) throws IOException {
         Json5Object placeholders = json5.parse(Files.readString(ctx.resources().resolve("lang").resolve("placeholders.json5"))).getAsJson5Object();
         for (Map.Entry<String, Json5Element> entry : placeholders.entrySet()) {
             String key = entry.getKey();
@@ -59,7 +58,7 @@ public class LangMergeTransform {
 
     }
 
-    public void process(@NotNull PackContext context) throws IOException {
+    public void process(PackContext context) throws IOException {
         Map<String, String> keySources = new HashMap<>();
         JsonObject result = new JsonObject();
 
@@ -104,7 +103,7 @@ public class LangMergeTransform {
     }
 
     @SuppressWarnings("StringSplitter")
-    private @NotNull JsonElement processValue(@NotNull String translation) {
+    private JsonElement processValue(String translation) {
         StringBuilder result = new StringBuilder();
 
         Pattern pattern = Pattern.compile("\\$(\\w+)");

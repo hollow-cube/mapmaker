@@ -10,11 +10,11 @@ public record AxiomServerboundSetFlySpeedPacket(
 ) implements ServerboundModPacket<AxiomServerboundSetFlySpeedPacket> {
 
     public static final Type<AxiomServerboundSetFlySpeedPacket> TYPE = Type.of(
-            AxiomAPI.CHANNEL, "set_fly_speed",
-            NetworkBufferTemplate.template(
-                    NetworkBuffer.FLOAT, AxiomServerboundSetFlySpeedPacket::speed,
-                    AxiomServerboundSetFlySpeedPacket::new
-            )
+        AxiomAPI.CHANNEL, "set_fly_speed",
+        NetworkBufferTemplate.template(
+            NetworkBuffer.FLOAT, AxiomServerboundSetFlySpeedPacket::speed,
+            AxiomServerboundSetFlySpeedPacket::new
+        )
     );
 
     @Override

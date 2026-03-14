@@ -5,7 +5,6 @@ import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -13,13 +12,13 @@ import java.util.Objects;
 public class ArgumentLiteral extends Argument<String> {
     private final String literal;
 
-    public ArgumentLiteral(@NotNull String literal) {
+    public ArgumentLiteral(String literal) {
         super(literal);
         this.literal = literal;
     }
 
     @Override
-    public @NotNull ParseResult<String> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public ParseResult<String> parse(CommandSender sender, StringReader reader) {
         var compareValue = literal.toLowerCase(Locale.ROOT);
 
         int pos = reader.pos();
@@ -30,7 +29,7 @@ public class ArgumentLiteral extends Argument<String> {
     }
 
     @Override
-    public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
+    public void suggest(CommandSender sender, String raw, Suggestion suggestion) {
         if (literal.toLowerCase(Locale.ROOT).startsWith(raw.toLowerCase(Locale.ROOT))) suggestion.add(literal);
     }
 
@@ -53,7 +52,7 @@ public class ArgumentLiteral extends Argument<String> {
     }
 
     @Override
-    public DeclareCommandsPacket.@NotNull NodeType getType() {
+    public DeclareCommandsPacket.NodeType getType() {
         return DeclareCommandsPacket.NodeType.LITERAL;
     }
 }

@@ -13,7 +13,6 @@ import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.tag.Tag;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
@@ -30,16 +29,16 @@ public final class AxiomPlayer {
     static final Tag<Boolean> AXIOM_PENDING_ENABLE = Tag.Transient("axiom:pending_enable");
 
     private static final AxiomClientboundEnablePacket.ServerConfig SERVER_CONFIG = new AxiomClientboundEnablePacket.ServerConfig(
-            0x100000, // 1mb,
-            AxiomAPI.BLUEPRINT_VERSION,
-            List.of(), List.of() // Custom Blocks
+        0x100000, // 1mb,
+        AxiomAPI.BLUEPRINT_VERSION,
+        List.of(), List.of() // Custom Blocks
     );
 
-    public static boolean isEnabled(@NotNull Player player) {
+    public static boolean isEnabled(Player player) {
         return player.getTag(AXIOM_ENABLED) == Boolean.TRUE;
     }
 
-    public static void setEnabled(@NotNull Player player, boolean enabled) {
+    public static void setEnabled(Player player, boolean enabled) {
         if (getVersion(player) == -1) {
             player.setTag(AXIOM_PENDING_ENABLE, enabled);
         } else {
@@ -47,7 +46,7 @@ public final class AxiomPlayer {
         }
     }
 
-    public static void handlePendingEnable(@NotNull Player player) {
+    public static void handlePendingEnable(Player player) {
         Boolean enable = player.getAndSetTag(AXIOM_PENDING_ENABLE, null);
         if (enable == null) return;
 
@@ -101,15 +100,15 @@ public final class AxiomPlayer {
         EventDispatcher.call(new AxiomEnabledEvent(player, enabled));
     }
 
-    public static int getVersion(@NotNull Player player) {
+    public static int getVersion(Player player) {
         return player.getTag(AXIOM_VERSION);
     }
 
-    public static void setVersion(@NotNull Player player, int version) {
+    public static void setVersion(Player player, int version) {
         player.setTag(AXIOM_VERSION, version);
     }
 
-    public static void updateIgnoredEntities(@NotNull Player player, @NotNull Consumer<Set<UUID>> updater) {
+    public static void updateIgnoredEntities(Player player, Consumer<Set<UUID>> updater) {
         var entities = player.updateAndGetTag(AXIOM_IGNORED_ENTITIES, it -> {
             updater.accept(it);
             return it;

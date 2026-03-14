@@ -17,7 +17,6 @@ import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.Material;
 import net.minestom.server.sound.SoundEvent;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -30,7 +29,7 @@ public class LauncherFeature implements HubFeature {
     private final LauncherEntity right = new LauncherEntity();
 
     @Override
-    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
+    public void load(MapServer server, HubMapWorld world) {
         left.setInstance(world.instance(), new Pos(-14.5, 37.5, 8.5, 180, 0));
         right.setInstance(world.instance(), new Pos(-14.5, 37.5, -7.5, 180, 0));
     }
@@ -67,7 +66,7 @@ public class LauncherFeature implements HubFeature {
         }
 
         @Override
-        public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
+        public CompletableFuture<Void> setInstance(Instance instance, Pos spawnPosition) {
             this.bb = new BoundingBox(SIZE.x(), SIZE.y(), SIZE.z(), MIN.add(spawnPosition));
             return super.setInstance(instance, spawnPosition);
         }
@@ -138,7 +137,7 @@ public class LauncherFeature implements HubFeature {
             }
         }
 
-        private void setState(@NotNull State state) {
+        private void setState(State state) {
             this.state = state;
         }
     }

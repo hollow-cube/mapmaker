@@ -25,6 +25,7 @@ import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -41,13 +42,13 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
     private static final double BASE_OFFSET = 1.8;
     private static final int ENTITY_UPDATE_INTERVAL = 5; // Seconds
 
-    private MapServer server;
+    private @UnknownNullability MapServer server; // lateinit
 
     private final NpcItemModel[] edgeEntities = new NpcItemModel[5];
     private int entityHeightTarget = 0;
 
     @Override
-    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
+    public void load(MapServer server, HubMapWorld world) {
         this.server = server;
 
         edgeEntities[0] = new NpcItemModel();
@@ -89,29 +90,29 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
         server.scheduler().submitTask(this::entityUpdate, ExecutionType.TICK_START);
     }
 
-    private void handleCreateMapsClick(@NotNull Player player) {
+    private void handleCreateMapsClick(Player player) {
         server.guiController().show(player, CreateMaps::new);
     }
 
-    private void handleBestMapsClick(@NotNull Player player) {
+    private void handleBestMapsClick(Player player) {
         var browser = new MapBrowserView(server.api(), server.mapService(), server.bridge(), false);
         Panel.open(player, browser);
         browser.simpleSort(MapBrowserView.SortPreset.BEST);
     }
 
-    private void handleQualityClick(@NotNull Player player) {
+    private void handleQualityClick(Player player) {
         var browser = new MapBrowserView(server.api(), server.mapService(), server.bridge(), false);
         Panel.open(player, browser);
         browser.simpleSort(MapBrowserView.SortPreset.QUALITY);
     }
 
-    private void handleNewMapsClick(@NotNull Player player) {
+    private void handleNewMapsClick(Player player) {
         var browser = new MapBrowserView(server.api(), server.mapService(), server.bridge(), false);
         Panel.open(player, browser);
         browser.simpleSort(MapBrowserView.SortPreset.NEW);
     }
 
-    private void handleSearchMapsClick(@NotNull Player player) {
+    private void handleSearchMapsClick(Player player) {
         var browser = new MapBrowserView(server.api(), server.mapService(), server.bridge(), false);
         Panel.open(player, browser);
         // Set initial sort preset to best, else pagination doesn't initialize properly
@@ -119,11 +120,11 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
         browser.openSearchInput();
     }
 
-    private void appendInteractor(@NotNull Entity entity, int width, int height, @NotNull Consumer<Player> onClick, boolean isCenter) {
+    private void appendInteractor(Entity entity, int width, int height, Consumer<Player> onClick, boolean isCenter) {
         var entityId = entity.getEntityId();
         var interactionEntity = new InteractionEntity(width, height, 40, new InteractionEntity.Target() {
             @Override
-            public void beginHover(@NotNull Player player) {
+            public void beginHover(Player player) {
                 // Enable glowing - This works because we never set any other flags in this set, otherwise
                 // it would be overridden when sending other metadata changes.
                 player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(
@@ -133,7 +134,7 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
             }
 
             @Override
-            public void endHover(@NotNull Player player) {
+            public void endHover(Player player) {
                 // Disable glowing - See above for how/why this is functional.
                 if (player.getPlayerConnection().getServerState() == ConnectionState.PLAY) {
                     player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(
@@ -144,14 +145,14 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
             }
 
             @Override
-            public void onRightClick(@NotNull Player player) {
+            public void onRightClick(Player player) {
                 onClick.accept(player);
             }
         });
         interactionEntity.setInstance(entity.getInstance(), entity.getPosition());
     }
 
-    private @NotNull TaskSchedule entityUpdate() {
+    private TaskSchedule entityUpdate() {
         int updateInterval = (int) (20 * 0.5) * ENTITY_UPDATE_INTERVAL;
 
         {   // Spawn some particles around the center entity

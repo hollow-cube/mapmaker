@@ -3,7 +3,6 @@ package net.hollowcube.common.math;
 import net.hollowcube.common.util.FloatIndexer;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
 
 public class Mat4 {
     private float m00;
@@ -50,7 +49,7 @@ public class Mat4 {
         this.m33 = floats[15];
     }
 
-    public Mat4(@NotNull FloatIndexer floats) {
+    public Mat4(FloatIndexer floats) {
         this.m00 = floats.get(0);
         this.m01 = floats.get(4);
         this.m02 = floats.get(8);
@@ -133,91 +132,91 @@ public class Mat4 {
         return this.m33;
     }
 
-    public @NotNull Mat4 m00(float m00) {
+    public Mat4 m00(float m00) {
         this.m00 = m00;
         return this;
     }
 
-    public @NotNull Mat4 m01(float m01) {
+    public Mat4 m01(float m01) {
         this.m01 = m01;
         return this;
     }
 
-    public @NotNull Mat4 m02(float m02) {
+    public Mat4 m02(float m02) {
         this.m02 = m02;
         return this;
     }
 
-    public @NotNull Mat4 m03(float m03) {
+    public Mat4 m03(float m03) {
         this.m03 = m03;
         return this;
     }
 
-    public @NotNull Mat4 m10(float m10) {
+    public Mat4 m10(float m10) {
         this.m10 = m10;
         return this;
     }
 
-    public @NotNull Mat4 m11(float m11) {
+    public Mat4 m11(float m11) {
         this.m11 = m11;
         return this;
     }
 
-    public @NotNull Mat4 m12(float m12) {
+    public Mat4 m12(float m12) {
         this.m12 = m12;
         return this;
     }
 
-    public @NotNull Mat4 m13(float m13) {
+    public Mat4 m13(float m13) {
         this.m13 = m13;
         return this;
     }
 
-    public @NotNull Mat4 m20(float m20) {
+    public Mat4 m20(float m20) {
         this.m20 = m20;
         return this;
     }
 
-    public @NotNull Mat4 m21(float m21) {
+    public Mat4 m21(float m21) {
         this.m21 = m21;
         return this;
     }
 
-    public @NotNull Mat4 m22(float m22) {
+    public Mat4 m22(float m22) {
         this.m22 = m22;
         return this;
     }
 
-    public @NotNull Mat4 m23(float m23) {
+    public Mat4 m23(float m23) {
         this.m23 = m23;
         return this;
     }
 
-    public @NotNull Mat4 m30(float m30) {
+    public Mat4 m30(float m30) {
         this.m30 = m30;
         return this;
     }
 
-    public @NotNull Mat4 m31(float m31) {
+    public Mat4 m31(float m31) {
         this.m31 = m31;
         return this;
     }
 
-    public @NotNull Mat4 m32(float m32) {
+    public Mat4 m32(float m32) {
         this.m32 = m32;
         return this;
     }
 
-    public @NotNull Mat4 m33(float m33) {
+    public Mat4 m33(float m33) {
         this.m33 = m33;
         return this;
     }
 
-    public @NotNull Vec translation() {
+    public Vec translation() {
         return new Vec(m30, m31, m32);
     }
 
-    public @NotNull SVD svdDecompose() {
+    public SVD svdDecompose() {
         return SVD.decompose(this);
     }
 

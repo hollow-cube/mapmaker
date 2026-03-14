@@ -6,15 +6,15 @@ import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
 
 public record AxiomServerboundSetNoPhysicalTriggerPacket(
-        boolean noPhysicalTrigger
+    boolean noPhysicalTrigger
 ) implements ServerboundModPacket<AxiomServerboundSetNoPhysicalTriggerPacket> {
 
     public static final Type<AxiomServerboundSetNoPhysicalTriggerPacket> TYPE = Type.of(
-            AxiomAPI.CHANNEL, "set_no_physical_trigger",
-            NetworkBufferTemplate.template(
-                    NetworkBuffer.BOOLEAN, AxiomServerboundSetNoPhysicalTriggerPacket::noPhysicalTrigger,
-                    AxiomServerboundSetNoPhysicalTriggerPacket::new
-            )
+        AxiomAPI.CHANNEL, "set_no_physical_trigger",
+        NetworkBufferTemplate.template(
+            NetworkBuffer.BOOLEAN, AxiomServerboundSetNoPhysicalTriggerPacket::noPhysicalTrigger,
+            AxiomServerboundSetNoPhysicalTriggerPacket::new
+        )
     );
 
     @Override

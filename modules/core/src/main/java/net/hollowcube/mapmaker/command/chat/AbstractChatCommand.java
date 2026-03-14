@@ -9,7 +9,6 @@ import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -19,10 +18,9 @@ public abstract class AbstractChatCommand extends CommandDsl {
     private final MapService maps;
     private final ChatMessageListener messages;
 
-
     public AbstractChatCommand(
-        @NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages,
-        @NotNull String name, @NotNull String... aliases
+        SessionManager sessions, MapService maps, ChatMessageListener messages,
+        String name, String... aliases
     ) {
         super(name, aliases);
 
@@ -31,11 +29,7 @@ public abstract class AbstractChatCommand extends CommandDsl {
         this.messages = messages;
     }
 
-    protected void handle(
-        @NotNull Player player,
-        @NotNull String channel,
-        @NotNull String message
-    ) {
+    protected void handle(Player player, String channel, String message) {
         String currentMapId = null;
         if (message.contains("[map]")) {
             var currentMap = MiscFunctionality.getCurrentMap(this.sessions, this.maps, player);
@@ -54,6 +48,5 @@ public abstract class AbstractChatCommand extends CommandDsl {
             currentMapId, messageSeed
         ));
     }
-
 
 }

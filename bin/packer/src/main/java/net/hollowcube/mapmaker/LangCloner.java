@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -30,7 +28,7 @@ public class LangCloner {
             "zh_cn", "zh_hk", "zh_tw", "zlm_arab"
     );
 
-    public void process(@NotNull PackContext context) throws IOException {
+    public void process(PackContext context) throws IOException {
         var langDir = context.rpMinecraftBase().resolve("lang");
         Files.createDirectories(langDir);
 

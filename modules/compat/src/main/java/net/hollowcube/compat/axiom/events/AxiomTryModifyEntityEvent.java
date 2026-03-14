@@ -5,7 +5,6 @@ import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -18,24 +17,24 @@ import java.util.UUID;
  */
 public final class AxiomTryModifyEntityEvent implements AxiomEvent {
 
-    private final @NotNull Player player;
-    private final @NotNull Entity entity;
+    private final Player player;
+    private final Entity entity;
     private final @Nullable Pos pos;
 
     private final @Nullable CompoundBinaryTag nbt;
 
-    private final @NotNull AxiomServerboundModifyEntitiesPacket.PassengerChange change;
-    private final @NotNull List<UUID> passengers;
+    private final AxiomServerboundModifyEntitiesPacket.PassengerChange change;
+    private final List<UUID> passengers;
 
     private boolean handled;
 
     public AxiomTryModifyEntityEvent(
-            @NotNull Player player,
-            @NotNull Entity entity,
-            @Nullable Pos pos,
-            @Nullable CompoundBinaryTag nbt,
-            @NotNull AxiomServerboundModifyEntitiesPacket.PassengerChange change,
-            @NotNull List<UUID> passengers
+        Player player,
+        Entity entity,
+        @Nullable Pos pos,
+        @Nullable CompoundBinaryTag nbt,
+        AxiomServerboundModifyEntitiesPacket.PassengerChange change,
+        List<UUID> passengers
     ) {
         this.player = player;
         this.entity = entity;
@@ -46,11 +45,11 @@ public final class AxiomTryModifyEntityEvent implements AxiomEvent {
     }
 
     @Override
-    public @NotNull Player player() {
+    public Player player() {
         return player;
     }
 
-    public @NotNull Entity entity() {
+    public Entity entity() {
         return entity;
     }
 
@@ -62,11 +61,11 @@ public final class AxiomTryModifyEntityEvent implements AxiomEvent {
         return nbt;
     }
 
-    public @NotNull AxiomServerboundModifyEntitiesPacket.PassengerChange change() {
+    public AxiomServerboundModifyEntitiesPacket.PassengerChange change() {
         return change;
     }
 
-    public @NotNull List<UUID> passengers() {
+    public List<UUID> passengers() {
         return passengers;
     }
 

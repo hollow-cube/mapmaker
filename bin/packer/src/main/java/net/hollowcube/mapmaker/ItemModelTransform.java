@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 public class ItemModelTransform {
     private static final Json5 json5 = new Json5();
 
-    public void process(@NotNull PackContext ctx) throws IOException {
+    public void process(PackContext ctx) throws IOException {
         Path fontBaseDir = ctx.resources().resolve("item_models");
         try (Stream<Path> fontFileSet = Files.walk(fontBaseDir)) {
             List<Path> files = fontFileSet.sorted(Comparator.comparing(Path::toString)).toList();
@@ -115,7 +115,7 @@ public class ItemModelTransform {
         }
     }
 
-    private @NotNull JsonObject transform3dModel(@NotNull JsonObject model, @NotNull String tex3d) {
+    private JsonObject transform3dModel(JsonObject model, String tex3d) {
         JsonObject textures = model.getAsJsonObject("textures");
         String oldTextureName = findReplaceableTexture(textures);
 
@@ -125,7 +125,7 @@ public class ItemModelTransform {
         return model;
     }
 
-    private String findReplaceableTexture(@NotNull JsonObject textures) {
+    private String findReplaceableTexture(JsonObject textures) {
         if (textures.size() != 2)
             throw new IllegalArgumentException("textures must have exactly 2 entries");
         if (!textures.has("particle"))

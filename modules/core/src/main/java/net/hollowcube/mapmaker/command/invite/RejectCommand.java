@@ -5,12 +5,12 @@ import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 public class RejectCommand extends AbstractInviteServiceCommand {
 
-    public RejectCommand(@NotNull PlayerInviteService inviteService, @NotNull PlayerService playerService,
-                         @NotNull SessionManager sessionManager) {
+    public RejectCommand(
+        PlayerInviteService inviteService, PlayerService playerService, SessionManager sessionManager
+    ) {
         super("reject", inviteService, playerService, sessionManager, "The player to reject", false);
 
         description = "Denies any pending request or invite from a player";
@@ -19,11 +19,11 @@ public class RejectCommand extends AbstractInviteServiceCommand {
     }
 
     @Override
-    void handle(@NotNull Player sender, @NotNull String targetId, @NotNull String targetName) {
+    void handle(Player sender, String targetId, String targetName) {
         this.inviteService.reject(sender, targetId);
     }
 
-    private void handleDefaultReject(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleDefaultReject(Player player, CommandContext context) {
         this.inviteService.reject(player);
     }
 }

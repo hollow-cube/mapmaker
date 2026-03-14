@@ -104,7 +104,7 @@ public enum AxiomPermission {
     ;
 
     public static final NetworkBuffer.Type<AxiomPermission> TYPE = NetworkBuffer.STRING
-            .transform(AxiomPermission::fromString, AxiomPermission::id);
+        .transform(AxiomPermission::fromString, AxiomPermission::id);
 
     private final String id;
 

@@ -10,7 +10,6 @@ import net.minestom.server.network.packet.client.play.ClientSetRecipeBookStatePa
 import net.minestom.server.network.packet.server.play.RecipeBookAddPacket;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.inventory.PlayerInventoryUtils;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -21,7 +20,7 @@ public class PlayerBackpack {
 
     public static final Tag<PlayerBackpack> TAG = Tag.Transient("mapmaker:player_backpack");
 
-    public static @NotNull PlayerBackpack fromPlayer(@NotNull Player player) {
+    public static PlayerBackpack fromPlayer(Player player) {
         return player.getTag(TAG);
     }
 
@@ -34,18 +33,18 @@ public class PlayerBackpack {
     private final Player player;
     private final EnumMap<BackpackItem, Integer> contents = new EnumMap<>(BackpackItem.class);
 
-    public PlayerBackpack(@NotNull Player player) {
+    public PlayerBackpack(Player player) {
         this.player = player;
     }
 
-    public int getQuantity(@NotNull BackpackItem item) {
+    public int getQuantity(BackpackItem item) {
         return contents.getOrDefault(item, 0);
     }
 
     /**
      * Does NOT send to the player automatically.
      */
-    public void update(@NotNull JsonObject networkObject) {
+    public void update(JsonObject networkObject) {
         for (var item : BackpackItem.values()) {
             var key = item.name().toLowerCase();
             if (networkObject.has(key)) {
@@ -58,27 +57,29 @@ public class PlayerBackpack {
      * Sends the backpack to the player
      */
     public void refresh() {
-        var recipeBookPacket = new RecipeBookAddPacket(Arrays.stream(BackpackItem.values())
-                .map(cm -> cm.getRecipeBookEntry(getQuantity(cm))).toList(), true);
+        var recipeBookPacket = new RecipeBookAddPacket(
+            Arrays.stream(BackpackItem.values())
+                .map(cm -> cm.getRecipeBookEntry(getQuantity(cm))).toList(), true
+        );
         player.sendPacket(recipeBookPacket);
 
         // TODO: 1.21.2 (RecipeBookSettingsPacket)
 //        var playerData = PlayerDataV2.fromPlayer(player);
 //        var unlockRecipesPacket = new UnlockRecipesPacket(0,
-//                playerData.getSetting(IS_BACKPACK_OPEN), playerData.getSetting(IS_BACKPACK_FILTERED),
-//                false, false,
-//                false, false,
-//                false, false,
-//                Arrays.stream(BackpackItem.values()).map(BackpackItem::recipeBookId).toList(), List.of());
+//            playerData.getSetting(IS_BACKPACK_OPEN), playerData.getSetting(IS_BACKPACK_FILTERED),
+//            false, false,
+//            false, false,
+//            false, false,
+//            Arrays.stream(BackpackItem.values()).map(BackpackItem::recipeBookId).toList(), List.of());
 //        player.sendPacket(unlockRecipesPacket);
     }
 
-    private static void handleRecipeBookClick(@NotNull ClientPlaceRecipePacket packet, @NotNull Player player) {
+    private static void handleRecipeBookClick(ClientPlaceRecipePacket packet, Player player) {
         // Remove the ghost recipe
         player.getInventory().setItemStack(PlayerInventoryUtils.CRAFT_RESULT, RecipeBookHack.BLANK_ITEM_CRAFTABLE);
     }
 
-    private static void handleSetRecipeBookState(@NotNull ClientSetRecipeBookStatePacket packet, @NotNull Player player) {
+    private static void handleSetRecipeBookState(ClientSetRecipeBookStatePacket packet, Player player) {
         if (packet.bookType() != ClientSetRecipeBookStatePacket.BookType.CRAFTING) return;
 
         var playerData = PlayerData.fromPlayer(player);

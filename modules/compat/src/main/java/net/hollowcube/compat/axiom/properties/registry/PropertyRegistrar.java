@@ -9,11 +9,11 @@ import net.kyori.adventure.key.Key;
 public interface PropertyRegistrar {
 
     <T> WorldProperty<T> register(
-            PropertyCategory category,
-            Key id,
-            String name, boolean localized,
-            WidgetType<T> widget,
-            T initialValue,
-            PropertyDispatcher dispatcher
+        PropertyCategory category,
+        Key id,
+        String name, boolean localized,
+        WidgetType<T> widget,
+        T initialValue,
+        PropertyDispatcher dispatcher
     );
 }

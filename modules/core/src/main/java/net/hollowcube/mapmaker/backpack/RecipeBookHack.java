@@ -6,7 +6,6 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.TooltipDisplay;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,14 +25,14 @@ public class RecipeBookHack {
     private static final List<String> orderedIds;
 
     public static final ItemStack BLANK_ITEM_CRAFTABLE = ItemStack.builder(Material.STICK)
-            .set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, Set.of()))
+        .set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, Set.of()))
             // TODO(1.21.4)
-//            .set(ItemComponent.CUSTOM_MODEL_DATA, 1)
+//        .set(ItemComponent.CUSTOM_MODEL_DATA, 1)
             // If this has a name it no longer matches in recipes
-//            .displayName(Component.text(""))
-            .build();
+//        .displayName(Component.text(""))
+        .build();
     public static final ItemStack BLANK_ITEM_UNCRAFTABLE = ItemStack.of(Material.GLOWSTONE_DUST)
-            .with(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, Set.of()));
+        .with(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, Set.of()));
 
     /**
      * Returns a namespace ID for a recipe with the given ordering index.
@@ -41,7 +40,7 @@ public class RecipeBookHack {
      * @param index The index, must be between 0 and {@link #MAX_IDS}, inclusive.
      * @return The namespace ID.
      */
-    public static @NotNull String getOrderedId(int index) {
+    public static String getOrderedId(int index) {
         Check.argCondition(index < 0 || index >= MAX_IDS, "Index out of bounds");
         return orderedIds.get(index);
     }

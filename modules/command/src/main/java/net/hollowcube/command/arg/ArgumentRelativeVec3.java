@@ -10,18 +10,17 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.NetworkBuffer;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 public class ArgumentRelativeVec3 extends Argument<Point> {
 
-    ArgumentRelativeVec3(@NotNull String id) {
+    ArgumentRelativeVec3(String id) {
         super(id);
     }
 
     @Override
-    public @NotNull ParseResult<Point> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public ParseResult<Point> parse(CommandSender sender, StringReader reader) {
         var origin = (sender instanceof Player player) ? player.getPosition() : Vec.ZERO;
         var x = readCoordinate(origin.x(), reader);
         if (x == null) return partial();
@@ -32,7 +31,7 @@ public class ArgumentRelativeVec3 extends Argument<Point> {
         return new ParseResult.Success<>(new Vec(x, y, z));
     }
 
-    private @Nullable Double readCoordinate(double origin, @NotNull StringReader reader) {
+    private @Nullable Double readCoordinate(double origin, StringReader reader) {
         var word = reader.readWord(WordType.GREEDY);
         var isRelative = !word.isEmpty() && word.charAt(0) == '~';
         if (isRelative) word = word.substring(1);
@@ -46,7 +45,7 @@ public class ArgumentRelativeVec3 extends Argument<Point> {
     }
 
     @Override
-    public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
+    public void suggest(CommandSender sender, String raw, Suggestion suggestion) {
         if (sender instanceof Player player) {
             var targetBlockPosition = PlayerUtil.getTargetBlock(player, PlayerUtil.DEFAULT_PLACEMENT_DISTANCE, false);
             var coordinateIndex = raw.split(" ").length;
@@ -60,7 +59,7 @@ public class ArgumentRelativeVec3 extends Argument<Point> {
         super.suggest(sender, raw, suggestion);
     }
 
-    private void suggest(@NotNull Suggestion suggestion, @Range(from = 1, to = 4) int coordinateIndex, @NotNull String raw, @NotNull Object first, @NotNull Object second, @NotNull Object third) {
+    private void suggest(Suggestion suggestion, @Range(from = 1, to = 4) int coordinateIndex, String raw, Object first, Object second, Object third) {
         if (coordinateIndex == 1) {
             suggestion.add("%s".formatted(first));
             suggestion.add("%s %s".formatted(first, second));
@@ -69,11 +68,12 @@ public class ArgumentRelativeVec3 extends Argument<Point> {
             suggestion.add("%s %s".formatted(raw, third));
         }
     }
-    @Override
-    public void properties(@NotNull NetworkBuffer buffer) {}
 
     @Override
-    public @NotNull ArgumentParserType argumentType() {
+    public void properties(NetworkBuffer buffer) {}
+
+    @Override
+    public ArgumentParserType argumentType() {
         return ArgumentParserType.VEC3;
     }
 }

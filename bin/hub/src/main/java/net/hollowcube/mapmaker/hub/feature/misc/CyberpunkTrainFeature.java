@@ -12,7 +12,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.item.Material;
 import net.minestom.server.timer.TaskSchedule;
-import org.jetbrains.annotations.NotNull;
 
 @AutoService(HubFeature.class)
 public class CyberpunkTrainFeature implements HubFeature {
@@ -33,7 +32,7 @@ public class CyberpunkTrainFeature implements HubFeature {
     private boolean moving = false;
 
     @Override
-    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
+    public void load(MapServer server, HubMapWorld world) {
         trainFront.setModel(Material.STICK, BadSprite.require("train_front"));
         trainFront.getEntityMeta().setScale(new Vec(4));
         trainFront.getEntityMeta().setBrightness(15, 15);
@@ -63,7 +62,7 @@ public class CyberpunkTrainFeature implements HubFeature {
         server.scheduler().submitTask(this::trainUpdate);
     }
 
-    private @NotNull TaskSchedule trainUpdate() {
+    private TaskSchedule trainUpdate() {
         if (moving) {
             moving = false;
             trainFront.editEntityMeta(meta -> {

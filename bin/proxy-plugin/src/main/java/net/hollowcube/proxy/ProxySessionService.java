@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -25,12 +24,12 @@ public class ProxySessionService {
     private final Logger logger;
     private final String url;
 
-    public ProxySessionService(@NotNull Logger logger, @NotNull String url) {
+    public ProxySessionService(Logger logger, String url) {
         this.logger = logger;
         this.url = String.format("%s/v3/internal/session", url);
     }
 
-    public @NotNull JsonObject createSession(@NotNull String id, @NotNull SessionCreateRequest body) throws SessionCreationDeniedError {
+    public JsonObject createSession(String id, SessionCreateRequest body) throws SessionCreationDeniedError {
         logger.info("creating new session for {} ({}) from {}", id, body.username(), body.ip());
         var reqBody = GSON.toJson(body);
         var req = HttpRequest.newBuilder()
@@ -53,7 +52,7 @@ public class ProxySessionService {
         }
     }
 
-    public void deleteSession(@NotNull String id) {
+    public void deleteSession(String id) {
         logger.info("deleting session for {}", id);
         var req = HttpRequest.newBuilder()
                 .method("DELETE", HttpRequest.BodyPublishers.noBody())
@@ -77,17 +76,17 @@ public class ProxySessionService {
         private final String type;
         private final Component reason;
 
-        public SessionCreationDeniedError(@NotNull String type, @NotNull String reason) {
+        public SessionCreationDeniedError(String type, String reason) {
             super(reason);
             this.type = type;
             this.reason = MiniMessage.miniMessage().deserialize(reason);
         }
 
-        public @NotNull String type() {
+        public String type() {
             return type;
         }
 
-        public @NotNull Component reason() {
+        public Component reason() {
             return reason;
         }
     }

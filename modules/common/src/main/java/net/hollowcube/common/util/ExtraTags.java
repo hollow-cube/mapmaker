@@ -11,7 +11,6 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.registry.RegistryTranscoder;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagSerializer;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -23,14 +22,14 @@ public final class ExtraTags {
     private ExtraTags() {
     }
 
-    public static @NotNull Tag<@NotNull Key> Key(@NotNull String key) {
+    public static Tag<Key> Key(String key) {
         return Tag.String(key).map(
                 str -> parseKey(str, null),
                 Key::asString
         );
     }
 
-    public static @NotNull Tag<Vec> VecAsList(@NotNull String key) {
+    public static Tag<Vec> VecAsList(String key) {
         return Tag.Double(key).list().map(entries -> {
             double x = 0, y = 0, z = 0;
             if (entries.size() >= 1) x = entries.get(0);
@@ -40,8 +39,7 @@ public final class ExtraTags {
         }, vec -> List.of(vec.x(), vec.y(), vec.z()));
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    public static <T> Tag<T> DataComponent(@NotNull String name, @NotNull DataComponent<T> component) {
+    public static <T> Tag<T> DataComponent(String name, DataComponent<T> component) {
         Supplier<Transcoder<BinaryTag>> factory = () -> new RegistryTranscoder<>(Transcoder.NBT, MinecraftServer.process());
         return Tag.NBT(name).map(
                 tag -> component.decode(factory.get(), tag).orElseThrow(),
@@ -50,7 +48,7 @@ public final class ExtraTags {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    public static <T> Tag<T> MappedView(@NotNull Tag<T> tag, @NotNull UnaryOperator<T> mapper) {
+    public static <T> Tag<T> MappedView(Tag<T> tag, UnaryOperator<T> mapper) {
         return Tag.View(TagSerializer.fromCompound(
                 compound -> mapper.apply(tag.read(compound)),
                 value -> {

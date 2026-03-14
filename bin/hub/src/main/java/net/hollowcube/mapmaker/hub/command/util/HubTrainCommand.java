@@ -20,6 +20,7 @@ import net.minestom.server.item.Material;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
@@ -33,7 +34,7 @@ public class HubTrainCommand extends CommandDsl {
     private final ArgumentEntity players = Argument.Entity("player").onlyPlayers(true);
     private final Scheduler scheduler;
 
-    public HubTrainCommand(@NotNull Scheduler scheduler) {
+    public HubTrainCommand(Scheduler scheduler) {
         super("train");
         this.scheduler = scheduler;
 
@@ -44,7 +45,7 @@ public class HubTrainCommand extends CommandDsl {
         addSyntax(playerOnly(this::handleTrainAttack), type, players);
     }
 
-    private void handleTrainAttack(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleTrainAttack(Player player, CommandContext context) {
         Consumer<Player> callback = switch (context.get(type).toLowerCase(Locale.ROOT)) {
             case "kick" -> target -> target.kick(Component.text("Ran over by a train.", NamedTextColor.RED));
             default -> target -> target.sendMessage(Component.text("The train has spared you.", NamedTextColor.GRAY));
@@ -65,9 +66,9 @@ public class HubTrainCommand extends CommandDsl {
         private final double distanceFromPlayer = 30; // How far the train travels
         private final int windupDelay = 20; // How many ticks before the train charges the player
         private final int trainActive = 20; // How many ticks the train will move (and be visible) for
-        private Vec trainDirection;
+        private @Nullable Vec trainDirection;
 
-        Train(@NotNull Player target, @NotNull Consumer<Player> callback) {
+        Train(Player target, Consumer<Player> callback) {
             this.target = target;
             this.callback = callback;
             NpcItemModel trainFront = new NpcItemModel();

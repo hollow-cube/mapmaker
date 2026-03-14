@@ -1,7 +1,5 @@
 package net.hollowcube.common.lang;
 
-import org.jetbrains.annotations.NotNull;
-
 public enum GenericMessages implements MessagesBase {
     COMMAND_PLAYER_ONLY("command.generic.player_only"),
     COMMAND_UNKNOWN_ERROR("command.generic.unknown_error"),
@@ -20,7 +18,7 @@ public enum GenericMessages implements MessagesBase {
     }
 
     @Override
-    public @NotNull String translationKey() {
+    public String translationKey() {
         return translationKey;
     }
 }

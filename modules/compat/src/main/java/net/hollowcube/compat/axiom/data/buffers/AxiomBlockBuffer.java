@@ -11,14 +11,13 @@ import net.hollowcube.compat.axiom.AxiomAPI;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
 public record AxiomBlockBuffer(
-        @NotNull Long2ObjectMap<Either<Block, Block[]>> updates,
-        @NotNull Long2ObjectMap<Short2ObjectMap<AxiomBlockEntityData>> blockEntities
+    Long2ObjectMap<Either<@Nullable Block, @Nullable Block[]>> updates,
+    Long2ObjectMap<Short2ObjectMap<AxiomBlockEntityData>> blockEntities
 ) implements AxiomBuffer {
 
     private static final long EOD = 0b1000000000000000000000000010000000000000000000000000100000000000L;
@@ -41,7 +40,7 @@ public record AxiomBlockBuffer(
         this.updates.put(index, Either.left(block));
     }
 
-    private void addBlocks(long index, Block[] blocks) {
+    private void addBlocks(long index, @Nullable Block[] blocks) {
         this.updates.put(index, Either.right(Objects.requireNonNull(blocks)));
     }
 
@@ -109,11 +108,11 @@ public record AxiomBlockBuffer(
         return blockBuffer;
     }
 
-    private static Block[] read(long[] data, int bits, Int2ObjectFunction<@Nullable Block> getter) {
+    private static @Nullable Block[] read(long[] data, int bits, Int2ObjectFunction<@Nullable Block> getter) {
         int dataSectionLength = (int) Math.ceil(Math.floor(64d / bits));
         long mask = (1L << bits) - 1L;
 
-        Block[] blocks = new Block[4096];
+        @Nullable Block[] blocks = new Block[4096];
 
         for (int i = 0; i < blocks.length; i++) {
             int index = i / dataSectionLength;

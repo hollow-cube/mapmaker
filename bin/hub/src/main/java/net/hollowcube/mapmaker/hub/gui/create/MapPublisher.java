@@ -13,14 +13,12 @@ import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNullByDefault;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-@NotNullByDefault
 final class MapPublisher {
 
     private final MapService mapService;

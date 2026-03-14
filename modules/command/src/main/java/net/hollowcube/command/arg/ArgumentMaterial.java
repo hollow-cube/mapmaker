@@ -6,7 +6,6 @@ import net.hollowcube.command.util.WordType;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.item.Material;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 import java.util.Set;
@@ -16,12 +15,12 @@ public class ArgumentMaterial extends Argument<Material> {
     private static final Set<Key> MATERIAL_IDS = Material.values().stream()
             .map(Material::key).collect(Collectors.toUnmodifiableSet());
 
-    ArgumentMaterial(@NotNull String id) {
+    ArgumentMaterial(String id) {
         super(id);
     }
 
     @Override
-    public @NotNull ParseResult<Material> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public ParseResult<Material> parse(CommandSender sender, StringReader reader) {
         var word = reader.readWord(WordType.GREEDY).toLowerCase(Locale.ROOT);
         if (!Key.parseable(word))
             return syntaxError("not a material: " + word);
@@ -38,7 +37,7 @@ public class ArgumentMaterial extends Argument<Material> {
     }
 
     @Override
-    public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
+    public void suggest(CommandSender sender, String raw, Suggestion suggestion) {
         raw = raw.toLowerCase(Locale.ROOT);
         for (var materialId : MATERIAL_IDS) {
             if (materialId.asString().startsWith(raw) || materialId.value().startsWith(raw))

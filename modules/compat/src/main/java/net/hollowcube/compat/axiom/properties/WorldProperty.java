@@ -5,7 +5,6 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 public final class WorldProperty<T> {
 
@@ -18,11 +17,11 @@ public final class WorldProperty<T> {
 
     @ApiStatus.Internal
     public WorldProperty(
-            Key id,
-            String name, boolean localized,
-            WidgetType<T> widget,
-            T initialValue,
-            PropertyDispatcher dispatcher
+        Key id,
+        String name, boolean localized,
+        WidgetType<T> widget,
+        T initialValue,
+        PropertyDispatcher dispatcher
     ) {
         this.id = id;
         this.name = name;
@@ -41,7 +40,7 @@ public final class WorldProperty<T> {
     }
 
     @ApiStatus.Internal
-    public void write(@NotNull Player player, @NotNull NetworkBuffer buffer) {
+    public void write(Player player, NetworkBuffer buffer) {
         buffer.write(NetworkBuffer.KEY, this.id);
         buffer.write(NetworkBuffer.STRING, this.name);
         buffer.write(NetworkBuffer.BOOLEAN, this.localized);
@@ -49,7 +48,7 @@ public final class WorldProperty<T> {
         buffer.write(NetworkBuffer.BYTE_ARRAY, NetworkBuffer.makeArray(this.widget.type().codec(), this.dispatcher.get(player, this)));
     }
 
-    public void update(@NotNull Player player, byte[] data) {
+    public void update(Player player, byte[] data) {
         T value = this.widget.type().codec().read(NetworkBuffer.wrap(data, 0, data.length));
         this.dispatcher.set(player, this, value);
     }

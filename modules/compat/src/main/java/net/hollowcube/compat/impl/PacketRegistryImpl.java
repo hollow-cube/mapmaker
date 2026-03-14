@@ -20,8 +20,8 @@ import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
+import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,12 +34,12 @@ import java.util.function.BiConsumer;
 @ApiStatus.Internal
 public final class PacketRegistryImpl implements PacketRegistry {
 
-    private static final @NotNull Tag<Boolean> HAS_SENT_WARNING = Tag.<Boolean>Transient("mod_compat:sent_unsupported_mods_warning").defaultValue(false);
+    private static final Tag<Boolean> HAS_SENT_WARNING = Tag.<Boolean>Transient("mod_compat:sent_unsupported_mods_warning").defaultValue(false);
 
     private static final String REGISTER_CHANNEL = "minecraft:register";
     private static final String UNREGISTER_CHANNEL = "minecraft:unregister";
     private static final Logger log = LoggerFactory.getLogger(PacketRegistryImpl.class);
-    private static PacketRegistryImpl INSTANCE;
+    private static @UnknownNullability PacketRegistryImpl INSTANCE; // lateinit singleton
 
     private final Map<String, ServerboundModPacket.Type<?>> serverbound = new ConcurrentHashMap<>();
     private final Map<String, ClientboundModPacket.Type<?>> clientbound = new ConcurrentHashMap<>();

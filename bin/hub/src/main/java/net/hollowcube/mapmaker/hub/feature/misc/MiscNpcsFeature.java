@@ -13,7 +13,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.entity.PlayerSkin;
-import org.jetbrains.annotations.NotNull;
 
 @AutoService(HubFeature.class)
 @SuppressWarnings("UnstableApiUsage")
@@ -21,7 +20,7 @@ public class MiscNpcsFeature implements HubFeature {
     private static final Pos PLAYTIME_NPC_POS = new Pos(50, 37, 0.5, 90, 0);
 
     @Override
-    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
+    public void load(MapServer server, HubMapWorld world) {
         world.instance().eventNode().addChild(NpcHandler.EVENT_NODE);
 
         var skin = new PlayerSkin(
@@ -33,7 +32,7 @@ public class MiscNpcsFeature implements HubFeature {
         playtimeNpc.setHandler(this::handlePlaytimeClick);
     }
 
-    private void handlePlaytimeClick(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {
+    private void handlePlaytimeClick(Player player, BaseNpcEntity npc, PlayerHand hand, boolean isLeftClick) {
         if (hand != PlayerHand.MAIN || isLeftClick) return;
 
         var playerData = PlayerData.fromPlayer(player);

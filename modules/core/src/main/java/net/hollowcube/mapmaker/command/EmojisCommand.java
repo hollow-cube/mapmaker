@@ -6,7 +6,6 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -26,7 +25,7 @@ public class EmojisCommand extends CommandDsl {
         addSyntax((sender, ignored) -> sender.sendMessage(emojiList));
     }
 
-    private static @NotNull Component buildMessage() {
+    private static Component buildMessage() {
         TextComponent.Builder publicMsg = Component.text(), hypercubeMsg = Component.text();
         publicMsg.append(LanguageProviderV2.translateMultiMerged("command.emojis.header.public", List.of())).appendNewline();
         hypercubeMsg.append(LanguageProviderV2.translateMultiMerged("command.emojis.header.hypercube", List.of())).appendNewline();

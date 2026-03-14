@@ -1,7 +1,7 @@
 package net.hollowcube.common;
 
 import net.minestom.server.MinecraftServer;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -15,11 +15,11 @@ public interface ServerRuntime {
 
     // Server info
 
-    default @NotNull String version() {
+    default String version() {
         return "unknown";
     }
 
-    default @NotNull String commit() {
+    default String commit() {
         return "dev";
     }
 
@@ -27,11 +27,11 @@ public interface ServerRuntime {
     /// Only relevant for map-per-server deployments. Will be "multi" for multi-map servers.
     ///
     /// Not an enum because this should not be used for any logic, just an indicator.
-    default @NotNull String size() {
+    default String size() {
         return "unknown";
     }
 
-    default @NotNull String shortCommit() {
+    default String shortCommit() {
         if (commit().length() < 7)
             return commit();
         return commit().substring(0, 7);
@@ -44,9 +44,9 @@ public interface ServerRuntime {
      * @implNote The default value is a consistent random string.
      * In a deployment it should be overridden with a real hostname value
      */
-    default @NotNull String hostname() {
+    default String hostname() {
         class Holder {
-            static String hostname = null;
+            static @Nullable String hostname = null;
         }
         if (Holder.hostname == null) {
             try {
@@ -59,7 +59,7 @@ public interface ServerRuntime {
     }
 
 
-    default @NotNull String resourcePackSha1() {
+    default String resourcePackSha1() {
         return "dev";
     }
 
@@ -69,18 +69,18 @@ public interface ServerRuntime {
 
     // Dependency info
 
-    default @NotNull String minestom() {
+    default String minestom() {
         return "unknown";
     }
 
     /**
      * Gets the current runtime. Server binaries must implement this interface through the SPI mechanism.
      */
-    static @NotNull ServerRuntime getRuntime() {
+    static ServerRuntime getRuntime() {
         // Cursed yikes code, but it does work :)
         // I wanted an excuse to use this weird feature of classes inside methods, and it does make a clean api here.
         class Holder {
-            static ServerRuntime runtime = null;
+            static @Nullable ServerRuntime runtime = null;
         }
         if (Holder.runtime == null) {
             Holder.runtime = ServiceLoader.load(ServerRuntime.class)

@@ -2,7 +2,6 @@ package net.hollowcube.compat.axiom.events;
 
 import net.hollowcube.compat.axiom.data.buffers.AxiomBuffer;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
@@ -13,33 +12,29 @@ import java.util.UUID;
  */
 public final class AxiomApplyBufferEvent implements AxiomEvent {
 
-    private final @NotNull Player player;
+    private final Player player;
 
-    private final @NotNull UUID id;
-    private final @NotNull AxiomBuffer buffer;
+    private final UUID id;
+    private final AxiomBuffer buffer;
 
     private boolean handled;
 
-    public AxiomApplyBufferEvent(
-            @NotNull Player player,
-            @NotNull UUID id,
-            @NotNull AxiomBuffer buffer
-    ) {
+    public AxiomApplyBufferEvent(Player player, UUID id, AxiomBuffer buffer) {
         this.player = player;
         this.id = id;
         this.buffer = buffer;
     }
 
     @Override
-    public @NotNull Player player() {
+    public Player player() {
         return player;
     }
 
-    public @NotNull UUID id() {
+    public UUID id() {
         return id;
     }
 
-    public @NotNull AxiomBuffer buffer() {
+    public AxiomBuffer buffer() {
         return buffer;
     }
 

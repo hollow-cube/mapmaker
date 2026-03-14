@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import de.marhali.json5.Json5;
 import de.marhali.json5.Json5Object;
 import de.marhali.json5.Json5Options;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,11 +20,11 @@ public class DynamicDataTransform {
 
     private final String name;
 
-    public DynamicDataTransform(@NotNull String name) {
+    public DynamicDataTransform(String name) {
         this.name = name;
     }
 
-    public void process(@NotNull PackContext ctx) throws IOException {
+    public void process(PackContext ctx) throws IOException {
         JsonObject entries = new JsonObject();
         ctx.dynamicData.add(name, entries);
 

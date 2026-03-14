@@ -16,12 +16,12 @@ import java.util.Locale;
 public final class DevServerBridge implements ServerBridge {
     private final DevServer server;
 
-    public DevServerBridge(@NotNull DevServer server) {
+    public DevServerBridge(DevServer server) {
         this.server = server;
     }
 
     @Override
-    public void joinMap(@NotNull Player player, @NotNull JoinConfig joinConfig) {
+    public void joinMap(Player player, JoinConfig joinConfig) {
         FutureUtil.assertThread();
         var playerId = PlayerData.fromPlayer(player).id();
         var map = server.mapService().getMap(playerId, joinConfig.mapId());
@@ -37,11 +37,11 @@ public final class DevServerBridge implements ServerBridge {
     }
 
     @Override
-    public void joinHub(@NotNull Player player) {
+    public void joinHub(Player player) {
         joinMapInternal(player, HubServer.HUB_MAP_DATA.id(), JoinMapState.PLAYING);
     }
 
-    private void joinMapInternal(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState) {
+    private void joinMapInternal(Player player, String mapId, JoinMapState joinMapState) {
         var playerId = PlayerData.fromPlayer(player).id();
 
         server.addPendingJoin(playerId, mapId, joinMapState.name().toLowerCase(Locale.ROOT));

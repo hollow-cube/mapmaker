@@ -8,7 +8,7 @@ import java.util.UUID;
 public record ClearAnnotationAction() implements AnnotationAction {
 
     public static final NetworkBuffer.Type<ClearAnnotationAction> SERIALIZER = NetworkBufferTemplate.template(
-            ClearAnnotationAction::new
+        ClearAnnotationAction::new
     );
 
 }

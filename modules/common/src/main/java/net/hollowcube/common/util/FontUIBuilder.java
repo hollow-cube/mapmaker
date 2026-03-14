@@ -6,7 +6,6 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +30,7 @@ public class FontUIBuilder {
      * @param slot   The slot to draw it at
      * @return This object, mutated by the parameters
      */
-    public @NotNull FontUIBuilder draw(@NotNull BadSprite sprite, int slot) {
+    public FontUIBuilder draw(BadSprite sprite, int slot) {
         int offset = sprite.offsetX() + (slot * 18); // absolute offset of this char
         appendRaw(FontUtil.computeOffset(offset - pos));
         appendRaw(String.valueOf(sprite.fontChar()));
@@ -39,14 +38,14 @@ public class FontUIBuilder {
         return this;
     }
 
-    public @NotNull FontUIBuilder drawInPlace(@NotNull BadSprite sprite) {
+    public FontUIBuilder drawInPlace(BadSprite sprite) {
         appendRaw(FontUtil.computeOffset(sprite.offsetX()));
         appendRaw(String.valueOf(sprite.fontChar()));
         pos += sprite.offsetX() + sprite.width() + 1 - sprite.rightOffset();
         return this;
     }
 
-    public @NotNull FontUIBuilder unsafeOffset(int delta) {
+    public FontUIBuilder unsafeOffset(int delta) {
         this.pos += delta;
         return this;
     }
@@ -54,47 +53,47 @@ public class FontUIBuilder {
     /**
      * Moves to this absolute position
      */
-    public @NotNull FontUIBuilder pos(int pos) {
+    public FontUIBuilder pos(int pos) {
         appendRaw(FontUtil.computeOffset(pos - this.pos));
         this.pos = pos;
         return this;
     }
 
-    public @NotNull FontUIBuilder offset(int amount) {
+    public FontUIBuilder offset(int amount) {
         appendRaw(FontUtil.computeOffset(amount));
         this.pos += amount;
         return this;
     }
 
-    public void append(@NotNull String rawText) {
+    public void append(String rawText) {
         append(rawText, FontUtil.measureText(rawText));
     }
 
-    public void append(@NotNull String rawText, int length) {
+    public void append(String rawText, int length) {
         appendRaw(rawText);
         this.pos += length;
     }
 
-    public void append(@NotNull String font, @NotNull String rawText) {
+    public void append(String font, String rawText) {
         append(FontUtil.rewrite(font, rawText), FontUtil.measureText(font, rawText));
     }
 
-    public @NotNull FontUIBuilder pushColor(@NotNull TextColor color) {
+    public FontUIBuilder pushColor(TextColor color) {
         this.colorStack.add(color);
         return this;
     }
 
-    public @NotNull FontUIBuilder popColor() {
+    public FontUIBuilder popColor() {
         this.colorStack.remove(this.colorStack.size() - 1);
         return this;
     }
 
-    public @NotNull FontUIBuilder pushShadowColor(@NotNull ShadowColor shadowColor) {
+    public FontUIBuilder pushShadowColor(ShadowColor shadowColor) {
         this.shadowColorStack.add(shadowColor);
         return this;
     }
 
-    public @NotNull FontUIBuilder popShadowColor() {
+    public FontUIBuilder popShadowColor() {
         this.shadowColorStack.remove(this.shadowColorStack.size() - 1);
         return this;
     }
@@ -109,22 +108,21 @@ public class FontUIBuilder {
         }
     }
 
-    public @NotNull Component build() {
+    public Component build() {
         return build(false);
     }
-
 
     public void tempReset() {
         appendRaw(FontUtil.computeOffset(-pos));
         pos = 0;
     }
 
-    public @NotNull Component build(boolean reset) {
+    public Component build(boolean reset) {
         if (reset) pos(0);
         return builder.build();
     }
 
-    public void appendRaw(@NotNull String text) {
+    public void appendRaw(String text) {
         var color = colorStack.isEmpty() ? NamedTextColor.WHITE : colorStack.get(colorStack.size() - 1);
         var shadowColor = shadowColorStack.isEmpty() ? null : shadowColorStack.get(shadowColorStack.size() - 1);
         builder.append(Component.text(text, color).shadowColor(shadowColor));

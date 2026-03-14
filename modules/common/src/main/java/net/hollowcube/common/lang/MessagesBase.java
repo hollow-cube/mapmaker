@@ -6,24 +6,23 @@ import net.kyori.adventure.text.TranslationArgument;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public interface MessagesBase extends ComponentLike {
 
-    @NotNull String translationKey();
+    String translationKey();
 
-    default @NotNull Component with(@NotNull Object... args) {
+    default Component with(Object... args) {
         return Component.translatable(translationKey(), asArgs(args));
     }
 
-    default @NotNull Component with(@NotNull List<Component> args) {
+    default Component with(List<Component> args) {
         return Component.translatable(translationKey(), args);
     }
 
-    default @NotNull Component asError(@Nullable String traceId, @NotNull Object... args) {
+    default Component asError(@Nullable String traceId, Object... args) {
         var base = Component.text("■ ", TextColor.color(0xFF2D2D));
         if (traceId != null) {
             base = base.clickEvent(ClickEvent.copyToClipboard(traceId))
@@ -33,11 +32,11 @@ public interface MessagesBase extends ComponentLike {
     }
 
     @Override
-    default @NotNull Component asComponent() {
+    default Component asComponent() {
         return Component.translatable(translationKey());
     }
 
-    static @NotNull List<ComponentLike> asArgs(Object... args) {
+    static List<ComponentLike> asArgs(Object... args) {
         if (args.length == 0) return List.of();
         var componentArgs = new ComponentLike[args.length];
         for (int i = 0; i < args.length; i++) {

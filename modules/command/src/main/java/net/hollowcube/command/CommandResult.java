@@ -1,14 +1,13 @@
 package net.hollowcube.command;
 
 import net.hollowcube.command.arg.Argument;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public sealed interface CommandResult {
 
     record Success() implements CommandResult {}
 
-    record Denied(@NotNull CommandNode node) implements CommandResult {}
+    record Denied(CommandNode node) implements CommandResult {}
 
     record SyntaxError(int start, @Nullable Argument<?> arg, @Nullable String message) implements CommandResult {}
 
@@ -18,27 +17,27 @@ public sealed interface CommandResult {
 
     // Factories
 
-    static @NotNull CommandResult.Success success() {
+    static CommandResult.Success success() {
         return new Success();
     }
 
-    static @NotNull CommandResult.Denied denied(@NotNull CommandNode node) {
+    static CommandResult.Denied denied(CommandNode node) {
         return new Denied(node);
     }
 
-    static @NotNull CommandResult.SyntaxError syntaxError(int start, @Nullable Argument<?> arg) {
+    static CommandResult.SyntaxError syntaxError(int start, @Nullable Argument<?> arg) {
         return new SyntaxError(start, arg, null);
     }
 
-    static @NotNull CommandResult.SyntaxError syntaxError(int start, @Nullable Argument<?> arg, @Nullable String message) {
+    static CommandResult.SyntaxError syntaxError(int start, @Nullable Argument<?> arg, @Nullable String message) {
         return new SyntaxError(start, arg, message);
     }
 
-    static @NotNull CommandResult.ExecutionError execError(@NotNull Throwable cause) {
+    static CommandResult.ExecutionError execError(Throwable cause) {
         return new ExecutionError(cause);
     }
 
-    static @NotNull CommandResult.NotFound notFound() {
+    static CommandResult.NotFound notFound() {
         return new NotFound();
     }
 

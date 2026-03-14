@@ -8,7 +8,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.RelativeFlags;
 
-@SuppressWarnings("UnstableApiUsage")
 public abstract class RelativePointStructCodec<P extends Point, T extends RelativePoint<P>> implements StructCodec<T> {
 
     public static final StructCodec<RelativeVec> VEC = new VecImpl();

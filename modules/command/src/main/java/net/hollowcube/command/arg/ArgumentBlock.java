@@ -8,8 +8,6 @@ import net.hollowcube.common.util.Either;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.instance.block.Block;
-import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.NonNull;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -17,16 +15,16 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class ArgumentBlock extends Argument<Block> {
-    private static final Collection<@NonNull Key> BLOCK_IDS = Block.values().stream()
+    private static final Collection<Key> BLOCK_IDS = Block.values().stream()
             .map(Block::key)
             .collect(Collectors.toUnmodifiableSet());
 
-    protected ArgumentBlock(@NotNull String id) {
+    protected ArgumentBlock(String id) {
         super(id);
     }
 
     @Override
-    public @NotNull ParseResult<Block> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public ParseResult<Block> parse(CommandSender sender, StringReader reader) {
         var result = BlockUtil.fromString(reader.readWord(WordType.GREEDY).toLowerCase(Locale.ROOT));
         return switch (result) {
             case Either.Left(var value) -> success(value);
@@ -41,7 +39,7 @@ public class ArgumentBlock extends Argument<Block> {
     }
 
     @Override
-    public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
+    public void suggest(CommandSender sender, String raw, Suggestion suggestion) {
         raw = raw.toLowerCase(Locale.ROOT);
 
         var index = raw.indexOf("[");

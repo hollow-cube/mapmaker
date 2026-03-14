@@ -11,7 +11,6 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
-import org.jetbrains.annotations.NotNull;
 
 public class MapCommand extends CommandDsl {
 
@@ -25,11 +24,11 @@ public class MapCommand extends CommandDsl {
     public final MapDrainCommand drain;
 
     public MapCommand(
-        @NotNull ApiClient api,
-        @NotNull PlayerService playerService,
-        @NotNull MapService mapService,
-        @NotNull ServerBridge bridge,
-        @NotNull JetStreamWrapper jetStream
+        ApiClient api,
+        PlayerService playerService,
+        MapService mapService,
+        ServerBridge bridge,
+        JetStreamWrapper jetStream
     ) {
         super("map");
 
@@ -55,7 +54,7 @@ public class MapCommand extends CommandDsl {
     }
 
     @Override
-    public void build(@NotNull CommandBuilder builder) {
+    public void build(CommandBuilder builder) {
         super.build(builder);
         alter.build(builder);
     }

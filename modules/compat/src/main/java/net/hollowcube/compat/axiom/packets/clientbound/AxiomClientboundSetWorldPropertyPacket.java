@@ -6,25 +6,24 @@ import net.hollowcube.compat.axiom.properties.WorldProperty;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
-import org.jetbrains.annotations.NotNull;
 
 public record AxiomClientboundSetWorldPropertyPacket(
-    @NotNull Key property,
+    Key property,
     int type,
     byte[] data
 ) implements AxiomClientboundModPacket<AxiomClientboundSetWorldPropertyPacket> {
 
     public static final Type<AxiomClientboundSetWorldPropertyPacket> TYPE = Type.of(
-            AxiomAPI.CHANNEL, "set_world_property",
-            NetworkBufferTemplate.template(
-                    ExtraNetworkBuffers.KEY, AxiomClientboundSetWorldPropertyPacket::property,
-                    NetworkBuffer.VAR_INT, AxiomClientboundSetWorldPropertyPacket::type,
-                    NetworkBuffer.BYTE_ARRAY, AxiomClientboundSetWorldPropertyPacket::data,
-                    AxiomClientboundSetWorldPropertyPacket::new
-            )
+        AxiomAPI.CHANNEL, "set_world_property",
+        NetworkBufferTemplate.template(
+            ExtraNetworkBuffers.KEY, AxiomClientboundSetWorldPropertyPacket::property,
+            NetworkBuffer.VAR_INT, AxiomClientboundSetWorldPropertyPacket::type,
+            NetworkBuffer.BYTE_ARRAY, AxiomClientboundSetWorldPropertyPacket::data,
+            AxiomClientboundSetWorldPropertyPacket::new
+        )
     );
 
-    public static <T> AxiomClientboundSetWorldPropertyPacket of(@NotNull WorldProperty<T> property, @NotNull T value) {
+    public static <T> AxiomClientboundSetWorldPropertyPacket of(WorldProperty<T> property, T value) {
         var id = property.id();
         var type = property.widget().id();
         var data = NetworkBuffer.makeArray(property.widget().type().codec(), value);

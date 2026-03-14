@@ -7,7 +7,6 @@ import net.hollowcube.mapmaker.feature.FeatureFlag;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 public class RecapCommand extends CommandDsl {
 
@@ -27,7 +26,7 @@ public class RecapCommand extends CommandDsl {
         addSyntax(playerOnly(this::invoke));
     }
 
-    private void invoke(@NotNull Player player, @NotNull CommandContext context) {
+    private void invoke(Player player, CommandContext context) {
         var recap = this.players.getRecap(player.getUuid().toString(), 2025);
         if (recap != null) {
             player.sendMessage(TranslatableBuilder.of("commands.recap.generated").with(recap).build());

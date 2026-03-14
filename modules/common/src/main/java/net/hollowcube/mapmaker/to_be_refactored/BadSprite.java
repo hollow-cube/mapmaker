@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.to_be_refactored;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -19,11 +18,11 @@ public record BadSprite(char fontChar, @Nullable String model, int width, int of
     private static final Map<String, String> MODEL_ID_MAP;
     private static final Map<String, String> ID_MODEL_MAP;
 
-    public static @NotNull BadSprite require(@NotNull String path) {
+    public static BadSprite require(String path) {
         return Objects.requireNonNull(SPRITE_MAP.get(path), path);
     }
 
-    public static @Nullable String idToModel(@NotNull String id) {
+    public static @Nullable String idToModel(String id) {
         return ID_MODEL_MAP.get(id);
     }
 
@@ -37,7 +36,7 @@ public record BadSprite(char fontChar, @Nullable String model, int width, int of
     }
 
     @Override
-    public @NotNull String model() {
+    public String model() {
         return Objects.requireNonNull(model);
     }
 

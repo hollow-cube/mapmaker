@@ -9,13 +9,12 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.responses.TotpSetupResponse;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 public class TotpCommand extends CommandDsl {
 
     private final PlayerService service;
 
-    public TotpCommand(@NotNull PlayerService service) {
+    public TotpCommand(PlayerService service) {
         super("2fa");
 
         this.service = service;
@@ -34,7 +33,7 @@ public class TotpCommand extends CommandDsl {
         );
     }
 
-    private void onEnable(@NotNull Player player) {
+    private void onEnable(Player player) {
         String playerId = player.getUuid().toString();
         TotpSetupResponse response = this.service.beginTotpSetup(playerId);
         if (response == null) {
@@ -57,7 +56,7 @@ public class TotpCommand extends CommandDsl {
         }
     }
 
-    private void onDisable(@NotNull Player player) {
+    private void onDisable(Player player) {
         String playerId = player.getUuid().toString();
         if (this.service.checkTotp(playerId, null) == PlayerService.TotpResult.NOT_ENABLED) {
             player.sendMessage("You do not have two-factor authentication enabled.");

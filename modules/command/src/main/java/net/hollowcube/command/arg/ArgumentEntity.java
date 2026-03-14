@@ -9,7 +9,6 @@ import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.entity.EntityFinder;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
@@ -21,27 +20,27 @@ public class ArgumentEntity extends Argument<EntityFinder> {
     private boolean onlyPlayers = false;
     private boolean sameWorld = false;
 
-    ArgumentEntity(@NotNull String id) {
+    ArgumentEntity(String id) {
         super(id);
     }
 
-    public @NotNull ArgumentEntity singleEntity(boolean singleEntity) {
+    public ArgumentEntity singleEntity(boolean singleEntity) {
         this.onlySingleEntity = singleEntity;
         return this;
     }
 
-    public @NotNull ArgumentEntity onlyPlayers(boolean onlyPlayers) {
+    public ArgumentEntity onlyPlayers(boolean onlyPlayers) {
         this.onlyPlayers = onlyPlayers;
         return this;
     }
 
-    public @NotNull ArgumentEntity sameWorld(boolean sameWorld) {
+    public ArgumentEntity sameWorld(boolean sameWorld) {
         this.sameWorld = sameWorld;
         return this;
     }
 
     @Override
-    public @NotNull ParseResult<EntityFinder> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public ParseResult<EntityFinder> parse(CommandSender sender, StringReader reader) {
         try {
             var input = reader.readWord(WordType.GREEDY);
             return success(net.minestom.server.command.builder.arguments.minecraft.ArgumentEntity
@@ -52,7 +51,7 @@ public class ArgumentEntity extends Argument<EntityFinder> {
     }
 
     @Override
-    public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
+    public void suggest(CommandSender sender, String raw, Suggestion suggestion) {
         raw = raw.toLowerCase(Locale.ROOT);
 
         // for now, just suggest matching players

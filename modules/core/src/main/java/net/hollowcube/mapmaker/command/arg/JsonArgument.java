@@ -9,7 +9,6 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.util.StringReader;
 import net.minestom.server.command.CommandSender;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.Reader;
 import java.util.Objects;
@@ -18,12 +17,12 @@ public class JsonArgument extends Argument<JsonElement> {
 
     private static final Gson GSON = new Gson();
 
-    protected JsonArgument(@NotNull String id) {
+    protected JsonArgument(String id) {
         super(id);
     }
 
     @Override
-    public @NotNull ParseResult<JsonElement> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public ParseResult<JsonElement> parse(CommandSender sender, StringReader reader) {
         try {
             var jsonReader = new JsonReader(new StringReaderReader(reader));
             jsonReader.setStrictness(Strictness.STRICT);
@@ -33,8 +32,8 @@ public class JsonArgument extends Argument<JsonElement> {
             if (e.getCause() instanceof MalformedJsonException) {
                 // Remove this its useless to the user
                 message = e.getCause().getMessage()
-                        .replace("Use JsonReader.setStrictness(Strictness.LENIENT) to accept ", "")
-                        .replace("\nSee https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json", "");
+                    .replace("Use JsonReader.setStrictness(Strictness.LENIENT) to accept ", "")
+                    .replace("\nSee https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json", "");
             }
             return syntaxError(reader.pos(), message);
         }
@@ -49,7 +48,7 @@ public class JsonArgument extends Argument<JsonElement> {
 
         private final StringReader reader;
 
-        public StringReaderReader(@NotNull StringReader reader) {
+        public StringReaderReader(StringReader reader) {
             this.reader = reader;
         }
 
@@ -59,7 +58,7 @@ public class JsonArgument extends Argument<JsonElement> {
         }
 
         @Override
-        public int read(char @NotNull [] cbuf, int off, int len) {
+        public int read(char[] cbuf, int off, int len) {
             if (reader.canRead()) {
                 Objects.checkFromIndexSize(off, len, cbuf.length);
 

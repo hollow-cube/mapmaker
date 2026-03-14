@@ -22,7 +22,6 @@ import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.network.packet.server.play.AcknowledgeBlockChangePacket;
 import net.minestom.server.network.packet.server.play.ChangeGameStatePacket;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -35,19 +34,19 @@ final class AxiomPacketHandler {
 
     private static final long MAX_ENTITY_PACKET_SIZE = 0x100000L;
 
-    static <T extends ServerboundModPacket<T>> BiConsumer<@NotNull Player, @NotNull T> handle(BiConsumer<@NotNull Player, @NotNull T> handler) {
+    static <T extends ServerboundModPacket<T>> BiConsumer<Player, T> handle(BiConsumer<Player, T> handler) {
         return (player, packet) -> {
             if (AxiomPlayer.isEnabled(player)) handler.accept(player, packet);
         };
     }
 
-    static <T extends ServerboundModPacket<T>> BiConsumer<@NotNull Player, @NotNull T> disabled(@Nullable String message) {
+    static <T extends ServerboundModPacket<T>> BiConsumer<Player, T> disabled(@Nullable String message) {
         return (player, _) -> {
             if (AxiomPlayer.isEnabled(player) && message != null) player.sendMessage(message);
         };
     }
 
-    static void onHello(@NotNull Player player, @NotNull AxiomServerboundHelloPacket packet) {
+    static void onHello(Player player, AxiomServerboundHelloPacket packet) {
         if (packet.apiVersion() < AxiomAPI.MIN_API_VERSION) {
             player.sendMessage("Incompatible Axiom API version. Please update your mod.");
         } else if (packet.apiVersion() > AxiomAPI.MAX_API_VERSION) {
@@ -61,16 +60,16 @@ final class AxiomPacketHandler {
 
     // Player Operations
 
-    static void onSetFlySpeed(@NotNull Player player, @NotNull AxiomServerboundSetFlySpeedPacket packet) {
+    static void onSetFlySpeed(Player player, AxiomServerboundSetFlySpeedPacket packet) {
         player.setFlyingSpeed(packet.speed());
     }
 
-    static void onTeleport(@NotNull Player player, @NotNull AxiomServerboundTeleportPacket packet) {
+    static void onTeleport(Player player, AxiomServerboundTeleportPacket packet) {
         var playerDimension = player.getInstance().getDimensionName();
         if (!packet.dimension().equals(playerDimension)) {
             PostHog.capture(player.getUuid().toString(), "axiom_teleport_dimension_mismatch", Map.of(
-                    "player_dimension", playerDimension,
-                    "packet_dimension", packet.dimension()
+                "player_dimension", playerDimension,
+                "packet_dimension", packet.dimension()
             ));
             return;
         }
@@ -78,7 +77,7 @@ final class AxiomPacketHandler {
         player.teleport(packet.position());
     }
 
-    static void onSetGameMode(@NotNull Player player, @NotNull AxiomServerboundSetGameModePacket packet) {
+    static void onSetGameMode(Player player, AxiomServerboundSetGameModePacket packet) {
         if (!packet.gameMode().allowFlying()) {
             player.sendPacket(new ChangeGameStatePacket(ChangeGameStatePacket.Reason.CHANGE_GAMEMODE, player.getGameMode().ordinal()));
             return;
@@ -86,7 +85,7 @@ final class AxiomPacketHandler {
         player.setGameMode(packet.gameMode());
     }
 
-    static void onSetWorldProperty(@NotNull Player player, @NotNull AxiomServerboundSetWorldPropertyPacket packet) {
+    static void onSetWorldProperty(Player player, AxiomServerboundSetWorldPropertyPacket packet) {
         new AxiomClientboundAckWorldPropertyPacket(packet.sequence()).send(player);
         try {
             var property = PropertyRegistry.getProperty(packet.id());
@@ -99,7 +98,7 @@ final class AxiomPacketHandler {
 
     // Data Operations
 
-    static void onMarkerDataRequest(@NotNull Player player, @NotNull AxiomServerboundMarkerRequestPacket packet) {
+    static void onMarkerDataRequest(Player player, AxiomServerboundMarkerRequestPacket packet) {
         var event = switch (packet.reason()) {
             case COPYING -> new AxiomMarkerDataRequestEvent.Copying(player, packet.id());
             case RIGHT_CLICK -> new AxiomMarkerDataRequestEvent.RightClick(player, packet.id());
@@ -111,7 +110,7 @@ final class AxiomPacketHandler {
         new AxiomClientboundMarkerResponsePacket(packet.id(), event.getData()).send(player);
     }
 
-    static void onEntityDataRequest(@NotNull Player player, @NotNull AxiomServerboundEntityRequestPacket packet) {
+    static void onEntityDataRequest(Player player, AxiomServerboundEntityRequestPacket packet) {
         var event = new AxiomEntitiesDataRequestEvent(player, packet.ids());
         EventDispatcher.call(event);
 
@@ -125,7 +124,7 @@ final class AxiomPacketHandler {
             long dataSize = getSize(data);
             if (dataSize > MAX_ENTITY_PACKET_SIZE) {
                 new AxiomClientboundEntitiesResponsePacket(
-                        packet.sequence(), false, Map.of(id, data)
+                    packet.sequence(), false, Map.of(id, data)
                 ).send(player);
             } else {
                 if (size + dataSize > MAX_ENTITY_PACKET_SIZE) {
@@ -144,7 +143,7 @@ final class AxiomPacketHandler {
 
     // Blocks/World Operations
 
-    static void onSetBlock(@NotNull Player player, @NotNull AxiomServerboundSetBlockPacket packet) {
+    static void onSetBlock(Player player, AxiomServerboundSetBlockPacket packet) {
         try {
             var instance = player.getInstance();
             var heldItem = player.getItemInHand(packet.hand());
@@ -169,8 +168,8 @@ final class AxiomPacketHandler {
                 }
 
                 instance.placeBlock(new BlockHandler.PlayerPlacement(
-                        block, existingBlock, instance, pos, player, packet.hand(), packet.face(),
-                        (float) packet.cursor().x(), (float) packet.cursor().y(), (float) packet.cursor().z()
+                    block, existingBlock, instance, pos, player, packet.hand(), packet.face(),
+                    (float) packet.cursor().x(), (float) packet.cursor().y(), (float) packet.cursor().z()
                 ), packet.updateNeighbors() != null && packet.updateNeighbors().contains(pos));
             }
         } finally {
@@ -178,7 +177,7 @@ final class AxiomPacketHandler {
         }
     }
 
-    static void onSetBuffer(@NotNull Player player, @NotNull AxiomServerboundSetBufferPacket packet) {
+    static void onSetBuffer(Player player, AxiomServerboundSetBufferPacket packet) {
         var instance = player.getInstance();
         if (!instance.getDimensionName().equals(packet.dimension())) return;
 
@@ -187,7 +186,7 @@ final class AxiomPacketHandler {
 
     // Entity Operations
 
-    static void onRemoveEntities(@NotNull Player player, @NotNull AxiomServerboundRemoveEntitiesPacket packet) {
+    static void onRemoveEntities(Player player, AxiomServerboundRemoveEntitiesPacket packet) {
         var instance = player.getInstance();
         for (var uuid : packet.entities()) {
             var entity = instance.getEntityByUuid(uuid);
@@ -200,14 +199,14 @@ final class AxiomPacketHandler {
         }
     }
 
-    static void onSpawnEntities(@NotNull Player player, @NotNull AxiomServerboundSpawnEntitiesPacket packet) {
+    static void onSpawnEntities(Player player, AxiomServerboundSpawnEntitiesPacket packet) {
         var instance = player.getInstance();
         for (var entry : packet.entries()) {
             if (instance.getEntityByUuid(entry.id()) != null) continue;
 
             try {
                 EventDispatcher.call(new AxiomTrySpawnEntityEvent(
-                        player, entry.id(), entry.copyFrom(), entry.pos(), entry.nbt()
+                    player, entry.id(), entry.copyFrom(), entry.pos(), entry.nbt()
                 ));
             } catch (Exception e) {
                 PostHog.captureException(e, player.getUuid().toString());
@@ -216,7 +215,7 @@ final class AxiomPacketHandler {
         }
     }
 
-    static void onModifyEntities(@NotNull Player player, @NotNull AxiomServerboundModifyEntitiesPacket packet) {
+    static void onModifyEntities(Player player, AxiomServerboundModifyEntitiesPacket packet) {
         var instance = player.getInstance();
         for (var entry : packet.entries()) {
             var entity = instance.getEntityByUuid(entry.id());
@@ -235,12 +234,12 @@ final class AxiomPacketHandler {
             }
 
             EventDispatcher.call(new AxiomTryModifyEntityEvent(
-                    player, entity, pos, entry.nbt(), entry.passengerChange(), entry.passengers()
+                player, entity, pos, entry.nbt(), entry.passengerChange(), entry.passengers()
             ));
         }
     }
 
-    static void onAnnotationUpdates(@NotNull Player player, @NotNull AxiomServerboundAnnotationUpdatePacket packet) {
+    static void onAnnotationUpdates(Player player, AxiomServerboundAnnotationUpdatePacket packet) {
         EventDispatcher.call(new AxiomAnnotationActionEvent(player, packet.actions()));
     }
 

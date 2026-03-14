@@ -1,18 +1,19 @@
 package net.hollowcube.mapmaker.util;
 
 import com.google.gson.JsonObject;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
 public final class ModelUtil {
+    private ModelUtil() {
+    }
 
-    public static @NotNull JsonObject createItemGenerated(@NotNull String texturePath) {
+    public static JsonObject createItemGenerated(String texturePath) {
         return createItemGenerated(texturePath, null);
     }
 
-    public static @NotNull JsonObject createItemGenerated(@NotNull String texturePath, @Nullable Consumer<JsonObject> editor) {
+    public static JsonObject createItemGenerated(String texturePath, @Nullable Consumer<JsonObject> editor) {
         JsonObject model = new JsonObject();
         model.addProperty("parent", "item/generated");
         JsonObject textures = new JsonObject();
@@ -24,7 +25,7 @@ public final class ModelUtil {
         return model;
     }
 
-    public static @NotNull JsonObject createBasicItem(@NotNull String modelPath) {
+    public static JsonObject createBasicItem(String modelPath) {
         JsonObject root = new JsonObject();
         JsonObject model = new JsonObject();
         model.addProperty("type", "model");

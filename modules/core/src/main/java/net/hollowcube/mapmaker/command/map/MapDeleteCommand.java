@@ -11,7 +11,6 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.Permission;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -25,7 +24,7 @@ public class MapDeleteCommand extends CommandDsl {
 
     private final MapService mapService;
 
-    public MapDeleteCommand(@NotNull MapService mapService) {
+    public MapDeleteCommand(MapService mapService) {
         super("delete");
         this.mapService = mapService;
 
@@ -39,7 +38,7 @@ public class MapDeleteCommand extends CommandDsl {
         addSyntax(playerOnly(this::handleDeleteMap), mapArg, reasonArg);
     }
 
-    private void handleDeleteMap(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleDeleteMap(Player player, CommandContext context) {
         var map = context.get(mapArg);
         var reason = context.get(reasonArg);
 

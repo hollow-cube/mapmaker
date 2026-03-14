@@ -3,12 +3,13 @@ package net.hollowcube.mapmaker.runtime;
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.datafix.DataFixer;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNullByDefault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Objects;
 
 @AutoService(ServerRuntime.class)
+@NotNullByDefault
 public class ServerRuntimeImpl implements ServerRuntime {
     private static final Logger logger = LoggerFactory.getLogger(ServerRuntime.class);
 
@@ -35,21 +36,21 @@ public class ServerRuntimeImpl implements ServerRuntime {
     }
 
     @Override
-    public @NotNull String version() {
+    public String version() {
         return version;
     }
 
     @Override
-    public @NotNull String commit() {
+    public String commit() {
         return commit;
     }
 
     @Override
-    public @NotNull String minestom() {
+    public String minestom() {
         return minestom;
     }
 
-    public @NotNull String resourcePackSha1() {
+    public String resourcePackSha1() {
         return Objects.requireNonNull(resourcePackHash);
     }
 
@@ -64,7 +65,7 @@ public class ServerRuntimeImpl implements ServerRuntime {
     }
 
     @Override
-    public @NotNull String size() {
+    public String size() {
         return size;
     }
 }

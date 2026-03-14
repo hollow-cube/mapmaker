@@ -17,7 +17,6 @@ import net.minestom.server.network.packet.server.play.TabCompletePacket;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.tag.Tag;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,20 +38,20 @@ public abstract class CommandHandlingPlayer extends ExtendedPlayer {
         packetListenerManager.setPlayListener(ClientTabCompletePacket.class, CommandHandlingPlayer::tabCommand);
     }
 
-    public CommandHandlingPlayer(@NotNull PlayerConnection connection, @NotNull GameProfile gameProfile) {
+    public CommandHandlingPlayer(PlayerConnection connection, GameProfile gameProfile) {
         super(connection, gameProfile);
     }
 
-    public static @NotNull PlayerProvider createDefaultProvider(@NotNull CommandManager commandManager) {
+    public static PlayerProvider createDefaultProvider(CommandManager commandManager) {
         return (connection, gameProfile) -> new CommandHandlingPlayer(connection, gameProfile) {
             @Override
-            public @NotNull CommandManager getCommandManager() {
+            public CommandManager getCommandManager() {
                 return commandManager;
             }
         };
     }
 
-    private static void execCommand(@NotNull ClientCommandChatPacket packet, @NotNull Player player) {
+    private static void execCommand(ClientCommandChatPacket packet, Player player) {
         final String command = packet.message();
 
         if (!Messenger.canReceiveCommand(player)) {
@@ -109,7 +108,7 @@ public abstract class CommandHandlingPlayer extends ExtendedPlayer {
         });
     }
 
-    private static void tabCommand(@NotNull ClientTabCompletePacket packet, @NotNull Player player) {
+    private static void tabCommand(ClientTabCompletePacket packet, Player player) {
         if (!Messenger.canReceiveCommand(player)) return;
 
         var manager = CommandHandlingPlayer.asHandled(player).getCommandManager();
@@ -154,6 +153,6 @@ public abstract class CommandHandlingPlayer extends ExtendedPlayer {
         sendPacket(getCommandManager().createCommandPacket(this));
     }
 
-    public abstract @NotNull CommandManager getCommandManager();
+    public abstract CommandManager getCommandManager();
 
 }

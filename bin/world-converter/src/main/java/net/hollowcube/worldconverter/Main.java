@@ -21,7 +21,6 @@ import net.minestom.server.item.Material;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.world.DimensionType;
 import net.minestom.server.world.biome.Biome;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +55,7 @@ public class Main {
         var loader = new PolarLoader(new PolarWorld()).setParallel(true);
         loader.setWorldAccess(new PolarWorldAccess() {
             @Override
-            public void saveWorldData(@NotNull Instance instance, @NotNull NetworkBuffer buffer) {
+            public void saveWorldData(Instance instance, NetworkBuffer buffer) {
                 buffer.write(NetworkBuffer.BYTE, (byte) 5); // Latest as of writing
                 buffer.write(NetworkBuffer.VAR_INT, MinecraftServer.DATA_VERSION);
 
@@ -66,7 +65,7 @@ public class Main {
             }
 
             @Override
-            public void saveChunkData(@NotNull Chunk chunk, @NotNull NetworkBuffer buffer) {
+            public void saveChunkData(Chunk chunk, NetworkBuffer buffer) {
                 var chunkIndex = CoordConversion.chunkIndex(chunk.getChunkX(), chunk.getChunkZ());
                 buffer.write(NetworkBuffer.VAR_INT, 5); // Latest as of writing
 
@@ -77,7 +76,8 @@ public class Main {
             }
 
             @Override
-            public void saveHeightmaps(@NotNull Chunk chunk, int[][] heightmaps) {
+            @SuppressWarnings("UnstableApiUsage")
+            public void saveHeightmaps(Chunk chunk, int[][] heightmaps) {
 
                 // heightmaps[Heightmaps.WORLD_SURFACE] = chunk.saveHeightmap(Heightmaps.WORLD_SURFACE);
                 // heightmaps[Heightmaps.MOTION_BLOCKING] = chunk.saveHeightmap(Heightmaps.MOTION_BLOCKING);
@@ -88,7 +88,7 @@ public class Main {
             }
 
             @Override
-            public @NotNull String getBiomeName(int id) {
+            public String getBiomeName(int id) {
                 var name = MinecraftServer.getBiomeRegistry().getKey(id).name();
                 if (biomeRenames.containsKey(name)) {
                     return biomeRenames.get(name);
@@ -105,7 +105,7 @@ public class Main {
         System.exit(0);
     }
 
-    private static boolean loadInputChunks(@NotNull Path path, @NotNull InstanceContainer instance) throws Exception {
+    private static boolean loadInputChunks(Path path, InstanceContainer instance) throws Exception {
         if (!Files.exists(path) || !Files.isDirectory(path)) {
             logger.error("Input world path does not exist or is not a directory: {}", path);
             return false;
@@ -140,10 +140,12 @@ public class Main {
                         }
 
                         var chunk = AnvilLoader.loadChunk(instance, xz.x * 32 + chunkX, xz.z * 32 + chunkZ, chunkData);
-                        if (chunk == null) {
-                            logger.warn("Failed to load chunk at {}.{} in region {}", chunkX, chunkZ, xz);
-                            continue; // Skip failed chunks
-                        }
+                        // TODO: Evaluating loadChunk, there was nowhere it could return null,
+                        //  as createChunk can never return null, so should this be a try catch instead?
+//                        if (chunk == null) {
+//                            logger.warn("Failed to load chunk at {}.{} in region {}", chunkX, chunkZ, xz);
+//                            continue; // Skip failed chunks
+//                        }
 
                         chunks.put(CoordConversion.chunkIndex(xz.x * 32 + chunkX, xz.z * 32 + chunkZ), chunk);
 
@@ -160,7 +162,8 @@ public class Main {
         return true;
     }
 
-    private static void findCustomBiomes(@NotNull Path path) throws Exception {
+    private static void findCustomBiomes(Path path) throws Exception {
+        // TODO: Files.walk should be used in try-with-resources
         var allBiomeOverrides = Files.walk(path.resolve("datapacks"))
                 .filter(Files::isDirectory)
                 .map(p -> p.resolve("data/minecraft/worldgen/biome"))
@@ -182,6 +185,7 @@ public class Main {
                     .orElseThrow();
 
             var newName = "custom:import" + (i++);
+            // TODO: Update for new biome attributes system
             var biomeInfo = new BiomeInfo(
                     newName, Material.STONE,
                     biome.effects().skyColor(),
@@ -203,7 +207,7 @@ public class Main {
     record XZ(int x, int z) {
     }
 
-    private static XZ parseRegionName(@NotNull String regionName) {
+    private static XZ parseRegionName(String regionName) {
         if (!regionName.startsWith("r.")) {
             throw new IllegalArgumentException("Invalid region name: " + regionName);
         }
@@ -216,7 +220,7 @@ public class Main {
         return new XZ(x, z);
     }
 
-    private static Map<Long, Chunk> stealChunkMap(@NotNull InstanceContainer instance) throws Exception {
+    private static Map<Long, Chunk> stealChunkMap(InstanceContainer instance) throws Exception {
         var field = InstanceContainer.class.getDeclaredField("chunks");
         field.setAccessible(true);
         return (Map<Long, Chunk>) field.get(instance);

@@ -11,7 +11,6 @@ import net.hollowcube.mapmaker.misc.Emoji;
 import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.network.NetworkBuffer;
-import org.jetbrains.annotations.NotNull;
 
 public class MessageArgument extends Argument<String> {
 
@@ -23,27 +22,27 @@ public class MessageArgument extends Argument<String> {
         }
     });
 
-    MessageArgument(@NotNull String id) {
+    MessageArgument(String id) {
         super(id);
     }
 
     @Override
-    public @NotNull ParseResult<String> parse(@NotNull CommandSender sender, @NotNull StringReader reader) {
+    public ParseResult<String> parse(CommandSender sender, StringReader reader) {
         return success(reader.readRemaining());
     }
 
     @Override
-    public @NotNull ArgumentParserType argumentType() {
+    public ArgumentParserType argumentType() {
         return ArgumentParserType.STRING;
     }
 
     @Override
-    public void properties(@NotNull NetworkBuffer buffer) {
+    public void properties(NetworkBuffer buffer) {
         buffer.write(NetworkBuffer.VAR_INT, 2);
     }
 
     @Override
-    public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
+    public void suggest(CommandSender sender, String raw, Suggestion suggestion) {
         int index = getEmojiIndex(raw);
 
         if (index != -1) {
