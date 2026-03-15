@@ -238,18 +238,35 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                     var world = MapWorld.forInstance(event.getInstance());
                     if (world == null) return;
 
-                    // If the owner has left, destroy the map on its next tick.
-                    var playerData = PlayerData.fromPlayer(event.getPlayer());
-                    if (playerData.id().equals(world.map().owner()) && !world.map().isPublished()) {
-                        world.instance().scheduleNextTick(ignored -> FutureUtil.submitVirtual(() ->
-                            destroy(key, Component.translatable("map.kicked"))));
+                    // If there is nobody left at all, always destroy the world
+                    if (event.getInstance().getPlayers().size() == 1) {
+                        FutureUtil.submitVirtual(() -> destroy(key, Component.translatable("map.closed")));
                         return;
                     }
 
-                    // Stop if there are still players in the instance
-                    if (event.getInstance().getPlayers().size() > 1) return;
+                    if (world.map().isPublished()) return;
 
-                    FutureUtil.submitVirtual(() -> destroy(key, Component.translatable("map.closed")));
+                    // Try to close the map if there are no registered builders left.
+                    var leavingId = PlayerData.fromPlayer(event.getPlayer()).id();
+                    FutureUtil.submitVirtual(() -> {
+                        var builders = api().maps.getMapBuilders(world.map().id(), true);
+                        var leavingIsBuilder = false;
+                        for (var builder : builders) {
+                            if (world.hasPlayer(builder.id()))
+                                return; // dont need to close
+                            if (builder.id().equals(leavingId))
+                                leavingIsBuilder = true;
+                        }
+
+                        // If the person leaving also is not a builder (aka we never had a builder to begin with),
+                        // then dont destroy the world. Mostly this is for editing org maps where the owner is fake.
+                        // TODO: a better version of this is to add some global map edit permission which is given
+                        //       to all staff members, allowing them to keep the world alive as if they are a builder.
+                        if (!leavingIsBuilder) return;
+
+                        // None of the builders are present, destroy it.
+                        destroy(key, Component.translatable("map.kicked"));
+                    });
                 });
             }
 

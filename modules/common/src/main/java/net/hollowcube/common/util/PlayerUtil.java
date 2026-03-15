@@ -11,6 +11,9 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
+import net.minestom.server.event.EventListener;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
+import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.server.common.PluginMessagePacket;
@@ -21,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Utility class for player-related operations.
@@ -103,5 +107,27 @@ public final class PlayerUtil {
         } else {
             player.kick(message);
         }
+    }
+
+    /// Runs the runnable when the given player next enters config or disconnects.
+    public static void onConfigOrDisconnect(Player player, Runnable runnable) {
+        var completed = new AtomicBoolean(false);
+        MinecraftServer.getGlobalEventHandler()
+            .addListener(EventListener.builder(AsyncPlayerConfigurationEvent.class)
+                .filter(event -> event.getPlayer() == player)
+                .expireWhen(_ -> completed.get())
+                .handler(_ -> {
+                    if (completed.compareAndExchange(false, true))
+                        runnable.run();
+                })
+                .build())
+            .addListener(EventListener.builder(PlayerDisconnectEvent.class)
+                .filter(event -> event.getPlayer() == player)
+                .expireWhen(_ -> completed.get())
+                .handler(_ -> {
+                    if (completed.compareAndExchange(false, true))
+                        runnable.run();
+                })
+                .build());
     }
 }

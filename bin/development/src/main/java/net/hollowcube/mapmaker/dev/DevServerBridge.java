@@ -12,6 +12,9 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+
+import static net.hollowcube.common.util.PlayerUtil.onConfigOrDisconnect;
 
 public final class DevServerBridge implements ServerBridge {
     private final DevServer server;
@@ -29,7 +32,7 @@ public final class DevServerBridge implements ServerBridge {
         var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
         if (playerProtocolVersion < map.protocolVersion()) {
             player.sendMessage(Component.translatable("map_join.wrongversion",
-                    Component.text(map.name()), Component.text(ProtocolVersions.getProtocolName(map.protocolVersion()))));
+                Component.text(map.name()), Component.text(ProtocolVersions.getProtocolName(map.protocolVersion()))));
             return;
         }
 
@@ -42,8 +45,10 @@ public final class DevServerBridge implements ServerBridge {
     }
 
     private void joinMapInternal(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState) {
-        var playerId = PlayerData.fromPlayer(player).id();
+        var future = new CompletableFuture<Void>();
+        onConfigOrDisconnect(player, () -> future.complete(null));
 
+        var playerId = PlayerData.fromPlayer(player).id();
         server.addPendingJoin(playerId, mapId, joinMapState.name().toLowerCase(Locale.ROOT));
 
         // We need to remove the player from the map before entering configuration, because by the time we get
@@ -54,6 +59,8 @@ public final class DevServerBridge implements ServerBridge {
         } else {
             world.scheduleRemovePlayer(player).thenRun(player::startConfigurationPhase);
         }
+
+        FutureUtil.getUnchecked(future);
     }
 
 }

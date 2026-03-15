@@ -19,6 +19,10 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.CompletableFuture;
+
+import static net.hollowcube.common.util.PlayerUtil.onConfigOrDisconnect;
+
 public class MapServerBridge implements ServerBridge {
     private static final Logger logger = LoggerFactory.getLogger(MapServerBridge.class);
 
@@ -74,10 +78,15 @@ public class MapServerBridge implements ServerBridge {
     @Override
     public void joinHub(@NotNull Player player) {
         try {
+            var future = new CompletableFuture<Void>();
+            onConfigOrDisconnect(player, () -> future.complete(null));
+
             var playerData = PlayerData.fromPlayer(player);
             var res = server.sessionService().joinHubV2(new JoinHubRequest(playerData.id()));
             logger.info("join hub result: {}", res);
             ProxySupport.transfer(player, res.serverClusterIp());
+
+            FutureUtil.getUnchecked(future); // Wait until not in instance
         } catch (SessionService.NoAvailableServerException ignored) {
             player.sendMessage("No hub server is available!");
         } catch (Exception e) {

@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.isolate;
 
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
@@ -15,6 +16,10 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.CompletableFuture;
+
+import static net.hollowcube.common.util.PlayerUtil.onConfigOrDisconnect;
 
 public class MapIsolateBridge implements ServerBridge {
     private static final Logger logger = LoggerFactory.getLogger(MapIsolateBridge.class);
@@ -64,14 +69,20 @@ public class MapIsolateBridge implements ServerBridge {
     @Override
     public void joinHub(Player player) {
         try {
+            var future = new CompletableFuture<Void>();
+            onConfigOrDisconnect(player, () -> future.complete(null));
+
             var playerData = PlayerData.fromPlayer(player);
             var res = sessionService.joinHubV2(new JoinHubRequest(playerData.id()));
             logger.info("join hub result: {}", res);
             ProxySupport.transfer(player, res.serverClusterIp());
+
+            FutureUtil.getUnchecked(future); // Wait until not in instance
         } catch (Exception e) {
             ExceptionReporter.reportException(e, player);
             player.sendMessage(Component.text("An error occurred while trying to return to the hub. Please try again later."));
         }
+
     }
 
 }

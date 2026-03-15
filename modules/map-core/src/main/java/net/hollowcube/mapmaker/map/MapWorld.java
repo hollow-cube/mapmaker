@@ -96,6 +96,14 @@ public sealed interface MapWorld extends TagReadable permits AbstractMapWorld {
     /// - Players spectating a playing map will appear in the playing world.
     @UnmodifiableView Collection<Player> players();
 
+    default boolean hasPlayer(String playerId) {
+        for (var player : players()) {
+            if (playerId.equals(player.getUuid().toString()))
+                return true;
+        }
+        return false;
+    }
+
     @Blocking void configurePlayer(AsyncPlayerConfigurationEvent event);
 
     @NonBlocking void spawnPlayer(Player player);

@@ -34,6 +34,8 @@ public interface ServerBridge {
     @Blocking
     void joinMap(@NotNull Player player, JoinConfig joinConfig);
 
+    /// Returns only when the player is no longer in their current instance (eg in config or gone).
+    @Blocking
     void joinHub(@NotNull Player player);
 
     enum JoinMapState {

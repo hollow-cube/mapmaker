@@ -7,10 +7,15 @@ import net.hollowcube.mapmaker.api.ResultList;
 import java.util.Map;
 
 import static net.hollowcube.mapmaker.api.ApiClient.notImplemented;
+import static net.hollowcube.mapmaker.api.HttpClientWrapper.query;
 
 public interface MapClient {
 
     default ResultList<MapSlot> getPlayerSlots(String playerId) {
+        throw notImplemented();
+    }
+
+    default ResultList<MapBuilder> getMapBuilders(String mapId, boolean onlyActive) {
         throw notImplemented();
     }
 
@@ -40,6 +45,14 @@ public interface MapClient {
             return http.get(
                 "getPlayerSlots",
                 V4_PLAYERS_PREFIX + "/" + playerId + "/map-slots",
+                new TypeToken<>() {});
+        }
+
+        @Override
+        public ResultList<MapBuilder> getMapBuilders(String mapId, boolean onlyActive) {
+            return http.get(
+                "getMapBuilders",
+                V4_PREFIX + "/" + mapId + "/builders" + query("onlyActive", onlyActive),
                 new TypeToken<>() {});
         }
 

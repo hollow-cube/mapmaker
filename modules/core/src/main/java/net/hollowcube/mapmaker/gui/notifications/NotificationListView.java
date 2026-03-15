@@ -62,8 +62,6 @@ public class NotificationListView extends Panel {
         var notifications = this.context.api().notifications.list(playerId, page, PAGE_SIZE, false);
         pagination.totalPages(notifications.totalPages(PAGE_SIZE));
 
-        System.out.println("got " + notifications.results().size() + " notifications");
-
         return notifications
             .results()
             .stream()
