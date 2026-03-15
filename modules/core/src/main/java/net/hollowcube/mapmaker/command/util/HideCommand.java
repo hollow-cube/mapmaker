@@ -9,14 +9,13 @@ import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
 public class HideCommand extends CommandDsl {
     private final PlayerService playerService;
 
-    public HideCommand(@NotNull PlayerService playerService) {
+    public HideCommand(PlayerService playerService) {
         super("hide");
         this.playerService = playerService;
 
@@ -26,7 +25,7 @@ public class HideCommand extends CommandDsl {
         addSyntax(playerOnly(this::handleHidePlayers));
     }
 
-    private void handleHidePlayers(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleHidePlayers(Player player, CommandContext context) {
         var playerData = PlayerData.fromPlayer(player);
         var current = playerData.getSetting(PlayerSettings.NEARBY_PLAYER_VISIBILITY);
         var newValue = current == VisibilityRule.GHOST ? VisibilityRule.HIDDEN : VisibilityRule.GHOST;

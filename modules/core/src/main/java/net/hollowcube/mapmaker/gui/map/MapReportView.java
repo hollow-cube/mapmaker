@@ -12,7 +12,6 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +30,7 @@ public class MapReportView extends Panel {
 
     private String comment = "";
 
-    public MapReportView(@NotNull MapService mapService, @NotNull MapData map) {
+    public MapReportView(MapService mapService, MapData map) {
         super(9, 10);
         this.mapService = mapService;
         this.map = map;
@@ -67,14 +66,14 @@ public class MapReportView extends Panel {
 
     private void handleEditComment() {
         host.pushView(simpleAnvil(
-                "generic2/anvil/field_container",
-                "report_map/comment_anvil_icon",
-                "Report Comment",
-                this::handleCommentChange
+            "generic2/anvil/field_container",
+            "report_map/comment_anvil_icon",
+            "Report Comment",
+            this::handleCommentChange
         ));
     }
 
-    private void handleCommentChange(@NotNull String newComment) {
+    private void handleCommentChange(String newComment) {
         newComment = newComment.trim();
         if (this.comment.equals(newComment)) return;
 
@@ -127,9 +126,9 @@ public class MapReportView extends Panel {
         return true;
     }
 
-    private @NotNull Component getCommentText() {
+    private Component getCommentText() {
         return comment.isEmpty()
-                ? Component.translatable("gui.report_map.add_comment.none")
-                : Component.text(comment);
+            ? Component.translatable("gui.report_map.add_comment.none")
+            : Component.text(comment);
     }
 }

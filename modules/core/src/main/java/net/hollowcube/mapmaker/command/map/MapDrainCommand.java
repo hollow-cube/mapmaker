@@ -11,7 +11,6 @@ import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -25,7 +24,7 @@ public class MapDrainCommand extends CommandDsl {
 
     private final JetStreamWrapper jetStream;
 
-    public MapDrainCommand(@NotNull MapService mapService, @NotNull JetStreamWrapper jetStream) {
+    public MapDrainCommand(MapService mapService, JetStreamWrapper jetStream) {
         super("drain");
         this.jetStream = jetStream;
 
@@ -41,7 +40,7 @@ public class MapDrainCommand extends CommandDsl {
         addSyntax(playerOnly(this::handleDrainMap), mapArg, reasonArg);
     }
 
-    private void handleDrainMap(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleDrainMap(Player player, CommandContext context) {
         var map = context.get(mapArg);
         var reason = context.get(reasonArg);
 

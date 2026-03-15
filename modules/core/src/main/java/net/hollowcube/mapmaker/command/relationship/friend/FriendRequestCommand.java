@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.command.relationship.friend;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ArgumentLiteral;
-import net.hollowcube.command.arg.ArgumentWord;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.DisplayName;
@@ -12,7 +11,6 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 public class FriendRequestCommand extends CommandDsl {
     private final Argument<String> targetArg;
@@ -21,7 +19,7 @@ public class FriendRequestCommand extends CommandDsl {
 
     private final PlayerService playerService;
 
-    public FriendRequestCommand(@NotNull PlayerService playerService) {
+    public FriendRequestCommand(PlayerService playerService) {
         super("request");
         this.playerService = playerService;
 
@@ -34,7 +32,7 @@ public class FriendRequestCommand extends CommandDsl {
                        this.targetArg); // removes a request bidirectionally
     }
 
-    private void execList(@NotNull Player player, @NotNull CommandContext context) {
+    private void execList(Player player, CommandContext context) {
         String directionValue = context.get(this.directionArg);
         boolean incoming = directionValue.equals("incoming");
         int page = context.get(this.pageArg);
@@ -60,7 +58,7 @@ public class FriendRequestCommand extends CommandDsl {
         player.sendMessage(builder.build());
     }
 
-    private void execRemove(@NotNull Player player, @NotNull CommandContext context) {
+    private void execRemove(Player player, CommandContext context) {
         var targetId = context.get(this.targetArg);
         if (targetId == null) return;
         if (targetId.equals(player.getUuid().toString())) {

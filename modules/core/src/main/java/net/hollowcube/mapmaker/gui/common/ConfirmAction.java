@@ -9,7 +9,7 @@ import net.kyori.adventure.text.TranslatableComponent;
 import org.jetbrains.annotations.NotNull;
 
 // Replaced by ExtraPanels helpers i think.
-@Deprecated
+@Deprecated // when canvas is turbo dumped
 public class ConfirmAction extends View {
     private @NotNull Runnable confirmationCallback;
 

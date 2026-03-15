@@ -11,7 +11,6 @@ import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
@@ -24,10 +23,7 @@ public class UnmuteCommand extends CommandDsl {
 
     private final PunishmentService punishmentService;
 
-    public UnmuteCommand(
-        @NotNull PunishmentService punishmentService,
-        @NotNull PlayerService playerService
-    ) {
+    public UnmuteCommand(PunishmentService punishmentService, PlayerService playerService) {
         super("unmute");
         this.punishmentService = punishmentService;
 
@@ -39,7 +35,7 @@ public class UnmuteCommand extends CommandDsl {
         this.addSyntax(playerOnly(this::execute), this.targetArgument, this.reasonArgument);
     }
 
-    private void execute(@NotNull Player player, @NotNull CommandContext context) {
+    private void execute(Player player, CommandContext context) {
         var target = context.get(this.targetArgument);
         if (target == null) return;
 

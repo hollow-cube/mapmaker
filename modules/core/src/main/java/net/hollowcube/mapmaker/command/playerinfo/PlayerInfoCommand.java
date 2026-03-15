@@ -6,17 +6,12 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
-import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 
 public class PlayerInfoCommand extends CommandDsl {
 
-    public PlayerInfoCommand(
-        @NotNull PlayerService players,
-        @NotNull MapService mapService,
-        @NotNull SessionManager sessionManager
-    ) {
+    public PlayerInfoCommand(PlayerService players, MapService mapService, SessionManager sessionManager) {
         super("playerinfo");
 
         category = CommandCategory.HIDDEN;
@@ -34,7 +29,7 @@ public class PlayerInfoCommand extends CommandDsl {
 
     private static class SubCommand<T> extends CommandDsl {
 
-        public SubCommand(@NotNull String name, @NotNull PlayerInfoType<T> type) {
+        public SubCommand(String name, PlayerInfoType<T> type) {
             super(name);
 
             category = CommandCategory.HIDDEN;

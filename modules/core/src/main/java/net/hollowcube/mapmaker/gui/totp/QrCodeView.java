@@ -4,7 +4,6 @@ import net.hollowcube.mapmaker.panels.AbstractImagePanel;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.minestom.server.map.Framebuffer;
-import org.jetbrains.annotations.NotNull;
 
 import java.awt.image.BufferedImage;
 import java.util.Base64;
@@ -28,7 +27,7 @@ public class QrCodeView extends AbstractImagePanel {
     }
 
     @Override
-    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+    protected void mount(InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
         this.updateImage(buffer -> {
             buffer.fill(0x00000000);

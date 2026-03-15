@@ -9,7 +9,6 @@ import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
@@ -22,10 +21,7 @@ public class KickCommand extends CommandDsl {
     private final Argument<String> targetArgument;
     private final Argument<String> reasonArgument = Argument.GreedyString("reason");
 
-    public KickCommand(
-        @NotNull PunishmentService service,
-        @NotNull SessionManager sessionManager
-    ) {
+    public KickCommand(PunishmentService service, SessionManager sessionManager) {
         super("kick");
         this.service = service;
         this.targetArgument = CoreArgument.AnyOnlinePlayer("target", sessionManager);
@@ -34,7 +30,7 @@ public class KickCommand extends CommandDsl {
         this.addSyntax(playerOnly(this::execute), this.targetArgument, this.reasonArgument);
     }
 
-    private void execute(@NotNull Player sender, @NotNull CommandContext context) {
+    private void execute(Player sender, CommandContext context) {
         var target = context.get(this.targetArgument);
         var reason = context.get(this.reasonArgument);
 

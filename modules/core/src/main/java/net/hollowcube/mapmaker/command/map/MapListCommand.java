@@ -12,7 +12,6 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 public class MapListCommand extends CommandDsl {
     private final ApiClient api;
@@ -21,7 +20,7 @@ public class MapListCommand extends CommandDsl {
 
     private final Argument<String> targetArg;
 
-    public MapListCommand(@NotNull ApiClient api, @NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
+    public MapListCommand(ApiClient api, PlayerService playerService, MapService mapService, ServerBridge bridge) {
         super("list");
         this.api = api;
         this.mapService = mapService;
@@ -36,7 +35,7 @@ public class MapListCommand extends CommandDsl {
         addSyntax(playerOnly(this::execute), targetArg);
     }
 
-    private void execute(@NotNull Player player, @NotNull CommandContext context) {
+    private void execute(Player player, CommandContext context) {
         String targetId;
         if (!context.has(targetArg)) {
             // No target specified, use self

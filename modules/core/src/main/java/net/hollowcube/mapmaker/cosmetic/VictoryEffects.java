@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.cosmetic;
 import net.hollowcube.mapmaker.backpack.Rarity;
 import net.hollowcube.mapmaker.cosmetic.impl.victory.FireworkVictoryEffectImpl;
 import net.hollowcube.mapmaker.cosmetic.impl.victory.ParticleVictoryEffects;
-import org.jetbrains.annotations.NotNull;
 
 public final class VictoryEffects {
 
@@ -21,7 +20,10 @@ public final class VictoryEffects {
             .impl(ParticleVictoryEffects.ChristmasExplosion::new)
             .build();
 
-    public static @NotNull Cosmetic.Builder builder(@NotNull String id) {
+    public static Cosmetic.Builder builder(String id) {
         return new Cosmetic.Builder(CosmeticType.VICTORY_EFFECT, id);
+    }
+
+    private VictoryEffects() {
     }
 }

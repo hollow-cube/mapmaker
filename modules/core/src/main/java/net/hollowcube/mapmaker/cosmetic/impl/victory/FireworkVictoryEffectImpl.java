@@ -19,35 +19,35 @@ import net.minestom.server.item.component.FireworkList;
 import net.minestom.server.network.packet.server.play.EntityStatusPacket;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.timer.TaskSchedule;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class FireworkVictoryEffectImpl extends AbstractVictoryEffectImpl {
-    public FireworkVictoryEffectImpl(@NotNull Cosmetic cosmetic) {
+    public FireworkVictoryEffectImpl(Cosmetic cosmetic) {
         super(cosmetic);
     }
 
     @Override
-    public void trigger(@NotNull Player player, @NotNull Point position) {
+    public void trigger(Player player, Point position) {
         var viewersAndSelf = new ArrayList<>(player.getViewers());
         viewersAndSelf.add(player);
         player.scheduleNextTick(ignored -> showFirework(
-                PacketGroupingAudience.of(viewersAndSelf),
-                player.getInstance(),
-                position,
-                15,
-                List.of(randomColorEffect())
+            PacketGroupingAudience.of(viewersAndSelf),
+            player.getInstance(),
+            position,
+            15,
+            List.of(randomColorEffect())
         ));
     }
 
-    public static void showFirework(PacketGroupingAudience audience, Instance instance, Point point, int ticks, List<FireworkExplosion> effects) {
+    public static void showFirework(PacketGroupingAudience audience, Instance instance, Point point, int ticks,
+                                    List<FireworkExplosion> effects) {
         var fireworks = new FireworkList((byte) 0, effects);
         var fireworkItem = ItemStack.builder(Material.FIREWORK_ROCKET)
-                .set(DataComponents.FIREWORKS, fireworks)
-                .build();
+            .set(DataComponents.FIREWORKS, fireworks)
+            .build();
         var fireworkEntity = new Entity(EntityType.FIREWORK_ROCKET);
         var meta = (FireworkRocketMeta) fireworkEntity.getEntityMeta();
 

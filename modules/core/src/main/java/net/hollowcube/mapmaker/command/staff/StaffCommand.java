@@ -10,14 +10,13 @@ import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.perm;
 
 public class StaffCommand extends CommandDsl {
     private final PlayerService playerService;
 
-    public StaffCommand(@NotNull PlayerService playerService) {
+    public StaffCommand(PlayerService playerService) {
         super("staff");
         this.playerService = playerService;
 

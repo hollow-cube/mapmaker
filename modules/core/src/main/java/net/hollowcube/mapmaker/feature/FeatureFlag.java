@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.feature;
 
 import org.jetbrains.annotations.NonBlocking;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * A feature flag is a boolean value which can be enabled or disabled at runtime,
@@ -13,11 +12,11 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface FeatureFlag {
 
-    static @NotNull FeatureFlag of(@NotNull String name) {
+    static FeatureFlag of(String name) {
         return new BasicFeatureFlag(name);
     }
 
-    static @NotNull FeatureFlag never() {
+    static FeatureFlag never() {
         return ignored -> false;
     }
 
@@ -36,6 +35,6 @@ public interface FeatureFlag {
      * @return True if the feature is known to be enabled, false otherwise.
      */
     @NonBlocking
-    boolean test(@NotNull Object... context);
+    boolean test(Object... context);
 
 }

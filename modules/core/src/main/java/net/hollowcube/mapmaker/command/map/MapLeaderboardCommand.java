@@ -6,13 +6,12 @@ import net.hollowcube.mapmaker.command.map.leaderboard.MapLeaderboardRestoreComm
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerService;
-import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 
 public class MapLeaderboardCommand extends CommandDsl {
 
-    public MapLeaderboardCommand(@NotNull PlayerService playerService, @NotNull MapService mapService) {
+    public MapLeaderboardCommand(PlayerService playerService, MapService mapService) {
         super("lb");
 
         description = "Remove or restore the times of a map";

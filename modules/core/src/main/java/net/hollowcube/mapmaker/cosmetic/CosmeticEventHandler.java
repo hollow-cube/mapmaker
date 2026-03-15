@@ -12,11 +12,10 @@ import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.inventory.click.Click;
 import net.minestom.server.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-public class CosmeticEventHandler {
+public final class CosmeticEventHandler {
 
     private static final Map<Short, CosmeticType> COSMETIC_SLOT_MAP = Map.ofEntries(
             Map.entry((short) 5, CosmeticType.HAT),
@@ -26,13 +25,13 @@ public class CosmeticEventHandler {
             //            Map.entry((short) 45, CosmeticType.ACCESSORY)
     );
 
-    public static void init(@NotNull PlayerService players) {
+    public static void init(PlayerService players) {
         var globalEventHandler = MinecraftServer.getGlobalEventHandler();
         globalEventHandler.addListener(InventoryPreClickEvent.class, event -> handleInventoryCosmeticSelector(players, event));
         globalEventHandler.addListener(PlayerGiveCreativeItemEvent.class, CosmeticEventHandler::creativeClickListener);
     }
 
-    private static void handleInventoryCosmeticSelector(@NotNull PlayerService players, @NotNull InventoryPreClickEvent event) {
+    private static void handleInventoryCosmeticSelector(PlayerService players, InventoryPreClickEvent event) {
         if (!(event.getInventory() instanceof PlayerInventory)) return; // Not the player inventory (e one, not just lower section)
         if (!(event.getClick() instanceof Click.Left(int slot))) return;
 
@@ -42,7 +41,7 @@ public class CosmeticEventHandler {
         Panel.open(event.getPlayer(), new CosmeticPanel(players, cosmeticType));
     }
 
-    private static void creativeClickListener(@NotNull PlayerGiveCreativeItemEvent event) {
+    private static void creativeClickListener(PlayerGiveCreativeItemEvent event) {
         if (event.getPlayer().getGameMode() != GameMode.CREATIVE) return;
         var item = event.item();
 
@@ -66,6 +65,9 @@ public class CosmeticEventHandler {
 //        guiController.show(player, c -> new CosmeticView(c, cosmeticType));
 
         event.setCancelled(true);
+    }
+
+    private CosmeticEventHandler() {
     }
 
 }

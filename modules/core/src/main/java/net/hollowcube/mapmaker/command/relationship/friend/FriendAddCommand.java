@@ -8,9 +8,7 @@ import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.responses.SendFriendRequestResult;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FriendAddCommand extends CommandDsl {
@@ -18,7 +16,7 @@ public class FriendAddCommand extends CommandDsl {
 
     private final PlayerService playerService;
 
-    public FriendAddCommand(@NotNull PlayerService playerService) {
+    public FriendAddCommand(PlayerService playerService) {
         super("add");
         this.playerService = playerService;
 
@@ -28,7 +26,7 @@ public class FriendAddCommand extends CommandDsl {
         addSyntax(playerOnly(this::exec), this.targetArg);
     }
 
-    private void exec(@NotNull Player player, @NotNull CommandContext context) {
+    private void exec(Player player, CommandContext context) {
         var targetData = context.get(this.targetArg);
         if (targetData == null) return;
         if (targetData.id().equals(player.getUuid().toString())) {

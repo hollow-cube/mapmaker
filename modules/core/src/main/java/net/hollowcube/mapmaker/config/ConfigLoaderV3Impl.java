@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.config;
 
 import com.google.gson.*;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-record ConfigLoaderV3Impl(@NotNull JsonObject root) implements ConfigLoaderV3 {
+record ConfigLoaderV3Impl(JsonObject root) implements ConfigLoaderV3 {
     private static final String ENV_PREFIX = "MAPMAKER";
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigLoaderV3Impl.class);
@@ -22,7 +22,7 @@ record ConfigLoaderV3Impl(@NotNull JsonObject root) implements ConfigLoaderV3 {
             .disableJdkUnsafe()
             .create();
 
-    public static @NotNull ConfigLoaderV3Impl loadDefault(String[] args) {
+    public static ConfigLoaderV3Impl loadDefault(String[] args) {
         try (var is = ConfigLoaderV3Impl.class.getResourceAsStream("/default_config.json")) {
             if (is == null) {
                 logger.error("default_config.json not present in binary");
@@ -60,7 +60,7 @@ record ConfigLoaderV3Impl(@NotNull JsonObject root) implements ConfigLoaderV3 {
         }
     }
 
-    public static @NotNull ConfigLoaderV3Impl loadFromText(byte @NotNull [] text, @NotNull Map<String, String> env) {
+    public static ConfigLoaderV3Impl loadFromText(byte[] text, Map<String, String> env) {
         try {
             var root = GSON.fromJson(new String(text, StandardCharsets.UTF_8), JsonObject.class);
             root = (JsonObject) replaceEnvVarOverrides(env, new ArrayList<>(), root);
@@ -77,7 +77,7 @@ record ConfigLoaderV3Impl(@NotNull JsonObject root) implements ConfigLoaderV3 {
     }
 
     @Override
-    public <C> @NotNull C get(@NotNull Class<C> clazz) {
+    public <C> C get(Class<C> clazz) {
         var path = clazz.getSimpleName().replace("Config", "")
                 .toLowerCase(Locale.ROOT);
         var element = GSON.fromJson(root.get(path), clazz);
@@ -90,7 +90,8 @@ record ConfigLoaderV3Impl(@NotNull JsonObject root) implements ConfigLoaderV3 {
         System.out.println(GSON.toJson(root));
     }
 
-    private static JsonElement replaceEnvVarOverrides(@NotNull Map<String, String> env, List<String> path, JsonElement element) {
+    // TODO: Should this be nullable? Code here says so, but usage says otherwise
+    private static @Nullable JsonElement replaceEnvVarOverrides(Map<String, String> env, List<String> path, @Nullable JsonElement element) {
         return switch (element) {
             case JsonObject object -> {
                 JsonObject replaced = new JsonObject();

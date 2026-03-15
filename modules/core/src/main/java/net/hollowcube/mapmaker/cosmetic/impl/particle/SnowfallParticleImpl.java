@@ -7,23 +7,22 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.timer.TaskSchedule;
-import org.jetbrains.annotations.NotNull;
 
 public class SnowfallParticleImpl extends AbstractParticleImpl {
 
-    public SnowfallParticleImpl(@NotNull Cosmetic cosmetic) {
+    public SnowfallParticleImpl(Cosmetic cosmetic) {
         super(cosmetic);
     }
 
     @Override
-    public void apply(@NotNull Player player) {
+    public void apply(Player player) {
         var task = player.scheduler()
             .submitTask(() -> particleTick(player));
         var lastTask = player.getAndSetTag(PARTICLE_TASK, task);
         if (lastTask != null) lastTask.cancel();
     }
 
-    private @NotNull TaskSchedule particleTick(Player player) {
+    private TaskSchedule particleTick(Player player) {
         player.sendPacketToViewersAndSelf(new ParticlePacket(
             Particle.FALLING_DUST.withBlock(Block.SNOW_BLOCK),
             false, false,

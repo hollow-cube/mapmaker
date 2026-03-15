@@ -15,7 +15,7 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.Material;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -27,15 +27,12 @@ public class MapIconPanel extends Panel {
     private final ServerBridge bridge;
     private final MapData map;
 
-    private DisplayName authorName = null; // Filled async
-    private Map.Entry<PersonalizedMapData.Progress, Integer> progress = null; // Filled async
+    private @Nullable DisplayName authorName = null; // Filled async
+    private @Nullable Map.Entry<PersonalizedMapData.Progress, Integer> progress = null; // Filled async
 
     private final Button button;
 
-    public MapIconPanel(
-        @NotNull ApiClient api, @NotNull MapService mapService,
-        @NotNull ServerBridge bridge, @NotNull MapData map
-    ) {
+    public MapIconPanel(ApiClient api, MapService mapService, ServerBridge bridge, MapData map) {
         super(1, 1);
         this.api = api;
         this.mapService = mapService;
@@ -48,7 +45,7 @@ public class MapIconPanel extends Panel {
             .onRightClick(this::handleViewMapDetails));
     }
 
-    public @NotNull MapData map() {
+    public MapData map() {
         return map;
     }
 
@@ -70,21 +67,21 @@ public class MapIconPanel extends Panel {
     }
 
     @Override
-    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+    protected void mount(InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
 
         if (this.authorName != null) return;
         async(() -> updateAuthor(api.players.getDisplayName(map.owner())));
     }
 
-    private void updateAuthor(@NotNull DisplayName displayName) {
+    private void updateAuthor(DisplayName displayName) {
         sync(() -> {
             authorName = displayName;
             updateIcon();
         });
     }
 
-    public void updateProgress(@NotNull Map.Entry<PersonalizedMapData.Progress, Integer> progress) {
+    public void updateProgress(Map.Entry<PersonalizedMapData.Progress, Integer> progress) {
         sync(() -> {
             this.progress = progress;
             updateIcon();

@@ -1,12 +1,11 @@
 package net.hollowcube.mapmaker.feature;
 
 import net.hollowcube.mapmaker.ExceptionReporter;
-import org.jetbrains.annotations.NotNull;
 
-record BasicFeatureFlag(@NotNull String name) implements FeatureFlag {
+record BasicFeatureFlag(String name) implements FeatureFlag {
 
     @Override
-    public boolean test(@NotNull Object... context) {
+    public boolean test(Object... context) {
         try {
             return FeatureFlagProvider.current().test(name, context);
         } catch (Exception e) {

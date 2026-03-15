@@ -12,7 +12,6 @@ import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
@@ -38,7 +37,7 @@ public class NoobCommand extends CommandDsl {
         addSyntax(playerOnly(this::handleApplyNoob));
     }
 
-    private void handleApplyNoob(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleApplyNoob(Player player, CommandContext context) {
         player.setHelmet(NOOB_HELMET);
         player.setChestplate(NOOB_CHESTPLATE);
         player.setLeggings(NOOB_LEGGINGS);

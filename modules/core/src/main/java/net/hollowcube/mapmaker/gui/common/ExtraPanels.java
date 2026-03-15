@@ -4,7 +4,6 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.panels.*;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -20,7 +19,7 @@ public final class ExtraPanels {
     public static final List<Component> LORE_POSTFIX_CLICKCREATE = LanguageProviderV2.translateMulti("gui.action.clickcreate", List.of());
     public static final List<Component> LORE_POSTFIX_NOT_AVAILABLE = LanguageProviderV2.translateMulti("gui.action.unavailable", List.of());
 
-    public static Text title(@NotNull String text) {
+    public static Text title(String text) {
         return new Text("", 9, 0, text).align(Text.CENTER, -23);
     }
 
@@ -28,11 +27,11 @@ public final class ExtraPanels {
         return new BackOrClosePanel();
     }
 
-    public static Button info(@NotNull String name) {
+    public static Button info(String name) {
         return infoWithKey("gui." + name + ".information");
     }
 
-    public static Button infoWithKey(@NotNull String translationKey) {
+    public static Button infoWithKey(String translationKey) {
         return new Button(translationKey, 1, 1)
             .background("generic2/btn/default/1_1")
             .sprite("generic2/btn/common/info", 4, 2);
@@ -44,18 +43,19 @@ public final class ExtraPanels {
 
     public static Text infoText(int width, String text, int xOffset) {
         return new Text(null, width, 1, text)
-            .font("small").align(xOffset, 6);
+            .font("small")
+            .align(xOffset, 6);
     }
 
-    public static Panel confirm(@NotNull Runnable onConfirm) {
+    public static Panel confirm(Runnable onConfirm) {
         return confirm(null, onConfirm);
     }
 
-    public static Panel confirm(@Nullable String text, @NotNull Runnable onConfirm) {
+    public static Panel confirm(@Nullable String text, Runnable onConfirm) {
         return new ConfirmPanel(text, _ -> onConfirm.run());
     }
 
-    public static Panel confirm(@Nullable String text, @NotNull Consumer<Player> onConfirm) {
+    public static Panel confirm(@Nullable String text, Consumer<Player> onConfirm) {
         return new ConfirmPanel(text, onConfirm);
     }
 
@@ -79,7 +79,7 @@ public final class ExtraPanels {
         }
 
         @Override
-        protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+        protected void mount(InventoryHost host, boolean isInitial) {
             super.mount(host, isInitial);
 
             if (host.canPopView()) {
@@ -93,7 +93,7 @@ public final class ExtraPanels {
     }
 
     private static class ConfirmPanel extends Panel {
-        public ConfirmPanel(@Nullable String text, @NotNull Consumer<Player> onConfirm) {
+        public ConfirmPanel(@Nullable String text, Consumer<Player> onConfirm) {
             super(3, 1);
 
             background("generic2/confirm", -10, -13);

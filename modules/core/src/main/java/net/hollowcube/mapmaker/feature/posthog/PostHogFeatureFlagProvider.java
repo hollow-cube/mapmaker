@@ -6,7 +6,6 @@ import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.posthog.FeatureFlagContext;
 import net.hollowcube.posthog.PostHog;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +19,7 @@ public class PostHogFeatureFlagProvider implements FeatureFlagProvider {
     // Uses the global PostHog instance which must have been initialized prior to this moment.
 
     @Override
-    public boolean test(@NotNull String name, @NotNull Object... context) {
+    public boolean test(String name, Object... context) {
         var transformedName = name.replace(".", "_");
         if (context.length == 0)
             return PostHog.getFeatureFlag(transformedName, NO_USER).isEnabled();
@@ -28,19 +27,19 @@ public class PostHogFeatureFlagProvider implements FeatureFlagProvider {
             case Player player -> {
                 var playerData = PlayerData.fromPlayer(player);
                 yield PostHog.getFeatureFlag(transformedName, playerData.id(), FeatureFlagContext.newBuilder()
-                        .personProperties(Map.of(
-                                "username", playerData.username(),
-                                "is_hypercube", String.valueOf(playerData.isHypercube())
-                        ))
-                        .build()).isEnabled();
+                    .personProperties(Map.of(
+                        "username", playerData.username(),
+                        "is_hypercube", String.valueOf(playerData.isHypercube())
+                    ))
+                    .build()).isEnabled();
             }
             case PlayerData playerData ->
-                    PostHog.getFeatureFlag(transformedName, playerData.id(), FeatureFlagContext.newBuilder()
-                            .personProperties(Map.of(
-                                    "username", playerData.username(),
-                                    "is_hypercube", String.valueOf(playerData.isHypercube())
-                            ))
-                            .build()).isEnabled();
+                PostHog.getFeatureFlag(transformedName, playerData.id(), FeatureFlagContext.newBuilder()
+                    .personProperties(Map.of(
+                        "username", playerData.username(),
+                        "is_hypercube", String.valueOf(playerData.isHypercube())
+                    ))
+                    .build()).isEnabled();
             case MapData map -> {
                 log.warn("Map context is not supported: {}", map);
                 yield false;

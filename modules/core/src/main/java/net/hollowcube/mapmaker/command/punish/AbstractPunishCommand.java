@@ -12,7 +12,6 @@ import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.types.PunishmentLadder;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -29,8 +28,7 @@ abstract class AbstractPunishCommand extends CommandDsl {
     private final Argument<PunishmentLadder> ladderArgument;
     private final Argument<String> commentArgument = Argument.GreedyString("comment");
 
-    AbstractPunishCommand(@NotNull String name, @NotNull PunishmentType type, @NotNull PunishmentService service,
-                          @NotNull PlayerService playerService) {
+    AbstractPunishCommand(String name, PunishmentType type, PunishmentService service, PlayerService playerService) {
         super(name);
 
         this.service = service;
@@ -50,14 +48,14 @@ abstract class AbstractPunishCommand extends CommandDsl {
 
         this.targetArgument = CoreArgument.AnyPlayerId("target", playerService);
         this.ladderArgument = Argument.Word("ladder").map(
-            (sender, raw) -> {
+            (_, raw) -> {
                 try {
                     return new ParseResult.Success<>(allLaddersByName.get(raw.toLowerCase(Locale.ROOT)));
                 } catch (Exception exception) {
                     return new ParseResult.Partial<>();
                 }
             },
-            (sender, raw, suggestion) -> {
+            (_, raw, suggestion) -> {
                 raw = raw.toLowerCase(Locale.ROOT);
                 for (var ladder : allLadderNames) {
                     if (ladder.startsWith(raw)) {
@@ -72,7 +70,7 @@ abstract class AbstractPunishCommand extends CommandDsl {
         this.addSyntax(playerOnly(this::execute), this.targetArgument, this.ladderArgument, this.commentArgument);
     }
 
-    private void execute(@NotNull Player sender, @NotNull CommandContext context) {
+    private void execute(Player sender, CommandContext context) {
         try {
             var target = context.get(this.targetArgument);
             var ladder = context.get(this.ladderArgument);

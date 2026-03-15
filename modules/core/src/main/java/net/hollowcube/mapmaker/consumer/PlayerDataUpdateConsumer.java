@@ -15,7 +15,6 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +38,7 @@ public class PlayerDataUpdateConsumer implements Closeable {
 
     private final MessageConsumer consumer;
 
-    public PlayerDataUpdateConsumer(@NotNull PlayerService playerService, JetStreamWrapper jetStream) {
+    public PlayerDataUpdateConsumer(PlayerService playerService, JetStreamWrapper jetStream) {
         this.playerService = playerService;
 
         this.consumer = jetStream.subscribe(STREAM, CONSUMER_CONFIG, PlayerDataUpdateMessage.class, this::handlePlayerDataUpdate);
@@ -54,14 +53,14 @@ public class PlayerDataUpdateConsumer implements Closeable {
         }
     }
 
-    private void handlePlayerDataUpdate(@NotNull Message msg, @NotNull PlayerDataUpdateMessage message) {
+    private void handlePlayerDataUpdate(Message msg, PlayerDataUpdateMessage message) {
         logger.info("Received player data update message {} for {}", message.action(), message.id());
         switch (message.action()) {
             case MODIFY -> handlePlayerDataModify(message);
         }
     }
 
-    private void handlePlayerDataModify(@NotNull PlayerDataUpdateMessage message) {
+    private void handlePlayerDataModify(PlayerDataUpdateMessage message) {
         var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(message.id()));
         if (player == null) return;
 
@@ -84,7 +83,7 @@ public class PlayerDataUpdateConsumer implements Closeable {
 
     private static final int MINUTES_TO_MONTHS = 31 * 24 * 60;
 
-    private void sendPlayerUpdateReasonMessage(@NotNull Player player, @NotNull PlayerDataUpdateMessage.Reason reason) {
+    private void sendPlayerUpdateReasonMessage(Player player, PlayerDataUpdateMessage.Reason reason) {
         switch (reason.type()) {
             case CUBITS -> {
                 player.sendMessage(Component.translatable("store.confirmation.cubits", Component.text(reason.quantity())));
@@ -109,7 +108,7 @@ public class PlayerDataUpdateConsumer implements Closeable {
         }
     }
 
-    private @NotNull Component createVoteRewardComponent(@NotNull PlayerDataUpdateMessage relative) {
+    private Component createVoteRewardComponent(PlayerDataUpdateMessage relative) {
         if (relative.backpack() != null) {
             return Component.text("some backpack update todo");
         } else if (relative.coins() != null) {

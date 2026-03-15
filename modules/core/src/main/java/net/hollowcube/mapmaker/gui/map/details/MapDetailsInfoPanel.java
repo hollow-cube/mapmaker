@@ -8,7 +8,6 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
@@ -17,7 +16,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 class MapDetailsInfoPanel extends Panel {
-    public MapDetailsInfoPanel(@NotNull MapData map) {
+    public MapDetailsInfoPanel(MapData map) {
         super(9, 4);
 
         // todo swap for build maps
@@ -47,7 +46,7 @@ class MapDetailsInfoPanel extends Panel {
                 Objects.requireNonNullElse(settingsText, "No Settings")));
     }
 
-    private @NotNull RowInfo mapQualityInfo(@NotNull MapQuality quality) {
+    private RowInfo mapQualityInfo(MapQuality quality) {
         return switch (quality) {
             case UNRATED -> new RowInfo("unrated", "Unrated", 3, 3);
             case GOOD -> new RowInfo("good", "Good", 3, 3);
@@ -58,7 +57,7 @@ class MapDetailsInfoPanel extends Panel {
         };
     }
 
-    private @NotNull RowInfo mapDifficultyInfo(@NotNull MapData.Difficulty difficulty) {
+    private RowInfo mapDifficultyInfo(MapData.Difficulty difficulty) {
         return switch (difficulty) {
             case UNKNOWN -> new RowInfo("unknown", "Unknown", 2, 2);
             case EASY -> new RowInfo("easy", "Easy", 4, 3);
@@ -69,7 +68,7 @@ class MapDetailsInfoPanel extends Panel {
         };
     }
 
-    private @NotNull RowInfo mapTypeInfo(@NotNull MapData mapData) {
+    private RowInfo mapTypeInfo(MapData mapData) {
         return switch (mapData.settings().getVariant()) {
             case PARKOUR -> switch (mapData.settings().getParkourSubVariant()) {
                 case null -> new RowInfo("pk_generic", "Generic Parkour", 2, 2);
@@ -90,37 +89,37 @@ class MapDetailsInfoPanel extends Panel {
         };
     }
 
-    private record RowInfo(@NotNull String key, @NotNull String name, int iconX, int iconY) {
+    private record RowInfo(String key, String name, int iconX, int iconY) {
     }
 
     private static class IconRow extends Panel {
 
         public IconRow(
-                int width, @NotNull String iconTranslationKey,
-                @NotNull String iconSprite, int iconSpriteX, int iconSpriteY,
-                @NotNull String textTranslationKey, @NotNull String text
+            int width, String iconTranslationKey,
+            String iconSprite, int iconSpriteX, int iconSpriteY,
+            String textTranslationKey, String text
         ) {
             this(width, iconTranslationKey, iconSprite, iconSpriteX, iconSpriteY,
-                    translatable(textTranslationKey + ".name"), LanguageProviderV2.translateMulti(textTranslationKey + ".lore", List.of()),
-                    text);
+                 translatable(textTranslationKey + ".name"), LanguageProviderV2.translateMulti(textTranslationKey + ".lore", List.of()),
+                 text);
         }
 
         public IconRow(
-                int width, @NotNull String iconTranslationKey,
-                @NotNull String iconSprite, int iconSpriteX, int iconSpriteY,
-                @NotNull Component textTitle, @NotNull List<Component> textLore, @NotNull String text
+            int width, String iconTranslationKey,
+            String iconSprite, int iconSpriteX, int iconSpriteY,
+            Component textTitle, List<Component> textLore, String text
         ) {
             super(width + 1, 1);
 
             add(0, 0, new Button(iconTranslationKey, 1, 1) {{
                 disableHoverSprite = true;
             }}
-                    .background("generic2/btn/default/1_1")
-                    .sprite(iconSprite, iconSpriteX, iconSpriteY));
+                .background("generic2/btn/default/1_1")
+                .sprite(iconSprite, iconSpriteX, iconSpriteY));
             add(1, 0, new Text(null, width, 1, text)
-                    .align(2, Text.CENTER)
-                    .sprite("map_details/info/row_bg_" + width)
-                    .text(textTitle, textLore));
+                .align(2, Text.CENTER)
+                .sprite("map_details/info/row_bg_" + width)
+                .text(textTitle, textLore));
         }
 
     }

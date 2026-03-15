@@ -5,7 +5,6 @@ import net.hollowcube.mapmaker.cosmetic.impl.CosmeticImpl;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.particle.Particle;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,13 +14,13 @@ public class DefaultParticleImpl extends AbstractParticleImpl {
 
     private final List<Particle> particles;
 
-    public DefaultParticleImpl(@NotNull Cosmetic cosmetic, @NotNull List<Particle> particles) {
+    public DefaultParticleImpl(Cosmetic cosmetic, List<Particle> particles) {
         super(cosmetic);
         this.particles = particles;
     }
 
     @Override
-    public void apply(@NotNull Player player) {
+    public void apply(Player player) {
         player.getPlayerMeta().setEffectParticles(this.particles);
     }
 

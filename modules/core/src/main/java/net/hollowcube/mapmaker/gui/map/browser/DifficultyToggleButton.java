@@ -2,14 +2,14 @@ package net.hollowcube.mapmaker.gui.map.browser;
 
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.hollowcube.mapmaker.panels.Button;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class DifficultyToggleButton extends Button {
     private final String translation;
     private final String sprite;
     private final int spriteX, spriteY;
 
-    private BooleanConsumer onChange;
+    private @Nullable BooleanConsumer onChange;
     private boolean selected = true; // gets changed to off in constructor
 
     public DifficultyToggleButton(String translation, String sprite, int spriteX, int spriteY) {
@@ -33,7 +33,7 @@ public class DifficultyToggleButton extends Button {
         if (onChange != null) onChange.accept(selected);
     }
 
-    public @NotNull DifficultyToggleButton onChange(@NotNull BooleanConsumer onChange) {
+    public DifficultyToggleButton onChange(BooleanConsumer onChange) {
         this.onChange = onChange;
         return this;
     }

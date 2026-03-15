@@ -14,7 +14,7 @@ import net.hollowcube.mapmaker.panels.Text;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.util.StringComparison;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,16 +38,16 @@ public class MapBrowserView extends Panel {
 
     protected final Pagination<MapSearchParams.Builder> pagination;
     private final Text searchTextElement;
-    private SimpleSortPanel simpleSortPanel;
+    private @Nullable SimpleSortPanel simpleSortPanel;
     protected boolean ignoreParamsOnSearch = true;
 
     private volatile String searchText = "";
 
-    public MapBrowserView(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
+    public MapBrowserView(ApiClient api, MapService mapService, ServerBridge bridge) {
         this(api, mapService, bridge, true);
     }
 
-    public MapBrowserView(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge, boolean fetchOnMount) {
+    public MapBrowserView(ApiClient api, MapService mapService, ServerBridge bridge, boolean fetchOnMount) {
         super(9, 10);
         this.api = api;
         this.mapService = mapService;
@@ -79,7 +79,7 @@ public class MapBrowserView extends Panel {
     }
 
     // This is a pretty gross inflexible method, but its fine for now
-    public void simpleSort(@NotNull SortPreset preset) {
+    public void simpleSort(SortPreset preset) {
         if (this.simpleSortPanel == null) return; // Sanity
         this.simpleSortPanel.setSync(false);
         this.simpleSortPanel.setSort(preset);
@@ -95,7 +95,7 @@ public class MapBrowserView extends Panel {
     }
 
     @Blocking
-    private @NotNull List<? extends Panel> onSearch(@NotNull MapSearchParams.Builder params, int page, int pageSize) {
+    private List<? extends Panel> onSearch(MapSearchParams.Builder params, int page, int pageSize) {
         // If we have a search query, ignore the given params.
         if (ignoreParamsOnSearch && !this.searchText.isEmpty()) {
             params = MapSearchParams.builder(host.player().getUuid().toString())
@@ -141,7 +141,7 @@ public class MapBrowserView extends Panel {
         super.unmount();
     }
 
-    private void handleSortChange(@NotNull MapSearchParams.Builder params) {
+    private void handleSortChange(MapSearchParams.Builder params) {
         // Altering the sort params will reset any search query to use the search you input.
         handleSearchTextChange("");
         this.pagination.reset(params);
@@ -151,7 +151,7 @@ public class MapBrowserView extends Panel {
         handleSearchTextChange("");
     }
 
-    private void handleSearchTextChange(@NotNull String newValue) {
+    private void handleSearchTextChange(String newValue) {
         var oldValue = this.searchText;
         searchText = newValue.trim();
         if (searchText.equals(oldValue)) return;

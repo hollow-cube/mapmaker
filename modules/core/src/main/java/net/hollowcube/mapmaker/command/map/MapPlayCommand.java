@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.Permission;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -24,7 +23,7 @@ public class MapPlayCommand extends CommandDsl {
     private final MapService mapService;
     private final ServerBridge bridge;
 
-    public MapPlayCommand(@NotNull MapService mapService, @NotNull ServerBridge bridge) {
+    public MapPlayCommand(MapService mapService, ServerBridge bridge) {
         super("play");
         this.mapService = mapService;
         this.bridge = bridge;
@@ -40,7 +39,7 @@ public class MapPlayCommand extends CommandDsl {
         addSyntax(playerOnly(this::handleForcePlayMap), mapArg, isolateArg);
     }
 
-    private void handleForcePlayMap(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleForcePlayMap(Player player, CommandContext context) {
         var map = context.get(mapArg);
         var isolateOverride = context.get(isolateArg);
 

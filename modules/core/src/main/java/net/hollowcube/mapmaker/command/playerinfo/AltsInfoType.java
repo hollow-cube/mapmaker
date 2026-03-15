@@ -5,7 +5,7 @@ import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 class AltsInfoType implements PlayerInfoType<String> {
 
@@ -16,20 +16,20 @@ class AltsInfoType implements PlayerInfoType<String> {
     }
 
     @Override
-    public Argument<String> getArgument() {
+    public Argument<@Nullable String> getArgument() {
         return CoreArgument.AnyPlayerId("player", this.players);
     }
 
     @Override
-    public void execute(@NotNull Player user, @NotNull String target) {
+    public void execute(Player user, String target) {
         var alts = this.players.getAlts(target);
         if (alts.isEmpty()) {
             user.sendMessage("No alts found for %s".formatted(target));
         } else {
             Component component = Component.text("Alts for ")
-                    .append(this.players.getPlayerDisplayName2(target).build())
-                    .append(Component.text(":"))
-                    .appendNewline();
+                .append(this.players.getPlayerDisplayName2(target).build())
+                .append(Component.text(":"))
+                .appendNewline();
             for (var alt : alts) {
                 component = component.append(Component.text(" - %s".formatted(alt.username()))).appendNewline();
             }

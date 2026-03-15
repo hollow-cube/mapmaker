@@ -14,7 +14,6 @@ import net.minestom.server.item.component.Equippable;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.inventory.PlayerInventoryUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -61,7 +60,10 @@ public enum CosmeticType {
     }
 
     CosmeticType(
-            String id, int iconSlot, String emptyIcon, @Nullable EquipmentSlot equipmentSlot, Consumer<Player> onReset) {
+            String id, int iconSlot,
+            @Nullable String emptyIcon, @Nullable EquipmentSlot equipmentSlot,
+            Consumer<Player> onReset
+    ) {
         this.id = id;
         this.setting = PlayerSetting.String("cosmetic." + id, "");
         this.tag = Tag.Transient("cosmetic." + id);
@@ -86,15 +88,15 @@ public enum CosmeticType {
         }
     }
 
-    public @NotNull String id() {
+    public String id() {
         return id;
     }
 
-    public @NotNull PlayerSetting<String> setting() {
+    public PlayerSetting<String> setting() {
         return setting;
     }
 
-    public @NotNull Tag<CosmeticType> tag() {
+    public Tag<CosmeticType> tag() {
         return tag;
     }
 
@@ -102,11 +104,11 @@ public enum CosmeticType {
         return iconSlot;
     }
 
-    public @NotNull ItemStack blankIcon() {
+    public ItemStack blankIcon() {
         return blankIcon;
     }
 
-    public void reset(@NotNull Player player) {
+    public void reset(Player player) {
         onReset.accept(player);
     }
 }

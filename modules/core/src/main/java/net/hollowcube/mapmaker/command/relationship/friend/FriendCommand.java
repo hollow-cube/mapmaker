@@ -5,12 +5,10 @@ import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
-import org.jetbrains.annotations.NotNull;
 
 public class FriendCommand extends CommandDsl {
 
-    public FriendCommand(
-        @NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull SessionManager sessionManager) {
+    public FriendCommand(PlayerService playerService, MapService mapService, SessionManager sessionManager) {
         super("friend");
 
         this.description = "A command that lets you interact with your friend relationships (add/remove/list)";

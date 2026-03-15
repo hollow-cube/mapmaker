@@ -9,10 +9,9 @@ import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerUseItemEvent;
-import org.jetbrains.annotations.NotNull;
 
 public abstract class AbstractAccessoryImpl extends ModelCosmeticImpl {
-    public static void addListeners(@NotNull EventNode<Event> eventNode) {
+    public static void addListeners(EventNode<Event> eventNode) {
         eventNode.addListener(PlayerUseItemEvent.class, event -> {
             var player = event.getPlayer();
             if (event.getHand() != PlayerHand.OFF || !player.getItemInMainHand().isAir())
@@ -27,9 +26,9 @@ public abstract class AbstractAccessoryImpl extends ModelCosmeticImpl {
 
     }
 
-    public AbstractAccessoryImpl(@NotNull Cosmetic cosmetic) {
+    public AbstractAccessoryImpl(Cosmetic cosmetic) {
         super(cosmetic);
     }
 
-    public abstract void useItem(@NotNull Player player);
+    public abstract void useItem(Player player);
 }

@@ -8,6 +8,7 @@ import net.hollowcube.canvas.internal.Context;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+@Deprecated // when canvas is turbo dumped
 public class BackButton2 extends View {
 
     private static final int OPT_BACK = 0;

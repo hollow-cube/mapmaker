@@ -15,9 +15,6 @@ import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
-
-import java.awt.*;
 
 public class FriendListCommand extends CommandDsl {
     private final Argument<Integer> pageArg = Argument.Int("page").min(1).defaultValue(1);
@@ -26,8 +23,7 @@ public class FriendListCommand extends CommandDsl {
     private final MapService mapService;
     private final SessionManager sessionManager;
 
-    public FriendListCommand(
-        @NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull SessionManager sessionManager) {
+    public FriendListCommand(PlayerService playerService, MapService mapService, SessionManager sessionManager) {
         super("list");
         this.playerService = playerService;
         this.mapService = mapService;
@@ -37,7 +33,7 @@ public class FriendListCommand extends CommandDsl {
         this.addSyntax(playerOnly(this::exec), this.pageArg);
     }
 
-    private void exec(@NotNull Player player, @NotNull CommandContext context) {
+    private void exec(Player player, CommandContext context) {
         int page = context.get(this.pageArg);
 
         PlayerService.Page<PlayerFriend> friends = this.playerService.getPlayerFriends(player.getUuid().toString(),

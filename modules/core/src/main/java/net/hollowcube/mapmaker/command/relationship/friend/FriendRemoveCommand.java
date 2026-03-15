@@ -8,7 +8,6 @@ import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FriendRemoveCommand extends CommandDsl {
@@ -16,7 +15,7 @@ public class FriendRemoveCommand extends CommandDsl {
 
     private final PlayerService playerService;
 
-    public FriendRemoveCommand(@NotNull PlayerService playerService) {
+    public FriendRemoveCommand(PlayerService playerService) {
         super("remove");
         this.playerService = playerService;
 
@@ -26,7 +25,7 @@ public class FriendRemoveCommand extends CommandDsl {
         this.addSyntax(playerOnly(this::exec), this.targetArg);
     }
 
-    private void exec(@NotNull Player player, @NotNull CommandContext context) {
+    private void exec(Player player, CommandContext context) {
         var targetData = context.get(this.targetArg);
         if (targetData == null) return;
         if (targetData.id().equals(player.getUuid().toString())) {

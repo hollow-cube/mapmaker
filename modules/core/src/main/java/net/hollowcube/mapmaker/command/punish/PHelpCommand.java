@@ -12,7 +12,6 @@ import net.hollowcube.mapmaker.punishments.types.PunishmentLadder;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,7 +26,7 @@ public class PHelpCommand extends CommandDsl {
 
     private final PunishmentService punishmentService;
 
-    public PHelpCommand(@NotNull PunishmentService punishmentService) {
+    public PHelpCommand(PunishmentService punishmentService) {
         super("phelp");
         this.punishmentService = punishmentService;
 
@@ -39,7 +38,7 @@ public class PHelpCommand extends CommandDsl {
         addSyntax(playerOnly(this::showLadderInfo), typeArg);
     }
 
-    private void showLadderInfo(@NotNull Player player, @NotNull CommandContext context) {
+    private void showLadderInfo(Player player, CommandContext context) {
         var typeFilter = context.get(typeArg);
 
         var builder = Component.text();
@@ -93,7 +92,7 @@ public class PHelpCommand extends CommandDsl {
     private static final long WEEK = 7 * DAY;
     private static final long MONTH = 30 * DAY;
 
-    private static @NotNull String formatDuration(long duration) {
+    private static String formatDuration(long duration) {
         if (duration < 0) {
             return "permanent";
         } else if (duration >= MONTH) {

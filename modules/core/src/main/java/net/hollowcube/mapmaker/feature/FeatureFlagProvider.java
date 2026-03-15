@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker.feature;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Objects;
 
 /**
@@ -9,15 +7,15 @@ import java.util.Objects;
  */
 public interface FeatureFlagProvider {
 
-    static void replaceGlobals(@NotNull FeatureFlagProvider provider) {
+    static void replaceGlobals(FeatureFlagProvider provider) {
         Globals.provider = Objects.requireNonNull(provider);
     }
 
-    static @NotNull FeatureFlagProvider current() {
+    static FeatureFlagProvider current() {
         return Globals.provider;
     }
 
-    boolean test(@NotNull String name, @NotNull Object... context);
+    boolean test(String name, Object... context);
 
     default void close() {
     }

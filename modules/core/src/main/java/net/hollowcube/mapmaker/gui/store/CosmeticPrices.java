@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CosmeticPrices {
+public final class CosmeticPrices {
 
     // This is pretty giga yikes and temporary. Just exists while cosmetics are being sold for cubits.
     private static final Map<String, MerchantTrade> TEMP_COSMETIC_TRADES;
@@ -72,5 +72,8 @@ public class CosmeticPrices {
 
     public static @Nullable MerchantTrade getTrade(Cosmetic cosmetic) {
         return TEMP_COSMETIC_TRADES.get(cosmetic.path());
+    }
+
+    private CosmeticPrices() {
     }
 }

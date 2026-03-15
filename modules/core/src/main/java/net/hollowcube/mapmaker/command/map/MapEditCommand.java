@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.Permission;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -23,7 +22,7 @@ public class MapEditCommand extends CommandDsl {
     private final MapService mapService;
     private final ServerBridge bridge;
 
-    public MapEditCommand(@NotNull MapService mapService, @NotNull ServerBridge bridge) {
+    public MapEditCommand(MapService mapService, ServerBridge bridge) {
         super("edit");
         this.mapService = mapService;
         this.bridge = bridge;
@@ -37,7 +36,7 @@ public class MapEditCommand extends CommandDsl {
         addSyntax(playerOnly(this::handleForceEditMap), mapArg);
     }
 
-    private void handleForceEditMap(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleForceEditMap(Player player, CommandContext context) {
         var map = context.get(mapArg);
 
         if (map == null) {

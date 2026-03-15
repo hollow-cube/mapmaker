@@ -15,7 +15,6 @@ import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -33,10 +32,7 @@ public class PHistoryCommand extends CommandDsl {
     private final PlayerService playerService;
     private final PunishmentService punishmentService;
 
-    public PHistoryCommand(
-        @NotNull PlayerService playerService,
-        @NotNull PunishmentService punishmentService
-    ) {
+    public PHistoryCommand(PlayerService playerService, PunishmentService punishmentService) {
         super("phistory");
         this.playerService = playerService;
         this.punishmentService = punishmentService;
@@ -51,7 +47,7 @@ public class PHistoryCommand extends CommandDsl {
         addSyntax(playerOnly(this::showPlayerHistory), playerArg, typeArg);
     }
 
-    private void showPlayerHistory(@NotNull Player player, @NotNull CommandContext context) {
+    private void showPlayerHistory(Player player, CommandContext context) {
         var target = context.get(playerArg);
         var type = context.get(typeArg);
 

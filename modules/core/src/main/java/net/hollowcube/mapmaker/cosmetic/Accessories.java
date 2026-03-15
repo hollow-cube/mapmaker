@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.cosmetic;
 import net.hollowcube.mapmaker.backpack.Rarity;
 import net.hollowcube.mapmaker.cosmetic.impl.ModelCosmeticImpl;
 import net.hollowcube.mapmaker.cosmetic.impl.accessory.ShrinkingDeviceImpl;
-import org.jetbrains.annotations.NotNull;
 
 public final class Accessories {
 
@@ -28,8 +27,11 @@ public final class Accessories {
             .tags(CosmeticTag.LIMITED_TIME)
             .build();
 
-    public static @NotNull Cosmetic.Builder builder(@NotNull String id) {
+    public static Cosmetic.Builder builder(String id) {
         return new Cosmetic.Builder(CosmeticType.ACCESSORY, id)
                 .impl(ModelCosmeticImpl::new);
+    }
+
+    private Accessories() {
     }
 }

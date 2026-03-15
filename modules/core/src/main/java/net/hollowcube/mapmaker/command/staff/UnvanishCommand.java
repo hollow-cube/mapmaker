@@ -12,7 +12,6 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 
@@ -23,7 +22,7 @@ public class UnvanishCommand extends CommandDsl {
     private final SessionManager sessionManager;
     private final PlayerService playerService;
 
-    public UnvanishCommand(@NotNull SessionManager sessionManager, @NotNull PlayerService playerService) {
+    public UnvanishCommand(SessionManager sessionManager, PlayerService playerService) {
         super("unvanish");
         this.sessionManager = sessionManager;
         this.playerService = playerService;
@@ -36,7 +35,7 @@ public class UnvanishCommand extends CommandDsl {
         addSyntax(playerOnly(this::handleVanish));
     }
 
-    private void handleVanish(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleVanish(Player player, CommandContext context) {
         boolean isSilent = context.has(silentArg);
 
         var playerData = PlayerData.fromPlayer(player);

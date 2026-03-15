@@ -14,7 +14,6 @@ import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.network.player.ResolvableProfile;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -41,8 +40,7 @@ public class MapDetailsTimesPanel extends Panel {
     private final Text playerTimeText;
     private final List<Button> playerButtons; // They need the same text :|
 
-    public MapDetailsTimesPanel(
-        @NotNull ApiClient api, @NotNull MapService mapService, @NotNull String mapId) {
+    public MapDetailsTimesPanel(ApiClient api, MapService mapService, String mapId) {
         super(9, 4);
         this.api = api;
         this.mapService = mapService;
@@ -68,7 +66,7 @@ public class MapDetailsTimesPanel extends Panel {
     }
 
     @Override
-    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+    protected void mount(InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
 
         this.tabs.select(0); // Always go back to the top 3 tab
@@ -107,7 +105,7 @@ public class MapDetailsTimesPanel extends Panel {
         .maximumSize(1000)
         .build();
 
-    public static @NotNull ResolvableProfile getPlayerHead2d(@Nullable String uuid) {
+    public static ResolvableProfile getPlayerHead2d(@Nullable String uuid) {
         if (uuid == null) return CoreSkulls.UNKNOWN_PLAYER;
         return HEAD_CACHE.get(uuid, key -> OpUtils.mapOr(
             PlayerSkin.fromUuid(key),
@@ -128,7 +126,7 @@ public class MapDetailsTimesPanel extends Panel {
             this.entries[2] = add(6, 0, new Entry("third"));
         }
 
-        public void update(@NotNull List<LeaderboardData.Entry> entries, @NotNull List<DisplayName> displayNames) {
+        public void update(List<LeaderboardData.Entry> entries, List<DisplayName> displayNames) {
             for (int i = 0; i < 3; i++) {
                 if (i >= entries.size()) continue;
 
@@ -145,7 +143,7 @@ public class MapDetailsTimesPanel extends Panel {
             private final Button playerHeadBtn;
             private final Text timeText;
 
-            public Entry(@NotNull String number) {
+            public Entry(String number) {
                 super(3, 3);
                 this.translationKey = "gui.map_details.top_times_tab." + number + "_place";
 
@@ -160,7 +158,7 @@ public class MapDetailsTimesPanel extends Panel {
                     .align(Text.CENTER, 6));
             }
 
-            public void update(@NotNull LeaderboardData.Entry entry, @NotNull Component playerName) {
+            public void update(LeaderboardData.Entry entry, Component playerName) {
                 var time = NumberUtil.formatMapPlaytime(entry.score(), true);
                 backgroundBtn.translationKey(translationKey, playerName, time);
                 playerHeadBtn.translationKey(translationKey, playerName, time);
@@ -187,7 +185,7 @@ public class MapDetailsTimesPanel extends Panel {
             this.entries[5] = add(5, 2, new TopTenPanel.Entry("ninth", true));
         }
 
-        public void update(@NotNull List<LeaderboardData.Entry> entries, @NotNull List<DisplayName> displayNames) {
+        public void update(List<LeaderboardData.Entry> entries, List<DisplayName> displayNames) {
             for (int i = 0; i < this.entries.length; i++) {
                 int index = i + START_OFFSET;
                 if (index >= entries.size()) return;
@@ -204,7 +202,7 @@ public class MapDetailsTimesPanel extends Panel {
             private final Button playerHeadBtn;
             private final Text timeText;
 
-            public Entry(@NotNull String number, boolean isRightColumn) {
+            public Entry(String number, boolean isRightColumn) {
                 super(4, 1);
                 this.translationKey = "gui.map_details.top_times_tab." + number + "_place";
 
@@ -217,7 +215,7 @@ public class MapDetailsTimesPanel extends Panel {
                 this.timeText.translationKey(translationKey, MISSING_PLAYER, MISSING_TIME);
             }
 
-            public void update(@NotNull LeaderboardData.Entry entry, @NotNull Component playerName) {
+            public void update(LeaderboardData.Entry entry, Component playerName) {
                 var time = NumberUtil.formatMapPlaytime(entry.score(), true);
                 playerHeadBtn.translationKey(translationKey, playerName, time);
                 playerHeadBtn.profile(getPlayerHead2d(entry.player()));

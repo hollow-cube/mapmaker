@@ -7,7 +7,7 @@ import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
 import net.hollowcube.mapmaker.player.PlayerData;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
@@ -21,11 +21,11 @@ public class RateMapView extends Panel {
     private final Button likeButton;
     private final Button dislikeButton;
 
-    private MapRating.State ratingState;
+    private @Nullable MapRating.State ratingState;
 
     public RateMapView(
-            @NotNull MapService mapService, @NotNull MapData map,
-            @NotNull MapRating.State initialState, @NotNull Consumer<MapRating.State> onChange
+        MapService mapService, MapData map,
+        MapRating.State initialState, Consumer<MapRating.State> onChange
     ) {
         super(9, 10);
         this.mapService = mapService;
@@ -39,22 +39,22 @@ public class RateMapView extends Panel {
         add(1, 0, info("map_rating"));
         var publishedId = MapData.formatPublishedId(map.publishedId());
         add(2, 0, new Text(null, 5, 1, publishedId)
-                .align(Text.CENTER, Text.CENTER)
-                .sprite("generic2/btn/default/5_1")
-                .translationKey("gui.map_rating.map_id", publishedId));
+            .align(Text.CENTER, Text.CENTER)
+            .sprite("generic2/btn/default/5_1")
+            .translationKey("gui.map_rating.map_id", publishedId));
         add(7, 0, new Button("gui.map_rating.report_map", 2, 1)
-                .background("generic2/btn/default/2_1")
-                .sprite("map_details/action/report", 15, 3)
-                .onLeftClick(() -> host.pushView(new MapReportView(mapService, map))));
+            .background("generic2/btn/default/2_1")
+            .sprite("map_details/action/report", 15, 3)
+            .onLeftClick(() -> host.pushView(new MapReportView(mapService, map))));
 
         this.likeButton = add(1, 2, new Button(null, 3, 3)
-                .onLeftClickAsync(() -> handleRatingStateChange(MapRating.State.LIKED)));
+            .onLeftClickAsync(() -> handleRatingStateChange(MapRating.State.LIKED)));
         this.dislikeButton = add(5, 2, new Button(null, 3, 3)
-                .onLeftClickAsync(() -> handleRatingStateChange(MapRating.State.DISLIKED)));
+            .onLeftClickAsync(() -> handleRatingStateChange(MapRating.State.DISLIKED)));
         updateLocalRatingState(initialState);
     }
 
-    private void handleRatingStateChange(@NotNull MapRating.State newState) {
+    private void handleRatingStateChange(MapRating.State newState) {
         var resultState = this.ratingState == newState ? MapRating.State.UNRATED : newState;
         updateLocalRatingState(resultState);
 
@@ -66,7 +66,7 @@ public class RateMapView extends Panel {
         });
     }
 
-    private void updateLocalRatingState(@NotNull MapRating.State newState) {
+    private void updateLocalRatingState(MapRating.State newState) {
         if (this.ratingState == newState) return;
         this.ratingState = newState;
 

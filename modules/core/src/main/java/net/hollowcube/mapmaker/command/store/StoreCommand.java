@@ -7,12 +7,11 @@ import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 public class StoreCommand extends CommandDsl {
     private final PlayerService playerService;
 
-    public StoreCommand(@NotNull PlayerService playerService) {
+    public StoreCommand(PlayerService playerService) {
         super("store", "buy");
         this.playerService = playerService;
 
@@ -22,7 +21,7 @@ public class StoreCommand extends CommandDsl {
         addSyntax(playerOnly(this::handleOpenStore));
     }
 
-    private void handleOpenStore(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleOpenStore(Player player, CommandContext context) {
         Panel.open(player, new StoreView(playerService));
     }
 }

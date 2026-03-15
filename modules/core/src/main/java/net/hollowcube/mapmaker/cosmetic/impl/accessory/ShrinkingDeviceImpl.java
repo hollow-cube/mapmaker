@@ -14,7 +14,6 @@ import net.minestom.server.entity.attribute.AttributeOperation;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.time.TimeUnit;
-import org.jetbrains.annotations.NotNull;
 
 public class ShrinkingDeviceImpl extends AbstractAccessoryImpl {
     private static final TagCooldown USE_COOLDOWN = new TagCooldown("cosmetic:shrinking_device", 60 * 1000); // 1m cooldown
@@ -25,12 +24,12 @@ public class ShrinkingDeviceImpl extends AbstractAccessoryImpl {
 
     private static final AttributeModifier SHRINK_MODIFIER = new AttributeModifier("cosmetic:shrinking_device", -0.75, AttributeOperation.ADD_VALUE);
 
-    public ShrinkingDeviceImpl(@NotNull Cosmetic cosmetic) {
+    public ShrinkingDeviceImpl(Cosmetic cosmetic) {
         super(cosmetic);
     }
 
     @Override
-    public void useItem(@NotNull Player player) {
+    public void useItem(Player player) {
         var playerId = PlayerData.fromPlayer(player).id();
         var session = SessionManager.instance.getSession(playerId);
         if (session == null || session.presence() == null) return;

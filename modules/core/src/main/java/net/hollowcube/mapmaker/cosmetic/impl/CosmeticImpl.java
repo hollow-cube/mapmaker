@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.cosmetic.impl;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 /*
 
@@ -35,15 +34,15 @@ WHAT DO THE COSMETICS NEED TO BE ABLE TO DO FUNCTIONALITY WISE
 public class CosmeticImpl {
     protected final Cosmetic cosmetic;
 
-    public CosmeticImpl(@NotNull Cosmetic cosmetic) {
+    public CosmeticImpl(Cosmetic cosmetic) {
         this.cosmetic = cosmetic;
     }
 
-    public @NotNull ItemStack iconItem() {
+    public ItemStack iconItem() {
         return cosmetic.iconItem();
     }
 
-    public void apply(@NotNull Player player) {
+    public void apply(Player player) {
     }
 
 }

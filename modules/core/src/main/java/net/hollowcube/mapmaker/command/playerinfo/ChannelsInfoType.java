@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.command.playerinfo;
 import net.hollowcube.compat.impl.PacketQueue;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 class ChannelsInfoType extends PlayerInfoType.ForPlayer {
 
@@ -14,20 +13,21 @@ class ChannelsInfoType extends PlayerInfoType.ForPlayer {
     }
 
     @Override
-    public void execute(@NotNull Player user, @NotNull Player target) {
+    public void execute(Player user, Player target) {
         PacketQueue queue = PacketQueue.get(target);
-        if (queue == null) {
-            user.sendMessage("No channels found for %s".formatted(target.getUsername()));
-        } else {
+        // TODO: There doesn't seem to be an instance where PacketQueue#get can return null
+//        if (queue == null) {
+//            user.sendMessage("No channels found for %s".formatted(target.getUsername()));
+//        } else {
             var channels = queue.channels().stream()
-                    .map(s -> namespaces ? s.split(":")[0] : s)
-                    .distinct()
-                    .sorted()
-                    .toList();
+                .map(s -> namespaces ? s.split(":")[0] : s)
+                .distinct()
+                .sorted()
+                .toList();
             Component message = Component.text((namespaces ? "Namespaces for (%s): " : "Channels for (%s): ").formatted(target.getUsername()))
-                    .appendNewline()
-                    .append(Component.text(String.join(", ", channels)));
+                .appendNewline()
+                .append(Component.text(String.join(", ", channels)));
             user.sendMessage(message);
-        }
+//        }
     }
 }

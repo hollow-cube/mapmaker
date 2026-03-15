@@ -9,18 +9,14 @@ import net.hollowcube.mapmaker.panels.Element;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.NotNull;
 
 public class MapContestBrowserView extends MapBrowserView {
 
-    public MapContestBrowserView(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
+    public MapContestBrowserView(ApiClient api, MapService mapService, ServerBridge bridge) {
         this(api, mapService, bridge, true);
     }
 
-    public MapContestBrowserView(
-        @NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge,
-        boolean fetchOnMount
-    ) {
+    public MapContestBrowserView(ApiClient api, MapService mapService, ServerBridge bridge, boolean fetchOnMount) {
         super(api, mapService, bridge, fetchOnMount);
 
         background("map_browser/contest_container", -10, -31);
@@ -35,7 +31,7 @@ public class MapContestBrowserView extends MapBrowserView {
     }
 
     @Override
-    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+    protected void mount(InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
         if (!isInitial) return;
 

@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -19,7 +18,7 @@ public class ListCommand extends CommandDsl {
     private final SessionManager sessionManager;
     private final PlayerService playerService;
 
-    public ListCommand(@NotNull SessionManager sessionManager, @NotNull PlayerService playerService) {
+    public ListCommand(SessionManager sessionManager, PlayerService playerService) {
         super("list");
         this.sessionManager = sessionManager;
         this.playerService = playerService;
@@ -32,7 +31,7 @@ public class ListCommand extends CommandDsl {
         addSubcommand(new MapListCommand());
     }
 
-    private void handleListPlayers(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleListPlayers(Player player, CommandContext context) {
         var sessions = List.copyOf(sessionManager.sessions(false));
         var playerNames = sessions
                 .stream()
@@ -59,7 +58,7 @@ public class ListCommand extends CommandDsl {
             addSyntax(playerOnly(this::handleListMaps));
         }
 
-        private void handleListMaps(@NotNull Player player, @NotNull CommandContext context) {
+        private void handleListMaps(Player player, CommandContext context) {
             var playerNames = player.getInstance().getPlayers()
                     .stream()
                     .map(otherPlayer -> otherPlayer.getUuid().toString())

@@ -13,7 +13,6 @@ import net.hollowcube.mapmaker.panels.Text;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.minestom.server.utils.Unit;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +30,7 @@ public abstract class MapListView extends Panel {
     private final Pagination<Unit> pagination;
     private boolean initialized = false;
 
-    protected MapListView(
-        @NotNull ApiClient api, @NotNull MapService mapService,
-        @NotNull ServerBridge bridge, @NotNull String title
-    ) {
+    protected MapListView(ApiClient api, MapService mapService, ServerBridge bridge, String title) {
         super(9, 10);
         this.api = api;
         this.mapService = mapService;
@@ -53,7 +49,7 @@ public abstract class MapListView extends Panel {
     }
 
     @Override
-    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+    protected void mount(InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
 
         if (!initialized) {
@@ -63,7 +59,7 @@ public abstract class MapListView extends Panel {
     }
 
     @Blocking
-    protected @NotNull List<? extends Panel> onSearch(@NotNull Unit ignored, int page, int pageSize) {
+    protected List<? extends Panel> onSearch(Unit ignored, int page, int pageSize) {
         var response = search(page, pageSize);
         if (response.getValue() > page) pagination.totalPages(response.getValue());
 
@@ -90,18 +86,18 @@ public abstract class MapListView extends Panel {
 
     // Int is # of pages, only relevant if page == 0
     @Blocking
-    protected abstract @NotNull Map.Entry<List<MapData>, Integer> search(int page, int pageSize);
+    protected abstract Map.Entry<List<MapData>, Integer> search(int page, int pageSize);
 
     public static class Player extends MapListView {
         private final String targetId;
 
-        public Player(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge, @NotNull String targetId) {
+        public Player(ApiClient api, MapService mapService, ServerBridge bridge, String targetId) {
             super(api, mapService, bridge, "Maps"); // Title is updated later.
             this.targetId = targetId;
         }
 
         @Override
-        protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+        protected void mount(InventoryHost host, boolean isInitial) {
             super.mount(host, isInitial);
             if (!isInitial) return;
 
@@ -116,7 +112,7 @@ public abstract class MapListView extends Panel {
         }
 
         @Override
-        protected Map.@NotNull Entry<List<MapData>, Integer> search(int page, int pageSize) {
+        protected Map.Entry<List<MapData>, Integer> search(int page, int pageSize) {
             var response = mapService.searchMaps(MapSearchParams.builder(host.player().getUuid().toString())
                 .page(page).pageSize(pageSize).owner(this.targetId).build());
             return Map.entry(response.results(), response.pageCount());
@@ -125,12 +121,12 @@ public abstract class MapListView extends Panel {
 
     public static class History extends MapListView {
 
-        public History(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
+        public History(ApiClient api, MapService mapService, ServerBridge bridge) {
             super(api, mapService, bridge, "Map History");
         }
 
         @Override
-        protected Map.@NotNull Entry<List<MapData>, Integer> search(int page, int pageSize) {
+        protected Map.Entry<List<MapData>, Integer> search(int page, int pageSize) {
             var playerId = PlayerData.fromPlayer(host.player()).id();
             var history = mapService.getPlayerMapHistory(playerId, page, pageSize);
             var mapIds = history.results().stream().map(MapHistory.Entry::mapId).toList();

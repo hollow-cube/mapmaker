@@ -4,7 +4,6 @@ import net.hollowcube.mapmaker.backpack.Rarity;
 import net.hollowcube.mapmaker.cosmetic.impl.particle.DefaultParticleImpl;
 import net.hollowcube.mapmaker.cosmetic.impl.particle.SnowfallParticleImpl;
 import net.minestom.server.particle.Particle;
-import org.jetbrains.annotations.NotNull;
 
 public final class Particles {
 
@@ -22,7 +21,10 @@ public final class Particles {
             .impl(SnowfallParticleImpl::new)
             .build();
 
-    public static @NotNull Cosmetic.Builder builder(@NotNull String id) {
+    public static Cosmetic.Builder builder(String id) {
         return new Cosmetic.Builder(CosmeticType.PARTICLE, id);
+    }
+
+    private Particles() {
     }
 }

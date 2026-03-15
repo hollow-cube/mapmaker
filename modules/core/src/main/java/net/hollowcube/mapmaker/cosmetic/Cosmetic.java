@@ -13,7 +13,6 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.CustomModelData;
 import net.minestom.server.tag.Tag;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -41,34 +40,34 @@ public class Cosmetic {
     }
 
     // In the form type/id
-    public static @NotNull Cosmetic byPathRequired(@NotNull String path) {
+    public static Cosmetic byPathRequired(String path) {
         return Objects.requireNonNull(byPath(path), "Cosmetic not found: " + path);
     }
 
     // In the form type/id
-    public static @Nullable Cosmetic byPath(@NotNull String path) {
+    public static @Nullable Cosmetic byPath(String path) {
         String[] split = path.split("/");
         if (split.length != 2) return null;
         return byId(CosmeticType.valueOf(split[0].toUpperCase(Locale.ROOT)), split[1]);
     }
 
-    public static @Nullable Cosmetic byId(@NotNull CosmeticType type, @Nullable String id) {
+    public static @Nullable Cosmetic byId(CosmeticType type, @Nullable String id) {
         if (id == null) return null;
         var byType = COSMETICS.get(type);
         if (byType == null) return null;
         return byType.get(id);
     }
 
-    public static @NotNull Collection<Cosmetic> values(@NotNull CosmeticType type) {
+    public static Collection<Cosmetic> values(CosmeticType type) {
         return COSMETICS.getOrDefault(type, Map.of()).values();
     }
 
-    public static @NotNull Comparator<Cosmetic> comparingName() {
+    public static Comparator<Cosmetic> comparingName() {
         // May need to switch this to translate the name first, but for now this will do.
         return Comparator.comparing(c -> "cosmetic." + c.type.id() + "." + c.id + ".name");
     }
 
-    public static <T> @NotNull Comparator<T> comparingName(Function<T, Cosmetic> getter) {
+    public static <T> Comparator<T> comparingName(Function<T, Cosmetic> getter) {
         // May need to switch this to translate the name first, but for now this will do.
         return Comparator.comparing(t -> {
             var c = getter.apply(t);
@@ -80,7 +79,7 @@ public class Cosmetic {
         return Comparator.comparingInt(c -> c.rarity.ordinal());
     }
 
-    public static <T> @NotNull Comparator<T> comparingRarity(@NotNull Function<T, Cosmetic> getter) {
+    public static <T> Comparator<T> comparingRarity(Function<T, Cosmetic> getter) {
         return Comparator.comparingInt(t -> getter.apply(t).rarity.ordinal());
     }
 
@@ -114,19 +113,19 @@ public class Cosmetic {
         this.impl = builder.implFunc.apply(this);
     }
 
-    public @NotNull CosmeticType type() {
+    public CosmeticType type() {
         return type;
     }
 
-    public @NotNull String id() {
+    public String id() {
         return id;
     }
 
-    public @NotNull String path() {
+    public String path() {
         return type.id() + "/" + id;
     }
 
-    public @NotNull Rarity rarity() {
+    public Rarity rarity() {
         return rarity;
     }
 
@@ -134,21 +133,21 @@ public class Cosmetic {
         return hidden;
     }
 
-    public @NotNull ItemStack iconItem() {
+    public ItemStack iconItem() {
         return icon;
     }
 
-    public @NotNull ItemStack iconLockedItem() {
+    public ItemStack iconLockedItem() {
         return iconLocked;
     }
 
-    public @NotNull ItemStack iconPreviewItem() {
+    public ItemStack iconPreviewItem() {
         return icon.builder()
             .customModelData(List.of(2f), List.of(), List.of(), List.of())
             .build();
     }
 
-    public @NotNull CosmeticImpl impl() {
+    public CosmeticImpl impl() {
         return impl;
     }
 
@@ -156,11 +155,11 @@ public class Cosmetic {
         return impl instanceof ModelCosmeticImpl;
     }
 
-    public @NotNull Component displayName() {
+    public Component displayName() {
         return Objects.requireNonNull(LanguageProviderV2.translate(Component.translatable("cosmetic." + type.id() + "." + id + ".name")));
     }
 
-    public @NotNull List<Component> lore() {
+    public List<Component> lore() {
         var itemLore = new ArrayList<Component>();
         itemLore.add(rarity.asComponent());
         if (!tags.isEmpty()) itemLore.add(Component.join(JoinConfiguration.noSeparators(), tags));
@@ -183,27 +182,27 @@ public class Cosmetic {
             this.id = id;
         }
 
-        public @NotNull Builder impl(@NotNull Function<Cosmetic, CosmeticImpl> implFunc) {
+        public Builder impl(Function<Cosmetic, CosmeticImpl> implFunc) {
             this.implFunc = implFunc;
             return this;
         }
 
-        public @NotNull Builder rarity(@NotNull Rarity rarity) {
+        public Builder rarity(Rarity rarity) {
             this.rarity = rarity;
             return this;
         }
 
-        public @NotNull Builder hidden() {
+        public Builder hidden() {
             this.hidden = true;
             return this;
         }
 
-        public @NotNull Builder tags(@NotNull CosmeticTag... tags) {
+        public Builder tags(CosmeticTag... tags) {
             this.tags.addAll(Arrays.asList(tags));
             return this;
         }
 
-        public @NotNull Cosmetic build() {
+        public Cosmetic build() {
             var cosmetic = new Cosmetic(this);
             COSMETICS.computeIfAbsent(type, k -> new HashMap<>()).put(id, cosmetic);
             return cosmetic;

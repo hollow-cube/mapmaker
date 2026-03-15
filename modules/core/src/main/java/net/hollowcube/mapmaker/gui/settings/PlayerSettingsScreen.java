@@ -13,11 +13,10 @@ import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerCustomClickEvent;
 import net.minestom.server.network.packet.server.common.ShowDialogPacket;
 import net.minestom.server.network.packet.server.play.CloseWindowPacket;
-import org.jetbrains.annotations.NotNull;
 
 public class PlayerSettingsScreen {
 
-    public static void init(@NotNull PlayerService players, @NotNull GlobalEventHandler events) {
+    public static void init(PlayerService players, GlobalEventHandler events) {
         events.addListener(PlayerCustomClickEvent.class, event -> {
             if (!event.getKey().equals(PlayerSettingsOptions.SETTINGS_DIALOG_ID)) return;
             if (!(event.getPayload() instanceof CompoundBinaryTag tag)) return;
@@ -42,17 +41,17 @@ public class PlayerSettingsScreen {
         });
     }
 
-    public static void openSettingsDialog(@NotNull Player player) {
+    public static void openSettingsDialog(Player player) {
         var data = PlayerData.fromPlayer(player);
         var dialog = DialogBuilder.create()
-                .title(Component.translatable("dialog.settings.title"))
-                .closeOnEscape()
-                .inputs(it -> {
-                    for (var option : PlayerSettingsOptions.OPTIONS) {
-                        it.input(option.input().apply(data));
-                    }
-                })
-                .buildNotice(PlayerSettingsOptions.SETTINGS_DIALOG_ID, null);
+            .title(Component.translatable("dialog.settings.title"))
+            .closeOnEscape()
+            .inputs(it -> {
+                for (var option : PlayerSettingsOptions.OPTIONS) {
+                    it.input(option.input().apply(data));
+                }
+            })
+            .buildNotice(PlayerSettingsOptions.SETTINGS_DIALOG_ID, null);
         player.sendPacket(new ShowDialogPacket(dialog));
     }
 }

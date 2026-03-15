@@ -7,7 +7,6 @@ import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.StringBinaryTag;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.dialog.DialogInput;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.List;
@@ -17,12 +16,12 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public record PlayerSettingsOption(
-        @NotNull String key,
-        @NotNull Function<PlayerData, DialogInput> input,
-        @NotNull BiConsumer<PlayerData, BinaryTag> applicator
+    String key,
+    Function<PlayerData, DialogInput> input,
+    BiConsumer<PlayerData, BinaryTag> applicator
 ) {
 
-    private static DialogInput.SingleOption.Option option(@NotNull String value, boolean selected) {
+    private static DialogInput.SingleOption.Option option(String value, boolean selected) {
         String[] parts = value.toLowerCase(Locale.ROOT).split("_");
         for (var i = 0; i < parts.length; i++) {
             var part = parts[i];
@@ -32,82 +31,75 @@ public record PlayerSettingsOption(
         return new DialogInput.SingleOption.Option(value, Component.text(String.join(" ", parts)), selected);
     }
 
-    public static PlayerSettingsOption forBool(
-            @NotNull PlayerSetting<Boolean> setting,
-            @NotNull Component label
-    ) {
+    public static PlayerSettingsOption forBool(PlayerSetting<Boolean> setting, Component label) {
         return new PlayerSettingsOption(
+            setting.key(),
+            (data) -> new DialogInput.SingleOption(
                 setting.key(),
-                (data) -> new DialogInput.SingleOption(
-                        setting.key(),
-                        PlayerSettingsOptions.OPTION_WIDTH,
-                        List.of(
-                                new DialogInput.SingleOption.Option("true", Component.text("Enabled"), data.getSetting(setting)),
-                                new DialogInput.SingleOption.Option("false", Component.text("Disabled"), !data.getSetting(setting))
-                        ),
-                        LanguageProviderV2.translate(label),
-                        true
+                PlayerSettingsOptions.OPTION_WIDTH,
+                List.of(
+                    new DialogInput.SingleOption.Option("true", Component.text("Enabled"), data.getSetting(setting)),
+                    new DialogInput.SingleOption.Option("false", Component.text("Disabled"), !data.getSetting(setting))
                 ),
-                (data, value) -> {
-                    if (!(value instanceof StringBinaryTag it)) return;
-                    data.setSetting(setting, it.value().equals("true"));
-                }
+                LanguageProviderV2.translate(label),
+                true
+            ),
+            (data, value) -> {
+                if (!(value instanceof StringBinaryTag it)) return;
+                data.setSetting(setting, it.value().equals("true"));
+            }
         );
     }
 
-    public static PlayerSettingsOption forSelect(
-            @NotNull PlayerSetting<String> setting,
-            @NotNull Component label,
-            @NotNull String... options
-    ) {
+    public static PlayerSettingsOption forSelect(PlayerSetting<String> setting, Component label, String... options) {
         var values = new HashSet<>(List.of(options));
         return new PlayerSettingsOption(
-                setting.key(),
-                (data) -> {
-                    var current = data.getSetting(setting);
-                    return new DialogInput.SingleOption(
-                            setting.key(),
-                            PlayerSettingsOptions.OPTION_WIDTH,
-                            Stream.of(options).map(it -> option(it, current.equals(it))).toList(),
-                            LanguageProviderV2.translate(label),
-                            true
-                    );
-                },
-                (data, value) -> {
-                    if (!(value instanceof StringBinaryTag it)) return;
-                    if (!values.contains(it.value())) return;
-                    data.setSetting(setting, it.value());
-                }
+            setting.key(),
+            (data) -> {
+                var current = data.getSetting(setting);
+                return new DialogInput.SingleOption(
+                    setting.key(),
+                    PlayerSettingsOptions.OPTION_WIDTH,
+                    Stream.of(options).map(it -> option(it, current.equals(it))).toList(),
+                    LanguageProviderV2.translate(label),
+                    true
+                );
+            },
+            (data, value) -> {
+                if (!(value instanceof StringBinaryTag it)) return;
+                if (!values.contains(it.value())) return;
+                data.setSetting(setting, it.value());
+            }
         );
     }
 
     public static <T extends Enum<T>> PlayerSettingsOption forEnum(
-            @NotNull PlayerSetting<T> setting,
-            @NotNull Component label,
-            @NotNull Class<T> type
+        PlayerSetting<T> setting,
+        Component label,
+        Class<T> type
     ) {
         var options = type.getEnumConstants();
         return new PlayerSettingsOption(
-                setting.key(),
-                (data) -> {
-                    var current = data.getSetting(setting);
-                    return new DialogInput.SingleOption(
-                            setting.key(),
-                            PlayerSettingsOptions.OPTION_WIDTH,
-                            Stream.of(options).map(it -> option(it.name(), current == it)).toList(),
-                            LanguageProviderV2.translate(label),
-                            true
-                    );
-                },
-                (data, value) -> {
-                    if (!(value instanceof StringBinaryTag it)) return;
-                    for (var option : options) {
-                        if (option.name().equalsIgnoreCase(it.value())) {
-                            data.setSetting(setting, option);
-                            return;
-                        }
+            setting.key(),
+            (data) -> {
+                var current = data.getSetting(setting);
+                return new DialogInput.SingleOption(
+                    setting.key(),
+                    PlayerSettingsOptions.OPTION_WIDTH,
+                    Stream.of(options).map(it -> option(it.name(), current == it)).toList(),
+                    LanguageProviderV2.translate(label),
+                    true
+                );
+            },
+            (data, value) -> {
+                if (!(value instanceof StringBinaryTag it)) return;
+                for (var option : options) {
+                    if (option.name().equalsIgnoreCase(it.value())) {
+                        data.setSetting(setting, option);
+                        return;
                     }
                 }
+            }
         );
     }
 

@@ -15,7 +15,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.command.CommandSender;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -43,7 +42,7 @@ public class TopTimesInfoType extends CommandDsl {
         this.addSyntax(this::exec, this.targetArgument, this.pageArgument);
     }
 
-    private void exec(@NotNull CommandSender sender, @NotNull CommandContext commandContext) {
+    private void exec(CommandSender sender, CommandContext commandContext) {
         String targetId = commandContext.get(this.targetArgument);
         int page = commandContext.get(this.pageArgument);
 
@@ -80,16 +79,14 @@ public class TopTimesInfoType extends CommandDsl {
      * This is a modified version of the LeaderboardData in the map service responses that is slimmed down for this purpose
      * and removes username resolution.
      */
-    public record LeaderboardData(
-        @NotNull List<Entry> top
-    ) {
+    public record LeaderboardData(List<Entry> top) {
         private static final TextColor COLOR_GOLD = TextColor.color(0xFFBC0F);
         private static final TextColor COLOR_SILVER = TextColor.color(0x808080);
         private static final TextColor COLOR_BRONZE = TextColor.color(0xCD7F32);
         private static final TextColor COLOR_DEFAULT = TextColor.color(0x696969);
 
         @RuntimeGson
-        public record Entry(@NotNull String mapName, int publishedMapId, long completionTime, int rank) {
+        public record Entry(String mapName, int publishedMapId, long completionTime, int rank) {
         }
 
         /**
@@ -127,9 +124,9 @@ public class TopTimesInfoType extends CommandDsl {
                                            }));
 
                 comp.append(
-                        Component.text(entry.mapName())
-                            .hoverEvent(Component.text("Click to copy published ID"))
-                            .clickEvent(ClickEvent.copyToClipboard(MapData.formatPublishedId(entry.publishedMapId())))
+                    Component.text(entry.mapName())
+                        .hoverEvent(Component.text("Click to copy published ID"))
+                        .clickEvent(ClickEvent.copyToClipboard(MapData.formatPublishedId(entry.publishedMapId())))
                     ).append(Component.text(FontUtil.computeOffset(maxNameWidth - nameWidths[i])))
                     .append(Component.text(" " + formatMapPlaytime(entry.completionTime(), true),
                                            TextColor.color(0xf2f2f2)));
@@ -140,6 +137,5 @@ public class TopTimesInfoType extends CommandDsl {
             return result;
         }
     }
-
 
 }

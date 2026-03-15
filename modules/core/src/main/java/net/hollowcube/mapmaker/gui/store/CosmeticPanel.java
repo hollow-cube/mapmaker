@@ -14,7 +14,6 @@ import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,7 +89,7 @@ public class CosmeticPanel extends Panel {
     }
 
     @Override
-    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+    protected void mount(InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
 
         if (isInitial) {
@@ -127,7 +126,7 @@ public class CosmeticPanel extends Panel {
     }
 
     @Blocking
-    private @NotNull List<? extends Element> fetch(CosmeticType type, int page, int pageSize) {
+    private List<? extends Element> fetch(CosmeticType type, int page, int pageSize) {
         var data = PlayerData.fromPlayer(this.host.player());
         var backpack = PlayerBackpack.fromPlayer(this.host.player());
         var unlockedCosmetics = this.players.getUnlockedCosmetics(data.id());

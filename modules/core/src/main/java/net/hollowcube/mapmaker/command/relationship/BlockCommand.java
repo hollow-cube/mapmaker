@@ -5,16 +5,13 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ArgumentLiteral;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategories;
-import net.hollowcube.mapmaker.command.CoreCommandCondition;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.BlockedPlayer;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -24,7 +21,7 @@ public class BlockCommand extends CommandDsl {
 
     private final PlayerService playerService;
 
-    public BlockCommand(@NotNull PlayerService playerService) {
+    public BlockCommand(PlayerService playerService) {
         super("block");
         this.playerService = playerService;
         this.category = CommandCategories.SOCIAL;
@@ -38,7 +35,7 @@ public class BlockCommand extends CommandDsl {
         this.addSyntax(playerOnly(this::execBlock), this.targetArg);
     }
 
-    private void execBlock(@NotNull Player player, @NotNull CommandContext context) {
+    private void execBlock(Player player, CommandContext context) {
         var targetId = context.get(this.targetArg);
         if (targetId == null) return;
         if (targetId.equals(player.getUuid().toString())) {
@@ -57,7 +54,7 @@ public class BlockCommand extends CommandDsl {
         }
     }
 
-    private void execListBlocks(@NotNull Player player, @NotNull CommandContext context) {
+    private void execListBlocks(Player player, CommandContext context) {
         int page = context.get(this.pageArg);
         PlayerService.Page<BlockedPlayer> blocks = this.playerService.getBlockedPlayers(player.getUuid().toString(), new PlayerService.Pageable(page, 10));
         int pageCount = Math.ceilDiv(blocks.totalItems(), 10);

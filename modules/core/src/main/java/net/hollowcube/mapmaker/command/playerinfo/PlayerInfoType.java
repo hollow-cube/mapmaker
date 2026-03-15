@@ -3,13 +3,12 @@ package net.hollowcube.mapmaker.command.playerinfo;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 public interface PlayerInfoType<T> {
 
     Argument<T> getArgument();
 
-    void execute(@NotNull Player user, @NotNull T target);
+    void execute(Player user, T target);
 
     abstract class ForPlayer implements PlayerInfoType<Player> {
 

@@ -11,7 +11,6 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Switch;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerSetting;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,7 +36,7 @@ class SimpleSortPanel extends Panel {
 
     private boolean sync = true;
 
-    public SimpleSortPanel(@NotNull Consumer<MapSearchParams.Builder> onSearch, boolean fetchOnMount) {
+    public SimpleSortPanel(Consumer<MapSearchParams.Builder> onSearch, boolean fetchOnMount) {
         super(9, 4);
         this.onSearch = onSearch;
         this.fetchOnMount = fetchOnMount;
@@ -71,7 +70,7 @@ class SimpleSortPanel extends Panel {
     }
 
     @Override
-    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+    protected void mount(InventoryHost host, boolean isInitial) {
         var playerData = PlayerData.fromPlayer(host.player());
         this.sort = playerData.getSetting(SORT_PRESET);
         sortSwitch.select(sort.ordinal());
@@ -93,12 +92,12 @@ class SimpleSortPanel extends Panel {
         this.sync = sync;
     }
 
-    public void setSort(@NotNull MapBrowserView.SortPreset sort) {
+    public void setSort(MapBrowserView.SortPreset sort) {
         if (this.sort == sort) onSearchChange();
         else this.sortSwitch.select(sort.ordinal());
     }
 
-    private void selectSort(@NotNull MapBrowserView.SortPreset sort) {
+    private void selectSort(MapBrowserView.SortPreset sort) {
         if (this.sort == sort) return;
         this.sort = sort;
         onSearchChange();
@@ -108,7 +107,7 @@ class SimpleSortPanel extends Panel {
         playerData.setSetting(SORT_PRESET, sort);
     }
 
-    private void selectDifficulty(@NotNull MapData.Difficulty difficulty, boolean selected) {
+    private void selectDifficulty(MapData.Difficulty difficulty, boolean selected) {
         var changed = selected ? difficulties.add(difficulty) : difficulties.remove(difficulty);
         if (!changed) return;
         onSearchChange();
@@ -126,15 +125,15 @@ class SimpleSortPanel extends Panel {
         }
         switch (sort) {
             case BEST -> params
-                    .ascending(false)
-                    .best(true)
-                    .qualities(MapQuality.GOOD, MapQuality.GREAT, MapQuality.EXCELLENT, MapQuality.OUTSTANDING, MapQuality.MASTERPIECE);
+                .ascending(false)
+                .best(true)
+                .qualities(MapQuality.GOOD, MapQuality.GREAT, MapQuality.EXCELLENT, MapQuality.OUTSTANDING, MapQuality.MASTERPIECE);
             case QUALITY -> params
-                    .ascending(false)
-                    .qualities(MapQuality.GREAT, MapQuality.EXCELLENT, MapQuality.OUTSTANDING, MapQuality.MASTERPIECE);
+                .ascending(false)
+                .qualities(MapQuality.GREAT, MapQuality.EXCELLENT, MapQuality.OUTSTANDING, MapQuality.MASTERPIECE);
             case NEW -> params
-                    .ascending(false)
-                    .best(false);
+                .ascending(false)
+                .best(false);
         }
         this.onSearch.accept(params);
     }

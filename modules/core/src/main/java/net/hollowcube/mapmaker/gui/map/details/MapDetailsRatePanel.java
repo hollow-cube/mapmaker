@@ -6,7 +6,7 @@ import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerData;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 class MapDetailsRatePanel extends Panel {
     private final MapService mapService;
@@ -15,9 +15,9 @@ class MapDetailsRatePanel extends Panel {
     private final Button likeButton;
     private final Button dislikeButton;
 
-    private MapRating.State ratingState;
+    private @Nullable MapRating.State ratingState;
 
-    public MapDetailsRatePanel(@NotNull MapService mapService, @NotNull String mapId) {
+    public MapDetailsRatePanel(MapService mapService, String mapId) {
         super(9, 4);
         this.mapService = mapService;
         this.mapId = mapId;
@@ -25,14 +25,14 @@ class MapDetailsRatePanel extends Panel {
         background("map_details/rate/container");
 
         this.likeButton = add(1, 1, new Button(null, 3, 3)
-                .onLeftClickAsync(() -> handleRatingStateChange(MapRating.State.LIKED)));
+            .onLeftClickAsync(() -> handleRatingStateChange(MapRating.State.LIKED)));
         this.dislikeButton = add(5, 1, new Button(null, 3, 3)
-                .onLeftClickAsync(() -> handleRatingStateChange(MapRating.State.DISLIKED)));
+            .onLeftClickAsync(() -> handleRatingStateChange(MapRating.State.DISLIKED)));
         updateLocalRatingState(MapRating.State.UNRATED);
     }
 
     @Override
-    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+    protected void mount(InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
         if (!isInitial) return;
 
@@ -43,7 +43,7 @@ class MapDetailsRatePanel extends Panel {
         });
     }
 
-    private void handleRatingStateChange(@NotNull MapRating.State newState) {
+    private void handleRatingStateChange(MapRating.State newState) {
         var resultState = this.ratingState == newState ? MapRating.State.UNRATED : newState;
         updateLocalRatingState(resultState);
 
@@ -52,7 +52,7 @@ class MapDetailsRatePanel extends Panel {
         async(() -> mapService.setMapRating(this.mapId, playerId, new MapRating(resultState, null)));
     }
 
-    private void updateLocalRatingState(@NotNull MapRating.State newState) {
+    private void updateLocalRatingState(MapRating.State newState) {
         if (this.ratingState == newState) return;
         this.ratingState = newState;
 

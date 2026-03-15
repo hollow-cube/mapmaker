@@ -4,12 +4,10 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategories;
-import net.hollowcube.mapmaker.command.CoreCommandCondition;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -18,7 +16,7 @@ public class UnblockCommand extends CommandDsl {
 
     private final PlayerService playerService;
 
-    public UnblockCommand(@NotNull PlayerService playerService) {
+    public UnblockCommand(PlayerService playerService) {
         super("unblock");
         this.playerService = playerService;
         this.category = CommandCategories.SOCIAL;
@@ -30,7 +28,7 @@ public class UnblockCommand extends CommandDsl {
         this.addSyntax(playerOnly(this::handleExec), this.targetArg);
     }
 
-    private void handleExec(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleExec(Player player, CommandContext context) {
         var targetId = context.get(this.targetArg);
         if (targetId == null) return;
         if (targetId.equals(player.getUuid().toString())) {

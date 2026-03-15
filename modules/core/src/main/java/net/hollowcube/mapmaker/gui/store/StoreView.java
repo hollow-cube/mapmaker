@@ -4,7 +4,6 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Switch;
 import net.hollowcube.mapmaker.panels.Text;
 import net.hollowcube.mapmaker.player.PlayerService;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -17,11 +16,11 @@ public class StoreView extends Panel {
     public static final int TAB_HYPERCUBE = 1;
     public static final int TAB_ADDONS = 2;
 
-    public StoreView(@NotNull PlayerService playerService) {
+    public StoreView(PlayerService playerService) {
         this(playerService, TAB_HYPERCUBE);
     }
 
-    public StoreView(@NotNull PlayerService playerService, int defaultTab) {
+    public StoreView(PlayerService playerService, int defaultTab) {
         super(9, 10);
         background("store/container", -10, -31);
         add(0, 0, title("Store"));

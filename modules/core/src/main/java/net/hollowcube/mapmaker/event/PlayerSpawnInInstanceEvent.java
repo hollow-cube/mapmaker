@@ -5,13 +5,12 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.trait.PlayerInstanceEvent;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Like PlayerSpawnEvent, but implements InstanceEvent.
  */
 public record PlayerSpawnInInstanceEvent(
-    @NotNull Player player,
+    Player player,
     boolean isFirstSpawn
 ) implements PlayerInstanceEvent {
 
@@ -23,7 +22,7 @@ public record PlayerSpawnInInstanceEvent(
     }
 
     @Override
-    public @NotNull Player getPlayer() {
+    public Player getPlayer() {
         return player;
     }
 

@@ -11,12 +11,10 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.ShadowColor;
-import org.jetbrains.annotations.NotNullByDefault;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-@NotNullByDefault
 public class TotpInputView extends AbstractAnvilView {
 
     private static final Component CLICK_TO_COPY = Component.text("Click to copy").color(NamedTextColor.GRAY);

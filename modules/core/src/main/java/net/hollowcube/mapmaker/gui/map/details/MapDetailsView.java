@@ -16,7 +16,6 @@ import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Locale;
@@ -37,16 +36,16 @@ public class MapDetailsView extends Panel {
 
     @Blocking
     public MapDetailsView(
-        @NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge,
-        @NotNull MapData mapData, boolean showJoinButton
+        ApiClient api, MapService mapService, ServerBridge bridge,
+        MapData mapData, boolean showJoinButton
     ) {
         var displayName = api.players.getDisplayName(mapData.owner());
         this(api, mapService, bridge, mapData, displayName, showJoinButton);
     }
 
     public MapDetailsView(
-        @NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge,
-        @NotNull MapData mapData, @NotNull DisplayName authorName, boolean showJoinButton
+        ApiClient api, MapService mapService, ServerBridge bridge,
+        MapData mapData, DisplayName authorName, boolean showJoinButton
     ) {
         super(9, 10);
         this.api = api;
@@ -106,7 +105,7 @@ public class MapDetailsView extends Panel {
     }
 
     @Override
-    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+    protected void mount(InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
         if (!isInitial || !showJoinButton) return;
 

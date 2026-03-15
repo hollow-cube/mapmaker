@@ -11,7 +11,6 @@ import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
@@ -22,11 +21,7 @@ public class WhereCommand extends CommandDsl {
     private final PlayerService playerService;
     private final MapService mapService;
 
-    public WhereCommand(
-        @NotNull SessionManager sessionManager,
-        @NotNull PlayerService playerService,
-        @NotNull MapService mapService
-    ) {
+    public WhereCommand(SessionManager sessionManager, PlayerService playerService, MapService mapService) {
         super("where", "find");
         this.sessionManager = sessionManager;
         this.playerService = playerService;
@@ -41,7 +36,7 @@ public class WhereCommand extends CommandDsl {
         addSyntax(playerOnly(this::handleFindPlayer), targetArg);
     }
 
-    private void handleFindPlayer(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleFindPlayer(Player player, CommandContext context) {
         var senderId = player.getUuid().toString();
 
         // If the target was not specified, use the player themselves.

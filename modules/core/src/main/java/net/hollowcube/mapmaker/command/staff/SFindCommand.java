@@ -13,7 +13,6 @@ import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -26,11 +25,7 @@ public class SFindCommand extends CommandDsl {
     private final PlayerService playerService;
     private final SessionManager sessionManager;
 
-    public SFindCommand(
-        @NotNull MapService mapService,
-        @NotNull PlayerService playerService,
-        @NotNull SessionManager sessionManager
-    ) {
+    public SFindCommand(MapService mapService, PlayerService playerService, SessionManager sessionManager) {
         super("sfind");
         this.mapService = mapService;
         this.playerService = playerService;
@@ -45,7 +40,7 @@ public class SFindCommand extends CommandDsl {
         addSyntax(playerOnly(this::handleFindPlayer), targetArg);
     }
 
-    private void handleFindPlayer(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleFindPlayer(Player player, CommandContext context) {
         var target = context.get(targetArg);
 
         var presence = sessionManager.getPresence(target);

@@ -9,7 +9,6 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -22,14 +21,14 @@ import static net.hollowcube.mapmaker.gui.store.StoreView.TAB_HYPERCUBE;
 public class HypercubeCommand extends CommandDsl {
     private final PlayerService playerService;
 
-    public HypercubeCommand(@NotNull PlayerService playerService) {
+    public HypercubeCommand(PlayerService playerService) {
         super("hypercube");
         this.playerService = playerService;
 
         addSyntax(playerOnly(this::handleHypercubeInfo));
     }
 
-    private void handleHypercubeInfo(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleHypercubeInfo(Player player, CommandContext context) {
         try {
             var playerId = PlayerData.fromPlayer(player).id();
             var status = playerService.getHypercubeStatus(playerId);
@@ -62,16 +61,12 @@ public class HypercubeCommand extends CommandDsl {
         if (day >= 11 && day <= 13) {
             return "th";
         }
-        switch (day % 10) {
-            case 1:
-                return "st";
-            case 2:
-                return "nd";
-            case 3:
-                return "rd";
-            default:
-                return "th";
-        }
+        return switch (day % 10) {
+            case 1 -> "st";
+            case 2 -> "nd";
+            case 3 -> "rd";
+            default -> "th";
+        };
     }
 
 }

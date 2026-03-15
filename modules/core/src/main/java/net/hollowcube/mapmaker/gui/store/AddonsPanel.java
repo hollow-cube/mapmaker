@@ -7,7 +7,6 @@ import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -41,7 +40,7 @@ class AddonsPanel extends Panel {
 
     private final PlayerService playerService;
 
-    public AddonsPanel(@NotNull PlayerService playerService) {
+    public AddonsPanel(PlayerService playerService) {
         super(9, 5);
         this.playerService = playerService;
 
@@ -70,7 +69,7 @@ class AddonsPanel extends Panel {
         private final Button delegate;
         private final Button cost;
 
-        Entry(@NotNull Addon[] chain) {
+        Entry(Addon[] chain) {
             super(1, 1);
             this.chain = chain;
 
@@ -80,12 +79,12 @@ class AddonsPanel extends Panel {
         }
 
         @Override
-        protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+        protected void mount(InventoryHost host, boolean isInitial) {
             super.mount(host, isInitial);
             updateDisplay(host.player());
         }
 
-        private void updateDisplay(@NotNull Player player) {
+        private void updateDisplay(Player player) {
             var firstLocked = firstLocked(player);
             Addon addon = Objects.requireNonNullElse(firstLocked, chain[chain.length - 1]);
 
@@ -108,7 +107,7 @@ class AddonsPanel extends Panel {
             updateDisplay(host.player());
         }
 
-        private @Nullable Addon firstLocked(@NotNull Player player) {
+        private @Nullable Addon firstLocked(Player player) {
             for (var addon : chain) {
                 if (isUpgradeOwned(player, addon.id))
                     continue;

@@ -13,7 +13,6 @@ import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -27,7 +26,7 @@ public class PStatusCommand extends CommandDsl {
     private final PlayerService playerService;
     private final PunishmentService punishmentService;
 
-    public PStatusCommand(@NotNull PlayerService playerService, @NotNull PunishmentService punishmentService) {
+    public PStatusCommand(PlayerService playerService, PunishmentService punishmentService) {
         super("pstatus");
         this.playerService = playerService;
         this.punishmentService = punishmentService;
@@ -41,7 +40,7 @@ public class PStatusCommand extends CommandDsl {
         addSyntax(playerOnly(this::showPlayerStatus), playerArg);
     }
 
-    private void showPlayerStatus(@NotNull Player player, @NotNull CommandContext context) {
+    private void showPlayerStatus(Player player, CommandContext context) {
         var target = context.get(playerArg);
         if (target == null) {
             player.sendMessage("Unknown player: " + context.getRaw(playerArg));

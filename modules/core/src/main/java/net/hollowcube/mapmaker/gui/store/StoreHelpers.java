@@ -15,7 +15,6 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Locale;
@@ -42,7 +41,7 @@ final class StoreHelpers {
         }
     }
 
-    static void buyPackage(@NotNull PlayerService playerService, @NotNull Player player, @NotNull Package packageName) {
+    static void buyPackage(PlayerService playerService, Player player, Package packageName) {
         try {
             var playerData = PlayerData.fromPlayer(player);
             var resp = playerService.createCheckoutLink(
@@ -62,11 +61,11 @@ final class StoreHelpers {
         }
     }
 
-    static boolean isUpgradeOwned(@NotNull Player player, @NotNull ShopUpgrade upgrade) {
+    static boolean isUpgradeOwned(Player player, ShopUpgrade upgrade) {
         return upgrade.has(PlayerData.fromPlayer(player));
     }
 
-    static void buyUpgrade(@NotNull PlayerService playerService, @NotNull Player player, @NotNull ShopUpgrade upgrade) {
+    static void buyUpgrade(PlayerService playerService, Player player, ShopUpgrade upgrade) {
         if (isUpgradeOwned(player, upgrade))
             return; // Sanity check
 
@@ -99,11 +98,14 @@ final class StoreHelpers {
         }
     }
 
-    private static @NotNull Book buildCheckoutBook(int productIndex, @NotNull String url) {
+    private static Book buildCheckoutBook(int productIndex, String url) {
         var sprite = Component.text(SPRITE_MAP[productIndex].fontChar(), TextColor.color(78, 92, 38))
             .hoverEvent(HoverEvent.showText(LanguageProviderV2.translateMultiMerged("store.checkout.open_in_browser", List.of())))
             .clickEvent(ClickEvent.openUrl(url));
 
         return Book.builder().addPage(sprite).build();
+    }
+
+    private StoreHelpers() {
     }
 }

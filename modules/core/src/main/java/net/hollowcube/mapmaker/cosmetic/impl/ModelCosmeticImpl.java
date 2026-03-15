@@ -8,7 +8,6 @@ import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.TooltipDisplay;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
@@ -39,7 +38,7 @@ public class ModelCosmeticImpl extends CosmeticImpl {
 
     private final ItemStack model;
 
-    public ModelCosmeticImpl(@NotNull Cosmetic cosmetic) {
+    public ModelCosmeticImpl(Cosmetic cosmetic) {
         super(cosmetic);
         this.model = ItemStack.builder(Material.STICK)
                 .set(DataComponents.CUSTOM_NAME, cosmetic.displayName())
@@ -52,7 +51,7 @@ public class ModelCosmeticImpl extends CosmeticImpl {
     }
 
     @Override
-    public @NotNull ItemStack iconItem() {
+    public ItemStack iconItem() {
         return model;
     }
 }
