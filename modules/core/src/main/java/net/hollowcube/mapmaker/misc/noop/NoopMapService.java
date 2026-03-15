@@ -125,7 +125,7 @@ public class NoopMapService implements MapService {
     }
 
     @Override
-    public void deletePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId, @Nullable String playerId) {
+    public void deletePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId, @Nullable String playerId, boolean notify) {
         throw new UnsupportedOperationException("not implemented");
     }
 

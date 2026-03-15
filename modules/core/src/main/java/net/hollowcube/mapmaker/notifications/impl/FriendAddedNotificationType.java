@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.notifications.impl;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.mapmaker.api.notifications.Notification;
 import net.hollowcube.mapmaker.notifications.PlayerNotification;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
@@ -21,7 +22,7 @@ public class FriendAddedNotificationType implements PlayerNotificationType {
     }
 
     @Override
-    public PlayerNotification createNotification(Player player, ServiceContext context, PlayerNotificationResponse.ComplexEntry entry) {
+    public PlayerNotification createNotification(Player player, ServiceContext context, Notification entry) {
         return new PlayerNotification(
             entry,
             ICON,

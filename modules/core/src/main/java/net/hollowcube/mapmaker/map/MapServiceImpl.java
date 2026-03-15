@@ -343,9 +343,12 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public void deletePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId, @Nullable String playerId) {
+    public void deletePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId, @Nullable String playerId, boolean notify) {
         var uri = urlV3 + "/maps/" + mapId + "/leaderboard/playtime";
-        if (playerId != null) uri += "?playerId=" + playerId;
+        if (playerId != null) {
+            uri += "?playerId=" + playerId;
+            if (notify) uri += "&notify=true";
+        }
         var req = HttpRequest.newBuilder()
             .uri(URI.create(uri))
             .method("DELETE", HttpRequest.BodyPublishers.noBody())

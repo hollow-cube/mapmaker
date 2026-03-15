@@ -42,8 +42,7 @@ public class NotificationActionsView extends Panel {
         add(7, 0, new Button("gui.notification.unread", 1, 1)
             .background("generic2/btn/default/1_1")
             .sprite("icon2/1_1/envelope", 1, 1)
-            .onLeftClick(() -> services.players().markNotificationRead(
-                this.host.player().getUuid().toString(),
+            .onLeftClick(() -> services.api().notifications.setReadStatus(
                 notification.entry().id(),
                 false
             ))

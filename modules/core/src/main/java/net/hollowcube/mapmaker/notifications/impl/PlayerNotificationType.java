@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.notifications.impl;
 
+import net.hollowcube.mapmaker.api.notifications.Notification;
 import net.hollowcube.mapmaker.notifications.PlayerNotification;
 import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
 import net.hollowcube.mapmaker.util.ServiceContext;
@@ -18,7 +19,7 @@ public interface PlayerNotificationType {
     String type();
 
     @NonBlocking
-    PlayerNotification createNotification(Player player, ServiceContext context, PlayerNotificationResponse.ComplexEntry entry);
+    PlayerNotification createNotification(Player player, ServiceContext context, Notification entry);
 
     @NonBlocking
     @Nullable Component createToast(Player player, ServiceContext context, PlayerNotificationResponse.SimpleEntry entry);

@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.notifications.impl;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.mapmaker.api.notifications.Notification;
 import net.hollowcube.mapmaker.notifications.DefaultActions;
 import net.hollowcube.mapmaker.notifications.PlayerNotification;
 import net.hollowcube.mapmaker.panels.Sprite;
@@ -22,7 +23,7 @@ public class MapTimeDeletedNotificationType implements PlayerNotificationType {
     }
 
     @Override
-    public PlayerNotification createNotification(Player player, ServiceContext context, PlayerNotificationResponse.ComplexEntry entry) {
+    public PlayerNotification createNotification(Player player, ServiceContext context, Notification entry) {
         var map = context.maps().getMap(player.getUuid().toString(), entry.key());
 
         return new PlayerNotification(

@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.notifications.impl;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.mapmaker.api.notifications.Notification;
 import net.hollowcube.mapmaker.notifications.PlayerNotification;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
@@ -23,7 +24,7 @@ public class FriendRequestNotificationType implements PlayerNotificationType {
     }
 
     @Override
-    public PlayerNotification createNotification(Player player, ServiceContext context, PlayerNotificationResponse.ComplexEntry entry) {
+    public PlayerNotification createNotification(Player player, ServiceContext context, Notification entry) {
         var username = context.players().getPlayerDisplayName2(entry.key());
 
         return new PlayerNotification(
@@ -39,7 +40,7 @@ public class FriendRequestNotificationType implements PlayerNotificationType {
                     PlayerNotification.ActionExecutor
                         .of(() -> {
                             context.players().sendFriendRequest(player.getUuid().toString(), entry.key());
-                            context.players().deleteNotification(player.getUuid().toString(), entry.id());
+                            context.api().notifications.delete(entry.id());
                         })
                         .withRefresh()
                 ),
@@ -50,7 +51,7 @@ public class FriendRequestNotificationType implements PlayerNotificationType {
                     PlayerNotification.ActionExecutor
                         .of(() -> {
                             context.players().deleteFriendRequest(player.getUuid().toString(), entry.key(), true);
-                            context.players().deleteNotification(player.getUuid().toString(), entry.id());
+                            context.api().notifications.delete(entry.id());
                         })
                         .withRefresh()
                 )

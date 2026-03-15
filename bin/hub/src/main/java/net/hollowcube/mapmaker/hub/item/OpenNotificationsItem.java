@@ -42,15 +42,15 @@ public class OpenNotificationsItem extends ItemHandler {
 
     public static void checkForUnread(MapWorld world, WeakReference<Player> reference) {
         var playerId = OpUtils.map(reference.get(), it -> it.getUuid().toString());
-        var players = world.server().playerService();
+        var api = world.server().api();
 
         if (playerId == null) return;
 
         FutureUtil.submitVirtual(() -> {
-            var response = players.getNotifications(playerId, 0, true);
-            if (response.results().isEmpty()) return;
-            var hasOne = response.results().size() == 1 && response.pageCount() <= 1;
-            var amount = response.results().size() + (response.pageCount() > 1 ? "+" : "");
+            var response = api.notifications.list(playerId, 0, 1, true);
+            if (response.isEmpty()) return;
+            var hasOne = response.count() == 1;
+            var amount = response.count();
 
             var player = reference.get();
             if (player == null) return;

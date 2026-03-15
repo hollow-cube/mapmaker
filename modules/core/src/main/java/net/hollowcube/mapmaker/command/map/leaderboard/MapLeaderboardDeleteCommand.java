@@ -61,20 +61,8 @@ public class MapLeaderboardDeleteCommand extends CommandDsl {
 
         var playerId = PlayerData.fromPlayer(player).id();
         try {
-            mapService.deletePlaytimeLeaderboard(playerId, map.id(), target);
+            mapService.deletePlaytimeLeaderboard(playerId, map.id(), target, notify);
             player.sendMessage("deleted for " + target);
-
-            if (notify) {
-                playerService.createNotification(
-                    target,
-                    "map_time_deleted",
-                    map.id(),
-                    null,
-                    null,
-                    true
-                );
-            }
-
         } catch (Exception e) {
             player.sendMessage("failed to delete leaderboard");
             ExceptionReporter.reportException(e, playerId);

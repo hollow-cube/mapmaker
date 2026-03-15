@@ -5,7 +5,6 @@ import com.google.gson.reflect.TypeToken;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.player.responses.PlayerAlts;
-import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
 import net.hollowcube.mapmaker.player.responses.SendFriendRequestResult;
 import net.hollowcube.mapmaker.player.responses.TotpSetupResponse;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
@@ -150,18 +149,6 @@ public interface PlayerService {
         }
         return true;
     }
-
-    // Notifications
-    @NotNull PlayerNotificationResponse getNotifications(@NotNull String playerId, int page, boolean unread);
-
-    void deleteNotification(@NotNull String playerId, @NotNull String notificationId);
-
-    void markNotificationRead(@NotNull String playerId, @NotNull String notificationId, boolean read);
-
-    void createNotification(
-        @NotNull String playerId, @NotNull String type, @NotNull String key, @Nullable JsonObject data,
-        @Nullable Integer expiresInSeconds, boolean replaceUnread
-    );
 
     // Recap
 

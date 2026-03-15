@@ -3,11 +3,11 @@ package net.hollowcube.mapmaker.notifications;
 import net.hollowcube.common.components.TranslatableBuilder;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.notifications.Notification;
 import net.hollowcube.mapmaker.gui.common.ExtraPanels;
 import net.hollowcube.mapmaker.notifications.impl.PlayerNotificationType;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Sprite;
-import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
 import net.hollowcube.mapmaker.util.ServiceContext;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -18,7 +18,7 @@ import java.time.Instant;
 import java.util.List;
 
 public record PlayerNotification(
-    PlayerNotificationResponse.ComplexEntry entry,
+    Notification entry,
 
     Sprite icon,
     Component title,
@@ -32,7 +32,7 @@ public record PlayerNotification(
     }
 
     public PlayerNotification(
-        PlayerNotificationResponse.ComplexEntry entry,
+        Notification entry,
         Sprite icon,
         String translation,
         List<Component> args,
@@ -48,7 +48,7 @@ public record PlayerNotification(
     }
 
     @NonBlocking
-    public static @Nullable PlayerNotification fromResponse(Player player, ServiceContext context, PlayerNotificationResponse.ComplexEntry entry) {
+    public static @Nullable PlayerNotification fromResponse(Player player, ServiceContext context, Notification entry) {
         var type = PlayerNotificationType.Lookup.get(entry.type());
         try {
             return type == null ? null : type.createNotification(player, context, entry);
