@@ -54,7 +54,7 @@ public class HubServer extends AbstractMapServer {
 
     static {
         HUB_MAP_DATA.settings().setSize(MapSize.UNLIMITED);
-        HUB_MAP_DATA.settings().set(MapSettings.TIME_OF_DAY, TimeOfDay.NIGHT);
+        HUB_MAP_DATA.settings().set(MapSettings.TIME_OF_DAY, TimeOfDay.NOON);
         HUB_MAP_DATA.settings().set(MapSettings.LIGHTING, true);
     }
 
