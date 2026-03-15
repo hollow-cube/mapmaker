@@ -11,6 +11,7 @@ import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.VelocityConfig;
+import net.hollowcube.mapmaker.editor.EditorMapWorld;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.command.DebugRenderersCommand;
@@ -420,6 +421,20 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
             "poi",
             DebugRenderersCommand::handleDebugRegions,
             "Shows the location information about nearby pois"
+        );
+
+        cmd.createPermissionedSubcommand(
+            "save",
+            (player, _) -> {
+                var world = EditorMapWorld.forPlayer(player);
+                if (world == null) {
+                    player.sendMessage("You are not in an editor world!");
+                    return;
+                }
+
+                world.save(true); // pretend to be auto save to get message
+            },
+            "Immediately saves the current (editor) world"
         );
 
         return cmd;

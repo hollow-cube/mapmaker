@@ -41,7 +41,7 @@ public class LocalMapService extends NoopMapService {
     }
 
     @Override
-    public void updateMapWorld(String id, byte[] worldData) {
+    public void updateMapWorld(String id, byte[] worldData, long loadTime) {
         try {
             Files.write(mapDirectory.resolve("world.polar"), worldData);
         } catch (IOException e) {

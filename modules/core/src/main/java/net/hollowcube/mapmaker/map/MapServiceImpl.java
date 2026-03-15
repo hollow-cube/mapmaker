@@ -279,11 +279,11 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 //    }
 
     @Override
-    public void updateMapWorld(@NotNull String id, byte @NotNull [] worldData) {
+    public void updateMapWorld(@NotNull String id, byte @NotNull [] worldData, long loadTime) {
         logger.log(System.Logger.Level.INFO, "Updating map world for " + id + ", length: " + worldData.length);
         var req = HttpRequest.newBuilder()
             .method("PUT", HttpRequest.BodyPublishers.ofByteArray(worldData))
-            .uri(URI.create(urlV3 + "/maps/" + id + "/world"))
+            .uri(URI.create(urlV3 + "/maps/" + id + "/world?loadTime=" + loadTime))
             .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
             .header(WORLD_SESSION_HEADER, "todo")
             .header("content-type", POLAR_CONTENT_TYPE)

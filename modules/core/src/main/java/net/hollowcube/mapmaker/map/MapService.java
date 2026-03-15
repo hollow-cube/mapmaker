@@ -59,7 +59,7 @@ public interface MapService {
         return result == null ? null : new ReadableMapData(Channels.newChannel(new ByteArrayInputStream(result)), result.length);
     }
 
-    void updateMapWorld(@NotNull String id, byte @NotNull [] worldData);
+    void updateMapWorld(@NotNull String id, byte @NotNull [] worldData, long loadTime);
 
     void reportMap(@NotNull String mapId, @NotNull MapReportRequest req);
 

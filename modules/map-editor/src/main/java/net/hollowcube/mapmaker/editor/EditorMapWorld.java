@@ -76,6 +76,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
     private final SpawnMarkerEntity spawnEntity;
 
+    private final long createdAt = System.currentTimeMillis();
     private final ReentrantLock saveLock = new ReentrantLock();
     private @Nullable Task autoSaveTask = null;
 
@@ -207,7 +208,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     }
 
     @Blocking
-    private void save(boolean isAutoSave) {
+    public void save(boolean isAutoSave) {
         saveLock.lock();
         try {
             if (isAutoSave) logger.info("Autosaving world {}", map().id());
@@ -231,7 +232,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
             // Save the world data (if it is unverified only)
             if (map().verification() != MapVerification.PENDING) {
                 var worldData = instance().save(new ReadWriteWorldAccess(this));
-                server().mapService().updateMapWorld(map().id(), worldData);
+                server().mapService().updateMapWorld(map().id(), worldData, createdAt);
             }
 
             for (var player : Set.copyOf(players())) {

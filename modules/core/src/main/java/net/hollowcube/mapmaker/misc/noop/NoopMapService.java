@@ -105,7 +105,7 @@ public class NoopMapService implements MapService {
     }
 
     @Override
-    public void updateMapWorld(@NotNull String id, byte @NotNull [] worldData) {
+    public void updateMapWorld(@NotNull String id, byte @NotNull [] worldData, long loadTime) {
         // Do nothing we arent going to save the world
     }
 
