@@ -84,7 +84,7 @@ public class MapSlotEntry extends Panel {
     protected void removeFromMap() {
         var player = host.player();
         var playerId = PlayerData.fromPlayer(player).id();
-        host.pushView(confirm("Leave map?", () -> FutureUtil.submitVirtual(() -> {
+        host.pushView(confirm("Leave Map?", () -> FutureUtil.submitVirtual(() -> {
             try {
                 api.maps.removeMapBuilder(slot.map().id(), playerId);
                 player.sendMessage(Component.translatable("leave.other.map"));

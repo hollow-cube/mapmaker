@@ -44,7 +44,7 @@ public class CosmeticButton extends Button {
             this.update();
             this.onLeftClick(() -> {
                 if (this.cost != null && this.cost.canAfford(this.data, this.backpack)) {
-                    this.host.pushView(ExtraPanels.confirm("Purchase cosmetic?", this::purchase));
+                    this.host.pushView(ExtraPanels.confirm("Purchase Cosmetic?", this::purchase));
                 } else if (!this.locked) {
                     this.data.setCosmetic(this.cosmetic.type(), this.isSelected() ? null : this.cosmetic);
                     this.siblings.forEach(CosmeticButton::update);

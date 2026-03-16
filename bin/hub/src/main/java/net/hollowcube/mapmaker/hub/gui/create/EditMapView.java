@@ -285,7 +285,7 @@ public class EditMapView extends Panel {
     @Blocking
     static void editMap(MapService mapService, MapData map, InventoryHost host, ServerBridge bridge) {
         if (map.verification() != MapVerification.UNVERIFIED) {
-            host.pushView(ExtraPanels.confirm("Reset verification progress?",
+            host.pushView(ExtraPanels.confirm("Reset Verification Progress?",
                 () -> buildMapAfterVerify(mapService, bridge, map, host.player())));
         } else {
             beginBuildingMap(bridge, map, host.player());
