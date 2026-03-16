@@ -55,7 +55,7 @@ public class MapSlotEntry extends Panel {
             host.player().sendMessage(Component.translatable("edit.map.failure.verify"));
             return;
         } else if (map.verification() == MapVerification.VERIFIED) {
-            host.player().sendMessage(Component.translatable("edit.map.failure.publish"));
+            host.player().sendMessage(Component.translatable("edit.map.failure.verified"));
             return;
         }
 
