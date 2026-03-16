@@ -53,12 +53,13 @@ public abstract class AbstractMapIntegrationTest {
         world = new PlayingMapWorld(server, map);
         ((AbstractMapMakerMapWorld) world).load();
 
-        player = env.createPlayer((connection, gameProfile) -> new MapPlayerImplImpl(connection, gameProfile) {
+        env.process().connection().setPlayerProvider((connection, gameProfile) -> new MapPlayer(connection, gameProfile) {
             @Override
             public @NotNull CommandManager getCommandManager() {
                 return new CommandManagerImpl();
             }
-        }, world.instance(), new Pos(0, 40, 0));
+        });
+        player = env.createPlayer(world.instance(), new Pos(0, 40, 0));
 
         // String id, String username, DisplayName displayName, JsonObject settings, long playtime, int coins, int cubits
         player.setTag(PlayerData.TAG, new PlayerData(player.getUuid().toString(), player.getUsername(),
