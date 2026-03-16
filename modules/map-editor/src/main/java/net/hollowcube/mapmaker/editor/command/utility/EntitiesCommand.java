@@ -24,7 +24,7 @@ public class EntitiesCommand extends CommandDsl {
 
     private void handleQueryAll(Player player, CommandContext context) {
         var entities = player.getInstance().getEntities().stream()
-                .filter(e -> e instanceof MapEntity)
+                .filter(e -> e instanceof MapEntity<?>)
                 .toList();
 
         if (entities.isEmpty()) {
@@ -35,7 +35,7 @@ public class EntitiesCommand extends CommandDsl {
         player.sendMessage("Entities in the map:");
         entities.forEach(entity -> {
             player.sendMessage(" - " + entity.getEntityType() + " at " + entity.getPosition());
-            if (entity instanceof ObjectEntity marker) {
+            if (entity instanceof ObjectEntity<?> marker) {
                 player.sendMessage(Component.text("   ").append(NbtUtil.prettyPrint(marker.getData())));
             }
         });

@@ -27,22 +27,17 @@ public class MapEntityType {
         return constructor.apply(entityType, uuid);
     }
 
+    public static boolean hasOverride(@NotNull EntityType entityType) {
+        return constructorMap.containsKey(entityType);
+    }
+
     public interface Constructor1 {
         @NotNull Entity create(@NotNull UUID uuid);
     }
 
-    public interface Constructor2 {
-        @NotNull Entity create(@NotNull EntityType entityType, @NotNull UUID uuid);
-    }
-
     public static void override(@NotNull EntityType entityType, @NotNull Constructor1 constructor) {
         Check.stateCondition(constructorMap.containsKey(entityType), "Entity type " + entityType + " is already overridden");
-        constructorMap.put(entityType, (unused, uuid) -> constructor.create(uuid));
-    }
-
-    public static void override(@NotNull EntityType entityType, @NotNull Constructor2 constructor) {
-        Check.stateCondition(constructorMap.containsKey(entityType), "Entity type " + entityType + " is already overridden");
-        constructorMap.put(entityType, constructor::create);
+        constructorMap.put(entityType, (_, uuid) -> constructor.create(uuid));
     }
 
     private static @NotNull Entity defaultConstructor(@NotNull EntityType entityType, @NotNull UUID uuid) {

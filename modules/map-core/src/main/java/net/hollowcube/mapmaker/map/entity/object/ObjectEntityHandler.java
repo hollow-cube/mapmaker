@@ -9,9 +9,9 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class ObjectEntityHandler {
     private final String id;
-    protected final ObjectEntity entity;
+    protected final ObjectEntity<?> entity;
 
-    protected ObjectEntityHandler(@NotNull String id, @NotNull ObjectEntity entity) {
+    protected ObjectEntityHandler(@NotNull String id, @NotNull ObjectEntity<?> entity) {
         this.id = id;
         this.entity = entity;
     }

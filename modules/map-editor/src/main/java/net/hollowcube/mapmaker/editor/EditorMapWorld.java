@@ -7,6 +7,7 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.editor.command.navigation.BackCommand;
 import net.hollowcube.mapmaker.editor.entity.SpawnMarkerEntity;
+import net.hollowcube.mapmaker.editor.entity.editor.EntityEditorDialog;
 import net.hollowcube.mapmaker.editor.gui.LeaderboardEditorView;
 import net.hollowcube.mapmaker.editor.item.BuilderMenuItem;
 import net.hollowcube.mapmaker.editor.item.EnterTestModeItem;
@@ -20,6 +21,7 @@ import net.hollowcube.mapmaker.editor.scripting.ReloadingScriptSession;
 import net.hollowcube.mapmaker.editor.scripting.ScriptChangeSource;
 import net.hollowcube.mapmaker.editor.terraform.TerraformInstanceStorageImpl;
 import net.hollowcube.mapmaker.editor.vanilla.DisplayEntityEditor;
+import net.hollowcube.mapmaker.editor.entity.editor.EntityEditor;
 import net.hollowcube.mapmaker.editor.vanilla.PickBlock;
 import net.hollowcube.mapmaker.editor.vanilla.SignEditor;
 import net.hollowcube.mapmaker.map.*;
@@ -48,9 +50,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.PlayerEntityInteractEvent;
-import net.minestom.server.event.player.PlayerPickBlockEvent;
-import net.minestom.server.event.player.PlayerTickEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.tag.TagWritable;
@@ -124,6 +124,9 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
             .addListener(MapPlayerTeleportingEvent.class, this::handlePlayerSavedTeleport)
             .addListener(PlayerEntityInteractEvent.class, this::handleSpawnEntityInteraction)
             .addListener(PlayerPickBlockEvent.class, PickBlock::handlePickBlock)
+            .addListener(PlayerBlockInteractEvent.class, EntityEditor::handleItemUse)
+            .addListener(PlayerPickEntityEvent.class, EntityEditor::handlePickEntity)
+            .addListener(PlayerCustomClickEvent.class, EntityEditorDialog::handleDialogSubmit)
             .addChild(SignEditor.EVENT_NODE)
             .addChild(CheckpointEditor.EVENT_NODE)
             .addChild(StatusEditor.EVENT_NODE);

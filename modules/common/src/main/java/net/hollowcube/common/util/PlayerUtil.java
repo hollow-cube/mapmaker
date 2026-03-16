@@ -59,10 +59,31 @@ public final class PlayerUtil {
         return null;
     }
 
+    /**
+     * Will try to put it in the hotbar first, then swap with the main hand putting the old item in the inventory.
+     * If the inventory is full, the old item will be dropped.
+     */
     public static void giveItem(@NotNull Player player, @NotNull ItemStack itemStack) {
-        if (!player.getInventory().addItemStack(itemStack)) {
-            player.setItemInHand(PlayerHand.MAIN, itemStack);
+        int emptySlot = -1;
+        for (int i = 0; i < 9; i++) {
+            var item = player.getInventory().getItemStack(i);
+            if (item.isAir() && emptySlot == -1) {
+                emptySlot = i;
+            } else if (itemStack.equals(item)) {
+                player.setHeldItemSlot((byte) i);
+                return;
+            }
         }
+
+        if (emptySlot != -1) {
+            player.getInventory().setItemStack(emptySlot, itemStack);
+            player.setHeldItemSlot((byte) emptySlot);
+            return;
+        }
+
+        var oldItem = player.getItemInHand(PlayerHand.MAIN);
+        player.setItemInHand(PlayerHand.MAIN, itemStack);
+        player.getInventory().addItemStack(oldItem);
     }
 
     @SuppressWarnings("UnstableApiUsage")

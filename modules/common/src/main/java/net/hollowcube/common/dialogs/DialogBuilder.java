@@ -5,11 +5,13 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.dialog.Dialog;
+import net.minestom.server.dialog.DialogActionButton;
 import net.minestom.server.dialog.DialogAfterAction;
 import net.minestom.server.dialog.DialogMetadata;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 public class DialogBuilder {
@@ -55,16 +57,16 @@ public class DialogBuilder {
     public Dialog buildSaveConfirmation(@NotNull Key key, @Nullable CompoundBinaryTag extra) {
         return new Dialog.Confirmation(
             this.metadata(DialogAfterAction.NONE),
-            DialogButtons.close(Component.translatable("dialog.generic.close"), 150),
-            DialogButtons.button(Component.translatable("dialog.generic.save"), 150, key, extra)
+            DialogButtons.button(Component.translatable("dialog.generic.save"), 150, key, extra),
+            DialogButtons.close(Component.translatable("dialog.generic.close"), 150)
         );
     }
 
     public Dialog buildSubmitConfirmation(@NotNull Key key, @Nullable CompoundBinaryTag extra) {
         return new Dialog.Confirmation(
             this.metadata(DialogAfterAction.CLOSE),
-            DialogButtons.close(Component.translatable("dialog.generic.close"), 150),
-            DialogButtons.button(Component.translatable("dialog.generic.submit"), 150, key, extra)
+            DialogButtons.button(Component.translatable("dialog.generic.submit"), 150, key, extra),
+            DialogButtons.close(Component.translatable("dialog.generic.close"), 150)
         );
     }
 
@@ -72,6 +74,15 @@ public class DialogBuilder {
         return new Dialog.Notice(
             this.metadata(DialogAfterAction.CLOSE),
             DialogButtons.button(Component.translatable("dialog.generic.close"), 150, key, extra)
+        );
+    }
+
+    public Dialog buildActions(List<DialogActionButton> buttons, int columns) {
+        return new Dialog.MultiAction(
+            this.metadata(DialogAfterAction.CLOSE),
+            buttons,
+            DialogButtons.close(Component.translatable("dialog.generic.close"), 150),
+            columns
         );
     }
 }

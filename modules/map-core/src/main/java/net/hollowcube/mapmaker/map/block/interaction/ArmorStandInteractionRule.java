@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
-import net.hollowcube.mapmaker.map.entity.impl.living.ArmorStandEntity;
+import net.hollowcube.mapmaker.map.entity.impl.other.ArmorStandEntity;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.BlockFace;
 import org.jetbrains.annotations.NotNull;
