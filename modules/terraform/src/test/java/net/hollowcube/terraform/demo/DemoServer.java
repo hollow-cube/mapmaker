@@ -5,7 +5,7 @@ import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.command.util.HelpCommand;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.command.CommandCategories;
-import net.hollowcube.schem.reader.SpongeSchematicReader;
+import net.hollowcube.schem.reader.SchematicReader;
 import net.hollowcube.terraform.Terraform;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
@@ -26,12 +26,10 @@ import java.nio.file.Path;
 public class DemoServer {
 
 
-    public static void main(String[] args) throws Exception {
+    static void main(String[] args) throws Exception {
         System.setProperty("terraform.debug.markers", "true");
 
-
-        new SpongeSchematicReader().read(Files.readAllBytes(Path.of("/Users/matt/Downloads/[ygamien]_Cubyg_I.schem")));
-
+        SchematicReader.sponge().read(Files.readAllBytes(Path.of("/Users/matt/Downloads/[ygamien]_Cubyg_I.schem")));
 
         var server = MinecraftServer.init();
 
@@ -70,7 +68,7 @@ public class DemoServer {
                     player.setGameMode(GameMode.CREATIVE);
 
                     //todo this is not a safe call. it blocks the tick thread during instance change.
-                    terraform.initLocalSession(player, player.getInstance().getUuid().toString());
+                    terraform.initLocalSession(player, player.getInstance(), player.getInstance().getUuid().toString());
                 })
                 .addListener(RemoveEntityFromInstanceEvent.class, event -> {
                     if (!(event.getEntity() instanceof Player player)) return;

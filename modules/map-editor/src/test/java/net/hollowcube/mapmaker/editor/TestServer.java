@@ -15,24 +15,27 @@ import net.hollowcube.mapmaker.player.PlayerServiceImpl;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
+import org.jetbrains.annotations.NotNull;
 
 public class TestServer {
     static {
         System.setProperty("minestom.chunk-view-distance", "16");
     }
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         var server = MinecraftServer.init();
 
         CompatProvider.load(MinecraftServer.getGlobalEventHandler());
 
-        DataFixer.addFixVersions(MapServerRunner.extraDataVersionsForMaps());
         DataFixer.buildModel();
 
-        MapEntities.initNoEvents();
+        // use dummy event node
+        MapEntities.init(EventNode.type("dummy", EventFilter.INSTANCE));
 
         var commandManager = new CommandManagerImpl();
         commandManager.register(new TestCommand());
@@ -40,7 +43,7 @@ public class TestServer {
         MinecraftServer.getConnectionManager().setPlayerProvider((connection, gameProfile) ->
             new MapPlayer(connection, gameProfile) {
                 @Override
-                public CommandManager getCommandManager() {
+                public @NotNull CommandManager getCommandManager() {
                     return commandManager;
                 }
             });
@@ -55,7 +58,7 @@ public class TestServer {
         var map = new MapData("fe048ae8-8d46-475f-ba6b-d2e87c83e649",
             "aceb326f-da15-45bc-bf2f-11940c21780c");
 
-        var world = new EditorMapWorld(mapServer, map);
+        var world = new EditorMapWorld(mapServer, map, null);
         world.loadWorld();
 
         MinecraftServer.getGlobalEventHandler()

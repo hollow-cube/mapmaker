@@ -79,6 +79,7 @@ class SimpleOctreeTest {
         assertTrue(overlap.contains(obj1));
         assertTrue(overlap.contains(obj2));
 
+        // TODO: This test is broken. I know nothing about what this test does or how it works. Matt pls fix.
         assertEquals(1, octree.objects.size()); // obj1 must still be in the root
     }
 

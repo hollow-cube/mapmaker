@@ -19,6 +19,6 @@ dependencies {
     }
     implementation(libs.included.schem)
 
-    testImplementation(project(":modules:test"))
+    testImplementation(libs.minestom.testing)
 
 }

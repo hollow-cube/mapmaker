@@ -20,7 +20,7 @@ sourceSets {
             javaSources {
                 property("version", System.getenv("MAPMAKER_VERSION") ?: "dev")
                 property("commitHash", System.getenv("MAPMAKER_COMMIT_HASH") ?: "dev")
-                property("minestomVersion", libs.minestom.get().version)
+                property("minestomVersion", libs.minestom.asProvider().get().version)
                 property("isRelease", isRelease.toString())
 
                 // When building for PRs we embed the rp hash in the build, otherwise its set in the pod spec.

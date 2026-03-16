@@ -3,6 +3,8 @@ package net.hollowcube.mapmaker.map;
 import net.hollowcube.mapmaker.map.setting.TimeOfDay;
 import net.hollowcube.mapmaker.map.setting.WeatherType;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,11 +47,22 @@ class MapWorldInstanceInitTest {
         assertEquals(13000, world.instance().getTime());
     }
 
-    private static class NoopMapWorld extends AbstractMapWorld {
+    private static class NoopMapWorld extends AbstractMapWorld<NoopPlayerState, NoopMapWorld> {
 
         public NoopMapWorld(MapData map) {
-            super(new TestMapServer(false), map, makeMapInstance(map, 't'));
+            super(new TestMapServer(), map, makeMapInstance(map, 't'), NoopPlayerState.class);
         }
 
+        @Override
+        protected NoopPlayerState configurePlayer(@NotNull Player player) {
+            return new NoopPlayerState.Dummy();
+        }
+
+    }
+
+    // must be a sealed interface with implementations to be AbstractMapWorld compliant
+    private sealed interface NoopPlayerState extends PlayerState<NoopPlayerState, NoopMapWorld> {
+        record Dummy() implements NoopPlayerState {
+        }
     }
 }

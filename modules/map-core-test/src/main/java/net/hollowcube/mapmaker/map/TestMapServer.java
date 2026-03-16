@@ -3,11 +3,15 @@ package net.hollowcube.mapmaker.map;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
+import net.hollowcube.mapmaker.api.ApiClient;
+import net.hollowcube.mapmaker.api.hdb.HeadDatabaseClient;
+import net.hollowcube.mapmaker.api.interaction.InteractionClient;
+import net.hollowcube.mapmaker.api.maps.MapClient;
+import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.noop.NoopMapService;
 import net.hollowcube.mapmaker.misc.noop.NoopPlayerService;
-import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
@@ -21,6 +25,18 @@ import java.util.function.Function;
 final class TestMapServer implements MapServer {
     private final MapService mapService = new NoopMapService();
     private final PlayerService playerService = new NoopPlayerService();
+    private final ApiClient apiClient = new ApiClient(
+        new PlayerClient.Noop(),
+        new MapClient.Noop(),
+        null,
+        null,
+        null
+    );
+
+    @Override
+    public @NotNull ApiClient api() {
+        return apiClient;
+    }
 
     @Override
     public @NotNull SessionService sessionService() {
@@ -35,11 +51,6 @@ final class TestMapServer implements MapServer {
     @Override
     public @NotNull MapService mapService() {
         return mapService;
-    }
-
-    @Override
-    public @NotNull PermManager permManager() {
-        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override

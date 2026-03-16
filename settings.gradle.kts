@@ -36,7 +36,6 @@ include(
     "modules:replay",
     "modules:terraform",
 
-    "modules:test",
     "modules:map-core-test",
 )
 
