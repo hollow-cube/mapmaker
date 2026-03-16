@@ -1,11 +1,13 @@
 package net.hollowcube.mapmaker.invite;
 
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface PlayerInviteService {
 
+    @Blocking
     void join(@NotNull Player sender, @NotNull String targetId);
 
     void registerInvite(@NotNull Player sender, @NotNull String targetId);

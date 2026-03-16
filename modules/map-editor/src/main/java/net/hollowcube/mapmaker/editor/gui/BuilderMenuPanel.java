@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.editor.gui;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.kyori.adventure.text.Component;
@@ -33,7 +34,7 @@ public class BuilderMenuPanel extends Panel {
             .background("generic2/btn/danger/1_1")
             .sprite("icon2/1_1/running_out_door", 1, 1)
             .translationKey("gui.builder_menu.save_and_exit")
-            .onLeftClick(() -> bridge.joinHub(this.host.player()))
+            .onLeftClickAsync(() -> bridge.joinHub(this.host.player()))
         );
 
         this.pagination = add(1, 2, new Pagination<>(7, 1));

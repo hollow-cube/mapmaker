@@ -15,6 +15,7 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.Material;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -52,6 +53,7 @@ public class MapIconPanel extends Panel {
         return map;
     }
 
+    @Blocking
     private void handlePlayMap() {
         var player = host.player();
 

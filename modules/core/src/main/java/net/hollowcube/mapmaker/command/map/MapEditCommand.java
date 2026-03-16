@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.Permission;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,6 +38,7 @@ public class MapEditCommand extends CommandDsl {
         addSyntax(playerOnly(this::handleForceEditMap), mapArg);
     }
 
+    @Blocking
     private void handleForceEditMap(@NotNull Player player, @NotNull CommandContext context) {
         var map = context.get(mapArg);
 

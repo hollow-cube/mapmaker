@@ -17,6 +17,7 @@ import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,6 +53,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     }
 
     @Override
+    @Blocking
     public void join(@NotNull Player sender, @NotNull String targetId) {
         var senderSession = sessionManager.getSession(sender.getUuid().toString());
         if (senderSession == null) {

@@ -20,6 +20,7 @@ import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
@@ -193,6 +194,7 @@ public class CreateMaps extends View {
         contestButtonSubmitted.setArgs(timeToEndComponent);
     }
 
+    @Blocking
     @Action("personal_world")
     public void enterPersonalWorld(@NotNull Player player) {
         var spawnMapId = MapData.SPAWN_MAP_ID;

@@ -251,6 +251,7 @@ public class EditMap extends View {
         }
     }
 
+    @Blocking
     private void actuallyEditMap(Player player) {
         try {
             if (map.verification() != MapVerification.UNVERIFIED) {
@@ -275,6 +276,7 @@ public class EditMap extends View {
     }
 
     @Action(value = "verify", async = true)
+    @Blocking
     private void verifyMap(@NotNull Player player) {
         if (map.verification() == MapVerification.UNVERIFIED) {
             var playerData = PlayerData.fromPlayer(player);

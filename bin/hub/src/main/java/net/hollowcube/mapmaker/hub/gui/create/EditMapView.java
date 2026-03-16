@@ -289,6 +289,7 @@ public class EditMapView extends Panel {
         }
     }
 
+    @Blocking
     private static void buildMapAfterVerify(MapService mapService, ServerBridge bridge, MapData map, Player player) {
         player.sendMessage(Component.translatable("progress.verification.lost"));
 

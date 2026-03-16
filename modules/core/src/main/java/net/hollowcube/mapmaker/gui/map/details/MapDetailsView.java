@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.gui.map.details;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.lang.TimeComponent;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.map.MapListView;
@@ -98,11 +99,15 @@ public class MapDetailsView extends Panel {
     }
 
     private void handleJoinMap() {
-        this.bridge.joinMap(host.player(), map.id(), ServerBridge.JoinMapState.PLAYING, "map_details_gui");
+        FutureUtil.submitVirtual(
+            () -> this.bridge.joinMap(host.player(), map.id(), ServerBridge.JoinMapState.PLAYING, "map_details_gui")
+        );
     }
 
     private void handleLeaveMap() {
-        this.bridge.joinHub(host.player());
+        FutureUtil.submitVirtual(
+            () -> this.bridge.joinHub(host.player())
+        );
     }
 
     @Override

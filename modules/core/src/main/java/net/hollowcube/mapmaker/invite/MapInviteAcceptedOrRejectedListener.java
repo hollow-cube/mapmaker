@@ -15,6 +15,7 @@ import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +65,7 @@ public final class MapInviteAcceptedOrRejectedListener implements Closeable {
         }
     }
 
+    @Blocking
     private void handleInviteMessage(@NotNull Message msg, @NotNull MapInviteAcceptedOrRejectedMessage message) {
         LOGGER.info("Received invite accepted or rejected message: {}", message);
 
@@ -101,6 +103,7 @@ public final class MapInviteAcceptedOrRejectedListener implements Closeable {
         sender.sendMessage(Component.translatable(translationString, targetDisplayName, mapName, targetName));
     }
 
+    @Blocking
     private void sendCorrectPlayerToServer(@NotNull MapInviteAcceptedOrRejectedMessage message) {
         var type = message.type();
 
@@ -113,6 +116,7 @@ public final class MapInviteAcceptedOrRejectedListener implements Closeable {
         }
     }
 
+    @Blocking
     private void joinMap(@NotNull UUID playerId, @NotNull String targetPlayerId, @NotNull String mapId, @NotNull String source) {
         var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(playerId);
         if (player == null) return;
