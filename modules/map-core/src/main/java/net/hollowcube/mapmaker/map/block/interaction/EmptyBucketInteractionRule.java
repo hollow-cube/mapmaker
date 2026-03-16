@@ -3,17 +3,16 @@ package net.hollowcube.mapmaker.map.block.interaction;
 import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.minestom.server.instance.block.Block;
-import org.jetbrains.annotations.NotNull;
 
 public class EmptyBucketInteractionRule implements BlockInteractionRule, BlockInteractionRule.AirInteractionRule {
 
     @Override
-    public @NotNull SneakState sneakState() {
+    public SneakState sneakState() {
         return SneakState.BOTH;
     }
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition);
         if (BlockTags.CAULDRONS.contains(block.key()) && !interaction.player().isSneaking()) {
@@ -29,7 +28,7 @@ public class EmptyBucketInteractionRule implements BlockInteractionRule, BlockIn
     }
 
     @Override
-    public boolean handleAirInteraction(@NotNull Interaction interaction) {
+    public boolean handleAirInteraction(Interaction interaction) {
         var player = interaction.player();
         var blockPosition = PlayerUtil.getTargetBlock(player, PlayerUtil.DEFAULT_PLACEMENT_DISTANCE, true);
         if (blockPosition == null) return false;

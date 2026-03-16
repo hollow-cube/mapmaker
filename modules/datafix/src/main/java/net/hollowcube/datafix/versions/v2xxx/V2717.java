@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class V2717 extends DataVersion {
     private static final Map<String, String> RENAMES = Map.of(
-            "minecraft:azalea_leaves_flowers", "minecraft:flowering_azalea_leaves"
+        "minecraft:azalea_leaves_flowers", "minecraft:flowering_azalea_leaves"
     );
 
     public V2717() {

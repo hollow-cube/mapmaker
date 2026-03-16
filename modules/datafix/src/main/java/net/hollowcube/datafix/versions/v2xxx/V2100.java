@@ -12,6 +12,6 @@ public class V2100 extends DataVersion {
 
         // TODO not sure this is right
         addReference(DataTypes.BLOCK_ENTITY, "minecraft:beehive", field -> field
-                .list("Bees.EntityData", DataTypes.ENTITY));
+            .list("Bees.EntityData", DataTypes.ENTITY));
     }
 }

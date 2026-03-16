@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v2xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V2679 extends DataVersion {
     public V2679() {
@@ -13,7 +14,7 @@ public class V2679 extends DataVersion {
         addFix(DataTypes.BLOCK_STATE, V2679::fixCauldronName);
     }
 
-    private static Value fixCauldronName(Value blockState) {
+    private static @Nullable Value fixCauldronName(Value blockState) {
         if (!"minecraft:cauldron".equals(blockState.getValue("Name")))
             return blockState;
 

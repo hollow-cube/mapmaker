@@ -3,15 +3,16 @@ package net.hollowcube.datafix.versions.v4xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class V4055 extends DataVersion {
     private static final List<String> PREFIXES = List.of(
-            "minecraft:generic.",
-            "minecraft:horse.",
-            "minecraft:player.",
-            "minecraft:zombie."
+        "minecraft:generic.",
+        "minecraft:horse.",
+        "minecraft:player.",
+        "minecraft:zombie."
     );
 
     public V4055() {
@@ -21,7 +22,7 @@ public class V4055 extends DataVersion {
         addFix(DataTypes.ENTITY, V4055::fixAttributeIdsInEntity);
     }
 
-    public static Value fixAttributeIdsInDataComponents(Value dataComponents) {
+    public static @Nullable Value fixAttributeIdsInDataComponents(Value dataComponents) {
         for (var modifier : dataComponents.get("minecraft:attribute_modifiers").get("modifiers")) {
             if (modifier.getValue("type") instanceof String s)
                 modifier.put("type", fix(s));
@@ -29,7 +30,7 @@ public class V4055 extends DataVersion {
         return null;
     }
 
-    public static Value fixAttributeIdsInEntity(Value entity) {
+    public static @Nullable Value fixAttributeIdsInEntity(Value entity) {
         for (var attribute : entity.get("attributes")) {
             if (attribute.getValue("id") instanceof String s)
                 attribute.put("id", fix(s));

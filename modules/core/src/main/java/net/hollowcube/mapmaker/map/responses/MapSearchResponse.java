@@ -7,8 +7,8 @@ import java.util.List;
 
 @RuntimeGson
 public record MapSearchResponse(
-        int page,
-        int pageCount,
-        List<MapData> results
+    int page,
+    int pageCount,
+    List<MapData> results
 ) {
 }

@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v4xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V4535 extends DataVersion {
 
@@ -12,7 +13,7 @@ public class V4535 extends DataVersion {
         addFix(DataTypes.BLOCK_ENTITY, "minecraft:copper_golem", V4535::fix);
     }
 
-    private static Value fix(Value block) {
+    private static @Nullable Value fix(Value block) {
         switch (block.remove("weather_state").as(Integer.class, 0)) {
             case 1 -> block.put("weather_state", "exposed");
             case 2 -> block.put("weather_state", "weathered");

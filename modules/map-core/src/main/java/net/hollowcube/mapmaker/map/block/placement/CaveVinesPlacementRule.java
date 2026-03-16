@@ -3,23 +3,22 @@ package net.hollowcube.mapmaker.map.block.placement;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class CaveVinesPlacementRule extends BaseBlockPlacementRule {
 
-    public CaveVinesPlacementRule(@NotNull Block block) {
+    public CaveVinesPlacementRule(Block block) {
         super(block);
     }
 
     @Override
-    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
+    public @Nullable Block blockPlace(PlacementState placementState) {
         if (placementState.blockFace() != BlockFace.BOTTOM) return null;
         return Block.CAVE_VINES;
     }
 
     @Override
-    public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
+    public Block blockUpdate(UpdateState updateState) {
         Block block = updateState.currentBlock();
         Point position = updateState.blockPosition();
         int x = position.blockX();

@@ -6,7 +6,6 @@ import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.generator.GenerationUnit;
 import net.minestom.server.instance.generator.Generator;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +32,7 @@ public class VoidGenerator implements Generator {
     }
 
     @Override
-    public void generate(@NotNull GenerationUnit unit) {
+    public void generate(GenerationUnit unit) {
         // Place all points we precalculated earlier
         var pair = new ChunkCoordinatePair(unit.absoluteStart().chunkX(), unit.absoluteStart().chunkZ());
         if (blocksToSet.containsKey(pair)) {

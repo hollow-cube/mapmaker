@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v0xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V109 extends DataVersion {
 
@@ -12,7 +13,7 @@ public class V109 extends DataVersion {
         addFix(DataTypes.ENTITY, V109::fixEntityHealth);
     }
 
-    private static Value fixEntityHealth(Value entity) {
+    private static @Nullable Value fixEntityHealth(Value entity) {
         if (entity.getValue("HealF") instanceof Number n) {
             entity.put("HealF", null);
             entity.put("Health", n.floatValue());

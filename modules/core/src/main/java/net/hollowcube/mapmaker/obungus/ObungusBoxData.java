@@ -3,20 +3,19 @@ package net.hollowcube.mapmaker.obungus;
 import net.hollowcube.common.util.RuntimeGson;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 
 @RuntimeGson
 public record ObungusBoxData(
-        @NotNull String id,
-        @Nullable String playerId,
-        @NotNull Instant createdAt,
-        @Nullable String name,
-        @NotNull String shape,
-        @Nullable String legacyUsername,
-        @NotNull String schematicData
+    String id,
+    @Nullable String playerId,
+    Instant createdAt,
+    @Nullable String name,
+    String shape,
+    @Nullable String legacyUsername,
+    String schematicData
 ) {
     public static final int FLAG_IS_LONG = 1;
     public static final int FLAG_IS_STRAIGHT = 2;
@@ -44,7 +43,7 @@ public record ObungusBoxData(
         return null;
     }
 
-    private static int bitSetToInt(String bitSet) {
+    private static int bitSetToInt(@Nullable String bitSet) {
         if (bitSet == null || bitSet.isEmpty() || !bitSet.matches("[01]+")) {
             throw new IllegalArgumentException("Invalid bit set string: " + bitSet);
         }

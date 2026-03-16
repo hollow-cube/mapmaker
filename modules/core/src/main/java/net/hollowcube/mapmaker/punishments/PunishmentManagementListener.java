@@ -20,7 +20,6 @@ import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventDispatcher;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,10 +44,7 @@ public class PunishmentManagementListener implements Closeable {
 
     private final MessageConsumer consumer;
 
-    public PunishmentManagementListener(
-        @NotNull PlayerService playerService,
-        @NotNull JetStreamWrapper jetStream
-    ) {
+    public PunishmentManagementListener(PlayerService playerService, JetStreamWrapper jetStream) {
         this.playerService = playerService;
 
         this.consumer = jetStream.subscribe(STREAM, CONSUMER_CONFIG, PunishmentUpdateMessage.class, this::handlePunishmentUpdate);
@@ -63,14 +59,14 @@ public class PunishmentManagementListener implements Closeable {
         }
     }
 
-    private void handlePunishmentUpdate(@NotNull Message msg, @NotNull PunishmentUpdateMessage message) {
+    private void handlePunishmentUpdate(Message msg, PunishmentUpdateMessage message) {
         switch (message.action()) {
             case CREATE -> handlePunishmentCreated(message.punishment(), message.component());
             case REVOKE -> handlePunishmentRevoked(message.punishment());
         }
     }
 
-    private void handlePunishmentCreated(@NotNull Punishment punishment, @NotNull Component message) {
+    private void handlePunishmentCreated(Punishment punishment, Component message) {
         LOGGER.info("Received punishment created message: {}", punishment);
 
         MinecraftServer.getSchedulerManager().scheduleNextTick(
@@ -95,14 +91,14 @@ public class PunishmentManagementListener implements Closeable {
         PlayerUtil.disconnect(player, message);
     }
 
-    private void handlePunishmentRevoked(@NotNull Punishment punishment) {
+    private void handlePunishmentRevoked(Punishment punishment) {
         MinecraftServer.getSchedulerManager().scheduleNextTick(
             () -> EventDispatcher.call(new PunishmentRevokedEvent(punishment)));
 
         announcePunishmentUpdate(false, punishment);
     }
 
-    private void announcePunishmentUpdate(boolean created, @NotNull Punishment punishment) {
+    private void announcePunishmentUpdate(boolean created, Punishment punishment) {
         var typeName = punishment.type().name().toLowerCase(Locale.ROOT);
         var announcement = Component.translatable(
             created ? "punishment.staff_announce." + typeName + ".created" : "punishment.staff_announce." + typeName + ".revoked",

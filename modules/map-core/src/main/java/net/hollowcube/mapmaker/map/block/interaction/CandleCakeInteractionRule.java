@@ -2,12 +2,11 @@ package net.hollowcube.mapmaker.map.block.interaction;
 
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
-import org.jetbrains.annotations.NotNull;
 
 public class CandleCakeInteractionRule implements BlockInteractionRule {
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var block = interaction.getBlock(interaction.blockPosition());
         var lit = block.getProperty("lit").equals("true");
         var item = interaction.item().material();

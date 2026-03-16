@@ -4,20 +4,20 @@ import net.hollowcube.datafix.DataType;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
 public class V4300 extends DataVersion {
     private static final Set<String> ENTITIES_WITH_SADDLE_ITEM = Set.of(
-            "minecraft:horse",
-            "minecraft:skeleton_horse",
-            "minecraft:zombie_horse",
-            "minecraft:donkey",
-            "minecraft:mule",
-            "minecraft:camel",
-            "minecraft:llama",
-            "minecraft:trader_llama"
+        "minecraft:horse",
+        "minecraft:skeleton_horse",
+        "minecraft:zombie_horse",
+        "minecraft:donkey",
+        "minecraft:mule",
+        "minecraft:camel",
+        "minecraft:llama",
+        "minecraft:trader_llama"
     );
     private static final Set<String> ENTITIES_WITH_SADDLE_FLAG = Set.of("minecraft:pig", "minecraft:strider");
 
@@ -36,11 +36,11 @@ public class V4300 extends DataVersion {
         ENTITIES_WITH_SADDLE_FLAG.forEach(id -> addFix(DataTypes.ENTITY, id, V4300::fixEntityWithSaddleFlag));
     }
 
-    static @NotNull DataType.Builder entityWithInventory(@NotNull DataType.Builder field) {
+    static DataType.Builder entityWithInventory(DataType.Builder field) {
         return field.list("Items", DataTypes.ITEM_STACK);
     }
 
-    private static Value fixEntityWithSaddleItem(Value entity) {
+    private static @Nullable Value fixEntityWithSaddleItem(Value entity) {
         var saddleItem = entity.remove("SaddleItem");
         if (saddleItem.isNull()) return null;
         entity.put("saddle", saddleItem);
@@ -48,7 +48,7 @@ public class V4300 extends DataVersion {
         return null;
     }
 
-    private static Value fixEntityWithSaddleFlag(Value entity) {
+    private static @Nullable Value fixEntityWithSaddleFlag(Value entity) {
         var hasSaddle = entity.remove("Saddle").as(Boolean.class, false);
         if (!hasSaddle) return null;
 

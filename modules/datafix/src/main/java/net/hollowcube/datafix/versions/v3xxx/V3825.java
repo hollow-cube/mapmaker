@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v3xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
@@ -15,7 +16,7 @@ public class V3825 extends DataVersion {
         super(3825);
 
         addReference(DataTypes.ENTITY, "minecraft:ominous_item_spawner", field -> field
-                .single("item", DataTypes.ITEM_STACK));
+            .single("item", DataTypes.ITEM_STACK));
 
         MAP_NAMES.forEach(id -> addFix(DataTypes.ITEM_STACK, id, V3825::fixItemCustomNameToItemNameMap));
         addFix(DataTypes.ITEM_STACK, "minecraft:white_banner", V3825::fixItemCustomNameToItemNameBanner);
@@ -23,7 +24,7 @@ public class V3825 extends DataVersion {
         addFix(DataTypes.BLOCK_ENTITY, "minecraft:trial_spawner", V3825::fixMoveToNormalConfig);
     }
 
-    private static Value fixItemCustomNameToItemNameBanner(Value itemStack) {
+    private static @Nullable Value fixItemCustomNameToItemNameBanner(Value itemStack) {
         var components = itemStack.get("components");
         if (!components.isMapLike()) return null;
         var customName = components.get("minecraft:custom_name");
@@ -34,7 +35,7 @@ public class V3825 extends DataVersion {
         return null;
     }
 
-    private static Value fixItemCustomNameToItemNameMap(Value itemStack) {
+    private static @Nullable Value fixItemCustomNameToItemNameMap(Value itemStack) {
         var components = itemStack.get("components");
         if (!components.isMapLike()) return null;
         var customName = components.get("minecraft:custom_name");
@@ -46,7 +47,7 @@ public class V3825 extends DataVersion {
         return null;
     }
 
-    private static Value fixOminousBannerBlockEntityName(Value blockEntity) {
+    private static @Nullable Value fixOminousBannerBlockEntityName(Value blockEntity) {
         var customName = blockEntity.get("CustomName");
         if (!customName.as(String.class, "").contains(OMINOUS_BANNER))
             return null;
@@ -70,28 +71,28 @@ public class V3825 extends DataVersion {
 
     static {
         MAP_NAMES = Set.of(
-                "filled_map.buried_treasure",
-                "filled_map.explorer_jungle",
-                "filled_map.explorer_swamp",
-                "filled_map.mansion",
-                "filled_map.monument",
-                "filled_map.trial_chambers",
-                "filled_map.village_desert",
-                "filled_map.village_plains",
-                "filled_map.village_savanna",
-                "filled_map.village_snowy",
-                "filled_map.village_taiga"
+            "filled_map.buried_treasure",
+            "filled_map.explorer_jungle",
+            "filled_map.explorer_swamp",
+            "filled_map.mansion",
+            "filled_map.monument",
+            "filled_map.trial_chambers",
+            "filled_map.village_desert",
+            "filled_map.village_plains",
+            "filled_map.village_savanna",
+            "filled_map.village_snowy",
+            "filled_map.village_taiga"
         );
         TRIAL_SPAWNER_CONFIG_MOVED_TAGS = Set.of(
-                "spawn_range",
-                "total_mobs",
-                "simultaneous_mobs",
-                "total_mobs_added_per_player",
-                "simultaneous_mobs_added_per_player",
-                "ticks_between_spawn",
-                "spawn_potentials",
-                "loot_tables_to_eject",
-                "items_to_drop_when_ominous"
+            "spawn_range",
+            "total_mobs",
+            "simultaneous_mobs",
+            "total_mobs_added_per_player",
+            "simultaneous_mobs_added_per_player",
+            "ticks_between_spawn",
+            "spawn_potentials",
+            "loot_tables_to_eject",
+            "items_to_drop_when_ominous"
         );
     }
 

@@ -20,11 +20,11 @@ public class V1515 extends DataVersion {
 
     static {
         RENAMED_CORAL_FANS = Map.of(
-                "minecraft:tube_coral_fan", "minecraft:tube_coral_wall_fan",
-                "minecraft:brain_coral_fan", "minecraft:brain_coral_wall_fan",
-                "minecraft:bubble_coral_fan", "minecraft:bubble_coral_wall_fan",
-                "minecraft:fire_coral_fan", "minecraft:fire_coral_wall_fan",
-                "minecraft:horn_coral_fan", "minecraft:horn_coral_wall_fan"
+            "minecraft:tube_coral_fan", "minecraft:tube_coral_wall_fan",
+            "minecraft:brain_coral_fan", "minecraft:brain_coral_wall_fan",
+            "minecraft:bubble_coral_fan", "minecraft:bubble_coral_wall_fan",
+            "minecraft:fire_coral_fan", "minecraft:fire_coral_wall_fan",
+            "minecraft:horn_coral_fan", "minecraft:horn_coral_wall_fan"
         );
     }
 }

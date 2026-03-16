@@ -7,7 +7,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionState;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.TaskSchedule;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -18,7 +17,7 @@ public final class ActionBar {
 
     private static final Tag<ActionBar> TAG = Tag.Transient("action_bar");
 
-    public static @NotNull ActionBar forPlayer(@NotNull Player player) {
+    public static ActionBar forPlayer(Player player) {
         var instance = player.getTag(TAG);
         if (instance == null) {
             instance = new ActionBar(player);
@@ -29,13 +28,13 @@ public final class ActionBar {
 
     @FunctionalInterface
     public interface Provider {
-        void provide(@NotNull Player player, @NotNull FontUIBuilder builder);
+        void provide(Player player, FontUIBuilder builder);
 
         default long expiration() {
             return -1;
         }
 
-        default int cacheKey(@NotNull Player player) {
+        default int cacheKey(Player player) {
             return ThreadLocalRandom.current().nextInt();
         }
     }
@@ -46,31 +45,31 @@ public final class ActionBar {
     private Component lastContent = Component.empty();
     private int lastHash = 0;
 
-    private ActionBar(@NotNull Player player) {
+    private ActionBar(Player player) {
         this.player = player;
 
         player.scheduler().submitTask(this::update);
     }
 
-    public void addProvider(@NotNull Provider provider) {
+    public void addProvider(Provider provider) {
         FutureUtil.assertTickThreadWarn();
         providers.remove(provider); // Remove if already exists (to use latest version always)
         providers.add(provider);
     }
 
-    public void removeProvider(@NotNull Provider provider) {
+    public void removeProvider(Provider provider) {
         FutureUtil.assertTickThreadWarn();
         providers.remove(provider);
     }
 
-    public void toggleProvider(@NotNull Provider provider) {
+    public void toggleProvider(Provider provider) {
         FutureUtil.assertTickThreadWarn();
         if (!providers.remove(provider)) {
             providers.add(provider);
         }
     }
 
-    private @NotNull TaskSchedule update() {
+    private TaskSchedule update() {
         if (player.getPlayerConnection().getConnectionState() != ConnectionState.PLAY)
             return TaskSchedule.tick(2);
 

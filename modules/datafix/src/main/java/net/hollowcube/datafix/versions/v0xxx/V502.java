@@ -4,6 +4,7 @@ import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.ItemRenameFix;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -17,7 +18,7 @@ public class V502 extends DataVersion {
         addFix(DataTypes.ENTITY, "Zombie", V502::fixZombieVillagerType);
     }
 
-    private static Value fixZombieVillagerType(Value value) {
+    private static @Nullable Value fixZombieVillagerType(Value value) {
         if (!value.get("IsVillager").as(Boolean.class, false))
             return null;
         value.put("IsVillager", null);

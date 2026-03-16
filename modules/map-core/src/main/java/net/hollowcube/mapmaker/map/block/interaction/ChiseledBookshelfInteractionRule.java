@@ -6,7 +6,6 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.Material;
 import net.minestom.server.sound.SoundEvent;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -22,7 +21,7 @@ public class ChiseledBookshelfInteractionRule implements BlockInteractionRule {
     }
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var clickFace = interaction.blockFace();
         if (clickFace == null) return false;
 
@@ -46,11 +45,11 @@ public class ChiseledBookshelfInteractionRule implements BlockInteractionRule {
     }
 
     @Override
-    public @NotNull SneakState sneakState() {
+    public SneakState sneakState() {
         return SneakState.NOT_SNEAKING_OR_EMPTY_HAND;
     }
 
-    private int getClickedSlot(@NotNull BlockFace blockFace, @NotNull Point cursorPosition) {
+    private int getClickedSlot(BlockFace blockFace, Point cursorPosition) {
         double x = switch (blockFace) {
             case SOUTH -> cursorPosition.x();
             case NORTH -> 1.0 - cursorPosition.x();

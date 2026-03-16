@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.temp;
 
 import net.hollowcube.common.util.RuntimeGson;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -9,36 +8,36 @@ import java.util.List;
 
 @RuntimeGson
 public record ChatMessageData(
-        @NotNull ClientChatMessageData.Type type,
+    ClientChatMessageData.Type type,
 
-        // Unsigned chat
-        @NotNull String sender,
-        @NotNull String channel,
-        @NotNull List<Part> parts,
-        long seed,
-        boolean senderHasHypercube,
+    // Unsigned chat
+    String sender,
+    String channel,
+    List<Part> parts,
+    long seed,
+    boolean senderHasHypercube,
 
-        // System message
-        @NotNull String target,
-        @NotNull String key,
-        @Nullable List<String> args,
-        boolean respectClientSettings,
+    // System message
+    String target,
+    String key,
+    @Nullable List<String> args,
+    boolean respectClientSettings,
 
-        @Nullable ChatMessageData extra
+    @Nullable ChatMessageData extra
 ) {
 
     @RuntimeGson
     public record Part(
-            @NotNull Type type,
+        Type type,
 
-            // RAW
-            @UnknownNullability String text,
+        // RAW
+        @UnknownNullability String text,
 
-            // EMOJI
-            @UnknownNullability String name,
+        // EMOJI
+        @UnknownNullability String name,
 
-            // MAP
-            @UnknownNullability String mapId
+        // MAP
+        @UnknownNullability String mapId
     ) {
 
         public enum Type {
@@ -47,7 +46,7 @@ public record ChatMessageData(
 
     }
 
-    public @NotNull List<String> argsSafe() {
+    public List<String> argsSafe() {
         return args == null ? List.of() : args;
     }
 

@@ -22,7 +22,6 @@ import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
@@ -33,11 +32,11 @@ public final class MiscFunctionality {
     private static final Component FADEOUT_TITLE = Component.text(BadSprite.SPRITE_MAP.get("hud/fadeout").fontChar());
     private static final Title.Times FADEOUT_TIMES = Title.Times.times(Duration.ofMillis(1000), Duration.ofMillis(15000), Duration.ofMillis(0));
 
-    public static void sendFadeout(@NotNull Player player) {
+    public static void sendFadeout(Player player) {
         player.showTitle(Title.title(FADEOUT_TITLE, Component.empty(), FADEOUT_TIMES));
     }
 
-    public static void assignTeam(@NotNull Player player) {
+    public static void assignTeam(Player player) {
         var playerData = PlayerData.fromPlayer(player);
         player.setTeam(CoreTeams.DEFAULT);
 //        player.setTeam(switch (playerData.displayName2().getBadgeName()) {
@@ -48,7 +47,7 @@ public final class MiscFunctionality {
 //        });
     }
 
-    public static void broadcastTabList(@NotNull Audience audience, int onlinePlayers) {
+    public static void broadcastTabList(Audience audience, int onlinePlayers) {
         var playersText = onlinePlayers == 1 ? "ᴘʟᴀʏᴇʀ" : "ᴘʟᴀʏᴇʀѕ";
         var playerCountText = FontUtil.rewrite("smallnums", "" + onlinePlayers);
 
@@ -88,7 +87,7 @@ public final class MiscFunctionality {
         }
 
         @Override
-        public int cacheKey(@NotNull Player player) {
+        public int cacheKey(Player player) {
             var playerData = PlayerData.fromPlayer(player);
             return Objects.hash(
                 player.getGameMode() == GameMode.SPECTATOR,
@@ -97,7 +96,7 @@ public final class MiscFunctionality {
         }
 
         @Override
-        public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
+        public void provide(Player player, FontUIBuilder builder) {
             // Never show in spectator. It generally makes no sense, but also Axiom uses spectator when in editor mode,
             // which should not show this ui for sure (it looks awful).
             if (player.getGameMode() == GameMode.SPECTATOR) return;
@@ -118,7 +117,7 @@ public final class MiscFunctionality {
 
     private static final BadSprite XP_BAR_BACKGROUND = BadSprite.SPRITE_MAP.get("hud/level/xp_bar_background");
 
-    public static void buildExperienceBar(@NotNull Player p, @NotNull FontUIBuilder builder) {
+    public static void buildExperienceBar(Player p, FontUIBuilder builder) {
         // Never show in spectator. It generally makes no sense, but also Axiom uses spectator when in editor mode,
         // which should not show this ui for sure (it looks awful).
         if (p.getGameMode() == GameMode.SPECTATOR) return;
@@ -131,19 +130,19 @@ public final class MiscFunctionality {
     }
 
     @Blocking
-    public static @Nullable MapData getCurrentMap(@NotNull SessionManager sessionManager, @NotNull MapService mapService, @NotNull Player player) {
+    public static @Nullable MapData getCurrentMap(SessionManager sessionManager, MapService mapService, Player player) {
         var playerId = PlayerData.fromPlayer(player).id();
         return getCurrentMap(sessionManager, mapService, playerId);
     }
 
     @Blocking
-    public static @Nullable MapData getCurrentMap(@NotNull SessionManager sessionManager, @NotNull MapService mapService, @NotNull String playerId) {
+    public static @Nullable MapData getCurrentMap(SessionManager sessionManager, MapService mapService, String playerId) {
         var presence = sessionManager.getPresence(playerId);
         if (presence == null || !presence.type().equals(MapPresence.TYPE)) return null;
         return mapService.getMap(playerId, presence.mapId());
     }
 
-    public static void applyCosmetics(@NotNull Player player, @NotNull PlayerData playerData) {
+    public static void applyCosmetics(Player player, PlayerData playerData) {
         for (var type : CosmeticType.VALUES) {
             type.reset(player); // Clear existing data for a cosmetic before applying
 
@@ -169,6 +168,6 @@ public final class MiscFunctionality {
 
     public interface CosmeticCallback {
         // pretty gross, oh well
-        void onCosmeticChange(@NotNull CosmeticType type, @Nullable Cosmetic cosmetic);
+        void onCosmeticChange(CosmeticType type, @Nullable Cosmetic cosmetic);
     }
 }

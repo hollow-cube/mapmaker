@@ -9,12 +9,12 @@ import java.util.Map;
 
 public class V1486 extends DataVersion {
     public static final Map<String, String> RENAMED_ENTITY_IDS = Map.of(
-            "minecraft:salmon_mob", "minecraft:salmon",
-            "minecraft:cod_mob", "minecraft:cod"
+        "minecraft:salmon_mob", "minecraft:salmon",
+        "minecraft:cod_mob", "minecraft:cod"
     );
     public static final Map<String, String> RENAMED_EGG_IDS = Map.of(
-            "minecraft:salmon_mob_spawn_egg", "minecraft:salmon_spawn_egg",
-            "minecraft:cod_mob_spawn_egg", "minecraft:cod_spawn_egg"
+        "minecraft:salmon_mob_spawn_egg", "minecraft:salmon_spawn_egg",
+        "minecraft:cod_mob_spawn_egg", "minecraft:cod_spawn_egg"
     );
 
     public V1486() {

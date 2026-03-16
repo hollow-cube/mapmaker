@@ -68,6 +68,7 @@ public abstract class Panel extends Element {
         });
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     protected void sync(Runnable runnable) {
         final InventoryHost host = this.host;
         if (host == null) return;

@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v0xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V804 extends DataVersion {
     public V804() {
@@ -11,7 +12,7 @@ public class V804 extends DataVersion {
         addFix(DataTypes.ITEM_STACK, "minecraft:banner", V804::fixBannerColor);
     }
 
-    private static Value fixBannerColor(Value value) {
+    private static @Nullable Value fixBannerColor(Value value) {
         Value tag = value.get("tag");
         if (tag.value() == null) return null;
         Value blockEntityTag = tag.get("BlockEntityTag");

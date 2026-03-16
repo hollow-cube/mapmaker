@@ -7,7 +7,6 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.annotations.SerializedName;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
@@ -15,35 +14,35 @@ import java.util.List;
 
 @RuntimeGson
 public class PlayerDataUpdateRequest {
-    private String username = null;
-    private List<String> ipHistory = null;
-    private Instant lastOnline = null;
+    private @Nullable String username = null;
+    private @Nullable List<String> ipHistory = null;
+    private @Nullable Instant lastOnline = null;
 
     @SerializedName("settingsUpdates")
-    private JsonObject settings = null;
+    private @Nullable JsonObject settings = null;
 
-    private JsonObject cosmetics = null;
+    private @Nullable JsonObject cosmetics = null;
 
     public boolean hasChanges() {
         return username != null || ipHistory != null || lastOnline != null || settings != null || cosmetics != null;
     }
 
-    public @NotNull PlayerDataUpdateRequest setUsername(String username) {
+    public PlayerDataUpdateRequest setUsername(String username) {
         this.username = username;
         return this;
     }
 
-    public @NotNull PlayerDataUpdateRequest setIpHistory(List<String> ipHistory) {
+    public PlayerDataUpdateRequest setIpHistory(List<String> ipHistory) {
         this.ipHistory = ipHistory;
         return this;
     }
 
-    public @NotNull PlayerDataUpdateRequest setLastOnline(Instant lastOnline) {
+    public PlayerDataUpdateRequest setLastOnline(Instant lastOnline) {
         this.lastOnline = lastOnline;
         return this;
     }
 
-    public @NotNull PlayerDataUpdateRequest updateSetting(@NotNull String key, @NotNull JsonElement value) {
+    public PlayerDataUpdateRequest updateSetting(String key, JsonElement value) {
         if (settings == null) {
             settings = new JsonObject();
         }
@@ -51,7 +50,7 @@ public class PlayerDataUpdateRequest {
         return this;
     }
 
-    public @NotNull PlayerDataUpdateRequest updateCosmetic(@NotNull CosmeticType type, @Nullable String id) {
+    public PlayerDataUpdateRequest updateCosmetic(CosmeticType type, @Nullable String id) {
         if (cosmetics == null) {
             cosmetics = new JsonObject();
         }

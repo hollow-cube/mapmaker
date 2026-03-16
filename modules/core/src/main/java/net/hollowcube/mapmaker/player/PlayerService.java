@@ -12,7 +12,6 @@ import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -22,46 +21,41 @@ import java.util.Set;
 public interface PlayerService {
     int DEFAULT_TAB_COMPLETE_LIMIT = 25;
 
-    @NotNull
-    DisplayName getPlayerDisplayName2(@NotNull String id);
+    DisplayName getPlayerDisplayName2(String id);
 
-    default @NotNull List<DisplayName> getPlayerDisplayNames(@NotNull List<String> ids) {
+    default List<DisplayName> getPlayerDisplayNames(List<String> ids) {
         return ids.stream() // todo probably makes sense to add a bulk endpoint
             .map(this::getPlayerDisplayName2)
             .toList();
     }
 
-    @NotNull
-    String getPlayerId(@NotNull String idOrUsername);
+    String getPlayerId(String idOrUsername);
 
-    @NotNull PlayerData getPlayerData(@NotNull String id);
+    PlayerData getPlayerData(String id);
 
-    void updatePlayerData(@NotNull String id, @NotNull PlayerDataUpdateRequest update);
+    void updatePlayerData(String id, PlayerDataUpdateRequest update);
 
     /**
      * Returns the unlocked cosmetics for the given player by their path, eg `head/crown`.
      */
-    @NotNull
-    Set<String> getUnlockedCosmetics(@NotNull String playerId);
+    Set<String> getUnlockedCosmetics(String playerId);
 
     void buyCosmetic(
-        @NotNull String id, @NotNull Cosmetic cosmetic, @Nullable Integer coins, @Nullable Integer cubits,
+        String id, Cosmetic cosmetic, @Nullable Integer coins, @Nullable Integer cubits,
         @Nullable JsonObject items
     );
 
-    void buyUpgrade(@NotNull String playerId, @NotNull String upgradeId, int cubits, @NotNull JsonObject meta);
+    void buyUpgrade(String playerId, String upgradeId, int cubits, JsonObject meta);
 
-    @NotNull
-    JsonObject getPlayerBackpack(@NotNull String id);
+    JsonObject getPlayerBackpack(String id);
 
-    @NotNull
-    TabCompleteResponse getUsernameTabCompletions(@NotNull String query, int limit);
+    TabCompleteResponse getUsernameTabCompletions(String query, int limit);
 
-    default @NotNull TabCompleteResponse getUsernameTabCompletions(@NotNull String query) {
+    default TabCompleteResponse getUsernameTabCompletions(String query) {
         return this.getUsernameTabCompletions(query, DEFAULT_TAB_COMPLETE_LIMIT);
     }
 
-    record CreateCheckoutLinkResponse(@NotNull String url) {
+    record CreateCheckoutLinkResponse(String url) {
     }
 
     /**
@@ -71,11 +65,9 @@ public interface PlayerService {
      * @param username The username of the player
      * @param product  The (internal) ID of the product, eg cubits_50
      */
-    @NotNull
-    CreateCheckoutLinkResponse createCheckoutLink(
-        @NotNull String source, @NotNull String username, @NotNull String product);
+    CreateCheckoutLinkResponse createCheckoutLink(String source, String username, String product);
 
-    @Nullable HypercubeStatus getHypercubeStatus(@NotNull String playerId);
+    @Nullable HypercubeStatus getHypercubeStatus(String playerId);
 
     enum TotpResult {
         SUCCESS,
@@ -85,28 +77,27 @@ public interface PlayerService {
         ALREADY_ENABLED,
     }
 
-    @NotNull TotpResult checkTotp(@NotNull String playerId, @Nullable String code);
+    TotpResult checkTotp(String playerId, @Nullable String code);
 
-    @NotNull TotpResult removeTotp(@NotNull String playerId);
+    TotpResult removeTotp(String playerId);
 
-    @Nullable TotpSetupResponse beginTotpSetup(@NotNull String playerId);
+    @Nullable TotpSetupResponse beginTotpSetup(String playerId);
 
-    @NotNull TotpResult completeTotpSetup(@NotNull String playerId, @NotNull String code);
+    TotpResult completeTotpSetup(String playerId, String code);
 
-    @NotNull List<PlayerAlts.Alt> getAlts(@NotNull String playerId);
+    List<PlayerAlts.Alt> getAlts(String playerId);
 
     // Friendships
 
-    default @NotNull Page<PlayerFriend> getPlayerFriends(@NotNull String playerId, @NotNull Pageable pageable) {
+    default Page<PlayerFriend> getPlayerFriends(String playerId, Pageable pageable) {
         return getPlayerFriends(playerId, null, pageable);
     }
 
-    @NotNull Page<PlayerFriend> getPlayerFriends(@NotNull String playerId, @Nullable Boolean onlineState, @NotNull Pageable pageable);
+    Page<PlayerFriend> getPlayerFriends(String playerId, @Nullable Boolean onlineState, Pageable pageable);
 
-    void removeFriend(@NotNull String playerId, @NotNull String targetId);
+    void removeFriend(String playerId, String targetId);
 
-    @NotNull Page<FriendRequest> getFriendRequests(
-        @NotNull String playerId, boolean incoming, @NotNull Pageable pageable);
+    Page<FriendRequest> getFriendRequests(String playerId, boolean incoming, Pageable pageable);
 
     /**
      * Sends a friend request or accepts a friend request if an inverted request already exists (one from the target)
@@ -114,20 +105,19 @@ public interface PlayerService {
      * @param playerId player that is sending the request
      * @param targetId player that is receiving the request
      */
-    @NotNull SendFriendRequestResult sendFriendRequest(@NotNull String playerId, @NotNull String targetId);
+    SendFriendRequestResult sendFriendRequest(String playerId, String targetId);
 
-    @NotNull FriendRequest deleteFriendRequest(
-        @NotNull String playerId, @NotNull String targetId, boolean bidirectional);
+    FriendRequest deleteFriendRequest(String playerId, String targetId, boolean bidirectional);
 
     // Blocks
 
-    void blockPlayer(@NotNull String playerId, @NotNull String targetId);
+    void blockPlayer(String playerId, String targetId);
 
-    @NotNull Page<BlockedPlayer> getBlockedPlayers(@NotNull String playerId, @NotNull Pageable pageable);
+    Page<BlockedPlayer> getBlockedPlayers(String playerId, Pageable pageable);
 
-    void unblockPlayer(@NotNull String playerId, @NotNull String targetId);
+    void unblockPlayer(String playerId, String targetId);
 
-    List<BlockedPlayer> getBlocksBetween(@NotNull String playerId, @NotNull String targetId, boolean bidirectional);
+    List<BlockedPlayer> getBlocksBetween(String playerId, String targetId, boolean bidirectional);
 
     /**
      *
@@ -136,8 +126,7 @@ public interface PlayerService {
      * @param bidirectional if bidirectional or not
      * @return true if the player is blocked by the target - you should stop execution
      */
-    default boolean failIfBlocked(
-        @NotNull Player player, @NotNull String targetId, @NotNull String targetUsername, boolean bidirectional) {
+    default boolean failIfBlocked(Player player, String targetId, String targetUsername, boolean bidirectional) {
         var blocks = this.getBlocksBetween(targetId, player.getUuid().toString(), bidirectional);
         if (blocks.isEmpty()) return false;
 
@@ -152,20 +141,20 @@ public interface PlayerService {
     }
 
     // Notifications
-    @NotNull PlayerNotificationResponse getNotifications(@NotNull String playerId, int page, boolean unread);
+    PlayerNotificationResponse getNotifications(String playerId, int page, boolean unread);
 
-    void deleteNotification(@NotNull String playerId, @NotNull String notificationId);
+    void deleteNotification(String playerId, String notificationId);
 
-    void markNotificationRead(@NotNull String playerId, @NotNull String notificationId, boolean read);
+    void markNotificationRead(String playerId, String notificationId, boolean read);
 
     void createNotification(
-        @NotNull String playerId, @NotNull String type, @NotNull String key, @Nullable JsonObject data,
+        String playerId, String type, String key, @Nullable JsonObject data,
         @Nullable Integer expiresInSeconds, boolean replaceUnread
     );
 
     // Recap
 
-    @Nullable String getRecap(@NotNull String playerId, int year);
+    @Nullable String getRecap(String playerId, int year);
 
     class BadRequestError extends RuntimeException {}
 
@@ -180,9 +169,9 @@ public interface PlayerService {
     record Pageable(int page, int pageSize) {}
 
     @RuntimeGson
-    record Page<T>(int page, int totalItems, @NotNull List<T> items) {
+    record Page<T>(int page, int totalItems, List<T> items) {
 
-        public static <T> Page<T> fromJson(@NotNull String json, @NotNull Class<T> clazz) {
+        public static <T> Page<T> fromJson(String json, Class<T> clazz) {
             return AbstractHttpService.GSON.fromJson(json, TypeToken.getParameterized(Page.class, clazz).getType());
         }
 

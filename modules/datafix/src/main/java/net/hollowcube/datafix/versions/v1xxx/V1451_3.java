@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V1451_3 extends DataVersion {
     private static final Object2IntMap<String> BLOCK_TO_ID = new Object2IntOpenHashMap<>();
@@ -13,45 +14,45 @@ public class V1451_3 extends DataVersion {
         super(1451, 3);
 
         addReference(DataTypes.ENTITY, "minecraft:egg", field -> field
-                .single("inTile", DataTypes.BLOCK_NAME));
+            .single("inTile", DataTypes.BLOCK_NAME));
         addReference(DataTypes.ENTITY, "minecraft:ender_pearl", field -> field
-                .single("inTile", DataTypes.BLOCK_NAME));
+            .single("inTile", DataTypes.BLOCK_NAME));
         addReference(DataTypes.ENTITY, "minecraft:fireball", field -> field
-                .single("inTile", DataTypes.BLOCK_NAME));
+            .single("inTile", DataTypes.BLOCK_NAME));
         addReference(DataTypes.ENTITY, "minecraft:potion", field -> field
-                .single("inTile", DataTypes.BLOCK_NAME)
-                .single("Potion", DataTypes.ITEM_STACK));
+            .single("inTile", DataTypes.BLOCK_NAME)
+            .single("Potion", DataTypes.ITEM_STACK));
         addReference(DataTypes.ENTITY, "minecraft:small_fireball", field -> field
-                .single("inTile", DataTypes.BLOCK_NAME));
+            .single("inTile", DataTypes.BLOCK_NAME));
         addReference(DataTypes.ENTITY, "minecraft:snowball", field -> field
-                .single("inTile", DataTypes.BLOCK_NAME));
+            .single("inTile", DataTypes.BLOCK_NAME));
         addReference(DataTypes.ENTITY, "minecraft:wither_skull", field -> field
-                .single("inTile", DataTypes.BLOCK_NAME));
+            .single("inTile", DataTypes.BLOCK_NAME));
         addReference(DataTypes.ENTITY, "minecraft:xp_bottle", field -> field
-                .single("inTile", DataTypes.BLOCK_NAME));
+            .single("inTile", DataTypes.BLOCK_NAME));
         addReference(DataTypes.ENTITY, "minecraft:arrow", field -> field
-                .single("inBlockState", DataTypes.BLOCK_STATE));
+            .single("inBlockState", DataTypes.BLOCK_STATE));
         addReference(DataTypes.ENTITY, "minecraft:enderman", field -> field
-                .single("carriedBlockState", DataTypes.BLOCK_STATE));
+            .single("carriedBlockState", DataTypes.BLOCK_STATE));
         addReference(DataTypes.ENTITY, "minecraft:falling_block", field -> field
-                .single("BlockState", DataTypes.BLOCK_STATE)
-                .single("TileEntityData", DataTypes.BLOCK_ENTITY));
+            .single("BlockState", DataTypes.BLOCK_STATE)
+            .single("TileEntityData", DataTypes.BLOCK_ENTITY));
         addReference(DataTypes.ENTITY, "minecraft:spectral_arrow", field -> field
-                .single("inBlockState", DataTypes.BLOCK_STATE));
+            .single("inBlockState", DataTypes.BLOCK_STATE));
         addReference(DataTypes.ENTITY, "minecraft:chest_minecart", field -> field
-                .single("DisplayState", DataTypes.BLOCK_STATE)
-                .single("LastOutput", DataTypes.TEXT_COMPONENT));
+            .single("DisplayState", DataTypes.BLOCK_STATE)
+            .single("LastOutput", DataTypes.TEXT_COMPONENT));
         addReference(DataTypes.ENTITY, "minecraft:furnace_minecart", field -> field
-                .single("DisplayState", DataTypes.BLOCK_STATE));
+            .single("DisplayState", DataTypes.BLOCK_STATE));
         addReference(DataTypes.ENTITY, "minecraft:hopper_minecart", field -> field
-                .single("DisplayState", DataTypes.BLOCK_STATE)
-                .list("Items", DataTypes.ITEM_STACK));
+            .single("DisplayState", DataTypes.BLOCK_STATE)
+            .list("Items", DataTypes.ITEM_STACK));
         addReference(DataTypes.ENTITY, "minecraft:minecart", field -> field
-                .single("DisplayState", DataTypes.BLOCK_STATE));
+            .single("DisplayState", DataTypes.BLOCK_STATE));
         addReference(DataTypes.ENTITY, "minecraft:spawner_minecart", field -> field
-                .single("DisplayState", DataTypes.BLOCK_STATE));
+            .single("DisplayState", DataTypes.BLOCK_STATE));
         addReference(DataTypes.ENTITY, "minecraft:tnt_minecart", field -> field
-                .single("DisplayState", DataTypes.BLOCK_STATE));
+            .single("DisplayState", DataTypes.BLOCK_STATE));
 
         // TODO: there is a block name fix in inTile for a handful of entities here,
         //  but I (matt) dont understand the mechanics of it. need to revisit.
@@ -74,7 +75,7 @@ public class V1451_3 extends DataVersion {
         addFix(DataTypes.ITEM_STACK, "minecraft:filled_map", V1451_3::fixMapItemStackMapId);
     }
 
-    private static Value updateFallingBlock(Value entity) {
+    private static @Nullable Value updateFallingBlock(Value entity) {
         var id = switch (entity.remove("Block").value()) {
             case String s -> BLOCK_TO_ID.getOrDefault(s, 0);
             case Number n -> n.intValue();
@@ -89,22 +90,22 @@ public class V1451_3 extends DataVersion {
         return null;
     }
 
-    private static Value updateEnderman(Value entity) {
+    private static @Nullable Value updateEnderman(Value entity) {
         return updateBlockIdAndDataToState(entity, "carried",
                 "carriedData", "carriedBlockState");
     }
 
-    private static Value updateDisplayTile(Value entity) {
+    private static @Nullable Value updateDisplayTile(Value entity) {
         return updateBlockIdAndDataToState(entity, "DisplayTile",
                 "DisplayData", "DisplayState");
     }
 
-    private static Value updateInTile(Value entity) {
+    private static @Nullable Value updateInTile(Value entity) {
         return updateBlockIdAndDataToState(entity, "inTile",
                 "inData", "inBlockState");
     }
 
-    private static Value updateBlockIdAndDataToState(Value value, String blockIdField, String blockDataField, String blockStateField) {
+    private static @Nullable Value updateBlockIdAndDataToState(Value value, String blockIdField, String blockDataField, String blockStateField) {
         var id = switch (value.remove(blockIdField).value()) {
             case String s -> BLOCK_TO_ID.getOrDefault(s, 0);
             case Number n -> n.intValue();

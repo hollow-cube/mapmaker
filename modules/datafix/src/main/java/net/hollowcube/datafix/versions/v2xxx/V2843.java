@@ -9,7 +9,7 @@ public class V2843 extends DataVersion {
         super(2843);
 
         addFix(DataTypes.BIOME_NAME, new BiomeRenameFix(
-                "minecraft:deep_warm_ocean", "minecraft:warm_ocean"
+            "minecraft:deep_warm_ocean", "minecraft:warm_ocean"
         ));
     }
 }

@@ -32,20 +32,20 @@ public class V2503 extends DataVersion {
 
     static {
         WALL_BLOCKS = Set.of(
-                "minecraft:andesite_wall",
-                "minecraft:brick_wall",
-                "minecraft:cobblestone_wall",
-                "minecraft:diorite_wall",
-                "minecraft:end_stone_brick_wall",
-                "minecraft:granite_wall",
-                "minecraft:mossy_cobblestone_wall",
-                "minecraft:mossy_stone_brick_wall",
-                "minecraft:nether_brick_wall",
-                "minecraft:prismarine_wall",
-                "minecraft:red_nether_brick_wall",
-                "minecraft:red_sandstone_wall",
-                "minecraft:sandstone_wall",
-                "minecraft:stone_brick_wall"
+            "minecraft:andesite_wall",
+            "minecraft:brick_wall",
+            "minecraft:cobblestone_wall",
+            "minecraft:diorite_wall",
+            "minecraft:end_stone_brick_wall",
+            "minecraft:granite_wall",
+            "minecraft:mossy_cobblestone_wall",
+            "minecraft:mossy_stone_brick_wall",
+            "minecraft:nether_brick_wall",
+            "minecraft:prismarine_wall",
+            "minecraft:red_nether_brick_wall",
+            "minecraft:red_sandstone_wall",
+            "minecraft:sandstone_wall",
+            "minecraft:stone_brick_wall"
         );
     }
 }

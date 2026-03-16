@@ -31,7 +31,6 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.item.Material;
 import org.intellij.lang.annotations.PrintFormat;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -94,8 +93,8 @@ public abstract class AbstractHttpService {
     public static final String userAgent = "github.com/hollow-cube/mapmaker@" + ServerRuntime.getRuntime().shortCommit();
 
     private final HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
-    private final OpenTelemetry otel;
-    protected final Tracer tracer;
+    private final @Nullable OpenTelemetry otel;
+    protected final @Nullable Tracer tracer;
 
     protected AbstractHttpService() {
         this(null);
@@ -110,7 +109,7 @@ public abstract class AbstractHttpService {
         this.tracer = otel.getTracer(getClass().getName(), ServerRuntime.getRuntime().version());
     }
 
-    protected <T> HttpResponse<T> doRequest(@NotNull String name, @NotNull HttpRequest.Builder reqBuilder, HttpResponse.BodyHandler<T> handler) {
+    protected <T> HttpResponse<T> doRequest(String name, HttpRequest.Builder reqBuilder, HttpResponse.BodyHandler<T> handler) {
         FutureUtil.assertThreadWarn();
         var span = tracer.spanBuilder(name).setSpanKind(SpanKind.CLIENT).startSpan();
         var context = Context.root().with(span);
@@ -139,7 +138,7 @@ public abstract class AbstractHttpService {
         }
     }
 
-    protected <T> HttpResponse<T> doRequest(@NotNull HttpRequest req, HttpResponse.BodyHandler<T> handler) {
+    protected <T> HttpResponse<T> doRequest(HttpRequest req, HttpResponse.BodyHandler<T> handler) {
         FutureUtil.assertThreadWarn();
         try {
             logger.log(System.Logger.Level.INFO, "{0} {1}", req.method(), req.uri());
@@ -162,7 +161,7 @@ public abstract class AbstractHttpService {
         hostname = hn;
     }
 
-    protected static @NotNull UrlQueryBuilder urlQueryBuilder() {
+    protected static UrlQueryBuilder urlQueryBuilder() {
         return new UrlQueryBuilder();
     }
 
@@ -170,12 +169,12 @@ public abstract class AbstractHttpService {
 
         private final Map<String, String> parts = new HashMap<>();
 
-        public UrlQueryBuilder add(@NotNull String key, @NotNull String value) {
+        public UrlQueryBuilder add(String key, String value) {
             this.parts.put(key, value);
             return this;
         }
 
-        public @NotNull String build() {
+        public String build() {
             var result = new StringBuilder();
             boolean first = true;
 
@@ -195,30 +194,30 @@ public abstract class AbstractHttpService {
         }
     }
 
-    protected static @NotNull URI url(@NotNull @PrintFormat String format, @NotNull Object... args) {
+    protected static URI url(@PrintFormat String format, Object... args) {
         return URI.create(String.format(format, args));
     }
 
-    protected static HttpRequest.Builder setup(@NotNull URI uri) {
+    protected static HttpRequest.Builder setup(URI uri) {
         // TODO setup common headers
         return HttpRequest.newBuilder(uri);
     }
 
-    protected static HttpRequest.Builder setupGet(@NotNull URI uri) {
+    protected static HttpRequest.Builder setupGet(URI uri) {
         return setup(uri).GET();
     }
 
-    protected static HttpRequest.Builder setupDelete(@NotNull URI uri) {
+    protected static HttpRequest.Builder setupDelete(URI uri) {
         return setup(uri).DELETE();
     }
 
-    protected static HttpRequest.Builder setupPost(@NotNull URI uri, @NotNull String body) {
+    protected static HttpRequest.Builder setupPost(URI uri, String body) {
         return setup(uri)
             .POST(HttpRequest.BodyPublishers.ofString(body))
             .header("Content-Type", "application/json");
     }
 
-    protected static HttpRequest.Builder setupPatch(@NotNull URI uri, @NotNull String body) {
+    protected static HttpRequest.Builder setupPatch(URI uri, String body) {
         return setup(uri)
             .method("PATCH", HttpRequest.BodyPublishers.ofString(body))
             .header("Content-Type", "application/json");

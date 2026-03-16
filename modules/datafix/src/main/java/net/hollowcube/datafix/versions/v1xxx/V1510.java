@@ -49,34 +49,34 @@ public class V1510 extends DataVersion {
 
     static {
         RENAMED_ENTITIES = Map.ofEntries(
-                Map.entry("minecraft:commandblock_minecart", "minecraft:command_block_minecart"),
-                Map.entry("minecraft:ender_crystal", "minecraft:end_crystal"),
-                Map.entry("minecraft:snowman", "minecraft:snow_golem"),
-                Map.entry("minecraft:evocation_illager", "minecraft:evoker"),
-                Map.entry("minecraft:evocation_fangs", "minecraft:evoker_fangs"),
-                Map.entry("minecraft:illusion_illager", "minecraft:illusioner"),
-                Map.entry("minecraft:vindication_illager", "minecraft:vindicator"),
-                Map.entry("minecraft:villager_golem", "minecraft:iron_golem"),
-                Map.entry("minecraft:xp_orb", "minecraft:experience_orb"),
-                Map.entry("minecraft:xp_bottle", "minecraft:experience_bottle"),
-                Map.entry("minecraft:eye_of_ender_signal", "minecraft:eye_of_ender"),
-                Map.entry("minecraft:fireworks_rocket", "minecraft:firework_rocket")
+            Map.entry("minecraft:commandblock_minecart", "minecraft:command_block_minecart"),
+            Map.entry("minecraft:ender_crystal", "minecraft:end_crystal"),
+            Map.entry("minecraft:snowman", "minecraft:snow_golem"),
+            Map.entry("minecraft:evocation_illager", "minecraft:evoker"),
+            Map.entry("minecraft:evocation_fangs", "minecraft:evoker_fangs"),
+            Map.entry("minecraft:illusion_illager", "minecraft:illusioner"),
+            Map.entry("minecraft:vindication_illager", "minecraft:vindicator"),
+            Map.entry("minecraft:villager_golem", "minecraft:iron_golem"),
+            Map.entry("minecraft:xp_orb", "minecraft:experience_orb"),
+            Map.entry("minecraft:xp_bottle", "minecraft:experience_bottle"),
+            Map.entry("minecraft:eye_of_ender_signal", "minecraft:eye_of_ender"),
+            Map.entry("minecraft:fireworks_rocket", "minecraft:firework_rocket")
         );
         RENAMED_BLOCKS = Map.ofEntries(
-                Map.entry("minecraft:portal", "minecraft:nether_portal"),
-                Map.entry("minecraft:oak_bark", "minecraft:oak_wood"),
-                Map.entry("minecraft:spruce_bark", "minecraft:spruce_wood"),
-                Map.entry("minecraft:birch_bark", "minecraft:birch_wood"),
-                Map.entry("minecraft:jungle_bark", "minecraft:jungle_wood"),
-                Map.entry("minecraft:acacia_bark", "minecraft:acacia_wood"),
-                Map.entry("minecraft:dark_oak_bark", "minecraft:dark_oak_wood"),
-                Map.entry("minecraft:stripped_oak_bark", "minecraft:stripped_oak_wood"),
-                Map.entry("minecraft:stripped_spruce_bark", "minecraft:stripped_spruce_wood"),
-                Map.entry("minecraft:stripped_birch_bark", "minecraft:stripped_birch_wood"),
-                Map.entry("minecraft:stripped_jungle_bark", "minecraft:stripped_jungle_wood"),
-                Map.entry("minecraft:stripped_acacia_bark", "minecraft:stripped_acacia_wood"),
-                Map.entry("minecraft:stripped_dark_oak_bark", "minecraft:stripped_dark_oak_wood"),
-                Map.entry("minecraft:mob_spawner", "minecraft:spawner")
+            Map.entry("minecraft:portal", "minecraft:nether_portal"),
+            Map.entry("minecraft:oak_bark", "minecraft:oak_wood"),
+            Map.entry("minecraft:spruce_bark", "minecraft:spruce_wood"),
+            Map.entry("minecraft:birch_bark", "minecraft:birch_wood"),
+            Map.entry("minecraft:jungle_bark", "minecraft:jungle_wood"),
+            Map.entry("minecraft:acacia_bark", "minecraft:acacia_wood"),
+            Map.entry("minecraft:dark_oak_bark", "minecraft:dark_oak_wood"),
+            Map.entry("minecraft:stripped_oak_bark", "minecraft:stripped_oak_wood"),
+            Map.entry("minecraft:stripped_spruce_bark", "minecraft:stripped_spruce_wood"),
+            Map.entry("minecraft:stripped_birch_bark", "minecraft:stripped_birch_wood"),
+            Map.entry("minecraft:stripped_jungle_bark", "minecraft:stripped_jungle_wood"),
+            Map.entry("minecraft:stripped_acacia_bark", "minecraft:stripped_acacia_wood"),
+            Map.entry("minecraft:stripped_dark_oak_bark", "minecraft:stripped_dark_oak_wood"),
+            Map.entry("minecraft:mob_spawner", "minecraft:spawner")
         );
         var renamedItems = new HashMap<>(RENAMED_BLOCKS);
         renamedItems.put("minecraft:clownfish", "minecraft:tropical_fish");

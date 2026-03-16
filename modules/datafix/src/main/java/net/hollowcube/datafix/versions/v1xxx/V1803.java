@@ -4,6 +4,7 @@ import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.DataFixUtils;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -14,7 +15,7 @@ public class V1803 extends DataVersion {
         addFix(DataTypes.ITEM_STACK, V1803::fixItemLore);
     }
 
-    private static Value fixItemLore(Value value) {
+    private static @Nullable Value fixItemLore(Value value) {
         var display = value.get("tag").get("display");
         var lore = display.get("Lore");
         if (lore.isNull()) return null;

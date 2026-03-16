@@ -14,7 +14,6 @@ import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -66,16 +65,16 @@ public class MapSettings {
     transient MapUpdateRequest updates = new MapUpdateRequest();
     transient ReentrantLock updateLock = new ReentrantLock();
 
-    private String name;
-    private Material icon;
-    private MapSize size;
+    private @Nullable String name;
+    private @Nullable Material icon;
+    private @Nullable MapSize size;
     private MapVariant variant;
-    private String subvariant;
+    private @Nullable String subvariant;
 
     private Pos spawnPoint;
 
     private final Map<MapSetting<?>, Object> cache = new ConcurrentHashMap<>();
-    private JsonObject extra;
+    private @Nullable JsonObject extra;
 
     // Settings
     public enum SettingType {
@@ -139,7 +138,7 @@ public class MapSettings {
         }
     }
 
-    private List<MapTags.Tag> tags;
+    private @Nullable List<MapTags.Tag> tags;
 
     public MapSettings() {
         this.name = "";
@@ -169,7 +168,7 @@ public class MapSettings {
     /**
      * Run a callback with the update request, and if the callback returns true, reset the update request.
      */
-    public void withUpdateRequest(@NotNull Function<@NotNull MapUpdateRequest, Boolean> callback) {
+    public void withUpdateRequest(Function<MapUpdateRequest, Boolean> callback) {
         updateLock.lock();
         try {
             if (updates.hasChanges() && callback.apply(updates)) {
@@ -183,7 +182,7 @@ public class MapSettings {
     /**
      * Run a callback with the update request, and if the callback returns true, reset the update request.
      */
-    public void modifyUpdateRequest(@NotNull Consumer<@NotNull MapUpdateRequest> callback) {
+    public void modifyUpdateRequest(Consumer<MapUpdateRequest> callback) {
         updateLock.lock();
         try {
             callback.accept(updates);
@@ -192,21 +191,21 @@ public class MapSettings {
         }
     }
 
-    public @NotNull String getName() {
+    public @Nullable String getName() {
         return name;
     }
 
-    public @NotNull String getNameSafe() {
+    public String getNameSafe() {
         if (name == null || name.isEmpty())
             return MapData.DEFAULT_NAME;
         return name;
     }
 
-    public @NotNull Component getNameComponent() {
+    public Component getNameComponent() {
         return Component.text(getNameSafe());
     }
 
-    public @NotNull Component getTagsComponent() {
+    public Component getTagsComponent() {
         var tags = getTags();
         var maxTags = Math.min(2, tags.size());
         var currTagIdx = 0;
@@ -340,7 +339,7 @@ public class MapSettings {
         return stringBuilder.toString();
     }
 
-    public void setName(@NotNull String name) {
+    public void setName(String name) {
         updateLock.lock();
         try {
             updates.setName(name);
@@ -354,7 +353,7 @@ public class MapSettings {
         return icon;
     }
 
-    public void setIcon(@NotNull Material icon) {
+    public void setIcon(Material icon) {
         updateLock.lock();
         try {
             updates.setIcon(icon.name());
@@ -364,11 +363,11 @@ public class MapSettings {
         }
     }
 
-    public @NotNull MapSize getSize() {
+    public MapSize getSize() {
         return Objects.requireNonNullElse(size, MapSize.NORMAL);
     }
 
-    public void setSize(@NotNull MapSize size) {
+    public void setSize(MapSize size) {
         updateLock.lock();
         try {
             updates.setSize(size);
@@ -378,11 +377,11 @@ public class MapSettings {
         }
     }
 
-    public @NotNull MapVariant getVariant() {
+    public MapVariant getVariant() {
         return variant;
     }
 
-    public void setVariant(@NotNull MapVariant type) {
+    public void setVariant(MapVariant type) {
         updateLock.lock();
         try {
             updates.setVariant(type);
@@ -432,11 +431,11 @@ public class MapSettings {
         }
     }
 
-    public @NotNull Pos getSpawnPoint() {
+    public Pos getSpawnPoint() {
         return spawnPoint;
     }
 
-    public void setSpawnPoint(@NotNull Pos spawnPoint) {
+    public void setSpawnPoint(Pos spawnPoint) {
         updateLock.lock();
         try {
             updates.setSpawnPoint(spawnPoint);
@@ -452,15 +451,15 @@ public class MapSettings {
         return this.tags;
     }
 
-    public boolean hasTag(@NotNull MapTags.Tag tag) {
+    public boolean hasTag(MapTags.Tag tag) {
         return this.tags != null && this.tags.contains(tag);
     }
 
-    public boolean addTag(@NotNull MapTags.Tag tag) {
-        if (tag.type != null) {
+    public boolean addTag(MapTags.Tag tag) {
+//        if (tag.type != null) {
             Check.stateCondition(variant == MapVariant.BUILDING && tag.type == MapTags.TagType.GAMEPLAY,
                 "building maps may not have gameplay tags");
-        }
+//        }
 
         updateLock.lock();
         try {
@@ -501,7 +500,7 @@ public class MapSettings {
         }
     }
 
-    public boolean removeTag(@NotNull MapTags.Tag tag) {
+    public boolean removeTag(MapTags.Tag tag) {
         updateLock.lock();
         try {
             if (this.tags == null) return false;
@@ -545,13 +544,13 @@ public class MapSettings {
         }
     }
 
-    public @NotNull JsonObject extra() {
+    public JsonObject extra() {
         if (this.extra == null) this.extra = new JsonObject();
         return this.extra;
     }
 
-    @SuppressWarnings({"unchecked", "UnstableApiUsage"})
-    public <T> @NotNull T get(@NotNull MapSetting<T> setting) {
+    @SuppressWarnings("unchecked")
+    public <T> T get(MapSetting<T> setting) {
         if (this.extra == null) return setting.defaultValue();
         var data = this.extra.get(setting.key());
         if (data == null) return setting.defaultValue();
@@ -563,8 +562,7 @@ public class MapSettings {
         );
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    public <T> void set(@NotNull MapSetting<T> setting, @NotNull T value) {
+    public <T> void set(MapSetting<T> setting, T value) {
         if (this.extra == null) this.extra = new JsonObject();
         updateLock.lock();
         try {

@@ -14,7 +14,6 @@ import net.minestom.server.item.Material;
 import net.minestom.server.registry.StaticProtocolObject;
 import net.minestom.server.sound.BuiltinSoundEvent;
 import net.minestom.server.sound.SoundEvent;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -41,19 +40,19 @@ public final class Autocompletors {
         }
     }
 
-    public static @NotNull List<Material> searchMaterials(@NotNull String query, int limit, Predicate<Material> predicate) {
+    public static List<Material> searchMaterials(String query, int limit, Predicate<Material> predicate) {
         return search(materials, query, limit, predicate);
     }
 
-    public static @NotNull List<Block> searchBlocks(@NotNull String query, int limit) {
+    public static List<Block> searchBlocks(String query, int limit) {
         return search(fullBlocks, query, limit);
     }
 
-    public static @NotNull List<Block> searchBlocks(@NotNull String query, int limit, Predicate<Block> predicate) {
+    public static List<Block> searchBlocks(String query, int limit, Predicate<Block> predicate) {
         return search(fullBlocks, query, limit, predicate);
     }
 
-    public static @NotNull List<BuiltinSoundEvent> searchSounds(@NotNull String query, int limit) {
+    public static List<BuiltinSoundEvent> searchSounds(String query, int limit) {
         return search(sounds, query, limit, _ -> true);
     }
 
@@ -64,11 +63,11 @@ public final class Autocompletors {
                 .build();
     }
 
-    private static <T extends StaticProtocolObject<@NotNull T>> List<T> search(AutocompleteEngine<IndexableProtocolObject<T>> engine, String query, int limit) {
+    private static <T extends StaticProtocolObject<T>> List<T> search(AutocompleteEngine<IndexableProtocolObject<T>> engine, String query, int limit) {
         return search(engine, query, limit, _ -> true);
     }
 
-    private static <T extends StaticProtocolObject<@NotNull T>> List<T> search(AutocompleteEngine<IndexableProtocolObject<T>> engine, String query, int limit, Predicate<T> predicate) {
+    private static <T extends StaticProtocolObject<T>> List<T> search(AutocompleteEngine<IndexableProtocolObject<T>> engine, String query, int limit, Predicate<T> predicate) {
         List<T> output = new ArrayList<>(limit);
         for (var result : engine.search(query)) {
             if (output.size() >= limit) break;
@@ -99,7 +98,7 @@ public final class Autocompletors {
         }
     }
 
-    private record IndexableProtocolObject<T extends StaticProtocolObject<@NotNull T>>(@NotNull T object) implements Indexable {
+    private record IndexableProtocolObject<T extends StaticProtocolObject<T>>(T object) implements Indexable {
         @Override
         public List<String> getFields() {
             return List.of(object.name(), object.key().value(), object.key().value().replace("_", " "));

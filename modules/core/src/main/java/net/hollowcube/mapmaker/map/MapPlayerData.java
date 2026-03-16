@@ -4,7 +4,6 @@ import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -13,25 +12,25 @@ import java.util.Arrays;
 public class MapPlayerData {
     public static final Tag<MapPlayerData> TAG = Tag.Transient("mapmaker:map_player_data");
 
-    public static @NotNull MapPlayerData fromPlayer(@NotNull Player player) {
+    public static MapPlayerData fromPlayer(Player player) {
         return player.getTag(TAG);
     }
 
     private String id;
-    private String[] mapSlots = new String[5];
-    private String contestSlot;
-    private String lastPlayedMap;
-    private String lastEditedMap;
+    private @Nullable String @Nullable [] mapSlots = new String[5];
+    private @Nullable String contestSlot;
+    private @Nullable String lastPlayedMap;
+    private @Nullable String lastEditedMap;
 
     public MapPlayerData() {
     }
 
-    public MapPlayerData(@NotNull String id) {
+    public MapPlayerData(String id) {
         this.id = id;
     }
 
     public MapPlayerData(
-        @NotNull String id, String[] mapSlots, @Nullable String contestSlot, @Nullable String lastPlayedMap,
+        String id, String[] mapSlots, @Nullable String contestSlot, @Nullable String lastPlayedMap,
         @Nullable String lastEditedMap
     ) {
         this.id = id;
@@ -41,11 +40,11 @@ public class MapPlayerData {
         this.lastEditedMap = lastEditedMap;
     }
 
-    public @NotNull String id() {
+    public String id() {
         return id;
     }
 
-    public String[] mapSlots(PlayerData playerData) {
+    public @Nullable String[] mapSlots(PlayerData playerData) {
         int unlockedSlots = playerData.mapSlots();
         if (mapSlots == null)
             mapSlots = new String[unlockedSlots];
@@ -62,14 +61,14 @@ public class MapPlayerData {
         return lastEditedMap == null || lastEditedMap.isEmpty() ? null : lastEditedMap;
     }
 
-    public void update(@NotNull MapPlayerData other) {
+    public void update(MapPlayerData other) {
         this.mapSlots = other.mapSlots;
         this.lastPlayedMap = other.lastPlayedMap;
         this.lastEditedMap = other.lastEditedMap;
         this.contestSlot = other.contestSlot;
     }
 
-    public @NotNull SlotState getSlotState(PlayerData playerData, int slot) {
+    public SlotState getSlotState(PlayerData playerData, int slot) {
         if (slot < 0 || slot >= playerData.mapSlots())
             return SlotState.LOCKED;
         if (slot >= mapSlots.length || mapSlots[slot] == null || mapSlots[slot].isEmpty())

@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class V2680 extends DataVersion {
     private static final Map<String, String> RENAMES = Map.of(
-            "minecraft:grass_path", "minecraft:dirt_path"
+        "minecraft:grass_path", "minecraft:dirt_path"
     );
 
     public V2680() {

@@ -6,21 +6,22 @@ import net.hollowcube.datafix.fixes.BlockRenameFix;
 import net.hollowcube.datafix.fixes.ItemRenameFix;
 import net.hollowcube.datafix.util.DataFixUtils;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
 public class V1488 extends DataVersion {
     private static final Map<String, String> RENAMED_BLOCKS_IDS = Map.of(
-            "minecraft:kelp_top", "minecraft:kelp",
-            "minecraft:kelp", "minecraft:kelp_plant"
+        "minecraft:kelp_top", "minecraft:kelp",
+        "minecraft:kelp", "minecraft:kelp_plant"
     );
 
     public V1488() {
         super(1488);
 
         addReference(DataTypes.BLOCK_ENTITY, "minecraft:command_block", field -> field
-                .single("CustomName", DataTypes.TEXT_COMPONENT)
-                .single("LastOutput", DataTypes.TEXT_COMPONENT));
+            .single("CustomName", DataTypes.TEXT_COMPONENT)
+            .single("LastOutput", DataTypes.TEXT_COMPONENT));
 
         var blockFix = new BlockRenameFix(RENAMED_BLOCKS_IDS);
         addFix(DataTypes.BLOCK_NAME, blockFix);
@@ -32,7 +33,7 @@ public class V1488 extends DataVersion {
         addFix(DataTypes.ENTITY, "minecraft:commandblock_minecart", V1488::fixCommandBlockEntityCustomName);
     }
 
-    private static Value fixCommandBlockEntityCustomName(Value value) {
+    private static @Nullable Value fixCommandBlockEntityCustomName(Value value) {
         value.put("CustomName", DataFixUtils.ensureTextComponentString(value.get("CustomName")));
         return null;
     }

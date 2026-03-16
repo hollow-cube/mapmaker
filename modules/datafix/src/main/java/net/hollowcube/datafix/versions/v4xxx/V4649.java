@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v4xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V4649 extends DataVersion {
 
@@ -12,7 +13,7 @@ public class V4649 extends DataVersion {
         addFix(DataTypes.DATA_COMPONENTS, V4649::fixTridentAnimation);
     }
 
-    private static Value fixTridentAnimation(Value dataComponents) {
+    private static @Nullable Value fixTridentAnimation(Value dataComponents) {
         var consumable = dataComponents.get("minecraft:consumable");
         if (!consumable.isMapLike()) return null;
 

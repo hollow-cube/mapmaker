@@ -5,7 +5,6 @@ import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.codec.Codec;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public sealed interface CostEntry permits CostEntry.Cubits, CostEntry.Coins, CostEntry.BackpackItem {
@@ -19,21 +18,20 @@ public sealed interface CostEntry permits CostEntry.Cubits, CostEntry.Coins, Cos
         return ((CostEntry.BackpackItem) ti).entry.id();
     });
 
-    @NotNull
     Component displayName();
 
-    int getCount(@NotNull PlayerData playerData, @NotNull PlayerBackpack backpack);
+    int getCount(PlayerData playerData, PlayerBackpack backpack);
 
     final class Cubits implements CostEntry {
         public static final Cubits INSTANCE = new Cubits();
 
         @Override
-        public @NotNull Component displayName() {
+        public Component displayName() {
             return Component.translatable("icon.cubits");
         }
 
         @Override
-        public int getCount(@NotNull PlayerData playerData, @NotNull PlayerBackpack backpack) {
+        public int getCount(PlayerData playerData, PlayerBackpack backpack) {
             return playerData.cubits();
         }
     }
@@ -42,12 +40,12 @@ public sealed interface CostEntry permits CostEntry.Cubits, CostEntry.Coins, Cos
         public static final Coins INSTANCE = new Coins();
 
         @Override
-        public @NotNull Component displayName() {
+        public Component displayName() {
             return Component.translatable("icon.coins");
         }
 
         @Override
-        public int getCount(@NotNull PlayerData playerData, @NotNull PlayerBackpack backpack) {
+        public int getCount(PlayerData playerData, PlayerBackpack backpack) {
             return playerData.coins();
         }
     }
@@ -56,12 +54,12 @@ public sealed interface CostEntry permits CostEntry.Cubits, CostEntry.Coins, Cos
         private static final Component NULL_COMPONENT = Component.text("null");
 
         @Override
-        public @NotNull Component displayName() {
+        public Component displayName() {
             return entry == null ? NULL_COMPONENT : entry.iconComponent().append(Component.text(FontUtil.computeOffset(2)));
         }
 
         @Override
-        public int getCount(@NotNull PlayerData playerData, @NotNull PlayerBackpack backpack) {
+        public int getCount(PlayerData playerData, PlayerBackpack backpack) {
             if (entry == null) return 0;
             return backpack.getQuantity(entry);
         }

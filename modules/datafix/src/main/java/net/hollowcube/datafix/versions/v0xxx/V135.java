@@ -9,7 +9,7 @@ public class V135 extends DataVersion {
         super(135);
 
         addReference(DataTypes.ENTITY, field -> field
-                .list("Passengers", DataTypes.ENTITY));
+            .list("Passengers", DataTypes.ENTITY));
 
         addFix(DataTypes.ENTITY, V135::fixEntityRidingToPassengers);
     }

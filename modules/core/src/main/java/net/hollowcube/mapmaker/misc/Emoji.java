@@ -7,7 +7,6 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -16,10 +15,10 @@ import java.util.Random;
 import java.util.function.Function;
 
 public record Emoji(
-        @NotNull String name,
-        boolean showInHelp,
-        boolean isPublic,
-        @NotNull Either<Component, Function<Random, Component>> component
+    String name,
+    boolean showInHelp,
+    boolean isPublic,
+    Either<Component, Function<Random, Component>> component
 ) {
     private static final LinkedHashMap<String, Emoji> EMOJI_MAP = new LinkedHashMap<>();
 
@@ -108,11 +107,11 @@ public record Emoji(
             SUS_PINK, SUS_PURPLE, SUS_RED, SUS_WHITE, SUS_YELLOW
     ).build();
 
-    public static @Nullable Emoji findByName(@NotNull String name) {
+    public static @Nullable Emoji findByName(String name) {
         return EMOJI_MAP.get(name.toLowerCase());
     }
 
-    public static @NotNull Collection<Emoji> values() {
+    public static Collection<Emoji> values() {
         return EMOJI_MAP.sequencedValues();
     }
 
@@ -127,25 +126,25 @@ public record Emoji(
 
     // Construction logic
 
-    private static @NotNull Builder builder(@NotNull String name) {
+    private static Builder builder(String name) {
         return new Builder(name);
     }
 
     private static class Builder {
         private final String id;
-        private Either<Component, Function<Random, Component>> component = null;
+        private @Nullable Either<Component, Function<@Nullable Random, Component>> component = null;
         private boolean showInHelp = true;
         private boolean isPublic = true;
 
-        private Builder(@NotNull String id) {
+        private Builder(String id) {
             this.id = id;
         }
 
-        public Builder parent(@NotNull String path) {
+        public Builder parent(String path) {
             return path(path + "/" + this.id);
         }
 
-        public Builder path(@NotNull String fullPath) {
+        public Builder path(String fullPath) {
             var sprite = BadSprite.require("icon/emoji/" + fullPath);
             var component = Component.text(sprite.fontChar(), NamedTextColor.WHITE)
                     .shadowColor(ShadowColor.none())
@@ -154,7 +153,7 @@ public record Emoji(
             return this;
         }
 
-        public Builder random(@NotNull Emoji... choices) {
+        public Builder random(Emoji... choices) {
             this.component = Either.right(random -> {
                 if (random == null) return SUS_RED.get(null);
                 return choices[random.nextInt(choices.length)].get(random);
@@ -162,7 +161,7 @@ public record Emoji(
             return this;
         }
 
-        public Builder alternative(@NotNull Emoji alternative, float chance) {
+        public Builder alternative(Emoji alternative, float chance) {
             var common = this.component;
             this.component = Either.right(random -> {
                 if (random == null) return common.map(Function.identity(), func -> func.apply(null));

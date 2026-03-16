@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.map.block.placement;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 
@@ -14,12 +13,12 @@ public final class ChorusPlantPlacementRule extends BaseBlockPlacementRule {
     private static final int PLANT_ID = Block.CHORUS_PLANT.id();
     private static final int FLOWER_ID = Block.CHORUS_FLOWER.id();
 
-    public ChorusPlantPlacementRule(@NotNull Block block) {
+    public ChorusPlantPlacementRule(Block block) {
         super(block);
     }
 
     @Override
-    public @NotNull Block blockPlace(@NotNull PlacementState placementState) {
+    public Block blockPlace(PlacementState placementState) {
         return computeState(
                 placementState.instance(),
                 placementState.placePosition(),
@@ -28,7 +27,7 @@ public final class ChorusPlantPlacementRule extends BaseBlockPlacementRule {
     }
 
     @Override
-    public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
+    public Block blockUpdate(UpdateState updateState) {
         return computeState(
                 updateState.instance(),
                 updateState.blockPosition(),
@@ -41,7 +40,7 @@ public final class ChorusPlantPlacementRule extends BaseBlockPlacementRule {
         return 1;
     }
 
-    private @NotNull Block computeState(@NotNull Block.Getter instance, @NotNull Point blockPosition, @NotNull Block current) {
+    private Block computeState(Block.Getter instance, Point blockPosition, Block current) {
         var props = new HashMap<String, String>();
         for (var face : BlockFace.values()) {
             var adjacentBlock = instance.getBlock(blockPosition.relative(face), TYPE);

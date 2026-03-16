@@ -4,17 +4,18 @@ import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.BlockStatePropertiesFix;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
 public class V2518 extends DataVersion {
     private static final Map<String, String> ORIENTATIONS_BY_FACING = Map.of(
-            "down", "down_south",
-            "up", "up_north",
-            "north", "north_up",
-            "south", "south_up",
-            "west", "west_up",
-            "east", "east_up"
+        "down", "down_south",
+        "up", "up_north",
+        "north", "north_up",
+        "south", "south_up",
+        "west", "west_up",
+        "east", "east_up"
     );
 
     public V2518() {
@@ -24,7 +25,7 @@ public class V2518 extends DataVersion {
         addFix(DataTypes.BLOCK_STATE, new BlockStatePropertiesFix("minecraft:jigsaw", V2518::fixJigsawRotation));
     }
 
-    private static Value fixJigsawBlockEntity(Value block) {
+    private static @Nullable Value fixJigsawBlockEntity(Value block) {
         var attachmentType = block.remove("attachement_type").as(String.class, "minecraft:empty");
         var targetPool = block.remove("target_pool").as(String.class, "minecraft:empty");
         block.put("name", attachmentType);

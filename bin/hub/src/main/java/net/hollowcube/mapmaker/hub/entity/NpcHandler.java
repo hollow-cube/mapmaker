@@ -7,7 +7,6 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerEntityInteractEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.tag.Tag;
-import org.jetbrains.annotations.NotNull;
 
 public interface NpcHandler {
     Tag<NpcHandler> TAG = Tag.Transient("mapmaker:hub/npc_handler");

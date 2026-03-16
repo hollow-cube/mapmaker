@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v0xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V813 extends DataVersion {
     private static final String[] NAMES_BY_COLOR;
@@ -14,7 +15,7 @@ public class V813 extends DataVersion {
         addFix(DataTypes.BLOCK_ENTITY, "minecraft:shulker_box", V813::fixBlockEntityShulkerColor);
     }
 
-    private static Value fixItemShulkerBoxColor(Value value) {
+    private static @Nullable Value fixItemShulkerBoxColor(Value value) {
         Value tag = value.get("tag");
         if (tag.value() == null) return null;
         Value blockEntityTag = tag.get("BlockEntityTag");
@@ -27,29 +28,29 @@ public class V813 extends DataVersion {
         return null;
     }
 
-    private static Value fixBlockEntityShulkerColor(Value value) {
+    private static @Nullable Value fixBlockEntityShulkerColor(Value value) {
         value.put("Color", null);
         return null;
     }
 
     static {
         NAMES_BY_COLOR = new String[]{
-                "minecraft:white_shulker_box",
-                "minecraft:orange_shulker_box",
-                "minecraft:magenta_shulker_box",
-                "minecraft:light_blue_shulker_box",
-                "minecraft:yellow_shulker_box",
-                "minecraft:lime_shulker_box",
-                "minecraft:pink_shulker_box",
-                "minecraft:gray_shulker_box",
-                "minecraft:silver_shulker_box",
-                "minecraft:cyan_shulker_box",
-                "minecraft:purple_shulker_box",
-                "minecraft:blue_shulker_box",
-                "minecraft:brown_shulker_box",
-                "minecraft:green_shulker_box",
-                "minecraft:red_shulker_box",
-                "minecraft:black_shulker_box"
+            "minecraft:white_shulker_box",
+            "minecraft:orange_shulker_box",
+            "minecraft:magenta_shulker_box",
+            "minecraft:light_blue_shulker_box",
+            "minecraft:yellow_shulker_box",
+            "minecraft:lime_shulker_box",
+            "minecraft:pink_shulker_box",
+            "minecraft:gray_shulker_box",
+            "minecraft:silver_shulker_box",
+            "minecraft:cyan_shulker_box",
+            "minecraft:purple_shulker_box",
+            "minecraft:blue_shulker_box",
+            "minecraft:brown_shulker_box",
+            "minecraft:green_shulker_box",
+            "minecraft:red_shulker_box",
+            "minecraft:black_shulker_box"
         };
     }
 }

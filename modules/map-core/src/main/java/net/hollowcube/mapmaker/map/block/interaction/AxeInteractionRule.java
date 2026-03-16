@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map.block.interaction;
 
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import net.minestom.server.instance.block.Block;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
@@ -15,12 +14,12 @@ public class AxeInteractionRule implements BlockInteractionRule {
     }
 
     @Override
-    public @NotNull SneakState sneakState() {
+    public SneakState sneakState() {
         return SneakState.BOTH;
     }
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition);
 

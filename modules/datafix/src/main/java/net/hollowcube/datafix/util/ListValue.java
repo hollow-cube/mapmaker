@@ -1,14 +1,12 @@
 package net.hollowcube.datafix.util;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Iterator;
 import java.util.List;
 
 public record ListValue(List<Object> value) implements Value {
 
     @Override
-    public <T> T as(@NotNull Class<T> type, T defaultValue) {
+    public <T> T as(Class<T> type, T defaultValue) {
         return defaultValue;
     }
 
@@ -45,7 +43,7 @@ public record ListValue(List<Object> value) implements Value {
     }
 
     @Override
-    public @NotNull Iterator<Value> iterator() {
+    public Iterator<Value> iterator() {
         var delegate = this.value.iterator();
         return new Iterator<>() {
             @Override

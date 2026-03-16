@@ -9,10 +9,10 @@ import java.util.Map;
 
 public class V2691 extends DataVersion {
     private static final Map<String, String> RENAMES = Map.of(
-            "minecraft:waxed_copper", "minecraft:waxed_copper_block",
-            "minecraft:oxidized_copper_block", "minecraft:oxidized_copper",
-            "minecraft:weathered_copper_block", "minecraft:weathered_copper",
-            "minecraft:exposed_copper_block", "minecraft:exposed_copper"
+        "minecraft:waxed_copper", "minecraft:waxed_copper_block",
+        "minecraft:oxidized_copper_block", "minecraft:oxidized_copper",
+        "minecraft:weathered_copper_block", "minecraft:weathered_copper",
+        "minecraft:exposed_copper_block", "minecraft:exposed_copper"
     );
 
     public V2691() {

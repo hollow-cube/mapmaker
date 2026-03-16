@@ -2,19 +2,19 @@ package net.hollowcube.datafix.fixes;
 
 import net.hollowcube.datafix.DataFix;
 import net.hollowcube.datafix.util.Value;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiFunction;
 
 public class EntityRenameFix implements DataFix {
-    private final BiFunction<Value, String, String> mapper;
+    private final BiFunction<Value, String, @Nullable String> mapper;
 
-    public EntityRenameFix(@NotNull BiFunction<Value, String, String> mapper) {
+    public EntityRenameFix(BiFunction<Value, String, String> mapper) {
         this.mapper = mapper;
     }
 
     @Override
-    public Value fix(Value value) {
+    public @Nullable Value fix(Value value) {
         if (!(value.get("id").value() instanceof String id))
             return null;
 

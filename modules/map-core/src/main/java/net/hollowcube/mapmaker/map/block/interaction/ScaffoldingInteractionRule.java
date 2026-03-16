@@ -7,7 +7,6 @@ import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.Material;
 import net.minestom.server.sound.SoundEvent;
-import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("UnstableApiUsage")
 public class ScaffoldingInteractionRule implements BlockInteractionRule {
@@ -26,7 +25,7 @@ public class ScaffoldingInteractionRule implements BlockInteractionRule {
     }
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         if (interaction.item().material().id() != SCAFFOLDING_ITEM) return false;
 
         var blockPosition = interaction.blockPosition();

@@ -4,7 +4,6 @@ import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.map.responses.PlayerTopTimesResponse;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
@@ -14,95 +13,77 @@ import java.util.List;
 @Blocking
 public interface MapService {
 
-    @NotNull
     String LEADERBOARD_TOP_TIMES = "top_times";
-    @NotNull
     String LEADERBOARD_MAPS_BEATEN = "maps_beaten";
 
+    MapData createMap(MapCreateRequest request);
 
-    @NotNull
-    MapData createMap(@NotNull MapCreateRequest request);
+    net.hollowcube.mapmaker.map.responses.MapSearchResponse searchMaps(MapSearchParams request);
 
-    @NotNull
-    net.hollowcube.mapmaker.map.responses.MapSearchResponse searchMaps(@NotNull MapSearchParams request);
+    MapProgressBatchResponse getMapProgress(String playerId, List<String> mapIds);
 
-    @NotNull
-    MapProgressBatchResponse getMapProgress(@NotNull String playerId, @NotNull List<String> mapIds);
+    MapSearchResponse<MapData> searchOrgMaps(String authorizer, int page, int pageSize, String orgId);
 
-    @NotNull
-    MapSearchResponse<MapData> searchOrgMaps(@NotNull String authorizer, int page, int pageSize, @NotNull String orgId);
+    MapData getMap(String authorizer, String id);
 
-    @NotNull
-    MapData getMap(@NotNull String authorizer, @NotNull String id);
+    List<MapData> getMaps(String authorizer, List<String> mapIds);
 
-    @NotNull
-    List<MapData> getMaps(@NotNull String authorizer, @NotNull List<String> mapIds);
+    MapData getMapByPublishedId(String authorizer, long publishedId);
 
-    @NotNull
-    MapData getMapByPublishedId(@NotNull String authorizer, long publishedId);
+    void updateMap(String authorizer, String id, MapUpdateRequest update);
 
-    void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update);
+    void deleteMap(String authorizer, String id, @Nullable String reason);
 
-    void deleteMap(@NotNull String authorizer, @NotNull String id, @Nullable String reason);
+    void beginVerification(String authorizer, String mapId);
 
-    void beginVerification(@NotNull String authorizer, @NotNull String mapId);
+    void deleteVerification(String authorizer, String mapId);
 
-    void deleteVerification(@NotNull String authorizer, @NotNull String mapId);
+    MapData publishMap(String authorizer, String id);
 
-    @NotNull
-    MapData publishMap(@NotNull String authorizer, @NotNull String id);
+    byte @Nullable [] getMapWorld(String id, boolean write);
 
-    byte @Nullable [] getMapWorld(@NotNull String id, boolean write);
-
-    default @Nullable ReadableMapData getMapWorldAsStream(@NotNull String id, boolean write) {
+    default @Nullable ReadableMapData getMapWorldAsStream(String id, boolean write) {
         var result = getMapWorld(id, write);
         return result == null ? null : new ReadableMapData(Channels.newChannel(new ByteArrayInputStream(result)), result.length);
     }
 
-    void updateMapWorld(@NotNull String id, byte @NotNull [] worldData);
+    void updateMapWorld(String id, byte[] worldData);
 
-    void reportMap(@NotNull String mapId, @NotNull MapReportRequest req);
+    void reportMap(String mapId, MapReportRequest req);
 
-    @NotNull
-    LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId);
+    LeaderboardData getGlobalLeaderboard(String name, @Nullable String playerId);
 
-    @NotNull
-    LeaderboardData getPlaytimeLeaderboard(@NotNull String mapId, @Nullable String playerId);
+    LeaderboardData getPlaytimeLeaderboard(String mapId, @Nullable String playerId);
 
-    void deletePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId, @Nullable String playerId);
+    void deletePlaytimeLeaderboard(String authorizer, String mapId, @Nullable String playerId);
 
-    void restorePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId);
+    void restorePlaytimeLeaderboard(String authorizer, String mapId);
 
     // Save states
-    @NotNull
-    SaveState createSaveState(@NotNull String mapId, @NotNull String playerId, int protocolVersion, @Nullable SaveStateType.Serializer<?> serializer);
+    SaveState createSaveState(String mapId, String playerId, int protocolVersion, @Nullable SaveStateType.Serializer<?> serializer);
 
-    @NotNull
-    SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer);
+    SaveState getLatestSaveState(String mapId, String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer);
 
     @Nullable
-    SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId);
+    SaveState getBestSaveState(String mapId, String playerId);
 
     @Nullable
-    SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update);
+    SaveStateUpdateResponse updateSaveState(String mapId, String playerId, String id, SaveStateUpdateRequest update);
 
-    void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id);
+    void deleteSaveState(String mapId, String playerId, String id);
 
-    @NotNull MapRating getMapRating(@NotNull String mapId, @NotNull String playerId);
+    MapRating getMapRating(String mapId, String playerId);
 
-    void setMapRating(@NotNull String mapId, @NotNull String playerId, @NotNull MapRating rating);
+    void setMapRating(String mapId, String playerId, MapRating rating);
 
-    @NotNull
-    MapPlayerData getMapPlayerData(@NotNull String playerId);
+    MapPlayerData getMapPlayerData(String playerId);
 
-    @NotNull
-    MapHistory getPlayerMapHistory(@NotNull String playerId, int page, int amount);
+    MapHistory getPlayerMapHistory(String playerId, int page, int amount);
 
-    @NotNull
-    PlayerTopTimesResponse getPlayerTopTimes(@NotNull String playerId, int page, int pageSize);
+    PlayerTopTimesResponse getPlayerTopTimes(String playerId, int page, int pageSize);
 
     class NotFoundError extends RuntimeException {
-        public NotFoundError(@NotNull String id) {
+        public NotFoundError(String id) {
             super("Map not found: " + id);
         }
     }
@@ -117,7 +98,7 @@ public interface MapService {
     }
 
     class InternalError extends RuntimeException {
-        public InternalError(@NotNull String message) {
+        public InternalError(String message) {
             super(message);
         }
 

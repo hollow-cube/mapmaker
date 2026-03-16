@@ -8,9 +8,9 @@ public class V3327 extends DataVersion {
         super(3327);
 
         addReference(DataTypes.BLOCK_ENTITY, "minecraft:decorated_pot", field -> field
-                .list("shards", DataTypes.ITEM_NAME)
-                .single("item", DataTypes.ITEM_STACK));
+            .list("shards", DataTypes.ITEM_NAME)
+            .single("item", DataTypes.ITEM_STACK));
         addReference(DataTypes.BLOCK_ENTITY, "minecraft:suspicious_sand", field -> field
-                .single("item", DataTypes.ITEM_STACK));
+            .single("item", DataTypes.ITEM_STACK));
     }
 }

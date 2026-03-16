@@ -8,7 +8,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -18,8 +17,8 @@ import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
 @RuntimeGson
 public record LeaderboardData(
-        @NotNull List<Entry> top,
-        @Nullable Entry player
+    List<Entry> top,
+    @Nullable Entry player
 ) {
     private static final TextColor COLOR_GOLD = TextColor.color(0xFFBC0F);
     private static final TextColor COLOR_SILVER = TextColor.color(0x808080);
@@ -27,18 +26,18 @@ public record LeaderboardData(
     private static final TextColor COLOR_DEFAULT = TextColor.color(0x696969);
 
     @RuntimeGson
-    public record Entry(@NotNull String player, long score, int rank) {
+    public record Entry(String player, long score, int rank) {
     }
 
-    public boolean contains(@NotNull String playerId) {
+    public boolean contains(String playerId) {
         return top().stream().anyMatch(e -> e.player().equals(playerId));
     }
 
-    public long getScore(@NotNull String playerId) {
+    public long getScore(String playerId) {
         return top().stream().filter(e -> e.player().equals(playerId)).findFirst().map(Entry::score).orElse(-1L);
     }
 
-    public int getRank(@NotNull String playerId) {
+    public int getRank(String playerId) {
         return top().stream().filter(e -> e.player().equals(playerId)).findFirst().map(Entry::rank).orElse(-1);
     }
 
@@ -50,7 +49,7 @@ public record LeaderboardData(
      * @return Entry text, or null if the leaderboard is empty.
      */
     @Blocking
-    public @Nullable List<Component> toComponents(@NotNull PlayerService playerService, boolean pad) {
+    public @Nullable List<Component> toComponents(PlayerService playerService, boolean pad) {
         if (top().isEmpty()) return null;
 
         var result = new ArrayList<Component>();

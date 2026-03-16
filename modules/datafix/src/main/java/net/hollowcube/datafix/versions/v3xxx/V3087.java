@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V3087 extends DataVersion {
     private static final Int2ObjectMap<String> FROG_VARIANT_IDS = new Int2ObjectArrayMap<>();
@@ -15,7 +16,7 @@ public class V3087 extends DataVersion {
         addFix(DataTypes.ENTITY, "minecraft:frog", V3087::fixFrogVariant);
     }
 
-    private static Value fixFrogVariant(Value entity) {
+    private static @Nullable Value fixFrogVariant(Value entity) {
         int frogVariant = entity.remove("Variant").as(Number.class, -1).intValue();
         if (frogVariant == -1) return null;
 

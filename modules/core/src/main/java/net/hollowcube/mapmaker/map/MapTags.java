@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
@@ -77,7 +79,7 @@ public final class MapTags {
         String name;
         boolean disabled;
 
-        String sprite;
+        @Nullable String sprite;
 
         Tag(TagType type, String name, boolean disabled) {
             this.type = type;
@@ -116,7 +118,7 @@ public final class MapTags {
             return this.disabled;
         }
 
-        public String sprite() {
+        public @Nullable String sprite() {
             return this.sprite;
         }
     }

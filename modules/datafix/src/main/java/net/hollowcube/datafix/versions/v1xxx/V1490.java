@@ -9,9 +9,9 @@ import java.util.Map;
 
 public class V1490 extends DataVersion {
     private static final Map<String, String> RENAMED_ITEM_IDS = Map.of(
-            "minecraft:melon_block", "minecraft:melon",
-            "minecraft:melon", "minecraft:melon_slice",
-            "minecraft:speckled_melon", "minecraft:glistering_melon_slice"
+        "minecraft:melon_block", "minecraft:melon",
+        "minecraft:melon", "minecraft:melon_slice",
+        "minecraft:speckled_melon", "minecraft:glistering_melon_slice"
     );
 
     public V1490() {

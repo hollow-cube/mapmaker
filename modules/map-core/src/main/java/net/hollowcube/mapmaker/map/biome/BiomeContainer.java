@@ -17,7 +17,6 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.tag.TagWritable;
 import net.minestom.server.world.biome.Biome;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,13 +66,13 @@ public class BiomeContainer implements TerraformInstanceBiomes {
     private boolean initialized = false;
 
     @Override
-    public @Nullable Biome getBiome(@NotNull RegistryKey<Biome> key) {
+    public @Nullable Biome getBiome(RegistryKey<Biome> key) {
         var biome = this.keyToBiome.get(key);
         return biome != null ? biome.biome() : this.parent.get(key);
     }
 
     @Override
-    public int getId(@NotNull RegistryKey<Biome> key) {
+    public int getId(RegistryKey<Biome> key) {
         var biome = this.keyToBiome.get(key);
         return biome != null ? biome.id() : this.parent.getId(key);
     }
@@ -87,7 +86,7 @@ public class BiomeContainer implements TerraformInstanceBiomes {
     }
 
     @Override
-    public @NotNull Collection<RegistryKey<Biome>> keys() {
+    public Collection<RegistryKey<Biome>> keys() {
         List<RegistryKey<Biome>> keys = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             var key = this.parent.getKey(i);
@@ -99,7 +98,7 @@ public class BiomeContainer implements TerraformInstanceBiomes {
     }
 
     @Override
-    public @NotNull Component getName(@NotNull RegistryKey<Biome> key) {
+    public Component getName(RegistryKey<Biome> key) {
         var biome = keyToBiome.get(key);
         if (biome != null) return biome.name();
         var translationKey = "biome.%s.%s".formatted(key.key().namespace(), key.key().value());
@@ -114,7 +113,7 @@ public class BiomeContainer implements TerraformInstanceBiomes {
      * @param id The protocol ID of the biome
      * @return The Minestom biome if it exists and is loaded, the default biome otherwise.
      */
-    public @NotNull String getLoadedBiomeName(int id) {
+    public String getLoadedBiomeName(int id) {
         // Try from local biomes first, then from parent
         var biome = idToBiome.get(id);
         if (biome != null) return biome.key().key().asString();
@@ -135,11 +134,11 @@ public class BiomeContainer implements TerraformInstanceBiomes {
         return biome;
     }
 
-    public boolean hasCustomBiome(@NotNull String name) {
+    public boolean hasCustomBiome(String name) {
         return this.biomes.stream().anyMatch(b -> b.getName().equals(name));
     }
 
-    public boolean isLoaded(@NotNull BiomeInfo info) {
+    public boolean isLoaded(BiomeInfo info) {
         return this.keyToBiome.values().stream().anyMatch(b -> b.info().equals(info));
     }
 
@@ -151,11 +150,11 @@ public class BiomeContainer implements TerraformInstanceBiomes {
         return 15;
     }
 
-    public @NotNull Collection<BiomeInfo> values() {
+    public Collection<BiomeInfo> values() {
         return Collections.unmodifiableCollection(biomes);
     }
 
-    public @NotNull List<Biome> loadedBiomes() {
+    public List<Biome> loadedBiomes() {
         var allBiomes = new ArrayList<>(this.parent.values());
         for (RegisteredBiome value : this.keyToBiome.values()) {
             allBiomes.add(value.biome());
@@ -163,7 +162,7 @@ public class BiomeContainer implements TerraformInstanceBiomes {
         return allBiomes;
     }
 
-    public void init(@NotNull TagReadable reader) {
+    public void init(TagReadable reader) {
         if (this.initialized) return;
         this.initialized = true;
 
@@ -185,16 +184,16 @@ public class BiomeContainer implements TerraformInstanceBiomes {
         }
     }
 
-    public void write(@NotNull TagWritable writer) {
+    public void write(TagWritable writer) {
         writer.setTag(TAG, this.biomes);
     }
 
-    public @NotNull SendablePacket registryDataPacket(boolean excludeVanilla) {
+    public SendablePacket registryDataPacket(boolean excludeVanilla) {
         if (excludeVanilla) return registryDataPacket;
         return createRegistryDataPacket(false);
     }
 
-    private @NotNull RegistryDataPacket createRegistryDataPacket(boolean excludeVanilla) {
+    private RegistryDataPacket createRegistryDataPacket(boolean excludeVanilla) {
         List<RegistryDataPacket.Entry> entries = new ArrayList<>();
 
         // Add parent biomes

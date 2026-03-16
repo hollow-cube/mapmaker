@@ -5,12 +5,11 @@ import net.kyori.adventure.sound.Sound;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
 
 public class ButtonInteractionRule extends AbstractToggleInteractionRule {
 
     @Override
-    protected void playSound(@NotNull Interaction interaction, @NotNull Block block, boolean newState) {
+    protected void playSound(Interaction interaction, Block block, boolean newState) {
         SoundEvent soundEvent = null;
         if (BlockTags.WOODEN_BUTTONS.contains(block.key())) {
             soundEvent = newState ? SoundEvent.BLOCK_WOODEN_BUTTON_CLICK_OFF : SoundEvent.BLOCK_WOODEN_BUTTON_CLICK_ON;

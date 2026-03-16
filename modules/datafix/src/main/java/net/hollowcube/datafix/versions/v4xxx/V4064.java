@@ -10,12 +10,12 @@ public class V4064 extends DataVersion {
         super(4064);
 
         addFix(DataTypes.DATA_COMPONENTS, new DataComponentRename(
-                "minecraft:fire_resistant", "minecraft:damage_resistant",
-                ignored -> {
-                    var newValue = Value.emptyMap();
-                    newValue.put("types", "#minecraft:is_fire");
-                    return newValue;
-                }
+            "minecraft:fire_resistant", "minecraft:damage_resistant",
+            ignored -> {
+                var newValue = Value.emptyMap();
+                newValue.put("types", "#minecraft:is_fire");
+                return newValue;
+            }
         ));
     }
 }

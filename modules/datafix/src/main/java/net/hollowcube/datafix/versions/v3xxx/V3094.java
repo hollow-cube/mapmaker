@@ -3,17 +3,18 @@ package net.hollowcube.datafix.versions.v3xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V3094 extends DataVersion {
     private static final String[] INSTRUMENTS = new String[]{
-            "minecraft:ponder_goat_horn",
-            "minecraft:sing_goat_horn",
-            "minecraft:seek_goat_horn",
-            "minecraft:feel_goat_horn",
-            "minecraft:admire_goat_horn",
-            "minecraft:call_goat_horn",
-            "minecraft:yearn_goat_horn",
-            "minecraft:dream_goat_horn"
+        "minecraft:ponder_goat_horn",
+        "minecraft:sing_goat_horn",
+        "minecraft:seek_goat_horn",
+        "minecraft:feel_goat_horn",
+        "minecraft:admire_goat_horn",
+        "minecraft:call_goat_horn",
+        "minecraft:yearn_goat_horn",
+        "minecraft:dream_goat_horn"
     };
 
     public V3094() {
@@ -22,7 +23,7 @@ public class V3094 extends DataVersion {
         addFix(DataTypes.ITEM_STACK, "minecraft:goat_horn", V3094::fixGoatHornInstrument);
     }
 
-    private static Value fixGoatHornInstrument(Value itemStack) {
+    private static @Nullable Value fixGoatHornInstrument(Value itemStack) {
         var tag = itemStack.get("tag");
         if (!tag.isMapLike()) return null;
 

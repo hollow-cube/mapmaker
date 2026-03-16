@@ -8,8 +8,8 @@ import java.util.Map;
 
 public class V2700 extends DataVersion {
     private static final Map<String, String> RENAMES = Map.of(
-            "minecraft:cave_vines_head", "minecraft:cave_vines",
-            "minecraft:cave_vines_body", "minecraft:cave_vines_plant"
+        "minecraft:cave_vines_head", "minecraft:cave_vines",
+        "minecraft:cave_vines_body", "minecraft:cave_vines_plant"
     );
 
     public V2700() {

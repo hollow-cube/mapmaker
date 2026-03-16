@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v1xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V1953 extends DataVersion {
     public V1953() {
@@ -11,7 +12,7 @@ public class V1953 extends DataVersion {
         addFix(DataTypes.BLOCK_ENTITY, "minecraft:banner", V1953::fixOminousBannerBlockEntityName);
     }
 
-    private static Value fixOminousBannerBlockEntityName(Value value) {
+    private static @Nullable Value fixOminousBannerBlockEntityName(Value value) {
         var customName = value.get("CustomName").as(String.class, null);
         if (customName == null || customName.isEmpty()) return null;
 

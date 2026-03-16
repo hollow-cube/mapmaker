@@ -8,6 +8,6 @@ public class V3204 extends DataVersion {
         super(3204);
 
         addReference(DataTypes.BLOCK_ENTITY, "minecraft:chiseled_bookshelf", field -> field
-                .list("Items", DataTypes.ITEM_STACK));
+            .list("Items", DataTypes.ITEM_STACK));
     }
 }

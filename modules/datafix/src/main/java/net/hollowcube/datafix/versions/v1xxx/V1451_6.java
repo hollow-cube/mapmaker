@@ -4,6 +4,7 @@ import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 import net.hollowcube.datafix.versions.v0xxx.V102;
+import org.jetbrains.annotations.Nullable;
 
 public class V1451_6 extends DataVersion {
     public V1451_6() {
@@ -12,7 +13,7 @@ public class V1451_6 extends DataVersion {
         addFix(DataTypes.BLOCK_ENTITY, "minecraft:jukebox", V1451_6::fixJukeboxBlockEntity);
     }
 
-    private static Value fixJukeboxBlockEntity(Value blockEntity) {
+    private static @Nullable Value fixJukeboxBlockEntity(Value blockEntity) {
         var record = blockEntity.remove("Record").as(Number.class, 0).intValue();
         if (record <= 0) return null;
 

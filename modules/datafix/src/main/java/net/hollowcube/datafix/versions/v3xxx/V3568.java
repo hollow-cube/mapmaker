@@ -5,14 +5,15 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
 public class V3568 extends DataVersion {
     private static final Int2ObjectMap<String> POTION_IDS = new Int2ObjectArrayMap<>();
     private static final Set<String> POTION_ITEMS = Set.of(
-            "minecraft:potion", "minecraft:splash_potion",
-            "minecraft:lingering_potion", "minecraft:tipped_arrow"
+        "minecraft:potion", "minecraft:splash_potion",
+        "minecraft:lingering_potion", "minecraft:tipped_arrow"
     );
 
     public V3568() {
@@ -29,13 +30,13 @@ public class V3568 extends DataVersion {
         addFix(DataTypes.ENTITY, V3568::fixLivingEntity);
     }
 
-    private static Value fixBeaconBlockEntity(Value value) {
+    private static @Nullable Value fixBeaconBlockEntity(Value value) {
         fixEffectIdAndRename(value, "Primary", "primary_effect");
         fixEffectIdAndRename(value, "Secondary", "secondary_effect");
         return null;
     }
 
-    private static Value fixSuspiciousStewItemStack(Value itemStack) {
+    private static @Nullable Value fixSuspiciousStewItemStack(Value itemStack) {
         var tag = itemStack.get("tag");
         if (!tag.isMapLike()) return null;
 
@@ -43,7 +44,7 @@ public class V3568 extends DataVersion {
         return null;
     }
 
-    private static Value fixPotionlikeItemStack(Value itemStack) {
+    private static @Nullable Value fixPotionlikeItemStack(Value itemStack) {
         var tag = itemStack.get("tag");
         if (!tag.isMapLike()) return null;
 
@@ -51,7 +52,7 @@ public class V3568 extends DataVersion {
         return null;
     }
 
-    private static Value fixMooshroomEntity(Value entity) {
+    private static @Nullable Value fixMooshroomEntity(Value entity) {
         var effect = Value.emptyMap();
         effect.put("id", entity.remove("EffectId"));
         fixEffectId(effect, "id");
@@ -65,17 +66,17 @@ public class V3568 extends DataVersion {
         return null;
     }
 
-    private static Value fixArrowEntity(Value entity) {
+    private static @Nullable Value fixArrowEntity(Value entity) {
         fixEffectList(entity, "CustomPotionEffects", "custom_potion_effects");
         return null;
     }
 
-    private static Value fixAreaEffectCloudEntity(Value entity) {
+    private static @Nullable Value fixAreaEffectCloudEntity(Value entity) {
         fixEffectList(entity, "Effects", "effects");
         return null;
     }
 
-    private static Value fixLivingEntity(Value entity) {
+    private static @Nullable Value fixLivingEntity(Value entity) {
         fixEffectList(entity, "ActiveEffects", "active_effects");
         return null;
     }

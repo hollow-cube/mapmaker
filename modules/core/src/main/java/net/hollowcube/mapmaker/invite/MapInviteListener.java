@@ -13,7 +13,6 @@ import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,8 +38,8 @@ public final class MapInviteListener implements Closeable {
     private final MessageConsumer consumer;
 
     public MapInviteListener(
-        @NotNull MapService mapService, @NotNull PlayerService playerService,
-        @NotNull SessionManager sessionManager, @NotNull JetStreamWrapper jetStream
+        MapService mapService, PlayerService playerService,
+        SessionManager sessionManager, JetStreamWrapper jetStream
     ) {
         this.mapService = mapService;
         this.playerService = playerService;
@@ -58,7 +57,7 @@ public final class MapInviteListener implements Closeable {
         }
     }
 
-    private void handleInviteMessage(@NotNull Message msg, @NotNull CreatedMapInviteMessage message) {
+    private void handleInviteMessage(Message msg, CreatedMapInviteMessage message) {
         LOGGER.info("Received invite created message: {}", message);
 
         var recipientId = UUID.fromString(message.recipientId());

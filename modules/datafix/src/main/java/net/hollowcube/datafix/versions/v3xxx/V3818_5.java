@@ -6,7 +6,7 @@ import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.DataFixUtils;
 import net.hollowcube.datafix.util.Value;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Set;
@@ -15,17 +15,17 @@ import static net.hollowcube.datafix.util.DataFixUtils.namespaced;
 
 public class V3818_5 extends DataVersion {
     private static final Set<String> POTION_ITEMS = Set.of(
-            "minecraft:potion", "minecraft:splash_potion",
-            "minecraft:lingering_potion", "minecraft:tipped_arrow"
+        "minecraft:potion", "minecraft:splash_potion",
+        "minecraft:lingering_potion", "minecraft:tipped_arrow"
     );
     private static final Set<String> BUCKETED_MOB_IDS = Set.of(
-            "minecraft:pufferfish_bucket", "minecraft:salmon_bucket",
-            "minecraft:cod_bucket", "minecraft:tropical_fish_bucket",
-            "minecraft:axolotl_bucket", "minecraft:tadpole_bucket"
+        "minecraft:pufferfish_bucket", "minecraft:salmon_bucket",
+        "minecraft:cod_bucket", "minecraft:tropical_fish_bucket",
+        "minecraft:axolotl_bucket", "minecraft:tadpole_bucket"
     );
     private static final Set<String> BUCKETED_MOB_TAGS = Set.of(
-            "NoAI", "Silent", "NoGravity", "Glowing", "Invulnerable",
-            "Health", "Age", "Variant", "HuntingCooldown", "BucketVariantTag"
+        "NoAI", "Silent", "NoGravity", "Glowing", "Invulnerable",
+        "Health", "Age", "Variant", "HuntingCooldown", "BucketVariantTag"
     );
     private static final Set<String> BOOLEAN_BLOCK_STATE_PROPERTIES;
     private static final Int2ObjectMap<String> MAP_DECORATION_IDS;
@@ -34,12 +34,12 @@ public class V3818_5 extends DataVersion {
         super(3818, 5);
 
         addReference(DataTypes.ITEM_STACK, field -> field
-                .single("components", DataTypes.DATA_COMPONENTS));
+            .single("components", DataTypes.DATA_COMPONENTS));
 
         addFix(DataTypes.ITEM_STACK, V3818_5::fixItemStack);
     }
 
-    private static Value fixItemStack(Value value) {
+    private static @Nullable Value fixItemStack(Value value) {
         String id = namespaced(value.get("id").as(String.class, null));
         if (id == null) return null;
         int count = value.remove("Count").as(Number.class, 1).intValue();
@@ -170,7 +170,7 @@ public class V3818_5 extends DataVersion {
         return null;
     }
 
-    private static Value fixBlockStateTag(Value blockStateTag) {
+    private static @Nullable Value fixBlockStateTag(Value blockStateTag) {
         if (blockStateTag.isNull()) return null;
         var newBlockState = Value.emptyMap();
         blockStateTag.forEachEntry((key, value) -> {
@@ -183,7 +183,7 @@ public class V3818_5 extends DataVersion {
         return newBlockState;
     }
 
-    private static Value fixBlockEntityTag(String itemId, Value components, Value blockEntityTag) {
+    private static @Nullable Value fixBlockEntityTag(String itemId, Value components, Value blockEntityTag) {
         if (blockEntityTag.isNull()) return null;
         components.put("minecraft:lock", blockEntityTag.remove("Lock"));
         var lootTable = blockEntityTag.remove("LootTable");
@@ -236,7 +236,7 @@ public class V3818_5 extends DataVersion {
         return blockEntityTag;
     }
 
-    private static Value fixEnchantments(Value enchantments, Value components, boolean isHidden) {
+    private static @Nullable Value fixEnchantments(Value enchantments, Value components, boolean isHidden) {
         if (enchantments.isNull()) return null;
         var newEnchantments = Value.emptyMap();
         var levels = Value.emptyMap();
@@ -255,7 +255,7 @@ public class V3818_5 extends DataVersion {
         return levels.size(0) > 0 || isHidden ? newEnchantments : null;
     }
 
-    private static Value fixBlockStatePredicateList(Value predicateList, boolean isHidden) {
+    private static @Nullable Value fixBlockStatePredicateList(Value predicateList, boolean isHidden) {
         if (predicateList.isNull()) return null;
         var newPredicate = Value.emptyMap();
         var newPredicateList = Value.emptyList();
@@ -268,7 +268,7 @@ public class V3818_5 extends DataVersion {
         return newPredicate;
     }
 
-    private static Value fixBlockStatePredicate(@NotNull String predicate) {
+    private static Value fixBlockStatePredicate(String predicate) {
         int openBracket = predicate.indexOf('['), closeBracket = predicate.indexOf(']');
         int openBrace = predicate.indexOf('{'), closeBrace = predicate.indexOf('}');
         int nameLength = openBracket != -1 ? openBracket : predicate.length();
@@ -297,7 +297,7 @@ public class V3818_5 extends DataVersion {
         return result;
     }
 
-    private static Value fixAttributeModifierList(@NotNull Value attributeModifiers, boolean isHidden) {
+    private static Value fixAttributeModifierList(Value attributeModifiers, boolean isHidden) {
         var newAttributeModifiers = Value.emptyMap();
 
         var modifierList = Value.emptyList();
@@ -310,7 +310,7 @@ public class V3818_5 extends DataVersion {
         return newAttributeModifiers;
     }
 
-    private static Value fixAttributeModifier(@NotNull Value modifier) {
+    private static Value fixAttributeModifier(Value modifier) {
         var newModifier = Value.emptyMap();
         newModifier.put("type", modifier.get("AttributeName"));
         newModifier.put("slot", modifier.get("Slot"));
@@ -325,7 +325,7 @@ public class V3818_5 extends DataVersion {
         return newModifier;
     }
 
-    private static void fixBucketedMobData(@NotNull Value tag, @NotNull Value components) {
+    private static void fixBucketedMobData(Value tag, Value components) {
         var bucketEntityData = Value.emptyMap();
         for (var key : BUCKETED_MOB_TAGS)
             bucketEntityData.put(key, tag.remove(key));
@@ -333,7 +333,7 @@ public class V3818_5 extends DataVersion {
             components.put("minecraft:bucket_entity_data", bucketEntityData);
     }
 
-    private static Value fixLodestoneTracker(Value tag) {
+    private static @Nullable Value fixLodestoneTracker(Value tag) {
         var lodestonePos = tag.remove("LodestonePos");
         var lodestoneDimension = tag.remove("LodestoneDimension");
         if (lodestonePos.isNull() && lodestoneDimension.isNull()) return null;
@@ -351,7 +351,7 @@ public class V3818_5 extends DataVersion {
         return lodestoneTracker;
     }
 
-    private static Value fixFireworkRocket(Value fireworks) {
+    private static @Nullable Value fixFireworkRocket(Value fireworks) {
         if (fireworks.isNull()) return null;
 
         var newFireworks = Value.emptyMap();
@@ -365,7 +365,7 @@ public class V3818_5 extends DataVersion {
         return newFireworks;
     }
 
-    private static Value fixExplosion(@NotNull Value explosion) {
+    private static Value fixExplosion(Value explosion) {
         var type = explosion.remove("Type").as(Number.class, 0).intValue();
         explosion.put("shape", switch (type) {
             case 1 -> "large_ball";
@@ -381,7 +381,7 @@ public class V3818_5 extends DataVersion {
         return explosion;
     }
 
-    private static Value fixPotionContents(@NotNull Value tag) {
+    private static Value fixPotionContents(Value tag) {
         var potionContents = Value.emptyMap();
         if (tag.remove("Potion").value() instanceof String s && !"minecraft:empty".equals(s))
             potionContents.put("potion", s);
@@ -390,7 +390,7 @@ public class V3818_5 extends DataVersion {
         return potionContents.size(0) > 0 ? potionContents : null;
     }
 
-    private static Value fixMapDecorations(@NotNull Value decorationList) {
+    private static Value fixMapDecorations(Value decorationList) {
         var mapDecorations = Value.emptyMap();
         for (var mapDecoration : decorationList) {
             var key = mapDecoration.get("id").as(String.class, "");
@@ -404,7 +404,7 @@ public class V3818_5 extends DataVersion {
         return mapDecorations;
     }
 
-    static Value fixProfile(Value skullOwner) {
+    static @Nullable Value fixProfile(Value skullOwner) {
         if (skullOwner.isNull()) return null;
         if (skullOwner.value() instanceof String name) {
             var result = Value.emptyMap();
@@ -421,7 +421,7 @@ public class V3818_5 extends DataVersion {
         return result;
     }
 
-    private static Value fixProfileProperties(Value properties) {
+    private static @Nullable Value fixProfileProperties(Value properties) {
         if (properties.isNull()) return null;
         var result = Value.emptyList();
         properties.forEachEntry((key, value) -> {
@@ -436,11 +436,11 @@ public class V3818_5 extends DataVersion {
         return result.size(0) > 0 ? result : null;
     }
 
-    private static boolean isValidPlayerName(String string) {
+    private static boolean isValidPlayerName(@Nullable String string) {
         return string != null && string.length() <= 16 && string.chars().filter(i -> i <= 32 || i >= 127).findAny().isEmpty();
     }
 
-    private static Value fixWritableBook(Value tag) {
+    private static @Nullable Value fixWritableBook(Value tag) {
         var pages = fixBookPages(tag);
         if (pages.size(0) == 0) return null;
         var result = Value.emptyMap();
@@ -480,53 +480,53 @@ public class V3818_5 extends DataVersion {
 
     static {
         BOOLEAN_BLOCK_STATE_PROPERTIES = Set.of(
-                "attached",
-                "bottom",
-                "conditional",
-                "disarmed",
-                "drag",
-                "enabled",
-                "extended",
-                "eye",
-                "falling",
-                "hanging",
-                "has_bottle_0",
-                "has_bottle_1",
-                "has_bottle_2",
-                "has_record",
-                "has_book",
-                "inverted",
-                "in_wall",
-                "lit",
-                "locked",
-                "occupied",
-                "open",
-                "persistent",
-                "powered",
-                "short",
-                "signal_fire",
-                "snowy",
-                "triggered",
-                "unstable",
-                "waterlogged",
-                "berries",
-                "bloom",
-                "shrieking",
-                "can_summon",
-                "up",
-                "down",
-                "north",
-                "east",
-                "south",
-                "west",
-                "slot_0_occupied",
-                "slot_1_occupied",
-                "slot_2_occupied",
-                "slot_3_occupied",
-                "slot_4_occupied",
-                "slot_5_occupied",
-                "cracked",
-                "crafting"
+            "attached",
+            "bottom",
+            "conditional",
+            "disarmed",
+            "drag",
+            "enabled",
+            "extended",
+            "eye",
+            "falling",
+            "hanging",
+            "has_bottle_0",
+            "has_bottle_1",
+            "has_bottle_2",
+            "has_record",
+            "has_book",
+            "inverted",
+            "in_wall",
+            "lit",
+            "locked",
+            "occupied",
+            "open",
+            "persistent",
+            "powered",
+            "short",
+            "signal_fire",
+            "snowy",
+            "triggered",
+            "unstable",
+            "waterlogged",
+            "berries",
+            "bloom",
+            "shrieking",
+            "can_summon",
+            "up",
+            "down",
+            "north",
+            "east",
+            "south",
+            "west",
+            "slot_0_occupied",
+            "slot_1_occupied",
+            "slot_2_occupied",
+            "slot_3_occupied",
+            "slot_4_occupied",
+            "slot_5_occupied",
+            "cracked",
+            "crafting"
         );
         MAP_DECORATION_IDS = new Int2ObjectOpenHashMap<>();
         MAP_DECORATION_IDS.defaultReturnValue("player");

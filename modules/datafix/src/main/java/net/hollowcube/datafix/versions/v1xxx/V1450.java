@@ -8,6 +8,7 @@ import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,7 +16,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 public class V1450 extends DataVersion {
-    private static final Value[] BLOCK_STATE_BY_LEGACY_ID = new Value[4096];
+    private static final @Nullable Value[] BLOCK_STATE_BY_LEGACY_ID = new Value[4096];
     private static final Object2IntMap<Value> LEGACY_ID_BY_LEGACY_BLOCK_STATE = new Object2IntOpenHashMap<>();
     private static final Object2IntMap<String> LEGACY_ID_BY_NAME = new Object2IntOpenHashMap<>();
     private static final Value AIR = Value.wrap("minecraft:air");
@@ -44,14 +45,14 @@ public class V1450 extends DataVersion {
         return Value.wrap(name);
     }
 
-    public static Value getBlockState(int legacyId, int legacyData) {
+    public static @Nullable Value getBlockState(int legacyId, int legacyData) {
         int index = (legacyId << 4) | (legacyData & 0xF);
         if (index >= 0 && index < BLOCK_STATE_BY_LEGACY_ID.length)
             return BLOCK_STATE_BY_LEGACY_ID[index];
         return null;
     }
 
-    private static Value fixUpgradeBlockState(Value blockState) {
+    private static @Nullable Value fixUpgradeBlockState(Value blockState) {
         int legacyId = LEGACY_ID_BY_LEGACY_BLOCK_STATE.getInt(blockState);
         if (legacyId >= 0 && legacyId < 4096)
             return BLOCK_STATE_BY_LEGACY_ID[legacyId];
@@ -70,9 +71,9 @@ public class V1450 extends DataVersion {
             if (is == null) throw new RuntimeException("Resource not found: " + path);
             var blocks = gson.fromJson(new InputStreamReader(is), JsonObject.class);
             var sortedEntries = blocks.entrySet().stream()
-                    .map(entry -> Map.entry(Integer.parseInt(entry.getKey()), entry.getValue().getAsString()))
-                    .sorted(Map.Entry.comparingByKey())
-                    .toList();
+                .map(entry -> Map.entry(Integer.parseInt(entry.getKey()), entry.getValue().getAsString()))
+                .sorted(Map.Entry.comparingByKey())
+                .toList();
             for (int i = 0; i < sortedEntries.size(); i++) {
                 var entry = sortedEntries.get(i);
 

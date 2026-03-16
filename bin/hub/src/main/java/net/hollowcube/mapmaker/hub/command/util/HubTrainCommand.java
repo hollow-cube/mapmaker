@@ -19,7 +19,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.item.Material;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;

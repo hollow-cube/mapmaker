@@ -1,17 +1,16 @@
 package net.hollowcube.mapmaker.session;
 
 import net.hollowcube.common.util.RuntimeGson;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
 @RuntimeGson
 public record Presence(
-        @NotNull String type,
-        @NotNull String state,
+    String type,
+    String state,
 
-        @NotNull String instanceId,
-        @NotNull String mapId
+    String instanceId,
+    String mapId
 ) {
 
     public static final String TYPE_MAPMAKER_HUB = "mapmaker:hub";

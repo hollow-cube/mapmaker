@@ -2,17 +2,18 @@ package net.hollowcube.datafix.fixes;
 
 import net.hollowcube.datafix.DataFix;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
 public record DataComponentRename(
-        String oldName,
-        String newName,
-        Function<Value, Value> transformer
+    String oldName,
+    String newName,
+    Function<Value, @Nullable Value> transformer
 ) implements DataFix {
 
     @Override
-    public Value fix(Value dataComponents) {
+    public @Nullable Value fix(Value dataComponents) {
         var oldComponent = dataComponents.remove(oldName);
         if (oldComponent.isNull()) return null;
 

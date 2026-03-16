@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class MapLeaderboardRestoreCommand extends CommandDsl {
@@ -18,7 +17,7 @@ public class MapLeaderboardRestoreCommand extends CommandDsl {
 
     private final MapService mapService;
 
-    public MapLeaderboardRestoreCommand(@NotNull MapService mapService) {
+    public MapLeaderboardRestoreCommand(MapService mapService) {
         super("restore");
         this.mapService = mapService;
 
@@ -30,7 +29,7 @@ public class MapLeaderboardRestoreCommand extends CommandDsl {
         addSyntax(playerOnly(this::handleRestoreLeaderboard), mapArg);
     }
 
-    private void handleRestoreLeaderboard(@NotNull Player player, @NotNull CommandContext context) {
+    private void handleRestoreLeaderboard(Player player, CommandContext context) {
         var map = context.get(mapArg);
         if (map == null) {
             player.sendMessage(

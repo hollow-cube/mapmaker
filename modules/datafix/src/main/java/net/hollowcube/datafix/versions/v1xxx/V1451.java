@@ -8,6 +8,6 @@ public class V1451 extends DataVersion {
         super(1451);
 
         addReference(DataTypes.BLOCK_ENTITY, "minecraft:trapped_chest", field -> field
-                .list("Items", DataTypes.ITEM_STACK));
+            .list("Items", DataTypes.ITEM_STACK));
     }
 }

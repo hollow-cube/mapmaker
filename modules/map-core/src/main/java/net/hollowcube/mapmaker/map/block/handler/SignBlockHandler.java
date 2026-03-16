@@ -5,7 +5,6 @@ import net.hollowcube.mapmaker.map.block.handler.sign.SignData;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.tag.Tag;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,12 +18,12 @@ public final class SignBlockHandler implements BlockHandler {
 
     private final Key key;
 
-    SignBlockHandler(@NotNull String id) {
+    SignBlockHandler(String id) {
         this.key = Key.key(id);
     }
 
     @Override
-    public @NotNull Key getKey() {
+    public Key getKey() {
         return key;
     }
 
@@ -34,11 +33,11 @@ public final class SignBlockHandler implements BlockHandler {
     }
 
     @Override
-    public @NotNull Collection<Tag<?>> getBlockEntityTags() {
+    public Collection<Tag<?>> getBlockEntityTags() {
         return List.of(
-                IS_WAXED,
-                FRONT_TEXT_FORMATTED,
-                BACK_TEXT_FORMATTED
+            IS_WAXED,
+            FRONT_TEXT_FORMATTED,
+            BACK_TEXT_FORMATTED
         );
     }
 }

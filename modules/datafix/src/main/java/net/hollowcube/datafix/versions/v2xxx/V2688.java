@@ -10,6 +10,6 @@ public class V2688 extends DataVersion {
         addReference(DataTypes.ENTITY, "minecraft:glow_squid");
 
         addReference(DataTypes.ENTITY, "minecraft:glow_item_frame", field -> field
-                .single("Item", DataTypes.ITEM_STACK));
+            .single("Item", DataTypes.ITEM_STACK));
     }
 }

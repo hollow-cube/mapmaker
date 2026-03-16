@@ -14,7 +14,6 @@ import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -68,7 +67,7 @@ public class InteractionRules {
         item(Material.LEAD, LeadInteractionRule.INSTANCE);
     }
 
-    public static void register(@NotNull EventNode<InstanceEvent> eventNode) {
+    public static void register(EventNode<InstanceEvent> eventNode) {
         eventNode.addListener(PlayerBlockInteractEvent.class, InteractionRules::handleBlockInteract);
         eventNode.addListener(PlayerBlockBreakEvent.class, InteractionRules::handleBlockBreak);
         eventNode.addListener(PlayerUseItemEvent.class, InteractionRules::handleItemUse);
@@ -76,7 +75,7 @@ public class InteractionRules {
 
     // Handler functions
 
-    private static void handleBlockInteract(@NotNull PlayerBlockInteractEvent event) {
+    private static void handleBlockInteract(PlayerBlockInteractEvent event) {
         if (event.isCancelled() || event.isBlockingItemUse()) return;
         //todo how to block the other hand from interacting when we get this event _if_ we handled it in the main hand
         // for now just disable all interactions in off hand
@@ -118,13 +117,13 @@ public class InteractionRules {
         }
     }
 
-    private static void handleBlockBreak(@NotNull PlayerBlockBreakEvent event) {
+    private static void handleBlockBreak(PlayerBlockBreakEvent event) {
         var block = event.getBlock();
         if ("true".equals(block.getProperty("waterlogged")) || BlockTags.PRE_WATERLOGGED_BLOCKS.contains(block.key()))
             event.setResultBlock(Block.WATER);
     }
 
-    private static void handleItemUse(@NotNull PlayerUseItemEvent event) {
+    private static void handleItemUse(PlayerUseItemEvent event) {
         if (event.isCancelled()) return;
         if (event.getHand() != PlayerHand.MAIN) return;
 
@@ -147,19 +146,19 @@ public class InteractionRules {
 
     // Utility functions for registering the rules above
 
-    private static void item(@NotNull Material material, @NotNull BlockInteractionRule rule) {
+    private static void item(Material material, BlockInteractionRule rule) {
         itemRules.put(material.id(), rule);
     }
 
-    private static void item(@NotNull Collection<Key> tag, @NotNull BlockInteractionRule rule) {
+    private static void item(Collection<Key> tag, BlockInteractionRule rule) {
         tag.forEach(id -> item(Objects.requireNonNull(Material.fromKey(id)), rule));
     }
 
-    private static void block(@NotNull Block block, @NotNull BlockInteractionRule rule) {
+    private static void block(Block block, BlockInteractionRule rule) {
         blockRules.put(block.id(), rule);
     }
 
-    private static void block(@NotNull Collection<Key> tag, @NotNull BlockInteractionRule rule) {
+    private static void block(Collection<Key> tag, BlockInteractionRule rule) {
         tag.forEach(id -> block(Objects.requireNonNull(Block.fromKey(id)), rule));
     }
 

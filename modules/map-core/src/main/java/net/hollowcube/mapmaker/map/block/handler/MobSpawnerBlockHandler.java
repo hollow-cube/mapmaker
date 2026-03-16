@@ -12,7 +12,6 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.tag.TagSerializer;
 import net.minestom.server.tag.TagWritable;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -24,12 +23,12 @@ public class MobSpawnerBlockHandler implements BlockHandler {
     public static final Key ID = Key.key("minecraft:mob_spawner");
 
     @Override
-    public @NotNull Key getKey() {
+    public Key getKey() {
         return ID;
     }
 
     @Override
-    public boolean onInteract(@NotNull BlockHandler.Interaction interaction) {
+    public boolean onInteract(BlockHandler.Interaction interaction) {
         if (!BlockHandlerHelpers.canEdit(interaction)) return true;
 
         ItemStack itemStack = interaction.getPlayer().getItemInHand(interaction.getHand());
@@ -38,9 +37,14 @@ public class MobSpawnerBlockHandler implements BlockHandler {
 
         String entityId = entityType.key().asString();
 
-        Block newBlock = interaction.getBlock().withTag(SPAWN_DATA, new EntityData(entityId))
-                .withTag(DELAY, (short) 100).withTag(MAX_NEARBY_ENTITIES, (short) 6).withTag(MAX_SPAWN_DELAY, (short) 800).withTag(MIN_SPAWN_DELAY, (short) 200)
-                .withTag(REQUIRED_PLAYER_RANGE, (short) 16).withTag(SPAWN_COUNT, (short) 4);
+        Block newBlock = interaction.getBlock()
+            .withTag(SPAWN_DATA, new EntityData(entityId))
+            .withTag(DELAY, (short) 100)
+            .withTag(MAX_NEARBY_ENTITIES, (short) 6)
+            .withTag(MAX_SPAWN_DELAY, (short) 800)
+            .withTag(MIN_SPAWN_DELAY, (short) 200)
+            .withTag(REQUIRED_PLAYER_RANGE, (short) 16)
+            .withTag(SPAWN_COUNT, (short) 4);
 
         interaction.getInstance().setBlock(interaction.getBlockPosition(), newBlock);
 
@@ -48,7 +52,7 @@ public class MobSpawnerBlockHandler implements BlockHandler {
     }
 
     @Override
-    public @NotNull Collection<Tag<?>> getBlockEntityTags() {
+    public Collection<Tag<?>> getBlockEntityTags() {
         return List.of(DELAY, MAX_NEARBY_ENTITIES, MAX_SPAWN_DELAY, MIN_SPAWN_DELAY, REQUIRED_PLAYER_RANGE, SPAWN_COUNT, SPAWN_DATA, SPAWN_RANGE);
     }
 
@@ -69,7 +73,7 @@ public class MobSpawnerBlockHandler implements BlockHandler {
         private final Tag<BinaryTag> PARENT = Tag.NBT("entity");
 
         @Override
-        public @Nullable EntityData read(@NotNull TagReadable reader) {
+        public @Nullable EntityData read(TagReadable reader) {
             BinaryTag nbt = reader.getTag(PARENT);
             if (nbt instanceof CompoundBinaryTag nbtCompound) {
                 return new EntityData(nbtCompound.getString("id"));
@@ -80,7 +84,7 @@ public class MobSpawnerBlockHandler implements BlockHandler {
         // SpawnData: { entity: {id: "minecraft:pig"}}
 
         @Override
-        public void write(@NotNull TagWritable writer, @NotNull EntityData value) {
+        public void write(TagWritable writer, EntityData value) {
             writer.setTag(PARENT, CompoundBinaryTag.from(Map.of("id", StringBinaryTag.stringBinaryTag(value.id))));
         }
     }
@@ -93,20 +97,20 @@ public class MobSpawnerBlockHandler implements BlockHandler {
         private final Tag<Integer> SKY_LIGHT_LIMIT = Tag.Integer("sky_light_limit");
 
         @Override
-        public @NotNull CustomSpawnRules read(@NotNull TagReadable reader) {
+        public CustomSpawnRules read(TagReadable reader) {
             int blockLight = reader.getTag(BLOCK_LIGHT_LIMIT);
             int skyLight = reader.getTag(SKY_LIGHT_LIMIT);
             return new CustomSpawnRules(blockLight, skyLight);
         }
 
         @Override
-        public void write(@NotNull TagWritable writer, @NotNull CustomSpawnRules value) {
+        public void write(TagWritable writer, CustomSpawnRules value) {
             writer.setTag(BLOCK_LIGHT_LIMIT, value.block_light_limit);
             writer.setTag(SKY_LIGHT_LIMIT, value.sky_light_limit);
         }
     }
 
-    private record EntitySpawnData(@NotNull EntityData entity, @NotNull CustomSpawnRules custom_spawn_rules) {
+    private record EntitySpawnData(EntityData entity, CustomSpawnRules custom_spawn_rules) {
     }
 
     private static class SpawnDataSerializer implements TagSerializer<EntitySpawnData> {
@@ -114,7 +118,7 @@ public class MobSpawnerBlockHandler implements BlockHandler {
         private final Tag<CustomSpawnRules> CUSTOM_SPAWN_LIGHT = Tag.Structure("custom_spawn_rules", new SpawnRulesSerializer());
 
         @Override
-        public @NotNull EntitySpawnData read(@NotNull TagReadable reader) {
+        public EntitySpawnData read(TagReadable reader) {
             EntityData entityData = reader.getTag(ENTITY_DATA);
             CustomSpawnRules customSpawnRules = reader.getTag(CUSTOM_SPAWN_LIGHT);
 
@@ -122,13 +126,13 @@ public class MobSpawnerBlockHandler implements BlockHandler {
         }
 
         @Override
-        public void write(@NotNull TagWritable writer, @NotNull EntitySpawnData value) {
+        public void write(TagWritable writer, EntitySpawnData value) {
             writer.setTag(ENTITY_DATA, value.entity);
             writer.setTag(CUSTOM_SPAWN_LIGHT, value.custom_spawn_rules);
         }
     }
 
-    private record EntitySpawnList(int weight, @NotNull EntitySpawnData data) {
+    private record EntitySpawnList(int weight, EntitySpawnData data) {
     }
 
     private static class EntitySpawnListSerializer implements TagSerializer<EntitySpawnList> {
@@ -136,7 +140,7 @@ public class MobSpawnerBlockHandler implements BlockHandler {
         private final Tag<EntitySpawnData> DATA = Tag.Structure("data", new SpawnDataSerializer());
 
         @Override
-        public @NotNull EntitySpawnList read(@NotNull TagReadable reader) {
+        public EntitySpawnList read(TagReadable reader) {
             int weight = reader.getTag(WEIGHT);
             EntitySpawnData entitySpawnData = reader.getTag(DATA);
 
@@ -144,7 +148,7 @@ public class MobSpawnerBlockHandler implements BlockHandler {
         }
 
         @Override
-        public void write(@NotNull TagWritable writer, @NotNull EntitySpawnList value) {
+        public void write(TagWritable writer, EntitySpawnList value) {
             writer.setTag(WEIGHT, value.weight);
             writer.setTag(DATA, value.data);
         }

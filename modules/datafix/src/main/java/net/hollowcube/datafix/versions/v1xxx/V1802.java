@@ -8,12 +8,14 @@ import java.util.Map;
 
 public class V1802 extends DataVersion {
     private static final Map<String, String> RENAMED_BLOCKS = Map.of(
-            "minecraft:stone_slab", "minecraft:smooth_stone_slab",
-            "minecraft:sign", "minecraft:oak_sign",
-            "minecraft:wall_sign", "minecraft:oak_wall_sign");
+        "minecraft:stone_slab", "minecraft:smooth_stone_slab",
+        "minecraft:sign", "minecraft:oak_sign",
+        "minecraft:wall_sign", "minecraft:oak_wall_sign"
+    );
     private static final Map<String, String> RENAMED_ITEMS = Map.of(
-            "minecraft:stone_slab", "minecraft:smooth_stone_slab",
-            "minecraft:sign", "minecraft:oak_sign");
+        "minecraft:stone_slab", "minecraft:smooth_stone_slab",
+        "minecraft:sign", "minecraft:oak_sign"
+    );
 
     public V1802() {
         super(1802);

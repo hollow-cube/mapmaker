@@ -6,7 +6,6 @@ import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.object.ObjectData;
-import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
@@ -17,7 +16,6 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NonBlocking;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -40,15 +38,15 @@ public class MapData {
         NIGHTMARE;
 
         private static final BadSprite[] TOOLTIP_ICONS = new BadSprite[]{
-                BadSprite.require("icon/map_tooltip/difficulty_unknown"),
-                BadSprite.require("icon/map_tooltip/difficulty_0"),
-                BadSprite.require("icon/map_tooltip/difficulty_1"),
-                BadSprite.require("icon/map_tooltip/difficulty_2"),
-                BadSprite.require("icon/map_tooltip/difficulty_3"),
-                BadSprite.require("icon/map_tooltip/difficulty_4"),
+            BadSprite.require("icon/map_tooltip/difficulty_unknown"),
+            BadSprite.require("icon/map_tooltip/difficulty_0"),
+            BadSprite.require("icon/map_tooltip/difficulty_1"),
+            BadSprite.require("icon/map_tooltip/difficulty_2"),
+            BadSprite.require("icon/map_tooltip/difficulty_3"),
+            BadSprite.require("icon/map_tooltip/difficulty_4"),
         };
 
-        public @NotNull BadSprite tooltipIcon() {
+        public BadSprite tooltipIcon() {
             return TOOLTIP_ICONS[ordinal()];
         }
     }
@@ -64,7 +62,7 @@ public class MapData {
     private MapVerification verification = MapVerification.UNVERIFIED;
 
     private long publishedId;
-    private Instant publishedAt;
+    private @Nullable Instant publishedAt;
     private boolean listed;
 
     private int likes;
@@ -74,7 +72,7 @@ public class MapData {
     private MapQuality quality;
 
     private int objectLimit = 100;
-    private List<ObjectData> objects = new ArrayList<>();
+    private @Nullable List<ObjectData> objects = new ArrayList<>();
     private transient int objectUsage = -1;
 
     private String contest;
@@ -83,16 +81,16 @@ public class MapData {
         this(UUID.randomUUID().toString(), UUID.randomUUID().toString());
     }
 
-    public MapData(@NotNull String id, @NotNull String owner) {
+    public MapData(String id, String owner) {
         this(id, owner, new MapSettings(), 0, null);
     }
 
     public MapData(
-            @NotNull String id,
-            @NotNull String owner,
-            @NotNull MapSettings settings,
-            long publishedId,
-            @Nullable Instant publishedAt
+        String id,
+        String owner,
+        MapSettings settings,
+        long publishedId,
+        @Nullable Instant publishedAt
     ) {
         this.id = id;
         this.owner = owner;
@@ -105,18 +103,18 @@ public class MapData {
         this.objects = new ArrayList<>();
     }
 
-    public @NotNull String id() {
+    public String id() {
         return id;
     }
 
-    public @NotNull String name() {
+    public String name() {
         var name = settings.getName();
         if (name.isEmpty())
             return DEFAULT_NAME;
         return name;
     }
 
-    public @NotNull String owner() {
+    public String owner() {
         return owner;
     }
 
@@ -124,15 +122,15 @@ public class MapData {
         return protocolVersion;
     }
 
-    public @NotNull MapSettings settings() {
+    public MapSettings settings() {
         return settings;
     }
 
-    public <T> @NotNull T getSetting(@NotNull MapSetting<T> setting) {
+    public <T> T getSetting(MapSetting<T> setting) {
         return settings.get(setting);
     }
 
-    public <T> void setSetting(@NotNull MapSetting<T> setting, @NotNull T value) {
+    public <T> void setSetting(MapSetting<T> setting, T value) {
         settings.set(setting, value);
     }
 
@@ -144,7 +142,7 @@ public class MapData {
         return !needsVerification() || verification == MapVerification.VERIFIED;
     }
 
-    public @NotNull MapVerification verification() {
+    public MapVerification verification() {
         return verification;
     }
 
@@ -180,7 +178,7 @@ public class MapData {
         return clearRate;
     }
 
-    public @NotNull Difficulty getDifficulty() {
+    public Difficulty getDifficulty() {
         // Note that this is also computed in the map service currently (though it should just send the
         // difficulty as an enum). If this is changed, make sure to update the service as well.
         if (uniquePlays() < MIN_PLAYS_FOR_DIFFICULTY || settings().getVariant() != MapVariant.PARKOUR)
@@ -193,15 +191,15 @@ public class MapData {
         return Difficulty.EASY;
     }
 
-    public @NotNull Component getDifficultyComponent() {
+    public Component getDifficultyComponent() {
         return Component.translatable("gui.play_maps.map_display.difficulty." + getDifficulty().name().toLowerCase(Locale.ROOT));
     }
 
-    public @NotNull String getDifficultyName() {
+    public String getDifficultyName() {
         return getDifficulty().name().toLowerCase(Locale.ROOT);
     }
 
-    public @NotNull MapQuality quality() {
+    public MapQuality quality() {
         return Objects.requireNonNullElse(quality, MapQuality.UNRATED);
     }
 
@@ -212,14 +210,14 @@ public class MapData {
     public int objectUsage() {
         if (objectUsage == -1) {
             objectUsage = objects().stream()
-                    .mapToInt(o -> o.type().cost())
-                    .sum();
+                .mapToInt(o -> o.type().cost())
+                .sum();
         }
 
         return objectUsage;
     }
 
-    public boolean addObject(@NotNull ObjectData object) {
+    public boolean addObject(ObjectData object) {
         settings.updateLock.lock();
         try {
             //todo reenable object limits later
@@ -240,7 +238,7 @@ public class MapData {
         }
     }
 
-    public boolean removeObject(@NotNull String id) {
+    public boolean removeObject(String id) {
         settings.updateLock.lock();
         try {
             if (objects == null) return false;
@@ -269,7 +267,7 @@ public class MapData {
         }
     }
 
-    public @NotNull List<ObjectData> objects() {
+    public List<ObjectData> objects() {
         if (this.objects == null) return List.of();
         return List.copyOf(objects);
     }
@@ -283,7 +281,7 @@ public class MapData {
         return contest;
     }
 
-    public static @NotNull String formatPublishedId(long number) {
+    public static String formatPublishedId(long number) {
         // Pad zeros if necessary
         var numberString = new StringBuilder(String.valueOf(number));
         while (numberString.length() < 9) {
@@ -292,13 +290,13 @@ public class MapData {
 
         // Format as xxx-xxx-xxx
         return numberString.substring(0, 3) +
-                "-" +
-                numberString.substring(3, 6) +
-                "-" +
-                numberString.substring(6);
+            "-" +
+            numberString.substring(3, 6) +
+            "-" +
+            numberString.substring(6);
     }
 
-    public static long parsePublishedID(@NotNull String publishedId) {
+    public static long parsePublishedID(String publishedId) {
         class Holder {
             static final Pattern ID_PATTERN = Pattern.compile("([0-9]{3})-([0-9]{3})-([0-9]{3})");
         }
@@ -312,7 +310,7 @@ public class MapData {
         return settings().getVariant() == MapVariant.PARKOUR;
     }
 
-    public @NotNull String createDimensionName(char classifier) {
+    public String createDimensionName(char classifier) {
         return String.format("mapmaker:map/%s/%s", id().substring(0, 8), classifier);
     }
 
@@ -326,10 +324,10 @@ public class MapData {
 
     // Returns title and lore (mutable list)
     @NonBlocking
-    public static @NotNull Map.Entry<Component, List<Component>> createHoverComponents(
-            @NotNull MapData map, @NotNull Component authorName,
-            @Nullable Map.Entry<PersonalizedMapData.Progress, Integer> personalProgress,
-            int playerProtocolVersion
+    public static Map.Entry<Component, List<Component>> createHoverComponents(
+        MapData map, Component authorName,
+        @Nullable Map.Entry<PersonalizedMapData.Progress, Integer> personalProgress,
+        int playerProtocolVersion
     ) {
         class Holder {
             static final BadSprite PLAYS_ICON = BadSprite.require("icon/map_tooltip/plays");
@@ -341,7 +339,7 @@ public class MapData {
         }
 
         var title = MapData.rewriteWithQualityFont(map.quality(), map.settings().getNameSafe())
-                .decoration(TextDecoration.ITALIC, false);
+            .decoration(TextDecoration.ITALIC, false);
 
         if (!map.isListed()) {
             title = title.append(Component.translatable("gui.play_maps.map_display.unlisted"));
@@ -362,54 +360,62 @@ public class MapData {
         lore.add(Component.translatable("gui.play_maps.map_display.author", authorName));
         lore.add(Component.empty());
         var contentLine1 = Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
-                .append(Component.text(quality.tooltipBorderSprite().fontChar()).shadowColor(ShadowColor.none()))
-                .append(Component.text(FontUtil.computeOffset(5)));
+            .append(Component.text(quality.tooltipBorderSprite().fontChar()).shadowColor(ShadowColor.none()))
+            .append(Component.text(FontUtil.computeOffset(5)));
         if (isParkour) contentLine1 = contentLine1.append(map.getDifficultyComponent())
-                .append(Component.text(FontUtil.computeOffset(6)));
+            .append(Component.text(FontUtil.computeOffset(6)));
         lore.add(contentLine1.append(getMapTypeComponent(map)));
         var difficultyIcon = map.getDifficulty().tooltipIcon();
         var totalPadding = Holder.QUALITY_BORDER_WIDTH - difficultyIcon.width();
         var leftPadding = (int) Math.ceil(totalPadding / 2.0) + (map.getDifficulty() == Difficulty.MEDIUM ? -1 : 0); // Cursed bias for medium :sob:
         var playsLikes = isParkour ? Holder.PLAYS_ICON_TEXT
-                .append(Component.text(NumberUtil.formatCurrency(map.uniquePlays()), TextColor.color(0xaeaeae)))
-                .append(Component.text(FontUtil.computeOffset(6))) : Component.empty();
+            .append(Component.text(NumberUtil.formatCurrency(map.uniquePlays()), TextColor.color(0xaeaeae)))
+            .append(Component.text(FontUtil.computeOffset(6))) : Component.empty();
         playsLikes = playsLikes
-                .append(Holder.LIKES_ICON_TEXT)
-                .append(Component.text(map.likes(), TextColor.color(0xaeaeae)));
-        lore.add(Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
+            .append(Holder.LIKES_ICON_TEXT)
+            .append(Component.text(map.likes(), TextColor.color(0xaeaeae)));
+        lore.add(
+            Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
                 .append(Component.text(FontUtil.computeOffset(leftPadding) + difficultyIcon.fontChar() + FontUtil.computeOffset(totalPadding - leftPadding)).shadowColor(ShadowColor.none()))
                 .append(Component.text(FontUtil.computeOffset(5)))
                 .append(Component.text(starText.toString()))
                 .append(Component.text(FontUtil.computeOffset(6)))
-                .append(playsLikes));
+                .append(playsLikes)
+        );
         lore.add(Component.empty());
 
         var settingsLine = createSettingsLine(map);
         if (settingsLine != null) {
-            lore.add(Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
+            lore.add(
+                Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
                     .append(Component.text(BadSprite.require("icon/map_tooltip/settings").fontChar()).shadowColor(ShadowColor.none()))
                     .append(Component.text(FontUtil.computeOffset(2)))
-                    .append(settingsLine));
+                    .append(settingsLine)
+            );
             lore.add(Component.empty());
         }
 
         if (playerProtocolVersion < map.protocolVersion()) {
             lore.addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display.wrongversion", List.of(
-                    Component.text(ProtocolVersions.getProtocolName(map.protocolVersion()))
+                Component.text(ProtocolVersions.getProtocolName(map.protocolVersion()))
             )));
             lore.add(Component.empty());
         } else if (personalProgress != null) {
             var progress = personalProgress.getKey();
             var playtime = personalProgress.getValue();
             if (progress == PersonalizedMapData.Progress.COMPLETE) {
-                lore.add(Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
+                lore.add(
+                    Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
                         .append(Component.text(BadSprite.require("icon/map_tooltip/completed").fontChar()).shadowColor(ShadowColor.none()))
                         .append(Component.text(FontUtil.computeOffset(6)))
-                        .append(Component.translatable("gui.play_maps.map_display.completed", Component.text(NumberUtil.formatMapPlaytime(playtime, true)))));
+                        .append(Component.translatable("gui.play_maps.map_display.completed", Component.text(NumberUtil.formatMapPlaytime(playtime, true))))
+                );
                 lore.add(Component.empty());
             } else if (progress == PersonalizedMapData.Progress.STARTED && playtime > 0) {
-                lore.add(Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
-                        .append(Component.translatable("gui.play_maps.map_display.in_progress", Component.text(NumberUtil.formatMapPlaytime(playtime, true)))));
+                lore.add(
+                    Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
+                        .append(Component.translatable("gui.play_maps.map_display.in_progress", Component.text(NumberUtil.formatMapPlaytime(playtime, true))))
+                );
                 lore.add(Component.empty());
             }
         }
@@ -417,7 +423,7 @@ public class MapData {
         return Map.entry(title, lore);
     }
 
-    private static @Nullable Component createSettingsLine(@NotNull MapData map) {
+    private static @Nullable Component createSettingsLine(MapData map) {
         class Holder {
             static final Component SEPARATOR = Component.text(", ", TextColor.color(0xB0B0B0));
         }
@@ -440,7 +446,7 @@ public class MapData {
         return Component.textOfChildren(components.toArray(new ComponentLike[0]));
     }
 
-    private static @NotNull Component getMapTypeComponent(@NotNull MapData map) {
+    private static Component getMapTypeComponent(MapData map) {
         if (map.settings().getVariant() == MapVariant.PARKOUR) {
             return switch (map.settings().getParkourSubVariant()) {
                 case SPEEDRUN -> Component.text("Speedrun Parkour", TextColor.color(0x55ffff));
@@ -463,7 +469,7 @@ public class MapData {
         }
     }
 
-    public static @NotNull Component rewriteWithQualityFont(@NotNull MapQuality quality, @NotNull String text) {
+    public static Component rewriteWithQualityFont(MapQuality quality, String text) {
         class Holder {
             static final MiniMessage MM = MiniMessage.miniMessage();
         }

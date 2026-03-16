@@ -1,15 +1,14 @@
 package net.hollowcube.datafix;
 
 import net.kyori.adventure.key.Key;
-import org.jetbrains.annotations.NotNull;
 
 public sealed interface DataType permits DataType.IdMapped {
 
-    static @NotNull DataType dataType(@NotNull Key key) {
+    static DataType dataType(Key key) {
         return new DataTypeImpl(key.asString());
     }
 
-    static @NotNull IdMapped idMappedDataType(@NotNull Key key) {
+    static IdMapped idMappedDataType(Key key) {
         return new DataTypeImpl(key.asString());
     }
 
@@ -18,15 +17,15 @@ public sealed interface DataType permits DataType.IdMapped {
     }
 
     interface Builder {
-        @NotNull Builder extend(@NotNull DataType type);
+        Builder extend(DataType type);
 
-        @NotNull Builder single(@NotNull String path, @NotNull DataType type);
-        @NotNull Builder list(@NotNull String path, @NotNull DataType type);
+        Builder single(String path, DataType type);
+        Builder list(String path, DataType type);
     }
 
     @FunctionalInterface
     interface BuilderFunc {
-        @NotNull Builder apply(@NotNull Builder type);
+        Builder apply(Builder type);
     }
 
     /**
@@ -34,6 +33,6 @@ public sealed interface DataType permits DataType.IdMapped {
      */
     int id();
 
-    @NotNull String name();
+    String name();
 
 }

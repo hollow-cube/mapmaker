@@ -13,7 +13,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.packet.server.play.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,9 +32,9 @@ public final class TheSneaky {
         CRITICAL, // Problematic mod (hacked client, etc)
     }
 
-    private record TestEntry(@NotNull String modId, @NotNull String tkey, @NotNull Severity severity, boolean inverse) {
+    private record TestEntry(String modId, String tkey, Severity severity, boolean inverse) {
 
-        public TestEntry(@NotNull String modId, @NotNull String tkey, @NotNull Severity severity) {
+        public TestEntry(String modId, String tkey, Severity severity) {
             this(modId, tkey, severity, false);
         }
     }
@@ -81,7 +80,7 @@ public final class TheSneaky {
             // JumpOverFences: (text.autoconfig.jumpoverfences.title) They let you change the jump height for certain blocks for the client only
     );
 
-    public static @NotNull CompletableFuture<PlayerReport> test(@NotNull Player player) {
+    public static CompletableFuture<PlayerReport> test(Player player) {
         var signPos = player.getPosition();
 
         TextComponent.Builder[] lines = new TextComponent.Builder[4];

@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v3xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V3564 extends DataVersion {
     public V3564() {
@@ -12,7 +13,7 @@ public class V3564 extends DataVersion {
         addFix(DataTypes.BLOCK_ENTITY, "minecraft:hanging_sign", V3564::fixDropInvalidSignData);
     }
 
-    private static Value fixDropInvalidSignData(Value blockEntity) {
+    private static @Nullable Value fixDropInvalidSignData(Value blockEntity) {
         if (blockEntity.remove("_filtered_correct").as(Boolean.class, false))
             return blockEntity;
 

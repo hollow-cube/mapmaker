@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.map.block.interaction;
 import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Handles waterlogging and placing blocks of water using the bucket.
@@ -11,12 +10,12 @@ import org.jetbrains.annotations.NotNull;
 public class WaterBucketInteractionRule implements BlockInteractionRule {
 
     @Override
-    public @NotNull SneakState sneakState() {
+    public SneakState sneakState() {
         return SneakState.BOTH;
     }
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         // Try to waterlog the block we clicked on
         var blockPosition = interaction.blockPosition();
         if (tryWaterlogBlock(interaction, blockPosition, true)) return true;
@@ -38,7 +37,7 @@ public class WaterBucketInteractionRule implements BlockInteractionRule {
         return tryWaterlogBlock(interaction, blockPosition, false);
     }
 
-    private boolean tryWaterlogBlock(@NotNull Interaction interaction, @NotNull Point blockPosition, boolean strict) {
+    private boolean tryWaterlogBlock(Interaction interaction, Point blockPosition, boolean strict) {
         var block = interaction.getBlock(blockPosition);
 
         // If the block is air, liquid, or adjacent and replaceable, just set it to a water block.

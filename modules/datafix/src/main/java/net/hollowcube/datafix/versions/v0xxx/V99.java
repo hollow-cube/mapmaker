@@ -3,7 +3,6 @@ package net.hollowcube.datafix.versions.v0xxx;
 import net.hollowcube.datafix.DataType;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
-import org.jetbrains.annotations.NotNull;
 
 public class V99 extends DataVersion {
 
@@ -13,20 +12,20 @@ public class V99 extends DataVersion {
         registerEntities();
         registerBlockEntities();
         addReference(DataTypes.ENTITY, field -> field
-                .extend(DataTypes.ENTITY_EQUIPMENT)
-                .single("Riding", DataTypes.ENTITY));
+            .extend(DataTypes.ENTITY_EQUIPMENT)
+            .single("Riding", DataTypes.ENTITY));
         addReference(DataTypes.ITEM_STACK, field -> field
-                .single("id", DataTypes.ITEM_NAME)
-                .single("tag.EntityTag", DataTypes.ENTITY)
-                .single("tag.BlockEntityTag", DataTypes.BLOCK_ENTITY)
-                .list("tag.CanDestroy", DataTypes.BLOCK_NAME)
-                .list("tag.CanPlaceOn", DataTypes.BLOCK_NAME)
-                .list("tag.Items", DataTypes.ITEM_STACK)
-                .list("tag.ChargedProjectiles", DataTypes.ITEM_STACK)
-                .list("tag.pages", DataTypes.TEXT_COMPONENT)
-                .list("tag.filtered_pages", DataTypes.TEXT_COMPONENT)
-                .single("tag.display.Name", DataTypes.TEXT_COMPONENT)
-                .list("tag.display.Lore", DataTypes.TEXT_COMPONENT));
+            .single("id", DataTypes.ITEM_NAME)
+            .single("tag.EntityTag", DataTypes.ENTITY)
+            .single("tag.BlockEntityTag", DataTypes.BLOCK_ENTITY)
+            .list("tag.CanDestroy", DataTypes.BLOCK_NAME)
+            .list("tag.CanPlaceOn", DataTypes.BLOCK_NAME)
+            .list("tag.Items", DataTypes.ITEM_STACK)
+            .list("tag.ChargedProjectiles", DataTypes.ITEM_STACK)
+            .list("tag.pages", DataTypes.TEXT_COMPONENT)
+            .list("tag.filtered_pages", DataTypes.TEXT_COMPONENT)
+            .single("tag.display.Name", DataTypes.TEXT_COMPONENT)
+            .list("tag.display.Lore", DataTypes.TEXT_COMPONENT));
 
         // TODO: The paper itemstack structure walker updates a lot of fields here, need to investigate more.
         //  it appears to basically be doing ADD_NAMES in mojangs version
@@ -53,28 +52,28 @@ public class V99 extends DataVersion {
         addReference(DataTypes.ENTITY, "ThrownEnderpearl", V99::throwableProjectile);
         addReference(DataTypes.ENTITY, "EyeOfEnderSignal");
         addReference(DataTypes.ENTITY, "ThrownPotion", field -> V99.throwableProjectile(field)
-                .single("Potion", DataTypes.ITEM_STACK));
+            .single("Potion", DataTypes.ITEM_STACK));
         addReference(DataTypes.ENTITY, "ThrownExpBottle", V99::throwableProjectile);
         addReference(DataTypes.ENTITY, "ItemFrame", field -> field.single("Item", DataTypes.ITEM_STACK));
         addReference(DataTypes.ENTITY, "WitherSkull", V99::throwableProjectile);
         addReference(DataTypes.ENTITY, "PrimedTnt");
         addReference(DataTypes.ENTITY, "FallingSand", field -> field
-                .single("Block", DataTypes.BLOCK_NAME)
-                .single("TileEntityData", DataTypes.BLOCK_ENTITY));
+            .single("Block", DataTypes.BLOCK_NAME)
+            .single("TileEntityData", DataTypes.BLOCK_ENTITY));
         addReference(DataTypes.ENTITY, "FireworksRocketEntity", field -> field
-                .single("FireworksItem", DataTypes.ITEM_STACK));
+            .single("FireworksItem", DataTypes.ITEM_STACK));
         addReference(DataTypes.ENTITY, "Minecart", field -> V99.minecart(field)
-                .single("Items", DataTypes.ITEM_STACK));
+            .single("Items", DataTypes.ITEM_STACK));
         addReference(DataTypes.ENTITY, "MinecartRideable", V99::minecart);
         addReference(DataTypes.ENTITY, "MinecartChest", field -> V99.minecart(field)
-                .single("Items", DataTypes.ITEM_STACK));
+            .single("Items", DataTypes.ITEM_STACK));
         addReference(DataTypes.ENTITY, "MinecartFurnace", V99::minecart);
         addReference(DataTypes.ENTITY, "MinecartTNT", V99::minecart);
         addReference(DataTypes.ENTITY, "MinecartSpawner", V99::minecart);
         addReference(DataTypes.ENTITY, "MinecartHopper", field -> V99.minecart(field)
-                .single("Items", DataTypes.ITEM_STACK));
+            .single("Items", DataTypes.ITEM_STACK));
         addReference(DataTypes.ENTITY, "MinecartCommandBlock", field -> V99.minecart(field)
-                .single("LastOutput", DataTypes.TEXT_COMPONENT));
+            .single("LastOutput", DataTypes.TEXT_COMPONENT));
         addReference(DataTypes.ENTITY, "ArmorStand");
         addReference(DataTypes.ENTITY, "Creeper");
         addReference(DataTypes.ENTITY, "Skeleton");
@@ -106,9 +105,9 @@ public class V99 extends DataVersion {
         addReference(DataTypes.ENTITY, "Ozelot");
         addReference(DataTypes.ENTITY, "VillagerGolem");
         addReference(DataTypes.ENTITY, "EntityHorse", field -> field
-                .list("Items", DataTypes.ITEM_STACK)
-                .single("ArmorItem", DataTypes.ITEM_STACK)
-                .single("SaddleItem", DataTypes.ITEM_STACK));
+            .list("Items", DataTypes.ITEM_STACK)
+            .single("ArmorItem", DataTypes.ITEM_STACK)
+            .single("SaddleItem", DataTypes.ITEM_STACK));
         addReference(DataTypes.ENTITY, "Rabbit");
         addReference(DataTypes.ENTITY, "Villager", field -> field.list("Inventory", DataTypes.ITEM_STACK));
         addReference(DataTypes.ENTITY, "EnderCrystal");
@@ -118,11 +117,11 @@ public class V99 extends DataVersion {
         addReference(DataTypes.ENTITY, "Shulker");
     }
 
-    private static @NotNull DataType.Builder throwableProjectile(@NotNull DataType.Builder field) {
+    private static DataType.Builder throwableProjectile(DataType.Builder field) {
         return field.single("inTile", DataTypes.BLOCK_NAME);
     }
 
-    private static @NotNull DataType.Builder minecart(@NotNull DataType.Builder field) {
+    private static DataType.Builder minecart(DataType.Builder field) {
         return field.single("DisplayTile", DataTypes.BLOCK_NAME);
     }
 
@@ -152,20 +151,20 @@ public class V99 extends DataVersion {
         addReference(DataTypes.BLOCK_ENTITY, "EndGateway");
     }
 
-    private static @NotNull DataType.Builder inventoryBlock(@NotNull DataType.Builder field) {
+    private static DataType.Builder inventoryBlock(DataType.Builder field) {
         return field.list("Items", DataTypes.ITEM_STACK);
     }
 
-    public static @NotNull DataType.Builder signBlock(@NotNull DataType.Builder field) {
+    public static DataType.Builder signBlock(DataType.Builder field) {
         return field
-                .single("Text1", DataTypes.TEXT_COMPONENT)
-                .single("Text2", DataTypes.TEXT_COMPONENT)
-                .single("Text3", DataTypes.TEXT_COMPONENT)
-                .single("Text4", DataTypes.TEXT_COMPONENT)
-                .single("FilteredText1", DataTypes.TEXT_COMPONENT) // TODO: not added until later
-                .single("FilteredText2", DataTypes.TEXT_COMPONENT) // TODO: not added until later
-                .single("FilteredText3", DataTypes.TEXT_COMPONENT) // TODO: not added until later
-                .single("FilteredText4", DataTypes.TEXT_COMPONENT); // TODO: not added until later
+            .single("Text1", DataTypes.TEXT_COMPONENT)
+            .single("Text2", DataTypes.TEXT_COMPONENT)
+            .single("Text3", DataTypes.TEXT_COMPONENT)
+            .single("Text4", DataTypes.TEXT_COMPONENT)
+            .single("FilteredText1", DataTypes.TEXT_COMPONENT) // TODO: not added until later
+            .single("FilteredText2", DataTypes.TEXT_COMPONENT) // TODO: not added until later
+            .single("FilteredText3", DataTypes.TEXT_COMPONENT) // TODO: not added until later
+            .single("FilteredText4", DataTypes.TEXT_COMPONENT); // TODO: not added until later
     }
 
     // TODO: What does V99.addNames accomplish?

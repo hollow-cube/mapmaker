@@ -4,7 +4,7 @@ import net.hollowcube.datafix.DataType;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class V4067 extends DataVersion {
     public V4067() {
@@ -36,16 +36,16 @@ public class V4067 extends DataVersion {
         addFix(DataTypes.ENTITY, "minecraft:chest_boat", V4067::fixChestBoatSplit);
     }
 
-    static @NotNull DataType.Builder chestBoat(@NotNull DataType.Builder field) {
+    static DataType.Builder chestBoat(DataType.Builder field) {
         return field.list("Items", DataTypes.ITEM_STACK);
     }
 
-    private static Value fixBoatSplit(Value entity) {
+    private static @Nullable Value fixBoatSplit(Value entity) {
         entity.put("id", getBoatType(entity));
         return null;
     }
 
-    private static Value fixChestBoatSplit(Value entity) {
+    private static @Nullable Value fixChestBoatSplit(Value entity) {
         entity.put("id", getBoatType(entity).replace("_", "_chest_"));
         return null;
     }

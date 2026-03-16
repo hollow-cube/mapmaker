@@ -3,24 +3,23 @@ package net.hollowcube.mapmaker.player;
 import net.hollowcube.common.util.RuntimeGson;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.StructCodec;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @RuntimeGson
 public record PlayerSkin(
-        @Nullable String texture,
-        @Nullable String signature
+    @Nullable String texture,
+    @Nullable String signature
 ) {
     public static final StructCodec<PlayerSkin> CODEC = StructCodec.struct(
             "texture", Codec.STRING.optional(), PlayerSkin::texture,
             "signature", Codec.STRING.optional(), PlayerSkin::signature,
             PlayerSkin::new);
 
-    public PlayerSkin(@NotNull net.minestom.server.entity.PlayerSkin skin) {
+    public PlayerSkin(net.minestom.server.entity.PlayerSkin skin) {
         this(skin.textures(), skin.signature());
     }
 
-    public @NotNull net.minestom.server.entity.PlayerSkin into() {
+    public net.minestom.server.entity.PlayerSkin into() {
         return new net.minestom.server.entity.PlayerSkin(texture, signature);
     }
 

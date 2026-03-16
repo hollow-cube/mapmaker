@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map.block.handler;
 
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockHandler;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * A no-op block handler does nothing, and is used for blocks where we do not actually care about any of the NBT data.
@@ -12,12 +11,12 @@ import org.jetbrains.annotations.NotNull;
 public class NoopBlockHandler implements BlockHandler {
     private final Key id;
 
-    NoopBlockHandler(@NotNull String id) {
+    NoopBlockHandler(String id) {
         this.id = Key.key(id);
     }
 
     @Override
-    public @NotNull Key getKey() {
+    public Key getKey() {
         return id;
     }
 }

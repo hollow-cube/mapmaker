@@ -8,6 +8,6 @@ public class V1920 extends DataVersion {
         super(1920);
 
         addReference(DataTypes.BLOCK_ENTITY, "minecraft:campfire", field -> field
-                .list("Items", DataTypes.ITEM_STACK));
+            .list("Items", DataTypes.ITEM_STACK));
     }
 }

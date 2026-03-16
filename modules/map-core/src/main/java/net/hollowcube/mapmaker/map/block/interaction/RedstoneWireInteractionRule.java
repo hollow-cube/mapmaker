@@ -4,7 +4,6 @@ import net.hollowcube.mapmaker.map.block.placement.RedstoneWirePlacementRule;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 import java.util.Map;
@@ -23,7 +22,7 @@ public class RedstoneWireInteractionRule implements BlockInteractionRule {
     }
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition);
 
@@ -51,7 +50,7 @@ public class RedstoneWireInteractionRule implements BlockInteractionRule {
     }
 
     // Returns NONE if it is NONE, SIDE if it is an unconnected side, and CONNECTED if it is UP or a connected side.
-    private @NotNull String getSideState(@NotNull Block.Getter instance, @NotNull Point originPosition, @NotNull Block block, @NotNull BlockFace face) {
+    private String getSideState(Block.Getter instance, Point originPosition, Block block, BlockFace face) {
         var state = block.getProperty(face.name().toLowerCase(Locale.ROOT));
         if (NONE.equals(state)) return NONE;
         if (UP.equals(state)) return CONNECTED;
@@ -63,7 +62,7 @@ public class RedstoneWireInteractionRule implements BlockInteractionRule {
     }
 
     @Override
-    public @NotNull SneakState sneakState() {
+    public SneakState sneakState() {
         return SneakState.NOT_SNEAKING_OR_EMPTY_HAND;
     }
 }

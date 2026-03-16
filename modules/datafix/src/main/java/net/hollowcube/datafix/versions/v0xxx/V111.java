@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v0xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V111 extends DataVersion {
     private static final int[][] DIRECTIONS = new int[][]{{0, 0, 1}, {-1, 0, 0}, {0, 0, -1}, {1, 0, 0}};
@@ -14,7 +15,7 @@ public class V111 extends DataVersion {
         addFix(DataTypes.ENTITY, "ItemFrame", value -> fixPaintingOrItemFrameDirection(value, true));
     }
 
-    private static Value fixPaintingOrItemFrameDirection(Value value, boolean isItemFrame) {
+    private static @Nullable Value fixPaintingOrItemFrameDirection(Value value, boolean isItemFrame) {
         if (value.getValue("Facing") != null) return null;
 
         int facing;

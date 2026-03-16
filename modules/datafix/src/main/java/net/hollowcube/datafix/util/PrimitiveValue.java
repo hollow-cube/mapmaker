@@ -1,13 +1,14 @@
 package net.hollowcube.datafix.util;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public record PrimitiveValue(
-        @NotNull Object value
+    // TODO: This was declared as NotNull, but in TranscoderValue, it is null checked. Is it nullable?
+    @Nullable Object value
 ) implements Value {
 
     @Override
-    public <T> T as(@NotNull Class<T> type, T defaultValue) {
+    public <T> T as(Class<T> type, T defaultValue) {
         if (type.isInstance(value)) {
             return type.cast(value);
         } else if (value instanceof Number number) {

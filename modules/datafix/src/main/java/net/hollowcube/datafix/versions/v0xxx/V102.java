@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -13,7 +14,7 @@ import static net.hollowcube.datafix.util.DataFixUtils.namespaced;
 public class V102 extends DataVersion {
     public static final Int2ObjectMap<String> ITEM_NAMES = new Int2ObjectOpenHashMap<>();
 
-    private static final String[] POTIONS = new String[128];
+    private static final @Nullable String[] POTIONS = new String[128];
     public static final String DEFAULT_POTION = "minecraft:water";
     private static final int SPLASH_POTION_ID = 16384;
 
@@ -21,7 +22,7 @@ public class V102 extends DataVersion {
         super(102);
 
         addReference(DataTypes.ITEM_STACK, field -> field
-                .single("id", DataTypes.ITEM_NAME));
+            .single("id", DataTypes.ITEM_NAME));
 
         addFix(DataTypes.ITEM_STACK, V102::fixItemIds);
         // We don't update ids between fixes inside the same version, so matching on "minecraft:potion" here would
@@ -29,7 +30,7 @@ public class V102 extends DataVersion {
         addFix(DataTypes.ITEM_STACK, V102::fixPotionIds);
     }
 
-    private static Value fixItemIds(Value value) {
+    private static @Nullable Value fixItemIds(Value value) {
         // if its an int, update the id, otherwise namespace it.
         final Object rawId = value.get("id").value();
         if (rawId instanceof Number n)
@@ -39,7 +40,7 @@ public class V102 extends DataVersion {
         return null;
     }
 
-    private static Value fixPotionIds(Value value) {
+    private static @Nullable Value fixPotionIds(Value value) {
         // See note above on register why we match here.
         if (!"minecraft:potion".equals(value.get("id").value()))
             return null;

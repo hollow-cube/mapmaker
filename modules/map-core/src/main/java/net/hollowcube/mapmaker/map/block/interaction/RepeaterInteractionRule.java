@@ -1,10 +1,8 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
-import org.jetbrains.annotations.NotNull;
-
 public class RepeaterInteractionRule implements BlockInteractionRule {
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition);
         var delay = Integer.parseInt(block.getProperty("delay"));
@@ -15,7 +13,7 @@ public class RepeaterInteractionRule implements BlockInteractionRule {
     }
 
     @Override
-    public @NotNull SneakState sneakState() {
+    public SneakState sneakState() {
         return SneakState.NOT_SNEAKING_OR_EMPTY_HAND;
     }
 }

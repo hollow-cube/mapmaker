@@ -11,18 +11,18 @@ public class V703 extends DataVersion {
 
         removeReference(DataTypes.ENTITY, "EntityHorse");
         addReference(DataTypes.ENTITY, "Horse", field -> field
-                .single("ArmorItem", DataTypes.ITEM_STACK)
-                .single("SaddleItem", DataTypes.ITEM_STACK));
+            .single("ArmorItem", DataTypes.ITEM_STACK)
+            .single("SaddleItem", DataTypes.ITEM_STACK));
         addReference(DataTypes.ENTITY, "Donkey", field -> field
-                .list("Items", DataTypes.ITEM_STACK)
-                .single("SaddleItem", DataTypes.ITEM_STACK));
+            .list("Items", DataTypes.ITEM_STACK)
+            .single("SaddleItem", DataTypes.ITEM_STACK));
         addReference(DataTypes.ENTITY, "Mule", field -> field
-                .list("Items", DataTypes.ITEM_STACK)
-                .single("SaddleItem", DataTypes.ITEM_STACK));
+            .list("Items", DataTypes.ITEM_STACK)
+            .single("SaddleItem", DataTypes.ITEM_STACK));
         addReference(DataTypes.ENTITY, "ZombieHorse", field -> field
-                .single("SaddleItem", DataTypes.ITEM_STACK));
+            .single("SaddleItem", DataTypes.ITEM_STACK));
         addReference(DataTypes.ENTITY, "SkeletonHorse", field -> field
-                .single("SaddleItem", DataTypes.ITEM_STACK));
+            .single("SaddleItem", DataTypes.ITEM_STACK));
 
         addFix(DataTypes.ENTITY, "EntityHorse", new EntityRenameFix(V703::fixEntityHorseSplit));
     }

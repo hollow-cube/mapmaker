@@ -11,7 +11,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -19,9 +19,9 @@ import java.util.function.Function;
 
 public final class PlacementRules {
     private static final BlockManager BLOCK_MANAGER = MinecraftServer.getBlockManager();
-    private static TerraformRegistry REGISTRY = null;
+    private static @UnknownNullability TerraformRegistry REGISTRY = null; // lateinit
 
-    public static void init(@NotNull Terraform tf) {
+    public static void init(Terraform tf) {
         REGISTRY = tf.registry();
 
         //
@@ -225,20 +225,20 @@ public final class PlacementRules {
 
     }
 
-    private static void register(@NotNull Collection<Key> tag, Function<Block, BlockPlacementRule> constructor) {
+    private static void register(Collection<Key> tag, Function<Block, BlockPlacementRule> constructor) {
         for (var blockId : tag) {
             var ruleInstance = Objects.requireNonNull(constructor.apply(blockFromId(blockId)));
             BLOCK_MANAGER.registerBlockPlacementRule(ruleInstance);
         }
     }
 
-    private static void register(@NotNull Block block, Function<Block, BlockPlacementRule> constructor) {
+    private static void register(Block block, Function<Block, BlockPlacementRule> constructor) {
         var ruleInstance = Objects.requireNonNull(constructor.apply(blockFromId(block.key())));
         Check.argCondition(BLOCK_MANAGER.getBlockPlacementRule(ruleInstance.getBlock()) != null, "double registration for: " + ruleInstance.getBlock().name());
         BLOCK_MANAGER.registerBlockPlacementRule(ruleInstance);
     }
 
-    private static @NotNull Block blockFromId(@NotNull Key key) {
+    private static Block blockFromId(Key key) {
         // Convert block to block state using terraforms registry of handlers.
         return Objects.requireNonNull(REGISTRY.blockState(Objects.requireNonNull(Block.fromKey(key)).stateId()));
     }

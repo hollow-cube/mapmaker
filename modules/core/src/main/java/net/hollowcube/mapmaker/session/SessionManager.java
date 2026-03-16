@@ -18,7 +18,6 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,11 +50,7 @@ public class SessionManager {
 
     private final MessageConsumer consumer;
 
-    public SessionManager(
-        @NotNull SessionService sessionService,
-        @NotNull PlayerService playerService,
-        @NotNull JetStreamWrapper jetStream
-    ) {
+    public SessionManager(SessionService sessionService, PlayerService playerService, JetStreamWrapper jetStream) {
         instance = this;
         this.sessionService = sessionService;
         this.playerService = playerService;
@@ -100,16 +95,16 @@ public class SessionManager {
         }
     }
 
-    public boolean isHidden(@NotNull String playerId) {
+    public boolean isHidden(String playerId) {
         var session = getSession(playerId);
         return session != null && session.hidden();
     }
 
-    public @Nullable PlayerSession getSession(@NotNull String playerId) {
+    public @Nullable PlayerSession getSession(String playerId) {
         return sessions.get(playerId);
     }
 
-    public @Nullable PlayerSession getSessionByName(@NotNull String playerName) {
+    public @Nullable PlayerSession getSessionByName(String playerName) {
         for (var session : sessions.values()) {
             if (session.username().equalsIgnoreCase(playerName)) {
                 return session;
@@ -118,17 +113,17 @@ public class SessionManager {
         return null;
     }
 
-    public @Nullable Presence getPresence(@NotNull String playerId) {
+    public @Nullable Presence getPresence(String playerId) {
         var session = getSession(playerId);
         return session == null ? null : session.presence();
     }
 
-    public void updateState(@NotNull String playerId, @NotNull SessionStateUpdateRequest req) {
+    public void updateState(String playerId, SessionStateUpdateRequest req) {
         Check.stateCondition(!sessions.containsKey(playerId), "session does not exist");
         updateSessionOptimistic(sessionService.updateSessionProperties(playerId, req), req.metadata());
     }
 
-    public @NotNull Collection<PlayerSession> sessions(boolean showHidden) {
+    public Collection<PlayerSession> sessions(boolean showHidden) {
         if (showHidden) return sessions.values();
         return sessions.values().stream().filter(s -> !s.hidden()).toList();
     }
@@ -139,7 +134,7 @@ public class SessionManager {
      *
      * @param session The new session state
      */
-    public void updateSessionOptimistic(@NotNull PlayerSession session, @NotNull SessionStateUpdateRequest.Metadata metadata) {
+    public void updateSessionOptimistic(PlayerSession session, SessionStateUpdateRequest.Metadata metadata) {
         var oldSession = sessions.get(session.playerId());
         if (oldSession == null) {
             handleSessionCreate(session);
@@ -148,7 +143,7 @@ public class SessionManager {
         }
     }
 
-    private void handleSessionCreate(@NotNull PlayerSession session) {
+    private void handleSessionCreate(PlayerSession session) {
         if (sessions.containsKey(session.playerId())) {
             handleSessionUpdate(session, new SessionStateUpdateRequest.Metadata());
             return;
@@ -164,7 +159,7 @@ public class SessionManager {
         syntheticTab.addSession(session);
     }
 
-    private void handleSessionDelete(@NotNull SessionUpdateMessage message) {
+    private void handleSessionDelete(SessionUpdateMessage message) {
         logger.debug("remote session deleted for {}", message.playerId());
         var removed = sessions.remove(message.playerId());
         if (removed == null) return;
@@ -180,7 +175,7 @@ public class SessionManager {
         if (player != null) player.kick(Component.text("An error has occurred, please try again.\n(session.kicked)"));
     }
 
-    private void handleSessionUpdate(@NotNull PlayerSession session, @NotNull SessionStateUpdateRequest.Metadata metadata) {
+    private void handleSessionUpdate(PlayerSession session, SessionStateUpdateRequest.Metadata metadata) {
         logger.debug("remote session updated for {}", session.playerId());
 
         //todo need to make this more complicated so that people who have extra perms to see invis players can see them. they still get the leave message probably
@@ -205,17 +200,17 @@ public class SessionManager {
         }
     }
 
-    private void handlePlayerSpawn(@NotNull PlayerSpawnEvent event) {
+    private void handlePlayerSpawn(PlayerSpawnEvent event) {
         if (!event.isFirstSpawn()) return;
 
         syntheticTab.addLocalPlayer(event.getPlayer());
     }
 
-    private boolean showJoinLeaveMessage(@NotNull DisplayName displayName) {
+    private boolean showJoinLeaveMessage(DisplayName displayName) {
         return displayName.getBadgeName() != null; // Show anyone with a badge for now.
     }
 
-    private void broadcastJoinMessage(@NotNull String playerId) {
+    private void broadcastJoinMessage(String playerId) {
         List<String> friends = this.playerService.getPlayerFriends(playerId, true, new PlayerService.Pageable(1, 10_000)).items()
             .stream().map(PlayerFriend::playerId).toList();
         var displayName = this.playerService.getPlayerDisplayName2(playerId);
@@ -230,7 +225,7 @@ public class SessionManager {
             .sendMessage(Component.translatable("chat.friend.join", displayName.build(DisplayName.Context.DEFAULT)));
     }
 
-    private void broadcastLeaveMessage(@NotNull String playerId) {
+    private void broadcastLeaveMessage(String playerId) {
         List<String> friends = this.playerService.getPlayerFriends(playerId, true, new PlayerService.Pageable(1, 10_000)).items()
             .stream().map(PlayerFriend::playerId).toList();
         var displayName = this.playerService.getPlayerDisplayName2(playerId);
@@ -245,15 +240,15 @@ public class SessionManager {
             .sendMessage(Component.translatable("chat.friend.leave", displayName.build(DisplayName.Context.DEFAULT)));
     }
 
-    public void configureVanishedPlayer(@NotNull Player player) {
+    public void configureVanishedPlayer(Player player) {
         player.scheduleNextTick(e -> e.updateViewableRule(p -> PlayerData.fromPlayer(p).has(Permission.GENERIC_STAFF)));
     }
 
-    private void configureVisiblePlayer(@NotNull Player player) {
+    private void configureVisiblePlayer(Player player) {
         player.updateViewableRule(null);
     }
 
-    private void handleSessionUpdateMessage(@NotNull Message msg, @NotNull SessionUpdateMessage message) {
+    private void handleSessionUpdateMessage(Message msg, SessionUpdateMessage message) {
         switch (message.action()) {
             case CREATE -> {
                 // We have to check if the session exists here because its possible we did an optimistic update on the session before the message arrived.

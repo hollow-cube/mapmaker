@@ -1,11 +1,13 @@
 package net.hollowcube.datafix.util;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.UUID;
 
 public class UUIDFixes {
 
 
-    public static Value replaceUuidFromLeastMost(Value value, String prefix, String key) {
+    public static @Nullable Value replaceUuidFromLeastMost(Value value, String prefix, String key) {
         // Funny story here. When doing fixes to Most/Least fields, Mojang accidentally inverts the mostSignificantBits
         // and leastSignificantBits. So we are forced to do the same :sob:
 
@@ -17,7 +19,7 @@ public class UUIDFixes {
         return null;
     }
 
-    public static Value replaceUuidFromMLTag(Value value, String container, String resultKey) {
+    public static @Nullable Value replaceUuidFromMLTag(Value value, String container, String resultKey) {
         var mlContainer = value.remove(container);
         var mostSignificantBits = mlContainer.get("M").as(Number.class, 0L).longValue();
         var leastSignificantBits = mlContainer.get("L").as(Number.class, 0L).longValue();

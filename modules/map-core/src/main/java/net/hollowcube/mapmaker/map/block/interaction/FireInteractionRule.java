@@ -2,18 +2,16 @@ package net.hollowcube.mapmaker.map.block.interaction;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
-import org.jetbrains.annotations.NotNull;
 
-@SuppressWarnings("UnstableApiUsage")
 public class FireInteractionRule implements BlockInteractionRule {
 
     @Override
-    public @NotNull SneakState sneakState() {
+    public SneakState sneakState() {
         return SneakState.BOTH;
     }
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var blockPosition = interaction.blockPosition();
         if (tryPlaceFire(interaction, blockPosition)) return true;
 
@@ -21,7 +19,7 @@ public class FireInteractionRule implements BlockInteractionRule {
         return tryPlaceFire(interaction, blockPosition);
     }
 
-    private boolean tryPlaceFire(@NotNull Interaction interaction, @NotNull Point blockPosition) {
+    private boolean tryPlaceFire(Interaction interaction, Point blockPosition) {
         var block = interaction.getBlock(blockPosition);
         if (!block.isAir()) return false;
 

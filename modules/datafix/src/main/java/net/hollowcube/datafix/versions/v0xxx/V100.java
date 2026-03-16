@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v0xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V100 extends DataVersion {
     public V100() {
@@ -11,16 +12,16 @@ public class V100 extends DataVersion {
         // TODO: Should compare this to paper V100 again, not sure.
 
         addReference(DataTypes.ENTITY_EQUIPMENT, field -> field
-                .list("ArmorItems", DataTypes.ITEM_STACK)
-                .list("HandItems", DataTypes.ITEM_STACK)
-                .single("body_armor_item", DataTypes.ITEM_STACK)
-                .single("saddle", DataTypes.ITEM_STACK));
+            .list("ArmorItems", DataTypes.ITEM_STACK)
+            .list("HandItems", DataTypes.ITEM_STACK)
+            .single("body_armor_item", DataTypes.ITEM_STACK)
+            .single("saddle", DataTypes.ITEM_STACK));
 
         addFix(DataTypes.ENTITY, V100::fixEntityDropChances);
         addFix(DataTypes.ENTITY_EQUIPMENT, V100::fixEntityEquipment);
     }
 
-    private static Value fixEntityDropChances(Value entity) {
+    private static @Nullable Value fixEntityDropChances(Value entity) {
         var dropChances = entity.remove("DropChances");
         if (dropChances.size(0) == 0) return null;
 
@@ -36,7 +37,7 @@ public class V100 extends DataVersion {
         return null;
     }
 
-    private static Value fixEntityEquipment(Value entity) {
+    private static @Nullable Value fixEntityEquipment(Value entity) {
         var equipment = entity.remove("Equipment");
         if (equipment.size(0) == 0) return null;
 

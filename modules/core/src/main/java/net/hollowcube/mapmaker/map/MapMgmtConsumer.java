@@ -9,7 +9,6 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import org.intellij.lang.annotations.MagicConstant;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,14 +23,14 @@ public abstract class MapMgmtConsumer implements Closeable {
     @RuntimeGson
     public record MapUpdateMessage(
         @MagicConstant(valuesFromClass = MapUpdateMessage.class) int action,
-        @NotNull String id,
+        String id,
         @Nullable String drainReason // Only present for drain, not required.
     ) {
         public static final int ACTION_CREATE = 0;
         public static final int ACTION_DELETE = 1;
         public static final int ACTION_DRAIN = 2;
 
-        public @NotNull String subject() {
+        public String subject() {
             return "map." + switch (action) {
                 case ACTION_CREATE -> "create";
                 case ACTION_DELETE -> "delete";
@@ -45,7 +44,7 @@ public abstract class MapMgmtConsumer implements Closeable {
 
     private final MessageConsumer consumer;
 
-    public MapMgmtConsumer(@NotNull JetStreamWrapper jetStream) {
+    public MapMgmtConsumer(JetStreamWrapper jetStream) {
         // We must initialize this at runtime so its not initialized in the graal build,
         // aka giving us every message since build on start :)
         var consumerConfig = ConsumerConfiguration.builder()
@@ -68,7 +67,7 @@ public abstract class MapMgmtConsumer implements Closeable {
         }
     }
 
-    private void handleMapUpdate(@NotNull Message m, @NotNull MapUpdateMessage msg) {
+    private void handleMapUpdate(Message m, MapUpdateMessage msg) {
         logger.info("Received map update message ({}): {}", msg.action, msg);
         FutureUtil.submitVirtual(() -> {
             switch (msg.action) {
@@ -79,13 +78,13 @@ public abstract class MapMgmtConsumer implements Closeable {
         });
     }
 
-    protected void handleMapCreate(@NotNull String mapId) {
+    protected void handleMapCreate(String mapId) {
     }
 
-    protected void handleMapDelete(@NotNull String mapId) {
+    protected void handleMapDelete(String mapId) {
     }
 
-    protected void handleMapDrain(@NotNull String mapId, @Nullable String reason) {
+    protected void handleMapDrain(String mapId, @Nullable String reason) {
     }
 
 }

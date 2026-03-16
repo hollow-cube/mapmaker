@@ -5,7 +5,6 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -26,19 +25,19 @@ import java.util.List;
 public class RailPlacementRule extends WaterloggedPlacementRule {
     private final boolean isStraight;
 
-    public RailPlacementRule(@NotNull Block block, boolean isStraight) {
+    public RailPlacementRule(Block block, boolean isStraight) {
         super(block);
         this.isStraight = isStraight;
     }
 
     @Override
-    public @Nullable Block blockPlace(@NotNull PlacementState placement) {
+    public @Nullable Block blockPlace(PlacementState placement) {
         var instance = placement.instance();
         var blockPosition = placement.placePosition();
 
         return new RailState(instance, blockPosition, this.block, this.isStraight)
-                .place(true, true, this.block.getProperty("shape"))
-                .getState().withProperty("waterlogged", waterlogged(placement));
+            .place(true, true, this.block.getProperty("shape"))
+            .getState().withProperty("waterlogged", waterlogged(placement));
     }
 
     public static class RailState {
@@ -123,11 +122,11 @@ public class RailPlacementRule extends WaterloggedPlacementRule {
             }
         }
 
-        private static boolean isRail(@NotNull Block.Getter instance, @NotNull Point blockPosition) {
+        private static boolean isRail(Block.Getter instance, Point blockPosition) {
             return isRail(instance.getBlock(blockPosition, Block.Getter.Condition.TYPE));
         }
 
-        private static boolean isRail(@NotNull Block block) {
+        private static boolean isRail(Block block) {
             return block.id() == Block.RAIL.id() || block.id() == Block.POWERED_RAIL.id() ||
                     block.id() == Block.DETECTOR_RAIL.id() || block.id() == Block.ACTIVATOR_RAIL.id();
         }
@@ -156,7 +155,7 @@ public class RailPlacementRule extends WaterloggedPlacementRule {
             return this.hasConnection($$0.pos);
         }
 
-        private boolean hasConnection(@NotNull Point blockPosition) {
+        private boolean hasConnection(Point blockPosition) {
             for (Point connection : this.connections) {
                 if (connection.blockX() != blockPosition.blockX() || connection.blockZ() != blockPosition.blockZ())
                     continue;

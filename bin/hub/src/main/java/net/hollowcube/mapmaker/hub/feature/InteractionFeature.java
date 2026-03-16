@@ -14,7 +14,6 @@ import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.player.PlayerEntityInteractEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.tag.Tag;
-import org.jetbrains.annotations.NotNull;
 
 @AutoService(HubFeature.class)
 public class InteractionFeature implements HubFeature {
@@ -26,12 +25,12 @@ public class InteractionFeature implements HubFeature {
     private HubMapWorld world;
 
     @Override
-    public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
+    public void load(MapServer server, HubMapWorld world) {
         this.world = world;
         world.eventNode().addChild(eventNode);
     }
 
-    private void onTick(@NotNull InstanceTickEvent event) {
+    private void onTick(InstanceTickEvent event) {
         for (var player : world.players()) {
             var rayStart = player.getPosition().add(0, player.getEyeHeight(), 0);
             var rayDirection = rayStart.direction();

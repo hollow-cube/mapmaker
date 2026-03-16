@@ -8,7 +8,6 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,11 +24,11 @@ public class ShelfBlockHandler implements BlockHandler {
     private static final Tag<Boolean> ALIGN_ITEMS_TO_BOTTOM = Tag.Boolean("align_items_to_bottom").defaultValue(false);
 
     @Override
-    public @NotNull Key getKey() {
+    public Key getKey() {
         return ID;
     }
 
-    private @NotNull Block setItemStack(@NotNull Block block, int index, @NotNull ItemStack newItemStack) {
+    private Block setItemStack(Block block, int index, ItemStack newItemStack) {
         var old = block.getTag(ITEMS_TAG);
         if (index < 0 || index >= old.size()) return block;
         if (!old.get(index).isAir() && !newItemStack.isAir()) return block;
@@ -40,7 +39,7 @@ public class ShelfBlockHandler implements BlockHandler {
     }
 
     @Override
-    public boolean onInteract(@NotNull BlockHandler.Interaction interaction) {
+    public boolean onInteract(BlockHandler.Interaction interaction) {
         if (!BlockHandlerHelpers.canEdit(interaction)) return true;
 
         var player = interaction.getPlayer();
@@ -83,7 +82,7 @@ public class ShelfBlockHandler implements BlockHandler {
     }
 
     @Override
-    public @NotNull Collection<Tag<?>> getBlockEntityTags() {
+    public Collection<Tag<?>> getBlockEntityTags() {
         return List.of(ITEMS_TAG, ALIGN_ITEMS_TO_BOTTOM);
     }
 }

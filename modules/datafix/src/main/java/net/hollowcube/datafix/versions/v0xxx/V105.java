@@ -3,9 +3,10 @@ package net.hollowcube.datafix.versions.v0xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V105 extends DataVersion {
-    private static final String[] ID_TO_ENTITY = new String[256];
+    private static final @Nullable String[] ID_TO_ENTITY = new String[256];
 
     public V105() {
         super(105);
@@ -13,7 +14,7 @@ public class V105 extends DataVersion {
         addFix(DataTypes.ITEM_STACK, "minecraft:spawn_egg", V105::fixSpawnEggEntityId);
     }
 
-    private static Value fixSpawnEggEntityId(Value itemStack) {
+    private static @Nullable Value fixSpawnEggEntityId(Value itemStack) {
         short damage = itemStack.get("Damage").as(Number.class, 0).shortValue();
         if (damage != 0) itemStack.put("Damage", (short) 0);
 
@@ -21,8 +22,8 @@ public class V105 extends DataVersion {
         Object existingEntityId = itemStack.get("tag").get("EntityTag").value();
         if (entityId != null && !entityId.equals(existingEntityId)) {
             itemStack.get("tag", Value::emptyMap)
-                    .get("EntityTag", Value::emptyMap)
-                    .put("id", entityId);
+                .get("EntityTag", Value::emptyMap)
+                .put("id", entityId);
         }
 
         return null;

@@ -2,15 +2,15 @@ package net.hollowcube.datafix.util;
 
 import com.google.gson.internal.LinkedTreeMap;
 import net.minestom.server.codec.Transcoder;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 public interface Value extends Iterable<Value> {
-    @NotNull Transcoder<Value> TRANSCODER = null; // todo
+    Transcoder<Value> TRANSCODER = null; // todo
 
     Value NULL = new NullValue();
 
@@ -22,7 +22,7 @@ public interface Value extends Iterable<Value> {
         return new ListValue(new ArrayList<>());
     }
 
-    static Value wrap(Object object) {
+    static Value wrap(@Nullable Object object) {
         if (object == null) {
             return NULL;
         } else if (object instanceof Value v) {
@@ -53,7 +53,7 @@ public interface Value extends Iterable<Value> {
 
     @Nullable Object value();
 
-    <T> T as(@NotNull Class<T> type, T defaultValue);
+    <T> @UnknownNullability T as(Class<T> type, @UnknownNullability T defaultValue);
 
     // ListLike
 
@@ -78,7 +78,7 @@ public interface Value extends Iterable<Value> {
     }
 
     @Override
-    default @NotNull Iterator<Value> iterator() {
+    default Iterator<Value> iterator() {
         return Collections.emptyIterator();
     }
 
@@ -88,30 +88,30 @@ public interface Value extends Iterable<Value> {
         return false;
     }
 
-    default @NotNull Value get(@NotNull String key) {
+    default Value get(String key) {
         return NULL;
     }
 
     // Remove and return
-    default @NotNull Value remove(@NotNull String key) {
+    default Value remove(String key) {
         var value = get(key);
         put(key, null);
         return value;
     }
 
-    default Object getValue(@NotNull String key) {
+    default @Nullable Object getValue(String key) {
         return null;
     }
 
-    default @NotNull Value get(@NotNull String key, Supplier<Value> defaultValue) {
+    default Value get(String key, Supplier<Value> defaultValue) {
         return defaultValue.get();
     }
 
-    default void put(@NotNull String key, Object value) {
+    default void put(String key, @Nullable Object value) {
         // noop
     }
 
-    default void forEachEntry(@NotNull BiConsumer<String, Value> consumer) {
+    default void forEachEntry(BiConsumer<String, Value> consumer) {
         // noop
     }
 }

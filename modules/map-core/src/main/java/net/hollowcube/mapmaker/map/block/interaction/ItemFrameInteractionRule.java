@@ -6,7 +6,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.metadata.other.ItemFrameMeta;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.utils.Direction;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
@@ -19,7 +18,7 @@ public class ItemFrameInteractionRule implements BlockInteractionRule {
     }
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var entity = this.glowing ? new ItemFrameEntity.Glowing(UUID.randomUUID()) : new ItemFrameEntity(UUID.randomUUID());
 
         var meta = (ItemFrameMeta) entity.getEntityMeta();
@@ -40,11 +39,11 @@ public class ItemFrameInteractionRule implements BlockInteractionRule {
     }
 
     @Override
-    public @NotNull SneakState sneakState() {
+    public SneakState sneakState() {
         return SneakState.BOTH;
     }
 
-    private @NotNull Pos calculatePlacementPos(@NotNull Point blockPosition, @NotNull BlockFace face) {
+    private Pos calculatePlacementPos(Point blockPosition, BlockFace face) {
         Direction direction = face.toDirection();
 
         // We offset the block position relative to the face direction so that we place the frame on the block
@@ -69,11 +68,11 @@ public class ItemFrameInteractionRule implements BlockInteractionRule {
         return new Pos(x, y, z, yaw, pitch);
     }
 
-    private static boolean isHorizontal(@NotNull Direction direction) {
+    private static boolean isHorizontal(Direction direction) {
         return direction != Direction.UP && direction != Direction.DOWN;
     }
 
-    static float getDegreesForHorizontalDirection(@NotNull Direction direction) {
+    static float getDegreesForHorizontalDirection(Direction direction) {
         // Minecraft horizontal directions go anticlockwise from south
         return switch (direction) {
             case SOUTH -> 0;

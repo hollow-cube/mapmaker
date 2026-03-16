@@ -4,7 +4,7 @@ import net.hollowcube.common.util.RuntimeGson;
 
 @RuntimeGson
 public record LegacyMapInfo(
-        String id,
-        String name
+    String id,
+    String name
 ) {
 }

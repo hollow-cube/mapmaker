@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.block.handler;
 
-import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.handler.base.ContainerSerializer;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
@@ -10,7 +9,6 @@ import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,18 +22,18 @@ public class CampfireBlockHandler implements BlockHandler {
     private static final Tag<List<ItemStack>> ITEMS_TAG = Tag.View(new ContainerSerializer(4)).defaultValue(DEFAULT_ITEMS);
 
     @Override
-    public @NotNull Key getKey() {
+    public Key getKey() {
         return ID;
     }
 
-    private @NotNull Block setItemStack(@NotNull Block block, int index, @NotNull ItemStack newItemStack) {
+    private Block setItemStack(Block block, int index, ItemStack newItemStack) {
         var items = new ArrayList<>(block.getTag(ITEMS_TAG));
         items.set(index, newItemStack);
         return block.withTag(ITEMS_TAG, items);
     }
 
     @Override
-    public boolean onInteract(@NotNull BlockHandler.Interaction interaction) {
+    public boolean onInteract(BlockHandler.Interaction interaction) {
         if (!BlockHandlerHelpers.canEdit(interaction)) return true;
 
         var player = interaction.getPlayer();
@@ -60,11 +58,11 @@ public class CampfireBlockHandler implements BlockHandler {
     }
 
     @Override
-    public @NotNull Collection<Tag<?>> getBlockEntityTags() {
+    public Collection<Tag<?>> getBlockEntityTags() {
         return List.of(ITEMS_TAG);
     }
 
-    private static int getClickIndex(@NotNull Point cursorPosition, @NotNull Block block) {
+    private static int getClickIndex(Point cursorPosition, Block block) {
         int raw;
         if (cursorPosition.x() > 0.5)
             raw = cursorPosition.z() > 0.5 ? 0 : 3;

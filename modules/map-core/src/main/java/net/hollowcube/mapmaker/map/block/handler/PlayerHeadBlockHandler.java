@@ -8,7 +8,6 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.network.player.ResolvableProfile;
 import net.minestom.server.tag.Tag;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -19,7 +18,7 @@ public class PlayerHeadBlockHandler implements BlockHandler {
 
     public static final Key ID = Key.key("minecraft:skull");
 
-    public static @Nullable ResolvableProfile extractProfile(@NotNull Block block) {
+    public static @Nullable ResolvableProfile extractProfile(Block block) {
         var profile = block.getTag(PROFILE);
         if (profile == null) return null;
         return DataComponents.PROFILE.decode(Transcoder.NBT, profile).orElseThrow();
@@ -29,7 +28,7 @@ public class PlayerHeadBlockHandler implements BlockHandler {
     }
 
     @Override
-    public @NotNull Key getKey() {
+    public Key getKey() {
         return ID;
     }
 
@@ -39,7 +38,7 @@ public class PlayerHeadBlockHandler implements BlockHandler {
     }
 
     @Override
-    public @NotNull Collection<Tag<?>> getBlockEntityTags() {
+    public Collection<Tag<?>> getBlockEntityTags() {
         return List.of(PROFILE);
     }
 

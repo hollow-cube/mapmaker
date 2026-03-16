@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v0xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V113 extends DataVersion {
     public V113() {
@@ -11,7 +12,7 @@ public class V113 extends DataVersion {
         addFix(DataTypes.ENTITY, V113::fixRedundantChanceTags);
     }
 
-    private static Value fixRedundantChanceTags(Value entity) {
+    private static @Nullable Value fixRedundantChanceTags(Value entity) {
         if (isZeroList(entity.get("HandDropChances"), 2))
             entity.put("HandDropChances", null);
         if (isZeroList(entity.get("HandDropChances"), 4))

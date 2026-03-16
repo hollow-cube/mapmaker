@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.util;
 
 import net.hollowcube.common.util.FutureUtil;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +32,7 @@ public class Shutdowner implements HttpServerWrapper.HealthCheck {
         void run() throws Exception;
     }
 
-    record Hook(@NotNull String name, @NotNull HookFunction task) implements HookFunction {
+    record Hook(String name, HookFunction task) implements HookFunction {
 
         @Override
         public void run() throws Exception {
@@ -46,7 +45,7 @@ public class Shutdowner implements HttpServerWrapper.HealthCheck {
 
     private volatile boolean isShuttingDown = false;
 
-    public Shutdowner(@NotNull Supplier<CompletableFuture<Void>> quiescenceFunction) {
+    public Shutdowner(Supplier<CompletableFuture<Void>> quiescenceFunction) {
         this.quiescenceFunction = quiescenceFunction;
 
         //noinspection ResultOfMethodCallIgnored
@@ -64,7 +63,7 @@ public class Shutdowner implements HttpServerWrapper.HealthCheck {
      *
      * <p>The last hook added will be the last one to be executed.</p>
      */
-    public void queue(@NotNull String name, @NotNull HookFunction hook) {
+    public void queue(String name, HookFunction hook) {
         shutdownHooks.add(new Hook(name, hook));
     }
 

@@ -12,7 +12,6 @@ import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.sound.SoundEvent;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -46,9 +45,9 @@ public interface BlockInteractionRule {
      * @param interaction The interaction that occurred.
      * @return True to stop the chain, false to continue.
      */
-    boolean handleInteraction(@NotNull Interaction interaction);
+    boolean handleInteraction(Interaction interaction);
 
-    default @NotNull SneakState sneakState() {
+    default SneakState sneakState() {
         return SneakState.NOT_SNEAKING;
     }
 
@@ -59,39 +58,43 @@ public interface BlockInteractionRule {
      * <p>Air Interaction objects always contain null values for blockPosition and blockFace.</p>
      */
     interface AirInteractionRule {
-        boolean handleAirInteraction(@NotNull Interaction interaction);
+        boolean handleAirInteraction(Interaction interaction);
     }
 
     record Interaction(
-            @NotNull Player player, @NotNull Instance instance, @UnknownNullability Point blockPosition,
-            @UnknownNullability BlockFace blockFace, @Nullable Point cursorPosition,
-            @NotNull ItemStack item, @NotNull PlayerHand hand
+        Player player,
+        Instance instance,
+        @UnknownNullability Point blockPosition,
+        @UnknownNullability BlockFace blockFace,
+        @Nullable Point cursorPosition,
+        ItemStack item,
+        PlayerHand hand
     ) implements Block.Getter, Block.Setter {
 
-        public @NotNull WorldBorder worldBorder() {
+        public WorldBorder worldBorder() {
             return instance.getWorldBorder();
         }
 
-        public boolean worldContains(@NotNull Point point) {
+        public boolean worldContains(Point point) {
             return instance.getWorldBorder().inBounds(point)
                     && point.blockY() >= instance.getCachedDimensionType().minY()
                     && point.blockY() <= instance.getCachedDimensionType().maxY();
         }
 
         @Override
-        public @UnknownNullability Block getBlock(int x, int y, int z, @NotNull Block.Getter.Condition condition) {
+        public @UnknownNullability Block getBlock(int x, int y, int z, Block.Getter.Condition condition) {
             return instance.getBlock(x, y, z, condition);
         }
 
         @Override
-        public void setBlock(int x, int y, int z, @NotNull Block block) {
+        public void setBlock(int x, int y, int z, Block block) {
             var blockPosition = new Vec(x, y, z);
             // Never set a block outside the border.
             if (!instance.getWorldBorder().inBounds(blockPosition)) return;
             instance.setBlock(blockPosition, block);
         }
 
-        public void placeBlock(@NotNull Point blockPosition, @NotNull Block block) {
+        public void placeBlock(Point blockPosition, Block block) {
             // Never set a block outside the border.
             if (!instance.getWorldBorder().inBounds(blockPosition)) return;
 
@@ -105,11 +108,11 @@ public interface BlockInteractionRule {
                     (float) cursorPosition.z()));
         }
 
-        public void playSound(@NotNull Sound sound, @NotNull Point blockPosition) {
+        public void playSound(Sound sound, Point blockPosition) {
             instance.playSound(sound, blockPosition);
         }
 
-        public void playBlockSound(@NotNull SoundEvent sound, float volume, float pitch) {
+        public void playBlockSound(SoundEvent sound, float volume, float pitch) {
             instance.playSound(Sound.sound(sound, Sound.Source.BLOCK, volume, pitch), blockPosition);
         }
     }

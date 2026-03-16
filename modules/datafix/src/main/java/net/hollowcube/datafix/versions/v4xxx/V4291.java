@@ -4,6 +4,7 @@ import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
 import net.minestom.server.codec.Transcoder;
+import org.jetbrains.annotations.Nullable;
 
 public class V4291 extends DataVersion {
     public V4291() {
@@ -13,7 +14,7 @@ public class V4291 extends DataVersion {
         addFix(DataTypes.TEXT_COMPONENT, V4291::fixComponentStringifiedFlags);
     }
 
-    private static Value fixTextComponentHoverEventInnerComponent(Value textComponent) {
+    private static @Nullable Value fixTextComponentHoverEventInnerComponent(Value textComponent) {
         if (!textComponent.isMapLike()) return null; // list or single string
         var hoverEvent = textComponent.get("hoverEvent");
         if (!hoverEvent.isMapLike()) return null;
@@ -32,7 +33,7 @@ public class V4291 extends DataVersion {
         return null;
     }
 
-    private static Value fixComponentStringifiedFlags(Value textComponent) {
+    private static @Nullable Value fixComponentStringifiedFlags(Value textComponent) {
         textComponent.put("bold", stringToBool(textComponent.get("bold")));
         textComponent.put("italic", stringToBool(textComponent.get("italic")));
         textComponent.put("underlined", stringToBool(textComponent.get("underlined")));
@@ -44,7 +45,7 @@ public class V4291 extends DataVersion {
     private static Value stringToBool(Value value) {
         var string = value.as(String.class, null);
         if (string == null) return value;
-        return Value.wrap(Boolean.parseBoolean(string));
+        return Value.wrap(Boolean.valueOf(string));
     }
 
 }

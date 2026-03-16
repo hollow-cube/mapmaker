@@ -2,20 +2,18 @@ package net.hollowcube.mapmaker.map.block.placement;
 
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-@SuppressWarnings("UnstableApiUsage")
 public class BigDripleafPlacementRule extends FacingHorizontalPlacementRule {
     private static final String PROP_FACING = "facing";
 
-    public BigDripleafPlacementRule(@NotNull Block block) {
+    public BigDripleafPlacementRule(Block block) {
         super(block, true);
     }
 
     @Override
-    public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
+    public Block blockUpdate(UpdateState updateState) {
         var currentBlock = updateState.currentBlock();
         if (updateState.fromFace() != BlockFace.TOP) return currentBlock;
 
@@ -24,8 +22,8 @@ public class BigDripleafPlacementRule extends FacingHorizontalPlacementRule {
         if (blockAbove.id() == Block.BIG_DRIPLEAF.id() || blockAbove.id() == Block.BIG_DRIPLEAF_STEM.id()) {
             var worldBlock = updateState.instance().getBlock(updateState.blockPosition(), Block.Getter.Condition.TYPE);
             return Block.BIG_DRIPLEAF_STEM.withProperties(Map.of(
-                    PROP_FACING, currentBlock.getProperty(PROP_FACING),
-                    "waterlogged", waterlogged(worldBlock)
+                PROP_FACING, currentBlock.getProperty(PROP_FACING),
+                "waterlogged", waterlogged(worldBlock)
             ));
         }
 
@@ -33,7 +31,7 @@ public class BigDripleafPlacementRule extends FacingHorizontalPlacementRule {
     }
 
     @Override
-    public @NotNull Block blockPlace(@NotNull PlacementState placementState) {
+    public Block blockPlace(PlacementState placementState) {
         var waterlogged = waterlogged(placementState);
 
         var posBelow = placementState.placePosition().add(0, -1, 0);
@@ -41,8 +39,8 @@ public class BigDripleafPlacementRule extends FacingHorizontalPlacementRule {
         if (blockBelow.id() == Block.BIG_DRIPLEAF.id() || blockBelow.id() == Block.BIG_DRIPLEAF_STEM.id()) {
             // If below has facing, use that.
             return this.block.withProperties(Map.of(
-                    PROP_FACING, blockBelow.getProperty(PROP_FACING),
-                    "waterlogged", waterlogged
+                PROP_FACING, blockBelow.getProperty(PROP_FACING),
+                "waterlogged", waterlogged
             ));
         }
 
@@ -51,8 +49,8 @@ public class BigDripleafPlacementRule extends FacingHorizontalPlacementRule {
         if (blockAbove.id() == Block.BIG_DRIPLEAF.id() || blockAbove.id() == Block.BIG_DRIPLEAF_STEM.id()) {
             // If above has facing, use that.
             return this.block.withProperties(Map.of(
-                    PROP_FACING, blockAbove.getProperty(PROP_FACING),
-                    "waterlogged", waterlogged
+                PROP_FACING, blockAbove.getProperty(PROP_FACING),
+                "waterlogged", waterlogged
             ));
         }
 

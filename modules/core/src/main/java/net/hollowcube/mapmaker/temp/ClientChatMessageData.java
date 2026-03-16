@@ -1,17 +1,16 @@
 package net.hollowcube.mapmaker.temp;
 
 import net.hollowcube.common.util.RuntimeGson;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @RuntimeGson
 public record ClientChatMessageData(
-    @NotNull Type type,
+    Type type,
 
     // CHAT_UNSIGNED
-    @NotNull String sender,
-    @NotNull String message,
-    @NotNull String channel,
+    String sender,
+    String message,
+    String channel,
     @Nullable String currentMap,
     long seed
 ) {

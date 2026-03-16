@@ -1,21 +1,20 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
 import net.minestom.server.item.Material;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
 public class LecternInteractionRule implements BlockInteractionRule {
     private static final Set<Material> BOOK_LIKE = Set.of(
-            Material.WRITTEN_BOOK,
-            Material.WRITABLE_BOOK,
-            Material.BOOK,
-            Material.ENCHANTED_BOOK,
-            Material.KNOWLEDGE_BOOK
+        Material.WRITTEN_BOOK,
+        Material.WRITABLE_BOOK,
+        Material.BOOK,
+        Material.ENCHANTED_BOOK,
+        Material.KNOWLEDGE_BOOK
     );
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition);
 

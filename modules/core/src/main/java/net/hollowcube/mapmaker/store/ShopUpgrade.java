@@ -5,7 +5,6 @@ import net.hollowcube.mapmaker.map.MapSize;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,18 +32,18 @@ public enum ShopUpgrade {
     private final int mapSlots;
     private final MapSize maxMapSize;
 
-    ShopUpgrade(@NotNull String id, @NotNull CostList cost, int mapSlots, MapSize maxMapSize) {
+    ShopUpgrade(String id, CostList cost, int mapSlots, MapSize maxMapSize) {
         this.id = id;
         this.cost = cost;
         this.mapSlots = mapSlots;
         this.maxMapSize = maxMapSize;
     }
 
-    public boolean canAfford(@NotNull PlayerData playerData, @NotNull PlayerBackpack backpack) {
+    public boolean canAfford(PlayerData playerData, PlayerBackpack backpack) {
         return cost.canAfford(playerData, backpack);
     }
 
-    public void appendLore(@NotNull PlayerData playerData, @NotNull PlayerBackpack backpack, @NotNull List<Component> lore) {
+    public void appendLore(PlayerData playerData, PlayerBackpack backpack, List<Component> lore) {
         cost.appendLore(playerData, backpack, lore);
     }
 

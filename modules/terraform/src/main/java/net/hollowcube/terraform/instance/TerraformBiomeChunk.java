@@ -9,7 +9,6 @@ import net.minestom.server.instance.palette.Palette;
 import net.minestom.server.network.packet.server.play.ChunkBiomesPacket;
 import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.world.biome.Biome;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -21,10 +20,7 @@ public final class TerraformBiomeChunk {
     private TerraformBiomeChunk() {
     }
 
-    public static @Nullable RegistryKey<Biome> getBiome(
-            @NotNull Chunk chunk,
-            int x, int y, int z
-    ) {
+    public static @Nullable RegistryKey<Biome> getBiome(Chunk chunk, int x, int y, int z) {
         var biomes = TerraformInstanceBiomes.forInstance(chunk.getInstance());
         if (biomes != null) {
             var section = chunk.getSectionAt(y);
@@ -37,11 +33,7 @@ public final class TerraformBiomeChunk {
         return null;
     }
 
-    public static boolean setBiome(
-            @NotNull Chunk chunk,
-            int x, int y, int z,
-            @NotNull RegistryKey<Biome> biome
-    ) {
+    public static boolean setBiome(Chunk chunk, int x, int y, int z, RegistryKey<Biome> biome) {
         assert Thread.holdsLock(chunk) : "Chunk must be locked before access";
         ChunkHack.invalidateChunk(chunk);
 
@@ -64,10 +56,7 @@ public final class TerraformBiomeChunk {
         return false;
     }
 
-    public static void fillBiome(
-            @NotNull Chunk chunk,
-            @NotNull RegistryKey<Biome> biome
-    ) {
+    public static void fillBiome(Chunk chunk, RegistryKey<Biome> biome) {
         assert Thread.holdsLock(chunk) : "Chunk must be locked before access";
         ChunkHack.invalidateChunk(chunk);
 
@@ -80,11 +69,7 @@ public final class TerraformBiomeChunk {
         }
     }
 
-    public static void fillBiome(
-            @NotNull Chunk chunk,
-            @NotNull RegistryKey<Biome> biome,
-            @NotNull BiomePredicate predicate
-    ) {
+    public static void fillBiome(Chunk chunk, RegistryKey<Biome> biome, BiomePredicate predicate) {
         assert Thread.holdsLock(chunk) : "Chunk must be locked before access";
         ChunkHack.invalidateChunk(chunk);
 
@@ -111,7 +96,7 @@ public final class TerraformBiomeChunk {
         }
     }
 
-    public static void sendBiomeUpdates(@NotNull TerraformInstanceBiomes biomes, @NotNull List<Chunk> chunks) {
+    public static void sendBiomeUpdates(TerraformInstanceBiomes biomes, List<Chunk> chunks) {
         List<ChunkBiomesPacket.ChunkBiomeData> data = new ArrayList<>();
         var serializer = Palette.biomeSerializer(MinecraftServer.getBiomeRegistry().size() + biomes.size());
         for (Chunk chunk : chunks) {

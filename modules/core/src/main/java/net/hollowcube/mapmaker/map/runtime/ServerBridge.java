@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map.runtime;
 
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -14,8 +13,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface ServerBridge {
 
-    record JoinConfig(@NotNull String mapId, @NotNull JoinMapState joinMapState, @NotNull String source,
-                      @Nullable String isolateOverride) {
+    record JoinConfig(String mapId, JoinMapState joinMapState, String source, @Nullable String isolateOverride) {
 
     }
 
@@ -27,14 +25,14 @@ public interface ServerBridge {
      * system, or an external allocator/matchmaker.
      */
     @Blocking
-    default void joinMap(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState, @NotNull String source) {
+    default void joinMap(Player player, String mapId, JoinMapState joinMapState, String source) {
         joinMap(player, new JoinConfig(mapId, joinMapState, source, null));
     }
 
     @Blocking
-    void joinMap(@NotNull Player player, JoinConfig joinConfig);
+    void joinMap(Player player, JoinConfig joinConfig);
 
-    void joinHub(@NotNull Player player);
+    void joinHub(Player player);
 
     enum JoinMapState {
         EDITING,

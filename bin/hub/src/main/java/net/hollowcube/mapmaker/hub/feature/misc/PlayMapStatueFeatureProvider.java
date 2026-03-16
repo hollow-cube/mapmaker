@@ -24,7 +24,6 @@ import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.TaskSchedule;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Map;

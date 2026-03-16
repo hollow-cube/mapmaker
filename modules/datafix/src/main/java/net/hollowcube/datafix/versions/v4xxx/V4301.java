@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v4xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V4301 extends DataVersion {
     public V4301() {
@@ -13,19 +14,19 @@ public class V4301 extends DataVersion {
         //  in that vein, do we actually need to register it before this moment? the
         //  fix here could easily just be a fix to entity that creates the equipment field.
         addReference(DataTypes.ENTITY_EQUIPMENT, field -> field
-                .single("equipment.mainhand", DataTypes.ITEM_STACK)
-                .single("equipment.offhand", DataTypes.ITEM_STACK)
-                .single("equipment.feet", DataTypes.ITEM_STACK)
-                .single("equipment.legs", DataTypes.ITEM_STACK)
-                .single("equipment.chest", DataTypes.ITEM_STACK)
-                .single("equipment.head", DataTypes.ITEM_STACK)
-                .single("equipment.body", DataTypes.ITEM_STACK)
-                .single("equipment.saddle", DataTypes.ITEM_STACK));
+            .single("equipment.mainhand", DataTypes.ITEM_STACK)
+            .single("equipment.offhand", DataTypes.ITEM_STACK)
+            .single("equipment.feet", DataTypes.ITEM_STACK)
+            .single("equipment.legs", DataTypes.ITEM_STACK)
+            .single("equipment.chest", DataTypes.ITEM_STACK)
+            .single("equipment.head", DataTypes.ITEM_STACK)
+            .single("equipment.body", DataTypes.ITEM_STACK)
+            .single("equipment.saddle", DataTypes.ITEM_STACK));
 
         addFix(DataTypes.ENTITY_EQUIPMENT, V4301::fixEntityEquipmentFormat);
     }
 
-    private static Value fixEntityEquipmentFormat(Value entity) {
+    private static @Nullable Value fixEntityEquipmentFormat(Value entity) {
         var armorItems = entity.remove("ArmorItems");
         var handItems = entity.remove("HandItems");
         var feet = handItems.get(0);
@@ -52,7 +53,8 @@ public class V4301 extends DataVersion {
         return null;
     }
 
-    private static boolean isNotEmpty(Value maybeItem) {
+    private static boolean isNotEmpty(@Nullable Value maybeItem) {
+        // TODO: Don't think it's actually possible for a Value to be null, as null is always Value.NULL
         return maybeItem != null && maybeItem.getValue("id") != null;
     }
 

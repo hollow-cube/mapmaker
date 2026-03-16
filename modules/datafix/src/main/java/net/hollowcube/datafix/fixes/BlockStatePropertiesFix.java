@@ -3,7 +3,7 @@ package net.hollowcube.datafix.fixes;
 import net.hollowcube.datafix.DataFix;
 import net.hollowcube.datafix.util.MapValue;
 import net.hollowcube.datafix.util.Value;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
@@ -13,13 +13,13 @@ public class BlockStatePropertiesFix implements DataFix {
     private final String id;
     private final Consumer<Value> function;
 
-    public BlockStatePropertiesFix(@NotNull String id, @NotNull Consumer<Value> function) {
+    public BlockStatePropertiesFix(String id, Consumer<Value> function) {
         this.id = id;
         this.function = function;
     }
 
     @Override
-    public Value fix(Value blockState) {
+    public @Nullable Value fix(Value blockState) {
         if (blockState.value() instanceof String s) {
             int index = s.indexOf('[');
             if (index == -1) return null;

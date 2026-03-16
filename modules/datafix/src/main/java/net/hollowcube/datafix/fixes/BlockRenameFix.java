@@ -2,18 +2,17 @@ package net.hollowcube.datafix.fixes;
 
 import net.hollowcube.datafix.DataFix;
 import net.hollowcube.datafix.util.Value;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
 public class BlockRenameFix implements DataFix {
     private final Map<String, String> nameMap;
 
-    public BlockRenameFix(@NotNull String oldName, @NotNull String newName) {
+    public BlockRenameFix(String oldName, String newName) {
         this.nameMap = Map.of(oldName, newName);
     }
 
-    public BlockRenameFix(@NotNull Map<String, String> nameMap) {
+    public BlockRenameFix(Map<String, String> nameMap) {
         this.nameMap = nameMap;
     }
 

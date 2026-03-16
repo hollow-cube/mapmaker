@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v1xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V1500 extends DataVersion {
 
@@ -13,7 +14,7 @@ public class V1500 extends DataVersion {
         addFix(DataTypes.BLOCK_ENTITY, "DUMMY", V1500::fixAddKeepPackedToDummyBlockEntity);
     }
 
-    private static Value fixAddKeepPackedToDummyBlockEntity(Value blockEntity) {
+    private static @Nullable Value fixAddKeepPackedToDummyBlockEntity(Value blockEntity) {
         blockEntity.put("keepPacked", true);
         return null;
     }

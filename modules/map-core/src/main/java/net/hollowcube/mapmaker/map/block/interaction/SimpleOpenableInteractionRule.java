@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
-import org.jetbrains.annotations.NotNull;
-
 public class SimpleOpenableInteractionRule implements BlockInteractionRule {
     public static final SimpleOpenableInteractionRule INSTANCE = new SimpleOpenableInteractionRule();
 
@@ -9,7 +7,7 @@ public class SimpleOpenableInteractionRule implements BlockInteractionRule {
     }
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition);
 
@@ -21,7 +19,7 @@ public class SimpleOpenableInteractionRule implements BlockInteractionRule {
     }
 
     @Override
-    public @NotNull SneakState sneakState() {
+    public SneakState sneakState() {
         return SneakState.NOT_SNEAKING_OR_EMPTY_HAND;
     }
 

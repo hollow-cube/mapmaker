@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V3086 extends DataVersion {
     private static final Int2ObjectMap<String> CAT_VARIANT_IDS = new Int2ObjectArrayMap<>();
@@ -16,7 +17,7 @@ public class V3086 extends DataVersion {
         addFix(DataTypes.ENTITY, "minecraft:cat", V3086::fixCatVariant);
     }
 
-    private static Value fixCatVariant(Value entity) {
+    private static @Nullable Value fixCatVariant(Value entity) {
         int catType = entity.remove("CatType").as(Number.class, -1).intValue();
         if (catType == -1) return null;
 

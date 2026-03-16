@@ -8,7 +8,6 @@ import net.hollowcube.mapmaker.map.responses.PlayerTopTimesResponse;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.Material;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
@@ -33,12 +32,12 @@ public class NoopMapService implements MapService {
     );
 
     @Override
-    public @NotNull MapData createMap(@NotNull MapCreateRequest request) {
+    public MapData createMap(MapCreateRequest request) {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public @NotNull net.hollowcube.mapmaker.map.responses.MapSearchResponse searchMaps(@NotNull MapSearchParams request) {
+    public net.hollowcube.mapmaker.map.responses.MapSearchResponse searchMaps(MapSearchParams request) {
         return new net.hollowcube.mapmaker.map.responses.MapSearchResponse(
             0, 1,
             staticMaps.values().stream().filter(m -> m instanceof PersonalizedMapData && m.publishedAt() != null).toList()
@@ -46,17 +45,17 @@ public class NoopMapService implements MapService {
     }
 
     @Override
-    public @NotNull MapProgressBatchResponse getMapProgress(@NotNull String playerId, @NotNull List<String> mapIds) {
+    public MapProgressBatchResponse getMapProgress(String playerId, List<String> mapIds) {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public @NotNull MapSearchResponse<MapData> searchOrgMaps(@NotNull String authorizer, int page, int pageSize, @NotNull String orgId) {
+    public MapSearchResponse<MapData> searchOrgMaps(String authorizer, int page, int pageSize, String orgId) {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id) {
+    public MapData getMap(String authorizer, String id) {
         var map = staticMaps.get(id);
         if (map == null) {
             throw new NotFoundError(id);
@@ -65,113 +64,113 @@ public class NoopMapService implements MapService {
     }
 
     @Override
-    public @NotNull List<MapData> getMaps(@NotNull String authorizer, @NotNull List<String> mapIds) {
+    public List<MapData> getMaps(String authorizer, List<String> mapIds) {
         return mapIds.stream().map(staticMaps::get).toList();
     }
 
     @Override
-    public @NotNull MapData getMapByPublishedId(@NotNull String authorizer, long publishedId) {
+    public MapData getMapByPublishedId(String authorizer, long publishedId) {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update) {
+    public void updateMap(String authorizer, String id, MapUpdateRequest update) {
         // Just dont do anything
     }
 
     @Override
-    public void deleteMap(@NotNull String authorizer, @NotNull String id, @Nullable String reason) {
+    public void deleteMap(String authorizer, String id, @Nullable String reason) {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public void beginVerification(@NotNull String authorizer, @NotNull String mapId) {
+    public void beginVerification(String authorizer, String mapId) {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public void deleteVerification(@NotNull String authorizer, @NotNull String mapId) {
+    public void deleteVerification(String authorizer, String mapId) {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public @NotNull MapData publishMap(@NotNull String authorizer, @NotNull String id) {
+    public MapData publishMap(String authorizer, String id) {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public byte @Nullable [] getMapWorld(@NotNull String id, boolean write) {
+    public byte @Nullable [] getMapWorld(String id, boolean write) {
         return null;
     }
 
     @Override
-    public void updateMapWorld(@NotNull String id, byte @NotNull [] worldData) {
+    public void updateMapWorld(String id, byte[] worldData) {
         // Do nothing we arent going to save the world
     }
 
     @Override
-    public void reportMap(@NotNull String mapId, @NotNull MapReportRequest req) {
+    public void reportMap(String mapId, MapReportRequest req) {
 
     }
 
     @Override
-    public @NotNull LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId) {
+    public LeaderboardData getGlobalLeaderboard(String name, @Nullable String playerId) {
         return new LeaderboardData(List.of(), new LeaderboardData.Entry(UUID.randomUUID().toString(), 0, 1000));
     }
 
     @Override
-    public @NotNull LeaderboardData getPlaytimeLeaderboard(@NotNull String mapId, @Nullable String playerId) {
+    public LeaderboardData getPlaytimeLeaderboard(String mapId, @Nullable String playerId) {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public void deletePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId, @Nullable String playerId) {
+    public void deletePlaytimeLeaderboard(String authorizer, String mapId, @Nullable String playerId) {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public void restorePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId) {
+    public void restorePlaytimeLeaderboard(String authorizer, String mapId) {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId, int protocolVersion, @Nullable SaveStateType.Serializer<?> serializer) {
+    public SaveState createSaveState(String mapId, String playerId, int protocolVersion, @Nullable SaveStateType.Serializer<?> serializer) {
         var obj = serializer.codec().decode(Transcoder.JSON, new JsonObject()).orElseThrow();
         return new SaveState(UUID.randomUUID().toString(), playerId, mapId, SaveStateType.PLAYING, serializer, obj);
     }
 
     @Override
-    public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
+    public SaveState getLatestSaveState(String mapId, String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
         throw new NotFoundError(mapId);
     }
 
     @Override
-    public @Nullable SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId) {
+    public @Nullable SaveState getBestSaveState(String mapId, String playerId) {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public @Nullable SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
+    public @Nullable SaveStateUpdateResponse updateSaveState(String mapId, String playerId, String id, SaveStateUpdateRequest update) {
         return null;
     }
 
     @Override
-    public void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id) {
+    public void deleteSaveState(String mapId, String playerId, String id) {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public @NotNull MapRating getMapRating(@NotNull String mapId, @NotNull String playerId) {
+    public MapRating getMapRating(String mapId, String playerId) {
         return new MapRating(MapRating.State.UNRATED, null);
     }
 
     @Override
-    public void setMapRating(@NotNull String mapId, @NotNull String playerId, @NotNull MapRating rating) {
+    public void setMapRating(String mapId, String playerId, MapRating rating) {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public @NotNull MapPlayerData getMapPlayerData(@NotNull String playerId) {
+    public MapPlayerData getMapPlayerData(String playerId) {
         return new MapPlayerData(
             playerId,
             new String[]{null, "62da0aaf-8cad-4c13-869c-02b07688988d", null, null},
@@ -180,12 +179,12 @@ public class NoopMapService implements MapService {
     }
 
     @Override
-    public @NotNull MapHistory getPlayerMapHistory(@NotNull String playerId, int page, int amount) {
+    public MapHistory getPlayerMapHistory(String playerId, int page, int amount) {
         return new MapHistory(page, false, List.of(new MapHistory.Entry("62da0aaf-8cad-4c13-869c-02b07688988d")));
     }
 
     @Override
-    public @NotNull PlayerTopTimesResponse getPlayerTopTimes(@NotNull String playerId, int page, int pageSize) {
+    public PlayerTopTimesResponse getPlayerTopTimes(String playerId, int page, int pageSize) {
         throw new UnsupportedOperationException("not implemented");
     }
 

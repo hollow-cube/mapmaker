@@ -4,7 +4,6 @@ import net.kyori.adventure.sound.Sound;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.sound.SoundEvent;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -12,12 +11,12 @@ public class PistonInteractionRule implements BlockInteractionRule {
     public static final PistonInteractionRule INSTANCE = new PistonInteractionRule();
 
     @Override
-    public @NotNull SneakState sneakState() {
+    public SneakState sneakState() {
         return SneakState.SNEAKING;
     }
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition);
         var isExtended = Boolean.parseBoolean(block.getProperty("extended"));

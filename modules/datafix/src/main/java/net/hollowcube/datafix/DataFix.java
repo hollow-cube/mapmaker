@@ -1,10 +1,11 @@
 package net.hollowcube.datafix;
 
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 @FunctionalInterface
 public interface DataFix {
 
-    Value fix(Value value);
+    @Nullable Value fix(Value value);
 
 }

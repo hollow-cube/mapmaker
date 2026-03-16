@@ -17,7 +17,6 @@ import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -36,12 +35,12 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     private final ServerBridge bridge;
 
     public PlayerInviteServiceImpl(
-        @NotNull OpenTelemetry otel,
-        @NotNull String url,
-        @NotNull PlayerService playerService,
-        @NotNull MapService mapService,
-        @NotNull SessionManager sessionManager,
-        @NotNull ServerBridge bridge
+        OpenTelemetry otel,
+        String url,
+        PlayerService playerService,
+        MapService mapService,
+        SessionManager sessionManager,
+        ServerBridge bridge
     ) {
         super(otel);
         this.url = String.format("%s/v3/internal/invites", url);
@@ -52,7 +51,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     }
 
     @Override
-    public void join(@NotNull Player sender, @NotNull String targetId) {
+    public void join(Player sender, String targetId) {
         var senderSession = sessionManager.getSession(sender.getUuid().toString());
         if (senderSession == null) {
             // Yeah this is very bad
@@ -91,7 +90,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     }
 
     @Override
-    public void registerInvite(@NotNull Player sender, @NotNull String targetId) {
+    public void registerInvite(Player sender, String targetId) {
         var senderMap = this.getCurrentMap(sender);
         if (senderMap == null) {
             sender.sendMessage(Component.translatable("map.invite.no_map"));
@@ -136,7 +135,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     }
 
     @Override
-    public void registerRequest(@NotNull Player sender, @NotNull String targetId) {
+    public void registerRequest(Player sender, String targetId) {
         var targetDisplayName = playerService.getPlayerDisplayName2(targetId);
 
         var targetSession = sessionManager.getSession(targetId);
@@ -178,8 +177,8 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         }
     }
 
-    private static void processRegisterError(@NotNull Player sender, @NotNull DisplayName targetDisplayName,
-                                             @NotNull SessionError error, boolean invite) {
+    private static void processRegisterError(Player sender, DisplayName targetDisplayName,
+                                             SessionError error, boolean invite) {
         var translationString = switch (error.code()) {
             case "invite_exists" -> "map.invite.already_present";
             case "request_exists" -> "map.request.already_present";
@@ -190,16 +189,16 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     }
 
     @Override
-    public void accept(@NotNull Player sender, @Nullable String targetId) {
+    public void accept(Player sender, @Nullable String targetId) {
         this.acceptOrReject(sender, targetId, true);
     }
 
     @Override
-    public void reject(@NotNull Player sender, @Nullable String targetId) {
+    public void reject(Player sender, @Nullable String targetId) {
         this.acceptOrReject(sender, targetId, false);
     }
 
-    private void acceptOrReject(@NotNull Player sender, @Nullable String targetId, boolean accept) {
+    private void acceptOrReject(Player sender, @Nullable String targetId, boolean accept) {
         String acceptReject = accept ? "accept" : "reject";
 
         Map<Object, Object> body = new HashMap<>();
@@ -236,11 +235,11 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         }
     }
 
-    private @Nullable MapData getCurrentMap(@NotNull Player player) {
+    private @Nullable MapData getCurrentMap(Player player) {
         return MiscFunctionality.getCurrentMap(sessionManager, mapService, player);
     }
 
-    private static void processAcceptOrRejectError(@NotNull InviteError error, @NotNull Player sender, String acceptReject) {
+    private static void processAcceptOrRejectError(InviteError error, Player sender, String acceptReject) {
         String translationKey = switch (error.errorCode()) {
             case ErrorCodes.INVITE_NOT_FOUND, ErrorCodes.REQUEST_NOT_FOUND, ErrorCodes.NO_INVITES_OR_REQUESTS ->
                 "map.invite_and_request.cant_" + acceptReject;
@@ -254,16 +253,16 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         sender.sendMessage(Component.translatable(translationKey));
     }
 
-    private static boolean doesPlayerOwnMap(@NotNull Player player, @NotNull MapData map) {
+    private static boolean doesPlayerOwnMap(Player player, MapData map) {
         return player.getUuid().equals(UUID.fromString(map.owner()));
     }
 
     @RuntimeGson
-    public record InviteError(int errorCode, @NotNull String errorText) {
+    public record InviteError(int errorCode, String errorText) {
     }
 
     @RuntimeGson
-    public record SessionError(@NotNull String code, @NotNull String message) {
+    public record SessionError(String code, String message) {
     }
 
     private static final class ErrorCodes {

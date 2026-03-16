@@ -3,21 +3,22 @@ package net.hollowcube.datafix.versions.v4xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V4059 extends DataVersion {
     public V4059() {
         super(4059);
 
         addReference(DataTypes.DATA_COMPONENTS, field -> field
-                        // todo we should be removing food here
-                        .single("minecraft:use_remainder", DataTypes.ITEM_STACK)
+                         // todo we should be removing food here
+                         .single("minecraft:use_remainder", DataTypes.ITEM_STACK)
                 // TODO equippable here.
         );
 
         addFix(DataTypes.DATA_COMPONENTS, V4059::fixFoodToConsumableComponent);
     }
 
-    private static Value fixFoodToConsumableComponent(Value dataComponents) {
+    private static @Nullable Value fixFoodToConsumableComponent(Value dataComponents) {
         var food = dataComponents.get("minecraft:food");
         if (!food.isMapLike()) return null;
 

@@ -6,7 +6,6 @@ import net.hollowcube.mapmaker.util.GenericServiceError;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -14,36 +13,36 @@ import java.util.List;
 @Blocking
 public interface SessionService {
 
-    @NotNull PlayerData createSession(
-        @NotNull String id,
-        @NotNull String proxy,
-        @NotNull String username,
-        @NotNull String ip,
-        @NotNull PlayerSkin skin,
-        @NotNull String version,
+    PlayerData createSession(
+        String id,
+        String proxy,
+        String username,
+        String ip,
+        PlayerSkin skin,
+        String version,
         int protocolVersion
     );
 
-    @NotNull TransferSessionResponse transferSession(@NotNull String id, @NotNull SessionTransferRequest req);
+    TransferSessionResponse transferSession(String id, SessionTransferRequest req);
 
-    void deleteSession(@NotNull String id);
+    void deleteSession(String id);
 
-    @NotNull PlayerSession updateSessionProperties(@NotNull String playerId, @NotNull SessionStateUpdateRequest req);
+    PlayerSession updateSessionProperties(String playerId, SessionStateUpdateRequest req);
 
-    @NotNull List<PlayerSession> sync();
+    List<PlayerSession> sync();
 
-    @NotNull JoinMapResponse joinMapV2(@NotNull JoinMapRequest req);
+    JoinMapResponse joinMapV2(JoinMapRequest req);
 
-    @NotNull JoinMapResponse joinHubV2(@NotNull JoinHubRequest req);
+    JoinMapResponse joinHubV2(JoinHubRequest req);
 
-    @NotNull List<String> getIsolateOverrides();
+    List<String> getIsolateOverrides();
 
-    default @NotNull JoinMapResponse findMapServer(@NotNull String mapId) {
+    default JoinMapResponse findMapServer(String mapId) {
         throw new UnsupportedOperationException("todo");
     }
 
     class InternalError extends RuntimeException {
-        public InternalError(@NotNull String message) {
+        public InternalError(String message) {
             super(message);
         }
 
@@ -54,14 +53,14 @@ public interface SessionService {
 
     class UnauthorizedError extends RuntimeException {
 
-        private final GenericServiceError error;
+        private final @Nullable GenericServiceError error;
 
         public UnauthorizedError(@Nullable GenericServiceError error) {
             super(error != null ? error.message() : null);
             this.error = error;
         }
 
-        public @NotNull GenericServiceError getError() {
+        public @Nullable GenericServiceError getError() {
             return error;
         }
     }
@@ -71,17 +70,17 @@ public interface SessionService {
         private final String type;
         private final Component reason;
 
-        public SessionCreationDeniedError(@NotNull String type, @NotNull String reason) {
+        public SessionCreationDeniedError(String type, String reason) {
             super(reason);
             this.type = type;
             this.reason = MiniMessage.miniMessage().deserialize(reason);
         }
 
-        public @NotNull String type() {
+        public String type() {
             return type;
         }
 
-        public @NotNull Component reason() {
+        public Component reason() {
             return reason;
         }
     }

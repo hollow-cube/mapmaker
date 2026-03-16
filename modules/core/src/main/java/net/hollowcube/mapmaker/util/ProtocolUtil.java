@@ -15,11 +15,10 @@ import static net.minestom.server.network.NetworkBuffer.VAR_INT;
 public final class ProtocolUtil {
 
     public static <K, V> void writeMap(
-            @NotNull NetworkBuffer buffer,
-            @NotNull NetworkBuffer.Type<K> keyType,
-            @NotNull NetworkBuffer.Type<V> valueType,
-            @NotNull Map<K, V> map
-
+        NetworkBuffer buffer,
+        NetworkBuffer.Type<K> keyType,
+        NetworkBuffer.Type<V> valueType,
+        Map<K, V> map
     ) {
         buffer.write(VAR_INT, map.size());
         for (var entry : map.entrySet()) {
@@ -29,11 +28,10 @@ public final class ProtocolUtil {
     }
 
     public static <K, V> void writeMap(
-            @NotNull NetworkBuffer buffer,
-            @NotNull NetworkBuffer.Type<K> keyType,
-            @NotNull BiConsumer<V, NetworkBuffer> valueWriter,
-            @NotNull Map<K, V> map
-
+        NetworkBuffer buffer,
+        NetworkBuffer.Type<K> keyType,
+        BiConsumer<V, NetworkBuffer> valueWriter,
+        Map<K, V> map
     ) {
         buffer.write(VAR_INT, map.size());
         for (var entry : map.entrySet()) {
@@ -43,11 +41,10 @@ public final class ProtocolUtil {
     }
 
     public static <K, V> void writeMap(
-            @NotNull NetworkBuffer buffer,
-            @NotNull BiConsumer<K, NetworkBuffer> keyWriter,
-            @NotNull BiConsumer<V, NetworkBuffer> valueWriter,
-            @NotNull Map<K, V> map
-
+        NetworkBuffer buffer,
+        BiConsumer<K, NetworkBuffer> keyWriter,
+        BiConsumer<V, NetworkBuffer> valueWriter,
+        Map<K, V> map
     ) {
         buffer.write(VAR_INT, map.size());
         for (var entry : map.entrySet()) {
@@ -56,10 +53,10 @@ public final class ProtocolUtil {
         }
     }
 
-    public static <K, V> @NotNull Map<K, V> readMap(
-            @NotNull NetworkBuffer buffer,
-            @NotNull NetworkBuffer.Type<K> keyType,
-            @NotNull Function<NetworkBuffer, V> valueReader
+    public static <K, V> Map<K, V> readMap(
+        NetworkBuffer buffer,
+        NetworkBuffer.Type<K> keyType,
+        Function<NetworkBuffer, V> valueReader
     ) {
         int size = buffer.read(VAR_INT);
         var map = new HashMap<K, V>(size);
@@ -69,10 +66,10 @@ public final class ProtocolUtil {
         return map;
     }
 
-    public static <K, V> @NotNull Map<K, V> readMap(
-            @NotNull NetworkBuffer buffer,
-            @NotNull NetworkBuffer.Type<K> keyType,
-            @NotNull NetworkBuffer.Type<V> valueType
+    public static <K, V> Map<K, V> readMap(
+        NetworkBuffer buffer,
+        NetworkBuffer.Type<K> keyType,
+        NetworkBuffer.Type<V> valueType
     ) {
         int size = buffer.read(VAR_INT);
         var map = new HashMap<K, V>(size);

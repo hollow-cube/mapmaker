@@ -2,22 +2,21 @@ package net.hollowcube.mapmaker.map.block.placement;
 
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class AlwaysReplacePlacementRule extends BlockPlacementRule {
 
-    public AlwaysReplacePlacementRule(@NotNull Block block) {
+    public AlwaysReplacePlacementRule(Block block) {
         super(block);
     }
 
     @Override
-    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
+    public @Nullable Block blockPlace(PlacementState placementState) {
         return block;
     }
 
     @Override
-    public boolean isSelfReplaceable(@NotNull Replacement replacement) {
+    public boolean isSelfReplaceable(Replacement replacement) {
         return true;
     }
 }

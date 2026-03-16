@@ -1,11 +1,10 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
 import net.hollowcube.mapmaker.map.block.BlockTags;
-import org.jetbrains.annotations.NotNull;
 
 public class DoorInteractionRule implements BlockInteractionRule {
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition);
 
@@ -25,7 +24,7 @@ public class DoorInteractionRule implements BlockInteractionRule {
     }
 
     @Override
-    public @NotNull SneakState sneakState() {
+    public SneakState sneakState() {
         return SneakState.NOT_SNEAKING_OR_EMPTY_HAND;
     }
 }

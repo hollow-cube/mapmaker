@@ -1,6 +1,5 @@
 package net.hollowcube.datafix.util;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -24,7 +23,7 @@ public class NullValue implements Value {
     }
 
     @Override
-    public <T> T as(@NotNull Class<T> type, T defaultValue) {
+    public <T> T as(Class<T> type, T defaultValue) {
         return defaultValue;
     }
 
@@ -49,7 +48,7 @@ public class NullValue implements Value {
     }
 
     @Override
-    public @NotNull Iterator<Value> iterator() {
+    public Iterator<Value> iterator() {
         return Collections.emptyIterator();
     }
 
@@ -59,27 +58,27 @@ public class NullValue implements Value {
     }
 
     @Override
-    public @NotNull Value get(@NotNull String key) {
+    public Value get(String key) {
         return this;
     }
 
     @Override
-    public Object getValue(@NotNull String key) {
+    public @Nullable Object getValue(String key) {
         return null;
     }
 
     @Override
-    public @NotNull Value get(@NotNull String key, Supplier<Value> defaultValue) {
+    public Value get(String key, Supplier<Value> defaultValue) {
         return this;
     }
 
     @Override
-    public void put(@NotNull String key, Object value) {
+    public void put(String key, @Nullable Object value) {
         // noop
     }
 
     @Override
-    public void forEachEntry(@NotNull BiConsumer<String, Value> consumer) {
+    public void forEachEntry(BiConsumer<String, Value> consumer) {
         // noop
     }
 

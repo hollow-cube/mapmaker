@@ -7,7 +7,6 @@ import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.to_be_refactored.BadSprite.require;
 
@@ -15,29 +14,29 @@ public class ExpBarRenderer implements ActionBar.Provider {
     private static final int XP_BAR_WIDTH = 182;
 
     private static final BadSprite[] XP_BAR_BACKGROUND = new BadSprite[]{
-            require("hud/level/xp_bar_background_off"), require("hud/level/xp_bar_background_on"),
+        require("hud/level/xp_bar_background_off"), require("hud/level/xp_bar_background_on"),
     };
     private static final BadSprite[] XP_BAR_EDGE = new BadSprite[]{
-            require("hud/level/xp_bar_edge_off"), require("hud/level/xp_bar_edge_on")
+        require("hud/level/xp_bar_edge_off"), require("hud/level/xp_bar_edge_on")
     };
     private static final BadSprite[] XP_BAR_SEGMENT = new BadSprite[]{
-            require("hud/level/xp_bar_segment_off"), require("hud/level/xp_bar_segment_on")
+        require("hud/level/xp_bar_segment_off"), require("hud/level/xp_bar_segment_on")
     };
     private static final BadSprite[] XP_BAR_SEGMENT_EDGE = new BadSprite[]{
-            require("hud/level/xp_bar_segment_edge_off"), require("hud/level/xp_bar_segment_edge_on")
+        require("hud/level/xp_bar_segment_edge_off"), require("hud/level/xp_bar_segment_edge_on")
     };
     private static final BadSprite[] XP_BAR_SEGMENT_DIVIDER = new BadSprite[]{
-            require("hud/level/xp_bar_segment_divider_off"), require("hud/level/xp_bar_segment_divider_on")
+        require("hud/level/xp_bar_segment_divider_off"), require("hud/level/xp_bar_segment_divider_on")
     };
     private static final BadSprite[] XP_BAR_SEGMENT_CENTER = new BadSprite[]{
-            require("hud/level/xp_bar_segment_center_off"), require("hud/level/xp_bar_segment_center_on")
+        require("hud/level/xp_bar_segment_center_off"), require("hud/level/xp_bar_segment_center_on")
     };
 
     private static final BadSprite[] NUMS = new BadSprite[]{
-            require("hud/level/num_0"),
-            require("hud/level/num_1"), require("hud/level/num_2"), require("hud/level/num_3"),
-            require("hud/level/num_4"), require("hud/level/num_5"), require("hud/level/num_6"),
-            require("hud/level/num_7"), require("hud/level/num_8"), require("hud/level/num_9")
+        require("hud/level/num_0"),
+        require("hud/level/num_1"), require("hud/level/num_2"), require("hud/level/num_3"),
+        require("hud/level/num_4"), require("hud/level/num_5"), require("hud/level/num_6"),
+        require("hud/level/num_7"), require("hud/level/num_8"), require("hud/level/num_9")
     };
 
     public ExpBarRenderer() {
@@ -47,7 +46,7 @@ public class ExpBarRenderer implements ActionBar.Provider {
     private long lastExp = -1;
 
     @Override
-    public int cacheKey(@NotNull Player player) {
+    public int cacheKey(Player player) {
         // Update the player experience bar if it has changed
         var playerData = PlayerData.fromPlayer(player);
         if (playerData.experience() != lastExp) {
@@ -61,7 +60,7 @@ public class ExpBarRenderer implements ActionBar.Provider {
     }
 
     @Override
-    public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
+    public void provide(Player player, FontUIBuilder builder) {
         // Never show in spectator. It generally makes no sense, but also Axiom uses spectator when in editor mode,
         // which should not show this ui for sure (it looks awful).
         if (player.getGameMode() == GameMode.SPECTATOR) return;

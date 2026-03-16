@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v0xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -14,7 +15,7 @@ public class V108 extends DataVersion {
         addFix(DataTypes.ENTITY, V108::fixEntityStringUuid);
     }
 
-    private static Value fixEntityStringUuid(Value entity) {
+    private static @Nullable Value fixEntityStringUuid(Value entity) {
         if (!(entity.get("UUID").value() instanceof String uuidString))
             return null;
         entity.put("UUID", null);

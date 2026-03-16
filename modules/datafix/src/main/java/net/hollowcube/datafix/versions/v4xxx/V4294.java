@@ -11,7 +11,7 @@ public class V4294 extends DataVersion {
         super(4294);
 
         addFix(DataTypes.BLOCK_STATE, new BlockStatePropertiesFix(
-                "minecraft:creaking_heart", V4294::fixCreakingHeartBlockActiveToState));
+            "minecraft:creaking_heart", V4294::fixCreakingHeartBlockActiveToState));
     }
 
     private static void fixCreakingHeartBlockActiveToState(Value blockProperties) {

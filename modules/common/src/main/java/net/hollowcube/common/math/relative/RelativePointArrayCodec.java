@@ -7,7 +7,6 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.RelativeFlags;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -37,7 +36,7 @@ public abstract class RelativePointArrayCodec<P extends Point, T extends Relativ
     private static class VecImpl extends RelativePointArrayCodec<Vec, RelativeVec> {
 
         @Override
-        public <D> Result<RelativeVec> decode(Transcoder<D> coder, @NotNull D value) {
+        public <D> Result<RelativeVec> decode(Transcoder<D> coder, D value) {
             var listResult = coder.getList(value);
             if (!(listResult instanceof Result.Ok(var list))) return listResult.cast();
 
@@ -71,7 +70,7 @@ public abstract class RelativePointArrayCodec<P extends Point, T extends Relativ
     private static class PosImpl extends RelativePointArrayCodec<Pos, RelativePos> {
 
         @Override
-        public <D> Result<RelativePos> decode(Transcoder<D> coder, @NotNull D value) {
+        public <D> Result<RelativePos> decode(Transcoder<D> coder, D value) {
             var listResult = coder.getList(value);
             if (!(listResult instanceof Result.Ok(var list))) return listResult.cast();
 

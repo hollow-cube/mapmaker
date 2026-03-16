@@ -1,7 +1,6 @@
 package net.hollowcube.datafix;
 
 import it.unimi.dsi.fastutil.Pair;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -16,11 +15,11 @@ public final class DataTypeBuilder {
     // ID mapped only
     final Map<String, DataTypeBuilder> idMap = new HashMap<>();
 
-    public DataTypeBuilder(@NotNull String id) {
+    public DataTypeBuilder(String id) {
         this.id = id;
     }
 
-    public void addProperty(@NotNull Property property) {
+    public void addProperty(Property property) {
         for (var existing : properties) {
             if (Arrays.equals(property.path(), existing.path()) && property.getType().id() == existing.getType().id()) {
 //                System.out.println("Skipping duplicate property " + property + " for " + id);
@@ -30,15 +29,15 @@ public final class DataTypeBuilder {
         properties.add(property);
     }
 
-    public void addFix(int encodedVersion, @NotNull DataFix fix) {
+    public void addFix(int encodedVersion, DataFix fix) {
         fixes.add(Pair.of(encodedVersion, fix));
     }
 
-    public @Nullable DataTypeBuilder get(@NotNull String id) {
+    public @Nullable DataTypeBuilder get(String id) {
         return this.idMap.get(id);
     }
 
-    public @NotNull DataTypeBuilder getOrCreate(@NotNull String id) {
+    public DataTypeBuilder getOrCreate(String id) {
         return this.idMap.computeIfAbsent(id, DataTypeBuilder::new);
     }
 

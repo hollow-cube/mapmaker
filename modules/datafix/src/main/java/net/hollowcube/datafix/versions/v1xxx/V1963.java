@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v1xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V1963 extends DataVersion {
     public V1963() {
@@ -11,7 +12,7 @@ public class V1963 extends DataVersion {
         addFix(DataTypes.ENTITY, "minecraft:villager", V1963::fixRemoveGolemGossip);
     }
 
-    private static Value fixRemoveGolemGossip(Value entity) {
+    private static @Nullable Value fixRemoveGolemGossip(Value entity) {
         var gossips = entity.get("Gossips");
         if (gossips.isNull() || gossips.size(0) == 0)
             return null;

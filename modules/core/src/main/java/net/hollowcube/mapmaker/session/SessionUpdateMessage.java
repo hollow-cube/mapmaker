@@ -1,22 +1,21 @@
 package net.hollowcube.mapmaker.session;
 
 import net.hollowcube.common.util.RuntimeGson;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 @RuntimeGson
 public record SessionUpdateMessage(
-        @NotNull Action action,
-        @NotNull String playerId,
+    Action action,
+    String playerId,
 
-        @UnknownNullability PlayerSession session,
+    @UnknownNullability PlayerSession session,
 
-        @Nullable SessionStateUpdateRequest.Metadata metadata
+    @Nullable SessionStateUpdateRequest.Metadata metadata
 ) {
 
     @Override
-    public @NotNull SessionStateUpdateRequest.Metadata metadata() {
+    public SessionStateUpdateRequest.Metadata metadata() {
         return this.metadata == null ? new SessionStateUpdateRequest.Metadata(null) : this.metadata;
     }
 

@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -18,7 +17,7 @@ public enum MapSize {
 
     private final int id;
     private final int size;
-    private final String icon;
+    private final @Nullable String icon;
 
     MapSize(int id, int size, @Nullable String icon) {
         this.id = id;
@@ -38,7 +37,7 @@ public enum MapSize {
         return Objects.requireNonNull(icon);
     }
 
-    public boolean unlocks(@NotNull MapSize other) {
+    public boolean unlocks(MapSize other) {
         if (DISABLED_SIZES.contains(other)) return false;
         return this.ordinal() >= other.ordinal();
     }

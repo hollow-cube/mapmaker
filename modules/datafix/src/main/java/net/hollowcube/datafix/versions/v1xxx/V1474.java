@@ -5,6 +5,7 @@ import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.fixes.BlockRenameFix;
 import net.hollowcube.datafix.fixes.ItemRenameFix;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V1474 extends DataVersion {
     public V1474() {
@@ -18,7 +19,7 @@ public class V1474 extends DataVersion {
         addFix(DataTypes.ITEM_NAME, new ItemRenameFix("minecraft:purple_shulker_box", "minecraft:shulker_box"));
     }
 
-    private static Value fixColorlessShulkerEntity(Value value) {
+    private static @Nullable Value fixColorlessShulkerEntity(Value value) {
         int color = value.get("Color").as(Number.class, 0).intValue();
         if (color == 10) value.put("Color", (byte) 16);
         return null;

@@ -8,6 +8,6 @@ public class V1909 extends DataVersion {
         super(1909);
 
         addReference(DataTypes.BLOCK_ENTITY, "minecraft:jigsaw", field -> field
-                .single("final_state", DataTypes.FLAT_BLOCK_STATE));
+            .single("final_state", DataTypes.FLAT_BLOCK_STATE));
     }
 }

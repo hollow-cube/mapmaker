@@ -4,7 +4,6 @@ import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapQuality;
 import net.hollowcube.mapmaker.map.MapVariant;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URLEncoder;
@@ -14,20 +13,20 @@ import java.util.stream.Collectors;
 
 @RuntimeGson
 public record MapSearchParams(
-        @NotNull String authorizer,
-        int page,
-        int pageSize,
-        boolean best,
-        boolean ascending,
-        @NotNull EnumSet<MapQuality> qualities,
-        @NotNull EnumSet<MapData.Difficulty> difficulties,
-        @Nullable String owner,
-        @Nullable String query,
-        @NotNull EnumSet<MapVariant> variants,
-        @Nullable String contest
+    String authorizer,
+    int page,
+    int pageSize,
+    boolean best,
+    boolean ascending,
+    EnumSet<MapQuality> qualities,
+    EnumSet<MapData.Difficulty> difficulties,
+    @Nullable String owner,
+    @Nullable String query,
+    EnumSet<MapVariant> variants,
+    @Nullable String contest
 ) {
 
-    public String toUrl(@NotNull String url) {
+    public String toUrl(String url) {
         Map<String, String> params = new HashMap<>();
 
         params.put("page", String.valueOf(this.page));
@@ -56,13 +55,13 @@ public record MapSearchParams(
         return set.stream().map(Enum::name).map(it -> it.toLowerCase(Locale.ROOT)).collect(Collectors.joining(","));
     }
 
-    public static Builder builder(@NotNull String authorizer) {
+    public static Builder builder(String authorizer) {
         return new Builder(authorizer);
     }
 
     public static class Builder {
 
-        private final @NotNull String authorizer;
+        private final String authorizer;
         private final EnumSet<MapQuality> qualities = EnumSet.allOf(MapQuality.class);
         private final EnumSet<MapData.Difficulty> difficulties = EnumSet.allOf(MapData.Difficulty.class);
         private final EnumSet<MapVariant> variants = EnumSet.allOf(MapVariant.class);
@@ -71,11 +70,11 @@ public record MapSearchParams(
         private int pageSize = 10;
         private boolean best = false;
         private boolean ascending = false;
-        private String owner = null;
-        private String query = null;
-        private String contest = null;
+        private @Nullable String owner = null;
+        private @Nullable String query = null;
+        private @Nullable String contest = null;
 
-        private Builder(@NotNull String authorizer) {
+        private Builder(String authorizer) {
             this.authorizer = authorizer;
         }
 
@@ -99,13 +98,13 @@ public record MapSearchParams(
             return this;
         }
 
-        public Builder qualities(@NotNull MapQuality... qualities) {
+        public Builder qualities(MapQuality... qualities) {
             this.qualities.clear();
             this.qualities.addAll(List.of(qualities));
             return this;
         }
 
-        public Builder difficulties(@NotNull MapData.Difficulty... difficulties) {
+        public Builder difficulties(MapData.Difficulty... difficulties) {
             this.difficulties.clear();
             this.difficulties.addAll(List.of(difficulties));
             return this;
@@ -121,7 +120,7 @@ public record MapSearchParams(
             return this;
         }
 
-        public Builder variants(@NotNull MapVariant... variants) {
+        public Builder variants(MapVariant... variants) {
             this.variants.clear();
             this.variants.addAll(variants.length == 0 ? EnumSet.allOf(MapVariant.class) : List.of(variants));
             return this;

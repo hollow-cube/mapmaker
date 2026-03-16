@@ -3,7 +3,6 @@ package net.hollowcube.datafix.versions.v3xxx;
 import net.hollowcube.datafix.DataType;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
-import org.jetbrains.annotations.NotNull;
 
 public class V3938 extends DataVersion {
     public V3938() {
@@ -15,10 +14,10 @@ public class V3938 extends DataVersion {
         // TODO there is one of those writeReadFix cases here, need to again figure out what that does...
     }
 
-    static @NotNull DataType.Builder abstractArrow(@NotNull DataType.Builder field) {
+    static DataType.Builder abstractArrow(DataType.Builder field) {
         return field
-                .single("inBlockState", DataTypes.BLOCK_STATE)
-                .single("item", DataTypes.ITEM_STACK)
-                .single("weapon", DataTypes.ITEM_STACK);
+            .single("inBlockState", DataTypes.BLOCK_STATE)
+            .single("item", DataTypes.ITEM_STACK)
+            .single("weapon", DataTypes.ITEM_STACK);
     }
 }

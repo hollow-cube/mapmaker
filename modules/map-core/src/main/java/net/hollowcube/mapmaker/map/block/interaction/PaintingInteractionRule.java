@@ -6,7 +6,6 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.utils.Direction;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
@@ -14,7 +13,7 @@ import static net.hollowcube.mapmaker.map.block.interaction.ItemFrameInteraction
 
 public class PaintingInteractionRule implements BlockInteractionRule {
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var blockFace = interaction.blockFace();
         if (blockFace == BlockFace.TOP || blockFace == BlockFace.BOTTOM) return false;
 
@@ -42,11 +41,11 @@ public class PaintingInteractionRule implements BlockInteractionRule {
     }
 
     @Override
-    public @NotNull SneakState sneakState() {
+    public SneakState sneakState() {
         return SneakState.BOTH;
     }
 
-    private @NotNull Pos calculatePlacementPos(@NotNull Point blockPosition, @NotNull BlockFace face) {
+    private Pos calculatePlacementPos(Point blockPosition, BlockFace face) {
         Direction direction = face.toDirection();
 
         // We offset the block position relative to the face direction so that we place the frame on the block

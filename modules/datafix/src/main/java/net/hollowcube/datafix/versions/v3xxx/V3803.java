@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v3xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V3803 extends DataVersion {
     public V3803() {
@@ -11,7 +12,7 @@ public class V3803 extends DataVersion {
         addFix(DataTypes.ITEM_STACK, V3803::fixSweepingEdgeEnchantmentName);
     }
 
-    private static Value fixSweepingEdgeEnchantmentName(Value value) {
+    private static @Nullable Value fixSweepingEdgeEnchantmentName(Value value) {
         var tag = value.get("tag");
         if (!tag.isMapLike()) return null;
 

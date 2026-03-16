@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v2xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V2535 extends DataVersion {
     public V2535() {
@@ -11,7 +12,7 @@ public class V2535 extends DataVersion {
         addFix(DataTypes.ENTITY, "minecraft:shulker", V2535::fixShulkerEntityRotation);
     }
 
-    private static Value fixShulkerEntityRotation(Value entity) {
+    private static @Nullable Value fixShulkerEntityRotation(Value entity) {
         var rotation = entity.get("Rotation");
         if (rotation.isNull() || rotation.size(0) == 0)
             return null;

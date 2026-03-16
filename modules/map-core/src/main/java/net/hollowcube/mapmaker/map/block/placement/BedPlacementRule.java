@@ -4,22 +4,20 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-@SuppressWarnings("UnstableApiUsage")
 public class BedPlacementRule extends BaseBlockPlacementRule {
     private static final String PROP_PART = "part";
     private static final String PROP_FACING = "facing";
 
-    public BedPlacementRule(@NotNull Block block) {
+    public BedPlacementRule(Block block) {
         super(block);
     }
 
     @Override
-    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
+    public @Nullable Block blockPlace(PlacementState placementState) {
         var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
         var facing = BlockFace.fromYaw(playerPosition.yaw());
 

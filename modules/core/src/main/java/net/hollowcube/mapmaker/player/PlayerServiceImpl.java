@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.player.requests.CreatePlayerNotificationRequest;
 import net.hollowcube.mapmaker.player.responses.*;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.MinecraftServer;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -32,13 +31,13 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
 
     private final String url;
 
-    public PlayerServiceImpl(@Nullable OpenTelemetry otel, @NotNull String url) {
+    public PlayerServiceImpl(@Nullable OpenTelemetry otel, String url) {
         super(otel);
         this.url = String.format("%s/v2/internal", url);
     }
 
     @Override
-    public void updatePlayerData(@NotNull String id, @NotNull PlayerDataUpdateRequest update) {
+    public void updatePlayerData(String id, PlayerDataUpdateRequest update) {
         logger.log(System.Logger.Level.INFO, "update playerdata for {0}", id);
         var reqBody = GSON.toJson(update);
         var req = HttpRequest.newBuilder()
@@ -51,7 +50,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull Set<String> getUnlockedCosmetics(@NotNull String playerId) {
+    public Set<String> getUnlockedCosmetics(String playerId) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(url + "/players/" + playerId + "/cosmetics"));
         var res = doRequest("getUnlockedCosmetics", req, HttpResponse.BodyHandlers.ofString());
@@ -66,7 +65,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
 
     @Override
     public void buyCosmetic(
-        @NotNull String id, @NotNull Cosmetic cosmetic, @Nullable Integer coins, @Nullable Integer cubits,
+        String id, Cosmetic cosmetic, @Nullable Integer coins, @Nullable Integer cubits,
         @Nullable JsonObject items
     ) {
         logger.log(System.Logger.Level.INFO, "buy cosmetic for {0}: {1}", id, cosmetic.path());
@@ -84,7 +83,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public void buyUpgrade(@NotNull String playerId, @NotNull String upgradeId, int cubits, @NotNull JsonObject meta) {
+    public void buyUpgrade(String playerId, String upgradeId, int cubits, JsonObject meta) {
         logger.log(System.Logger.Level.INFO, "buy upgrade for {0}: {1}", playerId, upgradeId);
         var reqBodyData = new JsonObject();
         reqBodyData.addProperty("upgradeId", upgradeId);
@@ -99,7 +98,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull JsonObject getPlayerBackpack(@NotNull String id) {
+    public JsonObject getPlayerBackpack(String id) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(url + "/players/" + id + "/backpack"));
         var res = doRequest("getPlayerBackpack", req, HttpResponse.BodyHandlers.ofString());
@@ -112,7 +111,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull String getPlayerId(@NotNull String idOrUsername) {
+    public String getPlayerId(String idOrUsername) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(url + "/players/" + idOrUsername + "/id"));
         var res = doRequest("getPlayerId", req, HttpResponse.BodyHandlers.ofString());
@@ -125,7 +124,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull PlayerData getPlayerData(@NotNull String id) {
+    public PlayerData getPlayerData(String id) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(url + "/players/" + id));
         var res = doRequest("getPlayerData", req, HttpResponse.BodyHandlers.ofString());
@@ -138,7 +137,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull DisplayName getPlayerDisplayName2(@NotNull String id) {
+    public DisplayName getPlayerDisplayName2(String id) {
         // If the player is online we have an up-to-date display name anyway
         var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(id));
         if (player != null) {
@@ -161,19 +160,19 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull TabCompleteResponse getUsernameTabCompletions(@NotNull String query, int limit) {
+    public TabCompleteResponse getUsernameTabCompletions(String query, int limit) {
         return this.getTabCompletions(TabCompleteBody.forUsernames(query, limit));
     }
 
     // This is designed so other tab completions could be added in future if wanted
     @RuntimeGson
-    private record TabCompleteBody(@NotNull String query, int limit) {
-        static TabCompleteBody forUsernames(@NotNull String query, int limit) {
+    private record TabCompleteBody(String query, int limit) {
+        static TabCompleteBody forUsernames(String query, int limit) {
             return new TabCompleteBody(query, limit);
         }
     }
 
-    private @NotNull TabCompleteResponse getTabCompletions(@NotNull TabCompleteBody body) {
+    private TabCompleteResponse getTabCompletions(TabCompleteBody body) {
         if (body.query().isEmpty()) {
             return new TabCompleteResponse(List.of());
         }
@@ -189,8 +188,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull CreateCheckoutLinkResponse createCheckoutLink(
-        @NotNull String source, @NotNull String username, @NotNull String product) {
+    public CreateCheckoutLinkResponse createCheckoutLink(String source, String username, String product) {
         var reqBody = GSON.toJson(Map.of(
             "username", username,
             "package", product
@@ -205,7 +203,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @Nullable HypercubeStatus getHypercubeStatus(@NotNull String playerId) {
+    public @Nullable HypercubeStatus getHypercubeStatus(String playerId) {
         var req = HttpRequest.newBuilder()
             .method("GET", HttpRequest.BodyPublishers.noBody())
             .uri(URI.create(url + "/players/" + playerId + "/hypercube"));
@@ -219,7 +217,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull TotpResult checkTotp(@NotNull String playerId, @Nullable String code) {
+    public TotpResult checkTotp(String playerId, @Nullable String code) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(url + "/players/" + playerId + "/totp" + (code != null ? "?code=" + code : "")))
             .GET();
@@ -237,7 +235,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull TotpResult removeTotp(@NotNull String playerId) {
+    public TotpResult removeTotp(String playerId) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(url + "/players/" + playerId + "/totp"))
             .DELETE();
@@ -253,7 +251,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @Nullable TotpSetupResponse beginTotpSetup(@NotNull String playerId) {
+    public @Nullable TotpSetupResponse beginTotpSetup(String playerId) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(url + "/players/" + playerId + "/totp/setup"))
             .POST(HttpRequest.BodyPublishers.noBody());
@@ -270,7 +268,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull TotpResult completeTotpSetup(@NotNull String playerId, @NotNull String code) {
+    public TotpResult completeTotpSetup(String playerId, String code) {
         var body = GSON.toJson(Map.of(
             "code", code
         ));
@@ -292,7 +290,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull List<PlayerAlts.Alt> getAlts(@NotNull String playerId) {
+    public List<PlayerAlts.Alt> getAlts(String playerId) {
         var req = HttpRequest.newBuilder().uri(URI.create(url + "/players/" + playerId + "/alts")).GET();
         var res = doRequest("getAlts", req, HttpResponse.BodyHandlers.ofString());
 
@@ -305,8 +303,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull Page<PlayerFriend> getPlayerFriends(
-        @NotNull String playerId, @Nullable Boolean onlineState, @NotNull Pageable pageable) {
+    public Page<PlayerFriend> getPlayerFriends(String playerId, @Nullable Boolean onlineState, Pageable pageable) {
         var builder = urlQueryBuilder()
             .add("page", String.valueOf(pageable.page()))
             .add("pageSize", String.valueOf(pageable.pageSize()));
@@ -324,7 +321,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public void removeFriend(@NotNull String playerId, @NotNull String targetId) {
+    public void removeFriend(String playerId, String targetId) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(url + "/players/" + playerId + "/friends/" + targetId))
             .DELETE();
@@ -339,8 +336,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull Page<FriendRequest> getFriendRequests(
-        @NotNull String playerId, boolean incoming, @NotNull Pageable pageable) {
+    public Page<FriendRequest> getFriendRequests(String playerId, boolean incoming, Pageable pageable) {
         String direction = incoming ? "incoming" : "outgoing";
         var req = HttpRequest.newBuilder()
             .uri(URI.create(
@@ -359,7 +355,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull SendFriendRequestResult sendFriendRequest(@NotNull String playerId, @NotNull String targetId) {
+    public SendFriendRequestResult sendFriendRequest(String playerId, String targetId) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(url + "/players/" + playerId + "/friendRequests/" + targetId))
             .POST(HttpRequest.BodyPublishers.noBody());
@@ -384,8 +380,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull FriendRequest deleteFriendRequest(
-        @NotNull String playerId, @NotNull String targetId, boolean bidirectional) {
+    public FriendRequest deleteFriendRequest(String playerId, String targetId, boolean bidirectional) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(
                 url + "/players/" + playerId + "/friendRequests/" + targetId + "?bidirectional=" + bidirectional))
@@ -401,7 +396,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public void blockPlayer(@NotNull String playerId, @NotNull String targetId) {
+    public void blockPlayer(String playerId, String targetId) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(url + "/players/" + playerId + "/blocks/" + targetId))
             .POST(HttpRequest.BodyPublishers.noBody());
@@ -417,7 +412,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull Page<BlockedPlayer> getBlockedPlayers(@NotNull String playerId, @NotNull Pageable pageable) {
+    public Page<BlockedPlayer> getBlockedPlayers(String playerId, Pageable pageable) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(url + "/players/%S/blocks?page=%s&pageSize=%s".formatted(playerId, pageable.page(),
                 pageable.pageSize())))
@@ -432,7 +427,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public void unblockPlayer(@NotNull String playerId, @NotNull String targetId) {
+    public void unblockPlayer(String playerId, String targetId) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(url + "/players/" + playerId + "/blocks/" + targetId))
             .DELETE();
@@ -447,8 +442,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public List<BlockedPlayer> getBlocksBetween(
-        @NotNull String playerId, @NotNull String targetId, boolean bidirectional) {
+    public List<BlockedPlayer> getBlocksBetween(String playerId, String targetId, boolean bidirectional) {
 
         var req = HttpRequest.newBuilder()
             .uri(URI.create(
@@ -465,7 +459,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull PlayerNotificationResponse getNotifications(@NotNull String playerId, int page, boolean unread) {
+    public PlayerNotificationResponse getNotifications(String playerId, int page, boolean unread) {
         var req = setupGet(url("%s/players/%s/notifications?page=%d&unread=%s", url, playerId, page, unread));
         var res = doRequest("getNotifications", req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
@@ -477,7 +471,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public void deleteNotification(@NotNull String playerId, @NotNull String notificationId) {
+    public void deleteNotification(String playerId, String notificationId) {
         var req = setupDelete(url("%s/players/%s/notifications/%s", url, playerId, notificationId));
         var res = doRequest("deleteNotification", req, HttpResponse.BodyHandlers.ofString());
         switch (res.statusCode()) {
@@ -490,7 +484,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public void markNotificationRead(@NotNull String playerId, @NotNull String notificationId, boolean read) {
+    public void markNotificationRead(String playerId, String notificationId, boolean read) {
         var data = Map.of("read", read);
         var req = setupPatch(url("%s/players/%s/notifications/%s", url, playerId, notificationId), GSON.toJson(data));
         var res = doRequest("markNotificationRead", req, HttpResponse.BodyHandlers.ofString());
@@ -505,9 +499,9 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
 
     @Override
     public void createNotification(
-        @NotNull String playerId,
-        @NotNull String type,
-        @NotNull String key,
+        String playerId,
+        String type,
+        String key,
         @Nullable JsonObject data,
         @Nullable Integer expiresInSeconds,
         boolean replaceUnread
@@ -523,7 +517,7 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @Nullable String getRecap(@NotNull String playerId, int year) {
+    public @Nullable String getRecap(String playerId, int year) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(url + "/recap/" + playerId + "/" + year))
             .GET();
@@ -537,6 +531,6 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @RuntimeGson
-    public record PlayerServiceError(@NotNull String code, @NotNull String message) {
+    public record PlayerServiceError(String code, String message) {
     }
 }

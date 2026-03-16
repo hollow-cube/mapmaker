@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.map.block.interaction;
 import net.hollowcube.mapmaker.map.item.ItemTags;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.item.Material;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -12,7 +11,7 @@ public class ComposterInteractionRule implements BlockInteractionRule {
     private static final Collection<Key> COMPOSTABLE_BLOCKS = new HashSet<>();
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition);
 

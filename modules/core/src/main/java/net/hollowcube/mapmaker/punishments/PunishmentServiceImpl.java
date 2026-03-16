@@ -5,7 +5,6 @@ import net.hollowcube.mapmaker.punishments.types.Punishment;
 import net.hollowcube.mapmaker.punishments.types.PunishmentLadder;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -16,12 +15,12 @@ import java.util.*;
 public class PunishmentServiceImpl extends AbstractHttpService implements PunishmentService {
     private final String url;
 
-    public PunishmentServiceImpl(@NotNull String url) {
+    public PunishmentServiceImpl(String url) {
         this.url = String.format("%s/v2/internal", url);
     }
 
     @Override
-    public @NotNull List<Punishment> getPunishments(@Nullable String playerId, @Nullable UUID executorId, @Nullable PunishmentType type) {
+    public List<Punishment> getPunishments(@Nullable String playerId, @Nullable UUID executorId, @Nullable PunishmentType type) {
         var queryBuilder = urlQueryBuilder();
         if (playerId != null) {
             queryBuilder.add("playerId", playerId);
@@ -46,7 +45,7 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
     }
 
     @Override
-    public @Nullable Punishment getActivePunishment(@NotNull String playerId, @NotNull PunishmentType type) {
+    public @Nullable Punishment getActivePunishment(String playerId, PunishmentType type) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(url + "/punishments/" + playerId + "/active?punishmentType=" + type.name().toLowerCase(Locale.ROOT)))
                 .GET()
@@ -62,9 +61,13 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
     }
 
     @Override
-    public @NotNull Punishment createPunishment(@NotNull UUID playerId, @NotNull UUID executorId,
-                                                @NotNull PunishmentType type, @Nullable String comment,
-                                                @Nullable String reason) {
+    public Punishment createPunishment(
+        UUID playerId,
+        UUID executorId,
+        PunishmentType type,
+        @Nullable String comment,
+        @Nullable String reason
+    ) {
         var body = new HashMap<String, String>();
         body.put("playerId", playerId.toString());
         body.put("executorId", executorId.toString());
@@ -89,8 +92,12 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
     }
 
     @Override
-    public void revokePunishment(@NotNull UUID playerId, @NotNull PunishmentType type,
-                                 @NotNull UUID revokedBy, @NotNull String revokedReason) {
+    public void revokePunishment(
+        UUID playerId,
+        PunishmentType type,
+        UUID revokedBy,
+        String revokedReason
+    ) {
         var body = Map.of(
                 "playerId", playerId.toString(),
                 "type", type.name().toLowerCase(Locale.ROOT),
@@ -109,22 +116,22 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
     }
 
     @Override
-    public @NotNull List<PunishmentLadder> getAllLadders() {
+    public List<PunishmentLadder> getAllLadders() {
         return this.getLadders("?punishmentType=");
     }
 
     @Override
-    public @NotNull List<PunishmentLadder> getLaddersByType(@NotNull PunishmentType type) {
+    public List<PunishmentLadder> getLaddersByType(PunishmentType type) {
         return this.getLadders("?punishmentType=" + type.name().toLowerCase(Locale.ROOT));
     }
 
     @Override
-    public @NotNull List<PunishmentLadder> searchLadders(@NotNull String idQuery, @NotNull PunishmentType type) {
+    public List<PunishmentLadder> searchLadders(String idQuery, PunishmentType type) {
         return this.getLadders("?id=" + idQuery + "&punishmentType=" + type.name().toLowerCase(Locale.ROOT));
     }
 
     @Override
-    public @NotNull PunishmentLadder getLadderById(@NotNull String id) {
+    public PunishmentLadder getLadderById(String id) {
         var ladders = this.getLadders("?id=" + id);
         if (ladders.size() != 1) {
             throw new InternalError("More than one punishment ladder returned for id: " + id);
@@ -133,7 +140,7 @@ public class PunishmentServiceImpl extends AbstractHttpService implements Punish
         return ladders.getFirst();
     }
 
-    private @NotNull List<PunishmentLadder> getLadders(@NotNull String query) {
+    private List<PunishmentLadder> getLadders(String query) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(url + "/punishments/ladders" + query))
                 .build();

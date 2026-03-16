@@ -173,11 +173,9 @@ public class AnvilSearchView<T> extends AbstractAnvilView {
         }
 
         public AnvilSearchView<T> build() {
-            Objects.requireNonNull(this.searchFunction, "searchFunction");
-            Objects.requireNonNull(this.buttonFactory, "buttonFactory");
-            Objects.requireNonNull(this.onSubmit, "onSubmit");
-            return new AnvilSearchView<>(this.icon, this.title, this.searchFunction, this.defaultSearchTerm,
-                this.buttonFactory, this.onSubmit, this.async);
+            return new AnvilSearchView<>(Objects.requireNonNull(this.icon), Objects.requireNonNull(this.title),
+                Objects.requireNonNull(this.searchFunction), this.defaultSearchTerm,
+                Objects.requireNonNull(this.buttonFactory), Objects.requireNonNull(this.onSubmit), this.async);
         }
     }
 }

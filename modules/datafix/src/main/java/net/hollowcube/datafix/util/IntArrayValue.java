@@ -1,12 +1,10 @@
 package net.hollowcube.datafix.util;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Iterator;
 
 public record IntArrayValue(int[] value) implements Value {
     @Override
-    public <T> T as(@NotNull Class<T> type, T defaultValue) {
+    public <T> T as(Class<T> type, T defaultValue) {
         return type.equals(value.getClass()) ? (T) value : defaultValue;
     }
 
@@ -30,7 +28,7 @@ public record IntArrayValue(int[] value) implements Value {
     }
 
     @Override
-    public @NotNull Iterator<Value> iterator() {
+    public Iterator<Value> iterator() {
         throw new UnsupportedOperationException("int array iteration");
     }
 }

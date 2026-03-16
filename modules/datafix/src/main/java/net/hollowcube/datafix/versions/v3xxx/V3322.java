@@ -3,13 +3,14 @@ package net.hollowcube.datafix.versions.v3xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
 public class V3322 extends DataVersion {
     private static final Set<String> POTION_ITEMS = Set.of(
-            "minecraft:potion", "minecraft:splash_potion",
-            "minecraft:lingering_potion", "minecraft:tipped_arrow"
+        "minecraft:potion", "minecraft:splash_potion",
+        "minecraft:lingering_potion", "minecraft:tipped_arrow"
     );
 
     public V3322() {
@@ -19,14 +20,14 @@ public class V3322 extends DataVersion {
         POTION_ITEMS.forEach(id -> addFix(DataTypes.ITEM_STACK, id, V3322::fixItemEffects));
     }
 
-    private static Value fixEntityEffects(Value entity) {
+    private static @Nullable Value fixEntityEffects(Value entity) {
         fixEffectList(entity.get("Effects"));
         fixEffectList(entity.get("ActiveEffects"));
         fixEffectList(entity.get("CustomPotionEffects"));
         return null;
     }
 
-    private static Value fixItemEffects(Value itemStack) {
+    private static @Nullable Value fixItemEffects(Value itemStack) {
         fixEffectList(itemStack.get("tag").get("CustomPotionEffects"));
         return null;
     }

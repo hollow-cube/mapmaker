@@ -1,17 +1,16 @@
 package net.hollowcube.mapmaker.session;
 
 import net.hollowcube.common.util.RuntimeGson;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @RuntimeGson
 public record SessionStateUpdateRequest(
-        @Nullable Boolean hidden,
+    @Nullable Boolean hidden,
 
-        @NotNull Metadata metadata
+    Metadata metadata
 ) {
 
-    public static @NotNull SessionStateUpdateRequest hidden(boolean newValue, boolean silent) {
+    public static SessionStateUpdateRequest hidden(boolean newValue, boolean silent) {
         return new SessionStateUpdateRequest(newValue, new Metadata(silent));
     }
 

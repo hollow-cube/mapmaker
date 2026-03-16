@@ -4,9 +4,9 @@ import net.hollowcube.common.util.RuntimeGson;
 
 @RuntimeGson
 public record TotpSetupResponse(
-        String uri,
-        int qrCodeSize,
-        String qrCode,
-        String[] recoveryCodes
+    String uri,
+    int qrCodeSize,
+    String qrCode,
+    String[] recoveryCodes
 ) {
 }

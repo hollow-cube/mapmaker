@@ -6,7 +6,6 @@ import de.marhali.json5.Json5;
 import de.marhali.json5.Json5Object;
 import net.hollowcube.mapmaker.util.ModelUtil;
 import net.hollowcube.mapmaker.util.Templates;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;

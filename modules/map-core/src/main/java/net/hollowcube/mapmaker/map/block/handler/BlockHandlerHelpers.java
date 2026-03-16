@@ -6,13 +6,11 @@ import net.minestom.server.component.DataComponents;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.component.CustomData;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class BlockHandlerHelpers {
 
-    public static boolean canEdit(@NotNull BlockHandler.Interaction interaction) {
+    public static boolean canEdit(BlockHandler.Interaction interaction) {
         var player = interaction.getPlayer();
         var world = MapWorld.forPlayer(player);
         return world != null && world.canEdit(player);
@@ -22,7 +20,7 @@ public final class BlockHandlerHelpers {
      * @param placement
      * @return true if the block data was applied, false otherwise
      */
-    public static boolean applyStoredBlockData(@NotNull BlockHandler.PlayerPlacement placement) {
+    public static boolean applyStoredBlockData(BlockHandler.PlayerPlacement placement) {
         var itemStack = placement.getPlayer().getItemInHand(placement.getHand());
         var blockData = extractBlockData(itemStack);
         if (blockData == null) return false;
@@ -45,14 +43,14 @@ public final class BlockHandlerHelpers {
      * @param placement
      * @return true if the block data was applied, false otherwise
      */
-    public static void applyItemData(@NotNull BlockHandler.PlayerPlacement placement) {
+    public static void applyItemData(BlockHandler.PlayerPlacement placement) {
         var itemStack = placement.getPlayer().getItemInHand(placement.getHand());
         var data = itemStack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null || data.nbt().isEmpty()) return;
         updateBlock(placement, data.nbt());
     }
 
-    public static @Nullable CompoundBinaryTag extractBlockData(@NotNull ItemStack itemStack) {
+    public static @Nullable CompoundBinaryTag extractBlockData(ItemStack itemStack) {
         var data = itemStack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null || data.nbt().isEmpty()) return null;
         var builder = CompoundBinaryTag.builder();
@@ -63,7 +61,7 @@ public final class BlockHandlerHelpers {
         return builder.build();
     }
 
-    public static void updateBlock(@NotNull BlockHandler.PlayerPlacement placement, @NotNull CompoundBinaryTag blockData) {
+    public static void updateBlock(BlockHandler.PlayerPlacement placement, CompoundBinaryTag blockData) {
         // Note that we refetch the block from instance rather than use the one in `placement`. This is because the
         // one in `placement` was not updated after the placement rule changed it.
         // todo this is realistically a Minestom bug that should be fixed

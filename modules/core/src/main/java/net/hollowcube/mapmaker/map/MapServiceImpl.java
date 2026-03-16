@@ -11,7 +11,6 @@ import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.registry.RegistryTranscoder;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -42,7 +41,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull MapData createMap(@NotNull MapCreateRequest request) {
+    public MapData createMap(MapCreateRequest request) {
         FutureUtil.assertThreadWarn();
         logger.log(System.Logger.Level.INFO, "creating new map for " + request.owner() + ", is for org: " + request.isOrg());
 
@@ -65,7 +64,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull net.hollowcube.mapmaker.map.responses.MapSearchResponse searchMaps(@NotNull MapSearchParams request) {
+    public net.hollowcube.mapmaker.map.responses.MapSearchResponse searchMaps(MapSearchParams request) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(request.toUrl(urlV3 + "/maps/search")))
             .header(AUTHORIZER_HEADER, request.authorizer())
@@ -76,7 +75,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull MapProgressBatchResponse getMapProgress(@NotNull String playerId, @NotNull List<String> mapIds) {
+    public MapProgressBatchResponse getMapProgress(String playerId, List<String> mapIds) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(urlV3 + "/maps/progress?playerId=" + playerId + "&mapIds=" + String.join(",", mapIds)))
             .header(AUTHORIZER_HEADER, playerId)
@@ -89,7 +88,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull MapSearchResponse<MapData> searchOrgMaps(@NotNull String authorizer, int page, int pageSize, @NotNull String orgId) {
+    public MapSearchResponse<MapData> searchOrgMaps(String authorizer, int page, int pageSize, String orgId) {
         String endpoint = url + "/search_orgs?" + "page=" + page + "&pageSize=" + pageSize + "&orgId=" + orgId;
         var req = HttpRequest.newBuilder()
             .uri(URI.create(endpoint))
@@ -104,7 +103,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id) {
+    public MapData getMap(String authorizer, String id) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(urlV3 + "/maps/" + id))
             .header(AUTHORIZER_HEADER, authorizer)
@@ -119,7 +118,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 
     /// ONLY returns published maps currently.
     @Override
-    public @NotNull List<MapData> getMaps(@NotNull String authorizer, @NotNull List<String> mapIds) {
+    public List<MapData> getMaps(String authorizer, List<String> mapIds) {
         if (mapIds.isEmpty()) return List.of();
         var req = HttpRequest.newBuilder()
             .uri(URI.create(urlV3 + "/maps?mapIds=" + String.join(",", mapIds)))
@@ -133,7 +132,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull MapData getMapByPublishedId(@NotNull String authorizer, long publishedId) {
+    public MapData getMapByPublishedId(String authorizer, long publishedId) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(urlV3 + "/maps/" + publishedId))
             .header(AUTHORIZER_HEADER, authorizer)
@@ -147,7 +146,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update) {
+    public void updateMap(String authorizer, String id, MapUpdateRequest update) {
         var reqBody = GSON.toJson(update);
         var req = HttpRequest.newBuilder()
             .method("PATCH", HttpRequest.BodyPublishers.ofString(reqBody))
@@ -163,7 +162,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public void deleteMap(@NotNull String authorizer, @NotNull String id, @Nullable String reason) {
+    public void deleteMap(String authorizer, String id, @Nullable String reason) {
         var body = new HashMap<String, String>();
         body.put("reason", reason);
         var reqBody = GSON.toJson(body);
@@ -181,7 +180,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public void beginVerification(@NotNull String authorizer, @NotNull String mapId) {
+    public void beginVerification(String authorizer, String mapId) {
         var req = HttpRequest.newBuilder()
             .POST(HttpRequest.BodyPublishers.noBody())
             .uri(URI.create(urlV3 + "/maps/" + mapId + "/verify"))
@@ -196,7 +195,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public void deleteVerification(@NotNull String authorizer, @NotNull String mapId) {
+    public void deleteVerification(String authorizer, String mapId) {
         var req = HttpRequest.newBuilder()
             .method("DELETE", HttpRequest.BodyPublishers.noBody())
             .uri(URI.create(urlV3 + "/maps/" + mapId + "/verify"))
@@ -212,7 +211,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull MapData publishMap(@NotNull String authorizer, @NotNull String id) {
+    public MapData publishMap(String authorizer, String id) {
         var body = "{}";
         var req = HttpRequest.newBuilder()
             .method("POST", HttpRequest.BodyPublishers.ofString(body))
@@ -228,7 +227,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public byte @Nullable [] getMapWorld(@NotNull String id, boolean write) {
+    public byte @Nullable [] getMapWorld(String id, boolean write) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(urlV3 + "/maps/" + id + "/world?scope=" + (write ? "write" : "read")))
             .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
@@ -246,7 +245,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
 //    @Override
-//    public @Nullable ReadableMapData getMapWorldAsStream(@NotNull String id, boolean write) {
+//    public @Nullable ReadableMapData getMapWorldAsStream(String id, boolean write) {
 //        var req = HttpRequest.newBuilder()
 //                .uri(URI.create(url + "/" + id + "/world?scope=" + (write ? "write" : "read")))
 //                .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
@@ -279,7 +278,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
 //    }
 
     @Override
-    public void updateMapWorld(@NotNull String id, byte @NotNull [] worldData) {
+    public void updateMapWorld(String id, byte[] worldData) {
         logger.log(System.Logger.Level.INFO, "Updating map world for " + id + ", length: " + worldData.length);
         var req = HttpRequest.newBuilder()
             .method("PUT", HttpRequest.BodyPublishers.ofByteArray(worldData))
@@ -297,7 +296,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public void reportMap(@NotNull String mapId, @NotNull MapReportRequest req) {
+    public void reportMap(String mapId, MapReportRequest req) {
         var reqBody = GSON.toJson(req);
         var req2 = HttpRequest.newBuilder()
             .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
@@ -313,7 +312,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull LeaderboardData getGlobalLeaderboard(@NotNull String name, @Nullable String playerId) {
+    public LeaderboardData getGlobalLeaderboard(String name, @Nullable String playerId) {
         var uri = urlV3 + "/maps/hub/leaderboard/" + name;
         if (playerId != null) uri += "?playerId=" + playerId;
         var req = HttpRequest.newBuilder()
@@ -328,7 +327,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull LeaderboardData getPlaytimeLeaderboard(@NotNull String mapId, @Nullable String playerId) {
+    public LeaderboardData getPlaytimeLeaderboard(String mapId, @Nullable String playerId) {
         var uri = urlV3 + "/maps/" + mapId + "/leaderboard/playtime";
         if (playerId != null) uri += "?playerId=" + playerId;
         var req = HttpRequest.newBuilder()
@@ -343,7 +342,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public void deletePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId, @Nullable String playerId) {
+    public void deletePlaytimeLeaderboard(String authorizer, String mapId, @Nullable String playerId) {
         var uri = urlV3 + "/maps/" + mapId + "/leaderboard/playtime";
         if (playerId != null) uri += "?playerId=" + playerId;
         var req = HttpRequest.newBuilder()
@@ -360,7 +359,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public void restorePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId) {
+    public void restorePlaytimeLeaderboard(String authorizer, String mapId) {
         var uri = urlV3 + "/maps/" + mapId + "/leaderboard/playtime/restore";
         var req = HttpRequest.newBuilder()
             .uri(URI.create(uri))
@@ -376,7 +375,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId, int protocolVersion, @Nullable SaveStateType.Serializer<?> serializer) {
+    public SaveState createSaveState(String mapId, String playerId, int protocolVersion, @Nullable SaveStateType.Serializer<?> serializer) {
         var req = HttpRequest.newBuilder()
             .method("POST", HttpRequest.BodyPublishers.ofString("""
                 {"protocolVersion": %d}
@@ -392,7 +391,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
+    public SaveState getLatestSaveState(String mapId, String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId + "/latest?typeFilter=" + (type == null ? "" : type.name().toLowerCase(Locale.ROOT))))
             .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
@@ -405,7 +404,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         };
     }
 
-    private @NotNull SaveState readTypedSaveState(@NotNull JsonObject obj, @Nullable SaveStateType.Serializer<?> serializer) {
+    private SaveState readTypedSaveState(JsonObject obj, @Nullable SaveStateType.Serializer<?> serializer) {
         var saveState = GSON.fromJson(obj, SaveState.class);
         if (serializer != null) {
             var stateObj = obj.get(serializer.name()) instanceof JsonObject jo ? jo : new JsonObject();
@@ -430,7 +429,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @Nullable SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId) {
+    public @Nullable SaveState getBestSaveState(String mapId, String playerId) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId + "/best"))
             .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
@@ -444,7 +443,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @Nullable SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
+    public @Nullable SaveStateUpdateResponse updateSaveState(String mapId, String playerId, String id, SaveStateUpdateRequest update) {
         update.updates.addProperty("dataVersion", DataFixer.maxVersion());
         var reqBody = GSON.toJson(update.updates);
         var req = HttpRequest.newBuilder()
@@ -464,7 +463,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id) {
+    public void deleteSaveState(String mapId, String playerId, String id) {
         var req = HttpRequest.newBuilder()
             .method("DELETE", HttpRequest.BodyPublishers.noBody())
             .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId + "/" + id))
@@ -476,7 +475,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull MapRating getMapRating(@NotNull String mapId, @NotNull String playerId) {
+    public MapRating getMapRating(String mapId, String playerId) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(urlV3 + "/maps/" + mapId + "/ratings/" + playerId))
             .header(AUTHORIZER_HEADER, playerId)
@@ -490,7 +489,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public void setMapRating(@NotNull String mapId, @NotNull String playerId, @NotNull MapRating rating) {
+    public void setMapRating(String mapId, String playerId, MapRating rating) {
         var reqBody = GSON.toJson(rating);
         var req = HttpRequest.newBuilder()
             .method("PUT", HttpRequest.BodyPublishers.ofString(reqBody))
@@ -503,7 +502,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull MapPlayerData getMapPlayerData(@NotNull String playerId) {
+    public MapPlayerData getMapPlayerData(String playerId) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(urlV3 + "/map-players/" + playerId))
             .header(AUTHORIZER_HEADER, playerId)
@@ -514,7 +513,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull MapHistory getPlayerMapHistory(@NotNull String playerId, int page, int amount) {
+    public MapHistory getPlayerMapHistory(String playerId, int page, int amount) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(urlV3 + "/map-players/" + playerId + "/history?page=" + page + "&pageSize=" + amount))
             .header(AUTHORIZER_HEADER, playerId)
@@ -529,7 +528,7 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull PlayerTopTimesResponse getPlayerTopTimes(@NotNull String playerId, int page, int pageSize) {
+    public PlayerTopTimesResponse getPlayerTopTimes(String playerId, int page, int pageSize) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create("%s/map-players/%s/topTimes?page=%s&pageSize=%s".formatted(urlV3, playerId, page, pageSize)))
             .GET()

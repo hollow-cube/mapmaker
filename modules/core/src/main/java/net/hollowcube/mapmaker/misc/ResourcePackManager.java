@@ -9,7 +9,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerPluginMessageEvent;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,7 @@ public final class ResourcePackManager {
      * @param player The player to send the resource pack to.
      * @return A future which completes when the resource pack is loaded for the player.
      */
-    public static @NotNull CompletableFuture<Void> sendResourcePack(@NotNull Player player) {
+    public static CompletableFuture<Void> sendResourcePack(Player player) {
         var runtime = ServerRuntime.getRuntime();
         if (runtime.resourcePackSha1().equals("dev")) {
             logger.info("Skipping resource pack for {} (in dev mode)", player.getUsername());

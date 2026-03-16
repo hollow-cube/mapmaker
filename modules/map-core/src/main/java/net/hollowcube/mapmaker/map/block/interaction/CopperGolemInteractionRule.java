@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.List;
 
 public class CopperGolemInteractionRule implements BlockInteractionRule {
@@ -13,7 +11,7 @@ public class CopperGolemInteractionRule implements BlockInteractionRule {
     }
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition);
 

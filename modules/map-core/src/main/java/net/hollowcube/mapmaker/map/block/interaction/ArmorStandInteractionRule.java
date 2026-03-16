@@ -3,14 +3,13 @@ package net.hollowcube.mapmaker.map.block.interaction;
 import net.hollowcube.mapmaker.map.entity.impl.living.ArmorStandEntity;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.BlockFace;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class ArmorStandInteractionRule implements BlockInteractionRule {
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         if (interaction.blockFace() == BlockFace.BOTTOM) return false;
 
         var position = interaction.blockPosition().relative(interaction.blockFace()).add(0.5, 0, 0.5);
@@ -28,7 +27,7 @@ public class ArmorStandInteractionRule implements BlockInteractionRule {
     }
 
     @Override
-    public @NotNull SneakState sneakState() {
+    public SneakState sneakState() {
         return SneakState.BOTH;
     }
 }

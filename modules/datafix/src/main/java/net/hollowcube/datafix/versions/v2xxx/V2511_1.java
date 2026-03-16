@@ -8,6 +8,6 @@ public class V2511_1 extends DataVersion {
         super(2511, 1);
 
         addReference(DataTypes.ENTITY, "minecraft:potion", field -> field
-                .single("Item", DataTypes.ITEM_STACK));
+            .single("Item", DataTypes.ITEM_STACK));
     }
 }

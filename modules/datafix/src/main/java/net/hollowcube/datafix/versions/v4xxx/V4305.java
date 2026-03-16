@@ -11,7 +11,7 @@ public class V4305 extends DataVersion {
         super(4305);
 
         addFix(DataTypes.BLOCK_STATE, new BlockStatePropertiesFix(
-                "minecraft:test_block", V4305::fixTestBlockMode));
+            "minecraft:test_block", V4305::fixTestBlockMode));
     }
 
     private static void fixTestBlockMode(Value blockProperties) {

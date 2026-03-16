@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v3xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V3818_2 extends DataVersion {
     public V3818_2() {
@@ -11,7 +12,7 @@ public class V3818_2 extends DataVersion {
         addFix(DataTypes.ENTITY, "minecraft:arrow", V3818_2::fixArrowEntityPotionFormat);
     }
 
-    private static Value fixArrowEntityPotionFormat(Value entity) {
+    private static @Nullable Value fixArrowEntityPotionFormat(Value entity) {
         var potion = entity.remove("Potion");
         var customPotionEffects = entity.remove("custom_potion_effects");
         var color = entity.remove("Color");

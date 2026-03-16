@@ -5,7 +5,7 @@ import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.DataFixUtils;
 import net.hollowcube.datafix.util.Value;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
@@ -34,30 +34,30 @@ public class V1458 extends DataVersion {
         addFix(DataTypes.BLOCK_ENTITY, V1458::fixBlockEntityCustomName);
     }
 
-    public static @NotNull DataType.Builder nameableInventory(@NotNull DataType.Builder field) {
+    public static DataType.Builder nameableInventory(DataType.Builder field) {
         return field
-                .list("Items", DataTypes.ITEM_STACK)
-                .single("CustomName", DataTypes.TEXT_COMPONENT);
+            .list("Items", DataTypes.ITEM_STACK)
+            .single("CustomName", DataTypes.TEXT_COMPONENT);
     }
 
-    static @NotNull DataType.Builder nameable(@NotNull DataType.Builder field) {
+    static DataType.Builder nameable(DataType.Builder field) {
         return field.single("CustomName", DataTypes.TEXT_COMPONENT);
     }
 
-    private static Value fixEntityCustomName(Value value) {
+    private static @Nullable Value fixEntityCustomName(Value value) {
         if ("minecraft:commandblock_minecart".equals(value.getValue("id")))
             return null;
         value.put("CustomName", DataFixUtils.ensureTextComponentString(value.get("CustomName")));
         return null;
     }
 
-    private static Value fixItemCustomName(Value value) {
+    private static @Nullable Value fixItemCustomName(Value value) {
         var display = value.get("tag").get("display");
         display.put("Name", DataFixUtils.ensureTextComponentString(display.get("Name")));
         return null;
     }
 
-    private static Value fixBlockEntityCustomName(Value value) {
+    private static @Nullable Value fixBlockEntityCustomName(Value value) {
         String id = value.get("id").as(String.class, "");
         if (!id.isEmpty() && !NAMEABLE_BLOCK_ENTITIES.contains(id))
             return null;
@@ -68,17 +68,17 @@ public class V1458 extends DataVersion {
 
     static {
         NAMEABLE_BLOCK_ENTITIES = Set.of(
-                "minecraft:beacon",
-                "minecraft:banner",
-                "minecraft:brewing_stand",
-                "minecraft:chest",
-                "minecraft:trapped_chest",
-                "minecraft:dispenser",
-                "minecraft:dropper",
-                "minecraft:enchanting_table",
-                "minecraft:furnace",
-                "minecraft:hopper",
-                "minecraft:shulker_box"
+            "minecraft:beacon",
+            "minecraft:banner",
+            "minecraft:brewing_stand",
+            "minecraft:chest",
+            "minecraft:trapped_chest",
+            "minecraft:dispenser",
+            "minecraft:dropper",
+            "minecraft:enchanting_table",
+            "minecraft:furnace",
+            "minecraft:hopper",
+            "minecraft:shulker_box"
         );
     }
 }

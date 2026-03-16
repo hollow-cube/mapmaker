@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.instance.generation;
 
 import net.minestom.server.instance.generator.Generator;
-import org.jetbrains.annotations.NotNull;
 
 public final class MapGenerators {
     private MapGenerators() {
@@ -11,15 +10,15 @@ public final class MapGenerators {
     private static final Generator FLAT = new FlatGenerator();
     private static final Generator STONE = new StoneGenerator();
 
-    public static @NotNull Generator voidWorld() {
+    public static Generator voidWorld() {
         return VOID;
     }
 
-    public static @NotNull Generator flatWorld() {
+    public static Generator flatWorld() {
         return FLAT;
     }
 
-    public static @NotNull Generator stoneWorld() {
+    public static Generator stoneWorld() {
         return STONE;
     }
 

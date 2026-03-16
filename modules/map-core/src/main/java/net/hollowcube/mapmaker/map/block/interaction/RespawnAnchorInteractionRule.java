@@ -1,12 +1,11 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
 import net.minestom.server.item.Material;
-import org.jetbrains.annotations.NotNull;
 
 public class RespawnAnchorInteractionRule implements BlockInteractionRule {
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         if (interaction.item().material().id() != Material.GLOWSTONE.id())
             return false;
 

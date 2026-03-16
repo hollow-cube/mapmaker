@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v3xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V3818_6 extends DataVersion {
     public V3818_6() {
@@ -11,7 +12,7 @@ public class V3818_6 extends DataVersion {
         addFix(DataTypes.ENTITY, "minecraft:area_effect_cloud", V3818_6::fixAreaEffectCloud);
     }
 
-    private static Value fixAreaEffectCloud(Value entity) {
+    private static @Nullable Value fixAreaEffectCloud(Value entity) {
         var color = entity.remove("Color");
         var effects = entity.remove("effects");
         var potion = entity.remove("Potion");

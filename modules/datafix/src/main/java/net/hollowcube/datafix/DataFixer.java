@@ -22,8 +22,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-@SuppressWarnings("UnstableApiUsage")
-public class DataFixer {
+public final class DataFixer {
     private static final AtomicInteger state = new AtomicInteger(); // 0=not built, 1=building, 2=built
 
     // Building state
@@ -37,11 +36,11 @@ public class DataFixer {
 
     // Builder Methods
 
-    static void addDataType(@NotNull DataType knownType) {
+    static void addDataType(DataType knownType) {
         dataTypes.add(knownType);
     }
 
-    public static void addFixVersions(@NotNull List<Supplier<DataVersion>> versions) {
+    public static void addFixVersions(List<Supplier<DataVersion>> versions) {
         if (state.get() != 0) throw new IllegalArgumentException("DataFixer is already built.");
         for (var version : versions) {
             var built = version.get();
@@ -522,5 +521,8 @@ public class DataFixer {
             V4649::new,
             V4656::new
         ));
+    }
+
+    private DataFixer() {
     }
 }

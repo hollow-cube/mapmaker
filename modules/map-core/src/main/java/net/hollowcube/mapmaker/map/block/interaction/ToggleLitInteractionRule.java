@@ -1,16 +1,14 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
-import org.jetbrains.annotations.NotNull;
-
 public class ToggleLitInteractionRule implements BlockInteractionRule {
 
     @Override
-    public @NotNull SneakState sneakState() {
+    public SneakState sneakState() {
         return SneakState.SNEAKING;
     }
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var item = interaction.item();
         if (item.material().isBlock()) return false;
         var blockPosition = interaction.blockPosition();

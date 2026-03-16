@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map.block.placement;
 
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -12,13 +11,13 @@ public class AxisPlacementRule extends WaterloggedPlacementRule {
 
     private final boolean canBeWaterlogged;
 
-    public AxisPlacementRule(@NotNull Block block) {
+    public AxisPlacementRule(Block block) {
         super(block);
         this.canBeWaterlogged = block.properties().containsKey("waterlogged");
     }
 
     @Override
-    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
+    public @Nullable Block blockPlace(PlacementState placementState) {
         var blockFace = Objects.requireNonNullElse(placementState.blockFace(), BlockFace.TOP);
         final Block result = block.withProperty(PROP_AXIS, switch (blockFace) {
             case WEST, EAST -> "x";

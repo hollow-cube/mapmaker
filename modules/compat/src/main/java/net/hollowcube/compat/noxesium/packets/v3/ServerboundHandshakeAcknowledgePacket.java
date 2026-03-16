@@ -4,7 +4,6 @@ import net.hollowcube.compat.api.packet.ServerboundModPacket;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -32,7 +31,7 @@ public record ServerboundHandshakeAcknowledgePacket(
         String version
     ) {
 
-        public static final NetworkBuffer.Type<@NotNull Mod> TYPE = NetworkBufferTemplate.template(
+        public static final NetworkBuffer.Type<Mod> TYPE = NetworkBufferTemplate.template(
             NetworkBuffer.STRING, Mod::id,
             NetworkBuffer.STRING, Mod::version,
             Mod::new
@@ -45,7 +44,7 @@ public record ServerboundHandshakeAcknowledgePacket(
         List<Key> capabilities
     ) {
 
-        public static final NetworkBuffer.Type<@NotNull Entrypoint> TYPE = NetworkBufferTemplate.template(
+        public static final NetworkBuffer.Type<Entrypoint> TYPE = NetworkBufferTemplate.template(
             NetworkBuffer.STRING, Entrypoint::id,
             NetworkBuffer.STRING, Entrypoint::version,
             NetworkBuffer.KEY.list(), Entrypoint::capabilities,

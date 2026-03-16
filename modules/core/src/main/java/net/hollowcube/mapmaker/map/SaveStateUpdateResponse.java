@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 @RuntimeGson
 public record SaveStateUpdateResponse(
-        @Nullable AppliedRewards rewards,
-        @Nullable Integer newPlacement
+    @Nullable AppliedRewards rewards,
+    @Nullable Integer newPlacement
 ) {
 }

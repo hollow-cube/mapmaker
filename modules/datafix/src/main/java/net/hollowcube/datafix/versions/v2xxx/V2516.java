@@ -4,6 +4,7 @@ import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.UUIDFixes;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V2516 extends DataVersion {
     public V2516() {
@@ -13,7 +14,7 @@ public class V2516 extends DataVersion {
         addFix(DataTypes.ENTITY, "minecraft:zombie_villager", V2516::fixEntityGossipUuid);
     }
 
-    private static Value fixEntityGossipUuid(Value entity) {
+    private static @Nullable Value fixEntityGossipUuid(Value entity) {
         for (var gossip : entity.get("Gossips"))
             UUIDFixes.replaceUuidFromLeastMost(gossip, "Target", "Target");
         return null;

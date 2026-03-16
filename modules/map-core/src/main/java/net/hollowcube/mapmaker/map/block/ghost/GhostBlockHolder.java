@@ -13,7 +13,6 @@ import net.minestom.server.network.packet.server.play.BlockChangePacket;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -32,7 +31,7 @@ import java.util.function.Supplier;
 public class GhostBlockHolder implements Block.Getter, Block.Setter {
     private static final Tag<GhostBlockHolder> TAG = Tag.Transient("ghost_block_manager");
 
-    public static @Nullable GhostBlockHolder forPlayerOptional(@NotNull Player player) {
+    public static @Nullable GhostBlockHolder forPlayerOptional(Player player) {
         var existing = player.getTag(TAG);
         if (existing != null) {
             if (existing.instance.equals(player.getInstance())) {
@@ -46,7 +45,7 @@ public class GhostBlockHolder implements Block.Getter, Block.Setter {
         return null;
     }
 
-    public static @NotNull GhostBlockHolder forPlayer(@NotNull Player player) {
+    public static GhostBlockHolder forPlayer(Player player) {
         var existing = forPlayerOptional(player);
         if (existing != null) return existing;
 
@@ -55,7 +54,7 @@ public class GhostBlockHolder implements Block.Getter, Block.Setter {
         return manager;
     }
 
-    public static void clear(@NotNull Player player, boolean delete) {
+    public static void clear(Player player, boolean delete) {
         var manager = forPlayerOptional(player);
         if (manager != null) manager.clear();
         if (delete) player.removeTag(TAG);
@@ -67,7 +66,7 @@ public class GhostBlockHolder implements Block.Getter, Block.Setter {
     private Long2ObjectMap<Block> blocks = new Long2ObjectArrayMap<>();
     private Long2ObjectMap<TaskWrapper> tasks = new Long2ObjectArrayMap<>();
 
-    private GhostBlockHolder(@NotNull Player player) {
+    private GhostBlockHolder(Player player) {
         this.player = player;
         this.instance = player.getInstance();
     }
@@ -83,7 +82,7 @@ public class GhostBlockHolder implements Block.Getter, Block.Setter {
      * @return the block at the position (from instance if not overridden)
      */
     @Override
-    public @UnknownNullability Block getBlock(int x, int y, int z, @NotNull Block.Getter.Condition ignored) {
+    public @UnknownNullability Block getBlock(int x, int y, int z, Block.Getter.Condition ignored) {
         final Block overridden = blocks.get(PositionUtil.packPosition(x, y, z));
         return overridden != null ? overridden : instance.getBlock(x, y, z, Block.Getter.Condition.TYPE);
     }
@@ -94,7 +93,7 @@ public class GhostBlockHolder implements Block.Getter, Block.Setter {
     }
 
     @Override
-    public void setBlock(@NotNull Point blockPosition, @Nullable Block block) {
+    public void setBlock(Point blockPosition, @Nullable Block block) {
         if (block != null) {
             blocks.put(PositionUtil.packPosition(blockPosition), block);
             player.sendPacket(new BlockChangePacket(blockPosition, block));
@@ -104,7 +103,7 @@ public class GhostBlockHolder implements Block.Getter, Block.Setter {
         }
     }
 
-    public void resendChunk(@NotNull Chunk chunk) {
+    public void resendChunk(Chunk chunk) {
         for (var entry : this.blocks.long2ObjectEntrySet()) {
             var blockPosition = PositionUtil.unpackPosition(entry.getLongKey());
             if (blockPosition.chunkX() != chunk.getChunkX() || blockPosition.chunkZ() != chunk.getChunkZ())
@@ -130,7 +129,7 @@ public class GhostBlockHolder implements Block.Getter, Block.Setter {
         }
     }
 
-    public @NotNull Map<Long, Block> save() {
+    public Map<Long, Block> save() {
         var map = new HashMap<Long, Block>(blocks.size());
         for (var entry : blocks.long2ObjectEntrySet()) {
             if (isBlockTransient(entry.getValue())) continue;
@@ -139,7 +138,7 @@ public class GhostBlockHolder implements Block.Getter, Block.Setter {
         return map;
     }
 
-    public void load(@NotNull Map<Long, Block> blocks) {
+    public void load(Map<Long, Block> blocks) {
         clear();
         for (var entry : blocks.entrySet()) {
             var blockPosition = PositionUtil.unpackPosition(entry.getKey());
@@ -147,7 +146,7 @@ public class GhostBlockHolder implements Block.Getter, Block.Setter {
         }
     }
 
-    public void submitTask(@NotNull Point blockPosition, @NotNull BlockUpdateTask task, boolean replace) {
+    public void submitTask(Point blockPosition, BlockUpdateTask task, boolean replace) {
         long blockIndex = PositionUtil.packPosition(blockPosition);
         var existing = tasks.get(blockIndex);
         if (existing != null) {
@@ -162,16 +161,16 @@ public class GhostBlockHolder implements Block.Getter, Block.Setter {
         tasks.put(blockIndex, wrapper);
     }
 
-    private static boolean isBlockTransient(@NotNull Block block) {
+    private static boolean isBlockTransient(Block block) {
         return block.id() == Block.BIG_DRIPLEAF.id();
     }
 
     private class TaskWrapper implements Supplier<TaskSchedule> {
         private final Point blockPosition;
         private final BlockUpdateTask task;
-        private Task handle;
+        private @Nullable Task handle;
 
-        private TaskWrapper(@NotNull Point blockPosition, @NotNull BlockUpdateTask task) {
+        private TaskWrapper(Point blockPosition, BlockUpdateTask task) {
             this.blockPosition = blockPosition;
             this.task = task;
         }
@@ -188,7 +187,7 @@ public class GhostBlockHolder implements Block.Getter, Block.Setter {
         @Override
         public TaskSchedule get() {
             var result = task.execute(getBlock(blockPosition, Condition.TYPE));
-            var schedule = result.getKey();
+            int schedule = result.getKey();
             if (schedule <= 0) {
                 cancel();
                 return TaskSchedule.stop();

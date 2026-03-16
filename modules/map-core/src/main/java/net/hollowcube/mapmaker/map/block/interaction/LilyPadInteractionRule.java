@@ -2,24 +2,23 @@ package net.hollowcube.mapmaker.map.block.interaction;
 
 import net.hollowcube.common.util.PlayerUtil;
 import net.minestom.server.instance.block.Block;
-import org.jetbrains.annotations.NotNull;
 
 // This is needed to be an interaction rule instead of a placement rule due to the ability for it to be placed without
 //  looking at a block
 public class LilyPadInteractionRule implements BlockInteractionRule, BlockInteractionRule.AirInteractionRule {
 
     @Override
-    public @NotNull SneakState sneakState() {
+    public SneakState sneakState() {
         return SneakState.BOTH;
     }
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         return handleAirInteraction(interaction);
     }
 
     @Override
-    public boolean handleAirInteraction(@NotNull Interaction interaction) {
+    public boolean handleAirInteraction(Interaction interaction) {
         var player = interaction.player();
         var blockPosition = PlayerUtil.getTargetBlock(player, PlayerUtil.DEFAULT_PLACEMENT_DISTANCE, true);
         if (blockPosition == null) return false;

@@ -6,7 +6,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -27,13 +26,13 @@ import java.util.Objects;
 public final class VinePlacementRule extends BaseBlockPlacementRule {
     private final boolean hasDown;
 
-    public VinePlacementRule(@NotNull Block block, boolean hasDown) {
+    public VinePlacementRule(Block block, boolean hasDown) {
         super(block);
         this.hasDown = hasDown;
     }
 
     @Override
-    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
+    public @Nullable Block blockPlace(PlacementState placementState) {
         var playerPosition = Objects.requireNonNullElse(placementState.playerPosition(), Pos.ZERO);
         var placeFace = Objects.requireNonNullElse(placementState.blockFace(), BlockFace.TOP);
 
@@ -42,21 +41,21 @@ public final class VinePlacementRule extends BaseBlockPlacementRule {
         var existingBlock = instance.getBlock(blockPosition);
 
         return Arrays.stream(getNearestLookingDirections(playerPosition, existingBlock.id() == this.block.id(), placeFace))
-                .filter(face -> face != BlockFace.BOTTOM || this.hasDown)
-                .map(face -> this.getStateForPlacement(existingBlock, instance, blockPosition, face))
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElse(existingBlock);
+            .filter(face -> face != BlockFace.BOTTOM || this.hasDown)
+            .map(face -> this.getStateForPlacement(existingBlock, instance, blockPosition, face))
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse(existingBlock);
     }
 
     @Override
-    public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
+    public Block blockUpdate(UpdateState updateState) {
         // Do not update the state. We disagree with vanilla here.
         return updateState.currentBlock();
     }
 
     @Override
-    public boolean isSelfReplaceable(@NotNull BlockPlacementRule.Replacement replacement) {
+    public boolean isSelfReplaceable(BlockPlacementRule.Replacement replacement) {
         return true;
     }
 
@@ -98,7 +97,7 @@ public final class VinePlacementRule extends BaseBlockPlacementRule {
         return $$6.withProperty(getPropertyName($$3), "true");
     }
 
-    private static @NotNull String getPropertyName(@NotNull BlockFace blockFace) {
+    private static String getPropertyName(BlockFace blockFace) {
         return switch (blockFace) {
             case BOTTOM -> "down";
             case TOP -> "up";
@@ -106,7 +105,7 @@ public final class VinePlacementRule extends BaseBlockPlacementRule {
         };
     }
 
-    public BlockFace[] getNearestLookingDirections(@NotNull Pos playerView, boolean replaceClicked, @NotNull BlockFace clickFace) {
+    public BlockFace[] getNearestLookingDirections(Pos playerView, boolean replaceClicked, BlockFace clickFace) {
         int $$2;
         BlockFace[] $$0 = orderedByNearest(playerView);
         if (replaceClicked) {

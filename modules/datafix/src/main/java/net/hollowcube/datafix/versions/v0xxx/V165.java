@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -19,13 +20,13 @@ public class V165 extends DataVersion {
         addFix(DataTypes.ITEM_STACK, "minecraft:written_book", V165::fixWrittenBookTextComponentStrictJson);
     }
 
-    private static Value fixSignTextComponentStrictJson(Value value) {
+    private static @Nullable Value fixSignTextComponentStrictJson(Value value) {
         for (var field : LINE_FIELDS)
             value.put(field, fixTextComponentStrictJson(value.get(field)));
         return null;
     }
 
-    private static Value fixWrittenBookTextComponentStrictJson(Value value) {
+    private static @Nullable Value fixWrittenBookTextComponentStrictJson(Value value) {
         var pages = value.get("tag").get("pages");
         for (int i = 0; i < pages.size(0); i++) {
             value.put(i, fixTextComponentStrictJson(value.get(i)));

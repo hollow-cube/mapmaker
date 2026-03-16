@@ -9,8 +9,8 @@ import java.util.Map;
 
 public class V2508 extends DataVersion {
     private static final Map<String, String> RENAMED_IDS = Map.of(
-            "minecraft:warped_fungi", "minecraft:warped_fungus",
-            "minecraft:crimson_fungi", "minecraft:crimson_fungus"
+        "minecraft:warped_fungi", "minecraft:warped_fungus",
+        "minecraft:crimson_fungi", "minecraft:crimson_fungus"
     );
 
     public V2508() {

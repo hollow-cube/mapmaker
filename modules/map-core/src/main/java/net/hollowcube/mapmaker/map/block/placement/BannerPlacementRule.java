@@ -7,7 +7,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -15,12 +14,12 @@ import java.util.Objects;
 // Initially taken from https://github.com/Minestom/Minestom/pull/1759
 public class BannerPlacementRule extends BaseBlockPlacementRule {
 
-    public BannerPlacementRule(@NotNull Block block) {
+    public BannerPlacementRule(Block block) {
         super(block);
     }
 
     @Override
-    public Block blockPlace(@NotNull PlacementState placementState) {
+    public @Nullable Block blockPlace(PlacementState placementState) {
         // Can't place at the bottom of a block
         var blockFace = Objects.requireNonNullElse(placementState.blockFace(), BlockFace.TOP); // Top is an arbitrary choice.
         if (blockFace == BlockFace.BOTTOM) {
@@ -33,11 +32,11 @@ public class BannerPlacementRule extends BaseBlockPlacementRule {
             int rotation = (int) (Math.round(yaw / 22.5d) % 16);
 
             return withBannerData(block, placementState.usedItemStack())
-                    .withProperty("rotation", String.valueOf(rotation));
+                .withProperty("rotation", String.valueOf(rotation));
         }
 
         return withBannerData(toWallBlock(block), placementState.usedItemStack())
-                .withProperty("facing", blockFace.name().toLowerCase());
+            .withProperty("facing", blockFace.name().toLowerCase());
     }
 
     private Block toWallBlock(Block block) {
@@ -48,7 +47,7 @@ public class BannerPlacementRule extends BaseBlockPlacementRule {
         String rawName = name.substring(0, name.lastIndexOf("_"));
 
         return Block.fromKey(rawName + "_wall_banner")
-                .withHandler(block.handler());
+            .withHandler(block.handler());
     }
 
     private Block withBannerData(Block block, @Nullable ItemStack stack) {

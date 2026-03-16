@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
 import net.hollowcube.mapmaker.util.ServiceContext;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class UpdateNotificationType implements PlayerNotificationType {
     }
 
     @Override
-    public Component createToast(Player player, ServiceContext context, PlayerNotificationResponse.SimpleEntry entry) {
+    public @Nullable Component createToast(Player player, ServiceContext context, PlayerNotificationResponse.SimpleEntry entry) {
         return null;
     }
 }

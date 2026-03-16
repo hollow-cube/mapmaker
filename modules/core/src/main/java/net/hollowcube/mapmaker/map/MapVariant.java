@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker.map;
 
-import org.jetbrains.annotations.NotNull;
-
 public enum MapVariant {
     PARKOUR(2, 2),
     BUILDING(3, 0),
@@ -23,7 +21,7 @@ public enum MapVariant {
         return maxGameplayTags;
     }
 
-    public int maxTags(@NotNull MapTags.TagType tagType) {
+    public int maxTags(MapTags.TagType tagType) {
         return switch (tagType) {
             case VISUAL -> maxVisualTags();
             case GAMEPLAY, GAMEPLAY_OLD -> maxGameplayTags();

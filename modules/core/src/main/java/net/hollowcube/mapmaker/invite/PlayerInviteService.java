@@ -1,31 +1,30 @@
 package net.hollowcube.mapmaker.invite;
 
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface PlayerInviteService {
 
-    void join(@NotNull Player sender, @NotNull String targetId);
+    void join(Player sender, String targetId);
 
-    void registerInvite(@NotNull Player sender, @NotNull String targetId);
+    void registerInvite(Player sender, String targetId);
 
-    void registerRequest(@NotNull Player sender, @NotNull String targetId);
+    void registerRequest(Player sender, String targetId);
 
-    void accept(@NotNull Player sender, @Nullable String targetId);
+    void accept(Player sender, @Nullable String targetId);
 
-    default void accept(@NotNull Player sender) {
+    default void accept(Player sender) {
         this.accept(sender, null);
     }
 
-    void reject(@NotNull Player sender, @Nullable String targetId);
+    void reject(Player sender, @Nullable String targetId);
 
-    default void reject(@NotNull Player sender) {
+    default void reject(Player sender) {
         this.reject(sender, null);
     }
 
     class InternalError extends RuntimeException {
-        public InternalError(@NotNull String message) {
+        public InternalError(String message) {
             super(message);
         }
 

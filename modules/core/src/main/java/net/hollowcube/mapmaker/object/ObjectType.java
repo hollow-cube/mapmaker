@@ -2,22 +2,21 @@ package net.hollowcube.mapmaker.object;
 
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.kyori.adventure.key.Key;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 public sealed interface ObjectType permits ObjectTypeImpl {
 
-    static @UnknownNullability ObjectType find(@NotNull String id) {
+    static @UnknownNullability ObjectType find(String id) {
         return ObjectTypeImpl.REGISTRY.get(id);
     }
 
-    static @NotNull Builder builder(@NotNull String id) {
+    static Builder builder(String id) {
         return new Builder(id);
     }
 
-    @NotNull String id();
-    @NotNull Key key();
+    String id();
+    Key key();
 
     int cost();
 
@@ -25,31 +24,31 @@ public sealed interface ObjectType permits ObjectTypeImpl {
     @Nullable String requiredSubVariant();
 
     final class Builder {
-        private final @NotNull String id;
+        private final String id;
         private int cost = 1;
-        private MapVariant requiredVariant = null;
-        private String requiredSubVariant = null;
+        private @Nullable MapVariant requiredVariant = null;
+        private @Nullable String requiredSubVariant = null;
 
-        private Builder(@NotNull String id) {
+        private Builder(String id) {
             this.id = id;
         }
 
-        public @NotNull Builder cost(int cost) {
+        public Builder cost(int cost) {
             this.cost = cost;
             return this;
         }
 
-        public @NotNull Builder requiredVariant(@Nullable MapVariant requiredVariant) {
+        public Builder requiredVariant(@Nullable MapVariant requiredVariant) {
             this.requiredVariant = requiredVariant;
             return this;
         }
 
-        public @NotNull Builder requiredSubVariant(@Nullable String requiredSubVariant) {
+        public Builder requiredSubVariant(@Nullable String requiredSubVariant) {
             this.requiredSubVariant = requiredSubVariant;
             return this;
         }
 
-        public @NotNull ObjectType build() {
+        public ObjectType build() {
             var type = new ObjectTypeImpl(Key.key(id), cost, requiredVariant, requiredSubVariant);
             ObjectTypeImpl.REGISTRY.put(id, type);
             return type;

@@ -8,6 +8,6 @@ public class V3082 extends DataVersion {
         super(3082);
 
         addReference(DataTypes.ENTITY, "minecraft:chest_boat", field -> field
-                .list("Items", DataTypes.ITEM_STACK));
+            .list("Items", DataTypes.ITEM_STACK));
     }
 }

@@ -8,9 +8,9 @@ public class V3807 extends DataVersion {
         super(3807);
 
         addReference(DataTypes.BLOCK_ENTITY, "minecraft:vault", field -> field
-                .single("config.key_item", DataTypes.ITEM_STACK)
-                .list("server_data.items_to_eject", DataTypes.ITEM_STACK)
-                .single("server_data.display_item", DataTypes.ITEM_STACK));
+            .single("config.key_item", DataTypes.ITEM_STACK)
+            .list("server_data.items_to_eject", DataTypes.ITEM_STACK)
+            .single("server_data.display_item", DataTypes.ITEM_STACK));
     }
 
 }

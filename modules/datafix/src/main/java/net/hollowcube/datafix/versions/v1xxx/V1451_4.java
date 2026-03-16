@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v1xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class V1451_4 extends DataVersion {
         addFix(DataTypes.ITEM_STACK, V1451_4::fixItemStackNameFlattening);
     }
 
-    private static Value fixBlockNameFlattening(Value blockName) {
+    private static @Nullable Value fixBlockNameFlattening(Value blockName) {
         var raw = blockName.value();
         if (raw instanceof String id) {
             return V1450.upgradeBlockName(namespaced(id));
@@ -32,7 +33,7 @@ public class V1451_4 extends DataVersion {
         } else return null;
     }
 
-    private static Value fixItemStackNameFlattening(Value itemStack) {
+    private static @Nullable Value fixItemStackNameFlattening(Value itemStack) {
         var id = itemStack.get("id").as(String.class, null);
         if (id == null) return null;
 
@@ -47,7 +48,7 @@ public class V1451_4 extends DataVersion {
         return null;
     }
 
-    static String updateItemId(String id, int damage) {
+    static @Nullable String updateItemId(@Nullable String id, int damage) {
         if (id == null || !ITEM_IDS.contains(id)) return null;
         var damageId = ITEM_WITH_DAMAGE_RENAMES.get(id + "." + damage);
         if (damageId != null) return damageId;
@@ -377,61 +378,61 @@ public class V1451_4 extends DataVersion {
         ITEM_WITH_DAMAGE_RENAMES.put("minecraft:record_wait.0", "minecraft:music_disc_wait");
         ITEM_WITH_DAMAGE_RENAMES.put("minecraft:record_ward.0", "minecraft:music_disc_ward");
         ITEM_IDS = ITEM_WITH_DAMAGE_RENAMES.keySet().stream()
-                .map(name -> name.substring(0, name.indexOf('.')))
-                .collect(Collectors.toSet());
+            .map(name -> name.substring(0, name.indexOf('.')))
+            .collect(Collectors.toSet());
         ITEMS_WITH_DURABILITY = Set.of(
-                "minecraft:bow",
-                "minecraft:carrot_on_a_stick",
-                "minecraft:chainmail_boots",
-                "minecraft:chainmail_chestplate",
-                "minecraft:chainmail_helmet",
-                "minecraft:chainmail_leggings",
-                "minecraft:diamond_axe",
-                "minecraft:diamond_boots",
-                "minecraft:diamond_chestplate",
-                "minecraft:diamond_helmet",
-                "minecraft:diamond_hoe",
-                "minecraft:diamond_leggings",
-                "minecraft:diamond_pickaxe",
-                "minecraft:diamond_shovel",
-                "minecraft:diamond_sword",
-                "minecraft:elytra",
-                "minecraft:fishing_rod",
-                "minecraft:flint_and_steel",
-                "minecraft:golden_axe",
-                "minecraft:golden_boots",
-                "minecraft:golden_chestplate",
-                "minecraft:golden_helmet",
-                "minecraft:golden_hoe",
-                "minecraft:golden_leggings",
-                "minecraft:golden_pickaxe",
-                "minecraft:golden_shovel",
-                "minecraft:golden_sword",
-                "minecraft:iron_axe",
-                "minecraft:iron_boots",
-                "minecraft:iron_chestplate",
-                "minecraft:iron_helmet",
-                "minecraft:iron_hoe",
-                "minecraft:iron_leggings",
-                "minecraft:iron_pickaxe",
-                "minecraft:iron_shovel",
-                "minecraft:iron_sword",
-                "minecraft:leather_boots",
-                "minecraft:leather_chestplate",
-                "minecraft:leather_helmet",
-                "minecraft:leather_leggings",
-                "minecraft:shears",
-                "minecraft:shield",
-                "minecraft:stone_axe",
-                "minecraft:stone_hoe",
-                "minecraft:stone_pickaxe",
-                "minecraft:stone_shovel",
-                "minecraft:stone_sword",
-                "minecraft:wooden_axe",
-                "minecraft:wooden_hoe",
-                "minecraft:wooden_pickaxe",
-                "minecraft:wooden_shovel",
-                "minecraft:wooden_sword"
+            "minecraft:bow",
+            "minecraft:carrot_on_a_stick",
+            "minecraft:chainmail_boots",
+            "minecraft:chainmail_chestplate",
+            "minecraft:chainmail_helmet",
+            "minecraft:chainmail_leggings",
+            "minecraft:diamond_axe",
+            "minecraft:diamond_boots",
+            "minecraft:diamond_chestplate",
+            "minecraft:diamond_helmet",
+            "minecraft:diamond_hoe",
+            "minecraft:diamond_leggings",
+            "minecraft:diamond_pickaxe",
+            "minecraft:diamond_shovel",
+            "minecraft:diamond_sword",
+            "minecraft:elytra",
+            "minecraft:fishing_rod",
+            "minecraft:flint_and_steel",
+            "minecraft:golden_axe",
+            "minecraft:golden_boots",
+            "minecraft:golden_chestplate",
+            "minecraft:golden_helmet",
+            "minecraft:golden_hoe",
+            "minecraft:golden_leggings",
+            "minecraft:golden_pickaxe",
+            "minecraft:golden_shovel",
+            "minecraft:golden_sword",
+            "minecraft:iron_axe",
+            "minecraft:iron_boots",
+            "minecraft:iron_chestplate",
+            "minecraft:iron_helmet",
+            "minecraft:iron_hoe",
+            "minecraft:iron_leggings",
+            "minecraft:iron_pickaxe",
+            "minecraft:iron_shovel",
+            "minecraft:iron_sword",
+            "minecraft:leather_boots",
+            "minecraft:leather_chestplate",
+            "minecraft:leather_helmet",
+            "minecraft:leather_leggings",
+            "minecraft:shears",
+            "minecraft:shield",
+            "minecraft:stone_axe",
+            "minecraft:stone_hoe",
+            "minecraft:stone_pickaxe",
+            "minecraft:stone_shovel",
+            "minecraft:stone_sword",
+            "minecraft:wooden_axe",
+            "minecraft:wooden_hoe",
+            "minecraft:wooden_pickaxe",
+            "minecraft:wooden_shovel",
+            "minecraft:wooden_sword"
         );
     }
 }

@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v1xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V1918 extends DataVersion {
     public V1918() {
@@ -12,7 +13,7 @@ public class V1918 extends DataVersion {
         addFix(DataTypes.ENTITY, "minecraft:zombie_villager", V1918::fixVillagerData);
     }
 
-    private static Value fixVillagerData(Value value) {
+    private static @Nullable Value fixVillagerData(Value value) {
         int profession = value.get("Profession").as(Number.class, 0).intValue();
         int career = value.get("Career").as(Number.class, 0).intValue();
         int careerLevel = value.get("CareerLevel").as(Number.class, 1).intValue();

@@ -7,7 +7,6 @@ import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
-import org.jetbrains.annotations.NotNullByDefault;
 
 /// A block handler which can receive collision triggers from a [MapPlayer].
 ///
@@ -16,7 +15,6 @@ import org.jetbrains.annotations.NotNullByDefault;
 ///
 /// **Note:** The [#collisionBox()] may not extend outside of a single block bounding box. This is a
 /// limitation of the current collision logic. It could be lifted in the future if necessary.
-@NotNullByDefault
 public interface CollidableBlock extends BlockHandler {
 
     record Collision(MapWorld world, Player player, BlockVec blockPosition, Block block) {

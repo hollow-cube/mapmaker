@@ -5,7 +5,6 @@ import net.minestom.server.ServerProcess;
 import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.world.DimensionType;
 import net.minestom.server.world.attribute.EnvironmentAttribute;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 
 import java.util.Objects;
@@ -34,7 +33,7 @@ public final class DimensionTypes {
     }
 
     @TestOnly
-    public static void register(@NotNull ServerProcess process) {
+    public static void register(ServerProcess process) {
         var overworld = Objects.requireNonNull(process.dimensionType().get(key("overworld")), "overworld");
         process.dimensionType().register("mapmaker:bright_dim",
             copyDimension(overworld)

@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.map.block.placement;
 
 import net.minestom.server.instance.block.Block;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -19,14 +18,14 @@ public class BlockStackingPlacementRule extends WaterloggedPlacementRule {
     private final String property;
     private final boolean canBeWaterlogged;
 
-    public BlockStackingPlacementRule(@NotNull Block block, @NotNull String property) {
+    public BlockStackingPlacementRule(Block block, String property) {
         super(block);
         this.property = property;
         this.canBeWaterlogged = block.getProperty("waterlogged") != null;
     }
 
     @Override
-    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
+    public @Nullable Block blockPlace(PlacementState placementState) {
         var existingBlock = placementState.instance().getBlock(placementState.placePosition());
         if (existingBlock.compare(block)) {
             // There is already a candle/sea pickle, and we are replacing it, increment the candle count
@@ -43,7 +42,7 @@ public class BlockStackingPlacementRule extends WaterloggedPlacementRule {
     }
 
     @Override
-    public boolean isSelfReplaceable(@NotNull Replacement replacement) {
+    public boolean isSelfReplaceable(Replacement replacement) {
         if (replacement.material().isBlock() && replacement.material().block().id() == this.block.id())
             return Integer.parseInt(replacement.block().properties().get(property)) != MAX_AMOUNT;
         return false;

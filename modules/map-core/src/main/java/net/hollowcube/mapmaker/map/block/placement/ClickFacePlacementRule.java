@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map.block.placement;
 
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -13,18 +12,18 @@ public class ClickFacePlacementRule extends WaterloggedPlacementRule {
     private final boolean useAltVertical;
     private final boolean canBeWaterlogged;
 
-    public ClickFacePlacementRule(@NotNull Block block) {
+    public ClickFacePlacementRule(Block block) {
         this(block, false);
     }
 
-    public ClickFacePlacementRule(@NotNull Block block, boolean useAltVertical) {
+    public ClickFacePlacementRule(Block block, boolean useAltVertical) {
         super(block);
         this.useAltVertical = useAltVertical;
         this.canBeWaterlogged = block.properties().containsKey("waterlogged");
     }
 
     @Override
-    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
+    public @Nullable Block blockPlace(PlacementState placementState) {
         var blockFace = Objects.requireNonNullElse(placementState.blockFace(), BlockFace.TOP);
         final Block result = block.withProperty(PROP_FACING, switch (blockFace) {
             case NORTH, SOUTH, EAST, WEST -> blockFace.name().toLowerCase();

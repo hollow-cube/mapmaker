@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v1xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V1456 extends DataVersion {
     public V1456() {
@@ -11,7 +12,7 @@ public class V1456 extends DataVersion {
         addFix(DataTypes.ENTITY, "minecraft:item_frame", V1456::fixItemFrameDirection);
     }
 
-    private static Value fixItemFrameDirection(Value value) {
+    private static @Nullable Value fixItemFrameDirection(Value value) {
         byte facing = value.get("Facing").as(Number.class, 0).byteValue();
         value.put("Facing", (byte) switch (facing) {
             case 0 -> 3;

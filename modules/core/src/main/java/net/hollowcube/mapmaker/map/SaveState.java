@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.util.RuntimeGson;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -22,13 +21,13 @@ public class SaveState {
     private Double startLatency;
     private Double endLatency;
 
-    SaveStateType.Serializer<?> serializer;
-    Object state;
+    @Nullable SaveStateType.Serializer<?> serializer;
+    @Nullable Object state;
 
     public SaveState() {
     }
 
-    public SaveState(@NotNull String id, @NotNull String playerId, @NotNull String mapId, @NotNull SaveStateType type, @NotNull SaveStateType.Serializer<?> serializer, @NotNull Object state) {
+    public SaveState(String id, String playerId, String mapId, SaveStateType type, SaveStateType.Serializer<?> serializer, Object state) {
         this.id = id;
         this.playerId = playerId;
         this.mapId = mapId;
@@ -38,19 +37,19 @@ public class SaveState {
         this.state = state;
     }
 
-    public @NotNull String id() {
+    public String id() {
         return id;
     }
 
-    public @NotNull String playerId() {
+    public String playerId() {
         return playerId;
     }
 
-    public @NotNull String mapId() {
+    public String mapId() {
         return mapId;
     }
 
-    public @NotNull SaveStateType type() {
+    public SaveStateType type() {
         return type;
     }
 
@@ -131,38 +130,38 @@ public class SaveState {
         this.protocolVersion = protocolVersion;
     }
 
-    public <T> @NotNull T state(@NotNull Class<T> stateType) {
+    public <T> T state(Class<T> stateType) {
         if (state == null)
             throw new IllegalStateException("State not loaded");
         if (!stateType.isAssignableFrom(state.getClass()))
             throw new IllegalArgumentException("State type mismatch. had " + state.getClass() + ", expected " + stateType + " details: " + Map.of(
-                    "id", id,
-                    "playerId", playerId,
-                    "mapId", mapId,
-                    "state", state,
-                    "stateType", stateType,
-                    "serializer", serializer,
-                    "dataVersion", dataVersion,
-                    "playtime", playtime,
-                    "ticks", ticks,
-                    "completed", completed
+                "id", id,
+                "playerId", playerId,
+                "mapId", mapId,
+                "state", state,
+                "stateType", stateType,
+                "serializer", serializer,
+                "dataVersion", dataVersion,
+                "playtime", playtime,
+                "ticks", ticks,
+                "completed", completed
             ));
         return stateType.cast(state);
     }
 
-    public <T> @Nullable T tryGetState(@NotNull Class<T> stateType) {
+    public <T> @Nullable T tryGetState(Class<T> stateType) {
         if (state == null) return null;
         if (!stateType.isAssignableFrom(state.getClass())) return null;
         return stateType.cast(state);
     }
 
-    public void setState(@NotNull Object state) {
+    public void setState(Object state) {
         if (!this.state.getClass().isAssignableFrom(state.getClass()))
             throw new IllegalArgumentException("State type mismatch. had " + this.state.getClass() + ", expected " + state.getClass());
         this.state = state;
     }
 
-    public @NotNull SaveStateUpdateRequest createUpdateRequest() {
+    public SaveStateUpdateRequest createUpdateRequest() {
         var req = new SaveStateUpdateRequest()
                 .setPlaytime(playtime)
                 .setTicks(ticks)
@@ -174,7 +173,7 @@ public class SaveState {
         return req;
     }
 
-    public @NotNull SaveStateUpdateRequest createUpsertRequest() {
+    public SaveStateUpdateRequest createUpsertRequest() {
         var req = new SaveStateUpdateRequest()
                 .setType(type)
                 .setPlaytime(playtime)

@@ -9,8 +9,8 @@ public class V3448 extends DataVersion {
         super(3448);
 
         addReference(DataTypes.BLOCK_ENTITY, "minecraft:decorated_pot", field -> field
-                .list("sherds", DataTypes.ITEM_NAME)
-                .single("item", DataTypes.ITEM_STACK));
+            .list("sherds", DataTypes.ITEM_NAME)
+            .single("item", DataTypes.ITEM_STACK));
 
         addFix(DataTypes.BLOCK_ENTITY, "minecraft:decorated_pot", V3448::fixSherdFieldRename);
     }

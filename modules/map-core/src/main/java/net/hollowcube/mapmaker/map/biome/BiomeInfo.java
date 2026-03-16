@@ -9,7 +9,6 @@ import net.minestom.server.item.Material;
 import net.minestom.server.world.biome.Biome;
 import net.minestom.server.world.biome.BiomeEffects;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -41,28 +40,28 @@ public class BiomeInfo {
     private Material displayItem = Material.GRASS_BLOCK;
 
     private Precipitation precipitation = Precipitation.NONE;
-    private Object particle = null; //todo
+    private @Nullable Object particle = null; //todo
 
     private RGBLike skyColor = DEFAULT_SKY_COLOR;
     private RGBLike fogColor = DEFAULT_FOG_COLOR;
     private RGBLike waterColor = DEFAULT_WATER_COLOR;
     private RGBLike waterFogColor = DEFAULT_WATER_FOG_COLOR;
-    private RGBLike grassColor = null;
-    private RGBLike foliageColor = null;
+    private @Nullable RGBLike grassColor = null;
+    private @Nullable RGBLike foliageColor = null;
 
-    private String music = null; //todo
-    private String ambientSound = null; //todo
-    private String additionsSound = null; //todo
-    private String moodSound = null; //todo
+    private @Nullable String music = null; //todo
+    private @Nullable String ambientSound = null; //todo
+    private @Nullable String additionsSound = null; //todo
+    private @Nullable String moodSound = null; //todo
 
     public BiomeInfo() {
 
     }
 
     public BiomeInfo(
-        @NotNull String name, @NotNull Material displayItem,
-        @NotNull RGBLike skyColor, @NotNull RGBLike fogColor,
-        @NotNull RGBLike waterColor, @NotNull RGBLike waterFogColor,
+        String name, Material displayItem,
+        RGBLike skyColor, RGBLike fogColor,
+        RGBLike waterColor, RGBLike waterFogColor,
         @Nullable RGBLike grassColor, @Nullable RGBLike foliageColor
     ) {
         this.name = name;
@@ -75,11 +74,11 @@ public class BiomeInfo {
         this.foliageColor = foliageColor;
     }
 
-    public @NotNull String getName() {
+    public String getName() {
         return name;
     }
 
-    public void setName(@NotNull String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -88,19 +87,19 @@ public class BiomeInfo {
         return Key.key("custom", getName().startsWith("custom:") ? getName().substring(7) : getName());
     }
 
-    public @NotNull Material getDisplayItem() {
+    public Material getDisplayItem() {
         return displayItem;
     }
 
-    public void setDisplayItem(@NotNull Material displayItem) {
+    public void setDisplayItem(Material displayItem) {
         this.displayItem = displayItem;
     }
 
-    public @NotNull RGBLike getSkyColor() {
+    public RGBLike getSkyColor() {
         return skyColor;
     }
 
-    public void setSkyColor(@NotNull RGBLike skyColor) {
+    public void setSkyColor(RGBLike skyColor) {
         this.skyColor = skyColor;
     }
 
@@ -108,23 +107,23 @@ public class BiomeInfo {
         return fogColor;
     }
 
-    public void setFogColor(@NotNull RGBLike fogColor) {
+    public void setFogColor(RGBLike fogColor) {
         this.fogColor = fogColor;
     }
 
-    public @NotNull RGBLike getWaterColor() {
+    public RGBLike getWaterColor() {
         return waterColor;
     }
 
-    public void setWaterColor(@NotNull RGBLike waterColor) {
+    public void setWaterColor(RGBLike waterColor) {
         this.waterColor = waterColor;
     }
 
-    public @NotNull RGBLike getWaterFogColor() {
+    public RGBLike getWaterFogColor() {
         return waterFogColor;
     }
 
-    public void setWaterFogColor(@NotNull RGBLike waterFogColor) {
+    public void setWaterFogColor(RGBLike waterFogColor) {
         this.waterFogColor = waterFogColor;
     }
 

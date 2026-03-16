@@ -4,7 +4,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.utils.Direction;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -14,12 +13,12 @@ public class BellPlacementRule extends BaseBlockPlacementRule {
     private static final String FACING = "facing";
     private static final String ATTACHMENT = "attachment";
 
-    public BellPlacementRule(@NotNull Block block) {
+    public BellPlacementRule(Block block) {
         super(block);
     }
 
     @Override
-    public @NotNull Block blockPlace(@NotNull PlacementState placementState) {
+    public Block blockPlace(PlacementState placementState) {
         Block.Getter instance = placementState.instance();
         Block block = this.block;
         int x = placementState.placePosition().blockX();
@@ -60,7 +59,7 @@ public class BellPlacementRule extends BaseBlockPlacementRule {
     }
 
     @Override
-    public @NotNull Block blockUpdate(@NotNull UpdateState updateState) {
+    public Block blockUpdate(UpdateState updateState) {
         Block.Getter instance = updateState.instance();
         Block block = updateState.currentBlock();
         int x = updateState.blockPosition().blockX();
@@ -109,7 +108,7 @@ public class BellPlacementRule extends BaseBlockPlacementRule {
         return block;
     }
 
-    private static boolean isAir(@NotNull Block block) {
+    private static boolean isAir(Block block) {
         return block.compare(Block.AIR) || block.compare(Block.VOID_AIR) || block.compare(Block.CAVE_AIR);
     }
 

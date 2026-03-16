@@ -22,22 +22,22 @@ public final class PlayerSettings {
 
     // Playing (parkour) maps
 
-    public static PlayerSetting<VisibilityRule> NEARBY_PLAYER_VISIBILITY = PlayerSetting.Enum("nearby_player_visibility", VisibilityRule.GHOST);
+    public static final PlayerSetting<VisibilityRule> NEARBY_PLAYER_VISIBILITY = PlayerSetting.Enum("nearby_player_visibility", VisibilityRule.GHOST);
 
 
     // Moderation
 
-    public static PlayerSetting<Boolean> IS_VANISHED = PlayerSetting.Bool("is_hidden", false);
-    public static PlayerSetting<Boolean> STAFF_MODE = PlayerSetting.Bool("staff_mode", true);
+    public static final PlayerSetting<Boolean> IS_VANISHED = PlayerSetting.Bool("is_hidden", false);
+    public static final PlayerSetting<Boolean> STAFF_MODE = PlayerSetting.Bool("staff_mode", true);
 
     // Terraform
 
-    public static PlayerSetting<Boolean> ENABLE_WE_CUI = PlayerSetting.Bool("we_outline_cui", false);
+    public static final PlayerSetting<Boolean> ENABLE_WE_CUI = PlayerSetting.Bool("we_outline_cui", false);
 
     // Social
 
-    public static PlayerSetting<Boolean> AUTO_REJECT_FRIEND_REQUESTS = PlayerSetting.Bool("auto_reject_friend_requests", false);
-    public static PlayerSetting<Boolean> ALLOW_DIRECT_MESSAGES = PlayerSetting.Bool("allow_direct_messages", true);
-    public static PlayerSetting<Boolean> ENABLE_PING_SOUNDS = PlayerSetting.Bool("enable_ping_sounds", true);
+    public static final PlayerSetting<Boolean> AUTO_REJECT_FRIEND_REQUESTS = PlayerSetting.Bool("auto_reject_friend_requests", false);
+    public static final PlayerSetting<Boolean> ALLOW_DIRECT_MESSAGES = PlayerSetting.Bool("allow_direct_messages", true);
+    public static final PlayerSetting<Boolean> ENABLE_PING_SOUNDS = PlayerSetting.Bool("enable_ping_sounds", true);
 
 }

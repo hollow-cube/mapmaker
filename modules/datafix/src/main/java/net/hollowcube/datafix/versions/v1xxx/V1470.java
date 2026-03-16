@@ -16,7 +16,7 @@ public class V1470 extends DataVersion {
         addReference(DataTypes.ENTITY, "minecraft:dolphin");
         addReference(DataTypes.ENTITY, "minecraft:drowned");
         addReference(DataTypes.ENTITY, "minecraft:trident", field -> field
-                .single("inBlockState", DataTypes.BLOCK_STATE)
-                .single("Trident", DataTypes.ITEM_STACK));
+            .single("inBlockState", DataTypes.BLOCK_STATE)
+            .single("Trident", DataTypes.ITEM_STACK));
     }
 }

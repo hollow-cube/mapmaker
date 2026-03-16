@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v3xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V3809 extends DataVersion {
     public V3809() {
@@ -14,7 +15,7 @@ public class V3809 extends DataVersion {
         addFix(DataTypes.ENTITY, "minecraft:donkey", V3809::fixHorseLikeInventoryIndexing);
     }
 
-    private static Value fixHorseLikeInventoryIndexing(Value value) {
+    private static @Nullable Value fixHorseLikeInventoryIndexing(Value value) {
         for (var itemStack : value.get("Items")) {
             itemStack.put("Slot", (byte) (itemStack.get("Slot")
                     .as(Number.class, 2).byteValue() - 2));

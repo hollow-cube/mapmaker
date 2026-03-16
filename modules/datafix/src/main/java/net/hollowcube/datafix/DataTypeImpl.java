@@ -1,7 +1,5 @@
 package net.hollowcube.datafix;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -11,7 +9,7 @@ final class DataTypeImpl implements DataType.IdMapped {
     private final int id;
     private final String name;
 
-    public DataTypeImpl(@NotNull String name) {
+    public DataTypeImpl(String name) {
         this.id = ID_COUNTER.getAndIncrement();
         this.name = name;
 
@@ -24,7 +22,7 @@ final class DataTypeImpl implements DataType.IdMapped {
     }
 
     @Override
-    public @NotNull String name() {
+    public String name() {
         return this.name;
     }
 

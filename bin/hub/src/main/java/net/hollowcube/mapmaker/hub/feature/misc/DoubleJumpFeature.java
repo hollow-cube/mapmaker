@@ -10,7 +10,6 @@ import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerStartFlyingEvent;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -21,9 +20,8 @@ public class DoubleJumpFeature implements HubFeature {
 
     @Override
     public void load(MapServer server, HubMapWorld world) {
-        world.eventNode()
-            .addListener(PlayerStartFlyingEvent.class, this::handleStartFlying)
-            .addListener(PlayerMoveEvent.class, this::handleMovement);
+        world.eventNode().addListener(PlayerStartFlyingEvent.class, this::handleStartFlying)
+                .addListener(PlayerMoveEvent.class, this::handleMovement);
     }
 
     private void handleStartFlying(PlayerStartFlyingEvent event) {

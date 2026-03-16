@@ -15,7 +15,6 @@ import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,9 +42,9 @@ public final class MapInviteAcceptedOrRejectedListener implements Closeable {
     private final MessageConsumer consumer;
 
     public MapInviteAcceptedOrRejectedListener(
-        @NotNull MapService mapService, @NotNull PlayerService playerService,
-        @NotNull SessionManager sessionManager, @NotNull ServerBridge serverBridge,
-        @NotNull JetStreamWrapper jetStream
+        MapService mapService, PlayerService playerService,
+        SessionManager sessionManager, ServerBridge serverBridge,
+        JetStreamWrapper jetStream
     ) {
         this.mapService = mapService;
         this.playerService = playerService;
@@ -64,14 +63,14 @@ public final class MapInviteAcceptedOrRejectedListener implements Closeable {
         }
     }
 
-    private void handleInviteMessage(@NotNull Message msg, @NotNull MapInviteAcceptedOrRejectedMessage message) {
+    private void handleInviteMessage(Message msg, MapInviteAcceptedOrRejectedMessage message) {
         LOGGER.info("Received invite accepted or rejected message: {}", message);
 
         this.sendAcceptedOrRejectedMessageToRecipient(message);
         this.sendCorrectPlayerToServer(message);
     }
 
-    private void sendAcceptedOrRejectedMessageToRecipient(@NotNull MapInviteAcceptedOrRejectedMessage message) {
+    private void sendAcceptedOrRejectedMessageToRecipient(MapInviteAcceptedOrRejectedMessage message) {
         var senderId = UUID.fromString(message.senderId());
         var sender = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(senderId);
         if (sender == null) {
@@ -101,7 +100,7 @@ public final class MapInviteAcceptedOrRejectedListener implements Closeable {
         sender.sendMessage(Component.translatable(translationString, targetDisplayName, mapName, targetName));
     }
 
-    private void sendCorrectPlayerToServer(@NotNull MapInviteAcceptedOrRejectedMessage message) {
+    private void sendCorrectPlayerToServer(MapInviteAcceptedOrRejectedMessage message) {
         var type = message.type();
 
         if (type == InviteType.INVITE) {
@@ -113,7 +112,7 @@ public final class MapInviteAcceptedOrRejectedListener implements Closeable {
         }
     }
 
-    private void joinMap(@NotNull UUID playerId, @NotNull String targetPlayerId, @NotNull String mapId, @NotNull String source) {
+    private void joinMap(UUID playerId, String targetPlayerId, String mapId, String source) {
         var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(playerId);
         if (player == null) return;
 

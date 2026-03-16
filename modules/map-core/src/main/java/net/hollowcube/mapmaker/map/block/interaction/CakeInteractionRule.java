@@ -3,13 +3,12 @@ package net.hollowcube.mapmaker.map.block.interaction;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class CakeInteractionRule implements BlockInteractionRule {
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition);
 
@@ -34,7 +33,7 @@ public class CakeInteractionRule implements BlockInteractionRule {
         return true;
     }
 
-    private static @Nullable Block convertCandleToCake(@NotNull Material material) {
+    private static @Nullable Block convertCandleToCake(Material material) {
         // The corresponding cake for a candle is just "x_candle_cake", e.g. "white_candle" -> "white_candle_cake"
         // This is also true for the normal candle, which is just "candle" -> "candle_cake"
         String blockName = material.key().value() + "_cake";

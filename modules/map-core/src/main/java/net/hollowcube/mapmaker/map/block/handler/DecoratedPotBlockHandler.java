@@ -9,7 +9,7 @@ import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.component.PotDecorations;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.Direction;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,18 +19,18 @@ public class DecoratedPotBlockHandler implements BlockHandler {
 
     private static final Key ID = Key.key("minecraft:decorated_pot");
     public static final Tag<PotDecorations> SHERDS = ExtraTags.DataComponent("sherds", DataComponents.POT_DECORATIONS)
-            .defaultValue(PotDecorations.EMPTY);
+        .defaultValue(PotDecorations.EMPTY);
 
     DecoratedPotBlockHandler() {
     }
 
     @Override
-    public @NotNull Key getKey() {
+    public Key getKey() {
         return ID;
     }
 
     @Override
-    public boolean onInteract(@NotNull Interaction interaction) {
+    public boolean onInteract(Interaction interaction) {
         if (!BlockHandlerHelpers.canEdit(interaction)) return true;
 
         var player = interaction.getPlayer();
@@ -54,8 +54,8 @@ public class DecoratedPotBlockHandler implements BlockHandler {
             };
 
             interaction.getInstance().setBlock(
-                    interaction.getBlockPosition(),
-                    interaction.getBlock().withTag(SHERDS, sherds)
+                interaction.getBlockPosition(),
+                interaction.getBlock().withTag(SHERDS, sherds)
             );
             return true;
         }
@@ -63,14 +63,14 @@ public class DecoratedPotBlockHandler implements BlockHandler {
     }
 
     @Override
-    public @NotNull Collection<Tag<?>> getBlockEntityTags() {
+    public Collection<Tag<?>> getBlockEntityTags() {
         return List.of(SHERDS);
     }
 
     private enum PotFace {
         FRONT, BACK, LEFT, RIGHT;
 
-        public static PotFace fromDirections(Direction front, Direction face) {
+        static @Nullable PotFace fromDirections(Direction front, Direction face) {
             if (front == face) return FRONT;
             if (front == face.opposite()) return BACK;
             if (front == DirectionUtil.rotate(face, true)) return RIGHT;

@@ -9,7 +9,7 @@ public class V4533 extends DataVersion {
         super(4533);
 
         addReference(DataTypes.BLOCK_ENTITY, "minecraft:shelf", field -> field
-                .list("Items", DataTypes.ITEM_STACK));
+            .list("Items", DataTypes.ITEM_STACK));
     }
 
 

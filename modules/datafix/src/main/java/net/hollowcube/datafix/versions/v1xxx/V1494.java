@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V1494 extends DataVersion {
     private static final Int2ObjectMap<String> ENCHANTMENT_IDS = new Int2ObjectOpenHashMap<>();
@@ -15,7 +16,7 @@ public class V1494 extends DataVersion {
         addFix(DataTypes.ITEM_STACK, V1494::fixItemEnchantmentNames);
     }
 
-    private static Value fixItemEnchantmentNames(Value value) {
+    private static @Nullable Value fixItemEnchantmentNames(Value value) {
         var tag = value.get("tag");
         if (!tag.isMapLike()) return null;
 

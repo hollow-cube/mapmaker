@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.datafix.DataType;
 import net.minestom.server.codec.Codec;
-import org.jetbrains.annotations.NotNull;
 
 public enum SaveStateType {
     EDITING, PLAYING, VERIFYING;
@@ -14,10 +13,10 @@ public enum SaveStateType {
     }
 
     public interface Serializer<T> {
-        @NotNull String name();
+        String name();
 
-        @NotNull Codec<T> codec();
+        Codec<T> codec();
 
-        @NotNull DataType dataType();
+        DataType dataType();
     }
 }

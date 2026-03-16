@@ -3,22 +3,21 @@ package net.hollowcube.mapmaker.player;
 import com.google.gson.JsonElement;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.backpack.BackpackItem;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 @RuntimeGson
 public record AppliedRewards(
-        @NotNull Inventory diff,
-        @Nullable Inventory newState
+    Inventory diff,
+    @Nullable Inventory newState
 ) {
 
     @RuntimeGson
     public record Inventory(
-            @Nullable Integer coins,
-            @Nullable Integer cubits,
-            @Nullable Integer exp,
-            @Nullable JsonElement backpack
+        @Nullable Integer coins,
+        @Nullable Integer cubits,
+        @Nullable Integer exp,
+        @Nullable JsonElement backpack
     ) {
 
         public boolean hasCoins() {

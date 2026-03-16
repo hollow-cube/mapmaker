@@ -9,7 +9,6 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.config.HttpConfig;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +24,7 @@ public class HttpServerWrapper {
     private final HttpConfig config;
     private final HttpServer server;
 
-    public HttpServerWrapper(@NotNull HttpConfig config) {
+    public HttpServerWrapper(HttpConfig config) {
         try {
             this.config = config;
             this.server = HttpServer.create(new InetSocketAddress(config.host(), config.port()), 0);
@@ -36,7 +35,7 @@ public class HttpServerWrapper {
         }
     }
 
-    public @NotNull String address() {
+    public String address() {
         return config.host();
     }
 
@@ -44,7 +43,7 @@ public class HttpServerWrapper {
         return config.port();
     }
 
-    public void addRoute(@NotNull String path, @NotNull HttpHandler handler) {
+    public void addRoute(String path, HttpHandler handler) {
         server.createContext(path, handler);
     }
 
@@ -66,7 +65,7 @@ public class HttpServerWrapper {
 
     public interface HealthCheck {
 
-        default @NotNull String name() {
+        default String name() {
             return this.getClass().getSimpleName();
         }
 
@@ -74,7 +73,7 @@ public class HttpServerWrapper {
 
     }
 
-    public record ReadyHttpHandler(@NotNull List<HealthCheck> checks) implements HttpHandler {
+    public record ReadyHttpHandler(List<HealthCheck> checks) implements HttpHandler {
         private static final Logger logger = LoggerFactory.getLogger(ReadyHttpHandler.class);
 
         @Override

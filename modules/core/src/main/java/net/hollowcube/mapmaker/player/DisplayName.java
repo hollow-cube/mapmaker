@@ -9,18 +9,17 @@ import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 @RuntimeGson
 public record DisplayName(
-    @NotNull List<Part> parts
+    List<Part> parts
 ) implements ComponentLike {
 
     @RuntimeGson
-    public record Part(@NotNull String type, @NotNull String text, @Nullable String color) {
+    public record Part(String type, String text, @Nullable String color) {
     }
 
     public enum Context {
@@ -37,15 +36,15 @@ public record DisplayName(
     }
 
     @Override
-    public @NotNull Component asComponent() {
+    public Component asComponent() {
         return build();
     }
 
-    public @NotNull Component build() {
+    public Component build() {
         return build(Context.DEFAULT);
     }
 
-    public @NotNull Component build(@NotNull Context context) {
+    public Component build(Context context) {
         var builder = Component.text();
         for (var part : parts) {
             switch (part.type) {

@@ -4,7 +4,6 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -53,22 +52,22 @@ public final class BlockTags {
     public static final Collection<Key> DOORS = extend(builtin("minecraft:doors"));
     public static final Collection<Key> TERRACOTTA = builtin("minecraft:terracotta");
     public static final Collection<Key> GLAZED_TERRACOTTA = create(
-            Block.WHITE_GLAZED_TERRACOTTA,
-            Block.ORANGE_GLAZED_TERRACOTTA,
-            Block.MAGENTA_GLAZED_TERRACOTTA,
-            Block.LIGHT_BLUE_GLAZED_TERRACOTTA,
-            Block.YELLOW_GLAZED_TERRACOTTA,
-            Block.LIME_GLAZED_TERRACOTTA,
-            Block.PINK_GLAZED_TERRACOTTA,
-            Block.GRAY_GLAZED_TERRACOTTA,
-            Block.LIGHT_GRAY_GLAZED_TERRACOTTA,
-            Block.CYAN_GLAZED_TERRACOTTA,
-            Block.PURPLE_GLAZED_TERRACOTTA,
-            Block.BLUE_GLAZED_TERRACOTTA,
-            Block.BROWN_GLAZED_TERRACOTTA,
-            Block.GREEN_GLAZED_TERRACOTTA,
-            Block.RED_GLAZED_TERRACOTTA,
-            Block.BLACK_GLAZED_TERRACOTTA
+        Block.WHITE_GLAZED_TERRACOTTA,
+        Block.ORANGE_GLAZED_TERRACOTTA,
+        Block.MAGENTA_GLAZED_TERRACOTTA,
+        Block.LIGHT_BLUE_GLAZED_TERRACOTTA,
+        Block.YELLOW_GLAZED_TERRACOTTA,
+        Block.LIME_GLAZED_TERRACOTTA,
+        Block.PINK_GLAZED_TERRACOTTA,
+        Block.GRAY_GLAZED_TERRACOTTA,
+        Block.LIGHT_GRAY_GLAZED_TERRACOTTA,
+        Block.CYAN_GLAZED_TERRACOTTA,
+        Block.PURPLE_GLAZED_TERRACOTTA,
+        Block.BLUE_GLAZED_TERRACOTTA,
+        Block.BROWN_GLAZED_TERRACOTTA,
+        Block.GREEN_GLAZED_TERRACOTTA,
+        Block.RED_GLAZED_TERRACOTTA,
+        Block.BLACK_GLAZED_TERRACOTTA
     );
     public static final Collection<Key> SMALL_FLOWERS = builtin("minecraft:small_flowers");
     public static final Collection<Key> FLOWER_POTS = builtin("minecraft:flower_pots");
@@ -76,31 +75,31 @@ public final class BlockTags {
     public static final Collection<Key> LEAVES = builtin("minecraft:leaves");
     public static final Collection<Key> SHULKER_BOXES = builtin("minecraft:shulker_boxes");
     public static final Collection<Key> SKULLS = create(
-            Block.SKELETON_SKULL, Block.SKELETON_WALL_SKULL,
-            Block.WITHER_SKELETON_SKULL, Block.WITHER_SKELETON_WALL_SKULL,
-            Block.ZOMBIE_HEAD, Block.ZOMBIE_WALL_HEAD,
-            Block.CREEPER_HEAD, Block.CREEPER_WALL_HEAD,
-            Block.DRAGON_HEAD, Block.DRAGON_WALL_HEAD,
-            Block.PIGLIN_HEAD, Block.PIGLIN_WALL_HEAD
+        Block.SKELETON_SKULL, Block.SKELETON_WALL_SKULL,
+        Block.WITHER_SKELETON_SKULL, Block.WITHER_SKELETON_WALL_SKULL,
+        Block.ZOMBIE_HEAD, Block.ZOMBIE_WALL_HEAD,
+        Block.CREEPER_HEAD, Block.CREEPER_WALL_HEAD,
+        Block.DRAGON_HEAD, Block.DRAGON_WALL_HEAD,
+        Block.PIGLIN_HEAD, Block.PIGLIN_WALL_HEAD
     );
     public static final Collection<Key> GLASS_PANES = create(
-            Block.GLASS_PANE,
-            Block.WHITE_STAINED_GLASS_PANE,
-            Block.LIGHT_GRAY_STAINED_GLASS_PANE,
-            Block.GRAY_STAINED_GLASS_PANE,
-            Block.BLACK_STAINED_GLASS_PANE,
-            Block.BROWN_STAINED_GLASS_PANE,
-            Block.RED_STAINED_GLASS_PANE,
-            Block.ORANGE_STAINED_GLASS_PANE,
-            Block.YELLOW_STAINED_GLASS_PANE,
-            Block.LIME_STAINED_GLASS_PANE,
-            Block.GREEN_STAINED_GLASS_PANE,
-            Block.CYAN_STAINED_GLASS_PANE,
-            Block.LIGHT_BLUE_STAINED_GLASS_PANE,
-            Block.BLUE_STAINED_GLASS_PANE,
-            Block.PURPLE_STAINED_GLASS_PANE,
-            Block.MAGENTA_STAINED_GLASS_PANE,
-            Block.PINK_STAINED_GLASS_PANE
+        Block.GLASS_PANE,
+        Block.WHITE_STAINED_GLASS_PANE,
+        Block.LIGHT_GRAY_STAINED_GLASS_PANE,
+        Block.GRAY_STAINED_GLASS_PANE,
+        Block.BLACK_STAINED_GLASS_PANE,
+        Block.BROWN_STAINED_GLASS_PANE,
+        Block.RED_STAINED_GLASS_PANE,
+        Block.ORANGE_STAINED_GLASS_PANE,
+        Block.YELLOW_STAINED_GLASS_PANE,
+        Block.LIME_STAINED_GLASS_PANE,
+        Block.GREEN_STAINED_GLASS_PANE,
+        Block.CYAN_STAINED_GLASS_PANE,
+        Block.LIGHT_BLUE_STAINED_GLASS_PANE,
+        Block.BLUE_STAINED_GLASS_PANE,
+        Block.PURPLE_STAINED_GLASS_PANE,
+        Block.MAGENTA_STAINED_GLASS_PANE,
+        Block.PINK_STAINED_GLASS_PANE
     );
     public static final Collection<Key> POTTABLE_FLOWERS = create(() -> {
         var flowers = new HashSet<Block>();
@@ -113,40 +112,40 @@ public final class BlockTags {
         return flowers;
     });
     public static final Collection<Key> TALL_FLOWERS = create(
-            Block.TALL_GRASS,
-            Block.ROSE_BUSH,
-            Block.LILAC,
-            Block.SUNFLOWER,
-            Block.LARGE_FERN,
-            Block.PEONY,
-            Block.PITCHER_PLANT
+        Block.TALL_GRASS,
+        Block.ROSE_BUSH,
+        Block.LILAC,
+        Block.SUNFLOWER,
+        Block.LARGE_FERN,
+        Block.PEONY,
+        Block.PITCHER_PLANT
     );
     public static final Collection<Key> ANY_WITH_LIT = createFromProperty("lit");
     public static Collection<Key> FARMLAND_CONVERTABLE = create(Block.DIRT, Block.GRASS_BLOCK, Block.DIRT_PATH);
     public static Collection<Key> DIRT_CONVERTABLE = create(Block.ROOTED_DIRT, Block.COARSE_DIRT);
     public static Collection<Key> DIRT_PATH_CONVERTABLE = create(
-            Block.GRASS_BLOCK, Block.DIRT, Block.MYCELIUM,
-            Block.PODZOL, Block.COARSE_DIRT, Block.ROOTED_DIRT
+        Block.GRASS_BLOCK, Block.DIRT, Block.MYCELIUM,
+        Block.PODZOL, Block.COARSE_DIRT, Block.ROOTED_DIRT
     );
     public static Collection<Key> CORAL = create(
-            Block.TUBE_CORAL, Block.BRAIN_CORAL, Block.BUBBLE_CORAL,
-            Block.FIRE_CORAL, Block.HORN_CORAL,
-            Block.DEAD_TUBE_CORAL, Block.DEAD_BRAIN_CORAL, Block.DEAD_BUBBLE_CORAL,
-            Block.DEAD_FIRE_CORAL, Block.DEAD_HORN_CORAL
+        Block.TUBE_CORAL, Block.BRAIN_CORAL, Block.BUBBLE_CORAL,
+        Block.FIRE_CORAL, Block.HORN_CORAL,
+        Block.DEAD_TUBE_CORAL, Block.DEAD_BRAIN_CORAL, Block.DEAD_BUBBLE_CORAL,
+        Block.DEAD_FIRE_CORAL, Block.DEAD_HORN_CORAL
     );
     public static Collection<Key> CORAL_FAN = create(
-            Block.TUBE_CORAL_FAN, Block.BRAIN_CORAL_FAN, Block.BUBBLE_CORAL_FAN,
-            Block.FIRE_CORAL_FAN, Block.HORN_CORAL_FAN,
-            Block.DEAD_TUBE_CORAL_FAN, Block.DEAD_BRAIN_CORAL_FAN, Block.DEAD_BUBBLE_CORAL_FAN,
-            Block.DEAD_FIRE_CORAL_FAN, Block.DEAD_HORN_CORAL_FAN
+        Block.TUBE_CORAL_FAN, Block.BRAIN_CORAL_FAN, Block.BUBBLE_CORAL_FAN,
+        Block.FIRE_CORAL_FAN, Block.HORN_CORAL_FAN,
+        Block.DEAD_TUBE_CORAL_FAN, Block.DEAD_BRAIN_CORAL_FAN, Block.DEAD_BUBBLE_CORAL_FAN,
+        Block.DEAD_FIRE_CORAL_FAN, Block.DEAD_HORN_CORAL_FAN
     );
     public static final Collection<Key> GROWABLE = create( //todo for bonemeal
-            Block.TORCHFLOWER_CROP, Block.MELON_STEM, Block.PUMPKIN_STEM,
-            Block.WHEAT, Block.CARROTS, Block.NETHER_WART, Block.POTATOES,
-            Block.PITCHER_CROP, Block.BEETROOTS, Block.COCOA
+        Block.TORCHFLOWER_CROP, Block.MELON_STEM, Block.PUMPKIN_STEM,
+        Block.WHEAT, Block.CARROTS, Block.NETHER_WART, Block.POTATOES,
+        Block.PITCHER_CROP, Block.BEETROOTS, Block.COCOA
     );
     public static final Collection<Key> PRE_WATERLOGGED_BLOCKS = create(
-            Block.KELP, Block.KELP_PLANT
+        Block.KELP, Block.KELP_PLANT
     );
     public static final Collection<Key> CAULDRONS = builtin("minecraft:cauldrons");
     public static final Collection<Key> LANTERNS = extend(builtin("minecraft:lanterns"));
@@ -157,15 +156,15 @@ public final class BlockTags {
     public static final Collection<Key> COPPER_STATUES = extend(builtin("minecraft:copper_golem_statues"));
     public static final Collection<Key> SHELVES = extend(builtin("minecraft:wooden_shelves"));
     public static final Collection<Key> UNRENDERABLE_DISPLAY_ENTITY_BLOCKS = group(
-            SIGNS,
-            ALL_HANGING_SIGNS,
-            BANNERS,
-            SKULLS,
-            create(Block.BELL, Block.DECORATED_POT)
+        SIGNS,
+        ALL_HANGING_SIGNS,
+        BANNERS,
+        SKULLS,
+        create(Block.BELL, Block.DECORATED_POT)
     );
 
     @SafeVarargs
-    private static @NotNull Collection<Key> group(@NotNull Collection<Key>... tags) {
+    private static Collection<Key> group(Collection<Key>... tags) {
         var set = new HashSet<Key>();
         for (var tag : tags) {
             set.addAll(tag);
@@ -173,7 +172,7 @@ public final class BlockTags {
         return Set.copyOf(set);
     }
 
-    private static @NotNull Collection<Key> extend(@NotNull Collection<Key> tag, @NotNull Block... block) {
+    private static Collection<Key> extend(Collection<Key> tag, Block... block) {
         var set = new HashSet<>(tag);
         for (var b : block) {
             set.add(b.key());
@@ -181,13 +180,13 @@ public final class BlockTags {
         return Set.copyOf(set);
     }
 
-    private static @NotNull Collection<Key> builtin(@NotNull String name) {
+    private static Collection<Key> builtin(String name) {
         var tag = Block.staticRegistry().getTag(Key.key(name));
         Check.notNull(tag, "Tag " + name + " is not registered");
         return StreamSupport.stream(tag.spliterator(), false).map(RegistryKey::key).toList();
     }
 
-    private static @NotNull Collection<Key> create(@NotNull Block... block) {
+    private static Collection<Key> create(Block... block) {
         var set = new HashSet<Key>();
         for (var b : block) {
             set.add(b.key());
@@ -195,7 +194,7 @@ public final class BlockTags {
         return Set.copyOf(set);
     }
 
-    private static @NotNull Collection<Key> create(@NotNull Supplier<Set<Block>> blocks) {
+    private static Collection<Key> create(Supplier<Set<Block>> blocks) {
         var set = new HashSet<Key>();
         for (var b : blocks.get()) {
             set.add(b.key());
@@ -203,7 +202,7 @@ public final class BlockTags {
         return Set.copyOf(set);
     }
 
-    private static @NotNull Collection<Key> createFromProperty(@NotNull String property) {
+    private static Collection<Key> createFromProperty(String property) {
         var set = new HashSet<Key>();
         for (var block : Block.values()) {
             if (block.getProperty(property) != null) {

@@ -3,13 +3,12 @@ package net.hollowcube.mapmaker.misc;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
 
 public class BackgroundSpriteSet {
     private final BadSprite left, right;
     private final BadSprite[] widthSprites = new BadSprite[9];
 
-    public BackgroundSpriteSet(@NotNull String name) {
+    public BackgroundSpriteSet(String name) {
         left = BadSprite.require(name + "/left");
         right = BadSprite.require(name + "/right");
         for (int i = 0; i < widthSprites.length; i++) {
@@ -17,7 +16,7 @@ public class BackgroundSpriteSet {
         }
     }
 
-    public @NotNull String build(int contentWidth, boolean includeLeft, boolean includeRight) {
+    public String build(int contentWidth, boolean includeLeft, boolean includeRight) {
         var sb = new StringBuilder();
         Check.argCondition(contentWidth > 0b111111111, "Oof too big (round 3)!");
 
@@ -32,7 +31,7 @@ public class BackgroundSpriteSet {
         return sb.toString();
     }
 
-    public @NotNull String build(int contentWidth) {
+    public String build(int contentWidth) {
         return build(contentWidth, true, true);
     }
 }

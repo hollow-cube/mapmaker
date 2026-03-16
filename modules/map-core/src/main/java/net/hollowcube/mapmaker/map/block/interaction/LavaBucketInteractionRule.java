@@ -3,17 +3,16 @@ package net.hollowcube.mapmaker.map.block.interaction;
 import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
-import org.jetbrains.annotations.NotNull;
 
 public class LavaBucketInteractionRule implements BlockInteractionRule {
 
     @Override
-    public @NotNull SneakState sneakState() {
+    public SneakState sneakState() {
         return SneakState.BOTH;
     }
 
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition);
 
@@ -31,7 +30,7 @@ public class LavaBucketInteractionRule implements BlockInteractionRule {
         return tryPlaceLava(interaction, blockPosition, false);
     }
 
-    private boolean tryPlaceLava(@NotNull Interaction interaction, @NotNull Point blockPosition, boolean strict) {
+    private boolean tryPlaceLava(Interaction interaction, Point blockPosition, boolean strict) {
         var block = interaction.getBlock(blockPosition);
         if (!block.isAir() && !block.isLiquid() && strict) return false;
 

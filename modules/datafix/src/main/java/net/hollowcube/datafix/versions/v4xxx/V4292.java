@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v4xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -18,7 +19,7 @@ public class V4292 extends DataVersion {
         addFix(DataTypes.TEXT_COMPONENT, V4292::fixTextComponentHoverAndClickEvent);
     }
 
-    private static Value fixTextComponentHoverAndClickEvent(Value textComponent) {
+    private static @Nullable Value fixTextComponentHoverAndClickEvent(Value textComponent) {
         var hoverEvent = textComponent.remove("hoverEvent");
         var clickEvent = textComponent.remove("clickEvent");
         if (!hoverEvent.isMapLike() && !clickEvent.isMapLike()) return null;
@@ -45,7 +46,7 @@ public class V4292 extends DataVersion {
         return hoverEvent;
     }
 
-    private static Value fixClickEvent(Value clickEvent) {
+    private static @Nullable Value fixClickEvent(Value clickEvent) {
         var action = clickEvent.get("action").as(String.class, "");
         var value = clickEvent.remove("value");
         return switch (action) {

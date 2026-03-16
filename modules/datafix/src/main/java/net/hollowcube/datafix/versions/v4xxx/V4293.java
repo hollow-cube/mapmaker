@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v4xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V4293 extends DataVersion {
     private static final float DEFAULT_CHANCE = 0.085F;
@@ -13,7 +14,7 @@ public class V4293 extends DataVersion {
         addFix(DataTypes.ENTITY, V4293::fixEntityDropChancesFormat);
     }
 
-    private static Value fixEntityDropChancesFormat(Value entity) {
+    private static @Nullable Value fixEntityDropChancesFormat(Value entity) {
         var dropChances = Value.emptyMap();
         var oldArmorDropChances = entity.remove("ArmorDropChances");
         var oldHandDropChances = entity.remove("HandDropChances");

@@ -7,6 +7,8 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.json.JSONOptions;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
 
 public final class DataFixUtils {
     public static final Gson GSON = new Gson();
@@ -15,8 +17,9 @@ public final class DataFixUtils {
             .editOptions(b -> b.value(JSONOptions.EMIT_COMPACT_TEXT_COMPONENT, false))
             .build();
 
-    public static String namespaced(String value) {
-        if (value == null) return value;
+    @Contract("null -> null; !null -> !null")
+    public static @Nullable String namespaced(@Nullable String value) {
+        if (value == null) return null;
         try {
             return Key.key(value).toString();
         } catch (InvalidKeyException ignored) {
@@ -45,7 +48,7 @@ public final class DataFixUtils {
         };
     }
 
-    public static Value ensureTextComponentString(Value value) {
+    public static @Nullable Value ensureTextComponentString(Value value) {
         String raw = value.as(String.class, null);
         if (raw == null) return null;
 

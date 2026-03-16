@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
+@SuppressWarnings("UnstableApiUsage")
 public class Button extends Element implements ButtonClickAliases {
 
     @FunctionalInterface
@@ -54,7 +55,7 @@ public class Button extends Element implements ButtonClickAliases {
     protected @Nullable Component itemTitle;
     protected @Nullable List<Component> itemLore;
     protected @Nullable List<Component> itemLorePostfix;
-    protected String itemModel = "minecraft:stick";
+    protected @Nullable String itemModel = "minecraft:stick";
     protected @Nullable String itemOverlay = null;
     protected @Nullable ResolvableProfile itemProfile = null;
     protected @Nullable DataComponentMap extraComponents = null;
@@ -306,7 +307,7 @@ public class Button extends Element implements ButtonClickAliases {
         };
     }
 
-    private static @Nullable CompletableFuture<Void> callClickFunc(
+    private static @Nullable CompletableFuture<@Nullable Void> callClickFunc(
         @Nullable OnClickTypeSlot func,
         @Nullable OnClickTypeSlot asyncFunc,
         ClickType clickType, int slot

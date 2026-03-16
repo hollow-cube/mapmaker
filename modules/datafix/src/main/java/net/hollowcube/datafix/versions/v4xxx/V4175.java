@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v4xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V4175 extends DataVersion {
     public V4175() {
@@ -12,7 +13,7 @@ public class V4175 extends DataVersion {
         addFix(DataTypes.DATA_COMPONENTS, V4175::fixCustomModelDataExpand);
     }
 
-    private static Value fixEquippableAssetRename(Value dataComponents) {
+    private static @Nullable Value fixEquippableAssetRename(Value dataComponents) {
         var equippable = dataComponents.get("minecraft:equippable");
         if (!equippable.isMapLike()) return null;
 
@@ -20,7 +21,7 @@ public class V4175 extends DataVersion {
         return null;
     }
 
-    private static Value fixCustomModelDataExpand(Value dataComponents) {
+    private static @Nullable Value fixCustomModelDataExpand(Value dataComponents) {
         var cmd = dataComponents.remove("minecraft:custom_model_data");
         var float0 = cmd.as(Number.class, 0.0f).floatValue();
         if (float0 == 0.0f) return null;

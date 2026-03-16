@@ -8,6 +8,6 @@ public class V3083 extends DataVersion {
         super(3083);
 
         addReference(DataTypes.ENTITY, "minecraft:allay", field -> field
-                .list("Inventory", DataTypes.ITEM_STACK));
+            .list("Inventory", DataTypes.ITEM_STACK));
     }
 }

@@ -6,13 +6,12 @@ import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.codec.Codec;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
 
 public record CostList(
-        @NotNull Map<CostEntry, Integer> entries
+    Map<CostEntry, Integer> entries
 ) {
     public static final Codec<CostList> CODEC = CostEntry.CODEC.mapValue(Codec.INT).transform(CostList::new, CostList::entries);
 
@@ -20,11 +19,11 @@ public record CostList(
     private static final TextColor GREEN = TextColor.fromCSSHexString("#46FA32");
     private static final TextColor GRAY = TextColor.fromCSSHexString("#B0B0B0");
 
-    public CostList(@NotNull CostEntry entry, int amount) {
+    public CostList(CostEntry entry, int amount) {
         this(Map.of(entry, amount));
     }
 
-    public boolean appendLore(@NotNull PlayerData playerData, @NotNull PlayerBackpack backpack, @NotNull List<Component> lore) {
+    public boolean appendLore(PlayerData playerData, PlayerBackpack backpack, List<Component> lore) {
         boolean canAfford = true, canP2W = false; //todo add support for buying with cubits later
         for (var entry : entries.entrySet()) {
             var type = entry.getKey();
@@ -42,7 +41,7 @@ public record CostList(
         return canAfford;
     }
 
-    public boolean canAfford(@NotNull PlayerData playerData, @NotNull PlayerBackpack backpack) {
+    public boolean canAfford(PlayerData playerData, PlayerBackpack backpack) {
         for (var entry : entries.entrySet()) {
             if (entry.getKey().getCount(playerData, backpack) < entry.getValue())
                 return false;

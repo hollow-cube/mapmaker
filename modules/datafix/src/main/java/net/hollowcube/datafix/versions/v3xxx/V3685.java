@@ -4,7 +4,7 @@ import net.hollowcube.datafix.DataType;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class V3685 extends DataVersion {
     public V3685() {
@@ -18,19 +18,19 @@ public class V3685 extends DataVersion {
         addFix(DataTypes.ENTITY, "minecraft:spectral_arrow", V3685::fixSpectralArrow);
     }
 
-    static @NotNull DataType.Builder abstractArrow(@NotNull DataType.Builder field) {
+    static DataType.Builder abstractArrow(DataType.Builder field) {
         return field
-                .single("inBlockState", DataTypes.BLOCK_STATE)
-                .single("item", DataTypes.ITEM_STACK);
+            .single("inBlockState", DataTypes.BLOCK_STATE)
+            .single("item", DataTypes.ITEM_STACK);
     }
 
-    private static Value fixArrow(Value value) {
+    private static @Nullable Value fixArrow(Value value) {
         var potionId = value.get("Potion").as(String.class, "minecraft:empty");
         value.put("item", createItemStack("minecraft:empty".equals(potionId) ? "minecraft:arrow" : "minecraft:tipped_arrow"));
         return null;
     }
 
-    private static Value fixSpectralArrow(Value value) {
+    private static @Nullable Value fixSpectralArrow(Value value) {
         value.put("item", createItemStack("minecraft:spectral_arrow"));
         return null;
     }

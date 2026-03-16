@@ -9,8 +9,8 @@ import java.util.Map;
 
 public class V1484 extends DataVersion {
     private static final Map<String, String> SEAGRASS_IDS = Map.of(
-            "minecraft:sea_grass", "minecraft:seagrass",
-            "minecraft:tall_sea_grass", "minecraft:tall_seagrass"
+        "minecraft:sea_grass", "minecraft:seagrass",
+        "minecraft:tall_sea_grass", "minecraft:tall_seagrass"
     );
 
     public V1484() {

@@ -5,7 +5,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -15,19 +14,19 @@ import java.util.Objects;
 public class ChestPlacementRule extends WaterloggedPlacementRule {
 
     private static final BlockFace[][] CONNECTION_FACES = new BlockFace[][]{
-            // Indices are BlockFace#ordinal() - 2
-            /*North*/{BlockFace.EAST, BlockFace.WEST},
-            /*South*/{BlockFace.WEST, BlockFace.EAST},
-            /*West*/{BlockFace.NORTH, BlockFace.SOUTH},
-            /*East*/{BlockFace.SOUTH, BlockFace.NORTH}
+        // Indices are BlockFace#ordinal() - 2
+        /*North*/{BlockFace.EAST, BlockFace.WEST},
+        /*South*/{BlockFace.WEST, BlockFace.EAST},
+        /*West*/{BlockFace.NORTH, BlockFace.SOUTH},
+        /*East*/{BlockFace.SOUTH, BlockFace.NORTH}
     };
 
-    public ChestPlacementRule(@NotNull Block block) {
+    public ChestPlacementRule(Block block) {
         super(block);
     }
 
     @Override
-    public @Nullable Block blockPlace(@NotNull BlockPlacementRule.PlacementState placement) {
+    public @Nullable Block blockPlace(BlockPlacementRule.PlacementState placement) {
         final Point blockPosition = placement.placePosition();
         final Pos playerPosition = Objects.requireNonNullElse(placement.playerPosition(), Pos.ZERO);
         BlockFace facing = BlockFace.fromYaw(playerPosition.yaw()).getOppositeFace();
@@ -75,7 +74,7 @@ public class ChestPlacementRule extends WaterloggedPlacementRule {
     }
 
     @Override
-    public @NotNull Block blockUpdate(@NotNull BlockPlacementRule.UpdateState update) {
+    public Block blockUpdate(BlockPlacementRule.UpdateState update) {
         final Block currentBlock = update.currentBlock();
         final Point blockPosition = update.blockPosition();
 

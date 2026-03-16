@@ -17,7 +17,6 @@ import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.intellij.lang.annotations.MagicConstant;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -32,7 +31,7 @@ public class PlayerData {
 
     private static final long[] XP_FOR_LEVELS = new long[51];
 
-    public static @NotNull PlayerData fromPlayer(@NotNull Player player) {
+    public static PlayerData fromPlayer(Player player) {
         return player.getTag(TAG);
     }
 
@@ -42,7 +41,7 @@ public class PlayerData {
     private String username;
     private DisplayName displayNameV2 = new DisplayName(List.of());
     private DisplayName displayName; // v4
-    private JsonObject settings = new JsonObject();
+    private @Nullable JsonObject settings = new JsonObject();
 
     @Expose(serialize = false, deserialize = false)
     public final long sessionStart = System.currentTimeMillis(); //todo this should be set by the session service
@@ -63,7 +62,7 @@ public class PlayerData {
     public PlayerData() {
     }
 
-    public PlayerData(String id, String username, @NotNull TextComponent displayName) {
+    public PlayerData(String id, String username, TextComponent displayName) {
         this.id = id;
         this.username = username;
     }
@@ -79,7 +78,7 @@ public class PlayerData {
     }
 
     @VisibleForTesting
-    public PlayerData(@NotNull Player player) {
+    public PlayerData(Player player) {
         this(player.getUuid().toString(),
             player.getUsername(),
             new DisplayName(List.of(new DisplayName.Part("username", player.getUsername(), null))),
@@ -93,7 +92,7 @@ public class PlayerData {
      * @param playerService
      * @return true if the update was successful, false if it failed (an error was already logged)
      */
-    public boolean writeUpdatesUpstream(@NotNull PlayerService playerService) {
+    public boolean writeUpdatesUpstream(PlayerService playerService) {
         //todo need to add a lock here
         if (!updates.hasChanges()) return true;
         try {
@@ -106,7 +105,7 @@ public class PlayerData {
         }
     }
 
-    public boolean writeUpdatesUpstream(@NotNull PlayerClient players) {
+    public boolean writeUpdatesUpstream(PlayerClient players) {
         //todo need to add a lock here
         var settingChanges = updates.settings();
         if (settingChanges == null) return true;
@@ -120,42 +119,42 @@ public class PlayerData {
         }
     }
 
-    public @NotNull String id() {
+    public String id() {
         return id;
     }
 
-    public @NotNull String username() {
+    public String username() {
         return username;
     }
 
-    public @NotNull Component displayName() {
+    public Component displayName() {
         return displayName2().asComponent();
     }
 
-    public @NotNull DisplayName displayName2() {
+    public DisplayName displayName2() {
         return displayName != null ? displayName : displayNameV2;
     }
 
-    public <T> @NotNull T getSetting(@NotNull PlayerSetting<T> setting) {
+    public <T> T getSetting(PlayerSetting<T> setting) {
         return setting.read(settings());
     }
 
-    public <T> void setSetting(@NotNull PlayerSetting<T> setting, @NotNull T value) {
+    public <T> void setSetting(PlayerSetting<T> setting, T value) {
         var raw = setting.write(value);
         settings().add(setting.key(), raw);
         updates.updateSetting(setting.key(), raw);
     }
 
-    public void resetSetting(@NotNull PlayerSetting<?> setting) {
+    public void resetSetting(PlayerSetting<?> setting) {
         settings().remove(setting.key());
         updates.updateSetting(setting.key(), JsonNull.INSTANCE);
     }
 
-    public @NotNull Collection<Map.Entry<String, JsonElement>> settingsRawValues() {
+    public Collection<Map.Entry<String, JsonElement>> settingsRawValues() {
         return settings().entrySet();
     }
 
-    private @NotNull JsonObject settings() {
+    private JsonObject settings() {
         if (settings == null) settings = new JsonObject();
         return settings;
     }
@@ -237,12 +236,12 @@ public class PlayerData {
         return mapBuilders;
     }
 
-    public @Nullable String getCosmetic(@NotNull CosmeticType type) {
+    public @Nullable String getCosmetic(CosmeticType type) {
         var cosmetic = getSetting(type.setting());
         return cosmetic.isEmpty() ? null : cosmetic;
     }
 
-    public void setCosmetic(@NotNull CosmeticType type, @Nullable Cosmetic cosmetic) {
+    public void setCosmetic(CosmeticType type, @Nullable Cosmetic cosmetic) {
         if (cosmetic != null && cosmetic.type() != type) throw new IllegalArgumentException("cosmetic type mismatch");
         setSetting(type.setting(), cosmetic == null ? "" : cosmetic.id());
     }

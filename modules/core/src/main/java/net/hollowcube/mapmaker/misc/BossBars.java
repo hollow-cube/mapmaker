@@ -13,7 +13,6 @@ import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -23,31 +22,33 @@ public class BossBars {
     private static final int BORDER_WIDTH = 4;
 
     public static final BossBar ADDRESS_LINE = BossBars.createLine2(
-            Component.text(FontUtil.rewrite("bossbar_small_2", "hollowcube.net"), NamedTextColor.WHITE));
+        Component.text(FontUtil.rewrite("bossbar_small_2", "hollowcube.net"), NamedTextColor.WHITE));
 
-    public static void clear(@NotNull Player player) {
+    public static void clear(Player player) {
         var bars = MinecraftServer.getBossBarManager().getPlayerBossBars(player);
         bars.forEach(b -> MinecraftServer.getBossBarManager().removeBossBar(player, b));
     }
 
-    public static @NotNull BossBar createLine1(@NotNull Component text) {
+    public static BossBar createLine1(Component text) {
         return build(text, BG_LINE_1);
     }
 
-    public static @NotNull BossBar createLine2(@NotNull Component text) {
+    public static BossBar createLine2(Component text) {
         return build(text, BG_LINE_2);
     }
 
-    private static @NotNull BossBar build(@NotNull Component text, @NotNull BackgroundSpriteSet bg) {
+    private static BossBar build(Component text, BackgroundSpriteSet bg) {
         int contentWidth = FontUtil.measureTextV2(text);
-        return bossBar(Component.text()
+        return bossBar(
+            Component.text()
                 .append(Component.text(bg.build(contentWidth + (2 * BORDER_WIDTH))).shadowColor(ShadowColor.none()))
                 .append(Component.text(FontUtil.computeOffset(-(contentWidth + BORDER_WIDTH + 2))))
                 .append(text)
-                .build());
+                .build()
+        );
     }
 
-    private static @NotNull BossBar bossBar(@NotNull Component text) {
+    private static BossBar bossBar(Component text) {
         return BossBar.bossBar(text, 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
     }
 
@@ -57,14 +58,14 @@ public class BossBars {
         Component ownerBossBarName;
         try {
             ownerBossBarName = playerService.getPlayerDisplayName2(map.owner())
-                    .build(DisplayName.Context.BOSS_BAR);
+                .build(DisplayName.Context.BOSS_BAR);
         } catch (Exception e) {
             ExceptionReporter.reportException(e);
             ownerBossBarName = Component.text("!error!", NamedTextColor.RED);
         }
 
         return List.of(
-                BossBars.createLine1(map.verification() == MapVerification.PENDING
+            BossBars.createLine1(map.verification() == MapVerification.PENDING
                         ? Component.text()
                         .append(Component.text(FontUtil.rewrite("bossbar_small_1", "verifying") + " ", NamedTextColor.WHITE))
                         .append(Component.text(FontUtil.rewrite("bossbar_ascii_1", map.name()), TextColor.color(0xF2F2F2))).build()
@@ -88,16 +89,16 @@ public class BossBars {
 
     public static List<BossBar> createEditingBossBar(MapData map) {
         var builder = Component.text()
-                .append(Component.text(FontUtil.rewrite("bossbar_small_1", "building") + " ", NamedTextColor.WHITE))
-                .append(Component.text(FontUtil.rewrite("bossbar_ascii_1", map.name()), TextColor.color(0x30FBFF)));
+            .append(Component.text(FontUtil.rewrite("bossbar_small_1", "building") + " ", NamedTextColor.WHITE))
+            .append(Component.text(FontUtil.rewrite("bossbar_ascii_1", map.name()), TextColor.color(0x30FBFF)));
 
 //        final String permissionName = player.getUuid().toString().equals(map().owner()) ? "Owner" : "Builder";
 //        builder.append(Component.text("  " + FontUtil.rewrite("bossbar_small_1", "permission") + " ", TextColor.color(0xB0B0B0)))
 //                .append(Component.text(FontUtil.rewrite("bossbar_ascii_1", permissionName), NamedTextColor.WHITE));
 
         return List.of(
-                BossBars.createLine1(builder.build()),
-                BossBars.ADDRESS_LINE
+            BossBars.createLine1(builder.build()),
+            BossBars.ADDRESS_LINE
         );
     }
 }

@@ -27,7 +27,6 @@ import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.ping.Status;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Base64;
@@ -37,10 +36,10 @@ import java.util.function.Predicate;
 public class DevServer extends AbstractMultiMapServer {
 
     // Hub stuff
-    private @Nullable HubMapWorld hubWorld;
+    private HubMapWorld hubWorld;
 
     // Map stuff
-    private @Nullable Terraform terraform;
+    private Terraform terraform;
 
     // Common stuff
     private final CommandManager hubCommandManager = new CommandManagerImpl(super.commandManager());
@@ -65,7 +64,7 @@ public class DevServer extends AbstractMultiMapServer {
     }
 
     @Override
-    protected Future<AbstractMapWorld<?, ?>> createWorldForRequest(MapJoinInfo joinInfo) {
+    protected Future<@Nullable AbstractMapWorld<?, ?>> createWorldForRequest(MapJoinInfo joinInfo) {
         var map = joinInfo.mapId().equals(MapData.SPAWN_MAP_ID)
             ? HubServer.HUB_MAP_DATA
             : mapService().getMap(joinInfo.playerId(), joinInfo.mapId());
@@ -87,7 +86,7 @@ public class DevServer extends AbstractMultiMapServer {
 
         MinecraftServer.getConnectionManager().setPlayerProvider((connection, gameProfile) -> new MapPlayer(connection, gameProfile) {
             @Override
-            public @NotNull CommandManager getCommandManager() {
+            public CommandManager getCommandManager() {
                 var world = MapWorld.forPlayer(this);
                 return world == null || world instanceof HubMapWorld
                     ? hubCommandManager : mapCommandManager;

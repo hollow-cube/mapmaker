@@ -12,9 +12,9 @@ public class V3689 extends DataVersion {
         addReference(DataTypes.ENTITY, "minecraft:breeze_wind_charge");
 
         addReference(DataTypes.BLOCK_ENTITY, "minecraft:trial_spawner", field -> field
-                // todo
-                .list("spawn_potentials.data.entity", DataTypes.ENTITY)
-                .single("spawn_data.entity", DataTypes.ENTITY));
+            // todo
+            .list("spawn_potentials.data.entity", DataTypes.ENTITY)
+            .single("spawn_data.entity", DataTypes.ENTITY));
     }
 
 }

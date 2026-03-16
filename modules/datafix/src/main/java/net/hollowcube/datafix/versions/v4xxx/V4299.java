@@ -4,6 +4,7 @@ import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.DataFixUtils;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V4299 extends DataVersion {
 
@@ -16,14 +17,14 @@ public class V4299 extends DataVersion {
         addFix(DataTypes.ITEM_STACK, "minecraft:painting", V4299::fixSpawnerItemVariantPainting);
     }
 
-    private static Value fixSpawnerItemVariantSalmonBucket(Value itemStack) {
+    private static @Nullable Value fixSpawnerItemVariantSalmonBucket(Value itemStack) {
         var bucketEntityData = itemStack.get("components").get("minecraft:bucket_entity_data");
         if (!bucketEntityData.isMapLike()) return null;
         bucketEntityData.put("minecraft:salmon/size", bucketEntityData.remove("type"));
         return null;
     }
 
-    private static Value fixSpawnerItemVariantAxolotlBucket(Value itemStack) {
+    private static @Nullable Value fixSpawnerItemVariantAxolotlBucket(Value itemStack) {
         var bucketEntityData = itemStack.get("components").get("minecraft:bucket_entity_data");
         if (!bucketEntityData.isMapLike()) return null;
         var variant = bucketEntityData.remove("Variant").as(Number.class, null);
@@ -38,7 +39,7 @@ public class V4299 extends DataVersion {
         return null;
     }
 
-    private static Value fixSpawnerItemVariantTropicalFishBucket(Value itemStack) {
+    private static @Nullable Value fixSpawnerItemVariantTropicalFishBucket(Value itemStack) {
         var bucketEntityData = itemStack.get("components").get("minecraft:bucket_entity_data");
         if (!bucketEntityData.isMapLike()) return null;
         var variant = bucketEntityData.remove("BucketVariantTag").as(Number.class, null);
@@ -62,7 +63,7 @@ public class V4299 extends DataVersion {
         return null;
     }
 
-    private static Value fixSpawnerItemVariantPainting(Value itemStack) {
+    private static @Nullable Value fixSpawnerItemVariantPainting(Value itemStack) {
         var components = itemStack.get("components");
         var entityData = components.get("minecraft:entity_data");
         if (!entityData.isMapLike() || "minecraft:painting".equals(entityData.getValue("id")))

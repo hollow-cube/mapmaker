@@ -9,13 +9,13 @@ import java.util.Map;
 
 public class V2528 extends DataVersion {
     private static final Map<String, String> BLOCK_RENAMES = Map.of(
-            "minecraft:soul_fire_torch", "minecraft:soul_torch",
-            "minecraft:soul_fire_wall_torch", "minecraft:soul_wall_torch",
-            "minecraft:soul_fire_lantern", "minecraft:soul_lantern"
+        "minecraft:soul_fire_torch", "minecraft:soul_torch",
+        "minecraft:soul_fire_wall_torch", "minecraft:soul_wall_torch",
+        "minecraft:soul_fire_lantern", "minecraft:soul_lantern"
     );
     private static final Map<String, String> ITEM_RENAMES = Map.of(
-            "minecraft:soul_fire_torch", "minecraft:soul_torch",
-            "minecraft:soul_fire_lantern", "minecraft:soul_lantern"
+        "minecraft:soul_fire_torch", "minecraft:soul_torch",
+        "minecraft:soul_fire_lantern", "minecraft:soul_lantern"
     );
 
     public V2528() {

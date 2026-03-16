@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v3xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V3833 extends DataVersion {
     public V3833() {
@@ -11,7 +12,7 @@ public class V3833 extends DataVersion {
         addFix(DataTypes.BLOCK_ENTITY, "minecraft:brushable_block", V3833::fixRemoveEmptyItemInBrushableBlock);
     }
 
-    private static Value fixRemoveEmptyItemInBrushableBlock(Value blockEntity) {
+    private static @Nullable Value fixRemoveEmptyItemInBrushableBlock(Value blockEntity) {
         var item = blockEntity.get("item");
         if (item.isNull()) return null;
 

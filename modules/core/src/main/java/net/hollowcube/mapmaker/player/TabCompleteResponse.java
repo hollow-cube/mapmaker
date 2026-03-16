@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.player;
 
 import net.hollowcube.common.util.RuntimeGson;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.List;
@@ -12,17 +11,15 @@ public record TabCompleteResponse(
 ) {
 
     @RuntimeGson
-    public record Entry(@NotNull String id, @NotNull String username) {
+    public record Entry(String id, String username) {
     }
 
-
     @Override
-    public @NotNull List<Entry> result() {
+    public List<Entry> result() {
         return this.result == null ? List.of() : this.result;
     }
 
-
-    public @NotNull List<Entry> resultSafe() {
+    public List<Entry> resultSafe() {
         return this.result == null ? List.of() : this.result;
     }
 }

@@ -8,10 +8,10 @@ public class V1929 extends DataVersion {
         super(1929);
 
         addReference(DataTypes.ENTITY, "minecraft:wandering_trader", field -> field
-                .list("Inventory", DataTypes.ITEM_STACK));
+            .list("Inventory", DataTypes.ITEM_STACK));
         addReference(DataTypes.ENTITY, "minecraft:trader_llama", field -> field
-                .list("Items", DataTypes.ITEM_STACK)
-                .single("SaddleItem", DataTypes.ITEM_STACK)
-                .single("DecorItem", DataTypes.ITEM_STACK));
+            .list("Items", DataTypes.ITEM_STACK)
+            .single("SaddleItem", DataTypes.ITEM_STACK)
+            .single("DecorItem", DataTypes.ITEM_STACK));
     }
 }

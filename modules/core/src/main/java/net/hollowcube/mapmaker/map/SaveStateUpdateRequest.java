@@ -5,7 +5,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.registry.RegistryTranscoder;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 
@@ -20,41 +20,43 @@ public class SaveStateUpdateRequest {
         return updates;
     }
 
-    public @NotNull SaveStateUpdateRequest setType(@NotNull SaveStateType type) {
+    public SaveStateUpdateRequest setType(SaveStateType type) {
         updates.addProperty("type", type.name().toLowerCase(Locale.ROOT));
         return this;
     }
 
-    public @NotNull SaveStateUpdateRequest setCompleted(boolean completed) {
+    public SaveStateUpdateRequest setCompleted(boolean completed) {
         updates.addProperty("completed", completed);
         return this;
     }
 
-    public @NotNull SaveStateUpdateRequest setPlaytime(long playtime) {
+    public SaveStateUpdateRequest setPlaytime(long playtime) {
         updates.addProperty("playtime", playtime);
         return this;
     }
 
-    public @NotNull SaveStateUpdateRequest setTicks(long playtime) {
+    public SaveStateUpdateRequest setTicks(long playtime) {
         updates.addProperty("ticks", playtime);
         return this;
     }
 
-    public @NotNull SaveStateUpdateRequest setProtocolVersion(int protocolVersion) {
+    public SaveStateUpdateRequest setProtocolVersion(int protocolVersion) {
         updates.addProperty("protocolVersion", protocolVersion);
         return this;
     }
 
-    public @NotNull SaveStateUpdateRequest setLatency(Double start, Double end) {
+    public SaveStateUpdateRequest setLatency(@Nullable Double start, @Nullable Double end) {
         if (start == null || end == null || start < 0 || end < 0) return this;
         updates.addProperty("startLatency", start);
         updates.addProperty("endLatency", end);
         return this;
     }
 
-    public @NotNull SaveStateUpdateRequest setState(@NotNull Object state, @NotNull SaveStateType.Serializer<?> serializer) {
+    public SaveStateUpdateRequest setState(Object state, SaveStateType.Serializer<?> serializer) {
         var coder = new RegistryTranscoder<>(Transcoder.JSON, MinecraftServer.process());
-        updates.add(serializer.name(), ((Codec<Object>) serializer.codec()).encode(coder, state).orElseThrow());
+        @SuppressWarnings("unchecked")
+        var codec = (Codec<Object>) serializer.codec();
+        updates.add(serializer.name(), codec.encode(coder, state).orElseThrow());
         return this;
     }
 

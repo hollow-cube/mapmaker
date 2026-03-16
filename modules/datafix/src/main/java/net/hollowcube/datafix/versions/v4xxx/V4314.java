@@ -3,6 +3,7 @@ package net.hollowcube.datafix.versions.v4xxx;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
+import org.jetbrains.annotations.Nullable;
 
 public class V4314 extends DataVersion {
 
@@ -19,24 +20,24 @@ public class V4314 extends DataVersion {
         addFix(DataTypes.ENTITY, "minecraft:leash_knot", V4314::fixBlockAttached);
     }
 
-    private static Value fixLivingEntity(Value entity) {
+    private static @Nullable Value fixLivingEntity(Value entity) {
         fixInlineBlockPos(entity, "SleepingX", "SleepingY", "SleepingZ", "sleeping_pos");
         return null;
     }
 
-    private static Value fixVex(Value entity) {
+    private static @Nullable Value fixVex(Value entity) {
         entity.put("life_ticks", entity.remove("LifeTicks"));
         fixInlineBlockPos(entity, "BoundX", "BoundY", "BoundZ", "bound_pos");
         return null;
     }
 
-    private static Value fixPhantom(Value entity) {
+    private static @Nullable Value fixPhantom(Value entity) {
         entity.put("size", entity.remove("Size"));
         fixInlineBlockPos(entity, "AX", "AY", "AZ", "anchor_pos");
         return null;
     }
 
-    private static Value fixTurtle(Value entity) {
+    private static @Nullable Value fixTurtle(Value entity) {
         entity.remove("TravelPosX");
         entity.remove("TravelPosY");
         entity.remove("TravelPosZ");
@@ -45,7 +46,7 @@ public class V4314 extends DataVersion {
         return null;
     }
 
-    private static Value fixBlockAttached(Value entity) {
+    private static @Nullable Value fixBlockAttached(Value entity) {
         fixInlineBlockPos(entity, "TileX", "TileY", "TileZ", "block_pos");
         return null;
     }

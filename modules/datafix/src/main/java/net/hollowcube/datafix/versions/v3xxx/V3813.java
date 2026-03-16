@@ -4,19 +4,19 @@ import net.hollowcube.datafix.DataFix;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.datafix.util.Value;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Set;
 
 public class V3813 extends DataVersion {
     private static final Set<String> PATROLLING_MOBS = Set.of(
-            "minecraft:witch", "minecraft:ravager",
-            "minecraft:pillager", "minecraft:illusioner",
-            "minecraft:evoker", "minecraft:vindicator"
+        "minecraft:witch", "minecraft:ravager",
+        "minecraft:pillager", "minecraft:illusioner",
+        "minecraft:evoker", "minecraft:vindicator"
     );
     private static final Map<String, String> PATROLLING_MOB_FIELDS = Map.of(
-            "PatrolTarget", "patrol_target"
+        "PatrolTarget", "patrol_target"
     );
 
     public V3813() {
@@ -24,11 +24,11 @@ public class V3813 extends DataVersion {
 
         addFix(DataTypes.ENTITY, posFieldFixAndRename(Map.of("Leash", "leash")));
         addFix(DataTypes.ENTITY, "minecraft:bee", posFieldFixAndRename(
-                Map.of("HivePos", "hive_pos", "FlowerPos", "flower_pos")));
+            Map.of("HivePos", "hive_pos", "FlowerPos", "flower_pos")));
         addFix(DataTypes.ENTITY, "minecraft:end_crystal", posFieldFixAndRename(
-                Map.of("BeamTarget", "beam_target")));
+            Map.of("BeamTarget", "beam_target")));
         addFix(DataTypes.ENTITY, "minecraft:wandering_trader", posFieldFixAndRename(
-                Map.of("WanderTarget", "wander_target")));
+            Map.of("WanderTarget", "wander_target")));
         PATROLLING_MOBS.forEach(id -> addFix(DataTypes.ENTITY, id, posFieldFixAndRename(PATROLLING_MOB_FIELDS)));
 
         addFix(DataTypes.BLOCK_ENTITY, "minecraft:beehive", posFieldFixAndRename(Map.of("FlowerPos", "flower_pos")));
@@ -37,7 +37,7 @@ public class V3813 extends DataVersion {
         addFix(DataTypes.ITEM_STACK, "minecraft:compass", V3813::fixCompassItemStack);
     }
 
-    private static DataFix posFieldFixAndRename(@NotNull Map<String, String> fields) {
+    private static DataFix posFieldFixAndRename(Map<String, String> fields) {
         return value -> {
             fields.forEach((oldField, newField) ->
                     value.put(newField, fixBlockPos(value.remove(oldField))));
@@ -45,7 +45,7 @@ public class V3813 extends DataVersion {
         };
     }
 
-    private static Value fixCompassItemStack(Value itemStack) {
+    private static @Nullable Value fixCompassItemStack(Value itemStack) {
         var tag = itemStack.get("tag");
         if (!tag.isMapLike()) return null;
 

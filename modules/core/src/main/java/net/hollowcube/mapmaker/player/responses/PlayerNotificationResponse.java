@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.player.responses;
 
 import com.google.gson.JsonObject;
 import net.hollowcube.common.util.RuntimeGson;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
@@ -16,23 +15,23 @@ public record PlayerNotificationResponse(
 ) {
 
     public sealed interface Entry {
-        @NotNull String type();
+        String type();
 
-        @NotNull String key();
+        String key();
 
         @Nullable JsonObject data();
     }
 
     @RuntimeGson
     public record ComplexEntry(
-        @NotNull String id,
+        String id,
 
-        @NotNull String type,
-        @NotNull String key,
+        String type,
+        String key,
 
         @Nullable JsonObject data,
 
-        @NotNull Instant createdAt,
+        Instant createdAt,
         @Nullable Instant readAt,
         @Nullable Instant expiresAt
     ) implements Entry {
@@ -40,10 +39,10 @@ public record PlayerNotificationResponse(
 
     @RuntimeGson
     public record SimpleEntry(
-        @NotNull String playerId,
-        @NotNull String action,
-        @NotNull String type,
-        @NotNull String key,
+        String playerId,
+        String action,
+        String type,
+        String key,
         @Nullable JsonObject data
     ) implements Entry {
     }

@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.obungus;
 import io.opentelemetry.api.OpenTelemetry;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,13 +18,13 @@ public class ObungusServiceImpl extends AbstractHttpService implements ObungusSe
 
     private final String url;
 
-    public ObungusServiceImpl(@Nullable OpenTelemetry otel, @NotNull String url) {
+    public ObungusServiceImpl(@Nullable OpenTelemetry otel, String url) {
         super(otel);
         this.url = String.format("%s/v2/obungus", url);
     }
 
     @Override
-    public @NotNull ObungusBoxData getBoxFromReviewQueue(@NotNull String playerId) {
+    public ObungusBoxData getBoxFromReviewQueue(String playerId) {
         logger.info("getting review box for player {}", playerId);
         var req = HttpRequest.newBuilder()
                 .uri(URI.create(url + "/review_queue?player=" + playerId))

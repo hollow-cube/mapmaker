@@ -6,13 +6,12 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
 
 public class StructureBlockHandler implements BlockHandler {
-    public static @NotNull Block forOffsetSize(@NotNull Point offset, @NotNull Point size, @NotNull Mode mode) {
+    public static Block forOffsetSize(Point offset, Point size, Mode mode) {
         var tagHandler = TagHandler.newHandler();
         tagHandler.setTag(POS_X, offset.blockX());
         tagHandler.setTag(POS_Y, offset.blockY());
@@ -23,8 +22,8 @@ public class StructureBlockHandler implements BlockHandler {
         tagHandler.setTag(MODE, mode);
         tagHandler.setTag(SHOW_BOUNDING_BOX, true);
         return Block.STRUCTURE_BLOCK
-                .withHandler(StructureBlockHandler.INSTANCE)
-                .withNbt(tagHandler.asCompound());
+            .withHandler(StructureBlockHandler.INSTANCE)
+            .withNbt(tagHandler.asCompound());
     }
 
     public enum Mode {
@@ -69,18 +68,18 @@ public class StructureBlockHandler implements BlockHandler {
     public static final Tag<Integer> SIZE_Z = Tag.Integer("sizeZ");
 
     @Override
-    public @NotNull Key getKey() {
+    public Key getKey() {
         return ID;
     }
 
     @Override
-    public @NotNull Collection<Tag<?>> getBlockEntityTags() {
+    public Collection<Tag<?>> getBlockEntityTags() {
         return List.of(
-                AUTHOR, IGNORE_ENTITIES, INTEGRITY,
-                METADATA, MIRROR, MODE, NAME,
-                POS_X, POS_Y, POS_Z,
-                POWERED, ROTATION, SEED, SHOW_BOUNDING_BOX,
-                SIZE_X, SIZE_Y, SIZE_Z
+            AUTHOR, IGNORE_ENTITIES, INTEGRITY,
+            METADATA, MIRROR, MODE, NAME,
+            POS_X, POS_Y, POS_Z,
+            POWERED, ROTATION, SEED, SHOW_BOUNDING_BOX,
+            SIZE_X, SIZE_Y, SIZE_Z
         );
     }
 }

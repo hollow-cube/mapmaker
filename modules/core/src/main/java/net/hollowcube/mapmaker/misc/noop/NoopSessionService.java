@@ -5,7 +5,6 @@ import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.session.PlayerSession;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.util.List;
@@ -13,12 +12,12 @@ import java.util.List;
 public class NoopSessionService implements SessionService {
 
     @Override
-    public @NotNull List<PlayerSession> sync() {
+    public List<PlayerSession> sync() {
         return List.of();
     }
 
     @Override
-    public @NotNull PlayerData createSession(@NotNull String id, @NotNull String proxy, @NotNull String username, @NotNull String ip, @NotNull PlayerSkin skin, @NotNull String version, int protocolVersion) {
+    public PlayerData createSession(String id, String proxy, String username, String ip, PlayerSkin skin, String version, int protocolVersion) {
         return new PlayerData(
                 id, username,
                 new DisplayName(List.of(new DisplayName.Part("username", username, null))),
@@ -28,7 +27,7 @@ public class NoopSessionService implements SessionService {
     }
 
     @Override
-    public @NotNull TransferSessionResponse transferSession(@NotNull String id, @NotNull SessionTransferRequest req) {
+    public TransferSessionResponse transferSession(String id, SessionTransferRequest req) {
         return new TransferSessionResponse(
                 new PlayerData(
                         id, id,
@@ -43,27 +42,27 @@ public class NoopSessionService implements SessionService {
     }
 
     @Override
-    public void deleteSession(@NotNull String id) {
+    public void deleteSession(String id) {
 
     }
 
     @Override
-    public @NotNull PlayerSession updateSessionProperties(@NotNull String playerId, @NotNull SessionStateUpdateRequest req) {
+    public PlayerSession updateSessionProperties(String playerId, SessionStateUpdateRequest req) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public @NotNull JoinMapResponse joinMapV2(@NotNull JoinMapRequest req) {
+    public JoinMapResponse joinMapV2(JoinMapRequest req) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public @NotNull JoinMapResponse joinHubV2(@NotNull JoinHubRequest req) {
+    public JoinMapResponse joinHubV2(JoinHubRequest req) {
         return new JoinMapResponse("1", "2");
     }
 
     @Override
-    public @NotNull List<String> getIsolateOverrides() {
+    public List<String> getIsolateOverrides() {
         return List.of();
     }
 }

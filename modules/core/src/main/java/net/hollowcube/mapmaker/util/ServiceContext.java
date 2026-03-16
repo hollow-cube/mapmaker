@@ -7,7 +7,6 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import org.jetbrains.annotations.NotNullByDefault;
 
-@NotNullByDefault
 public record ServiceContext(
     ApiClient api,
     PlayerService players,

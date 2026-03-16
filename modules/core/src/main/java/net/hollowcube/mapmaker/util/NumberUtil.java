@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker.util;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -14,7 +12,7 @@ public final class NumberUtil {
     private static final Pattern PARSE_PATTERN = Pattern.compile("([0-9]*\\.?[0-9]+)(ms|h|m|s|t)?");
 
 
-    public static @NotNull String format(double number, int maxDecimalPlaces) {
+    public static String format(double number, int maxDecimalPlaces) {
         BigDecimal bigDecimal = new BigDecimal(Double.toString(number));
         bigDecimal = bigDecimal.setScale(maxDecimalPlaces, RoundingMode.DOWN);
 
@@ -28,7 +26,7 @@ public final class NumberUtil {
      *
      * <p>For example: 1.23k, 1, 11, 10k, 100m, 200b</p>
      */
-    public static @NotNull String formatCurrency(long value) {
+    public static String formatCurrency(long value) {
         if (value > 999_999_999_999L) return "999t";
         if (value > 999_999_999) return roundToThreeSigFigs(value / 1_000_000_000f, 'b');
         if (value > 999_999) return roundToThreeSigFigs(value / 1_000_000f, 'm');
@@ -36,12 +34,12 @@ public final class NumberUtil {
         return String.valueOf(value);
     }
 
-    private static @NotNull String roundToThreeSigFigs(double value, char suffix) {
+    private static String roundToThreeSigFigs(double value, char suffix) {
         BigDecimal decimal = new BigDecimal(value, MathContext.DECIMAL64);
         return decimal.round(new MathContext(3, RoundingMode.HALF_UP)).stripTrailingZeros().toPlainString() + suffix;
     }
 
-    public static @NotNull String formatMapPlaytime(long time, boolean roundToTicks) {
+    public static String formatMapPlaytime(long time, boolean roundToTicks) {
         time = roundToTicks ? roundMillisToTicks(time) : time;
         long minutes = TimeUnit.MILLISECONDS.toMinutes(time);
         long seconds = TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time));
@@ -53,7 +51,7 @@ public final class NumberUtil {
         return Math.round(time / 50.0) * 50;
     }
 
-    public static @NotNull String formatPlayerPlaytime(long time) {
+    public static String formatPlayerPlaytime(long time) {
         var result = new StringBuilder();
         var days = time / 86400000;
         if (days > 0) {
@@ -81,7 +79,7 @@ public final class NumberUtil {
         return result.toString();
     }
 
-    public static @NotNull String formatDuration(long time) {
+    public static String formatDuration(long time) {
         var result = new StringBuilder();
         var days = time / 86400000;
         if (days > 0) {
@@ -114,15 +112,15 @@ public final class NumberUtil {
         return result.toString();
     }
 
-    public static String formatTimeSince(@NotNull Instant time) {
+    public static String formatTimeSince(Instant time) {
         return formatDuration(Instant.now(), time);
     }
 
-    public static String formatTimeUntil(@NotNull Instant time) {
+    public static String formatTimeUntil(Instant time) {
         return formatDuration(time, Instant.now());
     }
 
-    public static String formatDuration(@NotNull Instant now, @NotNull Instant start) {
+    public static String formatDuration(Instant now, Instant start) {
         long seconds = now.getEpochSecond() - start.getEpochSecond();
         if (seconds < 60) return seconds + "s ";
         long minutes = seconds / 60;
@@ -133,7 +131,7 @@ public final class NumberUtil {
         return days + "d ";
     }
 
-    public static int parseDurationToTicks(@NotNull String duration) {
+    public static int parseDurationToTicks(String duration) {
         duration = duration.trim().toLowerCase(Locale.ROOT).replace(" ", "");
         if (duration.isEmpty()) return 0;
         var matcher = PARSE_PATTERN.matcher(duration);

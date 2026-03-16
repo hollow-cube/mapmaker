@@ -19,7 +19,7 @@ public class V4307 extends DataVersion {
         addFix(DataTypes.DATA_COMPONENTS, V4307::fixConvertToTooltipDisplayComponent);
     }
 
-    private static Value fixConvertToTooltipDisplayComponent(Value dataComponents) {
+    private static @Nullable Value fixConvertToTooltipDisplayComponent(Value dataComponents) {
         var hiddenComponents = Value.emptyList();
         fixGeneric(dataComponents, hiddenComponents, "minecraft:can_place_on", "predicates");
         fixGeneric(dataComponents, hiddenComponents, "minecraft:can_break", "predicates");
@@ -71,23 +71,23 @@ public class V4307 extends DataVersion {
 
     static {
         ADDITIONAL_TOOLTIP_COMPONENTS = List.of(
-                "minecraft:banner_patterns",
-                "minecraft:bees",
-                "minecraft:block_entity_data",
-                "minecraft:block_state",
-                "minecraft:bundle_contents",
-                "minecraft:charged_projectiles",
-                "minecraft:container",
-                "minecraft:container_loot",
-                "minecraft:firework_explosion",
-                "minecraft:fireworks",
-                "minecraft:instrument",
-                "minecraft:map_id",
-                "minecraft:painting/variant",
-                "minecraft:pot_decorations",
-                "minecraft:potion_contents",
-                "minecraft:tropical_fish/pattern",
-                "minecraft:written_book_content"
+            "minecraft:banner_patterns",
+            "minecraft:bees",
+            "minecraft:block_entity_data",
+            "minecraft:block_state",
+            "minecraft:bundle_contents",
+            "minecraft:charged_projectiles",
+            "minecraft:container",
+            "minecraft:container_loot",
+            "minecraft:firework_explosion",
+            "minecraft:fireworks",
+            "minecraft:instrument",
+            "minecraft:map_id",
+            "minecraft:painting/variant",
+            "minecraft:pot_decorations",
+            "minecraft:potion_contents",
+            "minecraft:tropical_fish/pattern",
+            "minecraft:written_book_content"
         );
     }
 

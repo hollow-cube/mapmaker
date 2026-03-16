@@ -2,12 +2,10 @@ package net.hollowcube.mapmaker.map.block.interaction;
 
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.sound.SoundEvent;
-import org.jetbrains.annotations.NotNull;
 
-@SuppressWarnings("UnstableApiUsage")
 public class EnderEyeInteractionRule implements BlockInteractionRule {
     @Override
-    public boolean handleInteraction(@NotNull Interaction interaction) {
+    public boolean handleInteraction(Interaction interaction) {
         var blockPosition = interaction.blockPosition();
         var block = interaction.getBlock(blockPosition, Block.Getter.Condition.TYPE);
 
