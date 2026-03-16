@@ -88,8 +88,8 @@ public final class LibEntity {
         }
 
         @Override
-        protected DisplayEntity delegate() {
-            return (DisplayEntity) super.delegate();
+        protected DisplayEntity<?> delegate() {
+            return (DisplayEntity<?>) super.delegate();
         }
 
         @Override

@@ -17,8 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-@SuppressWarnings("UnstableApiUsage")
-public class PaintingEntity extends MapEntity {
+public class PaintingEntity extends MapEntity<PaintingMeta> {
     protected SoundEvent placeSound = SoundEvent.ENTITY_PAINTING_PLACE;
     protected SoundEvent breakSound = SoundEvent.ENTITY_PAINTING_BREAK;
 
@@ -45,11 +44,6 @@ public class PaintingEntity extends MapEntity {
     private void breakPainting() {
         playSound(breakSound, 1, 1);
         remove();
-    }
-
-    @Override
-    public @NotNull PaintingMeta getEntityMeta() {
-        return (PaintingMeta) super.getEntityMeta();
     }
 
     @Override

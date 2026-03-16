@@ -178,7 +178,7 @@ public class ReadWorldAccess implements PolarWorldAccess {
         UUID uuid = tag.get("UUID") instanceof IntArrayBinaryTag uuidTag ? UUIDUtils.fromNbt(uuidTag) : UUID.randomUUID();
 
         var entity = MapEntityType.create(entityType, uuid);
-        if (entity instanceof MapEntity mapEntity) mapEntity.readData(tag);
+        if (entity instanceof MapEntity<?> mapEntity) mapEntity.readData(tag);
 
         return entity;
     }
@@ -192,7 +192,7 @@ public class ReadWorldAccess implements PolarWorldAccess {
         var pitch = buffer.read(NetworkBuffer.FLOAT);
 
         var entity = MapEntityType.create(entityType, uuid);
-        if (entity instanceof MapEntity mapEntity)
+        if (entity instanceof MapEntity<?> mapEntity)
             mapEntity.legacyLoad(buffer, VERSION_LATEST);
 
         return entity.setInstance(chunk.getInstance(), new Pos(pos, yaw, pitch));

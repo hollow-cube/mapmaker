@@ -30,7 +30,7 @@ public class DisplayEntityEditor {
 
     private static void onEntityDespawn(EntityDespawnEvent event) {
         var entity = event.getEntity();
-        if (!(entity instanceof DisplayEntity displayEntity)) return;
+        if (!(entity instanceof DisplayEntity<?> displayEntity)) return;
         var sidebar = displayEntity.getTag(SELECTED_ENTITY_SIDEBAR);
         if (sidebar == null) return;
         sidebar.destory();
@@ -40,7 +40,7 @@ public class DisplayEntityEditor {
         var player = event.getPlayer();
         var selectedEntity = OpUtils.map(player.getTag(SELECTED_DISPLAY_ENTITY), player.getInstance()::getEntityByUuid);
 
-        if (!(selectedEntity instanceof DisplayEntity displayEntity)) {
+        if (!(selectedEntity instanceof DisplayEntity<?> displayEntity)) {
             setSelectedDisplayEntity(player, null);
         } else {
             var selectedSidebar = getDetailsSidebar(displayEntity, false);

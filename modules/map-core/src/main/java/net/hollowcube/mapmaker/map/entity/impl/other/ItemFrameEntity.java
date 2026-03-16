@@ -18,8 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.UUID;
 
-@SuppressWarnings("UnstableApiUsage")
-public class ItemFrameEntity extends MapEntity {
+public class ItemFrameEntity extends MapEntity<ItemFrameMeta> {
 
     public static class Glowing extends ItemFrameEntity {
         public Glowing(@NotNull UUID uuid) {
@@ -104,11 +103,6 @@ public class ItemFrameEntity extends MapEntity {
     private void addItem(@NotNull ItemStack item) {
         playSound(addItemSound, 1, 1);
         getEntityMeta().setItem(item);
-    }
-
-    @Override
-    public @NotNull ItemFrameMeta getEntityMeta() {
-        return (ItemFrameMeta) super.getEntityMeta();
     }
 
     @Override

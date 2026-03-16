@@ -10,6 +10,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.RelativeFlags;
+import net.minestom.server.entity.metadata.other.MarkerMeta;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,7 +27,7 @@ import java.util.concurrent.CompletableFuture;
  *
  * <p>todo add a mechanism to handle this on map load (eg in the hub), and in the future with scripting</p>
  */
-public class MarkerEntity extends ObjectEntity implements SpatialObject {
+public class MarkerEntity extends ObjectEntity<MarkerMeta> implements SpatialObject {
 
     public MarkerEntity() {
         this(UUID.randomUUID());

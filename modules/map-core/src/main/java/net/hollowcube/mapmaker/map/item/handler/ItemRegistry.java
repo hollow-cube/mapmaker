@@ -79,13 +79,18 @@ public class ItemRegistry {
 
     private static final Tag<Boolean> TRIGGER_TAG = Tag.Transient("mapmaker:triggered");
 
+    private final EventNode<InstanceEvent> attackEventNode = EventNode.type("mapmaker:item/registry.attack", EventFilter.INSTANCE)
+        .setPriority(1000)
+        .addListener(EntityAttackEvent.class, this::handleHitEntity);
+
+
     private final EventNode<InstanceEvent> eventNode = EventNode.type("mapmaker:item/registry", EventFilter.INSTANCE)
             .addListener(PlayerBlockInteractEvent.class, this::handleUseItemOnBlock)
             .addListener(PlayerUseItemEvent.class, this::handleUseItem)
             .addListener(PlayerBlockPlaceEvent.class, this::handlePlaceBlock)
             .addListener(PlayerBlockBreakEvent.class, this::handleBreakBlock)
             .addListener(PlayerEntityInteractEvent.class, this::handleUseItemOnEntity)
-            .addListener(EntityAttackEvent.class, this::handleHitEntity)
+            .addChild(attackEventNode)
             .addListener(InstanceTickEvent.class, this::handleInstanceTick)
             .addListener(PlayerBeginItemUseEvent.class, this::handleBeginItemUse)
             .addListener(PlayerCancelItemUseEvent.class, this::handleCancelItemUse)
@@ -423,5 +428,9 @@ public class ItemRegistry {
 
     public boolean isOnCooldown(@NotNull Player player) {
         return !useCooldown.test(player);
+    }
+
+    public static boolean isUsingItem(@NotNull Player player) {
+        return player.getTag(TRIGGER_TAG) != null;
     }
 }

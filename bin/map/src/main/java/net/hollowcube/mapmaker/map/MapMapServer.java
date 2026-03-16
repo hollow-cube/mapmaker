@@ -165,6 +165,7 @@ public class MapMapServer extends AbstractMultiMapServer {
         commandManager.register(new AddMarkerCommand());
         commandManager.register(new AddInteractionCommand());
         commandManager.register(new EntitiesCommand());
+        commandManager.register(new SummonCommand());
 
         // Need to update the condition of some commands to allow during build mode.
         var fly = commandManager.xpath("fly");

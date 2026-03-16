@@ -32,7 +32,7 @@ import java.util.UUID;
 import static net.kyori.adventure.nbt.FloatBinaryTag.floatBinaryTag;
 
 @SuppressWarnings("UnstableApiUsage")
-public sealed abstract class DisplayEntity extends MapEntity permits DisplayEntity.Block, DisplayEntity.Item, DisplayEntity.Text {
+public sealed abstract class DisplayEntity<M extends AbstractDisplayMeta> extends MapEntity<M> permits DisplayEntity.Block, DisplayEntity.Item, DisplayEntity.Text {
     private static final Codec<AbstractDisplayMeta.BillboardConstraints> BILLBOARD_CONSTRAINTS = Codec.Enum(AbstractDisplayMeta.BillboardConstraints.class);
 
     public static final Tag<UUID> SELECTED_DISPLAY_ENTITY = Tag.Transient("mapmaker:selected_display_entity");
@@ -49,11 +49,6 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
     @Override
     protected void movementTick() {
         // Intentionally do nothing
-    }
-
-    @Override
-    public @NotNull AbstractDisplayMeta getEntityMeta() {
-        return (AbstractDisplayMeta) super.getEntityMeta();
     }
 
     @Override
@@ -237,15 +232,10 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
         getEntityMeta().setScale(new Vec(point.x(), point.y(), point.z()));
     }
 
-    public static final class Block extends DisplayEntity {
+    public static final class Block extends DisplayEntity<BlockDisplayMeta> {
 
         public Block(@NotNull UUID uuid) {
             super(EntityType.BLOCK_DISPLAY, uuid);
-        }
-
-        @Override
-        public @NotNull BlockDisplayMeta getEntityMeta() {
-            return (BlockDisplayMeta) super.getEntityMeta();
         }
 
         @Override
@@ -272,7 +262,7 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
 
     }
 
-    public static final class Item extends DisplayEntity {
+    public static final class Item extends DisplayEntity<ItemDisplayMeta> {
         // Do somewhat more lenient parsing for some edge cases that (for some reason) exist, nicer to just handle them.
         private static final Map<String, ItemDisplayMeta.DisplayContext> LENIENT_DISPLAY_CONTEXT_MAP = Map.ofEntries(
                 Map.entry("none", ItemDisplayMeta.DisplayContext.NONE),
@@ -295,11 +285,6 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
 
         public Item(@NotNull UUID uuid) {
             super(EntityType.ITEM_DISPLAY, uuid);
-        }
-
-        @Override
-        public @NotNull ItemDisplayMeta getEntityMeta() {
-            return (ItemDisplayMeta) super.getEntityMeta();
         }
 
         @Override
@@ -328,16 +313,11 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
 
     }
 
-    public static final class Text extends DisplayEntity {
+    public static final class Text extends DisplayEntity<TextDisplayMeta> {
         private static final int DEFAULT_BACKGROUND = 1073741824;
 
         public Text(@NotNull UUID uuid) {
             super(EntityType.TEXT_DISPLAY, uuid);
-        }
-
-        @Override
-        public @NotNull TextDisplayMeta getEntityMeta() {
-            return (TextDisplayMeta) super.getEntityMeta();
         }
 
         @Override

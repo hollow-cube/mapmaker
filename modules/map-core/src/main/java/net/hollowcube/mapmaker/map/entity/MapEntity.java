@@ -1,6 +1,9 @@
 package net.hollowcube.mapmaker.map.entity;
 
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.entity.impl.base.AbstractLivingEntity;
+import net.hollowcube.mapmaker.map.entity.info.MapEntityInfo;
+import net.hollowcube.mapmaker.map.entity.info.MapEntityInfoType;
 import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.hollowcube.mapmaker.map.util.datafix.legacy.PreDataFixFixes;
 import net.hollowcube.mapmaker.util.ProtocolUtil;
@@ -8,8 +11,12 @@ import net.hollowcube.terraform.entity.TerraformEntity;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.*;
+import net.minestom.server.entity.attribute.Attribute;
+import net.minestom.server.entity.metadata.EntityMeta;
+import net.minestom.server.entity.metadata.LivingEntityMeta;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.utils.UUIDUtils;
@@ -18,7 +25,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.UUID;
 
 @SuppressWarnings("UnstableApiUsage")
-public class MapEntity extends Entity implements TerraformEntity {
+public class MapEntity<M extends EntityMeta> extends Entity implements TerraformEntity {
+
+    public static final MapEntityInfo<@NotNull MapEntity<? extends EntityMeta>> INFO = MapEntityInfo.builder()
+        .with("Silent", MapEntityInfoType.Bool(false, EntityMeta::setSilent, EntityMeta::isSilent))
+        .build();
+
+
+    private static final String SILENT_KEY = "Silent";
 
     protected MapEntity(@NotNull EntityType entityType) {
         super(entityType, UUID.randomUUID());
@@ -26,6 +40,12 @@ public class MapEntity extends Entity implements TerraformEntity {
 
     protected MapEntity(@NotNull EntityType entityType, @NotNull UUID uuid) {
         super(entityType, uuid);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public @NotNull M getEntityMeta() {
+        return (M) super.getEntityMeta();
     }
 
     // Interaction
@@ -102,6 +122,7 @@ public class MapEntity extends Entity implements TerraformEntity {
 
     @Override
     public void readData(@NotNull CompoundBinaryTag tag) {
+        // TODO these nbt fields are the same as vanilla, will need to be changed so data fixers work properly.
         var keys = tag.keySet();
 
         var meta = getEntityMeta();
@@ -119,10 +140,14 @@ public class MapEntity extends Entity implements TerraformEntity {
             setNoGravity(false);
             hasPhysics = true;
         }
+
+        // Vanilla
+        this.getEntityMeta().setSilent(tag.getBoolean(SILENT_KEY, false));
     }
 
     @Override
     public void writeData(@NotNull CompoundBinaryTag.Builder tag) {
+        // TODO these nbt fields are the same as vanilla, will need to be changed so data fixers work properly.
         tag.putString("id", getEntityType().name());
         tag.put("uuid", UUIDUtils.toNbt(getUuid()));
         tag.put("Pos", NbtUtil.into(getPosition()));
@@ -137,6 +162,9 @@ public class MapEntity extends Entity implements TerraformEntity {
         if (meta.isHasGlowingEffect()) tag.putBoolean("Glowing", true);
         if (meta.isOnFire()) tag.putBoolean("HasVisualFire", true);
         if (hasNoGravity()) tag.putBoolean("NoGravity", true);
+
+        // Vanilla
+        tag.putBoolean(SILENT_KEY, this.getEntityMeta().isSilent());
     }
 
     @Deprecated // Should never be used, but cannot be removed for backwards compatibility.
