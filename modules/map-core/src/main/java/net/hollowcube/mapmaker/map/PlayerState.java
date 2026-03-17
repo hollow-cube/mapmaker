@@ -19,7 +19,6 @@ public interface PlayerState<S extends PlayerState<S, W>, W extends AbstractMapW
         noxesium.clear();
         noxesium.set(NoxesiumGameComponents.DISABLE_SPIN_ATTACK_COLLISIONS, true);
         noxesium.set(NoxesiumGameComponents.CLIENT_AUTHORITATIVE_ELYTRA, true);
-        noxesium.set(NoxesiumGameComponents.ELYTRA_COYOTE_TIME, 1.0);
     }
 
     default void resetPlayer(W world, Player player, @Nullable S nextState) {

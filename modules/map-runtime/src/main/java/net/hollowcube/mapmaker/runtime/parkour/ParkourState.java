@@ -67,7 +67,6 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             noxesium.clear();
             noxesium.set(NoxesiumGameComponents.DISABLE_SPIN_ATTACK_COLLISIONS, true);
             noxesium.set(NoxesiumGameComponents.CLIENT_AUTHORITATIVE_ELYTRA, true);
-            noxesium.set(NoxesiumGameComponents.ELYTRA_COYOTE_TIME, 1.0);
 
             // Timer is only added for scorable playing states.
             ActionBar.forPlayer(player).addProvider(ParkourTimerHud.INSTANCE);
