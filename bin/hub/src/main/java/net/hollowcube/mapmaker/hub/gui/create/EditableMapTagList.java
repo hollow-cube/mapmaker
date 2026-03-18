@@ -31,6 +31,13 @@ public class EditableMapTagList extends Panel {
         return "gui.create_maps.tags." + tag.type().translationName() + '.' + tag.translationName();
     }
 
+    private static String getCategory(int index) {
+        if (index == 0) return "primary.first";
+        if (index == 1) return "primary.second";
+        if (index == 2) return "primary.third";
+        return "secondary";
+    }
+
     private void update() {
         clear();
 
@@ -40,24 +47,17 @@ public class EditableMapTagList extends Panel {
             var tag = tags.get(i);
             final int index = i;
             add(i, 0, new Button(1, 1)
-                .translationKey("gui.create_maps.edit.tags.with_data", getTagTranslationArgs(tag))
+                .translationKey("gui.create_maps.tags.display", getTagTranslationArgs(tag))
                 .sprite("icon2/1_1/" + tag.sprite(), 1, 1)
-                .onLeftClick(() -> host.pushTransientView(new SelectTagView(map,
-                    newTag -> handleReplaceTag(index, newTag))))
+                .onLeftClick(() -> host.pushTransientView(new SelectTagView(map, newTag -> handleReplaceTag(index, newTag))))
                 .onRightClick(() -> handleRemoveTag(index)));
         }
 
         if (i < 7) {
-            final String tagCategory;
-            if (i == 0) {
-                tagCategory = "main";
-            } else if (i <= 2) {
-                tagCategory = "primary";
-            } else {
-                tagCategory = "secondary";
-            }
+            final String tagCategory = getCategory(i);
 
-            add(i, 0, new Button("gui.create_maps.edit.tags." + tagCategory + ".add", 1, 1)
+            add(i, 0, new Button(1, 1)
+                .translationKey("gui.create_maps.edit.tags.add." + tagCategory)
                 .sprite("icon2/1_1/plus", 1, 1)
                 .onLeftClick(() -> host.pushTransientView(new SelectTagView(map, this::handleAddTag))));
         }
