@@ -11,12 +11,15 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.compat.moulberrytweaks.debugrender.DebugShape;
 import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderAddPacket;
+import net.hollowcube.mapmaker.command.arg.CoreArgument;
+import net.hollowcube.mapmaker.command.arg.MapArgument;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.hollowcube.mapmaker.map.util.ServerLatencyHud;
 import net.hollowcube.mapmaker.player.Permission;
@@ -44,8 +47,12 @@ public class DebugCommand extends CommandDsl {
     private final CommandCondition adminCondition;
     private final CommandCondition localCondition;
 
+    private final ServerBridge bridge;
+    private final MapArgument vjoinMapArg;
+
     public DebugCommand(
-        @NotNull PlayerService playerService, @NotNull MapService mapService
+        @NotNull PlayerService playerService, @NotNull MapService mapService,
+        @NotNull ServerBridge bridge
     ) {
         super("debug");
 
@@ -88,6 +95,12 @@ public class DebugCommand extends CommandDsl {
             "add dripleaf block handlers to relevant blocks");
         createPermissionedSubcommand("latency", this::handleLatency,
                                      "show latency to other players");
+
+        var vjoin = createPermissionedSubcommand("vjoin", this::handleVerificationJoin,
+            "join a verification state of a map");
+        this.bridge = bridge;
+        vjoinMapArg = CoreArgument.Map("map", mapService);
+        vjoin.addSyntax(playerOnly(this::handleVerificationJoin), vjoinMapArg);
     }
 
     public @NotNull CommandDsl createPermissionlessSubcommand(
@@ -285,6 +298,17 @@ public class DebugCommand extends CommandDsl {
 
     private void handleLatency(@NotNull Player player, @NotNull CommandContext context) {
         player.scheduleNextTick(_ -> ActionBar.forPlayer(player).toggleProvider(new ServerLatencyHud()));
+    }
+
+    private void handleVerificationJoin(@NotNull Player player, @NotNull CommandContext context) {
+        var mapId = context.getRaw(vjoinMapArg);
+        if (mapId == null) {
+            player.sendMessage("Map ID is required!");
+            return;
+        }
+
+        bridge.joinMap(player, mapId, ServerBridge.JoinMapState.VERIFYING, "debug_vjoin");
+
     }
 
     private void queueRateLimitedWorldUpdate(
