@@ -24,12 +24,6 @@ public interface PlayerService {
     @NotNull
     DisplayName getPlayerDisplayName2(@NotNull String id);
 
-    default @NotNull List<DisplayName> getPlayerDisplayNames(@NotNull List<String> ids) {
-        return ids.stream() // todo probably makes sense to add a bulk endpoint
-            .map(this::getPlayerDisplayName2)
-            .toList();
-    }
-
     @NotNull
     String getPlayerId(@NotNull String idOrUsername);
 
@@ -49,9 +43,6 @@ public interface PlayerService {
     );
 
     void buyUpgrade(@NotNull String playerId, @NotNull String upgradeId, int cubits, @NotNull JsonObject meta);
-
-    @NotNull
-    JsonObject getPlayerBackpack(@NotNull String id);
 
     @NotNull
     TabCompleteResponse getUsernameTabCompletions(@NotNull String query, int limit);

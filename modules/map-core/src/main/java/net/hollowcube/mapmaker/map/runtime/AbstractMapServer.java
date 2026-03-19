@@ -597,9 +597,8 @@ public abstract class AbstractMapServer implements MapServer {
             );
             var sessionResponseFuture = FutureUtil.fork(() -> sessionService.transferSession(playerId, transferReq));
             var mapPlayerDataFuture = FutureUtil.fork(() -> mapService.getMapPlayerData(playerId));
-            var backpackDataFuture = FutureUtil.fork(() -> playerService.getPlayerBackpack(playerId));
 
-            CompletableFuture.allOf(sessionResponseFuture, mapPlayerDataFuture, backpackDataFuture).join();
+            CompletableFuture.allOf(sessionResponseFuture, mapPlayerDataFuture).join();
 
             var sessionResponse = sessionResponseFuture.get();
             player.setTag(CompatProvider.FIRST_JOIN_TAG, sessionResponse.isJoin());
@@ -608,7 +607,6 @@ public abstract class AbstractMapServer implements MapServer {
             player.setTag(MapPlayerData.TAG, mapPlayerDataFuture.get());
             var backpack = new PlayerBackpack(player);
             player.setTag(PlayerBackpack.TAG, backpack);
-            backpack.update(backpackDataFuture.get());
 
             // If the player is joining vanished, configure them that way.
             if (sessionResponse.session().hidden()) {

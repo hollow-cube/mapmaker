@@ -67,11 +67,6 @@ public class NoopPlayerService implements PlayerService {
     }
 
     @Override
-    public @NotNull JsonObject getPlayerBackpack(@NotNull String id) {
-        return new JsonObject();
-    }
-
-    @Override
     public @NotNull TabCompleteResponse getUsernameTabCompletions(@NotNull String query, int limit) {
         return new TabCompleteResponse(MinecraftServer.getConnectionManager().getOnlinePlayers().stream()
             .map(p -> new TabCompleteResponse.Entry(p.getUuid().toString(),

@@ -101,19 +101,6 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @NotNull JsonObject getPlayerBackpack(@NotNull String id) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(url + "/players/" + id + "/backpack"));
-        var res = doRequest("getPlayerBackpack", req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), JsonObject.class);
-            case 404 -> new JsonObject();
-            default -> throw new SessionService.InternalError(
-                "Failed to get player backpack (" + res.statusCode() + "): " + res.body());
-        };
-    }
-
-    @Override
     public @NotNull String getPlayerId(@NotNull String idOrUsername) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(url + "/players/" + idOrUsername + "/id"));
