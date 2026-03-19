@@ -131,5 +131,8 @@ public final class PlayerUtil {
                         runnable.run();
                 })
                 .build());
+        // In case already offline
+        if (!player.isOnline() && !completed.compareAndExchange(false, true))
+            runnable.run();
     }
 }

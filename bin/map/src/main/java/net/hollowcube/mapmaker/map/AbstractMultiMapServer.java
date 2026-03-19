@@ -335,7 +335,10 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                     var player = players.get(i);
                     player.sendMessage(reason);
                     futures[i] = world.scheduleRemovePlayer(player)
-                        .thenRunAsync(() -> bridge().joinHub(player), FutureUtil.VIRUTAL_EXECUTOR)
+                        .thenRunAsync(() -> {
+                            if (!player.isOnline()) return;
+                            bridge().joinHub(player);
+                        }, FutureUtil.VIRUTAL_EXECUTOR)
                         .exceptionally(e -> {
                             ExceptionReporter.reportException(new RuntimeException("failed to remove player", e), player);
                             player.kick(reason);
@@ -345,6 +348,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                 span.setAttribute("players", players.size());
                 try {
                     CompletableFuture.allOf(futures).get(15, TimeUnit.SECONDS);
+                    System.out.println("drained players successfully!");
                 } catch (TimeoutException ignored) {
                     logger.error("failed to drain players in 15s, exiting.");
                 } catch (RuntimeException | InterruptedException | ExecutionException e) {
