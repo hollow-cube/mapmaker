@@ -572,7 +572,7 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     protected @NotNull DebugCommand createDebugCommand() {
-        var cmd = new DebugCommand(playerService(), mapService());
+        var cmd = new DebugCommand(playerService(), mapService(), bridge());
         cmd.createPermissionedSubcommand("reload-commands", (player, _) -> {
             loadRemoteCommands();
             player.sendMessage(Component.text("Reloaded commands"));
