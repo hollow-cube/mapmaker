@@ -117,7 +117,8 @@ public final class PlayerUtil {
                 .filter(event -> event.getPlayer() == player)
                 .expireWhen(_ -> completed.get())
                 .handler(_ -> {
-                    if (completed.compareAndExchange(false, true))
+                    // cax returns the expected value if successful, so invert
+                    if (!completed.compareAndExchange(false, true))
                         runnable.run();
                 })
                 .build())
@@ -125,7 +126,8 @@ public final class PlayerUtil {
                 .filter(event -> event.getPlayer() == player)
                 .expireWhen(_ -> completed.get())
                 .handler(_ -> {
-                    if (completed.compareAndExchange(false, true))
+                    // cax returns the expected value if successful, so invert
+                    if (!completed.compareAndExchange(false, true))
                         runnable.run();
                 })
                 .build());

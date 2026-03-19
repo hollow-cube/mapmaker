@@ -4,6 +4,8 @@ import io.nats.client.Message;
 import io.nats.client.api.AckPolicy;
 import io.nats.client.api.ConsumerConfiguration;
 import io.nats.client.api.DeliverPolicy;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.Tracer;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
@@ -71,6 +73,8 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
     private final Map<String, CompletableFuture<@Nullable MapJoinInfo>> pendingPlayerJoins = new ConcurrentHashMap<>();
     private final Set<AbstractMapWorld<?, ?>> closingWorlds = new ConcurrentHashMap<AbstractMapWorld<?, ?>, Integer>().keySet(1);
 
+    private Tracer tracer;
+
     private volatile boolean isClosed = false;
 
     public AbstractMultiMapServer(@NotNull ConfigLoaderV3 config) {
@@ -104,6 +108,8 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
         addBinding(Scheduler.class, MinecraftServer.getSchedulerManager());
 
         shutdowner().queue("close-worlds", this::close);
+
+        tracer = otel.getTracer(getClass().getName(), ServerRuntime.getRuntime().version());
     }
 
     //region Player Lifecycle
@@ -307,46 +313,52 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
 
     private void destroy(@NotNull MapKey key, @NotNull Component reason) {
         FutureUtil.assertThread();
-        final Future<AbstractMapWorld<?, ?>> worldFuture;
-        worldLock.lock();
+        var span = tracer.spanBuilder("destroyWorld").setSpanKind(SpanKind.CLIENT).startSpan();
         try {
-            worldFuture = worlds.remove(key);
-        } finally {
-            worldLock.unlock();
-        }
-        if (worldFuture == null) return;
-
-        var world = FutureUtil.getUnchecked(worldFuture);
-        try {
-            closingWorlds.add(world);
-
-            // Remove all players from the world.
-            var players = List.copyOf(world.players());
-            var futures = new CompletableFuture[players.size()];
-            for (int i = 0; i < players.size(); i++) {
-                var player = players.get(i);
-                player.sendMessage(reason);
-                futures[i] = world.scheduleRemovePlayer(player)
-                    .thenRunAsync(() -> bridge().joinHub(player), FutureUtil.VIRUTAL_EXECUTOR)
-                    .exceptionally(e -> {
-                        ExceptionReporter.reportException(new RuntimeException("failed to remove player", e), player);
-                        player.kick(reason);
-                        return null;
-                    });
-            }
+            final Future<AbstractMapWorld<?, ?>> worldFuture;
+            worldLock.lock();
             try {
-                CompletableFuture.allOf(futures).get(15, TimeUnit.SECONDS);
-            } catch (TimeoutException ignored) {
-                logger.error("failed to drain players in 15s, exiting.");
-            } catch (RuntimeException | InterruptedException | ExecutionException e) {
-                logger.error("failed to drain players", e);
+                worldFuture = worlds.remove(key);
+            } finally {
+                worldLock.unlock();
             }
+            if (worldFuture == null) return;
 
-            // Close the world itself
-            MinecraftServer.getSchedulerManager()
-                .scheduleEndOfTick(world::close);
+            var world = FutureUtil.getUnchecked(worldFuture);
+            try {
+                closingWorlds.add(world);
+
+                // Remove all players from the world.
+                var players = List.copyOf(world.players());
+                var futures = new CompletableFuture[players.size()];
+                for (int i = 0; i < players.size(); i++) {
+                    var player = players.get(i);
+                    player.sendMessage(reason);
+                    futures[i] = world.scheduleRemovePlayer(player)
+                        .thenRunAsync(() -> bridge().joinHub(player), FutureUtil.VIRUTAL_EXECUTOR)
+                        .exceptionally(e -> {
+                            ExceptionReporter.reportException(new RuntimeException("failed to remove player", e), player);
+                            player.kick(reason);
+                            return null;
+                        });
+                }
+                span.setAttribute("players", players.size());
+                try {
+                    CompletableFuture.allOf(futures).get(15, TimeUnit.SECONDS);
+                } catch (TimeoutException ignored) {
+                    logger.error("failed to drain players in 15s, exiting.");
+                } catch (RuntimeException | InterruptedException | ExecutionException e) {
+                    logger.error("failed to drain players", e);
+                }
+
+                // Close the world itself
+                MinecraftServer.getSchedulerManager()
+                    .scheduleEndOfTick(world::close);
+            } finally {
+                closingWorlds.remove(world);
+            }
         } finally {
-            closingWorlds.remove(world);
+            span.end();
         }
     }
 
