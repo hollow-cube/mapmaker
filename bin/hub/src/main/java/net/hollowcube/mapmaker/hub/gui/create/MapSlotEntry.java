@@ -51,9 +51,11 @@ public class MapSlotEntry extends Panel {
         // If you arent the owner, we need to check the latest version to make sure its not in a verifying state
         // TODO: this is still a race, we need to check elsewhere to prevent editing a map during/after verification
         var map = mapService.getMap(host.player().getUuid().toString(), slot.map().id());
-        if (map.verification() != MapVerification.UNVERIFIED) {
-            // TODO: translation key
-            host.player().sendMessage(Component.translatable("cant edit during verification"));
+        if (map.verification() == MapVerification.PENDING) {
+            host.player().sendMessage(Component.translatable("edit.map.failure.verify"));
+            return;
+        } else if (map.verification() == MapVerification.VERIFIED) {
+            host.player().sendMessage(Component.translatable("edit.map.failure.verified"));
             return;
         }
 
@@ -82,11 +84,10 @@ public class MapSlotEntry extends Panel {
     protected void removeFromMap() {
         var player = host.player();
         var playerId = PlayerData.fromPlayer(player).id();
-        host.pushView(confirm("Leave map?", () -> FutureUtil.submitVirtual(() -> {
+        host.pushView(confirm("Leave Map?", () -> FutureUtil.submitVirtual(() -> {
             try {
                 api.maps.removeMapBuilder(slot.map().id(), playerId);
-                // TODO: translation key
-                player.sendMessage("removed from map");
+                player.sendMessage(Component.translatable("leave.other.map"));
             } catch (RuntimeException e) {
                 ExceptionReporter.reportException(e, playerId);
                 player.sendMessage(Component.translatable("generic.unknown_error"));
@@ -124,7 +125,7 @@ public class MapSlotEntry extends Panel {
                 .translationKey(translationKey, mapName)
                 .onLeftClick(this::editMapDetails));
 
-            add(8, 0, new Button("gui.create_maps.edit.build", 1, 1)
+            add(8, 0, new Button("gui.create_maps.slot_selection.quick_build", 1, 1)
                 .sprite("icon2/1_1/hammer", 1, 1)
                 .onLeftClickAsync(this::buildInWorld));
         }
@@ -178,7 +179,7 @@ public class MapSlotEntry extends Panel {
                 .translationKey(translationKey, mapName)
                 .onLeftClickAsync(this::buildInWorld));
 
-            add(8, 0, new Button("gui.create_maps.edit.remove_self", 1, 1)
+            add(8, 0, new Button("gui.create_maps.slot.other.leave", 1, 1)
                 .sprite("icon2/1_1/running_out_door", 1, 1)
                 .onLeftClick(this::removeFromMap));
         }

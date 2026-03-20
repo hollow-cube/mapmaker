@@ -241,6 +241,7 @@ public class EditMapView extends Panel {
             .title("Add Map Builder")
             .searchFunction((query, limit) -> api.players.searchPlayers(query, List.of(slot.map().owner()), limit).results())
             // todo would be cool to default to some online players
+            // adding onto the above, probably their online friends
             .defaultSearchTerm("")
             // TODO if the player is already invited they should not be clickable
             .buttonFactory(pds -> {
@@ -248,10 +249,12 @@ public class EditMapView extends Panel {
                     .text(ExtraComponents.noItalic(pds.displayName()), List.of())
                     .model(MODEL_8X, null)
                     .profile(getPlayerHead2d(pds.id()));
-                if (isPlayerInvited(pds.id())) {
+                if (isPlayerInvitePending(pds.id())) {
 //                    button.background("create_maps2/head_outline_pending", 4, 4)
 //                        .translationKey("gui.create_maps.edit.builders.already_invited", pds.displayName().asComponent());
-                    button.lorePostfix(List.of(Component.text("no they are already added L")));
+                    button.lorePostfix(List.of(Component.translatable("gui.create_maps.edit.builders.add.search.entry.already_invited.lore")));
+                } else if (isPlayerInvited(pds.id())) {
+                    button.lorePostfix(List.of(Component.translatable("gui.create_maps.edit.builders.add.search.entry.already_added.lore")));
                 }
                 return button;
             })
@@ -282,7 +285,7 @@ public class EditMapView extends Panel {
     @Blocking
     static void editMap(MapService mapService, MapData map, InventoryHost host, ServerBridge bridge) {
         if (map.verification() != MapVerification.UNVERIFIED) {
-            host.pushView(ExtraPanels.confirm("Reset verification progress?",
+            host.pushView(ExtraPanels.confirm("Reset Verification Progress?",
                 () -> buildMapAfterVerify(mapService, bridge, map, host.player())));
         } else {
             beginBuildingMap(bridge, map, host.player());
@@ -318,5 +321,9 @@ public class EditMapView extends Panel {
 
     private boolean isPlayerInvited(String playerId) {
         return slot.builders().stream().anyMatch(builder -> builder.id().equals(playerId));
+    }
+
+    private boolean isPlayerInvitePending(String playerId) {
+        return slot.builders().stream().anyMatch(builder -> builder.id().equals(playerId) && builder.pending());
     }
 }
