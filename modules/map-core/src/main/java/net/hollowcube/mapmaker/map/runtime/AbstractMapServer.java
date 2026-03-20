@@ -294,7 +294,7 @@ public abstract class AbstractMapServer implements MapServer {
         // Copy the facets map to prevent modification
         facets = Map.copyOf(facets);
 
-        acHook.preReady();
+        acHook.preReady(this);
 
         // Finally, mark the service as ready for Kubernetes
         isReady = true;
@@ -340,6 +340,7 @@ public abstract class AbstractMapServer implements MapServer {
         return sessionManager;
     }
 
+    @Override
     public @NotNull CommandManager commandManager() {
         return commandManager;
     }
