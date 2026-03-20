@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.map;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
+import net.hollowcube.command.CommandManager;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -28,6 +29,7 @@ public class MockMapServer implements MapServer {
     public ServerBridge bridge;
     public Controller guiController;
     public Scheduler scheduler;
+    public CommandManager commandManager;
 
     @Override
     public @NotNull ApiClient api() {
@@ -67,6 +69,11 @@ public class MockMapServer implements MapServer {
     @Override
     public @NotNull ServerBridge bridge() {
         return Objects.requireNonNull(bridge, "ServerBridge is not initialized");
+    }
+
+    @Override
+    public @NotNull CommandManager commandManager() {
+        return Objects.requireNonNull(commandManager, "CommandManager is not initialized");
     }
 
     @Override
