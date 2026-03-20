@@ -53,12 +53,16 @@ jobs:
           AWS_S3_REGION: "auto"
           SOURCE_DIR: out
 
+      - name: Download anticheat.jar
+        run: gh release download --repo hollow-cube/anticheat --pattern "anticheat.jar"
+        env:
+          GH_TOKEN: ${{ env.ANTICHEAT_GH_TOKEN }}
       - name: Build map-isolate native image
         env:
           MAPMAKER_VERSION: ${{ github.event.pull_request.title || github.ref_name }}
           MAPMAKER_COMMIT_HASH: ${{ github.event.pull_request.head.sha || github.sha }}
           MAPMAKER_RESOURCE_PACK_HASH: ${{ steps.build-rp.outputs.resource_pack_sha }}
-        run: ./gradlew :bin:map-isolate:nativeCompile -PisRelease=false --no-configuration-cache
+        run: ./gradlew :bin:map-isolate:nativeCompile -Pac=true -PisRelease=false --no-configuration-cache
       - name: Upload build report
         uses: actions/upload-artifact@v4
         with:
