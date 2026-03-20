@@ -49,7 +49,6 @@ include(
 include(
     "bin:config",
     "bin:development",
-    "bin:example",
     "bin:hub",
     "bin:local",
     "bin:map",
