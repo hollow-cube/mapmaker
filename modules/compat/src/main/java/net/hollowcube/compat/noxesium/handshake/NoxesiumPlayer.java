@@ -3,21 +3,19 @@ package net.hollowcube.compat.noxesium.handshake;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.compat.noxesium.components.NoxesiumComponentMap;
 import net.hollowcube.compat.noxesium.components.NoxesiumComponentRegistry;
 import net.hollowcube.compat.noxesium.components.NoxesiumComponentType;
 import net.hollowcube.compat.noxesium.components.NoxesiumGameComponents;
+import net.hollowcube.compat.noxesium.events.NoxesiumPlayerInitEvent;
 import net.hollowcube.compat.noxesium.packets.v3.ClientboundHandshakeCompletePacket;
 import net.hollowcube.compat.noxesium.packets.v3.ClientboundUpdateGameComponentsPacket;
 import net.hollowcube.compat.noxesium.packets.v3.ServerboundHandshakeAcknowledgePacket;
 import net.hollowcube.compat.noxesium.packets.v3.ServerboundRegistryUpdateResultPacket;
-import net.hollowcube.posthog.PostHog;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Map;
 
 public class NoxesiumPlayer implements NoxesiumComponentType.Holder {
 
@@ -31,29 +29,19 @@ public class NoxesiumPlayer implements NoxesiumComponentType.Holder {
 
     private boolean syncingComponents = false;
     private boolean initialized = false;
-    private boolean loggedMods = false;
 
     public NoxesiumPlayer(Player player) {
         this.player = player;
     }
 
+    public Player player() {
+        return player;
+    }
+
     public void handle(ServerboundHandshakeAcknowledgePacket packet) {
         this.syncRegistries(NoxesiumGameComponents.REGISTRY);
 
-        if (!this.loggedMods && Boolean.TRUE.equals(this.player.getTag(CompatProvider.FIRST_JOIN_TAG))) {
-            this.loggedMods = true;
-
-            PostHog.capture(this.player.getUuid().toString(), "session_mods", Map.ofEntries(
-                Map.entry(
-                    "mods",
-                    packet.mods()
-                        .stream()
-                        .map(ServerboundHandshakeAcknowledgePacket.Mod::id)
-                        .sorted()
-                        .toList()
-                )
-            ));
-        }
+        EventDispatcher.call(new NoxesiumPlayerInitEvent(this, packet));
     }
 
     public void handle(ServerboundRegistryUpdateResultPacket packet) {

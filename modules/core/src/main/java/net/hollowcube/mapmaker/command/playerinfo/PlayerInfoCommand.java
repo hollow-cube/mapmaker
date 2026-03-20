@@ -26,10 +26,15 @@ public class PlayerInfoCommand extends CommandDsl {
         addSubcommand(new SubCommand<>("general", new GeneralInfoType(sessionManager)));
         addSubcommand(new SubCommand<>("channels", new ChannelsInfoType(false)));
         addSubcommand(new SubCommand<>("channel_namespaces", new ChannelsInfoType(true)));
-        addSubcommand(new SubCommand<>("info_reports", new ReportsInfoType()));
         addSubcommand(new SubCommand<>("alts", new AltsInfoType(players)));
 
         addSubcommand(new TopTimesInfoType(mapService, players));
+    }
+
+    /// Expands to public
+    @Override
+    public void addSubcommand(@NotNull CommandDsl command) {
+        super.addSubcommand(command);
     }
 
     private static class SubCommand<T> extends CommandDsl {
