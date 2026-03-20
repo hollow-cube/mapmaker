@@ -156,8 +156,4 @@ public class NoopPlayerService implements PlayerService {
         return List.of();
     }
 
-    @Override
-    public @Nullable String getRecap(@NotNull String playerId, int year) {
-        throw new UnsupportedOperationException();
-    }
 }

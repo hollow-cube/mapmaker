@@ -141,10 +141,6 @@ public interface PlayerService {
         return true;
     }
 
-    // Recap
-
-    @Nullable String getRecap(@NotNull String playerId, int year);
-
     class BadRequestError extends RuntimeException {}
 
     class NotFoundError extends RuntimeException {

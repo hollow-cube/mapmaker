@@ -37,6 +37,9 @@ For more about Hollow Cube, visit [hollowcube.net](https://hollowcube.net).
     - `native-image-helper` - Native image plugin to automatically generate some reflection metadata
 - `resources/` - Resource pack assets
 
+The game servers use [Minestom](https://github.com/Minestom/Minestom) and are stateless beyond active maps, delegating
+to the [api-server](https://github.com/hollow-cube/api-server) for storage and some processing.
+
 ## Getting Started
 
 See [Development Setup](.github/DEVELOPMENT_SETUP.md) for instructions on building and running the project locally.

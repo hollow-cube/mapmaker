@@ -453,8 +453,6 @@ public abstract class AbstractMapServer implements MapServer {
         }
 
         if (fullInstance) {
-            commandManager.register(new RecapCommand(playerService()));
-
             loadRemoteCommands();
         }
 
