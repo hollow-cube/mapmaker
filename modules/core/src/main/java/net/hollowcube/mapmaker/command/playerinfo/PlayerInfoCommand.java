@@ -31,12 +31,6 @@ public class PlayerInfoCommand extends CommandDsl {
         addSubcommand(new TopTimesInfoType(mapService, players));
     }
 
-    /// Expands to public
-    @Override
-    public void addSubcommand(@NotNull CommandDsl command) {
-        super.addSubcommand(command);
-    }
-
     private static class SubCommand<T> extends CommandDsl {
 
         public SubCommand(@NotNull String name, @NotNull PlayerInfoType<T> type) {

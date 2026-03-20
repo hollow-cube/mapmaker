@@ -195,5 +195,10 @@ public class CommandManagerImpl implements CommandManager {
             }
             return commands;
         }
+
+        @Override
+        public void edit(@NotNull CommandNode node, @NotNull Consumer<CommandBuilder> func) {
+            func.accept(new CommandBuilder(node));
+        }
     }
 }
