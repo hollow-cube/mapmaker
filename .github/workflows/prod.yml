@@ -68,11 +68,15 @@ jobs:
           cache: 'gradle'
 
       # Build server
+      - name: Download anticheat.jar
+        run: gh release download --repo hollow-cube/anticheat --pattern "anticheat.jar"
+        env:
+          GH_TOKEN: ${{ env.ANTICHEAT_GH_TOKEN }}
       - name: Build standalone binary
         env:
           MAPMAKER_VERSION: ${{ github.ref_name }}
           MAPMAKER_COMMIT_HASH: ${{ github.sha }}
-        run: ./gradlew :bin:map:shadowJar -PisRelease=true --no-daemon
+        run: ./gradlew :bin:map:shadowJar -Pac=true -PisRelease=true --no-daemon
 
       # Build and push docker image
       - name: Set up Docker Buildx
@@ -109,11 +113,15 @@ jobs:
           cache: 'gradle'
 
       # Build server
+      - name: Download anticheat.jar
+        run: gh release download --repo hollow-cube/anticheat --pattern "anticheat.jar"
+        env:
+          GH_TOKEN: ${{ env.ANTICHEAT_GH_TOKEN }}
       - name: Build standalone binary
         env:
           MAPMAKER_VERSION: ${{ github.ref_name }}
           MAPMAKER_COMMIT_HASH: ${{ github.sha }}
-        run: ./gradlew :bin:hub:shadowJar -PisRelease=true --no-daemon
+        run: ./gradlew :bin:hub:shadowJar -Pac=true -PisRelease=true --no-daemon
 
       # Build and push docker image
       - name: Set up Docker Buildx
@@ -144,6 +152,10 @@ jobs:
         with:
           submodules: 'recursive'
 
+      - name: Download anticheat.jar
+        run: gh release download --repo hollow-cube/anticheat --pattern "anticheat.jar"
+        env:
+          GH_TOKEN: ${{ env.ANTICHEAT_GH_TOKEN }}
       - name: Build standalone binary
         run: |
           docker run --rm \
@@ -153,7 +165,7 @@ jobs:
             -e MAPMAKER_COMMIT_HASH=${{ github.sha }} \
             --entrypoint /bin/bash \
             container-registry.oracle.com/graalvm/native-image:25 \
-            -c "./gradlew :bin:map-isolate:nativeCompile -PisRelease=true --no-configuration-cache --no-daemon"
+            -c "./gradlew :bin:map-isolate:nativeCompile -Pac=true -PisRelease=true --no-configuration-cache --no-daemon"
 
       # Build and push docker image
       - name: Set up Docker Buildx
