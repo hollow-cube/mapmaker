@@ -1,4 +1,4 @@
-# Assumes you have map-service, session-service, and player-service in `..`
+# Assumes you have api-server in `..`
 
 set -e
 ORIGINAL_DIR=$(pwd)

@@ -39,7 +39,7 @@ For more about Hollow Cube, visit [hollowcube.net](https://hollowcube.net).
 
 ## Getting Started
 
-See [Development Setup](TODO) for instructions on building and running the project locally.
+See [Development Setup](.github/DEVELOPMENT_SETUP.md) for instructions on building and running the project locally.
 
 ## Contributing
 
