@@ -14,7 +14,7 @@ You'll be automatically prompted by CLA Assistant when you open your first pull 
 
 ## Pull Requests
 
-- Please open and issue or discuss on Discord before opening a PR (even for bug fixes).
+- Please open an issue or discuss on Discord before opening a PR (even for bug fixes).
   This helps ensure that your contribution is aligned with our goals and avoids duplicate/wasted effort.
 - Keep PRs relatively focused on a single change. Smaller PRs are easier to review and more likely to be merged quickly.
 - Follow the code style defined in `.editorconfig`. Please avoid PRs that only change formatting or style.
