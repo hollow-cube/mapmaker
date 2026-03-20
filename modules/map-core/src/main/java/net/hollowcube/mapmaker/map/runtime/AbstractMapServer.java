@@ -71,6 +71,7 @@ import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
 import net.hollowcube.mapmaker.map.command.BugReportCommand;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.entity.MapEntities;
+import net.hollowcube.mapmaker.map.util.ACHook;
 import net.hollowcube.mapmaker.map.util.AnonHealthCheck;
 import net.hollowcube.mapmaker.map.util.DynamicController;
 import net.hollowcube.mapmaker.map.util.ServerStatsHud;
@@ -124,6 +125,8 @@ public abstract class AbstractMapServer implements MapServer {
 
     protected final ConfigLoaderV3 config;
     protected final GlobalConfig globalConfig;
+
+    private final ACHook acHook;
 
     protected final OpenTelemetry otel;
     private final ApiClient api;
@@ -189,6 +192,8 @@ public abstract class AbstractMapServer implements MapServer {
 
         var obungusService = new ObungusServiceImpl(otel, "http://localhost:9127");
         addBinding(ObungusService.class, obungusService, "obungus", "obungusService");
+
+        this.acHook = ServiceLoader.load(ACHook.class).findFirst().orElse(null);
     }
 
     protected abstract @NotNull String name();
@@ -288,6 +293,8 @@ public abstract class AbstractMapServer implements MapServer {
 
         // Copy the facets map to prevent modification
         facets = Map.copyOf(facets);
+
+        acHook.preReady();
 
         // Finally, mark the service as ready for Kubernetes
         isReady = true;
