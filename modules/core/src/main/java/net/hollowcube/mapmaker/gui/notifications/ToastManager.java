@@ -42,8 +42,8 @@ public class ToastManager {
     public static void showNotification(Player player, Component title, Component message) {
         var resolvedMessage = forceShadow(LanguageProviderV2.translate(message));
         var resolvedTitle = forceShadow(LanguageProviderV2.translate(title));
-        var titleWidth = FontUtil.measureTextV2(resolvedTitle);
-        var width = Math.max(Math.max(titleWidth, FontUtil.measureTextV2(resolvedMessage)), 140);
+        var titleWidth = FontUtil.measureText(resolvedTitle);
+        var width = Math.max(Math.max(titleWidth, FontUtil.measureText(resolvedMessage)), 140);
 
         var text = Component.empty()
                 .append(Component.text(FontUtil.computeOffset(104 - width)))

@@ -39,7 +39,7 @@ public abstract class AbstractAnvilView extends Panel {
             .disableTooltip()
             .background(icon, -46, -1)); // kinda gross
 
-        int titleWidth = FontUtil.measureTextV2(title);
+        int titleWidth = FontUtil.measureText(title);
         add(0, 0, new Text(null, 0, 0, title)
             .align(-(titleWidth / 2) + 30, -31));
 

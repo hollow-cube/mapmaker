@@ -39,7 +39,7 @@ public class BossBars {
     }
 
     private static @NotNull BossBar build(@NotNull Component text, @NotNull BackgroundSpriteSet bg) {
-        int contentWidth = FontUtil.measureTextV2(text);
+        int contentWidth = FontUtil.measureText(text);
         return bossBar(Component.text()
                 .append(Component.text(bg.build(contentWidth + (2 * BORDER_WIDTH))).shadowColor(ShadowColor.none()))
                 .append(Component.text(FontUtil.computeOffset(-(contentWidth + BORDER_WIDTH + 2))))

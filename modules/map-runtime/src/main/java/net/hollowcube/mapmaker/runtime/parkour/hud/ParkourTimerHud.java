@@ -62,7 +62,7 @@ public class ParkourTimerHud implements ActionBar.Provider {
 
         var text = formatMapPlaytime(time, true);
         // Text + spacing of same size of the ends of the background + timer width
-        var width = FontUtil.measureTextV2(text) + BACKGROUND_PADDING * 4 + TIMER.width();
+        var width = FontUtil.measureText(text) + BACKGROUND_PADDING * 4 + TIMER.width();
 
         builder.pushShadowColor(ShadowColor.none());
         builder.pos(-width / 2);

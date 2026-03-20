@@ -49,7 +49,7 @@ public class Text extends Button {
 
         if (text.isEmpty()) return;
         var text = this.font == null ? this.text : FontUtil.rewrite(this.font, this.text);
-        int width = FontUtil.measureTextV2(text);
+        int width = FontUtil.measureText(text);
         int x = computeAlignment(this.xAlign, width, builder.availWidth() * 18);
         int y = computeAlignment(this.yAlign, FontUtil.DEFAULT_HEIGHT, builder.availHeight() * 18);
         builder.drawText(x, y, text, width);
