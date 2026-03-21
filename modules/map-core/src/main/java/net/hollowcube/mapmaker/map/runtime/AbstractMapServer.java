@@ -253,6 +253,9 @@ public abstract class AbstractMapServer implements MapServer {
         shutdowner.queue("session-manager", sessionManager::close);
         FutureUtil.submitVirtual(sessionManager()::sync); // Sync existing sessions with remote
 
+        var transferConsumer = new PlayerTransferConsumer(bridge, jetStream);
+        shutdowner.queue("player-transfer-consumer", transferConsumer::close);
+
         // Must be initialized this late because of all its dependencies. this is pretty yikes im not a big fan
         var inviteServiceUrl = System.getenv("MAPMAKER_PLAYER_INVITE_SERVICE_URL");
         if (inviteServiceUrl != null)
