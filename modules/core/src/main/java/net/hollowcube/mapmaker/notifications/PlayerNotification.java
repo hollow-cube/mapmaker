@@ -93,36 +93,43 @@ public record PlayerNotification(
     public record ActionExecutor(
         boolean requiresConfirmation,
         boolean requiresRefresh,
+        boolean executeAsync,
         Runnable executor
     ) {
 
         public static ActionExecutor of(Runnable executor) {
-            return new ActionExecutor(false, false, executor);
+            return new ActionExecutor(false, false, false, executor);
         }
 
         public static ActionExecutor ofAsync(Runnable executor) {
-            return new ActionExecutor(false, false, () -> FutureUtil.submitVirtual(executor));
+            return new ActionExecutor(false, false, true, executor);
         }
 
         public ActionExecutor withConfirmation() {
-            return new ActionExecutor(true, this.requiresRefresh, this.executor);
+            return new ActionExecutor(true, this.requiresRefresh, this.executeAsync, this.executor);
         }
 
         public ActionExecutor withRefresh() {
-            return new ActionExecutor(this.requiresConfirmation, true, this.executor);
+            return new ActionExecutor(this.requiresConfirmation, true, this.executeAsync, this.executor);
         }
 
         public void execute(InventoryHost host, Runnable refresh, Runnable complete) {
-            if (this.requiresConfirmation) {
-                host.pushView(ExtraPanels.confirm(() -> {
-                    this.executor.run();
-                    if (this.requiresRefresh) refresh.run();
-                    complete.run();
-                }));
-            } else {
-                this.executor.run();
+            Runnable onFinish = () -> {
                 if (this.requiresRefresh) refresh.run();
                 complete.run();
+            };
+            Runnable execute = () -> {
+                if (this.executeAsync) {
+                    FutureUtil.fork(this.executor).thenRun(onFinish);
+                } else {
+                    this.executor.run();
+                    onFinish.run();
+                }
+            };
+            if (this.requiresConfirmation) {
+                host.pushView(ExtraPanels.confirm(execute));
+            } else {
+                execute.run();
             }
         }
     }
