@@ -105,6 +105,12 @@ final class MapPublisher {
     private @Nullable MapData doPublish(Player player) {
         MapData result = null;
         try {
+            // Save any pending changes immediately so details has the correct data (and we dont modify the map after publish)
+            map.settings().withUpdateRequest(req -> {
+                mapService.updateMap(player.getUuid().toString(), map.id(), req);
+                return true;
+            });
+
             result = this.mapService.publishMap(player.getUuid().toString(), this.map.id());
         } catch (Exception exception) {
             player.sendMessage(Component.translatable("publish.map.failure"));
