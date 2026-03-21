@@ -61,7 +61,8 @@ public final class DimensionTypes {
             .monsterSpawnBlockLightLimit(type.monsterSpawnBlockLightLimit())
             .skybox(type.skybox())
             .cardinalLight(type.cardinalLight())
-            .timelines(type.timelines());
+            .timelines(type.timelines())
+            .defaultClock(type.defaultClock());
         for (var entry : type.attributes().entries().entrySet()) {
             //noinspection unchecked
             builder.setAttribute((EnvironmentAttribute<Object>) entry.getKey(), entry.getValue().argument());
