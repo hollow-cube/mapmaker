@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.RuntimeGson;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +22,7 @@ public class SaveState {
 
     private Double startLatency;
     private Double endLatency;
+    private Double score;
 
     SaveStateType.Serializer<?> serializer;
     Object state;
@@ -123,6 +125,14 @@ public class SaveState {
         this.endLatency = latency;
     }
 
+    public double getScore() {
+        return OpUtils.or(score, () -> (double) getEffectivePlaytime());
+    }
+
+    public void setScore(double score) {
+        this.score = score;
+    }
+
     public int protocolVersion() {
         return protocolVersion;
     }
@@ -136,16 +146,16 @@ public class SaveState {
             throw new IllegalStateException("State not loaded");
         if (!stateType.isAssignableFrom(state.getClass()))
             throw new IllegalArgumentException("State type mismatch. had " + state.getClass() + ", expected " + stateType + " details: " + Map.of(
-                    "id", id,
-                    "playerId", playerId,
-                    "mapId", mapId,
-                    "state", state,
-                    "stateType", stateType,
-                    "serializer", serializer,
-                    "dataVersion", dataVersion,
-                    "playtime", playtime,
-                    "ticks", ticks,
-                    "completed", completed
+                "id", id,
+                "playerId", playerId,
+                "mapId", mapId,
+                "state", state,
+                "stateType", stateType,
+                "serializer", serializer,
+                "dataVersion", dataVersion,
+                "playtime", playtime,
+                "ticks", ticks,
+                "completed", completed
             ));
         return stateType.cast(state);
     }
@@ -162,26 +172,15 @@ public class SaveState {
         this.state = state;
     }
 
-    public @NotNull SaveStateUpdateRequest createUpdateRequest() {
-        var req = new SaveStateUpdateRequest()
-                .setPlaytime(playtime)
-                .setTicks(ticks)
-                .setCompleted(completed)
-                .setProtocolVersion(protocolVersion);
-        if (serializer != null && state != null) {
-            req.setState(state, serializer);
-        }
-        return req;
-    }
-
     public @NotNull SaveStateUpdateRequest createUpsertRequest() {
         var req = new SaveStateUpdateRequest()
-                .setType(type)
-                .setPlaytime(playtime)
-                .setTicks(ticks)
-                .setLatency(startLatency, endLatency)
-                .setCompleted(completed)
-                .setProtocolVersion(protocolVersion);
+            .setType(type)
+            .setPlaytime(playtime)
+            .setTicks(ticks)
+            .setLatency(startLatency, endLatency)
+            .setCompleted(completed)
+            .setProtocolVersion(protocolVersion)
+            .setScore(score);
         if (serializer != null && state != null) {
             req.setState(state, serializer);
         }
@@ -205,6 +204,7 @@ public class SaveState {
         copy.protocolVersion = protocolVersion;
         copy.startLatency = startLatency;
         copy.endLatency = endLatency;
+        copy.score = score;
         copy.serializer = serializer;
         copy.state = newState;
 

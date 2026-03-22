@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.util;
 
+import net.hollowcube.mapmaker.map.Leaderboard;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
@@ -47,6 +48,15 @@ public final class NumberUtil {
         long seconds = TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time));
         long milliseconds = time - TimeUnit.MINUTES.toMillis(minutes) - TimeUnit.SECONDS.toMillis(seconds);
         return String.format("%02d:%02d.%03d", minutes, seconds, milliseconds);
+    }
+
+    public static @NotNull String formatScore(Leaderboard.Format format, double score) {
+        // TODO: move me to format itself
+        return switch (format) {
+            case TIME -> formatMapPlaytime((long) score, true);
+            case NUMBER -> format(score, 2); // TODO: more here.
+            case PERCENT -> format(score * 100, 2) + "%"; // TODO: clamp to 0-100%?
+        };
     }
 
     public static long roundMillisToTicks(long time) {

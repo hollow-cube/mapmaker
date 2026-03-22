@@ -385,8 +385,6 @@ public class EditMap extends View {
         if (!map.isVerified()) return PublishStage.VERIFY;
         if (map.settings().getName().isEmpty()) return PublishStage.ADD_NAME;
         if (map.settings().getIcon() == null) return PublishStage.ADD_ICON;
-        if (map.settings().getVariant() == MapVariant.BUILDING && !map.objects().isEmpty())
-            return PublishStage.BAD_STATUS_PLATE;
         return PublishStage.PUBLISH;
     }
 

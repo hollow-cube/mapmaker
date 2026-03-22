@@ -32,6 +32,7 @@ import net.hollowcube.mapmaker.runtime.parkour.action.HotbarItems;
 import net.hollowcube.mapmaker.runtime.parkour.action.LegacyActionStateManager;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditLivesAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditTimerAction;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.variables.VariableStorage;
 import net.hollowcube.mapmaker.runtime.parkour.block.CheckpointPlateBlock;
 import net.hollowcube.mapmaker.runtime.parkour.block.ClientBlockPlacementListener;
 import net.hollowcube.mapmaker.runtime.parkour.block.FinishPlateBlock;
@@ -45,6 +46,7 @@ import net.hollowcube.mapmaker.runtime.parkour.setting.*;
 import net.hollowcube.mapmaker.scripting.WorldScriptContext;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.NumberUtil;
+import net.hollowcube.molang.MolangExpr;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -74,6 +76,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
+import static net.hollowcube.mapmaker.util.NumberUtil.formatScore;
 import static net.kyori.adventure.text.Component.translatable;
 
 public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWorld> {
@@ -83,7 +86,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     private static final Sound PLAYER_HURT_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_HURT, Sound.Source.PLAYER, 1, 1f);
     private static final Sound PLAYER_DEATH_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_DEATH, Sound.Source.PLAYER, 1, 1f);
 
-    private static final Tag<@Nullable Long> BEST_PLAYTIME = Tag.Transient("map:best_playtime");
+    private static final Tag<@Nullable SaveState> BEST_SAVESTATE = Tag.Transient("map:best_savestate");
 
     private static final List<ItemHandler> SILENT_ITEMS = List.of(
         // Hotbar items
@@ -140,6 +143,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         objectEntityHandlers.registerForMarkers(ResetMarkerHandler.ID, ResetMarkerHandler::new);
     }
 
+    private final MolangExpr leaderboardScoreExpr;
     private final @Nullable WorldScriptContext scriptContext;
 
     private final SaveStateType saveStateType;
@@ -204,6 +208,10 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         } else {
             this.scriptContext = null;
         }
+
+        // We throw on world creation if the expression is invalid. We parse when setting it, so this
+        // should not happen. Not sure if theres any better recourse than failing to load.
+        this.leaderboardScoreExpr = MolangExpr.parseOrThrow(map.settings().leaderboard().score());
     }
 
     public int defaultResetHeight() {
@@ -302,10 +310,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             RateMapItem.initLastRating(server().mapService(), player, map());
         }
 
-        player.setTag(BEST_PLAYTIME, OpUtils.map(
-            server().mapService().getBestSaveState(map().id(), player.getUuid().toString()),
-            SaveState::getEffectivePlaytime
-        ));
+        player.setTag(BEST_SAVESTATE, server().mapService().getBestSaveState(map().id(), player.getUuid().toString()));
 
         return createPlayingState(saveState);
     }
@@ -315,7 +320,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         // Always try to remove, feature flag could have been removed since entering world and we still want it gone
         ActionBar.forPlayer(player).removeProvider(ParkourDebugHud.INSTANCE);
 
-        player.removeTag(BEST_PLAYTIME);
+        player.removeTag(BEST_SAVESTATE);
 
         super.removePlayer(player);
     }
@@ -396,17 +401,19 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     }
 
     public void performFinishEffects(Player player, SaveState finishState) {
+        // TODO: this whole method needs to be specialized to the various leaderboard types (eg 'finished in x', 'finished with score of y', etc).
+
         // Show the completed message after removing the player because it is theoretically possible to not have the savestate fetched yet.
-        Long bestPlaytime = player.getTag(BEST_PLAYTIME);
-        if (bestPlaytime == null) {
-            player.setTag(BEST_PLAYTIME, finishState.getEffectivePlaytime());
+        var bestState = player.getTag(BEST_SAVESTATE);
+        if (bestState == null) {
+            player.setTag(BEST_SAVESTATE, finishState);
             player.sendMessage(Component.translatable(
                 "map.completed.first",
-                Component.text(formatMapPlaytime(finishState.getEffectivePlaytime(), true))
+                Component.text(formatScore(map().settings().leaderboard().format(), finishState.getScore()))
             ));
         } else {
             // Diff playtime rounded to ticks prior to subtracting for correct display.
-            var diffPlaytime = NumberUtil.roundMillisToTicks(bestPlaytime) -
+            var diffPlaytime = NumberUtil.roundMillisToTicks(bestState.getEffectivePlaytime()) -
                                NumberUtil.roundMillisToTicks(finishState.getEffectivePlaytime());
             var diffColor = diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN;
             var diffSymbol = diffPlaytime < 0 ? "+" : "-";
@@ -417,8 +424,8 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
                 Component.text(diffSymbol + formatMapPlaytime(Math.abs(diffPlaytime), false), diffColor)
             ));
 
-            if (finishState.getEffectivePlaytime() < bestPlaytime) {
-                player.setTag(BEST_PLAYTIME, finishState.getEffectivePlaytime());
+            if (finishState.getEffectivePlaytime() < bestState.getEffectivePlaytime()) {
+                player.setTag(BEST_SAVESTATE, finishState);
             }
         }
 
@@ -460,7 +467,16 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     }
 
     public @Nullable Long getPlayerBestPlaytime(Player player) {
-        return player.getTag(BEST_PLAYTIME);
+        return OpUtils.map(player.getTag(BEST_SAVESTATE), SaveState::getEffectivePlaytime);
+    }
+
+    public double computeScore(Player player, SaveState saveState) {
+        var playState = saveState.state(PlayState.class);
+        var variables = Objects.requireNonNullElseGet(playState.get(Attachments.VARIABLES), VariableStorage::new);
+        TempEffectApplicator.VARIABLE_LOOKUP.setStorage(variables);
+        TempEffectApplicator.QUERY.setContext(player);
+        return TempEffectApplicator.EVALUATOR.eval(this.leaderboardScoreExpr);
+        // TODO: what to do with errors during eval?
     }
 
     // endregion

@@ -43,9 +43,9 @@ public class TempEffectApplicator {
     private static final Sound CHECKPOINT_SOUND = Sound.sound(SoundEvent.ENTITY_EXPERIENCE_ORB_PICKUP, Sound.Source.MASTER, 0.1f, 0f);
     private static final TagCooldown STATUS_APPLY_COOLDOWN = new TagCooldown("mapmaker:status_plate_cooldown", 250);
 
-    private static final VariableStorage.MolangLookup VARIABLE_LOOKUP = VariableStorage.lookup();
-    private static final MolangResolver<Player> QUERY = new MolangResolver<>(VariableQueries::resolve);
-    private static final MolangEvaluator EVALUATOR = new MolangEvaluator(Map.of(
+    static final VariableStorage.MolangLookup VARIABLE_LOOKUP = VariableStorage.lookup();
+    static final MolangResolver<Player> QUERY = new MolangResolver<>(VariableQueries::resolve);
+    static final MolangEvaluator EVALUATOR = new MolangEvaluator(Map.of(
             "variable", VARIABLE_LOOKUP,
             "v", VARIABLE_LOOKUP,
             "query", QUERY,

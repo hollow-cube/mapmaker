@@ -57,7 +57,7 @@ public class MapMapServer extends AbstractMultiMapServer {
 
     @Override
     protected @NotNull Future<AbstractMapWorld<?, ?>> createWorldForRequest(@NotNull MapJoinInfo joinInfo) {
-        var map = mapService().getMap(joinInfo.playerId(), joinInfo.mapId());
+        var map = api().maps.get(joinInfo.mapId());
 
         final boolean isEditor = Presence.MAP_BUILDING_STATES.contains(joinInfo.state());
         return createWorld(map, isEditor, _ -> {

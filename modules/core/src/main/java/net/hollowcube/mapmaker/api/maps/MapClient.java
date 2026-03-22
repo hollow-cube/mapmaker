@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.api.maps;
 import com.google.gson.reflect.TypeToken;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.api.ResultList;
+import net.hollowcube.mapmaker.map.MapData;
 
 import java.util.Map;
 
@@ -10,6 +11,11 @@ import static net.hollowcube.mapmaker.api.ApiClient.notImplemented;
 import static net.hollowcube.mapmaker.api.HttpClientWrapper.query;
 
 public interface MapClient {
+
+    /// Get a map by its internal ID
+    default MapData get(String mapId) {
+        throw notImplemented();
+    }
 
     default ResultList<MapSlot> getPlayerSlots(String playerId) {
         throw notImplemented();
@@ -39,6 +45,14 @@ public interface MapClient {
     record Http(HttpClientWrapper http) implements MapClient {
         private static final String V4_PREFIX = "/v4/internal/maps";
         private static final String V4_PLAYERS_PREFIX = "/v4/internal/players";
+
+        @Override
+        public MapData get(String mapId) {
+            return http.get(
+                "getMap",
+                V4_PREFIX + "/" + mapId,
+                new TypeToken<>() {});
+        }
 
         @Override
         public ResultList<MapSlot> getPlayerSlots(String playerId) {
