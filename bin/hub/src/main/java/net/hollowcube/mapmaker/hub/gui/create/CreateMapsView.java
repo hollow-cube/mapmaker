@@ -4,6 +4,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapRole;
 import net.hollowcube.mapmaker.api.maps.MapSlot;
+import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -76,7 +77,8 @@ public class CreateMapsView extends Panel {
         this.createButton = add(8, 0, new Button(1, 1)
             .background("generic2/btn/default/1_1")
             .sprite("icon2/1_1/plus", 1, 1)
-            .onLeftClick(() -> this.host.pushTransientView(new NewMapView(api.maps, this::acceptNewMap))));
+            .onLeftClick(this::createMapOrOpenStore)
+            .onRightClick(this::tryOpenSecondaryStore));
 
         pagination.renderSync();
     }
@@ -123,17 +125,58 @@ public class CreateMapsView extends Panel {
 
     private void updateCreateButton() {
         // We have to lazy init this as host is not set until the view is mounted
-        var unlockedSlots = PlayerData.fromPlayer(this.host.player()).mapSlots();
-        var usedSlots = this.getUsedSlots();
 
-        var availableSlots = unlockedSlots - usedSlots;
-        if (availableSlots <= 0) {
-            // TODO: What do we display if they don't have enough slots?
-            this.createButton.translationKey("gui.create_maps.new", 0);
-            this.createButton.onLeftClick();
-        } else {
+        int availableSlots = getAvailableSlots();
+        if (availableSlots > 0) {
             this.createButton.translationKey("gui.create_maps.new", availableSlots);
+            return;
         }
+
+        // No remaining slots, prompt to unlock more in the store with hypercube first, or cubits if they already have hypercube.
+        var playerData = PlayerData.fromPlayer(this.host.player());
+        boolean isHypercube = playerData.isHypercube();
+        boolean hasCubits = playerData.cubits() >= 50;
+
+        String hypercubeKey = isHypercube ? "has_hypercube" : "no_hypercube";
+        String cubitsKey = hasCubits ? "has_cubits" : "no_cubits";
+        this.createButton.translationKey("gui.create_maps.new.no_space." + hypercubeKey + "." + cubitsKey);
+    }
+
+    private void createMapOrOpenStore() {
+        int availableSlots = getAvailableSlots();
+        if (availableSlots > 0) {
+            host.pushTransientView(new NewMapView(api.maps, this::acceptNewMap));
+            return;
+        }
+
+        var playerData = PlayerData.fromPlayer(this.host.player());
+        // TODO: dont hardcode 50
+        if (playerData.cubits() >= 50) {
+            // TODO open the menu for purchasing a new slot
+        } else if (playerData.isHypercube()) {
+            this.createButton.onLeftClick(() -> this.host.pushView(new StoreView(null, StoreView.TAB_CUBITS)));
+        } else {
+            this.createButton.onLeftClick(() -> this.host.pushView(new StoreView(null, StoreView.TAB_HYPERCUBE)));
+        }
+    }
+
+    private void tryOpenSecondaryStore() {
+        int availableSlots = getAvailableSlots();
+        if (availableSlots > 0) return;
+
+        var playerData = PlayerData.fromPlayer(this.host.player());
+        if (playerData.isHypercube()) return;
+
+        // TODO: player svc, dont hardcode 50
+        var secondaryTab = playerData.cubits() >= 50 ? StoreView.TAB_HYPERCUBE : StoreView.TAB_CUBITS;
+        this.host.pushView(new StoreView(null, secondaryTab));
+    }
+
+    private int getAvailableSlots() {
+        var playerData = PlayerData.fromPlayer(this.host.player());
+        var unlockedSlots = playerData.mapSlots();
+        var usedSlots = this.getUsedSlots();
+        return unlockedSlots - usedSlots;
     }
 
     private int getUsedSlots() {
@@ -188,7 +231,7 @@ public class CreateMapsView extends Panel {
         this.searchText = newValue.trim();
         if (this.searchText.equals(oldValue)) return;
 
-        var translationKey = "gui.create_maps.search";
+        var translationKey = this.searchText.isEmpty() ? "gui.create_maps.search" : "gui.create_maps.search.with_data";
         this.searchTextElement.translationKey(translationKey);
         this.searchTextElement.text(this.searchText.isEmpty() ? "Search..." : this.searchText);
         this.pagination.reset();

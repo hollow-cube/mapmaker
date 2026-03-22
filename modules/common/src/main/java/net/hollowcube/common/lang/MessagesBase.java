@@ -43,7 +43,7 @@ public interface MessagesBase extends ComponentLike {
         for (int i = 0; i < args.length; i++) {
             var arg = args[i];
             componentArgs[i] = switch (arg) {
-                case Component comp -> comp;
+                case ComponentLike like -> like;
                 case Number number -> TranslationArgument.numeric(number);
                 case Boolean bool -> TranslationArgument.bool(bool);
                 default -> Component.text(arg.toString());

@@ -82,7 +82,7 @@ public class EditMapView extends Panel {
         add(8, 0, new Button("gui.create_maps.edit.actions", 1, 1)
             .background("generic2/btn/default/1_1")
             .sprite("icon2/1_1/ellipsis", 1, 1)
-            .onLeftClick(() -> host.pushView(new EditMapActionsView(api, mapService, bridge, slot.map().id()))));
+            .onLeftClick(() -> host.pushView(new EditMapActionsView(api, mapService, bridge, slot.map()))));
 
         add(1, 1, infoText(1, "icon", -2));
         this.iconButton = add(1, 2, new Button("gui.create_maps.edit.icon", 1, 1)
