@@ -2,7 +2,7 @@ name: mapmaker
 version: '3.8'
 services:
   postgres:
-    image: postgres:16
+    image: postgres:18
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql
   minio:
     image: minio/minio:latest
     restart: unless-stopped
@@ -43,7 +43,7 @@ services:
 
   api-server:
     build:
-      context: ../hc-services
+      context: ../api-server
       dockerfile: deploy/Dockerfile
     restart: unless-stopped
     depends_on: [ postgres, nats, redis ]
@@ -53,9 +53,9 @@ services:
       SESSION_HTTP_PORT: "9124"
       SESSION_REDIS_ADDRESS: "redis:6379"
 
-      SESSION_POSTGRES_PLAYERS_URI: "postgres://postgres:postgres@postgres:5432/player-service?sslmode=disable"
-      SESSION_POSTGRES_MAPS_URI: "postgres://postgres:postgres@postgres:5432/map-service?sslmode=disable"
-      SESSION_POSTGRES_URI: "postgres://postgres:postgres@postgres:5432/session-service?sslmode=disable"
+      SESSION_POSTGRES_PLAYERS_URI: "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable"
+      SESSION_POSTGRES_MAPS_URI: "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable"
+      SESSION_POSTGRES_URI: "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable"
 
       SESSION_NATS_SERVERS: "nats://nats:4222"
 

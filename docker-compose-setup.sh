@@ -12,6 +12,6 @@ if [[ "$(uname -m)" == "aarch64" || "$(uname -m)" == "arm64" ]]; then
 fi
 export CGO_ENABLED=0
 
-cd ../hc-services
+cd ../api-server
 go build -o api-server cmd/api-server/*.go && true
 cd ${ORIGINAL_DIR}
