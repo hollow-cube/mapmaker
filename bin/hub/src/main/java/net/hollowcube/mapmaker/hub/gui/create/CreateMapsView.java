@@ -139,17 +139,16 @@ public class CreateMapsView extends Panel {
             String cubitsKey = hasCubits ? "has_cubits" : "no_cubits";
             this.createButton.translationKey("gui.create_maps.new.no_space." + hypercubeKey + "." + cubitsKey);
 
-            //host.player().sendMessage(String.valueOf(isHypercube) + playerData.cubits());
             if (isHypercube) {
                 this.createButton.onRightClick();
                 if (hasCubits) {
-                    // TODO purchase new slot view
+                    this.createButton.onLeftClick(); // TODO make it open the menu for purchasing a new slot
                 } else {
                     this.createButton.onLeftClick(() -> this.host.pushView(new StoreView(this.playerService, 0)));
                 }
             } else {
                 if (hasCubits) {
-                    // TODO left click purchase new slot view
+                    this.createButton.onLeftClick(); // TODO make it open the menu for purchasing a new slot
                     this.createButton.onRightClick(() -> this.host.pushView(new StoreView(this.playerService, 1)));
                 } else {
                     this.createButton.onLeftClick(() -> this.host.pushView(new StoreView(this.playerService, 1)));
