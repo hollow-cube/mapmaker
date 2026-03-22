@@ -1,6 +1,6 @@
 [versions]
 minecraft = "1.21.11"
-annotations = "26.0.2"
+annotations = "26.1.0"
 fastutil = "8.5.15"
 gson = "2.12.1"
 adventure = "4.25.0"
