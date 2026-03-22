@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.Player;
 
 import java.util.Objects;
 
@@ -24,12 +25,14 @@ public class EditMapActionsView extends Panel {
 
     private final String mapId;
 
-    public EditMapActionsView(ApiClient api, MapService mapService, ServerBridge bridge, String mapId) {
+    public EditMapActionsView(Player player, ApiClient api, MapService mapService, ServerBridge bridge, String mapId) {
         super(9, 10);
         this.api = api;
         this.mapService = mapService;
         this.bridge = bridge;
         this.mapId = mapId;
+
+        var map = mapService.getMap(player.getUuid().toString(), mapId);
 
         background("create_maps2/edit/actions_container", -10, -31);
         add(0, 0, title("Edit Map"));
@@ -41,7 +44,8 @@ public class EditMapActionsView extends Panel {
 
         add(1, 2, new Button("gui.create_maps.actions.copy_map", 3, 2));
 
-        add(5, 2, new Button("gui.create_maps.actions.resize_map", 3, 2));
+        add(5, 2, new Button(3, 2).translationKey(
+            "gui.create_maps.actions.resize_map", map.settings().getSize().formattedName()));
 
         add(1, 4, new Button("gui.create_maps.actions.transfer_ownership", 3, 2));
 

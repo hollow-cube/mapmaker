@@ -57,19 +57,22 @@ public class NewMapView extends Panel {
                 var button = locked
                     ? new LockedButton(tk, slotWidth, slotHeight)
                     : new Button(tk, slotWidth, slotHeight);
-                return button
-                    .translationKey("gui.create_maps.new.size." + mapSize.name().toLowerCase() + ".off" + (locked ? ".locked" : ""))
-                    .sprite("icon2/1_1/" + mapSize.icon(), 1, 1);
+                return button.sprite("icon2/1_1/" + mapSize.icon(), 1, 1);
             };
+
             RadioSelect.ButtonUpdater updateButton = (button, selected) -> {
                 SQUARE_BACKGROUND_EX.update(button, selected);
-                button.translationKey("gui.create_maps.new.size." + mapSize.name().toLowerCase() + (selected ? ".on" : ".off"));
+                if (locked) {
+                    button.translationKey("gui.create_maps.new.size." + mapSize.name().toLowerCase() + ".locked");
+                } else {
+                    button.translationKey("gui.create_maps.new.size." + mapSize.name().toLowerCase() + (selected ? ".on" : ".off"));
+                }
             };
 
             if (locked) {
                 var button = makeButton.construct(null, 1, 1);
                 updateButton.update(button, false);
-                sizeSelect.add(sizeSelect.index++, 0, button);
+                sizeSelect.add(sizeSelect.index++, 0, button); //TODO open purchase page on left click
             } else {
                 sizeSelect.addOption(mapSize, updateButton, makeButton);
             }
