@@ -48,7 +48,7 @@ public class CreateMapsItem extends ItemHandler {
         if (CoreFeatureFlags.CREATE_MAPS_V2.test(player) && !player.isSneaking()) {
             FutureUtil.submitVirtual(() -> {
                 try {
-                    CreateMapsView.open(player, api, mapService, bridge);
+                    CreateMapsView.open(player, api, mapService, playerService, bridge);
                 } catch (Exception e) {
                     ExceptionReporter.reportException(e, player);
                 }

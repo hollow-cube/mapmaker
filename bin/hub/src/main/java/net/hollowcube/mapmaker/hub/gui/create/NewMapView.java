@@ -85,6 +85,7 @@ public class NewMapView extends Panel {
             var host = this.host;
             onNewMap.accept(map);
             if (host.canPopView()) host.popView();
+            // TODO doesn't update left click behavior of the create new map button so you can click it to create a new map again despite having no slots
         });
     }
 

@@ -181,6 +181,12 @@ public class Button extends Element implements ButtonClickAliases {
     }
 
     @Override
+    public Button onRightClick() {
+        this.onRightClick = null;
+        return this;
+    }
+
+    @Override
     public Button onRightClick(OnClickTypeSlot onClick) {
         this.onRightClick = onClick;
         return this;

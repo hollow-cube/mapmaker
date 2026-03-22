@@ -4,11 +4,13 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapRole;
 import net.hollowcube.mapmaker.api.maps.MapSlot;
+import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.StringComparison;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.Unit;
@@ -25,19 +27,20 @@ import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
 public class CreateMapsView extends Panel {
     private static final int PAGE_SIZE = 5;
 
-    public static void open(Player player, ApiClient api, MapService mapService, ServerBridge bridge) {
+    public static void open(Player player, ApiClient api, MapService mapService, PlayerService playerService, ServerBridge bridge) {
         var playerId = PlayerData.fromPlayer(player).id();
         var slots = api.maps.getPlayerSlots(playerId).results();
 
         if (slots.isEmpty()) {
-            Panel.open(player, new NewMapView(mapService, _ -> FutureUtil.submitVirtual(() -> open(player, api, mapService, bridge))));
+            Panel.open(player, new NewMapView(mapService, _ -> FutureUtil.submitVirtual(() -> open(player, api, mapService, playerService, bridge))));
         } else {
-            Panel.open(player, new CreateMapsView(api, mapService, bridge, slots));
+            Panel.open(player, new CreateMapsView(api, mapService, playerService, bridge, slots));
         }
     }
 
     private final ApiClient api;
     private final MapService mapService;
+    private final PlayerService playerService;
     private final ServerBridge bridge;
 
     private final Button createButton;
@@ -50,10 +53,11 @@ public class CreateMapsView extends Panel {
     private String searchText = "";
     private @Nullable Runnable remountTask;
 
-    public CreateMapsView(ApiClient api, MapService mapService, ServerBridge bridge, List<MapSlot> initialSlots) {
+    public CreateMapsView(ApiClient api, MapService mapService, PlayerService playerService, ServerBridge bridge, List<MapSlot> initialSlots) {
         super(9, 10);
         this.api = api;
         this.mapService = mapService;
+        this.playerService = playerService;
         this.bridge = bridge;
         this.slots.addAll(initialSlots);
 
@@ -75,8 +79,7 @@ public class CreateMapsView extends Panel {
 
         this.createButton = add(8, 0, new Button(1, 1)
             .background("generic2/btn/default/1_1")
-            .sprite("icon2/1_1/plus", 1, 1)
-            .onLeftClick(() -> this.host.pushTransientView(new NewMapView(mapService, this::acceptNewMap))));
+            .sprite("icon2/1_1/plus", 1, 1));
 
         pagination.renderSync();
     }
@@ -123,16 +126,40 @@ public class CreateMapsView extends Panel {
 
     private void updateCreateButton() {
         // We have to lazy init this as host is not set until the view is mounted
-        var unlockedSlots = PlayerData.fromPlayer(this.host.player()).mapSlots();
+        var playerData = PlayerData.fromPlayer(this.host.player());
+        var unlockedSlots = playerData.mapSlots();
         var usedSlots = this.getUsedSlots();
-
         var availableSlots = unlockedSlots - usedSlots;
+
         if (availableSlots <= 0) {
-            // TODO: What do we display if they don't have enough slots?
-            this.createButton.translationKey("gui.create_maps.new", 0);
-            this.createButton.onLeftClick();
+            boolean isHypercube = playerData.isHypercube();
+            boolean hasCubits = playerData.cubits() >= 50;
+
+            String hypercubeKey = isHypercube ? "has_hypercube" : "no_hypercube";
+            String cubitsKey = hasCubits ? "has_cubits" : "no_cubits";
+            this.createButton.translationKey("gui.create_maps.new.no_space." + hypercubeKey + "." + cubitsKey);
+
+            //host.player().sendMessage(String.valueOf(isHypercube) + playerData.cubits());
+            if (isHypercube) {
+                this.createButton.onRightClick();
+                if (hasCubits) {
+                    // TODO purchase new slot view
+                } else {
+                    this.createButton.onLeftClick(() -> this.host.pushView(new StoreView(this.playerService, 0)));
+                }
+            } else {
+                if (hasCubits) {
+                    // TODO left click purchase new slot view
+                    this.createButton.onRightClick(() -> this.host.pushView(new StoreView(this.playerService, 1)));
+                } else {
+                    this.createButton.onLeftClick(() -> this.host.pushView(new StoreView(this.playerService, 1)));
+                    this.createButton.onRightClick(() -> this.host.pushView(new StoreView(this.playerService, 0)));
+                }
+            }
         } else {
             this.createButton.translationKey("gui.create_maps.new", availableSlots);
+            this.createButton.onLeftClick(() -> this.host.pushTransientView(new NewMapView(mapService, this::acceptNewMap)));
+            this.createButton.onRightClick();
         }
     }
 
@@ -188,7 +215,7 @@ public class CreateMapsView extends Panel {
         this.searchText = newValue.trim();
         if (this.searchText.equals(oldValue)) return;
 
-        var translationKey = "gui.create_maps.search";
+        var translationKey = this.searchText.isEmpty() ? "gui.create_maps.search" : "gui.create_maps.search.with_data";
         this.searchTextElement.translationKey(translationKey);
         this.searchTextElement.text(this.searchText.isEmpty() ? "Search..." : this.searchText);
         this.pagination.reset();
