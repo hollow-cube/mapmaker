@@ -14,4 +14,16 @@ public record Leaderboard(
         NUMBER,
         PERCENT,
     }
+
+    public Leaderboard withAsc(boolean asc) {
+        return new Leaderboard(asc, this.format, this.score);
+    }
+
+    public Leaderboard withFormat(Format format) {
+        return new Leaderboard(this.asc, format, this.score);
+    }
+
+    public Leaderboard withScore(String score) {
+        return new Leaderboard(this.asc, this.format, score);
+    }
 }

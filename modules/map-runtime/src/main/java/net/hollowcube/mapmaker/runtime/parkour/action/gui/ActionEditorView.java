@@ -21,17 +21,13 @@ public class ActionEditorView extends Panel {
     private final ActionTriggerData.Mutable data;
     private final Action.Type type;
 
-    public ActionEditorView(ActionTriggerData.Mutable data, Action.Type type, String title) {
-        this(data, type, false, title);
-    }
-
-    public ActionEditorView(ActionTriggerData.Mutable data, Action.Type type, boolean isRepeatable, String title) {
+    public ActionEditorView(ActionTriggerData.Mutable data, Action.Type type) {
         super(9, 10);
         this.data = data;
         this.type = type;
 
         background("action/list/container", -10, -31);
-        add(0, 0, title(title + " Actions"));
+        add(0, 0, title(type.getDisplayName() + " Actions"));
 
         add(0, 0, backOrClose());
         add(1, 0, info("action"));
@@ -39,8 +35,9 @@ public class ActionEditorView extends Panel {
             .align(Text.CENTER, Text.CENTER)
             .background("generic2/btn/default/5_1"));
 
-
-        if (isRepeatable) {
+        if (type == Action.Type.SPAWN) {
+            // Set by subclass, kinda gross
+        } else if (type == Action.Type.STATUS) {
             add(7, 0, new Button("gui.action.condition", 1, 1)
                 .background("generic2/btn/default/1_1")
                 .sprite("action/icon/condition", 1, 2)

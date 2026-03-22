@@ -39,7 +39,7 @@ public class CheckpointEditor {
         var checkpointData = Objects.requireNonNullElseGet(entity.getTag(CheckpointPlateBlock.ENTITY_DATA_TAG), ActionTriggerData::new).toMutable();
         var actionLocation = entity.getPosition().withY(y -> y + Objects.requireNonNullElse(entity.getMin(), Pos.ZERO).y());
 
-        var host = Panel.open(player, new ActionEditorView(checkpointData, Action.Type.CHECKPOINT, "Checkpoint"));
+        var host = Panel.open(player, new ActionEditorView(checkpointData, Action.Type.CHECKPOINT));
         host.setTag(ActionEditorView.ACTION_LOCATION, actionLocation);
         host.setTag(CoordinateAction.SPC_TARGET_TAG, entity);
         host.onClose(() -> {
@@ -70,7 +70,7 @@ public class CheckpointEditor {
             return;
 
         var data = Objects.requireNonNullElseGet(event.block().getTag(CheckpointPlateBlock.DATA_TAG), ActionTriggerData::new).toMutable();
-        var host = Panel.open(player, new ActionEditorView(data, Action.Type.CHECKPOINT, "Checkpoint"));
+        var host = Panel.open(player, new ActionEditorView(data, Action.Type.CHECKPOINT));
         host.setTag(ActionEditorView.ACTION_LOCATION, event.blockPosition());
         host.setTag(CoordinateAction.SPC_TARGET_TAG, event.blockPosition());
         host.onClose(() -> {

@@ -35,7 +35,7 @@ public class StatusEditor {
     public static final ObjectEntityEditor MARKER_EDITOR = (player, entity) -> {
         var data = Objects.requireNonNullElseGet(entity.getTag(StatusPlateBlock.ENTITY_DATA_TAG), ActionTriggerData::new).toMutable();
         var actionLocation = entity.getPosition().withY(y -> y + Objects.requireNonNullElse(entity.getMin(), Pos.ZERO).y());
-        var host = Panel.open(player, new ActionEditorView(data, Action.Type.STATUS, true, "Status"));
+        var host = Panel.open(player, new ActionEditorView(data, Action.Type.STATUS));
         host.setTag(ActionEditorView.ACTION_LOCATION, actionLocation);
         host.setTag(CoordinateAction.SPC_TARGET_TAG, entity);
         host.onClose(() -> {
@@ -66,7 +66,7 @@ public class StatusEditor {
 
         // Open checkpoint settings GUI
         var data = Objects.requireNonNullElseGet(event.block().getTag(StatusPlateBlock.DATA_TAG), ActionTriggerData::new).toMutable();
-        var host = Panel.open(player, new ActionEditorView(data, Action.Type.STATUS, true, "Status"));
+        var host = Panel.open(player, new ActionEditorView(data, Action.Type.STATUS));
         host.setTag(ActionEditorView.ACTION_LOCATION, event.blockPosition());
         host.setTag(CoordinateAction.SPC_TARGET_TAG, event.blockPosition());
         host.onClose(() -> {

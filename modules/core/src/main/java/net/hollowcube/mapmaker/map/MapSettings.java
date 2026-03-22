@@ -551,6 +551,16 @@ public class MapSettings {
         return Objects.requireNonNull(leaderboard, "leaderboard not present (probably using v3 api)");
     }
 
+    public void setLeaderboard(@NotNull Leaderboard leaderboard) {
+        updateLock.lock();
+        try {
+            this.updates.setLeaderboard(leaderboard);
+            this.leaderboard = leaderboard;
+        } finally {
+            updateLock.unlock();
+        }
+    }
+
     public @NotNull JsonObject extra() {
         if (this.extra == null) this.extra = new JsonObject();
         return this.extra;

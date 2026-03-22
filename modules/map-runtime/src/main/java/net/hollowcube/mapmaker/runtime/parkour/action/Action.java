@@ -19,9 +19,19 @@ public interface Action {
     }
 
     enum Type {
-        SPAWN,
-        CHECKPOINT,
-        STATUS,
+        SPAWN("Spawn"),
+        CHECKPOINT("Checkpoint"),
+        STATUS("Status");
+
+        private final String displayName;
+
+        Type(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
     }
 
     record Editor<T extends Action>(

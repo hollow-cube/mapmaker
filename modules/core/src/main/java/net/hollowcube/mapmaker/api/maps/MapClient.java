@@ -4,6 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.api.ResultList;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapUpdateRequest;
 
 import java.util.Map;
 
@@ -14,6 +15,10 @@ public interface MapClient {
 
     /// Get a map by its internal ID
     default MapData get(String mapId) {
+        throw notImplemented();
+    }
+
+    default void update(String mapId, MapUpdateRequest body) {
         throw notImplemented();
     }
 
@@ -52,6 +57,14 @@ public interface MapClient {
                 "getMap",
                 V4_PREFIX + "/" + mapId,
                 new TypeToken<>() {});
+        }
+
+        @Override
+        public void update(String mapId, MapUpdateRequest body) {
+            http.patch(
+                "updateMap",
+                V4_PREFIX + "/" + mapId,
+                body);
         }
 
         @Override
