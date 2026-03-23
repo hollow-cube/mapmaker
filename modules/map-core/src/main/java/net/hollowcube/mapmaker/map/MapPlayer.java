@@ -227,6 +227,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
         super.update(time);
 
         physicsTick();
+        cooldownTick();
         riptideTick();
         fallTick();
         weatherTick();
@@ -417,13 +418,36 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
         if (useCooldown == null || useCooldown.cooldownGroup() == null)
             return true;
 
-        int cooldownEnd = cooldownGroups.getInt(useCooldown.cooldownGroup());
-        if (cooldownEnd > getAliveTicks()) return false; // Still in cooldown
+        int cooldown = cooldownGroups.getInt(useCooldown.cooldownGroup());
+        if (cooldown > 0) return false; // Still in cooldown
 
         int cooldownTicks = (int) (useCooldown.seconds() * 20);
-        cooldownGroups.put(useCooldown.cooldownGroup(), (int) (getAliveTicks() + cooldownTicks));
+        cooldownGroups.put(useCooldown.cooldownGroup(), cooldownTicks);
         sendPacket(new SetCooldownPacket(useCooldown.cooldownGroup(), cooldownTicks));
         return true;
+    }
+
+    private void cooldownTick() {
+        // Tick cooldown
+        for (Object2IntMap.Entry<String> cooldown : cooldownGroups.object2IntEntrySet()) {
+            int newCooldown = cooldown.getIntValue() - 1;
+            if (newCooldown <= 0) {
+                cooldownGroups.removeInt(cooldown.getKey());
+            } else {
+                cooldown.setValue(newCooldown);
+            }
+        }
+    }
+
+    public void setItemCooldowns(Map<String, Integer> cooldowns) {
+        cooldownGroups.putAll(cooldowns);
+        for (Map.Entry<String, Integer> cooldown : cooldowns.entrySet()) {
+            sendPacket(new SetCooldownPacket(cooldown.getKey(), cooldown.getValue()));
+        }
+    }
+
+    public Map<String, Integer> getItemCooldowns() {
+        return Map.copyOf(cooldownGroups);
     }
 
     //endregion

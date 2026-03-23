@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.runtime.parkour.action;
 
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.runtime.PlayState;
@@ -141,6 +142,9 @@ public class LegacyActionStateManager {
 
         var ghostBlocks = GhostBlockHolder.forPlayerOptional(player);
         playState.setGhostBlocks(ghostBlocks == null ? Map.of() : ghostBlocks.save());
+
+        var cooldowns = ((MapPlayer) player).getItemCooldowns();
+        playState.setCooldownGroups(cooldowns);
 
         var items = playState.get(Attachments.HOTBAR_ITEMS, HotbarItems.EMPTY);
         playState.set(Attachments.HOTBAR_ITEMS, new HotbarItems(
