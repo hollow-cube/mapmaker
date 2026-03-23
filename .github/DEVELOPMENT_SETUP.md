@@ -40,6 +40,19 @@ This will run a local merged hub/map server, but you can easily debug and profil
 
 ## FAQ
 
+##### Loading the resource pack
+
+The resource pack is not sent by the server automatically currently (to avoid reloading it on every restart).
+
+The assets are packaged on every `DevServer` run, the jar can be explicitly built using the `Build RP` task
+(or `./gradlew :buildClient`).
+
+You can install it in two ways:
+
+* (recommended) Symlink `bin/packer/build/packer-out/client` to your resource pack folder. Note that in recent versions
+  you must also create an `allowed_symlinks.txt` file in the game directory with the symlink path.
+* Run `Build RP` and copy `build/client.zip` to your resource pack folder.
+
 ##### Elevated permissions
 
 You can give your account extra permissions by editing your player_data entry in the database and relogging.
