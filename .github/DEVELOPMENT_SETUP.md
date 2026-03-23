@@ -44,7 +44,7 @@ This will run a local merged hub/map server, but you can easily debug and profil
 
 The resource pack is not sent by the server automatically currently (to avoid reloading it on every restart).
 
-The assets are packaged on every `DevServer` run, the jar can be explicitly built using the `Build RP` task
+The assets are packaged on every `DevServer` run, the zip can be explicitly built using the `Build RP` task
 (or `./gradlew :buildClient`).
 
 You can install it in two ways:
