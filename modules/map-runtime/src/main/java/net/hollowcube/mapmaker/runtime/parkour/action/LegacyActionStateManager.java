@@ -143,7 +143,7 @@ public class LegacyActionStateManager {
         var ghostBlocks = GhostBlockHolder.forPlayerOptional(player);
         playState.setGhostBlocks(ghostBlocks == null ? Map.of() : ghostBlocks.save());
 
-        var cooldowns = ((MapPlayer) player).getItemCooldowns();
+        var cooldowns = ((MapPlayer) player).getCooldowns();
         playState.setCooldownGroups(cooldowns);
 
         var items = playState.get(Attachments.HOTBAR_ITEMS, HotbarItems.EMPTY);

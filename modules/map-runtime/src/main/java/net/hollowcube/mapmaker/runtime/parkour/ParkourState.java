@@ -19,7 +19,6 @@ import net.hollowcube.mapmaker.runtime.parkour.hud.*;
 import net.hollowcube.mapmaker.runtime.parkour.item.*;
 import net.hollowcube.mapmaker.runtime.parkour.setting.OnlySprintSetting;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
-import net.kyori.adventure.nbt.*;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -35,7 +34,6 @@ import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -151,7 +149,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             ((MapPlayer) player).removeOwnedEntities();
             ((MapPlayer) player).resetTouchingState();
 
-            ((MapPlayer) player).setItemCooldowns(playState.lastState().cooldownGroups());
+            ((MapPlayer) player).setCooldowns(playState.lastState().cooldownGroups());
 
             // The following is deinit logic which should not happen when switching from play to play (aka checkpoint reset).
             if (nextState instanceof AnyPlaying) return;

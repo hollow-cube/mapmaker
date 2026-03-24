@@ -1,7 +1,5 @@
 package net.hollowcube.mapmaker.runtime;
 
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.SaveStateType;
