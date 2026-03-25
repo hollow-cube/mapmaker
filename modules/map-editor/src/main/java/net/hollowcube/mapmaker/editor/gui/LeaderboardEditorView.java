@@ -36,22 +36,22 @@ public class LeaderboardEditorView extends Panel {
         add(2, 0, new Text(null, 5, 1, "todo")
             .align(Text.CENTER, Text.CENTER)
             .background("generic2/btn/default/5_1"));
-        add(7, 0, new Button("reset to default", 2, 1)
+        add(7, 0, new Button("gui.spawn.customized_leaderboard.action.reset", 2, 1)
             .background("generic2/btn/default/2_1")
             .sprite("icon2/1_1/refresh", 10, 1)
             .onLeftClick(this::onResetToDefault));
 
         add(1, 1, groupText(4, "format"));
         this.formatSwitch = add(1, 2, new Switch(4, 1, List.of(
-            new Text("format.playtime", 4, 1, "Time")
+            new Text("gui.spawn.customized_leaderboard.format.playtime", 4, 1, "Time")
                 .align(Text.CENTER, Text.CENTER)
                 .background("generic2/btn/default/4_1")
                 .onLeftClick(() -> onFormatChange(Leaderboard.Format.NUMBER)),
-            new Text("format.number", 4, 1, "Number")
+            new Text("gui.spawn.customized_leaderboard.format.number", 4, 1, "Number")
                 .align(Text.CENTER, Text.CENTER)
                 .background("generic2/btn/default/4_1")
                 .onLeftClick(() -> onFormatChange(Leaderboard.Format.PERCENT)),
-            new Text("format.percent", 4, 1, "Percent")
+            new Text("gui.spawn.customized_leaderboard.format.percent", 4, 1, "Percent")
                 .align(Text.CENTER, Text.CENTER)
                 .background("generic2/btn/default/4_1")
                 .onLeftClick(() -> onFormatChange(Leaderboard.Format.TIME))
@@ -59,18 +59,18 @@ public class LeaderboardEditorView extends Panel {
 
         add(6, 1, groupText(2, "order"));
         this.orderSwitch = add(6, 2, new Switch(2, 1, List.of(
-            new Button("order.asc", 2, 1)
+            new Button("gui.spawn.customized_leaderboard.order.asc", 2, 1)
                 .sprite("icon2/1_1/list_up", 10, 1)
                 .background("generic2/btn/default/2_1")
                 .onLeftClick(() -> onOrderChange(false)),
-            new Button("order.desc", 2, 1)
+            new Button("gui.spawn.customized_leaderboard.order.desc", 2, 1)
                 .sprite("icon2/1_1/list_down", 10, 1)
                 .background("generic2/btn/default/2_1")
                 .onLeftClick(() -> onOrderChange(true))
         )));
 
         add(1, 3, groupText(7, "score expression"));
-        this.expressionInput = add(1, 4, new StringInput("score.expression",
+        this.expressionInput = add(1, 4, new StringInput("gui.spawn.customized_leaderboard.score.expression",
             this::onExpressionChange, () -> editingExpression = true)
             .anvilIcon("action/anvil/variable_expression_icon"));
 
