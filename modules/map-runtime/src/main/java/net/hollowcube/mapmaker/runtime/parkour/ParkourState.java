@@ -149,7 +149,9 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             ((MapPlayer) player).removeOwnedEntities();
             ((MapPlayer) player).resetTouchingState();
 
-            ((MapPlayer) player).setCooldowns(playState.lastState().cooldownGroups());
+            if (playState.lastState() != null) {
+                ((MapPlayer) player).setCooldowns(playState.lastState().cooldownGroups());
+            }
 
             // The following is deinit logic which should not happen when switching from play to play (aka checkpoint reset).
             if (nextState instanceof AnyPlaying) return;
