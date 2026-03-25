@@ -457,7 +457,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
             // TODO: translation key
             add(7, 0, new Button("gui.map.settings?", 2, 1)
                 .background("generic2/btn/default/2_1")
-                .sprite("icon2/1_1/gear", 10, 1)
+                .sprite("icon2/1_1/trophy", 10, 1)
                 .onLeftClick(() -> {
                     // TODO: some overarching settings page? Or just a leaderboard icon
                     host.pushView(new LeaderboardEditorView(map()));

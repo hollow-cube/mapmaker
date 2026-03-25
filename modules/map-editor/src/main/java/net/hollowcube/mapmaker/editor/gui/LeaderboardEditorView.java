@@ -38,9 +38,8 @@ public class LeaderboardEditorView extends Panel {
             .background("generic2/btn/default/5_1"));
         add(7, 0, new Button("reset to default", 2, 1)
             .background("generic2/btn/default/2_1")
-            .sprite("icon2/1_1/elytra", 10, 1)
-            .onLeftClick(() -> {}));
-
+            .sprite("icon2/1_1/refresh", 10, 1)
+            .onLeftClick(this::onResetToDefault));
 
         add(1, 1, groupText(4, "format"));
         this.formatSwitch = add(1, 2, new Switch(4, 1, List.of(
@@ -61,9 +60,11 @@ public class LeaderboardEditorView extends Panel {
         add(6, 1, groupText(2, "order"));
         this.orderSwitch = add(6, 2, new Switch(2, 1, List.of(
             new Button("order.asc", 2, 1)
+                .sprite("icon2/1_1/list_up", 10, 1)
                 .background("generic2/btn/default/2_1")
                 .onLeftClick(() -> onOrderChange(false)),
             new Button("order.desc", 2, 1)
+                .sprite("icon2/1_1/list_down", 10, 1)
                 .background("generic2/btn/default/2_1")
                 .onLeftClick(() -> onOrderChange(true))
         )));
@@ -83,6 +84,14 @@ public class LeaderboardEditorView extends Panel {
         this.formatSwitch.select(leaderboard.format().ordinal());
         this.orderSwitch.select(leaderboard.asc() ? 0 : 1);
         this.expressionInput.update(leaderboard.score());
+    }
+
+    private void onResetToDefault() {
+        if (Leaderboard.DEFAULT.equals(leaderboard)) return;
+
+        leaderboard = Leaderboard.DEFAULT;
+        expression = MolangExpression.from(leaderboard.score());
+        update();
     }
 
     private void onFormatChange(Leaderboard.Format format) {

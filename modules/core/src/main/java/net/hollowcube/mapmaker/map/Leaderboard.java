@@ -15,6 +15,8 @@ public record Leaderboard(
         PERCENT,
     }
 
+    public static final Leaderboard DEFAULT = new Leaderboard(true, Format.TIME, "q.playtime");
+
     public Leaderboard withAsc(boolean asc) {
         return new Leaderboard(asc, this.format, this.score);
     }
