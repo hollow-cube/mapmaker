@@ -10,15 +10,15 @@ import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.PlayerPickBlockEvent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.component.ItemBlockState;
-import org.jetbrains.annotations.NotNull;
 
 public final class PickBlock {
 
-    public static void handlePickBlock(@NotNull PlayerPickBlockEvent event) {
+    public static void handlePickBlock(PlayerPickBlockEvent event) {
         var player = event.getPlayer();
         if (player.getGameMode() != GameMode.CREATIVE) return; // Sanity
         var world = EditorMapWorld.forPlayer(player);
         if (world == null) return; // Sanity
+        if (!world.canEdit(player)) return;
 
         // First try to get the block from the item registry
         var block = event.getBlock();

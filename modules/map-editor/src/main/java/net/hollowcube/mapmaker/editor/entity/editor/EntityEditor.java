@@ -44,6 +44,8 @@ public class EntityEditor {
         if (world == null) return;
         if (!(event.getTarget() instanceof MapEntity<?> entity)) return;
         if (!MapEntityType.hasOverride(entity.getEntityType())) return;
+        if (!world.canEdit(player)) return;
+
         var item = ENTITY_TO_ITEM.get(entity.getEntityType());
         if (item == null) return;
         var stack = ItemStack.builder(item);
