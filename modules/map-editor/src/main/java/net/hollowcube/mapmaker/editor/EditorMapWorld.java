@@ -454,8 +454,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         public SpawnActionEditorView(ActionTriggerData.Mutable data) {
             super(data, Action.Type.SPAWN);
 
-            // TODO: translation key
-            add(7, 0, new Button("gui.map.settings?", 2, 1)
+            add(7, 0, new Button("gui.spawn.customized_leaderboard.title", 2, 1)
                 .background("generic2/btn/default/2_1")
                 .sprite("icon2/1_1/trophy", 10, 1)
                 .onLeftClick(() -> {

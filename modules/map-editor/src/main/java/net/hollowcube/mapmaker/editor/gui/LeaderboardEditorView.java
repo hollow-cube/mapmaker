@@ -32,8 +32,8 @@ public class LeaderboardEditorView extends Panel {
         add(0, 0, title("Edit Leaderboard"));
 
         add(0, 0, backOrClose());
-        add(1, 0, infoWithKey("todo"));
-        add(2, 0, new Text(null, 5, 1, "todo")
+        add(1, 0, infoWithKey("gui.spawn.customized_leaderboard.information"));
+        add(2, 0, new Text(null, 5, 1, "todo") //seriously, what should this say lol
             .align(Text.CENTER, Text.CENTER)
             .background("generic2/btn/default/5_1"));
         add(7, 0, new Button("gui.spawn.customized_leaderboard.action.reset", 2, 1)
