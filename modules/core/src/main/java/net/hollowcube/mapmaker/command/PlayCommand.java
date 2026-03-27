@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.gui.map.browser.MapBrowserView;
 import net.hollowcube.mapmaker.map.MapData;
@@ -10,10 +11,10 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,25 +24,25 @@ public class PlayCommand extends CommandDsl {
 
     private final Argument<@Nullable MapData> mapArg;
 
-    private final PlayerService playerService;
+    private final ApiClient api;
     private final MapService mapService;
     private final SessionManager sessionManager;
     private final ServerBridge bridge;
 
     public PlayCommand(
-            @NotNull PlayerService playerService,
-            @NotNull MapService mapService,
-            @NotNull SessionManager sessionManager,
-            @NotNull ServerBridge bridge
+        @NotNull ApiClient api,
+        @NotNull MapService mapService,
+        @NotNull SessionManager sessionManager,
+        @NotNull ServerBridge bridge
     ) {
         super("play");
-        this.playerService = playerService;
+        this.api = api;
         this.mapService = mapService;
         this.sessionManager = sessionManager;
         this.bridge = bridge;
 
         mapArg = CoreArgument.Map("map", mapService)
-                .description("The ID of the map to play");
+            .description("The ID of the map to play");
 
         category = CommandCategories.SOCIAL;
         description = "Teleport to a map, resuming your progress if you have any";
@@ -52,9 +53,10 @@ public class PlayCommand extends CommandDsl {
     }
 
     private void handleDefault(@NotNull Player player, @NotNull CommandContext context) {
-        Panel.open(player, new MapBrowserView(playerService, mapService, bridge));
+        Panel.open(player, new MapBrowserView(api, mapService, bridge));
     }
 
+    @Blocking
     private void joinTargetMap(@NotNull Player player, @NotNull CommandContext context) {
         var map = context.get(mapArg);
         if (map == null) {

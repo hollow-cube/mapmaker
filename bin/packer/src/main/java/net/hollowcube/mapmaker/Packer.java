@@ -2,6 +2,8 @@ package net.hollowcube.mapmaker;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class Packer {
     private static final System.Logger logger = System.getLogger(Packer.class.getName());
@@ -23,6 +25,9 @@ public class Packer {
         System.setProperty("java.awt.headless", "true");
 
         var minecraftPath = Path.of(args[1]).toRealPath();
+        var mcVersions = Arrays.stream(args[2].split(","))
+                .map(it -> it.split(":"))
+                .collect(Collectors.toMap(it -> it[0], it -> it[1]));
 
         try {
             var outDir = Path.of(args[0]);
@@ -40,7 +45,7 @@ public class Packer {
 
         Files.createDirectories(OUT_DIR);
 
-        PackContext ctx = new PackContext(RESOURCE_DIR, OUT_DIR, minecraftPath);
+        PackContext ctx = new PackContext(RESOURCE_DIR, OUT_DIR, minecraftPath, mcVersions);
         SpriteTransform spriteTransform = new SpriteTransform();
         spriteTransform.process(ctx);
 

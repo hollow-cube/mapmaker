@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.store;
 
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.codec.Codec;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +21,8 @@ public sealed interface CostEntry permits CostEntry.Cubits, CostEntry.Coins, Cos
 
     @NotNull
     Component displayName();
-    int getCount(@NotNull PlayerDataV2 playerData, @NotNull PlayerBackpack backpack);
+
+    int getCount(@NotNull PlayerData playerData, @NotNull PlayerBackpack backpack);
 
     final class Cubits implements CostEntry {
         public static final Cubits INSTANCE = new Cubits();
@@ -32,7 +33,7 @@ public sealed interface CostEntry permits CostEntry.Cubits, CostEntry.Coins, Cos
         }
 
         @Override
-        public int getCount(@NotNull PlayerDataV2 playerData, @NotNull PlayerBackpack backpack) {
+        public int getCount(@NotNull PlayerData playerData, @NotNull PlayerBackpack backpack) {
             return playerData.cubits();
         }
     }
@@ -46,7 +47,7 @@ public sealed interface CostEntry permits CostEntry.Cubits, CostEntry.Coins, Cos
         }
 
         @Override
-        public int getCount(@NotNull PlayerDataV2 playerData, @NotNull PlayerBackpack backpack) {
+        public int getCount(@NotNull PlayerData playerData, @NotNull PlayerBackpack backpack) {
             return playerData.coins();
         }
     }
@@ -60,7 +61,7 @@ public sealed interface CostEntry permits CostEntry.Cubits, CostEntry.Coins, Cos
         }
 
         @Override
-        public int getCount(@NotNull PlayerDataV2 playerData, @NotNull PlayerBackpack backpack) {
+        public int getCount(@NotNull PlayerData playerData, @NotNull PlayerBackpack backpack) {
             if (entry == null) return 0;
             return backpack.getQuantity(entry);
         }

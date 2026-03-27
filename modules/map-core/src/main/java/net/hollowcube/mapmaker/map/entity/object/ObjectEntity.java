@@ -3,14 +3,14 @@ package net.hollowcube.mapmaker.map.entity.object;
 import net.hollowcube.common.util.ExtraTags;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.compat.axiom.AxiomAPI;
-import net.hollowcube.compat.axiom.AxiomPlayer;
+import net.hollowcube.compat.axiom.events.AxiomEnabledEvent;
 import net.hollowcube.compat.axiom.events.AxiomMarkerDataRequestEvent;
 import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundMarkerDataPacket;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomUpdateCustomEntityDataEvent;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.*;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.Result;
@@ -23,6 +23,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.RelativeFlags;
+import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.registry.RegistryTranscoder;
 import net.minestom.server.tag.Tag;
@@ -30,6 +31,7 @@ import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -47,16 +49,17 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
             .map(n -> (CompoundBinaryTag) n, n -> n)
             .defaultValue(CompoundBinaryTag.empty());
     protected static final Tag<Key> TYPE_TAG = Tag.String("type").path("data")
-            .map(Key::key, Key::asString)
+            .map(str -> ExtraTags.parseKey(str, UNKNOWN_TYPE), Key::asString)
             .defaultValue(UNKNOWN_TYPE);
     protected static final Tag<@Nullable String> NAME_TAG = Tag.String("name").path("data");
-    protected static final Tag<@Nullable Vec> REGION_MIN_TAG = ExtraTags.VecAsList("min").path("data");
-    protected static final Tag<@Nullable Vec> REGION_MAX_TAG = ExtraTags.VecAsList("max").path("data");
+    protected static final Tag<@Nullable Vec> REGION_MIN_TAG = VecAsList("min").path("data");
+    protected static final Tag<@Nullable Vec> REGION_MAX_TAG = VecAsList("max").path("data");
 
     static {
-        var globalEventHandler = MinecraftServer.getGlobalEventHandler();
-        globalEventHandler.addListener(AxiomMarkerDataRequestEvent.class, ObjectEntity::handleAxiomRequestMarkerData);
-        globalEventHandler.addListener(TerraformAxiomUpdateCustomEntityDataEvent.class, ObjectEntity::handleAxiomUpdateMarkerData);
+        var events = MinecraftServer.getGlobalEventHandler();
+        events.addListener(AxiomMarkerDataRequestEvent.class, ObjectEntity::handleAxiomRequestMarkerData);
+        events.addListener(TerraformAxiomUpdateCustomEntityDataEvent.class, ObjectEntity::handleAxiomUpdateMarkerData);
+        events.addListener(AxiomEnabledEvent.class, ObjectEntity::handleAxiomEnabled);
     }
 
     protected @Nullable ObjectEntityHandler handler;
@@ -77,11 +80,11 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
     }
 
     public @NotNull String getDisplayName() {
-        return Objects.requireNonNullElseGet(getTag(NAME_TAG), () -> getTag(TYPE_TAG).asString());
+        return Objects.requireNonNullElseGet(getTag(NAME_TAG), this::getType);
     }
 
     public @NotNull String getType() {
-        return getTag(TYPE_TAG).asString();
+        return OpUtils.mapOr(getTag(TYPE_TAG), Key::asString, UNKNOWN_TYPE.asString());
     }
 
     public @NotNull CompoundBinaryTag getData() {
@@ -91,6 +94,15 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
     public <T> @NotNull Result<T> getData(@NotNull Codec<T> codec) {
         var coder = new RegistryTranscoder<>(Transcoder.NBT, MinecraftServer.process());
         return codec.decode(coder, getData());
+    }
+
+    public @NotNull CompoundBinaryTag getCleanData() {
+        var data = CompoundBinaryTag.builder();
+        for (var entry : getTag(DATA_TAG)) {
+            if (AxiomAPI.HIDDEN_MARKER_KEYS.contains(entry.getKey())) continue;
+            data.put(entry.getKey(), entry.getValue());
+        }
+        return data.build();
     }
 
     public @Nullable Point getMin() {
@@ -114,21 +126,25 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
 
     @Override
     public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
-        var world = MapWorld.unsafeFromInstance(instance);
-        visible = world != null && !world.isReadOnly();
+        var world = MapWorld.forInstance(instance);
+        visible = world != null && world.canEdit(null);
         if (handler != null) {
             handler.onRemove();
             handler = null;
         }
         return super.setInstance(instance, spawnPosition).thenRun(() -> {
-            if (world == null) return;
-            handler = world.objectEntityHandlers().create(getType(), this);
+            if (world != null) {
+                handler = world.objectEntityHandlers().create(getType(), this);
+            }
         });
     }
 
     @Override
     public void readData(@NotNull CompoundBinaryTag tag) {
         super.readData(tag);
+        // Always reset these two tags in case the parent updated them incorrectly.
+        setNoGravity(true);
+        hasPhysics = false;
 
         setTag(DATA_TAG, tag.getCompound("data"));
         updateBoundingBox();
@@ -142,25 +158,31 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         tag.put("data", getTag(DATA_TAG));
     }
 
+    public boolean canSendToClient(@NotNull Player player) {
+        return sendToClient && this.handler != null && this.handler.canSendToPlayer(player);
+    }
+
     @Override
     public void updateNewViewer(@NotNull Player player) {
-        if (sendToClient) super.updateNewViewer(player);
+        if (canSendToClient(player)) super.updateNewViewer(player);
 
-        // see below for why this is commented
-        var world = MapWorld.forPlayerOptional(player);
+        var world = MapWorld.forPlayer(player);
         if (world == null) return;
 
         if (handler != null) handler.addViewer(world, player);
-        if (world.canEdit(player) && AxiomPlayer.isEnabled(player)) {
+
+        // We dont check for axiom here because on join we dont know if its enabled or not.
+        // We should have received the channel tho so itll get stopped if the mod isnt installed.
+        if (world.canEdit(player)) {
             createAxiomMarkerUpdatePacket().send(player);
         }
     }
 
     @Override
     public void updateOldViewer(@NotNull Player player) {
-        if (sendToClient) super.updateOldViewer(player);
+        if (canSendToClient(player)) super.updateOldViewer(player);
 
-        var world = MapWorld.forPlayerOptional(player);
+        var world = MapWorld.forPlayer(player);
         if (world == null) return;
 
         if (handler != null) handler.removeViewer(world, player);
@@ -184,7 +206,11 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> teleport(@NotNull Pos position, long @Nullable [] chunks, @MagicConstant(flagsFromClass = RelativeFlags.class) int flags) {
+    public @NotNull CompletableFuture<Void> teleport(
+            @NotNull Pos position,
+            long @Nullable [] chunks,
+            @MagicConstant(flagsFromClass = RelativeFlags.class) int flags
+    ) {
         return super.teleport(position, chunks, flags)
                 .thenRun(() -> createAxiomMarkerUpdatePacket().sendToViewers(this));
     }
@@ -195,12 +221,23 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
     }
 
     private static void handleAxiomRequestMarkerData(@NotNull AxiomMarkerDataRequestEvent event) {
-        var world = MapWorld.forPlayerOptional(event.player());
+        final var player = event.player();
+        final var world = MapWorld.forPlayer(player);
         if (!(event.marker() instanceof ObjectEntity entity)) return;
         if (world == null || !world.canEdit(event.player())) return;
         if (!world.instance().equals(entity.getInstance())) return;
 
-        event.setData(entity.getTag(DATA_TAG).put("axiom:hide", AxiomAPI.HIDDEN_MARKER_DATA).putString("type", entity.getType()));
+        var editor = world.objectEntityHandlers().getEditor(entity.getType(), entity.getClass());
+        if (event instanceof AxiomMarkerDataRequestEvent.RightClick && !player.isSneaking() && editor != null) {
+            if (editor.onPlayerEdit(player, entity)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+
+        event.setData(entity.getTag(DATA_TAG)
+                .put("axiom:hide", AxiomAPI.HIDDEN_MARKER_DATA)
+                .putString("type", entity.getType()));
     }
 
     private static void handleAxiomUpdateMarkerData(@NotNull TerraformAxiomUpdateCustomEntityDataEvent event) {
@@ -209,37 +246,59 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
 
         var newData = event.data().getCompound("data");
         var updating = !newData.getBoolean("axiom:modify", false);
-        var minChanged = newData.get("min") != null;
-        var maxChanged = newData.get("max") != null;
+        marker.setData(newData, event.editor(), updating);
+    }
+
+    public void setData(@NotNull CompoundBinaryTag data, @Nullable Player initiator, boolean update) {
+        var minChanged = data.get("min") != null;
+        var maxChanged = data.get("max") != null;
 
         var builder = CompoundBinaryTag.builder();
-        if (updating) builder.put(marker.getTag(DATA_TAG));
-        builder.put(newData);
+        if (update) builder.put(this.getTag(DATA_TAG));
+        builder.put(data);
 
         AxiomAPI.RESERVED_MARKER_DATA.forEach(builder::remove);
 
-        var oldType = marker.getType();
-        marker.setTag(DATA_TAG, builder.build());
+        var oldType = this.getType();
+        this.setTag(DATA_TAG, builder.build());
 
         // TODO cant use update tag here because of a class cast exception, likely a minestom issue - Gravy
-        if (updating) {
-            if (minChanged) marker.setTag(REGION_MIN_TAG, marker.getTag(REGION_MIN_TAG).sub(marker.getPosition()));
-            if (maxChanged) marker.setTag(REGION_MAX_TAG, marker.getTag(REGION_MAX_TAG).sub(marker.getPosition()));
+        if (update) {
+            if (minChanged) this.setTag(REGION_MIN_TAG, this.getTag(REGION_MIN_TAG).sub(this.getPosition()));
+            if (maxChanged) this.setTag(REGION_MAX_TAG, this.getTag(REGION_MAX_TAG).sub(this.getPosition()));
         }
 
-        marker.updateForViewers(); // Send updated region to viewers
-        marker.updateBoundingBox();
+        this.updateForViewers(); // Send updated region to viewers
+        this.updateBoundingBox();
 
-        var newType = marker.getType();
+        var newType = this.getType();
         if (!Objects.equals(oldType, newType)) {
-            if (marker.handler != null) marker.handler.onRemove();
+            if (this.handler != null) this.handler.onRemove();
 
-            var world = MapWorld.unsafeFromInstance(marker.getInstance());
-            if (world != null) {
-                marker.handler = world.objectEntityHandlers().create(newType, marker);
-            } else marker.handler = null;
+            var world = MapWorld.forInstance(this.getInstance());
+            this.handler = world != null ? world.objectEntityHandlers().create(newType, this) : null;
         }
-        if (marker.handler != null) marker.handler.onDataChange(event.editor());
+        this.handleDataChange(initiator);
+    }
+
+    private static void handleAxiomEnabled(@NotNull AxiomEnabledEvent event) {
+        if (!event.isEnabled()) return;
+
+        var player = event.player();
+
+        event.getInstance().getEntityTracker().nearbyEntitiesByChunkRange(
+                player.getPosition(),
+                player.getSettings().effectiveViewDistance(),
+                EntityTracker.Target.ENTITIES,
+                entity -> {
+                    if (entity instanceof ObjectEntity object && object.isViewer(player)) {
+                        object.createAxiomMarkerUpdatePacket().send(player);
+                    }
+                });
+    }
+
+    public void handleDataChange(@Nullable Player player) {
+        if (this.handler != null) this.handler.onDataChange(player);
     }
 
     private void updateForViewers() {
@@ -285,11 +344,43 @@ public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUp
         if (entity == null) return null;
 
         // Ensure they are in the same instance, and that the world is editable
-        var world = MapWorld.forPlayerOptional(editor);
+        var world = MapWorld.forPlayer(editor);
         if (world == null || !world.instance().equals(entity.getInstance()) || !world.canEdit(editor))
             return null;
 
         return entity instanceof ObjectEntity object ? object : null;
     }
+
+    // Axiom allows yo uto use '~' to represent a position relative to the position, but all our vecs are relative.
+    private static double asAxiomDouble(@NotNull BinaryTag tag) {
+        if (tag instanceof NumberBinaryTag number) {
+            return number.doubleValue();
+        } else if (tag instanceof StringBinaryTag string) {
+            try {
+                return string.value().startsWith("~") ? Double.parseDouble(string.value().substring(1))
+                        : Double.parseDouble(string.value());
+            } catch (Exception _) {
+            }
+        }
+        return 0.0;
+    }
+
+    private static @NotNull Tag<Vec> VecAsList(@NotNull String key) {
+        return Tag.NBT(key).list().map(
+                entries -> {
+                    double x = 0.0, y = 0.0, z = 0.0;
+                    if (entries.size() >= 1) x = asAxiomDouble(entries.get(0));
+                    if (entries.size() >= 2) y = asAxiomDouble(entries.get(1));
+                    if (entries.size() >= 3) z = asAxiomDouble(entries.get(2));
+                    return new Vec(x, y, z);
+                },
+                vec -> List.of(
+                        DoubleBinaryTag.doubleBinaryTag(vec.x()),
+                        DoubleBinaryTag.doubleBinaryTag(vec.y()),
+                        DoubleBinaryTag.doubleBinaryTag(vec.z())
+                )
+        );
+    }
+
 
 }

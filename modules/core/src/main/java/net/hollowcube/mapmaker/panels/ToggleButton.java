@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.panels;
 
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ToggleButton extends Button {
@@ -9,7 +8,7 @@ public class ToggleButton extends Button {
     private final String sprite;
     private final int spriteX, spriteY;
 
-    private BooleanConsumer onChange;
+    private @Nullable BooleanConsumer onChange;
     private boolean selected = true; // gets changed to off in constructor
 
     public ToggleButton(int width, int height, String translation, String sprite, int spriteX, int spriteY) {
@@ -31,18 +30,18 @@ public class ToggleButton extends Button {
         if (onChange != null) onChange.accept(selected);
     }
 
-    public @NotNull ToggleButton onChange(@NotNull BooleanConsumer onChange) {
+    public ToggleButton onChange(BooleanConsumer onChange) {
         this.onChange = onChange;
         return this;
     }
 
     @Override
-    public @NotNull ToggleButton background(@Nullable String sprite) {
+    public ToggleButton background(@Nullable String sprite) {
         return background(sprite, 0, 0);
     }
 
     @Override
-    public @NotNull ToggleButton background(@Nullable String sprite, int x, int y) {
+    public ToggleButton background(@Nullable String sprite, int x, int y) {
         super.background(sprite, x, y);
         return this;
     }

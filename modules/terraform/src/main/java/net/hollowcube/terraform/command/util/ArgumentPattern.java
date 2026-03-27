@@ -40,7 +40,7 @@ public class ArgumentPattern extends Argument<Pattern> {
             var tf = LocalSession.forPlayer(player).terraform();
             var blockState = tf.registry().blockState(rawBlockState.stateId());
 
-            return success((world, blockPosition) -> blockState);
+            return success((_, _) -> blockState);
         } catch (ArgumentSyntaxException e) {
             return partial();
         }

@@ -3,8 +3,6 @@ package net.hollowcube.mapmaker.map.entity.marker;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntity;
-import net.hollowcube.mapmaker.map.event.entity.MarkerEntityEnteredEvent;
-import net.hollowcube.mapmaker.map.event.entity.MarkerEntityExitedEvent;
 import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -40,13 +38,11 @@ public class MarkerEntity extends ObjectEntity implements SpatialObject {
         this.sendToClient = false;
     }
 
-    public void onPlayerEntered(@NotNull MapWorld world, @NotNull Player player) {
-        world.callEvent(new MarkerEntityEnteredEvent(world, player, this));
+    public void onPlayerEntered2NoEventTemp(@NotNull Player player) {
         if (this.handler != null) this.handler.onPlayerEnter(player);
     }
 
-    public void onPlayerExited(@NotNull MapWorld world, @NotNull Player player) {
-        world.callEvent(new MarkerEntityExitedEvent(world, player, this));
+    public void onPlayerExited2NoEventTemp(@NotNull Player player) {
         if (this.handler != null) this.handler.onPlayerExit(player);
     }
 
@@ -58,7 +54,7 @@ public class MarkerEntity extends ObjectEntity implements SpatialObject {
     ) {
         return super.teleport(position, velocity, chunks, flags, shouldConfirm).thenRun(() -> {
             if (handler != null) handler.onPositionChange(position);
-            var world = MapWorld.unsafeFromInstance(instance);
+            var world = MapWorld.forInstance(instance);
             if (world != null) world.queueCollisionTreeRebuild();
         });
     }
@@ -66,7 +62,7 @@ public class MarkerEntity extends ObjectEntity implements SpatialObject {
     @Override
     protected void updateBoundingBox() {
         super.updateBoundingBox();
-        var world = MapWorld.unsafeFromInstance(instance);
+        var world = MapWorld.forInstance(instance);
         if (world != null) world.queueCollisionTreeRebuild();
     }
 
@@ -76,9 +72,16 @@ public class MarkerEntity extends ObjectEntity implements SpatialObject {
         Point min = OpUtils.map(this.getMin(), pos::add), max = OpUtils.map(this.getMax(), pos::add);
         if (min == null || max == null) return net.hollowcube.mapmaker.map.util.spatial.BoundingBox.ZERO;
 
+        var minX = (float) Math.min(min.x(), max.x());
+        var minY = (float) Math.min(min.y(), max.y());
+        var minZ = (float) Math.min(min.z(), max.z());
+        var maxX = (float) Math.max(min.x(), max.x());
+        var maxY = (float) Math.max(min.y(), max.y());
+        var maxZ = (float) Math.max(min.z(), max.z());
+
         return new net.hollowcube.mapmaker.map.util.spatial.BoundingBox(
-                (float) min.x(), (float) min.y(), (float) min.z(),
-                (float) max.x(), (float) max.y(), (float) max.z()
+                minX, minY, minZ,
+                maxX, maxY, maxZ
         );
     }
 }

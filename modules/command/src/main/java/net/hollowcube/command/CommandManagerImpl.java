@@ -67,6 +67,11 @@ public class CommandManagerImpl implements CommandManager {
     }
 
     @Override
+    public void unregister(@NotNull String name) {
+        root.unregister(name);
+    }
+
+    @Override
     public @NotNull Suggestion suggest(@NotNull CommandSender sender, @NotNull String input) {
         var reader = new StringReader(input);
         var context = new SuggestionContext(sender);
@@ -105,10 +110,10 @@ public class CommandManagerImpl implements CommandManager {
         AtomicInteger id = new AtomicInteger(1);
         @SuppressWarnings("SuspiciousMethodCalls") // intellij dumb
         var context = new CommandEvaluationContext(
-                player,
-                commandMap::getInt,
-                commandMap::containsKey,
-                node -> commandMap.put(node, id.getAndIncrement())
+            player,
+            commandMap::getInt,
+            commandMap::containsKey,
+            node -> commandMap.put(node, id.getAndIncrement())
         );
 
         var rootNodes = new IntArrayList();
@@ -130,8 +135,8 @@ public class CommandManagerImpl implements CommandManager {
             rootNodes.add(context.getId(node).intValue());
             nodes.add(builder.toNode(context));
             nodes.addAll(children.stream()
-                    .map(CommandNodeBuilder::new)
-                    .map(builders -> builders.toNode(context)).toList());
+                .map(CommandNodeBuilder::new)
+                .map(builders -> builders.toNode(context)).toList());
         }
 
         root.children = rootNodes.toIntArray();
@@ -189,6 +194,11 @@ public class CommandManagerImpl implements CommandManager {
                 commands.add(Map.entry(pair.argument(), child));
             }
             return commands;
+        }
+
+        @Override
+        public void edit(@NotNull CommandNode node, @NotNull Consumer<CommandBuilder> func) {
+            func.accept(new CommandBuilder(node));
         }
     }
 }

@@ -1,6 +1,6 @@
 package net.hollowcube.common.math;
 
-final class MathUtil {
+public final class MathUtil {
 
     public static float invsqrt(float r) {
         return 1.0F / (float) java.lang.Math.sqrt((double) r);
@@ -15,6 +15,15 @@ final class MathUtil {
         }
 
         return b >= (float) java.lang.Math.PI ? -cos : cos;
+    }
+
+    public static double parseFiniteDouble(String value, double fallback) {
+        try {
+            double parsed = Double.parseDouble(value);
+            return Double.isNaN(parsed) || Double.isInfinite(parsed) ? fallback : parsed;
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
     }
 
 }

@@ -30,6 +30,8 @@ import static net.minestom.server.network.NetworkBuffer.SHORT;
 
 public class EmptyChunk extends Chunk {
     private static final List<Section> SECTIONS;
+    private static final ChunkData CHUNK_DATA;
+    private static final LightData LIGHT_DATA;
 
     static {
         var theSections = new ArrayList<Section>();
@@ -37,6 +39,14 @@ public class EmptyChunk extends Chunk {
             theSections.add(new Section());
         }
         SECTIONS = List.copyOf(theSections);
+        CHUNK_DATA = new ChunkData(Map.of(), NetworkBuffer.makeArray(networkBuffer -> {
+            for (Section section : SECTIONS) {
+                networkBuffer.write(SHORT, (short) section.blockPalette().count());
+                networkBuffer.write(Palette.BLOCK_SERIALIZER, section.blockPalette());
+                networkBuffer.write(Palette.biomeSerializer(MinecraftServer.getBiomeRegistry().size()), section.biomePalette());
+            }
+        }), Map.of());
+        LIGHT_DATA = createLightData(true);
     }
 
     public EmptyChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
@@ -85,56 +95,11 @@ public class EmptyChunk extends Chunk {
 
 
     private @NotNull ChunkDataPacket createChunkPacket() {
-        final byte[] data;
-        data = NetworkBuffer.makeArray(networkBuffer -> {
-            for (Section section : SECTIONS) {
-                networkBuffer.write(SHORT, (short) section.blockPalette().count());
-                networkBuffer.write(Palette.BLOCK_SERIALIZER, section.blockPalette());
-                networkBuffer.write(Palette.biomeSerializer(MinecraftServer.getBiomeRegistry().size()), section.biomePalette());
-            }
-        });
-
-        return new ChunkDataPacket(chunkX, chunkZ,
-                new ChunkData(Map.of(), data, Map.of()),
-                createLightData(true)
-        );
+        return new ChunkDataPacket(chunkX, chunkZ, CHUNK_DATA, LIGHT_DATA);
     }
 
     @NotNull UpdateLightPacket createLightPacket() {
-        return new UpdateLightPacket(chunkX, chunkZ, createLightData(false));
-    }
-
-    protected LightData createLightData(boolean requiredFullChunk) {
-        BitSet skyMask = new BitSet();
-        BitSet blockMask = new BitSet();
-        BitSet emptySkyMask = new BitSet();
-        BitSet emptyBlockMask = new BitSet();
-        List<byte[]> skyLights = new ArrayList<>();
-        List<byte[]> blockLights = new ArrayList<>();
-
-        int index = 0;
-        for (Section section : SECTIONS) {
-            index++;
-            final byte[] skyLight = section.skyLight().array();
-            final byte[] blockLight = section.blockLight().array();
-            if (skyLight.length != 0) {
-                skyLights.add(skyLight);
-                skyMask.set(index);
-            } else {
-                emptySkyMask.set(index);
-            }
-            if (blockLight.length != 0) {
-                blockLights.add(blockLight);
-                blockMask.set(index);
-            } else {
-                emptyBlockMask.set(index);
-            }
-        }
-        return new LightData(
-                skyMask, blockMask,
-                emptySkyMask, emptyBlockMask,
-                skyLights, blockLights
-        );
+        return new UpdateLightPacket(chunkX, chunkZ, LIGHT_DATA);
     }
 
     @Override
@@ -165,5 +130,38 @@ public class EmptyChunk extends Chunk {
     @Override
     public void setBiome(int x, int y, int z, @NotNull RegistryKey<Biome> biome) {
 
+    }
+
+    private static LightData createLightData(boolean requiredFullChunk) {
+        BitSet skyMask = new BitSet();
+        BitSet blockMask = new BitSet();
+        BitSet emptySkyMask = new BitSet();
+        BitSet emptyBlockMask = new BitSet();
+        List<byte[]> skyLights = new ArrayList<>();
+        List<byte[]> blockLights = new ArrayList<>();
+
+        int index = 0;
+        for (Section section : SECTIONS) {
+            index++;
+            final byte[] skyLight = section.skyLight().array();
+            final byte[] blockLight = section.blockLight().array();
+            if (skyLight.length != 0) {
+                skyLights.add(skyLight);
+                skyMask.set(index);
+            } else {
+                emptySkyMask.set(index);
+            }
+            if (blockLight.length != 0) {
+                blockLights.add(blockLight);
+                blockMask.set(index);
+            } else {
+                emptyBlockMask.set(index);
+            }
+        }
+        return new LightData(
+                skyMask, blockMask,
+                emptySkyMask, emptyBlockMask,
+                skyLights, blockLights
+        );
     }
 }

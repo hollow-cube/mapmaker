@@ -8,8 +8,7 @@ import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -17,14 +16,16 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
+
 public class MapDeleteCommand extends CommandDsl {
     private final Argument<@Nullable MapData> mapArg;
     private final Argument<String> reasonArg = Argument.GreedyString("reason")
-            .description("The reason for deleting the map");
+        .description("The reason for deleting the map");
 
     private final MapService mapService;
 
-    public MapDeleteCommand(@NotNull MapService mapService, @NotNull PermManager permManager) {
+    public MapDeleteCommand(@NotNull MapService mapService) {
         super("delete");
         this.mapService = mapService;
 
@@ -32,9 +33,9 @@ public class MapDeleteCommand extends CommandDsl {
         examples = List.of("/map delete 123-456-789", "/map delete a12345bc-67de-8f91-ghij-2345k6l78912");
 
         mapArg = CoreArgument.Map("map", mapService)
-                .description("The ID of the map to delete");
+            .description("The ID of the map to delete");
 
-        setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
+        setCondition(staffPerm(Permission.GENERIC_STAFF));
         addSyntax(playerOnly(this::handleDeleteMap), mapArg, reasonArg);
     }
 
@@ -44,7 +45,7 @@ public class MapDeleteCommand extends CommandDsl {
 
         if (map == null) {
             player.sendMessage(
-                    Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
+                Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
         if (reason == null || reason.isEmpty()) {

@@ -1,16 +1,15 @@
 package net.hollowcube.mapmaker.session;
 
+import io.nats.client.Message;
+import io.nats.client.MessageConsumer;
+import io.nats.client.api.AckPolicy;
+import io.nats.client.api.ConsumerConfiguration;
+import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.kafka.BaseConsumer;
-import net.hollowcube.mapmaker.kafka.KafkaConfig;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
-import net.hollowcube.mapmaker.player.DisplayName;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
-import net.hollowcube.mapmaker.player.PlayerService;
-import net.hollowcube.mapmaker.player.SessionService;
+import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.to_be_refactored.SyntheticTabListManager;
-import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.Audiences;
@@ -18,19 +17,15 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.validate.Check;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.jctools.queues.MpscArrayQueue;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.UUID;
+import java.time.Duration;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.LockSupport;
-import java.util.function.Predicate;
 
 public class SessionManager {
     private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
@@ -40,34 +35,37 @@ public class SessionManager {
 
     private static final ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
 
+    private static final String STREAM = "SESSIONS";
+    private static final ConsumerConfiguration CONSUMER_CONFIG = ConsumerConfiguration.builder()
+        .filterSubjects("session.>")
+        .deliverPolicy(DeliverPolicy.New)
+        .ackPolicy(AckPolicy.None)
+        .inactiveThreshold(Duration.ofMinutes(5))
+        .build();
+
     private final SessionService sessionService;
     private final PlayerService playerService;
-    private final ConsumerImpl consumer;
 
     private final Map<String, PlayerSession> sessions = new ConcurrentHashMap<>(); // All sessions, including local ones
     private final SyntheticTabListManager syntheticTab;
 
-    private final Predicate<String> hasSeeVanishedPerm;
+    private final MessageConsumer consumer;
 
     public SessionManager(
-            @NotNull SessionService sessionService,
-            @NotNull PlayerService playerService,
-            @NotNull PermManager permManager,
-            @NotNull KafkaConfig kafkaConfig,
-            boolean noop
+        @NotNull SessionService sessionService,
+        @NotNull PlayerService playerService,
+        @NotNull JetStreamWrapper jetStream
     ) {
         instance = this;
         this.sessionService = sessionService;
         this.playerService = playerService;
 
-        if (!noop) this.consumer = new ConsumerImpl(String.join(",", kafkaConfig.bootstrapServerList()));
-        else this.consumer = null;
-
         this.syntheticTab = new SyntheticTabListManager(this, playerService);
         MinecraftServer.getGlobalEventHandler()
-                .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn);
+            .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn);
 
-        this.hasSeeVanishedPerm = permManager.createPrefetchedCondition(PlatformPerm.SEE_VANISHED);
+        this.consumer = jetStream.subscribe(STREAM, CONSUMER_CONFIG, SessionUpdateMessage.class, this::handleSessionUpdateMessage);
+        Thread.startVirtualThread(this::incrementalSyncLoop); // begin doing incremental sync every few minutes to ensure we stay in sync.
     }
 
     public void sync() {
@@ -79,8 +77,27 @@ public class SessionManager {
         logger.info("synced session manager with {} sessions", sessions.size());
     }
 
+    public void syncIncremental() {
+        var oldSessions = new HashSet<>(sessions.keySet());
+        for (var session : sessionService.sync()) {
+            if (oldSessions.remove(session.playerId())) {
+                handleSessionCreate(session);
+            } else {
+                handleSessionUpdate(session, new SessionStateUpdateRequest.Metadata());
+            }
+        }
+
+        for (var deleted : oldSessions) {
+            handleSessionDelete(new SessionUpdateMessage(SessionUpdateMessage.Action.DELETE, deleted, null, null));
+        }
+    }
+
     public void close() {
-        if (consumer != null) consumer.close();
+        try {
+            consumer.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public boolean isHidden(@NotNull String playerId) {
@@ -132,19 +149,18 @@ public class SessionManager {
     }
 
     private void handleSessionCreate(@NotNull PlayerSession session) {
+        if (sessions.containsKey(session.playerId())) {
+            handleSessionUpdate(session, new SessionStateUpdateRequest.Metadata());
+            return;
+        }
+
         logger.debug("remote session created for {}", session.playerId());
         sessions.put(session.playerId(), session);
 
         // Do not send a join message/add to tab list if the player is hidden
         if (session.hidden()) return;
 
-        var joinMessage = buildJoinMessage(session.playerId());
-        for (var player : CONNECTION_MANAGER.getOnlinePlayers()) {
-            // Do not send the join message to the player who joined, we send that to them immediately on join so that it feels better
-            if (player.getUuid().toString().equals(session.playerId())) continue;
-            player.sendMessage(joinMessage);
-        }
-
+        this.broadcastJoinMessage(session.playerId());
         syntheticTab.addSession(session);
     }
 
@@ -195,73 +211,75 @@ public class SessionManager {
         syntheticTab.addLocalPlayer(event.getPlayer());
     }
 
-    private @NotNull Component buildJoinMessage(@NotNull String playerId) {
-        var displayName = playerService.getPlayerDisplayName2(playerId);
-        return Component.translatable("chat.player.join", displayName.build(DisplayName.Context.DEFAULT));
+    private boolean showJoinLeaveMessage(@NotNull DisplayName displayName) {
+        return displayName.getBadgeName() != null; // Show anyone with a badge for now.
     }
 
     private void broadcastJoinMessage(@NotNull String playerId) {
-        var joinMessage = buildJoinMessage(playerId);
-        Audiences.players().sendMessage(joinMessage);
+        List<String> friends = this.playerService.getPlayerFriends(playerId, true, new PlayerService.Pageable(1, 10_000)).items()
+            .stream().map(PlayerFriend::playerId).toList();
+        var displayName = this.playerService.getPlayerDisplayName2(playerId);
+
+        if (showJoinLeaveMessage(displayName)) {
+            // only send to non-friends
+            Audiences.players(lPlayer -> !friends.contains(lPlayer.getUuid().toString()))
+                .sendMessage(Component.translatable("chat.player.join", displayName.build(DisplayName.Context.DEFAULT)));
+        }
+
+        Audiences.players(lPlayer -> friends.contains(lPlayer.getUuid().toString()))
+            .sendMessage(Component.translatable("chat.friend.join", displayName.build(DisplayName.Context.DEFAULT)));
     }
 
     private void broadcastLeaveMessage(@NotNull String playerId) {
-        var displayName = playerService.getPlayerDisplayName2(playerId);
-        var leaveMessage = Component.translatable("chat.player.leave", displayName.build(DisplayName.Context.DEFAULT));
-        Audiences.players().sendMessage(leaveMessage);
+        List<String> friends = this.playerService.getPlayerFriends(playerId, true, new PlayerService.Pageable(1, 10_000)).items()
+            .stream().map(PlayerFriend::playerId).toList();
+        var displayName = this.playerService.getPlayerDisplayName2(playerId);
+
+        if (showJoinLeaveMessage(displayName)) {
+            // only send to non-friends
+            Audiences.players(player -> !friends.contains(player.getUuid().toString()))
+                .sendMessage(Component.translatable("chat.player.leave", displayName.build(DisplayName.Context.DEFAULT)));
+        }
+
+        Audiences.players(player -> friends.contains(player.getUuid().toString()))
+            .sendMessage(Component.translatable("chat.friend.leave", displayName.build(DisplayName.Context.DEFAULT)));
     }
 
     public void configureVanishedPlayer(@NotNull Player player) {
-        player.updateViewableRule(p -> hasSeeVanishedPerm.test(PlayerDataV2.fromPlayer(p).id()));
+        player.scheduleNextTick(e -> e.updateViewableRule(p -> PlayerData.fromPlayer(p).has(Permission.GENERIC_STAFF)));
     }
 
     private void configureVisiblePlayer(@NotNull Player player) {
         player.updateViewableRule(null);
     }
 
-    private class ConsumerImpl extends BaseConsumer<SessionUpdateMessage> {
-        private final MpscArrayQueue<SessionUpdateMessage> queue = new MpscArrayQueue<>(512);
-        private final Thread thread = Thread.startVirtualThread(this::processQueue);
-
-        protected ConsumerImpl(@NotNull String bootstrapServers) {
-            super("session-updates", AbstractHttpService.hostname, s -> AbstractHttpService.GSON.fromJson(s, SessionUpdateMessage.class), bootstrapServers);
-        }
-
-        @Override
-        public void close() {
-            this.thread.interrupt();
-            super.close();
-        }
-
-        @Override
-        protected void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull SessionUpdateMessage message) {
-            while (!queue.relaxedOffer(message))
-                FutureUtil.sleep(1000);
-            LockSupport.unpark(thread);
-        }
-
-        private void processQueue() {
-            while (true) {
-                LockSupport.park();
-                if (this.thread.isInterrupted() || !this.thread.isAlive())
-                    return;
-
-                queue.drain(message -> {
-                    switch (message.action()) {
-                        case CREATE -> {
-                            // We have to check if the session exists here because its possible we did an optimistic update on the session before the message arrived.
-                            var oldSession = sessions.get(message.playerId());
-                            if (oldSession == null) {
-                                handleSessionCreate(message.session());
-                            } else {
-                                handleSessionUpdate(message.session(), message.metadata());
-                            }
-                        }
-                        case DELETE -> handleSessionDelete(message);
-                        case UPDATE -> handleSessionUpdate(message.session(), message.metadata());
-                    }
-                });
+    private void handleSessionUpdateMessage(@NotNull Message msg, @NotNull SessionUpdateMessage message) {
+        switch (message.action()) {
+            case CREATE -> {
+                // We have to check if the session exists here because its possible we did an optimistic update on the session before the message arrived.
+                var oldSession = sessions.get(message.playerId());
+                if (oldSession == null) {
+                    handleSessionCreate(message.session());
+                } else {
+                    handleSessionUpdate(message.session(), message.metadata());
+                }
             }
+            case DELETE -> handleSessionDelete(message);
+            case UPDATE -> handleSessionUpdate(message.session(), message.metadata());
+        }
+    }
+
+    @Blocking
+    private void incrementalSyncLoop() {
+        FutureUtil.sleep(30_000);
+        while (true) {
+            try {
+                syncIncremental();
+            } catch (Exception e) {
+                ExceptionReporter.reportException(e);
+            }
+
+            FutureUtil.sleep(5 * 60 * 1000);
         }
     }
 }

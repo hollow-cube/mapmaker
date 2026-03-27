@@ -4,9 +4,11 @@ import com.google.gson.JsonObject;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
+import net.hollowcube.mapmaker.map.setting.NoSpectateMode;
 import net.hollowcube.mapmaker.map.setting.TimeOfDay;
 import net.hollowcube.mapmaker.map.setting.WeatherType;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.util.TriState;
 import net.minestom.server.ServerFlag;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
@@ -18,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -32,7 +35,7 @@ public class MapSettings {
     public static final MapSetting<Boolean> NO_JUMP = MapSetting.Bool("no_jump", false);
     public static final MapSetting<Boolean> NO_SNEAK = MapSetting.Bool("no_sneak", false);
 
-    public static final MapSetting<Boolean> NO_SPECTATOR = MapSetting.Bool("no_spectator", false);
+    public static final MapSetting<NoSpectateMode> NO_SPECTATOR = new MapSetting<>("no_spectator", NoSpectateMode.OFF, NoSpectateMode.CODEC);
     public static final MapSetting<Boolean> RESET_IN_WATER = MapSetting.Bool("reset_in_water", false);
     public static final MapSetting<Boolean> RESET_IN_LAVA = MapSetting.Bool("reset_in_lava", false);
     public static final MapSetting<Boolean> NO_RELOG = MapSetting.Bool("no_relog", false);
@@ -43,13 +46,22 @@ public class MapSettings {
     public static final MapSetting<TimeOfDay> TIME_OF_DAY = MapSetting.Enum("time_of_day", TimeOfDay.NOON);
     public static final MapSetting<WeatherType> WEATHER_TYPE = MapSetting.Enum("weather_type", WeatherType.CLEAR);
     public static final MapSetting<Boolean> LIGHTING = MapSetting.Bool("lighting", false);
+    public static final MapSetting<String> RESOURCE_PACK = MapSetting.String("resource_pack", "");
+    public static final MapSetting<TriState> CAN_SEND_POSE = MapSetting.Enum("can_send_pose", TriState.NOT_SET);
 
     public static final MapSetting<Boolean>[] TOOLTIP_SETTINGS = new MapSetting[]{
-            BOAT, ONLY_SPRINT, NO_SPRINT, NO_JUMP, NO_SNEAK,
+        BOAT, ONLY_SPRINT, NO_SPRINT, NO_JUMP, NO_SNEAK,
     };
 
     // Weird/one off/experimental settings
     public static final MapSetting<Boolean> PROGRESS_INDEX_ADDITION = MapSetting.Bool("progress_index_addition", false);
+
+    // Internal settings
+
+    // Overrides the map instance size in map-per-server deployments. Should generally not be used a size will be inferred by default.
+    public static final MapSetting<String> INSTANCE_SIZE = MapSetting.String("instance_size", "");
+    // If set on a parkour map, the map will try to load a script bundle in playing mode.
+    public static final MapSetting<Boolean> HAS_SCRIPT_BUNDLE = MapSetting.Bool("has_script_bundle", false);
 
     transient MapUpdateRequest updates = new MapUpdateRequest();
     transient ReentrantLock updateLock = new ReentrantLock();
@@ -132,19 +144,19 @@ public class MapSettings {
     public MapSettings() {
         this.name = "";
         this.icon = null;
-        this.variant = MapVariant.BUILDING;
+        this.variant = MapVariant.PARKOUR;
         this.size = MapSize.NORMAL;
         this.spawnPoint = new Pos(0.5, 40, 0.5);
         this.tags = new ArrayList<>();
     }
 
     public MapSettings(
-            @Nullable String name,
-            @Nullable Material icon,
-            @Nullable MapSize size,
-            @Nullable MapVariant variant,
-            @Nullable Pos spawnPoint,
-            @Nullable List<MapTags.Tag> tags
+        @Nullable String name,
+        @Nullable Material icon,
+        @Nullable MapSize size,
+        @Nullable MapVariant variant,
+        @Nullable Pos spawnPoint,
+        @Nullable List<MapTags.Tag> tags
     ) {
         this.name = name;
         this.icon = icon;
@@ -352,8 +364,8 @@ public class MapSettings {
         }
     }
 
-    public @Nullable MapSize getSize() {
-        return size;
+    public @NotNull MapSize getSize() {
+        return Objects.requireNonNullElse(size, MapSize.NORMAL);
     }
 
     public void setSize(@NotNull MapSize size) {
@@ -440,9 +452,15 @@ public class MapSettings {
         return this.tags;
     }
 
+    public boolean hasTag(@NotNull MapTags.Tag tag) {
+        return this.tags != null && this.tags.contains(tag);
+    }
+
     public boolean addTag(@NotNull MapTags.Tag tag) {
-        Check.stateCondition(variant == MapVariant.BUILDING && tag.type == MapTags.TagType.GAMEPLAY,
+        if (tag.type != null) {
+            Check.stateCondition(variant == MapVariant.BUILDING && tag.type == MapTags.TagType.GAMEPLAY,
                 "building maps may not have gameplay tags");
+        }
 
         updateLock.lock();
         try {
@@ -453,6 +471,29 @@ public class MapSettings {
             }
 
             this.tags.add(tag);
+            updates.setTags(this.tags);
+            return true;
+        } finally {
+            updateLock.unlock();
+        }
+    }
+
+    public void setTag(int index, MapTags.Tag tag) {
+        updateLock.lock();
+        try {
+            if (this.tags == null) return;
+            this.tags.set(index, tag);
+            updates.setTags(this.tags);
+        } finally {
+            updateLock.unlock();
+        }
+    }
+
+    public boolean removeTag(int index) {
+        updateLock.lock();
+        try {
+            if (this.tags == null) return false;
+            this.tags.remove(index);
             updates.setTags(this.tags);
             return true;
         } finally {
@@ -483,7 +524,7 @@ public class MapSettings {
                 this.tags = new ArrayList<>();
             }
             this.tags = new ArrayList<>(this.tags.stream().filter(
-                    tag -> tag.getType() == MapTags.TagType.VISUAL
+                tag -> tag.type() == MapTags.TagType.VISUAL
             ).toList());
         } finally {
             updateLock.unlock();
@@ -497,7 +538,7 @@ public class MapSettings {
                 this.tags = new ArrayList<>();
             }
             this.tags = new ArrayList<>(this.tags.stream().filter(
-                    tag -> tag.getType() == MapTags.TagType.GAMEPLAY
+                tag -> tag.type() == MapTags.TagType.GAMEPLAY
             ).toList());
         } finally {
             updateLock.unlock();
@@ -515,10 +556,10 @@ public class MapSettings {
         var data = this.extra.get(setting.key());
         if (data == null) return setting.defaultValue();
         return (T) this.cache.computeIfAbsent(
-                setting,
-                (_) -> setting.codec()
-                        .decode(Transcoder.JSON, data)
-                        .orElse(setting.defaultValue())
+            setting,
+            (_) -> setting.codec()
+                .decode(Transcoder.JSON, data)
+                .orElse(setting.defaultValue())
         );
     }
 

@@ -24,7 +24,6 @@ import net.minestom.server.tag.TagWritable;
 import net.minestom.server.timer.Task;
 import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
@@ -45,61 +44,61 @@ import java.util.function.UnaryOperator;
 public class InventoryHost implements TagReadable, TagWritable {
     private static final Logger logger = LoggerFactory.getLogger(InventoryHost.class);
     private static final Sound CLICK_SOUND = Sound.sound(SoundEvent.UI_BUTTON_CLICK, Sound.Source.PLAYER, 0.2f, 1f);
-    private static final ThreadLocal<InventoryHost> CURRENT = new ThreadLocal<>();
+    private static final ThreadLocal<@Nullable InventoryHost> CURRENT = new ThreadLocal<>();
 
-    public static @NotNull InventoryHost current() {
+    public static InventoryHost current() {
         return Objects.requireNonNull(CURRENT.get(), "No current InventoryHost");
     }
 
     static {
         MinecraftServer.getGlobalEventHandler()
-                .addListener(InventoryPreClickEvent.class, InventoryHost::handleInventoryClick)
-                .addListener(PlayerAnvilInputEvent.class, InventoryHost::handleAnvilInput);
+            .addListener(InventoryPreClickEvent.class, InventoryHost::handleInventoryClick)
+            .addListener(PlayerAnvilInputEvent.class, InventoryHost::handleAnvilInput);
     }
 
     private final Player player;
     private final InventoryWrapper handle = new InventoryWrapper();
     private final TagHandler tagHandler = TagHandler.newHandler();
-    private Runnable closeCallback = null;
+    private @Nullable Runnable closeCallback = null;
 
-    private Task redrawTask = null;
+    private @Nullable Task redrawTask = null;
     // If present, indicates a potentially pending click event. We should not respond to other clicks while this
     // is both not null and not CompletableFuture#isDone.
-    private CompletableFuture<Void> pendingClick = null;
+    private @Nullable CompletableFuture<Void> pendingClick = null;
 
     private record StackedView(Panel panel, InventoryType inventoryType, boolean isTransient) {
     }
 
     private final List<StackedView> viewStack = new ArrayList<>();
 
-    public InventoryHost(@NotNull Player player) {
+    public InventoryHost(Player player) {
         this.player = player;
     }
 
-    public @NotNull Player player() {
+    public Player player() {
         return player;
     }
 
-    public @NotNull Inventory handle() {
+    public Inventory handle() {
         return Objects.requireNonNull(handle);
     }
 
-    public void pushTransientView(@NotNull Panel panel) {
+    public void pushTransientView(Panel panel) {
         pushView(panel, true);
     }
 
     /// Replaces the current view with a new one. This works similarly to what would happen
     /// if the parent view was transient.
-    public void replaceView(@NotNull Panel panel) {
+    public void replaceView(Panel panel) {
         popView();
         pushView(panel);
     }
 
-    public void pushView(@NotNull Panel panel) {
+    public void pushView(Panel panel) {
         pushView(panel, false);
     }
 
-    private void pushView(@NotNull Panel panel, boolean isTransient) {
+    private void pushView(Panel panel, boolean isTransient) {
         if (!viewStack.isEmpty()) {
             var last = viewStack.getLast();
             last.panel.unmount();
@@ -132,7 +131,19 @@ public class InventoryHost implements TagReadable, TagWritable {
         return viewStack.size() > 1;
     }
 
-    public void onClose(@NotNull Runnable callback) {
+    public void popOrClose() {
+        if (canPopView()) {
+            popView();
+        } else {
+            close();
+        }
+    }
+
+    public void close() {
+        player.closeInventory();
+    }
+
+    public void onClose(Runnable callback) {
         this.closeCallback = callback;
     }
 
@@ -142,32 +153,32 @@ public class InventoryHost implements TagReadable, TagWritable {
     }
 
     @Override
-    public <T> @UnknownNullability T getTag(@NotNull Tag<T> tag) {
+    public <T> @UnknownNullability T getTag(Tag<T> tag) {
         return this.tagHandler.getTag(tag);
     }
 
     @Override
-    public <T> void setTag(@NotNull Tag<T> tag, @Nullable T value) {
+    public <T> void setTag(Tag<T> tag, @Nullable T value) {
         this.tagHandler.setTag(tag, value);
     }
 
     @Override
-    public <T> @Nullable T getAndSetTag(@NotNull Tag<T> tag, @Nullable T value) {
+    public <T> @Nullable T getAndSetTag(Tag<T> tag, @Nullable T value) {
         return this.tagHandler.getAndSetTag(tag, value);
     }
 
     @Override
-    public <T> void updateTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
+    public <T> void updateTag(Tag<T> tag, UnaryOperator<@UnknownNullability T> value) {
         this.tagHandler.updateTag(tag, value);
     }
 
     @Override
-    public <T> @UnknownNullability T updateAndGetTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
+    public <T> @UnknownNullability T updateAndGetTag(Tag<T> tag, UnaryOperator<@UnknownNullability T> value) {
         return this.tagHandler.updateAndGetTag(tag, value);
     }
 
     @Override
-    public <T> @UnknownNullability T getAndUpdateTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
+    public <T> @UnknownNullability T getAndUpdateTag(Tag<T> tag, UnaryOperator<@UnknownNullability T> value) {
         return this.tagHandler.getAndUpdateTag(tag, value);
     }
 
@@ -178,9 +189,11 @@ public class InventoryHost implements TagReadable, TagWritable {
         if (this.viewStack.isEmpty()) return;
         final StackedView root = this.viewStack.getLast();
 
+        var slotOverrides = SpecialInventoryHosts.getSlotPositionOverrides(root.inventoryType);
+
         // Currently we always consume the player inventory so add 4 rows.
-        int containerSizeInRows = getInterpretedSize(root.inventoryType) / 9;
-        var menuBuilder = new MenuBuilder(9, containerSizeInRows + 4, containerSizeInRows);
+        int containerSizeInRows = SpecialInventoryHosts.getContainerSize(root.inventoryType) / 9;
+        var menuBuilder = new MenuBuilder(9, containerSizeInRows + 4, containerSizeInRows, slotOverrides);
         root.panel.build(menuBuilder);
 
         if (!handle.isViewer(player))
@@ -188,19 +201,19 @@ public class InventoryHost implements TagReadable, TagWritable {
         this.handle.updateContents(root.inventoryType, menuBuilder.getItems(), menuBuilder.getTitle());
     }
 
-    private static void handleInventoryClick(@NotNull InventoryPreClickEvent event) {
+    private static void handleInventoryClick(InventoryPreClickEvent event) {
         final int slot;
         final InventoryHost host;
         if (event.getInventory() instanceof InventoryWrapper inventory) {
             host = inventory.owner(); // Click in an inventory
             slot = event.getClick().slot();
         } else if (event.getInventory() instanceof PlayerInventory &&
-                event.getPlayer().getOpenInventory() instanceof InventoryWrapper inventory) {
+                   event.getPlayer().getOpenInventory() instanceof InventoryWrapper inventory) {
             host = inventory.owner(); // Click in player inventory
 
             // Slot needs to be offset from the top of the main inventory
             int offsetSlot = event.getClick().slot();
-            int mainSize = getInterpretedSize(host.handle.getInventoryType());
+            int mainSize = SpecialInventoryHosts.getContainerSize(host.handle.getInventoryType());
 
             // We need to reorder the hotbar to come last
             slot = mainSize + offsetSlot + (offsetSlot < 9 ? 27 : -9);
@@ -230,23 +243,7 @@ public class InventoryHost implements TagReadable, TagWritable {
         }
     }
 
-    /**
-     * We have special handling for inventories that don't exactly match the expected grid/column layout we use
-     * for inventories. For example an anvil has its 3 special slots but we pretend it has 9 slots for the sake
-     * of the layout system. Slots 3-8 are skipped in that case.
-     *
-     * @return The size of the inventory as interpreted by the layout system.
-     */
-    private static int getInterpretedSize(@NotNull InventoryType type) {
-        return switch (type) {
-            case CHEST_1_ROW, CHEST_2_ROW, CHEST_3_ROW,
-                 CHEST_4_ROW, CHEST_5_ROW, CHEST_6_ROW -> type.getSize();
-            case ANVIL, CARTOGRAPHY -> 9;
-            default -> throw new IllegalStateException("Unsupported inventory type: " + type);
-        };
-    }
-
-    private static void handleAnvilInput(@NotNull PlayerAnvilInputEvent event) {
+    private static void handleAnvilInput(PlayerAnvilInputEvent event) {
         if (!(event.getInventory() instanceof InventoryWrapper inventory)) return;
         var host = inventory.owner();
         if (host.viewStack.isEmpty()) return;
@@ -263,58 +260,62 @@ public class InventoryHost implements TagReadable, TagWritable {
 
         // Represents the player inventory slots which will be sent if present.
         // May be smaller than the player inventory (eg 9 items) and will show the player items for the rest.
-        private ItemStack[] playerInventory = null;
+        // TODO: why is this ever null?
+        private ItemStack @UnknownNullability [] playerInventory = null;
 
         public InventoryWrapper() {
             // We override handling of inventory type and title. If these values are ever observed, a mistake has been made
             super(InventoryType.CHEST_6_ROW, UNREACHABLE);
         }
 
-        public @NotNull InventoryHost owner() {
+        public InventoryHost owner() {
             return InventoryHost.this;
         }
 
         @Override
-        public @NotNull InventoryType getInventoryType() {
+        public InventoryType getInventoryType() {
             return this.inventoryType;
         }
 
         @Override
         public int getSize() {
+            // This needs a null check because the Inventory constructor calls getSize before the inventoryType field
+            // is initialized. Pretty gross and sneaky :(
+            //noinspection DataFlowIssue
             return Objects.requireNonNullElse(this.inventoryType, InventoryType.CHEST_6_ROW).getSize();
         }
 
         @Override
-        public @NotNull Component getTitle() {
+        public Component getTitle() {
             return this.title;
         }
 
-        public void updateContents(@NotNull InventoryType type, @NotNull ItemStack[] items, @NotNull Component title) {
+        public void updateContents(InventoryType type, ItemStack[] items, Component title) {
             this.inventoryType = type;
             this.title = title;
             copyInventoryContents(items);
 
             try {
-                sendPacketToViewers(new BundlePacket());
-                sendPacketToViewers(new OpenWindowPacket(getWindowId(), getInventoryType().getWindowType(), getTitle()));
+                player.sendPacket(new BundlePacket());
+                player.sendPacket(new OpenWindowPacket(getWindowId(), getInventoryType().getWindowType(), getTitle()));
                 update();
                 updatePlayerInventory();
             } finally {
-                sendPacketToViewers(new BundlePacket());
+                player.sendPacket(new BundlePacket());
             }
         }
 
-        private void copyInventoryContents(@NotNull ItemStack[] items) {
+        private void copyInventoryContents(ItemStack[] items) {
             Check.argCondition(items.length < getSize(), "items length must be at least the size of the inventory");
             System.arraycopy(items, 0, itemStacks, 0, getSize());
-            var size = getInterpretedSize(getInventoryType());
+            var size = SpecialInventoryHosts.getContainerSize(getInventoryType());
             if (items.length > size) {
                 this.playerInventory = Arrays.copyOfRange(items, size, items.length);
             } else this.playerInventory = null;
         }
 
         @Override
-        public boolean addViewer(@NotNull Player player) {
+        public boolean addViewer(Player player) {
             var result = super.addViewer(player);
             if (result && ensureDelegatingPlayerInventory(player)) {
                 updatePlayerInventory();
@@ -323,7 +324,7 @@ public class InventoryHost implements TagReadable, TagWritable {
         }
 
         @Override
-        public boolean removeViewer(@NotNull Player player) {
+        public boolean removeViewer(Player player) {
             var result = super.removeViewer(player);
             if (result) { // Update the player inventory to show their original items.
                 player.getInventory().update();
@@ -343,7 +344,7 @@ public class InventoryHost implements TagReadable, TagWritable {
         }
 
         @Override
-        public void update(@NotNull Player player) {
+        public void update(Player player) {
             var itemStacks = new ItemStack[getSize()];
             System.arraycopy(this.itemStacks, 0, itemStacks, 0, getSize());
             player.sendPacket(new WindowItemsPacket(getWindowId(), 0, List.of(itemStacks), player.getInventory().getCursorItem()));
@@ -353,7 +354,7 @@ public class InventoryHost implements TagReadable, TagWritable {
             getViewers().forEach(player -> player.sendPacket(createWindowItemsPacket(player)));
         }
 
-        private WindowItemsPacket createWindowItemsPacket(@NotNull Player player) {
+        private WindowItemsPacket createWindowItemsPacket(Player player) {
             ItemStack[] convertedSlots = new ItemStack[PlayerInventory.INVENTORY_SIZE];
             Arrays.fill(convertedSlots, ItemStack.AIR);
             for (int i = 0; i < convertedSlots.length; i++) {
@@ -378,13 +379,13 @@ public class InventoryHost implements TagReadable, TagWritable {
             } else return -1;
         }
 
-        private boolean ensureDelegatingPlayerInventory(@NotNull Player player) {
+        private boolean ensureDelegatingPlayerInventory(Player player) {
             if (player.getInventory() instanceof DelegatingPlayerInventory)
                 return true;
 
             try {
                 class Holder {
-                    static Field inventoryField;
+                    static @Nullable Field inventoryField;
                 }
                 if (Holder.inventoryField == null) {
                     Holder.inventoryField = Player.class.getDeclaredField("inventory");
@@ -407,7 +408,7 @@ public class InventoryHost implements TagReadable, TagWritable {
     private static final class DelegatingPlayerInventory extends PlayerInventory {
         private final Player player;
 
-        public DelegatingPlayerInventory(@NotNull Player player) {
+        public DelegatingPlayerInventory(Player player) {
             this.player = player;
 
             // Copy all contents of players current inventory to this one
@@ -433,7 +434,7 @@ public class InventoryHost implements TagReadable, TagWritable {
         }
 
         @Override
-        public void update(@NotNull Player player) {
+        public void update(Player player) {
             // Same as above (but in case a single player update is called)
             if (player.getOpenInventory() instanceof InventoryWrapper wrapper && wrapper.playerInventorySlots() > 0) {
                 wrapper.updatePlayerInventory();

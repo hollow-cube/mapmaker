@@ -45,6 +45,7 @@ public class InteractionRules {
         block(Block.COMPARATOR, new ComparatorInteractionRule());
         block(Block.CHISELED_BOOKSHELF, ChiseledBookshelfInteractionRule.INSTANCE);
         block(Block.REDSTONE_WIRE, RedstoneWireInteractionRule.INSTANCE);
+        block(BlockTags.COPPER_STATUES, CopperGolemInteractionRule.INSTANCE);
 
         item(Material.WATER_BUCKET, new WaterBucketInteractionRule());
         item(Material.LAVA_BUCKET, new LavaBucketInteractionRule());

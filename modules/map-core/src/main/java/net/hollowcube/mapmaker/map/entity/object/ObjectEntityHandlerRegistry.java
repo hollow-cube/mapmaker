@@ -13,10 +13,12 @@ import java.util.function.Function;
 
 public class ObjectEntityHandlerRegistry {
     private final Map<String, Function<ObjectEntity, ObjectEntityHandler>> factories = new HashMap<>();
+    private final Map<String, ObjectEntityEditor> editors = new HashMap<>();
+    private final Map<Class<?>, ObjectEntityEditor> defaultEditors = new HashMap<>();
 
     public ObjectEntityHandlerRegistry() {
         registerForMarkers(ParticleEmitterMarkerHandler.ID, ParticleEmitterMarkerHandler::new);
-        registerForInteractions(TeleportObjectHandler.ID, TeleportObjectHandler::new);
+        register(TeleportObjectHandler.ID, TeleportObjectHandler::new);
     }
 
     public void registerForMarkers(String id, Function<MarkerEntity, ObjectEntityHandler> factory) {
@@ -31,6 +33,14 @@ public class ObjectEntityHandlerRegistry {
         factories.put(id, factory);
     }
 
+    public void registerEditor(String id, ObjectEntityEditor editor) {
+        editors.put(id, editor);
+    }
+
+    public void registerDefaultEditor(Class<?> objectClass, ObjectEntityEditor editor) {
+        defaultEditors.put(objectClass, editor);
+    }
+
     public @Nullable ObjectEntityHandler create(@Nullable String type, @NotNull ObjectEntity entity) {
         if (type == null) return null;
         var factory = factories.get(type);
@@ -38,4 +48,12 @@ public class ObjectEntityHandlerRegistry {
         return factory.apply(entity);
     }
 
+    public @Nullable ObjectEntityEditor getEditor(@NotNull String type) {
+        return this.editors.get(type);
+    }
+
+    public @Nullable ObjectEntityEditor getEditor(@NotNull String type, @Nullable Class<?> owner) {
+        var editor = this.getEditor(type);
+        return editor != null || owner == null ? editor : this.defaultEditors.get(owner);
+    }
 }

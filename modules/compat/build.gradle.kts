@@ -9,7 +9,6 @@ dependencies {
     implementation(libs.bundles.adventure)
     implementation(libs.fastutil)
     implementation(libs.posthog)
-    implementation(libs.noxesium)
     implementation(libs.zstd)
     implementation(libs.feather)
 }

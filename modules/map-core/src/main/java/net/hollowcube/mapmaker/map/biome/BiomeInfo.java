@@ -21,15 +21,15 @@ public class BiomeInfo {
     private static final RGBLike DEFAULT_WATER_FOG_COLOR = new Color(0x050533);
 
     public static final Codec<BiomeInfo> CODEC = StructCodec.struct(
-            "name", Codec.STRING.optional(""), BiomeInfo::getName,
-            "displayItem", Material.CODEC.optional(Material.GRASS_BLOCK), BiomeInfo::getDisplayItem,
-            "skyColor", Color.CODEC.optional(DEFAULT_SKY_COLOR), BiomeInfo::getSkyColor,
-            "fogColor", Color.CODEC.optional(DEFAULT_FOG_COLOR), BiomeInfo::getFogColor,
-            "waterColor", Color.CODEC.optional(DEFAULT_WATER_COLOR), BiomeInfo::getWaterColor,
-            "waterFogColor", Color.CODEC.optional(DEFAULT_WATER_FOG_COLOR), BiomeInfo::getWaterFogColor,
-            "grassColor", Color.CODEC.optional(), BiomeInfo::getGrassColor,
-            "foliageColor", Color.CODEC.optional(), BiomeInfo::getFoliageColor,
-            BiomeInfo::new);
+        "name", Codec.STRING.optional(""), BiomeInfo::getName,
+        "displayItem", Material.CODEC.optional(Material.GRASS_BLOCK), BiomeInfo::getDisplayItem,
+        "skyColor", Color.CODEC.optional(DEFAULT_SKY_COLOR), BiomeInfo::getSkyColor,
+        "fogColor", Color.CODEC.optional(DEFAULT_FOG_COLOR), BiomeInfo::getFogColor,
+        "waterColor", Color.CODEC.optional(DEFAULT_WATER_COLOR), BiomeInfo::getWaterColor,
+        "waterFogColor", Color.CODEC.optional(DEFAULT_WATER_FOG_COLOR), BiomeInfo::getWaterFogColor,
+        "grassColor", Color.CODEC.optional(), BiomeInfo::getGrassColor,
+        "foliageColor", Color.CODEC.optional(), BiomeInfo::getFoliageColor,
+        BiomeInfo::new);
 
     public enum Precipitation {
         NONE,
@@ -60,10 +60,10 @@ public class BiomeInfo {
     }
 
     public BiomeInfo(
-            @NotNull String name, @NotNull Material displayItem,
-            @NotNull RGBLike skyColor, @NotNull RGBLike fogColor,
-            @NotNull RGBLike waterColor, @NotNull RGBLike waterFogColor,
-            @Nullable RGBLike grassColor, @Nullable RGBLike foliageColor
+        @NotNull String name, @NotNull Material displayItem,
+        @NotNull RGBLike skyColor, @NotNull RGBLike fogColor,
+        @NotNull RGBLike waterColor, @NotNull RGBLike waterFogColor,
+        @Nullable RGBLike grassColor, @Nullable RGBLike foliageColor
     ) {
         this.name = name;
         this.displayItem = displayItem;
@@ -150,10 +150,7 @@ public class BiomeInfo {
         if (key == null) return null;
 
         var effects = BiomeEffects.builder()
-                .skyColor(this.getSkyColor())
-                .fogColor(this.getFogColor())
-                .waterColor(this.getWaterColor())
-                .waterFogColor(this.getWaterFogColor());
+            .waterColor(this.getWaterColor());
         if (this.getGrassColor() != null) effects.grassColor(this.getGrassColor());
         if (this.getFoliageColor() != null) effects.foliageColor(this.getFoliageColor());
 
@@ -164,9 +161,9 @@ public class BiomeInfo {
         };
 
         return Biome.builder()
-                .temperature(temperature)
-                .downfall(1.0F)
-                .effects(effects.build())
-                .build();
+            .temperature(temperature)
+            .downfall(1.0F)
+            .effects(effects.build())
+            .build();
     }
 }

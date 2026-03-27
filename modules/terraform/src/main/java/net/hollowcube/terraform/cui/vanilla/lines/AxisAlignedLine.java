@@ -1,6 +1,6 @@
 package net.hollowcube.terraform.cui.vanilla.lines;
 
-import net.hollowcube.common.types.Axis;
+import net.hollowcube.schem.util.Axis;
 import net.kyori.adventure.util.RGBLike;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;

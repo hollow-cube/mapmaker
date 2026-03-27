@@ -18,6 +18,7 @@ public record Presence(
     public static final String TYPE_MAPMAKER_MAP = "mapmaker:map";
 
 
-    public static final Set<String> MAP_BUILDING_STATES = Set.of("editing", "testing", "verifying");
-    public static final Set<String> MAP_PLAYING_STATES = Set.of("playing", "spectating");
+    public static final String VERIFYING_STATE = "verifying";
+    public static final Set<String> MAP_BUILDING_STATES = Set.of("editing", "testing");
+    public static final Set<String> MAP_PLAYING_STATES = Set.of("playing", "spectating", "verifying");
 }

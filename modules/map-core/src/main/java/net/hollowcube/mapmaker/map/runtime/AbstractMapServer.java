@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.map.runtime;
 
 import com.google.gson.JsonObject;
+import io.nats.client.Nats;
+import io.nats.client.Options;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
@@ -20,14 +22,16 @@ import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.dialogs.DialogButtons;
 import net.hollowcube.common.events.EventExtensions;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.datafix.DataFixer;
-import net.hollowcube.datafix.DataVersion;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.ApiClient;
+import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.chat.ChatAutoCompleter;
 import net.hollowcube.mapmaker.chat.ChatChannelDisplay;
@@ -40,7 +44,11 @@ import net.hollowcube.mapmaker.command.chat.MsgCommand;
 import net.hollowcube.mapmaker.command.invite.*;
 import net.hollowcube.mapmaker.command.map.MapCommand;
 import net.hollowcube.mapmaker.command.punish.*;
+import net.hollowcube.mapmaker.command.relationship.BlockCommand;
+import net.hollowcube.mapmaker.command.relationship.UnblockCommand;
+import net.hollowcube.mapmaker.command.relationship.friend.FriendCommand;
 import net.hollowcube.mapmaker.command.staff.SFindCommand;
+import net.hollowcube.mapmaker.command.staff.StaffCommand;
 import net.hollowcube.mapmaker.command.staff.UnvanishCommand;
 import net.hollowcube.mapmaker.command.staff.VanishCommand;
 import net.hollowcube.mapmaker.command.store.HypercubeCommand;
@@ -48,7 +56,7 @@ import net.hollowcube.mapmaker.command.store.StoreCommand;
 import net.hollowcube.mapmaker.command.util.*;
 import net.hollowcube.mapmaker.config.*;
 import net.hollowcube.mapmaker.consumer.PlayerDataUpdateConsumer;
-import net.hollowcube.mapmaker.cosmetic.CosmeticInventoryHandler;
+import net.hollowcube.mapmaker.cosmetic.CosmeticEventHandler;
 import net.hollowcube.mapmaker.cosmetic.impl.accessory.AbstractAccessoryImpl;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.posthog.PostHogFeatureFlagProvider;
@@ -58,28 +66,21 @@ import net.hollowcube.mapmaker.invite.MapInviteAcceptedOrRejectedListener;
 import net.hollowcube.mapmaker.invite.MapInviteListener;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.invite.PlayerInviteServiceImpl;
-import net.hollowcube.mapmaker.kafka.FriendlyProducer;
-import net.hollowcube.mapmaker.kafka.KafkaConfig;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
+import net.hollowcube.mapmaker.map.command.BugReportCommand;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.entity.MapEntities;
-import net.hollowcube.mapmaker.map.object.ObjectTypes;
+import net.hollowcube.mapmaker.map.util.ACHook;
 import net.hollowcube.mapmaker.map.util.AnonHealthCheck;
 import net.hollowcube.mapmaker.map.util.DynamicController;
-import net.hollowcube.mapmaker.map.util.MapPlayerImpl;
-import net.hollowcube.mapmaker.map.util.datafix.versions.V3701;
-import net.hollowcube.mapmaker.map.util.datafix.versions.V3838;
-import net.hollowcube.mapmaker.map.util.datafix.versions.V4325_1;
-import net.hollowcube.mapmaker.metrics.MetricWriter;
-import net.hollowcube.mapmaker.metrics.MetricWriterNoop;
-import net.hollowcube.mapmaker.metrics.MetricWriterPosthog;
+import net.hollowcube.mapmaker.map.util.ServerStatsHud;
 import net.hollowcube.mapmaker.misc.ExpBarRenderer;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.misc.noop.*;
+import net.hollowcube.mapmaker.notifications.NotificationsConsumer;
 import net.hollowcube.mapmaker.obungus.ObungusService;
 import net.hollowcube.mapmaker.obungus.ObungusServiceImpl;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PermManagerImpl;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.punishments.PunishmentManagementListener;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
@@ -87,9 +88,11 @@ import net.hollowcube.mapmaker.punishments.PunishmentServiceImpl;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
-import net.hollowcube.mapmaker.store.ShopUpgradeCache;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.*;
+import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
+import net.hollowcube.mapmaker.util.nats.NatsConfig;
+import net.hollowcube.mapmaker.util.telemetry.NoopSpanExporter;
 import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -100,8 +103,6 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
-import net.minestom.server.extras.MojangAuth;
-import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.network.packet.server.common.ServerLinksPacket;
 import net.minestom.server.timer.Scheduler;
@@ -112,13 +113,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -128,19 +126,19 @@ public abstract class AbstractMapServer implements MapServer {
     protected final ConfigLoaderV3 config;
     protected final GlobalConfig globalConfig;
 
+    private final ACHook acHook;
+
     protected final OpenTelemetry otel;
-    private final MetricWriter metrics;
+    private final ApiClient api;
     private final SessionService sessionService;
     private final PlayerService playerService;
     private final MapService mapService;
-    private final PermManager permManager;
     private final PunishmentService punishmentService;
     private PlayerInviteService inviteService; // So many dependencies very yikes
 
     // Listeners for other features
-    private MapAllocator allocator;
     private ServerBridge bridge;
-    private FriendlyProducer producer;
+    protected JetStreamWrapper jetStream;
 
     private SessionManager sessionManager;
     private ChatMessageListener chatMessageListener;
@@ -156,16 +154,18 @@ public abstract class AbstractMapServer implements MapServer {
     private volatile boolean isReady = false; // Corresponds to the associated health check
     private final Shutdowner shutdowner = new Shutdowner(this::awaitQuiescence);
 
-    protected AbstractMapServer(@NotNull ConfigLoaderV3 config) {
-        config.dump();
+    private final List<String> remoteCommandNames = new ArrayList<>();
 
+    protected AbstractMapServer(@NotNull ConfigLoaderV3 config) {
         this.config = config;
         this.globalConfig = config.get(GlobalConfig.class);
 
         this.otel = initTracing(config);
 
-        this.metrics = createMetricWriter(config);
-        shutdowner.queue("metric-writer", metrics::close);
+        var apiUrl = config.get(Player_ServiceConfig.class).url();
+        if (apiUrl.isEmpty()) apiUrl = "http://localhost:9127";
+        var http = new HttpClientWrapper(otel, apiUrl);
+        this.api = new ApiClient(http);
 
         var playerServiceUrl = config.get(Player_ServiceConfig.class).url();
         if (!playerServiceUrl.isEmpty()) {
@@ -175,7 +175,7 @@ public abstract class AbstractMapServer implements MapServer {
             playerService = new NoopPlayerService();
             punishmentService = new NoopPunishmentService();
         } else {
-            var localUrl = "http://localhost:9126"; // tilt
+            var localUrl = "http://localhost:9127"; // tilt
             playerService = new PlayerServiceImpl(otel, localUrl);
             punishmentService = new PunishmentServiceImpl(localUrl);
         }
@@ -188,31 +188,12 @@ public abstract class AbstractMapServer implements MapServer {
         var mapServiceUrl = config.get(Map_ServiceConfig.class).url();
         if (!mapServiceUrl.isEmpty()) mapService = new MapServiceImpl(mapServiceUrl);
         else if (globalConfig.noop()) mapService = new NoopMapService();
-        else mapService = new MapServiceImpl("http://localhost:9125"); // tilt
+        else mapService = new MapServiceImpl("http://localhost:9127"); // tilt
 
-        if (globalConfig.noop()) {
-            permManager = new NoopPermManager();
-        } else {
-            var spicedbConfig = config.get(SpiceDBConfig.class);
-            var spicedbUrl = spicedbConfig.url();
-            if (spicedbUrl.isEmpty()) spicedbUrl = "http://localhost:8443";
-            var spicedbToken = spicedbConfig.token();
-            if (spicedbToken.isEmpty()) spicedbToken = "supersecretkey";
-            permManager = new PermManagerImpl(otel, spicedbUrl, spicedbToken);
-        }
-
-        var obungusService = new ObungusServiceImpl(otel, "http://localhost:9125");
+        var obungusService = new ObungusServiceImpl(otel, "http://localhost:9127");
         addBinding(ObungusService.class, obungusService, "obungus", "obungusService");
 
-        ShopUpgradeCache.init(permManager);
-    }
-
-    protected @NotNull MetricWriter createMetricWriter(@NotNull ConfigLoaderV3 config) {
-        var metricsConfig = config.get(MetricsConfig.class);
-        if (metricsConfig.password() != null && !metricsConfig.password().isEmpty()) {
-            return new MetricWriterPosthog();
-        }
-        return new MetricWriterNoop();
+        this.acHook = ServiceLoader.load(ACHook.class).findFirst().orElse(null);
     }
 
     protected abstract @NotNull String name();
@@ -224,26 +205,14 @@ public abstract class AbstractMapServer implements MapServer {
 
     @Blocking
     public final void start() {
-        // Minestom init bits
-        var velocityConfig = config.get(VelocityConfig.class);
-        if (!velocityConfig.secret().isEmpty()) {
-            logger.info("Enabling modern forwarding...");
-            VelocityProxy.enable(velocityConfig.secret());
-        } else {
-            logger.info("Velocity not configured, using online mode...");
-            MojangAuth.init();
-        }
-
         MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
         MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProviderV2.translate(component);
-        MinecraftServer.getConnectionManager().setPlayerProvider((connection, gameProfile) -> new MapPlayerImpl(connection, gameProfile) {
-            @Override
-            public @NotNull CommandManager getCommandManager() {
-                return commandManager;
-            }
-        });
 
         EventExtensions.init();
+
+        // Block handlers are always necessary to prevent invisible/visually incorrect blocks,
+        // even if we don't have block placement.
+        BlockHandlers.init();
 
         // Dependent service init
 
@@ -252,10 +221,13 @@ public abstract class AbstractMapServer implements MapServer {
             logger.info("Posthog is enabled, loading feature flag provider");
             // project api key is not a secret.
             PostHog.init("phc_mK0jji1aC3hvMBGLOLjuVARqolDGPS9AiuNUOhMwVyA", config -> config
-                    .personalApiKey(unleashConfig.posthogPersonalApiKey())
-                    .endpoint("https://us.i.posthog.com")
-                    .featureFlagsPollingInterval(Duration.ofMinutes(10))
-                    .exceptionMiddleware(AbstractMapServer::posthogExceptionMiddleware));
+                .personalApiKey(unleashConfig.posthogPersonalApiKey())
+                .blockUntilLocalFlagsLoaded(Duration.ofSeconds(3)) // if it fails, it'll still get re-fetched, just it'll return DISABLED for initially joining players
+                .endpoint("https://us.i.posthog.com")
+                .featureFlagsPollingInterval(Duration.ofMinutes(10))
+                .allowRemoteFeatureFlagEvaluation(false)
+                .exceptionMiddleware(AbstractMapServer::posthogExceptionMiddleware)
+                .gson(AbstractHttpService.GSON));
             shutdowner.queue("posthog", PostHog::shutdown);
 
             FeatureFlagProvider.replaceGlobals(new PostHogFeatureFlagProvider());
@@ -264,46 +236,57 @@ public abstract class AbstractMapServer implements MapServer {
         }
         shutdowner.queue("feature-flag-provider", FeatureFlagProvider.current()::close);
 
-        allocator = createAllocator();
-        shutdowner.queue("map-allocator", allocator::close);
         bridge = createBridge();
 
-        var kafkaConfig = config.get(KafkaConfig.class);
-        sessionManager = new SessionManager(sessionService(), playerService(), permManager(), kafkaConfig, globalConfig.noop());
+        try {
+            var nc = Nats.connect(Options.builder()
+                .servers(config.get(NatsConfig.class).servers().split(","))
+                .executor(Executors.newVirtualThreadPerTaskExecutor())
+                .build());
+            shutdowner.queue("nats", nc::close);
+            jetStream = new JetStreamWrapper(nc, otel);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        sessionManager = new SessionManager(sessionService(), playerService(), jetStream);
         shutdowner.queue("session-manager", sessionManager::close);
         FutureUtil.submitVirtual(sessionManager()::sync); // Sync existing sessions with remote
+
+        var transferConsumer = new PlayerTransferConsumer(bridge, jetStream);
+        shutdowner.queue("player-transfer-consumer", transferConsumer::close);
 
         // Must be initialized this late because of all its dependencies. this is pretty yikes im not a big fan
         var inviteServiceUrl = System.getenv("MAPMAKER_PLAYER_INVITE_SERVICE_URL");
         if (inviteServiceUrl != null)
-            this.inviteService = new PlayerInviteServiceImpl(otel, inviteServiceUrl, playerService, mapService, sessionManager, bridge, permManager);
+            this.inviteService = new PlayerInviteServiceImpl(otel, inviteServiceUrl, playerService, mapService, sessionManager, bridge);
         else if (globalConfig.noop()) this.inviteService = new NoopPlayerInviteService();
         else {
-            this.inviteService = new PlayerInviteServiceImpl(otel, "http://localhost:9127", playerService, mapService, sessionManager, bridge, permManager); // tilt
+            this.inviteService = new PlayerInviteServiceImpl(otel, "http://localhost:9127", playerService, mapService, sessionManager, bridge); // tilt
         }
 
-        // Create one producer to reuse.
-        producer = new FriendlyProducer(kafkaConfig.bootstrapServers(), globalConfig.noop());
-        facets.put(FriendlyProducer.class, producer);
-        shutdowner.queue("kafka-producer", producer::close);
+        var services = new ServiceContext(api(), playerService(), sessionService(), mapService(), bridge());
 
         if (!globalConfig.noop()) {
-            mapInviteListener = new MapInviteListener(mapService, playerService, sessionManager, kafkaConfig.bootstrapServers());
+            mapInviteListener = new MapInviteListener(mapService, playerService, sessionManager, jetStream);
             shutdowner.queue("map-invite-listener", mapInviteListener::close);
 
-            mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(mapService, playerService, sessionManager, bridge(), kafkaConfig.bootstrapServers());
+            mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(mapService, playerService, sessionManager, bridge(), jetStream);
             shutdowner.queue("map-invite-acceptance-listener", mapInviteAcceptedOrRejectedListener::close);
 
-            var punishmentCreatedListener = new PunishmentManagementListener(playerService, permManager, kafkaConfig.bootstrapServers());
+            var punishmentCreatedListener = new PunishmentManagementListener(playerService, jetStream);
             shutdowner.queue("punishment-listener", punishmentCreatedListener::close);
 
-            chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, kafkaConfig.bootstrapServers(), producer, permManager);
+            chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, jetStream);
             facets.put(ChatMessageListener.class, chatMessageListener);
             shutdowner.queue("chat-message-listener", chatMessageListener::close);
             MinecraftServer.getPacketListenerManager().setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
 
-            playerDataUpdateConsumer = new PlayerDataUpdateConsumer(kafkaConfig.bootstrapServers(), playerService);
+            playerDataUpdateConsumer = new PlayerDataUpdateConsumer(playerService, jetStream);
             shutdowner.queue("player-data-listener", playerDataUpdateConsumer::close);
+
+            var notificationsConsumer = new NotificationsConsumer(services, jetStream);
+            shutdowner.queue("notifications-consumer", notificationsConsumer::close);
         }
 
         ChatAnnouncer.setupAnnouncements(config, sessionManager(), shutdowner);
@@ -311,18 +294,18 @@ public abstract class AbstractMapServer implements MapServer {
         facets.put(Controller.class, guiController);
         prepareStart();
 
-        var ignored = ObjectTypes.CHECKPOINT_PLATE; // Will fix when reworking ram usage
-
         // Copy the facets map to prevent modification
         facets = Map.copyOf(facets);
+
+        if (acHook != null) acHook.preReady(this);
 
         // Finally, mark the service as ready for Kubernetes
         isReady = true;
     }
 
     @Override
-    public @NotNull MetricWriter metrics() {
-        return metrics;
+    public @NotNull ApiClient api() {
+        return api;
     }
 
     @Override
@@ -341,11 +324,6 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     @Override
-    public @NotNull PermManager permManager() {
-        return permManager;
-    }
-
-    @Override
     public @NotNull PunishmentService punishmentService() {
         return punishmentService;
     }
@@ -353,11 +331,6 @@ public abstract class AbstractMapServer implements MapServer {
     @Override
     public @NotNull PlayerInviteService inviteService() {
         return inviteService;
-    }
-
-    @Override
-    public @NotNull MapAllocator allocator() {
-        return allocator;
     }
 
     @Override
@@ -370,6 +343,7 @@ public abstract class AbstractMapServer implements MapServer {
         return sessionManager;
     }
 
+    @Override
     public @NotNull CommandManager commandManager() {
         return commandManager;
     }
@@ -384,8 +358,6 @@ public abstract class AbstractMapServer implements MapServer {
         return MinecraftServer.getSchedulerManager();
     }
 
-    protected abstract @NotNull MapAllocator createAllocator();
-
     protected abstract @NotNull ServerBridge createBridge();
 
     /**
@@ -396,10 +368,11 @@ public abstract class AbstractMapServer implements MapServer {
 
         CompatProvider.load(globalEventHandler);
 
-        CosmeticInventoryHandler.init(guiController);
+        CosmeticEventHandler.init(playerService());
         AbstractAccessoryImpl.addListeners(globalEventHandler);
 
         PlayerSettingsScreen.init(playerService(), globalEventHandler);
+        DialogButtons.init(globalEventHandler);
 
         var entityEvents = EventNode.type("mapmaker:map/entity", EventFilter.INSTANCE);
         globalEventHandler.addChild(entityEvents);
@@ -408,43 +381,56 @@ public abstract class AbstractMapServer implements MapServer {
         addBinding(MapServer.class, this, "mapServer", "server");
         addBinding(ConfigLoaderV3.class, config);
 
-        addBinding(MetricWriter.class, metrics, "metrics");
+        addBinding(ApiClient.class, api, "api");
         addBinding(SessionService.class, sessionService, "sessionService");
         addBinding(PlayerService.class, playerService, "playerService");
         addBinding(MapService.class, mapService, "mapService");
-        addBinding(PermManager.class, permManager, "permManager");
         addBinding(PunishmentService.class, punishmentService, "punishmentService");
         addBinding(PlayerInviteService.class, inviteService, "playerInviteService");
 
-        addBinding(MapAllocator.class, allocator, "allocator");
         addBinding(SessionManager.class, sessionManager, "sessionManager");
         addBinding(ServerBridge.class, bridge(), "bridge");
+
+        var services = new ServiceContext(
+            api(),
+            playerService(),
+            sessionService(),
+            mapService(),
+            bridge()
+        );
 
         boolean fullInstance = !globalConfig.noop();
 
         commandManager.register(new MinestomCommand());
         commandManager.register(new EmojisCommand());
-        if (fullInstance) commandManager.register(new CosmeticsCommand(guiController()));
+        if (fullInstance) commandManager.register(new CosmeticsCommand(playerService()));
         if (fullInstance) commandManager.register(new RulesCommand());
         commandManager.register(createDebugCommand());
-        commandManager.register(new StoreCommand(playerService(), permManager()));
-        commandManager.register(new HypercubeCommand(playerService(), permManager()));
+        commandManager.register(new StoreCommand(playerService()));
+        commandManager.register(new HypercubeCommand(playerService()));
         commandManager.register(new DiscordCommand());
-        if (fullInstance) commandManager.register(new LinkCommand(playerService()));
-        if (fullInstance) commandManager.register(new TotpCommand(playerService(), guiController()));
-        commandManager.register(new NoobCommand(permManager()));
+        if (fullInstance) commandManager.register(new TotpCommand(playerService()));
+        commandManager.register(new NoobCommand());
         commandManager.register(new HideCommand(playerService()));
+        commandManager.register(new SettingsCommand());
+        commandManager.register(new BugReportCommand());
 
         if (fullInstance) {
-            commandManager.register(new PlayCommand(playerService(), mapService(), sessionManager(), bridge()));
-            commandManager.register(new WhereCommand(sessionManager(), playerService(), mapService(), permManager()));
+            commandManager.register(new UnblockCommand(playerService()));
+            commandManager.register(new BlockCommand(playerService()));
+            commandManager.register(new FriendCommand(playerService(), mapService(), sessionManager()));
+        }
+
+        if (fullInstance) {
+            commandManager.register(new PlayCommand(api(), mapService(), sessionManager(), bridge()));
+            commandManager.register(new WhereCommand(sessionManager(), playerService(), mapService()));
             commandManager.register(new ListCommand(sessionManager(), playerService()));
-            commandManager.register(new MsgCommand(sessionManager(), mapService(), chatMessageListener));
+            commandManager.register(new MsgCommand(sessionManager(), mapService(), chatMessageListener, playerService()));
             commandManager.register(new ChannelCommand.Global(sessionManager(), mapService(), chatMessageListener));
             commandManager.register(new ChannelCommand.Local(sessionManager(), mapService(), chatMessageListener));
             commandManager.register(new ChannelCommand.Reply(sessionManager(), mapService(), chatMessageListener));
-            commandManager.register(new ChannelCommand.Staff(sessionManager(), mapService(), chatMessageListener, permManager()));
-            commandManager.register(new ChatCommand(playerService(), permManager()));
+            commandManager.register(new ChannelCommand.Staff(sessionManager(), mapService(), chatMessageListener));
+            commandManager.register(new ChatCommand(playerService()));
         }
 
         if (fullInstance) {
@@ -455,42 +441,58 @@ public abstract class AbstractMapServer implements MapServer {
             commandManager.register(new JoinCommand(inviteService(), playerService(), sessionManager()));
         }
 
-        commandManager.register(new MapCommand(guiController(), playerService(), mapService(), permManager(), bridge(), producer));
+        commandManager.register(new MapCommand(api(), playerService(), mapService(), bridge(), jetStream));
 
         if (fullInstance) {
-            commandManager.register(new SFindCommand(mapService(), playerService(), sessionManager(), permManager()));
-            commandManager.register(new VanishCommand(sessionManager(), playerService(), permManager()));
-            commandManager.register(new UnvanishCommand(sessionManager(), playerService(), permManager()));
+            commandManager.register(new SFindCommand(mapService(), playerService(), sessionManager()));
+            commandManager.register(new VanishCommand(sessionManager(), playerService()));
+            commandManager.register(new UnvanishCommand(sessionManager(), playerService()));
+            commandManager.register(new StaffCommand(playerService()));
         }
 
         if (fullInstance) {
-            commandManager.register(new PHelpCommand(punishmentService(), permManager()));
-            commandManager.register(new PStatusCommand(playerService(), punishmentService(), permManager()));
-            commandManager.register(new PHistoryCommand(playerService(), punishmentService(), permManager()));
+            commandManager.register(new PHelpCommand(punishmentService()));
+            commandManager.register(new PStatusCommand(playerService(), punishmentService()));
+            commandManager.register(new PHistoryCommand(playerService(), punishmentService()));
         }
 
         if (fullInstance) {
-            FutureUtil.submitVirtual(() -> commandManager.register(new BanCommand(punishmentService(), playerService(), permManager())));
-            commandManager.register(new UnbanCommand(punishmentService(), playerService(), permManager()));
-            FutureUtil.submitVirtual(() -> commandManager.register(new MuteCommand(punishmentService(), playerService(), permManager())));
-            commandManager.register(new UnmuteCommand(punishmentService(), playerService(), permManager()));
-            commandManager.register(new KickCommand(punishmentService(), sessionManager(), permManager()));
+            commandManager.register(new UnbanCommand(punishmentService(), playerService()));
+            FutureUtil.submitVirtual(() -> commandManager.register(new MuteCommand(punishmentService(), playerService())));
+            commandManager.register(new UnmuteCommand(punishmentService(), playerService()));
+            commandManager.register(new KickCommand(punishmentService(), sessionManager()));
         }
 
-        DataFixer.addFixVersions(extraDataVersions());
+        if (fullInstance) {
+            loadRemoteCommands();
+        }
+
         DataFixer.buildModel();
+    }
+
+    private void loadRemoteCommands() {
+        for (var commandName : remoteCommandNames)
+            commandManager().unregister(commandName);
+        remoteCommandNames.clear();
+
+        var interactions = api().interactions.getCommands();
+        for (var interaction : interactions) {
+            var cmd = new RemoteCommand(api(), playerService(), interaction);
+            remoteCommandNames.add(cmd.name());
+            commandManager.register(cmd);
+        }
     }
 
     public @NotNull List<HttpServerWrapper.HealthCheck> healthChecks() {
         return List.of(
-                shutdowner(),
-                new AnonHealthCheck("minestom", MinecraftServer::isStarted),
-                new AnonHealthCheck("hub", () -> isReady),
-                new AnonHealthCheck("tick", () -> {
-                    var future = new CompletableFuture<Boolean>();
-                    MinecraftServer.getSchedulerManager().scheduleNextTick(() -> future.complete(true));
-                    return FutureUtil.getUnchecked(future);
-                })
+            shutdowner(),
+            new AnonHealthCheck("minestom", MinecraftServer::isStarted),
+            new AnonHealthCheck("hub", () -> isReady),
+            new AnonHealthCheck("tick", () -> {
+                var future = new CompletableFuture<Boolean>();
+                MinecraftServer.getSchedulerManager().scheduleNextTick(() -> future.complete(true));
+                return FutureUtil.getUnchecked(future);
+            })
         );
     }
 
@@ -550,16 +552,16 @@ public abstract class AbstractMapServer implements MapServer {
 
     private @NotNull OpenTelemetry initTracing(@NotNull ConfigLoaderV3 config) {
         Resource resource = Resource.getDefault().toBuilder()
-                .put(ResourceAttributes.SERVICE_NAME, name())
-                .put(ResourceAttributes.SERVICE_VERSION, ServerRuntime.getRuntime().version())
-                .build();
+            .put(ResourceAttributes.SERVICE_NAME, name())
+            .put(ResourceAttributes.SERVICE_VERSION, ServerRuntime.getRuntime().version())
+            .build();
 
         var tracingConfig = config.get(TracingConfig.class);
         SpanExporter spanExporter;
         if (tracingConfig.otlpEndpoint() != null && !tracingConfig.otlpEndpoint().isEmpty()) {
             spanExporter = OtlpHttpSpanExporter.builder()
-                    .setEndpoint(tracingConfig.otlpEndpoint())
-                    .build();
+                .setEndpoint(tracingConfig.otlpEndpoint())
+                .build();
         } else if (tracingConfig.noop()) {
             spanExporter = NoopSpanExporter.INSTANCE;
         } else {
@@ -567,23 +569,24 @@ public abstract class AbstractMapServer implements MapServer {
         }
 
         SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
-                .addSpanProcessor(SimpleSpanProcessor.create(spanExporter))
-                .setResource(resource)
-                .build();
+            .addSpanProcessor(SimpleSpanProcessor.create(spanExporter))
+            .setResource(resource)
+            .build();
 
         return OpenTelemetrySdk.builder()
-                .setTracerProvider(sdkTracerProvider)
-                .setPropagators(ContextPropagators.create(TextMapPropagator
-                        .composite(W3CTraceContextPropagator.getInstance(), W3CBaggagePropagator.getInstance())))
-                .buildAndRegisterGlobal();
-    }
-
-    protected @NotNull List<Supplier<DataVersion>> extraDataVersions() {
-        return List.of(V3701::new, V3838::new, V4325_1::new);
+            .setTracerProvider(sdkTracerProvider)
+            .setPropagators(ContextPropagators.create(TextMapPropagator
+                .composite(W3CTraceContextPropagator.getInstance(), W3CBaggagePropagator.getInstance())))
+            .buildAndRegisterGlobal();
     }
 
     protected @NotNull DebugCommand createDebugCommand() {
-        return new DebugCommand(playerService(), permManager(), mapService(), allocator());
+        var cmd = new DebugCommand(playerService(), mapService(), bridge());
+        cmd.createPermissionedSubcommand("reload-commands", (player, _) -> {
+            loadRemoteCommands();
+            player.sendMessage(Component.text("Reloaded commands"));
+        }, "reload remote commands");
+        return cmd;
     }
 
     /**
@@ -598,23 +601,21 @@ public abstract class AbstractMapServer implements MapServer {
         var playerId = player.getUuid().toString();
         try {
             var transferReq = new SessionTransferRequest(
-                    presence.instanceId(), presence.type(),
-                    presence.state(), presence.mapId()
+                presence.instanceId(), presence.type(),
+                presence.state(), presence.mapId()
             );
             var sessionResponseFuture = FutureUtil.fork(() -> sessionService.transferSession(playerId, transferReq));
             var mapPlayerDataFuture = FutureUtil.fork(() -> mapService.getMapPlayerData(playerId));
-            var backpackDataFuture = FutureUtil.fork(() -> playerService.getPlayerBackpack(playerId));
 
-            CompletableFuture.allOf(sessionResponseFuture, mapPlayerDataFuture, backpackDataFuture).join();
+            CompletableFuture.allOf(sessionResponseFuture, mapPlayerDataFuture).join();
 
             var sessionResponse = sessionResponseFuture.get();
             player.setTag(CompatProvider.FIRST_JOIN_TAG, sessionResponse.isJoin());
-            player.setTag(PlayerDataV2.TAG, sessionResponse.data());
+            player.setTag(PlayerData.TAG, sessionResponse.data());
             sessionManager.updateSessionOptimistic(sessionResponse.session(), new SessionStateUpdateRequest.Metadata());
             player.setTag(MapPlayerData.TAG, mapPlayerDataFuture.get());
             var backpack = new PlayerBackpack(player);
             player.setTag(PlayerBackpack.TAG, backpack);
-            backpack.update(backpackDataFuture.get());
 
             // If the player is joining vanished, configure them that way.
             if (sessionResponse.session().hidden()) {
@@ -625,8 +626,8 @@ public abstract class AbstractMapServer implements MapServer {
             return true;
         } catch (SessionService.UnauthorizedError ignored) {
             player.kick(Component.text("The server is currently in a closed beta.\nVisit ")
-                    .append(Component.text("hollowcube.net").clickEvent(ClickEvent.openUrl("https://hollowcube.net/")))
-                    .append(Component.text(" for more information.")));
+                .append(Component.text("hollowcube.net").clickEvent(ClickEvent.openUrl("https://hollowcube.net/")))
+                .append(Component.text(" for more information.")));
             return false;
         } catch (Exception e) {
             logger.error("failed to create session", e);
@@ -637,15 +638,15 @@ public abstract class AbstractMapServer implements MapServer {
 
     protected void handleFirstSpawn(@NotNull Player player) {
         logger.info("doing spawn for {}", player.getUsername());
-        var playerData = PlayerDataV2.fromPlayer(player);
+        var playerData = PlayerData.fromPlayer(player);
 
         player.sendPacket(new ServerLinksPacket(List.of(
-                new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.WEBSITE, "https://hollowcube.net/"),
-                new ServerLinksPacket.Entry(Component.text("Store"), "https://hollowcube.net/store"),
-                new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.NEWS, "https://hollowcube.net/news"),
-                new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.COMMUNITY_GUIDELINES, "https://hollowcube.net/rules"),
-                new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.SUPPORT, "https://hollowcube.net/contact"),
-                new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.BUG_REPORT, "https://discord.hollowcube.net/")
+            new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.WEBSITE, "https://hollowcube.net/"),
+            new ServerLinksPacket.Entry(Component.text("Store"), "https://hollowcube.net/store"),
+            new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.NEWS, "https://hollowcube.net/news"),
+            new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.COMMUNITY_GUIDELINES, "https://hollowcube.net/rules"),
+            new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.SUPPORT, "https://hollowcube.net/contact"),
+            new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.BUG_REPORT, "https://discord.hollowcube.net/")
         )));
 
         // Player init
@@ -657,26 +658,24 @@ public abstract class AbstractMapServer implements MapServer {
 
         var actionBar = ActionBar.forPlayer(player);
         actionBar.addProvider(ChatChannelDisplay.INSTANCE);
-        actionBar.addProvider(MiscFunctionality::buildCurrencyDisplay);
+        actionBar.addProvider(MiscFunctionality.CurrencyDisplayHud.INSTANCE);
         actionBar.addProvider(new ExpBarRenderer());
 
         // Add the player to the world they are spawning into
-        //todo need to support joining as a spectator
-        var world = MapWorld.unsafeFromInstance(player.getInstance());
+        var world = MapWorld.forInstance(player.getInstance());
         if (world == null) { // Sanity check
             player.kick("unknown error");
             return;
         }
-        FutureUtil.submitVirtual(() -> {
-            try {
-                world.addPlayer(player);
-                // See comment in AbstractMapWorld#configurePlayer
-                player.scheduleNextTick(ignored -> player.setAutoViewEntities(true));
-            } catch (Exception e) {
-                ExceptionReporter.reportException(e, player);
-                player.kick(Component.text("Failed to join the world. Please try again later."));
-            }
-        });
+        try {
+            world.spawnPlayer(player);
+
+            // See comment in AbstractMapWorld#configurePlayer
+            player.setAutoViewEntities(true);
+        } catch (Exception e) {
+            ExceptionReporter.reportException(e, player);
+            player.kick(Component.text("Failed to join the world. Please try again later."));
+        }
 
         if (CoreFeatureFlags.SERVER_STAT_OVERLAY.test(player)) {
             actionBar.addProvider(new ServerStatsHud());
@@ -720,6 +719,11 @@ public abstract class AbstractMapServer implements MapServer {
             return false;
 
         // todo fancier exception grouping
+
+        var runtime = ServerRuntime.getRuntime();
+        message.addProperty("$app_version", runtime.version());
+        message.addProperty("server", runtime.hostname());
+
         return true;
     }
 

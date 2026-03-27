@@ -2,12 +2,10 @@ package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandlerRegistry;
+import net.hollowcube.mapmaker.map.event.trait.Map2Event;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.util.spatial.Octree;
-import net.hollowcube.mapmaker.util.NumberUtil;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.minestom.server.coordinate.Pos;
+import net.minestom.server.ServerFlag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
@@ -15,172 +13,149 @@ import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
-import net.minestom.server.tag.TagWritable;
+import net.minestom.server.thread.TickSchedulerThread;
+import net.minestom.server.timer.Scheduler;
+import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.*;
 
 import java.util.Collection;
-import java.util.Objects;
-import java.util.function.UnaryOperator;
+import java.util.concurrent.CompletableFuture;
 
-public sealed interface MapWorld extends TagReadable, TagWritable permits AbstractMapWorld {
+/// Any world running on mapmaker.
+@NotNullByDefault
+public sealed interface MapWorld extends TagReadable permits AbstractMapWorld {
 
-    interface Constructor<T extends AbstractMapWorld> {
-        @NotNull T create(@NotNull MapServer server, @NotNull MapData map);
-
-        @NotNull Class<T> type();
-    }
-
-    @NonBlocking
-    static @NotNull MapWorld forPlayer(@NotNull Player player) {
-        return Objects.requireNonNull(forPlayerOptional(player));
-    }
-
-    @NonBlocking
-    static @Nullable MapWorld forPlayerOptional(@NotNull Player player) {
-        if (player.getInstance() == null) return null;
-        var world = unsafeFromInstance(player.getInstance());
-        if (world instanceof AbstractMapWorld w1)
-            return w1.getMapForPlayer(player);
-        return null;
-    }
-
-    @NonBlocking
-    static @Nullable MapWorld unsafeFromInstance(@Nullable Instance instance) {
+    /// Returns the _root_ map world for the given instance (if this instance is a map world).
+    /// Note that in a case where there are sub-worlds, this will never return them (for example,
+    /// the editing world will always be returned even if a test instance exists).
+    static @Nullable MapWorld forInstance(@Nullable Instance instance) {
         if (instance == null) return null;
-        return instance.getTag(AbstractMapWorld.SELF_TAG);
+        return instance.getTag(AbstractMapWorld.ROOT_MAP_WORLD_TAG);
     }
 
-    /**
-     * A unique identifier for this world <i>locally to this physical server</i>. This is not the map id.
-     *
-     * <p>No guarantees are made of the format and it should not be depended on.</p>
-     *
-     * @return the locally unique id of this world.
-     */
-    @NotNull String worldId();
-
-    default boolean isReadOnly() {
-        return true;
+    static @Nullable MapWorld forPlayer(Player player) {
+        return forPlayer(MapWorld.class, player);
     }
 
-    @NotNull MapServer server();
+    static <W extends MapWorld> @Nullable W forPlayer(Class<W> type, Player player) {
+        var instance = player.getInstance();
+        if (instance == null) return null;
 
-    @NotNull MapData map();
+        var root = forInstance(instance);
+        if (root == null) return null;
 
-    @NotNull Instance instance();
-
-    default @NotNull Pos spawnPoint(@NotNull Player player) {
-        return map().settings().getSpawnPoint();
+        var canonical = root.canonicalWorld(player, type);
+        return type.isInstance(canonical) ? type.cast(canonical) : null;
     }
 
-    @NotNull ItemRegistry itemRegistry();
+    MapServer server();
 
-    @NotNull BiomeContainer biomes();
+    MapData map();
 
-    @NotNull ObjectEntityHandlerRegistry objectEntityHandlers();
-    // AnimationManager, etc.
+    /// The instance this world exists in. Each world is always tied to a single instance,
+    /// but multiple worlds can use the same instance.
+    ///
+    /// For example, a testing world for parkour maps are in the same instance as the editing world.
+    Instance instance();
 
-    @NotNull Collection<Player> players();
+    /// An event node which is localized to only players actively in the world.
+    ///
+    /// This will trigger no matter the state of the player, you likely want more specific
+    /// event nodes from the map implementation.
+    EventNode<InstanceEvent> eventNode();
 
-    @NotNull Collection<Player> spectators();
-
-    @Deprecated
-    default @Nullable MapWorld playWorld() {
-        // This is a gross hack because we need to get the test world from an edit world out of that module.
-        return null;
-    }
-
-    @Blocking
-    void configurePlayer(@NotNull AsyncPlayerConfigurationEvent event);
-
-    @Blocking
-    void addPlayer(@NotNull Player player);
-
-    @Blocking
-    void addSpectator(@NotNull Player player);
-
-    @Blocking
-    void removePlayer(@NotNull Player player);
-
-    default boolean isPlaying(@NotNull Player player) {
-        return players().contains(player);
-    }
-
-    default boolean isSpectating(@NotNull Player player) {
-        return spectators().contains(player);
-    }
-
-    default boolean canEdit(@NotNull Player player) {
-        return false; // Worlds are read-only by default
-    }
-
-    // Event Handling
-
-    /**
-     * Gets the {@link EventNode} for this world.
-     *
-     * @return An event node for the active players and spectators in the world.
-     */
-    @NotNull EventNode<InstanceEvent> eventNode();
-
-    default void callEvent(@NotNull InstanceEvent event) {
+    default void callEvent(Map2Event event) {
         instance().eventNode().call(event);
     }
 
-    // Collision tree
+    default Scheduler scheduler() {
+        return instance().scheduler();
+    }
 
-    @NotNull Octree octree();
+    Octree collisionTree();
 
     /// Queues a rebuild of the collision tree, will be processed sometime in the future up to the implementation.
     void queueCollisionTreeRebuild();
 
-    // TagReadable/TagWritable read-only implementation (EditingMapWorld overrides the write methods to make it writable)
+    //region Registries
 
-    @Override
-    default boolean hasTag(@NotNull Tag<?> tag) {
-        return instance().hasTag(tag);
+    BiomeContainer biomes();
+
+    ItemRegistry itemRegistry();
+
+    ObjectEntityHandlerRegistry objectEntityHandlers();
+
+    //endregion
+
+    //region Player Lifecycle
+
+    /// An immutable view of the players in this world.
+    ///
+    /// This includes all players who are participating in any way, specifically:
+    /// - Players testing an editing map will appear in the editing and testing worlds.
+    /// - Players spectating a playing map will appear in the playing world.
+    @UnmodifiableView Collection<Player> players();
+
+    default boolean hasPlayer(String playerId) {
+        for (var player : players()) {
+            if (playerId.equals(player.getUuid().toString()))
+                return true;
+        }
+        return false;
     }
 
+    @Blocking void configurePlayer(AsyncPlayerConfigurationEvent event);
+
+    @NonBlocking void spawnPlayer(Player player);
+
+    /// @return a future which completes _during a safe point tick_.
+    CompletableFuture<Void> scheduleRemovePlayer(Player player);
+
+    @NonBlocking void removePlayer(Player player);
+
+    @NonBlocking
+    default @Nullable MapWorld canonicalWorld(Player player, Class<? extends MapWorld> type) {
+        return type.isAssignableFrom(getClass()) ? this : null;
+    }
+
+    /// Recognizing that this is a terrible function that obviously should not exist,
+    /// it is being added in the phase of the map rework branch where it really just needs
+    /// to be done and we can come back to figure out a better mechanism here later.
+    @Deprecated
+    default boolean shouldTriggerDripleaf(Player player) {
+        return false;
+    }
+
+    /// Called each tick on the tick scheduler thread. This means that it will always be
+    /// after end of tick schedules on the instance, and before the next tick schedules.
+    ///
+    /// Generally should be used for transitioning players between states.
+    default @NonBlocking TaskSchedule safePointTick() {
+        if (!ServerFlag.INSIDE_TEST && !(Thread.currentThread() instanceof TickSchedulerThread)) // Sanity check
+            throw new IllegalStateException("safePointTick called from non-scheduler thread! " + Thread.currentThread());
+        return TaskSchedule.nextTick();
+    }
+
+    //endregion
+
+    //region Tag implementation
+
     @Override
-    default <T> @UnknownNullability T getTag(@NotNull Tag<T> tag) {
+    default <T> @UnknownNullability T getTag(Tag<T> tag) {
         return instance().getTag(tag);
     }
 
     @Override
-    default <T> @UnknownNullability T getAndUpdateTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
-        throw new UnsupportedOperationException("World is read-only");
+    default boolean hasTag(Tag<?> tag) {
+        return instance().hasTag(tag);
     }
 
-    @Override
-    default <T> @UnknownNullability T updateAndGetTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
-        throw new UnsupportedOperationException("World is read-only");
+    // TODO: not a fan, would like to move marker handler editing behavior out of ObjectEntity. but currently its there.
+    @Deprecated
+    default boolean canEdit(@Nullable Player player) {
+        return false; // default read only
     }
 
-    @Override
-    default <T> @Nullable T getAndSetTag(@NotNull Tag<T> tag, @Nullable T value) {
-        throw new UnsupportedOperationException("World is read-only");
-    }
+    //endregion
 
-    @Override
-    default <T> void setTag(@NotNull Tag<T> tag, @Nullable T value) {
-        throw new UnsupportedOperationException("World is read-only");
-    }
-
-    @Override
-    default <T> void updateTag(@NotNull Tag<T> tag, @NotNull UnaryOperator<@UnknownNullability T> value) {
-        throw new UnsupportedOperationException("World is read-only");
-    }
-
-    @Override
-    default void removeTag(@NotNull Tag<?> tag) {
-        throw new UnsupportedOperationException("World is read-only");
-    }
-
-    default void appendDebugInfo(TextComponent.@NotNull Builder builder) {
-        builder.appendNewline().append(Component.text("  ᴀɢᴇ: " + NumberUtil.formatDuration(instance().getWorldAge() * 50)));
-        builder.appendNewline()
-                .append(Component.text("  ᴘʟᴀʏᴇʀѕ: " + players().size()))
-                .append(Component.text(" ꜱᴘᴇᴄᴛᴀᴛᴏʀѕ: " + spectators().size()))
-                .append(Component.text(" ɪɴꜱᴛᴀɴᴄᴇ: " + instance().getPlayers().size()));
-    }
 }

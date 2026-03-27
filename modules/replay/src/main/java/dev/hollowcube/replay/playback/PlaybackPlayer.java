@@ -34,14 +34,17 @@ public class PlaybackPlayer extends Entity {
             properties.add(new PlayerInfoUpdatePacket.Property("textures", skinTexture, skinSignature));
         }
         var entry = new PlayerInfoUpdatePacket.Entry(getUuid(), username, properties, false,
-                0, GameMode.SURVIVAL, null, null, 0);
+                0, GameMode.SURVIVAL, null, null, 0, true);
         player.sendPacket(new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.ADD_PLAYER, entry));
 
         // Spawn the player entity
         super.updateNewViewer(player);
 
         // Enable skin layers
-        player.sendPackets(new EntityMetaDataPacket(getEntityId(), Map.of(17, Metadata.Byte((byte) 127))));
+        player.sendPacket(new EntityMetaDataPacket(getEntityId(), Map.of(
+                MetadataDef.Avatar.DISPLAYED_MODEL_PARTS_FLAGS.index(),
+                Metadata.Byte((byte) 0b1111111)
+        )));
         setInvisible(true);
     }
 

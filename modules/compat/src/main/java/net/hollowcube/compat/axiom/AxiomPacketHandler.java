@@ -41,18 +41,22 @@ final class AxiomPacketHandler {
         };
     }
 
-    static <T extends ServerboundModPacket<T>> BiConsumer<@NotNull Player, @NotNull T> disabled(String message) {
-        return (player, packet) -> {
-            if (AxiomPlayer.isEnabled(player)) player.sendMessage(message);
+    static <T extends ServerboundModPacket<T>> BiConsumer<@NotNull Player, @NotNull T> disabled(@Nullable String message) {
+        return (player, _) -> {
+            if (AxiomPlayer.isEnabled(player) && message != null) player.sendMessage(message);
         };
     }
 
     static void onHello(@NotNull Player player, @NotNull AxiomServerboundHelloPacket packet) {
-        if (packet.apiVersion() < AxiomAPI.API_VERSION) {
-            player.sendMessage("Incompatible Axiom API version. Please update your client.");
+        if (packet.apiVersion() < AxiomAPI.MIN_API_VERSION) {
+            player.sendMessage("Incompatible Axiom API version. Please update your mod.");
+        } else if (packet.apiVersion() > AxiomAPI.MAX_API_VERSION) {
+            player.sendMessage("Axiom API version is too new. Please be patient while we update the server. For now, you can use an older version of the mod.");
         } else {
             AxiomPlayer.setVersion(player, packet.apiVersion());
         }
+
+        AxiomPlayer.handlePendingEnable(player);
     }
 
     // Player Operations
@@ -96,7 +100,11 @@ final class AxiomPacketHandler {
     // Data Operations
 
     static void onMarkerDataRequest(@NotNull Player player, @NotNull AxiomServerboundMarkerRequestPacket packet) {
-        var event = new AxiomMarkerDataRequestEvent(player, packet.id());
+        var event = switch (packet.reason()) {
+            case COPYING -> new AxiomMarkerDataRequestEvent.Copying(player, packet.id());
+            case RIGHT_CLICK -> new AxiomMarkerDataRequestEvent.RightClick(player, packet.id());
+            default -> new AxiomMarkerDataRequestEvent(player, packet.id());
+        };
         EventDispatcher.call(event);
         if (event.getData() == null || event.isCancelled()) return;
 
@@ -161,9 +169,9 @@ final class AxiomPacketHandler {
                 }
 
                 instance.placeBlock(new BlockHandler.PlayerPlacement(
-                        block, instance, pos, player, packet.hand(), packet.face(),
+                        block, existingBlock, instance, pos, player, packet.hand(), packet.face(),
                         (float) packet.cursor().x(), (float) packet.cursor().y(), (float) packet.cursor().z()
-                ), packet.updateNeighbors());
+                ), packet.updateNeighbors() != null && packet.updateNeighbors().contains(pos));
             }
         } finally {
             player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));

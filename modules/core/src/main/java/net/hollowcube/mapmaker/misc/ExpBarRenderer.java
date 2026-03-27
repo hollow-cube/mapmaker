@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.misc;
 
 import net.hollowcube.common.util.FontUIBuilder;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.format.ShadowColor;
@@ -47,18 +47,24 @@ public class ExpBarRenderer implements ActionBar.Provider {
     private long lastExp = -1;
 
     @Override
-    public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
-        // Never show in spectator. It generally makes no sense, but also Axiom uses spectator when in editor mode,
-        // which should not show this ui for sure (it looks awful).
-        if (player.getGameMode() == GameMode.SPECTATOR) return;
-
+    public int cacheKey(@NotNull Player player) {
         // Update the player experience bar if it has changed
-        var playerData = PlayerDataV2.fromPlayer(player);
+        var playerData = PlayerData.fromPlayer(player);
         if (playerData.experience() != lastExp) {
             player.setLevel(playerData.level());
             player.setExp(playerData.levelProgress());
             lastExp = playerData.experience();
         }
+
+        var showExpBar = player.getGameMode() == GameMode.CREATIVE;
+        return showExpBar ? (int) (player.getExp() * XP_BAR_WIDTH) : -1;
+    }
+
+    @Override
+    public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
+        // Never show in spectator. It generally makes no sense, but also Axiom uses spectator when in editor mode,
+        // which should not show this ui for sure (it looks awful).
+        if (player.getGameMode() == GameMode.SPECTATOR) return;
 
         var hasExperienceBar = player.getGameMode() == GameMode.SURVIVAL || player.getGameMode() == GameMode.ADVENTURE;
         if (hasExperienceBar) return; // Use the builtin one for these.

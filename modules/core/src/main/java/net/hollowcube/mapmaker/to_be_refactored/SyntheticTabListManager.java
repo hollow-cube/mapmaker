@@ -41,7 +41,7 @@ public class SyntheticTabListManager {
         var playerListEntry = new PlayerInfoUpdatePacket.Entry(
                 getListUuid(session.playerId()), username, properties,
                 true, 0, null, displayName.build(),
-                null, displayName.getTabListOrder()
+                null, displayName.getTabListOrder(), true
         );
 
         listedPlayers.put(session.playerId(), playerListEntry);

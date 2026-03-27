@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.panels;
 
+import it.unimi.dsi.fastutil.ints.IntIntPair;
 import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -10,7 +11,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.TooltipDisplay;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 
 import java.util.Arrays;
@@ -20,18 +21,22 @@ import java.util.function.Function;
 public class MenuBuilder {
     @TestOnly
     public static final ItemStack EMPTY_ITEM = ItemStack.builder(Material.STICK)
-            .set(DataComponents.ITEM_MODEL, "minecraft:air")
-            .set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, Set.of()))
-            // Need to remove the name because the item can appear on the hotbar.
-            .set(DataComponents.CUSTOM_NAME, Component.empty())
-            .build();
+        .set(DataComponents.ITEM_MODEL, "minecraft:air")
+        .set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, Set.of()))
+        // Need to remove the name because the item can appear on the hotbar.
+        .set(DataComponents.CUSTOM_NAME, Component.empty())
+        .build();
 
     private final int absWidth, absHeight, containerSlotHeight;
+    private final IntIntPair[] slotPosOverrides;
+
     private int slotX, slotY, slotWidth, slotHeight;
     private final FontUIBuilder title = new FontUIBuilder();
     private final ItemStack[] items;
 
-    public MenuBuilder(int slotWidth, int slotHeight, int containerSlotHeight) {
+    public MenuBuilder(int slotWidth, int slotHeight, int containerSlotHeight, IntIntPair[] slotPosOverrides) {
+        this.slotPosOverrides = slotPosOverrides;
+
         this.slotX = this.slotY = 0;
         this.slotWidth = this.absWidth = slotWidth;
         this.slotHeight = this.absHeight = slotHeight;
@@ -98,7 +103,7 @@ public class MenuBuilder {
         this.slotHeight = this.slotY + height;
     }
 
-    public <T> void editSlotsWithout(int x, int y, int width, int height, @NotNull DataComponent<T> component) {
+    public <T> void editSlotsWithout(int x, int y, int width, int height, DataComponent<T> component) {
         int startX = this.slotX + x;
         int startY = this.slotY + y;
         int endX = startX + width;
@@ -114,11 +119,11 @@ public class MenuBuilder {
         }
     }
 
-    public <T> void editSlots(int x, int y, int width, int height, @NotNull DataComponent<T> component, @NotNull T data) {
+    public <T> void editSlots(int x, int y, int width, int height, DataComponent<T> component, T data) {
         editSlots(x, y, width, height, component, (Function<T, T>) _ -> data);
     }
 
-    public <T> void editSlots(int x, int y, int width, int height, @NotNull DataComponent<T> component, @NotNull Function<T, T> editor) {
+    public <T> void editSlots(int x, int y, int width, int height, DataComponent<T> component, Function<@Nullable T, T> editor) {
         int startX = this.slotX + x;
         int startY = this.slotY + y;
         int endX = startX + width;
@@ -135,7 +140,7 @@ public class MenuBuilder {
         }
     }
 
-    public void draw(int x, int y, @NotNull BadSprite sprite) {
+    public void draw(int x, int y, BadSprite sprite) {
         int startX = computeAbsoluteX(x), startY = computeAbsoluteY(y);
 
         title.pushColor(FontUtil.computeVerticalOffset(startY));
@@ -144,7 +149,7 @@ public class MenuBuilder {
         title.popColor();
     }
 
-    public void drawText(int x, int y, @NotNull String text, int width) {
+    public void drawText(int x, int y, String text, int width) {
         int startX = computeAbsoluteX(x), startY = computeAbsoluteY(y);
 
         // Account for font height. Not sure this is the solution i want for that.
@@ -167,11 +172,20 @@ public class MenuBuilder {
     }
 
     private int computeAbsoluteX(int offset) {
+        var override = getPositionOverride();
+        if (override != null) {
+            return override.firstInt() + offset;
+        }
         // -1 accounts for the gui title offset
         return -1 + (this.slotX * 18) + offset;
     }
 
     private int computeAbsoluteY(int offset) {
+        var override = getPositionOverride();
+        if (override != null) {
+            return override.secondInt() + offset;
+        }
+
         // +4 accounts for the gui title offset
         int y = 4 + (this.slotY * 18) + offset;
         // If we are past the game container slots into player inv we have to account for that gap:
@@ -179,5 +193,11 @@ public class MenuBuilder {
         // If we are past the player inv we need to account for the player inv -> hotbar gap:
         if (this.slotY >= this.containerSlotHeight + 3) y += 4;
         return y;
+    }
+
+    private @Nullable IntIntPair getPositionOverride() {
+        int index = this.slotY * this.absWidth + this.slotX;
+        if (index < 0 || index >= this.slotPosOverrides.length) return null;
+        return this.slotPosOverrides[index];
     }
 }

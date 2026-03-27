@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.Hats;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.player.responses.PlayerAlts;
+import net.hollowcube.mapmaker.player.responses.SendFriendRequestResult;
 import net.hollowcube.mapmaker.player.responses.TotpSetupResponse;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +20,7 @@ public class NoopPlayerService implements PlayerService {
     public @NotNull DisplayName getPlayerDisplayName2(@NotNull String id) {
         var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(id));
         if (player != null) {
-            return PlayerDataV2.fromPlayer(player).displayName2();
+            return PlayerData.fromPlayer(player).displayName2();
         }
 
         if (id.equals("597481a0-02fb-441c-9188-c407bec05084"))
@@ -38,6 +39,11 @@ public class NoopPlayerService implements PlayerService {
     }
 
     @Override
+    public @NotNull PlayerData getPlayerData(@NotNull String id) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void updatePlayerData(@NotNull String id, @NotNull PlayerDataUpdateRequest update) {
 
     }
@@ -48,7 +54,10 @@ public class NoopPlayerService implements PlayerService {
     }
 
     @Override
-    public void buyCosmetic(@NotNull String id, @NotNull Cosmetic cosmetic, @Nullable Integer coins, @Nullable Integer cubits, @Nullable JsonObject items) {
+    public void buyCosmetic(
+        @NotNull String id, @NotNull Cosmetic cosmetic, @Nullable Integer coins, @Nullable Integer cubits,
+        @Nullable JsonObject items
+    ) {
         throw new UnsupportedOperationException();
     }
 
@@ -58,30 +67,22 @@ public class NoopPlayerService implements PlayerService {
     }
 
     @Override
-    public @NotNull JsonObject getPlayerBackpack(@NotNull String id) {
-        return new JsonObject();
-    }
-
-    @Override
-    public @NotNull TabCompleteResponse getUsernameTabCompletions(@NotNull String query) {
+    public @NotNull TabCompleteResponse getUsernameTabCompletions(@NotNull String query, int limit) {
         return new TabCompleteResponse(MinecraftServer.getConnectionManager().getOnlinePlayers().stream()
-                .map(p -> new TabCompleteResponse.Entry(p.getUuid().toString(), p.getUsername()))
-                .toList());
+            .map(p -> new TabCompleteResponse.Entry(p.getUuid().toString(),
+                p.getUsername()))
+            .toList());
     }
 
     @Override
-    public @NotNull CreateCheckoutLinkResponse createCheckoutLink(@NotNull String source, @NotNull String playerId, @NotNull String productId) {
+    public @NotNull CreateCheckoutLinkResponse createCheckoutLink(
+        @NotNull String source, @NotNull String playerId, @NotNull String productId) {
         return new CreateCheckoutLinkResponse("https://hollowcube.net/store/checkout/fkelnk");
     }
 
     @Override
     public @Nullable HypercubeStatus getHypercubeStatus(@NotNull String playerId) {
         return null;
-    }
-
-    @Override
-    public @NotNull LinkResult attemptVerify(@NotNull String playerId, @NotNull String secret) {
-        throw new UnsupportedOperationException("");
     }
 
     @Override
@@ -108,4 +109,51 @@ public class NoopPlayerService implements PlayerService {
     public @NotNull List<PlayerAlts.Alt> getAlts(@NotNull String playerId) {
         return List.of();
     }
+
+    @Override
+    public @NotNull Page<PlayerFriend> getPlayerFriends(@NotNull String playerId, @Nullable Boolean onlineState, @NotNull Pageable pageable) {
+        return Page.empty();
+    }
+
+    @Override
+    public void removeFriend(@NotNull String playerId, @NotNull String targetId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @NotNull Page<FriendRequest> getFriendRequests(@NotNull String playerId, boolean incoming, @NotNull Pageable pageable) {
+        return Page.empty();
+    }
+
+    @Override
+    public @NotNull SendFriendRequestResult sendFriendRequest(@NotNull String playerId, @NotNull String targetId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @NotNull FriendRequest deleteFriendRequest(@NotNull String playerId, @NotNull String targetId, boolean bidirectional) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void blockPlayer(@NotNull String playerId, @NotNull String targetId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @NotNull Page<BlockedPlayer> getBlockedPlayers(@NotNull String playerId, @NotNull Pageable pageable) {
+        return Page.empty();
+    }
+
+    @Override
+    public void unblockPlayer(@NotNull String playerId, @NotNull String targetId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<BlockedPlayer> getBlocksBetween(
+        @NotNull String playerId, @NotNull String targetId, boolean bidirectional) {
+        return List.of();
+    }
+
 }

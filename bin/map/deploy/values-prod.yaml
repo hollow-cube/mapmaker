@@ -1,8 +1,5 @@
 fullnameOverride: mapmaker-map
 
-nodeSelector:
-  kubernetes.io/hostname: ovh-02
-
 mapmaker:
   role: map
 
@@ -16,15 +13,16 @@ image:
 resources:
   limits:
     #    cpu: 1500m
-    memory: 10Gi
+    memory: 6Gi
   requests:
     #    cpu: 500m
-    memory: 10Gi
+    memory: 6Gi
 
 serviceMonitor:
   enabled: true
 
 env:
+  MAPMAKER_INSTANCE_SIZE: "multi"
   MAPMAKER_COMMIT_SHA: "$COMMIT_SHA"
   MAPMAKER_RESOURCE_PACK_HASH: "$RESOURCE_PACK_HASH"
   MAPMAKER_SHUTDOWN_MAX_WAIT_MILLIS: "21600000" # 6 hours
@@ -33,14 +31,12 @@ env:
 
   MAPMAKER_VELOCITY_SECRET: "AsmMzWkjyrNvu5DprZWupQXy79mKFHK7d5Aj662YmVq4zEQns3RWb7NFpxvcTzgV"
 
-  MAPMAKER_MAP_SERVICE_URL: "http://map-service.mapmaker.svc.cluster.local:9124"
-  MAPMAKER_PLAYER_SERVICE_URL: "http://player-service.mapmaker.svc.cluster.local:9124"
-  MAPMAKER_SESSION_SERVICE_URL: "http://session-service.mapmaker.svc.cluster.local:9124"
-  MAPMAKER_PLAYER_INVITE_SERVICE_URL: "http://session-service.mapmaker.svc.cluster.local:9124"
+  MAPMAKER_MAP_SERVICE_URL: "http://api-server:9124"
+  MAPMAKER_PLAYER_SERVICE_URL: "http://api-server:9124"
+  MAPMAKER_SESSION_SERVICE_URL: "http://api-server:9124"
+  MAPMAKER_PLAYER_INVITE_SERVICE_URL: "http://api-server:9124"
 
-  MAPMAKER_SPICEDB_URL: "http://spicedb:8443"
-  MAPMAKER_SPICEDB_TOKEN: "${SPICEDB_SECRET_KEY}"
-  MAPMAKER_KAFKA_BOOTSTRAP_SERVERS: "kafka:9093"
+  MAPMAKER_NATS_SERVERS: "nats://nats:4222"
 
   MAPMAKER_UNLEASH_ENABLED: "false"
   MAPMAKER_UNLEASH_USE_POSTHOG: "true"

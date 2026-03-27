@@ -17,18 +17,22 @@ public class BackgroundSpriteSet {
         }
     }
 
-    public @NotNull String build(int contentWidth) {
+    public @NotNull String build(int contentWidth, boolean includeLeft, boolean includeRight) {
         var sb = new StringBuilder();
         Check.argCondition(contentWidth > 0b111111111, "Oof too big (round 3)!");
 
-        sb.append(left.fontChar()).append(FontUtil.computeOffset(-1));
+        if (includeLeft) sb.append(left.fontChar()).append(FontUtil.computeOffset(-1));
         for (int i = 0; i < widthSprites.length; i++) {
             if ((contentWidth & (1 << i)) != 0) {
                 sb.append(widthSprites[i].fontChar()).append(FontUtil.computeOffset(-1));
             }
         }
-        sb.append(right.fontChar());
+        if (includeRight) sb.append(right.fontChar());
 
         return sb.toString();
+    }
+
+    public @NotNull String build(int contentWidth) {
+        return build(contentWidth, true, true);
     }
 }

@@ -1,12 +1,15 @@
 package net.hollowcube.mapmaker.map.util.datafix.versions;
 
+import com.google.auto.service.AutoService;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.DataVersion;
+import net.hollowcube.datafix.ExternalDataFix;
 import net.hollowcube.datafix.util.Value;
 
-public class V4325_1 extends DataVersion {
+@AutoService(ExternalDataFix.class)
+public class V4325_1 extends DataVersion implements ExternalDataFix {
     private static final Int2ObjectMap<String> CMD_TO_MODEL_ID = new Int2ObjectArrayMap<>();
 
     public V4325_1() {

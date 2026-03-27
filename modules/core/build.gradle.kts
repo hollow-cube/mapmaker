@@ -14,7 +14,9 @@ dependencies {
     implementation(project(":modules:datafix"))
 
     implementation(libs.minestom)
-    implementation(libs.bundles.otel)
+    implementation(libs.bundles.otel) {
+        exclude(group = "io.opentelemetry", module = "opentelemetry-exporter-sender-okhttp")
+    }
     implementation(libs.bundles.adventure)
     implementation(libs.fastutil)
     implementation(libs.posthog)
@@ -22,10 +24,10 @@ dependencies {
     implementation(libs.similarity)
     implementation(libs.completely)
     implementation(libs.gson)
-    implementation(libs.kafka)
     implementation(libs.jctools)
     implementation(libs.caffeine)
-    implementation(libs.bundles.prometheus)
+    implementation(libs.bundles.prometheus) // TODO: why is this a core module dependency
+    implementation(libs.nats)
 
     testImplementation(project(":modules:test"))
 }

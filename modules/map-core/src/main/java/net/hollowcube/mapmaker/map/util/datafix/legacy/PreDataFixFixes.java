@@ -16,21 +16,20 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Implements some manual data fixes from the 1.20.4 to 1.20.5 upgrade when data converter was added to do proper upgrades.
  */
-@SuppressWarnings("UnstableApiUsage")
 public final class PreDataFixFixes {
 
     public static int fixEntityMetaIndex1_20_4(int index) {
         return switch (index) {
-            case 18 -> 19; // VILLAGERDATA
-            case 19 -> 20; // OPTVARINT
-            case 20 -> 21; // POSE
-            case 21 -> 22; // CAT_VARIANT
-            case 22 -> 26; // FROG_VARIANT
-            case 23 -> 29; // OPT_GLOBAL_POSITION
-            case 24 -> 30; // PAINTING_VARIANT
-            case 25 -> 31; // SNIFFER_STATE
-            case 26 -> 33; // VECTOR3
-            case 27 -> 34; // QUATERNION
+            case 18 -> Metadata.TYPE_VILLAGERDATA; // VILLAGERDATA
+            case 19 -> Metadata.TYPE_OPT_VARINT; // OPTVARINT
+            case 20 -> Metadata.TYPE_POSE; // POSE
+            case 21 -> Metadata.TYPE_CAT_VARIANT; // CAT_VARIANT
+            case 22 -> Metadata.TYPE_FROG_VARIANT; // FROG_VARIANT
+            case 23 -> Metadata.TYPE_OPT_GLOBAL_POSITION; // OPT_GLOBAL_POSITION
+            case 24 -> Metadata.TYPE_PAINTING_VARIANT; // PAINTING_VARIANT
+            case 25 -> Metadata.TYPE_SNIFFER_STATE; // SNIFFER_STATE
+            case 26 -> Metadata.TYPE_VECTOR3; // VECTOR3
+            case 27 -> Metadata.TYPE_QUATERNION; // QUATERNION
             default -> index;
         };
     }

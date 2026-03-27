@@ -41,6 +41,10 @@ public class PasteCommand extends CommandDsl {
         //todo should have arg for this
         var playerSession = PlayerSession.forPlayer(player);
         var clipboard = playerSession.clipboard(Clipboard.DEFAULT);
+        if (clipboard.isEmpty()) {
+            player.sendMessage(Component.translatable("terraform.clipboard.empty"));
+            return;
+        }
 
         execute(player, clipboard, mask);
     }

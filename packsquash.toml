@@ -1,5 +1,0 @@
-pack_directory = 'bin/packer/build/packer-out/client'
-output_file_path = 'squashed.zip'
-
-['**/*.png']
-downsize_if_single_color = false

@@ -5,6 +5,7 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.annotations.SerializedName;
+import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Instant;
 import java.util.List;
 
+@RuntimeGson
 public class PlayerDataUpdateRequest {
     private String username = null;
     private List<String> ipHistory = null;
@@ -55,6 +57,10 @@ public class PlayerDataUpdateRequest {
         }
         cosmetics.add(type.id(), id == null ? JsonNull.INSTANCE : new JsonPrimitive(id));
         return this;
+    }
+
+    public @Nullable JsonObject settings() {
+        return settings == null || settings.isEmpty() ? null : settings;
     }
 
 }

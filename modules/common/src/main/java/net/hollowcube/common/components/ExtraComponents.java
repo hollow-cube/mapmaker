@@ -1,7 +1,9 @@
 package net.hollowcube.common.components;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -14,5 +16,9 @@ public class ExtraComponents {
 
     public static @NotNull Component multiline(@NotNull List<Component> components) {
         return Component.join(JoinConfiguration.newlines(), components);
+    }
+
+    public static @NotNull Component noItalic(@NotNull ComponentLike like) {
+        return like.asComponent().style(style -> style.decoration(TextDecoration.ITALIC, false));
     }
 }

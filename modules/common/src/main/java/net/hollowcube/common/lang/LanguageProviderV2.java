@@ -1,5 +1,7 @@
 package net.hollowcube.common.lang;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -21,7 +23,6 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
-import org.apache.kafka.common.cache.LRUCache;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -68,12 +69,12 @@ public class LanguageProviderV2 {
             for (var element : elements) {
                 if (!element.isJsonPrimitive()) continue;
                 ARG_PATTERN.matcher(element.getAsString())
-                        .results()
-                        .forEachOrdered(match -> {
-                            var format = match.group("format");
-                            if (format == null || NUMBER_FORMATTERS.containsKey(format)) return;
-                            NUMBER_FORMATTERS.put(format, new DecimalFormat(format));
-                        });
+                    .results()
+                    .forEachOrdered(match -> {
+                        var format = match.group("format");
+                        if (format == null || NUMBER_FORMATTERS.containsKey(format)) return;
+                        NUMBER_FORMATTERS.put(format, new DecimalFormat(format));
+                    });
             }
         }
 
@@ -84,7 +85,9 @@ public class LanguageProviderV2 {
     private static final Map<String, @Nullable ElementNode> componentCache = new ConcurrentHashMap<>();
     private static final Map<String, @Nullable List<ElementNode>> multiComponentCache = new ConcurrentHashMap<>();
 
-    private static final LRUCache<TranslatableComponent, Component> expandedComponentCache = new LRUCache<>(1000);
+    private static final Cache<TranslatableComponent, Component> expandedComponentCache = Caffeine.newBuilder()
+        .maximumSize(1000)
+        .build();
 
     public static @NotNull String translateToPlain(@NotNull String translationKey) {
         return PLAIN_TEXT.serialize(translate(translatable(translationKey)));
@@ -102,12 +105,12 @@ public class LanguageProviderV2 {
         if (!(component instanceof TranslatableComponent translatable)) {
             // Minestom seems not to check for children so we do it here, but this is probably insanely slow for the 99% of cases we dont need it...
             return component.children(component.children().stream()
-                    .map(LanguageProviderV2::translate)
-                    .toList());
+                .map(LanguageProviderV2::translate)
+                .toList());
         }
 
         // Return from cache if present
-        var cached = expandedComponentCache.get(translatable);
+        var cached = expandedComponentCache.getIfPresent(translatable);
         if (cached != null) return cached;
 //        logger.debug("Cache miss for {}", translatable.key());
 
@@ -118,8 +121,8 @@ public class LanguageProviderV2 {
 
         // Apply the args to the partial (after translating the args)
         var args = translatable.arguments().stream()
-                .map(translationArgument -> translate(translationArgument.asComponent()))
-                .toList();
+            .map(translationArgument -> translate(translationArgument.asComponent()))
+            .toList();
         Component result;
         try {
             result = BASE_EMPTY.append(treeToComponent(partial, args));
@@ -138,12 +141,12 @@ public class LanguageProviderV2 {
 
         // Apply the args to the partials (after translating the args)
         var translatedArgs = args.stream()
-                .map(ComponentLike::asComponent)
-                .map(LanguageProviderV2::translate)
-                .toList();
+            .map(ComponentLike::asComponent)
+            .map(LanguageProviderV2::translate)
+            .toList();
         return partials.stream()
-                .map(partial -> BASE_EMPTY.append(treeToComponent(partial, translatedArgs)))
-                .toList();
+            .map(partial -> BASE_EMPTY.append(treeToComponent(partial, translatedArgs)))
+            .toList();
     }
 
     public static @NotNull Component translateMultiMerged(@NotNull String key, @NotNull List<? extends ComponentLike> args) {
@@ -167,11 +170,15 @@ public class LanguageProviderV2 {
         return translatable("block." + block.key().namespace() + "." + block.key().value());
     }
 
+    public static boolean hasTranslationKey(@NotNull String key) {
+        return langData.has(key);
+    }
+
     // Use of a lot of internal Minimessage APIs below. May break in the future and need to write this ourselves.
 
     private static final PlainTextComponentSerializer PLAIN_TEXT = PlainTextComponentSerializer.plainText();
     private static final MiniMessage MINI_MESSAGE = MiniMessage.builder()
-            .build();
+        .build();
 
     public static final Component BASE_EMPTY = Component.text("", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false);
 
@@ -231,20 +238,20 @@ public class LanguageProviderV2 {
 
     static @NotNull String replaceInString(@NotNull String value, @NotNull List<Component> args) {
         return ARG_PATTERN.matcher(value)
-                .replaceAll(match -> {
-                    var index = Integer.parseInt(match.group("index"));
-                    if (index < 0 || index >= args.size()) {
-                        return "$$" + index;
-                    } else {
-                        var component = args.get(index);
-                        var format = match.group("format");
-                        var formatter = format == null ? null : NUMBER_FORMATTERS.get(format);
-                        if (formatter != null && component instanceof TranslationArgument argument && argument.value() instanceof Number number) {
-                            return formatter.format(number);
-                        }
-                        return PLAIN_TEXT.serialize(component);
+            .replaceAll(match -> {
+                var index = Integer.parseInt(match.group("index"));
+                if (index < 0 || index >= args.size()) {
+                    return "\\$\\$" + index;
+                } else {
+                    var component = args.get(index);
+                    var format = match.group("format");
+                    var formatter = format == null ? null : NUMBER_FORMATTERS.get(format);
+                    if (formatter != null && component instanceof TranslationArgument argument && argument.value() instanceof Number number) {
+                        return formatter.format(number);
                     }
-                });
+                    return PLAIN_TEXT.serialize(component);
+                }
+            });
     }
 
     // The following are taken directly from MiniMessageParser inside minimessage. It is an internal API.

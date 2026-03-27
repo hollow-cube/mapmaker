@@ -56,7 +56,7 @@ public class BonemealInteractionRule implements BlockInteractionRule {
                     interaction.setBlock(otherPosition, otherBlock.withProperty("age", String.valueOf(age)));
                 }
             } else {
-                age %= maxAge;
+                age %= (maxAge + 1);
                 block = block.withProperty("age", String.valueOf(age));
             }
         }

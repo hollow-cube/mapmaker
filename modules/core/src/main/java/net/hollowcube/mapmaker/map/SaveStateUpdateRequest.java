@@ -7,6 +7,8 @@ import net.minestom.server.codec.Transcoder;
 import net.minestom.server.registry.RegistryTranscoder;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
+
 public class SaveStateUpdateRequest {
     JsonObject updates = new JsonObject();
 
@@ -16,6 +18,11 @@ public class SaveStateUpdateRequest {
 
     public JsonObject updates() {
         return updates;
+    }
+
+    public @NotNull SaveStateUpdateRequest setType(@NotNull SaveStateType type) {
+        updates.addProperty("type", type.name().toLowerCase(Locale.ROOT));
+        return this;
     }
 
     public @NotNull SaveStateUpdateRequest setCompleted(boolean completed) {
@@ -28,8 +35,20 @@ public class SaveStateUpdateRequest {
         return this;
     }
 
+    public @NotNull SaveStateUpdateRequest setTicks(long playtime) {
+        updates.addProperty("ticks", playtime);
+        return this;
+    }
+
     public @NotNull SaveStateUpdateRequest setProtocolVersion(int protocolVersion) {
         updates.addProperty("protocolVersion", protocolVersion);
+        return this;
+    }
+
+    public @NotNull SaveStateUpdateRequest setLatency(Double start, Double end) {
+        if (start == null || end == null || start < 0 || end < 0) return this;
+        updates.addProperty("startLatency", start);
+        updates.addProperty("endLatency", end);
         return this;
     }
 

@@ -11,7 +11,7 @@ public class AcceptCommand extends AbstractInviteServiceCommand {
 
     public AcceptCommand(@NotNull PlayerInviteService inviteService, @NotNull PlayerService playerService,
                          @NotNull SessionManager sessionManager) {
-        super("accept", inviteService, playerService, sessionManager, "The player to accept the invite from");
+        super("accept", inviteService, playerService, sessionManager, "The player to accept the invite from", false);
 
         description = "Accept any pending request or invite from a player";
 
@@ -19,7 +19,7 @@ public class AcceptCommand extends AbstractInviteServiceCommand {
     }
 
     @Override
-    void handle(@NotNull Player sender, @NotNull String targetId) {
+    void handle(@NotNull Player sender, @NotNull String targetId, @NotNull String targetName) {
         this.inviteService.accept(sender, targetId);
     }
 

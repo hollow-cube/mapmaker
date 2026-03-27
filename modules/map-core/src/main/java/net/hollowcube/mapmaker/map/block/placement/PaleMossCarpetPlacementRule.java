@@ -56,10 +56,7 @@ public final class PaleMossCarpetPlacementRule extends BaseBlockPlacementRule {
         }
 
         var below = instance.getBlock(blockPosition.relative(BlockFace.BOTTOM), Block.Getter.Condition.TYPE);
-        var hasBottomFace = below.registry().collisionShape().isFaceFull(BlockFace.TOP);
-        if (!hasBottomFace && !isAnyAttached) return Block.AIR;
-
-        newProperties.put("bottom", hasBottomFace ? "true" : "false");
+        newProperties.put("bottom", !below.isAir() || !isAnyAttached ? "true" : "false");
 
         return block.withProperties(newProperties);
     }

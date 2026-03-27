@@ -1,301 +1,288 @@
 package net.hollowcube.mapmaker.map;
 
-import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.OpUtils;
-import net.hollowcube.common.util.PlayerUtil;
-import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
+import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandlerRegistry;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
+import net.hollowcube.mapmaker.map.monitoring.MapCoreJFR;
+import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
+import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.map.util.spatial.Octree;
 import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
-import net.hollowcube.terraform.instance.TerraformInstanceBiomes;
+import net.hollowcube.mapmaker.misc.BossBars;
+import net.hollowcube.mapmaker.util.NumberUtil;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.TextComponent;
+import net.minestom.server.FeatureFlag;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.ServerFlag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
+import net.minestom.server.event.player.PlayerDeathEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
-import net.minestom.server.instance.Instance;
-import net.minestom.server.network.packet.server.CachedPacket;
-import net.minestom.server.network.packet.server.common.TagsPacket;
-import net.minestom.server.network.packet.server.configuration.SelectKnownPacksPacket;
-import net.minestom.server.registry.Registries;
+import net.minestom.server.event.trait.PlayerInstanceEvent;
+import net.minestom.server.instance.Weather;
+import net.minestom.server.instance.WorldBorder;
 import net.minestom.server.tag.Tag;
-import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import net.minestom.server.tag.TagReadable;
+import net.minestom.server.tag.TagWritable;
+import net.minestom.server.thread.TickSchedulerThread;
+import net.minestom.server.timer.TaskSchedule;
+import net.minestom.server.utils.validate.Check;
+import org.jetbrains.annotations.*;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.BiFunction;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiPredicate;
 
 import static net.hollowcube.mapmaker.map.util.spatial.Octree.simpleOctree;
 
-@SuppressWarnings("UnstableApiUsage")
-public non-sealed abstract class AbstractMapWorld implements MapWorld {
-    private static final Logger logger = LoggerFactory.getLogger(AbstractMapWorld.class);
-
-    protected static <T extends AbstractMapWorld> @NotNull Constructor<T> ctor(@NotNull BiFunction<MapServer, MapData, T> create, @NotNull Class<T> type) {
-        return new Constructor<>() {
-            @Override
-            public @NotNull T create(@NotNull MapServer server, @NotNull MapData map) {
-                return create.apply(server, map);
-            }
-
-            @Override
-            public @NotNull Class<T> type() {
-                return type;
-            }
-        };
-    }
-
-    static final Tag<MapWorld> SELF_TAG = Tag.Transient("mapworld");
-
-    public static final Component CLOSED_MESSAGE = Component.translatable("map.closed");
-
-    private final String worldId = UUID.randomUUID().toString();
+@NotNullByDefault
+public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W extends AbstractMapWorld<S, W>> implements MapWorld {
+    @SuppressWarnings("rawtypes")
+    protected static final Tag<PlayerState> PLAYER_INITIAL_STATE = Tag.Transient("player_initial_state");
+    static final Tag<MapWorld> ROOT_MAP_WORLD_TAG = Tag.Transient("root_map_world");
 
     private final MapServer server;
     private final MapData map;
-    protected final MapInstance instance;
-    private final EventNode<InstanceEvent> eventNode;
+    private final MapInstance instance;
 
-    private final ItemRegistry itemRegistry = new ItemRegistry();
+    private final Set<Player> players = new HashSet<>();
+    private final Set<Player> playersImmutable = Collections.unmodifiableSet(players);
+    private final EventNode<InstanceEvent> eventNode = EventNode.event(
+        UUID.randomUUID().toString(), EventFilter.INSTANCE,
+        event -> !(event instanceof PlayerEvent playerEvent) || players.contains(playerEvent.getPlayer())
+    );
+
+    private final Class<S> stateClass;
+    private final List<Class<?>> stateSubclasses;
+    private final Set<Player>[] playersByState;
+    private final EventNode<PlayerInstanceEvent>[] eventNodesByState;
+    private final Map<Player, S> playerStates = new HashMap<>();
+    // pendingStateChanges is a map to deduplicate single tick changes (it should be
+    // impossible to change a player's state multiple times per tick, latest wins).
+    private final Map<Player, PlayerStateChange<S, W>> pendingStateChanges = new HashMap<>();
+    private final Map<Player, CompletableFuture<@Nullable Void>> pendingRemovals = new ConcurrentHashMap<>();
+    protected volatile boolean isClosed;
+
     private final BiomeContainer biomeContainer = new BiomeContainer();
-    private final ObjectEntityHandlerRegistry markerRegistry = new ObjectEntityHandlerRegistry();
+    private final ItemRegistry itemRegistry = new ItemRegistry();
+    private final ObjectEntityHandlerRegistry objectEntityHandlerRegistry = new ObjectEntityHandlerRegistry();
 
-    private final Set<Player> players = new CopyOnWriteArraySet<>();
-    private final Set<Player> playersUnmodifiable = Collections.unmodifiableSet(players);
-    private final Set<Player> spectators = new CopyOnWriteArraySet<>();
-    private final Set<Player> spectatorsUnmodifiable = Collections.unmodifiableSet(spectators);
+    private Octree octree = Octree.emptyOctree();
+    private boolean octreeDirty = true;
 
-    private Octree octree = null;
+    private @Nullable List<BossBar> bossBars;
 
-    protected AbstractMapWorld(@NotNull MapServer server, @NotNull MapData map, @NotNull MapInstance instance) {
+    @SuppressWarnings("unchecked")
+    protected AbstractMapWorld(MapServer server, MapData map, MapInstance instance, Class<S> stateClass) {
         this.server = server;
         this.map = map;
         this.instance = instance;
-        this.eventNode = EventNode.event("world-local", EventFilter.INSTANCE, this::testEvent);
 
-        // Configure the events from the instance & managers
-        instance.eventNode().addChild(eventNode);
-        instance.eventNode().addChild(itemRegistry.eventNode());
+        this.stateClass = stateClass;
+        this.stateSubclasses = collectRecursiveSealedSubclasses(stateClass);
+        this.playersByState = new Set[stateSubclasses.size()];
+        this.eventNodesByState = new EventNode[stateSubclasses.size()];
+        for (int i = 0; i < stateSubclasses.size(); i++) {
+            this.playersByState[i] = new HashSet<>();
+            final var stateSubclass = stateSubclasses.get(i);
+            this.eventNodesByState[i] = OpUtils.build(EventNode.event(
+                UUID.randomUUID().toString(),
+                EventUtil.PLAYER_INSTANCE_FILTER,
+                (e) -> stateSubclass.isInstance(getPlayerState(e.getPlayer()))
+            ), eventNode()::addChild);
+        }
 
-        instance().eventNode().addListener(PlayerInstanceLeaveEvent.class, this::handleInstanceLeave);
+        // Only set the root tag if this is the root, otherwise we rely on the parent to
+        // return this world in canonicalWorld implementations.
+        instance.updateTag(ROOT_MAP_WORLD_TAG, existing ->
+            Objects.requireNonNullElse(existing, this));
 
-        // Set the instance self tag so that this world can be discovered via MapWorld#unsafeFromInstance
-        // If there is already a tag do nothing, it means that this is a child world and the parent has already set the tag.
-        if (!instance.hasTag(SELF_TAG)) instance.setTag(SELF_TAG, this);
-        instance.setTag(TerraformInstanceBiomes.BIOMES, biomeContainer);
+        instance.eventNode()
+            .addChild(eventNode)
+            .addChild(itemRegistry.eventNode())
+            .addListener(PlayerInstanceLeaveEvent.class, this::handlePlayerLeave)
+            .addListener(PlayerDeathEvent.class, this::handlePlayerDeath);
+
+        configureInstance();
     }
 
     @Override
-    public @NotNull String worldId() {
-        return worldId;
-    }
-
-    @Override
-    public @NotNull MapServer server() {
+    public MapServer server() {
         return server;
     }
 
     @Override
-    public @NotNull MapData map() {
+    public MapData map() {
         return map;
     }
 
     @Override
-    public @NotNull Instance instance() {
+    public MapInstance instance() {
         return instance;
     }
 
     @Override
-    public @NotNull ItemRegistry itemRegistry() {
-        return itemRegistry;
+    public EventNode<InstanceEvent> eventNode() {
+        return eventNode;
+    }
+
+    public EventNode<PlayerInstanceEvent> eventNode(Class<? extends S> stateType) {
+        return eventNodesByState[stateIndex(stateType)];
     }
 
     @Override
-    public @NotNull BiomeContainer biomes() {
+    public Octree collisionTree() {
+        return this.octree;
+    }
+
+    @Override
+    public void queueCollisionTreeRebuild() {
+        this.octreeDirty = true;
+    }
+
+    @Override
+    public @UnmodifiableView Collection<Player> players() {
+        return playersImmutable;
+    }
+
+    //region Registries
+
+    @Override
+    public BiomeContainer biomes() {
         return biomeContainer;
     }
 
     @Override
-    public @NotNull ObjectEntityHandlerRegistry objectEntityHandlers() {
-        return markerRegistry;
+    public ItemRegistry itemRegistry() {
+        return itemRegistry;
     }
 
     @Override
-    public @NotNull Set<Player> players() {
-        return playersUnmodifiable;
+    public ObjectEntityHandlerRegistry objectEntityHandlers() {
+        return objectEntityHandlerRegistry;
+    }
+
+    //endregion
+
+    // region Player Lifecycle
+
+    public @Nullable S getPlayerState(Player player) {
+        return playerStates.get(player);
+    }
+
+    public final void changePlayerState(Player player, S nextState) {
+        changePlayerState(player, nextState, (_, _) -> true);
+    }
+
+    public void changePlayerState(Player player, S nextState, BiPredicate<Player, S> predicate) {
+        pendingStateChanges.merge(
+            player,
+            new PlayerStateChange<>(nextState, predicate),
+            PlayerStateChange::handleConflict
+        );
     }
 
     @Override
-    public @NotNull Set<Player> spectators() {
-        return spectatorsUnmodifiable;
-    }
-
-    @Override
-    public final void configurePlayer(@NotNull AsyncPlayerConfigurationEvent event) {
-        var player = event.getPlayer();
-
-        try {
-            List<SelectKnownPacksPacket.Entry> knownPacks;
-            try {
-                knownPacks = PlayerUtil.stealKnownPacksFuture(player).get(5, TimeUnit.SECONDS);
-            } catch (InterruptedException | TimeoutException e) {
-                logger.warn("Client failed to respond to known packs request", e);
-                knownPacks = null;
-            } catch (ExecutionException e) {
-                throw new RuntimeException("Error receiving known packs", e);
-            }
-            boolean excludeVanilla = knownPacks != null && knownPacks.contains(SelectKnownPacksPacket.MINECRAFT_CORE);
-
-            // Send registry data ourself to allow custom biomes per map
-            var serverProcess = MinecraftServer.process();
-            player.sendPacket(serverProcess.chatType().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.dimensionType().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(biomes().registryDataPacket(excludeVanilla));
-            player.sendPacket(serverProcess.damageType().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.dialog().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.trimMaterial().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.trimPattern().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.bannerPattern().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.enchantment().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.paintingVariant().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.jukeboxSong().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.instrument().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.wolfVariant().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.wolfSoundVariant().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.catVariant().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.chickenVariant().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.cowVariant().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.frogVariant().registryDataPacket(serverProcess, excludeVanilla));
-            player.sendPacket(serverProcess.pigVariant().registryDataPacket(serverProcess, excludeVanilla));
-
-            player.sendPacket(TEMP_TAGS_PACKET);
-            event.setSendRegistryData(false);
-
-            // Send feature flag so that vanilla doesnt show disabled items tooltip
-
-            // Set the instance and spawn point of the player.
-            event.setSpawningInstance(instance());
-            preAddPlayer(event);
-
-            // addPlayer is called during PlayerSpawnEvent meaning that the player is already in the instance,
-            // and all of the entity `updateNewViewer` calls were already made. This makes it unsafe to call
-            // MapWorld#forPlayer during viewer add which is unexpected and strange behavior.
-            // To fix it, we disable auto entity viewing during config, and then reenable it after the player is added
-            // to the world.
-            // todo: this only happens during reconfiguration, not when using the spectator item or enter/exiting test mode
-            //       Those two cases need to be fixed in a generic way that handles all other cases.
-            player.setAutoViewEntities(false);
-        } catch (Exception e) {
-            logger.error("Failed to configure player", e);
-            player.kick("An unexpected error occurred while configuring your player. Please try again.");
-        }
-    }
-
-    public void preAddPlayer(@NotNull AsyncPlayerConfigurationEvent event) {
+    public final void configurePlayer(AsyncPlayerConfigurationEvent event) {
         final var player = event.getPlayer();
 
-        player.setRespawnPoint(spawnPoint(player));
+        MapWorldHelpers.applyMapResourcePack(map, player);
+
+        // Always add all feature flags to the world. We don't restrict what blocks/items people use.
+        FeatureFlag.values().forEach(event::addFeatureFlag);
+
+        event.setSpawningInstance(instance());
+
+        var initialState = configurePlayer(player);
+        player.setTag(PLAYER_INITIAL_STATE, initialState);
+
+        // addPlayer is called during PlayerSpawnEvent meaning that the player is already in the instance,
+        // and all of the entity `updateNewViewer` calls were already made. This makes it unsafe to call
+        // MapWorld#forPlayer during viewer add which is unexpected and strange behavior.
+        // To fix it, we disable auto entity viewing during config, and then reenable it after the player is added
+        // to the world.
+        player.setAutoViewEntities(false);
     }
 
+    /// !! Implementations must set player respawn position.
+    protected abstract S configurePlayer(Player player);
+
     @Override
-    public void addPlayer(@NotNull Player player) {
+    public void spawnPlayer(Player player) {
+        Check.stateCondition(isClosed, "Cannot add player to closed world.");
+        assert !this.players.contains(player);
         this.players.add(player);
-        MapWorldHelpers.resetPlayer(player);
-    }
 
-    @Override
-    public void addSpectator(@NotNull Player player) {
-        this.spectators.add(player);
-        MapWorldHelpers.resetPlayer(player);
-    }
+        //noinspection unchecked
+        final var initialState = (S) Objects.requireNonNull(player.getTag(PLAYER_INITIAL_STATE));
 
-    @Override
-    public void removePlayer(@NotNull Player player) {
-        this.players.remove(player);
-        this.spectators.remove(player);
-    }
-
-    //todo not a fan of this, but idk a better solution
-    @Deprecated
-    public void removePlayerImmediate(@NotNull Player player) {
-        this.players.remove(player);
-        this.spectators.remove(player);
-    }
-
-    //todo not a fan of this, but idk a better solution
-    @Deprecated
-    public void addPlayerImmediate(@NotNull Player player) {
-        this.players.add(player);
-    }
-
-    /**
-     * Returns this map if the player is currently playing it, or a sub map if the player is in a sub map.
-     *
-     * @param player The player to get the map for
-     * @return The map that the player is currently playing, or null if they are not in a map of this tree, or are spectating.
-     */
-    protected @Nullable MapWorld getMapForPlayer(@NotNull Player player) {
-        return players().contains(player) || spectators().contains(player) ? this : null;
-    }
-
-    @Override
-    public @NotNull EventNode<InstanceEvent> eventNode() {
-        return eventNode;
-    }
-
-    protected boolean testEvent(@NotNull InstanceEvent event) {
-        if (event instanceof PlayerEvent pe)
-            return isPlaying(pe.getPlayer()) || isSpectating(pe.getPlayer());
-        return true;
-    }
-
-    private void handleInstanceLeave(@NotNull PlayerInstanceLeaveEvent event) {
-        if (event.getInstance() != instance()) return; // Sanity
-
-        // Sanity: If they are still in this world, remove them from it.
-        var player = event.getPlayer();
-        if (isPlaying(player) || isSpectating(player)) {
-            FutureUtil.submitVirtual(() -> removePlayer(player));
+        var stateChangeEvent = new MapCoreJFR.StateChange(getClass(), null, initialState.getClass());
+        stateChangeEvent.begin();
+        try {
+            playerStates.put(player, initialState);
+            playersByState[stateIndex(initialState)].add(player);
+            //noinspection unchecked
+            initialState.configurePlayer((W) this, player, null);
+        } finally {
+            stateChangeEvent.end();
         }
-    }
 
-    @Blocking
-    public void onDataLoaded() {
-        this.biomes().init(this);
-    }
-
-    @Blocking
-    public abstract void load();
-
-    @Blocking
-    public void close(@Nullable Component reason) {
-        logger.info("Closing world {}", this);
-        removePlayerSet(this, players, reason);
-        removePlayerSet(this, spectators, reason);
-        players.clear();
-        spectators.clear();
+        if (this.bossBars != null) bossBars.forEach(player::showBossBar);
     }
 
     @Override
-    public @NotNull Octree octree() {
-        FutureUtil.assertTickThreadWarn();
-        if (octree == null) {
+    public CompletableFuture<Void> scheduleRemovePlayer(Player player) {
+        return this.pendingRemovals.computeIfAbsent(player, _ -> new CompletableFuture<>());
+    }
+
+    @Override
+    public void removePlayer(Player player) {
+        if (!this.players.contains(player)) return;
+        if (!(Thread.currentThread() instanceof TickSchedulerThread))
+            throw new UnsupportedOperationException("removePlayer must be called from the scheduler thread!");
+
+        if (this.bossBars != null) BossBars.clear(player);
+
+        // Have to get and remove later because we need to still be in the state when resetting
+        // them out of it (this is a contract of this interface). However this is OK because all
+        // of this logic only happens during a safe point tick anyway.
+        final var state = playerStates.get(player);
+
+        var stateChangeEvent = new MapCoreJFR.StateChange(getClass(), state.getClass(), null);
+        stateChangeEvent.begin();
+        try {
+            //noinspection unchecked
+            state.resetPlayer((W) this, player, null);
+            playersByState[stateIndex(state)].remove(player);
+            pendingStateChanges.remove(player);
+            playerStates.remove(player);
+        } finally {
+            stateChangeEvent.commit();
+        }
+
+        this.players.remove(player);
+    }
+
+    @Override
+    @NonBlocking
+    public TaskSchedule safePointTick() {
+        if (isClosed) return TaskSchedule.stop();
+
+        MapWorld.super.safePointTick();
+
+        // Rebuild octree for new entities.
+        if (octreeDirty) {
             List<SpatialObject> allObjects = new ArrayList<>();
             for (var entity : instance().getEntities()) {
                 if (entity.isRemoved() || !(entity instanceof SpatialObject spatial)) continue;
@@ -304,58 +291,172 @@ public non-sealed abstract class AbstractMapWorld implements MapWorld {
             }
 
             var size = OpUtils.mapOr(map().settings().getSize(),
-                    MapSize::size, MapSize.NORMAL.size());
+                MapSize::size, MapSize.NORMAL.size());
             var powerOfTwo = (int) Math.ceil(Math.log(Math.min(size, 4096)) / Math.log(2));
             this.octree = simpleOctree(powerOfTwo, allObjects);
+            this.octreeDirty = false;
         }
-        return octree;
-    }
 
-    @Override
-    public void queueCollisionTreeRebuild() {
-        this.octree = null;
-    }
+        var pendingRemoveIter = pendingRemovals.entrySet().iterator();
+        while (pendingRemoveIter.hasNext()) {
+            var pendingLeave = pendingRemoveIter.next();
+            removePlayer(pendingLeave.getKey());
+            pendingLeave.getValue().complete(null);
+            pendingRemoveIter.remove();
+        }
 
-    private static void removePlayerSet(@NotNull MapWorld world, @NotNull Collection<Player> players, @Nullable Component reason) {
-        for (var player : Set.copyOf(players)) {
+        // Apply pending state changes.
+        var iter = pendingStateChanges.entrySet().iterator();
+        while (iter.hasNext()) {
+            final var entry = iter.next();
+            final var player = entry.getKey();
+            final var lastState = playerStates.get(player);
+            final var change = entry.getValue();
+            final var nextState = change.state();
+
+            var stateChangeEvent = new MapCoreJFR.StateChange(getClass(), lastState.getClass(), nextState.getClass());
+            stateChangeEvent.begin();
             try {
-                if (reason != null) player.sendMessage(reason);
-                world.removePlayer(player);
-                if (reason instanceof TranslatableComponent trans && trans.key().equals("mapmaker.shutdown")) {
-                    player.kick(trans);
-                } else {
-                    world.server().bridge().joinHub(player);
+                if (change.canChange(player)) {
+                    lastState.resetPlayer((W) this, player, nextState);
+                    playersByState[stateIndex(lastState)].remove(player);
+
+                    // todo what should we do if theres a failure here?
+
+                    playerStates.put(player, nextState);
+                    playersByState[stateIndex(nextState)].add(player);
+                    nextState.configurePlayer((W) this, player, lastState);
                 }
-            } catch (Exception e) {
-                logger.error("failed to move player to hub ({})", player.getUuid(), e);
-                ExceptionReporter.reportException(e, player);
-                player.kick(CLOSED_MESSAGE);
+            } finally {
+                stateChangeEvent.commit();
+                iter.remove();
             }
         }
+
+        return TaskSchedule.nextTick();
     }
 
-    private static final CachedPacket TEMP_TAGS_PACKET = new CachedPacket(AbstractMapWorld::createTagsPacket);
+    private void handlePlayerLeave(PlayerInstanceLeaveEvent event) {
+        // Only the canonical instance should actually handle removing the player.
+        if (MapWorld.forInstance(event.getInstance()) != this) return;
+        if (!players.contains(event.getPlayer())) return; // Sanity
 
-    private static @NotNull TagsPacket createTagsPacket() {
-        final List<TagsPacket.Registry> entries = new ArrayList<>();
+        scheduleRemovePlayer(event.getPlayer());
+    }
 
-        // The following are the registries which contain tags used by the vanilla client.
-        // We don't care about registries unused by the client.
-        final Registries registries = MinecraftServer.process();
-        entries.add(registries.bannerPattern().tagRegistry());
-        entries.add(registries.biome().tagRegistry());
-        entries.add(registries.blocks().tagRegistry());
-        entries.add(registries.dialog().tagRegistry());
-        entries.add(registries.catVariant().tagRegistry());
-        entries.add(registries.damageType().tagRegistry());
-        entries.add(registries.enchantment().tagRegistry());
-        entries.add(registries.entityType().tagRegistry());
-        entries.add(registries.fluid().tagRegistry());
-        entries.add(registries.gameEvent().tagRegistry());
-        entries.add(registries.instrument().tagRegistry());
-        entries.add(registries.material().tagRegistry());
-        entries.add(registries.paintingVariant().tagRegistry());
+    private void handlePlayerDeath(PlayerDeathEvent event) {
+        event.setChatMessage(null);
+    }
 
-        return new TagsPacket(entries);
+    // endregion
+
+    // region World Lifecycle
+
+    protected void configureInstance() {
+        instance().setGenerator(MapGenerators.voidWorld());
+
+        var diameter = map().settings().getSize().size();
+        instance().setWorldBorder(new WorldBorder(diameter,
+            0f, 0f, 0,
+            0, ServerFlag.WORLD_BORDER_SIZE
+        ));
+
+        instance().setTime(switch (map().getSetting(MapSettings.TIME_OF_DAY)) {
+            case NOON -> 6000;
+            case SUNRISE -> 23000;
+            case SUNSET -> 13000;
+            case NIGHT -> 18000;
+        });
+
+        instance().setWeather(switch (map().getSetting(MapSettings.WEATHER_TYPE)) {
+            case CLEAR -> new Weather(0, 0);
+            case RAINING -> new Weather(1f, 0f);
+            case THUNDERSTORM -> new Weather(1f, 1f);
+        }, 1);
+    }
+
+    @Blocking
+    public void loadWorld() {
+        loadWorldData();
+
+        this.bossBars = createBossBars();
+    }
+
+    public void close() {
+        if (!(Thread.currentThread() instanceof TickSchedulerThread))
+            throw new UnsupportedOperationException("close must be called from the scheduler thread!");
+        if (!players().isEmpty())
+            throw new IllegalStateException("Cannot close a map world with players!");
+        this.isClosed = true;
+
+        // At the beginning of the _next_ tick (as in, after this safe point tick), unregister the instance.
+        MinecraftServer.getSchedulerManager().scheduleNextTick(() ->
+            MinecraftServer.getInstanceManager().unregisterInstance(instance()));
+    }
+
+    protected @Nullable List<BossBar> createBossBars() {
+        return List.of();
+    }
+
+    protected void loadWorldData() {
+        var mapData = server().mapService().getMapWorldAsStream(map().id(), false);
+        if (mapData == null) return;
+
+        instance().loadStream(mapData, new ReadWorldAccess(this));
+    }
+
+    public void loadWorldTag(TagReadable tag) {
+        biomes().init(tag);
+    }
+
+    public void saveWorldTag(TagWritable tag) {
+        biomes().write(tag);
+    }
+
+    // endregion
+
+    private int stateIndex(S state) {
+        return stateIndex((Class<? extends S>) state.getClass());
+    }
+
+    private int stateIndex(Class<? extends S> state) {
+        int index = stateSubclasses.indexOf(state);
+        Check.argCondition(index == -1, "State {0} is not a permitted subclass of {1}", state, stateClass);
+        return index;
+    }
+
+    protected static MapInstance makeMapInstance(MapData map, char classifier) {
+        return makeMapInstance(map, classifier, null);
+    }
+
+    protected static MapInstance makeMapInstance(
+        MapData map, char classifier,
+        @Nullable MapInstance.LightingMode lightingOverride
+    ) {
+        var lightingMode = Objects.requireNonNullElseGet(lightingOverride,
+            () -> map.getSetting(MapSettings.LIGHTING) ? MapInstance.LightingMode.GENERATED : MapInstance.LightingMode.FULL_BRIGHT);
+        return new MapInstance(map.createDimensionName(classifier), lightingMode);
+    }
+
+    private static List<Class<?>> collectRecursiveSealedSubclasses(Class<?> stateClass) {
+        Check.argCondition(!stateClass.isSealed(), "stateClass must be sealed");
+        var stateSubclasses = new HashSet<>(List.of(stateClass.getPermittedSubclasses()));
+        int size;
+        do {
+            size = stateSubclasses.size();
+            for (var subclass : stateClass.getPermittedSubclasses()) {
+                if (subclass.isSealed() && subclass.isInterface())
+                    stateSubclasses.addAll(List.of(subclass.getPermittedSubclasses()));
+            }
+
+        } while (size != stateSubclasses.size());
+        return List.copyOf(stateSubclasses);
+    }
+
+    public void appendDebugText(TextComponent.Builder builder) {
+        builder.appendNewline().append(Component.text("  ᴀɢᴇ: " + NumberUtil.formatDuration(instance().getWorldAge() * 50)));
+        builder.appendNewline()
+            .append(Component.text("  ᴘʟᴀʏᴇʀѕ: " + players().size()))
+            .append(Component.text(" ɪɴꜱᴛᴀɴᴄᴇ: " + instance().getPlayers().size()));
     }
 }

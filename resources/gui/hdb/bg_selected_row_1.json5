@@ -1,9 +1,0 @@
-{
-    //TODO I should really make background unselected and selected states in the generic folder since they're used everywhere
-    "type": "sprite",
-    "origin": [
-        0,
-        0
-    ],
-    "shift_y": 126,
-}

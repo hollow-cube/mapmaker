@@ -1,5 +1,7 @@
 package net.hollowcube.common.util;
 
+import net.kyori.adventure.key.InvalidKeyException;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.MinecraftServer;
@@ -10,13 +12,22 @@ import net.minestom.server.registry.RegistryTranscoder;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagSerializer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 public final class ExtraTags {
     private ExtraTags() {
+    }
+
+    public static @NotNull Tag<@NotNull Key> Key(@NotNull String key) {
+        return Tag.String(key).map(
+                str -> parseKey(str, null),
+                Key::asString
+        );
     }
 
     public static @NotNull Tag<Vec> VecAsList(@NotNull String key) {
@@ -48,5 +59,13 @@ public final class ExtraTags {
                     return builder.build();
                 }
         ));
+    }
+
+    public static @Nullable Key parseKey(String str, @Nullable Key defaultValue) {
+        try {
+            return Key.key(str.toLowerCase(Locale.ROOT));
+        } catch (InvalidKeyException _) {
+            return defaultValue;
+        }
     }
 }

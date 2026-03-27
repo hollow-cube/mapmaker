@@ -11,18 +11,21 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.compat.moulberrytweaks.debugrender.DebugShape;
 import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderAddPacket;
+import net.hollowcube.mapmaker.command.arg.CoreArgument;
+import net.hollowcube.mapmaker.command.arg.MapArgument;
 import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
-import net.hollowcube.mapmaker.map.runtime.MapAllocator;
+import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.util.NbtUtil;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.map.util.ServerLatencyHud;
+import net.hollowcube.mapmaker.player.Permission;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
-import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.ComponentUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -37,82 +40,92 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class DebugCommand extends CommandDsl {
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 
-    private final MapAllocator allocator;
+public class DebugCommand extends CommandDsl {
 
     private final CommandCondition adminCondition;
     private final CommandCondition localCondition;
 
+    private final ServerBridge bridge;
+    private final MapArgument vjoinMapArg;
+
     public DebugCommand(
-            @NotNull PlayerService playerService, @NotNull PermManager permManager, @NotNull MapService mapService,
-            @NotNull MapAllocator allocator
+        @NotNull PlayerService playerService, @NotNull MapService mapService,
+        @NotNull ServerBridge bridge
     ) {
         super("debug");
-        this.allocator = allocator;
 
         description = "Debugging utilities for map maker";
         category = CommandCategory.HIDDEN;
 
-        adminCondition = permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN);
-        localCondition = ($, $$) -> ServerRuntime.getRuntime().isDevelopment() ? CommandCondition.ALLOW
-                : CommandCondition.DENY;
+        adminCondition = staffPerm(Permission.GENERIC_STAFF);
+        localCondition = (_, _) -> ServerRuntime.getRuntime().isDevelopment() ? CommandCondition.ALLOW
+            : CommandCondition.DENY;
 
         // Mapmaker stuff
         createPermissionlessSubcommand("rp", this::handleDebugResourcePack,
-                "Show information about the current resource pack version");
+            "Show information about the current resource pack version");
         createPermissionlessSubcommand("self", this::handleDebugSelf,
-                "Show information about yourself");
+            "Show information about yourself");
         createPermissionlessSubcommand("server", this::handleDebugServer,
-                "Show information about the current server");
+            "Show information about the current server");
         createPermissionedSubcommand("gc", (ignored1, ignored2) -> System.gc(),
-                "Force a garbage collection");
+            "Force a garbage collection");
 
         // Minestom stuff
         createPermissionlessSubcommand("commands", this::handleCommandsDebug,
-                "Reload the currently available commands");
+            "Reload the currently available commands");
         createPermissionlessSubcommand("block", this::handleBlockDebug,
-                "Show debug information about the block you're looking at");
+            "Show debug information about the block you're looking at");
         createPermissionlessSubcommand("heightmap", this::handleHeightmapDebug,
-                "Show debug information about the heightmaps at your location");
+            "Show debug information about the heightmaps at your location");
         createPermissionlessSubcommand("pvn", this::handlePvnDebug,
-                "Show your current protocol version");
+            "Show your current protocol version");
 
-        createPermissionedSubcommand("map_alloc", this::showMapAllocatorDebug,
-                "Show map allocator debug info");
         createPermissionedSubcommand("relight", this::relightWorld,
-                "Relight the world");
+            "Relight the world");
         createPermissionedSubcommand("reheightmap", this::handleReHeightmapDebug,
-                "Rebuild the heightmap in the map");
+            "Rebuild the heightmap in the map");
         createPermissionedSubcommand("yndranth", this::handleYndranthDebug,
-                "dump block nbt directly");
+            "dump block nbt directly");
         createPermissionedSubcommand("tree", this::handleTreeDebug,
-                "show map octree");
+            "show map octree");
+        createPermissionedSubcommand("fixthedripleaf", this::fixTheDripleaf,
+            "add dripleaf block handlers to relevant blocks");
+        createPermissionedSubcommand("latency", this::handleLatency,
+                                     "show latency to other players");
+
+        var vjoin = createPermissionedSubcommand("vjoin", this::handleVerificationJoin,
+            "join a verification state of a map");
+        this.bridge = bridge;
+        vjoinMapArg = CoreArgument.Map("map", mapService);
+        vjoin.addSyntax(playerOnly(this::handleVerificationJoin), vjoinMapArg);
     }
 
     public @NotNull CommandDsl createPermissionlessSubcommand(
-            @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
+        @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
         return createSubcommand(name, handler, null, description);
     }
 
     public @NotNull CommandDsl createPermissionedSubcommand(
-            @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
+        @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
         return createSubcommand(name, handler, adminCondition, description);
     }
 
     public @NotNull CommandDsl createLocalSubcommand(
-            @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
+        @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @NotNull String description) {
         return createSubcommand(name, handler, localCondition, description);
     }
 
     private void handleDebugResourcePack(@NotNull Player player, @NotNull CommandContext context) {
         var packHash = ServerRuntime.getRuntime().resourcePackSha1();
         player.sendMessage(Component.text("Resource pack: ")
-                .append(ComponentUtil.createBasicCopy(packHash)));
+            .append(ComponentUtil.createBasicCopy(packHash)));
     }
 
     private void handleDebugSelf(@NotNull Player player, @NotNull CommandContext context) {
-        var playerData = PlayerDataV2.fromPlayer(player);
+        var playerData = PlayerData.fromPlayer(player);
         player.sendMessage(Component.text(playerData.username() + " (" + playerData.id().substring(0, 8) + "...)"));
         player.sendMessage(Component.text("Display: ").append(playerData.displayName2().build()));
         var rawSettings = playerData.settingsRawValues();
@@ -127,13 +140,16 @@ public class DebugCommand extends CommandDsl {
     }
 
     private void handleDebugServer(@NotNull Player player, @NotNull CommandContext context) {
-        player.sendMessage("Host: " + AbstractHttpService.hostname);
-        player.sendMessage("Release: " + !ServerRuntime.getRuntime().isDevelopment());
+        var runtime = ServerRuntime.getRuntime();
+
+        player.sendMessage("Host: " + runtime.hostname());
+        player.sendMessage("Release: " + !runtime.isDevelopment() + " (" + runtime.commit().substring(0, 8) + ")");
+        player.sendMessage("Size: " + runtime.size());
     }
 
     private @NotNull CommandDsl createSubcommand(
-            @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @Nullable CommandCondition condition,
-            @NotNull String description
+        @NotNull String name, @NotNull CommandExecutor.PlayerOnly handler, @Nullable CommandCondition condition,
+        @NotNull String description
     ) {
         var cmd = new CommandDsl(name);
         cmd.setDescription(description);
@@ -166,7 +182,7 @@ public class DebugCommand extends CommandDsl {
         } else {
             if (block.handler() != null) {
                 player.sendMessage(
-                        "Block: " + block.handler().getKey() + "@" + block.handler().getClass().getSimpleName());
+                    "Block: " + block.handler().getKey() + "@" + block.handler().getClass().getSimpleName());
             } else {
                 player.sendMessage("Block: " + "no handler");
             }
@@ -224,19 +240,15 @@ public class DebugCommand extends CommandDsl {
         player.sendMessage(Component.text("Protocol: " + pvn + " (" + ProtocolVersions.getProtocolName(pvn) + ")"));
     }
 
-    private void showMapAllocatorDebug(@NotNull Player player, @NotNull CommandContext context) {
-        allocator.showDebugInfo(player);
-    }
-
     private void handleTreeDebug(@NotNull Player player, @NotNull CommandContext context) {
-        var world = MapWorld.forPlayerOptional(player);
+        var world = MapWorld.forPlayer(player);
         if (world == null) {
             player.sendMessage("You are not in a map world!");
             return;
         }
 
         player.scheduleNextTick(_ -> {
-            var boundingBoxes = world.octree().debugBoundingBoxes();
+            var boundingBoxes = world.collisionTree().debugBoundingBoxes();
             player.sendMessage("Found " + boundingBoxes.size() + " bounding boxes in octree.");
 
             int i = 0;
@@ -247,10 +259,10 @@ public class DebugCommand extends CommandDsl {
                     size = new Vec(0.5);
                 }
                 new ClientboundDebugRenderAddPacket(
-                        Key.key("octree", String.valueOf(i++)),
-                        new DebugShape.Box(bb.boundingBox().center(), size, Quaternion.ZERO,
-                                0, color | 0xFF000000, 5),
-                        0, 20 * 20).send(player); // 20s
+                    Key.key("octree", String.valueOf(i++)),
+                    new DebugShape.Box(bb.boundingBox().center(), size, Quaternion.ZERO,
+                        0, color | 0xFF000000, 5),
+                    0, 20 * 20).send(player); // 20s
             }
         });
 
@@ -263,8 +275,44 @@ public class DebugCommand extends CommandDsl {
         }, 50);
     }
 
+    private void fixTheDripleaf(@NotNull Player player, @NotNull CommandContext context) {
+        var instance = player.getInstance();
+        var dimensionHeight = instance.getCachedDimensionType().height();
+        player.sendMessage("Fixing the dripleaf!!!");
+        int fixed = 0;
+        for (var chunk : instance.getChunks()) {
+            for (int x = 0; x < 16; x++) {
+                for (int z = 0; z < 16; z++) {
+                    for (int y = -64; y < dimensionHeight; y++) {
+                        var block = chunk.getBlock(x, y, z);
+                        if (block.name().equals("minecraft:big_dripleaf")) {
+                            chunk.setBlock(x, y, z, block.withHandler(DripleafBlock.INSTANCE));
+                            fixed++;
+                        }
+                    }
+                }
+            }
+        }
+        player.sendMessage("Fixed " + fixed + " dripleaf blocks!");
+    }
+
+    private void handleLatency(@NotNull Player player, @NotNull CommandContext context) {
+        player.scheduleNextTick(_ -> ActionBar.forPlayer(player).toggleProvider(new ServerLatencyHud()));
+    }
+
+    private void handleVerificationJoin(@NotNull Player player, @NotNull CommandContext context) {
+        var mapId = context.getRaw(vjoinMapArg);
+        if (mapId == null) {
+            player.sendMessage("Map ID is required!");
+            return;
+        }
+
+        bridge.joinMap(player, mapId, ServerBridge.JoinMapState.VERIFYING, "debug_vjoin");
+
+    }
+
     private void queueRateLimitedWorldUpdate(
-            @NotNull Player player, @NotNull String name, @NotNull Consumer<List<Chunk>> action, int rate) {
+        @NotNull Player player, @NotNull String name, @NotNull Consumer<List<Chunk>> action, int rate) {
         FutureUtil.submitVirtual(() -> {
             var chunks = List.copyOf(player.getInstance().getChunks());
             int nBatches = (chunks.size() + rate - 1) / rate;

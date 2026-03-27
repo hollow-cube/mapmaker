@@ -5,8 +5,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.types.Punishment;
@@ -20,17 +19,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Objects;
 
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
+
 public class PStatusCommand extends CommandDsl {
     private final Argument<String> playerArg;
 
     private final PlayerService playerService;
     private final PunishmentService punishmentService;
 
-    public PStatusCommand(
-            @NotNull PlayerService playerService,
-            @NotNull PunishmentService punishmentService,
-            @NotNull PermManager permManager
-    ) {
+    public PStatusCommand(@NotNull PlayerService playerService, @NotNull PunishmentService punishmentService) {
         super("pstatus");
         this.playerService = playerService;
         this.punishmentService = punishmentService;
@@ -38,14 +35,18 @@ public class PStatusCommand extends CommandDsl {
         category = CommandCategories.STAFF;
         description = "Check the punishment status of a player";
         playerArg = CoreArgument.AnyPlayerId("player", playerService)
-                .description("The player to check the status of");
+            .description("The player to check the status of");
 
-        setCondition(permManager.createPlatformCondition2(PlatformPerm.VIEW_PUNISHMENTS));
+        setCondition(staffPerm(Permission.GENERIC_STAFF));
         addSyntax(playerOnly(this::showPlayerStatus), playerArg);
     }
 
     private void showPlayerStatus(@NotNull Player player, @NotNull CommandContext context) {
         var target = context.get(playerArg);
+        if (target == null) {
+            player.sendMessage("Unknown player: " + context.getRaw(playerArg));
+            return;
+        }
 
         var targetDisplayName = playerService.getPlayerDisplayName2(target).build();
         player.sendMessage(Component.translatable("punishment.status.header", targetDisplayName));
@@ -61,12 +62,12 @@ public class PStatusCommand extends CommandDsl {
         if (punishment == null) return Component.translatable("punishment.status.none");
 
         return Component.translatable("punishment.status.entry", List.of(
-                playerService.getPlayerDisplayName2(punishment.executorId()).build(),
-                Component.text(Objects.requireNonNullElse(punishment.ladderId(), "none")),
-                Component.text(punishment.comment()),
-                Component.text(NumberUtil.formatTimeSince(punishment.createdAt())),
-                punishment.expiresAt() == null ? Component.translatable("punishment.status.duration.permanent")
-                        : Component.translatable("punishment.status.duration.relative", Component.text(NumberUtil.formatTimeUntil(punishment.expiresAt())))
+            playerService.getPlayerDisplayName2(punishment.executorId()).build(),
+            Component.text(Objects.requireNonNullElse(punishment.ladderId(), "none")),
+            Component.text(punishment.comment()),
+            Component.text(NumberUtil.formatTimeSince(punishment.createdAt())),
+            punishment.expiresAt() == null ? Component.translatable("punishment.status.duration.permanent")
+                : Component.translatable("punishment.status.duration.relative", Component.text(NumberUtil.formatTimeUntil(punishment.expiresAt())))
         ));
     }
 

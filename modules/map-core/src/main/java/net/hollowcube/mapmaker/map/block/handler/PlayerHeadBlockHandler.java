@@ -6,7 +6,7 @@ import net.minestom.server.codec.Transcoder;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
-import net.minestom.server.item.component.HeadProfile;
+import net.minestom.server.network.player.ResolvableProfile;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,7 +19,7 @@ public class PlayerHeadBlockHandler implements BlockHandler {
 
     public static final Key ID = Key.key("minecraft:skull");
 
-    public static @Nullable HeadProfile extractProfile(@NotNull Block block) {
+    public static @Nullable ResolvableProfile extractProfile(@NotNull Block block) {
         var profile = block.getTag(PROFILE);
         if (profile == null) return null;
         return DataComponents.PROFILE.decode(Transcoder.NBT, profile).orElseThrow();

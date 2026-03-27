@@ -6,6 +6,7 @@ import net.hollowcube.compat.api.ModChannelRegisterEvent;
 import net.hollowcube.compat.api.packet.ClientboundModPacket;
 import net.hollowcube.compat.api.packet.PacketRegistry;
 import net.hollowcube.compat.api.packet.ServerboundModPacket;
+import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.minestom.server.MinecraftServer;
@@ -16,9 +17,13 @@ import net.minestom.server.event.player.PlayerPluginMessageEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerTickEndEvent;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,8 +34,11 @@ import java.util.function.BiConsumer;
 @ApiStatus.Internal
 public final class PacketRegistryImpl implements PacketRegistry {
 
+    private static final @NotNull Tag<Boolean> HAS_SENT_WARNING = Tag.<Boolean>Transient("mod_compat:sent_unsupported_mods_warning").defaultValue(false);
+
     private static final String REGISTER_CHANNEL = "minecraft:register";
     private static final String UNREGISTER_CHANNEL = "minecraft:unregister";
+    private static final Logger log = LoggerFactory.getLogger(PacketRegistryImpl.class);
     private static PacketRegistryImpl INSTANCE;
 
     private final Map<String, ServerboundModPacket.Type<?>> serverbound = new ConcurrentHashMap<>();
@@ -51,7 +59,12 @@ public final class PacketRegistryImpl implements PacketRegistry {
                     var registerEvent = new ModChannelRegisterEvent(player, channels);
                     EventDispatcher.call(registerEvent);
                     PacketQueue.get(player).registerChannels(player, channels);
-                    if (!registerEvent.getDisabledMods().isEmpty() && Boolean.TRUE.equals(player.getAndSetTag(CompatProvider.FIRST_JOIN_TAG, null))) {
+
+                    var hasDisabledMods = !registerEvent.getDisabledMods().isEmpty();
+                    var isFirstJoin = Boolean.TRUE.equals(player.getTag(CompatProvider.FIRST_JOIN_TAG));
+                    var hasSentWarning = Boolean.TRUE.equals(player.getTag(HAS_SENT_WARNING));
+                    if (hasDisabledMods && isFirstJoin && !hasSentWarning) {
+                        player.setTag(HAS_SENT_WARNING, true);
                         var pvnText = Component.text(ProtocolVersions.getProtocolName(MinecraftServer.PROTOCOL_VERSION));
                         var disabledModList = Component.join(JoinConfiguration.commas(true), registerEvent.getDisabledMods());
                         player.sendMessage(Component.translatable("join.unsupported_mods", pvnText, disabledModList));
@@ -104,7 +117,16 @@ public final class PacketRegistryImpl implements PacketRegistry {
 
     @SuppressWarnings("unchecked")
     private <T extends ServerboundModPacket<T>> void handlePacket(ServerboundModPacket.Type<T> type, PlayerPluginMessageEvent event) {
-        var packet = NetworkBuffer.wrap(event.getMessage(), 0, event.getMessage().length).read(type.codec());
+        T packet;
+        try {
+            packet = NetworkBuffer.wrap(event.getMessage(), 0, event.getMessage().length).read(type.codec());
+        } catch (Exception e) {
+            var wrapped = new RuntimeException("Failed to decode packet: " + type.id(), e);
+            PostHog.captureException(wrapped, event.getPlayer().getUuid().toString());
+            log.error("failed to decode packet for {}: {}", event.getPlayer().getUsername(), type.id(), wrapped);
+            return;
+        }
+
         var handler = (BiConsumer<Player, T>) this.handlers.get(event.getIdentifier());
         if (handler == null) return;
         handler.accept(event.getPlayer(), packet);

@@ -18,6 +18,11 @@ public class GenericTempActionBarProvider implements ActionBar.Provider {
     }
 
     @Override
+    public int cacheKey(@NotNull Player player) {
+        return message.hashCode();
+    }
+
+    @Override
     public long expiration() {
         return expiration;
     }

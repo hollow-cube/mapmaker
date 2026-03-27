@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.util.transformations;
 
-import net.hollowcube.common.types.Axis;
-import net.hollowcube.schem.Rotation;
+import net.hollowcube.schem.util.Axis;
+import net.hollowcube.schem.util.Rotation;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;

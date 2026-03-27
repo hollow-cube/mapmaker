@@ -3,15 +3,15 @@ package net.hollowcube.mapmaker.map;
 import net.hollowcube.canvas.View;
 import net.hollowcube.canvas.internal.Context;
 import net.hollowcube.canvas.internal.Controller;
+import net.hollowcube.command.CommandManager;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
-import net.hollowcube.mapmaker.map.runtime.MapAllocator;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.metrics.MetricWriter;
-import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.session.SessionManager;
+import net.hollowcube.mapmaker.util.ServiceContext;
 import net.minestom.server.entity.Player;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.NotNull;
@@ -20,19 +20,35 @@ import java.util.function.Function;
 
 public interface MapServer {
 
-    // Core services
-    @NotNull MetricWriter metrics();
+    @NotNull ApiClient api();
+
     @NotNull SessionService sessionService();
+
     @NotNull PlayerService playerService();
+
     @NotNull MapService mapService();
-    @NotNull PermManager permManager();
+
     @NotNull PunishmentService punishmentService();
+
     @NotNull PlayerInviteService inviteService();
 
+    default @NotNull ServiceContext createServiceContext() {
+        return new ServiceContext(
+            this.api(),
+            this.playerService(),
+            this.sessionService(),
+            this.mapService(),
+            this.bridge()
+        );
+    }
+
     // Higher level managers
-    @NotNull MapAllocator allocator();
+
     @NotNull SessionManager sessionManager();
+
     @NotNull ServerBridge bridge();
+
+    @NotNull CommandManager commandManager();
 
     @NotNull Controller guiController();
 

@@ -1,14 +1,22 @@
 package net.hollowcube.mapmaker.map.block.handler;
 
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.component.DataComponents;
+import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.component.CustomData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-final class BlockHandlerHelpers {
+public final class BlockHandlerHelpers {
+
+    public static boolean canEdit(@NotNull BlockHandler.Interaction interaction) {
+        var player = interaction.getPlayer();
+        var world = MapWorld.forPlayer(player);
+        return world != null && world.canEdit(player);
+    }
 
     /**
      * @param placement
@@ -24,23 +32,31 @@ final class BlockHandlerHelpers {
         return true;
     }
 
+    public static boolean applyStoredBlockData(PlayerBlockPlaceEvent event) {
+        var itemStack = event.getPlayer().getItemInHand(event.getHand());
+        var blockData = extractBlockData(itemStack);
+        if (blockData == null) return false;
+
+        event.setBlock(event.getBlock().withNbt(blockData));
+        return true;
+    }
+
     /**
      * @param placement
      * @return true if the block data was applied, false otherwise
      */
     public static void applyItemData(@NotNull BlockHandler.PlayerPlacement placement) {
         var itemStack = placement.getPlayer().getItemInHand(placement.getHand());
-        var blockData = itemStack.get(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).nbt();
-        if (blockData.size() == 0) return;
-        updateBlock(placement, blockData);
+        var data = itemStack.get(DataComponents.BLOCK_ENTITY_DATA);
+        if (data == null || data.nbt().isEmpty()) return;
+        updateBlock(placement, data.nbt());
     }
 
     public static @Nullable CompoundBinaryTag extractBlockData(@NotNull ItemStack itemStack) {
-        var blockData = itemStack.get(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).nbt();
-        if (blockData.size() == 0) return null;
+        var data = itemStack.get(DataComponents.BLOCK_ENTITY_DATA);
+        if (data == null || data.nbt().isEmpty()) return null;
         var builder = CompoundBinaryTag.builder();
-        builder.put(blockData);
-        builder.remove("id");
+        builder.put(data.nbt());
         builder.remove("x");
         builder.remove("y");
         builder.remove("z");

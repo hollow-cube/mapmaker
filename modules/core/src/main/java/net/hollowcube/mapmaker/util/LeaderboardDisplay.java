@@ -10,10 +10,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.Viewable;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.Metadata;
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.*;
 import net.minestom.server.entity.metadata.display.TextDisplayMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
@@ -43,8 +40,6 @@ public class LeaderboardDisplay {
     private static final double TEXT_SCALE = 1.5;
     private static final double TITLE_SCALE = 2.25;
     public static final double SUBTITLE_SCALE = 1.25;
-
-    private static final int TEXT_METADATA_INDEX = 23;
 
     private static final Component HORIZONTAL_PADDING = Component.text(FontUtil.computeOffset(9));
 
@@ -204,7 +199,7 @@ public class LeaderboardDisplay {
         }
         if (padding) content = content.appendNewline();
 
-        Map<Integer, Metadata.Entry<?>> metaUpdates = Map.of(TEXT_METADATA_INDEX, Metadata.Chat(content));
+        Map<Integer, Metadata.Entry<?>> metaUpdates = Map.of(MetadataDef.TextDisplay.TEXT.index(), Metadata.Component(content));
         player.sendPacket(new EntityMetaDataPacket(entriesEntity.getEntityId(), metaUpdates));
     }
 

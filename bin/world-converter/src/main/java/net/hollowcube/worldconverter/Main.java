@@ -40,7 +40,7 @@ public class Main {
     private static final Map<String, String> biomeRenames = new HashMap<>();
     private static final List<BiomeInfo> customBiomes = new ArrayList<>();
 
-    public static void main(String[] args) throws Exception {
+    static void main(String[] args) throws Exception {
         if (args.length < 2) {
             System.out.println("Usage: java -jar world-converter.jar <input_world_path> <output_world_path>");
             return;

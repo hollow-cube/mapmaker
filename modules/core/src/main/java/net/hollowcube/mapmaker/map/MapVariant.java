@@ -26,7 +26,8 @@ public enum MapVariant {
     public int maxTags(@NotNull MapTags.TagType tagType) {
         return switch (tagType) {
             case VISUAL -> maxVisualTags();
-            case GAMEPLAY -> maxGameplayTags();
+            case GAMEPLAY, GAMEPLAY_OLD -> maxGameplayTags();
+            default -> 0;
         };
     }
 }

@@ -3,6 +3,7 @@ package net.hollowcube.worldconverter;
 
 import net.kyori.adventure.nbt.*;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.Section;
@@ -156,8 +157,12 @@ public class AnvilLoader {
                     if (property.getValue() instanceof StringBinaryTag propertyValue) {
                         properties.put(property.getKey(), propertyValue.value());
                     } else {
-                        LOGGER.warn("Fail to parse block state properties {}, expected a string for {}, but contents were {}",
-                                propertiesNBT, property.getKey(), TagStringIOExt.writeTag(property.getValue()));
+                        try {
+                            LOGGER.warn("Fail to parse block state properties {}, expected a string for {}, but contents were {}",
+                                    propertiesNBT, property.getKey(), MinestomAdventure.tagStringIO().asString(property.getValue()));
+                        } catch (Exception e) {
+                            LOGGER.warn("Fail to parse block state properties {}", propertiesNBT, e);
+                        }
                     }
                 }
                 if (!properties.isEmpty()) block = block.withProperties(properties);

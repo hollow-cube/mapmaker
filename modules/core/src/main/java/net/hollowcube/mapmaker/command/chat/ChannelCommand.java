@@ -4,17 +4,18 @@ import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import org.jetbrains.annotations.NotNull;
 
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
+
 public class ChannelCommand extends AbstractChatCommand {
 
     private ChannelCommand(
-            @NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages,
-            @NotNull String channel, @NotNull String name, @NotNull String... aliases
+        @NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages,
+        @NotNull String channel, @NotNull String name, @NotNull String... aliases
     ) {
         super(sessions, maps, messages, name, aliases);
 
@@ -40,15 +41,15 @@ public class ChannelCommand extends AbstractChatCommand {
 
     public static class Reply extends ChannelCommand {
         public Reply(@NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages) {
-            super(sessions, maps, messages, ClientChatMessageData.CHANNEL_REPLY, "replay", "r");
+            super(sessions, maps, messages, ClientChatMessageData.CHANNEL_REPLY, "reply", "r");
         }
     }
 
     public static class Staff extends ChannelCommand {
-        public Staff(@NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages, @NotNull PermManager permissions) {
+        public Staff(@NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages) {
             super(sessions, maps, messages, ClientChatMessageData.CHANNEL_STAFF, "sc");
 
-            setCondition(permissions.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
+            setCondition(staffPerm(Permission.GENERIC_STAFF));
         }
     }
 

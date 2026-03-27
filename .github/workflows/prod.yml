@@ -9,19 +9,19 @@ jobs:
   resource-pack-build:
     runs-on: ubuntu-latest
     outputs:
-      resource_pack_sha: ${{ steps.process.outputs.resource_pack_sha }}
+      resource_pack_sha: ${{ steps.build-rp.outputs.resource_pack_sha }}
     steps:
       - name: Import Secrets
         uses: hollow-cube/actions/secrets@main
         with:
           token: ${{ secrets.VAULT_TOKEN }}
-          path: global/resourcepacks3
+          path: global/github
       - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
-          java-version: '24'
+          java-version: '25'
           distribution: 'graalvm'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -29,23 +29,24 @@ jobs:
           cache-read-only: false
 
       - name: Build resource pack
-        run: ./gradlew :bin:packer:buildClient
-      - name: Round 2
-        id: process
+        id: build-rp
         run: |
+          ./gradlew :bin:packer:buildClient
+          
           export RESOURCE_PACK_SHA=$(sha1sum build/client.zip | cut -d ' ' -f1)
           echo "resource_pack_sha=${RESOURCE_PACK_SHA}" >> "$GITHUB_OUTPUT"
           echo "Resource Pack Hash: ${RESOURCE_PACK_SHA}" >> "$GITHUB_STEP_SUMMARY"
-          
-          mkdir -p out
-          cp build/client.zip out/mapmaker-${RESOURCE_PACK_SHA}.zip
+
+          mkdir -p out/resource-pack
+          cp build/client.zip out/resource-pack/${RESOURCE_PACK_SHA}.zip
       - name: Upload resource pack
         uses: jakejarvis/s3-sync-action@master
         env:
-          AWS_S3_BUCKET: hollowcube-resource-pack
-          AWS_ACCESS_KEY_ID: ${{ env.RP_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ env.RP_SECRET_KEY }}
-          AWS_S3_REGION: "us-east-1"
+          AWS_S3_ENDPOINT: https://bdb9cb2904188b760591dc1589a1ccf3.r2.cloudflarestorage.com
+          AWS_S3_BUCKET: assets
+          AWS_ACCESS_KEY_ID: ${{ env.R2_ASSETS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.R2_ASSETS_SECRET_KEY }}
+          AWS_S3_REGION: "auto"
           SOURCE_DIR: out
 
   docker-build-map:
@@ -60,21 +61,22 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
-          java-version: '24'
+          java-version: '25'
           distribution: 'graalvm'
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-read-only: false
+          cache: 'gradle'
 
       # Build server
+      - name: Download anticheat.jar
+        run: gh release download --repo hollow-cube/anticheat --pattern "anticheat.jar"
+        env:
+          GH_TOKEN: ${{ env.ANTICHEAT_GH_TOKEN }}
       - name: Build standalone binary
         env:
           MAPMAKER_VERSION: ${{ github.ref_name }}
           MAPMAKER_COMMIT_HASH: ${{ github.sha }}
-        run: ./gradlew :bin:map:shadowJar -PisRelease=true
+        run: ./gradlew :bin:map:shadowJar -Pac=true -PisRelease=true --no-daemon
 
       # Build and push docker image
       - name: Set up Docker Buildx
@@ -104,21 +106,22 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
-          java-version: '24'
+          java-version: '25'
           distribution: 'graalvm'
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-read-only: false
+          cache: 'gradle'
 
       # Build server
+      - name: Download anticheat.jar
+        run: gh release download --repo hollow-cube/anticheat --pattern "anticheat.jar"
+        env:
+          GH_TOKEN: ${{ env.ANTICHEAT_GH_TOKEN }}
       - name: Build standalone binary
         env:
           MAPMAKER_VERSION: ${{ github.ref_name }}
           MAPMAKER_COMMIT_HASH: ${{ github.sha }}
-        run: ./gradlew :bin:hub:shadowJar -PisRelease=true
+        run: ./gradlew :bin:hub:shadowJar -Pac=true -PisRelease=true --no-daemon
 
       # Build and push docker image
       - name: Set up Docker Buildx
@@ -148,21 +151,21 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-      - uses: actions/setup-java@v4
-        with:
-          java-version: '24'
-          distribution: 'graalvm'
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-read-only: false
 
-      # Build server
-      - name: Build standalone binary
+      - name: Download anticheat.jar
+        run: gh release download --repo hollow-cube/anticheat --pattern "anticheat.jar"
         env:
-          MAPMAKER_VERSION: ${{ github.ref_name }}
-          MAPMAKER_COMMIT_HASH: ${{ github.sha }}
-        run: ./gradlew :bin:map-isolate:nativeCompile -PisRelease=true --no-configuration-cache
+          GH_TOKEN: ${{ env.ANTICHEAT_GH_TOKEN }}
+      - name: Build standalone binary
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/work" \
+            -w /work \
+            -e MAPMAKER_VERSION=${{ github.ref_name }} \
+            -e MAPMAKER_COMMIT_HASH=${{ github.sha }} \
+            --entrypoint /bin/bash \
+            container-registry.oracle.com/graalvm/native-image:25 \
+            -c "./gradlew :bin:map-isolate:nativeCompile -Pac=true -PisRelease=true --no-configuration-cache --no-daemon"
 
       # Build and push docker image
       - name: Set up Docker Buildx
@@ -237,7 +240,7 @@ jobs:
           RESOURCE_PACK_HASH: ${{ needs.resource-pack-build.outputs.resource_pack_sha }}
         run: |
           # Setup Kubernetes
-          tailscale configure kubeconfig prod-v2
+          tailscale configure kubeconfig prod-v3
           kubectl cluster-info
 
           # Deploy the chart
@@ -291,7 +294,7 @@ jobs:
           RESOURCE_PACK_HASH: ${{ needs.resource-pack-build.outputs.resource_pack_sha }}
         run: |
           # Setup Kubernetes
-          tailscale configure kubeconfig prod-v2
+          tailscale configure kubeconfig prod-v3
           kubectl cluster-info
 
           # Deploy the chart
@@ -344,7 +347,7 @@ jobs:
           RESOURCE_PACK_HASH: ${{ needs.resource-pack-build.outputs.resource_pack_sha }}
         run: |
           # Setup Kubernetes
-          tailscale configure kubeconfig prod-v2
+          tailscale configure kubeconfig prod-v3
           kubectl cluster-info
 
           # Deploy the chart

@@ -6,8 +6,7 @@ import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.types.PunishmentLadder;
@@ -19,6 +18,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.UUID;
 
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
+
 abstract class AbstractPunishCommand extends CommandDsl {
 
     protected final PunishmentService service;
@@ -29,7 +30,7 @@ abstract class AbstractPunishCommand extends CommandDsl {
     private final Argument<String> commentArgument = Argument.GreedyString("comment");
 
     AbstractPunishCommand(@NotNull String name, @NotNull PunishmentType type, @NotNull PunishmentService service,
-                          @NotNull PlayerService playerService, @NotNull PermManager permManager) {
+                          @NotNull PlayerService playerService) {
         super(name);
 
         this.service = service;
@@ -49,24 +50,24 @@ abstract class AbstractPunishCommand extends CommandDsl {
 
         this.targetArgument = CoreArgument.AnyPlayerId("target", playerService);
         this.ladderArgument = Argument.Word("ladder").map(
-                (sender, raw) -> {
-                    try {
-                        return new ParseResult.Success<>(allLaddersByName.get(raw.toLowerCase(Locale.ROOT)));
-                    } catch (Exception exception) {
-                        return new ParseResult.Partial<>();
-                    }
-                },
-                (sender, raw, suggestion) -> {
-                    raw = raw.toLowerCase(Locale.ROOT);
-                    for (var ladder : allLadderNames) {
-                        if (ladder.startsWith(raw)) {
-                            suggestion.add(ladder);
-                        }
+            (sender, raw) -> {
+                try {
+                    return new ParseResult.Success<>(allLaddersByName.get(raw.toLowerCase(Locale.ROOT)));
+                } catch (Exception exception) {
+                    return new ParseResult.Partial<>();
+                }
+            },
+            (sender, raw, suggestion) -> {
+                raw = raw.toLowerCase(Locale.ROOT);
+                for (var ladder : allLadderNames) {
+                    if (ladder.startsWith(raw)) {
+                        suggestion.add(ladder);
                     }
                 }
+            }
         );
 
-        setCondition(permManager.createPlatformCondition2(type == PunishmentType.BAN ? PlatformPerm.BAN_PLAYER : PlatformPerm.MUTE_PLAYER));
+        setCondition(staffPerm(Permission.GENERIC_STAFF));
         this.addSyntax(playerOnly(this::execute), this.targetArgument, this.ladderArgument);
         this.addSyntax(playerOnly(this::execute), this.targetArgument, this.ladderArgument, this.commentArgument);
     }
@@ -77,6 +78,10 @@ abstract class AbstractPunishCommand extends CommandDsl {
             var ladder = context.get(this.ladderArgument);
             var comment = context.get(this.commentArgument);
 
+            if (target == null) {
+                sender.sendMessage("Unknown player: " + context.getRaw(targetArgument));
+                return;
+            }
             if (ladder == null) {
                 sender.sendMessage("Unknown ladder: " + context.getRaw(ladderArgument));
                 return;

@@ -120,8 +120,7 @@ public final class TerraformImpl implements Terraform {
 
     @Override
     public void initPlayerSession(@NotNull Player player, @NotNull String playerId) {
-        //todo handle exceptions here i guess
-//        Check.stateCondition(player.hasTag(PlayerSession.TAG), "Player already has a session");
+        Check.stateCondition(player.hasTag(PlayerSession.TAG), "Player already has a session");
 
         var sessionData = storage.loadPlayerSession(playerId);
         var session = new PlayerSession(this, playerId, player, sessionData);
@@ -132,36 +131,34 @@ public final class TerraformImpl implements Terraform {
 
     @Override
     public void savePlayerSession(@NotNull Player player, boolean drop) {
-        try {
-            var session = PlayerSession.forPlayer(player);
-            var sessionData = session.write();
-            storage.savePlayerSession(session.id(), sessionData);
-            if (drop) player.removeTag(PlayerSession.TAG);
-            logger.debug("Saved session for {} ({}) drop={}, size={}", player.getUuid(), player.getUsername(),
-                         drop, Format.formatBytes(sessionData.length));
-        } catch (NullPointerException ignored) {
-            logger.warn("No session found for {} ({})", player.getUuid(), player.getUsername());
-        }
+        var session = drop
+                ? player.getAndSetTag(PlayerSession.TAG, null)
+                : player.getTag(PlayerSession.TAG);
+        Check.notNull(session, "Player does not have a session: {0}", player.getUsername());
+
+        var sessionData = session.write();
+        storage.savePlayerSession(session.id(), sessionData);
+        logger.debug("Saved session for {} ({}) drop={}, size={}", player.getUuid(), player.getUsername(),
+                drop, Format.formatBytes(sessionData.length));
     }
 
     @Override
-    public void initLocalSession(@NotNull Player player, @NotNull String sessionId) {
-        //todo handle exceptions here i guess
-        var instance = Objects.requireNonNull(player.getInstance(), "Player must be in an instance");
-        var tag = Tag.<LocalSession>Transient(String.format("terraform:session/%s", player.getUuid()));
-//        Check.stateCondition(instance.hasTag(tag), "Player already has a local session");
+    public void initLocalSession(@NotNull Player player, @NotNull Instance instance, @NotNull String sessionId) {
+        var existing = LocalSession.forPlayerOptional(player);
+        if (existing != null && !sessionId.equals(existing.id())) {
+            throw new IllegalStateException("Player already has a local session with a different id: "
+                    + player.getUsername() + " (" + existing.id() + " != " + sessionId + ")");
+        }
 
         var playerSession = PlayerSession.forPlayer(player);
         var sessionData = storage.loadLocalSession(playerSession.id(), sessionId);
-        var session = new LocalSession(playerSession, sessionId, instance, sessionData);
-        instance.setTag(tag, session);
+        player.setTag(LocalSession.TAG, new LocalSession(playerSession, sessionId, instance, sessionData));
         logger.debug("Created local session for {} ({}) withData={}", player.getUuid(), player.getUsername(),
                 sessionData != null && sessionData.length > 0);
     }
 
     @Override
-    public void saveLocalSession(@NotNull Player player, @Nullable Instance playerInstance, boolean drop) {
-        var instance = Objects.requireNonNullElseGet(playerInstance, player::getInstance);
+    public void saveLocalSession(@NotNull Player player, @NotNull Instance instance, boolean drop) {
         var tag = Tag.<LocalSession>Transient(String.format("terraform:session/%s", player.getUuid()));
 
         var session = instance.getTag(tag);

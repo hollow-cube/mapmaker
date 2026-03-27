@@ -7,7 +7,7 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -19,11 +19,14 @@ import java.util.List;
 public class MapLeaderboardDeleteCommand extends CommandDsl {
     private final Argument<@Nullable MapData> mapArg;
     private final Argument<@Nullable String> playerArg;
+    private final Argument<?> notifyArg;
 
+    private final PlayerService playerService;
     private final MapService mapService;
 
     public MapLeaderboardDeleteCommand(@NotNull PlayerService playerService, @NotNull MapService mapService) {
         super("delete");
+        this.playerService = playerService;
         this.mapService = mapService;
 
         description = "Removes a player's or all completion times on a map";
@@ -33,14 +36,18 @@ public class MapLeaderboardDeleteCommand extends CommandDsl {
                 .description("The ID of the map to delete entries from");
         playerArg = CoreArgument.AnyPlayerId("player", playerService)
                 .description("The player (optional) to delete the entries of");
+        notifyArg = Argument.Literal("notify")
+                .description("Whether to notify the player(s) about the deletion");
 
         addSyntax(playerOnly(this::handleDeleteLeaderboard), mapArg);
         addSyntax(playerOnly(this::handleDeleteLeaderboard), mapArg, playerArg);
+        addSyntax(playerOnly(this::handleDeleteLeaderboard), mapArg, playerArg, notifyArg);
     }
 
     private void handleDeleteLeaderboard(@NotNull Player player, @NotNull CommandContext context) {
         var map = context.get(mapArg);
         var target = context.get(playerArg);
+        var notify = context.has(notifyArg);
 
         if (map == null) {
             player.sendMessage(
@@ -52,9 +59,9 @@ public class MapLeaderboardDeleteCommand extends CommandDsl {
             return;
         }
 
-        var playerId = PlayerDataV2.fromPlayer(player).id();
+        var playerId = PlayerData.fromPlayer(player).id();
         try {
-            mapService.deletePlaytimeLeaderboard(playerId, map.id(), target);
+            mapService.deletePlaytimeLeaderboard(playerId, map.id(), target, notify);
             player.sendMessage("deleted for " + target);
         } catch (Exception e) {
             player.sendMessage("failed to delete leaderboard");

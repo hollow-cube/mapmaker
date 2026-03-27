@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.gui.map;
 
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapHistory;
 import net.hollowcube.mapmaker.map.MapService;
@@ -9,8 +10,7 @@ import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Pagination;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.minestom.server.utils.Unit;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -23,29 +23,30 @@ import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
 
 public abstract class MapListView extends Panel {
-    protected final PlayerService playerService;
+    protected final ApiClient api;
     protected final MapService mapService;
     protected final ServerBridge bridge;
 
     protected final Text titleText;
     private final Pagination<Unit> pagination;
+    private boolean initialized = false;
 
     protected MapListView(
-            @NotNull PlayerService playerService, @NotNull MapService mapService,
-            @NotNull ServerBridge bridge, @NotNull String title
+        @NotNull ApiClient api, @NotNull MapService mapService,
+        @NotNull ServerBridge bridge, @NotNull String title
     ) {
         super(9, 10);
-        this.playerService = playerService;
+        this.api = api;
         this.mapService = mapService;
         this.bridge = bridge;
 
-        background("map_list/container", -10, -31);
+        background("generic2/containers/paginated/7x3", -10, -31);
         this.titleText = add(0, 0, title(title));
 
         add(0, 0, backOrClose());
 
         this.pagination = add(1, 1, new Pagination<Unit>(7, 3)
-                .fetchAsync(this::onSearch));
+            .fetchAsync(this::onSearch));
         add(2, 4, pagination.prevButton());
         add(3, 4, pagination.pageText(3, 1));
         add(6, 4, pagination.nextButton());
@@ -55,7 +56,10 @@ public abstract class MapListView extends Panel {
     protected void mount(@NotNull InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
 
-        pagination.reset(Unit.INSTANCE);
+        if (!initialized) {
+            initialized = true;
+            pagination.reset(Unit.INSTANCE);
+        }
     }
 
     @Blocking
@@ -67,7 +71,7 @@ public abstract class MapListView extends Panel {
         var entries = new ArrayList<MapIconPanel>();
         for (var map : response.getKey()) {
             if (map.isCompletable()) mapIds.add(map.id());
-            entries.add(new MapIconPanel(playerService, mapService, bridge, map));
+            entries.add(new MapIconPanel(api, mapService, bridge, map));
         }
 
         // Fetch the player's current progress on the maps
@@ -91,8 +95,8 @@ public abstract class MapListView extends Panel {
     public static class Player extends MapListView {
         private final String targetId;
 
-        public Player(@NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull ServerBridge bridge, @NotNull String targetId) {
-            super(playerService, mapService, bridge, "Maps"); // Title is updated later.
+        public Player(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge, @NotNull String targetId) {
+            super(api, mapService, bridge, "Maps"); // Title is updated later.
             this.targetId = targetId;
         }
 
@@ -105,7 +109,7 @@ public abstract class MapListView extends Panel {
                 titleText.text("Your Maps");
             else {
                 async(() -> {
-                    var displayName = playerService.getPlayerDisplayName2(targetId);
+                    var displayName = api.players.getDisplayName(targetId);
                     sync(() -> titleText.text(displayName.getUsername() + "'s Maps"));
                 });
             }
@@ -114,20 +118,20 @@ public abstract class MapListView extends Panel {
         @Override
         protected Map.@NotNull Entry<List<MapData>, Integer> search(int page, int pageSize) {
             var response = mapService.searchMaps(MapSearchParams.builder(host.player().getUuid().toString())
-                    .page(page).pageSize(pageSize).owner(this.targetId).build());
+                .page(page).pageSize(pageSize).owner(this.targetId).build());
             return Map.entry(response.results(), response.pageCount());
         }
     }
 
     public static class History extends MapListView {
 
-        public History(@NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
-            super(playerService, mapService, bridge, "Map History");
+        public History(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
+            super(api, mapService, bridge, "Map History");
         }
 
         @Override
         protected Map.@NotNull Entry<List<MapData>, Integer> search(int page, int pageSize) {
-            var playerId = PlayerDataV2.fromPlayer(host.player()).id();
+            var playerId = PlayerData.fromPlayer(host.player()).id();
             var history = mapService.getPlayerMapHistory(playerId, page, pageSize);
             var mapIds = history.results().stream().map(MapHistory.Entry::mapId).toList();
             var maps = mapService.getMaps(playerId, mapIds);

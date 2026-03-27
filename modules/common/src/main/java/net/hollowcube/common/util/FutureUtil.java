@@ -14,6 +14,8 @@ import java.util.concurrent.*;
 import java.util.function.Consumer;
 
 public final class FutureUtil {
+    public static final Executor VIRUTAL_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
+
     private static volatile boolean isShuttingDown = false;
 
     private FutureUtil() {

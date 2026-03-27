@@ -3,8 +3,10 @@ package net.hollowcube.mapmaker.cosmetic;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.backpack.Rarity;
 import net.hollowcube.mapmaker.cosmetic.impl.CosmeticImpl;
+import net.hollowcube.mapmaker.cosmetic.impl.ModelCosmeticImpl;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
@@ -21,7 +23,6 @@ public class Cosmetic {
     private static final CustomModelData LOCKED_CMD = new CustomModelData(List.of(1f), List.of(), List.of(), List.of());
     private static final Map<CosmeticType, Map<String, Cosmetic>> COSMETICS = new HashMap<>();
 
-    @SuppressWarnings("UnstableApiUsage")
     public static final Codec<Cosmetic> CODEC = Codec.STRING.transform(Cosmetic::byPathRequired, Cosmetic::path);
     public static final Tag<Boolean> COSMETIC_TAG = Tag.Boolean("cosmetic");
 
@@ -86,16 +87,20 @@ public class Cosmetic {
     private final CosmeticType type;
     private final String id;
     private final Rarity rarity;
+    private final boolean hidden;
+    private final Set<CosmeticTag> tags;
 
     private final CosmeticImpl impl;
 
     private final ItemStack icon;
     private final ItemStack iconLocked;
 
-    private Cosmetic(CosmeticType type, String id, Rarity rarity, Function<Cosmetic, CosmeticImpl> implFunc) {
-        this.type = type;
-        this.id = id;
-        this.rarity = rarity;
+    private Cosmetic(Builder builder) {
+        this.type = builder.type;
+        this.id = builder.id;
+        this.rarity = builder.rarity;
+        this.hidden = builder.hidden;
+        this.tags = Set.copyOf(builder.tags);
 
         var displayName = displayName();
         var lore = lore();
@@ -106,7 +111,7 @@ public class Cosmetic {
                 .build().withTag(COSMETIC_TAG, true);
         this.iconLocked = icon.with(DataComponents.CUSTOM_MODEL_DATA, LOCKED_CMD);
 
-        this.impl = implFunc.apply(this);
+        this.impl = builder.implFunc.apply(this);
     }
 
     public @NotNull CosmeticType type() {
@@ -125,6 +130,10 @@ public class Cosmetic {
         return rarity;
     }
 
+    public boolean isHidden() {
+        return hidden;
+    }
+
     public @NotNull ItemStack iconItem() {
         return icon;
     }
@@ -133,8 +142,18 @@ public class Cosmetic {
         return iconLocked;
     }
 
+    public @NotNull ItemStack iconPreviewItem() {
+        return icon.builder()
+            .customModelData(List.of(2f), List.of(), List.of(), List.of())
+            .build();
+    }
+
     public @NotNull CosmeticImpl impl() {
         return impl;
+    }
+
+    public boolean canBePreviewed() {
+        return impl instanceof ModelCosmeticImpl;
     }
 
     public @NotNull Component displayName() {
@@ -144,6 +163,7 @@ public class Cosmetic {
     public @NotNull List<Component> lore() {
         var itemLore = new ArrayList<Component>();
         itemLore.add(rarity.asComponent());
+        if (!tags.isEmpty()) itemLore.add(Component.join(JoinConfiguration.noSeparators(), tags));
         itemLore.add(Component.empty());
         itemLore.addAll(LanguageProviderV2.translateMulti("cosmetic." + type.id() + "." + id + ".lore", List.of()));
         return itemLore;
@@ -152,9 +172,11 @@ public class Cosmetic {
     public static class Builder {
         private final CosmeticType type;
         private final String id;
+        private final Set<CosmeticTag> tags = new HashSet<>();
 
         private Function<Cosmetic, CosmeticImpl> implFunc = CosmeticImpl::new;
         private Rarity rarity = Rarity.COMMON;
+        private boolean hidden = false;
 
         Builder(CosmeticType type, String id) {
             this.type = type;
@@ -171,8 +193,18 @@ public class Cosmetic {
             return this;
         }
 
+        public @NotNull Builder hidden() {
+            this.hidden = true;
+            return this;
+        }
+
+        public @NotNull Builder tags(@NotNull CosmeticTag... tags) {
+            this.tags.addAll(Arrays.asList(tags));
+            return this;
+        }
+
         public @NotNull Cosmetic build() {
-            var cosmetic = new Cosmetic(type, id, rarity, implFunc);
+            var cosmetic = new Cosmetic(this);
             COSMETICS.computeIfAbsent(type, k -> new HashMap<>()).put(id, cosmetic);
             return cosmetic;
         }

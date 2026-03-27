@@ -47,9 +47,8 @@ public class ModelCosmeticImpl extends CosmeticImpl {
                 .set(DataComponents.ITEM_MODEL, BadSprite.require("cosmetic/" + cosmetic.type().id() + "/" + cosmetic.id()).model())
                 .set(DataComponents.DYED_COLOR, new Color(255, 255, 255))
                 .set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(false, HIDDEN_TOOLTIPS))
-                .build()
-                // stupid, builder settag should return the builder...
-                .withTag(COSMETIC_TAG, true);
+                .set(COSMETIC_TAG, true)
+                .build();
     }
 
     @Override

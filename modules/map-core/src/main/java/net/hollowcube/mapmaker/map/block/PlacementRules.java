@@ -41,7 +41,7 @@ public final class PlacementRules {
         register(BlockTags.FENCE_GATES, FenceGatePlacementRule::new);
         register(BlockTags.WALLS, WallPlacementRule::new);
         register(BlockTags.GLASS_PANES, PanePlacementRule::new);
-        register(Block.IRON_BARS, PanePlacementRule::new);
+        register(BlockTags.BARS, PanePlacementRule::new);
 
         register(BlockTags.DOORS, DoorPlacementRule::new);
         register(BlockTags.TRAPDOORS, TrapdoorPlacementRule::new);
@@ -65,6 +65,7 @@ public final class PlacementRules {
         register(Block.VINE, b -> new VinePlacementRule(b, false));
         register(Block.GLOW_LICHEN, b -> new VinePlacementRule(b, true));
         register(Block.SCULK_VEIN, b -> new VinePlacementRule(b, true));
+        register(Block.RESIN_CLUMP, b -> new VinePlacementRule(b, true));
         register(Block.BIG_DRIPLEAF, BigDripleafPlacementRule::new);
         register(Block.SMALL_DRIPLEAF, SmallDripleafPlacementRule::new);
         register(Block.KELP, KelpPlacementRule::new);
@@ -73,12 +74,14 @@ public final class PlacementRules {
 
         register(Block.CHEST, ChestPlacementRule::new);
         register(Block.TRAPPED_CHEST, ChestPlacementRule::new);
+        register(BlockTags.COPPER_CHESTS, ChestPlacementRule::new);
         register(Block.ENDER_CHEST, b -> new FacingHorizontalPlacementRule(b, true));
         register(BlockTags.SHULKER_BOXES, b -> new ClickFacingPlacementRule(b, true, false));
 
         register(Block.TORCH, b -> new TorchPlacementRule(b, Block.WALL_TORCH));
         register(Block.SOUL_TORCH, b -> new TorchPlacementRule(b, Block.SOUL_WALL_TORCH));
         register(Block.REDSTONE_TORCH, b -> new TorchPlacementRule(b, Block.REDSTONE_WALL_TORCH));
+        register(Block.COPPER_TORCH, b -> new TorchPlacementRule(b, Block.COPPER_WALL_TORCH));
 
         register(Block.BASALT, AxisPlacementRule::new);
         register(Block.POLISHED_BASALT, AxisPlacementRule::new);
@@ -89,8 +92,11 @@ public final class PlacementRules {
         register(Block.QUARTZ_PILLAR, AxisPlacementRule::new);
         register(Block.DEEPSLATE, AxisPlacementRule::new);
         register(Block.INFESTED_DEEPSLATE, AxisPlacementRule::new);
-        register(Block.CHAIN, AxisPlacementRule::new);
+        register(BlockTags.CHAINS, AxisPlacementRule::new);
         register(Block.CREAKING_HEART, AxisPlacementRule::new);
+        register(Block.OCHRE_FROGLIGHT, AxisPlacementRule::new);
+        register(Block.PEARLESCENT_FROGLIGHT, AxisPlacementRule::new);
+        register(Block.VERDANT_FROGLIGHT, AxisPlacementRule::new);
 
         register(Block.FURNACE, b -> new FacingHorizontalPlacementRule(b, true));
         register(Block.LECTERN, b -> new FacingHorizontalPlacementRule(b, true));
@@ -108,6 +114,7 @@ public final class PlacementRules {
         register(Block.END_PORTAL_FRAME, b -> new FacingHorizontalPlacementRule(b, true));
         register(Block.VAULT, b -> new FacingHorizontalPlacementRule(b, true));
         register(Block.DRIED_GHAST, b -> new FacingHorizontalPlacementRule(b, true));
+        register(BlockTags.COPPER_STATUES, b -> new FacingHorizontalPlacementRule(b, true));
 
         register(Block.DISPENSER, b -> new FacingAllAxisPlacementRule(b, false));
         register(Block.DROPPER, b -> new FacingAllAxisPlacementRule(b, false));
@@ -120,7 +127,7 @@ public final class PlacementRules {
         register(Block.CALIBRATED_SCULK_SENSOR, b -> new FacingHorizontalPlacementRule(b, false));
         register(Block.BARREL, b -> new FacingAllAxisPlacementRule(b, false));
 
-        register(Block.LIGHTNING_ROD, b -> new ClickFacePlacementRule(b, true));
+        register(BlockTags.LIGHTNING_RODS, b -> new ClickFacePlacementRule(b, true));
         register(Block.END_ROD, b -> new ClickFacePlacementRule(b, true));
 
         register(Block.HOPPER, b -> new ClickFacingPlacementRule(b, false, true));
@@ -133,8 +140,7 @@ public final class PlacementRules {
         register(Block.SEA_PICKLE, b -> new BlockStackingPlacementRule(b, BlockStackingPlacementRule.SEA_PICKLE_PROPERTY));
         register(Block.TURTLE_EGG, b -> new BlockStackingPlacementRule(b, BlockStackingPlacementRule.TURTLE_EGGS_PROPERTY));
 
-        register(Block.LANTERN, LanternPlacementRule::new);
-        register(Block.SOUL_LANTERN, LanternPlacementRule::new);
+        register(BlockTags.LANTERNS, LanternPlacementRule::new);
 
         register(Block.LADDER, b -> new FacingClickHorizontalPlacementRule(b, false));
         register(Block.COCOA, b -> new FacingClickHorizontalPlacementRule(b, true));
@@ -193,6 +199,9 @@ public final class PlacementRules {
         register(Block.WILDFLOWERS, b -> new QuadSegmentPlacementRule(b, "flower_amount"));
         register(Block.LEAF_LITTER, b -> new QuadSegmentPlacementRule(b, "segment_amount"));
 
+        register(Block.SHORT_GRASS, AlwaysReplacePlacementRule::new); // theres a lot more should search in registry or something
+        register(Block.STRUCTURE_VOID, StructureVoidPlacementRule::new);
+
         // Annoying single use wall of shame >:(
 
         register(Block.BELL, BellPlacementRule::new);
@@ -201,10 +210,12 @@ public final class PlacementRules {
         register(Block.SNOW, SnowPlacementRule::new);
         register(Block.SCAFFOLDING, ScaffoldingPlacementRule::new);
         register(Block.JIGSAW, JigsawPlacementRule::new);
+        register(Block.CRAFTER, CrafterPlacementRule::new);
         register(Block.FIRE, FirePlacementRule::new);
         register(Block.REDSTONE_WIRE, RedstoneWirePlacementRule::new);
         register(Block.PALE_HANGING_MOSS, PaleHangingMossPlacementRule::new);
         register(Block.PALE_MOSS_CARPET, PaleMossCarpetPlacementRule::new);
+        register(BlockTags.SHELVES, ShelfPlacementRule::new);
 
         //
         // ==== WARNING ====

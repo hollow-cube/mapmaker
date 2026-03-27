@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.entity.impl.projectile;
 
+import net.hollowcube.mapmaker.map.MapPlayer;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.ServerFlag;
 import net.minestom.server.collision.Aerodynamics;
@@ -53,11 +54,17 @@ public class EnderPearlEntity extends AbstractProjectileEntity {
 
     @Override
     protected void handleBlockCollision(Block hitBlock, Point hitPos, Pos posBefore) {
+        super.handlePossibleDripleafCollision(shooter, hitBlock, hitPos);
+
         remove();
 
         shooter.playSound(Sound.sound(SoundEvent.ENTITY_PLAYER_TELEPORT, Sound.Source.PLAYER, 1, 1), posBefore);
         shooter.teleport(posBefore.withView(0, 0), Vec.ZERO,
                 null, RelativeFlags.VIEW | RelativeFlags.DELTA_COORD);
+        if (shooter instanceof MapPlayer mp) {
+            mp.resetFallDistance();
+            mp.resetImpulsePosition();
+        }
     }
 
     @Override

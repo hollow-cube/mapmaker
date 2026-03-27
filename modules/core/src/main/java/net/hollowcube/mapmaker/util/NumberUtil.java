@@ -42,11 +42,15 @@ public final class NumberUtil {
     }
 
     public static @NotNull String formatMapPlaytime(long time, boolean roundToTicks) {
+        time = roundToTicks ? roundMillisToTicks(time) : time;
         long minutes = TimeUnit.MILLISECONDS.toMinutes(time);
         long seconds = TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time));
         long milliseconds = time - TimeUnit.MINUTES.toMillis(minutes) - TimeUnit.SECONDS.toMillis(seconds);
-        if (roundToTicks) milliseconds -= milliseconds % 50;
         return String.format("%02d:%02d.%03d", minutes, seconds, milliseconds);
+    }
+
+    public static long roundMillisToTicks(long time) {
+        return Math.round(time / 50.0) * 50;
     }
 
     public static @NotNull String formatPlayerPlaytime(long time) {

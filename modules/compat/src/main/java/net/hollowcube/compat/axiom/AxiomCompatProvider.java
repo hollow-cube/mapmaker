@@ -10,38 +10,51 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.entity.EntitySpawnEvent;
 import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
+import net.minestom.server.event.player.PlayerTickEndEvent;
 
 @AutoService(CompatProvider.class)
 public class AxiomCompatProvider implements CompatProvider {
 
     @Override
     public void registerPackets(PacketRegistry registry) {
+        // Serverbound packets
+        registry.register(AxiomServerboundAnnotationUpdatePacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onAnnotationUpdates));
+        registry.register(AxiomServerboundRemoveEntitiesPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onRemoveEntities));
         registry.register(AxiomServerboundHelloPacket.TYPE, AxiomPacketHandler::onHello);
-        registry.register(AxiomServerboundSetFlySpeedPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSetFlySpeed));
-        registry.register(AxiomServerboundTeleportPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onTeleport));
-        registry.register(AxiomServerboundSetGameModePacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSetGameMode));
-        registry.register(AxiomServerboundSetWorldPropertyPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSetWorldProperty));
+        registry.register(AxiomServerboundModifyEntitiesPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onModifyEntities));
         registry.register(AxiomServerboundMarkerRequestPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onMarkerDataRequest));
+        // request chunk
         registry.register(AxiomServerboundEntityRequestPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onEntityDataRequest));
         registry.register(AxiomServerboundSetBlockPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSetBlock));
         registry.register(AxiomServerboundSetBufferPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSetBuffer));
-        registry.register(AxiomServerboundRemoveEntitiesPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onRemoveEntities));
-        registry.register(AxiomServerboundSpawnEntitiesPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSpawnEntities));
-        registry.register(AxiomServerboundModifyEntitiesPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onModifyEntities));
-        registry.register(AxiomServerboundAnnotationUpdatePacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onAnnotationUpdates));
+        registry.register(AxiomServerboundSetFlySpeedPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSetFlySpeed));
+        registry.register(AxiomServerboundSetGameModePacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSetGameMode));
+        registry.register(AxiomServerboundSetNoPhysicalTriggerPacket.TYPE, AxiomPacketHandler.disabled(null));
         registry.register(AxiomServerboundSetTimePacket.TYPE, AxiomPacketHandler.disabled("Time modification is disabled on HollowCube."));
+        registry.register(AxiomServerboundSetWorldPropertyPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSetWorldProperty));
+        registry.register(AxiomServerboundSpawnEntitiesPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onSpawnEntities));
+        registry.register(AxiomServerboundTeleportPacket.TYPE, AxiomPacketHandler.handle(AxiomPacketHandler::onTeleport));
 
-        registry.register(AxiomClientboundEnablePacket.TYPE);
-        registry.register(AxiomClientboundMarkerDataPacket.TYPE);
-        registry.register(AxiomClientboundSetWorldPropertyPacket.TYPE);
-        registry.register(AxiomClientboundRegisterWorldPropertiesPacket.TYPE);
+        // Clientbound packets
         registry.register(AxiomClientboundAckWorldPropertyPacket.TYPE);
-        registry.register(AxiomClientboundSetRestrictionsPacket.TYPE);
-        registry.register(AxiomClientboundMarkerResponsePacket.TYPE);
-        registry.register(AxiomClientboundEntitiesResponsePacket.TYPE);
-        registry.register(AxiomClientboundAllowedGamemodesPacket.TYPE);
-        registry.register(AxiomClientboundIgnoreDisplayEntitiesPacket.TYPE);
+        // Add server heightmap
         registry.register(AxiomClientboundAnnotationUpdatePacket.TYPE);
+        // Custom blocks
+        // editor warning
+        registry.register(AxiomClientboundEnablePacket.TYPE);
+        registry.register(AxiomClientboundIgnoreDisplayEntitiesPacket.TYPE);
+        registry.register(AxiomClientboundMarkerDataPacket.TYPE);
+        registry.register(AxiomClientboundMarkerResponsePacket.TYPE);
+        // redo handshake
+        // custom blocks v2
+        // custom items
+        registry.register(AxiomClientboundRegisterWorldPropertiesPacket.TYPE);
+        // chunk response
+        registry.register(AxiomClientboundEntitiesResponsePacket.TYPE);
+        registry.register(AxiomClientboundSetRestrictionsPacket.TYPE);
+        registry.register(AxiomClientboundSetWorldPropertyPacket.TYPE);
+        registry.register(AxiomClientboundUpdateAvailableDispatchesPacket.TYPE);
+
     }
 
     @Override
@@ -55,5 +68,6 @@ public class AxiomCompatProvider implements CompatProvider {
 
         events.addListener(RemoveEntityFromInstanceEvent.class, AxiomEventHandler::onEntityRemoved);
         events.addListener(EntitySpawnEvent.class, AxiomEventHandler::onEntitySpawned);
+        events.addListener(PlayerTickEndEvent.class, AxiomEventHandler::onPlayerTick);
     }
 }

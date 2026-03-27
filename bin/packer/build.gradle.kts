@@ -15,22 +15,34 @@ application {
     mainClass = "net.hollowcube.mapmaker.Packer"
 }
 
-val mcVersion = libs.versions.minecraft.get()
 val packerOut = layout.buildDirectory.dir("packer-out")
-val minecraftCache = rootDir.resolve(".gradle").resolve("minecraft-cache").resolve(mcVersion)
+val minecraftCacheDirectory = rootDir.resolve(".gradle").resolve("minecraft-cache")
+val mcVersions = mapOf(
+    "1.21.4" to 769,
+    "1.21.5" to 770,
+    "1.21.6" to 771,
+    "1.21.8" to 772,
+    "1.21.9" to 773,
+)
 
 tasks.register<DefaultTask>("downloadMinecraft") {
-    if (!minecraftCache.exists()) {
-        minecraftCache.mkdirs()
-        val manifest = getJson("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json")
-        val version = manifest["versions"].asJsonArray.first { element -> element.asJsonObject["id"].asString == mcVersion }
-        val versionPackage = getJson(version.asJsonObject.get("url").asString)
-        val clientJar = copyTo(versionPackage["downloads"].asJsonObject["client"].asJsonObject["url"].asString, temporaryDir.resolve("client.jar"))
+    for ((mcVersion, _) in mcVersions) {
+        val directory = minecraftCacheDirectory.resolve(mcVersion)
+        if (!directory.exists()) {
+            val manifest = getJson("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json")
+            val version =
+                manifest["versions"].asJsonArray.first { element -> element.asJsonObject["id"].asString == mcVersion }
+            val versionPackage = getJson(version.asJsonObject.get("url").asString)
+            val clientJar = copyTo(
+                versionPackage["downloads"].asJsonObject["client"].asJsonObject["url"].asString,
+                temporaryDir.resolve("client.jar")
+            )
 
-        project.copy {
-            from(zipTree(clientJar))
-            into(minecraftCache)
-            include("assets/**")
+            project.copy {
+                from(zipTree(clientJar))
+                into(directory)
+                include("assets/**")
+            }
         }
     }
 }
@@ -41,14 +53,19 @@ tasks.register<JavaExec>("runPacker") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = application.mainClass
     workingDir = rootProject.layout.projectDirectory.asFile
-    args = listOf(file(packerOut).absolutePath, minecraftCache.absolutePath)
+    args = listOf(
+        file(packerOut).absolutePath,
+        minecraftCacheDirectory.absolutePath,
+        mcVersions.map { "${it.key}:${it.value}" }.joinToString(","),
+    )
 
     inputs.dir(file(rootProject.layout.projectDirectory.dir("resources")))
     outputs.dir(packerOut)
 
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(24)
-        vendor = JvmVendorSpec.GRAAL_VM
+        languageVersion = JavaLanguageVersion.of(25)
+        vendor = JvmVendorSpec.matching("GraalVM")
+        nativeImageCapable = true
     }
 }
 

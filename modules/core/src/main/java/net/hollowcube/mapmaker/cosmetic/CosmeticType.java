@@ -1,11 +1,13 @@
 package net.hollowcube.mapmaker.cosmetic;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.mapmaker.cosmetic.impl.particle.AbstractParticleImpl;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.EquipmentSlot;
+import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.Equippable;
@@ -16,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public enum CosmeticType {
     // Note: The order here is relevant to the cosmetic selector GUI.
@@ -23,11 +26,12 @@ public enum CosmeticType {
 
     HAT("hat", PlayerInventoryUtils.HELMET_SLOT, "empty_helmet", EquipmentSlot.HELMET),
     BACKWEAR("backwear", PlayerInventoryUtils.CHESTPLATE_SLOT, "empty_chestplate", EquipmentSlot.CHESTPLATE),
-    ACCESSORY("accessory", PlayerInventoryUtils.OFFHAND_SLOT, null, null), // Do not add empty icon for accessory because it would force you to always see it in hand.
+    // Do not add empty icon for accessory because it would force you to always see it in hand.
+    ACCESSORY("accessory", PlayerInventoryUtils.OFFHAND_SLOT, null),
     PET("pet", PlayerInventoryUtils.LEGGINGS_SLOT, "empty_leggings", EquipmentSlot.LEGGINGS),
-    EMOTE("emote", PlayerInventoryUtils.CRAFT_SLOT_1, "empty_emote", null),
-    PARTICLE("particle", PlayerInventoryUtils.BOOTS_SLOT, "empty_boots", EquipmentSlot.BOOTS),
-    VICTORY_EFFECT("victory_effect", PlayerInventoryUtils.CRAFT_SLOT_2, "empty_victory_effect", null),
+    EMOTE("emote", PlayerInventoryUtils.CRAFT_SLOT_1, "empty_emote"),
+    PARTICLE("particle", PlayerInventoryUtils.BOOTS_SLOT, "empty_boots", EquipmentSlot.BOOTS, AbstractParticleImpl::reset),
+    VICTORY_EFFECT("victory_effect", PlayerInventoryUtils.CRAFT_SLOT_2, "empty_victory_effect"),
     ;
 
     public static final CosmeticType[] VALUES = values();
@@ -46,12 +50,24 @@ public enum CosmeticType {
     private final Tag<CosmeticType> tag;
     private final int iconSlot;
     private final ItemStack blankIcon;
+    private final Consumer<Player> onReset;
+
+    CosmeticType(String id, int iconSlot, String emptyIcon) {
+        this(id, iconSlot, emptyIcon, null);
+    }
 
     CosmeticType(String id, int iconSlot, String emptyIcon, @Nullable EquipmentSlot equipmentSlot) {
+        this(id, iconSlot, emptyIcon, equipmentSlot, _ -> {});
+    }
+
+    CosmeticType(
+            String id, int iconSlot, String emptyIcon, @Nullable EquipmentSlot equipmentSlot, Consumer<Player> onReset) {
         this.id = id;
         this.setting = PlayerSetting.String("cosmetic." + id, "");
         this.tag = Tag.Transient("cosmetic." + id);
         this.iconSlot = iconSlot;
+        this.onReset = onReset;
+
         var baseTranslation = "cosmetic.type." + id + ".blank";
 
         Tag<Boolean> COSMETIC_TAG = Tag.Boolean("cosmetic");
@@ -88,5 +104,9 @@ public enum CosmeticType {
 
     public @NotNull ItemStack blankIcon() {
         return blankIcon;
+    }
+
+    public void reset(@NotNull Player player) {
+        onReset.accept(player);
     }
 }

@@ -1,67 +1,81 @@
 package net.hollowcube.mapmaker.punishments;
 
-import com.google.gson.Gson;
+import io.nats.client.Message;
+import io.nats.client.MessageConsumer;
+import io.nats.client.api.AckPolicy;
+import io.nats.client.api.ConsumerConfiguration;
+import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.kafka.BaseConsumer;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.common.util.PlayerUtil;
+import net.hollowcube.mapmaker.PlayerSettings;
+import net.hollowcube.mapmaker.player.Permission;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.punishments.event.PunishmentCreatedEvent;
 import net.hollowcube.mapmaker.punishments.event.PunishmentRevokedEvent;
 import net.hollowcube.mapmaker.punishments.types.Punishment;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.hollowcube.mapmaker.punishments.types.PunishmentUpdateMessage;
-import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventDispatcher;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
+import java.time.Duration;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
-public class PunishmentManagementListener extends BaseConsumer<PunishmentUpdateMessage> {
+public class PunishmentManagementListener implements Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(PunishmentManagementListener.class);
 
-    private static final String PUNISHMENTS_TOPIC = "punishments";
-    private static final Gson GSON = AbstractHttpService.GSON;
+    private static final String STREAM = "PUNISHMENTS";
+    private static final ConsumerConfiguration CONSUMER_CONFIG = ConsumerConfiguration.builder()
+        .filterSubjects("punishment.>")
+        .deliverPolicy(DeliverPolicy.New)
+        .ackPolicy(AckPolicy.None)
+        .inactiveThreshold(Duration.ofMinutes(5))
+        .build();
 
     private final PlayerService playerService;
-    private final PermManager permManager;
+
+    private final MessageConsumer consumer;
 
     public PunishmentManagementListener(
-            @NotNull PlayerService playerService,
-            @NotNull PermManager permManager,
-            @NotNull String kafkaBrokers
+        @NotNull PlayerService playerService,
+        @NotNull JetStreamWrapper jetStream
     ) {
-        super(PUNISHMENTS_TOPIC, "punishments", PunishmentManagementListener::fromJson, kafkaBrokers);
         this.playerService = playerService;
-        this.permManager = permManager;
-    }
 
-    private static @NotNull PunishmentUpdateMessage fromJson(@NotNull String json) {
-        return GSON.fromJson(json, PunishmentUpdateMessage.class);
+        this.consumer = jetStream.subscribe(STREAM, CONSUMER_CONFIG, PunishmentUpdateMessage.class, this::handlePunishmentUpdate);
     }
 
     @Override
-    protected void onMessage(@NotNull ConsumerRecord<String, String> kafkaRecord, @NotNull PunishmentUpdateMessage message) {
-        FutureUtil.submitVirtual(() -> {
-            switch (message.action()) {
-                case CREATE -> handlePunishmentCreated(message.punishment());
-                case REVOKE -> handlePunishmentRevoked(message.punishment());
-            }
-        });
+    public void close() {
+        try {
+            consumer.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private void handlePunishmentCreated(@NotNull Punishment punishment) {
+    private void handlePunishmentUpdate(@NotNull Message msg, @NotNull PunishmentUpdateMessage message) {
+        switch (message.action()) {
+            case CREATE -> handlePunishmentCreated(message.punishment(), message.component());
+            case REVOKE -> handlePunishmentRevoked(message.punishment());
+        }
+    }
+
+    private void handlePunishmentCreated(@NotNull Punishment punishment, @NotNull Component message) {
         LOGGER.info("Received punishment created message: {}", punishment);
 
         MinecraftServer.getSchedulerManager().scheduleNextTick(
-                () -> EventDispatcher.call(new PunishmentCreatedEvent(punishment)));
+            () -> EventDispatcher.call(new PunishmentCreatedEvent(punishment))
+        );
 
         // Announce async to kick as quick as possible
         FutureUtil.submitVirtual(() -> announcePunishmentUpdate(true, punishment));
@@ -78,13 +92,12 @@ public class PunishmentManagementListener extends BaseConsumer<PunishmentUpdateM
             // Player is not on this server - ignore
             return;
         }
-
-        player.kick(Component.text("You have been " + (type == PunishmentType.BAN ? "banned" : "kicked") + " from the server. Reason: " + punishment.comment()));
+        PlayerUtil.disconnect(player, message);
     }
 
     private void handlePunishmentRevoked(@NotNull Punishment punishment) {
         MinecraftServer.getSchedulerManager().scheduleNextTick(
-                () -> EventDispatcher.call(new PunishmentRevokedEvent(punishment)));
+            () -> EventDispatcher.call(new PunishmentRevokedEvent(punishment)));
 
         announcePunishmentUpdate(false, punishment);
     }
@@ -92,18 +105,15 @@ public class PunishmentManagementListener extends BaseConsumer<PunishmentUpdateM
     private void announcePunishmentUpdate(boolean created, @NotNull Punishment punishment) {
         var typeName = punishment.type().name().toLowerCase(Locale.ROOT);
         var announcement = Component.translatable(
-                created ? "punishment.staff_announce." + typeName + ".created" : "punishment.staff_announce." + typeName + ".revoked",
-                playerService.getPlayerDisplayName2(punishment.playerId()),
-                playerService.getPlayerDisplayName2(punishment.executorId()),
-                Component.text(Objects.requireNonNullElse(punishment.ladderId(), punishment.comment()))
+            created ? "punishment.staff_announce." + typeName + ".created" : "punishment.staff_announce." + typeName + ".revoked",
+            playerService.getPlayerDisplayName2(punishment.playerId()),
+            playerService.getPlayerDisplayName2(punishment.executorId()),
+            Component.text(Objects.requireNonNullElse(punishment.ladderId(), punishment.comment()))
         );
-        var permission = switch (punishment.type()) {
-            case BAN -> PlatformPerm.BAN_PLAYER;
-            case MUTE -> PlatformPerm.MUTE_PLAYER;
-            case KICK -> PlatformPerm.KICK_PLAYER;
-        };
         for (var player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-            if (!permManager.hasPlatformPermission(player, permission)) continue;
+            var playerData = PlayerData.fromPlayer(player);
+            var staffMode = playerData.getSetting(PlayerSettings.STAFF_MODE);
+            if (!staffMode || !playerData.has(Permission.GENERIC_STAFF)) continue;
 
             player.sendMessage(announcement);
         }

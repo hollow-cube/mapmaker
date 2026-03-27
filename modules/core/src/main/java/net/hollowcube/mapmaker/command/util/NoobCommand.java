@@ -3,38 +3,38 @@ package net.hollowcube.mapmaker.command.util;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategories;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
+import net.hollowcube.mapmaker.util.CoreSkulls;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
-import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.component.HeadProfile;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
+
 public class NoobCommand extends CommandDsl {
     private static final ItemStack NOOB_HELMET = ItemStack.builder(Material.PLAYER_HEAD)
-            .set(DataComponents.PROFILE, new HeadProfile(new PlayerSkin("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGEyODRkOTc4MDViZTUzMWNhZGYwNjI3YzVjMjllOTAzNWUxNzEyMTU4MWRjYWJjZjk1MTBmZmQ5ZDQ2MDdmZiJ9fX0=", null)))
-            .set(DataComponents.CUSTOM_NAME, Component.text("Roblox Noob", NamedTextColor.BLUE).decoration(TextDecoration.ITALIC, false))
-            .build();
+        .set(DataComponents.PROFILE, CoreSkulls.ROBLOX_NOOB)
+        .set(DataComponents.CUSTOM_NAME, Component.text("Roblox Noob", NamedTextColor.BLUE).decoration(TextDecoration.ITALIC, false))
+        .build();
 
     private static final ItemStack NOOB_CHESTPLATE = ItemStack.of(Material.LEATHER_CHESTPLATE);
     private static final ItemStack NOOB_LEGGINGS = ItemStack.of(Material.LEATHER_LEGGINGS);
     private static final ItemStack NOOB_BOOTS = ItemStack.of(Material.LEATHER_BOOTS);
 
-    public NoobCommand(@NotNull PermManager permManager) {
+    public NoobCommand() {
         super("noob");
 
         category = CommandCategories.STAFF;
         description = "Become the Roblox noob!";
 
-        setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
+        setCondition(staffPerm(Permission.GENERIC_STAFF));
         addSyntax(playerOnly(this::handleApplyNoob));
     }
 

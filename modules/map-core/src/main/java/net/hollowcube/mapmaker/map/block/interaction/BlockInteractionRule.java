@@ -95,9 +95,10 @@ public interface BlockInteractionRule {
             // Never set a block outside the border.
             if (!instance.getWorldBorder().inBounds(blockPosition)) return;
 
+            var existingBlock = instance.getBlock(blockPosition);
             var cursorPosition = Objects.requireNonNullElse(cursorPosition(), Vec.ZERO);
             instance.placeBlock(new BlockHandler.PlayerPlacement(
-                    block, instance, blockPosition,
+                    block, existingBlock, instance, blockPosition,
                     player, hand, blockFace,
                     (float) cursorPosition.x(),
                     (float) cursorPosition.y(),

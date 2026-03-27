@@ -4,8 +4,8 @@ plugins {
 
 repositories {
     // This code is duplicated in the java-binary configuration, should make any changes there also.
-    val centralLibs = listOf(libs.minestom, libs.polar, libs.posthog, libs.adventure.api)
-            .mapNotNull { it.get().version }
+    val centralLibs = listOf(libs.minestom, libs.polar, libs.posthog, libs.adventure.api, libs.luau.core)
+        .mapNotNull { it.get().version }
     if (centralLibs.any { it == "dev" })
         mavenLocal()
     if (centralLibs.any { it.endsWith("-SNAPSHOT") || it.matches(Regex("^.+-(\\d{8})\\.(\\d{6})-(\\d+)\$")) }) {
@@ -13,6 +13,7 @@ repositories {
             content {
                 includeGroup("net.minestom")
                 includeGroup("dev.hollowcube")
+                includeGroup("net.kyori")
             }
         }
     }
@@ -42,15 +43,19 @@ dependencies {
     testImplementation(libs.junit.api)
     testImplementation(libs.junit.params)
     testImplementation(libs.junit.engine)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(24)
-        vendor = JvmVendorSpec.GRAAL_VM
+        languageVersion = JavaLanguageVersion.of(25)
+        vendor = JvmVendorSpec.matching("GraalVM")
+        nativeImageCapable = true
     }
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+
+    systemProperty("minestom.inside-test", "true")
 }

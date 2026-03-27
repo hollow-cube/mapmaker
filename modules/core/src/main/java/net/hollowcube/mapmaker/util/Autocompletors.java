@@ -10,84 +10,51 @@ import com.miguelfonseca.completely.text.index.FuzzyIndex;
 import com.miguelfonseca.completely.text.index.PatriciaTrie;
 import com.miguelfonseca.completely.text.match.EditDistanceAutomaton;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.Material;
+import net.minestom.server.registry.StaticProtocolObject;
+import net.minestom.server.sound.BuiltinSoundEvent;
+import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 
 public final class Autocompletors {
 
-    private static final AutocompleteEngine<IndexableMaterial> materials = createEngine();
-    private static final AutocompleteEngine<IndexableBlock> fullBlocks = createEngine();
-
-    private static final Set<Block> EXCLUDED_BLOCKS = Set.of(
-            Block.STRUCTURE_BLOCK, Block.JIGSAW, Block.BARRIER,
-            Block.COMMAND_BLOCK, Block.CHAIN_COMMAND_BLOCK, Block.REPEATING_COMMAND_BLOCK,
-            Block.TEST_BLOCK, Block.TEST_INSTANCE_BLOCK,
-
-            // Blocks with bad prediction
-            Block.BEACON, Block.SMITHING_TABLE, Block.CRAFTER, Block.CRAFTING_TABLE, Block.FURNACE, Block.BLAST_FURNACE,
-            Block.SMOKER, Block.CARTOGRAPHY_TABLE, Block.LOOM, Block.NOTE_BLOCK, Block.BARREL,
-            Block.SHULKER_BOX, Block.BLACK_SHULKER_BOX, Block.BLUE_SHULKER_BOX, Block.BROWN_SHULKER_BOX, Block.CYAN_SHULKER_BOX,
-            Block.GRAY_SHULKER_BOX, Block.GREEN_SHULKER_BOX, Block.LIGHT_BLUE_SHULKER_BOX, Block.LIGHT_GRAY_SHULKER_BOX,
-            Block.LIME_SHULKER_BOX, Block.MAGENTA_SHULKER_BOX, Block.ORANGE_SHULKER_BOX, Block.PINK_SHULKER_BOX,
-            Block.PURPLE_SHULKER_BOX, Block.RED_SHULKER_BOX, Block.WHITE_SHULKER_BOX, Block.YELLOW_SHULKER_BOX,
-            Block.DISPENSER, Block.DROPPER, Block.RESPAWN_ANCHOR
-    );
+    private static final AutocompleteEngine<IndexableProtocolObject<Material>> materials = createEngine();
+    private static final AutocompleteEngine<IndexableProtocolObject<Block>> fullBlocks = createEngine();
+    private static final AutocompleteEngine<IndexableProtocolObject<BuiltinSoundEvent>> sounds = createEngine();
 
     static {
         for (var material : Material.values()) {
-            materials.add(new IndexableMaterial(material));
+            materials.add(new IndexableProtocolObject<>(material));
         }
-        blocksLoop:
-        for (var block : Block.values()) {
-            var material = block.registry().material();
-            if (material == null) continue; // Non block item
-            if (!material.key().equals(block.key())) continue; // Weird block item (like flint and steel)
-            if (EXCLUDED_BLOCKS.contains(block))
-                continue; // Blocks with bad prediction
-
-            // Only add blocks that are full cubes
-            var shape = block.registry().collisionShape();
-            for (var face : BlockFace.values()) {
-                if (!shape.isFaceFull(face))
-                    continue blocksLoop;
-            }
-
-            fullBlocks.add(new IndexableBlock(block));
+        for (var block : ItemUtils.PLACEABLE_ON_BLOCKS) {
+            fullBlocks.add(new IndexableProtocolObject<>(block));
+        }
+        for (var sound : SoundEvent.values()) {
+            if (!(sound instanceof BuiltinSoundEvent event)) continue;
+            sounds.add(new IndexableProtocolObject<>(event));
         }
     }
 
     public static @NotNull List<Material> searchMaterials(@NotNull String query, int limit, Predicate<Material> predicate) {
-        List<Material> output = new ArrayList<>(limit);
-        for (IndexableMaterial material : materials.search(query)) {
-            if (output.size() >= limit) break;
-            if (predicate.test(material.material())) {
-                output.add(material.material());
-            }
-        }
-        return output;
+        return search(materials, query, limit, predicate);
     }
 
     public static @NotNull List<Block> searchBlocks(@NotNull String query, int limit) {
-        return searchBlocks(query, limit, _ -> true);
+        return search(fullBlocks, query, limit);
     }
 
     public static @NotNull List<Block> searchBlocks(@NotNull String query, int limit, Predicate<Block> predicate) {
-        List<Block> output = new ArrayList<>(limit);
-        for (var block : fullBlocks.search(query)) {
-            if (output.size() >= limit) break;
-            if (predicate.test(block.block())) {
-                output.add(block.block());
-            }
-        }
-        return output;
+        return search(fullBlocks, query, limit, predicate);
+    }
+
+    public static @NotNull List<BuiltinSoundEvent> searchSounds(@NotNull String query, int limit) {
+        return search(sounds, query, limit, _ -> true);
     }
 
     public static <T extends Indexable> AutocompleteEngine<T> createEngine() {
@@ -95,6 +62,21 @@ public final class Autocompletors {
                 .setIndex(new Indexer<>())
                 .setAnalyzers(new LowerCaseTransformer(), new WordTokenizer())
                 .build();
+    }
+
+    private static <T extends StaticProtocolObject<@NotNull T>> List<T> search(AutocompleteEngine<IndexableProtocolObject<T>> engine, String query, int limit) {
+        return search(engine, query, limit, _ -> true);
+    }
+
+    private static <T extends StaticProtocolObject<@NotNull T>> List<T> search(AutocompleteEngine<IndexableProtocolObject<T>> engine, String query, int limit, Predicate<T> predicate) {
+        List<T> output = new ArrayList<>(limit);
+        for (var result : engine.search(query)) {
+            if (output.size() >= limit) break;
+            if (predicate.test(result.object())) {
+                output.add(result.object());
+            }
+        }
+        return output;
     }
 
     private static class Indexer<T> implements IndexAdapter<T> {
@@ -117,18 +99,10 @@ public final class Autocompletors {
         }
     }
 
-    private record IndexableMaterial(@NotNull Material material) implements Indexable {
+    private record IndexableProtocolObject<T extends StaticProtocolObject<@NotNull T>>(@NotNull T object) implements Indexable {
         @Override
         public List<String> getFields() {
-            return List.of(material.name(), material.key().value(), material.key().value().replace("_", " "));
+            return List.of(object.name(), object.key().value(), object.key().value().replace("_", " "));
         }
     }
-
-    private record IndexableBlock(@NotNull Block block) implements Indexable {
-        @Override
-        public List<String> getFields() {
-            return List.of(block.name(), block.key().value(), block.key().value().replace("_", " "));
-        }
-    }
-
 }

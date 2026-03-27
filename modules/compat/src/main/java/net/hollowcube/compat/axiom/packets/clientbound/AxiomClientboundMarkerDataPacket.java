@@ -1,6 +1,7 @@
 package net.hollowcube.compat.axiom.packets.clientbound;
 
 import net.hollowcube.compat.axiom.AxiomAPI;
+import net.kyori.adventure.util.ARGBLike;
 import net.minestom.server.color.AlphaColor;
 import net.minestom.server.color.Color;
 import net.minestom.server.coordinate.Point;
@@ -18,12 +19,12 @@ public record AxiomClientboundMarkerDataPacket(
 ) implements AxiomClientboundModPacket<AxiomClientboundMarkerDataPacket> {
 
     public static final Type<AxiomClientboundMarkerDataPacket> TYPE = Type.of(
-            AxiomAPI.CHANNEL, "marker_data",
-            NetworkBufferTemplate.template(
-                    Entry.CODEC.list(), AxiomClientboundMarkerDataPacket::entries,
-                    NetworkBuffer.UUID.list(), AxiomClientboundMarkerDataPacket::removed,
-                    AxiomClientboundMarkerDataPacket::new
-            )
+        AxiomAPI.CHANNEL, "marker_data",
+        NetworkBufferTemplate.template(
+            Entry.CODEC.list(), AxiomClientboundMarkerDataPacket::entries,
+            NetworkBuffer.UUID.list(), AxiomClientboundMarkerDataPacket::removed,
+            AxiomClientboundMarkerDataPacket::new
+        )
     );
 
     public static AxiomClientboundMarkerDataPacket spawnMarker(UUID id, Point pos) {
@@ -31,8 +32,8 @@ public record AxiomClientboundMarkerDataPacket(
     }
 
     public static AxiomClientboundMarkerDataPacket updateMarker(
-            UUID id, Point pos, String name, Point min, Point max,
-            AlphaColor lineColor, AlphaColor fillColor, float lineWidth
+        UUID id, Point pos, String name, Point min, Point max,
+        AlphaColor lineColor, AlphaColor fillColor, float lineWidth
     ) {
         return new AxiomClientboundMarkerDataPacket(List.of(new Entry(id, pos, name, min, max, lineColor, fillColor, lineWidth)), List.of());
     }
@@ -47,16 +48,16 @@ public record AxiomClientboundMarkerDataPacket(
     }
 
     public record Entry(
-            @NotNull UUID id,
-            @NotNull Point pos,
-            @Nullable String name,
+        @NotNull UUID id,
+        @NotNull Point pos,
+        @Nullable String name,
 
-            @Nullable Point min,
-            @Nullable Point max,
+        @Nullable Point min,
+        @Nullable Point max,
 
-            @Nullable AlphaColor lineColor,
-            @Nullable AlphaColor fillColor,
-            float lineWidth
+        @Nullable ARGBLike lineColor,
+        @Nullable ARGBLike fillColor,
+        float lineWidth
     ) {
 
         public static final NetworkBuffer.Type<Entry> CODEC = new NetworkBuffer.Type<>() {
@@ -94,9 +95,9 @@ public record AxiomClientboundMarkerDataPacket(
                 Point min = flags != 0 ? buffer.read(NetworkBuffer.VECTOR3D) : null;
                 Point max = flags != 0 ? buffer.read(NetworkBuffer.VECTOR3D) : null;
 
-                AlphaColor lineColor = (flags & 2) != 0 ? buffer.read(AlphaColor.NETWORK_TYPE) : null;
+                ARGBLike lineColor = (flags & 2) != 0 ? buffer.read(AlphaColor.NETWORK_TYPE) : null;
                 float lineWidth = (flags & 4) != 0 ? buffer.read(NetworkBuffer.FLOAT) : 0;
-                AlphaColor fillColor = (flags & 8) != 0 ? buffer.read(AlphaColor.NETWORK_TYPE) : null;
+                ARGBLike fillColor = (flags & 8) != 0 ? buffer.read(AlphaColor.NETWORK_TYPE) : null;
 
                 return new Entry(id, pos, name, min, max, lineColor, fillColor, lineWidth);
             }

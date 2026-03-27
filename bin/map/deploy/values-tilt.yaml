@@ -12,13 +12,11 @@ env:
   MAPMAKER_VELOCITY_SECRET: "abcdef"
   MAPMAKER_SHUTDOWN_MAX_WAIT_MILLIS: "15000" # 15 seconds
 
-  MAPMAKER_MAP_SERVICE_URL: "http://map-service:9124"
-  MAPMAKER_PLAYER_SERVICE_URL: "http://player-service:9124"
-  MAPMAKER_SESSION_SERVICE_URL: "http://session-service:9124"
-  MAPMAKER_PLAYER_INVITE_SERVICE_URL: "http://session-service:9124"
+  MAPMAKER_MAP_SERVICE_URL: "http://api-server:9124"
+  MAPMAKER_PLAYER_SERVICE_URL: "http://api-server:9124"
+  MAPMAKER_SESSION_SERVICE_URL: "http://api-server:9124"
+  MAPMAKER_PLAYER_INVITE_SERVICE_URL: "http://api-server:9124"
 
-  MAPMAKER_SPICEDB_URL: "http://local:8443"
-
-  MAPMAKER_KAFKA_BOOTSTRAP_SERVERS: "kafka:9093"
+  MAPMAKER_NATS_SERVERS: "nats://nats:4222"
 
 replicaCount: 1

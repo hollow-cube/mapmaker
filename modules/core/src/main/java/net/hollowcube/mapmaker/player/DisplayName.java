@@ -16,7 +16,7 @@ import java.util.List;
 
 @RuntimeGson
 public record DisplayName(
-        @NotNull List<Part> parts
+    @NotNull List<Part> parts
 ) implements ComponentLike {
 
     @RuntimeGson
@@ -26,6 +26,8 @@ public record DisplayName(
     public enum Context {
         DEFAULT,
         PLAIN,
+        // Like DEFAULT, but uncolored becomes white instead of gray
+        NAME_TAG,
         // Like DEFAULT, but uses offset characters vertically
         BOSS_BAR
     }
@@ -49,7 +51,7 @@ public record DisplayName(
             switch (part.type) {
                 case "username" -> {
                     //todo get colors from placeholder file
-                    var color = TextColor.color(0xB0B0B0);
+                    var color = context == Context.NAME_TAG ? NamedTextColor.WHITE : TextColor.color(0xB0B0B0);
                     if (part.color != null && !part.color.isEmpty()) color = TextColor.fromCSSHexString(part.color);
 
                     var text = part.text;
@@ -64,7 +66,7 @@ public record DisplayName(
                     var icon = part.text.contains("hypercube") ? "icon/" + part.text : "icon/staff/" + part.text;
                     if (context == Context.BOSS_BAR) icon += "_bb";
                     builder.append(Component.text(BadSprite.require(icon).fontChar() + FontUtil.computeOffset(1), NamedTextColor.WHITE)
-                            .hoverEvent(HoverEvent.showText(LanguageProviderV2.translate(Component.translatable("badge." + part.text + ".lore")))));
+                        .hoverEvent(HoverEvent.showText(LanguageProviderV2.translate(Component.translatable("badge." + part.text + ".lore")))));
                 }
                 default -> throw new IllegalArgumentException("Unknown part type: " + part.type);
             }

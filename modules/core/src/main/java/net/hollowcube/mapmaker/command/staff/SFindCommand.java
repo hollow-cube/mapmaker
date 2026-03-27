@@ -7,8 +7,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
+import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
@@ -18,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
+
 public class SFindCommand extends CommandDsl {
     private final Argument<String> targetArg;
 
@@ -26,10 +27,9 @@ public class SFindCommand extends CommandDsl {
     private final SessionManager sessionManager;
 
     public SFindCommand(
-            @NotNull MapService mapService,
-            @NotNull PlayerService playerService,
-            @NotNull SessionManager sessionManager,
-            @NotNull PermManager permManager
+        @NotNull MapService mapService,
+        @NotNull PlayerService playerService,
+        @NotNull SessionManager sessionManager
     ) {
         super("sfind");
         this.mapService = mapService;
@@ -39,9 +39,9 @@ public class SFindCommand extends CommandDsl {
         category = CommandCategories.STAFF;
         description = "Find a player on the server";
         targetArg = CoreArgument.AnyOnlinePlayer("player", sessionManager)
-                .description("The player you want to find");
+            .description("The player you want to find");
 
-        setCondition(permManager.createPlatformCondition2(PlatformPerm.MAP_ADMIN));
+        setCondition(staffPerm(Permission.GENERIC_STAFF));
         addSyntax(playerOnly(this::handleFindPlayer), targetArg);
     }
 
@@ -57,12 +57,12 @@ public class SFindCommand extends CommandDsl {
         var targetName = playerService.getPlayerDisplayName2(target).build();
         switch (presence.type()) {
             case Presence.TYPE_MAPMAKER_HUB ->
-                    player.sendMessage(Component.translatable("command.sfind.result.hub", targetName));
+                player.sendMessage(Component.translatable("command.sfind.result.hub", targetName));
             case Presence.TYPE_MAPMAKER_MAP -> {
                 var map = mapService.getMap(target, presence.mapId());
                 player.sendMessage(LanguageProviderV2.translateMultiMerged(
-                        "command.sfind.result.map",
-                        List.of(targetName, Component.text(map.name()), Component.text(presence.state()), Component.text(presence.instanceId()))
+                    "command.sfind.result.map",
+                    List.of(targetName, Component.text(map.name()), Component.text(presence.state()), Component.text(presence.instanceId()))
                 ));
             }
             default -> player.sendMessage(Component.translatable("command.where.unknown", targetName));

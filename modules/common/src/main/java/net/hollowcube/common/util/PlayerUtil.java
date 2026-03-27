@@ -1,5 +1,9 @@
 package net.hollowcube.common.util;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.minestom.server.Auth;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.coordinate.Point;
@@ -7,18 +11,20 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
+import net.minestom.server.event.EventListener;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
+import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.network.packet.server.configuration.SelectKnownPacksPacket;
+import net.minestom.server.network.packet.server.common.PluginMessagePacket;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.utils.block.BlockIterator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Utility class for player-related operations.
@@ -27,6 +33,7 @@ public final class PlayerUtil {
 
     public static final double DEFAULT_PLACEMENT_DISTANCE = 4.5;
     private static final BoundingBox PLAYER_STANDING_BB = EntityType.PLAYER.registry().boundingBox();
+    private static final String DISCONNECT_CHANNEL = "velocity:disconnect";
 
     public static @Nullable Point getTargetBlock(@NotNull Player player, double maxDistance, boolean includeLiquids) {
         try {
@@ -87,25 +94,45 @@ public final class PlayerUtil {
         return !result.collisionX() && !result.collisionY() && !result.collisionZ();
     }
 
-    @SuppressWarnings({"unchecked", "UnstableApiUsage"})
-    public static @NotNull CompletableFuture<List<SelectKnownPacksPacket.Entry>> stealKnownPacksFuture(@NotNull Player player) {
-        class Holder {
-            static Field knownPacksFuture;
+    public static void disconnect(@NotNull Player player, @NotNull Component message) {
+        disconnect(player.getPlayerConnection(), message);
+    }
+
+    public static void disconnect(@NotNull PlayerConnection player, @NotNull Component message) {
+        if (MinecraftServer.process().auth() instanceof Auth.Velocity) {
+            player.sendPacket(new PluginMessagePacket(
+                DISCONNECT_CHANNEL,
+                GsonComponentSerializer.gson().serialize(message).getBytes(StandardCharsets.UTF_8)
+            ));
+        } else {
+            player.kick(message);
         }
-        try {
-            if (Holder.knownPacksFuture == null) {
-                Holder.knownPacksFuture = PlayerConnection.class.getDeclaredField("knownPacksFuture");
-                Holder.knownPacksFuture.setAccessible(true);
-            }
-            Object future = Holder.knownPacksFuture.get(player.getPlayerConnection());
-            if (future == null) {
-                // There is a race here which could result in the client responding too quickly. In that case we need to re request
-                // the known packs. todo: find a better way around this, its really cursed.
-                return player.getPlayerConnection().requestKnownPacks(List.of(SelectKnownPacksPacket.MINECRAFT_CORE));
-            }
-            return (CompletableFuture<List<SelectKnownPacksPacket.Entry>>) future;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    }
+
+    /// Runs the runnable when the given player next enters config or disconnects.
+    public static void onConfigOrDisconnect(Player player, Runnable runnable) {
+        var completed = new AtomicBoolean(false);
+        MinecraftServer.getGlobalEventHandler()
+            .addListener(EventListener.builder(AsyncPlayerConfigurationEvent.class)
+                .filter(event -> event.getPlayer() == player)
+                .expireWhen(_ -> completed.get())
+                .handler(_ -> {
+                    // cax returns the expected value if successful, so invert
+                    if (!completed.compareAndExchange(false, true))
+                        runnable.run();
+                })
+                .build())
+            .addListener(EventListener.builder(PlayerDisconnectEvent.class)
+                .filter(event -> event.getPlayer() == player)
+                .expireWhen(_ -> completed.get())
+                .handler(_ -> {
+                    // cax returns the expected value if successful, so invert
+                    if (!completed.compareAndExchange(false, true))
+                        runnable.run();
+                })
+                .build());
+        // In case already offline
+        if (!player.isOnline() && !completed.compareAndExchange(false, true))
+            runnable.run();
     }
 }

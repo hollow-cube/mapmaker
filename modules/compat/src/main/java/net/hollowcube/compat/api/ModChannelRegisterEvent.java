@@ -28,15 +28,25 @@ public class ModChannelRegisterEvent implements PlayerEvent {
         return disabledMods;
     }
 
+    public @NotNull List<String> getChannels() {
+        return channels;
+    }
+
     public int getPlayerProtocolVersion() {
         return ProtocolVersions.getProtocolVersion(player);
     }
 
-    public void excludeNamespace(@NotNull Component modName, @NotNull String... namespaces) {
+    public boolean excludeNamespace(@NotNull String... namespaces) {
         boolean removed = false;
         for (String namespace : namespaces) {
             removed |= channels.removeIf(channel -> channel.startsWith(namespace + ":"));
         }
-        if (removed) disabledMods.add(modName);
+        return removed;
+    }
+
+    public void excludeNamespace(@NotNull Component modName, @NotNull String... namespaces) {
+        if (excludeNamespace(namespaces)) {
+            disabledMods.add(modName);
+        }
     }
 }

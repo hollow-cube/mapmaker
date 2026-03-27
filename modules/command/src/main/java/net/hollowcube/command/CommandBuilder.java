@@ -16,7 +16,7 @@ public class CommandBuilder {
         this(new CommandNode());
     }
 
-    private CommandBuilder(@NotNull CommandNode node) {
+    CommandBuilder(@NotNull CommandNode node) {
         this.node = node;
     }
 

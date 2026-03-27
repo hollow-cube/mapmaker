@@ -25,6 +25,7 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -272,7 +273,25 @@ public sealed abstract class DisplayEntity extends MapEntity permits DisplayEnti
     }
 
     public static final class Item extends DisplayEntity {
-        private static final Codec<ItemDisplayMeta.DisplayContext> DISPLAY_CONTEXT = Codec.Enum(ItemDisplayMeta.DisplayContext.class);
+        // Do somewhat more lenient parsing for some edge cases that (for some reason) exist, nicer to just handle them.
+        private static final Map<String, ItemDisplayMeta.DisplayContext> LENIENT_DISPLAY_CONTEXT_MAP = Map.ofEntries(
+                Map.entry("none", ItemDisplayMeta.DisplayContext.NONE),
+                Map.entry("thirdperson_left_hand", ItemDisplayMeta.DisplayContext.THIRDPERSON_LEFT_HAND),
+                Map.entry("thirdperson_lefthand", ItemDisplayMeta.DisplayContext.THIRDPERSON_LEFT_HAND),
+                Map.entry("thirdperson_right_hand", ItemDisplayMeta.DisplayContext.THIRDPERSON_RIGHT_HAND),
+                Map.entry("thirdperson_righthand", ItemDisplayMeta.DisplayContext.THIRDPERSON_RIGHT_HAND),
+                Map.entry("firstperson_left_hand", ItemDisplayMeta.DisplayContext.FIRSTPERSON_LEFT_HAND),
+                Map.entry("firstperson_lefthand", ItemDisplayMeta.DisplayContext.FIRSTPERSON_LEFT_HAND),
+                Map.entry("firstperson_right_hand", ItemDisplayMeta.DisplayContext.FIRSTPERSON_RIGHT_HAND),
+                Map.entry("firstperson_righthand", ItemDisplayMeta.DisplayContext.FIRSTPERSON_RIGHT_HAND),
+                Map.entry("head", ItemDisplayMeta.DisplayContext.HEAD),
+                Map.entry("gui", ItemDisplayMeta.DisplayContext.GUI),
+                Map.entry("ground", ItemDisplayMeta.DisplayContext.GROUND),
+                Map.entry("fixed", ItemDisplayMeta.DisplayContext.FIXED)
+        );
+        private static final Codec<ItemDisplayMeta.DisplayContext> DISPLAY_CONTEXT = Codec.STRING.transform(
+                ctx -> LENIENT_DISPLAY_CONTEXT_MAP.get(ctx.toLowerCase(Locale.ROOT)),
+                ctx -> ctx.name().toLowerCase(Locale.ROOT));
 
         public Item(@NotNull UUID uuid) {
             super(EntityType.ITEM_DISPLAY, uuid);

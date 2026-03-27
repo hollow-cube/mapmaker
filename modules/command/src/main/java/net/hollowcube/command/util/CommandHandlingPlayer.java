@@ -2,6 +2,7 @@ package net.hollowcube.command.util;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandResult;
+import net.hollowcube.common.extensions.ExtendedPlayer;
 import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -15,6 +16,7 @@ import net.minestom.server.network.packet.client.play.ClientTabCompletePacket;
 import net.minestom.server.network.packet.server.play.TabCompletePacket;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +26,12 @@ import org.slf4j.LoggerFactory;
  *
  * <p>It is valid to override BLAH BLAH BLAH</p>
  */
-public abstract class CommandHandlingPlayer extends Player {
+public abstract class CommandHandlingPlayer extends ExtendedPlayer {
 
     private static final Logger log = LoggerFactory.getLogger(CommandHandlingPlayer.class);
+
+    private static final Tag<Long> LAST_COMMAND = Tag.Long("last_command").defaultValue(0L);
+    private static final long COMMAND_COOLDOWN = 350; // milliseconds
 
     static {
         var packetListenerManager = MinecraftServer.getPacketListenerManager();
@@ -50,47 +55,58 @@ public abstract class CommandHandlingPlayer extends Player {
     private static void execCommand(@NotNull ClientCommandChatPacket packet, @NotNull Player player) {
         final String command = packet.message();
 
-        if (Messenger.canReceiveCommand(player)) {
-            Thread.startVirtualThread(() -> {
-                try {
-                    var manager = CommandHandlingPlayer.asHandled(player).getCommandManager();
-
-                    switch (manager.execute(player, command)) {
-                        case CommandResult.Success ignored -> {
-                        }
-                        case CommandResult.Denied ignored ->
-                                player.sendMessage(Component.translatable("command.not_found"));
-                        case CommandResult.NotFound ignored ->
-                                player.sendMessage(Component.translatable("command.not_found"));
-                        case CommandResult.SyntaxError result -> {
-                            var errorMessage = result.message();
-                            var builder = Component.text()
-                                    .append(Component.text("Syntax error:", NamedTextColor.RED))
-                                    .appendNewline()
-                                    .append(Component.text(command.substring(0, result.start()), NamedTextColor.GRAY))
-                                    .append(Component.text(command.substring(result.start()), NamedTextColor.RED, TextDecoration.UNDERLINED))
-                                    .append(Component.text("<--[HERE] ", NamedTextColor.RED));
-                            if (errorMessage != null) {
-                                builder.append(Component.text(errorMessage, NamedTextColor.RED));
-                            }
-                            player.sendMessage(builder.build());
-                        }
-                        case CommandResult.ExecutionError result -> {
-                            player.sendMessage(Component.translatable("generic.unknown_error"));
-                            var syntheticException = new RuntimeException(
-                                    "An unhandled exception occurred while executing the command '" + command + "'", result.cause());
-                            PostHog.captureException(syntheticException, player.getUuid().toString());
-                            log.error("command eval failure", syntheticException);
-                        }
-                    }
-                } catch (Exception e) {
-                    PostHog.captureException(e, player.getUuid().toString());
-                    log.error("command failure", e);
-                }
-            });
-        } else {
+        if (!Messenger.canReceiveCommand(player)) {
             Messenger.sendRejectionMessage(player);
+            return;
         }
+
+        // Rate limit player commands
+        long now = System.currentTimeMillis();
+        if (now - player.getTag(LAST_COMMAND) < COMMAND_COOLDOWN) {
+            player.sendMessage(Component.translatable("command.rate_limited"));
+            return;
+        }
+        player.setTag(LAST_COMMAND, now);
+
+        Thread.startVirtualThread(() -> {
+            try {
+                var manager = CommandHandlingPlayer.asHandled(player).getCommandManager();
+
+                switch (manager.execute(player, command)) {
+                    case CommandResult.Success ignored -> {
+                    }
+                    case CommandResult.Denied ignored ->
+                        player.sendMessage(Component.translatable("command.not_found"));
+                    case CommandResult.NotFound ignored ->
+                        player.sendMessage(Component.translatable("command.not_found"));
+                    case CommandResult.SyntaxError result -> {
+                        var errorMessage = result.message();
+                        var builder = Component.text()
+                            .append(Component.text("Syntax error:", NamedTextColor.RED))
+                            .appendNewline()
+                            .append(Component.text(command.substring(0, result.start()), NamedTextColor.GRAY))
+                            .append(Component.text(command.substring(result.start()), NamedTextColor.RED,
+                                                   TextDecoration.UNDERLINED))
+                            .append(Component.text("<--[HERE] ", NamedTextColor.RED));
+                        if (errorMessage != null) {
+                            builder.append(Component.text(errorMessage, NamedTextColor.RED));
+                        }
+                        player.sendMessage(builder.build());
+                    }
+                    case CommandResult.ExecutionError result -> {
+                        player.sendMessage(Component.translatable("generic.unknown_error"));
+                        var syntheticException = new RuntimeException(
+                            "An unhandled exception occurred while executing the command '" + command + "'",
+                            result.cause());
+                        PostHog.captureException(syntheticException, player.getUuid().toString());
+                        log.error("command eval failure", syntheticException);
+                    }
+                }
+            } catch (Exception e) {
+                PostHog.captureException(e, player.getUuid().toString());
+                log.error("command failure", e);
+            }
+        });
     }
 
     private static void tabCommand(@NotNull ClientTabCompletePacket packet, @NotNull Player player) {
@@ -108,20 +124,20 @@ public abstract class CommandHandlingPlayer extends Player {
                 var suggestion = manager.suggest(player, text);
                 if (!suggestion.isEmpty()) {
                     player.sendPacket(new TabCompletePacket(
-                            packet.transactionId(),
-                            suggestion.getStart() + 1,
-                            suggestion.getLength(),
-                            suggestion.getEntries().stream()
-                                    .map(entry -> new TabCompletePacket.Match(
-                                            entry.replacement(),
-                                            entry.tooltip()
-                                    ))
-                                    .toList())
+                        packet.transactionId(),
+                        suggestion.getStart() + 1,
+                        suggestion.getLength(),
+                        suggestion.getEntries().stream()
+                            .map(entry -> new TabCompletePacket.Match(
+                                entry.replacement(),
+                                entry.tooltip()
+                            ))
+                            .toList())
                     );
                 }
             } catch (Exception e) {
                 PostHog.captureException(e, player.getUuid().toString());
-                log.error("command suggestion failure", e);
+                log.error("command suggestion failure on: '" + packet.text() + "'", e);
             }
         });
     }

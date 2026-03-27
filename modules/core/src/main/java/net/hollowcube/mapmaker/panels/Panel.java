@@ -7,7 +7,6 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.thread.TickThread;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -18,7 +17,7 @@ public abstract class Panel extends Element {
     public static final Panel EMPTY = new Panel(0, 0) {
     };
 
-    public static @NotNull InventoryHost open(@NotNull Player player, @NotNull Panel panel) {
+    public static InventoryHost open(Player player, Panel panel) {
         final InventoryHost host = new InventoryHost(player);
         host.pushView(panel);
         return host;
@@ -34,12 +33,12 @@ public abstract class Panel extends Element {
         this(InventoryType.CHEST_6_ROW, slotWidth, slotHeight);
     }
 
-    protected Panel(@NotNull InventoryType inventoryType, int slotWidth, int slotHeight) {
+    protected Panel(InventoryType inventoryType, int slotWidth, int slotHeight) {
         super(slotWidth, slotHeight);
         this.inventoryType = inventoryType;
     }
 
-    public <E extends Element> @NotNull E add(int x, int y, @NotNull E element) {
+    public <E extends Element> E add(int x, int y, E element) {
         this.children.add(new PosChild(x, y, element));
         if (host != null) {
             host.queueRedraw();
@@ -54,7 +53,7 @@ public abstract class Panel extends Element {
         if (host != null) host.queueRedraw();
     }
 
-    protected void async(@NotNull Runnable runnable) {
+    protected void async(Runnable runnable) {
         final InventoryHost host = this.host;
         if (host == null) return;
         FutureUtil.submitVirtual(() -> {
@@ -69,21 +68,24 @@ public abstract class Panel extends Element {
         });
     }
 
-    protected void sync(@NotNull Runnable runnable) {
+    protected void sync(Runnable runnable) {
         final InventoryHost host = this.host;
         if (host == null) return;
-        if (TickThread.current() != null) runnable.run();
-        else host.player().scheduleNextTick(_ -> runnable.run());
+        if (Thread.currentThread() instanceof TickThread) runnable.run();
+        else host.player().scheduleNextTick(_ -> {
+            if (this.host == null) return; // Inventory was closed since the original call.
+            runnable.run();
+        });
     }
 
     // Impl
 
-    @NotNull InventoryType inventoryType() {
+    InventoryType inventoryType() {
         return this.inventoryType;
     }
 
     @Override
-    public void build(@NotNull MenuBuilder builder) {
+    public void build(MenuBuilder builder) {
         super.build(builder);
 
         for (var child : children) {
@@ -97,10 +99,10 @@ public abstract class Panel extends Element {
     }
 
     @Override
-    public @Nullable CompletableFuture<Void> handleClick(@NotNull ClickType clickType, int x, int y) {
+    public @Nullable CompletableFuture<Void> handleClick(ClickType clickType, int x, int y) {
         for (var child : children) {
             if (x >= child.x && x < child.x + child.child.slotWidth
-                    && y >= child.y && y < child.y + child.child.slotHeight) {
+                && y >= child.y && y < child.y + child.child.slotHeight) {
                 return child.child.handleClick(clickType, x - child.x, y - child.y);
             }
         }
@@ -108,7 +110,7 @@ public abstract class Panel extends Element {
     }
 
     @Override
-    protected void mount(@NotNull InventoryHost host, boolean isInitial) {
+    protected void mount(InventoryHost host, boolean isInitial) {
         super.mount(host, isInitial);
         for (var child : children) {
             child.child.mount(host, isInitial);
@@ -125,11 +127,11 @@ public abstract class Panel extends Element {
 
     // DSL
 
-    protected static @NotNull Button button(@NotNull String translationKey) {
+    protected static Button button(String translationKey) {
         return button(translationKey, 1, 1);
     }
 
-    protected static @NotNull Button button(@NotNull String translationKey, int width, int height) {
+    protected static Button button(String translationKey, int width, int height) {
         return new Button(translationKey, width, height);
     }
 }

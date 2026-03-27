@@ -2,8 +2,8 @@ package net.hollowcube.terraform.compat.worldedit.command;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
-import net.hollowcube.common.types.Axis;
-import net.hollowcube.schem.Rotation;
+import net.hollowcube.schem.util.Axis;
+import net.hollowcube.schem.util.Rotation;
 import net.hollowcube.terraform.buffer.BlockBuffer;
 import net.hollowcube.terraform.command.util.ArgumentRotation;
 import net.hollowcube.terraform.command.util.CommandPreviewHelper;
@@ -253,7 +253,7 @@ public final class SchematicCommands {
                         clipboard.setData(result.undoBuffer().toSchematic(offset));
                         player.sendMessage(Messages.CLIPBOARD_COPY.with(result.blocksChanged()));
                     })
-                              .dryRunIfCapacity();
+                    .dryRunIfCapacity();
             if (task == null) {
                 player.sendMessage(Messages.GENERIC_QUEUE_FULL);
             }
@@ -316,7 +316,7 @@ public final class SchematicCommands {
                         clipboard.setData(result.undoBuffer().toSchematic(offset));
                         player.sendMessage(Messages.CLIPBOARD_CUT.with(result.blocksChanged()));
                     })
-                              .submitIfCapacity();
+                    .submitIfCapacity();
             if (task == null) {
                 player.sendMessage(Messages.GENERIC_QUEUE_FULL);
             }
@@ -391,6 +391,11 @@ public final class SchematicCommands {
 
             var playerSession = PlayerSession.forPlayer(player);
             var clipboard = playerSession.clipboard(Clipboard.DEFAULT);
+            if (clipboard.isEmpty()) {
+                player.sendMessage(Messages.GENERIC_NO_CLIPBOARD);
+                return;
+            }
+
             var schem = clipboard.getTransformedSchematic();
 
             var session = LocalSession.forPlayer(player);
@@ -436,7 +441,7 @@ public final class SchematicCommands {
                         }
                         player.sendMessage(Messages.CLIPBOARD_PASTE.with(result.blocksChanged()));
                     })
-                                   .submitIfCapacity();
+                    .submitIfCapacity();
             if (submitted == null) {
                 player.sendMessage(Messages.GENERIC_QUEUE_FULL);
             }

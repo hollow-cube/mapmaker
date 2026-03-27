@@ -43,10 +43,7 @@ public class CosmeticImpl {
         return cosmetic.iconItem();
     }
 
-    void apply(@NotNull Player player) {
-    }
-
-    void remove(@NotNull Player player) {
+    public void apply(@NotNull Player player) {
     }
 
 }

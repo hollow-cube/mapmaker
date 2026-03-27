@@ -16,19 +16,21 @@ dependencies {
     implementation(project(":modules:canvas:impl-standalone"))
     implementation(project(":modules:core"))
     implementation(project(":modules:datafix"))
-    implementation(project(":modules:map"))
     implementation(project(":modules:terraform"))
+    implementation(project(":modules:map-runtime"))
 
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)
     implementation(libs.slf4j.jul)
     implementation(libs.logback)
     implementation(libs.bundles.prometheus)
-    implementation(libs.bundles.otel)
+    implementation(libs.bundles.otel) {
+        exclude(group = "io.opentelemetry", module = "opentelemetry-exporter-sender-okhttp")
+    }
 
     nativeImageCompileOnly(project(":tools:native-image-helper"))
     configurations.named("nativeImageClasspath") {
-        exclude(group = "net.minestom", module = "data")
+//        exclude(group = "net.minestom", module = "data")
     }
 }
 
@@ -49,7 +51,7 @@ tasks.nativeCompile {
 }
 
 application {
-    mainClass = "net.hollowcube.mapmaker.map.IsolateMain"
+    mainClass = "net.hollowcube.mapmaker.isolate.IsolateMain"
 }
 
 graalvmNative {
@@ -58,10 +60,29 @@ graalvmNative {
             fallback.set(false)
             buildArgs(
                 listOf(
-                    "--enable-native-access=ALL-UNNAMED", "-H:+AllowVMInspection",
+                    "--enable-native-access=ALL-UNNAMED", "--enable-monitoring=jfr",
                     "--features=net.hollowcube.nativeimage.HCNativeImageFeature",
+//                    "--gc=G1",
+
+//                    "--future-defaults=all",
+                    "-H:+UseCompressedReferences", "-R:MaxHeapSize=200m",
                     "--static-nolibc", "--no-fallback",
                     "--emit build-report",
+
+                    // TODO: https enabled because we fetch skins from the session service. Should proxy (with cache)
+                    //  this on the servers, or just store skins ourselves on player data
+                    "--enable-url-protocols=http,https",
+
+                    "--initialize-at-build-time=net.hollowcube.mapmaker.isolate.IsolateMain",
+
+                    "--report-unsupported-elements-at-runtime",
+                    "--initialize-at-build-time=it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap",
+                    "--initialize-at-build-time=it.unimi.dsi.fastutil.ints.Int2ObjectMaps\$EmptyMap",
+                    "--initialize-at-build-time=ch.qos.logback.classic.spi.LogbackServiceProvider",
+
+                    "--initialize-at-build-time=net.hollowcube.mapmaker.map.runtime.MapServerInitializer",
+                    "--initialize-at-build-time=net.hollowcube.datafix.DataFixer",
+                    "--initialize-at-build-time=net.hollowcube.datafix",
                 )
             )
         }

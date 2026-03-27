@@ -6,6 +6,7 @@ import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.object.ObjectData;
+import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
@@ -27,6 +28,8 @@ import java.util.regex.Pattern;
 @RuntimeGson
 public class MapData {
     public static final String DEFAULT_NAME = "Untitled Map";
+
+    public static final int MAX_NAME_LENGTH = 20;
 
     public enum Difficulty {
         UNKNOWN,
@@ -62,6 +65,7 @@ public class MapData {
 
     private long publishedId;
     private Instant publishedAt;
+    private boolean listed;
 
     private int likes;
     private int uniquePlays;
@@ -76,6 +80,7 @@ public class MapData {
     private String contest;
 
     public MapData() {
+        this(UUID.randomUUID().toString(), UUID.randomUUID().toString());
     }
 
     public MapData(@NotNull String id, @NotNull String owner) {
@@ -149,6 +154,10 @@ public class MapData {
 
     public long publishedId() {
         return publishedId;
+    }
+
+    public boolean isListed() {
+        return listed;
     }
 
     public @UnknownNullability String publishedIdString() {
@@ -334,6 +343,10 @@ public class MapData {
         var title = MapData.rewriteWithQualityFont(map.quality(), map.settings().getNameSafe())
                 .decoration(TextDecoration.ITALIC, false);
 
+        if (!map.isListed()) {
+            title = title.append(Component.translatable("gui.play_maps.map_display.unlisted"));
+        }
+
         var quality = map.quality();
         var starText = new StringBuilder();
         for (int i = 0; i < 6; i++) {
@@ -394,7 +407,7 @@ public class MapData {
                         .append(Component.text(FontUtil.computeOffset(6)))
                         .append(Component.translatable("gui.play_maps.map_display.completed", Component.text(NumberUtil.formatMapPlaytime(playtime, true)))));
                 lore.add(Component.empty());
-            } else if (progress == PersonalizedMapData.Progress.STARTED) {
+            } else if (progress == PersonalizedMapData.Progress.STARTED && playtime > 0) {
                 lore.add(Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
                         .append(Component.translatable("gui.play_maps.map_display.in_progress", Component.text(NumberUtil.formatMapPlaytime(playtime, true)))));
                 lore.add(Component.empty());

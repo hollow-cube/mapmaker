@@ -5,6 +5,7 @@ plugins {
 }
 
 val isRelease = rootProject.properties.getOrDefault("isRelease", "false").toString().toBoolean()
+val loadAnticheat = rootProject.properties.getOrDefault("ac", "false").toString().toBoolean()
 
 dependencies {
     implementation(project(":modules:common"))
@@ -12,6 +13,10 @@ dependencies {
     implementation(project(":modules:datafix"))
 
     implementation(libs.minestom)
+
+    if (loadAnticheat) {
+        implementation(files(rootProject.projectDir.resolve("anticheat.jar")))
+    }
 }
 
 sourceSets {
@@ -22,6 +27,13 @@ sourceSets {
                 property("commitHash", System.getenv("MAPMAKER_COMMIT_HASH") ?: "dev")
                 property("minestomVersion", libs.minestom.get().version)
                 property("isRelease", isRelease.toString())
+
+                // When building for PRs we embed the rp hash in the build, otherwise its set in the pod spec.
+                val staticPackHash = System.getenv("MAPMAKER_RESOURCE_PACK_HASH")
+                property(
+                    "resourcePackHash",
+                    if (staticPackHash != null) "\"${staticPackHash}\"" else "null"
+                )
             }
         }
     }

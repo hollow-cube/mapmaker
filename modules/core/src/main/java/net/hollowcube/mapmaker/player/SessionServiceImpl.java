@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.player;
 
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import io.opentelemetry.api.OpenTelemetry;
 import net.hollowcube.mapmaker.session.PlayerSession;
@@ -10,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -24,13 +27,23 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
     }
 
     @Override
-    public @NotNull PlayerDataV2 createSession(@NotNull String id, @NotNull String proxy, @NotNull String username, @NotNull String ip, @NotNull PlayerSkin skin) {
+    public @NotNull PlayerData createSession(
+            @NotNull String id,
+            @NotNull String proxy,
+            @NotNull String username,
+            @NotNull String ip,
+            @NotNull PlayerSkin skin,
+            @NotNull String version,
+            int protocolVersion
+    ) {
         logger.log(System.Logger.Level.INFO, "creating new session for {0} ({1}) from {2}", id, username, ip);
         var reqBody = GSON.toJson(Map.of(
                 "proxy", proxy,
                 "username", username,
                 "ip", ip,
-                "skin", skin
+                "skin", skin,
+                "protocolVersion", protocolVersion,
+                "version", version
         ));
         var req = HttpRequest.newBuilder()
                 .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
@@ -38,8 +51,11 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
                 .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
-            case 201 -> GSON.fromJson(res.body(), PlayerDataV2.class);
-            case 401 -> throw createUnauthorizedError(res);
+            case 201 -> GSON.fromJson(res.body(), PlayerData.class);
+            case 403 -> {
+                var error = GSON.fromJson(res.body(), JsonObject.class);
+                throw new SessionCreationDeniedError(error.get("type").getAsString(), error.get("message").getAsString());
+            }
             default -> throw new InternalError("Failed to create session (" + res.statusCode() + "): " + res.body());
         };
     }
@@ -56,7 +72,7 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
         return switch (res.statusCode()) {
             case 201 -> GSON.fromJson(res.body(), TransferSessionResponse.class);
             case 401 -> throw createUnauthorizedError(res);
-            default -> throw new InternalError("Failed to create session (" + res.statusCode() + "): " + res.body());
+            default -> throw new InternalError("Failed to transfer session (" + res.statusCode() + "): " + res.body());
         };
     }
 
@@ -148,6 +164,34 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
             case 401 -> throw createUnauthorizedError(res);
             case 503 -> throw new NoAvailableServerException();
             default -> throw new InternalError("Failed to findMapServer (" + res.statusCode() + "): " + res.body());
+        };
+    }
+
+    private record IsolateOverride(
+            @NotNull String id,
+            @NotNull Instant lastUpdated
+    ) {
+    }
+
+    @Override
+    public @NotNull List<String> getIsolateOverrides() {
+        var req = HttpRequest.newBuilder()
+                .GET()
+                .uri(url("%s/server/isolate-overrides", baseUrl))
+                .build();
+        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
+        return switch (res.statusCode()) {
+            case 200 -> {
+                var entries = GSON.fromJson(res.body(), new TypeToken<List<IsolateOverride>>() {
+                });
+                yield entries.stream()
+                        .sorted(Comparator.comparing(a -> a.lastUpdated))
+                        .map(IsolateOverride::id)
+                        .toList();
+            }
+            case 401 -> throw createUnauthorizedError(res);
+            case 503 -> throw new NoAvailableServerException();
+            default -> throw new InternalError("Failed to join hub (" + res.statusCode() + "): " + res.body());
         };
     }
 

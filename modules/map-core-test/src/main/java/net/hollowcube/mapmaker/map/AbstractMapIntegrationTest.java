@@ -10,7 +10,7 @@ import net.hollowcube.mapmaker.map.util.MapPlayerImplImpl;
 import net.hollowcube.mapmaker.map.world.AbstractMapMakerMapWorld;
 import net.hollowcube.mapmaker.map.world.PlayingMapWorld;
 import net.hollowcube.mapmaker.player.DisplayName;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
@@ -62,12 +62,12 @@ public abstract class AbstractMapIntegrationTest {
         }, world.instance(), new Pos(0, 40, 0));
 
         // String id, String username, DisplayName displayName, JsonObject settings, long playtime, int coins, int cubits
-        player.setTag(PlayerDataV2.TAG, new PlayerDataV2(player.getUuid().toString(), player.getUsername(),
+        player.setTag(PlayerData.TAG, new PlayerData(player.getUuid().toString(), player.getUsername(),
                 new DisplayName(List.of(new DisplayName.Part("username", player.getUsername(), null))),
                 new JsonObject(), 0, 0, 0));
 
         ((PlayingMapWorld) world).preAddPlayer(new AsyncPlayerConfigurationEvent(player, true));
         world.addPlayer(player);
-        SaveState.fromPlayer(player).setPlayStartTime(System.currentTimeMillis());
+        SaveState.fromPlayer(player).setPlayStartTime(System.nanoTime() / 1_000_000);
     }
 }

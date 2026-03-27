@@ -1,34 +1,35 @@
 [versions]
-minecraft = "1.21.6"
-annotations = "26.0.2"
+minecraft = "1.21.11"
+annotations = "26.1.0"
 fastutil = "8.5.15"
 gson = "2.12.1"
-adventure = "4.23.0"
-minestom = "2025.07.11-1.21.7"
-posthog = "0.1.9"
+adventure = "4.25.0"
+minestom = "2026.01.01-1.21.11"
+posthog = "0.1.12"
 slf4j = "2.0.9"
-kafka = "3.9.0"
-junit = "5.11.4"
+junit = "6.1.0-M1"
 autoservice = "1.1.1"
 noxesium = "2.5.0"
 zstd = "1.5.7-2"
 otel = "1.45.0"
 otel-semconv = "1.28.0-alpha"
-polar = "1.14.6"
+polar = "1.15.0"
 similarity = "2.0.0"
 completely = "0.9.0"
 jctools = "4.0.5"
 caffeine = "3.1.8"
 prometheus = "0.16.0"
-mql = "1.1.0"
 logback = "1.5.18"
 json5 = "2.0.0"
-graalvm = "24.2.1"
+graalvm = "25.0.0"
 blossom = "2.1.0"
 velocity = "3.4.0-SNAPSHOT"
 classgraph = "4.8.179"
+javapoet = "0.7.0"
+luau = "1.0.0"
+directory-watcher = "0.19.1"
+nats = "2.25.1"
 included = "-INCLUDED"
-feather = "0.0.5"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
@@ -41,7 +42,6 @@ posthog = { group = "dev.hollowcube", name = "posthog-java", version.ref = "post
 slf4j = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
 slf4j-jul = { group = "org.slf4j", name = "jul-to-slf4j", version.ref = "slf4j" }
 logback = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
-kafka = { group = "org.apache.kafka", name = "kafka-clients", version.ref = "kafka" }
 noxesium = { group = "com.noxcrew.noxesium", name = "api", version.ref = "noxesium" }
 zstd = { group = "com.github.luben", name = "zstd-jni", version.ref = "zstd" }
 polar = { group = "dev.hollowcube", name = "polar", version.ref = "polar" }
@@ -51,9 +51,16 @@ jctools = { group = "org.jctools", name = "jctools-core", version.ref = "jctools
 caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
 json5 = { group = "de.marhali", name = "json5-java", version.ref = "json5" }
 velocity-api = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
-feather = { group = "net.digitalingot.feather-server-api", name = "messaging", version.ref = "feather" }
+luau-core = { group = "dev.hollowcube", name = "luau", version.ref = "luau" }
+luau-natives-macos-arm64 = { group = "dev.hollowcube", name = "luau-natives-macos-arm64", version.ref = "luau" }
+luau-natives-linux-x64 = { group = "dev.hollowcube", name = "luau-natives-linux-x64", version.ref = "luau" }
+luau-natives-windows-x64 = { group = "dev.hollowcube", name = "luau-natives-windows-x64", version.ref = "luau" }
+javapoet = { group = "com.palantir.javapoet", name = "javapoet", version.ref = "javapoet" }
+directory-watcher = { group = "io.methvin", name = "directory-watcher", version.ref = "directory-watcher" }
+nats = { group = "io.nats", name = "jnats", version.ref = "nats" }
 
 included-molang = { group = "dev.hollowcube", name = "molang", version.ref = "included" }
+included-schem = { group = "dev.hollowcube", name = "schem", version.ref = "included" }
 
 nativeimage = { group = "org.graalvm.sdk", name = "nativeimage", version.ref = "graalvm" }
 classgraph = { group = "io.github.classgraph", name = "classgraph", version.ref = "classgraph" }

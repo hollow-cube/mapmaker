@@ -9,9 +9,8 @@ import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.command.CommandCategories;
-import net.hollowcube.mapmaker.perm.PermManager;
-import net.hollowcube.mapmaker.perm.PlatformPerm;
-import net.hollowcube.mapmaker.player.PlayerDataV2;
+import net.hollowcube.mapmaker.player.Permission;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
@@ -19,19 +18,17 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
-import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 public class ChatCommand extends CommandDsl {
 
 
     private final PlayerService players;
-    private final PermManager permissions;
     private final Argument<Channel> channelArg;
 
-    public ChatCommand(@NotNull PlayerService players, @NotNull PermManager permissions) {
+    public ChatCommand(@NotNull PlayerService players) {
         super("chat");
         this.players = players;
-        this.permissions = permissions;
         this.channelArg = new ChannelArgument();
 
         this.description = "Switch chat channels";
@@ -42,8 +39,8 @@ public class ChatCommand extends CommandDsl {
 
     private void handle(@NotNull Player player, @NotNull CommandContext context) {
         var channel = context.get(channelArg);
-        var playerData = PlayerDataV2.fromPlayer(player);
-        if (!channel.available.test(this.permissions, player)) return;
+        var playerData = PlayerData.fromPlayer(player);
+        if (!channel.available.test(player)) return;
 
         playerData.setSetting(PlayerSettings.CHAT_CHANNEL, channel.name().toLowerCase(Locale.ROOT));
         playerData.writeUpdatesUpstream(players);
@@ -63,7 +60,8 @@ public class ChatCommand extends CommandDsl {
 
             boolean isPartial = false;
             for (var value : Channel.values()) {
-                if (!(sender instanceof Player player) || !value.available.test(ChatCommand.this.permissions, player)) continue;
+                if (!(sender instanceof Player player) || !value.available.test(player))
+                    continue;
 
                 var name = value.name().toLowerCase(Locale.ROOT);
                 if (name.equals(word)) return success(value);
@@ -77,7 +75,8 @@ public class ChatCommand extends CommandDsl {
         public void suggest(@NotNull CommandSender sender, @NotNull String raw, @NotNull Suggestion suggestion) {
             raw = raw.toLowerCase(Locale.ROOT);
             for (var value : Channel.values()) {
-                if (!(sender instanceof Player player) || !value.available.test(ChatCommand.this.permissions, player)) continue;
+                if (!(sender instanceof Player player) || !value.available.test(player))
+                    continue;
 
                 var name = value.name().toLowerCase(Locale.ROOT);
                 if (name.startsWith(raw)) suggestion.add(name);
@@ -88,17 +87,21 @@ public class ChatCommand extends CommandDsl {
     private enum Channel {
         GLOBAL("commands.chat.switching.global"),
         LOCAL("commands.chat.switching.local"),
-        STAFF("commands.chat.switching.staff", (perms, player) -> perms.hasPlatformPermission(player, PlatformPerm.MAP_ADMIN)),
+        STAFF("commands.chat.switching.staff", (player) -> {
+            PlayerData playerData = PlayerData.fromPlayer(player);
+            var isStaffMode = playerData.getSetting(PlayerSettings.STAFF_MODE);
+            return isStaffMode && playerData.has(Permission.GENERIC_STAFF);
+        }),
         ;
 
         public final String translation;
-        public final BiPredicate<PermManager, Player> available;
+        public final Predicate<Player> available;
 
         Channel(String translation) {
-            this(translation, (_, _) -> true);
+            this(translation, (_) -> true);
         }
 
-        Channel(String translation, BiPredicate<PermManager, Player> available) {
+        Channel(String translation, Predicate<Player> available) {
             this.translation = translation;
             this.available = available;
         }

@@ -1,0 +1,22 @@
+{{ if .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ include "map-isolate.fullname" . }}
+  labels:
+    {{- include "map-isolate.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      mapmaker.hollowcube.net/role: map-isolate
+  podMetricsEndpoints:
+    - port: http
+      path: /metrics
+      interval: 5s
+      scrapeTimeout: 5s
+      relabelings:
+        - sourceLabels: [ __meta_kubernetes_endpoints_label_app_kubernetes_io_version ]
+          targetLabel: version
+        - sourceLabels: [ __meta_kubernetes_pod_node_name ]
+          targetLabel: node
+{{ end }}
