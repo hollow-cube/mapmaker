@@ -24,6 +24,13 @@ public record Leaderboard(
 
         private static final DecimalFormat NUMBER_FULL_PRECISION = new DecimalFormat("#,##0.###############");
 
+        public String missingText() {
+            return switch (this) {
+                case TIME -> "--:--:--";
+                case NUMBER, PERCENT -> "-";
+            };
+        }
+
         public Component format(double value) {
             var formatted = text(formatPlain(value));
             if (this == NUMBER) return formatted.hoverEvent(showText(text(NUMBER_FULL_PRECISION.format(value))));
@@ -32,7 +39,7 @@ public record Leaderboard(
 
         public String formatPlain(double value) {
             return switch (this) {
-                case TIME -> NumberUtil.formatMapPlaytime((long) value * 50, true);
+                case TIME -> NumberUtil.formatMapPlaytime((long) value, true);
                 case NUMBER -> NumberUtil.formatNumberTiered(value);
                 case PERCENT -> NumberUtil.format(Math.clamp(value, 0, 100), 2) + "%";
             };

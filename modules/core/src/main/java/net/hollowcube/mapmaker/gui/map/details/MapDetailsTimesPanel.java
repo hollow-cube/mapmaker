@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 import static net.kyori.adventure.text.Component.text;
 
 public class MapDetailsTimesPanel extends Panel {
-    private static final String MISSING_SCORE = "-";
     private static final Component MISSING_PLAYER = text("Not set!");
     public static final String MODEL_8X = "mapmaker:2d_player_head";
     private static final String MODEL_8X_OFFSET_1 = "mapmaker:2d_player_head_offset1";
@@ -60,7 +59,7 @@ public class MapDetailsTimesPanel extends Panel {
             "map_details/times/other_times", 2, 1));
 
         this.playerHeadBtn = add(2, 3, new Button(null, 1, 1));
-        this.playerTimeText = add(3, 3, new Text("", 3, 1, MISSING_SCORE)
+        this.playerTimeText = add(3, 3, new Text("", 3, 1, lbFormat.missingText())
             .align(Text.CENTER, Text.CENTER));
         var playerTimeBtn = add(6, 3, new Button(null, 1, 1));
         this.playerButtons = List.of(playerHeadBtn, playerTimeText, playerTimeBtn);
@@ -90,7 +89,7 @@ public class MapDetailsTimesPanel extends Panel {
                 this.topTenPanel.update(leaderboard.top(), displayNames);
 
                 {   // Update the player entry
-                    var time = (leaderboard.player() == null ? MISSING_SCORE
+                    var time = (leaderboard.player() == null ? lbFormat.missingText()
                         : lbFormat.formatPlain(leaderboard.player().score()));
                     for (var btn : playerButtons)
                         btn.translationKey("gui.map_details.top_times_tab.personal_best", text(time));
@@ -154,12 +153,12 @@ public class MapDetailsTimesPanel extends Panel {
 
                 // This abuses a bit of a hack that we set the entire area to a button then overlay the model and text
                 this.backgroundBtn = add(0, 0, new Button(null, 3, 3)
-                    .translationKey(translationKey, MISSING_PLAYER, MISSING_SCORE));
+                    .translationKey(translationKey, MISSING_PLAYER, lbFormat.missingText()));
                 this.playerHeadBtn = add(1, 1, new Button(null, 1, 1)
-                    .translationKey(translationKey, MISSING_PLAYER, MISSING_SCORE)
+                    .translationKey(translationKey, MISSING_PLAYER, lbFormat.missingText())
                     .model(MODEL_8X, null)
                     .profile(CoreSkulls.UNKNOWN_PLAYER));
-                this.scoreText = add(0, 2, new Text(null, 3, 1, MISSING_SCORE)
+                this.scoreText = add(0, 2, new Text(null, 3, 1, lbFormat.missingText())
                     .align(Text.CENTER, 6));
             }
 
@@ -215,12 +214,12 @@ public class MapDetailsTimesPanel extends Panel {
                 this.translationKey = "gui.map_details.top_times_tab." + number + "_place";
 
                 this.playerHeadBtn = add(0, 0, new Button(null, 1, 1)
-                    .translationKey(translationKey, MISSING_PLAYER, MISSING_SCORE)
+                    .translationKey(translationKey, MISSING_PLAYER, lbFormat.missingText())
                     .model(isRightColumn ? MODEL_8X_OFFSET_2 : MODEL_8X_OFFSET_1, null)
                     .profile(CoreSkulls.UNKNOWN_PLAYER));
-                this.timeText = add(1, 0, new Text(null, 3, 1, MISSING_SCORE)
+                this.timeText = add(1, 0, new Text(null, 3, 1, lbFormat.missingText())
                     .align(isRightColumn ? -1 : 5, 5));
-                this.timeText.translationKey(translationKey, MISSING_PLAYER, MISSING_SCORE);
+                this.timeText.translationKey(translationKey, MISSING_PLAYER, lbFormat.missingText());
             }
 
             public void update(LeaderboardData.Entry entry, Component playerName) {
