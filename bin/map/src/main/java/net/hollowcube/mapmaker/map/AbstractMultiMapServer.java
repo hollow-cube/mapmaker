@@ -348,7 +348,6 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                 span.setAttribute("players", players.size());
                 try {
                     CompletableFuture.allOf(futures).get(15, TimeUnit.SECONDS);
-                    System.out.println("drained players successfully!");
                 } catch (TimeoutException ignored) {
                     logger.error("failed to drain players in 15s, exiting.");
                 } catch (RuntimeException | InterruptedException | ExecutionException e) {

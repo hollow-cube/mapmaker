@@ -154,6 +154,47 @@ public final class NumberUtil {
         return (int) (totalMillis / 50); // convert to ticks
     }
 
+
+    public static String formatNumberTiered(double value) {
+        // thanks claude
+        if (value == 0) return "0";
+
+        double abs = Math.abs(value);
+
+        if (abs < 0.0005 && abs > 0)
+            return String.format("%.1e", value);
+        if (abs >= 1_000_000_000_000_000D)
+            return String.format("%.1e", value);
+
+        String[] suffixes = {"", "k", "m", "b", "t"};
+        int tier = 0;
+        double reduced = abs;
+
+        while (reduced >= 1_000 && tier < suffixes.length - 1) {
+            reduced /= 1_000;
+            tier++;
+        }
+
+        if (value < 0) reduced = -reduced;
+
+        String formatted;
+        if (tier == 0) {
+            if (reduced == Math.floor(reduced) && abs >= 1) {
+                formatted = String.format("%,.0f", reduced);
+            } else {
+                formatted = String.format("%,.3f", reduced);
+                formatted = formatted.replaceAll("0+$", "").replaceAll("\\.$", "");
+            }
+        } else {
+            formatted = String.format("%.4g", reduced);
+            if (formatted.contains(".")) {
+                formatted = formatted.replaceAll("0+$", "").replaceAll("\\.$", "");
+            }
+        }
+
+        return formatted + suffixes[tier];
+    }
+
     private NumberUtil() {
     }
 }

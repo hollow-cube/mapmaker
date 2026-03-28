@@ -6,6 +6,7 @@ import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.editor.command.navigation.BackCommand;
 import net.hollowcube.mapmaker.editor.entity.SpawnMarkerEntity;
+import net.hollowcube.mapmaker.editor.gui.LeaderboardEditorView;
 import net.hollowcube.mapmaker.editor.item.BuilderMenuItem;
 import net.hollowcube.mapmaker.editor.item.EnterTestModeItem;
 import net.hollowcube.mapmaker.editor.item.ExitTestModeItem;
@@ -24,10 +25,12 @@ import net.hollowcube.mapmaker.map.event.MapPlayerTeleportingEvent;
 import net.hollowcube.mapmaker.map.item.vanilla.DebugStickItem;
 import net.hollowcube.mapmaker.map.polar.ReadWriteWorldAccess;
 import net.hollowcube.mapmaker.misc.BossBars;
+import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.action.Action;
+import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
 import net.hollowcube.mapmaker.runtime.parkour.action.gui.ActionEditorView;
 import net.hollowcube.mapmaker.runtime.parkour.marker.CheckpointMarkerHandler;
 import net.hollowcube.mapmaker.runtime.parkour.marker.FinishMarkerHandler;
@@ -217,10 +220,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
             // Save the map settings
             map().settings().withUpdateRequest(updates -> {
                 try {
-                    //todo map worlds should have an "owner" which is the owner if they are present, otherwise
-                    // it is the first trusted player to join the world. If someone leaves it should find a new
-                    // "owner" of the world, or if it cannot (only invited people left), it should close the world.
-                    server().mapService().updateMap(map().owner(), map().id(), updates);
+                    server().api().maps.update(map().id(), updates);
                     return true;
                 } catch (Exception e) {
                     logger.error("Failed to save map settings for {}", map().id(), e);
@@ -425,7 +425,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
         // Open checkpoint settings view
         var checkpointData = getTag(SPAWN_CHECKPOINT_EFFECTS).toMutable();
-        var host = Panel.open(player, new ActionEditorView(checkpointData, Action.Type.SPAWN, "Spawn"));
+        var host = Panel.open(player, new SpawnActionEditorView(checkpointData));
         host.setTag(ActionEditorView.ACTION_LOCATION, entity.getPosition());
         host.onClose(() -> instance().setTag(SPAWN_CHECKPOINT_EFFECTS, checkpointData.toImmutable()));
     }
@@ -447,6 +447,21 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         builder.appendNewline().append(Component.text("  ʜᴀѕ_ᴛᴇѕᴛ: " + (testWorld != null)));
         if (testWorld != null) {
             testWorld.appendDebugText(builder);
+        }
+    }
+
+    private class SpawnActionEditorView extends ActionEditorView {
+        public SpawnActionEditorView(ActionTriggerData.Mutable data) {
+            super(data, Action.Type.SPAWN);
+
+            add(7, 0, new Button("gui.spawn.customized_leaderboard.title", 2, 1)
+                .background("generic2/btn/default/2_1")
+                .sprite("icon2/1_1/trophy", 10, 1)
+                .onLeftClick(() -> {
+                    // TODO: some overarching settings page? Or just a leaderboard icon
+                    host.pushView(new LeaderboardEditorView(map()));
+                })
+            );
         }
     }
 }

@@ -15,8 +15,12 @@ public class VariableQueries {
         var best = world.getPlayerBestPlaytime(player);
 
         return switch (field) {
-            case "playtime" -> state instanceof ParkourState.AnyPlaying playing ? (double) playing.saveState().getRealPlaytime() / 1000.0 : null;
-            case "best_playtime" -> best != null ? (double) best / 1000.0 : null;
+            case "playtime" -> switch (state) {
+                case ParkourState.AnyPlaying playing -> (double) playing.saveState().getEffectivePlaytime();
+                case ParkourState.Finished finished -> (double) finished.saveState().getEffectivePlaytime();
+                default -> null;
+            };
+            case "best_playtime" -> best != null ? (double) best : null;
             default -> null;
         };
     }

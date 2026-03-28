@@ -319,6 +319,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             world.itemRegistry().setItemStack(player, ResetSaveStateItem.ID, 7);
             world.itemRegistry().setItemStack(player, MapDetailsItem.ID, 8);
 
+            saveState.setScore(world.computeScore(player, saveState));
             FutureUtil.submitVirtual(() -> writeSaveState(world, player, saveState));
 
             // If this is a verification, immediately remove them from the world and send them back to the hub

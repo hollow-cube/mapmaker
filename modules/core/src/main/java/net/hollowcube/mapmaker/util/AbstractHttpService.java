@@ -58,6 +58,7 @@ public abstract class AbstractHttpService {
         .registerTypeAdapter(RewardType.class, new EnumTypeAdapter<>(RewardType.class))
         .registerTypeAdapter(MapTags.Tag.class, new EnumTypeAdapter<>(MapTags.Tag.class))
         .registerTypeAdapter(InviteType.class, new EnumTypeAdapter<>(InviteType.class))
+        .registerTypeAdapter(Leaderboard.Format.class, new EnumTypeAdapter<>(Leaderboard.Format.class))
         .registerTypeAdapter(MapVerification.class, new LenientEnumTypeAdapter<>(MapVerification.class))
         .registerTypeAdapter(MapSize.class, new LenientEnumTypeAdapter<>(MapSize.class))
         .registerTypeAdapter(Command.Argument.Type.class, new LenientEnumTypeAdapter<>(Command.Argument.Type.class))

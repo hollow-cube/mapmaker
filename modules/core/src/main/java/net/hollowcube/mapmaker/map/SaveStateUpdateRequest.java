@@ -58,4 +58,9 @@ public class SaveStateUpdateRequest {
         return this;
     }
 
+    public @NotNull SaveStateUpdateRequest setScore(Double score) {
+        updates.addProperty("score", score);
+        return this;
+    }
+
 }

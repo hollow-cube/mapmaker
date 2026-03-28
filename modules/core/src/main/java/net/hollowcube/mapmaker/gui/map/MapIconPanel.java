@@ -46,7 +46,7 @@ public class MapIconPanel extends Panel {
         this.button = add(0, 0, new Button(null, 1, 1)
             .onLeftClickAsync(this::handlePlayMap)
             .onShiftLeftClickAsync(this::handlePlayMap) // for old shift+click behavior muscle memory
-            .onRightClick(this::handleViewMapDetails));
+            .onRightClickAsync(this::handleViewMapDetails));
     }
 
     public @NotNull MapData map() {
@@ -66,8 +66,13 @@ public class MapIconPanel extends Panel {
         bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.PLAYING, "play_maps_gui");
     }
 
+    @Blocking
     private void handleViewMapDetails() {
         if (this.authorName == null) return;
+
+        // TODO(api v4): we currently have to refetch the map because v3 api doesnt return the leaderboard.
+        var map = api.maps.get(this.map.id());
+
         host.pushView(new MapDetailsView(api, mapService, bridge, map, authorName, true));
     }
 

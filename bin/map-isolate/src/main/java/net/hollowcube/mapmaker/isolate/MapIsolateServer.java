@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.isolate;
 
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.common.util.Uuids;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.MapCommands;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
@@ -93,7 +92,7 @@ public class MapIsolateServer extends AbstractMapServer {
         ParkourMapWorld.initGlobalReferences();
 
         try {
-            var map = mapService().getMap(Uuids.ZERO, this.mapId);
+            var map = api().maps.get(this.mapId);
 
             world = new ParkourMapWorld(this, map);
             FutureUtil.submitVirtual(() -> {

@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.hub.gui.create;
 
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapVerification;
@@ -23,15 +24,16 @@ import java.util.function.Supplier;
 @NotNullByDefault
 final class MapPublisher {
 
+    private final ApiClient api;
     private final MapService mapService;
     private final ServerBridge bridge;
     private final MapData map;
 
     private final Button button;
 
-    @Blocking
-    MapPublisher(MapService mapService, ServerBridge bridge, MapData map,
+    @Blocking MapPublisher(ApiClient api, MapService mapService, ServerBridge bridge, MapData map,
                  Supplier<InventoryHost> hostSupplier, Consumer<MapData> onPublish) {
+        this.api = api;
         this.mapService = mapService;
         this.bridge = bridge;
         this.map = map;
@@ -111,7 +113,10 @@ final class MapPublisher {
                 return true;
             });
 
-            result = this.mapService.publishMap(player.getUuid().toString(), this.map.id());
+            this.mapService.publishMap(player.getUuid().toString(), this.map.id());
+
+            // TODO(v4 api): we refetch the map so it includes leaderboard info
+            result = api.maps.get(map.id());
         } catch (Exception exception) {
             player.sendMessage(Component.translatable("publish.map.failure"));
             ExceptionReporter.reportException(exception, player);

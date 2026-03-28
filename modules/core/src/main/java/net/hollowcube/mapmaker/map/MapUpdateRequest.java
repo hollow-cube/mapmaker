@@ -3,12 +3,10 @@ package net.hollowcube.mapmaker.map;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.hollowcube.common.util.RuntimeGson;
-import net.hollowcube.mapmaker.object.ObjectData;
 import net.minestom.server.coordinate.Pos;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RuntimeGson
@@ -31,16 +29,15 @@ public class MapUpdateRequest {
 
     public List<MapTags.Tag> tags = null;
 
-    public List<ObjectData> newObjects = new ArrayList<>();
-    public List<String> removedObjects = new ArrayList<>();
+    public Leaderboard leaderboard = null;
 
     public MapQuality qualityOverride = null;
 
     public boolean hasChanges() {
         return name != null || icon != null || variant != null || subvariant != null || spawnPoint != null ||
                onlySprint != null || noSprint != null || noJump != null || noSneak != null || boat != null ||
-               tags != null || !newObjects.isEmpty() || !removedObjects.isEmpty() || size != null ||
-               qualityOverride != null || extra != null || protocolVersion != 0 || listed != null;
+               tags != null || size != null || qualityOverride != null || extra != null || protocolVersion != 0 ||
+               listed != null || leaderboard != null;
     }
 
     public void setProtocolVersion(int protocolVersion) {
@@ -97,6 +94,10 @@ public class MapUpdateRequest {
 
     public void setTags(List<MapTags.Tag> tags) {
         this.tags = tags;
+    }
+
+    public void setLeaderboard(@NotNull Leaderboard leaderboard) {
+        this.leaderboard = leaderboard;
     }
 
     public void setQualityOverride(@Nullable MapQuality qualityOverride) {

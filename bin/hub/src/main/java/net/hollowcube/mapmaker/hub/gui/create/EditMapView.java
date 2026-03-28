@@ -69,7 +69,7 @@ public class EditMapView extends Panel {
             this.host.replaceView(new MapDetailsView(api, mapService, bridge, publishedMap, true));
             onPublish.run();
         };
-        this.publisher = new MapPublisher(mapService, bridge, slot.map(), () -> this.host, publishCallback);
+        this.publisher = new MapPublisher(api, mapService, bridge, slot.map(), () -> this.host, publishCallback);
 
         background("create_maps2/edit/container", -10, -31);
         add(0, 0, title("Edit Map"));

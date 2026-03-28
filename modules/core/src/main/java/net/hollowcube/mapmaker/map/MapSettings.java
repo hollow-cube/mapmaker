@@ -74,6 +74,8 @@ public class MapSettings {
 
     private Pos spawnPoint;
 
+    private Leaderboard leaderboard;
+
     private final Map<MapSetting<?>, Object> cache = new ConcurrentHashMap<>();
     private JsonObject extra;
 
@@ -540,6 +542,20 @@ public class MapSettings {
             this.tags = new ArrayList<>(this.tags.stream().filter(
                 tag -> tag.type() == MapTags.TagType.GAMEPLAY
             ).toList());
+        } finally {
+            updateLock.unlock();
+        }
+    }
+
+    public @NotNull Leaderboard leaderboard() {
+        return Objects.requireNonNull(leaderboard, "leaderboard not present (probably using v3 api)");
+    }
+
+    public void setLeaderboard(@NotNull Leaderboard leaderboard) {
+        updateLock.lock();
+        try {
+            this.updates.setLeaderboard(leaderboard);
+            this.leaderboard = leaderboard;
         } finally {
             updateLock.unlock();
         }
