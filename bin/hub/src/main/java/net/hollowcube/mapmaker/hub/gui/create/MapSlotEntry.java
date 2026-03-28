@@ -139,14 +139,15 @@ public class MapSlotEntry extends Panel {
             super(api, mapService, bridge, slot, onPublish);
 
             var map = slot.map();
-            var translationKey = "gui.create_maps.slot.yours";
+            var translationKey = "gui.create_maps.slot.other";
             var mapName = map.settings().getNameSafe();
+            var ownerDisplayName = api.players.getDisplayName(map.owner()).asComponent();
 
             // TODO: Different background for builder maps
             background("create_maps2/slot/blue", 1, 1);
 
             add(0, 0, new Button(null, 1, 1)
-                .translationKey(translationKey, mapName)
+                .translationKey(translationKey, mapName, ownerDisplayName)
                 .background("create_maps2/head_outline", 4, 4)
                 .profile(getPlayerHead2d(map.owner()))
                 .model(MODEL_8X, null)
@@ -176,7 +177,7 @@ public class MapSlotEntry extends Panel {
 
             add(1, 0, new Text(7, 1, mapName)
                 .align(2, Text.CENTER)
-                .translationKey(translationKey, mapName)
+                .translationKey(translationKey, mapName, ownerDisplayName)
                 .onLeftClickAsync(this::buildInWorld));
 
             add(8, 0, new Button("gui.create_maps.slot.other.leave", 1, 1)

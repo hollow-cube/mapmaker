@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public enum MapSize {
@@ -36,6 +37,11 @@ public enum MapSize {
 
     public String icon() {
         return Objects.requireNonNull(icon);
+    }
+
+    public String formattedName() {
+        String size = this.name();
+        return size.substring(0, 1).toUpperCase(Locale.ROOT) + size.substring(1).toLowerCase(Locale.ROOT);
     }
 
     public boolean unlocks(@NotNull MapSize other) {

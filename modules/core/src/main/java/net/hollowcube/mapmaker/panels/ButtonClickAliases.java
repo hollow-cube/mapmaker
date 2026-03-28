@@ -42,6 +42,8 @@ interface ButtonClickAliases {
         return onRightClickAsync((clickType, _) -> onClick.onClick(clickType));
     }
 
+    Button onRightClick();
+
     Button onRightClick(Button.OnClickTypeSlot onClick);
 
     Button onRightClickAsync(Button.OnClickTypeSlot onClick);
