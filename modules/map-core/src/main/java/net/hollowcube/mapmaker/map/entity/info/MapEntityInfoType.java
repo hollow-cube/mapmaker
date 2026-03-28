@@ -69,10 +69,18 @@ public interface MapEntityInfoType<T, E extends MapEntity<?>> {
     static <E extends AbstractLivingEntity<?>> MapEntityInfoType<Double, E> Attribute(
         Attribute attribute
     ) {
+        return Attribute(attribute, attribute.minValue(), attribute.maxValue());
+    }
+
+    static <E extends AbstractLivingEntity<?>> MapEntityInfoType<Double, E> Attribute(
+        Attribute attribute,
+        double min,
+        double max
+    ) {
         return new MapEntityInfoTypes.Float64<>(
             attribute.defaultValue(),
-            attribute.minValue(),
-            attribute.maxValue(),
+            min,
+            max,
             0.1,
             (entity, data) -> entity.setAttribute(attribute, data),
             (entity) -> entity.getAttribute(attribute)

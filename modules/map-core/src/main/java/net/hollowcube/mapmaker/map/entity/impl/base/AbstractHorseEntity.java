@@ -2,8 +2,10 @@ package net.hollowcube.mapmaker.map.entity.impl.base;
 
 import net.hollowcube.mapmaker.map.entity.info.CommonMapEntityInfoTypes;
 import net.hollowcube.mapmaker.map.entity.info.MapEntityInfo;
+import net.hollowcube.mapmaker.map.entity.info.MapEntityInfoType;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.metadata.animal.AbstractHorseMeta;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,10 +15,11 @@ public abstract class AbstractHorseEntity<M extends AbstractHorseMeta> extends A
 
     public static final MapEntityInfo<@NotNull AbstractHorseEntity<? extends AbstractHorseMeta>> INFO = MapEntityInfo.<AbstractHorseEntity<? extends AbstractHorseMeta>>builder(AbstractAgeableEntity.INFO)
         .with("Saddled", CommonMapEntityInfoTypes.Saddle())
+        .with("Jump Strength", MapEntityInfoType.Attribute(Attribute.JUMP_STRENGTH, Attribute.JUMP_STRENGTH.minValue(), 5.0))
+        .with("Movement Speed", MapEntityInfoType.Attribute(Attribute.MOVEMENT_SPEED, Attribute.MOVEMENT_SPEED.minValue(), 2.5))
         .build();
 
-    public static final MapEntityInfo<@NotNull AbstractHorseEntity<? extends AbstractHorseMeta>> ARMORED_INFO = MapEntityInfo.<AbstractHorseEntity<? extends AbstractHorseMeta>>builder(AbstractAgeableEntity.INFO)
-        .with("Saddled", CommonMapEntityInfoTypes.Saddle())
+    public static final MapEntityInfo<@NotNull AbstractHorseEntity<? extends AbstractHorseMeta>> ARMORED_INFO = MapEntityInfo.builder(INFO)
         .with("Armor", CommonMapEntityInfoTypes.BodyArmor(CommonMapEntityInfoTypes.HorseArmor.class))
         .build();
 
