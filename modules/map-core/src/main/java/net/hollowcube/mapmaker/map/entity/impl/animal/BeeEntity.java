@@ -13,11 +13,11 @@ import java.util.UUID;
 public class BeeEntity extends AbstractAgeableEntity<BeeMeta> {
 
     public static final MapEntityInfo<@NotNull BeeEntity> INFO = MapEntityInfo.<BeeEntity>builder(AbstractAgeableEntity.INFO)
-        .with("Is Rolling", MapEntityInfoType.Bool(false, BeeMeta::setAngry, BeeMeta::isAngry))
+        .with("Is Rolling", MapEntityInfoType.Bool(false, BeeMeta::setRolling, BeeMeta::isRolling))
         .with("Is Angry", MapEntityInfoType.Bool(
             false,
-            (meta, isAngry) -> meta.setAngerTicks(isAngry ? Integer.MAX_VALUE : 0),
-            (meta) -> meta.getAngerTicks() > 0
+            (meta, isAngry) -> meta.setAngerEndTime(isAngry ? Integer.MAX_VALUE : 0),
+            (meta) -> meta.getAngerEndTime() > 0
         ))
         .with("Has Nectar", MapEntityInfoType.Bool(false, BeeMeta::setHasNectar, BeeMeta::isHasNectar))
         .with("Has Stung", MapEntityInfoType.Bool(false, BeeMeta::setHasStung, BeeMeta::isHasStung))
@@ -39,10 +39,10 @@ public class BeeEntity extends AbstractAgeableEntity<BeeMeta> {
         // Vanilla
         this.getEntityMeta().setHasStung(tag.getBoolean(HAS_STUNG_KEY, false));
         this.getEntityMeta().setHasNectar(tag.getBoolean(HAS_NECTAR_KEY, false));
-        this.getEntityMeta().setAngerTicks(tag.getLong(ANGER_END_TIME_KEY, 0));
+        this.getEntityMeta().setAngerEndTime(tag.getLong(ANGER_END_TIME_KEY, 0));
 
         // Mapmaker
-        this.getEntityMeta().setAngry(tag.getBoolean(IS_ROLLING, false));
+        this.getEntityMeta().setRolling(tag.getBoolean(IS_ROLLING, false));
     }
 
     @Override
@@ -52,9 +52,9 @@ public class BeeEntity extends AbstractAgeableEntity<BeeMeta> {
         // Vanilla
         tag.putBoolean(HAS_STUNG_KEY, this.getEntityMeta().isHasStung());
         tag.putBoolean(HAS_NECTAR_KEY, this.getEntityMeta().isHasNectar());
-        tag.putLong(ANGER_END_TIME_KEY, this.getEntityMeta().getAngerTicks());
+        tag.putLong(ANGER_END_TIME_KEY, this.getEntityMeta().getAngerEndTime());
 
         // Mapmaker
-        tag.putBoolean(IS_ROLLING, this.getEntityMeta().isAngry());
+        tag.putBoolean(IS_ROLLING, this.getEntityMeta().isRolling());
     }
 }
