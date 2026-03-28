@@ -35,6 +35,8 @@ repositories {
             includeGroup("net.digitalingot.feather-server-api")
         }
     }
+
+    maven(url = "https://repo.lunarclient.dev")
 }
 
 dependencies {
