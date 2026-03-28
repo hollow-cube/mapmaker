@@ -401,8 +401,6 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     }
 
     public void performFinishEffects(Player player, SaveState finishState) {
-        // TODO: this whole method needs to be specialized to the various leaderboard types (eg 'finished in x', 'finished with score of y', etc).
-
         // Show the completed message after removing the player because it is theoretically possible to not have the savestate fetched yet.
         var lb = map().settings().leaderboard();
         var bestState = player.getTag(BEST_SAVESTATE);
