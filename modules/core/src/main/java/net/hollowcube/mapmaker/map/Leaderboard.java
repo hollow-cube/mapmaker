@@ -1,7 +1,14 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.util.RuntimeGson;
+import net.hollowcube.mapmaker.util.NumberUtil;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+
+import java.text.DecimalFormat;
+
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
 
 @RuntimeGson
 public record Leaderboard(
@@ -13,6 +20,24 @@ public record Leaderboard(
         TIME,
         NUMBER,
         PERCENT,
+        ;
+
+        private static final DecimalFormat NUMBER_FULL_PRECISION = new DecimalFormat("#,##0.###############");
+
+        public Component format(double value) {
+            var formatted = text(formatPlain(value));
+            if (this == NUMBER) return formatted.hoverEvent(showText(text(NUMBER_FULL_PRECISION.format(value))));
+            return formatted;
+        }
+
+        public String formatPlain(double value) {
+            return switch (this) {
+                case TIME -> NumberUtil.formatMapPlaytime((long) value * 50, true);
+                case NUMBER -> NumberUtil.formatNumberTiered(value);
+                case PERCENT -> NumberUtil.format(Math.clamp(value, 0, 100), 2) + "%";
+            };
+        }
+
     }
 
     public static final Leaderboard DEFAULT = new Leaderboard(true, Format.TIME, "q.playtime");

@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapPlayerData;
@@ -27,20 +28,22 @@ public class TopTimesCommand extends CommandDsl {
 
     private final Argument<@Nullable MapData> mapArg;
 
+    private final ApiClient api;
     private final MapService maps;
     private final PlayerService players;
     private final SessionManager sessions;
 
-    public TopTimesCommand(@NotNull MapService maps, @NotNull PlayerService players, @NotNull SessionManager sessions) {
-        super("toptimes", "tt");
+    public TopTimesCommand(@NotNull ApiClient api, @NotNull MapService maps, @NotNull PlayerService players, @NotNull SessionManager sessions) {
+        super("toptimes", "tt", "leaderboard", "lb");
+        this.api = api;
         this.maps = maps;
         this.players = players;
         this.sessions = sessions;
 
         category = CommandCategories.MAP;
-        description = "Lists the top 10 fastest completion times of a map";
+        description = "Shows the top leaderboard positions for a map";
 
-        mapArg = CoreArgument.Map("map", maps).description("The map to check the top times of");
+        mapArg = CoreArgument.Map("map", maps).description("The map to check the leaderboard of");
 
         addSyntax(playerOnly(this::showTopTimes));
         addSyntax(playerOnly(this::showTopTimes), mapArg);
@@ -78,7 +81,10 @@ public class TopTimesCommand extends CommandDsl {
         } else {
             var playerData = PlayerData.fromPlayer(player);
             var leaderboard = maps.getPlaytimeLeaderboard(map.id(), playerData.id());
-            var messages = leaderboard.toComponents(players, false);
+
+            // TODO: we have to fetch the map from v4 api to get the leaderboard config, should port everything here to new api.
+            var lbFormat = api.maps.get(map.id()).settings().leaderboard().format();
+            var messages = leaderboard.toComponents(api.players, lbFormat, false);
 
             if (messages == null) {
                 player.sendMessage(Component.translatable(NO_TIMES_FOUND, Component.text(map.id())));

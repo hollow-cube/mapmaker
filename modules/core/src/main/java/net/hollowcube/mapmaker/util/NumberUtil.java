@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.util;
 
-import net.hollowcube.mapmaker.map.Leaderboard;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
@@ -48,15 +47,6 @@ public final class NumberUtil {
         long seconds = TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time));
         long milliseconds = time - TimeUnit.MINUTES.toMillis(minutes) - TimeUnit.SECONDS.toMillis(seconds);
         return String.format("%02d:%02d.%03d", minutes, seconds, milliseconds);
-    }
-
-    public static @NotNull String formatScore(Leaderboard.Format format, double score) {
-        // TODO: move me to format itself
-        return switch (format) {
-            case TIME -> formatMapPlaytime((long) score, true);
-            case NUMBER -> format(score, 2); // TODO: more here.
-            case PERCENT -> format(score * 100, 2) + "%"; // TODO: clamp to 0-100%?
-        };
     }
 
     public static long roundMillisToTicks(long time) {
@@ -162,6 +152,47 @@ public final class NumberUtil {
             }
         }
         return (int) (totalMillis / 50); // convert to ticks
+    }
+
+
+    public static String formatNumberTiered(double value) {
+        // thanks claude
+        if (value == 0) return "0";
+
+        double abs = Math.abs(value);
+
+        if (abs < 0.0005 && abs > 0)
+            return String.format("%.1e", value);
+        if (abs >= 1_000_000_000_000_000D)
+            return String.format("%.1e", value);
+
+        String[] suffixes = {"", "k", "m", "b", "t"};
+        int tier = 0;
+        double reduced = abs;
+
+        while (reduced >= 1_000 && tier < suffixes.length - 1) {
+            reduced /= 1_000;
+            tier++;
+        }
+
+        if (value < 0) reduced = -reduced;
+
+        String formatted;
+        if (tier == 0) {
+            if (reduced == Math.floor(reduced) && abs >= 1) {
+                formatted = String.format("%,.0f", reduced);
+            } else {
+                formatted = String.format("%,.3f", reduced);
+                formatted = formatted.replaceAll("0+$", "").replaceAll("\\.$", "");
+            }
+        } else {
+            formatted = String.format("%.4g", reduced);
+            if (formatted.contains(".")) {
+                formatted = formatted.replaceAll("0+$", "").replaceAll("\\.$", "");
+            }
+        }
+
+        return formatted + suffixes[tier];
     }
 
     private NumberUtil() {

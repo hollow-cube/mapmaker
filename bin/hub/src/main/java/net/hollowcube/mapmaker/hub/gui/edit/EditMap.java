@@ -315,7 +315,10 @@ public class EditMap extends View {
             MapData publishedMap;
             try {
                 publishButton.setState(State.LOADING);
-                publishedMap = mapService.publishMap(playerData.id(), map.id());
+                mapService.publishMap(playerData.id(), map.id());
+
+                // TODO(v4 api): we refetch the map so it includes leaderboard info
+                publishedMap = api.maps.get(map.id());
             } catch (Exception e) {
                 //todo record this exception in sentry or something
                 logger.log(System.Logger.Level.ERROR, "Failed to publish map", e);

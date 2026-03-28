@@ -47,6 +47,7 @@ import net.hollowcube.mapmaker.scripting.WorldScriptContext;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.hollowcube.molang.MolangExpr;
+import net.hollowcube.molang.MolangOptimizer;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -75,8 +76,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
-import static net.hollowcube.mapmaker.util.NumberUtil.formatScore;
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWorld> {
@@ -86,7 +86,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     private static final Sound PLAYER_HURT_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_HURT, Sound.Source.PLAYER, 1, 1f);
     private static final Sound PLAYER_DEATH_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_DEATH, Sound.Source.PLAYER, 1, 1f);
 
-    private static final Tag<@Nullable SaveState> BEST_SAVESTATE = Tag.Transient("map:best_savestate");
+    private static final Tag<SaveState> BEST_SAVESTATE = Tag.Transient("map:best_savestate");
 
     private static final List<ItemHandler> SILENT_ITEMS = List.of(
         // Hotbar items
@@ -211,7 +211,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
         // We throw on world creation if the expression is invalid. We parse when setting it, so this
         // should not happen. Not sure if theres any better recourse than failing to load.
-        this.leaderboardScoreExpr = MolangExpr.parseOrThrow(map.settings().leaderboard().score());
+        this.leaderboardScoreExpr = MolangOptimizer.optimizeAst(MolangExpr.parseOrThrow(map.settings().leaderboard().score()));
     }
 
     public int defaultResetHeight() {
@@ -404,24 +404,30 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         // TODO: this whole method needs to be specialized to the various leaderboard types (eg 'finished in x', 'finished with score of y', etc).
 
         // Show the completed message after removing the player because it is theoretically possible to not have the savestate fetched yet.
+        var lb = map().settings().leaderboard();
         var bestState = player.getTag(BEST_SAVESTATE);
         if (bestState == null) {
             player.setTag(BEST_SAVESTATE, finishState);
             player.sendMessage(Component.translatable(
-                "map.completed.first",
-                Component.text(formatScore(map().settings().leaderboard().format(), finishState.getScore()))
+                "map.completed." + lb.format().name().toLowerCase() + ".first",
+                lb.format().format(finishState.getScore())
             ));
         } else {
-            // Diff playtime rounded to ticks prior to subtracting for correct display.
-            var diffPlaytime = NumberUtil.roundMillisToTicks(bestState.getEffectivePlaytime()) -
-                               NumberUtil.roundMillisToTicks(finishState.getEffectivePlaytime());
-            var diffColor = diffPlaytime < 0 ? NamedTextColor.RED : NamedTextColor.GREEN;
-            var diffSymbol = diffPlaytime < 0 ? "+" : "-";
+            double bestScore = bestState.getScore(), finishScore = finishState.getScore();
+            if (lb.format() == Leaderboard.Format.TIME) {
+                // Diff playtime rounded to ticks prior to subtracting for correct display.
+                bestScore = NumberUtil.roundMillisToTicks((long) bestScore);
+                finishScore = NumberUtil.roundMillisToTicks((long) finishScore);
+            }
+
+            var diffScore = bestScore - finishScore;
+            var diffColor = diffScore < 0 && lb.asc() ? NamedTextColor.RED : NamedTextColor.GREEN;
+            var diffSymbol = diffScore < 0 ? "+" : "-";
             player.sendMessage(Component.translatable(
-                "map.completed.with_prior",
-                Component.text(formatMapPlaytime(finishState.getEffectivePlaytime(), true)),
+                "map.completed." + lb.format().name().toLowerCase() + ".with_prior",
+                lb.format().format(finishState.getScore()),
                 // Note: roundToTicks is not used here. We do the rounding above because we need to round prior to calculating the difference.
-                Component.text(diffSymbol + formatMapPlaytime(Math.abs(diffPlaytime), false), diffColor)
+                text(diffSymbol, diffColor).children(List.of(lb.format().format(Math.abs(diffScore))))
             ));
 
             if (finishState.getEffectivePlaytime() < bestState.getEffectivePlaytime()) {
@@ -453,7 +459,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         }
     }
 
-    public void handleTestingModeFinish(Player player) {
+    public void handleTestingModeFinish(Player player, SaveState saveState) {
         // Noop except in testparkourmapworld. pretty gross but i dont have a better solution immediately.
     }
 
@@ -470,12 +476,16 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         return OpUtils.map(player.getTag(BEST_SAVESTATE), SaveState::getEffectivePlaytime);
     }
 
+    protected MolangExpr leaderboardScoreExpr() {
+        return this.leaderboardScoreExpr;
+    }
+
     public double computeScore(Player player, SaveState saveState) {
         var playState = saveState.state(PlayState.class);
         var variables = Objects.requireNonNullElseGet(playState.get(Attachments.VARIABLES), VariableStorage::new);
         TempEffectApplicator.VARIABLE_LOOKUP.setStorage(variables);
         TempEffectApplicator.QUERY.setContext(player);
-        return TempEffectApplicator.EVALUATOR.eval(this.leaderboardScoreExpr);
+        return TempEffectApplicator.EVALUATOR.eval(leaderboardScoreExpr());
         // TODO: what to do with errors during eval?
     }
 

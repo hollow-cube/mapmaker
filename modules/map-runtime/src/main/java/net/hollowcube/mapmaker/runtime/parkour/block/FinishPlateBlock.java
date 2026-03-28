@@ -32,10 +32,11 @@ public class FinishPlateBlock implements BlockHandler, PressurePlateBlock {
                 finishState.setEndLatency(((MapPlayer) player).averageLatency());
                 yield new ParkourState.Finished(finishState);
             }
-            case ParkourState.Testing(var _, var parent) -> {
+            case ParkourState.Testing(var saveState, var parent) -> {
                 if (parent != null) yield parent;
 
-                world.handleTestingModeFinish(player);
+                saveState.complete(System.nanoTime() / 1_000_000);
+                world.handleTestingModeFinish(player, saveState);
                 yield null;
             }
             case null, default -> null;
