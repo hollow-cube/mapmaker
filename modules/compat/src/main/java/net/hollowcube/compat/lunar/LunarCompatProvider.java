@@ -72,8 +72,8 @@ public class LunarCompatProvider implements CompatProvider, DiscordRichPresenceP
             Map.of(
                 "@type", ClientboundLunarPacket.TYPE_PREFIX + "richpresence.v1.OverrideServerRichPresenceMessage",
                 "player_state", activity,
-                // This is a lunar bug, it seems to escape the / character and discord doesn't undo it, so we need to replace it with another character
-                "game_variant_name", map.replace("/", "∕")
+                // This is a lunar bug, it seems to escape the / character and discord doesn't undo it
+                "game_variant_name", map.replace("/", "")
             )
         ).send(player);
     }
