@@ -223,9 +223,10 @@ public abstract class AbstractMapServer implements MapServer {
             PostHog.init("phc_mK0jji1aC3hvMBGLOLjuVARqolDGPS9AiuNUOhMwVyA", config -> config
                 .personalApiKey(unleashConfig.posthogPersonalApiKey())
                 .blockUntilLocalFlagsLoaded(Duration.ofSeconds(3)) // if it fails, it'll still get re-fetched, just it'll return DISABLED for initially joining players
-                .endpoint("https://us.i.posthog.com")
+                .endpoint("http://api-server.mapmaker:9124/posthog")
                 .featureFlagsPollingInterval(Duration.ofMinutes(10))
                 .allowRemoteFeatureFlagEvaluation(false)
+                .blockUntilLocalFlagsLoaded(Duration.ofSeconds(10))
                 .exceptionMiddleware(AbstractMapServer::posthogExceptionMiddleware)
                 .gson(AbstractHttpService.GSON));
             shutdowner.queue("posthog", PostHog::shutdown);
