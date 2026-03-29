@@ -14,6 +14,7 @@ import net.hollowcube.mapmaker.api.interaction.Command;
 import net.hollowcube.mapmaker.api.interaction.Interaction;
 import net.hollowcube.mapmaker.api.interaction.InteractionResponse;
 import net.hollowcube.mapmaker.api.maps.MapRole;
+import net.hollowcube.mapmaker.api.maps.MapWorldMessage;
 import net.hollowcube.mapmaker.backpack.BackpackItem;
 import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.map.*;
@@ -61,6 +62,7 @@ public abstract class AbstractHttpService {
         .registerTypeAdapter(Leaderboard.Format.class, new EnumTypeAdapter<>(Leaderboard.Format.class))
         .registerTypeAdapter(MapVerification.class, new LenientEnumTypeAdapter<>(MapVerification.class))
         .registerTypeAdapter(MapSize.class, new LenientEnumTypeAdapter<>(MapSize.class))
+        .registerTypeAdapter(MapWorldMessage.Action.class, new LenientEnumTypeAdapter<>(MapWorldMessage.Action.class))
         .registerTypeAdapter(Command.Argument.Type.class, new LenientEnumTypeAdapter<>(Command.Argument.Type.class))
         .registerTypeAdapter(Interaction.Type.class, new LenientEnumTypeAdapter<>(Interaction.Type.class))
         .registerTypeAdapter(InteractionResponse.Type.class, new LenientEnumTypeAdapter<>(InteractionResponse.Type.class))

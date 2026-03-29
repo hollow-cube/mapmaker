@@ -48,6 +48,8 @@ public sealed interface MapWorld extends TagReadable permits AbstractMapWorld {
         return type.isInstance(canonical) ? type.cast(canonical) : null;
     }
 
+    String worldId();
+
     MapServer server();
 
     MapData map();

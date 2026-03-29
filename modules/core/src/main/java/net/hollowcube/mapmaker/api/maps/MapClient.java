@@ -4,6 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.api.ResultList;
 import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapSize;
 import net.hollowcube.mapmaker.map.MapUpdateRequest;
 
 import java.util.Map;
@@ -12,6 +13,10 @@ import static net.hollowcube.mapmaker.api.ApiClient.notImplemented;
 import static net.hollowcube.mapmaker.api.HttpClientWrapper.query;
 
 public interface MapClient {
+
+    default MapData create(String owner, MapSize size) {
+        throw notImplemented();
+    }
 
     /// Get a map by its internal ID
     default MapData get(String mapId) {
@@ -50,6 +55,15 @@ public interface MapClient {
     record Http(HttpClientWrapper http) implements MapClient {
         private static final String V4_PREFIX = "/v4/internal/maps";
         private static final String V4_PLAYERS_PREFIX = "/v4/internal/players";
+
+        @Override
+        public MapData create(String owner, MapSize size) {
+            return http.post(
+                "createMap",
+                V4_PREFIX,
+                Map.of("owner", owner, "size", size),
+                new TypeToken<>() {});
+        }
 
         @Override
         public MapData get(String mapId) {
