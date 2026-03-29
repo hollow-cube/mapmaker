@@ -65,16 +65,15 @@ public class LunarCompatProvider implements CompatProvider, DiscordRichPresenceP
 
     @Override
     public void setRichPresence(
-        @NotNull Player player, @NotNull String playerState, @NotNull String gameName,
-        @NotNull String gameVariantName
+        @NotNull Player player,
+        @NotNull String line1,
+        @NotNull String line2
     ) {
         new ClientboundLunarPacket(
             Map.of(
                 "@type", ClientboundLunarPacket.TYPE_PREFIX + "richpresence.v1.OverrideServerRichPresenceMessage",
-                "game_name", gameName,
-                // This is a lunar bug, it seems to escape the / character and discord doesn't undo it, so we need to replace it with another character
-                "game_variant_name", gameVariantName.replace("/", "∕"),
-                "player_state", playerState
+                "game_name", line1,
+                "player_state", line2
             )
         ).send(player);
     }

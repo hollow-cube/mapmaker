@@ -112,6 +112,6 @@ public sealed interface EditorState extends PlayerState<EditorState, EditorMapWo
     @Override
     default void configurePlayer(EditorMapWorld world, Player player, @Nullable EditorState lastState) {
         PlayerState.super.configurePlayer(world, player, lastState);
-        DiscordRichPresenceManager.queueRichPresenceUpdate(player, "a map", "", "Building");
+        DiscordRichPresenceManager.queueRichPresenceUpdate(player, "Building", "a map");
     }
 }
