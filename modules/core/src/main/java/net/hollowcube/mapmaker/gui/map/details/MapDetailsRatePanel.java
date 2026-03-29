@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerData;
+import org.jetbrains.annotations.UnknownNullability;
 
 class MapDetailsRatePanel extends Panel {
     private final MapService mapService;
@@ -14,7 +15,7 @@ class MapDetailsRatePanel extends Panel {
     private final Button likeButton;
     private final Button dislikeButton;
 
-    private MapRating.State ratingState = MapRating.State.UNRATED;
+    private MapRating.@UnknownNullability State ratingState; // notnull after init
 
     public MapDetailsRatePanel(MapService mapService, String mapId) {
         super(9, 4);
