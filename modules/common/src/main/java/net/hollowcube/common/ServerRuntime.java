@@ -45,6 +45,8 @@ public interface ServerRuntime {
      * In a deployment it should be overridden with a real hostname value
      */
     default @NotNull String hostname() {
+        if (isDevelopment()) return "devserver";
+
         class Holder {
             static String hostname = null;
         }

@@ -333,9 +333,6 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
             try {
                 closingWorlds.add(world);
 
-                var destroyMessage = MapWorldMessage.destroyed(world.worldId());
-                jetStream.publish(destroyMessage.subject(), destroyMessage);
-
                 // Remove all players from the world.
                 var players = List.copyOf(world.players());
                 var futures = new CompletableFuture[players.size()];
@@ -363,8 +360,16 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                 }
 
                 // Close the world itself
-                MinecraftServer.getSchedulerManager()
-                    .scheduleEndOfTick(world::close);
+                MinecraftServer.getSchedulerManager().scheduleEndOfTick(() -> {
+                    try {
+                        world.close();
+                    } finally {
+                        FutureUtil.submitVirtual(() -> {
+                            var destroyMessage = MapWorldMessage.destroyed(world.worldId());
+                            jetStream.publish(destroyMessage.subject(), destroyMessage);
+                        });
+                    }
+                });
             } finally {
                 closingWorlds.remove(world);
             }
