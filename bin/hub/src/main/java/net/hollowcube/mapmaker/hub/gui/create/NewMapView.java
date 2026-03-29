@@ -1,11 +1,9 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.common.util.ProtocolVersions;
+import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapSize;
-import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.panels.buttons.LockedButton;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -18,15 +16,15 @@ import static net.hollowcube.mapmaker.panels.RadioSelect.ButtonUpdater.SQUARE_BA
 
 public class NewMapView extends Panel {
 
-    private final MapService mapService;
+    private final MapClient maps;
     private final Consumer<MapData> onNewMap;
 
     private final RadioSelect<MapSize> sizeSelect;
     private final Button confirmButton;
 
-    public NewMapView(MapService mapService, Consumer<MapData> onNewMap) {
+    public NewMapView(MapClient maps, Consumer<MapData> onNewMap) {
         super(9, 10);
-        this.mapService = mapService;
+        this.maps = maps;
         this.onNewMap = onNewMap;
 
         background("create_maps2/new/container", -10, -31);
@@ -78,9 +76,7 @@ public class NewMapView extends Panel {
 
     private void handleSubmit() {
         var playerId = PlayerData.fromPlayer(host.player()).id();
-        var map = mapService.createMap(MapCreateRequest.forPlayerV2(
-            playerId, sizeSelect.selected(),
-            ProtocolVersions.getProtocolVersion(playerId)));
+        var map = maps.create(playerId, sizeSelect.selected());
         sync(() -> {
             var host = this.host;
             onNewMap.accept(map);

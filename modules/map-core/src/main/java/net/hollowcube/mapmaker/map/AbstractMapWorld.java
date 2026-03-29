@@ -52,6 +52,8 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     protected static final Tag<PlayerState> PLAYER_INITIAL_STATE = Tag.Transient("player_initial_state");
     static final Tag<MapWorld> ROOT_MAP_WORLD_TAG = Tag.Transient("root_map_world");
 
+    private final String worldId = UUID.randomUUID().toString();
+
     private final MapServer server;
     private final MapData map;
     private final MapInstance instance;
@@ -115,6 +117,11 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
             .addListener(PlayerDeathEvent.class, this::handlePlayerDeath);
 
         configureInstance();
+    }
+
+    @Override
+    public String worldId() {
+        return worldId;
     }
 
     @Override

@@ -4,6 +4,7 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.MapCommands;
+import net.hollowcube.mapmaker.api.maps.MapWorldMessage;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -113,6 +114,10 @@ public class MapIsolateServer extends AbstractMapServer {
         }
 
         addBinding(Scheduler.class, world.instance().scheduler());
+
+        var serverId = ServerRuntime.getRuntime().hostname();
+        var worldMessage = MapWorldMessage.created(serverId, mapId, "playing");
+        jetStream.publish(worldMessage.subject(), worldMessage);
 
         var mapMgmtConsumer = new MapIsolateMapMgmtConsumerImpl(jetStream, this);
         shutdowner().queue("map-mgmt-listener", mapMgmtConsumer::close);

@@ -30,7 +30,7 @@ public class CreateMapsView extends Panel {
         var slots = api.maps.getPlayerSlots(playerId).results();
 
         if (slots.isEmpty()) {
-            Panel.open(player, new NewMapView(mapService, _ -> FutureUtil.submitVirtual(() -> open(player, api, mapService, bridge))));
+            Panel.open(player, new NewMapView(api.maps, _ -> FutureUtil.submitVirtual(() -> open(player, api, mapService, bridge))));
         } else {
             Panel.open(player, new CreateMapsView(api, mapService, bridge, slots));
         }
@@ -76,7 +76,7 @@ public class CreateMapsView extends Panel {
         this.createButton = add(8, 0, new Button(1, 1)
             .background("generic2/btn/default/1_1")
             .sprite("icon2/1_1/plus", 1, 1)
-            .onLeftClick(() -> this.host.pushTransientView(new NewMapView(mapService, this::acceptNewMap))));
+            .onLeftClick(() -> this.host.pushTransientView(new NewMapView(api.maps, this::acceptNewMap))));
 
         pagination.renderSync();
     }

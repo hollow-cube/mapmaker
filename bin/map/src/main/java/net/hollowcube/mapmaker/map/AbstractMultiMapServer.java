@@ -11,6 +11,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.maps.MapWorldMessage;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
@@ -274,6 +275,10 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                         destroy(key, Component.translatable("map.kicked"));
                     });
                 });
+
+                var worldMessage = MapWorldMessage.created(
+                    createdWorld.worldId(), createdWorld.map().id(), "todo");
+                jetStream.publish(worldMessage.subject(), worldMessage);
             }
 
             createdWorld.loadWorld();
@@ -327,6 +332,9 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
             var world = FutureUtil.getUnchecked(worldFuture);
             try {
                 closingWorlds.add(world);
+
+                var destroyMessage = MapWorldMessage.destroyed(world.worldId());
+                jetStream.publish(destroyMessage.subject(), destroyMessage);
 
                 // Remove all players from the world.
                 var players = List.copyOf(world.players());
