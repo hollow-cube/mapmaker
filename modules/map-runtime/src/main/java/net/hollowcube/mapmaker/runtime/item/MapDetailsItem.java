@@ -49,8 +49,10 @@ public class MapDetailsItem extends ItemHandler {
             }
             DisplayName finalAuthorName = authorName;
 
+            // TODO(v4 api): we refetch the map so it includes leaderboard info
+            var map = world.server().api().maps.get(world.map().id());
             Panel.open(player, new MapDetailsView(world.server().api(), world.server().mapService(),
-                world.server().bridge(), world.map(), finalAuthorName, false));
+                world.server().bridge(), map, finalAuthorName, false));
         });
     }
 

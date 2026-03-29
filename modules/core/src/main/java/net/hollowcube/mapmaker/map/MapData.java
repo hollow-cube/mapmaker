@@ -5,8 +5,6 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
-import net.hollowcube.mapmaker.object.ObjectData;
-import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
@@ -73,10 +71,6 @@ public class MapData {
 
     private MapQuality quality;
 
-    private int objectLimit = 100;
-    private List<ObjectData> objects = new ArrayList<>();
-    private transient int objectUsage = -1;
-
     private String contest;
 
     public MapData() {
@@ -99,10 +93,6 @@ public class MapData {
         this.settings = settings;
         this.publishedId = publishedId;
         this.publishedAt = publishedAt;
-//        this.pois = new ArrayList<>();
-//        this.maxPois = 100;
-        this.objectLimit = 100;
-        this.objects = new ArrayList<>();
     }
 
     public @NotNull String id() {
@@ -203,80 +193,6 @@ public class MapData {
 
     public @NotNull MapQuality quality() {
         return Objects.requireNonNullElse(quality, MapQuality.UNRATED);
-    }
-
-    public int objectLimit() {
-        return objectLimit;
-    }
-
-    public int objectUsage() {
-        if (objectUsage == -1) {
-            objectUsage = objects().stream()
-                    .mapToInt(o -> o.type().cost())
-                    .sum();
-        }
-
-        return objectUsage;
-    }
-
-    public boolean addObject(@NotNull ObjectData object) {
-        settings.updateLock.lock();
-        try {
-            //todo reenable object limits later
-//            if (objectUsage() + object.type().cost() > objectLimit)
-//                return false;
-
-            if (objects == null) objects = new ArrayList<>();
-            objects.add(object);
-            objectUsage += object.type().cost();
-
-            // Add to update
-            settings.updates.newObjects.add(object);
-            settings.updates.removedObjects.remove(object.id());
-
-            return true;
-        } finally {
-            settings.updateLock.unlock();
-        }
-    }
-
-    public boolean removeObject(@NotNull String id) {
-        settings.updateLock.lock();
-        try {
-            if (objects == null) return false;
-
-            var removed = false;
-            var iter = objects.iterator();
-            while (iter.hasNext()) {
-                var object = iter.next();
-
-                if (object.id().equals(id)) {
-                    iter.remove();
-                    objectUsage = objectUsage() - object.type().cost();
-                    removed = true;
-
-                    settings.updates.removedObjects.add(id);
-                }
-            }
-
-            if (removed) {
-                settings.updates.newObjects.removeIf(p -> p.id().equals(id));
-            }
-
-            return removed;
-        } finally {
-            settings.updateLock.unlock();
-        }
-    }
-
-    public @NotNull List<ObjectData> objects() {
-        if (this.objects == null) return List.of();
-        return List.copyOf(objects);
-    }
-
-    public @Nullable ObjectData getObject(String id) {
-        var object = objects().stream().filter(obj -> obj.id().equals(id)).findFirst();
-        return object.orElse(null);
     }
 
     public @Nullable String contest() {

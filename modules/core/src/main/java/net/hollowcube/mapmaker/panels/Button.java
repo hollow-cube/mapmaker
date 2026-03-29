@@ -94,7 +94,7 @@ public class Button extends Element implements ButtonClickAliases {
         return this;
     }
 
-    public Button text(Component title, List<Component> lore) {
+    public Button text(@Nullable Component title, @Nullable List<Component> lore) {
         this.itemTitle = title;
         this.itemLore = lore;
 

@@ -6,6 +6,9 @@
       },
       {
         "pattern": "\\Qdefault_config.json\\E"
+      },
+      {
+        "pattern": "\\Qchar_widths.bin\\E"
       }
     ]
   }

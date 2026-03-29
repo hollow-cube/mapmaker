@@ -8,8 +8,8 @@ import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
+import net.hollowcube.molang.MolangExpr;
 import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -17,6 +17,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.BiPredicate;
+
+import static net.kyori.adventure.text.Component.translatable;
 
 public class TestParkourMapWorld extends ParkourMapWorld implements SubWorld {
 
@@ -84,13 +86,12 @@ public class TestParkourMapWorld extends ParkourMapWorld implements SubWorld {
     }
 
     @Override
-    public void handleTestingModeFinish(Player player) {
-        // Not sure what should really happen here, for now just tell them
-        // they completed the map and send them back to editing mode
-        player.sendMessage(Component.translatable("testing_mode.finish"));
+    public void handleTestingModeFinish(Player player, SaveState saveState) {
+        var score = map().settings().leaderboard().format().format(computeScore(player, saveState));
+        player.sendMessage(translatable("testing_mode.finish", score));
 
-        if (parent.getPlayerState(player) instanceof EditorState.Testing(var saveState))
-            parent.changePlayerState(player, new EditorState.Building(saveState));
+        if (parent.getPlayerState(player) instanceof EditorState.Testing(var testState))
+            parent.changePlayerState(player, new EditorState.Building(testState));
     }
 
     @Override
@@ -106,5 +107,11 @@ public class TestParkourMapWorld extends ParkourMapWorld implements SubWorld {
     @Override
     protected void computeDefaultResetHeight() {
         this.defaultResetHeight = instance().getCachedDimensionType().minY() - 5;
+    }
+
+    @Override
+    protected MolangExpr leaderboardScoreExpr() {
+        // Always parse it inline since it can change during editing.
+        return MolangExpr.parseOrThrow(map().settings().leaderboard().score());
     }
 }

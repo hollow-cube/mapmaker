@@ -12,6 +12,7 @@ import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.CoreTeams;
+import net.hollowcube.mapmaker.util.ItemUtils;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -148,15 +149,13 @@ public final class MiscFunctionality {
             type.reset(player); // Clear existing data for a cosmetic before applying
 
             var cosmetic = Cosmetic.byId(type, playerData.getCosmetic(type));
-            var itemStack = cosmetic == null ? type.blankIcon() : cosmetic.impl().iconItem();
-            // If the itemstack has a glider we need to preserve it.
-            if (player.getInventory().getItemStack(type.iconSlot()).has(DataComponents.GLIDER)) {
-                itemStack = itemStack.with(DataComponents.GLIDER);
-                var equippable = itemStack.get(DataComponents.EQUIPPABLE);
-                if (equippable != null) itemStack = itemStack.with(DataComponents.EQUIPPABLE,
-                    equippable.withAssetId("minecraft:elytra"));
-            }
-            player.getInventory().setItemStack(type.iconSlot(), itemStack);
+            var newStack = cosmetic == null ? type.blankIcon() : cosmetic.impl().iconItem();
+            var oldStack = player.getInventory().getItemStack(type.iconSlot());
+
+            player.getInventory().setItemStack(
+                type.iconSlot(),
+                ItemUtils.mergeStackComponents(oldStack, newStack.without(DataComponents.EQUIPPABLE))
+            );
 
             if (cosmetic != null) {
                 cosmetic.impl().apply(player);
