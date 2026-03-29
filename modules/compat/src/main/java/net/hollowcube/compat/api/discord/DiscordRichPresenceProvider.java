@@ -4,7 +4,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public interface DiscordRichPresenceProvider {
-    void setRichPresence(@NotNull Player player, @NotNull String line1, @NotNull String line2);
+    void setRichPresence(@NotNull Player player, @NotNull String activity, @NotNull String map);
 
     void clearRichPresence(@NotNull Player player);
 

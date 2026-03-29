@@ -17,11 +17,11 @@ public class DiscordRichPresenceManager {
     }
 
 
-    public static void queueRichPresenceUpdate(@NotNull Player player, @NotNull String line1, @NotNull String line2) {
+    public static void queueRichPresenceUpdate(@NotNull Player player, @NotNull String activity, @NotNull String map) {
         player.scheduler().buildTask(() -> {
             for (DiscordRichPresenceProvider provider : PROVIDERS) {
                 if (provider.isRichPresenceSupportedFor(player)) {
-                    provider.setRichPresence(player, line1, line2);
+                    provider.setRichPresence(player, activity, map);
                     break;
                 }
             }

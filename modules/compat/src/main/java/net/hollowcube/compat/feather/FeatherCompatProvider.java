@@ -50,13 +50,13 @@ public class FeatherCompatProvider implements CompatProvider, DiscordRichPresenc
     }
 
     @Override
-    public void setRichPresence(@NotNull Player player, @NotNull String line1, @NotNull String line2) {
+    public void setRichPresence(@NotNull Player player, @NotNull String activity, @NotNull String map) {
         new ClientboundFeatherPacket(
                 new S2CSetDiscordActivity(
                         IMAGE_URL,
                         "Hollow Cube",
-                        line2,
-                        line1,
+                        map,
+                        "%s on Hollow Cube".formatted(activity),
                         null,
                         null,
                         null,

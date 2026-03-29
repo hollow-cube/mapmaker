@@ -66,14 +66,14 @@ public class LunarCompatProvider implements CompatProvider, DiscordRichPresenceP
     @Override
     public void setRichPresence(
         @NotNull Player player,
-        @NotNull String line1,
-        @NotNull String line2
+        @NotNull String activity,
+        @NotNull String map
     ) {
         new ClientboundLunarPacket(
             Map.of(
                 "@type", ClientboundLunarPacket.TYPE_PREFIX + "richpresence.v1.OverrideServerRichPresenceMessage",
-                "game_name", line1,
-                "player_state", line2
+                "game_name", activity,
+                "map_name", map
             )
         ).send(player);
     }
