@@ -46,10 +46,10 @@ public class TempEffectApplicator {
     static final VariableStorage.MolangLookup VARIABLE_LOOKUP = VariableStorage.lookup();
     static final MolangResolver<Player> QUERY = new MolangResolver<>(VariableQueries::resolve);
     static final MolangEvaluator EVALUATOR = new MolangEvaluator(Map.of(
-            "variable", VARIABLE_LOOKUP,
-            "v", VARIABLE_LOOKUP,
-            "query", QUERY,
-            "q", QUERY
+        "variable", VARIABLE_LOOKUP,
+        "v", VARIABLE_LOOKUP,
+        "query", QUERY,
+        "q", QUERY
     ));
 
     public static void applyCheckpoint(ActionTriggerData data, Player player, String checkpointId, Point position) {
@@ -79,20 +79,20 @@ public class TempEffectApplicator {
         // its present the teleport position, or the first
         // position the player touched the checkpoint otherwise.
         var respawnPosition = OpUtils.mapOr(
-                data.actions().findLast(RespawnPosAction.class),
-                action -> {
-                    float yaw = player.getPosition().yaw();
-                    float pitch = player.getPosition().pitch();
-                    Pos origin;
-                    if (position instanceof BlockVec(int x, int y, int z)) {
-                        // If the position is a block vector then we want to center the player on the block
-                        origin = new Pos(x + 0.5, y, z + 0.5, yaw, pitch);
-                    } else {
-                        origin = new Pos(position, yaw, pitch);
-                    }
-                    return action.target().resolve(origin);
-                },
-                player.getPosition()
+            data.actions().findLast(RespawnPosAction.class),
+            action -> {
+                float yaw = player.getPosition().yaw();
+                float pitch = player.getPosition().pitch();
+                Pos origin;
+                if (position instanceof BlockVec(int x, int y, int z)) {
+                    // If the position is a block vector then we want to center the player on the block
+                    origin = new Pos(x + 0.5, y, z + 0.5, yaw, pitch);
+                } else {
+                    origin = new Pos(position, yaw, pitch);
+                }
+                return action.target().resolve(origin);
+            },
+            player.getPosition()
         );
 
         List<String> newHistory;
@@ -108,11 +108,12 @@ public class TempEffectApplicator {
 
         // Cache the last state so that we can reset back here.
         playState.setLastState(new PlayState(
-                null,
-                newHistory,
-                respawnPosition,
-                Map.copyOf(playState.ghostBlocks()),
-                Map.copyOf(playState.actionData())
+            null,
+            newHistory,
+            respawnPosition,
+            Map.copyOf(playState.ghostBlocks()),
+            Map.copyOf(playState.actionData()),
+            List.copyOf(playState.entities())
         ));
 
         // Update the player based on the new state
@@ -164,9 +165,9 @@ public class TempEffectApplicator {
         if (pos == null) return;
 
         var respawnView = OpUtils.mapOr(
-                data.actions().findLast(RespawnPosAction.class),
-                action -> action.target().resolve(player.getPosition()),
-                player.getPosition()
+            data.actions().findLast(RespawnPosAction.class),
+            action -> action.target().resolve(player.getPosition()),
+            player.getPosition()
         );
 
         float yaw = respawnView.yaw();
@@ -216,8 +217,8 @@ public class TempEffectApplicator {
                 message = translatable("action.condition.not_acceptable");
             } else {
                 message = translatable(
-                        "action.condition.not_acceptable.custom",
-                        List.of(Component.text(condition.message()))
+                    "action.condition.not_acceptable.custom",
+                    List.of(Component.text(condition.message()))
                 );
             }
             player.sendMessage(message);
@@ -231,14 +232,14 @@ public class TempEffectApplicator {
         if (progressIndex > 0) {
             int currentIndex = state.get(Attachments.PROGRESS_INDEX, 0);
             boolean isFail = map.getSetting(MapSettings.PROGRESS_INDEX_ADDITION)
-                    // With additive index you can get anything <= current + 1
-                    ? (progressIndex > currentIndex + 1)
-                    // Without additive progress index you must be at the prior index or the current one
-                    : (progressIndex != currentIndex && progressIndex != currentIndex + 1);
+                // With additive index you can get anything <= current + 1
+                ? (progressIndex > currentIndex + 1)
+                // Without additive progress index you must be at the prior index or the current one
+                : (progressIndex != currentIndex && progressIndex != currentIndex + 1);
             if (isFail) {
                 if (PROGRESS_INDEX_WARNING.test(player)) {
                     player.sendMessage(translatable("action.progress_index.not_acceptable",
-                            Component.text(currentIndex), Component.text(progressIndex - 1)));
+                        Component.text(currentIndex), Component.text(progressIndex - 1)));
                 }
                 return true;
             }

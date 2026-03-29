@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.runtime.parkour.action;
 
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
+import net.hollowcube.mapmaker.map.entity.PlayerEntityTracker;
 import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditAttributeAction;
@@ -28,6 +29,7 @@ import net.minestom.server.potion.TimedPotion;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Map;
 
 import static net.hollowcube.mapmaker.map.util.EventUtil.playerEventNode;
@@ -92,6 +94,9 @@ public class LegacyActionStateManager {
         var ghostBlocks = GhostBlockHolder.forPlayer(player);
         ghostBlocks.load(state.ghostBlocks());
 
+        var entityTracker = PlayerEntityTracker.forPlayer(player);
+        entityTracker.load(state.entities());
+
         // Apply items to current state.
         var items = state.get(Attachments.HOTBAR_ITEMS, HotbarItems.EMPTY);
         player.getInventory().setItemStack(3, items.item0() == null ? ItemStack.AIR : items.item0().createItemStack());
@@ -141,6 +146,9 @@ public class LegacyActionStateManager {
 
         var ghostBlocks = GhostBlockHolder.forPlayerOptional(player);
         playState.setGhostBlocks(ghostBlocks == null ? Map.of() : ghostBlocks.save());
+
+        var entityTracker = PlayerEntityTracker.forPlayerOptional(player);
+        playState.setEntities(entityTracker == null ? List.of() : entityTracker.save());
 
         var items = playState.get(Attachments.HOTBAR_ITEMS, HotbarItems.EMPTY);
         playState.set(Attachments.HOTBAR_ITEMS, new HotbarItems(

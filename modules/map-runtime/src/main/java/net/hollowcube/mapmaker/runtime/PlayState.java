@@ -43,6 +43,7 @@ public final class PlayState {
             "pos", ExtraCodecs.POS.optional(), PlayState::pos,
             StructCodec.INLINE, GHOST_BLOCKS_CODEC.optional(), PlayState::ghostBlocks,
             StructCodec.INLINE, new ActionDataCodec(Integer.MAX_VALUE), PlayState::actionData,
+        "entities", Codec.RAW_VALUE.list().optional(), PlayState::entities,
             PlayState::new));
 
     public static final SaveStateType.Serializer<PlayState> SERIALIZER = SaveStateType.serializer("playState", CODEC, HCDataTypes.PLAY_STATE);
@@ -55,21 +56,24 @@ public final class PlayState {
     private @Nullable Pos pos;
     private Map<Long, Block> ghostBlocks;
     private Map<Attachment<?>, Object> actionData;
+    private List<Codec.RawValue> entities;
 
     public PlayState() {
-        this(null, null, null, null, null);
+        this(null, null, null, null, null, null);
     }
 
     public PlayState(
             @Nullable PlayState lastState, @Nullable List<String> statusEffects,
             @Nullable Pos pos, @Nullable Map<Long, Block> ghostBlocks,
-            @Nullable Map<Attachment<?>, Object> actionData
+            @Nullable Map<Attachment<?>, Object> actionData,
+            @Nullable List<Codec.RawValue> entities
     ) {
         this.lastState = lastState;
         this.history = new ArrayList<>(Objects.requireNonNullElse(statusEffects, List.of()));
         this.pos = pos;
         this.ghostBlocks = new HashMap<>(Objects.requireNonNullElse(ghostBlocks, Map.of()));
         this.actionData = new HashMap<>(Objects.requireNonNullElse(actionData, Map.of()));
+        this.entities = new ArrayList<>(Objects.requireNonNullElse(entities, List.of()));
     }
 
     public boolean isEmpty() {
@@ -143,13 +147,21 @@ public final class PlayState {
         this.pos = pos;
     }
 
+    public List<Codec.RawValue> entities() {
+        return entities;
+    }
+
+    public void setEntities(List<Codec.RawValue> objects) {
+        this.entities = new ArrayList<>(objects);
+    }
+
     public PlayState copy() {
         var newActionData = new HashMap<Attachment<?>, Object>(actionData.size());
         for (var entry : actionData.entrySet()) {
             //noinspection unchecked
             newActionData.put(entry.getKey(), ((Attachment<Object>) entry.getKey()).copyValue(entry.getValue()));
         }
-        return new PlayState(lastState, history, pos, new HashMap<>(ghostBlocks), newActionData);
+        return new PlayState(lastState, history, pos, new HashMap<>(ghostBlocks), newActionData, entities);
     }
 
     public void setFrom(PlayState other) {
@@ -163,6 +175,7 @@ public final class PlayState {
             //noinspection unchecked
             this.actionData.put(entry.getKey(), ((Attachment<Object>) entry.getKey()).copyValue(entry.getValue()));
         }
+        this.entities = new ArrayList<>(other.entities);
     }
 
     @Override

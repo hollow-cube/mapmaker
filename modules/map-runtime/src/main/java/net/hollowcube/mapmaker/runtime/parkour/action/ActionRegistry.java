@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.runtime.parkour.action;
 
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.*;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.entity.SpawnEntityAction;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.codec.Codec;
@@ -67,6 +68,7 @@ public final class ActionRegistry {
         register(EditVariableAction.KEY, EditVariableAction.CODEC, EditVariableAction.EDITOR);
         register(EditVelocityAction.KEY, EditVelocityAction.CODEC, EditVelocityAction.EDITOR, Action.Type.STATUS);
         register(PlaySoundAction.KEY, PlaySoundAction.CODEC, PlaySoundAction.EDITOR);
+        register(SpawnEntityAction.KEY, SpawnEntityAction.CODEC, SpawnEntityAction.EDITOR);
     }
 
     private static <T extends Action> RegistryKey<StructCodec<? extends Action>> register(Key name, StructCodec<T> codec, Action.Editor<T> editor, Action.Type... types) {

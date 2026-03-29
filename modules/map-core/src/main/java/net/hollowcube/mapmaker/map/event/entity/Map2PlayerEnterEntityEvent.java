@@ -6,7 +6,8 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 
 public record Map2PlayerEnterEntityEvent(
-        MapWorld world, Player player,
+    MapWorld world,
+    Player player,
         Entity enteredEntity
 ) implements Map2PlayerEvent {
 }

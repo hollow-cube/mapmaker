@@ -63,12 +63,9 @@ import net.minestom.server.snapshot.PlayerSnapshot;
 import net.minestom.server.snapshot.SnapshotUpdater;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.utils.chunk.ChunkCache;
-import net.minestom.server.utils.validate.Check;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -80,9 +77,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFunctionality.CosmeticCallback {
-
-    private static final Logger log = LoggerFactory.getLogger(MapPlayer.class);
-
     static {
         MinecraftServer.getPacketListenerManager().setPlayListener(ClientPongPacket.class, (packet, player) -> {
             if (player instanceof MapPlayer mp) mp.lastReceivedPingId = packet.id();
@@ -388,8 +382,8 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
 
     public void addOwnedEntity(@NotNull Entity entity) {
         FutureUtil.assertTickThread();
-        Check.argCondition(entity.isAutoViewable() || entity.getViewers().size() != 1 || !entity.getViewers().contains(this),
-            "Owned entity must not be auto viewable and must be viewing only this player");
+//        Check.argCondition(entity.isAutoViewable() || entity.getViewers().size() != 1 || !entity.getViewers().contains(this),
+//            "Owned entity must not be auto viewable and must be viewing only this player");
 
         this.ownedEntities.add(entity.getEntityId());
     }
