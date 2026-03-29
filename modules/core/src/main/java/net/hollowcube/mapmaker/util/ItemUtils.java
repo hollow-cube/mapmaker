@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.util;
 
 import net.kyori.adventure.text.Component;
+import net.minestom.server.component.DataComponent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.ItemStack;
@@ -9,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public final class ItemUtils {
@@ -82,5 +84,22 @@ public final class ItemUtils {
 
     public static ItemStack asDisplay(@NotNull Material material, @Nullable String overlay) {
         return OverlayItem.with(ItemStack.builder(Material.STICK), material, overlay).build();
+    }
+
+    public static ItemStack mergeStackComponents(ItemStack oldStack, ItemStack newStack) {
+        if (newStack.isAir()) return ItemStack.AIR;
+        if (oldStack.isAir()) return newStack;
+
+        var builder = newStack.builder();
+        for (var value : oldStack.componentPatch().entrySet()) {
+            mergeComponent(builder, value.component(), oldStack, newStack);
+        }
+        return builder.build();
+    }
+
+    private static <T> void mergeComponent(ItemStack.Builder builder, DataComponent<@NotNull T> component, ItemStack oldStack, ItemStack newStack) {
+        if (!newStack.componentPatch().has(component) && oldStack.has(component)) {
+            builder.set(component, Objects.requireNonNull(oldStack.get(component)));
+        }
     }
 }

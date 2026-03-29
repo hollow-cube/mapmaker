@@ -22,7 +22,10 @@ import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.PlayerInstanceEvent;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.component.EnchantmentList;
 import net.minestom.server.item.component.Equippable;
+import net.minestom.server.item.component.TooltipDisplay;
+import net.minestom.server.item.enchant.Enchantment;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.TimedPotion;
 import net.minestom.server.sound.SoundEvent;
@@ -33,12 +36,20 @@ import java.util.Map;
 import static net.hollowcube.mapmaker.map.util.EventUtil.playerEventNode;
 
 public class LegacyActionStateManager {
-    private static final Equippable EMPTY_EQUIPPABLE = new Equippable(EquipmentSlot.CHESTPLATE, SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
-            null, null, null, false, false, false, false,
-            false, SoundEvent.ITEM_SHEARS_SNIP);
-    private static final Equippable ELYTRA_EQUIPPABLE = new Equippable(EquipmentSlot.CHESTPLATE, SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
-            "minecraft:elytra", null, null, false, false, false,
-            false, false, SoundEvent.ITEM_SHEARS_SNIP);
+    private static final Equippable EMPTY_EQUIPPABLE = new Equippable(
+        EquipmentSlot.CHESTPLATE,
+        SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
+        null, null, null, false, false, false, false,
+        false, SoundEvent.ITEM_SHEARS_SNIP
+    );
+    private static final Equippable ELYTRA_EQUIPPABLE = new Equippable(
+        EquipmentSlot.CHESTPLATE,
+        SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
+        "minecraft:elytra", null, null, false, false,
+        false,
+        false, false, SoundEvent.ITEM_SHEARS_SNIP
+    );
+    private static final EnchantmentList CURSE_OF_BINDING = new EnchantmentList(Enchantment.BINDING_CURSE, 1);
 
     public static final EventNode<PlayerInstanceEvent> EVENT_NODE = playerEventNode()
             .addListener(ParkourMapPlayerUpdateStateEvent.class, LegacyActionStateManager::handleUpdatePlayerFromState)
@@ -99,12 +110,28 @@ public class LegacyActionStateManager {
         player.getInventory().setItemStack(5, items.item2() == null ? ItemStack.AIR : items.item2().createItemStack());
 
         // Apply elytra or remove it if not relevant
+        var chestplate = player.getChestplate();
         if (state.get(Attachments.ELYTRA, false)) {
-            player.setChestplate(player.getChestplate().with(DataComponents.GLIDER)
-                    .with(DataComponents.EQUIPPABLE, ELYTRA_EQUIPPABLE));
+            player.setChestplate(
+                chestplate
+                    .with(DataComponents.GLIDER)
+                    .with(DataComponents.EQUIPPABLE, ELYTRA_EQUIPPABLE)
+                    .with(DataComponents.ENCHANTMENTS, CURSE_OF_BINDING)
+                    .with(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, false)
+                    .with(
+                        DataComponents.TOOLTIP_DISPLAY,
+                        chestplate.get(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.EMPTY)
+                            .without(DataComponents.ENCHANTMENTS)
+                    )
+            );
         } else {
-            player.setChestplate(player.getChestplate().without(DataComponents.GLIDER)
-                    .with(DataComponents.EQUIPPABLE, EMPTY_EQUIPPABLE));
+            player.setChestplate(
+                chestplate
+                    .without(DataComponents.GLIDER)
+                    .with(DataComponents.EQUIPPABLE, EMPTY_EQUIPPABLE)
+                    .without(DataComponents.ENCHANTMENTS)
+                    .without(DataComponents.ENCHANTMENT_GLINT_OVERRIDE)
+            );
             if (player.isFlyingWithElytra()) player.setFlyingWithElytra(false);
         }
     }
