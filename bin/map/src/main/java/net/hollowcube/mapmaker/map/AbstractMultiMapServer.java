@@ -360,16 +360,10 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                 }
 
                 // Close the world itself
-                MinecraftServer.getSchedulerManager().scheduleEndOfTick(() -> {
-                    try {
-                        world.close();
-                    } finally {
-                        FutureUtil.submitVirtual(() -> {
-                            var destroyMessage = MapWorldMessage.destroyed(world.worldId());
-                            jetStream.publish(destroyMessage.subject(), destroyMessage);
-                        });
-                    }
-                });
+                MinecraftServer.getSchedulerManager().scheduleEndOfTick(() -> world.close().thenRunAsync(() -> {
+                    var destroyMessage = MapWorldMessage.destroyed(world.worldId());
+                    jetStream.publish(destroyMessage.subject(), destroyMessage);
+                }));
             } finally {
                 closingWorlds.remove(world);
             }

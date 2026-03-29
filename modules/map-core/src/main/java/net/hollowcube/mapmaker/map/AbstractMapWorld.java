@@ -389,7 +389,7 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         this.bossBars = createBossBars();
     }
 
-    public void close() {
+    public CompletableFuture<Void> close() {
         if (!(Thread.currentThread() instanceof TickSchedulerThread))
             throw new UnsupportedOperationException("close must be called from the scheduler thread!");
         if (!players().isEmpty())
@@ -399,6 +399,9 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         // At the beginning of the _next_ tick (as in, after this safe point tick), unregister the instance.
         MinecraftServer.getSchedulerManager().scheduleNextTick(() ->
             MinecraftServer.getInstanceManager().unregisterInstance(instance()));
+
+        // We dont need to wait for the instance unregister, its fine.
+        return CompletableFuture.completedFuture(null);
     }
 
     protected @Nullable List<BossBar> createBossBars() {

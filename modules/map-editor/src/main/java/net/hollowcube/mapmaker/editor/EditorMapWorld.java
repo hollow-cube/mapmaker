@@ -61,6 +61,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -191,7 +192,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     }
 
     @Override
-    public void close() {
+    public CompletableFuture<Void> close() {
         if (autoSaveTask != null) autoSaveTask.cancel();
         autoSaveTask = null;
 
@@ -202,12 +203,20 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
             testWorldLock.unlock();
         }
 
+        var future = new CompletableFuture<Void>();
         FutureUtil.submitVirtual(() -> {
             save(false);
 
             MinecraftServer.getSchedulerManager()
-                .scheduleEndOfTick(super::close);
+                .scheduleEndOfTick(() -> {
+                    try {
+                        super.close();
+                    } finally {
+                        future.complete(null);
+                    }
+                });
         });
+        return future;
     }
 
     @Blocking
