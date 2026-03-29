@@ -5,6 +5,8 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
+import net.minestom.server.utils.validate.Check;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
@@ -19,8 +21,8 @@ public class ControlledNumberInput extends Panel {
 
     private final Text labelText;
     private final Text inputText;
-    private final Button minusButton;
-    private final Button plusButton;
+    private final @Nullable Button minusButton;
+    private final @Nullable Button plusButton;
 
     private Int2ObjectFunction<String> formatter = String::valueOf;
     private IntFunction<String> toString = String::valueOf;
@@ -35,36 +37,47 @@ public class ControlledNumberInput extends Panel {
     }
 
     public ControlledNumberInput(String key, Consumer<Integer> onChange, boolean oneSlotHack) {
-        super(7, oneSlotHack ? 1 : 2);
+        this(7, key, onChange, oneSlotHack, true);
+    }
+
+    public ControlledNumberInput(int width, String key, Consumer<Integer> onChange, boolean oneSlotHack, boolean withSteppers) {
+        int stepWidth = withSteppers ? 2 : 0;
+        Check.argCondition(width - stepWidth < 1, "Width must be greater >= 3");
+        super(width, oneSlotHack ? 1 : 2);
         this.key = key;
         this.onChange = onChange;
 
         if (oneSlotHack) {
-            this.labelText = add(0, 0, new Text(null, 7, 0,
+            this.labelText = add(0, 0, new Text(null, width, 0,
                 LanguageProviderV2.translateToPlain("gui.action." + key))
                 .font("small").align(1, -11));
         } else {
-            this.labelText = add(0, 0, AbstractActionEditorPanel.groupText(7,
+            this.labelText = add(0, 0, AbstractActionEditorPanel.groupText(width,
                 LanguageProviderV2.translateToPlain("gui.action." + key)));
             this.labelText.translationKey("gui.action." + key);
         }
 
-        this.inputText = add(0, oneSlotHack ? 0 : 1, new Text("gui.action." + key, 5, 1, "")
-            .align(6, 5).background("generic2/input/5_1_shadow"));
+        this.inputText = add(0, oneSlotHack ? 0 : 1, new Text("gui.action." + key, width - stepWidth, 1, "")
+            .align(6, 5).background("generic2/input/" + (width - stepWidth) + "_1_shadow"));
         this.inputText
             .lorePostfix(LORE_POSTFIX_CLICKEDIT)
             .onLeftClick(this::beginAnvilEdit);
 
-        this.minusButton = add(5, oneSlotHack ? 0 : 1, new Button("gui.action." + key + ".minus", 1, 1)
-            .background("generic2/btn/default/1_1_shadow")
-            .sprite("generic2/icon/minus", 4, 8)
-            .onLeftClick(() -> handleNewValue(value - smallStep))
-            .onShiftLeftClick(() -> handleNewValue(value - bigStep)));
-        this.plusButton = add(6, oneSlotHack ? 0 : 1, new Button("gui.action." + key + ".plus", 1, 1)
-            .background("generic2/btn/default/1_1_shadow")
-            .sprite("generic2/icon/plus", 4, 4)
-            .onLeftClick(() -> handleNewValue(value + smallStep))
-            .onShiftLeftClick(() -> handleNewValue(value + bigStep)));
+        if (withSteppers) {
+            this.minusButton = add(width - 2, oneSlotHack ? 0 : 1, new Button("gui.action." + key + ".minus", 1, 1)
+                .background("generic2/btn/default/1_1_shadow")
+                .sprite("generic2/icon/minus", 4, 8)
+                .onLeftClick(() -> handleNewValue(value - smallStep))
+                .onShiftLeftClick(() -> handleNewValue(value - bigStep)));
+            this.plusButton = add(width - 1, oneSlotHack ? 0 : 1, new Button("gui.action." + key + ".plus", 1, 1)
+                .background("generic2/btn/default/1_1_shadow")
+                .sprite("generic2/icon/plus", 4, 4)
+                .onLeftClick(() -> handleNewValue(value + smallStep))
+                .onShiftLeftClick(() -> handleNewValue(value + bigStep)));
+        } else {
+            this.minusButton = null;
+            this.plusButton = null;
+        }
     }
 
     public ControlledNumberInput label(String text) {
@@ -102,10 +115,14 @@ public class ControlledNumberInput extends Panel {
         this.value = Math.clamp(value, this.min, this.max);
         this.inputText.text(this.formatter.apply(this.value));
 
-        if (this.value == this.min) minusButton.background("generic2/btn/disabled/1_1_shadow");
-        else minusButton.background("generic2/btn/default/1_1_shadow");
-        if (this.value == this.max) plusButton.background("generic2/btn/disabled/1_1_shadow");
-        else plusButton.background("generic2/btn/default/1_1_shadow");
+        if (minusButton != null) {
+            if (this.value == this.min) minusButton.background("generic2/btn/disabled/1_1_shadow");
+            else minusButton.background("generic2/btn/default/1_1_shadow");
+        }
+        if (plusButton != null) {
+            if (this.value == this.max) plusButton.background("generic2/btn/disabled/1_1_shadow");
+            else plusButton.background("generic2/btn/default/1_1_shadow");
+        }
     }
 
     private void beginAnvilEdit() {

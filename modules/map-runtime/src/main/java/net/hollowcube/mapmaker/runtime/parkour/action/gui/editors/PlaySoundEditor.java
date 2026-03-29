@@ -26,8 +26,9 @@ import static net.hollowcube.mapmaker.gui.common.ExtraPanels.LORE_POSTFIX_CLICKE
 
 public class PlaySoundEditor extends AbstractActionEditorPanel<@NotNull PlaySoundAction> {
 
-    private final ControlledNumberInput volumeInput;
     private final Text soundInput;
+    private final ControlledNumberInput volumeInput;
+    private final ControlledNumberInput pitchInput;
 
     public PlaySoundEditor(ActionList.Ref ref) {
         super(ref);
@@ -48,20 +49,27 @@ public class PlaySoundEditor extends AbstractActionEditorPanel<@NotNull PlaySoun
             ))
         );
 
-        this.volumeInput = add(1, 3, new ControlledNumberInput("play_sound.volume", update(PlaySoundAction::withVolume)));
+        this.volumeInput = add(1, 3, new ControlledNumberInput(4, "play_sound.volume", update(PlaySoundAction::withVolume), false, true));
         this.volumeInput.range(1, 100);
         this.volumeInput.stepped(5, 10);
+
+        this.pitchInput = add(6, 3, new ControlledNumberInput(2, "play_sound.pitch",
+            update((v, i) -> v.withPitch(i / 100f)), false, false));
+        this.pitchInput.parsed(i -> String.valueOf(i / 100f), s -> (int) (Float.parseFloat(s) * 100));
+        this.pitchInput.formatted(i -> String.valueOf(i / 100f));
+        this.pitchInput.range(0, 200);
     }
 
     @Override
     protected void update(PlaySoundAction data) {
-        this.volumeInput.update((int) (data.volume() * 100));
         if (data.event() == null) {
             this.soundInput.text("");
         } else {
             var name = data.event().key().asMinimalString();
             this.soundInput.text(FontUtil.shorten(name, 115, 5));
         }
+        this.volumeInput.update((int) (data.volume() * 100));
+        this.pitchInput.update((int) (data.pitch() * 100));
     }
 
     private static Button makeSoundButton(SoundEvent sound) {
@@ -101,7 +109,8 @@ public class PlaySoundEditor extends AbstractActionEditorPanel<@NotNull PlaySoun
             return Component.translatable("gui.action.play_sound.thumbnail.empty");
         return Component.translatable("gui.action.play_sound.thumbnail", List.of(
             Component.text(action.event().key().asMinimalString()),
-            TranslationArgument.numeric((int) (action.volume() * 100))
+            TranslationArgument.numeric((int) (action.volume() * 100)),
+            TranslationArgument.numeric(action.pitch())
         ));
     }
 }
