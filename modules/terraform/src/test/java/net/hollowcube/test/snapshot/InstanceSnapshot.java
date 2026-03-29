@@ -1,12 +1,14 @@
 package net.hollowcube.test.snapshot;
 
 import net.hollowcube.schem.Schematic;
-import net.hollowcube.schem.reader.SpongeSchematicReader;
-import net.hollowcube.schem.writer.SpongeSchematicWriter;
+import net.hollowcube.schem.reader.SchematicReader;
+import net.hollowcube.schem.writer.SchematicWriter;
 import net.hollowcube.test.assertions.Assertions;
 import net.hollowcube.test.subject.TestInstance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.IOException;
 
 public class InstanceSnapshot implements Snapshot<TestInstance, Schematic> {
 
@@ -18,13 +20,17 @@ public class InstanceSnapshot implements Snapshot<TestInstance, Schematic> {
     @Override
     public byte @NotNull [] serializeSnapshot(@Nullable Schematic snapshot) {
         if (snapshot == null) return new byte[0];
-        return new SpongeSchematicWriter().write(snapshot);
+        return SchematicWriter.sponge().write(snapshot);
     }
 
     @Override
     public Schematic deserializeSnapshot(byte @NotNull [] serialized) {
         if (serialized.length == 0) return null;
-        return new SpongeSchematicReader().read(serialized);
+        try {
+            return SchematicReader.sponge().read(serialized);
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
     }
 
     @Override

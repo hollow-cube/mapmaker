@@ -11,9 +11,12 @@ import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerServiceImpl;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -25,22 +28,21 @@ public class TestServer {
         System.setProperty("minestom.chunk-view-distance", "16");
     }
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         var server = MinecraftServer.init();
 
         CompatProvider.load(MinecraftServer.getGlobalEventHandler());
 
-        DataFixer.addFixVersions(MapServerRunner.extraDataVersionsForMaps());
         DataFixer.buildModel();
 
-        MapEntities.initNoEvents();
+        MapEntities.init(EventNode.type("dummy", EventFilter.INSTANCE));
 
         var commandManager = new CommandManagerImpl();
 
         MinecraftServer.getConnectionManager().setPlayerProvider((connection, gameProfile) ->
             new MapPlayer(connection, gameProfile) {
                 @Override
-                public CommandManager getCommandManager() {
+                public @NotNull CommandManager getCommandManager() {
                     return commandManager;
                 }
             });

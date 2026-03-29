@@ -4,8 +4,13 @@ plugins {
 
 repositories {
     // This code is duplicated in the java-binary configuration, should make any changes there also.
-    val centralLibs = listOf(libs.minestom, libs.polar, libs.posthog, libs.adventure.api, libs.luau.core)
-        .mapNotNull { it.get().version }
+    val centralLibs = listOf(
+        libs.minestom.asProvider().get(),
+        libs.polar.get(),
+        libs.posthog.get(),
+        libs.adventure.api.get(),
+        libs.luau.core.get()
+    ).mapNotNull { it.version }
     if (centralLibs.any { it == "dev" })
         mavenLocal()
     if (centralLibs.any { it.endsWith("-SNAPSHOT") || it.matches(Regex("^.+-(\\d{8})\\.(\\d{6})-(\\d+)\$")) }) {

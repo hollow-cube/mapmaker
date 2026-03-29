@@ -3,8 +3,9 @@ plugins {
 }
 
 dependencies {
-    api(project(":modules:test"))
+    api(libs.minestom.testing)
     api(project(":modules:map-core"))
+    api(project(":modules:map-runtime")) // needs this for some test input
 
     implementation(project(":modules:compat"))
 //    implementation(project(":modules:script-engine"))

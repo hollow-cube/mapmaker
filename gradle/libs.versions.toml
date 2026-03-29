@@ -38,6 +38,7 @@ autoservice-annotations = { group = "com.google.auto.service", name = "auto-serv
 fastutil = { group = "it.unimi.dsi", name = "fastutil", version.ref = "fastutil" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 minestom = { group = "net.minestom", name = "minestom", version.ref = "minestom" }
+minestom-testing = { group = "net.minestom", name = "testing", version.ref = "minestom" }
 posthog = { group = "dev.hollowcube", name = "posthog-java", version.ref = "posthog" }
 slf4j = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
 slf4j-jul = { group = "org.slf4j", name = "jul-to-slf4j", version.ref = "slf4j" }
