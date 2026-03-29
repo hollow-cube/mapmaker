@@ -72,8 +72,12 @@ public class LunarCompatProvider implements CompatProvider, DiscordRichPresenceP
         new ClientboundLunarPacket(
             Map.of(
                 "@type", ClientboundLunarPacket.TYPE_PREFIX + "richpresence.v1.OverrideServerRichPresenceMessage",
-                "game_name", activity,
-                "map_name", map
+                "game_name", "game_name",
+                "game_variant_name", "game_variant_name",
+                "game_state", "game_state",
+                "player_state", "player_state",
+                "map_name", map,
+                "sub_server", "sub_server"
             )
         ).send(player);
     }
