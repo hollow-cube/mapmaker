@@ -9,7 +9,6 @@ import net.hollowcube.compat.lunar.packets.ClientboundLunarPacket;
 import net.hollowcube.compat.lunar.packets.ServerboundLunarPacket;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.GlobalEventHandler;
-import net.minestom.server.event.player.PlayerPluginMessageEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
@@ -72,8 +71,9 @@ public class LunarCompatProvider implements CompatProvider, DiscordRichPresenceP
         new ClientboundLunarPacket(
             Map.of(
                 "@type", ClientboundLunarPacket.TYPE_PREFIX + "richpresence.v1.OverrideServerRichPresenceMessage",
-                "game_name", activity,
-                "game_variant_name", map
+                "player_state", activity,
+                // This is a lunar bug, it seems to escape the / character and discord doesn't undo it, so we need to replace it with another character
+                "game_variant_name", map.replace("/", "∕")
             )
         ).send(player);
     }
