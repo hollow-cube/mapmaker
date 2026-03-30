@@ -70,7 +70,7 @@ public class LunarCompatProvider implements CompatProvider, DiscordRichPresenceP
         @Nullable String details
     ) {
         // This is a lunar bug, it seems to escape the / character and discord doesn't undo it
-        details = details != null ? details : "";
+        details = details != null ? details.replace("/", "∕") : "";
 
         new ClientboundLunarPacket(
             Map.of(
