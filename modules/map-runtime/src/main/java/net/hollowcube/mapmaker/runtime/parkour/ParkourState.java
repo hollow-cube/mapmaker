@@ -394,10 +394,11 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             DiscordRichPresenceManager.queueRichPresenceUpdate(
                 player,
                 activity,
-                "%s (/play %s)".formatted(map.name(), map.publishedIdString())
+                map.name(),
+                "/play %s".formatted(map.publishedIdString())
             );
         } else {
-            DiscordRichPresenceManager.queueRichPresenceUpdate(player, activity, "");
+            DiscordRichPresenceManager.queueRichPresenceUpdate(player, activity, "a map", "");
         }
     }
 

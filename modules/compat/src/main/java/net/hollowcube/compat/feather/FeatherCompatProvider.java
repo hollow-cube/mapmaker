@@ -17,6 +17,7 @@ import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,13 +51,17 @@ public class FeatherCompatProvider implements CompatProvider, DiscordRichPresenc
     }
 
     @Override
-    public void setRichPresence(@NotNull Player player, @NotNull String activity, @NotNull String map) {
+    public void setRichPresence(
+        @NotNull Player player,
+        @NotNull String activity, @NotNull String name,
+        @Nullable String details
+    ) {
         new ClientboundFeatherPacket(
                 new S2CSetDiscordActivity(
                         IMAGE_URL,
                         "Hollow Cube",
-                        map,
-                        "%s on Hollow Cube".formatted(activity),
+                        details,
+                        "%s %s on Hollow Cube".formatted(activity, name),
                         null,
                         null,
                         null,

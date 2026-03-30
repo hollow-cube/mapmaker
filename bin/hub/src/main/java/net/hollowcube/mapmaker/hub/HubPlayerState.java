@@ -66,7 +66,7 @@ public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMa
                 mp.setCanSendPose(false);
             }
 
-            DiscordRichPresenceManager.queueRichPresenceUpdate(player, "In the lobby", "");
+            DiscordRichPresenceManager.queueRichPresenceUpdate(player, "In the", "lobby", "play.hollowcube.net");
         }
 
         @Override

@@ -1,6 +1,7 @@
 package net.hollowcube.compat.lunar.packets;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import net.hollowcube.compat.api.packet.ClientboundModPacket;
 import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +12,7 @@ import java.util.Map;
 public record ClientboundLunarPacket(
         @NotNull Map<String, ?> data
 ) implements ClientboundModPacket<ClientboundLunarPacket> {
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
     public static final String TYPE_PREFIX = "type.googleapis.com/lunarclient.apollo.";
 
 

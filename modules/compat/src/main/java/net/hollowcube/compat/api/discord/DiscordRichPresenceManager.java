@@ -2,6 +2,7 @@ package net.hollowcube.compat.api.discord;
 
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.HashSet;
@@ -17,11 +18,15 @@ public class DiscordRichPresenceManager {
     }
 
 
-    public static void queueRichPresenceUpdate(@NotNull Player player, @NotNull String activity, @NotNull String map) {
+    public static void queueRichPresenceUpdate(
+        @NotNull Player player,
+        @NotNull String activity, @NotNull String name,
+        @Nullable String details
+    ) {
         player.scheduler().buildTask(() -> {
             for (DiscordRichPresenceProvider provider : PROVIDERS) {
                 if (provider.isRichPresenceSupportedFor(player)) {
-                    provider.setRichPresence(player, activity, map);
+                    provider.setRichPresence(player, activity, name, details);
                     break;
                 }
             }

@@ -11,6 +11,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -65,15 +66,18 @@ public class LunarCompatProvider implements CompatProvider, DiscordRichPresenceP
     @Override
     public void setRichPresence(
         @NotNull Player player,
-        @NotNull String activity,
-        @NotNull String map
+        @NotNull String activity, @NotNull String name,
+        @Nullable String details
     ) {
+        // This is a lunar bug, it seems to escape the / character and discord doesn't undo it
+        details = details != null ? details : "";
+
         new ClientboundLunarPacket(
             Map.of(
                 "@type", ClientboundLunarPacket.TYPE_PREFIX + "richpresence.v1.OverrideServerRichPresenceMessage",
                 "player_state", activity,
-                // This is a lunar bug, it seems to escape the / character and discord doesn't undo it
-                "game_variant_name", map.replace("/", "")
+                "game_name", name,
+                "game_variant_name", details
             )
         ).send(player);
     }
