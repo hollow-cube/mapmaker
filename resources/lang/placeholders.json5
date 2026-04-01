@@ -157,6 +157,11 @@
     "ref": "icon/emoji/sus/red",
     "no_shadow": true
   },
+  "COLON3": {
+    "type": "sprite",
+    "ref": "icon/emoji/misc/3",
+    "no_shadow": true
+  },
   // Standard Colors
   // #696969 - Dark Gray (Brackets, Double Arrow, Direct Messaging Commands Arrow, etc.)
   "dark_gray": {

@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker;
 
+import net.hollowcube.mapmaker.chat.components.ChatLanguage;
 import net.hollowcube.mapmaker.map.VisibilityRule;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
@@ -12,6 +13,7 @@ public final class PlayerSettings {
 
     public static final PlayerSetting<String> CHAT_CHANNEL = PlayerSetting.String("chat_channel", ClientChatMessageData.CHANNEL_GLOBAL);
     public static final PlayerSetting<Boolean> COSMETICS_SHOW_LOCKED = PlayerSetting.Bool("cosmetics.show_locked", true);
+    public static final PlayerSetting<ChatLanguage> CHAT_LANGUAGE = PlayerSetting.Enum("chat_language", ChatLanguage.ORIGINAL);
 
     // Hub
 
@@ -22,7 +24,7 @@ public final class PlayerSettings {
 
     // Playing (parkour) maps
 
-    public static PlayerSetting<VisibilityRule> NEARBY_PLAYER_VISIBILITY = PlayerSetting.Enum("nearby_player_visibility", VisibilityRule.GHOST);
+    public static final PlayerSetting<VisibilityRule> NEARBY_PLAYER_VISIBILITY = PlayerSetting.Enum("nearby_player_visibility", VisibilityRule.GHOST);
 
 
     // Moderation

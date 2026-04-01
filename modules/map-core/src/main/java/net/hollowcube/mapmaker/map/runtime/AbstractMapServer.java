@@ -113,6 +113,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -415,6 +417,7 @@ public abstract class AbstractMapServer implements MapServer {
         commandManager.register(new HideCommand(playerService()));
         commandManager.register(new SettingsCommand());
         commandManager.register(new BugReportCommand());
+        commandManager.register(new UwUCommand(playerService()));
 
         if (fullInstance) {
             commandManager.register(new UnblockCommand(playerService()));
@@ -686,6 +689,13 @@ public abstract class AbstractMapServer implements MapServer {
 
         // Resend the skin - TODO: this is a minestom bug, it should automatically resend metadata after reconfig but this is a temp fix.
         player.sendPacket(player.getMetadataPacket());
+
+        if (Boolean.TRUE.equals(player.getTag(CompatProvider.FIRST_JOIN_TAG))) {
+            var now = LocalDateTime.now(ZoneOffset.ofHours(-5));
+            if (now.getDayOfMonth() == 1 && now.getMonthValue() == 4) {
+                player.sendMessage(Component.translatable("join.uwu"));
+            }
+        }
     }
 
     protected void handlePlayerDisconnect(@NotNull Player player) {

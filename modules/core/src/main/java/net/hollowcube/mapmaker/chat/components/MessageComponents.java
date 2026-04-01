@@ -5,9 +5,11 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.ProtocolVersions;
+import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.misc.Emoji;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.temp.ChatMessageData;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -23,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -118,22 +121,26 @@ public class MessageComponents {
 
     public @NotNull MessageComponent createGlobalMessage(@NotNull Player player, @NotNull ChatMessageData message) {
         Random random = new Random(message.seed());
+        var shouldUwuify = PlayerData.fromPlayer(player).getSetting(PlayerSettings.CHAT_LANGUAGE) == ChatLanguage.UWU;
 
         var builder = MessageComponent.builder();
 
         for (var part : message.parts()) {
             switch (part.type()) {
                 case RAW -> {
-                    Component component = Component.text(part.text());
+                    Component component = Component.text(shouldUwuify ? uwuify(part.text(), random) : part.text());
 
                     var namePattern = Pattern.compile(String.format("(?:^|\\s)(%s)", player.getUsername()), Pattern.CASE_INSENSITIVE);
                     if (namePattern.matcher(part.text()).find()) {
                         builder.ping(!player.getUuid().toString().equals(message.sender()));
 
-                        component = component.replaceText(TextReplacementConfig.builder()
-                                .match(namePattern)
-                                .replacement((match, _) -> Component.text(match.group(), PING_COLOR))
-                                .build());
+                        if (!shouldUwuify) {
+                            component = component.replaceText(
+                                TextReplacementConfig.builder()
+                                    .match(namePattern)
+                                    .replacement((match, _) -> Component.text(match.group(), PING_COLOR)).build()
+                            );
+                        }
                     }
 
                     builder.append(component);
@@ -149,12 +156,13 @@ public class MessageComponents {
 
     public @NotNull MessageComponent createDirectMessage(@NotNull Player player, @NotNull ChatMessageData message) {
         Random random = new Random(message.seed());
+        var shouldUwuify = PlayerData.fromPlayer(player).getSetting(PlayerSettings.CHAT_LANGUAGE) == ChatLanguage.UWU;
 
         var builder = MessageComponent.builder();
 
         for (var part : message.parts()) {
             switch (part.type()) {
-                case RAW -> builder.append(Component.text(part.text()));
+                case RAW  -> builder.append(Component.text(shouldUwuify ? uwuify(part.text(), random) : part.text()));
                 case EMOJI -> this.emoji(builder, message.senderHasHypercube(), part.name(), random);
                 case MAP -> this.map(builder, part.mapId(), player);
                 case URL -> this.link(builder, part.text());
@@ -162,5 +170,59 @@ public class MessageComponents {
         }
 
         return builder.build();
+    }
+
+    private static String uwuify(String input, Random random) {
+        var parts = input.split(" ");
+        var output = new ArrayList<String>();
+        var index = 0;
+        for (var part : parts) {
+            if (part.startsWith("@")) {
+                output.add(part);
+            } else {
+                var uwuified = part;
+                if (random.nextInt(5) == 0 && part.length() >= 3) {
+                    var character = uwuified.charAt(0);
+                    var stutterCount = random.nextInt(1) + 1;
+                    for (var i = 0; i < stutterCount; i++) {
+                        uwuified = "%s-%s".formatted(character, uwuified);
+                    }
+                }
+
+                uwuified = uwuified.replaceAll("[rl]", "w");
+                uwuified = uwuified.replaceAll("[RL]", "W");
+                uwuified = uwuified.replaceAll("n([aeiou])", "ny$1");
+                uwuified = uwuified.replaceAll("N([aeiouAEIOU])", "Ny$1");
+                uwuified = uwuified.replaceAll("(?i)ove", "uv");
+
+                if (uwuified.endsWith("!") || uwuified.endsWith("?") || uwuified.endsWith(".")) {
+                    if (random.nextInt(4) == 0) {
+                        var extraPunctuationCount = random.nextInt(3) + 1;
+                        var extraPunctuation = new StringBuilder();
+                        for (var i = 0; i < extraPunctuationCount; i++) {
+                            extraPunctuation.append(random.nextBoolean() ? "!" : "?");
+                        }
+                        uwuified += extraPunctuation;
+                    }
+                }
+
+                output.add(uwuified);
+            }
+
+            if (index < parts.length - 1 && parts.length > 5 && random.nextInt(10) == 0) {
+                if (random.nextInt(10) == 0) {
+                    output.add("owo");
+                } else if (random.nextInt(10) == 0) {
+                    output.add("uwu");
+                } else if (random.nextInt(10) == 0) {
+                    output.add("rawr");
+                } else if (random.nextInt(10) == 0) {
+                    output.add("nya~");
+                }
+            }
+            index++;
+        }
+
+        return String.join(" ", output);
     }
 }
