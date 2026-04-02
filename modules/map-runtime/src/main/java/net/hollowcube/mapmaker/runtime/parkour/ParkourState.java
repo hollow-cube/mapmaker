@@ -164,28 +164,30 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         }
 
         static CompletableFuture<Void> resetTeleport(Player player, Pos position) {
-            try {
-                player.sendPacket(new BundlePacket());
+            return player.teleport(position, Vec.ZERO, null, RelativeFlags.NONE)
+                .thenRun(() -> {
+                    try {
+                        player.sendPacket(new BundlePacket());
 
-                var chunk = player.getInstance().getChunkAt(position);
-                if (chunk != null) {
-                    player.sendPacket(chunk.getFullDataPacket());
-                    var ghostBlocks = GhostBlockHolder.forPlayerOptional(player);
-                    if (ghostBlocks != null) ghostBlocks.resendChunk(chunk);
-                }
+                        var chunk = player.getInstance().getChunkAt(position);
+                        if (chunk != null) {
+                            player.sendPacket(chunk.getFullDataPacket());
+                            var ghostBlocks = GhostBlockHolder.forPlayerOptional(player);
+                            if (ghostBlocks != null) ghostBlocks.resendChunk(chunk);
+                        }
 
-                player.setFlyingWithElytra(false);
-                var future = player.teleport(position, Vec.ZERO, null, RelativeFlags.NONE);
+                        player.setFlyingWithElytra(false);
 
-                // Force the player immediately into whatever pose the server thinks they should be in at the target pos.
-                if (player instanceof MapPlayer mp) mp.updatePose();
-                player.sendPacket(new EntityMetaDataPacket(player.getEntityId(),
-                        Map.of(MetadataDef.Player.POSE.index(), Metadata.Pose(player.getPose()))));
-
-                return future;
-            } finally {
-                player.sendPacket(new BundlePacket());
-            }
+                        // Force the player immediately into whatever pose the server thinks they should be in at the target pos.
+                        ((MapPlayer) player).updatePose();
+                        player.sendPacket(new EntityMetaDataPacket(
+                            player.getEntityId(),
+                            Map.of(MetadataDef.Player.POSE.index(), Metadata.Pose(player.getPose()))
+                        ));
+                    } finally {
+                        player.sendPacket(new BundlePacket());
+                    }
+                });
         }
     }
 
