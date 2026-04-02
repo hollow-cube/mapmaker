@@ -418,8 +418,12 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
                 finishScore = NumberUtil.roundMillisToTicks((long) finishScore);
             }
 
+            boolean isBetterScore =
+                (lb.asc() && finishScore < bestScore) ||
+                (!lb.asc() && finishScore > bestScore);
+
             var diffScore = bestScore - finishScore;
-            var diffColor = diffScore < 0 && lb.asc() ? NamedTextColor.RED : NamedTextColor.GREEN;
+            var diffColor = isBetterScore ? NamedTextColor.GREEN : NamedTextColor.RED;
             var diffSymbol = diffScore < 0 ? "+" : "-";
             player.sendMessage(Component.translatable(
                 "map.completed." + lb.format().name().toLowerCase() + ".with_prior",
@@ -428,9 +432,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
                 text(diffSymbol, diffColor).children(List.of(lb.format().format(Math.abs(diffScore))))
             ));
 
-            if (finishState.getEffectivePlaytime() < bestState.getEffectivePlaytime()) {
-                player.setTag(BEST_SAVESTATE, finishState);
-            }
+            if (isBetterScore) player.setTag(BEST_SAVESTATE, finishState);
         }
 
         // Will be called when the completion animation is finished

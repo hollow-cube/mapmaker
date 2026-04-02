@@ -38,8 +38,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
-
 
 public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMapWorld> {
 
@@ -324,9 +322,10 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
 
             // If this is a verification, immediately remove them from the world and send them back to the hub
             if (world.map().verification() == MapVerification.PENDING) {
+                var lb = world.map().settings().leaderboard();
                 player.sendMessage(Component.translatable(
-                    "map.completed.first",
-                    Component.text(formatMapPlaytime(saveState.getEffectivePlaytime(), true))
+                    "map.completed." + lb.format().name().toLowerCase() + ".first",
+                    lb.format().format(saveState.getScore())
                 ));
 
                 FutureUtil.submitVirtual(() -> world.server().bridge().joinHub(player));
