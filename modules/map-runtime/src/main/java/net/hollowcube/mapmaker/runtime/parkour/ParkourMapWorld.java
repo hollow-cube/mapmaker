@@ -68,7 +68,6 @@ import net.minestom.server.tag.TagWritable;
 import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.Nullable;
-
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
@@ -76,6 +75,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
+import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
@@ -83,27 +83,38 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     private static final int RESET_HEIGHT_OFFSET = 5;
 
-    private static final Sound PLAYER_HURT_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_HURT, Sound.Source.PLAYER, 1, 1f);
-    private static final Sound PLAYER_DEATH_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_DEATH, Sound.Source.PLAYER, 1, 1f);
+    private static final Sound PLAYER_HURT_SOUND =
+        sound(SoundEvent.ENTITY_PLAYER_HURT, Sound.Source.PLAYER, 1, 1f);
+    private static final Sound PLAYER_DEATH_SOUND =
+        sound(SoundEvent.ENTITY_PLAYER_DEATH, Sound.Source.PLAYER, 1, 1f);
 
     private static final Tag<SaveState> BEST_SAVESTATE = Tag.Transient("map:best_savestate");
 
     private static final List<ItemHandler> SILENT_ITEMS = List.of(
-        // Hotbar items
-        MapDetailsItem.INSTANCE, ReturnToHubItem.INSTANCE, RateMapItem.INSTANCE,
-        ReturnToCheckpointItem.INSTANCE, ResetSaveStateItem.INSTANCE,
-        ToggleSpectatorModeItem.INSTANCE_OFF, ToggleSpectatorModeItem.INSTANCE_ON,
-        ToggleGameplayItem.INSTANCE_OFF, ToggleGameplayItem.INSTANCE_ON,
-        ToggleFlightItem.INSTANCE_OFF, ToggleFlightItem.INSTANCE_ON,
+        MapDetailsItem.INSTANCE,
+        ReturnToHubItem.INSTANCE,
+        RateMapItem.INSTANCE,
+        ReturnToCheckpointItem.INSTANCE,
+        ResetSaveStateItem.INSTANCE,
+        ToggleSpectatorModeItem.INSTANCE_OFF,
+        ToggleSpectatorModeItem.INSTANCE_ON,
+        ToggleGameplayItem.INSTANCE_OFF,
+        ToggleGameplayItem.INSTANCE_ON,
+        ToggleFlightItem.INSTANCE_OFF,
+        ToggleFlightItem.INSTANCE_ON,
         SetSpectatorCheckpointItem.INSTANCE,
-        // Gameplay items
-        FireworkRocketItem.INSTANCE, EnderPearlItem.INSTANCE,
-        WindChargeItem.INSTANCE, TridentItem.INSTANCE,
+        FireworkRocketItem.INSTANCE,
+        EnderPearlItem.INSTANCE,
+        WindChargeItem.INSTANCE,
+        TridentItem.INSTANCE,
         MaceItem.INSTANCE
     );
 
     // Holds the CheckpointEffectData applied to the player on first spawn.
-    public static final Tag<ActionTriggerData> SPAWN_CHECKPOINT_EFFECTS = DFU.Tag(ActionTriggerData.CODEC, "spawn_checkpoint_effects");
+    public static final Tag<ActionTriggerData> SPAWN_CHECKPOINT_EFFECTS = DFU.Tag(
+        ActionTriggerData.CODEC,
+        "spawn_checkpoint_effects"
+    );
 
     private static @Nullable ServerProcess initProcess = null;
 
@@ -123,21 +134,43 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
         process.packetListener().setPlayListener(
             ClientPlayerBlockPlacementPacket.class,
-            ClientBlockPlacementListener::handleBlockPlacementPacket);
+            ClientBlockPlacementListener::handleBlockPlacementPacket
+        );
 
-        process.block().registerHandler(CheckpointPlateBlock.INSTANCE.getKey(), () -> CheckpointPlateBlock.INSTANCE);
-        process.block().registerHandler(FinishPlateBlock.INSTANCE.getKey(), () -> FinishPlateBlock.INSTANCE);
-        process.block().registerHandler(StatusPlateBlock.INSTANCE.getKey(), () -> StatusPlateBlock.INSTANCE);
+        process.block().registerHandler(
+            CheckpointPlateBlock.INSTANCE.getKey(),
+            () -> CheckpointPlateBlock.INSTANCE
+        );
+        process.block().registerHandler(
+            FinishPlateBlock.INSTANCE.getKey(),
+            () -> FinishPlateBlock.INSTANCE
+        );
+        process.block().registerHandler(
+            StatusPlateBlock.INSTANCE.getKey(),
+            () -> StatusPlateBlock.INSTANCE
+        );
 
-        process.block().registerHandler(DripleafBlock.INSTANCE.getKey(), () -> DripleafBlock.INSTANCE);
+        process.block().registerHandler(
+            DripleafBlock.INSTANCE.getKey(),
+            () -> DripleafBlock.INSTANCE
+        );
 
         MinecraftServer.getGlobalEventHandler().addChild(PotionHandler.EVENT_NODE);
     }
 
     public static void registerMarkers(ObjectEntityHandlerRegistry objectEntityHandlers) {
-        objectEntityHandlers.registerForMarkers(MapLeaderboardMarkerHandler.ID, MapLeaderboardMarkerHandler::new);
-        objectEntityHandlers.registerForMarkers(HappyGhastMarkerHandler.ID, HappyGhastMarkerHandler::new);
-        objectEntityHandlers.registerForMarkers(CheckpointMarkerHandler.ID, CheckpointMarkerHandler::new);
+        objectEntityHandlers.registerForMarkers(
+            MapLeaderboardMarkerHandler.ID,
+            MapLeaderboardMarkerHandler::new
+        );
+        objectEntityHandlers.registerForMarkers(
+            HappyGhastMarkerHandler.ID,
+            HappyGhastMarkerHandler::new
+        );
+        objectEntityHandlers.registerForMarkers(
+            CheckpointMarkerHandler.ID,
+            CheckpointMarkerHandler::new
+        );
         objectEntityHandlers.registerForMarkers(StatusMarkerHandler.ID, StatusMarkerHandler::new);
         objectEntityHandlers.registerForMarkers(FinishMarkerHandler.ID, FinishMarkerHandler::new);
         objectEntityHandlers.registerForMarkers(ResetMarkerHandler.ID, ResetMarkerHandler::new);
@@ -156,10 +189,14 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     protected ParkourMapWorld(MapServer server, MapData map, MapInstance instance) {
         super(server, map, instance, ParkourState.class);
-        Check.stateCondition(initProcess == null, "ParkourMapWorld is not initialized, was `ParkourMapWorld2.initGlobalReferences()` called?");
+        Check.stateCondition(
+            initProcess == null,
+            "ParkourMapWorld is not initialized, was `ParkourMapWorld2.initGlobalReferences()` called?"
+        );
 
         this.saveStateType = map.verification() == MapVerification.PENDING
-            ? SaveStateType.VERIFYING : SaveStateType.PLAYING;
+            ? SaveStateType.VERIFYING
+            : SaveStateType.PLAYING;
         this.defaultResetHeight = instance().getCachedDimensionType().minY();
 
         SILENT_ITEMS.forEach(itemRegistry()::registerSilent);
@@ -167,8 +204,14 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         registerMarkers(objectEntityHandlers());
 
         eventNode(ParkourState.AnyPlaying.class)
-            .addListener(PlayerMoveEvent.class, event -> handlePlayerOrVehicleMove(event.getPlayer(), event.getNewPosition()))
-            .addListener(PlayerMoveVehicleEvent.class, event -> handlePlayerOrVehicleMove(event.getPlayer(), event.getNewPosition()))
+            .addListener(
+                PlayerMoveEvent.class,
+                event -> handlePlayerOrVehicleMove(event.getPlayer(), event.getNewPosition())
+            )
+            .addListener(
+                PlayerMoveVehicleEvent.class,
+                event -> handlePlayerOrVehicleMove(event.getPlayer(), event.getNewPosition())
+            )
             .addListener(PlayerTickEvent.class, this::handlePlayerTick)
             .addListener(PlayerTickEndEvent.class, this::handleClientPlayerTick)
             .addChild(DelayedBlockInteractions.EVENT_NODE)
@@ -184,11 +227,15 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             .addChild(ResetLiquidSetting.EVENT_NODE)
             .addChild(TickRateSetting.EVENT_NODE);
 
-        eventNode(ParkourState.Spectating.class)
-            .addListener(PlayerMoveEvent.class, this::handleSpectatorMove);
+        eventNode(ParkourState.Spectating.class).addListener(
+            PlayerMoveEvent.class,
+            this::handleSpectatorMove
+        );
 
-        eventNode(ParkourState.Finished.class)
-            .addListener(PlayerMoveEvent.class, this::handleSpectatorMove);
+        eventNode(ParkourState.Finished.class).addListener(
+            PlayerMoveEvent.class,
+            this::handleSpectatorMove
+        );
 
         // Make the entire world readonly to all players inside it (spec or playing doesn't matter)
         eventNode().addChild(EventUtil.READ_ONLY_NODE);
@@ -198,12 +245,24 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         if (map.getSetting(MapSettings.HAS_SCRIPT_BUNDLE)) {
             // TODO(scripting): Generalize this init logic
             if (ServerRuntime.getRuntime().isDevelopment()) {
-                var playerScript = Objects.requireNonNull(ParkourMapWorld.class.getResource("/scripts/" + map.id() + "/player.luau"));
-                var baseUrl = URI.create(playerScript.toString().substring(0, playerScript.toString().lastIndexOf('/')));
+                var playerScript = Objects.requireNonNull(
+                    ParkourMapWorld.class.getResource("/scripts/" + map.id() + "/player.luau")
+                );
+                var baseUrl = URI.create(
+                    playerScript.toString().substring(0, playerScript.toString().lastIndexOf('/'))
+                );
                 this.scriptContext = new WorldScriptContext(this, baseUrl, false);
             } else {
-                var zipUrl = Objects.requireNonNull(ParkourMapWorld.class.getResource("/net.hollowcube.scripting/" + map.id() + ".zip"));
-                this.scriptContext = new WorldScriptContext(this, URI.create(zipUrl.toString()), true);
+                var zipUrl = Objects.requireNonNull(
+                    ParkourMapWorld.class.getResource(
+                        "/net.hollowcube.scripting/" + map.id() + ".zip"
+                    )
+                );
+                this.scriptContext = new WorldScriptContext(
+                    this,
+                    URI.create(zipUrl.toString()),
+                    true
+                );
             }
         } else {
             this.scriptContext = null;
@@ -211,7 +270,9 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
         // We throw on world creation if the expression is invalid. We parse when setting it, so this
         // should not happen. Not sure if theres any better recourse than failing to load.
-        this.leaderboardScoreExpr = MolangOptimizer.optimizeAst(MolangExpr.parseOrThrow(map.settings().leaderboard().score()));
+        this.leaderboardScoreExpr = MolangOptimizer.optimizeAst(
+            MolangExpr.parseOrThrow(map.settings().leaderboard().score())
+        );
     }
 
     public int defaultResetHeight() {
@@ -230,16 +291,20 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     }
 
     public void hardResetPlayer(Player player) {
-        var newSaveState = new SaveState(UUID.randomUUID().toString(),
-            map().id(), player.getUuid().toString(), saveStateType,
-            PlayState.SERIALIZER, new PlayState());
+        var newSaveState = new SaveState(
+            UUID.randomUUID().toString(),
+            map().id(),
+            player.getUuid().toString(),
+            saveStateType,
+            PlayState.SERIALIZER,
+            new PlayState()
+        );
         newSaveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
         changePlayerState(player, createPlayingState(newSaveState));
     }
 
     public void softResetPlayer(Player player) {
-        if (!(getPlayerState(player) instanceof ParkourState.AnyPlaying playing))
-            return;
+        if (!(getPlayerState(player) instanceof ParkourState.AnyPlaying playing)) return;
         var saveState = playing.saveState();
         var playState = saveState.state(PlayState.class);
 
@@ -290,27 +355,43 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         final var playerData = PlayerData.fromPlayer(player);
         SaveState saveState;
         try {
-            saveState = server().mapService().getLatestSaveState(map().id(),
-                playerData.id(), saveStateType, PlayState.SERIALIZER);
+            saveState = server()
+                .mapService()
+                .getLatestSaveState(
+                    map().id(),
+                    playerData.id(),
+                    saveStateType,
+                    PlayState.SERIALIZER
+                );
         } catch (MapService.NotFoundError ignored) {
             // No save state yet, create one locally.
             // We do an upsert to save, so it will be created in the map service at that point.
-            saveState = new SaveState(UUID.randomUUID().toString(),
-                map().id(), playerData.id(), saveStateType,
-                PlayState.SERIALIZER, new PlayState());
+            saveState = new SaveState(
+                UUID.randomUUID().toString(),
+                map().id(),
+                playerData.id(),
+                saveStateType,
+                PlayState.SERIALIZER,
+                new PlayState()
+            );
             saveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
         }
 
-        player.setRespawnPoint(Objects.requireNonNullElseGet(
-            saveState.state(PlayState.class).pos(),
-            () -> map().settings().getSpawnPoint()
-        ));
+        player.setRespawnPoint(
+            Objects.requireNonNullElseGet(
+                saveState.state(PlayState.class).pos(),
+                () -> map().settings().getSpawnPoint()
+            )
+        );
 
         if (RateMapItem.isMapRatable(this)) {
             RateMapItem.initLastRating(server().mapService(), player, map());
         }
 
-        player.setTag(BEST_SAVESTATE, server().mapService().getBestSaveState(map().id(), player.getUuid().toString()));
+        player.setTag(
+            BEST_SAVESTATE,
+            server().mapService().getBestSaveState(map().id(), player.getUuid().toString())
+        );
 
         return createPlayingState(saveState);
     }
@@ -338,8 +419,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     /// Initializes the parkour timer from some action the player took
     /// for example moving or placing a block
     public void initTimerFromAction(Player player) {
-        if (!(getPlayerState(player) instanceof ParkourState.AnyPlaying playing))
-            return;
+        if (!(getPlayerState(player) instanceof ParkourState.AnyPlaying playing)) return;
         initTimerFromAction(player, playing.saveState());
     }
 
@@ -361,8 +441,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     }
 
     private void handlePlayerOrVehicleMove(Player player, Pos newPos) {
-        if (!(getPlayerState(player) instanceof ParkourState.AnyPlaying playing))
-            return;
+        if (!(getPlayerState(player) instanceof ParkourState.AnyPlaying playing)) return;
 
         var saveState = playing.saveState();
         var oldPosition = player.getPosition();
@@ -371,7 +450,10 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         }
 
         var playState = saveState.state(PlayState.class);
-        int resetHeight = OpUtils.or(playState.get(Attachments.RESET_HEIGHT), this::defaultResetHeight);
+        int resetHeight = OpUtils.or(
+            playState.get(Attachments.RESET_HEIGHT),
+            this::defaultResetHeight
+        );
         if (player.getPosition().y() < resetHeight) {
             softResetPlayer(player);
             return;
@@ -396,7 +478,10 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     private void handleSpectatorMove(PlayerMoveEvent event) {
         if (event.getNewPosition().y() < instance().getCachedDimensionType().minY()) {
-            ParkourState.AnyPlaying.resetTeleport(event.getPlayer(), map().settings().getSpawnPoint());
+            ParkourState.AnyPlaying.resetTeleport(
+                event.getPlayer(),
+                map().settings().getSpawnPoint()
+            );
         }
     }
 
@@ -406,10 +491,12 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         var bestState = player.getTag(BEST_SAVESTATE);
         if (bestState == null) {
             player.setTag(BEST_SAVESTATE, finishState);
-            player.sendMessage(Component.translatable(
-                "map.completed." + lb.format().name().toLowerCase() + ".first",
-                lb.format().format(finishState.getScore())
-            ));
+            player.sendMessage(
+                Component.translatable(
+                    "map.completed." + lb.format().name().toLowerCase() + ".first",
+                    lb.format().format(finishState.getScore())
+                )
+            );
         } else {
             double bestScore = bestState.getScore(), finishScore = finishState.getScore();
             if (lb.format() == Leaderboard.Format.TIME) {
@@ -418,19 +505,20 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
                 finishScore = NumberUtil.roundMillisToTicks((long) finishScore);
             }
 
-            boolean isBetterScore =
-                (lb.asc() && finishScore < bestScore) ||
-                (!lb.asc() && finishScore > bestScore);
+            boolean isBetterScore = (lb.asc() && finishScore < bestScore) || (!lb.asc() && finishScore > bestScore);
 
             var diffScore = bestScore - finishScore;
             var diffColor = isBetterScore ? NamedTextColor.GREEN : NamedTextColor.RED;
             var diffSymbol = diffScore < 0 ? "+" : "-";
-            player.sendMessage(Component.translatable(
-                "map.completed." + lb.format().name().toLowerCase() + ".with_prior",
-                lb.format().format(finishState.getScore()),
-                // Note: roundToTicks is not used here. We do the rounding above because we need to round prior to calculating the difference.
-                text(diffSymbol, diffColor).children(List.of(lb.format().format(Math.abs(diffScore))))
-            ));
+            player.sendMessage(
+                Component.translatable(
+                    "map.completed." + lb.format().name().toLowerCase() + ".with_prior",
+                    lb.format().format(finishState.getScore()),
+                    text(diffSymbol, diffColor).children(
+                        List.of(lb.format().format(Math.abs(diffScore)))
+                    )
+                )
+            );
 
             if (isBetterScore) player.setTag(BEST_SAVESTATE, finishState);
         }
@@ -442,18 +530,35 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
                 final MapRating lastRating = lastRatingFuture.resultNow();
                 // Note that we dont want to open the GUI if you have since opened a different inventory because its really annoying in practice.
                 if ((lastRating == null || lastRating.state() == MapRating.State.UNRATED) && player.getOpenInventory() == null) {
-                    Panel.open(player, new RateMapView(server().mapService(), map(), MapRating.State.UNRATED, newState ->
-                        player.setTag(RateMapItem.LAST_RATING_TAG, CompletableFuture.completedFuture(new MapRating(newState, null)))));
+                    Panel.open(
+                        player,
+                        new RateMapView(
+                            server().mapService(),
+                            map(),
+                            MapRating.State.UNRATED,
+                            newState -> player.setTag(
+                                RateMapItem.LAST_RATING_TAG,
+                                CompletableFuture.completedFuture(new MapRating(newState, null))
+                            )
+                        )
+                    );
                 }
             }
         };
 
         // Show the completion animation
-        MapCompletionAnimation.schedule(player, new AppliedRewards.Inventory(null, null, null, null), tryShowRateGui);
+        MapCompletionAnimation.schedule(
+            player,
+            new AppliedRewards.Inventory(null, null, null, null),
+            tryShowRateGui
+        );
 
         // Play the victory effect
         var playerData = PlayerData.fromPlayer(player);
-        var victoryEffect = Cosmetic.byId(CosmeticType.VICTORY_EFFECT, playerData.getSetting(CosmeticType.VICTORY_EFFECT.setting()));
+        var victoryEffect = Cosmetic.byId(
+            CosmeticType.VICTORY_EFFECT,
+            playerData.getSetting(CosmeticType.VICTORY_EFFECT.setting())
+        );
         if (victoryEffect != null && victoryEffect.impl() instanceof AbstractVictoryEffectImpl impl) {
             impl.trigger(player, player.getPosition());
         }
@@ -466,8 +571,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     private TaskSchedule visibilityTick() {
         for (var player : players()) {
             player.updateViewerRule(); // Spec doesnt currently have a viewer rule
-            if (player instanceof MapPlayer mp)
-                mp.updateVisibility();
+            if (player instanceof MapPlayer mp) mp.updateVisibility();
         }
         return TaskSchedule.tick(5);
     }
@@ -482,7 +586,10 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     public double computeScore(Player player, SaveState saveState) {
         var playState = saveState.state(PlayState.class);
-        var variables = Objects.requireNonNullElseGet(playState.get(Attachments.VARIABLES), VariableStorage::new);
+        var variables = Objects.requireNonNullElseGet(
+            playState.get(Attachments.VARIABLES),
+            VariableStorage::new
+        );
         TempEffectApplicator.VARIABLE_LOOKUP.setStorage(variables);
         TempEffectApplicator.QUERY.setContext(player);
         return TempEffectApplicator.EVALUATOR.eval(leaderboardScoreExpr());
@@ -528,7 +635,10 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
                 for (int localX = 0; localX < 16; localX++) {
                     for (int localZ = 0; localZ < 16; localZ++) {
                         int lowestBlockY = chunk.getHeight(Heightmaps.WORLD_BOTTOM, localX, localZ);
-                        if (lowestBlockY >= worldMinHeight) minBlockY = Math.min(minBlockY, lowestBlockY);
+                        if (lowestBlockY >= worldMinHeight) minBlockY = Math.min(
+                            minBlockY,
+                            lowestBlockY
+                        );
                     }
                 }
             }

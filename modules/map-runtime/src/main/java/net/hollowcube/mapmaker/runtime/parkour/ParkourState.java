@@ -32,17 +32,19 @@ import net.minestom.server.entity.attribute.AttributeOperation;
 import net.minestom.server.network.packet.server.play.BundlePacket;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import org.jetbrains.annotations.Nullable;
-
 import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-
 public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMapWorld> {
 
     sealed interface AnyPlaying extends ParkourState {
-        AttributeModifier NO_FALL_DAMAGE_MODIFIER = new AttributeModifier("mapmaker:play.no_fall_damage", 1024, AttributeOperation.ADD_MULTIPLIED_BASE);
+        AttributeModifier NO_FALL_DAMAGE_MODIFIER = new AttributeModifier(
+            "mapmaker:play.no_fall_damage",
+            1024,
+            AttributeOperation.ADD_MULTIPLIED_BASE
+        );
         Instant NO_POSE_CHANGES_EPOCH = Instant.ofEpochMilli(1756771200000L); // 2025-09-02 12:00:00 GMT
 
         SaveState saveState();
@@ -54,7 +56,11 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         }
 
         @Override
-        default void configurePlayer(ParkourMapWorld world, Player player, @Nullable ParkourState lastState) {
+        default void configurePlayer(
+            ParkourMapWorld world,
+            Player player,
+            @Nullable ParkourState lastState
+        ) {
             var mp = (MapPlayer) player;
 
             player.getAttribute(Attribute.SAFE_FALL_DISTANCE).addModifier(NO_FALL_DAMAGE_MODIFIER);
@@ -85,11 +91,26 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             // For initial exit we use the player respawn point set during config, so this
             // logic also exists in ParkourMapWorld.
             if (lastState != null) {
-                resetTeleport(player, Objects.requireNonNullElseGet(playState.pos(),
-                        () -> world.map().settings().getSpawnPoint()));
+                resetTeleport(
+                    player,
+                    Objects.requireNonNullElseGet(
+                        playState.pos(),
+                        () -> world.map().settings().getSpawnPoint()
+                    )
+                );
             }
 
-            world.callEvent(new ParkourMapPlayerUpdateStateEvent(world, player, saveState(), playState, isFreshState, isMapJoin, false));
+            world.callEvent(
+                new ParkourMapPlayerUpdateStateEvent(
+                    world,
+                    player,
+                    saveState(),
+                    playState,
+                    isFreshState,
+                    isMapJoin,
+                    false
+                )
+            );
 
             if (!isFreshState) {
                 // If the playtime is non-zero (ie they have played before) start timing immediately.
@@ -107,15 +128,20 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
 
             var map = world.map();
             switch (map.getSetting(MapSettings.CAN_SEND_POSE)) {
-                case NOT_SET ->
-                        mp.setCanSendPose(map.publishedAt() != null && map.publishedAt().isBefore(NO_POSE_CHANGES_EPOCH));
+                case NOT_SET -> mp.setCanSendPose(
+                    map.publishedAt() != null && map.publishedAt().isBefore(NO_POSE_CHANGES_EPOCH)
+                );
                 case TRUE -> mp.setCanSendPose(true);
                 case FALSE -> mp.setCanSendPose(false);
             }
         }
 
         @Override
-        default void resetPlayer(ParkourMapWorld world, Player player, @Nullable ParkourState nextState) {
+        default void resetPlayer(
+            ParkourMapWorld world,
+            Player player,
+            @Nullable ParkourState nextState
+        ) {
             var scriptContext = world.scriptContext();
             if (scriptContext != null) scriptContext.destroyPlayer((MapPlayer) player);
 
@@ -141,7 +167,9 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             } else {
                 // Otherwise set the current pos and update their state.
                 playState.setPos(player.getPosition());
-                world.callEvent(new ParkourMapPlayerStateUpdateEvent(world, player, saveState, playState));
+                world.callEvent(
+                    new ParkourMapPlayerStateUpdateEvent(world, player, saveState, playState)
+                );
             }
 
             ((MapPlayer) player).removeOwnedEntities();
@@ -150,44 +178,55 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             // The following is deinit logic which should not happen when switching from play to play (aka checkpoint reset).
             if (nextState instanceof AnyPlaying) return;
 
-            player.getAttribute(Attribute.SAFE_FALL_DISTANCE).removeModifier(NO_FALL_DAMAGE_MODIFIER);
+            player.getAttribute(Attribute.SAFE_FALL_DISTANCE).removeModifier(
+                NO_FALL_DAMAGE_MODIFIER
+            );
             ActionBar.forPlayer(player).removeProvider(ParkourTimerHud.INSTANCE);
 
             if (nextState != null || player.isRemoved()) return;
 
             var emptyPlayState = new PlayState();
-            world.callEvent(new ParkourMapPlayerUpdateStateEvent(world, player,
-                    saveState.copy(emptyPlayState), emptyPlayState,
-                    false, false, true));
+            world.callEvent(
+                new ParkourMapPlayerUpdateStateEvent(
+                    world,
+                    player,
+                    saveState.copy(emptyPlayState),
+                    emptyPlayState,
+                    false,
+                    false,
+                    true
+                )
+            );
             GhostBlockHolder.clear(player, true);
             ResetHeightDisplay.clear(player);
         }
 
         static CompletableFuture<Void> resetTeleport(Player player, Pos position) {
-            return player.teleport(position, Vec.ZERO, null, RelativeFlags.NONE)
-                .thenRun(() -> {
-                    try {
-                        player.sendPacket(new BundlePacket());
+            return player.teleport(position, Vec.ZERO, null, RelativeFlags.NONE).thenRun(() -> {
+                try {
+                    player.sendPacket(new BundlePacket());
 
-                        var chunk = player.getInstance().getChunkAt(position);
-                        if (chunk != null) {
-                            player.sendPacket(chunk.getFullDataPacket());
-                            var ghostBlocks = GhostBlockHolder.forPlayerOptional(player);
-                            if (ghostBlocks != null) ghostBlocks.resendChunk(chunk);
-                        }
+                    var chunk = player.getInstance().getChunkAt(position);
+                    if (chunk != null) {
+                        player.sendPacket(chunk.getFullDataPacket());
+                        var ghostBlocks = GhostBlockHolder.forPlayerOptional(player);
+                        if (ghostBlocks != null) ghostBlocks.resendChunk(chunk);
+                    }
 
-                        player.setFlyingWithElytra(false);
+                    player.setFlyingWithElytra(false);
 
-                        // Force the player immediately into whatever pose the server thinks they should be in at the target pos.
-                        ((MapPlayer) player).updatePose();
-                        player.sendPacket(new EntityMetaDataPacket(
+                    // Force the player immediately into whatever pose the server thinks they should be in at the target pos.
+                    ((MapPlayer) player).updatePose();
+                    player.sendPacket(
+                        new EntityMetaDataPacket(
                             player.getEntityId(),
                             Map.of(MetadataDef.Player.POSE.index(), Metadata.Pose(player.getPose()))
-                        ));
-                    } finally {
-                        player.sendPacket(new BundlePacket());
-                    }
-                });
+                        )
+                    );
+                } finally {
+                    player.sendPacket(new BundlePacket());
+                }
+            });
         }
     }
 
@@ -205,13 +244,18 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         }
 
         @Override
-        public void configurePlayer(ParkourMapWorld world, Player player, @Nullable ParkourState lastState) {
+        public void configurePlayer(
+            ParkourMapWorld world,
+            Player player,
+            @Nullable ParkourState lastState
+        ) {
             MapWorldHelpers.resetPlayerOnTickThread(player);
             AnyPlaying.super.configurePlayer(world, player, lastState);
 
             world.itemRegistry().setItemStack(player, ReturnToCheckpointItem.ID, 0);
-            if (SpectateHelper.canSpectate(world, player))
+            if (SpectateHelper.canSpectate(world, player)) {
                 world.itemRegistry().setItemStack(player, ToggleSpectatorModeItem.ID_ON, 1);
+            }
             world.itemRegistry().setItemStack(player, ResetSaveStateItem.ID, 7);
             world.itemRegistry().setItemStack(player, MapDetailsItem.ID, 8);
 
@@ -224,13 +268,18 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         }
 
         @Override
-        public void resetPlayer(ParkourMapWorld world, Player player, @Nullable ParkourState nextState) {
+        public void resetPlayer(
+            ParkourMapWorld world,
+            Player player,
+            @Nullable ParkourState nextState
+        ) {
             AnyPlaying.super.resetPlayer(world, player, nextState);
 
             // Wdon't save if entering finished state, that state will handle saving the record.
             boolean shouldSave = !(nextState instanceof Finished)
-                    // Save if exiting, entering spec, >10s playing, or completed
-                    && (nextState == null || nextState instanceof Spectating || saveState.getRealPlaytime() > 10_000 || saveState.isCompleted());
+                                 && (nextState == null || nextState instanceof Spectating
+                                     || saveState.getRealPlaytime() > 10_000
+                                     || saveState.isCompleted());
             if (shouldSave) FutureUtil.submitVirtual(() -> writeSaveState(world, player, saveState));
         }
 
@@ -246,7 +295,11 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         }
 
         @Override
-        public void configurePlayer(ParkourMapWorld world, Player player, @Nullable ParkourState lastState) {
+        public void configurePlayer(
+            ParkourMapWorld world,
+            Player player,
+            @Nullable ParkourState lastState
+        ) {
             ActionBar.forPlayer(player).removeProvider(SpectatorModeHud.INSTANCE);
             MapWorldHelpers.resetPlayerOnTickThread(player, false);
             AnyPlaying.super.configurePlayer(world, player, lastState);
@@ -266,7 +319,11 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         }
 
         @Override
-        public void configurePlayer(ParkourMapWorld world, Player player, @Nullable ParkourState lastState) {
+        public void configurePlayer(
+            ParkourMapWorld world,
+            Player player,
+            @Nullable ParkourState lastState
+        ) {
             ParkourState.super.configurePlayer(world, player, lastState);
             ActionBar.forPlayer(player).addProvider(SpectatorModeHud.INSTANCE);
             player.setAllowFlying(gameState.get(SpectateHelper.SPECTATOR_FLIGHT, true));
@@ -287,7 +344,10 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
                 gameState.setFrom(saveState.state(PlayState.class));
 
                 // If we have an empty save state with no playtime, try to add world spawn effects.
-                boolean hasAppliedSpawnActions = gameState.get(Attachments.START_ACTIONS_APPLIED, false);
+                boolean hasAppliedSpawnActions = gameState.get(
+                    Attachments.START_ACTIONS_APPLIED,
+                    false
+                );
                 var spawnCheckpoint = world.getTag(ParkourMapWorld.SPAWN_CHECKPOINT_EFFECTS);
                 if (spawnCheckpoint != null && !hasAppliedSpawnActions) {
                     spawnCheckpoint.actions().applyTo(player, gameState);
@@ -299,7 +359,11 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         }
 
         @Override
-        public void resetPlayer(ParkourMapWorld world, Player player, @Nullable ParkourState nextState) {
+        public void resetPlayer(
+            ParkourMapWorld world,
+            Player player,
+            @Nullable ParkourState nextState
+        ) {
             // Don't remove the spectating hud if we are switching to a non-scorable play state
             if (nextState instanceof Playing2 || nextState == null) {
                 ActionBar.forPlayer(player).removeProvider(SpectatorModeHud.INSTANCE);
@@ -310,7 +374,11 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
     record Finished(SaveState saveState) implements ParkourState {
 
         @Override
-        public void configurePlayer(ParkourMapWorld world, Player player, @Nullable ParkourState lastState) {
+        public void configurePlayer(
+            ParkourMapWorld world,
+            Player player,
+            @Nullable ParkourState lastState
+        ) {
             ParkourState.super.configurePlayer(world, player, lastState);
             ActionBar.forPlayer(player).addProvider(FinishedModeHud.INSTANCE);
             player.setAllowFlying(true);
@@ -325,10 +393,12 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             // If this is a verification, immediately remove them from the world and send them back to the hub
             if (world.map().verification() == MapVerification.PENDING) {
                 var lb = world.map().settings().leaderboard();
-                player.sendMessage(Component.translatable(
-                    "map.completed." + lb.format().name().toLowerCase() + ".first",
-                    lb.format().format(saveState.getScore())
-                ));
+                player.sendMessage(
+                    Component.translatable(
+                        "map.completed." + lb.format().name().toLowerCase() + ".first",
+                        lb.format().format(saveState.getScore())
+                    )
+                );
 
                 FutureUtil.submitVirtual(() -> world.server().bridge().joinHub(player));
                 return;
@@ -340,7 +410,11 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         }
 
         @Override
-        public void resetPlayer(ParkourMapWorld world, Player player, @Nullable ParkourState nextState) {
+        public void resetPlayer(
+            ParkourMapWorld world,
+            Player player,
+            @Nullable ParkourState nextState
+        ) {
             ActionBar.forPlayer(player).removeProvider(FinishedModeHud.INSTANCE);
 
             // In case animation hasn't completed yet, cancel it.
@@ -372,8 +446,9 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         // Write the save state to the database
         try {
             var playerData = PlayerData.fromPlayer(player);
-            world.server().mapService().updateSaveState(
-                    world.map().id(), playerData.id(), saveState.id(), update);
+            world.server()
+                .mapService()
+                .updateSaveState(world.map().id(), playerData.id(), saveState.id(), update);
         } catch (Exception e) {
             var wrappedException = new RuntimeException("failed to save player save state", e);
             ExceptionReporter.reportException(wrappedException, player);

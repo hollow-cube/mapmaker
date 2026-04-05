@@ -30,31 +30,55 @@ import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.TimedPotion;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.Map;
-
 import static net.hollowcube.mapmaker.map.util.EventUtil.playerEventNode;
 
 public class LegacyActionStateManager {
     private static final Equippable EMPTY_EQUIPPABLE = new Equippable(
         EquipmentSlot.CHESTPLATE,
         SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
-        null, null, null, false, false, false, false,
-        false, SoundEvent.ITEM_SHEARS_SNIP
+        null,
+        null,
+        null,
+        false,
+        false,
+        false,
+        false,
+        false,
+        SoundEvent.ITEM_SHEARS_SNIP
     );
     private static final Equippable ELYTRA_EQUIPPABLE = new Equippable(
         EquipmentSlot.CHESTPLATE,
         SoundEvent.ITEM_ARMOR_EQUIP_GENERIC,
-        "minecraft:elytra", null, null, false, false,
+        "minecraft:elytra",
+        null,
+        null,
         false,
-        false, false, SoundEvent.ITEM_SHEARS_SNIP
+        false,
+        false,
+        false,
+        false,
+        SoundEvent.ITEM_SHEARS_SNIP
     );
-    private static final EnchantmentList CURSE_OF_BINDING = new EnchantmentList(Enchantment.BINDING_CURSE, 1);
+    private static final EnchantmentList CURSE_OF_BINDING = new EnchantmentList(
+        Enchantment.BINDING_CURSE,
+        1
+    );
 
-    public static final EventNode<PlayerInstanceEvent> EVENT_NODE = playerEventNode()
-            .addListener(ParkourMapPlayerUpdateStateEvent.class, LegacyActionStateManager::handleUpdatePlayerFromState)
-            .addListener(ParkourMapPlayerStateUpdateEvent.class, LegacyActionStateManager::handleUpdateStateFromPlayer)
-            .addListener(ParkourMapPlayerTookActionEvent.class, LegacyActionStateManager::handlePlayerTookAction);
+    public static final EventNode<PlayerInstanceEvent> EVENT_NODE =
+        playerEventNode()
+            .addListener(
+                ParkourMapPlayerUpdateStateEvent.class,
+                LegacyActionStateManager::handleUpdatePlayerFromState
+            )
+            .addListener(
+                ParkourMapPlayerStateUpdateEvent.class,
+                LegacyActionStateManager::handleUpdateStateFromPlayer
+            )
+            .addListener(
+                ParkourMapPlayerTookActionEvent.class,
+                LegacyActionStateManager::handlePlayerTookAction
+            );
 
     private static void handleUpdatePlayerFromState(ParkourMapPlayerUpdateStateEvent event) {
         final var player = event.player();
@@ -77,14 +101,19 @@ public class LegacyActionStateManager {
             player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(2 * lives.max());
             player.setHealth(2 * lives.value());
         } else {
-            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(Attribute.MAX_HEALTH.defaultValue());
+            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(
+                Attribute.MAX_HEALTH.defaultValue()
+            );
             player.setHealth((float) Attribute.MAX_HEALTH.defaultValue());
         }
 
         // Update the timer right away if it's partial (aka the player switched states or left while the timer is running)
         var timeLimit = state.get(EditTimerAction.SAVE_DATA);
         if (timeLimit != null && !event.isFreshState() && timeLimit.isPartial()) {
-            player.setTag(EditTimerAction.COUNTDOWN_END, System.nanoTime() / 1_000_000 + timeLimit.toMillis());
+            player.setTag(
+                EditTimerAction.COUNTDOWN_END,
+                System.nanoTime() / 1_000_000 + timeLimit.toMillis()
+            );
         } else {
             player.removeTag(EditTimerAction.COUNTDOWN_END);
         }
@@ -92,12 +121,16 @@ public class LegacyActionStateManager {
         // Update the potions on the player
         player.clearEffects();
         for (var entry : state.get(Attachments.POTION_EFFECTS, new PotionEffectList()).entries()) {
-            player.addEffect(new Potion(
+            player.addEffect(
+                new Potion(
                     entry.type().vanillaEffect(),
                     (byte) (entry.level() - 1),
-                    entry.duration() <= 0 ? Potion.INFINITE_DURATION : entry.duration() / MinecraftServer.TICK_MS, // Convert from milliseconds to ticks
+                    entry.duration() <= 0
+                        ? Potion.INFINITE_DURATION
+                        : entry.duration() / MinecraftServer.TICK_MS,
                     Potion.ICON_FLAG
-            ));
+                )
+            );
         }
 
         var ghostBlocks = GhostBlockHolder.forPlayer(player);
@@ -105,29 +138,37 @@ public class LegacyActionStateManager {
 
         // Apply items to current state.
         var items = state.get(Attachments.HOTBAR_ITEMS, HotbarItems.EMPTY);
-        player.getInventory().setItemStack(3, items.item0() == null ? ItemStack.AIR : items.item0().createItemStack());
-        player.getInventory().setItemStack(4, items.item1() == null ? ItemStack.AIR : items.item1().createItemStack());
-        player.getInventory().setItemStack(5, items.item2() == null ? ItemStack.AIR : items.item2().createItemStack());
+        player.getInventory().setItemStack(
+            3,
+            items.item0() == null ? ItemStack.AIR : items.item0().createItemStack()
+        );
+        player.getInventory().setItemStack(
+            4,
+            items.item1() == null ? ItemStack.AIR : items.item1().createItemStack()
+        );
+        player.getInventory().setItemStack(
+            5,
+            items.item2() == null ? ItemStack.AIR : items.item2().createItemStack()
+        );
 
         // Apply elytra or remove it if not relevant
         var chestplate = player.getChestplate();
         if (state.get(Attachments.ELYTRA, false)) {
             player.setChestplate(
-                chestplate
-                    .with(DataComponents.GLIDER)
+                chestplate.with(DataComponents.GLIDER)
                     .with(DataComponents.EQUIPPABLE, ELYTRA_EQUIPPABLE)
                     .with(DataComponents.ENCHANTMENTS, CURSE_OF_BINDING)
                     .with(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, false)
                     .with(
                         DataComponents.TOOLTIP_DISPLAY,
-                        chestplate.get(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.EMPTY)
-                            .without(DataComponents.ENCHANTMENTS)
+                        chestplate.get(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.EMPTY).without(
+                            DataComponents.ENCHANTMENTS
+                        )
                     )
             );
         } else {
             player.setChestplate(
-                chestplate
-                    .without(DataComponents.GLIDER)
+                chestplate.without(DataComponents.GLIDER)
                     .with(DataComponents.EQUIPPABLE, EMPTY_EQUIPPABLE)
                     .without(DataComponents.ENCHANTMENTS)
                     .without(DataComponents.ENCHANTMENT_GLINT_OVERRIDE)
@@ -145,11 +186,16 @@ public class LegacyActionStateManager {
         if (countdownEnd != -1) {
             // We have to clamp it to 1 because if we don't when they rejoin their time limit will
             // be less than or equal to 0 meaning it will allow them to play forever due tp <= 0 being infinite time.
-            playState.set(EditTimerAction.SAVE_DATA, TimerData.partial((int) Math.max((countdownEnd - now) / 50, 1)));
+            playState.set(
+                EditTimerAction.SAVE_DATA,
+                TimerData.partial((int) Math.max((countdownEnd - now) / 50, 1))
+            );
         }
 
         // Update remaining time for the remaining effects (and remove if expired)
-        var iter = playState.get(Attachments.POTION_EFFECTS, new PotionEffectList()).entries().iterator();
+        var iter = playState.get(Attachments.POTION_EFFECTS, new PotionEffectList())
+            .entries()
+            .iterator();
         while (iter.hasNext()) {
             var entry = iter.next();
             if (entry.duration() <= 0) continue; // No need to update if infinite
@@ -170,11 +216,14 @@ public class LegacyActionStateManager {
         playState.setGhostBlocks(ghostBlocks == null ? Map.of() : ghostBlocks.save());
 
         var items = playState.get(Attachments.HOTBAR_ITEMS, HotbarItems.EMPTY);
-        playState.set(Attachments.HOTBAR_ITEMS, new HotbarItems(
+        playState.set(
+            Attachments.HOTBAR_ITEMS,
+            new HotbarItems(
                 OpUtils.map(items.item0(), item -> updateItemStack(player, item, 3)),
                 OpUtils.map(items.item1(), item -> updateItemStack(player, item, 4)),
                 OpUtils.map(items.item2(), item -> updateItemStack(player, item, 5))
-        ));
+            )
+        );
     }
 
     private static void handlePlayerTookAction(ParkourMapPlayerTookActionEvent event) {
@@ -185,13 +234,20 @@ public class LegacyActionStateManager {
 
         var timer = state.state(PlayState.class).get(EditTimerAction.SAVE_DATA);
         if (timer != null && timer.ticks() > 0) {
-            player.setTag(EditTimerAction.COUNTDOWN_END, System.nanoTime() / 1_000_000 + timer.toMillis());
+            player.setTag(
+                EditTimerAction.COUNTDOWN_END,
+                System.nanoTime() / 1_000_000 + timer.toMillis()
+            );
         } else {
             player.removeTag(EditTimerAction.COUNTDOWN_END);
         }
     }
 
-    private static @Nullable CheckpointItem updateItemStack(Player player, CheckpointItem item, int slot) {
+    private static @Nullable CheckpointItem updateItemStack(
+        Player player,
+        CheckpointItem item,
+        int slot
+    ) {
         var itemStack = player.getInventory().getItemStack(slot);
         if (itemStack.isAir()) return null; // Consumed
         return item.updateFromItemStack(itemStack);
