@@ -183,17 +183,11 @@ public abstract class AbstractMapServer implements MapServer {
 
         var sessionServiceUrl = config.get(Session_ServiceConfig.class).url();
         if (!sessionServiceUrl.isEmpty()) {
-            sessionService = new SessionServiceImpl(
-                otel,
-                sessionServiceUrl
-            );
+            sessionService = new SessionServiceImpl(otel, sessionServiceUrl);
         } else if (globalConfig.noop()) {
             sessionService = new NoopSessionService();
         } else {
-            sessionService = new SessionServiceImpl(
-                otel,
-                "http://localhost:9127"
-            ); // tilt
+            sessionService = new SessionServiceImpl(otel, "http://localhost:9127"); // tilt
         }
 
         var mapServiceUrl = config.get(Map_ServiceConfig.class).url();
@@ -202,9 +196,7 @@ public abstract class AbstractMapServer implements MapServer {
         } else if (globalConfig.noop()) {
             mapService = new NoopMapService();
         } else {
-            mapService = new MapServiceImpl(
-                "http://localhost:9127"
-            ); // tilt
+            mapService = new MapServiceImpl("http://localhost:9127"); // tilt
         }
 
         var obungusService = new ObungusServiceImpl(otel, "http://localhost:9127");
@@ -873,8 +865,10 @@ public abstract class AbstractMapServer implements MapServer {
     private static boolean posthogExceptionMiddleware(@NotNull Throwable t, JsonObject message) {
         var oom = t;
         while (oom != null) {
-            if (oom instanceof OutOfMemoryError) return false;
-            else oom = oom.getCause();
+            if (oom instanceof OutOfMemoryError) {
+                return false;
+            }
+            oom = oom.getCause();
         }
 
         if (MINESTOM_PACKET_EXCEPTION.matcher(t.toString()).find()) return false;
