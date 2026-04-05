@@ -194,20 +194,6 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
     }
 
     @Override
-    public @Nullable HypercubeStatus getHypercubeStatus(@NotNull String playerId) {
-        var req = HttpRequest.newBuilder()
-            .method("GET", HttpRequest.BodyPublishers.noBody())
-            .uri(URI.create(url + "/players/" + playerId + "/hypercube"));
-        var res = doRequest("getHypercubeStatus", req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), HypercubeStatus.class);
-            case 404 -> null;
-            default ->
-                throw new InternalError("Failed to get hypercube status url (" + res.statusCode() + "): " + res.body());
-        };
-    }
-
-    @Override
     public @NotNull TotpResult checkTotp(@NotNull String playerId, @Nullable String code) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(url + "/players/" + playerId + "/totp" + (code != null ? "?code=" + code : "")))

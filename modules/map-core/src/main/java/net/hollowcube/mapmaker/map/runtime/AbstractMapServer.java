@@ -410,7 +410,7 @@ public abstract class AbstractMapServer implements MapServer {
         if (fullInstance) commandManager.register(new RulesCommand());
         commandManager.register(createDebugCommand());
         commandManager.register(new StoreCommand(playerService()));
-        commandManager.register(new HypercubeCommand(playerService()));
+        commandManager.register(new HypercubeCommand(api(), playerService()));
         commandManager.register(new DiscordCommand());
         if (fullInstance) commandManager.register(new TotpCommand(playerService()));
         commandManager.register(new NoobCommand());

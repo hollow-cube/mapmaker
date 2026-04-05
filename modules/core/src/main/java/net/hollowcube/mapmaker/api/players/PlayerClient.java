@@ -2,10 +2,12 @@ package net.hollowcube.mapmaker.api.players;
 
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.api.ResultList;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerData;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,10 @@ public interface PlayerClient {
     }
 
     default DisplayName getDisplayName(String playerId) {
+        throw notImplemented();
+    }
+
+    default @Nullable Hypercube getHypercube(String playerId) {
         throw notImplemented();
     }
 
@@ -49,6 +55,18 @@ public interface PlayerClient {
                 "getDisplayName",
                 V4_PREFIX + "/" + playerId + "/display-name",
                 new TypeToken<>() {});
+        }
+
+        @Override
+        public @Nullable Hypercube getHypercube(String playerId) {
+            try {
+                return http.get(
+                    "getHypercube",
+                    V4_PREFIX + "/" + playerId + "/hypercube",
+                    new TypeToken<>() {});
+            } catch (ApiClient.NotFoundError _) {
+                return null;
+            }
         }
 
         @Override
