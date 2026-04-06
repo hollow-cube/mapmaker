@@ -20,6 +20,6 @@ dependencies {
     implementation(libs.included.schem)
     implementation(libs.included.molang)
 
-    testImplementation(project(":modules:test"))
+    testImplementation(libs.minestom.testing)
 
 }

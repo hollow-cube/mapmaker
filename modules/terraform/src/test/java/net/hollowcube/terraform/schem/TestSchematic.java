@@ -11,18 +11,19 @@ import java.util.Map;
 
 class TestSchematic {
 
-    @Test
-    public void main() throws Exception {
-        var b = Files.readAllBytes(Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/modules/terraform/src/test/resources/schemtests/pumpkinstandtado.schematic"));
-        // All other options are an NBT compound at the root.
-        final Map.Entry<String, CompoundBinaryTag> rootPair = BinaryTagIO.reader().readNamed(
-                new ByteArrayInputStream(b),
-                BinaryTagIO.Compression.GZIP
-        );
-
-
-        System.out.println(rootPair.getKey());
-    }
+    // This test only works on matt's machine
+//    @Test
+//    void main() throws Exception {
+//        var b = Files.readAllBytes(Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/modules/terraform/src/test/resources/schemtests/pumpkinstandtado.schematic"));
+//        // All other options are an NBT compound at the root.
+//        final Map.Entry<String, CompoundBinaryTag> rootPair = BinaryTagIO.reader().readNamed(
+//                new ByteArrayInputStream(b),
+//                BinaryTagIO.Compression.GZIP
+//        );
+//
+//
+//        System.out.println(rootPair.getKey());
+//    }
 //
 //    @Test
 //    void applyNoRotation() {

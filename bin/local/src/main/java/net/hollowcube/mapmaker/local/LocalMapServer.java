@@ -12,10 +12,8 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.NoopServerBridge;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.misc.noop.NoopPermManager;
 import net.hollowcube.mapmaker.misc.noop.NoopPlayerService;
 import net.hollowcube.mapmaker.misc.noop.NoopSessionService;
-import net.hollowcube.mapmaker.perm.PermManager;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.session.Presence;
@@ -43,7 +41,6 @@ public class LocalMapServer extends AbstractMapServer {
     private final ServerBridge bridge = new NoopServerBridge();
     private final SessionService sessionService = new NoopSessionService();
     private final PlayerService playerService = new NoopPlayerService();
-    private final PermManager permManager = new NoopPermManager();
 
     // Its only kinda unknown. it's not created in the constructor, but after prepareState
     // it is always not-null which should cover any reasonable logic.
@@ -83,11 +80,6 @@ public class LocalMapServer extends AbstractMapServer {
     @Override
     public MapService mapService() {
         return mapService;
-    }
-
-    @Override
-    public PermManager permManager() {
-        return permManager;
     }
 
     @Override

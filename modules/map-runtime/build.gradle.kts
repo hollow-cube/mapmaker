@@ -18,7 +18,7 @@ dependencies {
     implementation(libs.directory.watcher)
 
     testImplementation(project(":modules:compat"))
-    testImplementation(project(":modules:test"))
+    testImplementation(libs.minestom.testing)
     testImplementation(libs.bundles.otel) {
         exclude(group = "io.opentelemetry", module = "opentelemetry-exporter-sender-okhttp")
     }

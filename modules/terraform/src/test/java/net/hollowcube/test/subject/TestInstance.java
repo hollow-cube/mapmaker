@@ -3,7 +3,7 @@ package net.hollowcube.test.subject;
 import net.hollowcube.schem.Schematic;
 import net.hollowcube.schem.builder.SchematicBuilder;
 import net.hollowcube.test.TestEnvImpl;
-import net.minestom.server.instance.IChunkLoader;
+import net.minestom.server.instance.ChunkLoader;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +15,7 @@ public class TestInstance extends InstanceContainer {
     private final TestEnvImpl owner;
     private final String id;
 
-    public TestInstance(@NotNull TestEnvImpl owner, @NotNull String id, @Nullable IChunkLoader loader) {
+    public TestInstance(@NotNull TestEnvImpl owner, @NotNull String id, @Nullable ChunkLoader loader) {
         super(UUID.randomUUID(), DimensionType.OVERWORLD, loader);
         this.owner = owner;
         this.id = id;

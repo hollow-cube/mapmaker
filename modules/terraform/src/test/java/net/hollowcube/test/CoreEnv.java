@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-@SuppressWarnings("UnstableApiUsage")
 final class CoreEnv {
     private static final URI VIEWER_URL = URI.create("http://localhost:12415/");
     private static final HttpClient httpClient = HttpClient.newHttpClient();

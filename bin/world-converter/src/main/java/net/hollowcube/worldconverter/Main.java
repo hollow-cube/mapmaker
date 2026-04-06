@@ -20,6 +20,7 @@ import net.minestom.server.instance.anvil.RegionFileWrapper;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.world.DimensionType;
+import net.minestom.server.world.attribute.EnvironmentAttribute;
 import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -182,12 +183,14 @@ public class Main {
                     .orElseThrow();
 
             var newName = "custom:import" + (i++);
+            // TODO: Is this correct now? I'm not 100% on how these new attributes work,
+            //  but I think we only want the argument value
             var biomeInfo = new BiomeInfo(
                     newName, Material.STONE,
-                    biome.effects().skyColor(),
-                    biome.effects().fogColor(),
+                    getBiomeAttribute(biome, EnvironmentAttribute.SKY_COLOR),
+                    getBiomeAttribute(biome, EnvironmentAttribute.FOG_COLOR),
                     biome.effects().waterColor(),
-                    biome.effects().waterFogColor(),
+                    getBiomeAttribute(biome, EnvironmentAttribute.WATER_FOG_COLOR),
                     biome.effects().grassColor(),
                     biome.effects().foliageColor()
             );
@@ -198,6 +201,13 @@ public class Main {
             System.out.println("minecraft:" + key + " -> " + newName);
         }
 
+    }
+
+    private static <T> T getBiomeAttribute(@NotNull Biome biome, @NotNull EnvironmentAttribute<T> attribute) {
+        var entry = biome.attributes().entries().get(attribute);
+        @SuppressWarnings("unchecked")
+        var value = (T) entry.argument();
+        return value;
     }
 
     record XZ(int x, int z) {

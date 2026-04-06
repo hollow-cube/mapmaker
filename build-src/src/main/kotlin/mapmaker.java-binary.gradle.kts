@@ -8,8 +8,12 @@ group = "net.hollowcube"
 
 repositories {
     // This code is duplicated in the java-library configuration, should make any changes there also.
-    val centralLibs = listOf(libs.minestom, libs.polar, libs.posthog, libs.adventure.api)
-        .mapNotNull { it.get().version }
+    val centralLibs = listOf(
+        libs.minestom.asProvider().get(),
+        libs.polar.get(),
+        libs.posthog.get(),
+        libs.adventure.api.get()
+    ).mapNotNull { it.version }
     if (centralLibs.any { it == "dev" })
         mavenLocal()
     if (centralLibs.any { it.endsWith("-SNAPSHOT") || it.matches(Regex("^.+-(\\d{8})\\.(\\d{6})-(\\d+)\$")) }) {
