@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.runtime.parkour;
 
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
+import net.hollowcube.compat.api.discord.DiscordRichPresenceManager;
 import net.hollowcube.compat.noxesium.components.NoxesiumGameComponents;
 import net.hollowcube.compat.noxesium.handshake.NoxesiumPlayer;
 import net.hollowcube.mapmaker.ExceptionReporter;
@@ -221,6 +222,8 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
                 // the touching state immediately because we should already be inside.
                 ((MapPlayer) player).updateTouchingState(world, false);
             }
+
+            queueRichPresenceUpdate(world, player, "Playing");
         }
 
         @Override
@@ -253,6 +256,8 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
 
             ((MapPlayer) player).resetTouchingState();
             ((MapPlayer) player).updateTouchingState(world, true);
+
+            queueRichPresenceUpdate(world, player, "Testing");
         }
     }
 
@@ -296,6 +301,8 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
 
                 gameState.set(SpectateHelper.GAME_STATE_SAVED, true);
             }
+
+            queueRichPresenceUpdate(world, player, "Spectating");
         }
 
         @Override
@@ -337,6 +344,8 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             // This is delegated back to the world kinda stupidly. We need to be able
             // to override the behavior for testing worlds
             world.performFinishEffects(player, saveState);
+
+            queueRichPresenceUpdate(world, player, "Playing");
         }
 
         @Override
@@ -377,6 +386,20 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         } catch (Exception e) {
             var wrappedException = new RuntimeException("failed to save player save state", e);
             ExceptionReporter.reportException(wrappedException, player);
+        }
+    }
+
+    private static void queueRichPresenceUpdate(ParkourMapWorld world, Player player, String activity) {
+        var map = world.map();
+        if (map.isPublished()) {
+            DiscordRichPresenceManager.queueRichPresenceUpdate(
+                player,
+                activity,
+                map.name(),
+                "/play %s".formatted(map.publishedIdString())
+            );
+        } else {
+            DiscordRichPresenceManager.queueRichPresenceUpdate(player, activity, "a map", "");
         }
     }
 
