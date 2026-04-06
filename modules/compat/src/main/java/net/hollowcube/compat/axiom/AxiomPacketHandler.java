@@ -11,7 +11,6 @@ import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.nbt.*;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.component.DataComponents;
-import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.RelativeFlags;
@@ -156,14 +155,14 @@ final class AxiomPacketHandler {
 
                 if (block.isAir()) {
                     // Air needs to trigger break event to handle cancellation (e.g. for worldedit wand)
-                    var event = new PlayerBlockBreakEvent(player, existingBlock, block, new BlockVec(pos), packet.face());
+                    var event = new PlayerBlockBreakEvent(player, player.getInstance(), existingBlock, block, pos.asBlockVec(), packet.face());
                     EventDispatcher.call(event);
                     if (event.isCancelled()) continue;
                 } else if (heldItem.has(DataComponents.CUSTOM_MODEL_DATA)) {
                     // Items with custom model data need to trigger interact event
                     // We need to offset as if we are placing on the block next to it, which is not what axiom sends.
-                    var relBlockPosition = new BlockVec(pos.relative(packet.face().getOppositeFace()));
-                    var event = new PlayerBlockInteractEvent(player, packet.hand(), existingBlock, relBlockPosition, packet.cursor(), packet.face());
+                    var relBlockPosition = pos.relative(packet.face().getOppositeFace()).asBlockVec();
+                    var event = new PlayerBlockInteractEvent(player, packet.hand(), player.getInstance(), existingBlock, relBlockPosition, packet.cursor(), packet.face());
                     EventDispatcher.call(event);
                     if (event.isCancelled() || event.isBlockingItemUse()) continue;
                 }
