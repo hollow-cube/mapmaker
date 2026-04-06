@@ -57,10 +57,10 @@
         "directory": "pvn_773"
       },
       {
-        "min_format": 67,
+        "min_format": 76,
         "max_format": 84,
         "formats": {
-          "min_inclusive": 67,
+          "min_inclusive": 76,
           "max_inclusive": 84
         },
         "directory": "pvn_775"
