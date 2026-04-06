@@ -133,7 +133,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
 
     private final IntList ownedEntities = new IntArrayList();
 
-    private final Object2IntMap<String> cooldownGroups = new Object2IntArrayMap<>();
+    private final Object2IntMap<String> cooldowns = new Object2IntArrayMap<>();
 
     private Function<Player, PlayerVisibility> visibilityFunc = null;
     // entity id -> visibility ordinal
@@ -227,6 +227,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
         super.update(time);
 
         physicsTick();
+        cooldownTick();
         riptideTick();
         fallTick();
         weatherTick();
@@ -417,13 +418,47 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
         if (useCooldown == null || useCooldown.cooldownGroup() == null)
             return true;
 
-        int cooldownEnd = cooldownGroups.getInt(useCooldown.cooldownGroup());
-        if (cooldownEnd > getAliveTicks()) return false; // Still in cooldown
+        int cooldown = cooldowns.getInt(useCooldown.cooldownGroup());
+        if (cooldown > 0) return false; // Still in cooldown
 
         int cooldownTicks = (int) (useCooldown.seconds() * 20);
-        cooldownGroups.put(useCooldown.cooldownGroup(), (int) (getAliveTicks() + cooldownTicks));
+        cooldowns.put(useCooldown.cooldownGroup(), cooldownTicks);
         sendPacket(new SetCooldownPacket(useCooldown.cooldownGroup(), cooldownTicks));
         return true;
+    }
+
+    private void cooldownTick() {
+        // Tick cooldown
+        var iterator = cooldowns.object2IntEntrySet().iterator();
+        while (iterator.hasNext()) {
+            Object2IntMap.Entry<String> cooldown = iterator.next();
+            int newCooldown = cooldown.getIntValue() - 1;
+            if (newCooldown <= 0) {
+                iterator.remove();
+                sendPacket(new SetCooldownPacket(cooldown.getKey(), 0)); // Make sure the client is synced
+            } else {
+                cooldown.setValue(newCooldown);
+            }
+        }
+    }
+
+    public void setCooldowns(Map<String, Integer> newCooldowns) {
+
+        for (Object2IntMap.Entry<String> cooldown : cooldowns.object2IntEntrySet()) {
+            if (!newCooldowns.containsKey(cooldown.getKey()))
+                sendPacket(new SetCooldownPacket(cooldown.getKey(), 0)); // Reset the cooldown for the client
+        }
+
+        for (Map.Entry<String, Integer> cooldown : newCooldowns.entrySet()) {
+            sendPacket(new SetCooldownPacket(cooldown.getKey(), cooldown.getValue()));
+        }
+
+        cooldowns.clear();
+        cooldowns.putAll(newCooldowns);
+    }
+
+    public Map<String, Integer> getCooldowns() {
+        return Map.copyOf(cooldowns);
     }
 
     //endregion
