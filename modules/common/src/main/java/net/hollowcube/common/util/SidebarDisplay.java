@@ -121,7 +121,7 @@ public class SidebarDisplay implements Viewable {
     }
 
     @Override
-    public @NotNull Set<@NotNull Player> getViewers() {
+    public @NotNull Set<? extends @NotNull Player> getViewers() {
         return this.sidebar.getViewers();
     }
 

@@ -69,7 +69,7 @@ public class WindChargeEntity extends AbstractProjectileEntity {
     }
 
     public static void sendExplosion(
-        Collection<Player> players,
+        Collection<? extends Player> players,
         Point hitPos,
         float radius,
         float knockbackMultiplier,

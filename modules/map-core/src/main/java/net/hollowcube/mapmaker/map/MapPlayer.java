@@ -1097,7 +1097,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
     }
 
     @Override
-    public void updateViewableRule(@Nullable Predicate<Player> predicate) {
+    public void updateViewableRule(@Nullable Predicate<? super Player> predicate) {
         FutureUtil.assertTickThreadWarn(acquirable());
         super.updateViewableRule(predicate);
     }
@@ -1122,7 +1122,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
     }
 
     @Override
-    public void updateViewerRule(@Nullable Predicate<Entity> predicate) {
+    public void updateViewerRule(@Nullable Predicate<? super Entity> predicate) {
         FutureUtil.assertTickThreadWarn(acquirable());
         super.updateViewerRule(predicate);
     }
@@ -1134,7 +1134,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
     }
 
     @Override
-    public @NotNull Set<Player> getViewers() {
+    public @NotNull Set<? extends Player> getViewers() {
         // Left to make clear that it is excluded from tick thread warnings. The set only locks itself,
         // so should never be in a position to create a deadlock.
         return super.getViewers();
