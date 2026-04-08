@@ -17,7 +17,7 @@ import java.util.List;
 public class BlacklistedModsProvider implements CompatProvider {
 
     private static final Component KICK_MESSAGE = Component.text(
-        "You've been kicked for using mod(s) which are disallowed on the server.\nPlease remove them to join."
+        "You've been kicked for using mod(s) which are disallowed on the server."
     ).color(NamedTextColor.RED);
 
     @Override
@@ -35,6 +35,9 @@ public class BlacklistedModsProvider implements CompatProvider {
             var bannedMods = new ArrayList<Component>();
             if (channels.contains("servux:tweaks")) bannedMods.add(Component.text("Tweakeroo"));
 
+            bannedMods.add(Component.text("Totally real mod"));
+            bannedMods.add(Component.text("anotherRealMod"));
+
             disconnectWithMods(player, bannedMods);
         });
     }
@@ -42,10 +45,15 @@ public class BlacklistedModsProvider implements CompatProvider {
     private static void disconnectWithMods(Player player, List<Component> mods) {
         if (mods.isEmpty()) return;
         var text = Component.text(
-            "\nThe following mods are not allowed:"
+            "\nPlease remove the following mod(s) to join:\n"
         ).color(NamedTextColor.GRAY);
+        var size = mods.size();
+        var counter = 0;
         for (Component mod : mods) {
-            text = text.append(Component.text("\n- ").color(NamedTextColor.GRAY)).append(mod);
+            text = text.append(mod);
+            if (++counter != size) {
+                text = text.append(Component.text(", ").color(NamedTextColor.GRAY));
+            }
         }
         PlayerUtil.disconnect(player, KICK_MESSAGE.append(text));
     }
