@@ -35,9 +35,6 @@ public class BlacklistedModsProvider implements CompatProvider {
             var bannedMods = new ArrayList<Component>();
             if (channels.contains("servux:tweaks")) bannedMods.add(Component.text("Tweakeroo"));
 
-            bannedMods.add(Component.text("Totally real mod"));
-            bannedMods.add(Component.text("anotherRealMod"));
-
             disconnectWithMods(player, bannedMods);
         });
     }
