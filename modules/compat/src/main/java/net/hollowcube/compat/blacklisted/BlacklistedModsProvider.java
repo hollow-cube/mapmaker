@@ -41,7 +41,12 @@ public class BlacklistedModsProvider implements CompatProvider {
 
     private static void disconnectWithMods(Player player, List<Component> mods) {
         if (mods.isEmpty()) return;
-
-        PlayerUtil.disconnect(player, KICK_MESSAGE);
+        var text = Component.text(
+            "\nThe following mods are not allowed:"
+        ).color(NamedTextColor.GRAY);
+        for (Component mod : mods) {
+            text = text.append(Component.text("\n- ").color(NamedTextColor.GRAY)).append(mod);
+        }
+        PlayerUtil.disconnect(player, KICK_MESSAGE.append(text));
     }
 }
