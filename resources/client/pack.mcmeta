@@ -12,33 +12,6 @@
   "overlays": {
     "entries": [
       {
-        "min_format": 46,
-        "max_format": 46,
-        "formats": {
-          "min_inclusive": 46,
-          "max_inclusive": 46
-        },
-        "directory": "pvn_769"
-      },
-      {
-        "min_format": 47,
-        "max_format": 55,
-        "formats": {
-          "min_inclusive": 47,
-          "max_inclusive": 55
-        },
-        "directory": "pvn_770"
-      },
-      {
-        "min_format": 56,
-        "max_format": 63,
-        "formats": {
-          "min_inclusive": 56,
-          "max_inclusive": 63
-        },
-        "directory": "pvn_771"
-      },
-      {
         "min_format": 64,
         "max_format": 64,
         "formats": {
