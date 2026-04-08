@@ -43,13 +43,13 @@ public class BlacklistedModsProvider implements CompatProvider {
         if (mods.isEmpty()) return;
         var text = Component.text(
             "\nPlease remove the following mod(s) to join:\n"
-        ).color(NamedTextColor.GRAY);
+        ).color(NamedTextColor.RED);
         var size = mods.size();
         var counter = 0;
         for (Component mod : mods) {
-            text = text.append(mod);
+            text = text.append(mod.color(NamedTextColor.GRAY));
             if (++counter != size) {
-                text = text.append(Component.text(", ").color(NamedTextColor.GRAY));
+                text = text.append(Component.text(", "));
             }
         }
         PlayerUtil.disconnect(player, KICK_MESSAGE.append(text));
