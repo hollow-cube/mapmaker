@@ -2,10 +2,12 @@ package net.hollowcube.mapmaker.isolate;
 
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.MapCommands;
 import net.hollowcube.mapmaker.api.maps.MapWorldMessage;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
@@ -154,6 +156,12 @@ public class MapIsolateServer extends AbstractMapServer {
     protected void handleConfigPhase(AsyncPlayerConfigurationEvent event) {
         try {
             var player = event.getPlayer();
+            if (config.get(VelocityConfig.class).secret().isEmpty()) {
+                ProtocolVersions.unsafeSetProtocolVersion(player, MinecraftServer.PROTOCOL_VERSION);
+            } else {
+                ProtocolVersions.requestProtocolVersionFromProxy(player);
+                if (!player.isOnline()) return;
+            }
 
             // Queue resource pack download/apply while we do other things
             var resourcePackFuture = ResourcePackManager.sendResourcePack(player);
