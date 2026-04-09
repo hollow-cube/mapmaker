@@ -6,6 +6,7 @@ import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.compat.api.ModChannelRegisterEvent;
 import net.hollowcube.compat.api.packet.PacketRegistry;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.GlobalEventHandler;
@@ -43,15 +44,7 @@ public class BlacklistedModsProvider implements CompatProvider {
         if (mods.isEmpty()) return;
         var text = Component.text(
             "\nPlease remove the following mod(s) to join:\n"
-        ).color(NamedTextColor.RED);
-        var size = mods.size();
-        var counter = 0;
-        for (Component mod : mods) {
-            text = text.append(mod.color(NamedTextColor.GRAY));
-            if (++counter != size) {
-                text = text.append(Component.text(", "));
-            }
-        }
+        ).color(NamedTextColor.RED).append(Component.join(JoinConfiguration.commas(true), mods).color(NamedTextColor.GRAY));
         PlayerUtil.disconnect(player, KICK_MESSAGE.append(text));
     }
 }
