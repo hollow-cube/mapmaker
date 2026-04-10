@@ -9,25 +9,24 @@ import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.animal.LlamaMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class LlamaEntity extends AbstractChestedHorseEntity<LlamaMeta> {
 
-    public static final MapEntityInfo<@NotNull LlamaEntity> INFO = MapEntityInfo.<LlamaEntity>builder(AbstractChestedHorseEntity.INFO)
+    public static final MapEntityInfo<LlamaEntity> INFO = MapEntityInfo.<LlamaEntity>builder(AbstractChestedHorseEntity.INFO)
         .with("Variant", MapEntityInfoType.Enum(LlamaMeta.Variant.class, LlamaMeta.Variant.CREAMY, DataComponents.LLAMA_VARIANT))
         .with("Carpet", CommonMapEntityInfoTypes.DyeBodyArmor("_carpet"))
         .build();
 
     private static final String VARIANT_KEY = "Variant";
 
-    public LlamaEntity(@NotNull UUID uuid) {
+    public LlamaEntity(UUID uuid) {
         super(EntityType.LLAMA, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -35,7 +34,7 @@ public class LlamaEntity extends AbstractChestedHorseEntity<LlamaMeta> {
     }
 
     @Override
-    public void writeData(@NotNull CompoundBinaryTag.Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

@@ -8,13 +8,12 @@ import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.water.AxolotlMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class AxolotlEntity extends AbstractAgeableEntity<AxolotlMeta> {
 
-    public static final MapEntityInfo<@NotNull AxolotlEntity> INFO = MapEntityInfo.<AxolotlEntity>builder(AbstractAgeableEntity.INFO)
+    public static final MapEntityInfo<AxolotlEntity> INFO = MapEntityInfo.<AxolotlEntity>builder(AbstractAgeableEntity.INFO)
         .with("Variant", MapEntityInfoType.Enum(AxolotlMeta.Variant.class, AxolotlMeta.Variant.LUCY, DataComponents.AXOLOTL_VARIANT))
         .with("Playing Dead", MapEntityInfoType.Bool(false, AxolotlMeta::setPlayingDead, AxolotlMeta::isPlayingDead))
         .build();
@@ -22,12 +21,12 @@ public class AxolotlEntity extends AbstractAgeableEntity<AxolotlMeta> {
     private static final String PLAYING_DEAD_KEY = "mapmaker:playing_dead";
     private static final String VARIANT_KEY = "Variant";
 
-    public AxolotlEntity(@NotNull UUID uuid) {
+    public AxolotlEntity(UUID uuid) {
         super(EntityType.AXOLOTL, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -38,7 +37,7 @@ public class AxolotlEntity extends AbstractAgeableEntity<AxolotlMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

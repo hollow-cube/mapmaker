@@ -10,24 +10,23 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.animal.FrogMeta;
 import net.minestom.server.entity.metadata.animal.FrogVariant;
 import net.minestom.server.registry.Registries;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class FrogEntity extends AbstractAgeableEntity<FrogMeta> {
 
-    public static final MapEntityInfo<@NotNull FrogEntity> INFO = MapEntityInfo.<FrogEntity>builder(AbstractAgeableEntity.INFO)
+    public static final MapEntityInfo<FrogEntity> INFO = MapEntityInfo.<FrogEntity>builder(AbstractAgeableEntity.INFO)
         .with("Variant", MapEntityInfoType.RegisteredKey(Registries::frogVariant, FrogVariant.TEMPERATE, DataComponents.FROG_VARIANT))
         .build();
 
     private static final String VARIANT_KEY = "variant";
 
-    public FrogEntity(@NotNull UUID uuid) {
+    public FrogEntity(UUID uuid) {
         super(EntityType.FROG, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -35,7 +34,7 @@ public class FrogEntity extends AbstractAgeableEntity<FrogMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

@@ -10,24 +10,23 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.animal.ChickenMeta;
 import net.minestom.server.entity.metadata.animal.ChickenVariant;
 import net.minestom.server.registry.Registries;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class ChickenEntity extends AbstractAgeableEntity<ChickenMeta> {
 
-    public static final MapEntityInfo<@NotNull ChickenEntity> INFO = MapEntityInfo.<ChickenEntity>builder(AbstractAgeableEntity.INFO)
+    public static final MapEntityInfo<ChickenEntity> INFO = MapEntityInfo.<ChickenEntity>builder(AbstractAgeableEntity.INFO)
         .with("Variant", MapEntityInfoType.RegisteredKey(Registries::chickenVariant, ChickenVariant.TEMPERATE, DataComponents.CHICKEN_VARIANT))
         .build();
 
     private static final String VARIANT_KEY = "variant";
 
-    public ChickenEntity(@NotNull UUID uuid) {
+    public ChickenEntity(UUID uuid) {
         super(EntityType.CHICKEN, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -35,7 +34,7 @@ public class ChickenEntity extends AbstractAgeableEntity<ChickenMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

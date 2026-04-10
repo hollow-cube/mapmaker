@@ -11,13 +11,12 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.animal.tameable.CatMeta;
 import net.minestom.server.entity.metadata.animal.tameable.CatVariant;
 import net.minestom.server.registry.Registries;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class CatEntity extends AbstractTameableEntity<CatMeta> {
 
-    public static final MapEntityInfo<@NotNull CatEntity> INFO = MapEntityInfo.<CatEntity>builder(AbstractTameableEntity.INFO)
+    public static final MapEntityInfo<CatEntity> INFO = MapEntityInfo.<CatEntity>builder(AbstractTameableEntity.INFO)
         .with("Variant", MapEntityInfoType.RegisteredKey(Registries::catVariant, CatVariant.BLACK, DataComponents.CAT_VARIANT))
         .with("Collar", MapEntityInfoType.Enum(DyeColor.class, DyeColor.RED, DataComponents.CAT_COLLAR))
         .with("Is Lying", MapEntityInfoType.Bool(false, CatMeta::setLying, CatMeta::isLying))
@@ -27,12 +26,12 @@ public class CatEntity extends AbstractTameableEntity<CatMeta> {
     private static final String COLLAR_COLOR_KEY = "CollarColor";
     private static final String LYING_KEY = "mapmaker:lying";
 
-    public CatEntity(@NotNull UUID uuid) {
+    public CatEntity(UUID uuid) {
         super(EntityType.CAT, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -44,7 +43,7 @@ public class CatEntity extends AbstractTameableEntity<CatMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

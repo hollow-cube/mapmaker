@@ -6,13 +6,12 @@ import net.hollowcube.mapmaker.map.entity.info.MapEntityInfoType;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.animal.BeeMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class BeeEntity extends AbstractAgeableEntity<BeeMeta> {
 
-    public static final MapEntityInfo<@NotNull BeeEntity> INFO = MapEntityInfo.<BeeEntity>builder(AbstractAgeableEntity.INFO)
+    public static final MapEntityInfo<BeeEntity> INFO = MapEntityInfo.<BeeEntity>builder(AbstractAgeableEntity.INFO)
         .with("Is Rolling", MapEntityInfoType.Bool(false, BeeMeta::setRolling, BeeMeta::isRolling))
         .with("Is Angry", MapEntityInfoType.Bool(
             false,
@@ -28,12 +27,12 @@ public class BeeEntity extends AbstractAgeableEntity<BeeMeta> {
     private static final String ANGER_END_TIME_KEY = "anger_end_time";
     private static final String IS_ROLLING = "mapmaker:is_rolling";
 
-    public BeeEntity(@NotNull UUID uuid) {
+    public BeeEntity(UUID uuid) {
         super(EntityType.BEE, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -46,7 +45,7 @@ public class BeeEntity extends AbstractAgeableEntity<BeeMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

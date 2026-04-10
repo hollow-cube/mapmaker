@@ -8,24 +8,23 @@ import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.animal.RabbitMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class RabbitEntity extends AbstractAgeableEntity<RabbitMeta> {
 
-    public static final MapEntityInfo<@NotNull RabbitEntity> INFO = MapEntityInfo.<RabbitEntity>builder(AbstractAgeableEntity.INFO)
+    public static final MapEntityInfo<RabbitEntity> INFO = MapEntityInfo.<RabbitEntity>builder(AbstractAgeableEntity.INFO)
         .with("Variant", MapEntityInfoType.Enum(RabbitMeta.Variant.class, RabbitMeta.Variant.BROWN, DataComponents.RABBIT_VARIANT))
         .build();
 
     private static final String TYPE_KEY = "RabbitType";
 
-    public RabbitEntity(@NotNull UUID uuid) {
+    public RabbitEntity(UUID uuid) {
         super(EntityType.RABBIT, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -33,7 +32,7 @@ public class RabbitEntity extends AbstractAgeableEntity<RabbitMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla
