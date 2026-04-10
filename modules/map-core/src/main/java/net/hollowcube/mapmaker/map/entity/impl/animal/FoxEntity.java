@@ -8,13 +8,12 @@ import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.animal.FoxMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class FoxEntity extends AbstractAgeableEntity<FoxMeta> {
 
-    public static final MapEntityInfo<@NotNull FoxEntity> INFO = MapEntityInfo.<FoxEntity>builder(AbstractAgeableEntity.INFO)
+    public static final MapEntityInfo<FoxEntity> INFO = MapEntityInfo.<FoxEntity>builder(AbstractAgeableEntity.INFO)
         .with("Variant", MapEntityInfoType.Enum(FoxMeta.Variant.class, FoxMeta.Variant.RED, DataComponents.FOX_VARIANT))
         .with("Sitting", MapEntityInfoType.Bool(false, FoxMeta::setSitting, FoxMeta::isSitting))
         .with("Sleeping", MapEntityInfoType.Bool(false, FoxMeta::setSleeping, FoxMeta::isSleeping))
@@ -25,12 +24,12 @@ public class FoxEntity extends AbstractAgeableEntity<FoxMeta> {
     private static final String SITTING_KEY = "Sitting";
     private static final String SLEEPING_KEY = "Sleeping";
 
-    public FoxEntity(@NotNull UUID uuid) {
+    public FoxEntity(UUID uuid) {
         super(EntityType.FOX, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -41,7 +40,7 @@ public class FoxEntity extends AbstractAgeableEntity<FoxMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

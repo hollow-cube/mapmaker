@@ -9,13 +9,12 @@ import net.minestom.server.color.DyeColor;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.animal.SheepMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class SheepEntity extends AbstractAgeableEntity<SheepMeta> {
 
-    public static final MapEntityInfo<@NotNull SheepEntity> INFO = MapEntityInfo.<SheepEntity>builder(AbstractAgeableEntity.INFO)
+    public static final MapEntityInfo<SheepEntity> INFO = MapEntityInfo.<SheepEntity>builder(AbstractAgeableEntity.INFO)
         .with("Color", MapEntityInfoType.Enum(DyeColor.class, DyeColor.WHITE, DataComponents.SHEEP_COLOR))
         .with("Sheared", MapEntityInfoType.Bool(false, SheepMeta::setSheared, SheepMeta::isSheared))
         .build();
@@ -23,12 +22,12 @@ public class SheepEntity extends AbstractAgeableEntity<SheepMeta> {
     private static final String COLOR_KEY = "Color";
     private static final String SHEARED_KEY = "Sheared";
 
-    public SheepEntity(@NotNull UUID uuid) {
+    public SheepEntity(UUID uuid) {
         super(EntityType.SHEEP, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -37,7 +36,7 @@ public class SheepEntity extends AbstractAgeableEntity<SheepMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

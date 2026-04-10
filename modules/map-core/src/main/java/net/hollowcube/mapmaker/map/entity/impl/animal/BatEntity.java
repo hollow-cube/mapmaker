@@ -6,24 +6,23 @@ import net.hollowcube.mapmaker.map.entity.info.MapEntityInfoType;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.ambient.BatMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class BatEntity extends AbstractMobEntity<BatMeta> {
 
-    public static final MapEntityInfo<@NotNull BatEntity> INFO = MapEntityInfo.<BatEntity>builder(AbstractMobEntity.INFO)
+    public static final MapEntityInfo<BatEntity> INFO = MapEntityInfo.<BatEntity>builder(AbstractMobEntity.INFO)
         .with("Is Hanging", MapEntityInfoType.Bool(false, BatMeta::setHanging, BatMeta::isHanging))
         .build();
 
     private static final String BAT_FLAGS_KEY = "BatFlags";
 
-    public BatEntity(@NotNull UUID uuid) {
+    public BatEntity(UUID uuid) {
         super(EntityType.BAT, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -31,7 +30,7 @@ public class BatEntity extends AbstractMobEntity<BatMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

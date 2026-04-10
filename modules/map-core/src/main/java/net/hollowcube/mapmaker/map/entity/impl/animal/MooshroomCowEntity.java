@@ -8,24 +8,23 @@ import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.animal.MooshroomMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class MooshroomCowEntity extends AbstractAgeableEntity<MooshroomMeta> {
 
-    public static final MapEntityInfo<@NotNull MooshroomCowEntity> INFO = MapEntityInfo.<MooshroomCowEntity>builder(AbstractAgeableEntity.INFO)
+    public static final MapEntityInfo<MooshroomCowEntity> INFO = MapEntityInfo.<MooshroomCowEntity>builder(AbstractAgeableEntity.INFO)
         .with("Variant", MapEntityInfoType.Enum(MooshroomMeta.Variant.class, MooshroomMeta.Variant.RED, DataComponents.MOOSHROOM_VARIANT))
         .build();
 
     private static final String VARIANT_KEY = "Type";
 
-    public MooshroomCowEntity(@NotNull UUID uuid) {
+    public MooshroomCowEntity(UUID uuid) {
         super(EntityType.MOOSHROOM, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -33,7 +32,7 @@ public class MooshroomCowEntity extends AbstractAgeableEntity<MooshroomMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

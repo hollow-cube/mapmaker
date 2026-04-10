@@ -10,21 +10,19 @@ import net.hollowcube.mapmaker.map.entity.impl.animal.equine.*;
 import net.hollowcube.mapmaker.map.entity.impl.animal.golem.CopperGolemEntity;
 import net.hollowcube.mapmaker.map.entity.impl.animal.golem.IronGolemEntity;
 import net.hollowcube.mapmaker.map.entity.impl.animal.golem.SnowGolemEntity;
-import net.hollowcube.mapmaker.map.entity.impl.hostile.nether.*;
-import net.hollowcube.mapmaker.map.entity.impl.other.ArmorStandEntity;
-import net.hollowcube.mapmaker.map.entity.impl.hostile.ShulkerEntity;
 import net.hollowcube.mapmaker.map.entity.impl.hostile.*;
+import net.hollowcube.mapmaker.map.entity.impl.hostile.arthropod.CaveSpiderEntity;
 import net.hollowcube.mapmaker.map.entity.impl.hostile.arthropod.EndermiteEntity;
 import net.hollowcube.mapmaker.map.entity.impl.hostile.arthropod.SilverfishEntity;
-import net.hollowcube.mapmaker.map.entity.impl.hostile.illager.*;
-import net.hollowcube.mapmaker.map.entity.impl.hostile.skeleton.*;
-import net.hollowcube.mapmaker.map.entity.impl.hostile.arthropod.CaveSpiderEntity;
 import net.hollowcube.mapmaker.map.entity.impl.hostile.arthropod.SpiderEntity;
-import net.hollowcube.mapmaker.map.entity.impl.hostile.zombie.*;
-import net.hollowcube.mapmaker.map.entity.impl.other.EndCrystalEntity;
-import net.hollowcube.mapmaker.map.entity.impl.other.ItemFrameEntity;
-import net.hollowcube.mapmaker.map.entity.impl.other.LeashKnotEntity;
-import net.hollowcube.mapmaker.map.entity.impl.other.PaintingEntity;
+import net.hollowcube.mapmaker.map.entity.impl.hostile.illager.*;
+import net.hollowcube.mapmaker.map.entity.impl.hostile.nether.*;
+import net.hollowcube.mapmaker.map.entity.impl.hostile.skeleton.*;
+import net.hollowcube.mapmaker.map.entity.impl.hostile.zombie.DrownedEntity;
+import net.hollowcube.mapmaker.map.entity.impl.hostile.zombie.HuskEntity;
+import net.hollowcube.mapmaker.map.entity.impl.hostile.zombie.ZombieEntity;
+import net.hollowcube.mapmaker.map.entity.impl.hostile.zombie.ZombifiedPiglinEntity;
+import net.hollowcube.mapmaker.map.entity.impl.other.*;
 import net.hollowcube.mapmaker.map.entity.impl.villager.VillagerEntity;
 import net.hollowcube.mapmaker.map.entity.impl.villager.WanderingTraderEntity;
 import net.hollowcube.mapmaker.map.entity.impl.villager.ZombieVillagerEntity;
@@ -32,7 +30,6 @@ import net.hollowcube.mapmaker.map.entity.interaction.InteractionEditorScreen;
 import net.hollowcube.mapmaker.map.entity.interaction.InteractionEntity;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
-import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
@@ -40,9 +37,7 @@ import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.player.PlayerCustomClickEvent;
 import net.minestom.server.event.player.PlayerEntityInteractEvent;
 import net.minestom.server.event.trait.InstanceEvent;
-import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public final class MapEntities {
 
@@ -92,7 +87,7 @@ public final class MapEntities {
         MapEntityType.override(EntityType.LEASH_KNOT, LeashKnotEntity::new);
 
         // Animals
-        // MapEntityType.override(EntityType.ALLAY, AllayEntity::new);
+        MapEntityType.override(EntityType.ALLAY, AllayEntity::new);
         MapEntityType.override(EntityType.ARMADILLO, ArmadilloEntity::new);
         MapEntityType.override(EntityType.AXOLOTL, AxolotlEntity::new);
         MapEntityType.override(EntityType.BEE, BeeEntity::new);

@@ -6,13 +6,12 @@ import net.hollowcube.mapmaker.map.entity.info.MapEntityInfoType;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.animal.GoatMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class GoatEntity extends AbstractAgeableEntity<GoatMeta> {
 
-    public static final MapEntityInfo<@NotNull GoatEntity> INFO = MapEntityInfo.<GoatEntity>builder(AbstractAgeableEntity.INFO)
+    public static final MapEntityInfo<GoatEntity> INFO = MapEntityInfo.<GoatEntity>builder(AbstractAgeableEntity.INFO)
         .with("Has Left Horn", MapEntityInfoType.Bool(false, GoatMeta::setLeftHorn, GoatMeta::hasLeftHorn))
         .with("Has Right Horn", MapEntityInfoType.Bool(false, GoatMeta::setRightHorn, GoatMeta::hasRightHorn))
         .build();
@@ -20,12 +19,12 @@ public class GoatEntity extends AbstractAgeableEntity<GoatMeta> {
     private static final String HAS_LEFT_HORN_KEY = "HasLeftHorn";
     private static final String HAS_RIGHT_HORN_KEY = "HasRightHorn";
 
-    public GoatEntity(@NotNull UUID uuid) {
+    public GoatEntity(UUID uuid) {
         super(EntityType.GOAT, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -34,7 +33,7 @@ public class GoatEntity extends AbstractAgeableEntity<GoatMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

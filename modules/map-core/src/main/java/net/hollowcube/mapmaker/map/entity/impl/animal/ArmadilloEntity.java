@@ -7,24 +7,23 @@ import net.hollowcube.mapmaker.map.util.NbtUtilV2;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.animal.ArmadilloMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class ArmadilloEntity extends AbstractAgeableEntity<ArmadilloMeta> {
 
-    public static final MapEntityInfo<@NotNull ArmadilloEntity> INFO = MapEntityInfo.<ArmadilloEntity>builder(AbstractAgeableEntity.INFO)
+    public static final MapEntityInfo<ArmadilloEntity> INFO = MapEntityInfo.<ArmadilloEntity>builder(AbstractAgeableEntity.INFO)
         .with("State", MapEntityInfoType.Enum(ArmadilloMeta.State.class, ArmadilloMeta.State.IDLE, ArmadilloMeta::setState, ArmadilloMeta::getState))
         .build();
 
     private static final String STATE_KEY = "state";
 
-    public ArmadilloEntity(@NotNull UUID uuid) {
+    public ArmadilloEntity(UUID uuid) {
         super(EntityType.ARMADILLO, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -32,7 +31,7 @@ public class ArmadilloEntity extends AbstractAgeableEntity<ArmadilloMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

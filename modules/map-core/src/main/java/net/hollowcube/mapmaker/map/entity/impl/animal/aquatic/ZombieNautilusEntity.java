@@ -11,25 +11,24 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.animal.ZombieNautilusMeta;
 import net.minestom.server.entity.metadata.animal.ZombieNautilusVariant;
 import net.minestom.server.registry.Registries;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class ZombieNautilusEntity extends AbstractTameableEntity<ZombieNautilusMeta> {
 
-    public static final MapEntityInfo<@NotNull ZombieNautilusEntity> INFO = MapEntityInfo.<ZombieNautilusEntity>builder(AbstractTameableEntity.INFO)
+    public static final MapEntityInfo<ZombieNautilusEntity> INFO = MapEntityInfo.<ZombieNautilusEntity>builder(AbstractTameableEntity.INFO)
         .with("Variant", MapEntityInfoType.RegisteredKey(Registries::zombieNautilusVariant, ZombieNautilusVariant.TEMPERATE, DataComponents.ZOMBIE_NAUTILUS_VARIANT))
         .with("Armor", CommonMapEntityInfoTypes.BodyArmor(CommonMapEntityInfoTypes.NautilusArmor.class))
         .build();
 
     private static final String VARIANT_KEY = "variant";
 
-    public ZombieNautilusEntity(@NotNull UUID uuid) {
+    public ZombieNautilusEntity(UUID uuid) {
         super(EntityType.ZOMBIE_NAUTILUS, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -37,7 +36,7 @@ public class ZombieNautilusEntity extends AbstractTameableEntity<ZombieNautilusM
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

@@ -9,24 +9,23 @@ import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.animal.tameable.ParrotMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class ParrotEntity extends AbstractTameableEntity<ParrotMeta> {
 
-    public static final MapEntityInfo<@NotNull ParrotEntity> INFO = MapEntityInfo.<ParrotEntity>builder(AbstractAgeableEntity.INFO)
+    public static final MapEntityInfo<ParrotEntity> INFO = MapEntityInfo.<ParrotEntity>builder(AbstractAgeableEntity.INFO)
         .with("Variant", MapEntityInfoType.Enum(ParrotMeta.Color.class, ParrotMeta.Color.RED_BLUE, DataComponents.PARROT_VARIANT))
         .build();
 
     private static final String VARIANT_KEY = "Variant";
 
-    public ParrotEntity(@NotNull UUID uuid) {
+    public ParrotEntity(UUID uuid) {
         super(EntityType.PARROT, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -34,7 +33,7 @@ public class ParrotEntity extends AbstractTameableEntity<ParrotMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

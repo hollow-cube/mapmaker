@@ -7,13 +7,12 @@ import net.hollowcube.mapmaker.map.util.NbtUtilV2;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.animal.PandaMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class PandaEntity extends AbstractAgeableEntity<PandaMeta> {
 
-    public static final MapEntityInfo<@NotNull PandaEntity> INFO = MapEntityInfo.<PandaEntity>builder(AbstractAgeableEntity.INFO)
+    public static final MapEntityInfo<PandaEntity> INFO = MapEntityInfo.<PandaEntity>builder(AbstractAgeableEntity.INFO)
         .with("Sitting", MapEntityInfoType.Bool(false, PandaMeta::setSitting, PandaMeta::isSitting))
         .with("Variant", MapEntityInfoType.Enum(PandaMeta.Gene.class, PandaMeta.Gene.BROWN, (meta, gene) -> {
             meta.setMainGene(gene);
@@ -24,12 +23,12 @@ public class PandaEntity extends AbstractAgeableEntity<PandaMeta> {
     private static final String MAIN_GENE_KEY = "MainGene";
     private static final String HIDDEN_GENE_KEY = "HiddenGene";
 
-    public PandaEntity(@NotNull UUID uuid) {
+    public PandaEntity(UUID uuid) {
         super(EntityType.PANDA, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -38,7 +37,7 @@ public class PandaEntity extends AbstractAgeableEntity<PandaMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

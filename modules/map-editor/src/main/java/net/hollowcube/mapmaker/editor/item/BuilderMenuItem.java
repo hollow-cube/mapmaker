@@ -37,6 +37,8 @@ public class BuilderMenuItem extends ItemHandler {
     public void build(ItemStack.Builder builder, @Nullable CompoundBinaryTag tag) {
         super.build(builder, tag);
 
+        // Set so the builder menu item can't break blocks,
+        // useful when used on small entities so if you miss you don't remove blocks by accident.
         builder.set(DataComponents.TOOL, new Tool(List.of(), 0f, 0, false));
     }
 

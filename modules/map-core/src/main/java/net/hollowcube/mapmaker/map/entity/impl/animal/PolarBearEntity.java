@@ -6,24 +6,23 @@ import net.hollowcube.mapmaker.map.entity.info.MapEntityInfoType;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.animal.PolarBearMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class PolarBearEntity extends AbstractAgeableEntity<PolarBearMeta> {
 
-    public static final MapEntityInfo<@NotNull PolarBearEntity> INFO = MapEntityInfo.<PolarBearEntity>builder(AbstractAgeableEntity.INFO)
+    public static final MapEntityInfo<PolarBearEntity> INFO = MapEntityInfo.<PolarBearEntity>builder(AbstractAgeableEntity.INFO)
         .with("Standing", MapEntityInfoType.Bool(false, PolarBearMeta::setStandingUp, PolarBearMeta::isStandingUp))
         .build();
 
     private static final String STANDING_KEY = "mapmaker:standing";
 
-    public PolarBearEntity(@NotNull UUID uuid) {
+    public PolarBearEntity(UUID uuid) {
         super(EntityType.POLAR_BEAR, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -31,7 +30,7 @@ public class PolarBearEntity extends AbstractAgeableEntity<PolarBearMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

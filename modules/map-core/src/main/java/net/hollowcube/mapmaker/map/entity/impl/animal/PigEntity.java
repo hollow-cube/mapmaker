@@ -10,24 +10,23 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.animal.PigMeta;
 import net.minestom.server.entity.metadata.animal.PigVariant;
 import net.minestom.server.registry.Registries;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class PigEntity extends AbstractAgeableEntity<PigMeta> {
 
-    public static final MapEntityInfo<@NotNull PigEntity> INFO = MapEntityInfo.<PigEntity>builder(AbstractAgeableEntity.INFO)
+    public static final MapEntityInfo<PigEntity> INFO = MapEntityInfo.<PigEntity>builder(AbstractAgeableEntity.INFO)
         .with("Variant", MapEntityInfoType.RegisteredKey(Registries::pigVariant, PigVariant.TEMPERATE, DataComponents.PIG_VARIANT))
         .build();
 
     private static final String VARIANT_KEY = "variant";
 
-    public PigEntity(@NotNull UUID uuid) {
+    public PigEntity(UUID uuid) {
         super(EntityType.PIG, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -35,7 +34,7 @@ public class PigEntity extends AbstractAgeableEntity<PigMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

@@ -8,13 +8,12 @@ import net.minestom.server.color.DyeColor;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.water.fish.TropicalFishMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class TropicalFishEntity extends AbstractFishEntity<TropicalFishMeta> {
 
-    public static final MapEntityInfo<@NotNull TropicalFishEntity> INFO = MapEntityInfo.<TropicalFishEntity>builder(AbstractFishEntity.INFO)
+    public static final MapEntityInfo<TropicalFishEntity> INFO = MapEntityInfo.<TropicalFishEntity>builder(AbstractFishEntity.INFO)
         .with("Pattern Color", MapEntityInfoType.Enum(DyeColor.class, DyeColor.WHITE, DataComponents.TROPICAL_FISH_PATTERN_COLOR))
         .with("Base Color", MapEntityInfoType.Enum(DyeColor.class, DyeColor.WHITE, DataComponents.TROPICAL_FISH_BASE_COLOR))
         .with("Pattern", MapEntityInfoType.Enum(TropicalFishMeta.Pattern.class, TropicalFishMeta.Pattern.KOB, DataComponents.TROPICAL_FISH_PATTERN))
@@ -22,12 +21,12 @@ public class TropicalFishEntity extends AbstractFishEntity<TropicalFishMeta> {
 
     private static final String VARIANT_KEY = "Variant";
 
-    public TropicalFishEntity(@NotNull UUID uuid) {
+    public TropicalFishEntity(UUID uuid) {
         super(EntityType.TROPICAL_FISH, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         var variant = TropicalFishMeta.Variant.fromPackedId(tag.getInt(VARIANT_KEY, 0));
@@ -39,7 +38,7 @@ public class TropicalFishEntity extends AbstractFishEntity<TropicalFishMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

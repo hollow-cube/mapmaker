@@ -33,7 +33,7 @@ public class MapEntityInfoRegistry {
     private static final Map<Class<?>, MapEntityInfo<?>> REGISTRY = new ConcurrentHashMap<>();
     static {
         // Animals
-        // register(AllayEntity.class, AllayEntity.INFO);
+        register(AllayEntity.class, AllayEntity.INFO);
         register(ArmadilloEntity.class, ArmadilloEntity.INFO);
         register(AxolotlEntity.class, AxolotlEntity.INFO);
         register(BeeEntity.class, BeeEntity.INFO);

@@ -7,24 +7,23 @@ import net.hollowcube.mapmaker.map.entity.info.MapEntityInfoType;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.golem.SnowGolemMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class SnowGolemEntity extends AbstractMobEntity<SnowGolemMeta> {
 
-    public static final MapEntityInfo<@NotNull SnowGolemEntity> INFO = MapEntityInfo.<SnowGolemEntity>builder(AbstractLivingEntity.INFO)
+    public static final MapEntityInfo<SnowGolemEntity> INFO = MapEntityInfo.<SnowGolemEntity>builder(AbstractLivingEntity.INFO)
         .with("Pumpkin", MapEntityInfoType.Bool(false, SnowGolemMeta::setHasPumpkinHat, SnowGolemMeta::isHasPumpkinHat))
         .build();
 
     private static final String PUMPKIN_KEY = "Pumpkin";
 
-    public SnowGolemEntity(@NotNull UUID uuid) {
+    public SnowGolemEntity(UUID uuid) {
         super(EntityType.SNOW_GOLEM, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -32,7 +31,7 @@ public class SnowGolemEntity extends AbstractMobEntity<SnowGolemMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

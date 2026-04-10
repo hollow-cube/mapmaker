@@ -6,13 +6,12 @@ import net.hollowcube.mapmaker.map.entity.info.MapEntityInfoType;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.animal.CamelMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class CamelEntity extends AbstractHorseEntity<CamelMeta> {
 
-    public static final MapEntityInfo<@NotNull CamelEntity> INFO = MapEntityInfo.<CamelEntity>builder(AbstractHorseEntity.INFO)
+    public static final MapEntityInfo<CamelEntity> INFO = MapEntityInfo.<CamelEntity>builder(AbstractHorseEntity.INFO)
         .with("Is Sitting", MapEntityInfoType.Bool(
             false,
             (meta, sitting) -> meta.setLastPoseChangeTick(sitting ? -1 : 0),
@@ -22,12 +21,12 @@ public class CamelEntity extends AbstractHorseEntity<CamelMeta> {
 
     private static final String LAST_POSE_TICK_KEY = "LastPoseTick";
 
-    public CamelEntity(@NotNull UUID uuid) {
+    public CamelEntity(UUID uuid) {
         super(EntityType.CAMEL, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -35,7 +34,7 @@ public class CamelEntity extends AbstractHorseEntity<CamelMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla

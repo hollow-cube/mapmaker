@@ -11,13 +11,12 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.animal.tameable.WolfMeta;
 import net.minestom.server.entity.metadata.animal.tameable.WolfVariant;
 import net.minestom.server.registry.Registries;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class WolfEntity extends AbstractTameableEntity<WolfMeta> {
 
-    public static final MapEntityInfo<@NotNull WolfEntity> INFO = MapEntityInfo.<WolfEntity>builder(AbstractTameableEntity.INFO)
+    public static final MapEntityInfo<WolfEntity> INFO = MapEntityInfo.<WolfEntity>builder(AbstractTameableEntity.INFO)
         .with("Variant", MapEntityInfoType.RegisteredKey(Registries::wolfVariant, WolfVariant.PALE, DataComponents.WOLF_VARIANT))
         .with("Collar", MapEntityInfoType.Enum(DyeColor.class, DyeColor.RED, DataComponents.WOLF_COLLAR))
         .build();
@@ -25,12 +24,12 @@ public class WolfEntity extends AbstractTameableEntity<WolfMeta> {
     private static final String VARIANT_KEY = "variant";
     private static final String COLLAR_COLOR_KEY = "CollarColor";
 
-    public WolfEntity(@NotNull UUID uuid) {
+    public WolfEntity(UUID uuid) {
         super(EntityType.WOLF, uuid);
     }
 
     @Override
-    public void readData(@NotNull CompoundBinaryTag tag) {
+    public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
         // Vanilla
@@ -39,7 +38,7 @@ public class WolfEntity extends AbstractTameableEntity<WolfMeta> {
     }
 
     @Override
-    public void writeData(CompoundBinaryTag.@NotNull Builder tag) {
+    public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
         // Vanilla
