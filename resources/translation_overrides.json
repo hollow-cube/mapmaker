@@ -9,5 +9,6 @@
   "time.sunm\u0065t\u0065or-cli\u0065ntbound.name": "",
   "gui.recipebook.moreRecips": "",
   "gui.stats": "Server Options",
-  "multiplayer.downloadingStats": "Requesting Server Options"
+  "multiplayer.downloadingStats": "Requesting Server Options",
+  "soundCategory.voice": "Map Volume"
 }

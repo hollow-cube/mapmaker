@@ -64,7 +64,7 @@ public record PlaySoundAction(
         if (this.event == null) return;
 
         player.stopSound(SoundStop.named(this.event));
-        player.playSound(Sound.sound(this.event, Sound.Source.MASTER, this.volume, this.pitch));
+        player.playSound(Sound.sound(this.event, Sound.Source.VOICE, this.volume, this.pitch));
     }
 
 }

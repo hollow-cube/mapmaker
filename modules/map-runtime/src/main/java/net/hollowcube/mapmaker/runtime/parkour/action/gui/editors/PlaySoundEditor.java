@@ -13,6 +13,7 @@ import net.hollowcube.mapmaker.util.Autocompletors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.TranslationArgument;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -72,7 +73,13 @@ public class PlaySoundEditor extends AbstractActionEditorPanel<@NotNull PlaySoun
         this.pitchInput.update((int) (data.pitch() * 100));
     }
 
-    private static Button makeSoundButton(SoundEvent sound) {
+    public static Button makeSoundButton(@Nullable SoundEvent sound) {
+        if (sound == null) {
+            return new Button(null, 1, 1)
+                .from(ItemStack.of(Material.BARRIER))
+                .text(Component.text("All").decoration(TextDecoration.ITALIC, false), List.of());
+        }
+
         var id = sound.key().asMinimalString();
 
         var key = id.substring(0, id.indexOf('.'));
@@ -101,7 +108,7 @@ public class PlaySoundEditor extends AbstractActionEditorPanel<@NotNull PlaySoun
 
         return new Button(null, 1, 1)
             .from(ItemStack.of(icon))
-            .text(Component.text(sound.name()), List.of());
+            .text(Component.text(sound.name()).decoration(TextDecoration.ITALIC, false), List.of());
     }
 
     public static TranslatableComponent makeThumbnail(@Nullable PlaySoundAction action) {
