@@ -22,10 +22,7 @@ import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Metadata;
-import net.minestom.server.entity.MetadataDef;
-import net.minestom.server.entity.Player;
-import net.minestom.server.entity.RelativeFlags;
+import net.minestom.server.entity.*;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.attribute.AttributeModifier;
 import net.minestom.server.entity.attribute.AttributeOperation;
@@ -177,12 +174,16 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
                         }
 
                         player.setFlyingWithElytra(false);
+                        var meta = EntityMetadataStealer.steal(player);
 
                         // Force the player immediately into whatever pose the server thinks they should be in at the target pos.
                         ((MapPlayer) player).updatePose();
                         player.sendPacket(new EntityMetaDataPacket(
                             player.getEntityId(),
-                            Map.of(MetadataDef.Player.POSE.index(), Metadata.Pose(player.getPose()))
+                            Map.of(
+                                MetadataDef.Player.POSE.index(), Metadata.Pose(player.getPose()),
+                                MetadataDef.Player.ENTITY_FLAGS.index(), Metadata.Byte(meta.get(MetadataDef.Player.ENTITY_FLAGS))
+                            )
                         ));
                     } finally {
                         player.sendPacket(new BundlePacket());
