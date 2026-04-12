@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.player;
 
 public final class Permission {
+    public static final long NONE = 0;
+
     public static final long EXTENDED_LIMITS = 1;
 
     public static final long MAP_DELETE = 1 << 1;

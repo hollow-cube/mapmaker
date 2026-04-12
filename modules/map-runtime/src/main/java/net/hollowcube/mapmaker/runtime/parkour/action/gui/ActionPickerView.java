@@ -5,6 +5,8 @@ import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
+import net.hollowcube.mapmaker.player.Permission;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.parkour.action.Action;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionList;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionRegistry;
@@ -45,8 +47,12 @@ public class ActionPickerView extends Panel {
             int x = i % 7, y = i / 7;
 
             var editor = ActionRegistry.getEditor(actionKey);
+
             if (editor.exclusiveSet().stream().anyMatch(actionList::has))
                 continue; // skip if any exclusive action is already present
+            if (editor.requiredPermission() != Permission.NONE && !PlayerData.fromPlayer(host.player()).has(editor.requiredPermission()))
+                continue; // skip if player doesn't have required permission
+
             add(x + 1, y + 2, new Button(null, 1, 1)
                 .text(Component.translatable("gui.action." + actionKey.value() + ".title"),
                     LanguageProviderV2.translateMulti("gui.action." + actionKey.value() + ".info.lore", List.of()))
