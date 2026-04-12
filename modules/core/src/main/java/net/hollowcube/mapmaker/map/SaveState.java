@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.RuntimeGson;
+import net.minestom.server.command.builder.arguments.ArgumentType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,6 +27,9 @@ public class SaveState {
 
     SaveStateType.Serializer<?> serializer;
     Object state;
+
+    // Non-null if this save state currently has a replay associated with it.
+    private transient @Nullable String replay;
 
     public SaveState() {
     }
@@ -170,6 +174,15 @@ public class SaveState {
         if (!this.state.getClass().isAssignableFrom(state.getClass()))
             throw new IllegalArgumentException("State type mismatch. had " + this.state.getClass() + ", expected " + state.getClass());
         this.state = state;
+    }
+
+    public @Nullable String replay() {
+        ArgumentType.NbtCompound()
+        return replay;
+    }
+
+    public void setReplay(@Nullable String replay) {
+        this.replay = replay;
     }
 
     public @NotNull SaveStateUpdateRequest createUpsertRequest() {

@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":modules:compat"))
     implementation(project(":modules:common"))
     implementation(project(":modules:datafix"))
+    implementation(project(":modules:replay"))
 
     implementation(libs.minestom)
     implementation(libs.bundles.otel) {

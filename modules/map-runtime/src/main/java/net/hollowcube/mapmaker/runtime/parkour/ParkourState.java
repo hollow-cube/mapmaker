@@ -228,7 +228,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         public void resetPlayer(ParkourMapWorld world, Player player, @Nullable ParkourState nextState) {
             AnyPlaying.super.resetPlayer(world, player, nextState);
 
-            // Wdon't save if entering finished state, that state will handle saving the record.
+            // Don't save if entering finished state, that state will handle saving the record.
             boolean shouldSave = !(nextState instanceof Finished)
                     // Save if exiting, entering spec, >10s playing, or completed
                     && (nextState == null || nextState instanceof Spectating || saveState.getRealPlaytime() > 10_000 || saveState.isCompleted());
@@ -369,6 +369,12 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
     private static void writeSaveState(ParkourMapWorld world, Player player, SaveState saveState) {
         var update = saveState.createUpsertRequest();
         update.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
+
+        // TODO(replay): save replay
+        var replay = saveState.replay();
+        if (replay != null) {
+            System.out.println("REPLAY: saving replay " + replay);
+        }
 
         // Write the save state to the database
         try {

@@ -234,6 +234,11 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             map().id(), player.getUuid().toString(), saveStateType,
             PlayState.SERIALIZER, new PlayState());
         newSaveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
+
+        newSaveState.setReplay(UUID.randomUUID().toString());
+        System.out.println("REPLAY: creating new replay for reset " + newSaveState.replay());
+        // TODO(replay): create a new replay
+
         changePlayerState(player, createPlayingState(newSaveState));
     }
 
@@ -283,6 +288,8 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         // Resume playing from this state as a safe point action
         var newSaveState = saveState.copy(newPlayState);
         changePlayerState(player, playing.withSaveState(newSaveState));
+
+        // TODO(replay): add checkpoint reset marker to replay
     }
 
     @Override
@@ -292,6 +299,8 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         try {
             saveState = server().mapService().getLatestSaveState(map().id(),
                 playerData.id(), saveStateType, PlayState.SERIALIZER);
+
+            // TODO(replay): try to load existing replay
         } catch (MapService.NotFoundError ignored) {
             // No save state yet, create one locally.
             // We do an upsert to save, so it will be created in the map service at that point.
@@ -299,6 +308,10 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
                 map().id(), playerData.id(), saveStateType,
                 PlayState.SERIALIZER, new PlayState());
             saveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
+
+            saveState.setReplay(UUID.randomUUID().toString());
+            System.out.println("REPLAY: creating new replay " + saveState.replay());
+            // TODO(replay): create new replay
         }
 
         player.setRespawnPoint(Objects.requireNonNullElseGet(
@@ -321,6 +334,9 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         ActionBar.forPlayer(player).removeProvider(ParkourDebugHud.INSTANCE);
 
         player.removeTag(BEST_SAVESTATE);
+
+        // TODO(replay): save the replay for the player
+        //  (and track the in-progress save in case we are about to shut down)
 
         super.removePlayer(player);
     }
@@ -356,6 +372,8 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             // Set starting latency
             saveState.setStartLatency(mp.averageLatency());
         }
+
+        // TODO(replay): begin or resume recording if there is a replay for this run
 
         EventDispatcher.call(new ParkourMapPlayerTookActionEvent(this, player, saveState));
     }
@@ -494,6 +512,15 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     //region World lifecycle
 
     @Override
+    public TaskSchedule safePointTick() {
+        var result = super.safePointTick();
+
+        // TODO: advance all active recordings
+
+        return result;
+    }
+
+    @Override
     public void loadWorld() {
         super.loadWorld();
 
@@ -512,6 +539,13 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         super.saveWorldTag(tag);
 
         tag.setTag(SPAWN_CHECKPOINT_EFFECTS, instance().getTag(SPAWN_CHECKPOINT_EFFECTS));
+    }
+
+    @Override
+    public CompletableFuture<Void> close() {
+        // TODO(replay): save all in-progress replays/wait for any pending saves.
+
+        return super.close();
     }
 
     protected void computeDefaultResetHeight() {
