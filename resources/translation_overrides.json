@@ -10,5 +10,6 @@
   "gui.recipebook.moreRecips": "",
   "gui.stats": "Server Options",
   "multiplayer.downloadingStats": "Requesting Server Options",
-  "soundCategory.voice": "Map Volume"
+  "soundCategory.voice": "Map Sounds",
+  "soundCategory.record": "Map Music"
 }

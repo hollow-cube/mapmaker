@@ -5,6 +5,7 @@ import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.action.Action;
 import net.hollowcube.mapmaker.runtime.parkour.action.gui.editors.StopSoundEditor;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.SoundStop;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.entity.Player;
@@ -38,7 +39,12 @@ public record StopSoundAction(@Nullable SoundEvent event) implements Action {
 
     @Override
     public void applyTo(Player player, PlayState state) {
-        player.stopSound(this.event != null ? SoundStop.named(this.event) : SoundStop.all());
+        if (this.event != null) {
+            player.stopSound(SoundStop.named(this.event));
+        } else {
+            player.stopSound(SoundStop.source(Sound.Source.VOICE));
+            player.stopSound(SoundStop.source(Sound.Source.RECORD));
+        }
     }
 
 }
