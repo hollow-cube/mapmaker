@@ -1,12 +1,11 @@
 package net.hollowcube.mapmaker.runtime.parkour.action;
 
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.entity.potion.PotionEffectList;
 import net.hollowcube.mapmaker.runtime.PlayState;
-import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditAttributeAction;
-import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditLivesAction;
-import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditTimerAction;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.*;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.attributes.ActionAttributes;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.attributes.AttributeMap;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.base.TimerData;
@@ -57,7 +56,7 @@ public class LegacyActionStateManager {
             .addListener(ParkourMapPlayerTookActionEvent.class, LegacyActionStateManager::handlePlayerTookAction);
 
     private static void handleUpdatePlayerFromState(ParkourMapPlayerUpdateStateEvent event) {
-        final var player = event.player();
+        final var player = (MapPlayer) event.player();
         final var state = event.playState();
 
         // Update attributes
@@ -134,6 +133,14 @@ public class LegacyActionStateManager {
             );
             if (player.isFlyingWithElytra()) player.setFlyingWithElytra(false);
         }
+
+        var time = state.get(SetTimeAction.SAVE_DATA);
+        if (time == null) player.clearLocalTime();
+        else player.setLocalTime(time.time());
+
+        var weather = state.get(SetWeatherAction.SAVE_DATA);
+        if (weather == null) player.setWeather(player.getInstance().getWeather(), 1);
+        else player.setWeather(weather.weather(), 0.04f); // todo where does that number come from
     }
 
     private static void handleUpdateStateFromPlayer(ParkourMapPlayerStateUpdateEvent event) {

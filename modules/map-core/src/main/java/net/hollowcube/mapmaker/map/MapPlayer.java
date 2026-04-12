@@ -44,6 +44,7 @@ import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.metadata.LivingEntityMeta;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.PlayerMoveEvent;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.Weather;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
@@ -57,6 +58,7 @@ import net.minestom.server.network.packet.server.play.*;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.potion.PotionEffect;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.registry.RegistryTag;
 import net.minestom.server.registry.TagKey;
 import net.minestom.server.snapshot.PlayerSnapshot;
@@ -64,9 +66,11 @@ import net.minestom.server.snapshot.SnapshotUpdater;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.utils.chunk.ChunkCache;
 import net.minestom.server.utils.validate.Check;
+import net.minestom.server.world.clock.WorldClock;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,8 +174,8 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
         try {
             var mh = MethodHandles.privateLookupIn(Player.class, MethodHandles.lookup())
                 .findGetter(Player.class, "chunkQueue", LongPriorityQueue.class);
-            var chunkQUeue = (LongPriorityQueue) mh.invoke(this);
-            chunkQUeue.clear();
+            var chunkQueue = (LongPriorityQueue) mh.invoke(this);
+            chunkQueue.clear();
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
@@ -181,7 +185,10 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
     public void sendPacket(@NotNull SendablePacket packet) {
         switch (packet) {
             // In case it is sent from somewhere we dont expect
-            case PingPacket(int id) -> lastPingId.set(id);
+            case PingPacket(int id) -> {
+                lastPingId.set(id);
+                super.sendPacket(packet); // forward
+            }
 
             // Don't send pose packets to self if we aren't supposed to
             case EntityMetaDataPacket(var entity, var entries)
@@ -189,13 +196,12 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
                 var newEntries = new HashMap<>(entries);
                 newEntries.remove(MetadataDef.POSE.index());
                 super.sendPacket(new EntityMetaDataPacket(entity, newEntries));
-                return;
             }
-            default -> {  // Do nothing
-            }
-        }
 
-        super.sendPacket(packet);
+            case SetTimePacket timePacket -> super.sendPacket(rewriteTimePacket(timePacket));
+
+            default -> super.sendPacket(packet);
+        }
     }
 
     @Override
@@ -243,6 +249,26 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
     public boolean setGameMode(@NotNull GameMode gameMode) {
         if (gameMode == GameMode.CREATIVE) resetImpulsePosition();
         return super.setGameMode(gameMode);
+    }
+
+    public @NotNull CompletableFuture<Void> teleport(
+        @NotNull Pos position, @NotNull Vec velocity, long @Nullable [] chunks,
+        @MagicConstant(flagsFromClass = RelativeFlags.class) int flags,
+        boolean shouldConfirm) {
+        // See note on pendingTeleports
+        pendingTeleports.incrementAndGet();
+        return super.teleport(position, velocity, chunks, flags, shouldConfirm)
+            .thenRun(pendingTeleports::decrementAndGet)
+            .exceptionally(ex -> {
+                pendingTeleports.decrementAndGet();
+                throw new RuntimeException("Failed to teleport player " + getUsername(), ex);
+            });
+    }
+
+    @Override
+    public @NonNull CompletableFuture<Void> setInstance(@NonNull Instance instance, @NonNull Pos spawnPosition) {
+        clearLocalTime(false);
+        return super.setInstance(instance, spawnPosition);
     }
 
     // region EXT: Pose
@@ -324,20 +350,6 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
 
     // endregion
 
-    public @NotNull CompletableFuture<Void> teleport(
-        @NotNull Pos position, @NotNull Vec velocity, long @Nullable [] chunks,
-        @MagicConstant(flagsFromClass = RelativeFlags.class) int flags,
-        boolean shouldConfirm) {
-        // See note on pendingTeleports
-        pendingTeleports.incrementAndGet();
-        return super.teleport(position, velocity, chunks, flags, shouldConfirm)
-            .thenRun(pendingTeleports::decrementAndGet)
-            .exceptionally(ex -> {
-                pendingTeleports.decrementAndGet();
-                throw new RuntimeException("Failed to teleport player " + getUsername(), ex);
-            });
-    }
-
     //region EXT: Ping
 
     private final AtomicInteger lastPingId = new AtomicInteger(0);
@@ -383,6 +395,8 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
 
         super.refreshLatency(latency);
     }
+
+    //endregion
 
     //region EXT: Owned Entities
 
@@ -944,6 +958,44 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
 
     //endregion
 
+    //region EXT: Time
+
+    // May need to make this more complex in the future, but for now just override all the clocks we send to the given time.
+    private int localTime = -1;
+
+    public void setLocalTime(int localTime) {
+        this.localTime = localTime;
+        syncLocalTime();
+    }
+
+    public void clearLocalTime() {
+        if (this.localTime == -1) return;
+        clearLocalTime(true);
+    }
+
+    private void clearLocalTime(boolean syncClient) {
+        this.localTime = -1;
+        if (syncClient) syncLocalTime();
+    }
+
+    private void syncLocalTime() {
+        var instance = getInstance();
+        if (instance != null) sendPacket(instance.createTimePacket());
+    }
+
+    private SetTimePacket rewriteTimePacket(SetTimePacket packet) {
+        int localTime = this.localTime;
+        if (localTime < 0) return packet;
+
+        // Right now we assume that time is always frozen when overridden, and there is no partial tick.
+        var newClocks = new HashMap<RegistryKey<WorldClock>, SetTimePacket.ClockState>();
+        for (var clock : packet.clocks().keySet())
+            newClocks.put(clock, new SetTimePacket.ClockState(localTime, 0, 0));
+        return new SetTimePacket(localTime, newClocks);
+    }
+
+    //endregion
+
     //region EXT: Weather
 
     private float targetRainLevel = 0, targetThunderLevel = 0;
@@ -966,8 +1018,16 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
             return; // Nothing to do
 
         float lastRainLevel = currentRainLevel, lastThunderLevel = currentThunderLevel;
-        currentRainLevel = Math.clamp(currentRainLevel + Math.copySign(weatherTransitionRate, targetRainLevel - currentRainLevel), 0, 1);
-        currentThunderLevel = Math.clamp(currentThunderLevel + Math.copySign(weatherTransitionRate, targetThunderLevel - currentThunderLevel), 0, 1);
+        float rainDelta = targetRainLevel - currentRainLevel;
+        if (rainDelta != 0) {
+            float step = Math.copySign(Math.min(weatherTransitionRate, Math.abs(rainDelta)), rainDelta);
+            currentRainLevel = Math.clamp(currentRainLevel + step, 0, 1);
+        }
+        float thunderDelta = targetThunderLevel - currentThunderLevel;
+        if (thunderDelta != 0) {
+            float step = Math.copySign(Math.min(weatherTransitionRate, Math.abs(thunderDelta)), thunderDelta);
+            currentThunderLevel = Math.clamp(currentThunderLevel + step, 0, 1);
+        }
 
         if (currentRainLevel > 0 && lastRainLevel == 0) {
             sendPacket(new ChangeGameStatePacket(ChangeGameStatePacket.Reason.BEGIN_RAINING, 0));

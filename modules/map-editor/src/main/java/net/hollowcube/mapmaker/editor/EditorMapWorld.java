@@ -188,7 +188,9 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         super.loadWorldTag(tag);
 
         if (terraformInstanceStorage != null) terraformInstanceStorage.load(tag);
+
         instance().setTag(SPAWN_CHECKPOINT_EFFECTS, tag.getTag(SPAWN_CHECKPOINT_EFFECTS));
+        ParkourMapWorld.applyGlobalSpawnActions(this);
     }
 
     @Override
@@ -436,7 +438,10 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         var checkpointData = getTag(SPAWN_CHECKPOINT_EFFECTS).toMutable();
         var host = Panel.open(player, new SpawnActionEditorView(checkpointData));
         host.setTag(ActionEditorView.ACTION_LOCATION, entity.getPosition());
-        host.onClose(() -> instance().setTag(SPAWN_CHECKPOINT_EFFECTS, checkpointData.toImmutable()));
+        host.onClose(() -> {
+            instance().setTag(SPAWN_CHECKPOINT_EFFECTS, checkpointData.toImmutable());
+            ParkourMapWorld.applyGlobalSpawnActions(this);
+        });
     }
 
     @Override

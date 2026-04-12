@@ -15,6 +15,7 @@ public final class ExtraPanels {
     public static final List<Component> LORE_POSTFIX_CLICKSELECT = LanguageProviderV2.translateMulti("gui.action.clickselect", List.of());
     public static final List<Component> LORE_POSTFIX_CLICKEDIT = LanguageProviderV2.translateMulti("gui.action.clickedit", List.of());
     public static final List<Component> LORE_POSTFIX_CLICKCHOOSE = LanguageProviderV2.translateMulti("gui.action.clickchoose", List.of());
+    public static final List<Component> LORE_POSTFIX_CLICKCYCLE = LanguageProviderV2.translateMulti("gui.action.clickcycle", List.of());
     public static final List<Component> LORE_POSTFIX_CLICKEDITORREMOVE = LanguageProviderV2.translateMulti("gui.action.clickeditorremove", List.of());
     public static final List<Component> LORE_POSTFIX_CLICKREMOVE = LanguageProviderV2.translateMulti("gui.action.clickremove", List.of());
     public static final List<Component> LORE_POSTFIX_CLICKCREATE = LanguageProviderV2.translateMulti("gui.action.clickcreate", List.of());

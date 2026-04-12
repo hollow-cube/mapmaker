@@ -29,7 +29,6 @@ import net.minestom.server.event.player.PlayerDeathEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.event.trait.PlayerInstanceEvent;
-import net.minestom.server.instance.Weather;
 import net.minestom.server.instance.WorldBorder;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
@@ -367,19 +366,6 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
             0f, 0f, 0,
             0, ServerFlag.WORLD_BORDER_SIZE
         ));
-
-        instance().setTime(switch (map().getSetting(MapSettings.TIME_OF_DAY)) {
-            case NOON -> 6000;
-            case SUNRISE -> 23000;
-            case SUNSET -> 13000;
-            case NIGHT -> 18000;
-        });
-
-        instance().setWeather(switch (map().getSetting(MapSettings.WEATHER_TYPE)) {
-            case CLEAR -> new Weather(0, 0);
-            case RAINING -> new Weather(1f, 0f);
-            case THUNDERSTORM -> new Weather(1f, 1f);
-        }, 1);
     }
 
     @Blocking
