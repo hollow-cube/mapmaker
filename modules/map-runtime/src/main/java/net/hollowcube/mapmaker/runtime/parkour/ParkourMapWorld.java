@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.runtime.parkour;
 
+import dev.hollowcube.replay.ReplayRecorder;
+import dev.hollowcube.replay.event.DeltaMoveEvent;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.events.PlayerMoveVehicleEvent;
 import net.hollowcube.common.util.OpUtils;
@@ -167,6 +169,20 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         registerMarkers(objectEntityHandlers());
 
         eventNode(ParkourState.AnyPlaying.class)
+            .addListener(PlayerMoveEvent.class, event -> {
+                if (!(getPlayerState(event.getPlayer()) instanceof ParkourState.Playing2(var saveState)))
+                    return;
+
+                var replay = saveState.replay();
+                if (replay == null) return;
+
+                var oldPos = event.getPlayer().getPosition();
+                var newPos = event.getNewPosition();
+                var delta = newPos.sub(oldPos).withView(newPos); // always absolute view
+
+                // lots of option for specialty here: small/medium/large delta thresholds with different encoding, view only changes, etc.
+                replay.submit(new DeltaMoveEvent(event.getPlayer().getEntityId(), delta));
+            })
             .addListener(PlayerMoveEvent.class, event -> handlePlayerOrVehicleMove(event.getPlayer(), event.getNewPosition()))
             .addListener(PlayerMoveVehicleEvent.class, event -> handlePlayerOrVehicleMove(event.getPlayer(), event.getNewPosition()))
             .addListener(PlayerTickEvent.class, this::handlePlayerTick)
@@ -235,7 +251,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             PlayState.SERIALIZER, new PlayState());
         newSaveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
 
-        newSaveState.setReplay(UUID.randomUUID().toString());
+        newSaveState.setReplay(ReplayRecorder.create(UUID.fromString(map().id()), new UUID(0, 0)));
         System.out.println("REPLAY: creating new replay for reset " + newSaveState.replay());
         // TODO(replay): create a new replay
 
@@ -309,7 +325,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
                 PlayState.SERIALIZER, new PlayState());
             saveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
 
-            saveState.setReplay(UUID.randomUUID().toString());
+            saveState.setReplay(ReplayRecorder.create(UUID.fromString(map().id()), new UUID(0, 0)));
             System.out.println("REPLAY: creating new replay " + saveState.replay());
             // TODO(replay): create new replay
         }
@@ -515,7 +531,14 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     public TaskSchedule safePointTick() {
         var result = super.safePointTick();
 
-        // TODO: advance all active recordings
+        // TODO(replay): advance all active recordings
+        for (var player : players()) {
+            if (!(getPlayerState(player) instanceof ParkourState.Playing2(var saveState)))
+                continue;
+
+            var replay = saveState.replay();
+            if (replay != null) replay.advance();
+        }
 
         return result;
     }

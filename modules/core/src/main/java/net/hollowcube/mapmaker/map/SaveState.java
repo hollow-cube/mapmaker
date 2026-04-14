@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.map;
 
+import dev.hollowcube.replay.ReplayRecorder;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.RuntimeGson;
-import net.minestom.server.command.builder.arguments.ArgumentType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,7 +29,7 @@ public class SaveState {
     Object state;
 
     // Non-null if this save state currently has a replay associated with it.
-    private transient @Nullable String replay;
+    private transient @Nullable ReplayRecorder replay;
 
     public SaveState() {
     }
@@ -176,12 +176,11 @@ public class SaveState {
         this.state = state;
     }
 
-    public @Nullable String replay() {
-        ArgumentType.NbtCompound()
+    public @Nullable ReplayRecorder replay() {
         return replay;
     }
 
-    public void setReplay(@Nullable String replay) {
+    public void setReplay(@Nullable ReplayRecorder replay) {
         this.replay = replay;
     }
 

@@ -6,10 +6,13 @@ import net.minestom.server.utils.validate.Check;
 import java.util.UUID;
 
 public final class ReplayHeader {
-    private static final int HEADER_LENGTH = 256;
+    public static final int HEADER_LENGTH = 256;
     public static final int MAGIC = 0x48435250; // 'HCRP'
 
     public static final short VERSION_LATEST = 1;
+
+    public static final int RECORD_COMPRESSION_LEVEL = 3;
+    public static final int COMPACT_COMPRESSION_LEVEL = 19;
 
     public static final short FLAGS_NONE = 0; // unused for now
 
@@ -55,6 +58,46 @@ public final class ReplayHeader {
 
         // Skip the remaining fixed header length
         buffer.advanceRead(HEADER_LENGTH - (buffer.readIndex() - startIndex));
+    }
+
+    public short version() {
+        return version;
+    }
+
+    public UUID worldId() {
+        return worldId;
+    }
+
+    public UUID worldVersion() {
+        return worldVersion;
+    }
+
+    public long timestamp() {
+        return timestamp;
+    }
+
+    public short dictionary() {
+        return dictionary;
+    }
+
+    public int metadataLength() {
+        return metadataLength;
+    }
+
+    public int indexLength() {
+        return indexLength;
+    }
+
+    public int tickCount() {
+        return tickCount;
+    }
+
+    public int chunkCount() {
+        return chunkCount;
+    }
+
+    public long indexByteOffset() {
+        return HEADER_LENGTH + metadataLength;
     }
 
     public void update(int metadataLength, int indexLength, int tickCount, int chunkCount) {
