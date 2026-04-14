@@ -96,7 +96,6 @@ final class ReplayRecorderImpl implements ReplayRecorder {
         var targetAddress = networkBufferAddress(segmentBuffer) + segmentBuffer.writeIndex();
         var baseAddress = networkBufferAddress(scratchBuffer);
 
-        // Compress in place
         long compressedLength = Zstd.compressUnsafe(
             targetAddress, requiredSize,
             baseAddress, dataLength,

@@ -18,6 +18,9 @@ dependencies {
     implementation(project(":modules:terraform"))
     implementation(project(":modules:compat"))
 
+    implementation(project(":modules:replay"))
+    implementation(libs.zstd)
+
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)
     implementation(libs.slf4j.jul)

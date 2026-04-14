@@ -181,7 +181,7 @@ public class SaveState {
     }
 
     public void setReplay(@Nullable ReplayRecorder replay) {
-        this.replay = replay;
+//        this.replay = replay;
     }
 
     public @NotNull SaveStateUpdateRequest createUpsertRequest() {

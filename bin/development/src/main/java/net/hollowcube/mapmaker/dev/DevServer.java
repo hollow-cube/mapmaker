@@ -1,5 +1,8 @@
 package net.hollowcube.mapmaker.dev;
 
+import com.github.luben.zstd.Zstd;
+import dev.hollowcube.replay.data.ChunkIndex;
+import dev.hollowcube.replay.data.ReplayHeader;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.util.*;
@@ -10,6 +13,7 @@ import net.hollowcube.mapmaker.editor.EditorState;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.PlayerSkin;
 import net.hollowcube.mapmaker.player.SessionService;
@@ -19,6 +23,10 @@ import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.adventure.MinestomAdventure;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -26,12 +34,19 @@ import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
+import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.ping.Status;
+import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Base64;
 import java.util.concurrent.Future;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import static net.minestom.server.network.PolarBufferAccessWidener.networkBufferAddress;
 
 public class DevServer extends AbstractMultiMapServer {
 
@@ -172,4 +187,105 @@ public class DevServer extends AbstractMultiMapServer {
             .build());
     }
 
+    @Override
+    protected @NotNull DebugCommand createDebugCommand() {
+        var cmd = super.createDebugCommand();
+
+        cmd.createPermissionedSubcommand("replay", (player, context) -> {
+            try {
+                var path = Path.of("/Users/matt/dev/projects/hollowcube/mapmaker/workspace/replay-test/test1-compact.dat");
+                var bytes = Files.readAllBytes(path);
+                var buffer = NetworkBuffer.wrap(bytes, 0, bytes.length);
+
+                System.out.println("file: " + path.getFileName().toString() + " (" + bytes.length + " bytes)");
+
+                var header = new ReplayHeader(buffer);
+                System.out.println("version: " + header.version());
+                System.out.println("worldId: " + header.worldId());
+                System.out.println("worldVersion: " + header.worldVersion());
+                System.out.println("timestamp: " + header.timestamp());
+                System.out.println("dictionary: " + header.dictionary());
+                System.out.println("metadataLength: " + header.metadataLength());
+                System.out.println("indexLength: " + header.indexLength());
+                System.out.println("tickCount: " + header.tickCount());
+                System.out.println("chunkCount: " + header.chunkCount());
+
+                var metadata = buffer.read(NetworkBuffer.NBT_COMPOUND);
+                System.out.println("\nmetadata: " + MinestomAdventure.tagStringIO().asString(metadata));
+
+                var index = new ChunkIndex[header.chunkCount()];
+                for (int i = 0; i < header.chunkCount(); i++) {
+                    index[i] = buffer.read(ChunkIndex.NETWORK_TYPE);
+                }
+
+                var scratch = NetworkBuffer.resizableBuffer(2048);
+
+                var entity = new LivingEntity(EntityType.MANNEQUIN) {
+                    {
+                        setNoGravity(true);
+                        hasPhysics = false;
+                    }
+
+                    @Override
+                    protected void movementTick() {
+                        // nothing
+                    }
+                };
+                entity.setInstance(player.getInstance(), new Pos(0, 40, 0));
+
+                player.scheduler().submitTask(new Supplier<>() {
+                    int tick = 0;
+                    int chunkIndex = 0;
+
+                    private boolean newChunk = true;
+
+                    @Override
+                    public TaskSchedule get() {
+                        var chunk = index[chunkIndex];
+
+                        if (newChunk) {
+                            newChunk = false;
+                            System.out.println("\nchunk: " + chunk);
+
+                            scratch.clear();
+                            scratch.ensureWritable(chunk.uncompressedLength());
+                            Zstd.decompressUnsafe(
+                                networkBufferAddress(scratch), chunk.uncompressedLength(),
+                                networkBufferAddress(buffer) + chunk.byteOffset(), chunk.compressedLength()
+                            );
+                        }
+
+                        var tickIndex = scratch.read(NetworkBuffer.VAR_INT);
+                        var eventCount = scratch.read(NetworkBuffer.SHORT);
+                        System.out.println(tick + " (" + tickIndex + "): " + eventCount + " events");
+
+                        for (int j = 0; j < eventCount; j++) {
+                            var typeId = scratch.read(NetworkBuffer.VAR_INT);
+                            var entityId = scratch.read(NetworkBuffer.VAR_INT);
+                            var delta = scratch.read(NetworkBuffer.POS);
+                            System.out.println("  " + typeId + " " + entityId + " " + delta);
+
+                            entity.teleport(entity.getPosition().add(delta));
+                        }
+
+                        tick++;
+                        if (tick >= chunk.startTick() + chunk.tickCount()) {
+                            chunkIndex++;
+                            newChunk = true;
+                        }
+                        if (chunkIndex >= header.chunkCount()) {
+                            System.out.println("DONE");
+                            entity.remove();
+                            return TaskSchedule.stop();
+                        }
+                        return TaskSchedule.nextTick();
+                    }
+                });
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, "replay testing locally");
+
+        return cmd;
+    }
 }
