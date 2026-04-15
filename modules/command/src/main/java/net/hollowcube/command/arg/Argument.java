@@ -67,6 +67,10 @@ public abstract class Argument<T> {
         return new ArgumentBlock(id);
     }
 
+    public static @NotNull ArgumentCompoundTag CompoundTag(@NotNull String id) {
+        return new ArgumentCompoundTag(id);
+    }
+
     // Impl
 
     private final String id;
