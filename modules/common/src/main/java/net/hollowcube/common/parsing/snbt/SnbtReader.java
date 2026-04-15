@@ -8,6 +8,8 @@ import java.util.Arrays;
 
 public class SnbtReader {
 
+    private final Scope scope = new Scope();
+
     private final String string;
     private final int maxDepth;
 
@@ -70,16 +72,16 @@ public class SnbtReader {
     }
 
     public Scope scope() {
-        return new Scope();
+        this.depth++;
+        if (this.depth > this.maxDepth) {
+            throw new ParsingException(this.cursor, "Exceeded maximum SNBT depth of " + this.maxDepth);
+        }
+        return this.scope;
     }
 
     public class Scope implements AutoCloseable {
 
         private Scope() {
-            SnbtReader.this.depth++;
-            if (SnbtReader.this.depth > SnbtReader.this.maxDepth) {
-                throw new ParsingException(SnbtReader.this.cursor, "Exceeded maximum depth of " + SnbtReader.this.maxDepth);
-            }
         }
 
         @Override
