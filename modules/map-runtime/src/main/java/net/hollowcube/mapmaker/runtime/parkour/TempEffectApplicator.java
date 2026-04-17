@@ -29,6 +29,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.sound.SoundEvent;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,7 +42,10 @@ public class TempEffectApplicator {
     private static final TagCooldown PROGRESS_INDEX_WARNING = new TagCooldown("mapmaker:play/progress_index_warning", 5000);
 
     private static final Sound CHECKPOINT_SOUND = Sound.sound(SoundEvent.ENTITY_EXPERIENCE_ORB_PICKUP, Sound.Source.MASTER, 0.1f, 0f);
-    private static final TagCooldown STATUS_APPLY_COOLDOWN = new TagCooldown("mapmaker:status_plate_cooldown", 250);
+
+    private static final Instant LEGACY_STATUS_PLATE_DATE = Instant.ofEpochMilli(1776387977716L); // 2026-04-16 ish
+    private static final TagCooldown LEGACY_STATUS_APPLY_COOLDOWN = new TagCooldown("mapmaker:status_plate_cooldown", 250);
+    private static final TagCooldown STATUS_APPLY_COOLDOWN = new TagCooldown("mapmaker:status_plate_cooldown", 1);
 
     static final VariableStorage.MolangLookup VARIABLE_LOOKUP = VariableStorage.lookup();
     static final MolangResolver<Player> QUERY = new MolangResolver<>(VariableQueries::resolve);
@@ -135,7 +139,10 @@ public class TempEffectApplicator {
             return; // Player already has the status plate in this checkpoint.
         if (checkProgressIndex(player, world.map(), playState, data.actions())) return;
         if (checkCondition(player, world.map(), playState, data.condition())) return;
-        if (!STATUS_APPLY_COOLDOWN.test(player)) return;
+
+        var statusCooldown = !world.map().isPublished() || world.map().publishedAt().isAfter(LEGACY_STATUS_PLATE_DATE)
+            ? STATUS_APPLY_COOLDOWN : LEGACY_STATUS_APPLY_COOLDOWN;
+        if (!statusCooldown.test(player)) return;
 
         // Update the play state from the player's current view of the world.
         world.callEvent(new ParkourMapPlayerStateUpdateEvent(world, player, saveState, playState));
