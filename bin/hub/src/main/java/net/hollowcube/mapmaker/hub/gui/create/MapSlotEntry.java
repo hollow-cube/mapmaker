@@ -87,6 +87,7 @@ public class MapSlotEntry extends Panel {
         host.pushView(confirm("Leave Map?", () -> FutureUtil.submitVirtual(() -> {
             try {
                 api.maps.removeMapBuilder(slot.map().id(), playerId);
+                player.closeInventory();
                 player.sendMessage(Component.translatable("leave.other.map"));
             } catch (RuntimeException e) {
                 ExceptionReporter.reportException(e, playerId);

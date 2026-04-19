@@ -61,7 +61,7 @@ public final class MapBuilderInviteNotificationType implements PlayerNotificatio
                                 player.sendMessage(Component.translatable("gui.notification.map_builder.invite.accept.gone"));
                                 player.closeInventory();
                             } catch (ApiClient.BadRequestError _) {
-                                // TODO: missing translation, and open store
+                                // TODO: open store
                                 player.sendMessage(Component.translatable("gui.notification.map_builder.invite.accept.no_slots"));
                                 return; // dont delete in this case
                             }
