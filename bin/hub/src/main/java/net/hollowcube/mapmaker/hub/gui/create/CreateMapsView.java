@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.StringComparison;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.Unit;
@@ -26,19 +27,20 @@ import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
 public class CreateMapsView extends Panel {
     private static final int PAGE_SIZE = 5;
 
-    public static void open(Player player, ApiClient api, MapService mapService, ServerBridge bridge) {
+    public static void open(Player player, ApiClient api, MapService mapService, PlayerService playerService, ServerBridge bridge) {
         var playerId = PlayerData.fromPlayer(player).id();
         var slots = api.maps.getPlayerSlots(playerId).results();
 
         if (slots.isEmpty()) {
-            Panel.open(player, new NewMapView(api.maps, _ -> FutureUtil.submitVirtual(() -> open(player, api, mapService, bridge))));
+            Panel.open(player, new NewMapView(api.maps, _ -> FutureUtil.submitVirtual(() -> open(player, api, mapService, playerService, bridge))));
         } else {
-            Panel.open(player, new CreateMapsView(api, mapService, bridge, slots));
+            Panel.open(player, new CreateMapsView(api, mapService, playerService, bridge, slots));
         }
     }
 
     private final ApiClient api;
     private final MapService mapService;
+    private final PlayerService playerService;
     private final ServerBridge bridge;
 
     private final Button createButton;
@@ -51,10 +53,11 @@ public class CreateMapsView extends Panel {
     private String searchText = "";
     private @Nullable Runnable remountTask;
 
-    public CreateMapsView(ApiClient api, MapService mapService, ServerBridge bridge, List<MapSlot> initialSlots) {
+    public CreateMapsView(ApiClient api, MapService mapService, PlayerService playerService, ServerBridge bridge, List<MapSlot> initialSlots) {
         super(9, 10);
         this.api = api;
         this.mapService = mapService;
+        this.playerService = playerService;
         this.bridge = bridge;
         this.slots.addAll(initialSlots);
 
@@ -153,10 +156,11 @@ public class CreateMapsView extends Panel {
         // TODO: dont hardcode 50
         if (playerData.cubits() >= 50) {
             // TODO open the menu for purchasing a new slot
+            host.player().sendMessage("opening menu for buying a slot amirite");
         } else if (playerData.isHypercube()) {
-            this.createButton.onLeftClick(() -> this.host.pushView(new StoreView(null, StoreView.TAB_CUBITS)));
+            this.host.pushView(new StoreView(playerService, StoreView.TAB_CUBITS));
         } else {
-            this.createButton.onLeftClick(() -> this.host.pushView(new StoreView(null, StoreView.TAB_HYPERCUBE)));
+            this.host.pushView(new StoreView(playerService, StoreView.TAB_HYPERCUBE));
         }
     }
 
@@ -167,9 +171,9 @@ public class CreateMapsView extends Panel {
         var playerData = PlayerData.fromPlayer(this.host.player());
         if (playerData.isHypercube()) return;
 
-        // TODO: player svc, dont hardcode 50
+        // TODO: dont hardcode 50
         var secondaryTab = playerData.cubits() >= 50 ? StoreView.TAB_HYPERCUBE : StoreView.TAB_CUBITS;
-        this.host.pushView(new StoreView(null, secondaryTab));
+        this.host.pushView(new StoreView(playerService, secondaryTab));
     }
 
     private int getAvailableSlots() {
