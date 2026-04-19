@@ -64,7 +64,7 @@ public record PlaySoundAction(
         if (this.event == null) return;
 
         player.stopSound(SoundStop.named(this.event));
-        player.playSound(Sound.sound(this.event, getSoundSource(this.event), this.volume, this.pitch));
+        player.playSound(Sound.sound(this.event, getSoundSource(this.event), this.volume, this.pitch), Sound.Emitter.self());
     }
 
     public static Sound.Source getSoundSource(SoundEvent event) {
