@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.invite.types.MapInvite;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.DisplayName;
@@ -97,6 +98,10 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         var senderMap = this.getCurrentMap(sender);
         if (senderMap == null) {
             sender.sendMessage(Component.translatable("map.invite.no_map"));
+            return;
+        }
+        if (senderMap.verification() != MapVerification.UNVERIFIED) {
+            sender.sendMessage(Component.translatable("map.invite.verifying"));
             return;
         }
 
