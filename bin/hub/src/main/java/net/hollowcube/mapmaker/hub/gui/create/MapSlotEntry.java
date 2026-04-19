@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Button;
+import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -133,56 +134,62 @@ public class MapSlotEntry extends Panel {
     }
 
     public static final class Builder extends MapSlotEntry {
+        private static final String TRANSLATION_KEY = "gui.create_maps.slot.other";
+        private static final Component LOADING = Component.text("loading...");
+
+        private final ApiClient api;
+        private final MapSlot slot;
+
+        private final Button iconButton;
+        private final Button nameButton;
+
         public Builder(
             ApiClient api, MapService mapService, ServerBridge bridge,
             MapSlot slot, Runnable onPublish
         ) {
             super(api, mapService, bridge, slot, onPublish);
+            this.api = api;
+            this.slot = slot;
 
             var map = slot.map();
-            var translationKey = "gui.create_maps.slot.yours";
             var mapName = map.settings().getNameSafe();
 
             // TODO: Different background for builder maps
             background("create_maps2/slot/blue", 1, 1);
 
-            add(0, 0, new Button(null, 1, 1)
-                .translationKey(translationKey, mapName)
+            this.iconButton = add(0, 0, new Button(null, 1, 1)
+                .translationKey(TRANSLATION_KEY, mapName, LOADING)
                 .background("create_maps2/head_outline", 4, 4)
                 .profile(getPlayerHead2d(map.owner()))
                 .model(MODEL_8X, null)
                 .onLeftClickAsync(this::buildInWorld));
-////            new Button(null, 1, 1)
-////                .background("create_maps2/head_outline" + (pending ? "_pending" : ""), 4, 4)
-////                .model(MODEL_8X, null)
-////                .profile(getPlayerHead2d(builderId))
-////                .translationKey("gui.create_maps.edit.builders." + (pending ? "pending" : "entry"), displayName.asComponent())
-//            iconButton
-//                .background("create_maps2/head_outline", 4, 4)
-//                .model(MODEL_8X, null)
-//                .profile(getPlayerHead2d(map.owner()));
-//
-//            async(() -> {
-//                var ownerDisplayName = api.players.getDisplayName(map.owner()).asComponent();
-//                iconButton.translationKey("gui.create_maps.slot.builder", name, ownerDisplayName);
-//            });
 
-//            var iconButton = add(0, 0, new Button(null, 1, 1)
-//                .background("create_maps2/head_outline" + (pending ? "_pending" : ""), 4, 4)
-//                .translationKey(translationKey, mapName)
-//                .onLeftClick(this::editMapDetails));
-//            var userIcon = map.settings().getIcon();
-//            if (userIcon != null) iconButton.model(userIcon.toString(), null);
-//            else iconButton.sprite("icon2/1_1/item_frame", 1, 1);
-
-            add(1, 0, new Text(7, 1, mapName)
+            this.nameButton = add(1, 0, new Text(7, 1, mapName)
                 .align(2, Text.CENTER)
-                .translationKey(translationKey, mapName)
+                .translationKey(TRANSLATION_KEY, mapName, LOADING)
                 .onLeftClickAsync(this::buildInWorld));
 
             add(8, 0, new Button("gui.create_maps.slot.other.leave", 1, 1)
                 .sprite("icon2/1_1/running_out_door", 1, 1)
                 .onLeftClick(this::removeFromMap));
+        }
+
+        @Override
+        protected void mount(InventoryHost host, boolean isInitial) {
+            super.mount(host, isInitial);
+
+            if (!isInitial) return;
+            async(() -> {
+                var ownerDisplayName = api.players.getDisplayName(slot.map().owner()).asComponent();
+                sync(() -> {
+                    var mapName = slot.map().settings().getNameSafe();
+
+                    this.iconButton.translationKey(TRANSLATION_KEY, mapName, ownerDisplayName);
+                    this.nameButton.translationKey(TRANSLATION_KEY, mapName, ownerDisplayName);
+                });
+            });
+
+
         }
     }
 
