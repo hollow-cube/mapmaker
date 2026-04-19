@@ -72,7 +72,7 @@ public final class MapBuilderInviteNotificationType implements PlayerNotificatio
                                 // Ignored, it may have been deleted by the server
                             }
                         })
-                        .withConfirmation()
+                        .withConfirmation("Accept Invite")
                         .withRefresh()
                 ),
                 PlayerNotification.Action.of(
@@ -94,7 +94,7 @@ public final class MapBuilderInviteNotificationType implements PlayerNotificatio
                                 // Ignored, it may have been deleted by the server
                             }
                         })
-                        .withConfirmation()
+                        .withConfirmation("Reject Invite")
                         .withRefresh()
                 )
             )
