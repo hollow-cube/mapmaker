@@ -4,6 +4,7 @@ import net.hollowcube.common.components.ExtraComponents;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapSlot;
 import net.hollowcube.mapmaker.api.players.PlayerDataStub;
@@ -255,6 +256,8 @@ public class EditMapView extends Panel {
                     button.lorePostfix(List.of(Component.translatable("gui.create_maps.edit.builders.add.search.entry.already_invited.lore")));
                 } else if (isPlayerInvited(pds.id())) {
                     button.lorePostfix(List.of(Component.translatable("gui.create_maps.edit.builders.add.search.entry.already_added.lore")));
+                } else if (!pds.getSetting(PlayerSettings.ALLOW_BUILDER_INVITES)) {
+                    button.lorePostfix(List.of(Component.translatable("gui.create_maps.edit.builders.add.search.entry.invites_disabled.lore")));
                 }
                 return button;
             })
@@ -265,7 +268,8 @@ public class EditMapView extends Panel {
 
     @Blocking
     private boolean addMapBuilder(PlayerDataStub pds) {
-        if (isPlayerInvited(pds.id())) return false;
+        if (isPlayerInvited(pds.id()) || !pds.getSetting(PlayerSettings.ALLOW_BUILDER_INVITES))
+            return false;
 
         api.maps.inviteMapBuilder(slot.map().id(), pds.id());
         slot = slot.withLocalBuilder(pds.id());

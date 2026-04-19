@@ -37,6 +37,10 @@ public class PlayerSettingsOptions {
             Component.translatable("dialog.settings.option.allow_direct_messages")
         ),
         PlayerSettingsOption.forBool(
+            PlayerSettings.ALLOW_BUILDER_INVITES,
+            Component.translatable("dialog.settings.option.allow_builder_invites")
+        ),
+        PlayerSettingsOption.forBool(
             PlayerSettings.ENABLE_PING_SOUNDS,
             Component.translatable("dialog.settings.option.enable_ping_sounds")
         )

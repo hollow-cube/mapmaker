@@ -40,6 +40,7 @@ public final class PlayerSettings {
 
     public static PlayerSetting<Boolean> AUTO_REJECT_FRIEND_REQUESTS = PlayerSetting.Bool("auto_reject_friend_requests", false);
     public static PlayerSetting<Boolean> ALLOW_DIRECT_MESSAGES = PlayerSetting.Bool("allow_direct_messages", true);
+    public static PlayerSetting<Boolean> ALLOW_BUILDER_INVITES = PlayerSetting.Bool("allow_builder_invites", true);
     public static PlayerSetting<Boolean> ENABLE_PING_SOUNDS = PlayerSetting.Bool("enable_ping_sounds", true);
 
 }
