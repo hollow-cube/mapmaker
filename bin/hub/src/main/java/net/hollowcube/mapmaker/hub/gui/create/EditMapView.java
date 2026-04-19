@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.hub.gui.create;
 
 import net.hollowcube.common.components.ExtraComponents;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.PlayerSettings;
@@ -44,6 +45,8 @@ public class EditMapView extends Panel {
         material != Material.RECOVERY_COMPASS &&
         !material.name().endsWith("glass_pane");
 
+    private static final int NAME_INPUT_MAX = 100;
+
     private final ApiClient api;
     private final MapService mapService;
 
@@ -76,7 +79,8 @@ public class EditMapView extends Panel {
         add(0, 0, title("Edit Map"));
 
         add(0, 0, backOrClose());
-        this.nameText = add(1, 0, new Text("gui.create_maps.edit.name", 7, 1, slot.map().settings().getNameSafe()).align(8, 5));
+        var name = FontUtil.shorten(slot.map().settings().getNameSafe(), NAME_INPUT_MAX, 5);
+        this.nameText = add(1, 0, new Text("gui.create_maps.edit.name", 7, 1, name).align(8, 5));
         this.nameText.lorePostfix(LORE_POSTFIX_CLICKEDIT)
             .onLeftClick(this::beginNameEdit);
         add(8, 0, new Button("gui.create_maps.edit.actions", 1, 1)
@@ -188,7 +192,9 @@ public class EditMapView extends Panel {
                     ? message.substring(0, MapData.MAX_NAME_LENGTH) : message;
 
                 slot.map().settings().setName(limitedName);
-                nameText.text(limitedName);
+
+                var name = FontUtil.shorten(slot.map().settings().getNameSafe(), NAME_INPUT_MAX, 5);
+                nameText.text(name);
                 updatePublishStage();
             },
             slot.map().settings().getName()
