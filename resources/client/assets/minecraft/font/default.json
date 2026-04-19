@@ -55,6 +55,15 @@
       "chars": [
         "\uF839"
       ]
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:font/highlight.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uF840"
+      ]
     }
   ]
 }
