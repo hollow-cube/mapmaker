@@ -312,9 +312,9 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         }
 
         // Apply pending state changes.
-        var iter = pendingStateChanges.entrySet().iterator();
-        while (iter.hasNext()) {
-            final var entry = iter.next();
+        var stateChanges = new ArrayList<>(pendingStateChanges.entrySet());
+        pendingStateChanges.clear();
+        for (var entry : stateChanges) {
             final var player = entry.getKey();
             final var lastState = playerStates.get(player);
             final var change = entry.getValue();
@@ -335,7 +335,6 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
                 }
             } finally {
                 stateChangeEvent.commit();
-                iter.remove();
             }
         }
 
