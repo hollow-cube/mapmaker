@@ -103,9 +103,8 @@ public class NpcPlayer extends BaseNpcEntity {
     public void updateOldViewer(@NotNull Player player) {
         super.updateOldViewer(player);
 
-        if (equipment.containsKey(EquipmentSlot.HELMET))
-            player.sendPacket(new PlayerInfoRemovePacket(getUuid()));
-        else nameTag.removeViewer(player);
+        if (equipment.containsKey(EquipmentSlot.HELMET)) nameTag.removeViewer(player);
+        player.sendPacket(new PlayerInfoRemovePacket(getUuid()));
     }
 
     @Override
