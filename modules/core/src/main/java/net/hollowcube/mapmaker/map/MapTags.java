@@ -23,25 +23,25 @@ public final class MapTags {
         // See the warning in EditMap for more details.
 
         // Visual
-        TERRAIN(TagType.VISUAL, "Terrain", false),
-        ORGANICS(TagType.VISUAL, "Organics", false),
-        STRUCTURE(TagType.VISUAL, "Structure", false),
-        INTERIOR(TagType.VISUAL, "Interior", false),
-        MUSIC(TagType.VISUAL, "Music", true),
-        TWODIMENSIONAL(TagType.VISUAL, "2D", false),
-        RECREATION(TagType.VISUAL, "Recreation", false),
+        TERRAIN(TagType.VISUAL, "Terrain", false, "rock_grass"),
+        ORGANICS(TagType.VISUAL, "Organics", false, "plant"),
+        STRUCTURE(TagType.VISUAL, "Structure", false, "house_4"),
+        INTERIOR(TagType.VISUAL, "Interior", false, "couch"),
+        MUSIC(TagType.VISUAL, "Music", true, "music_disc"),
+        TWODIMENSIONAL(TagType.VISUAL, "2D", false, "tv_flatscreen"),
+        RECREATION(TagType.VISUAL, "Recreation", false, "eiffel_tower"),
         STORY(TagType.VISUAL, "Story", false, "book_open"),
 
         // Gameplay
-        COOP(TagType.GAMEPLAY_OLD, "Co-Op", true),
+        COOP(TagType.GAMEPLAY_OLD, "Co-Op", true, "hands_shaking"),
         PUZZLE(TagType.GAMEPLAY_OLD, "Puzzle", false, "puzzle_piece"),
-        MINIGAME(TagType.GAMEPLAY_OLD, "Minigame", true),
-        EXPLORATION(TagType.GAMEPLAY_OLD, "Exploration", false),
-        BOSSBATTLE(TagType.GAMEPLAY_OLD, "Boss Battle", false),
-        AUTOCOMPLETE(TagType.GAMEPLAY_OLD, "Auto-Complete", false),
-        ESCAPE(TagType.GAMEPLAY_OLD, "Escape", false),
+        MINIGAME(TagType.GAMEPLAY_OLD, "Minigame", true, "joystick"),
+        EXPLORATION(TagType.GAMEPLAY_OLD, "Exploration", false, "treasure_map"),
+        BOSSBATTLE(TagType.GAMEPLAY_OLD, "Boss Battle", false, "ender_dragon_head"),
+        AUTOCOMPLETE(TagType.GAMEPLAY_OLD, "Auto-Complete", false, "robot_arm"),
+        ESCAPE(TagType.GAMEPLAY_OLD, "Escape", false, "door_open_prisoner"),
         TRIVIA(TagType.GAMEPLAY_OLD, "Trivia", false, "brain"),
-        STRATEGY(TagType.GAMEPLAY_OLD, "Strategy", false),
+        STRATEGY(TagType.GAMEPLAY_OLD, "Strategy", false, "rook"),
 
         // New tags, never used in EditMap
         SPEEDRUN(TagType.GAMEPLAY, "steve_move_right"),
