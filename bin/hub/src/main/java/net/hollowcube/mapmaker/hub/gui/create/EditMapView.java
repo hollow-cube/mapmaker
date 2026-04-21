@@ -124,8 +124,7 @@ public class EditMapView extends Panel {
         // When we want to show a read-only view we will need to change this, for now not necessary.
         Sanity.check(pd.id().equals(slot.map().owner()), "can only view your own maps right now");
 
-//        var builderSlots = pd.mapBuilders();
-        var builderSlots = 3; // TODO: missing slots in old endpoint
+        var builderSlots = pd.mapBuilders();
 
         builderButtons.clear();
         boolean addedAddButton = false;
@@ -157,6 +156,7 @@ public class EditMapView extends Panel {
             } else {
                 button = new Button("gui.create_maps.edit.builders.locked", 1, 1)
                     .sprite("icon2/1_1/lock", 1, 1);
+                // TODO store prompt variants
             }
 
             builderButtons.add(i, 0, button);
