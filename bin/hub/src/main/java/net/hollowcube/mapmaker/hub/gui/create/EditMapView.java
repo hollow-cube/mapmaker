@@ -17,6 +17,7 @@ import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.util.Autocompletors;
 import net.hollowcube.mapmaker.util.Sanity;
 import net.kyori.adventure.text.Component;
@@ -154,9 +155,19 @@ public class EditMapView extends Panel {
                     .sprite("icon2/1_1/plus", 1, 1)
                     .onLeftClick(this::beginAddMapBuilder);
             } else {
-                button = new Button("gui.create_maps.edit.builders.locked", 1, 1)
+                boolean hasCubits = pd.cubits() >= ShopUpgrade.MAP_BUILDER_2.cubits();
+                String cubitsKey = hasCubits ? "has_cubits" : "no_cubits";
+
+                button = new Button("gui.create_maps.edit.builders.locked." + cubitsKey, 1, 1)
                     .sprite("icon2/1_1/lock", 1, 1);
-                // TODO store prompt variants
+                // Hypercube gives all builder slots so if you have it you won't see these buttons at all
+                if (hasCubits) {
+                    // TODO Left Click to Purchase with Cubits
+                    // TODO Right Click to Buy Hypercube
+                } else {
+                    // TODO Left Click to Buy Hypercube
+                    // TODO Right Click to Buy Cubits
+                }
             }
 
             builderButtons.add(i, 0, button);

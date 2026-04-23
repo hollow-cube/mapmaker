@@ -40,9 +40,9 @@ class AddonsPanel extends Panel {
         new Addon(ShopUpgrade.MAP_SIZE_4, "gui.store.addons.map_size_colossal", 2, "castle")
     };
     private static final Addon[] MAP_BUILDERS = new Addon[]{
-        new Addon(ShopUpgrade.MAP_BUILDER_2, "gui.store.addons.map_builder", 0, "sd_card"), // TODO: icon
-        new Addon(ShopUpgrade.MAP_BUILDER_3, "gui.store.addons.map_builder", 0, "sd_card"),
-        new Addon(ShopUpgrade.MAP_BUILDER_4, "gui.store.addons.map_builder", 0, "sd_card")
+        new Addon(ShopUpgrade.MAP_BUILDER_2, "gui.store.addons.map_builder", 0, "trusted_builder"),
+        new Addon(ShopUpgrade.MAP_BUILDER_3, "gui.store.addons.map_builder", 0, "trusted_builder"),
+        new Addon(ShopUpgrade.MAP_BUILDER_4, "gui.store.addons.map_builder", 0, "trusted_builder")
     };
 
     private final PlayerService playerService;
@@ -56,17 +56,19 @@ class AddonsPanel extends Panel {
         add(1, 1, new Entry(MAP_SLOTS));
         add(3, 1, new Entry(MAP_SIZES));
         add(5, 1, new Entry(MAP_BUILDERS));
-        add(7, 1, button("", 1, 1)
-            .sprite("store/addons/slot_default"));
-
-        add(1, 3, button("", 1, 1)
-            .sprite("store/addons/slot_default"));
-        add(3, 3, button("", 1, 1)
-            .sprite("store/addons/slot_default"));
-        add(5, 3, button("", 1, 1)
-            .sprite("store/addons/slot_default"));
-        add(7, 3, button("", 1, 1)
-            .sprite("store/addons/slot_default"));
+        // Add the other slots when needed, otherwise the hover shows as .name
+        // I added the slot_default textures into the container, so don't forget that
+//        add(7, 1, button("", 1, 1)
+//            .sprite("store/addons/slot_default"));
+//
+//        add(1, 3, button("", 1, 1)
+//            .sprite("store/addons/slot_default"));
+//        add(3, 3, button("", 1, 1)
+//            .sprite("store/addons/slot_default"));
+//        add(5, 3, button("", 1, 1)
+//            .sprite("store/addons/slot_default"));
+//        add(7, 3, button("", 1, 1)
+//            .sprite("store/addons/slot_default"));
 
     }
 
