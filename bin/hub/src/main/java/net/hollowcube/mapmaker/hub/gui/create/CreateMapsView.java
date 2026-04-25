@@ -231,11 +231,11 @@ public class CreateMapsView extends Panel {
             Runnable onPublish = () -> this.remountTask = this::rebuildSlots;
 
             if (slot.map().isPublished()) {
-                entries.add(new MapSlotEntry.Published(this.api, this.mapService, this.bridge, slot, onPublish));
+                entries.add(new MapSlotEntry.Published(this.api, this.mapService, this.playerService, this.bridge, slot, onPublish));
             } else if (slot.role() == MapRole.OWNER) {
-                entries.add(new MapSlotEntry.Owner(this.api, this.mapService, this.bridge, slot, onPublish));
+                entries.add(new MapSlotEntry.Owner(this.api, this.mapService, this.playerService, this.bridge, slot, onPublish));
             } else {
-                entries.add(new MapSlotEntry.Builder(this.api, this.mapService, this.bridge, slot, onPublish));
+                entries.add(new MapSlotEntry.Builder(this.api, this.mapService, this.playerService, this.bridge, slot, onPublish));
             }
         }
 

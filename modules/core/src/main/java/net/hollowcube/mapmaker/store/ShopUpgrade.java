@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static net.kyori.adventure.text.Component.translatable;
+
 public enum ShopUpgrade {
     MAP_SLOT("map_slot", new CostList(CostEntry.Cubits.INSTANCE, 50), 1, MapSize.NORMAL, 0),
 
@@ -27,6 +29,7 @@ public enum ShopUpgrade {
 
     public static final Map<String, ShopUpgrade> BY_ID = Arrays.stream(ShopUpgrade.values())
         .collect(Collectors.toMap(value -> value.id, Function.identity()));
+    public static final List<ShopUpgrade> MAP_BUILDERS = List.of(MAP_BUILDER_2, MAP_BUILDER_3, MAP_BUILDER_4);
 
     private final String id;
     private final CostList cost;
@@ -76,6 +79,15 @@ public enum ShopUpgrade {
             case MAP_SLOT -> false; // Unlockable repeatedly forever
             case MAP_SIZE_2, MAP_SIZE_3, MAP_SIZE_4 -> maxMapSize().id() <= playerData.maxMapSize().id();
             case MAP_BUILDER_2, MAP_BUILDER_3, MAP_BUILDER_4 -> playerData.mapBuilders() - 1 >= mapBuilders;
+        };
+    }
+
+    public Component buyComponent() {
+        return switch (this) {
+            case MAP_SLOT -> translatable("store.add-ons.map_slot.buy");
+            case MAP_SIZE_2, MAP_SIZE_3, MAP_SIZE_4 ->
+                translatable("store.add-ons.map_size.buy", maxMapSize().asComponent());
+            case MAP_BUILDER_2, MAP_BUILDER_3, MAP_BUILDER_4 -> translatable("store.add-ons.trusted_builder_slot.buy");
         };
     }
 }
