@@ -13,6 +13,7 @@ import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.Sanity;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -26,17 +27,20 @@ public class MapSlotEntry extends Panel {
 
     private final ApiClient api;
     private final MapService mapService;
+    private final PlayerService playerService;
     private final ServerBridge bridge;
     private final MapSlot slot;
     private final Runnable onPublish;
 
     private MapSlotEntry(
-        ApiClient api, MapService mapService, ServerBridge bridge,
+        ApiClient api, MapService mapService,
+        PlayerService playerService, ServerBridge bridge,
         MapSlot slot, Runnable onPublish
     ) {
         super(9, 1);
         this.api = api;
         this.mapService = mapService;
+        this.playerService = playerService;
         this.bridge = bridge;
         this.slot = slot;
         this.onPublish = onPublish;
@@ -68,7 +72,7 @@ public class MapSlotEntry extends Panel {
 
         async(() -> {
             // TODO: this constructor is blocking, which is kinda confusing and im not a fan overall.
-            var view = new EditMapView(this.api, this.mapService, this.bridge, slot, this.onPublish);
+            var view = new EditMapView(this.api, this.mapService, this.playerService, this.bridge, slot, this.onPublish);
             sync(() -> host.pushView(view));
         });
     }
@@ -103,10 +107,11 @@ public class MapSlotEntry extends Panel {
 
     public static final class Owner extends MapSlotEntry {
         public Owner(
-            ApiClient api, MapService mapService, ServerBridge bridge,
+            ApiClient api, MapService mapService,
+            PlayerService playerService, ServerBridge bridge,
             MapSlot slot, Runnable onPublish
         ) {
-            super(api, mapService, bridge, slot, onPublish);
+            super(api, mapService, playerService, bridge, slot, onPublish);
 
             var map = slot.map();
             var translationKey = "gui.create_maps.slot.yours";
@@ -144,10 +149,11 @@ public class MapSlotEntry extends Panel {
         private final Button nameButton;
 
         public Builder(
-            ApiClient api, MapService mapService, ServerBridge bridge,
+            ApiClient api, MapService mapService,
+            PlayerService playerService, ServerBridge bridge,
             MapSlot slot, Runnable onPublish
         ) {
-            super(api, mapService, bridge, slot, onPublish);
+            super(api, mapService, playerService, bridge, slot, onPublish);
             this.api = api;
             this.slot = slot;
 
@@ -195,10 +201,11 @@ public class MapSlotEntry extends Panel {
 
     public static final class Published extends MapSlotEntry {
         public Published(
-            ApiClient api, MapService mapService, ServerBridge bridge,
+            ApiClient api, MapService mapService,
+            PlayerService playerService, ServerBridge bridge,
             MapSlot slot, Runnable onPublish
         ) {
-            super(api, mapService, bridge, slot, onPublish);
+            super(api, mapService, playerService, bridge, slot, onPublish);
 
             var map = slot.map();
             var translationKey = "gui.create_maps.slot.published";

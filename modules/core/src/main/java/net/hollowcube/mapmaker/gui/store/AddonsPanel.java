@@ -94,7 +94,7 @@ class AddonsPanel extends Panel {
         }
 
         private void updateDisplay(@NotNull Player player) {
-            var firstLocked = firstLocked(player);
+            var firstLocked = firstNotOwned(player);
             Addon addon = Objects.requireNonNullElse(firstLocked, chain[chain.length - 1]);
 
             delegate.translationKey(addon.translation + (firstLocked != null ? "" : ".unlocked"), countComponent());
@@ -109,22 +109,22 @@ class AddonsPanel extends Panel {
         }
 
         private void handlePreBuyUpgrade() {
-            var firstLocked = firstLocked(host.player());
-            Addon addon = Objects.requireNonNullElse(firstLocked, chain[chain.length - 1]);
+            var addon = firstNotOwned(host.player());
+            if (addon == null) return;
 
             var name = LanguageProviderV2.translateToPlain(Component.translatable(addon.translation + ".name", countComponent()));
             host.pushView(confirm("Buy " + name + "?", FutureUtil.wrapVirtual(this::handleBuyUpgrade)));
         }
 
         private void handleBuyUpgrade() {
-            var firstLocked = firstLocked(host.player());
+            var firstLocked = firstNotOwned(host.player());
             if (firstLocked == null) return;
 
             buyUpgrade(playerService, host.player(), firstLocked.id);
             updateDisplay(host.player());
         }
 
-        private @Nullable Addon firstLocked(@NotNull Player player) {
+        private @Nullable Addon firstNotOwned(@NotNull Player player) {
             for (var addon : chain) {
                 if (isUpgradeOwned(player, addon.id))
                     continue;

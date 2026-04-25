@@ -78,6 +78,7 @@ public final class StoreHelpers {
 
             //todo
             player.sendMessage(Component.translatable("currency.missing"));
+            player.closeInventory();
             return;
         }
 
@@ -90,11 +91,13 @@ public final class StoreHelpers {
             playerData.setCubits(playerData.cubits() - upgrade.cubits());
             playerData.updateFromMapUpgrade(upgrade.mapSlots(), upgrade.maxMapSize(), upgrade.mapBuilders());
 
-            player.sendMessage(Component.translatable("store.add-ons.buy", Component.text(upgrade.name())));
+            player.sendMessage(upgrade.buyComponent());
         } catch (PlayerService.NotFoundError e) {
             player.sendMessage(Component.translatable("store.add-ons.buy.error"));
+            player.closeInventory();
         } catch (Exception e) {
             player.sendMessage(Component.translatable("store.add-ons.buy.error"));
+            player.closeInventory();
             ExceptionReporter.reportException(e, player);
         }
     }
