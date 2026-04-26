@@ -1,8 +1,5 @@
 package net.hollowcube.mapmaker.map;
 
-import net.hollowcube.canvas.View;
-import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
@@ -12,11 +9,8 @@ import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.ServiceContext;
-import net.minestom.server.entity.Player;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.function.Function;
 
 public interface MapServer {
 
@@ -50,8 +44,6 @@ public interface MapServer {
 
     @NotNull CommandManager commandManager();
 
-    @NotNull Controller guiController();
-
     @NotNull Scheduler scheduler();
 
     /**
@@ -63,7 +55,5 @@ public interface MapServer {
      * @throws IllegalArgumentException if the facet is not present
      */
     <T> @NotNull T facet(@NotNull Class<T> type);
-
-    void showView(@NotNull Player player, @NotNull Function<Context, View> viewProvider);
 
 }

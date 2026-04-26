@@ -17,7 +17,6 @@ import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.anvil.RegionFileWrapper;
-import net.minestom.server.item.Material;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.world.DimensionType;
 import net.minestom.server.world.biome.Biome;
@@ -182,20 +181,21 @@ public class Main {
                     .orElseThrow();
 
             var newName = "custom:import" + (i++);
-            var biomeInfo = new BiomeInfo(
-                    newName, Material.STONE,
-                    biome.effects().skyColor(),
-                    biome.effects().fogColor(),
-                    biome.effects().waterColor(),
-                    biome.effects().waterFogColor(),
-                    biome.effects().grassColor(),
-                    biome.effects().foliageColor()
-            );
-            var key = biomeFile.getFileName().toString().replace(".json", "");
-            biomeRenames.put("minecraft:" + key, newName);
-            customBiomes.add(biomeInfo);
-
-            System.out.println("minecraft:" + key + " -> " + newName);
+            throw new UnsupportedOperationException("todo update me");
+//            var biomeInfo = new BiomeInfo(
+//                    newName, Material.STONE,
+//                    biome.effects().skyColor(),
+//                    biome.effects().fogColor(),
+//                    biome.effects().waterColor(),
+//                    biome.effects().waterFogColor(),
+//                    biome.effects().grassColor(),
+//                    biome.effects().foliageColor()
+//            );
+//            var key = biomeFile.getFileName().toString().replace(".json", "");
+//            biomeRenames.put("minecraft:" + key, newName);
+//            customBiomes.add(biomeInfo);
+//
+//            System.out.println("minecraft:" + key + " -> " + newName);
         }
 
     }

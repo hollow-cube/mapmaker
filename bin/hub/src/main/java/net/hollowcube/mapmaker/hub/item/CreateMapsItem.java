@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub.item;
 
-import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
@@ -24,15 +23,13 @@ public class CreateMapsItem extends ItemHandler {
     private final PlayerService playerService;
     private final MapService mapService;
     private final ServerBridge bridge;
-    private final Controller guiController;
 
-    public CreateMapsItem(ApiClient api, PlayerService playerService, MapService mapService, ServerBridge bridge, @NotNull Controller guiController) {
+    public CreateMapsItem(ApiClient api, PlayerService playerService, MapService mapService, ServerBridge bridge) {
         super(ID, RIGHT_CLICK_ANY);
         this.api = api;
         this.playerService = playerService;
         this.mapService = mapService;
         this.bridge = bridge;
-        this.guiController = guiController;
     }
 
     @Override

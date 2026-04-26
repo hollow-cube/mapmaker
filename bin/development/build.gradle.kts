@@ -12,8 +12,6 @@ dependencies {
     implementation(project(":modules:map-runtime"))
     implementation(project(":modules:map-editor"))
 
-    implementation(project(":modules:canvas:api"))
-    implementation(project(":modules:canvas:impl-standalone"))
     implementation(project(":modules:datafix"))
     implementation(project(":modules:terraform"))
     implementation(project(":modules:compat"))

@@ -1,4 +1,4 @@
-package net.hollowcube.canvas;
+package net.hollowcube.mapmaker.panels;
 
 public enum ClickType {
     LEFT_CLICK,

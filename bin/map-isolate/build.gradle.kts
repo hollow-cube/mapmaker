@@ -12,8 +12,6 @@ repositories {
 dependencies {
     implementation(project(":bin:config"))
 
-    implementation(project(":modules:canvas:api"))
-    implementation(project(":modules:canvas:impl-standalone"))
     implementation(project(":modules:core"))
     implementation(project(":modules:datafix"))
     implementation(project(":modules:terraform"))

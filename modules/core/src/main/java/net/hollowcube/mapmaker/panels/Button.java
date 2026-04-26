@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.panels;
 
-import net.hollowcube.canvas.ClickType;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.lang.MessagesBase;
 import net.hollowcube.common.util.FontUtil;
