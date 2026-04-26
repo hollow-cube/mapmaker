@@ -34,7 +34,7 @@ public final class MapTags {
 
         // Gameplay
         COOP(TagType.GAMEPLAY_OLD, "Co-Op", true, "hands_shaking"),
-        PUZZLE(TagType.GAMEPLAY_OLD, "Puzzle", false, "puzzle_piece"),
+        PUZZLE(TagType.GAMEPLAY, "Puzzle", false, "puzzle_piece"), // this makes it show first in the tag selection menu but whatever lol
         MINIGAME(TagType.GAMEPLAY_OLD, "Minigame", true, "joystick"),
         EXPLORATION(TagType.GAMEPLAY_OLD, "Exploration", false, "treasure_map"),
         BOSSBATTLE(TagType.GAMEPLAY_OLD, "Boss Battle", false, "ender_dragon_head"),
