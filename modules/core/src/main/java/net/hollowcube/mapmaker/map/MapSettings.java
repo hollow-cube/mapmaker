@@ -229,9 +229,9 @@ public class MapSettings {
     }
 
     public @Nullable String getTagsString() {
-        List<String> tags = getTags().stream()
+        List<String> tags = new ArrayList<>(getTags().stream()
             .map(tag -> LanguageProviderV2.translateToPlain(tag.baseTranslationKey() + ".name"))
-            .toList();
+            .toList());
         if (tags.isEmpty()) {
             return null;
         }
@@ -263,9 +263,9 @@ public class MapSettings {
     }
 
     public String getTagsFullString() {
-        List<String> tags = getTags().stream()
+        List<String> tags = new ArrayList<>(getTags().stream()
             .map(tag -> LanguageProviderV2.translateToPlain(tag.baseTranslationKey() + ".name"))
-            .toList();
+            .toList());
 
         StringBuilder stringBuilder = new StringBuilder();
 
