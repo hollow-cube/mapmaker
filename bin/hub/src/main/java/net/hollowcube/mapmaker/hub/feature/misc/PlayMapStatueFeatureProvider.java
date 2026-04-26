@@ -1,12 +1,14 @@
 package net.hollowcube.mapmaker.hub.feature.misc;
 
 import com.google.auto.service.AutoService;
+import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.map.browser.MapBrowserView;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.entity.util.InteractionEntity;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
-import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
+import net.hollowcube.mapmaker.hub.gui.create.CreateMapsView;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -90,7 +92,13 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
     }
 
     private void handleCreateMapsClick(@NotNull Player player) {
-        server.guiController().show(player, CreateMaps::new);
+        FutureUtil.submitVirtual(() -> {
+            try {
+                CreateMapsView.open(player, server.api(), server.mapService(), server.playerService(), server.bridge());
+            } catch (Exception e) {
+                ExceptionReporter.reportException(e, player);
+            }
+        });
     }
 
     private void handleBestMapsClick(@NotNull Player player) {

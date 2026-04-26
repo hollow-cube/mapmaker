@@ -2,11 +2,9 @@ package net.hollowcube.mapmaker.hub.item;
 
 import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.hub.gui.create.CreateMapsView;
-import net.hollowcube.mapmaker.hub.gui.edit.CreateMaps;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -45,18 +43,14 @@ public class CreateMapsItem extends ItemHandler {
     @Override
     protected void rightClicked(@NotNull Click click) {
         var player = click.player();
-        if (CoreFeatureFlags.CREATE_MAPS_V2.test(player) && !player.isSneaking()) {
-            FutureUtil.submitVirtual(() -> {
-                try {
-                    CreateMapsView.open(player, api, mapService, playerService, bridge);
-                } catch (Exception e) {
-                    ExceptionReporter.reportException(e, player);
-                }
-            });
-            return;
-        }
 
-        guiController.show(player, CreateMaps::new);
+        FutureUtil.submitVirtual(() -> {
+            try {
+                CreateMapsView.open(player, api, mapService, playerService, bridge);
+            } catch (Exception e) {
+                ExceptionReporter.reportException(e, player);
+            }
+        });
     }
 
 }
