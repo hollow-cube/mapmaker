@@ -116,6 +116,7 @@ public class TempEffectApplicator {
                 newHistory,
                 respawnPosition,
                 Map.copyOf(playState.ghostBlocks()),
+                Map.copyOf(playState.cooldownGroups()),
                 Map.copyOf(playState.actionData())
         ));
 

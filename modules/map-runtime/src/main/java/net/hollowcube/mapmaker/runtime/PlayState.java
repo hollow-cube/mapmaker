@@ -37,11 +37,15 @@ public final class PlayState {
     private static final StructCodec<Map<Long, Block>> GHOST_BLOCKS_CODEC = StructCodec.struct(
             "ghostBlocks", ExtraCodecs.LONG_STRING.mapValue(ExtraCodecs.BLOCK_STATE_STRING).optional(Map.of()), Function.identity(),
             it -> it);
+    private static final StructCodec<Map<String, Integer>> COOLDOWN_GROUPS_CODEC = StructCodec.struct(
+            "cooldownGroups", Codec.STRING.mapValue(Codec.INT).optional(Map.of()), Function.identity(),
+            it -> it);
     public static Codec<PlayState> CODEC = net.minestom.server.codec.Codec.Recursive(codec -> StructCodec.struct(
             "lastState", codec.optional(), PlayState::lastState,
             "history", net.minestom.server.codec.Codec.STRING.list().optional(List.of()), PlayState::history,
             "pos", ExtraCodecs.POS.optional(), PlayState::pos,
             StructCodec.INLINE, GHOST_BLOCKS_CODEC.optional(), PlayState::ghostBlocks,
+            StructCodec.INLINE, COOLDOWN_GROUPS_CODEC.optional(), PlayState::cooldownGroups,
             StructCodec.INLINE, new ActionDataCodec(Integer.MAX_VALUE), PlayState::actionData,
             PlayState::new));
 
@@ -54,21 +58,24 @@ public final class PlayState {
     private final List<String> history;
     private @Nullable Pos pos;
     private Map<Long, Block> ghostBlocks;
+    private Map<String, Integer> cooldownGroups;
     private Map<Attachment<?>, Object> actionData;
 
     public PlayState() {
-        this(null, null, null, null, null);
+        this(null, null, null, null, null, null);
     }
 
     public PlayState(
             @Nullable PlayState lastState, @Nullable List<String> statusEffects,
             @Nullable Pos pos, @Nullable Map<Long, Block> ghostBlocks,
+            @Nullable Map<String, Integer> cooldownGroups,
             @Nullable Map<Attachment<?>, Object> actionData
     ) {
         this.lastState = lastState;
         this.history = new ArrayList<>(Objects.requireNonNullElse(statusEffects, List.of()));
         this.pos = pos;
         this.ghostBlocks = new HashMap<>(Objects.requireNonNullElse(ghostBlocks, Map.of()));
+        this.cooldownGroups = new HashMap<>(Objects.requireNonNullElse(cooldownGroups, Map.of()));
         this.actionData = new HashMap<>(Objects.requireNonNullElse(actionData, Map.of()));
     }
 
@@ -127,6 +134,14 @@ public final class PlayState {
         this.ghostBlocks = new HashMap<>(blockMap);
     }
 
+    public Map<String, Integer> cooldownGroups() {
+        return cooldownGroups;
+    }
+
+    public void setCooldownGroups(Map<String, Integer> cooldownGroups) {
+        this.cooldownGroups = new HashMap<>(cooldownGroups);
+    }
+
     public void setLastState(@Nullable PlayState lastState) {
         this.lastState = lastState == null ? null : lastState.copy();
     }
@@ -149,7 +164,7 @@ public final class PlayState {
             //noinspection unchecked
             newActionData.put(entry.getKey(), ((Attachment<Object>) entry.getKey()).copyValue(entry.getValue()));
         }
-        return new PlayState(lastState, history, pos, new HashMap<>(ghostBlocks), newActionData);
+        return new PlayState(lastState, history, pos, new HashMap<>(ghostBlocks), new HashMap<>(cooldownGroups), newActionData);
     }
 
     public void setFrom(PlayState other) {
