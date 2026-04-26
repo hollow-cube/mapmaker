@@ -9,7 +9,7 @@ public interface Snapshot<T, S> {
 
     byte @NotNull [] serializeSnapshot(@Nullable S snapshot);
 
-    S deserializeSnapshot(byte @NotNull [] serialized);
+    @Nullable S deserializeSnapshot(byte @NotNull [] serialized);
 
     void assertSnapshot(S expected, S actual);
 

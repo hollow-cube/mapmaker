@@ -29,5 +29,5 @@ dependencies {
     implementation(libs.bundles.prometheus) // TODO: why is this a core module dependency
     implementation(libs.nats)
 
-    testImplementation(project(":modules:test"))
+    testImplementation(libs.minestom.testing)
 }

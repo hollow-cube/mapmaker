@@ -36,7 +36,7 @@ public class AbstractEditorMapWorldIntegrationTest {
         CompatProvider.load(env.process().eventHandler());
 
         var map = new MapData();
-        world = new EditorMapWorld(null, map);
+        world = new EditorMapWorld(null, map, null);
 
         player = env.createPlayer(world.instance(), new Pos(0, 40, 0));
         player.setTag(PlayerData.TAG, new PlayerData(player));
