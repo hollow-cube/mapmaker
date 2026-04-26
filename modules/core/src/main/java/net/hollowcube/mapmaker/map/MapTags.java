@@ -108,6 +108,10 @@ public final class MapTags {
             return this.name().toLowerCase(Locale.ROOT);
         }
 
+        public String baseTranslationKey() {
+            return "gui.create_maps.tags." + type().translationName() + '.' + translationName();
+        }
+
         public TagType type() {
             return this.type;
         }
