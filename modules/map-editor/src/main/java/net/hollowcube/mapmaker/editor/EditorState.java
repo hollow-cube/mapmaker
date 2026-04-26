@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.editor;
 
+import net.hollowcube.compat.api.discord.DiscordRichPresenceManager;
 import net.hollowcube.compat.axiom.AxiomPlayer;
 import net.hollowcube.compat.noxesium.components.NoxesiumGameComponents;
 import net.hollowcube.compat.noxesium.handshake.NoxesiumPlayer;
@@ -108,4 +109,9 @@ public sealed interface EditorState extends PlayerState<EditorState, EditorMapWo
         }
     }
 
+    @Override
+    default void configurePlayer(EditorMapWorld world, Player player, @Nullable EditorState lastState) {
+        PlayerState.super.configurePlayer(world, player, lastState);
+        DiscordRichPresenceManager.queueRichPresenceUpdate(player, "Building", "a map", "");
+    }
 }
