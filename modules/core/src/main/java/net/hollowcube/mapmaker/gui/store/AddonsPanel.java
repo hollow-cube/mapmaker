@@ -1,17 +1,23 @@
 package net.hollowcube.mapmaker.gui.store;
 
+import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Sprite;
+import net.hollowcube.mapmaker.player.Permission;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
+import static net.hollowcube.mapmaker.gui.common.ExtraPanels.confirm;
 import static net.hollowcube.mapmaker.gui.store.StoreHelpers.buyUpgrade;
 import static net.hollowcube.mapmaker.gui.store.StoreHelpers.isUpgradeOwned;
 
@@ -22,21 +28,21 @@ class AddonsPanel extends Panel {
         "store/addons/cost_150_cubits",
     };
 
-    private record Addon(ShopUpgrade id, String translation, int cost, String icon, int iconX, int iconY) {
+    private record Addon(ShopUpgrade id, String translation, int cost, String icon) {
     }
 
     private static final Addon[] MAP_SLOTS = new Addon[]{
-        new Addon(ShopUpgrade.MAP_SLOT_3, "gui.store.addons.map_slots_3", 0, "store/addons/map_slot", 4, 4),
-        new Addon(ShopUpgrade.MAP_SLOT_4, "gui.store.addons.map_slots_4", 1, "store/addons/map_slot", 4, 4),
-        new Addon(ShopUpgrade.MAP_SLOT_5, "gui.store.addons.map_slots_5", 2, "store/addons/map_slot", 4, 4)
+        new Addon(ShopUpgrade.MAP_SLOT, "gui.store.addons.map_slot", 0, "sd_card"),
     };
     private static final Addon[] MAP_SIZES = new Addon[]{
-        new Addon(ShopUpgrade.MAP_SIZE_2, "gui.store.addons.map_size_large", 0, "store/addons/map_size_2", 3, 4),
-        new Addon(ShopUpgrade.MAP_SIZE_3, "gui.store.addons.map_size_massive", 1, "store/addons/map_size_3", 3, 3),
-        new Addon(ShopUpgrade.MAP_SIZE_4, "gui.store.addons.map_size_colossal", 2, "store/addons/map_size_4", 2, 2)
+        new Addon(ShopUpgrade.MAP_SIZE_2, "gui.store.addons.map_size_large", 0, "house_2"),
+        new Addon(ShopUpgrade.MAP_SIZE_3, "gui.store.addons.map_size_massive", 1, "house_3"),
+        new Addon(ShopUpgrade.MAP_SIZE_4, "gui.store.addons.map_size_colossal", 2, "castle")
     };
-    private static final Addon[] BUILD_TOOLS = new Addon[]{
-        new Addon(ShopUpgrade.BUILD_TOOLS, "gui.store.addons.terraform_advanced", 0, "store/addons/build_tools", 3, 2),
+    private static final Addon[] MAP_BUILDERS = new Addon[]{
+        new Addon(ShopUpgrade.MAP_BUILDER_2, "gui.store.addons.map_builder", 0, "trusted_builder"),
+        new Addon(ShopUpgrade.MAP_BUILDER_3, "gui.store.addons.map_builder", 0, "trusted_builder"),
+        new Addon(ShopUpgrade.MAP_BUILDER_4, "gui.store.addons.map_builder", 0, "trusted_builder")
     };
 
     private final PlayerService playerService;
@@ -49,18 +55,20 @@ class AddonsPanel extends Panel {
 
         add(1, 1, new Entry(MAP_SLOTS));
         add(3, 1, new Entry(MAP_SIZES));
-        add(5, 1, new Entry(BUILD_TOOLS));
-        add(7, 1, button("", 1, 1)
-            .sprite("store/addons/slot_default"));
-
-        add(1, 3, button("", 1, 1)
-            .sprite("store/addons/slot_default"));
-        add(3, 3, button("", 1, 1)
-            .sprite("store/addons/slot_default"));
-        add(5, 3, button("", 1, 1)
-            .sprite("store/addons/slot_default"));
-        add(7, 3, button("", 1, 1)
-            .sprite("store/addons/slot_default"));
+        add(5, 1, new Entry(MAP_BUILDERS));
+        // Add the other slots when needed, otherwise the hover shows as .name
+        // I added the slot_default textures into the container, so don't forget that
+//        add(7, 1, button("", 1, 1)
+//            .sprite("store/addons/slot_default"));
+//
+//        add(1, 3, button("", 1, 1)
+//            .sprite("store/addons/slot_default"));
+//        add(3, 3, button("", 1, 1)
+//            .sprite("store/addons/slot_default"));
+//        add(5, 3, button("", 1, 1)
+//            .sprite("store/addons/slot_default"));
+//        add(7, 3, button("", 1, 1)
+//            .sprite("store/addons/slot_default"));
 
     }
 
@@ -75,7 +83,7 @@ class AddonsPanel extends Panel {
             this.chain = chain;
 
             this.delegate = add(0, 0, button("", 1, 1)
-                .onLeftClickAsync(this::handleBuyUpgrade));
+                .onLeftClick(this::handlePreBuyUpgrade));
             this.cost = add(0, 0, button("", 1, 0));
         }
 
@@ -86,12 +94,12 @@ class AddonsPanel extends Panel {
         }
 
         private void updateDisplay(@NotNull Player player) {
-            var firstLocked = firstLocked(player);
+            var firstLocked = firstNotOwned(player);
             Addon addon = Objects.requireNonNullElse(firstLocked, chain[chain.length - 1]);
 
-            delegate.translationKey(addon.translation + (firstLocked != null ? "" : ".unlocked"));
+            delegate.translationKey(addon.translation + (firstLocked != null ? "" : ".unlocked"), countComponent());
             delegate.background(firstLocked == null ? "store/addons/slot_selected" : "store/addons/slot_default");
-            delegate.sprite(addon.icon, addon.iconX, addon.iconY);
+            delegate.sprite("icon2/1_1/" + addon.icon, 1, 1);
 
             if (firstLocked != null) {
                 cost.background(COST_SPRITES[firstLocked.cost], -1, 24);
@@ -100,21 +108,46 @@ class AddonsPanel extends Panel {
             }
         }
 
+        private void handlePreBuyUpgrade() {
+            var addon = firstNotOwned(host.player());
+            if (addon == null) return;
+
+            var name = LanguageProviderV2.translateToPlain(Component.translatable(addon.translation + ".name", countComponent()));
+            host.pushView(confirm("Buy " + name + "?", FutureUtil.wrapVirtual(this::handleBuyUpgrade)));
+        }
+
         private void handleBuyUpgrade() {
-            var firstLocked = firstLocked(host.player());
+            var firstLocked = firstNotOwned(host.player());
             if (firstLocked == null) return;
 
             buyUpgrade(playerService, host.player(), firstLocked.id);
             updateDisplay(host.player());
         }
 
-        private @Nullable Addon firstLocked(@NotNull Player player) {
+        private @Nullable Addon firstNotOwned(@NotNull Player player) {
             for (var addon : chain) {
                 if (isUpgradeOwned(player, addon.id))
                     continue;
                 return addon;
             }
             return null;
+        }
+
+        private Component countComponent() {
+            var playerData = PlayerData.fromPlayer(host.player());
+            return Component.text(switch (chain[0].id) {
+                case MAP_SLOT -> {
+                    int totalSlots = playerData.mapSlots();
+                    if (playerData.has(Permission.EXTENDED_LIMITS))
+                        totalSlots -= 3;
+                    yield String.valueOf(totalSlots + 1);
+                }
+                case MAP_BUILDER_2, MAP_BUILDER_3, MAP_BUILDER_4 -> {
+                    int totalBuilders = playerData.mapBuilders();
+                    yield String.valueOf(totalBuilders + 1);
+                }
+                default -> "";
+            });
         }
 
     }

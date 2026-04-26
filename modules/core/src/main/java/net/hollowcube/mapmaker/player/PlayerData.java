@@ -212,9 +212,12 @@ public class PlayerData {
     }
 
     @Deprecated
-    public void updateFromMapUpgrade(int mapSlots, MapSize maxMapSize) {
+    public void updateFromMapUpgrade(int mapSlots, MapSize maxMapSize, int mapBuilders) {
         this.mapSlots += mapSlots;
         this.tempMaxMapSize = MapSize.values()[Math.max(this.tempMaxMapSize.id(), maxMapSize.id())];
+        if (mapBuilders > 0) {
+            this.mapBuilders = Math.max(this.mapBuilders, 1 + mapBuilders); // 1 is default then set to mapBuilders
+        }
     }
 
     public boolean isHypercube() {

@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Locale;
 
-final class StoreHelpers {
+public final class StoreHelpers {
 
     public enum Package {
         CUBITS_50,
@@ -42,7 +42,7 @@ final class StoreHelpers {
         }
     }
 
-    static void buyPackage(@NotNull PlayerService playerService, @NotNull Player player, @NotNull Package packageName) {
+    public static void buyPackage(@NotNull PlayerService playerService, @NotNull Player player, @NotNull Package packageName) {
         try {
             var playerData = PlayerData.fromPlayer(player);
             var resp = playerService.createCheckoutLink(
@@ -66,7 +66,7 @@ final class StoreHelpers {
         return upgrade.has(PlayerData.fromPlayer(player));
     }
 
-    static void buyUpgrade(@NotNull PlayerService playerService, @NotNull Player player, @NotNull ShopUpgrade upgrade) {
+    public static void buyUpgrade(@NotNull PlayerService playerService, @NotNull Player player, @NotNull ShopUpgrade upgrade) {
         if (isUpgradeOwned(player, upgrade))
             return; // Sanity check
 
@@ -78,6 +78,7 @@ final class StoreHelpers {
 
             //todo
             player.sendMessage(Component.translatable("currency.missing"));
+            player.closeInventory();
             return;
         }
 
@@ -88,13 +89,15 @@ final class StoreHelpers {
 
             // Success! Preempt the update message by updating locally
             playerData.setCubits(playerData.cubits() - upgrade.cubits());
-            playerData.updateFromMapUpgrade(upgrade.mapSlots(), upgrade.maxMapSize());
+            playerData.updateFromMapUpgrade(upgrade.mapSlots(), upgrade.maxMapSize(), upgrade.mapBuilders());
 
-            player.sendMessage(Component.translatable("store.add-ons.buy", Component.text(upgrade.name())));
+            player.sendMessage(upgrade.buyComponent());
         } catch (PlayerService.NotFoundError e) {
             player.sendMessage(Component.translatable("store.add-ons.buy.error"));
+            player.closeInventory();
         } catch (Exception e) {
             player.sendMessage(Component.translatable("store.add-ons.buy.error"));
+            player.closeInventory();
             ExceptionReporter.reportException(e, player);
         }
     }

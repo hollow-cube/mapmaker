@@ -11,12 +11,16 @@ import net.hollowcube.mapmaker.api.maps.MapSlot;
 import net.hollowcube.mapmaker.api.players.PlayerDataStub;
 import net.hollowcube.mapmaker.gui.common.ExtraPanels;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
+import net.hollowcube.mapmaker.gui.store.StoreHelpers;
+import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.util.Autocompletors;
 import net.hollowcube.mapmaker.util.Sanity;
 import net.kyori.adventure.text.Component;
@@ -49,6 +53,7 @@ public class EditMapView extends Panel {
 
     private final ApiClient api;
     private final MapService mapService;
+    private final PlayerService playerService;
 
     private MapSlot slot;
     private final MapPublisher publisher;
@@ -61,12 +66,14 @@ public class EditMapView extends Panel {
     @Blocking
     public EditMapView(
         ApiClient api, MapService mapService,
+        PlayerService playerService,
         ServerBridge bridge, MapSlot slot,
         Runnable onPublish
     ) {
         super(9, 10);
         this.api = api;
         this.mapService = mapService;
+        this.playerService = playerService;
         this.slot = slot;
 
         Consumer<MapData> publishCallback = publishedMap -> {
@@ -124,8 +131,7 @@ public class EditMapView extends Panel {
         // When we want to show a read-only view we will need to change this, for now not necessary.
         Sanity.check(pd.id().equals(slot.map().owner()), "can only view your own maps right now");
 
-//        var builderSlots = pd.mapBuilders();
-        var builderSlots = 3; // TODO: missing slots in old endpoint
+        var builderSlots = pd.mapBuilders();
 
         builderButtons.clear();
         boolean addedAddButton = false;
@@ -155,8 +161,13 @@ public class EditMapView extends Panel {
                     .sprite("icon2/1_1/plus", 1, 1)
                     .onLeftClick(this::beginAddMapBuilder);
             } else {
-                button = new Button("gui.create_maps.edit.builders.locked", 1, 1)
-                    .sprite("icon2/1_1/lock", 1, 1);
+                boolean hasCubits = pd.cubits() >= ShopUpgrade.MAP_BUILDER_2.cubits();
+                String cubitsKey = hasCubits ? "has_cubits" : "no_cubits";
+
+                button = new Button("gui.create_maps.edit.builders.locked." + cubitsKey, 1, 1)
+                    .sprite("icon2/1_1/lock", 1, 1)
+                    .onLeftClick(this::buyBuilderPrimary)
+                    .onRightClick(this::buyBuilderSecondary);
             }
 
             builderButtons.add(i, 0, button);
@@ -240,6 +251,44 @@ public class EditMapView extends Panel {
             iconButton.model("minecraft:air", null);
             iconButton.sprite("icon2/1_1/plus", 1, 1);
         }
+    }
+
+    private void buyBuilderPrimary() {
+        var playerData = PlayerData.fromPlayer(host.player());
+        boolean hasCubits = playerData.cubits() >= ShopUpgrade.MAP_BUILDER_2.cubits();
+
+        if (hasCubits) {
+            host.pushView(confirm("Buy Trusted Builder", FutureUtil.virtual(this::buyBuilderSlot)));
+        } else {
+            this.host.pushView(new StoreView(playerService, StoreView.TAB_HYPERCUBE));
+        }
+    }
+
+    private void buyBuilderSecondary() {
+        var playerData = PlayerData.fromPlayer(host.player());
+        boolean hasCubits = playerData.cubits() >= ShopUpgrade.MAP_BUILDER_2.cubits();
+
+        this.host.pushView(new StoreView(
+            playerService,
+            hasCubits ? StoreView.TAB_HYPERCUBE : StoreView.TAB_CUBITS
+        ));
+    }
+
+    @Blocking
+    private void buyBuilderSlot(Player player) {
+        var playerData = PlayerData.fromPlayer(player);
+        var nextSlot = latestBuilderUpgrade(playerData);
+        if (nextSlot == null) return;
+
+        StoreHelpers.buyUpgrade(playerService, player, nextSlot);
+        sync(this::drawBuilderButtons);
+    }
+
+    private static @Nullable ShopUpgrade latestBuilderUpgrade(PlayerData playerData) {
+        for (var upgrade : ShopUpgrade.MAP_BUILDERS) {
+            if (!upgrade.has(playerData)) return upgrade;
+        }
+        return null;
     }
 
     private void beginAddMapBuilder() {

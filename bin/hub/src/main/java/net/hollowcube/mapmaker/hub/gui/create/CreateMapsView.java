@@ -4,6 +4,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapRole;
 import net.hollowcube.mapmaker.api.maps.MapSlot;
+import net.hollowcube.mapmaker.gui.store.StoreHelpers;
 import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -11,17 +12,18 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.util.StringComparison;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.Unit;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
-import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
+import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
 import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
 
 public class CreateMapsView extends Panel {
@@ -62,7 +64,7 @@ public class CreateMapsView extends Panel {
         this.slots.addAll(initialSlots);
 
         background("create_maps2/container", -10, -31);
-        add(0, 0, title("Create Map"));
+        add(0, 0, title("Create Maps"));
 
         add(0, 0, backOrClose());
 
@@ -153,10 +155,8 @@ public class CreateMapsView extends Panel {
         }
 
         var playerData = PlayerData.fromPlayer(this.host.player());
-        // TODO: dont hardcode 50
-        if (playerData.cubits() >= 50) {
-            // TODO open the menu for purchasing a new slot
-            host.player().sendMessage("opening menu for buying a slot amirite");
+        if (playerData.cubits() >= ShopUpgrade.MAP_BUILDER_2.cubits()) {
+            host.pushView(confirm("Buy Map Slot?", FutureUtil.virtual(this::handleBuyMapSlot)));
         } else if (playerData.isHypercube()) {
             this.host.pushView(new StoreView(playerService, StoreView.TAB_CUBITS));
         } else {
@@ -171,9 +171,21 @@ public class CreateMapsView extends Panel {
         var playerData = PlayerData.fromPlayer(this.host.player());
         if (playerData.isHypercube()) return;
 
-        // TODO: dont hardcode 50
-        var secondaryTab = playerData.cubits() >= 50 ? StoreView.TAB_HYPERCUBE : StoreView.TAB_CUBITS;
+        var secondaryTab = playerData.cubits() >= ShopUpgrade.MAP_BUILDER_2.cubits() ? StoreView.TAB_HYPERCUBE : StoreView.TAB_CUBITS;
         this.host.pushView(new StoreView(playerService, secondaryTab));
+    }
+
+    @Blocking
+    private void handleBuyMapSlot(Player player) {
+        StoreHelpers.buyUpgrade(playerService, player, ShopUpgrade.MAP_SLOT);
+        sync(() -> {
+            updateCreateButton();
+
+            // If they now have an available slot (which is not always the case
+            // if they have over-created maps and lost slots), move to create screen.
+            if (getAvailableSlots() > 0)
+                createMapOrOpenStore();
+        });
     }
 
     private int getAvailableSlots() {
@@ -219,11 +231,11 @@ public class CreateMapsView extends Panel {
             Runnable onPublish = () -> this.remountTask = this::rebuildSlots;
 
             if (slot.map().isPublished()) {
-                entries.add(new MapSlotEntry.Published(this.api, this.mapService, this.bridge, slot, onPublish));
+                entries.add(new MapSlotEntry.Published(this.api, this.mapService, this.playerService, this.bridge, slot, onPublish));
             } else if (slot.role() == MapRole.OWNER) {
-                entries.add(new MapSlotEntry.Owner(this.api, this.mapService, this.bridge, slot, onPublish));
+                entries.add(new MapSlotEntry.Owner(this.api, this.mapService, this.playerService, this.bridge, slot, onPublish));
             } else {
-                entries.add(new MapSlotEntry.Builder(this.api, this.mapService, this.bridge, slot, onPublish));
+                entries.add(new MapSlotEntry.Builder(this.api, this.mapService, this.playerService, this.bridge, slot, onPublish));
             }
         }
 
