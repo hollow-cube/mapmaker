@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
 import com.google.gson.JsonObject;
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
@@ -25,7 +26,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @RuntimeGson
 public class MapSettings {
@@ -229,14 +229,15 @@ public class MapSettings {
     }
 
     public @Nullable String getTagsString() {
-        List<String> tags = getTags().stream().map(tag -> tag.name).collect(Collectors.toList());
-
+        List<String> tags = getTags().stream()
+            .map(tag -> LanguageProviderV2.translateToPlain(tag.baseTranslationKey() + ".name"))
+            .toList();
         if (tags.isEmpty()) {
             return null;
         }
 
         var tagsLength = FontUtil.measureText(String.join(", ", tags));
-        var maxLength = 139;
+        var maxLength = 110;
 
         var initialTagsCount = tags.size();
 
@@ -262,7 +263,9 @@ public class MapSettings {
     }
 
     public String getTagsFullString() {
-        List<String> tags = getTags().stream().map(tag -> tag.name).toList();
+        List<String> tags = getTags().stream()
+            .map(tag -> LanguageProviderV2.translateToPlain(tag.baseTranslationKey() + ".name"))
+            .toList();
 
         StringBuilder stringBuilder = new StringBuilder();
 

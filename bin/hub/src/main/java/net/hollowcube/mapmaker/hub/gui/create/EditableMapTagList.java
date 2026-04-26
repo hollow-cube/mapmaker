@@ -22,14 +22,11 @@ public class EditableMapTagList extends Panel {
 
     static List<Component> getTagTranslationArgs(MapTags.Tag tag) {
         return List.of(
-            Component.translatable(getFullTagTranslation(tag) + ".name"),
-            Component.translatable(getFullTagTranslation(tag) + ".lore")
+            Component.translatable(tag.baseTranslationKey() + ".name"),
+            Component.translatable(tag.baseTranslationKey() + ".lore")
         );
     }
 
-    private static String getFullTagTranslation(MapTags.Tag tag) {
-        return "gui.create_maps.tags." + tag.type().translationName() + '.' + tag.translationName();
-    }
 
     private static String getCategory(int index) {
         if (index == 0) return "primary.first";

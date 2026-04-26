@@ -64,7 +64,7 @@ public class CreateMapsView extends Panel {
         this.slots.addAll(initialSlots);
 
         background("create_maps2/container", -10, -31);
-        add(0, 0, title("Create Map"));
+        add(0, 0, title("Create Maps"));
 
         add(0, 0, backOrClose());
 
