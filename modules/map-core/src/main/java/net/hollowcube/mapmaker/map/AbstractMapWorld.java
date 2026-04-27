@@ -5,6 +5,8 @@ import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandlerRegistry;
+import net.hollowcube.mapmaker.map.event.MapPlayerJoinEvent;
+import net.hollowcube.mapmaker.map.event.MapPlayerLeaveEvent;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.monitoring.MapCoreJFR;
@@ -245,6 +247,8 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         }
 
         if (this.bossBars != null) bossBars.forEach(player::showBossBar);
+
+        callEvent(new MapPlayerJoinEvent(this, (MapPlayer) player));
     }
 
     @Override
@@ -257,6 +261,8 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         if (!this.players.contains(player)) return;
         if (!(Thread.currentThread() instanceof TickSchedulerThread))
             throw new UnsupportedOperationException("removePlayer must be called from the scheduler thread!");
+
+        callEvent(new MapPlayerLeaveEvent(this, (MapPlayer) player));
 
         if (this.bossBars != null) BossBars.clear(player);
 

@@ -5,6 +5,7 @@ import io.nats.client.MessageConsumer;
 import io.nats.client.api.AckPolicy;
 import io.nats.client.api.ConsumerConfiguration;
 import io.nats.client.api.DeliverPolicy;
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.player.*;
@@ -177,7 +178,9 @@ public class SessionManager {
 
         // If we have the player locally that is bad, kick them immediately.
         var player = CONNECTION_MANAGER.getOnlinePlayerByUuid(UUID.fromString(message.playerId()));
-        if (player != null) player.kick(Component.text("An error has occurred, please try again.\n(session.kicked)"));
+        if (player != null && !ServerRuntime.getRuntime().isDevelopment()) {
+            player.kick(Component.text("An error has occurred, please try again.\n(session.kicked)"));
+        }
     }
 
     private void handleSessionUpdate(@NotNull PlayerSession session, @NotNull SessionStateUpdateRequest.Metadata metadata) {

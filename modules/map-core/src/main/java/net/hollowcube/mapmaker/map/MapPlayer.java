@@ -20,6 +20,7 @@ import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.command.DebugRenderersCommand;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.event.PlayerJumpEvent;
+import net.hollowcube.mapmaker.map.event.PlayerLandEvent;
 import net.hollowcube.mapmaker.map.event.entity.Map2PlayerEnterEntityEvent;
 import net.hollowcube.mapmaker.map.event.entity.Map2PlayerExitEntityEvent;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
@@ -758,6 +759,9 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
                 resetImpulsePosition();
             }
         }
+
+        var world = MapWorld.forPlayer(this);
+        if (world != null) world.callEvent(new PlayerLandEvent(world, this));
 
         if (effectiveFallDistance <= 0) return;
         int damage = calculateFallDamage(effectiveFallDistance, damageMultiplier);

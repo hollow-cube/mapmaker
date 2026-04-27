@@ -1,7 +1,10 @@
 package net.hollowcube.mapmaker.local.scripting;
 
 import net.hollowcube.mapmaker.editor.SubWorld;
-import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.AbstractMapWorld;
+import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapServer;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.runtime.parkour.item.RateMapItem;
 import net.hollowcube.mapmaker.scripting.WorldScriptContext;
@@ -30,7 +33,7 @@ public class FreeformMapWorld extends AbstractMapWorld<FreeformState, FreeformMa
             .addChild(EventUtil.READ_ONLY_NODE);
 
         this.scriptContext = new WorldScriptContext(this, dataDirectory.resolve("scripts"));
-//        this.scriptContext.initializeWorld();
+        this.scriptContext.initializeWorld();
     }
 
     @Override
@@ -41,7 +44,7 @@ public class FreeformMapWorld extends AbstractMapWorld<FreeformState, FreeformMa
 
         player.setRespawnPoint(map().settings().getSpawnPoint());
 
-        return new FreeformState.Building();
+        return new FreeformState.Playing();
     }
 
     @Override
@@ -60,14 +63,14 @@ public class FreeformMapWorld extends AbstractMapWorld<FreeformState, FreeformMa
     public void spawnPlayer(Player player) {
         super.spawnPlayer(player);
 
-        scriptContext.initializePlayer((MapPlayer) player);
+//        scriptContext.initializePlayer((MapPlayer) player);
     }
 
     @Override
     public void removePlayer(Player player) {
         super.removePlayer(player);
 
-        scriptContext.destroyPlayer((MapPlayer) player);
+//        scriptContext.destroyPlayer((MapPlayer) player);
     }
 
     private void handlePlayerTick(PlayerTickEvent event) {

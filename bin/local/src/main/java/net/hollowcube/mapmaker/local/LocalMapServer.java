@@ -16,8 +16,10 @@ import net.hollowcube.mapmaker.misc.noop.NoopPlayerService;
 import net.hollowcube.mapmaker.misc.noop.NoopSessionService;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
+import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.session.Presence;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
@@ -89,11 +91,16 @@ public class LocalMapServer extends AbstractMapServer {
         MinecraftServer.getConnectionManager()
             .setPlayerProvider(simpleMapPlayer(commandManager()));
 
+        ParkourMapWorld.initGlobalReferences();
+
         var map = new MapData();
+        map.settings().setSpawnPoint(new Pos(0.5, 300, 0.5, 180, 0));
         world = new EditorMapWorld(this, map, null) {
             @Override
             protected AbstractMapWorld<?, ?> createTestWorld() {
-                return new FreeformMapWorld(LocalMapServer.this, map, mapDirectory);
+                var fw = new FreeformMapWorld(LocalMapServer.this, map, mapDirectory);
+                eventNode().addChild(fw.eventNode()); // need to propagate events down.
+                return fw;
             }
         };
         world.loadWorld();
