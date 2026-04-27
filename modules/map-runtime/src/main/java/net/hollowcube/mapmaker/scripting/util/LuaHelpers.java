@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.scripting.util;
 
+import com.google.gson.*;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.internal.vm.lua_Debug;
 import net.kyori.adventure.key.Key;
@@ -29,6 +30,19 @@ public final class LuaHelpers {
             func.accept(key);
 
             // Remove the value, keep the key for the next iteration
+            state.pop(1);
+        }
+    }
+
+    /// Iterates over an array (sequence) table in order from index 1 to #table.
+    /// During the callback, the value is at index -1.
+    /// The state is left exactly as it was before the call.
+    public static void arrayForEach(LuaState state, int tableIndex, Consumer<Integer> func) {
+        int absIndex = state.absIndex(tableIndex);
+        int length = state.len(absIndex);
+        for (int i = 1; i <= length; i++) {
+            state.rawGetI(absIndex, i);
+            func.accept(i);
             state.pop(1);
         }
     }
@@ -80,6 +94,55 @@ public final class LuaHelpers {
 
             return lua_Debug.source(debug).getString(0);
         }
+    }
+
+    public static void pushJsonElement(LuaState state, JsonElement element) {
+        switch (element) {
+            case JsonObject object -> {
+                state.newTable();
+                for (var entry : object.entrySet()) {
+                    pushJsonElement(state, entry.getValue());
+                    state.setField(-2, entry.getKey());
+                }
+            }
+            case JsonArray array -> {
+                state.newTable();
+                for (int i = 0; i < array.size(); i++) {
+                    pushJsonElement(state, array.get(i));
+                    state.rawSetI(-2, i + 1);
+                }
+            }
+            case JsonNull _ -> state.pushNil();
+            case JsonPrimitive primitive -> {
+                if (primitive.isBoolean()) {
+                    state.pushBoolean(primitive.getAsBoolean());
+                } else if (primitive.isNumber()) {
+                    state.pushNumber(primitive.getAsDouble());
+                } else {
+                    state.pushString(primitive.getAsString());
+                }
+            }
+            default -> throw new IllegalArgumentException("Unknown JsonElement type: " + element.getClass());
+        }
+    }
+
+    public static JsonElement toJsonElement(LuaState state, int index) {
+        return switch (state.type(index)) {
+            case NIL -> JsonNull.INSTANCE;
+            case BOOLEAN -> new JsonPrimitive(state.toBoolean(-1));
+            case NUMBER -> new JsonPrimitive(state.toNumber(-1));
+            case STRING -> new JsonPrimitive(state.toString(-1));
+            case TABLE -> {
+                int absIndex = state.absIndex(index);
+                var obj = new JsonObject();
+                tableForEach(state, absIndex, key -> obj.add(key, toJsonElement(state, -1)));
+                yield obj;
+            }
+            // todo support vector type, some userdata types, and buffer type (probably)
+            case NONE, FUNCTION, LIGHTUSERDATA, USERDATA, VECTOR, THREAD, BUFFER -> {
+                throw new IllegalArgumentException("Cannot read JSON from type " + state.typeName(index));
+            }
+        };
     }
 
 }

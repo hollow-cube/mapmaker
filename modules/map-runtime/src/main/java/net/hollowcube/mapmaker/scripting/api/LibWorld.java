@@ -1,20 +1,23 @@
 package net.hollowcube.mapmaker.scripting.api;
 
 import net.hollowcube.luau.LuaState;
-import net.hollowcube.luau.gen.LuaExport;
 import net.hollowcube.luau.gen.LuaLibrary;
-import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.luau.gen.LuaMethod;
+import net.hollowcube.mapmaker.scripting.ScriptContext;
 
 @LuaLibrary(name = "@mapmaker/world")
 public final class LibWorld {
 
-    @LuaExport
-    public record World(MapWorld world) {
+    @LuaMethod
+    public static int getBlock(LuaState state) {
+        var world = ScriptContext.get(state).world();
+        var pos = LuaVector.check(state, 1);
 
+        var block = world.instance().getBlock(pos);
+        // TODO: this should return a Block not a string
+        state.pushString(block.name());
+        return 1;
     }
 
-    public static void pushWorld(LuaState state, MapWorld world) {
-        LibWorld$luau.pushWorld(state, new World(world));
-    }
 
 }

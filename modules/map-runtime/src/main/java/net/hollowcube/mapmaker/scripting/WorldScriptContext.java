@@ -98,8 +98,10 @@ public class WorldScriptContext {
         LibEnv$luau.register(state);
         LibWorld$luau.register(state);
         LibPlayer$luau.register(state);
+        LibPlayers$luau.register(state);
         LibEntity$luau.register(state);
         LibItem$luau.register(state);
+        LibStore$luau.register(state);
 
         state.sandbox();
         return state;
@@ -225,20 +227,36 @@ public class WorldScriptContext {
     }
 
     private void onReload(FsModuleLoader.ReloadEvent event) {
-        for (var player : world.players()) {
-            var context = (PlayerContextImpl) Objects.requireNonNull(player.getTag(PLAYER_SCRIPT_CONTEXT));
-            context.disposables.removeIf(disposable -> {
-                if (disposable.isDisposed()) return true;
-                if (disposable.disposeOnReload() && disposable.chunkName() != null && event.invalidated().contains(disposable.chunkName())) {
-                    disposable.dispose();
-                    return true;
-                }
-                return false;
-            });
-            initPlayerThread(context);
+        var context = (WorldContextImpl) Objects.requireNonNull(world.instance().getTag(WORLD_SCRIPT_CONTEXT));
+        context.disposables.removeIf(disposable -> {
+            if (disposable.isDisposed()) return true;
+            if (disposable.disposeOnReload() && disposable.chunkName() != null && event.invalidated().contains(disposable.chunkName())) {
+                disposable.dispose();
+                return true;
+            }
+            return false;
+        });
+        initWorldThread(context);
 
-            ActionBar.forPlayer(player).addProvider(new GenericTempActionBarProvider("File changed: " + event.changed(), 1000));
+        var actionBar = new GenericTempActionBarProvider("File changed: " + event.changed(), 1000);
+        for (var player : world.players()) {
+            ActionBar.forPlayer(player).addProvider(actionBar);
         }
+
+//        for (var player : world.players()) {
+//            var context = (PlayerContextImpl) Objects.requireNonNull(player.getTag(PLAYER_SCRIPT_CONTEXT));
+//            context.disposables.removeIf(disposable -> {
+//                if (disposable.isDisposed()) return true;
+//                if (disposable.disposeOnReload() && disposable.chunkName() != null && event.invalidated().contains(disposable.chunkName())) {
+//                    disposable.dispose();
+//                    return true;
+//                }
+//                return false;
+//            });
+//            initPlayerThread(context);
+//
+//            ActionBar.forPlayer(player).addProvider(new GenericTempActionBarProvider("File changed: " + event.changed(), 1000));
+//        }
     }
 
     private void initWorldThread(WorldContextImpl context) {

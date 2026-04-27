@@ -29,8 +29,8 @@ public final class LibEnv {
         if (!(context instanceof ScriptContext.World worldContext))
             throw state.error("environment player is only available in player-bound scripts");
 
-        LibWorld.pushWorld(state, worldContext.world());
-        return 1;
+//        LibWorld.pushWorld(state, worldContext.world());
+        throw new UnsupportedOperationException("todo");
     }
 
 }

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 public sealed interface FreeformState extends PlayerState<FreeformState, FreeformMapWorld> {
 
-    record Building() implements FreeformState {
+    record Playing() implements FreeformState {
 
         @Override
         public void configurePlayer(FreeformMapWorld world, Player player, @Nullable FreeformState lastState) {
