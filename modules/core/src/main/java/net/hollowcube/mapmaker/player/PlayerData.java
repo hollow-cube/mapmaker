@@ -233,6 +233,9 @@ public class PlayerData {
     }
 
     public MapSize maxMapSize() {
+        if (isHypercube() && (tempMaxMapSize == null || tempMaxMapSize.id() < MapSize.MASSIVE.id())) {
+            return MapSize.MASSIVE;
+        }
         return tempMaxMapSize;
     }
 
