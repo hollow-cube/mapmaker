@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.scripting;
 
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.compiler.LuauCompiler;
+import net.hollowcube.luau.gen.runtime.GeneratedStringAtoms;
 import net.hollowcube.luau.require.RequireResolver;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.MapWorld;
@@ -85,7 +86,7 @@ public class WorldScriptContext {
         state.openLibs();
 
         state.openRequire(resolver);
-        registerGeneratedStringAtoms(state);
+        GeneratedStringAtoms.register(state);
 
         LuaGlobals.register(state);
         LuaVector.register(state);
@@ -340,17 +341,6 @@ public class WorldScriptContext {
         var parentData = parent.getThreadData();
         if (parentData instanceof ThreadData td)
             thread.setThreadData(td.scriptContext());
-    }
-
-    private static void registerGeneratedStringAtoms(LuaState state) {
-        // todo cache this or something
-        try {
-            Class.forName("net.hollowcube.luau.gen.runtime.GeneratedStringAtoms")
-                .getDeclaredMethod("register", LuaState.class)
-                .invoke(null, state);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }
