@@ -8,6 +8,7 @@ dependencies {
     implementation(libs.javapoet)
     implementation(libs.luau.core)
     implementation(libs.fastutil)
+    implementation(libs.gson)
 
     testImplementation(libs.compile.testing)
 }

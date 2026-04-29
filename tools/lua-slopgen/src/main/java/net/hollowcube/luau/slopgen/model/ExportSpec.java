@@ -1,6 +1,7 @@
 package net.hollowcube.luau.slopgen.model;
 
 import com.palantir.javapoet.TypeName;
+import net.hollowcube.luau.slopgen.docs.MemberDocs;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -21,10 +22,11 @@ public record ExportSpec(
     List<MethodSpec> methods,
     List<MetaSpec> metaMethods,
     int userDataTag,
-    boolean hasSubtypes
+    boolean hasSubtypes,
+    MemberDocs docs
 ) {
     public ExportSpec withHasSubtypes(boolean hasSubtypes) {
         return new ExportSpec(javaType, luaName, superExport, isFinal,
-            properties, methods, metaMethods, userDataTag, hasSubtypes);
+            properties, methods, metaMethods, userDataTag, hasSubtypes, docs);
     }
 }

@@ -2,6 +2,7 @@ package net.hollowcube.luau.slopgen.model;
 
 import com.palantir.javapoet.ClassName;
 import net.hollowcube.luau.gen.LuaLibrary;
+import net.hollowcube.luau.slopgen.docs.MemberDocs;
 
 import java.util.List;
 
@@ -16,5 +17,6 @@ public record LibrarySpec(
     LuaLibrary.Scope scope,
     List<ExportSpec> exports,
     List<MethodSpec> staticMethods,
-    List<PropertySpec> staticProperties
+    List<PropertySpec> staticProperties,
+    MemberDocs docs
 ) {}

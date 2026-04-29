@@ -27,14 +27,18 @@ class EndToEndTest {
                 @LuaLibrary(name = "@e2e/inherit")
                 public final class LibE2E {
                     @LuaExport public static class Animal {
+                        /// @luaReturn string
                         @LuaProperty public int getName(LuaState s) { s.pushString("a"); return 1; }
                     }
                     @LuaExport public static class Dog extends Animal {
+                        /// @luaReturn string
                         @LuaProperty public int getBreed(LuaState s) { s.pushString("d"); return 1; }
+                        /// @luaParam value string
                         @LuaProperty public void setBreed(LuaState s) {}
                         @LuaMethod public void bark(LuaState s) {}
                     }
                     @LuaExport public static final class Puppy extends Dog {
+                        /// @luaReturn number
                         @LuaMethod public int age(LuaState s) { s.pushInteger(1); return 1; }
                     }
                 }
@@ -56,13 +60,21 @@ class EndToEndTest {
                 @LuaLibrary(name = "@e2e/meta")
                 public final class LibAllMeta {
                     @LuaExport public static final class Vec {
+                        /// @luaReturn Vec
                         @LuaMethod(meta = Meta.ADD)      public int add(LuaState s) { return 1; }
+                        /// @luaReturn Vec
                         @LuaMethod(meta = Meta.SUB)      public int sub(LuaState s) { return 1; }
+                        /// @luaReturn Vec
                         @LuaMethod(meta = Meta.UNM)      public int unm(LuaState s) { return 1; }
+                        /// @luaReturn boolean
                         @LuaMethod(meta = Meta.EQ)       public int eq(LuaState s) { return 1; }
+                        /// @luaReturn boolean
                         @LuaMethod(meta = Meta.LT)       public int lt(LuaState s) { return 1; }
+                        /// @luaReturn number
                         @LuaMethod(meta = Meta.LEN)      public int len(LuaState s) { return 1; }
+                        /// @luaReturn string
                         @LuaMethod(meta = Meta.TOSTRING) public int str(LuaState s) { return 1; }
+                        /// @luaReturn nil
                         @LuaMethod(meta = Meta.CALL)     public int call(LuaState s) { return 1; }
                     }
                 }
@@ -83,10 +95,14 @@ class EndToEndTest {
                 import net.hollowcube.luau.gen.LuaProperty;
                 @LuaLibrary(name = "@e2e/mix")
                 public final class LibMix {
+                    /// @luaReturn number
                     @LuaProperty public static int getVersion(LuaState s) { s.pushInteger(1); return 1; }
+                    /// @luaReturn Thing
                     @LuaMethod public static int build(LuaState s) { s.pushInteger(1); return 1; }
                     @LuaExport public static final class Thing {
+                        /// @luaReturn number
                         @LuaProperty public int getX(LuaState s) { return 1; }
+                        /// @luaParam value number
                         @LuaProperty public void setX(LuaState s) {}
                         @LuaMethod public void touch(LuaState s) {}
                     }

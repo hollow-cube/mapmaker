@@ -55,6 +55,7 @@ class LibraryEmitterTest {
             import net.hollowcube.luau.gen.LuaProperty;
             @LuaLibrary(name = "@t/sp")
             public final class LibStaticProp {
+                /// @luaReturn number
                 @LuaProperty
                 public static int getVersion(LuaState state) { state.pushInteger(1); return 1; }
             }
@@ -71,6 +72,7 @@ class LibraryEmitterTest {
             import net.hollowcube.luau.gen.LuaMethod;
             @LuaLibrary(name = "@t/sm")
             public final class LibStaticMethod {
+                /// @luaReturn number
                 @LuaMethod
                 public static int build(LuaState state) { state.pushInteger(1); return 1; }
             }
@@ -90,6 +92,7 @@ class LibraryEmitterTest {
             public final class LibLeafProps {
                 @LuaExport
                 public static final class Thing {
+                    /// @luaReturn number
                     @LuaProperty public int getColor(LuaState state) { state.pushInteger(0); return 1; }
                 }
             }
@@ -110,6 +113,7 @@ class LibraryEmitterTest {
                 @LuaExport
                 public static final class Thing {
                     @LuaMethod public void poke(LuaState state) {}
+                    /// @luaReturn number
                     @LuaMethod public int compute(LuaState state) { state.pushInteger(0); return 1; }
                 }
             }
@@ -129,6 +133,7 @@ class LibraryEmitterTest {
             public final class LibSetter {
                 @LuaExport
                 public static final class Thing {
+                    /// @luaParam value number
                     @LuaProperty public void setColor(LuaState state) {}
                 }
             }
@@ -148,6 +153,7 @@ class LibraryEmitterTest {
             public final class LibTree {
                 @LuaExport
                 public static class A {
+                    /// @luaReturn number
                     @LuaProperty public int getX(LuaState s) { return 1; }
                 }
                 @LuaExport
@@ -172,6 +178,7 @@ class LibraryEmitterTest {
             public final class LibMeta {
                 @LuaExport
                 public static final class Vec {
+                    /// @luaReturn Vec
                     @LuaMethod(meta = Meta.ADD)
                     public int plus(LuaState state) { return 1; }
                 }
