@@ -68,7 +68,8 @@ class JavadocTagParserTest {
     void returnTagSingle() {
         var docs = JavadocTagParser.parse("@luaReturn Player?");
         assertEquals(1, docs.returns().size());
-        assertEquals("Player?", docs.returns().get(0));
+        assertEquals("Player?", docs.returns().get(0).typeExpr());
+        assertEquals("", docs.returns().get(0).description());
     }
 
     @Test
@@ -79,8 +80,41 @@ class JavadocTagParserTest {
             """;
         var docs = JavadocTagParser.parse(raw);
         assertEquals(2, docs.returns().size());
-        assertEquals("Player", docs.returns().get(0));
-        assertEquals("World", docs.returns().get(1));
+        assertEquals("Player", docs.returns().get(0).typeExpr());
+        assertEquals("World", docs.returns().get(1).typeExpr());
+    }
+
+    @Test
+    void paramTagWithDescription() {
+        var docs = JavadocTagParser.parse("@luaParam name string - the player's display name");
+        var p = docs.params().get(0);
+        assertEquals("name", p.name());
+        assertEquals("string", p.typeExpr());
+        assertEquals("the player's display name", p.description());
+    }
+
+    @Test
+    void returnTagWithDescription() {
+        var docs = JavadocTagParser.parse("@luaReturn Player? - nil if no player matched");
+        assertEquals("Player?", docs.returns().get(0).typeExpr());
+        assertEquals("nil if no player matched", docs.returns().get(0).description());
+    }
+
+    @Test
+    void genericTagWithDescription() {
+        var docs = JavadocTagParser.parse("@luaGeneric T - the wrapped value type");
+        var g = docs.generics().get(0);
+        assertEquals("T", g.name());
+        assertFalse(g.pack());
+        assertEquals("the wrapped value type", g.description());
+    }
+
+    @Test
+    void functionTypeArrowDoesNotConfuseDescriptionSplit() {
+        var docs = JavadocTagParser.parse("@luaParam fn (x: number) -> string - a transform");
+        var p = docs.params().get(0);
+        assertEquals("(x: number) -> string", p.typeExpr());
+        assertEquals("a transform", p.description());
     }
 
     @Test

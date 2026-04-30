@@ -13,9 +13,23 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
+/// Schedule and manage threads. Run a function on a new thread, defer it to the next tick,
+/// delay it by a number of ticks, pause the current thread, or cancel any of the above.
 @LuaLibrary(name = "@mapmaker/task")
 public final class LibTask {
 
+    /// Runs `thread` immediately on a new thread. Any extra arguments are passed to it.
+    /// Returns the thread so it can be cancelled later with `task.cancel`.
+    ///
+    /// ```luau
+    /// task.spawn(function(name) print("hello", name) end, "world")
+    /// ```
+    ///
+    /// @luaGeneric A...
+    /// @luaGeneric R...
+    /// @luaParam thread ((A...) -> R...) | thread - the function or thread to run
+    /// @luaParam args A... - arguments passed to the function
+    /// @luaReturn thread
     @LuaMethod
     public static int spawn(LuaState state) {
         LuaState thread = toThread(state, 1);
@@ -31,6 +45,14 @@ public final class LibTask {
         return 1;
     }
 
+    /// Runs `thread` on the next tick. Any extra arguments are passed to it.
+    /// Returns the thread so it can be cancelled later.
+    ///
+    /// @luaGeneric A...
+    /// @luaGeneric R...
+    /// @luaParam thread ((A...) -> R...) | thread - the function or thread to run
+    /// @luaParam args A... - arguments passed to the function
+    /// @luaReturn thread
     @LuaMethod
     public static int defer(LuaState state) {
         LuaState thread = toThread(state, 1);
@@ -46,6 +68,15 @@ public final class LibTask {
         return 1;
     }
 
+    /// Runs `thread` after `ticks` ticks. Any extra arguments are passed to it. Returns the
+    /// thread so it can be cancelled later.
+    ///
+    /// @luaGeneric A...
+    /// @luaGeneric R...
+    /// @luaParam ticks number - the number of ticks to wait
+    /// @luaParam thread ((A...) -> R...) | thread - the function or thread to run
+    /// @luaParam args A... - arguments passed to the function
+    /// @luaReturn thread
     @LuaMethod
     public static int delay(LuaState state) {
         int ticks = state.optInteger(1, 0);
@@ -63,6 +94,13 @@ public final class LibTask {
         return 1;
     }
 
+    /// Pauses the current thread for `ticks` ticks. Defaults to one tick.
+    ///
+    /// ```luau
+    /// task.wait(20) -- pause for one second at 20 TPS
+    /// ```
+    ///
+    /// @luaParam ticks number? - the number of ticks to wait
     @LuaMethod
     public static int wait(LuaState state) {
         int ticks = state.optInteger(1, 0);
@@ -78,6 +116,11 @@ public final class LibTask {
         return state.yield(0);
     }
 
+    /// Cancels a thread previously returned by `spawn`, `defer`, or `delay`. Returns `true`
+    /// if the thread was running and is now cancelled, `false` if it had already finished.
+    ///
+    /// @luaParam thread thread
+    /// @luaReturn boolean
     @LuaMethod
     public static int cancel(LuaState state) {
         state.checkType(1, LuaType.THREAD);

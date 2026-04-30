@@ -7,9 +7,8 @@ import com.google.testing.compile.JavaFileObjects;
 import com.palantir.javapoet.ClassName;
 import net.hollowcube.luau.gen.LuaLibrary;
 import net.hollowcube.luau.gen.Meta;
-import net.hollowcube.luau.slopgen.model.AtomTable;
-import net.hollowcube.luau.slopgen.model.LibrarySpec;
-import net.hollowcube.luau.slopgen.model.UserDataTagTable;
+import net.hollowcube.luau.slopgen.Idents;
+import net.hollowcube.luau.slopgen.Model;
 import org.junit.jupiter.api.Test;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -28,37 +27,37 @@ class LibraryModelBuilderTest {
 
     @Test
     void emptyLibrary() {
-        var spec = parseSingle("fixtures.LibEmpty", """
+        var library = parseSingle("fixtures.LibEmpty", """
             package fixtures;
             import net.hollowcube.luau.gen.LuaLibrary;
             @LuaLibrary(name = "@test/empty")
             public final class LibEmpty {}
             """);
-        assertEquals("@test/empty", spec.moduleName());
-        assertEquals(LuaLibrary.Scope.REQUIRE, spec.scope());
-        assertEquals(ClassName.get("fixtures", "LibEmpty"), spec.sourceType());
-        assertEquals(ClassName.get("fixtures", "LibEmpty$luau"), spec.glueType());
-        assertTrue(spec.exports().isEmpty());
-        assertTrue(spec.staticMethods().isEmpty());
-        assertTrue(spec.staticProperties().isEmpty());
+        assertEquals("@test/empty", library.moduleName());
+        assertEquals(LuaLibrary.Scope.REQUIRE, library.scope());
+        assertEquals(ClassName.get("fixtures", "LibEmpty"), library.sourceType());
+        assertEquals(ClassName.get("fixtures", "LibEmpty$luau"), library.glueType());
+        assertTrue(library.exports().isEmpty());
+        assertTrue(library.staticMethods().isEmpty());
+        assertTrue(library.staticProperties().isEmpty());
     }
 
     @Test
     void globalScopedLibrary() {
-        var spec = parseSingle("fixtures.LibGlobal", """
+        var library = parseSingle("fixtures.LibGlobal", """
             package fixtures;
             import net.hollowcube.luau.gen.LuaLibrary;
             import net.hollowcube.luau.gen.LuaLibrary.Scope;
             @LuaLibrary(name = "myglobal", scope = Scope.GLOBAL)
             public final class LibGlobal {}
             """);
-        assertEquals(LuaLibrary.Scope.GLOBAL, spec.scope());
-        assertEquals("myglobal", spec.moduleName());
+        assertEquals(LuaLibrary.Scope.GLOBAL, library.scope());
+        assertEquals("myglobal", library.moduleName());
     }
 
     @Test
     void staticGetterAddedAsProperty() {
-        var spec = parseSingle("fixtures.LibStatics", """
+        var library = parseSingle("fixtures.LibStatics", """
             package fixtures;
             import net.hollowcube.luau.LuaState;
             import net.hollowcube.luau.gen.LuaLibrary;
@@ -69,8 +68,8 @@ class LibraryModelBuilderTest {
                 public static int getVersion(LuaState state) { return 1; }
             }
             """);
-        assertEquals(1, spec.staticProperties().size());
-        var prop = spec.staticProperties().get(0);
+        assertEquals(1, library.staticProperties().size());
+        var prop = library.staticProperties().get(0);
         assertEquals("version", prop.luaName());
         assertNotNull(prop.getter());
         assertNull(prop.setter());
@@ -79,7 +78,7 @@ class LibraryModelBuilderTest {
 
     @Test
     void staticNonVoidMethod() {
-        var spec = parseSingle("fixtures.LibStaticMethod", """
+        var library = parseSingle("fixtures.LibStaticMethod", """
             package fixtures;
             import net.hollowcube.luau.LuaState;
             import net.hollowcube.luau.gen.LuaLibrary;
@@ -90,8 +89,8 @@ class LibraryModelBuilderTest {
                 public static int build(LuaState state) { return 1; }
             }
             """);
-        assertEquals(1, spec.staticMethods().size());
-        var m = spec.staticMethods().get(0);
+        assertEquals(1, library.staticMethods().size());
+        var m = library.staticMethods().get(0);
         assertEquals("build", m.luaName());
         assertEquals("build", m.javaMethodName());
         assertEquals(false, m.isVoid());
@@ -99,7 +98,7 @@ class LibraryModelBuilderTest {
 
     @Test
     void singleExportWithGetterOnly() {
-        var spec = parseSingle("fixtures.LibLeaf", """
+        var library = parseSingle("fixtures.LibLeaf", """
             package fixtures;
             import net.hollowcube.luau.LuaState;
             import net.hollowcube.luau.gen.LuaLibrary;
@@ -114,8 +113,8 @@ class LibraryModelBuilderTest {
                 }
             }
             """);
-        assertEquals(1, spec.exports().size());
-        var ex = spec.exports().get(0);
+        assertEquals(1, library.exports().size());
+        var ex = library.exports().get(0);
         assertEquals("Thing", ex.luaName());
         assertEquals(true, ex.isFinal());
         assertNull(ex.superExport());
@@ -127,7 +126,7 @@ class LibraryModelBuilderTest {
 
     @Test
     void exportWithGetterAndSetterMergedIntoOneProperty() {
-        var spec = parseSingle("fixtures.LibProp", """
+        var library = parseSingle("fixtures.LibProp", """
             package fixtures;
             import net.hollowcube.luau.LuaState;
             import net.hollowcube.luau.gen.LuaLibrary;
@@ -144,8 +143,8 @@ class LibraryModelBuilderTest {
                 }
             }
             """);
-        var ex = spec.exports().get(0);
-        assertEquals(1, ex.properties().size(), "getter+setter must merge into one PropertySpec");
+        var ex = library.exports().get(0);
+        assertEquals(1, ex.properties().size(), "getter+setter must merge into one Property");
         var prop = ex.properties().get(0);
         assertEquals("color", prop.luaName());
         assertNotNull(prop.getter());
@@ -154,7 +153,7 @@ class LibraryModelBuilderTest {
 
     @Test
     void exportWithVoidAndNonVoidMethods() {
-        var spec = parseSingle("fixtures.LibMethods", """
+        var library = parseSingle("fixtures.LibMethods", """
             package fixtures;
             import net.hollowcube.luau.LuaState;
             import net.hollowcube.luau.gen.LuaLibrary;
@@ -171,7 +170,7 @@ class LibraryModelBuilderTest {
                 }
             }
             """);
-        var ex = spec.exports().get(0);
+        var ex = library.exports().get(0);
         assertEquals(2, ex.methods().size());
         assertEquals("poke", ex.methods().get(0).luaName());
         assertEquals(true, ex.methods().get(0).isVoid());
@@ -181,7 +180,7 @@ class LibraryModelBuilderTest {
 
     @Test
     void inheritanceChainPopulatesSuperAndHasSubtypes() {
-        var spec = parseSingle("fixtures.LibTree", """
+        var library = parseSingle("fixtures.LibTree", """
             package fixtures;
             import net.hollowcube.luau.LuaState;
             import net.hollowcube.luau.gen.LuaLibrary;
@@ -199,14 +198,14 @@ class LibraryModelBuilderTest {
                 public static final class C extends B {}
             }
             """);
-        assertEquals(3, spec.exports().size());
+        assertEquals(3, library.exports().size());
         var byName = new java.util.HashMap<String, com.palantir.javapoet.TypeName>();
-        for (var e : spec.exports()) byName.put(e.luaName(), e.javaType());
+        for (var e : library.exports()) byName.put(e.luaName(), e.javaType());
 
         // A has subtype B; B has subtype C; C is leaf.
-        var a = findExport(spec, "A");
-        var b = findExport(spec, "B");
-        var c = findExport(spec, "C");
+        var a = findExport(library, "A");
+        var b = findExport(library, "B");
+        var c = findExport(library, "C");
         assertNull(a.superExport());
         assertEquals(byName.get("A"), b.superExport());
         assertEquals(byName.get("B"), c.superExport());
@@ -217,7 +216,7 @@ class LibraryModelBuilderTest {
 
     @Test
     void metaMethodSeparatedFromRegularMethods() {
-        var spec = parseSingle("fixtures.LibMeta", """
+        var library = parseSingle("fixtures.LibMeta", """
             package fixtures;
             import net.hollowcube.luau.LuaState;
             import net.hollowcube.luau.gen.LuaLibrary;
@@ -233,7 +232,7 @@ class LibraryModelBuilderTest {
                 }
             }
             """);
-        var ex = spec.exports().get(0);
+        var ex = library.exports().get(0);
         assertTrue(ex.methods().isEmpty());
         assertEquals(1, ex.metaMethods().size());
         assertEquals(Meta.ADD, ex.metaMethods().get(0).meta());
@@ -241,7 +240,7 @@ class LibraryModelBuilderTest {
 
     @Test
     void recordExportSupported() {
-        var spec = parseSingle("fixtures.LibRec", """
+        var library = parseSingle("fixtures.LibRec", """
             package fixtures;
             import net.hollowcube.luau.gen.LuaLibrary;
             import net.hollowcube.luau.gen.LuaExport;
@@ -251,7 +250,7 @@ class LibraryModelBuilderTest {
                 public record Hot() {}
             }
             """);
-        var ex = spec.exports().get(0);
+        var ex = library.exports().get(0);
         assertEquals("Hot", ex.luaName());
         assertNull(ex.superExport(), "record's superclass (Record) is filtered out");
     }
@@ -273,7 +272,7 @@ class LibraryModelBuilderTest {
                 }
             }
             """);
-        var atoms = capturing.atomTable.entries();
+        var atoms = capturing.idents.entries();
         assertEquals(2, atoms.size());
         // Source-declaration order — alpha first, beta second.
         assertEquals("alpha", atoms.get(0).luaName());
@@ -320,19 +319,15 @@ class LibraryModelBuilderTest {
 
     // --- helpers ---
 
-    private static com.palantir.javapoet.TypeName typeName(LibrarySpec spec, String exportLuaName) {
-        return findExport(spec, exportLuaName).javaType();
-    }
-
-    private static net.hollowcube.luau.slopgen.model.ExportSpec findExport(LibrarySpec spec, String luaName) {
-        for (var e : spec.exports())
+    private static Model.Export findExport(Model.Library library, String luaName) {
+        for (var e : library.exports())
             if (e.luaName().equals(luaName)) return e;
         throw new AssertionError("no export named " + luaName);
     }
 
-    private static LibrarySpec parseSingle(String fqcn, String source) {
+    private static Model.Library parseSingle(String fqcn, String source) {
         var capturing = compileWithCapture(fqcn, source);
-        assertEquals(1, capturing.captured.size(), "expected exactly one LibrarySpec");
+        assertEquals(1, capturing.captured.size(), "expected exactly one Model.Library");
         return capturing.captured.get(0);
     }
 
@@ -352,9 +347,8 @@ class LibraryModelBuilderTest {
 
     @AutoService(Processor.class)
     private static final class CapturingProcessor extends AbstractProcessor {
-        final List<LibrarySpec> captured = new ArrayList<>();
-        final AtomTable atomTable = new AtomTable();
-        final UserDataTagTable userDataTagTable = new UserDataTagTable();
+        final List<Model.Library> captured = new ArrayList<>();
+        final Idents idents = new Idents();
 
         @Override
         public Set<String> getSupportedAnnotationTypes() {
@@ -368,11 +362,11 @@ class LibraryModelBuilderTest {
 
         @Override
         public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-            var builder = new LibraryModelBuilder(processingEnv, atomTable, userDataTagTable);
+            var builder = new LibraryModelBuilder(processingEnv, idents);
             for (var el : roundEnv.getElementsAnnotatedWith(LuaLibrary.class)) {
                 if (el instanceof TypeElement t) {
-                    var spec = builder.build(t);
-                    if (spec != null) captured.add(spec);
+                    var library = builder.build(t);
+                    if (library != null) captured.add(library);
                 }
             }
             return true;

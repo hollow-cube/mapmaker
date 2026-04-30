@@ -4,7 +4,9 @@ import java.util.List;
 
 /// The full extracted contents of a documentation comment in slopgen-relevant form: free-text
 /// description plus the recognized `@luaParam` / `@luaReturn` / `@luaGeneric` block tags. Type
-/// expressions are kept as raw strings here; the docs module parses them later.
+/// expressions are kept as raw strings here; [net.hollowcube.luau.slopgen.parse.LibraryModelBuilder]
+/// parses them into [net.hollowcube.luau.slopgen.types.LuauType] AST and stores the result on
+/// the resolved [net.hollowcube.luau.slopgen.Model].
 ///
 /// Used uniformly across libraries, exports, methods, and accessors. Container-level docs
 /// (library, export) only carry meaningful values in `description`; the validator rejects
@@ -13,7 +15,7 @@ public record MemberDocs(
     String description,
     List<TagGeneric> generics,
     List<TagParam> params,
-    List<String> returns,
+    List<TagReturn> returns,
     List<TagDiagnostic> diagnostics
 ) {
     public static MemberDocs empty() {

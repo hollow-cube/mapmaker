@@ -1,4 +1,4 @@
-package net.hollowcube.luau.docs.types;
+package net.hollowcube.luau.slopgen.types;
 
 import org.jetbrains.annotations.Nullable;
 

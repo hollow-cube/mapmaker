@@ -4,8 +4,8 @@ import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
-import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,7 +20,7 @@ class SnapshotTest {
 
     @Test
     void libSampleJavaGlue() throws Exception {
-        var compilation = compile();
+        var compilation = compile(null);
 
         var glue = compilation.generatedSourceFile("fixtures.LibSample$luau")
             .orElseThrow(() -> new AssertionError("expected generated fixtures.LibSample$luau"));
@@ -30,28 +30,25 @@ class SnapshotTest {
     }
 
     @Test
-    void libSampleRawJson() throws Exception {
-        var compilation = compile();
+    void libSampleFragmentJson(@TempDir Path tempDir) throws Exception {
+        var compilation = compile(tempDir);
+        assertThat(compilation).succeeded();
 
-        var json = findResource(compilation, "META-INF/luau-slopgen/fixtures.LibSample.json")
-            .orElseThrow(() -> new AssertionError("expected raw JSON for fixtures.LibSample"));
-        var actual = json.getCharContent(true).toString();
+        var fragment = tempDir.resolve("fixtures.LibSample.json");
+        if (!Files.exists(fragment))
+            throw new AssertionError("expected fragment at " + fragment + " but the AP did not write it");
 
-        assertGolden("snapshot/LibSample.expected.json", actual);
+        assertGolden("snapshot/LibSample.expected.json", Files.readString(fragment));
     }
 
-    private static Compilation compile() {
-        return Compiler.javac()
-            .withProcessors(new LuaLibraryProcessor(), new LuaAtomTableProcessor())
-            .compile(JavaFileObjects.forResource("snapshot/LibSample.java"));
-    }
-
-    private static java.util.Optional<JavaFileObject> findResource(Compilation compilation, String pathSuffix) {
-        for (var f : compilation.generatedFiles()) {
-            if (f.getName().endsWith(pathSuffix) || f.getName().endsWith("/" + pathSuffix))
-                return java.util.Optional.of(f);
+    private static Compilation compile(Path fragmentDir) {
+        var compiler = Compiler.javac()
+            .withProcessors(new LuaLibraryProcessor(), new LuaAtomTableProcessor());
+        if (fragmentDir != null) {
+            compiler = compiler.withOptions("-A" + LuaLibraryProcessor.MODEL_OUT_OPTION
+                                            + "=" + fragmentDir.toAbsolutePath());
         }
-        return java.util.Optional.empty();
+        return compiler.compile(JavaFileObjects.forResource("snapshot/LibSample.java"));
     }
 
     private static void assertGolden(String resourceRelativePath, String actual) throws IOException {
@@ -66,10 +63,5 @@ class SnapshotTest {
         }
         String expected = Files.readString(goldenPath);
         assertEquals(expected, actual);
-    }
-
-    @SuppressWarnings("unused")
-    private static void assertSucceeded(Compilation c) {
-        assertThat(c).succeeded();
     }
 }

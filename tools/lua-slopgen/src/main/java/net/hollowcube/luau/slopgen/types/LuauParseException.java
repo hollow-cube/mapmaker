@@ -1,4 +1,4 @@
-package net.hollowcube.luau.docs.types;
+package net.hollowcube.luau.slopgen.types;
 
 /// Thrown by [LuauTypeParser] when input does not match the grammar. Carries a `(offset, message)`
 /// pair so callers can prepend the originating `file:line:column` context.

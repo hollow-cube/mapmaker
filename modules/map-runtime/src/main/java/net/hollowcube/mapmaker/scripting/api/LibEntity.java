@@ -12,6 +12,7 @@ import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 
 import java.util.Locale;
 
+/// Entity types. To spawn an entity, call `player.world:spawn_entity(...)`.
 @LuaLibrary(name = "@mapmaker/entity")
 public final class LibEntity {
 
@@ -19,6 +20,7 @@ public final class LibEntity {
         LibEntity$luau.pushEntity(state, entity);
     }
 
+    /// The base type for all entities.
     @LuaExport
     public static class Entity {
         private final net.minestom.server.entity.Entity delegate;
@@ -40,12 +42,17 @@ public final class LibEntity {
 
         //region Properties
 
+        /// The entity's UUID.
+        ///
+        /// @luaReturn string
         @LuaProperty
         public int getUuid(LuaState state) {
             state.pushString(delegate.getUuid().toString());
             return 1;
         }
 
+        /// The entity's current position.
+        /// @luaReturn vector
         @LuaProperty
         public int getPosition(LuaState state) {
             var pos = delegate().getPosition();
@@ -53,12 +60,16 @@ public final class LibEntity {
             return 1;
         }
 
+        /// The entity's yaw (horizontal rotation), in degrees.
+        /// @luaReturn number
         @LuaProperty
         public int getYaw(LuaState state) {
             state.pushNumber(delegate().getPosition().yaw());
             return 1;
         }
 
+        /// The entity's pitch (vertical rotation), in degrees.
+        /// @luaReturn number
         @LuaProperty
         public int getPitch(LuaState state) {
             state.pushNumber(delegate().getPosition().pitch());
@@ -69,6 +80,7 @@ public final class LibEntity {
 
         //region Instance Methods
 
+        /// Removes the entity from the world. Has no effect if the entity is already removed.
         @LuaMethod
         public void remove(LuaState state) {
             if (delegate.isRemoved())
@@ -80,6 +92,9 @@ public final class LibEntity {
         //endregion
     }
 
+    /// An entity that renders something at its position — usually text, a block, or an
+    /// item. Most properties on `Display` and its subtypes can be smoothly animated with
+    /// `:interpolate`.
     @LuaExport
     public static class Display extends Entity {
 
@@ -119,12 +134,15 @@ public final class LibEntity {
 
         //region Properties
 
+        /// How the display orients itself toward the player.
+        /// @luaReturn "fixed" | "vertical" | "horizontal" | "center"
         @LuaProperty
         public int getBillboard(LuaState state) {
             state.pushString(delegate().getEntityMeta().getBillboardRenderConstraints().name().toLowerCase(Locale.ROOT));
             return 1;
         }
 
+        /// @luaParam value "fixed" | "vertical" | "horizontal" | "center"
         @LuaProperty
         public void setBillboard(LuaState state) {
             setBillboard(state, 1);
@@ -145,12 +163,15 @@ public final class LibEntity {
 
         // TODO: block light, sky light, glow color override, width, height, shadow radius, shadow strength, view range, translation
 
+        /// The display's scale. Each axis can be set independently. Interpolatable.
+        /// @luaReturn vector
         @LuaProperty
         public int getScale(LuaState state) {
             LuaVector.push(state, delegate().getEntityMeta().getScale());
             return 1;
         }
 
+        /// @luaParam value vector
         @LuaProperty
         public void setScale(LuaState state) {
             setScale(state, 1);
@@ -167,6 +188,15 @@ public final class LibEntity {
 
         //region Instance Methods
 
+        /// Smoothly transitions properties to new values over `duration` ticks. Only
+        /// interpolatable properties can appear in the target table.
+        ///
+        /// ```luau
+        /// display:interpolate(20, { scale = vector(2, 2, 2) })  -- grow over one second
+        /// ```
+        ///
+        /// @luaParam duration number
+        /// @luaParam properties { [string]: any }
         @LuaMethod
         public int interpolate(LuaState state) {
             int duration = state.checkInteger(1);
@@ -193,6 +223,7 @@ public final class LibEntity {
 
     }
 
+    /// A display that renders styled text floating in the world.
     @LuaExport
     public static final class TextDisplay extends Display {
 
@@ -234,6 +265,8 @@ public final class LibEntity {
 
         //region Properties
 
+        /// The text shown by this display.
+        /// @luaReturn @mapmaker.Text
         @LuaProperty
         public int getText(LuaState state) {
             var text = delegate().getEntityMeta().getText();
@@ -241,6 +274,7 @@ public final class LibEntity {
             return 1;
         }
 
+        /// @luaParam value AnyText
         @LuaProperty
         public void setText(LuaState state) {
             setText(state, 1);
@@ -251,12 +285,15 @@ public final class LibEntity {
             delegate().getEntityMeta().setText(text);
         }
 
+        /// Whether the text is rendered with a drop shadow.
+        /// @luaReturn boolean
         @LuaProperty
         public int getShadow(LuaState state) {
             state.pushBoolean(delegate().getEntityMeta().isShadow());
             return 1;
         }
 
+        /// @luaParam value boolean
         @LuaProperty
         public void setShadow(LuaState state) {
             setShadow(state, 1);
@@ -267,6 +304,8 @@ public final class LibEntity {
             delegate().getEntityMeta().setShadow(shadow);
         }
 
+        /// The background colour behind the text, as a packed ARGB integer.
+        /// @luaReturn number
         @LuaProperty
         public int getBackground(LuaState state) {
             int background = delegate().getEntityMeta().getBackgroundColor();
@@ -274,6 +313,7 @@ public final class LibEntity {
             return 1;
         }
 
+        /// @luaParam value number
         @LuaProperty
         public void setBackground(LuaState state) {
             setBackground(state, 1);
@@ -287,6 +327,8 @@ public final class LibEntity {
 
         // TODO: defaultBackground, line width, see through, shadow, text
 
+        /// The text's opacity, between `0` (fully transparent) and `1` (fully opaque).
+        /// @luaReturn number
         @LuaProperty
         public int getOpacity(LuaState state) {
             var opacity = delegate().getEntityMeta().getTextOpacity();
@@ -294,6 +336,7 @@ public final class LibEntity {
             return 1;
         }
 
+        /// @luaParam value number
         @LuaProperty
         public void setOpacity(LuaState state) {
             setOpacity(state, 1);

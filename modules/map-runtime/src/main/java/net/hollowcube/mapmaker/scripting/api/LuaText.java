@@ -14,6 +14,8 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 import java.util.Objects;
 
+/// Build and manipulate styled text. `Text` values can be passed anywhere the API accepts a
+/// message, title, or label. Available as a global named `Text`, without `require`.
 @LuaLibrary(name = "Text", scope = Scope.GLOBAL)
 public final class LuaText {
     private static final PlainTextComponentSerializer PLAIN_TEXT_SERIALIZER =
@@ -59,16 +61,16 @@ public final class LuaText {
 
     //region Static Methods
 
-    /// Construct a new Text object from a minimessage string.
+    /// Parses a MiniMessage-formatted string into a `Text`. Always escape user input with
+    /// `Text.sanitize` first to prevent unintended formatting.
     ///
     /// ```luau
-    /// local redText = Text.new("<red>This is red text</red>")
-    /// player:SendMessage(redText) -- Player will see "This is red text" in red.
-    ///```
+    /// local greeting = Text.new("<red>welcome!</red>")
+    /// player:send_message(greeting)
+    /// ```
     ///
-    /// @return My return vaue
-    /// @luaParam text: string - The string text in minimessage format. User input text be escaped using [#sanitize].
-    /// @luaReturn Text - The parsed text component.
+    /// @luaParam text string
+    /// @luaReturn Text
     @LuaMethod
     public static int new_(LuaState state) {
         var raw = state.checkString(1);
@@ -76,16 +78,16 @@ public final class LuaText {
         return 1;
     }
 
-    /// Sanitizes input text for any minimessage tags.
+    /// Escapes any MiniMessage tags in a string. Use this before passing user-supplied text
+    /// to `Text.new` to prevent injected formatting.
     ///
     /// ```luau
-    /// local raw = "<red>This is not red text</red>"
-    /// local safe = Text.sanitize(raw)
-    /// -- Safe contains the text "<red>This is not red text</red>", with no formatting.
-    ///```
+    /// local safe = Text.sanitize(player_input)
+    /// player:send_message(Text.new("you said: " .. safe))
+    /// ```
     ///
-    /// @luaParam text: string - The raw text, possibly containing minimessage tags
-    /// @luaReturn string - The same string, but with any minimessage tags escaped.
+    /// @luaParam text string
+    /// @luaReturn string
     @LuaMethod
     public static int sanitize(LuaState state) {
         var raw = state.checkString(1);
@@ -95,6 +97,8 @@ public final class LuaText {
 
     //endregion
 
+    /// A piece of styled text. Built with `Text.new`, accepted anywhere the API takes a
+    /// message or label.
     // TODO: should implement some implFor thing on export where
     //       you can write a definition for an existing type (eg
     //       Component in this case)
@@ -103,6 +107,7 @@ public final class LuaText {
 
         //region Meta Methods
 
+        /// Concatenates two `Text` values, or a `Text` with any string-able value.
         @LuaMethod(meta = Meta.CONCAT)
         public int luaConcat(LuaState state) {
             var rhs = checkAnyText(state, 1);
@@ -110,12 +115,14 @@ public final class LuaText {
             return 1;
         }
 
+        /// Returns the length of the rendered plain text, ignoring formatting.
         @LuaMethod(meta = Meta.LEN)
         public int luaLen(LuaState state) {
             state.pushInteger(PLAIN_TEXT_SERIALIZER.serialize(value).length());
             return 1;
         }
 
+        /// Returns the plain-text form, without any formatting.
         @LuaMethod(meta = Meta.TOSTRING)
         public int luaToString(LuaState state) {
             state.pushString(PLAIN_TEXT_SERIALIZER.serialize(value));

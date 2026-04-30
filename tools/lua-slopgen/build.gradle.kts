@@ -3,9 +3,11 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":tools:lua-slopgen:api"))
-
-    implementation(libs.javapoet)
+    // api so consumers (e.g. :tools:lua-slopgen:engine-api) get LuaLibrary.Scope etc., which
+    // appear in `Model.Library` record components.
+    api(project(":tools:lua-slopgen:api"))
+    // javapoet TypeName/ClassName also appear in record components (Model.Export.javaType etc.).
+    api(libs.javapoet)
     implementation(libs.luau.core)
     implementation(libs.fastutil)
     implementation(libs.gson)

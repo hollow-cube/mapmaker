@@ -18,6 +18,7 @@ public final class LuaGlobals {
         state.setGlobal("print");
     }
 
+
     private static int print(LuaState state) {
         var builder = new StringBuilder();
         int top = state.top();

@@ -5,8 +5,7 @@ import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
 import net.hollowcube.luau.gen.LuaLibrary;
-import net.hollowcube.luau.slopgen.model.AtomTable;
-import net.hollowcube.luau.slopgen.model.UserDataTagTable;
+import net.hollowcube.luau.slopgen.Idents;
 import net.hollowcube.luau.slopgen.parse.LibraryModelBuilder;
 import org.junit.jupiter.api.Test;
 
@@ -249,16 +248,15 @@ class LibraryEmitterTest {
         }
 
         @Override public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-            var atomTable = new AtomTable();
-            var tagTable = new UserDataTagTable();
-            var builder = new LibraryModelBuilder(processingEnv, atomTable, tagTable);
-            var emitter = new LibraryEmitter(atomTable, AtomResolver.literal(atomTable));
+            var idents = new Idents();
+            var builder = new LibraryModelBuilder(processingEnv, idents);
+            var emitter = new LibraryEmitter(idents, AtomResolver.literal());
             for (var el : roundEnv.getElementsAnnotatedWith(LuaLibrary.class)) {
                 if (el instanceof TypeElement t) {
-                    var spec = builder.build(t);
-                    if (spec != null) {
+                    var library = builder.build(t);
+                    if (library != null) {
                         try {
-                            emitter.emit(spec).writeTo(processingEnv.getFiler());
+                            emitter.emit(library).writeTo(processingEnv.getFiler());
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }

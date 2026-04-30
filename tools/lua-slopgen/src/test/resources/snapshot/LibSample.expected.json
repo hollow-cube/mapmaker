@@ -1,76 +1,114 @@
 {
   "schemaVersion": 1,
-  "kind": "raw-library",
-  "module": "@test/sample",
-  "scope": "REQUIRE",
-  "sourceClass": "fixtures.LibSample",
-  "description": "A fixture library with a static getter, a base export, and a final subtype.",
-  "staticMethods": [],
-  "staticProperties": [
-    {
-      "luaName": "version",
-      "getter": {
-        "javaName": "getVersion",
-        "description": "The current sample API version.",
-        "returnTypeExpr": "number"
-      },
-      "setter": null
-    }
-  ],
-  "exports": [
-    {
-      "luaName": "Animal",
-      "javaType": "fixtures.LibSample.Animal",
-      "description": "A non-final base export representing any animal.",
-      "superExport": null,
-      "isFinal": false,
-      "methods": [],
-      "properties": [
+  "kind": "luau-engine-api",
+  "libraries": {
+    "@test/sample": {
+      "sourceType": "fixtures.LibSample",
+      "glueType": "fixtures.LibSample$luau",
+      "moduleName": "@test/sample",
+      "scope": "REQUIRE",
+      "exports": [
         {
-          "luaName": "name",
+          "javaType": "fixtures.LibSample.Animal",
+          "luaName": "Animal",
+          "superExport": null,
+          "isFinal": false,
+          "properties": [
+            {
+              "luaName": "name",
+              "getter": {
+                "javaMethodName": "getName",
+                "enclosingType": "fixtures.LibSample.Animal",
+                "description": "The animal's display name.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "string",
+                  "args": []
+                }
+              },
+              "setter": null
+            }
+          ],
+          "methods": [],
+          "metaMethods": [],
+          "userDataTag": 1,
+          "hasSubtypes": true,
+          "description": "A non-final base export representing any animal."
+        },
+        {
+          "javaType": "fixtures.LibSample.Dog",
+          "luaName": "Dog",
+          "superExport": "fixtures.LibSample.Animal",
+          "isFinal": true,
+          "properties": [
+            {
+              "luaName": "breed",
+              "getter": {
+                "javaMethodName": "getBreed",
+                "enclosingType": "fixtures.LibSample.Dog",
+                "description": "",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "string",
+                  "args": []
+                }
+              },
+              "setter": {
+                "javaMethodName": "setBreed",
+                "enclosingType": "fixtures.LibSample.Dog",
+                "description": "",
+                "paramName": "value",
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "string",
+                  "args": []
+                }
+              }
+            }
+          ],
+          "methods": [
+            {
+              "luaName": "bark",
+              "javaMethodName": "bark",
+              "isVoid": true,
+              "enclosingType": "fixtures.LibSample.Dog",
+              "description": "Make the dog bark loudly.",
+              "generics": [],
+              "params": [],
+              "returns": []
+            }
+          ],
+          "metaMethods": [],
+          "userDataTag": 2,
+          "hasSubtypes": false,
+          "description": "A specific kind of animal."
+        }
+      ],
+      "staticMethods": [],
+      "staticProperties": [
+        {
+          "luaName": "version",
           "getter": {
-            "javaName": "getName",
-            "description": "The animal's display name.",
-            "returnTypeExpr": "string"
+            "javaMethodName": "getVersion",
+            "enclosingType": "fixtures.LibSample",
+            "description": "The current sample API version.",
+            "paramName": null,
+            "type": {
+              "kind": "named",
+              "module": null,
+              "name": "number",
+              "args": []
+            }
           },
           "setter": null
         }
       ],
-      "metaMethods": []
-    },
-    {
-      "luaName": "Dog",
-      "javaType": "fixtures.LibSample.Dog",
-      "description": "A specific kind of animal.",
-      "superExport": "fixtures.LibSample.Animal",
-      "isFinal": true,
-      "methods": [
-        {
-          "luaName": "bark",
-          "javaName": "bark",
-          "description": "Make the dog bark loudly.",
-          "generics": [],
-          "params": [],
-          "returns": []
-        }
-      ],
-      "properties": [
-        {
-          "luaName": "breed",
-          "getter": {
-            "javaName": "getBreed",
-            "description": "",
-            "returnTypeExpr": "string"
-          },
-          "setter": {
-            "javaName": "setBreed",
-            "description": "",
-            "paramName": "value",
-            "paramTypeExpr": "string"
-          }
-        }
-      ],
-      "metaMethods": []
+      "description": "A fixture library with a static getter, a base export, and a final subtype."
     }
-  ]
+  }
 }

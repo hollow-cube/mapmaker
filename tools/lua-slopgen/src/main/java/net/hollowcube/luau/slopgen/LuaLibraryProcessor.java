@@ -1,27 +1,23 @@
 package net.hollowcube.luau.slopgen;
 
-import com.google.auto.service.AutoService;
 import net.hollowcube.luau.gen.LuaLibrary;
-import net.hollowcube.luau.slopgen.docs.RawLibraryJsonEmitter;
 import net.hollowcube.luau.slopgen.emit.AtomResolver;
 import net.hollowcube.luau.slopgen.emit.AtomTableEmitter;
 import net.hollowcube.luau.slopgen.emit.LibraryEmitter;
-import net.hollowcube.luau.slopgen.model.AtomTable;
-import net.hollowcube.luau.slopgen.model.LibrarySpec;
-import net.hollowcube.luau.slopgen.model.UserDataTagTable;
 import net.hollowcube.luau.slopgen.parse.LibraryModelBuilder;
 
 import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Filer;
-import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.tools.StandardLocation;
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Set;
@@ -31,10 +27,15 @@ import java.util.Set;
 /// the generated source are symbolic (`LuaStringAtoms.A_<name>`), so changing one library's method
 /// body does not touch any other generated file.
 ///
-/// Also emits a per-library raw JSON document at `META-INF/luau-slopgen/<fqcn>.json` for the
-/// docs-module aggregator to consume.
-@AutoService(Processor.class)
+/// When the `luau.modelOut` processor option is set, emits a per-library JSON fragment to
+/// `<luau.modelOut>/<fqcn>.json` (a [Schema] document with a single entry in `libraries`). The
+/// fragment lives outside `CLASS_OUTPUT` so it does not ship inside the production jar; the
+/// `engine-api` module consumes it via a Gradle artifact variant. Without the option set, only
+/// runtime glue is emitted.
+@SupportedOptions(LuaLibraryProcessor.MODEL_OUT_OPTION)
 public class LuaLibraryProcessor extends AbstractProcessor {
+
+    public static final String MODEL_OUT_OPTION = "luau.modelOut";
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -42,15 +43,16 @@ public class LuaLibraryProcessor extends AbstractProcessor {
         var elementUtils = processingEnv.getElementUtils();
         var filer = processingEnv.getFiler();
 
-        // Per-library throwaway tables — atom values assigned here are unused; the SymbolicResolver
+        // Per-library throwaway Idents — atom values assigned here are unused; the SymbolicResolver
         // emits names not values. The tags are also throwaway since per-library codegen doesn't
         // need globally-unique tags (the runtime issues real tags from a separate space, but the
         // current codepath bakes a constant per export — that's a pre-existing concern, not split-
         // related).
-        var atomTable = new AtomTable();
-        var tagTable = new UserDataTagTable();
-        var modelBuilder = new LibraryModelBuilder(processingEnv, atomTable, tagTable);
-        var emitter = new LibraryEmitter(atomTable, AtomResolver.symbolic(AtomTableEmitter.LUA_STRING_ATOMS));
+        var idents = new Idents();
+        var modelBuilder = new LibraryModelBuilder(processingEnv, idents);
+        var emitter = new LibraryEmitter(idents, AtomResolver.symbolic(AtomTableEmitter.LUA_STRING_ATOMS));
+
+        Path fragmentDir = resolveFragmentDir();
 
         var sortedElements = new ArrayList<Element>(roundEnv.getElementsAnnotatedWith(LuaLibrary.class));
         sortedElements.sort(Comparator.comparing(e -> {
@@ -65,6 +67,7 @@ public class LuaLibraryProcessor extends AbstractProcessor {
                 messager.printError("LuaLibrary classes must be final", annotatedElement);
 
             var luaLibrary = typeElement.getAnnotation(LuaLibrary.class);
+            assert luaLibrary != null; // We're processing this annotation, its present.
             var libName = luaLibrary.name();
             boolean isGlobal = luaLibrary.scope() == LuaLibrary.Scope.GLOBAL;
             if (isGlobal && !libName.matches("^[a-zA-Z_][a-zA-Z0-9_]*$"))
@@ -76,35 +79,42 @@ public class LuaLibraryProcessor extends AbstractProcessor {
             var glueQualifiedName = packageName + "." + typeElement.getSimpleName() + "$luau";
             if (elementUtils.getTypeElement(glueQualifiedName) != null) continue;
 
-            var spec = modelBuilder.build(typeElement);
-            if (spec == null) continue;
+            var library = modelBuilder.build(typeElement);
+            if (library == null) continue;
 
             try {
-                emitter.emit(spec, typeElement).writeTo(filer);
+                emitter.emit(library, typeElement).writeTo(filer);
             } catch (IOException e) {
                 messager.printError("Failed to write generated file for " + annotatedElement.getSimpleName(), annotatedElement);
             }
 
-            writeRawJson(filer, spec, typeElement);
+            if (fragmentDir != null) writeFragment(fragmentDir, library, typeElement);
         }
 
         // Return false so the annotation also reaches LuaAtomTableProcessor.
         return false;
     }
 
-    /// Emits the per-library raw JSON next to the generated Java glue. Path is keyed by the
-    /// library's source class FQCN so each library lands in a distinct file in
-    /// `META-INF/luau-slopgen/`. Failures are reported as compile errors.
-    private void writeRawJson(Filer filer, LibrarySpec spec, TypeElement origin) {
-        var resourcePath = "META-INF/luau-slopgen/" + spec.sourceType().toString() + ".json";
+    private Path resolveFragmentDir() {
+        var raw = processingEnv.getOptions().get(MODEL_OUT_OPTION);
+        if (raw == null || raw.isBlank()) return null;
+        return Path.of(raw);
+    }
+
+    /// Writes the per-library JSON fragment ([Schema] with one library populated) into the
+    /// configured output dir as `<fqcn>.json`. Plain file I/O — `Filer` would route the file
+    /// into `CLASS_OUTPUT` and bake it into the consumer's jar, which is exactly what this
+    /// option exists to avoid.
+    private void writeFragment(Path fragmentDir, Model.Library library, TypeElement origin) {
+        var fragmentPath = fragmentDir.resolve(library.sourceType().toString() + ".json");
         try {
-            var resource = filer.createResource(StandardLocation.CLASS_OUTPUT, "", resourcePath, origin);
-            try (Writer w = resource.openWriter()) {
-                w.write(RawLibraryJsonEmitter.toJson(spec));
+            Files.createDirectories(fragmentPath.getParent());
+            try (var w = new BufferedWriter(Files.newBufferedWriter(fragmentPath, StandardCharsets.UTF_8))) {
+                SchemaJson.writeFragment(library, w);
             }
         } catch (IOException e) {
             processingEnv.getMessager().printError(
-                "Failed to write raw JSON for " + origin.getQualifiedName() + ": " + e.getMessage(),
+                "Failed to write JSON fragment for " + origin.getQualifiedName() + ": " + e.getMessage(),
                 origin);
         }
     }

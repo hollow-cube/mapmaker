@@ -5,9 +5,16 @@ import net.hollowcube.luau.gen.LuaLibrary;
 import net.hollowcube.luau.gen.LuaMethod;
 import net.hollowcube.mapmaker.scripting.ScriptContext;
 
+/// Read and write the world this script is running in. For per-player effects, use
+/// `player.world` instead.
 @LuaLibrary(name = "@mapmaker/world")
 public final class LibWorld {
 
+    /// Returns the block at the given position. Currently returns the block's id as a
+    /// string (e.g. `"minecraft:stone"`).
+    ///
+    /// @luaParam position vector
+    /// @luaReturn string
     @LuaMethod
     public static int getBlock(LuaState state) {
         var world = ScriptContext.get(state).world();

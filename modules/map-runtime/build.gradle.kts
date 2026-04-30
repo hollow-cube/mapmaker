@@ -36,3 +36,22 @@ dependencies {
         implementation(libs.luau.natives.windows.x64)
     }
 }
+
+/// Slopgen Phase 4: per-library JSON fragments are emitted to a build-only directory (NOT the
+/// production jar) by the AP via the `luau.modelOut` processor option. The engine-api aggregator
+/// task pulls fragments via the consumable `luauApiFragments` configuration variant declared
+/// below.
+val luauApiFragmentsDir = layout.buildDirectory.dir("luau-api-fragments")
+
+tasks.compileJava {
+    options.compilerArgs.add("-Aluau.modelOut=${luauApiFragmentsDir.get().asFile.absolutePath}")
+    outputs.dir(luauApiFragmentsDir).withPropertyName("luauApiFragments")
+}
+
+val luauApiFragments by configurations.creating {
+    isCanBeConsumed = true
+    isCanBeResolved = false
+    outgoing.artifact(luauApiFragmentsDir) {
+        builtBy(tasks.compileJava)
+    }
+}

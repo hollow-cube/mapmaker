@@ -2,7 +2,6 @@ package net.hollowcube.luau.slopgen.emit;
 
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
-import net.hollowcube.luau.slopgen.model.AtomTable;
 
 /// Strategy for emitting an atom reference inside a generated `switch` case label. Two
 /// implementations:
@@ -17,7 +16,7 @@ public interface AtomResolver {
 
     CodeBlock label(String luaName, short value);
 
-    static AtomResolver literal(AtomTable atoms) {
+    static AtomResolver literal() {
         return (luaName, value) -> CodeBlock.of("$L", value);
     }
 

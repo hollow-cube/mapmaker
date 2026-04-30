@@ -6,8 +6,8 @@ import it.unimi.dsi.fastutil.objects.Object2ShortMaps;
 import it.unimi.dsi.fastutil.objects.Object2ShortOpenHashMap;
 import net.hollowcube.luau.LuaCallbacks;
 import net.hollowcube.luau.LuaState;
+import net.hollowcube.luau.slopgen.Idents;
 import net.hollowcube.luau.slopgen.LuaNames;
-import net.hollowcube.luau.slopgen.model.AtomTable;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
@@ -24,12 +24,12 @@ public final class AtomTableEmitter {
     public static final ClassName LUA_STRING_ATOMS =
         ClassName.get(LuaNames.RUNTIME_PACKAGE_NAME, "LuaStringAtoms");
 
-    public JavaFile emitConstants(AtomTable atoms, Element... originatingElements) {
+    public JavaFile emitConstants(Idents idents, Element... originatingElements) {
         var typeBuilder = TypeSpec.classBuilder(LUA_STRING_ATOMS)
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
         for (var e : originatingElements) typeBuilder.addOriginatingElement(e);
 
-        for (var entry : atoms.entries()) {
+        for (var entry : idents.entries()) {
             typeBuilder.addField(FieldSpec.builder(short.class, AtomNames.javaIdentifier(entry.luaName()))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .initializer("(short) $L", entry.value())
@@ -42,11 +42,11 @@ public final class AtomTableEmitter {
             .build();
     }
 
-    public JavaFile emit(AtomTable atoms) {
-        return emit(atoms, new Element[0]);
+    public JavaFile emit(Idents idents) {
+        return emit(idents, new Element[0]);
     }
 
-    public JavaFile emit(AtomTable atoms, Element... originatingElements) {
+    public JavaFile emit(Idents idents, Element... originatingElements) {
         var typeBuilder = TypeSpec.classBuilder(GENERATED_STRING_ATOMS)
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
         for (var e : originatingElements) typeBuilder.addOriginatingElement(e);
@@ -77,7 +77,7 @@ public final class AtomTableEmitter {
 
         var initBlock = CodeBlock.builder();
         initBlock.addStatement("$T holder = new $T<>()", mapType, Object2ShortOpenHashMap.class);
-        for (var entry : atoms.entries())
+        for (var entry : idents.entries())
             initBlock.addStatement("holder.put($S, (short) $L)", entry.luaName(), entry.value());
         initBlock.addStatement("HOLDER = $T.unmodifiable(holder)", Object2ShortMaps.class);
         typeBuilder.addStaticBlock(initBlock.build());

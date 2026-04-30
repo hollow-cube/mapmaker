@@ -68,8 +68,8 @@ public final class LuaDocsValidator {
 
     /// Validate a meta `@LuaMethod` (one with `meta != Meta.NONE`). Same as a regular method
     /// for return-presence purposes — Lua metamethods may yield zero or one value, and the
-    /// existing emitter already handles void via `MetaSpec.isVoid()`. Future work: model meta
-    /// param shape.
+    /// existing emitter already handles void via `Model.MetaMethod.isVoid()`. Future work:
+    /// model meta param shape.
     public void validateMeta(Element element, MemberDocs docs, boolean javaVoid) {
         validateMethod(element, docs, javaVoid);
     }
@@ -79,7 +79,7 @@ public final class LuaDocsValidator {
     /// parsing both sides as Luau type expressions.
     public void validatePropertyConsistency(Element setterElement, MemberDocs getter, MemberDocs setter) {
         if (getter.returns().isEmpty() || setter.params().isEmpty()) return;
-        var getType = getter.returns().get(0);
+        var getType = getter.returns().get(0).typeExpr();
         var setType = setter.params().get(0).typeExpr();
         if (!getType.equals(setType)) {
             messager.printMessage(SEVERITY,
@@ -89,25 +89,33 @@ public final class LuaDocsValidator {
         }
     }
 
-    /// Validate container-level docs (library or export class). These positions accept only
-    /// description text; param/return/generic tags are rejected here.
-    public void validateContainer(Element element, MemberDocs docs, String kind) {
+    /// Validate library-level docs. Libraries are static-only and have no shared
+    /// generics across methods, so `@luaParam` / `@luaReturn` / `@luaGeneric` are all
+    /// rejected here — they belong on a method or accessor.
+    public void validateLibraryContainer(Element element, MemberDocs docs) {
         reportTagDiagnostics(element, docs);
-        if (!docs.params().isEmpty()) {
-            messager.printMessage(SEVERITY,
-                "@luaParam is not valid on a " + kind + " — declare it on a method or accessor",
-                element);
-        }
-        if (!docs.returns().isEmpty()) {
-            messager.printMessage(SEVERITY,
-                "@luaReturn is not valid on a " + kind + " — declare it on a method or accessor",
-                element);
-        }
-        if (!docs.generics().isEmpty()) {
-            messager.printMessage(SEVERITY,
-                "@luaGeneric is not yet supported on a " + kind + " — declare it on the method",
-                element);
-        }
+        rejectTag(element, !docs.params().isEmpty(),
+            "@luaParam is not valid on a library — declare it on a method or accessor");
+        rejectTag(element, !docs.returns().isEmpty(),
+            "@luaReturn is not valid on a library — declare it on a method or accessor");
+        rejectTag(element, !docs.generics().isEmpty(),
+            "@luaGeneric is not valid on a library — declare it on the method");
+    }
+
+    /// Validate `@LuaExport` class-level docs. Type-level `@luaGeneric` declarations are
+    /// allowed and become shared across every method, accessor, and meta-method on that
+    /// type. Param/return tags are still rejected here — they belong on members.
+    public void validateExportContainer(Element element, MemberDocs docs) {
+        reportTagDiagnostics(element, docs);
+        rejectTag(element, !docs.params().isEmpty(),
+            "@luaParam is not valid on a @LuaExport class — declare it on a method or accessor");
+        rejectTag(element, !docs.returns().isEmpty(),
+            "@luaReturn is not valid on a @LuaExport class — declare it on a method or accessor");
+        // @luaGeneric is allowed and is read by the model builder — no diagnostic here.
+    }
+
+    private void rejectTag(Element element, boolean condition, String message) {
+        if (condition) messager.printMessage(SEVERITY, message, element);
     }
 
     private void reportTagDiagnostics(Element element, MemberDocs docs) {

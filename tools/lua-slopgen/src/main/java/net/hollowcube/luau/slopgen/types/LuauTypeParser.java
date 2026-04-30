@@ -1,4 +1,4 @@
-package net.hollowcube.luau.docs.types;
+package net.hollowcube.luau.slopgen.types;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -292,7 +292,18 @@ public final class LuauTypeParser {
                 }
                 case K_TYPEOF -> parseTypeof();
                 case LBRACE -> parseTable();
-                case LPAREN, LT -> parseFunction();
+                case LPAREN -> {
+                    // Disambiguate `(T) -> R` (function type) from `(T)` (parenthesized type used
+                    // for grouping in a union/intersection like `(A | B) & C`). Without this, every
+                    // `(…)` at top level assumes a function follows and demands `->` after the
+                    // matching `)` — which breaks `((A...) -> R...) | thread`.
+                    if (looksLikeFunctionType()) yield parseFunction();
+                    idx++; // consume LPAREN
+                    var inner = parseType();
+                    expect(TokenType.RPAREN, "expected ')' to close grouped type");
+                    yield inner;
+                }
+                case LT -> parseFunction(); // inline generic prefix path; rejected with a clear msg
                 case DOT_DOT_DOT -> {
                     throw new LuauParseException(tok.offset,
                         "variadic '...' is only valid inside function param/return lists or pack arguments");

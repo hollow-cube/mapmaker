@@ -21,6 +21,16 @@ public final class LibBase {
         LibBase$luau.pushEventSource(state, new EventSource(event, pusher));
     }
 
+    /// A stream of events you can subscribe to. Use `:listen` to react every time the event
+    /// fires, `:once` to handle just the next one, or `:wait` to pause the current thread
+    /// until the next event.
+    ///
+    /// ```luau
+    /// local players = require("@mapmaker/players")
+    /// players.on_join:listen(function(player)
+    ///     player:send_message("welcome!")
+    /// end)
+    /// ```
     @LuaExport
     public static final class EventSource {
 
@@ -37,6 +47,10 @@ public final class LibBase {
             this.pusher = pusher;
         }
 
+        /// Calls `handler` every time this event fires.
+        ///
+        /// @luaGeneric A...
+        /// @luaParam handler (A...) -> () - the function to run on each event
         @LuaMethod
         public int listen(LuaState state) {
             state.checkType(1, LuaType.FUNCTION);
@@ -60,6 +74,10 @@ public final class LibBase {
             return 0;
         }
 
+        /// Calls `handler` the next time this event fires, then unsubscribes.
+        ///
+        /// @luaGeneric A...
+        /// @luaParam handler (A...) -> () - the function to run on the next event
         @LuaMethod
         public int once(LuaState state) {
             state.checkType(1, LuaType.FUNCTION);
@@ -83,6 +101,16 @@ public final class LibBase {
             return 0;
         }
 
+        /// Pauses the calling thread until the next time this event fires, then resumes
+        /// with the event's arguments.
+        ///
+        /// ```luau
+        /// local player = players.on_join:wait()
+        /// print(player.name .. " joined")
+        /// ```
+        ///
+        /// @luaGeneric A...
+        /// @luaReturn A...
         @LuaMethod
         public int wait(LuaState state) {
             EventHandle handle = new EventHandle();
