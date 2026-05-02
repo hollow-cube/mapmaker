@@ -31,6 +31,8 @@ public final class LibBase {
     ///     player:send_message("welcome!")
     /// end)
     /// ```
+    ///
+    /// @luaGeneric A...
     @LuaExport
     public static final class EventSource {
 
@@ -49,7 +51,6 @@ public final class LibBase {
 
         /// Calls `handler` every time this event fires.
         ///
-        /// @luaGeneric A...
         /// @luaParam handler (A...) -> () - the function to run on each event
         @LuaMethod
         public int listen(LuaState state) {
@@ -76,7 +77,6 @@ public final class LibBase {
 
         /// Calls `handler` the next time this event fires, then unsubscribes.
         ///
-        /// @luaGeneric A...
         /// @luaParam handler (A...) -> () - the function to run on the next event
         @LuaMethod
         public int once(LuaState state) {
@@ -109,7 +109,6 @@ public final class LibBase {
         /// print(player.name .. " joined")
         /// ```
         ///
-        /// @luaGeneric A...
         /// @luaReturn A...
         @LuaMethod
         public int wait(LuaState state) {

@@ -282,6 +282,160 @@ class LibraryModelBuilderTest {
     }
 
     @Test
+    void exportTypeLevelGenericLandsOnExport() {
+        var library = parseSingle("fixtures.LibEvt", """
+            package fixtures;
+            import net.hollowcube.luau.LuaState;
+            import net.hollowcube.luau.gen.LuaLibrary;
+            import net.hollowcube.luau.gen.LuaExport;
+            import net.hollowcube.luau.gen.LuaMethod;
+            @LuaLibrary(name = "@t/evt")
+            public final class LibEvt {
+                /// @luaGeneric A...
+                @LuaExport
+                public static final class EventSource {
+                    /// @luaParam handler (A...) -> ()
+                    @LuaMethod public int listen(LuaState s) { return 0; }
+                }
+            }
+            """);
+        var ex = library.exports().get(0);
+        assertEquals(1, ex.generics().size());
+        var g = ex.generics().get(0);
+        assertEquals("A", g.name());
+        assertTrue(g.pack(), "T... should produce pack=true");
+        // Method-level generics are empty — the `A` reference is bound by the type-level decl.
+        assertTrue(ex.methods().get(0).generics().isEmpty());
+    }
+
+    @Test
+    void exportLevelGenericIsVisibleAcrossEveryMember() {
+        // Pin: type-level generics are not duplicated onto each method/accessor; they live on
+        // the export and the resolver reads them from there. This keeps generated declarations
+        // accurate when projecting to `.d.luau`.
+        var library = parseSingle("fixtures.LibAll", """
+            package fixtures;
+            import net.hollowcube.luau.LuaState;
+            import net.hollowcube.luau.gen.LuaLibrary;
+            import net.hollowcube.luau.gen.LuaExport;
+            import net.hollowcube.luau.gen.LuaMethod;
+            import net.hollowcube.luau.gen.LuaProperty;
+            @LuaLibrary(name = "@t/all")
+            public final class LibAll {
+                /// @luaGeneric T - the wrapped value
+                @LuaExport
+                public static final class Box {
+                    /// @luaReturn T
+                    @LuaProperty public int getValue(LuaState s) { return 1; }
+                    /// @luaParam value T
+                    @LuaProperty public void setValue(LuaState s) {}
+                    /// @luaParam other T
+                    /// @luaReturn boolean
+                    @LuaMethod public int equals(LuaState s) { return 1; }
+                }
+            }
+            """);
+        var ex = library.exports().get(0);
+        assertEquals(1, ex.generics().size());
+        assertEquals("T", ex.generics().get(0).name());
+        assertEquals(false, ex.generics().get(0).pack());
+        // Each member has zero of its own generics; T is inherited from the type.
+        assertTrue(ex.methods().get(0).generics().isEmpty());
+        assertEquals(1, ex.properties().size());
+    }
+
+    @Test
+    void shadowingTypeGenericOnMethodIsAnError() {
+        var compilation = compile("fixtures.LibShadow", """
+            package fixtures;
+            import net.hollowcube.luau.LuaState;
+            import net.hollowcube.luau.gen.LuaLibrary;
+            import net.hollowcube.luau.gen.LuaExport;
+            import net.hollowcube.luau.gen.LuaMethod;
+            @LuaLibrary(name = "@t/sh")
+            public final class LibShadow {
+                /// @luaGeneric A...
+                @LuaExport
+                public static final class Source {
+                    /// @luaGeneric A...
+                    /// @luaParam handler (A...) -> ()
+                    @LuaMethod public int listen(LuaState s) { return 0; }
+                }
+            }
+            """);
+        assertThat(compilation).hadErrorContaining(
+            "@luaGeneric A shadows the same name on enclosing type 'Source'");
+    }
+
+    @Test
+    void shadowingScalarGenericOnMethodIsAnError() {
+        // Same name, scalar form on both sides — also a shadow.
+        var compilation = compile("fixtures.LibShadow2", """
+            package fixtures;
+            import net.hollowcube.luau.LuaState;
+            import net.hollowcube.luau.gen.LuaLibrary;
+            import net.hollowcube.luau.gen.LuaExport;
+            import net.hollowcube.luau.gen.LuaMethod;
+            @LuaLibrary(name = "@t/sh2")
+            public final class LibShadow2 {
+                /// @luaGeneric T
+                @LuaExport
+                public static final class Holder {
+                    /// @luaGeneric T
+                    /// @luaParam value T
+                    /// @luaReturn T
+                    @LuaMethod public int echo(LuaState s) { return 1; }
+                }
+            }
+            """);
+        assertThat(compilation).hadErrorContaining(
+            "@luaGeneric T shadows the same name on enclosing type 'Holder'");
+    }
+
+    @Test
+    void distinctMethodGenericNamesAreFine() {
+        // The shadow check must not flag method-level generics whose names differ from the
+        // type-level ones.
+        var library = parseSingle("fixtures.LibCompat", """
+            package fixtures;
+            import net.hollowcube.luau.LuaState;
+            import net.hollowcube.luau.gen.LuaLibrary;
+            import net.hollowcube.luau.gen.LuaExport;
+            import net.hollowcube.luau.gen.LuaMethod;
+            @LuaLibrary(name = "@t/co")
+            public final class LibCompat {
+                /// @luaGeneric A...
+                @LuaExport
+                public static final class Source {
+                    /// @luaGeneric R
+                    /// @luaParam map (A...) -> R
+                    /// @luaReturn R
+                    @LuaMethod public int collect(LuaState s) { return 1; }
+                }
+            }
+            """);
+        var ex = library.exports().get(0);
+        assertEquals(1, ex.generics().size());
+        assertEquals("A", ex.generics().get(0).name());
+        assertEquals(1, ex.methods().get(0).generics().size());
+        assertEquals("R", ex.methods().get(0).generics().get(0).name());
+    }
+
+    @Test
+    void typeLevelGenericIsRejectedOnLibraryContainer() {
+        // Libraries are static-only; there's nothing to share generics across, so declaring
+        // `@luaGeneric` on the library is rejected. (Migration severity = warning.)
+        var compilation = compile("fixtures.LibBadGen", """
+            package fixtures;
+            import net.hollowcube.luau.gen.LuaLibrary;
+            /// @luaGeneric T
+            @LuaLibrary(name = "@t/badgen")
+            public final class LibBadGen {}
+            """);
+        assertThat(compilation).hadWarningContaining("@luaGeneric is not valid on a library");
+    }
+
+    @Test
     void instanceMethodOnLibraryClassReportsError() {
         var compilation = compile("fixtures.LibBad", """
             package fixtures;

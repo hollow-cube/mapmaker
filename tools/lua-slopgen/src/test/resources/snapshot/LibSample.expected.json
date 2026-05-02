@@ -13,6 +13,7 @@
           "luaName": "Animal",
           "superExport": null,
           "isFinal": false,
+          "generics": [],
           "properties": [
             {
               "luaName": "name",
@@ -42,6 +43,7 @@
           "luaName": "Dog",
           "superExport": "fixtures.LibSample.Animal",
           "isFinal": true,
+          "generics": [],
           "properties": [
             {
               "luaName": "breed",

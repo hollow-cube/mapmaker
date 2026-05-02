@@ -123,7 +123,14 @@ public final class LibraryModelBuilder {
         boolean isFinal = exportClass.getModifiers().contains(Modifier.FINAL);
 
         var exportDocs = parseDocs(exportClass);
-        docsValidator.validateContainer(exportClass, exportDocs, "@LuaExport class");
+        docsValidator.validateExportContainer(exportClass, exportDocs);
+
+        // Type-level generics — shared by every method, accessor, and meta-method on this
+        // export. Method-level `@luaGeneric` may not redeclare any of these names; the check
+        // happens per-member below.
+        var typeGenerics = mapGenerics(exportDocs.generics());
+        var typeGenericNames = new HashSet<String>();
+        for (var g : typeGenerics) typeGenericNames.add(g.name());
 
         TypeName superExport = null;
         var superMirror = exportClass.getSuperclass();
@@ -159,6 +166,10 @@ public final class LibraryModelBuilder {
             var isVoid = method.getReturnType().getKind() == TypeKind.VOID;
             var memberDocs = parseDocs(method);
 
+            // Method-level `@luaGeneric T` shadowing a type-level `T` is rejected — the same
+            // name would denote two different things in `(A...) -> T` style signatures.
+            checkGenericShadowing(method, memberDocs, typeGenericNames, luaName);
+
             if (luaProperty != null) {
                 var name = LuaNames.toLuaProperty(javaName);
                 if (javaName.startsWith("set")) {
@@ -187,7 +198,26 @@ public final class LibraryModelBuilder {
         for (var m : methods) idents.atomFor(m.luaName());
 
         return new Model.Export(javaType, luaName, superExport, isFinal,
-            properties, methods, metaMethods, tag, /*hasSubtypes=*/false, exportDocs.description());
+            typeGenerics, properties, methods, metaMethods, tag,
+            /*hasSubtypes=*/false, exportDocs.description());
+    }
+
+    /// Reject method-level `@luaGeneric` declarations that reuse a name already bound by an
+    /// `@luaGeneric` on the enclosing `@LuaExport` class. The type-level generic is already
+    /// in scope for every member; redeclaring it on a single method would be ambiguous.
+    private void checkGenericShadowing(
+        ExecutableElement method, MemberDocs docs, Set<String> typeGenericNames, String typeLuaName
+    ) {
+        if (typeGenericNames.isEmpty()) return;
+        for (var g : docs.generics()) {
+            if (typeGenericNames.contains(g.name())) {
+                env.getMessager().printError(
+                    "@luaGeneric " + g.name() + " shadows the same name on enclosing type '"
+                    + typeLuaName + "' — remove the redeclaration on the method, the type-level "
+                    + "generic is already in scope.",
+                    method);
+            }
+        }
     }
 
     private Model.Method buildMethod(
