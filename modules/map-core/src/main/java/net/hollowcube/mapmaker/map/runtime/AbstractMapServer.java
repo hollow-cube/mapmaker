@@ -78,8 +78,6 @@ import net.hollowcube.mapmaker.misc.ExpBarRenderer;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.misc.noop.*;
 import net.hollowcube.mapmaker.notifications.NotificationsConsumer;
-import net.hollowcube.mapmaker.obungus.ObungusService;
-import net.hollowcube.mapmaker.obungus.ObungusServiceImpl;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.punishments.PunishmentManagementListener;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
@@ -188,9 +186,6 @@ public abstract class AbstractMapServer implements MapServer {
         if (!mapServiceUrl.isEmpty()) mapService = new MapServiceImpl(mapServiceUrl);
         else if (globalConfig.noop()) mapService = new NoopMapService();
         else mapService = new MapServiceImpl("http://localhost:9127"); // tilt
-
-        var obungusService = new ObungusServiceImpl(otel, "http://localhost:9127");
-        addBinding(ObungusService.class, obungusService, "obungus", "obungusService");
 
         this.acHook = ServiceLoader.load(ACHook.class).findFirst().orElse(null);
     }

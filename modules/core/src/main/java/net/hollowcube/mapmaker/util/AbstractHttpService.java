@@ -20,7 +20,6 @@ import net.hollowcube.mapmaker.api.maps.MapWorldMessage;
 import net.hollowcube.mapmaker.backpack.BackpackItem;
 import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.map.*;
-import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataUpdateMessage;
 import net.hollowcube.mapmaker.player.RewardType;
@@ -79,7 +78,6 @@ public abstract class AbstractHttpService {
         .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
         .registerTypeAdapter(Material.class, new MaterialTypeAdapter())
         .registerTypeAdapter(Component.class, new ComponentTypeAdapter())
-        .registerTypeAdapter(ObjectType.class, new ObjectTypeTypeAdapter())
         .registerTypeAdapter(Point.class, new PointTypeAdapter())
         .registerTypeAdapter(DisplayName.class, new DisplayNameTypeAdapter())
         .registerTypeAdapter(Optional.class, new OptionalTypeAdapter())
