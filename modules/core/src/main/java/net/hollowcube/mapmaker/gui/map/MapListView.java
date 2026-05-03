@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.gui.map;
 
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.PlayerMapProgress;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -24,20 +23,15 @@ import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
 
 public abstract class MapListView extends Panel {
     protected final ApiClient api;
-    protected final MapService mapService;
     protected final ServerBridge bridge;
 
     protected final Text titleText;
     private final Pagination<Unit> pagination;
     private boolean initialized = false;
 
-    protected MapListView(
-        @NotNull ApiClient api, @NotNull MapService mapService,
-        @NotNull ServerBridge bridge, @NotNull String title
-    ) {
+    protected MapListView(@NotNull ApiClient api, @NotNull ServerBridge bridge, @NotNull String title) {
         super(9, 10);
         this.api = api;
-        this.mapService = mapService;
         this.bridge = bridge;
 
         background("generic2/containers/paginated/7x3", -10, -31);
@@ -72,7 +66,7 @@ public abstract class MapListView extends Panel {
         var entries = new ArrayList<MapIconPanel>();
         for (var map : response.getKey()) {
             if (map.isCompletable()) mapIds.add(map.id());
-            entries.add(new MapIconPanel(api, mapService, bridge, map));
+            entries.add(new MapIconPanel(api, bridge, map));
         }
 
         // Fetch the player's current progress on the maps
@@ -96,8 +90,8 @@ public abstract class MapListView extends Panel {
     public static class Player extends MapListView {
         private final String targetId;
 
-        public Player(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge, @NotNull String targetId) {
-            super(api, mapService, bridge, "Maps"); // Title is updated later.
+        public Player(@NotNull ApiClient api, @NotNull ServerBridge bridge, @NotNull String targetId) {
+            super(api, bridge, "Maps"); // Title is updated later.
             this.targetId = targetId;
         }
 
@@ -126,8 +120,8 @@ public abstract class MapListView extends Panel {
 
     public static class History extends MapListView {
 
-        public History(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
-            super(api, mapService, bridge, "Map History");
+        public History(@NotNull ApiClient api, @NotNull ServerBridge bridge) {
+            super(api, bridge, "Map History");
         }
 
         @Override

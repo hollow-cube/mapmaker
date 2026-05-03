@@ -8,7 +8,6 @@ import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.map.MapListView;
 import net.hollowcube.mapmaker.gui.map.MapReportView;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
@@ -36,15 +35,15 @@ public class MapDetailsView extends Panel {
 
     @Blocking
     public MapDetailsView(
-        ApiClient api, MapService mapService, ServerBridge bridge,
+        ApiClient api, ServerBridge bridge,
         MapData mapData, boolean showJoinButton
     ) {
         var displayName = api.players.getDisplayName(mapData.owner());
-        this(api, mapService, bridge, mapData, displayName, showJoinButton);
+        this(api, bridge, mapData, displayName, showJoinButton);
     }
 
     public MapDetailsView(
-        ApiClient api, MapService mapService, ServerBridge bridge,
+        ApiClient api, ServerBridge bridge,
         MapData mapData, DisplayName authorName, boolean showJoinButton
     ) {
         super(9, 10);
@@ -67,7 +66,7 @@ public class MapDetailsView extends Panel {
             .align(Text.CENTER, Text.CENTER)
             .background("generic2/btn/default/5_1")
             .translationKey("gui.map_details.creator_profile", authorName.build()))
-            .onLeftClick(() -> host.pushView(new MapListView.Player(api, mapService, bridge, map.owner())));
+            .onLeftClick(() -> host.pushView(new MapListView.Player(api, bridge, map.owner())));
         add(7, 0, new Button("gui.map_rating.report_map", 2, 1)
             .background("generic2/btn/default/2_1")
             .sprite("map_details/action/report", 15, 3)
@@ -75,7 +74,7 @@ public class MapDetailsView extends Panel {
 
         var tabs = add(0, 2, new Switch(9, 4, List.of(
             new MapDetailsInfoPanel(mapData),
-            new MapDetailsTimesPanel(api, mapService, mapData),
+            new MapDetailsTimesPanel(api, mapData),
             new MapDetailsRatePanel(api.maps, mapData.id())
         )));
         tabs.select(0);

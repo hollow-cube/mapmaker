@@ -33,7 +33,6 @@ import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.timer.ExecutionType;
-import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -105,8 +104,6 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
             var mapMgmtConsumer = new MapMgmtConsumerImpl(jetStream, this);
             shutdowner().queue("map-mgmt-listener", mapMgmtConsumer::close);
         }
-
-        addBinding(Scheduler.class, MinecraftServer.getSchedulerManager());
 
         shutdowner().queue("close-worlds", this::close);
 

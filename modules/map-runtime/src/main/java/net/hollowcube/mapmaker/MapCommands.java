@@ -23,7 +23,7 @@ public final class MapCommands {
         commandManager.register(new HubCommand(server.bridge()));
         commandManager.register(new PlayerInfoCommand(server.api(), server.sessionManager()));
 
-        commandManager.register(new TopTimesCommand(server.api(), server.mapService(), server.sessionManager()));
+        commandManager.register(new TopTimesCommand(server.api(), server.sessionManager()));
 
         commandManager.register(new ShowHeightCommand());
 

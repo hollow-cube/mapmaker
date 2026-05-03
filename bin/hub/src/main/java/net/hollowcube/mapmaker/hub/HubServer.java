@@ -102,9 +102,6 @@ public class HubServer extends AbstractMapServer {
         var scheduler = MinecraftServer.getSchedulerManager();
         scheduler.scheduleEndOfTick(() -> scheduler.submitTask(world::safePointTick, ExecutionType.TICK_END));
 
-        addBinding(HubMapWorld.class, world, "world", "hubWorld", "hubMapWorld");
-        addBinding(Scheduler.class, world.scheduler());
-
         registerCommands(this, commandManager(), world, world.instance().scheduler());
         loadHubFeatures(this, world);
     }

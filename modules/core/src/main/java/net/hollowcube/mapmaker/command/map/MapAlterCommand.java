@@ -7,6 +7,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.*;
@@ -348,7 +349,7 @@ public class MapAlterCommand {
                 return true; // Exceptions handled outside
             });
             return true;
-        } catch (MapService.NotFoundError ignored) {
+        } catch (ApiClient.NotFoundError _) {
             player.sendMessage("Map not found");
         } catch (Exception e) {
             player.sendMessage(Component.translatable("generic.unknown_error"));

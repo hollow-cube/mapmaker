@@ -6,7 +6,6 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.TimeComponent;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.api.ApiClient;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerFriend;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -28,7 +27,6 @@ public class FriendListCommand extends CommandDsl {
     public FriendListCommand(
         @NotNull ApiClient api,
         @NotNull PlayerService playerService,
-        @NotNull MapService mapService,
         @NotNull SessionManager sessionManager
     ) {
         super("list");

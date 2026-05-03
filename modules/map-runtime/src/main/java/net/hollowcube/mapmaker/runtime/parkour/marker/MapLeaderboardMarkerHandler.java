@@ -42,9 +42,9 @@ public class MapLeaderboardMarkerHandler extends ObjectEntityHandler {
         var facing = data.getString("facing", "follow");
         var hasBackground = data.getBoolean("background", true);
         var leaderboard = this.leaderboard = new LeaderboardDisplay(entity,
-                () -> world.server().mapService().getPlaytimeLeaderboard(world.map().id(), null),
+            () -> world.server().api().maps.getMapLeaderboard(world.map().id(), null),
                 playerId -> OpUtils.mapOr(
-                        world.server().mapService().getPlaytimeLeaderboard(world.map().id(), playerId).player(),
+                    world.server().api().maps.getMapLeaderboard(world.map().id(), playerId).player(),
                         LeaderboardData.Entry::score,
                         0L
                 ),

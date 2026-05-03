@@ -15,7 +15,6 @@ import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.gui.store.StoreHelpers;
 import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
@@ -65,7 +64,7 @@ public class EditMapView extends Panel {
 
     @Blocking
     public EditMapView(
-        ApiClient api, MapService mapService,
+        ApiClient api,
         PlayerService playerService,
         ServerBridge bridge, MapSlot slot,
         Runnable onPublish
@@ -76,7 +75,7 @@ public class EditMapView extends Panel {
         this.slot = slot;
 
         Consumer<MapData> publishCallback = publishedMap -> {
-            this.host.replaceView(new MapDetailsView(api, mapService, bridge, publishedMap, true));
+            this.host.replaceView(new MapDetailsView(api, bridge, publishedMap, true));
             onPublish.run();
         };
         this.publisher = new MapPublisher(api, bridge, slot.map(), () -> this.host, publishCallback);

@@ -20,8 +20,6 @@ public interface MapServer {
 
     @NotNull PlayerService playerService();
 
-    @NotNull MapService mapService();
-
     @NotNull PunishmentService punishmentService();
 
     @NotNull PlayerInviteService inviteService();
@@ -43,15 +41,5 @@ public interface MapServer {
     @NotNull CommandManager commandManager();
 
     @NotNull Scheduler scheduler();
-
-    /**
-     * More generic API to get facets of the server which may or may not be present in different environments.
-     *
-     * @param type The type of the facet
-     * @param <T>  facet type
-     * @return The facet
-     * @throws IllegalArgumentException if the facet is not present
-     */
-    <T> @NotNull T facet(@NotNull Class<T> type);
 
 }

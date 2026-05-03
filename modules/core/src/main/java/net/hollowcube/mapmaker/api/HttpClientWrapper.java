@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -40,10 +41,14 @@ public class HttpClientWrapper {
         this.baseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
     }
 
+    public URI url(String url) {
+        return URI.create(baseUrl + url);
+    }
+
     public <T> T get(String operation, String url, TypeToken<T> responseType) {
         var res = doRequest(operation,
             HttpRequest.newBuilder()
-                .uri(java.net.URI.create(baseUrl + url))
+                .uri(url(url))
                 .GET(),
             HttpResponse.BodyHandlers.ofString());
         return parseOrThrowResponse(res, responseType);
@@ -52,7 +57,7 @@ public class HttpClientWrapper {
     public void post(String operation, String url) {
         var res = doRequest(operation,
             HttpRequest.newBuilder()
-                .uri(java.net.URI.create(baseUrl + url))
+                .uri(url(url))
                 .POST(HttpRequest.BodyPublishers.noBody()),
             HttpResponse.BodyHandlers.ofString());
         maybeThrowResponse(res);
@@ -62,7 +67,7 @@ public class HttpClientWrapper {
         var body = AbstractHttpService.GSON.toJson(requestBody);
         var res = doRequest(operation,
             HttpRequest.newBuilder()
-                .uri(java.net.URI.create(baseUrl + url))
+                .uri(url(url))
                 .POST(HttpRequest.BodyPublishers.ofString(body)),
             HttpResponse.BodyHandlers.ofString());
         maybeThrowResponse(res);
@@ -72,7 +77,7 @@ public class HttpClientWrapper {
         var body = AbstractHttpService.GSON.toJson(requestBody);
         var res = doRequest(operation,
             HttpRequest.newBuilder()
-                .uri(java.net.URI.create(baseUrl + url))
+                .uri(url(url))
                 .POST(HttpRequest.BodyPublishers.ofString(body)),
             HttpResponse.BodyHandlers.ofString());
         return parseOrThrowResponse(res, responseType);
@@ -82,7 +87,7 @@ public class HttpClientWrapper {
         var body = AbstractHttpService.GSON.toJson(requestBody);
         var res = doRequest(operation,
             HttpRequest.newBuilder()
-                .uri(java.net.URI.create(baseUrl + url))
+                .uri(url(url))
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(body)),
             HttpResponse.BodyHandlers.ofString());
         maybeThrowResponse(res);
@@ -92,7 +97,7 @@ public class HttpClientWrapper {
         var body = AbstractHttpService.GSON.toJson(requestBody);
         var res = doRequest(operation,
             HttpRequest.newBuilder()
-                .uri(java.net.URI.create(baseUrl + url))
+                .uri(url(url))
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(body)),
             HttpResponse.BodyHandlers.ofString());
         return parseOrThrowResponse(res, responseType);
@@ -102,7 +107,7 @@ public class HttpClientWrapper {
         var body = AbstractHttpService.GSON.toJson(requestBody);
         var res = doRequest(operation,
             HttpRequest.newBuilder()
-                .uri(java.net.URI.create(baseUrl + url))
+                .uri(url(url))
                 .PUT(HttpRequest.BodyPublishers.ofString(body)),
             HttpResponse.BodyHandlers.ofString());
         maybeThrowResponse(res);
@@ -112,7 +117,7 @@ public class HttpClientWrapper {
         var body = AbstractHttpService.GSON.toJson(requestBody);
         var res = doRequest(operation,
             HttpRequest.newBuilder()
-                .uri(java.net.URI.create(baseUrl + url))
+                .uri(url(url))
                 .PUT(HttpRequest.BodyPublishers.ofString(body)),
             HttpResponse.BodyHandlers.ofString());
         return parseOrThrowResponse(res, responseType);
@@ -121,7 +126,7 @@ public class HttpClientWrapper {
     public void delete(String operation, String url) {
         var res = doRequest(operation,
             HttpRequest.newBuilder()
-                .DELETE().uri(java.net.URI.create(baseUrl + url)),
+                .DELETE().uri(url(url)),
             HttpResponse.BodyHandlers.ofString());
         maybeThrowResponse(res);
     }
@@ -138,8 +143,10 @@ public class HttpClientWrapper {
             span.setAttribute(HttpAttributes.HTTP_REQUEST_METHOD, req.method());
             span.setAttribute(UrlAttributes.URL_FULL, req.uri().toString());
 
-            logger.debug("{} {}", req.method(), req.uri());
-            return httpClient.send(req, handler);
+            long start = System.nanoTime();
+            var response = httpClient.send(req, handler);
+            logger.info("{} {} ({} in {}ms)", req.method(), req.uri(), response.statusCode(), (System.nanoTime() - start) / 1_000_000d);
+            return response;
         } catch (InterruptedException e) {
             // propagate the interrupted exception without declaring it. We want to be able to handle
             // this, eg in a gui to abort load. But its a pain to handle it everywhere we dont care and
@@ -159,7 +166,7 @@ public class HttpClientWrapper {
         };
     }
 
-    public <T> @UnknownNullability T maybeThrowResponse(HttpResponse<String> response) {
+    public <T> @UnknownNullability T maybeThrowResponse(HttpResponse<?> response) {
         return switch (response.statusCode()) {
             case 200, 201, 204 -> null;
             case 400 -> throw new ApiClient.BadRequestError(response);

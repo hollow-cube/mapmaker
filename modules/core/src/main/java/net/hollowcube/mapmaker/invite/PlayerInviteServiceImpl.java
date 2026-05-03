@@ -96,7 +96,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
             sender.sendMessage(Component.translatable("map.invite.no_map"));
             return;
         }
-        if (senderMap.verification() != MapVerification.UNVERIFIED) {
+        if (!senderMap.isPublished() && senderMap.verification() != MapVerification.UNVERIFIED) {
             sender.sendMessage(Component.translatable("map.invite.verifying"));
             return;
         }

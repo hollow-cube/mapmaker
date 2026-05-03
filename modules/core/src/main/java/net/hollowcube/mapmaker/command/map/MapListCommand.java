@@ -6,7 +6,6 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.gui.map.MapListView;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -15,15 +14,13 @@ import org.jetbrains.annotations.NotNull;
 
 public class MapListCommand extends CommandDsl {
     private final ApiClient api;
-    private final MapService mapService;
     private final ServerBridge bridge;
 
     private final Argument<String> targetArg;
 
-    public MapListCommand(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
+    public MapListCommand(@NotNull ApiClient api, @NotNull ServerBridge bridge) {
         super("list");
         this.api = api;
-        this.mapService = mapService;
         this.bridge = bridge;
 
         description = "Show all the maps published by a player";
@@ -51,7 +48,7 @@ public class MapListCommand extends CommandDsl {
             }
         }
 
-        Panel.open(player, new MapListView.Player(api, mapService, bridge, targetId));
+        Panel.open(player, new MapListView.Player(api, bridge, targetId));
     }
 
 }

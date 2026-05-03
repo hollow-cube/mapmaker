@@ -4,9 +4,9 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +30,7 @@ public class MapArgument extends Argument<@Nullable MapData> {
 
         try {
             return getOrEmpty(() -> maps.get(mapId));
-        } catch (IllegalArgumentException | MapService.NotFoundError ignored) {
+        } catch (IllegalArgumentException | ApiClient.NotFoundError ignored) {
             // Not a valid or existing map (endpoint checks both id and published id)
         }
 

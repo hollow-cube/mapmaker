@@ -4,7 +4,6 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.map.MapIconPanel;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.PlayerMapProgress;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -31,7 +30,6 @@ public class MapBrowserView extends Panel {
     }
 
     private final ApiClient api;
-    private final MapService mapService;
     private final ServerBridge bridge;
     private final boolean fetchOnMount;
 
@@ -44,14 +42,13 @@ public class MapBrowserView extends Panel {
 
     private volatile String searchText = "";
 
-    public MapBrowserView(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
-        this(api, mapService, bridge, true);
+    public MapBrowserView(@NotNull ApiClient api, @NotNull ServerBridge bridge) {
+        this(api, bridge, true);
     }
 
-    public MapBrowserView(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge, boolean fetchOnMount) {
+    public MapBrowserView(@NotNull ApiClient api, @NotNull ServerBridge bridge, boolean fetchOnMount) {
         super(9, 10);
         this.api = api;
-        this.mapService = mapService;
         this.bridge = bridge;
         this.fetchOnMount = fetchOnMount;
 
@@ -116,7 +113,7 @@ public class MapBrowserView extends Panel {
         var entries = new ArrayList<MapIconPanel>();
         for (var map : results) {
             if (map.isCompletable()) mapIds.add(map.id());
-            entries.add(new MapIconPanel(api, mapService, bridge, map));
+            entries.add(new MapIconPanel(api, bridge, map));
         }
 
         // Fetch the player's current progress on the maps

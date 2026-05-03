@@ -64,8 +64,6 @@ import net.hollowcube.mapmaker.invite.MapInviteListener;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.invite.PlayerInviteServiceImpl;
 import net.hollowcube.mapmaker.map.MapServer;
-import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.map.MapServiceImpl;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
 import net.hollowcube.mapmaker.map.command.BugReportCommand;
@@ -76,7 +74,10 @@ import net.hollowcube.mapmaker.map.util.AnonHealthCheck;
 import net.hollowcube.mapmaker.map.util.ServerStatsHud;
 import net.hollowcube.mapmaker.misc.ExpBarRenderer;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.hollowcube.mapmaker.misc.noop.*;
+import net.hollowcube.mapmaker.misc.noop.NoopPlayerInviteService;
+import net.hollowcube.mapmaker.misc.noop.NoopPlayerService;
+import net.hollowcube.mapmaker.misc.noop.NoopPunishmentService;
+import net.hollowcube.mapmaker.misc.noop.NoopSessionService;
 import net.hollowcube.mapmaker.notifications.NotificationsConsumer;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.punishments.PunishmentManagementListener;
@@ -105,14 +106,15 @@ import net.minestom.server.network.packet.server.common.ServerLinksPacket;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ServiceLoader;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
@@ -130,7 +132,6 @@ public abstract class AbstractMapServer implements MapServer {
     private final ApiClient api;
     private final SessionService sessionService;
     private final PlayerService playerService;
-    private final MapService mapService;
     private final PunishmentService punishmentService;
     private PlayerInviteService inviteService; // So many dependencies very yikes
 
@@ -145,8 +146,6 @@ public abstract class AbstractMapServer implements MapServer {
     private PlayerDataUpdateConsumer playerDataUpdateConsumer;
 
     private final CommandManager commandManager = new CommandManagerImpl();
-
-    private Map<Class<?>, Object> facets = new HashMap<>(); // Not concurrent, not editable after start.
 
     private volatile boolean isReady = false; // Corresponds to the associated health check
     private final Shutdowner shutdowner = new Shutdowner(this::awaitQuiescence);
@@ -182,20 +181,10 @@ public abstract class AbstractMapServer implements MapServer {
         else if (globalConfig.noop()) sessionService = new NoopSessionService();
         else sessionService = new SessionServiceImpl(otel, "http://localhost:9127"); // tilt
 
-        var mapServiceUrl = config.get(Map_ServiceConfig.class).url();
-        if (!mapServiceUrl.isEmpty()) mapService = new MapServiceImpl(mapServiceUrl);
-        else if (globalConfig.noop()) mapService = new NoopMapService();
-        else mapService = new MapServiceImpl("http://localhost:9127"); // tilt
-
         this.acHook = ServiceLoader.load(ACHook.class).findFirst().orElse(null);
     }
 
     protected abstract @NotNull String name();
-
-    @Override
-    public <T> @NotNull T facet(@NotNull Class<T> type) {
-        return type.cast(facets.get(type));
-    }
 
     @Blocking
     public final void start() {
@@ -273,7 +262,6 @@ public abstract class AbstractMapServer implements MapServer {
             shutdowner.queue("punishment-listener", punishmentCreatedListener::close);
 
             chatMessageListener = new ChatMessageListener(sessionManager, api, punishmentService, jetStream);
-            facets.put(ChatMessageListener.class, chatMessageListener);
             shutdowner.queue("chat-message-listener", chatMessageListener::close);
             MinecraftServer.getPacketListenerManager().setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
 
@@ -287,9 +275,6 @@ public abstract class AbstractMapServer implements MapServer {
         ChatAnnouncer.setupAnnouncements(config, sessionManager(), shutdowner);
 
         prepareStart();
-
-        // Copy the facets map to prevent modification
-        facets = Map.copyOf(facets);
 
         if (acHook != null) acHook.preReady(this);
 
@@ -310,11 +295,6 @@ public abstract class AbstractMapServer implements MapServer {
     @Override
     public @NotNull PlayerService playerService() {
         return playerService;
-    }
-
-    @Override
-    public @NotNull MapService mapService() {
-        return mapService;
     }
 
     @Override
@@ -367,19 +347,6 @@ public abstract class AbstractMapServer implements MapServer {
         globalEventHandler.addChild(entityEvents);
         MapEntities.init(entityEvents);
 
-        addBinding(MapServer.class, this, "mapServer", "server");
-        addBinding(ConfigLoaderV3.class, config);
-
-        addBinding(ApiClient.class, api, "api");
-        addBinding(SessionService.class, sessionService, "sessionService");
-        addBinding(PlayerService.class, playerService, "playerService");
-        addBinding(MapService.class, mapService, "mapService");
-        addBinding(PunishmentService.class, punishmentService, "punishmentService");
-        addBinding(PlayerInviteService.class, inviteService, "playerInviteService");
-
-        addBinding(SessionManager.class, sessionManager, "sessionManager");
-        addBinding(ServerBridge.class, bridge(), "bridge");
-
         boolean fullInstance = !globalConfig.noop();
 
         commandManager.register(new MinestomCommand());
@@ -400,11 +367,11 @@ public abstract class AbstractMapServer implements MapServer {
         if (fullInstance) {
             commandManager.register(new UnblockCommand(api().players, playerService()));
             commandManager.register(new BlockCommand(api().players, playerService()));
-            commandManager.register(new FriendCommand(api(), playerService(), mapService(), sessionManager()));
+            commandManager.register(new FriendCommand(api(), playerService(), sessionManager()));
         }
 
         if (fullInstance) {
-            commandManager.register(new PlayCommand(api(), mapService(), sessionManager(), bridge()));
+            commandManager.register(new PlayCommand(api(), sessionManager(), bridge()));
             commandManager.register(new WhereCommand(api(), sessionManager()));
             commandManager.register(new ListCommand(sessionManager(), api().players));
             commandManager.register(new MsgCommand(sessionManager(), api().maps, chatMessageListener, playerService()));
@@ -423,7 +390,7 @@ public abstract class AbstractMapServer implements MapServer {
             commandManager.register(new JoinCommand(inviteService(), playerService(), api().players, sessionManager()));
         }
 
-        commandManager.register(new MapCommand(api(), playerService(), mapService(), bridge(), jetStream));
+        commandManager.register(new MapCommand(api(), bridge(), jetStream));
 
         if (fullInstance) {
             commandManager.register(new SFindCommand(api(), sessionManager()));
@@ -480,16 +447,6 @@ public abstract class AbstractMapServer implements MapServer {
 
     public @NotNull Shutdowner shutdowner() {
         return shutdowner;
-    }
-
-    protected <T> void addBinding(@Nullable Class<T> type, @NotNull T instance, @NotNull String... names) {
-        if (!type.isAssignableFrom(instance.getClass())) {
-            throw new IllegalArgumentException("Instance " + instance + " is not of type " + type);
-        }
-
-        if (type != null) {
-            facets.put(type, instance);
-        }
     }
 
     /**

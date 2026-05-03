@@ -314,7 +314,12 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             RateMapItem.initLastRating(server().api().maps, player, map());
         }
 
-        player.setTag(BEST_SAVESTATE, server().api().maps.getBestSaveState(map().id(), player.getUuid().toString()));
+        SaveState bestState = null;
+        try {
+            bestState = server().api().maps.getBestSaveState(map().id(), player.getUuid().toString());
+        } catch (ApiClient.NotFoundError _) {
+        }
+        player.setTag(BEST_SAVESTATE, bestState);
 
         return createPlayingState(saveState);
     }

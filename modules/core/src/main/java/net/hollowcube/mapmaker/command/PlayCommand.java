@@ -7,7 +7,6 @@ import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.gui.map.browser.MapBrowserView;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.panels.Panel;
@@ -25,19 +24,16 @@ public class PlayCommand extends CommandDsl {
     private final Argument<@Nullable MapData> mapArg;
 
     private final ApiClient api;
-    private final MapService mapService;
     private final SessionManager sessionManager;
     private final ServerBridge bridge;
 
     public PlayCommand(
         @NotNull ApiClient api,
-        @NotNull MapService mapService,
         @NotNull SessionManager sessionManager,
         @NotNull ServerBridge bridge
     ) {
         super("play");
         this.api = api;
-        this.mapService = mapService;
         this.sessionManager = sessionManager;
         this.bridge = bridge;
 
@@ -53,7 +49,7 @@ public class PlayCommand extends CommandDsl {
     }
 
     private void handleDefault(@NotNull Player player, @NotNull CommandContext context) {
-        Panel.open(player, new MapBrowserView(api, mapService, bridge));
+        Panel.open(player, new MapBrowserView(api, bridge));
     }
 
     @Blocking

@@ -13,7 +13,13 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.registry.RegistryTranscoder;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.channels.Channels;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +27,8 @@ import static net.hollowcube.mapmaker.api.ApiClient.notImplemented;
 import static net.hollowcube.mapmaker.api.HttpClientWrapper.query;
 
 public interface MapClient {
+    String LEADERBOARD_TOP_TIMES = "top_times";
+    String LEADERBOARD_MAPS_BEATEN = "maps_beaten";
 
     default MapData create(String owner, MapSize size) {
         throw notImplemented();
@@ -36,6 +44,21 @@ public interface MapClient {
     }
 
     default void delete(String actorId, String mapId, @Nullable String reason) {
+        throw notImplemented();
+    }
+
+    default byte[] getWorld(String mapId) {
+        throw notImplemented();
+    }
+
+    default ReadableMapData getWorldStream(String id) {
+        // Default impl just wraps the byte array so not actually streaming. Polar stream loader doesnt benefit
+        // much from streaming, but we can replace this implementation in the future if theres a benefit.
+        var bytes = getWorld(id);
+        return new ReadableMapData(Channels.newChannel(new ByteArrayInputStream(bytes)), bytes.length);
+    }
+
+    default void updateWorld(String mapId, byte[] worldData, long loadTime) {
         throw notImplemented();
     }
 
@@ -116,9 +139,30 @@ public interface MapClient {
         throw notImplemented();
     }
 
+    default LeaderboardData getGlobalLeaderboard(String name, @Nullable String playerId) {
+        throw notImplemented();
+    }
+
+    default LeaderboardData getMapLeaderboard(String mapId, @Nullable String playerId) {
+        throw notImplemented();
+    }
+
+    default void deleteMapLeaderboard(String mapId, @Nullable String playerId, boolean notify) {
+        throw notImplemented();
+    }
+
+    default void restoreMapLeaderboard(String mapId) {
+        throw notImplemented();
+    }
+
+
     record Http(HttpClientWrapper http) implements MapClient {
+        private static final String POLAR_CONTENT_TYPE = "application/vnd.hollowcube.polar";
+
         private static final String V4_PREFIX = "/v4/internal/maps";
         private static final String V4_PLAYERS_PREFIX = "/v4/internal/players";
+
+        private static final Logger logger = LoggerFactory.getLogger(MapClient.class);
 
         @Override
         public MapData create(String owner, MapSize size) {
@@ -154,6 +198,36 @@ public interface MapClient {
         }
 
         @Override
+        public byte[] getWorld(String mapId) {
+            var res = http.doRequest(
+                "getMapWorld",
+                HttpRequest.newBuilder()
+                    .uri(http.url(V4_PREFIX + "/" + mapId + "/world"))
+                    .GET(),
+                HttpResponse.BodyHandlers.ofByteArray());
+            http.maybeThrowResponse(res);
+
+            var contentType = res.headers().firstValue("content-type").orElse(null);
+            if (!POLAR_CONTENT_TYPE.equals(contentType))
+                throw new IllegalStateException("Unexpected content type for map world: " + contentType);
+
+            logger.info("Received map world for {}, length: {}", mapId, res.body().length);
+            return res.body();
+        }
+
+        @Override
+        public void updateWorld(String mapId, byte[] worldData, long loadTime) {
+            var res = http.doRequest(
+                "updateMapWorld",
+                HttpRequest.newBuilder()
+                    .uri(http.url(V4_PREFIX + "/" + mapId + "/world" + query("loadTime", loadTime)))
+                    .PUT(HttpRequest.BodyPublishers.ofByteArray(worldData))
+                    .header("content-type", POLAR_CONTENT_TYPE),
+                HttpResponse.BodyHandlers.ofByteArray());
+            http.maybeThrowResponse(res);
+        }
+
+        @Override
         public void publish(String mapId) {
             http.post(
                 "publishMap",
@@ -165,7 +239,7 @@ public interface MapClient {
         public void beginVerification(String mapId) {
             http.post(
                 "beginVerification",
-                V4_PREFIX + "/" + mapId + "/verification"
+                V4_PREFIX + "/" + mapId + "/verify"
             );
         }
 
@@ -173,7 +247,7 @@ public interface MapClient {
         public void deleteVerification(String mapId) {
             http.delete(
                 "deleteVerification",
-                V4_PREFIX + "/" + mapId + "/verification"
+                V4_PREFIX + "/" + mapId + "/verify"
             );
         }
 
@@ -226,7 +300,7 @@ public interface MapClient {
         public void report(String mapId, MapReport report) {
             http.post(
                 "reportMap",
-                V4_PREFIX + "/" + mapId + "/reports",
+                V4_PREFIX + "/" + mapId + "/report",
                 report
             );
         }
@@ -242,10 +316,10 @@ public interface MapClient {
 
         @Override
         public void setPlayerRating(String mapId, String playerId, MapRating rating) {
-            http.post(
+            http.put(
                 "setMapPlayerRating",
                 V4_PREFIX + "/" + mapId + "/ratings/" + playerId,
-                Map.of("rating", rating)
+                rating
             );
         }
 
@@ -290,7 +364,7 @@ public interface MapClient {
         public SaveState getLatestSaveState(String mapId, String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
             JsonObject raw = http.get(
                 "getLatestSaveState",
-                V4_PREFIX + "/" + mapId + "/states/" + playerId + "/latest" + query(type == null ? null : type.name().toLowerCase()),
+                V4_PREFIX + "/" + mapId + "/states/" + playerId + "/latest" + query("type", type == null ? null : type.name().toLowerCase()),
                 new TypeToken<>() {}
             );
 
@@ -321,7 +395,7 @@ public interface MapClient {
         @Override
         public SaveState getBestSaveState(String mapId, String playerId) {
             return http.get(
-                "getLatestSaveState",
+                "getBestSaveState",
                 V4_PREFIX + "/" + mapId + "/states/" + playerId + "/best",
                 new TypeToken<>() {}
             );
@@ -336,6 +410,40 @@ public interface MapClient {
             );
         }
 
+        @Override
+        public LeaderboardData getGlobalLeaderboard(String name, @Nullable String playerId) {
+            return http.get(
+                "getGlobalLeaderboard",
+                V4_PREFIX + "/hub/leaderboard/" + name + query("playerId", playerId),
+                new TypeToken<>() {}
+            );
+        }
+
+        @Override
+        public LeaderboardData getMapLeaderboard(String mapId, @Nullable String playerId) {
+            return http.get(
+                "getMapLeaderboard",
+                V4_PREFIX + "/" + mapId + "/leaderboard" + query("playerId", playerId),
+                new TypeToken<>() {}
+            );
+        }
+
+        @Override
+        public void deleteMapLeaderboard(String mapId, @Nullable String playerId, boolean notify) {
+            http.delete(
+                "deleteMapLeaderboard",
+                V4_PREFIX + "/" + mapId + "/leaderboard" + query("playerId", playerId, "notify", notify)
+            );
+        }
+
+        @Override
+        public void restoreMapLeaderboard(String mapId) {
+            http.put(
+                "restoreMapLeaderboard",
+                V4_PREFIX + "/" + mapId + "/leaderboard",
+                Map.of()
+            );
+        }
     }
 
     record Noop() implements MapClient {}

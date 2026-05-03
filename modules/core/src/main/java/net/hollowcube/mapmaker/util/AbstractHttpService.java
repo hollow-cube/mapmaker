@@ -51,7 +51,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public abstract class AbstractHttpService {
-    private static final System.Logger logger = System.getLogger(MapServiceImpl.class.getName());
+    private static final System.Logger logger = System.getLogger(AbstractHttpService.class.getName());
 
     public static final Gson GSON = new GsonBuilder()
         .registerTypeAdapter(MapVariant.class, new EnumTypeAdapter<>(MapVariant.class))
@@ -129,14 +129,14 @@ public abstract class AbstractHttpService {
             if (res.statusCode() == 403) {
                 // We simply convert auth issues to 404s
                 logger.log(System.Logger.Level.ERROR, "auth failed for request: " + req.method() + " " + req.uri());
-                throw new MapService.NotFoundError("???");
+                throw new RuntimeException("Unexpected auth failure for request: " + req.method() + " " + req.uri());
             }
             return res;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new MapService.InternalError(e);
+            throw new RuntimeException(e);
         } catch (IOException e) {
-            throw new MapService.InternalError(e);
+            throw new RuntimeException(e);
         } finally {
             span.end();
         }
@@ -149,9 +149,9 @@ public abstract class AbstractHttpService {
             return httpClient.send(req, handler);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new MapService.InternalError(e);
+            throw new RuntimeException(e);
         } catch (IOException e) {
-            throw new MapService.InternalError(e);
+            throw new RuntimeException(e);
         }
     }
 

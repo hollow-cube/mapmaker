@@ -7,7 +7,6 @@ import net.hollowcube.mapmaker.api.maps.MapSlot;
 import net.hollowcube.mapmaker.gui.store.StoreHelpers;
 import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -29,19 +28,18 @@ import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
 public class CreateMapsView extends Panel {
     private static final int PAGE_SIZE = 5;
 
-    public static void open(Player player, ApiClient api, MapService mapService, PlayerService playerService, ServerBridge bridge) {
+    public static void open(Player player, ApiClient api, PlayerService playerService, ServerBridge bridge) {
         var playerId = PlayerData.fromPlayer(player).id();
         var slots = api.maps.getPlayerSlots(playerId).results();
 
         if (slots.isEmpty()) {
-            Panel.open(player, new NewMapView(api.maps, _ -> FutureUtil.submitVirtual(() -> open(player, api, mapService, playerService, bridge))));
+            Panel.open(player, new NewMapView(api.maps, playerService, _ -> FutureUtil.submitVirtual(() -> open(player, api, playerService, bridge))));
         } else {
-            Panel.open(player, new CreateMapsView(api, mapService, playerService, bridge, slots));
+            Panel.open(player, new CreateMapsView(api, playerService, bridge, slots));
         }
     }
 
     private final ApiClient api;
-    private final MapService mapService;
     private final PlayerService playerService;
     private final ServerBridge bridge;
 
@@ -55,10 +53,9 @@ public class CreateMapsView extends Panel {
     private String searchText = "";
     private @Nullable Runnable remountTask;
 
-    public CreateMapsView(ApiClient api, MapService mapService, PlayerService playerService, ServerBridge bridge, List<MapSlot> initialSlots) {
+    public CreateMapsView(ApiClient api, PlayerService playerService, ServerBridge bridge, List<MapSlot> initialSlots) {
         super(9, 10);
         this.api = api;
-        this.mapService = mapService;
         this.playerService = playerService;
         this.bridge = bridge;
         this.slots.addAll(initialSlots);
@@ -150,7 +147,7 @@ public class CreateMapsView extends Panel {
     private void createMapOrOpenStore() {
         int availableSlots = getAvailableSlots();
         if (availableSlots > 0) {
-            host.pushTransientView(new NewMapView(api.maps, this::acceptNewMap));
+            host.pushTransientView(new NewMapView(api.maps, playerService, this::acceptNewMap));
             return;
         }
 
@@ -231,11 +228,11 @@ public class CreateMapsView extends Panel {
             Runnable onPublish = () -> this.remountTask = this::rebuildSlots;
 
             if (slot.map().isPublished()) {
-                entries.add(new MapSlotEntry.Published(this.api, this.mapService, this.playerService, this.bridge, slot, onPublish));
+                entries.add(new MapSlotEntry.Published(this.api, this.playerService, this.bridge, slot, onPublish));
             } else if (slot.role() == MapRole.OWNER) {
-                entries.add(new MapSlotEntry.Owner(this.api, this.mapService, this.playerService, this.bridge, slot, onPublish));
+                entries.add(new MapSlotEntry.Owner(this.api, this.playerService, this.bridge, slot, onPublish));
             } else {
-                entries.add(new MapSlotEntry.Builder(this.api, this.mapService, this.playerService, this.bridge, slot, onPublish));
+                entries.add(new MapSlotEntry.Builder(this.api, this.playerService, this.bridge, slot, onPublish));
             }
         }
 

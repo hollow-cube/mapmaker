@@ -7,7 +7,6 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -21,11 +20,11 @@ public class MapLeaderboardDeleteCommand extends CommandDsl {
     private final Argument<@Nullable String> playerArg;
     private final Argument<?> notifyArg;
 
-    private final MapService mapService;
+    private final ApiClient api;
 
-    public MapLeaderboardDeleteCommand(@NotNull ApiClient api, @NotNull MapService mapService) {
+    public MapLeaderboardDeleteCommand(@NotNull ApiClient api) {
         super("delete");
-        this.mapService = mapService;
+        this.api = api;
 
         description = "Removes a player's or all completion times on a map";
         examples = List.of("/map lb delete 123-456-789", "/map lb delete 123-456-789 SethPRG");
@@ -59,7 +58,7 @@ public class MapLeaderboardDeleteCommand extends CommandDsl {
 
         var playerId = PlayerData.fromPlayer(player).id();
         try {
-            mapService.deletePlaytimeLeaderboard(playerId, map.id(), target, notify);
+            api.maps.deleteMapLeaderboard(map.id(), target, notify);
             player.sendMessage("deleted for " + target);
         } catch (Exception e) {
             player.sendMessage("failed to delete leaderboard");

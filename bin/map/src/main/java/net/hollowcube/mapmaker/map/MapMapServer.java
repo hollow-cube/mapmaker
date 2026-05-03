@@ -16,7 +16,6 @@ import net.hollowcube.mapmaker.map.block.PlacementRules;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.NoopServerBridge;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.misc.noop.NoopMapService;
 import net.hollowcube.mapmaker.runtime.building.BuildingMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.session.Presence;
@@ -93,18 +92,18 @@ public class MapMapServer extends AbstractMultiMapServer {
 
             return true;
         });
-        this.terraform = initBuildLogic(mapService(), commandManager(), terraformEvents, interactionEvents);
+        this.terraform = initBuildLogic(commandManager(), terraformEvents, interactionEvents, globalConfig.noop());
         MinecraftServer.getGlobalEventHandler().addChild(terraformEvents).addChild(interactionEvents);
 
-        registerCommands(this, commandManager(), mapService());
+        registerCommands(this, commandManager());
     }
 
     // Static so it can be referenced from dev server runner
     public static @NotNull Terraform initBuildLogic(
-        @NotNull MapService mapService,
         @NotNull CommandManager commandManager,
         @NotNull EventNode<InstanceEvent> terraformEvents,
-        @NotNull EventNode<InstanceEvent> interactionEvents
+        @NotNull EventNode<InstanceEvent> interactionEvents,
+        boolean memoryStore
     ) {
         // Create terraform instance
         var terraform = Terraform.builder()
@@ -116,7 +115,7 @@ public class MapMapServer extends AbstractMultiMapServer {
             .module(Terraform.WORLDEDIT_MODULE)
             .module(Terraform.VANILLA_MODULE)
             .module(MapServerModule::new)
-            .storage(mapService instanceof NoopMapService ? "TerraformStorageMemory" : "TerraformStorageHttp")
+            .storage(memoryStore ? "TerraformStorageMemory" : "TerraformStorageHttp")
             .build();
 
         // Block/item rules
@@ -128,7 +127,7 @@ public class MapMapServer extends AbstractMultiMapServer {
     }
 
     // Static so it can be referenced from dev server runner
-    public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager, @NotNull MapService maps) {
+    public static void registerCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager) {
         // Register a second help command (regular is in registerPlayingCommands). One for terraform commands, and one for regular.
         // We test terraform commands simply by checking if they start with / (eg // commands)
         commandManager.register(new HelpCommand(

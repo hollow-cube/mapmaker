@@ -6,7 +6,6 @@ import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.PlayerMapProgress;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Button;
@@ -23,7 +22,6 @@ import java.util.Objects;
 
 public class MapIconPanel extends Panel {
     private final ApiClient api;
-    private final MapService mapService;
     private final ServerBridge bridge;
     private final MapData map;
 
@@ -32,13 +30,9 @@ public class MapIconPanel extends Panel {
 
     private final Button button;
 
-    public MapIconPanel(
-        @NotNull ApiClient api, @NotNull MapService mapService,
-        @NotNull ServerBridge bridge, @NotNull MapData map
-    ) {
+    public MapIconPanel(@NotNull ApiClient api, @NotNull ServerBridge bridge, @NotNull MapData map) {
         super(1, 1);
         this.api = api;
-        this.mapService = mapService;
         this.bridge = bridge;
         this.map = map;
 
@@ -72,7 +66,7 @@ public class MapIconPanel extends Panel {
         // TODO(api v4): we currently have to refetch the map because v3 api doesnt return the leaderboard.
         var map = api.maps.get(this.map.id());
 
-        host.pushView(new MapDetailsView(api, mapService, bridge, map, authorName, true));
+        host.pushView(new MapDetailsView(api, bridge, map, authorName, true));
     }
 
     @Override
