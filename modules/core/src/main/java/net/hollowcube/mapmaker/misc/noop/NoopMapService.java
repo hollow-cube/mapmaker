@@ -1,11 +1,8 @@
 package net.hollowcube.mapmaker.misc.noop;
 
-import com.google.gson.JsonObject;
 import net.hollowcube.mapmaker.map.*;
-import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.map.responses.PlayerTopTimesResponse;
-import net.minestom.server.codec.Transcoder;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -33,11 +30,6 @@ public class NoopMapService implements MapService {
     );
 
     @Override
-    public @NotNull MapData createMap(@NotNull MapCreateRequest request) {
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
     public @NotNull net.hollowcube.mapmaker.map.responses.MapSearchResponse searchMaps(@NotNull MapSearchParams request) {
         return new net.hollowcube.mapmaker.map.responses.MapSearchResponse(
             0, 1,
@@ -47,11 +39,6 @@ public class NoopMapService implements MapService {
 
     @Override
     public @NotNull MapProgressBatchResponse getMapProgress(@NotNull String playerId, @NotNull List<String> mapIds) {
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
-    public @NotNull MapSearchResponse<MapData> searchOrgMaps(@NotNull String authorizer, int page, int pageSize, @NotNull String orgId) {
         throw new UnsupportedOperationException("not implemented");
     }
 
@@ -135,12 +122,6 @@ public class NoopMapService implements MapService {
     }
 
     @Override
-    public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId, int protocolVersion, @Nullable SaveStateType.Serializer<?> serializer) {
-        var obj = serializer.codec().decode(Transcoder.JSON, new JsonObject()).orElseThrow();
-        return new SaveState(UUID.randomUUID().toString(), playerId, mapId, SaveStateType.PLAYING, serializer, obj);
-    }
-
-    @Override
     public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
         throw new NotFoundError(mapId);
     }
@@ -153,11 +134,6 @@ public class NoopMapService implements MapService {
     @Override
     public @Nullable SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
         return null;
-    }
-
-    @Override
-    public void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id) {
-        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override

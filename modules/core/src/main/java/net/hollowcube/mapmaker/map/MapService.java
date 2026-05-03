@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map;
 
-import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.map.responses.PlayerTopTimesResponse;
 import org.jetbrains.annotations.Blocking;
@@ -19,18 +18,11 @@ public interface MapService {
     @NotNull
     String LEADERBOARD_MAPS_BEATEN = "maps_beaten";
 
-
-    @NotNull
-    MapData createMap(@NotNull MapCreateRequest request);
-
     @NotNull
     net.hollowcube.mapmaker.map.responses.MapSearchResponse searchMaps(@NotNull MapSearchParams request);
 
     @NotNull
     MapProgressBatchResponse getMapProgress(@NotNull String playerId, @NotNull List<String> mapIds);
-
-    @NotNull
-    MapSearchResponse<MapData> searchOrgMaps(@NotNull String authorizer, int page, int pageSize, @NotNull String orgId);
 
     @NotNull
     MapData getMap(@NotNull String authorizer, @NotNull String id);
@@ -74,8 +66,6 @@ public interface MapService {
     void restorePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId);
 
     // Save states
-    @NotNull
-    SaveState createSaveState(@NotNull String mapId, @NotNull String playerId, int protocolVersion, @Nullable SaveStateType.Serializer<?> serializer);
 
     @NotNull
     SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer);
@@ -85,8 +75,6 @@ public interface MapService {
 
     @Nullable
     SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update);
-
-    void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id);
 
     @NotNull MapRating getMapRating(@NotNull String mapId, @NotNull String playerId);
 
@@ -107,15 +95,6 @@ public interface MapService {
         }
     }
 
-    class SlotInUseError extends RuntimeException {
-    }
-
-    class NoPermissionError extends RuntimeException {
-        public NoPermissionError() {
-            super("No permission for map");
-        }
-    }
-
     class InternalError extends RuntimeException {
         public InternalError(@NotNull String message) {
             super(message);
@@ -126,9 +105,4 @@ public interface MapService {
         }
     }
 
-    class AlreadyExistsError extends RuntimeException {
-        public AlreadyExistsError() {
-            super("Already exists");
-        }
-    }
 }

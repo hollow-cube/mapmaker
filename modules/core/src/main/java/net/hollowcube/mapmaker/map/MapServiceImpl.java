@@ -1,10 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
 import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
-import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.datafix.DataFixer;
-import net.hollowcube.mapmaker.map.requests.MapCreateRequest;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.map.responses.PlayerTopTimesResponse;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
@@ -42,29 +39,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull MapData createMap(@NotNull MapCreateRequest request) {
-        FutureUtil.assertThreadWarn();
-        logger.log(System.Logger.Level.INFO, "creating new map for " + request.owner() + ", is for org: " + request.isOrg());
-
-        var req = HttpRequest.newBuilder()
-            .POST(HttpRequest.BodyPublishers.ofString(GSON.toJson(request)))
-            .uri(URI.create(urlV3 + "/maps"))
-            .header(AUTHORIZER_HEADER, request.authorizer())
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-
-        return switch (res.statusCode()) {
-            case 201 -> GSON.fromJson(res.body(), MapData.class);
-            case 400 -> {
-                var err = GSON.fromJson(res.body(), ErrorRes.class);
-                if ("slot_in_use".equals(err.code)) throw new SlotInUseError();
-                throw new InternalError("Failed to create map: " + err);
-            }
-            default -> throw new InternalError("Failed to create map: " + res.body());
-        };
-    }
-
-    @Override
     public @NotNull net.hollowcube.mapmaker.map.responses.MapSearchResponse searchMaps(@NotNull MapSearchParams request) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(request.toUrl(urlV3 + "/maps/search")))
@@ -84,21 +58,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
         var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
         return switch (res.statusCode()) {
             case 200 -> GSON.fromJson(res.body(), MapProgressBatchResponse.class);
-            default -> throw new InternalError("Failed to search maps: " + res.body());
-        };
-    }
-
-    @Override
-    public @NotNull MapSearchResponse<MapData> searchOrgMaps(@NotNull String authorizer, int page, int pageSize, @NotNull String orgId) {
-        String endpoint = url + "/search_orgs?" + "page=" + page + "&pageSize=" + pageSize + "&orgId=" + orgId;
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(endpoint))
-            .header(AUTHORIZER_HEADER, authorizer)
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), new TypeToken<MapSearchResponse<MapData>>() {
-            });
             default -> throw new InternalError("Failed to search maps: " + res.body());
         };
     }
@@ -379,22 +338,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     }
 
     @Override
-    public @NotNull SaveState createSaveState(@NotNull String mapId, @NotNull String playerId, int protocolVersion, @Nullable SaveStateType.Serializer<?> serializer) {
-        var req = HttpRequest.newBuilder()
-            .method("POST", HttpRequest.BodyPublishers.ofString("""
-                {"protocolVersion": %d}
-                """.formatted(protocolVersion)))
-            .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId))
-            .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 201 -> readTypedSaveState(GSON.fromJson(res.body(), JsonObject.class), serializer);
-            default -> throw new InternalError("Failed to create savestate: " + res.body());
-        };
-    }
-
-    @Override
     public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
         var req = HttpRequest.newBuilder()
             .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId + "/latest?typeFilter=" + (type == null ? "" : type.name().toLowerCase(Locale.ROOT))))
@@ -464,18 +407,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             case 404 -> throw new NotFoundError(id);
             default -> throw new InternalError("Failed to update savestate (" + res.statusCode() + "): " + res.body());
         };
-    }
-
-    @Override
-    public void deleteSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id) {
-        var req = HttpRequest.newBuilder()
-            .method("DELETE", HttpRequest.BodyPublishers.noBody())
-            .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId + "/" + id))
-            .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        if (res.statusCode() == 204) return; // Ok
-        throw new InternalError("Failed to delete savestate: " + res.body());
     }
 
     @Override
