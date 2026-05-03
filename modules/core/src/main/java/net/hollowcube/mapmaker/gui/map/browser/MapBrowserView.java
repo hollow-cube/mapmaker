@@ -4,7 +4,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.map.MapIconPanel;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.PlayerMapProgress;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Element;
@@ -30,7 +30,6 @@ public class MapBrowserView extends Panel {
     }
 
     private final ApiClient api;
-    private final MapService mapService;
     private final ServerBridge bridge;
     private final boolean fetchOnMount;
 
@@ -43,14 +42,13 @@ public class MapBrowserView extends Panel {
 
     private volatile String searchText = "";
 
-    public MapBrowserView(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
-        this(api, mapService, bridge, true);
+    public MapBrowserView(@NotNull ApiClient api, @NotNull ServerBridge bridge) {
+        this(api, bridge, true);
     }
 
-    public MapBrowserView(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge, boolean fetchOnMount) {
+    public MapBrowserView(@NotNull ApiClient api, @NotNull ServerBridge bridge, boolean fetchOnMount) {
         super(9, 10);
         this.api = api;
-        this.mapService = mapService;
         this.bridge = bridge;
         this.fetchOnMount = fetchOnMount;
 
@@ -98,12 +96,11 @@ public class MapBrowserView extends Panel {
     private @NotNull List<? extends Panel> onSearch(@NotNull MapSearchParams.Builder params, int page, int pageSize) {
         // If we have a search query, ignore the given params.
         if (ignoreParamsOnSearch && !this.searchText.isEmpty()) {
-            params = MapSearchParams.builder(host.player().getUuid().toString())
-                .query(searchText);
+            params = MapSearchParams.builder().query(searchText);
         } else params = params.query(searchText);
 
-        var response = mapService.searchMaps(params.page(page).pageSize(pageSize).build());
-        if (page == 0) pagination.totalPages(response.pageCount());
+        var response = api.maps.search(params.page(page).pageSize(pageSize).build());
+        if (page == 0) pagination.totalPages(response.totalPages(pageSize));
 
         // Sort the page of results using string similarity to the query
         var results = response.results();
@@ -116,15 +113,16 @@ public class MapBrowserView extends Panel {
         var entries = new ArrayList<MapIconPanel>();
         for (var map : results) {
             if (map.isCompletable()) mapIds.add(map.id());
-            entries.add(new MapIconPanel(api, mapService, bridge, map));
+            entries.add(new MapIconPanel(api, bridge, map));
         }
 
         // Fetch the player's current progress on the maps
         if (!mapIds.isEmpty()) async(() -> {
-            var resp = mapService.getMapProgress(host.player().getUuid().toString(), mapIds);
+            var playerId = host.player().getUuid().toString();
+            var resp = api.maps.searchMapProgress(playerId, mapIds).keyBy(PlayerMapProgress::mapId);
             sync(() -> {
                 for (var map : entries) {
-                    var progress = resp.getProgress(map.map().id());
+                    var progress = resp.get(map.map().id());
                     if (progress != null) map.updateProgress(progress);
                 }
             });

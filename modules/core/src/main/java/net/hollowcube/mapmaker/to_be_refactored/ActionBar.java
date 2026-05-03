@@ -71,7 +71,7 @@ public final class ActionBar {
     }
 
     private @NotNull TaskSchedule update() {
-        if (player.getPlayerConnection().getConnectionState() != ConnectionState.PLAY)
+        if (player.getPlayerConnection().getClientState() != ConnectionState.PLAY)
             return TaskSchedule.tick(2);
 
         long now = System.currentTimeMillis();

@@ -7,10 +7,12 @@ import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.api.ResultList;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static net.hollowcube.mapmaker.api.ApiClient.notImplemented;
 
@@ -36,6 +38,10 @@ public interface PlayerClient {
         throw notImplemented();
     }
 
+    default ResultList<PlayerDataStub> getAlts(String playerId) {
+        throw notImplemented();
+    }
+
     record Noop() implements PlayerClient {}
 
     record Http(HttpClientWrapper http) implements PlayerClient {
@@ -51,6 +57,9 @@ public interface PlayerClient {
 
         @Override
         public DisplayName getDisplayName(String playerId) {
+            var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(playerId));
+            if (player != null) return PlayerData.fromPlayer(player).displayName2();
+
             return http.get(
                 "getDisplayName",
                 V4_PREFIX + "/" + playerId + "/display-name",
@@ -83,6 +92,14 @@ public interface PlayerClient {
                 "searchPlayers",
                 V4_PREFIX + "/search",
                 Map.of("query", query, "exclude", exclude, "limit", limit),
+                new TypeToken<>() {});
+        }
+
+        @Override
+        public ResultList<PlayerDataStub> getAlts(String playerId) {
+            return http.get(
+                "getAlts",
+                V4_PREFIX + "/" + playerId + "/alts",
                 new TypeToken<>() {});
         }
 

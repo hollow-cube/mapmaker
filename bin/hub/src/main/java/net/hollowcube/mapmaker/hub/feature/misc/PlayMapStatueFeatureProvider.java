@@ -94,7 +94,7 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
     private void handleCreateMapsClick(@NotNull Player player) {
         FutureUtil.submitVirtual(() -> {
             try {
-                CreateMapsView.open(player, server.api(), server.mapService(), server.playerService(), server.bridge());
+                CreateMapsView.open(player, server.api(), server.playerService(), server.bridge());
             } catch (Exception e) {
                 ExceptionReporter.reportException(e, player);
             }
@@ -102,25 +102,25 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
     }
 
     private void handleBestMapsClick(@NotNull Player player) {
-        var browser = new MapBrowserView(server.api(), server.mapService(), server.bridge(), false);
+        var browser = new MapBrowserView(server.api(), server.bridge(), false);
         Panel.open(player, browser);
         browser.simpleSort(MapBrowserView.SortPreset.BEST);
     }
 
     private void handleQualityClick(@NotNull Player player) {
-        var browser = new MapBrowserView(server.api(), server.mapService(), server.bridge(), false);
+        var browser = new MapBrowserView(server.api(), server.bridge(), false);
         Panel.open(player, browser);
         browser.simpleSort(MapBrowserView.SortPreset.QUALITY);
     }
 
     private void handleNewMapsClick(@NotNull Player player) {
-        var browser = new MapBrowserView(server.api(), server.mapService(), server.bridge(), false);
+        var browser = new MapBrowserView(server.api(), server.bridge(), false);
         Panel.open(player, browser);
         browser.simpleSort(MapBrowserView.SortPreset.NEW);
     }
 
     private void handleSearchMapsClick(@NotNull Player player) {
-        var browser = new MapBrowserView(server.api(), server.mapService(), server.bridge(), false);
+        var browser = new MapBrowserView(server.api(), server.bridge(), false);
         Panel.open(player, browser);
         // Set initial sort preset to best, else pagination doesn't initialize properly
         browser.simpleSort(MapBrowserView.SortPreset.BEST);

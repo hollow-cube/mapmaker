@@ -5,7 +5,6 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapSlot;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Button;
@@ -26,20 +25,18 @@ import static net.hollowcube.mapmaker.gui.map.details.MapDetailsTimesPanel.getPl
 public class MapSlotEntry extends Panel {
 
     private final ApiClient api;
-    private final MapService mapService;
     private final PlayerService playerService;
     private final ServerBridge bridge;
     private final MapSlot slot;
     private final Runnable onPublish;
 
     private MapSlotEntry(
-        ApiClient api, MapService mapService,
+        ApiClient api,
         PlayerService playerService, ServerBridge bridge,
         MapSlot slot, Runnable onPublish
     ) {
         super(9, 1);
         this.api = api;
-        this.mapService = mapService;
         this.playerService = playerService;
         this.bridge = bridge;
         this.slot = slot;
@@ -49,13 +46,13 @@ public class MapSlotEntry extends Panel {
     @Blocking
     protected void buildInWorld() {
         if (isOwner(host.player())) {
-            EditMapView.editMap(mapService, slot.map(), this.host, bridge);
+            EditMapView.editMap(api.maps, slot.map(), this.host, bridge);
             return;
         }
 
         // If you arent the owner, we need to check the latest version to make sure its not in a verifying state
         // TODO: this is still a race, we need to check elsewhere to prevent editing a map during/after verification
-        var map = mapService.getMap(host.player().getUuid().toString(), slot.map().id());
+        var map = api.maps.get(slot.map().id());
         if (map.verification() == MapVerification.PENDING) {
             host.player().sendMessage(Component.translatable("edit.map.failure.verify"));
             return;
@@ -72,7 +69,7 @@ public class MapSlotEntry extends Panel {
 
         async(() -> {
             // TODO: this constructor is blocking, which is kinda confusing and im not a fan overall.
-            var view = new EditMapView(this.api, this.mapService, this.playerService, this.bridge, slot, this.onPublish);
+            var view = new EditMapView(this.api, this.playerService, this.bridge, slot, this.onPublish);
             sync(() -> host.pushView(view));
         });
     }
@@ -82,7 +79,7 @@ public class MapSlotEntry extends Panel {
         Sanity.check(isOwner(host.player()), "cannot show details for someone else's map");
 
         var displayName = PlayerData.fromPlayer(host.player()).displayName2();
-        var view = new MapDetailsView(api, mapService, bridge, slot.map(), displayName, true);
+        var view = new MapDetailsView(api, bridge, slot.map(), displayName, true);
         this.host.pushView(view);
     }
 
@@ -107,11 +104,11 @@ public class MapSlotEntry extends Panel {
 
     public static final class Owner extends MapSlotEntry {
         public Owner(
-            ApiClient api, MapService mapService,
+            ApiClient api,
             PlayerService playerService, ServerBridge bridge,
             MapSlot slot, Runnable onPublish
         ) {
-            super(api, mapService, playerService, bridge, slot, onPublish);
+            super(api, playerService, bridge, slot, onPublish);
 
             var map = slot.map();
             var translationKey = "gui.create_maps.slot.yours";
@@ -149,11 +146,11 @@ public class MapSlotEntry extends Panel {
         private final Button nameButton;
 
         public Builder(
-            ApiClient api, MapService mapService,
+            ApiClient api,
             PlayerService playerService, ServerBridge bridge,
             MapSlot slot, Runnable onPublish
         ) {
-            super(api, mapService, playerService, bridge, slot, onPublish);
+            super(api, playerService, bridge, slot, onPublish);
             this.api = api;
             this.slot = slot;
 
@@ -201,11 +198,11 @@ public class MapSlotEntry extends Panel {
 
     public static final class Published extends MapSlotEntry {
         public Published(
-            ApiClient api, MapService mapService,
+            ApiClient api,
             PlayerService playerService, ServerBridge bridge,
             MapSlot slot, Runnable onPublish
         ) {
-            super(api, mapService, playerService, bridge, slot, onPublish);
+            super(api, playerService, bridge, slot, onPublish);
 
             var map = slot.map();
             var translationKey = "gui.create_maps.slot.published";

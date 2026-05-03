@@ -4,6 +4,7 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.editor.command.navigation.BackCommand;
 import net.hollowcube.mapmaker.editor.entity.SpawnMarkerEntity;
 import net.hollowcube.mapmaker.editor.gui.LeaderboardEditorView;
@@ -243,7 +244,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
             // Save the world data (if it is unverified only)
             if (map().verification() != MapVerification.PENDING) {
                 var worldData = instance().save(new ReadWriteWorldAccess(this));
-                server().mapService().updateMapWorld(map().id(), worldData, createdAt);
+                server().api().maps.updateWorld(map().id(), worldData, createdAt);
             }
 
             for (var player : Set.copyOf(players())) {
@@ -322,9 +323,9 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         final var playerData = PlayerData.fromPlayer(player);
         SaveState saveState;
         try {
-            saveState = server().mapService().getLatestSaveState(map().id(), playerData.id(),
+            saveState = server().api().maps.getLatestSaveState(map().id(), playerData.id(),
                 SaveStateType.EDITING, EditState.SERIALIZER);
-        } catch (MapService.NotFoundError ignored) {
+        } catch (ApiClient.NotFoundError _) {
             // No save state yet, create one locally.
             // We do an upsert to save, so it will be created in the map service at that point.
             saveState = new SaveState(UUID.randomUUID().toString(),
@@ -404,7 +405,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
             var playerData = PlayerData.fromPlayer(player);
             var saveStateUpdate = saveState.createUpsertRequest();
-            server().mapService().updateSaveState(map().id(), playerData.id(), saveState.id(), saveStateUpdate);
+            server().api().maps.updateSaveState(map().id(), playerData.id(), saveState.id(), saveStateUpdate);
 
             logger.info("Updated data for {}", player.getUuid());
         } catch (Exception e) {

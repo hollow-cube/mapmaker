@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.command.invite;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
@@ -16,16 +17,19 @@ abstract class AbstractInviteServiceCommand extends CommandDsl {
 
     protected final PlayerInviteService inviteService;
     private final PlayerService playerService;
+    private final PlayerClient players;
     private final SessionManager sessionManager;
     private final Argument<String> targetArgument;
     private final boolean preventBlocked;
 
     AbstractInviteServiceCommand(@NotNull String command, @NotNull PlayerInviteService inviteService,
-                                 @NotNull PlayerService playerService, @NotNull SessionManager sessionManager,
+                                 @NotNull PlayerService playerService, @NotNull PlayerClient players,
+                                 @NotNull SessionManager sessionManager,
                                  @NotNull String playerArgDescription, boolean preventBlocked) {
         super(command);
         this.inviteService = inviteService;
         this.playerService = playerService;
+        this.players = players;
         this.sessionManager = sessionManager;
         this.preventBlocked = preventBlocked;
 
@@ -51,7 +55,7 @@ abstract class AbstractInviteServiceCommand extends CommandDsl {
         }
 
         var targetSession = this.sessionManager.getSession(targetId);
-        var targetDisplayName = this.playerService.getPlayerDisplayName2(targetId);
+        var targetDisplayName = players.getDisplayName(targetId);
         if (targetSession == null) {
             player.sendMessage(Component.translatable("generic.player.offline", targetDisplayName));
             return;

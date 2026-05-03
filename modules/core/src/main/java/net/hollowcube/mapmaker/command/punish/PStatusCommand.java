@@ -3,10 +3,10 @@ package net.hollowcube.mapmaker.command.punish;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.types.Punishment;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
@@ -24,17 +24,17 @@ import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 public class PStatusCommand extends CommandDsl {
     private final Argument<String> playerArg;
 
-    private final PlayerService playerService;
+    private final PlayerClient players;
     private final PunishmentService punishmentService;
 
-    public PStatusCommand(@NotNull PlayerService playerService, @NotNull PunishmentService punishmentService) {
+    public PStatusCommand(@NotNull PlayerClient players, @NotNull PunishmentService punishmentService) {
         super("pstatus");
-        this.playerService = playerService;
+        this.players = players;
         this.punishmentService = punishmentService;
 
         category = CommandCategories.STAFF;
         description = "Check the punishment status of a player";
-        playerArg = CoreArgument.AnyPlayerId("player", playerService)
+        playerArg = CoreArgument.AnyPlayerId("player", players)
             .description("The player to check the status of");
 
         setCondition(staffPerm(Permission.GENERIC_STAFF));
@@ -48,7 +48,7 @@ public class PStatusCommand extends CommandDsl {
             return;
         }
 
-        var targetDisplayName = playerService.getPlayerDisplayName2(target).build();
+        var targetDisplayName = players.getDisplayName(target).build();
         player.sendMessage(Component.translatable("punishment.status.header", targetDisplayName));
 
         var ban = punishmentService.getActivePunishment(target, PunishmentType.BAN);
@@ -62,7 +62,7 @@ public class PStatusCommand extends CommandDsl {
         if (punishment == null) return Component.translatable("punishment.status.none");
 
         return Component.translatable("punishment.status.entry", List.of(
-            playerService.getPlayerDisplayName2(punishment.executorId()).build(),
+            players.getDisplayName(punishment.executorId()).build(),
             Component.text(Objects.requireNonNullElse(punishment.ladderId(), "none")),
             Component.text(punishment.comment()),
             Component.text(NumberUtil.formatTimeSince(punishment.createdAt())),

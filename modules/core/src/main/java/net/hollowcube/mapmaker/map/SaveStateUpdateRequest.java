@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
 import com.google.gson.JsonObject;
+import net.hollowcube.datafix.DataFixer;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.Transcoder;
@@ -11,6 +12,10 @@ import java.util.Locale;
 
 public class SaveStateUpdateRequest {
     JsonObject updates = new JsonObject();
+
+    public SaveStateUpdateRequest() {
+        updates.addProperty("dataVersion", DataFixer.maxVersion());
+    }
 
     public boolean hasChanges() {
         return !updates.isEmpty();

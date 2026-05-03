@@ -11,10 +11,9 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.compat.moulberrytweaks.debugrender.DebugShape;
 import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderAddPacket;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.command.arg.MapArgument;
-import net.hollowcube.mapmaker.map.MapPlayerData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
@@ -24,7 +23,6 @@ import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.hollowcube.mapmaker.map.util.ServerLatencyHud;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.ComponentUtil;
 import net.kyori.adventure.key.Key;
@@ -51,7 +49,7 @@ public class DebugCommand extends CommandDsl {
     private final MapArgument vjoinMapArg;
 
     public DebugCommand(
-        @NotNull PlayerService playerService, @NotNull MapService mapService,
+        @NotNull ApiClient api,
         @NotNull ServerBridge bridge
     ) {
         super("debug");
@@ -99,7 +97,7 @@ public class DebugCommand extends CommandDsl {
         var vjoin = createPermissionedSubcommand("vjoin", this::handleVerificationJoin,
             "join a verification state of a map");
         this.bridge = bridge;
-        vjoinMapArg = CoreArgument.Map("map", mapService);
+        vjoinMapArg = CoreArgument.Map("map", api.maps);
         vjoin.addSyntax(playerOnly(this::handleVerificationJoin), vjoinMapArg);
     }
 
@@ -133,10 +131,6 @@ public class DebugCommand extends CommandDsl {
         for (var entry : rawSettings) {
             player.sendMessage(Component.text("  " + entry.getKey() + ": " + entry.getValue()));
         }
-
-        var mapPlayerData = MapPlayerData.fromPlayer(player);
-        player.sendMessage(Component.text("Last played: " + mapPlayerData.lastPlayedMap()));
-        player.sendMessage(Component.text("Last edited: " + mapPlayerData.lastEditedMap()));
     }
 
     private void handleDebugServer(@NotNull Player player, @NotNull CommandContext context) {

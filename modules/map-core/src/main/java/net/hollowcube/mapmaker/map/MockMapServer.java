@@ -17,7 +17,6 @@ public class MockMapServer implements MapServer {
     public ApiClient api;
     public SessionService sessionService;
     public PlayerService playerService;
-    public MapService mapService;
     public PunishmentService punishmentService;
     public PlayerInviteService inviteService;
     public SessionManager sessionManager;
@@ -38,11 +37,6 @@ public class MockMapServer implements MapServer {
     @Override
     public @NotNull PlayerService playerService() {
         return Objects.requireNonNull(playerService, "PlayerService is not initialized");
-    }
-
-    @Override
-    public @NotNull MapService mapService() {
-        return Objects.requireNonNull(mapService, "MapService is not initialized");
     }
 
     @Override
@@ -73,11 +67,6 @@ public class MockMapServer implements MapServer {
     @Override
     public @NotNull Scheduler scheduler() {
         return Objects.requireNonNull(scheduler, "Scheduler is not initialized");
-    }
-
-    @Override
-    public <T> @NotNull T facet(@NotNull Class<T> type) {
-        throw new IllegalArgumentException("MockMapServer does not support facets");
     }
 
 }

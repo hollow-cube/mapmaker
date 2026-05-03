@@ -11,13 +11,12 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.PlayerSettings;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.chat.components.MessageComponents;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.event.PunishmentCreatedEvent;
 import net.hollowcube.mapmaker.punishments.event.PunishmentRevokedEvent;
@@ -76,8 +75,7 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
     private static final long CHAT_COOLDOWN = 500L;
 
     private final SessionManager sessionManager;
-    private final PlayerService playerService;
-    private final MapService mapService;
+    private final ApiClient api;
     private final PunishmentService punishmentService;
     private final JetStreamWrapper jetStream;
 
@@ -87,13 +85,11 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
     private final MessageConsumer consumer;
 
     public ChatMessageListener(
-        SessionManager sessionManager, PlayerService playerService,
-        MapService mapService, PunishmentService punishmentService,
-        JetStreamWrapper jetStream
+        SessionManager sessionManager, ApiClient api,
+        PunishmentService punishmentService, JetStreamWrapper jetStream
     ) {
         this.sessionManager = sessionManager;
-        this.playerService = playerService;
-        this.mapService = mapService;
+        this.api = api;
         this.punishmentService = punishmentService;
         this.jetStream = jetStream;
 
@@ -102,7 +98,7 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
             .executor(FutureUtil.VIRTUAL)
             .buildAsync(this::fetchActiveMute);
 
-        this.components = new MessageComponents(mapService, playerService);
+        this.components = new MessageComponents(api);
 
         MinecraftServer.getGlobalEventHandler()
             .addListener(PunishmentCreatedEvent.class, this::handlePunishmentCreated)
@@ -140,17 +136,12 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
         FutureUtil.submitVirtual(() -> {
             String currentMapId = null;
             if (message.contains("[map]")) {
-                try {
-                    var currentMap = MiscFunctionality.getCurrentMap(sessionManager, mapService, player);
-                    if (currentMap == null || !currentMap.isPublished()) {
-                        player.sendMessage(Component.translatable("chat.map.invalid"));
-                        return;
-                    }
-                    currentMapId = currentMap.id();
-                } catch (MapService.NotFoundError _) {
+                var currentMap = MiscFunctionality.getCurrentMap(sessionManager, api.maps, player);
+                if (currentMap == null || !currentMap.isPublished()) {
                     player.sendMessage(Component.translatable("chat.map.invalid"));
                     return;
                 }
+                currentMapId = currentMap.id();
             }
 
             trySendChatMessage(
@@ -230,7 +221,7 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
         logger.info("Received chat message: {}", message);
 
         try {
-            var senderDisplayName = playerService.getPlayerDisplayName2(message.sender());
+            var senderDisplayName = api.players.getDisplayName(message.sender());
             var senderName = senderDisplayName.build(DisplayName.Context.DEFAULT);
             var isColored = senderDisplayName.parts().size() > 1;
 
@@ -274,8 +265,8 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
 
             if (sender == null && target == null && spies.isEmpty()) return; // Not relevant to this server
 
-            var targetDisplayName = playerService.getPlayerDisplayName2(message.channel()).build();
-            var senderDisplayName = playerService.getPlayerDisplayName2(message.sender()).build();
+            var targetDisplayName = api.players.getDisplayName(message.channel()).build();
+            var senderDisplayName = api.players.getDisplayName(message.sender()).build();
 
             if (target != null) {
                 var data = this.components.createDirectMessage(target, message);
@@ -317,7 +308,7 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
             for (var rawArg : message.argsSafe()) {
                 // Hacky way to send display name in arg, we should properly support a type field on arg to resolve it.
                 if (rawArg.startsWith("pdn::")) {
-                    var displayName = playerService.getPlayerDisplayName2(rawArg.substring(5));
+                    var displayName = api.players.getDisplayName(rawArg.substring(5));
                     args.add(displayName.build());
                     continue;
                 }

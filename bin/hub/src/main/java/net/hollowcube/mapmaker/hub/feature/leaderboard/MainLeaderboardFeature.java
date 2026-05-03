@@ -2,22 +2,18 @@ package net.hollowcube.mapmaker.hub.feature.leaderboard;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.map.MapServer;
-import net.hollowcube.mapmaker.map.MapService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @AutoService(HubFeature.class)
 public class MainLeaderboardFeature implements HubFeature {
-    private static final Logger logger = LoggerFactory.getLogger(MainLeaderboardFeature.class);
-
     private static final TaskSchedule SCHEDULE = TaskSchedule.tick(60 * 20); // 1 minute
 
     private Leaderboard2 parkourLeaderboard;
@@ -25,14 +21,13 @@ public class MainLeaderboardFeature implements HubFeature {
 
     @Override
     public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
-        var mapService = server.mapService();
-        var playerService = server.playerService();
+        var api = server.api();
         parkourLeaderboard = new Leaderboard2(
-                () -> mapService.getGlobalLeaderboard(MapService.LEADERBOARD_MAPS_BEATEN, null),
-                playerId -> mapService.getGlobalLeaderboard(MapService.LEADERBOARD_MAPS_BEATEN, playerId).player().score(),
-                () -> mapService.getGlobalLeaderboard(MapService.LEADERBOARD_TOP_TIMES, null),
-                playerId -> mapService.getGlobalLeaderboard(MapService.LEADERBOARD_TOP_TIMES, playerId).player().score(),
-                playerId -> playerService.getPlayerDisplayName2(playerId).build(),
+            () -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_MAPS_BEATEN, null),
+            playerId -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_MAPS_BEATEN, playerId).player().score(),
+            () -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_TOP_TIMES, null),
+            playerId -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_TOP_TIMES, playerId).player().score(),
+            playerId -> api.players.getDisplayName(playerId).build(),
                 10);
         buildingLeaderboard = new Leaderboard2(
                 null, null,

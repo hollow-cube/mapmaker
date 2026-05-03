@@ -24,7 +24,7 @@ public class MapTimeDeletedNotificationType implements PlayerNotificationType {
 
     @Override
     public PlayerNotification createNotification(Player player, ServiceContext context, Notification entry) {
-        var map = context.maps().getMap(player.getUuid().toString(), entry.key());
+        var map = context.api().maps.get(entry.key());
 
         return new PlayerNotification(
             entry,

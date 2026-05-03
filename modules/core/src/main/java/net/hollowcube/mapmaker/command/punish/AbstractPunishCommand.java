@@ -5,9 +5,9 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.types.PunishmentLadder;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
@@ -30,7 +30,7 @@ abstract class AbstractPunishCommand extends CommandDsl {
     private final Argument<String> commentArgument = Argument.GreedyString("comment");
 
     AbstractPunishCommand(@NotNull String name, @NotNull PunishmentType type, @NotNull PunishmentService service,
-                          @NotNull PlayerService playerService) {
+                          @NotNull PlayerClient players) {
         super(name);
 
         this.service = service;
@@ -48,7 +48,7 @@ abstract class AbstractPunishCommand extends CommandDsl {
         }
         var allLadderNames = allLaddersByName.keySet().stream().sorted().toList();
 
-        this.targetArgument = CoreArgument.AnyPlayerId("target", playerService);
+        this.targetArgument = CoreArgument.AnyPlayerId("target", players);
         this.ladderArgument = Argument.Word("ladder").map(
             (sender, raw) -> {
                 try {

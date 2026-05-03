@@ -5,10 +5,10 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.hollowcube.mapmaker.util.NumberUtil;
@@ -30,20 +30,20 @@ public class PHistoryCommand extends CommandDsl {
     private final Argument<PunishmentType> typeArg = Argument.Enum("type", PunishmentType.class)
         .description("The type of punishment to check");
 
-    private final PlayerService playerService;
+    private final PlayerClient players;
     private final PunishmentService punishmentService;
 
     public PHistoryCommand(
-        @NotNull PlayerService playerService,
+        @NotNull PlayerClient players,
         @NotNull PunishmentService punishmentService
     ) {
         super("phistory");
-        this.playerService = playerService;
+        this.players = players;
         this.punishmentService = punishmentService;
 
         category = CommandCategories.STAFF;
         description = "Check the punishment history of a player";
-        playerArg = CoreArgument.AnyPlayerId("player", playerService)
+        playerArg = CoreArgument.AnyPlayerId("player", players)
             .description("The player to check the history of");
 
         setCondition(staffPerm(Permission.GENERIC_STAFF));
@@ -67,7 +67,7 @@ public class PHistoryCommand extends CommandDsl {
             return;
         }
 
-        var targetDisplayName = playerService.getPlayerDisplayName2(target).build();
+        var targetDisplayName = players.getDisplayName(target).build();
         var builder = Component.text();
         builder.append(Component.translatable("punishment.history.header", targetDisplayName, Component.text(punishments.size())));
 
@@ -84,14 +84,14 @@ public class PHistoryCommand extends CommandDsl {
             }
 
             builder.append(Component.text(" by "));
-            builder.append(playerService.getPlayerDisplayName2(punishment.executorId()).build());
+            builder.append(players.getDisplayName(punishment.executorId()).build());
 
             if (punishment.revokedAt() != null) {
                 builder.append(Component.text(" ("));
                 builder.append(Component.text("revoked").hoverEvent(HoverEvent.showText(
                     Component.text(Objects.requireNonNullElse(punishment.revokedReason(), "no reason given")))));
                 builder.append(Component.text(" by "));
-                builder.append(OpUtils.mapOr(punishment.revokedBy(), it -> playerService.getPlayerDisplayName2(it).build(), Component.text("Unknown")));
+                builder.append(OpUtils.mapOr(punishment.revokedBy(), it -> players.getDisplayName(it).build(), Component.text("Unknown")));
                 builder.append(Component.text(" " + NumberUtil.formatTimeSince(punishment.revokedAt())));
                 builder.append(Component.text(" ago)"));
             } else if (punishment.expiresAt() != null) {

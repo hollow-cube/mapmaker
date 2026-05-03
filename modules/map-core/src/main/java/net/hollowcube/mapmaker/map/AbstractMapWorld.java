@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
@@ -394,10 +395,12 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     }
 
     protected void loadWorldData() {
-        var mapData = server().mapService().getMapWorldAsStream(map().id(), false);
-        if (mapData == null) return;
-
-        instance().loadStream(mapData, new ReadWorldAccess(this));
+        try {
+            var data = server().api().maps.getWorldStream(map().id());
+            instance().loadStream(data, new ReadWorldAccess(this));
+        } catch (ApiClient.NotFoundError _) {
+            // No world is fine, we will add the default blocks
+        }
     }
 
     public void loadWorldTag(TagReadable tag) {

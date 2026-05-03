@@ -244,7 +244,7 @@ public class MapData {
     @NonBlocking
     public static @NotNull Map.Entry<Component, List<Component>> createHoverComponents(
             @NotNull MapData map, @NotNull Component authorName,
-            @Nullable Map.Entry<PersonalizedMapData.Progress, Integer> personalProgress,
+            @Nullable PlayerMapProgress personalProgress,
             int playerProtocolVersion
     ) {
         class Holder {
@@ -315,15 +315,15 @@ public class MapData {
             )));
             lore.add(Component.empty());
         } else if (personalProgress != null) {
-            var progress = personalProgress.getKey();
-            var playtime = personalProgress.getValue();
-            if (progress == PersonalizedMapData.Progress.COMPLETE) {
+            var progress = personalProgress.progress();
+            var playtime = personalProgress.playtime();
+            if (progress == PlayerMapProgress.Progress.COMPLETE) {
                 lore.add(Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
                         .append(Component.text(BadSprite.require("icon/map_tooltip/completed").fontChar()).shadowColor(ShadowColor.none()))
                         .append(Component.text(FontUtil.computeOffset(6)))
                         .append(Component.translatable("gui.play_maps.map_display.completed", Component.text(NumberUtil.formatMapPlaytime(playtime, true)))));
                 lore.add(Component.empty());
-            } else if (progress == PersonalizedMapData.Progress.STARTED && playtime > 0) {
+            } else if (progress == PlayerMapProgress.Progress.STARTED && playtime > 0) {
                 lore.add(Component.empty().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
                         .append(Component.translatable("gui.play_maps.map_display.in_progress", Component.text(NumberUtil.formatMapPlaytime(playtime, true)))));
                 lore.add(Component.empty());

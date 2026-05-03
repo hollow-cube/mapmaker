@@ -3,8 +3,8 @@ package net.hollowcube.mapmaker.command.relationship;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.command.CommandCategories;
-import net.hollowcube.mapmaker.command.CoreCommandCondition;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
@@ -16,16 +16,18 @@ import java.util.List;
 public class UnblockCommand extends CommandDsl {
     private final Argument<String> targetArg;
 
+    private final PlayerClient players;
     private final PlayerService playerService;
 
-    public UnblockCommand(@NotNull PlayerService playerService) {
+    public UnblockCommand(@NotNull PlayerClient players, @NotNull PlayerService playerService) {
         super("unblock");
+        this.players = players;
         this.playerService = playerService;
         this.category = CommandCategories.SOCIAL;
         this.description = "Unblocks a player";
         this.examples = List.of("/unblock SethPRG");
 
-        this.targetArg = CoreArgument.AnyPlayerId("target", playerService).description("The player to unblock");
+        this.targetArg = CoreArgument.AnyPlayerId("target", players).description("The player to unblock");
 
         this.addSyntax(playerOnly(this::handleExec), this.targetArg);
     }

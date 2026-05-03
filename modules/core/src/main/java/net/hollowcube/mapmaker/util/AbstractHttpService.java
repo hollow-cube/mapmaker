@@ -13,12 +13,13 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.api.interaction.Command;
 import net.hollowcube.mapmaker.api.interaction.Interaction;
 import net.hollowcube.mapmaker.api.interaction.InteractionResponse;
+import net.hollowcube.mapmaker.api.maps.MapRating;
+import net.hollowcube.mapmaker.api.maps.MapReport;
 import net.hollowcube.mapmaker.api.maps.MapRole;
 import net.hollowcube.mapmaker.api.maps.MapWorldMessage;
 import net.hollowcube.mapmaker.backpack.BackpackItem;
 import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.map.*;
-import net.hollowcube.mapmaker.object.ObjectType;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataUpdateMessage;
 import net.hollowcube.mapmaker.player.RewardType;
@@ -50,7 +51,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public abstract class AbstractHttpService {
-    private static final System.Logger logger = System.getLogger(MapServiceImpl.class.getName());
+    private static final System.Logger logger = System.getLogger(AbstractHttpService.class.getName());
 
     public static final Gson GSON = new GsonBuilder()
         .registerTypeAdapter(MapVariant.class, new EnumTypeAdapter<>(MapVariant.class))
@@ -67,17 +68,16 @@ public abstract class AbstractHttpService {
         .registerTypeAdapter(Interaction.Type.class, new LenientEnumTypeAdapter<>(Interaction.Type.class))
         .registerTypeAdapter(InteractionResponse.Type.class, new LenientEnumTypeAdapter<>(InteractionResponse.Type.class))
         .registerTypeAdapter(MapRole.class, new LenientEnumTypeAdapter<>(MapRole.class))
-        .registerTypeAdapter(PersonalizedMapData.Progress.class, new EnumTypeAdapter<>(PersonalizedMapData.Progress.class))
+        .registerTypeAdapter(PlayerMapProgress.Progress.class, new EnumTypeAdapter<>(PlayerMapProgress.Progress.class))
         .registerTypeAdapter(ClientChatMessageData.Type.class, new EnumOrdinalTypeAdapter<>(ClientChatMessageData.Type.class))
         .registerTypeAdapter(ChatMessageData.Part.Type.class, new EnumOrdinalTypeAdapter<>(ChatMessageData.Part.Type.class))
         .registerTypeAdapter(SessionUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(SessionUpdateMessage.Action.class))
         .registerTypeAdapter(MapRating.State.class, new LenientEnumTypeAdapter<>(MapRating.State.class))
         .registerTypeAdapter(MapQuality.class, new LenientEnumTypeAdapter<>(MapQuality.class))
-        .registerTypeAdapter(ReportCategory.class, new EnumTypeAdapter<>(ReportCategory.class))
+        .registerTypeAdapter(MapReport.Category.class, new EnumTypeAdapter<>(MapReport.Category.class))
         .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
         .registerTypeAdapter(Material.class, new MaterialTypeAdapter())
         .registerTypeAdapter(Component.class, new ComponentTypeAdapter())
-        .registerTypeAdapter(ObjectType.class, new ObjectTypeTypeAdapter())
         .registerTypeAdapter(Point.class, new PointTypeAdapter())
         .registerTypeAdapter(DisplayName.class, new DisplayNameTypeAdapter())
         .registerTypeAdapter(Optional.class, new OptionalTypeAdapter())
@@ -129,14 +129,14 @@ public abstract class AbstractHttpService {
             if (res.statusCode() == 403) {
                 // We simply convert auth issues to 404s
                 logger.log(System.Logger.Level.ERROR, "auth failed for request: " + req.method() + " " + req.uri());
-                throw new MapService.NotFoundError("???");
+                throw new RuntimeException("Unexpected auth failure for request: " + req.method() + " " + req.uri());
             }
             return res;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new MapService.InternalError(e);
+            throw new RuntimeException(e);
         } catch (IOException e) {
-            throw new MapService.InternalError(e);
+            throw new RuntimeException(e);
         } finally {
             span.end();
         }
@@ -149,9 +149,9 @@ public abstract class AbstractHttpService {
             return httpClient.send(req, handler);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new MapService.InternalError(e);
+            throw new RuntimeException(e);
         } catch (IOException e) {
-            throw new MapService.InternalError(e);
+            throw new RuntimeException(e);
         }
     }
 

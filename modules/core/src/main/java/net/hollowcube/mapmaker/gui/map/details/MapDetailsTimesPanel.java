@@ -7,7 +7,6 @@ import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.Leaderboard;
 import net.hollowcube.mapmaker.map.LeaderboardData;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -29,7 +28,6 @@ public class MapDetailsTimesPanel extends Panel {
     private static final String MODEL_8X_OFFSET_2 = "mapmaker:2d_player_head_offset2";
 
     private final ApiClient api;
-    private final MapService mapService;
     private final MapData map;
     private final Leaderboard.Format lbFormat;
 
@@ -41,10 +39,9 @@ public class MapDetailsTimesPanel extends Panel {
     private final Text playerTimeText;
     private final List<Button> playerButtons; // They need the same text :|
 
-    public MapDetailsTimesPanel(ApiClient api, MapService mapService, MapData map) {
+    public MapDetailsTimesPanel(ApiClient api, MapData map) {
         super(9, 4);
         this.api = api;
-        this.mapService = mapService;
         this.map = map;
         this.lbFormat = map.settings().leaderboard().format();
 
@@ -77,7 +74,7 @@ public class MapDetailsTimesPanel extends Panel {
 
         async(() -> {
             var playerId = PlayerData.fromPlayer(host.player()).id();
-            var leaderboard = mapService.getPlaytimeLeaderboard(map.id(), playerId);
+            var leaderboard = api.maps.getMapLeaderboard(map.id(), playerId);
             // TODO: bulk endpoint?
             var displayNames = leaderboard.top().stream()
                 .map(LeaderboardData.Entry::player)

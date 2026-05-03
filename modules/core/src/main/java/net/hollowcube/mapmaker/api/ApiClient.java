@@ -41,25 +41,25 @@ public final class ApiClient {
     public static class Error extends RuntimeException {
         private final int statusCode;
 
-        public Error(HttpResponse<String> response) {
+        public Error(HttpResponse<?> response) {
             this.statusCode = response.statusCode();
         }
     }
 
     public static class NotFoundError extends Error {
-        public NotFoundError(HttpResponse<String> response) {
+        public NotFoundError(HttpResponse<?> response) {
             super(response);
         }
     }
 
     public static class BadRequestError extends Error {
-        public BadRequestError(HttpResponse<String> response) {
+        public BadRequestError(HttpResponse<?> response) {
             super(response);
         }
     }
 
     public static class InternalServerError extends Error {
-        public InternalServerError(HttpResponse<String> response) {
+        public InternalServerError(HttpResponse<?> response) {
             super(response);
         }
     }

@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.gui.common.ExtraPanels;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
@@ -17,13 +17,13 @@ import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
 
 public class EditMapActionsView extends Panel {
 
-    private final MapService mapService;
+    private final MapClient maps;
 
     private final MapData map;
 
-    public EditMapActionsView(MapService mapService, MapData map) {
+    public EditMapActionsView(MapClient maps, MapData map) {
         super(9, 10);
-        this.mapService = mapService;
+        this.maps = maps;
         this.map = map;
 
         background("create_maps2/edit/actions_container", -10, -31);
@@ -53,7 +53,7 @@ public class EditMapActionsView extends Panel {
         async(() -> {
             try {
                 var playerId = PlayerData.fromPlayer(player).id();
-                mapService.deleteMap(playerId, map.id(), null);
+                maps.delete(playerId, map.id(), null);
 
                 player.closeInventory();
                 player.sendMessage(Component.translatable("command.map.delete.success"));

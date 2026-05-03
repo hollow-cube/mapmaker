@@ -1,37 +1,41 @@
 package net.hollowcube.mapmaker.command.playerinfo;
 
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.player.PlayerService;
-import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import static net.kyori.adventure.text.Component.text;
+
 class AltsInfoType implements PlayerInfoType<String> {
 
-    private final PlayerService players;
+    private final PlayerClient players;
 
-    public AltsInfoType(PlayerService players) {
+    public AltsInfoType(@NotNull PlayerClient players) {
         this.players = players;
     }
 
     @Override
     public Argument<String> getArgument() {
-        return CoreArgument.AnyPlayerId("player", this.players);
+        return CoreArgument.AnyPlayerId("player", players);
     }
 
     @Override
     public void execute(@NotNull Player user, @NotNull String target) {
-        var alts = this.players.getAlts(target);
+        var alts = players.getAlts(target);
         if (alts.isEmpty()) {
             user.sendMessage("No alts found for %s".formatted(target));
         } else {
-            Component component = Component.text("Alts for ")
-                    .append(this.players.getPlayerDisplayName2(target).build())
-                    .append(Component.text(":"))
-                    .appendNewline();
+            var component = text()
+                .append(text("Alts for "))
+                .append(players.getDisplayName(target).build())
+                .append(text(":"))
+                .appendNewline();
             for (var alt : alts) {
-                component = component.append(Component.text(" - %s".formatted(alt.username()))).appendNewline();
+                component = component.append(text(" - "))
+                    .append(alt.displayName())
+                    .appendNewline();
             }
             user.sendMessage(component);
         }

@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 @RuntimeGson
 public record MapSearchParams(
-        @NotNull String authorizer,
         int page,
         int pageSize,
         boolean best,
@@ -56,13 +55,12 @@ public record MapSearchParams(
         return set.stream().map(Enum::name).map(it -> it.toLowerCase(Locale.ROOT)).collect(Collectors.joining(","));
     }
 
-    public static Builder builder(@NotNull String authorizer) {
-        return new Builder(authorizer);
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static class Builder {
 
-        private final @NotNull String authorizer;
         private final EnumSet<MapQuality> qualities = EnumSet.allOf(MapQuality.class);
         private final EnumSet<MapData.Difficulty> difficulties = EnumSet.allOf(MapData.Difficulty.class);
         private final EnumSet<MapVariant> variants = EnumSet.allOf(MapVariant.class);
@@ -75,8 +73,7 @@ public record MapSearchParams(
         private String query = null;
         private String contest = null;
 
-        private Builder(@NotNull String authorizer) {
-            this.authorizer = authorizer;
+        private Builder() {
         }
 
         public Builder page(int page) {
@@ -133,7 +130,7 @@ public record MapSearchParams(
         }
 
         public MapSearchParams build() {
-            return new MapSearchParams(authorizer, page, pageSize, best, ascending, qualities,
+            return new MapSearchParams(page, pageSize, best, ascending, qualities,
                                        difficulties, owner, query, variants, contest);
         }
     }

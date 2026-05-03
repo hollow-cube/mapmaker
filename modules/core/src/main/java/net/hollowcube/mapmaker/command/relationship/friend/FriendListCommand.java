@@ -5,7 +5,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.TimeComponent;
 import net.hollowcube.common.util.OpUtils;
-import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerFriend;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -17,20 +17,21 @@ import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
-
 public class FriendListCommand extends CommandDsl {
     private final Argument<Integer> pageArg = Argument.Int("page").min(1).defaultValue(1);
 
+    private final ApiClient api;
     private final PlayerService playerService;
-    private final MapService mapService;
     private final SessionManager sessionManager;
 
     public FriendListCommand(
-        @NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull SessionManager sessionManager) {
+        @NotNull ApiClient api,
+        @NotNull PlayerService playerService,
+        @NotNull SessionManager sessionManager
+    ) {
         super("list");
+        this.api = api;
         this.playerService = playerService;
-        this.mapService = mapService;
         this.sessionManager = sessionManager;
 
         this.addSyntax(playerOnly(this::exec));
@@ -54,7 +55,7 @@ public class FriendListCommand extends CommandDsl {
             .append(
                 Component.translatable("command.friend.list.header", Component.text(friends.page()), Component.text(pageCount)));
         for (PlayerFriend friend : friends.items()) {
-            DisplayName displayName = this.playerService.getPlayerDisplayName2(friend.playerId());
+            DisplayName displayName = api.players.getDisplayName(friend.playerId());
             Component username = displayName.asComponent();
             PlayerSession session = this.sessionManager.getSession(friend.playerId());
             if (friend.online() && session != null && !session.hidden()) {
@@ -64,7 +65,7 @@ public class FriendListCommand extends CommandDsl {
                         case Presence.TYPE_MAPMAKER_HUB ->
                             Component.translatable("command.friend.list.line.hub", username);
                         case Presence.TYPE_MAPMAKER_MAP -> {
-                            var map = this.mapService.getMap(player.getUuid().toString(), presence.mapId());
+                            var map = api.maps.get(presence.mapId());
                             if (Presence.MAP_BUILDING_STATES.contains(presence.state())) {
                                 yield Component.translatable("command.friend.list.line.building", username,
                                                              Component.text(friend.username()),

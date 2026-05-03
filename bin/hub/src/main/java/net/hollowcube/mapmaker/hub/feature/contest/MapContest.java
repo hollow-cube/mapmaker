@@ -98,7 +98,7 @@ public class MapContest implements HubFeature {
         if (world == null) return;
 
         Panel.open(player, new MapContestBrowserView(
-            world.server().api(), world.server().mapService(), world.server().bridge()
+            world.server().api(), world.server().bridge()
         ));
     }
 

@@ -6,11 +6,10 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.PlayerSettings;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.temp.ChatMessageData;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
@@ -48,22 +47,20 @@ public class MessageComponents {
             .expireAfterWrite(1, TimeUnit.HOURS)
             .build();
 
-    private final @NotNull MapService mapService;
-    private final @NotNull PlayerService playerService;
+    private final @NotNull ApiClient api;
 
-    public MessageComponents(@NotNull MapService mapService, @NotNull PlayerService playerService) {
-        this.mapService = mapService;
-        this.playerService = playerService;
+    public MessageComponents(@NotNull ApiClient api) {
+        this.api = api;
     }
 
     // region Component Parts
 
     @Blocking
-    private void map(@NotNull MessageComponent.Builder builder, @NotNull String mapid, @NotNull Player player) {
+    private void map(@NotNull MessageComponent.Builder builder, @NotNull String mapId, @NotNull Player player) {
         var uuid = player.getUuid().toString();
-        var map = mapDataCache.get(mapid, id -> mapService.getMap(uuid, id));
-        var author = usernameCache.get(map.owner(), id -> playerService.getPlayerDisplayName2(id).build());
-        var progress = mapService.getMapProgress(uuid, List.of(mapid)).getProgress(mapid);
+        var map = mapDataCache.get(mapId, api.maps::get);
+        var author = usernameCache.get(map.owner(), id -> api.players.getDisplayName(id).build());
+        var progress = api.maps.searchMapProgress(uuid, List.of(mapId)).first();
 
         var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
         var components = MapData.createHoverComponents(map, author, progress, playerProtocolVersion);
