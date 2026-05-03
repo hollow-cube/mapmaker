@@ -2,8 +2,6 @@ package net.hollowcube.mapmaker.map;
 
 import com.google.gson.JsonObject;
 import net.hollowcube.datafix.DataFixer;
-import net.hollowcube.mapmaker.map.requests.MapSearchParams;
-import net.hollowcube.mapmaker.map.responses.PlayerTopTimesResponse;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Transcoder;
@@ -14,8 +12,6 @@ import org.jetbrains.annotations.Nullable;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -36,154 +32,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
     public MapServiceImpl(String url) {
         this.url = String.format("%s/v1/internal/maps", url);
         this.urlV3 = String.format("%s/v3/internal", url);
-    }
-
-    @Override
-    public @NotNull net.hollowcube.mapmaker.map.responses.MapSearchResponse searchMaps(@NotNull MapSearchParams request) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(request.toUrl(urlV3 + "/maps/search")))
-            .header(AUTHORIZER_HEADER, request.authorizer())
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        if (res.statusCode() != 200) throw new InternalError("Failed to search maps: " + res.body());
-        return GSON.fromJson(res.body(), net.hollowcube.mapmaker.map.responses.MapSearchResponse.class);
-    }
-
-    @Override
-    public @NotNull MapProgressBatchResponse getMapProgress(@NotNull String playerId, @NotNull List<String> mapIds) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(urlV3 + "/maps/progress?playerId=" + playerId + "&mapIds=" + String.join(",", mapIds)))
-            .header(AUTHORIZER_HEADER, playerId)
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), MapProgressBatchResponse.class);
-            default -> throw new InternalError("Failed to search maps: " + res.body());
-        };
-    }
-
-    @Override
-    public @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(urlV3 + "/maps/" + id))
-            .header(AUTHORIZER_HEADER, authorizer)
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), MapData.class);
-            case 404 -> throw new NotFoundError(id);
-            default -> throw new InternalError("Failed to get map: " + res.body());
-        };
-    }
-
-    /// ONLY returns published maps currently.
-    @Override
-    public @NotNull List<MapData> getMaps(@NotNull String authorizer, @NotNull List<String> mapIds) {
-        if (mapIds.isEmpty()) return List.of();
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(urlV3 + "/maps?mapIds=" + String.join(",", mapIds)))
-            .header(AUTHORIZER_HEADER, authorizer)
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), MapDataResults.class).results();
-            default -> throw new InternalError("Failed to get maps: " + res.statusCode() + ": " + res.body());
-        };
-    }
-
-    @Override
-    public @NotNull MapData getMapByPublishedId(@NotNull String authorizer, long publishedId) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(urlV3 + "/maps/" + publishedId))
-            .header(AUTHORIZER_HEADER, authorizer)
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), MapData.class);
-            case 404 -> throw new NotFoundError(MapData.formatPublishedId(publishedId));
-            default -> throw new InternalError("Failed to get map: " + res.body());
-        };
-    }
-
-    @Override
-    public void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update) {
-        var reqBody = GSON.toJson(update);
-        var req = HttpRequest.newBuilder()
-            .method("PATCH", HttpRequest.BodyPublishers.ofString(reqBody))
-            .uri(URI.create(urlV3 + "/maps/" + id))
-            .header(AUTHORIZER_HEADER, authorizer)
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        switch (res.statusCode()) {
-            case 204 -> {/* update ok */}
-            case 404 -> throw new NotFoundError(id);
-            default -> throw new InternalError("Failed to update map" + res.statusCode() + ": " + res.body());
-        }
-    }
-
-    @Override
-    public void deleteMap(@NotNull String authorizer, @NotNull String id, @Nullable String reason) {
-        var body = new HashMap<String, String>();
-        body.put("reason", reason);
-        var reqBody = GSON.toJson(body);
-        var req = HttpRequest.newBuilder()
-            .method("DELETE", HttpRequest.BodyPublishers.ofString(reqBody))
-            .uri(URI.create(urlV3 + "/maps/" + id))
-            .header(AUTHORIZER_HEADER, authorizer)
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        switch (res.statusCode()) {
-            case 200 -> {/* delete ok */}
-            case 404 -> throw new NotFoundError(id);
-            default -> throw new InternalError("Failed to delete map" + res.statusCode() + ": " + res.body());
-        }
-    }
-
-    @Override
-    public void beginVerification(@NotNull String authorizer, @NotNull String mapId) {
-        var req = HttpRequest.newBuilder()
-            .POST(HttpRequest.BodyPublishers.noBody())
-            .uri(URI.create(urlV3 + "/maps/" + mapId + "/verify"))
-            .header(AUTHORIZER_HEADER, authorizer)
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        switch (res.statusCode()) {
-            case 200 -> {/* verification ok */}
-            case 404 -> throw new NotFoundError(mapId);
-            default -> throw new InternalError("Failed to begin verification: " + res.body());
-        }
-    }
-
-    @Override
-    public void deleteVerification(@NotNull String authorizer, @NotNull String mapId) {
-        var req = HttpRequest.newBuilder()
-            .method("DELETE", HttpRequest.BodyPublishers.noBody())
-            .uri(URI.create(urlV3 + "/maps/" + mapId + "/verify"))
-            .header(AUTHORIZER_HEADER, authorizer)
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        switch (res.statusCode()) {
-            case 200 -> {/* deleted */}
-            case 404 -> throw new NotFoundError(mapId);
-            default ->
-                throw new InternalError("Failed to delete verification (" + res.statusCode() + "): " + res.body());
-        }
-    }
-
-    @Override
-    public @NotNull MapData publishMap(@NotNull String authorizer, @NotNull String id) {
-        var body = "{}";
-        var req = HttpRequest.newBuilder()
-            .method("POST", HttpRequest.BodyPublishers.ofString(body))
-            .uri(URI.create(urlV3 + "/maps/" + id + "/publish"))
-            .header(AUTHORIZER_HEADER, authorizer)
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), MapData.class);
-            case 404 -> throw new NotFoundError(id);
-            default -> throw new InternalError("Failed to publish map: " + res.body());
-        };
     }
 
     @Override
@@ -252,22 +100,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             case 200 -> {/* update ok */}
             case 404 -> throw new NotFoundError(id);
             default -> throw new InternalError("Failed to update map world: " + res.body());
-        }
-    }
-
-    @Override
-    public void reportMap(@NotNull String mapId, @NotNull MapReportRequest req) {
-        var reqBody = GSON.toJson(req);
-        var req2 = HttpRequest.newBuilder()
-            .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
-            .uri(URI.create(urlV3 + "/maps/" + mapId + "/report"))
-            .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
-            .build();
-        var res = doRequest(req2, HttpResponse.BodyHandlers.ofString());
-        switch (res.statusCode()) {
-            case 200 -> {
-            }
-            default -> throw new InternalError("Failed to report map: " + res.body());
         }
     }
 
@@ -406,73 +238,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             }
             case 404 -> throw new NotFoundError(id);
             default -> throw new InternalError("Failed to update savestate (" + res.statusCode() + "): " + res.body());
-        };
-    }
-
-    @Override
-    public @NotNull MapRating getMapRating(@NotNull String mapId, @NotNull String playerId) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(urlV3 + "/maps/" + mapId + "/ratings/" + playerId))
-            .header(AUTHORIZER_HEADER, playerId)
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), MapRating.class);
-            case 404 -> new MapRating();
-            default -> throw new InternalError("Failed to get map rating (" + res.statusCode() + "): " + res.body());
-        };
-    }
-
-    @Override
-    public void setMapRating(@NotNull String mapId, @NotNull String playerId, @NotNull MapRating rating) {
-        var reqBody = GSON.toJson(rating);
-        var req = HttpRequest.newBuilder()
-            .method("PUT", HttpRequest.BodyPublishers.ofString(reqBody))
-            .uri(URI.create(urlV3 + "/maps/" + mapId + "/ratings/" + playerId))
-            .header(AUTHORIZER_HEADER, playerId)
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        if (res.statusCode() == 200) return; // Ok
-        throw new InternalError("Failed to set map rating (" + res.statusCode() + "): " + res.body());
-    }
-
-    @Override
-    public @NotNull MapPlayerData getMapPlayerData(@NotNull String playerId) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(urlV3 + "/map-players/" + playerId))
-            .header(AUTHORIZER_HEADER, playerId)
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        if (res.statusCode() == 200) return GSON.fromJson(res.body(), MapPlayerData.class); // Ok
-        throw new InternalError("Failed to get map player data: " + res.body());
-    }
-
-    @Override
-    public @NotNull MapHistory getPlayerMapHistory(@NotNull String playerId, int page, int amount) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(urlV3 + "/map-players/" + playerId + "/history?page=" + page + "&pageSize=" + amount))
-            .header(AUTHORIZER_HEADER, playerId)
-            .build();
-
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), MapHistory.class);
-            case 404 -> new MapHistory(page, false, List.of());
-            default -> throw new InternalError("Failed to get player map history: " + res.body());
-        };
-    }
-
-    @Override
-    public @NotNull PlayerTopTimesResponse getPlayerTopTimes(@NotNull String playerId, int page, int pageSize) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create("%s/map-players/%s/topTimes?page=%s&pageSize=%s".formatted(urlV3, playerId, page, pageSize)))
-            .GET()
-            .build();
-
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), PlayerTopTimesResponse.class);
-            default -> throw new InternalError("Failed to get player top times: " + res.body());
         };
     }
 

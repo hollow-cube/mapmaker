@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapService;
@@ -19,19 +20,23 @@ import java.util.List;
 
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 
+// TODO: this command should become a remote interaction command
 public class SFindCommand extends CommandDsl {
     private final Argument<String> targetArg;
 
+    private final ApiClient api;
     private final MapService mapService;
     private final PlayerService playerService;
     private final SessionManager sessionManager;
 
     public SFindCommand(
+        @NotNull ApiClient api,
         @NotNull MapService mapService,
         @NotNull PlayerService playerService,
         @NotNull SessionManager sessionManager
     ) {
         super("sfind");
+        this.api = api;
         this.mapService = mapService;
         this.playerService = playerService;
         this.sessionManager = sessionManager;
@@ -59,7 +64,7 @@ public class SFindCommand extends CommandDsl {
             case Presence.TYPE_MAPMAKER_HUB ->
                 player.sendMessage(Component.translatable("command.sfind.result.hub", targetName));
             case Presence.TYPE_MAPMAKER_MAP -> {
-                var map = mapService.getMap(target, presence.mapId());
+                var map = api.maps.get(presence.mapId());
                 player.sendMessage(LanguageProviderV2.translateMultiMerged(
                     "command.sfind.result.map",
                     List.of(targetName, Component.text(map.name()), Component.text(presence.state()), Component.text(presence.instanceId()))

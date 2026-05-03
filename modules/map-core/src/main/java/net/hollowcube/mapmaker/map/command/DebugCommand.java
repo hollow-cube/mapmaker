@@ -13,7 +13,6 @@ import net.hollowcube.compat.moulberrytweaks.debugrender.DebugShape;
 import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderAddPacket;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.command.arg.MapArgument;
-import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
@@ -133,10 +132,6 @@ public class DebugCommand extends CommandDsl {
         for (var entry : rawSettings) {
             player.sendMessage(Component.text("  " + entry.getKey() + ": " + entry.getValue()));
         }
-
-        var mapPlayerData = MapPlayerData.fromPlayer(player);
-        player.sendMessage(Component.text("Last played: " + mapPlayerData.lastPlayedMap()));
-        player.sendMessage(Component.text("Last edited: " + mapPlayerData.lastEditedMap()));
     }
 
     private void handleDebugServer(@NotNull Player player, @NotNull CommandContext context) {

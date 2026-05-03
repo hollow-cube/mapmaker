@@ -2,10 +2,9 @@ package net.hollowcube.mapmaker.gui.map;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.maps.MapClient;
+import net.hollowcube.mapmaker.api.maps.MapReport;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapReportRequest;
-import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.map.ReportCategory;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.MultiSelect;
 import net.hollowcube.mapmaker.panels.Panel;
@@ -22,18 +21,18 @@ import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
 
 public class MapReportView extends Panel {
 
-    private final MapService mapService;
+    private final MapClient maps;
     private final MapData map;
 
     private final Button commentButton;
-    private final MultiSelect<ReportCategory> options;
+    private final MultiSelect<MapReport.Category> options;
     private final Button submitButton;
 
     private String comment = "";
 
-    public MapReportView(@NotNull MapService mapService, @NotNull MapData map) {
+    public MapReportView(@NotNull MapClient maps, @NotNull MapData map) {
         super(9, 10);
-        this.mapService = mapService;
+        this.maps = maps;
         this.map = map;
 
         background("report_map/container", -10, -31);
@@ -52,13 +51,13 @@ public class MapReportView extends Panel {
                 .translationKey("gui.report_map.add_comment", getCommentText())
                 .onLeftClick(this::handleEditComment));
 
-        this.options = add(1, 2, new MultiSelect<ReportCategory>(6).onChange(this::updateSubmitButton));
-        options.addOption(ReportCategory.CHEATED, "gui.report_map.category.cheated", "icon2/1_1/herobrine_face", 1, 1);
-        options.addOption(ReportCategory.DISCRIMINATION, "gui.report_map.category.discrimination", "icon2/1_1/angry_face", 1, 1);
-        options.addOption(ReportCategory.EXPLICIT_CONTENT, "gui.report_map.category.explicit_content", "icon2/1_1/denied", 1, 1);
-        options.addOption(ReportCategory.SPAM, "gui.report_map.category.spam", "icon2/1_1/trash_can", 1, 1);
-        options.addOption(ReportCategory.DCMA, "gui.report_map.category.dcma", "icon2/1_1/robber_running", 1, 1);
-        options.addOption(ReportCategory.UNPLAYABLE, "gui.report_map.category.unplayable", "icon2/1_1/broken_file", 1, 1);
+        this.options = add(1, 2, new MultiSelect<MapReport.Category>(6).onChange(this::updateSubmitButton));
+        options.addOption(MapReport.Category.CHEATED, "gui.report_map.category.cheated", "icon2/1_1/herobrine_face", 1, 1);
+        options.addOption(MapReport.Category.DISCRIMINATION, "gui.report_map.category.discrimination", "icon2/1_1/angry_face", 1, 1);
+        options.addOption(MapReport.Category.EXPLICIT_CONTENT, "gui.report_map.category.explicit_content", "icon2/1_1/denied", 1, 1);
+        options.addOption(MapReport.Category.SPAM, "gui.report_map.category.spam", "icon2/1_1/trash_can", 1, 1);
+        options.addOption(MapReport.Category.DMCA, "gui.report_map.category.dcma", "icon2/1_1/robber_running", 1, 1);
+        options.addOption(MapReport.Category.UNPLAYABLE, "gui.report_map.category.unplayable", "icon2/1_1/broken_file", 1, 1);
 
         this.submitButton = add(2, 4, new Text("gui.report_map.submit.missing_categories", 5, 1, "Submit Report")
                 .align(Text.CENTER, Text.CENTER).background("generic2/btn/danger/5_1"))
@@ -106,9 +105,9 @@ public class MapReportView extends Panel {
         var player = host.player();
         player.closeInventory();
         var playerId = PlayerData.fromPlayer(player).id();
-        var req = new MapReportRequest(playerId, new ArrayList<>(options.selectedItems()), comment, null, null);
+        var req = new MapReport(playerId, new ArrayList<>(options.selectedItems()), comment, null, null);
         try {
-            mapService.reportMap(map.id(), req);
+            maps.report(map.id(), req);
             player.sendMessage(Component.translatable("gui.report_map.submit.success"));
         } catch (Exception e) {
             player.sendMessage(Component.translatable("gui.report_map.submit.failure"));

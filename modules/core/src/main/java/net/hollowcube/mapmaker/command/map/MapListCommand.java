@@ -6,10 +6,10 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.gui.map.MapListView;
-import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Panel;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +40,7 @@ public class MapListCommand extends CommandDsl {
         String targetId;
         if (!context.has(targetArg)) {
             // No target specified, use self
-            targetId = MapPlayerData.fromPlayer(player).id();
+            targetId = PlayerData.fromPlayer(player).id();
         } else {
             // Execute for the target, if they exist.
             targetId = context.get(targetArg);

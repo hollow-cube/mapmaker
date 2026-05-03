@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
@@ -81,13 +80,13 @@ final class MapPublisher {
 
     @Blocking
     private void tryBeginVerification(InventoryHost host) {
-        var playerData = PlayerData.fromPlayer(host.player());
+        var player = host.player();
         try {
-            this.mapService.beginVerification(playerData.id(), this.map.id());
+            api.maps.beginVerification(this.map.id());
         } catch (Exception exception) {
             host.close();
             host.player().sendMessage(Component.translatable("edit.map.failure"));
-            ExceptionReporter.reportException(exception, playerData);
+            ExceptionReporter.reportException(exception, player);
         }
     }
 
@@ -109,11 +108,11 @@ final class MapPublisher {
         try {
             // Save any pending changes immediately so details has the correct data (and we dont modify the map after publish)
             map.settings().withUpdateRequest(req -> {
-                mapService.updateMap(player.getUuid().toString(), map.id(), req);
+                api.maps.update(map.id(), req);
                 return true;
             });
 
-            this.mapService.publishMap(player.getUuid().toString(), this.map.id());
+            api.maps.publish(map.id());
 
             // TODO(v4 api): we refetch the map so it includes leaderboard info
             result = api.maps.get(map.id());

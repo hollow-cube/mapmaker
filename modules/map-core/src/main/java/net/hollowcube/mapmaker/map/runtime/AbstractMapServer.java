@@ -63,7 +63,10 @@ import net.hollowcube.mapmaker.invite.MapInviteAcceptedOrRejectedListener;
 import net.hollowcube.mapmaker.invite.MapInviteListener;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.invite.PlayerInviteServiceImpl;
-import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.MapServer;
+import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.map.MapServiceImpl;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
 import net.hollowcube.mapmaker.map.command.BugReportCommand;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
@@ -586,21 +589,16 @@ public abstract class AbstractMapServer implements MapServer {
                 presence.instanceId(), presence.type(),
                 presence.state(), presence.mapId()
             );
-            var sessionResponseFuture = FutureUtil.fork(() -> sessionService.transferSession(playerId, transferReq));
-            var mapPlayerDataFuture = FutureUtil.fork(() -> mapService.getMapPlayerData(playerId));
+            var session = sessionService.transferSession(playerId, transferReq);
 
-            CompletableFuture.allOf(sessionResponseFuture, mapPlayerDataFuture).join();
-
-            var sessionResponse = sessionResponseFuture.get();
-            player.setTag(CompatProvider.FIRST_JOIN_TAG, sessionResponse.isJoin());
-            player.setTag(PlayerData.TAG, sessionResponse.data());
-            sessionManager.updateSessionOptimistic(sessionResponse.session(), new SessionStateUpdateRequest.Metadata());
-            player.setTag(MapPlayerData.TAG, mapPlayerDataFuture.get());
+            player.setTag(CompatProvider.FIRST_JOIN_TAG, session.isJoin());
+            player.setTag(PlayerData.TAG, session.data());
+            sessionManager.updateSessionOptimistic(session.session(), new SessionStateUpdateRequest.Metadata());
             var backpack = new PlayerBackpack(player);
             player.setTag(PlayerBackpack.TAG, backpack);
 
             // If the player is joining vanished, configure them that way.
-            if (sessionResponse.session().hidden()) {
+            if (session.session().hidden()) {
                 logger.info("joining player {} is vanished", player.getUsername());
                 sessionManager.configureVanishedPlayer(player);
             }

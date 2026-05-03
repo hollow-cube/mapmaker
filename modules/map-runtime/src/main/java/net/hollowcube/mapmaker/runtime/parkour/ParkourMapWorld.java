@@ -5,6 +5,7 @@ import net.hollowcube.common.events.PlayerMoveVehicleEvent;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.dfu.DFU;
+import net.hollowcube.mapmaker.api.maps.MapRating;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.cosmetic.impl.victory.AbstractVictoryEffectImpl;

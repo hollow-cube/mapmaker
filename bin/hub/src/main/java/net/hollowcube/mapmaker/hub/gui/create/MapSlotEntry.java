@@ -49,13 +49,13 @@ public class MapSlotEntry extends Panel {
     @Blocking
     protected void buildInWorld() {
         if (isOwner(host.player())) {
-            EditMapView.editMap(mapService, slot.map(), this.host, bridge);
+            EditMapView.editMap(api.maps, slot.map(), this.host, bridge);
             return;
         }
 
         // If you arent the owner, we need to check the latest version to make sure its not in a verifying state
         // TODO: this is still a race, we need to check elsewhere to prevent editing a map during/after verification
-        var map = mapService.getMap(host.player().getUuid().toString(), slot.map().id());
+        var map = api.maps.get(slot.map().id());
         if (map.verification() == MapVerification.PENDING) {
             host.player().sendMessage(Component.translatable("edit.map.failure.verify"));
             return;

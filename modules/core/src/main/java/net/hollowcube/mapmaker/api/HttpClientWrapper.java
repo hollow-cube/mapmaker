@@ -10,6 +10,7 @@ import io.opentelemetry.semconv.UrlAttributes;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,12 +150,15 @@ public class HttpClientWrapper {
         };
     }
 
-    public static String query(Object... pairs) {
+    public static String query(@Nullable Object... pairs) {
         if (pairs.length % 2 != 0)
             throw new IllegalArgumentException("Must have an even number of arguments");
         var builder = new StringBuilder().append('?');
         for (int i = 0; i < pairs.length; i += 2) {
-            builder.append(pairs[i]).append('=').append(urlEncode(pairs[i + 1].toString()));
+            var value = pairs[i + 1];
+            if (value == null) continue; // skip null values entirely
+
+            builder.append(pairs[i]).append('=').append(urlEncode(value.toString()));
             if (i != pairs.length - 2) builder.append('&');
         }
         return builder.toString();

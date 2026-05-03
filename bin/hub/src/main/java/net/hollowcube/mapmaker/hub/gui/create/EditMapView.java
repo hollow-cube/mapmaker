@@ -7,6 +7,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.api.ApiClient;
+import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.api.maps.MapSlot;
 import net.hollowcube.mapmaker.api.players.PlayerDataStub;
 import net.hollowcube.mapmaker.gui.common.ExtraPanels;
@@ -52,7 +53,6 @@ public class EditMapView extends Panel {
     private static final int NAME_INPUT_MAX = 100;
 
     private final ApiClient api;
-    private final MapService mapService;
     private final PlayerService playerService;
 
     private MapSlot slot;
@@ -72,7 +72,6 @@ public class EditMapView extends Panel {
     ) {
         super(9, 10);
         this.api = api;
-        this.mapService = mapService;
         this.playerService = playerService;
         this.slot = slot;
 
@@ -93,7 +92,7 @@ public class EditMapView extends Panel {
         add(8, 0, new Button("gui.create_maps.edit.actions", 1, 1)
             .background("generic2/btn/default/1_1")
             .sprite("icon2/1_1/ellipsis", 1, 1)
-            .onLeftClick(() -> host.pushView(new EditMapActionsView(mapService, slot.map()))));
+            .onLeftClick(() -> host.pushView(new EditMapActionsView(api.maps, slot.map()))));
 
         add(1, 1, infoText(1, "icon", -2));
         this.iconButton = add(1, 2, new Button("gui.create_maps.edit.icon", 1, 1)
@@ -181,7 +180,7 @@ public class EditMapView extends Panel {
         final var player = host.player();
         async(() -> slot.map().settings().withUpdateRequest(req -> {
             try {
-                mapService.updateMap(player.getUuid().toString(), slot.map().id(), req);
+                api.maps.update(slot.map().id(), req);
                 return true;
             } catch (Exception e) {
                 ExceptionReporter.reportException(e, player);
@@ -342,21 +341,20 @@ public class EditMapView extends Panel {
     }
 
     @Blocking
-    static void editMap(MapService mapService, MapData map, InventoryHost host, ServerBridge bridge) {
+    static void editMap(MapClient maps, MapData map, InventoryHost host, ServerBridge bridge) {
         if (map.verification() != MapVerification.UNVERIFIED) {
             host.pushView(ExtraPanels.confirm("Reset Verification Progress?",
-                FutureUtil.wrapVirtual(() -> buildMapAfterVerify(mapService, bridge, map, host.player()))));
+                FutureUtil.wrapVirtual(() -> buildMapAfterVerify(maps, bridge, map, host.player()))));
         } else {
             beginBuildingMap(bridge, map, host.player());
         }
     }
 
     @Blocking
-    private static void buildMapAfterVerify(MapService mapService, ServerBridge bridge, MapData map, Player player) {
+    private static void buildMapAfterVerify(MapClient maps, ServerBridge bridge, MapData map, Player player) {
         player.sendMessage(Component.translatable("progress.verification.lost"));
 
-        var playerData = PlayerData.fromPlayer(player);
-        mapService.deleteVerification(playerData.id(), map.id());
+        maps.deleteVerification(map.id());
 
         beginBuildingMap(bridge, map, player);
     }

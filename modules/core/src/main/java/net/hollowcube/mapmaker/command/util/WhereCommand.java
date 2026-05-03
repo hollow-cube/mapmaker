@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.command.util;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapService;
@@ -18,16 +19,19 @@ import java.util.Objects;
 public class WhereCommand extends CommandDsl {
     private final Argument<String> targetArg;
 
+    private final ApiClient api;
     private final SessionManager sessionManager;
     private final PlayerService playerService;
     private final MapService mapService;
 
     public WhereCommand(
+        @NotNull ApiClient api,
         @NotNull SessionManager sessionManager,
         @NotNull PlayerService playerService,
         @NotNull MapService mapService
     ) {
         super("where", "find");
+        this.api = api;
         this.sessionManager = sessionManager;
         this.playerService = playerService;
         this.mapService = mapService;
@@ -61,7 +65,7 @@ public class WhereCommand extends CommandDsl {
             switch (presence.type()) {
                 case Presence.TYPE_MAPMAKER_HUB -> player.sendMessage(Component.translatable("command.where.self.hub"));
                 case Presence.TYPE_MAPMAKER_MAP -> {
-                    var map = mapService.getMap(senderId, presence.mapId());
+                    var map = api.maps.get(presence.mapId());
                     if (Presence.MAP_BUILDING_STATES.contains(presence.state())) {
                         player.sendMessage(Component.translatable("command.where.self.building", Component.text(map.name())));
                     } else if (Presence.VERIFYING_STATE.equals(presence.state())) {
@@ -86,7 +90,7 @@ public class WhereCommand extends CommandDsl {
                     return;
                 }
 
-                var map = mapService.getMap(senderId, presence.mapId());
+                var map = api.maps.get(presence.mapId());
                 if (Presence.MAP_BUILDING_STATES.contains(presence.state())) {
                     player.sendMessage(Component.translatable("command.where.building", targetName, Component.text(target), Component.text(map.name())));
                 } else if (Presence.VERIFYING_STATE.equals(presence.state())) {

@@ -3,16 +3,13 @@ package net.hollowcube.mapmaker.command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapPlayerData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -30,20 +27,18 @@ public class TopTimesCommand extends CommandDsl {
 
     private final ApiClient api;
     private final MapService maps;
-    private final PlayerService players;
     private final SessionManager sessions;
 
-    public TopTimesCommand(@NotNull ApiClient api, @NotNull MapService maps, @NotNull PlayerService players, @NotNull SessionManager sessions) {
+    public TopTimesCommand(@NotNull ApiClient api, @NotNull MapService maps, @NotNull SessionManager sessions) {
         super("toptimes", "tt", "leaderboard", "lb");
         this.api = api;
         this.maps = maps;
-        this.players = players;
         this.sessions = sessions;
 
         category = CommandCategories.MAP;
         description = "Shows the top leaderboard positions for a map";
 
-        mapArg = CoreArgument.Map("map", maps).description("The map to check the leaderboard of");
+        mapArg = CoreArgument.Map("map", api.maps).description("The map to check the leaderboard of");
 
         addSyntax(playerOnly(this::showTopTimes));
         addSyntax(playerOnly(this::showTopTimes), mapArg);
@@ -58,18 +53,7 @@ public class TopTimesCommand extends CommandDsl {
                 return;
             }
         } else {
-            try {
-                map = OpUtils.or(
-                    MiscFunctionality.getCurrentMap(sessions, maps, player),
-                    () -> OpUtils.map(
-                        MapPlayerData.fromPlayer(player).lastPlayedMap(),
-                        id -> maps.getMap(PlayerData.fromPlayer(player).id(), id)
-                    )
-                );
-            } catch (MapService.NotFoundError _) {
-                map = null;
-            }
-
+            map = MiscFunctionality.getCurrentMap(sessions, api, player);
             if (map == null) {
                 player.sendMessage(NO_MAP_PLAYED);
                 return;

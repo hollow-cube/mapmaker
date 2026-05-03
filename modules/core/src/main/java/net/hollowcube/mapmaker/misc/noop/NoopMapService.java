@@ -1,8 +1,6 @@
 package net.hollowcube.mapmaker.misc.noop;
 
 import net.hollowcube.mapmaker.map.*;
-import net.hollowcube.mapmaker.map.requests.MapSearchParams;
-import net.hollowcube.mapmaker.map.responses.PlayerTopTimesResponse;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -30,63 +28,6 @@ public class NoopMapService implements MapService {
     );
 
     @Override
-    public @NotNull net.hollowcube.mapmaker.map.responses.MapSearchResponse searchMaps(@NotNull MapSearchParams request) {
-        return new net.hollowcube.mapmaker.map.responses.MapSearchResponse(
-            0, 1,
-            staticMaps.values().stream().filter(m -> m instanceof PersonalizedMapData && m.publishedAt() != null).toList()
-        );
-    }
-
-    @Override
-    public @NotNull MapProgressBatchResponse getMapProgress(@NotNull String playerId, @NotNull List<String> mapIds) {
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
-    public @NotNull MapData getMap(@NotNull String authorizer, @NotNull String id) {
-        var map = staticMaps.get(id);
-        if (map == null) {
-            throw new NotFoundError(id);
-        }
-        return map;
-    }
-
-    @Override
-    public @NotNull List<MapData> getMaps(@NotNull String authorizer, @NotNull List<String> mapIds) {
-        return mapIds.stream().map(staticMaps::get).toList();
-    }
-
-    @Override
-    public @NotNull MapData getMapByPublishedId(@NotNull String authorizer, long publishedId) {
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
-    public void updateMap(@NotNull String authorizer, @NotNull String id, @NotNull MapUpdateRequest update) {
-        // Just dont do anything
-    }
-
-    @Override
-    public void deleteMap(@NotNull String authorizer, @NotNull String id, @Nullable String reason) {
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
-    public void beginVerification(@NotNull String authorizer, @NotNull String mapId) {
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
-    public void deleteVerification(@NotNull String authorizer, @NotNull String mapId) {
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
-    public @NotNull MapData publishMap(@NotNull String authorizer, @NotNull String id) {
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
     public byte @Nullable [] getMapWorld(@NotNull String id, boolean write) {
         return null;
     }
@@ -94,11 +35,6 @@ public class NoopMapService implements MapService {
     @Override
     public void updateMapWorld(@NotNull String id, byte @NotNull [] worldData, long loadTime) {
         // Do nothing we arent going to save the world
-    }
-
-    @Override
-    public void reportMap(@NotNull String mapId, @NotNull MapReportRequest req) {
-
     }
 
     @Override
@@ -134,35 +70,6 @@ public class NoopMapService implements MapService {
     @Override
     public @Nullable SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
         return null;
-    }
-
-    @Override
-    public @NotNull MapRating getMapRating(@NotNull String mapId, @NotNull String playerId) {
-        return new MapRating(MapRating.State.UNRATED, null);
-    }
-
-    @Override
-    public void setMapRating(@NotNull String mapId, @NotNull String playerId, @NotNull MapRating rating) {
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
-    public @NotNull MapPlayerData getMapPlayerData(@NotNull String playerId) {
-        return new MapPlayerData(
-            playerId,
-            new String[]{null, "62da0aaf-8cad-4c13-869c-02b07688988d", null, null},
-            null, null, null
-        );
-    }
-
-    @Override
-    public @NotNull MapHistory getPlayerMapHistory(@NotNull String playerId, int page, int amount) {
-        return new MapHistory(page, false, List.of(new MapHistory.Entry("62da0aaf-8cad-4c13-869c-02b07688988d")));
-    }
-
-    @Override
-    public @NotNull PlayerTopTimesResponse getPlayerTopTimes(@NotNull String playerId, int page, int pageSize) {
-        throw new UnsupportedOperationException("not implemented");
     }
 
 }

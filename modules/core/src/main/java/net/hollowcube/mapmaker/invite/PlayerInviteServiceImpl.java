@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.invite;
 
 import io.opentelemetry.api.OpenTelemetry;
 import net.hollowcube.common.util.RuntimeGson;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.invite.types.MapInvite;
 import net.hollowcube.mapmaker.map.MapData;
@@ -32,6 +33,7 @@ import java.util.UUID;
 public final class PlayerInviteServiceImpl extends AbstractHttpService implements PlayerInviteService {
 
     private final String url;
+    private final ApiClient api;
     private final PlayerService playerService;
     private final MapService mapService;
     private final SessionManager sessionManager;
@@ -40,6 +42,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     public PlayerInviteServiceImpl(
         @NotNull OpenTelemetry otel,
         @NotNull String url,
+        @NotNull ApiClient api,
         @NotNull PlayerService playerService,
         @NotNull MapService mapService,
         @NotNull SessionManager sessionManager,
@@ -47,6 +50,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     ) {
         super(otel);
         this.url = String.format("%s/v3/internal/invites", url);
+        this.api = api;
         this.playerService = playerService;
         this.mapService = mapService;
         this.sessionManager = sessionManager;
@@ -81,7 +85,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
             return;
         }
 
-        var targetMap = mapService.getMap(targetId, targetPresence.mapId());
+        var targetMap = api.maps.get(targetPresence.mapId());
         var senderData = PlayerData.fromPlayer(sender);
         // TODO: When trusted members exist for maps, check if the player is a trusted member
         if (!targetMap.isPublished() && !senderData.has(Permission.GENERIC_STAFF)) {
@@ -164,7 +168,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
             return;
         }
 
-        var targetMap = mapService.getMap(targetId, targetPresence.mapId());
+        var targetMap = api.maps.get(targetPresence.mapId());
 
         var body = GSON.toJson(new MapInvite(InviteType.REQUEST, sender, targetId, targetMap));
         var request = HttpRequest.newBuilder()
@@ -224,7 +228,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         switch (statusCode) {
             case 200 -> {
                 var invite = GSON.fromJson(response.body(), MapInvite.class);
-                var inviteMap = mapService.getMap(invite.senderId(), invite.mapId());
+                var inviteMap = api.maps.get(invite.mapId());
 
                 boolean isInvite = invite.inviteType() == InviteType.INVITE;
                 String inviteRequest = isInvite ? "invite" : "request";

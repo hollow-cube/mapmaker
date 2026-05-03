@@ -7,7 +7,7 @@ import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.map.PersonalizedMapData;
+import net.hollowcube.mapmaker.map.PlayerMapProgress;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
@@ -19,7 +19,6 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public class MapIconPanel extends Panel {
@@ -29,7 +28,7 @@ public class MapIconPanel extends Panel {
     private final MapData map;
 
     private DisplayName authorName = null; // Filled async
-    private Map.Entry<PersonalizedMapData.Progress, Integer> progress = null; // Filled async
+    private PlayerMapProgress progress = null; // Filled async
 
     private final Button button;
 
@@ -91,7 +90,7 @@ public class MapIconPanel extends Panel {
         });
     }
 
-    public void updateProgress(@NotNull Map.Entry<PersonalizedMapData.Progress, Integer> progress) {
+    public void updateProgress(@NotNull PlayerMapProgress progress) {
         sync(() -> {
             this.progress = progress;
             updateIcon();

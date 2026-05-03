@@ -13,6 +13,8 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.api.interaction.Command;
 import net.hollowcube.mapmaker.api.interaction.Interaction;
 import net.hollowcube.mapmaker.api.interaction.InteractionResponse;
+import net.hollowcube.mapmaker.api.maps.MapRating;
+import net.hollowcube.mapmaker.api.maps.MapReport;
 import net.hollowcube.mapmaker.api.maps.MapRole;
 import net.hollowcube.mapmaker.api.maps.MapWorldMessage;
 import net.hollowcube.mapmaker.backpack.BackpackItem;
@@ -67,13 +69,13 @@ public abstract class AbstractHttpService {
         .registerTypeAdapter(Interaction.Type.class, new LenientEnumTypeAdapter<>(Interaction.Type.class))
         .registerTypeAdapter(InteractionResponse.Type.class, new LenientEnumTypeAdapter<>(InteractionResponse.Type.class))
         .registerTypeAdapter(MapRole.class, new LenientEnumTypeAdapter<>(MapRole.class))
-        .registerTypeAdapter(PersonalizedMapData.Progress.class, new EnumTypeAdapter<>(PersonalizedMapData.Progress.class))
+        .registerTypeAdapter(PlayerMapProgress.Progress.class, new EnumTypeAdapter<>(PlayerMapProgress.Progress.class))
         .registerTypeAdapter(ClientChatMessageData.Type.class, new EnumOrdinalTypeAdapter<>(ClientChatMessageData.Type.class))
         .registerTypeAdapter(ChatMessageData.Part.Type.class, new EnumOrdinalTypeAdapter<>(ChatMessageData.Part.Type.class))
         .registerTypeAdapter(SessionUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(SessionUpdateMessage.Action.class))
         .registerTypeAdapter(MapRating.State.class, new LenientEnumTypeAdapter<>(MapRating.State.class))
         .registerTypeAdapter(MapQuality.class, new LenientEnumTypeAdapter<>(MapQuality.class))
-        .registerTypeAdapter(ReportCategory.class, new EnumTypeAdapter<>(ReportCategory.class))
+        .registerTypeAdapter(MapReport.Category.class, new EnumTypeAdapter<>(MapReport.Category.class))
         .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
         .registerTypeAdapter(Material.class, new MaterialTypeAdapter())
         .registerTypeAdapter(Component.class, new ComponentTypeAdapter())

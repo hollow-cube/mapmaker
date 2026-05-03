@@ -33,7 +33,7 @@ public final class MapBuilderInviteNotificationType implements PlayerNotificatio
         var mapId = data.get("mapId").getAsString();
 
         var inviterDisplayName = context.players().getPlayerDisplayName2(inviterId);
-        var map = context.maps().getMap(inviterId, mapId);
+        var map = context.api().maps.get(mapId);
 
         return new EntryData(map.id(), Component.text(map.name()), inviterDisplayName.asComponent());
     }

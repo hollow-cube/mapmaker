@@ -2,11 +2,13 @@ package net.hollowcube.mapmaker.api.maps;
 
 import com.google.gson.reflect.TypeToken;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
+import net.hollowcube.mapmaker.api.PaginatedList;
 import net.hollowcube.mapmaker.api.ResultList;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapSize;
-import net.hollowcube.mapmaker.map.MapUpdateRequest;
+import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.requests.MapSearchParams;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Map;
 
 import static net.hollowcube.mapmaker.api.ApiClient.notImplemented;
@@ -24,6 +26,22 @@ public interface MapClient {
     }
 
     default void update(String mapId, MapUpdateRequest body) {
+        throw notImplemented();
+    }
+
+    default void delete(String actorId, String mapId, @Nullable String reason) {
+        throw notImplemented();
+    }
+
+    default void publish(String mapId) {
+        throw notImplemented();
+    }
+
+    default void beginVerification(String mapId) {
+        throw notImplemented();
+    }
+
+    default void deleteVerification(String mapId) {
         throw notImplemented();
     }
 
@@ -49,6 +67,34 @@ public interface MapClient {
     }
 
     default void rejectMapBuilderInvite(String mapId, String playerId) {
+        throw notImplemented();
+    }
+
+    default void report(String mapId, MapReport report) {
+        throw notImplemented();
+    }
+
+    default MapRating getPlayerRating(String mapId, String playerId) {
+        throw notImplemented();
+    }
+
+    default void setPlayerRating(String mapId, String playerId, MapRating rating) {
+        throw notImplemented();
+    }
+
+    default PaginatedList<String> getPlayerMapHistory(String playerId, int page, int pageSize) {
+        throw notImplemented();
+    }
+
+    default PaginatedList<PlayerTopTimeEntry> getPlayerTopTimes(String playerId, int page, int pageSize) {
+        throw notImplemented();
+    }
+
+    default PaginatedList<MapData> search(MapSearchParams params) {
+        throw notImplemented();
+    }
+
+    default ResultList<PlayerMapProgress> searchMapProgress(String playerId, List<String> mapIds) {
         throw notImplemented();
     }
 
@@ -79,6 +125,38 @@ public interface MapClient {
                 "updateMap",
                 V4_PREFIX + "/" + mapId,
                 body);
+        }
+
+        @Override
+        public void delete(String actorId, String mapId, @Nullable String reason) {
+            http.delete(
+                "deleteMap",
+                V4_PREFIX + "/" + mapId + query("actorId", actorId, "reason", reason)
+            );
+        }
+
+        @Override
+        public void publish(String mapId) {
+            http.post(
+                "publishMap",
+                V4_PREFIX + "/" + mapId + "/publish"
+            );
+        }
+
+        @Override
+        public void beginVerification(String mapId) {
+            http.post(
+                "beginVerification",
+                V4_PREFIX + "/" + mapId + "/verification"
+            );
+        }
+
+        @Override
+        public void deleteVerification(String mapId) {
+            http.delete(
+                "deleteVerification",
+                V4_PREFIX + "/" + mapId + "/verification"
+            );
         }
 
         @Override
@@ -124,6 +202,70 @@ public interface MapClient {
             http.post(
                 "rejectMapBuilderInvite",
                 V4_PREFIX + "/" + mapId + "/builders/" + playerId + "/reject");
+        }
+
+        @Override
+        public void report(String mapId, MapReport report) {
+            http.post(
+                "reportMap",
+                V4_PREFIX + "/" + mapId + "/reports",
+                report
+            );
+        }
+
+        @Override
+        public MapRating getPlayerRating(String mapId, String playerId) {
+            return http.get(
+                "getMapPlayerRating",
+                V4_PREFIX + "/" + mapId + "/ratings/" + playerId,
+                new TypeToken<>() {}
+            );
+        }
+
+        @Override
+        public void setPlayerRating(String mapId, String playerId, MapRating rating) {
+            http.post(
+                "setMapPlayerRating",
+                V4_PREFIX + "/" + mapId + "/ratings/" + playerId,
+                Map.of("rating", rating)
+            );
+        }
+
+        @Override
+        public PaginatedList<String> getPlayerMapHistory(String playerId, int page, int pageSize) {
+            return http.get(
+                "getPlayerMapHistory",
+                V4_PLAYERS_PREFIX + "/" + playerId + "/map-history" + query("page", page, "pageSize", pageSize),
+                new TypeToken<>() {}
+            );
+        }
+
+        @Override
+        public PaginatedList<PlayerTopTimeEntry> getPlayerTopTimes(String playerId, int page, int pageSize) {
+            return http.get(
+                "getPlayerTopTimes",
+                V4_PLAYERS_PREFIX + "/" + playerId + "/top-times" + query("page", page, "pageSize", pageSize),
+                new TypeToken<>() {}
+            );
+        }
+
+        @Override
+        public PaginatedList<MapData> search(MapSearchParams params) {
+            return http.get(
+                "searchMaps",
+                params.toUrl(V4_PREFIX + "/search"),
+                new TypeToken<>() {}
+            );
+        }
+
+        @Override
+        public ResultList<PlayerMapProgress> searchMapProgress(String playerId, List<String> mapIds) {
+            return http.post(
+                "searchMapProgress",
+                V4_PREFIX + "/search/progress",
+                Map.of("playerId", playerId, "mapIds", mapIds),
+                new TypeToken<>() {}
+            );
         }
     }
 

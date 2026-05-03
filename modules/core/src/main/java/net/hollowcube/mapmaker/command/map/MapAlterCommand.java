@@ -7,11 +7,11 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.codec.Result;
 import net.minestom.server.codec.Transcoder;
@@ -56,12 +56,12 @@ public class MapAlterCommand {
         .with(ProtocolVersions.SUPPORTED_PROTOCOL_NAMES)
         .description("The new minimum required version for the map");
 
-    private final MapService mapService;
+    private final MapClient maps;
 
-    public MapAlterCommand(@NotNull MapService mapService) {
-        this.mapService = mapService;
+    public MapAlterCommand(@NotNull MapClient maps) {
+        this.maps = maps;
 
-        mapArg = CoreArgument.Map("map", mapService) //todo should be any map dependent on context.
+        mapArg = CoreArgument.Map("map", maps)
             .description("The ID of the map to edit");
 
         var subvariantTypes = new ArrayList<String>();
@@ -343,9 +343,8 @@ public class MapAlterCommand {
     @Blocking
     private boolean doMapUpdate(@NotNull Player player, @NotNull MapData map) {
         try {
-            var playerId = PlayerData.fromPlayer(player).id();
             map.settings().withUpdateRequest(req -> {
-                mapService.updateMap(playerId, map.id(), req);
+                maps.update(map.id(), req);
                 return true; // Exceptions handled outside
             });
             return true;

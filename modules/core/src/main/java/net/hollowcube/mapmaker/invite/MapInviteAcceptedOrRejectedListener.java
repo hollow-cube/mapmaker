@@ -5,6 +5,7 @@ import io.nats.client.MessageConsumer;
 import io.nats.client.api.AckPolicy;
 import io.nats.client.api.ConsumerConfiguration;
 import io.nats.client.api.DeliverPolicy;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.invite.types.MapInviteAcceptedOrRejectedMessage;
 import net.hollowcube.mapmaker.map.MapService;
@@ -36,6 +37,7 @@ public final class MapInviteAcceptedOrRejectedListener implements Closeable {
         .inactiveThreshold(Duration.ofMinutes(5))
         .build();
 
+    private final ApiClient api;
     private final MapService mapService;
     private final PlayerService playerService;
     private final SessionManager sessionManager;
@@ -44,10 +46,12 @@ public final class MapInviteAcceptedOrRejectedListener implements Closeable {
     private final MessageConsumer consumer;
 
     public MapInviteAcceptedOrRejectedListener(
+        @NotNull ApiClient api,
         @NotNull MapService mapService, @NotNull PlayerService playerService,
         @NotNull SessionManager sessionManager, @NotNull ServerBridge serverBridge,
         @NotNull JetStreamWrapper jetStream
     ) {
+        this.api = api;
         this.mapService = mapService;
         this.playerService = playerService;
         this.sessionManager = sessionManager;
@@ -82,7 +86,7 @@ public final class MapInviteAcceptedOrRejectedListener implements Closeable {
             return;
         }
 
-        var map = this.mapService.getMap(message.recipientId(), message.mapId());
+        var map = api.maps.get(message.mapId());
         var mapName = Component.text(map.name());
 
         var targetId = message.recipientId();
@@ -121,7 +125,7 @@ public final class MapInviteAcceptedOrRejectedListener implements Closeable {
         var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(playerId);
         if (player == null) return;
 
-        var map = this.mapService.getMap(targetPlayerId, mapId);
+        var map = api.maps.get(mapId);
         this.serverBridge.joinMap(player, mapId, map.isPublished() ? JoinMapState.PLAYING : JoinMapState.EDITING, source);
     }
 }

@@ -6,6 +6,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.PlayerSettings;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.misc.Emoji;
@@ -48,10 +49,12 @@ public class MessageComponents {
             .expireAfterWrite(1, TimeUnit.HOURS)
             .build();
 
+    private final @NotNull ApiClient api;
     private final @NotNull MapService mapService;
     private final @NotNull PlayerService playerService;
 
-    public MessageComponents(@NotNull MapService mapService, @NotNull PlayerService playerService) {
+    public MessageComponents(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull PlayerService playerService) {
+        this.api = api;
         this.mapService = mapService;
         this.playerService = playerService;
     }
@@ -59,11 +62,11 @@ public class MessageComponents {
     // region Component Parts
 
     @Blocking
-    private void map(@NotNull MessageComponent.Builder builder, @NotNull String mapid, @NotNull Player player) {
+    private void map(@NotNull MessageComponent.Builder builder, @NotNull String mapId, @NotNull Player player) {
         var uuid = player.getUuid().toString();
-        var map = mapDataCache.get(mapid, id -> mapService.getMap(uuid, id));
+        var map = mapDataCache.get(mapId, api.maps::get);
         var author = usernameCache.get(map.owner(), id -> playerService.getPlayerDisplayName2(id).build());
-        var progress = mapService.getMapProgress(uuid, List.of(mapid)).getProgress(mapid);
+        var progress = api.maps.searchMapProgress(uuid, List.of(mapId)).first();
 
         var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
         var components = MapData.createHoverComponents(map, author, progress, playerProtocolVersion);

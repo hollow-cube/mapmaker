@@ -2,16 +2,15 @@ package net.hollowcube.mapmaker.command.arg;
 
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
-import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.api.maps.MapClient;
+import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
-import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
-import java.util.UUID;
 
 public final class CoreArgument {
 
@@ -39,7 +38,7 @@ public final class CoreArgument {
     }
 
     public static @NotNull Argument<@Nullable String> AnyPlayerId(
-        @NotNull String id, @NotNull PlayerService playerService) {
+        @NotNull String id, @NotNull PlayerClient players) {
         return Argument.Word(id).map(
             /* Mapper */ (sender, raw) -> new ParseResult.Success<>(() -> {
                 if (raw.trim().isEmpty()) return null;
@@ -81,8 +80,8 @@ public final class CoreArgument {
 
     // Map Stuff
 
-    public static MapArgument Map(@NotNull String id, @NotNull MapService mapService) {
-        return new MapArgument(id, mapService);
+    public static MapArgument Map(@NotNull String id, @NotNull MapClient maps) {
+        return new MapArgument(id, maps);
     }
 
     public static MessageArgument Message(@NotNull String id) {

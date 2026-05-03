@@ -73,12 +73,12 @@ public class MapDetailsView extends Panel {
         add(7, 0, new Button("gui.map_rating.report_map", 2, 1)
             .background("generic2/btn/default/2_1")
             .sprite("map_details/action/report", 15, 3)
-            .onLeftClick(() -> host.pushView(new MapReportView(mapService, map))));
+            .onLeftClick(() -> host.pushView(new MapReportView(api.maps, map))));
 
         var tabs = add(0, 2, new Switch(9, 4, List.of(
             new MapDetailsInfoPanel(mapData),
             new MapDetailsTimesPanel(api, mapService, mapData),
-            new MapDetailsRatePanel(mapService, mapData.id())
+            new MapDetailsRatePanel(api.maps, mapData.id())
         )));
         tabs.select(0);
         add(0, 1, tabs.button(0, 3, 1,
