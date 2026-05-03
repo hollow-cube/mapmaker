@@ -6,14 +6,12 @@ import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.invite.types.MapInvite;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
@@ -34,8 +32,6 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
 
     private final String url;
     private final ApiClient api;
-    private final PlayerService playerService;
-    private final MapService mapService;
     private final SessionManager sessionManager;
     private final ServerBridge bridge;
 
@@ -43,16 +39,12 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         @NotNull OpenTelemetry otel,
         @NotNull String url,
         @NotNull ApiClient api,
-        @NotNull PlayerService playerService,
-        @NotNull MapService mapService,
         @NotNull SessionManager sessionManager,
         @NotNull ServerBridge bridge
     ) {
         super(otel);
         this.url = String.format("%s/v3/internal/invites", url);
         this.api = api;
-        this.playerService = playerService;
-        this.mapService = mapService;
         this.sessionManager = sessionManager;
         this.bridge = bridge;
     }
@@ -67,7 +59,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
             return;
         }
 
-        var targetDisplayName = playerService.getPlayerDisplayName2(targetId);
+        var targetDisplayName = api.players.getDisplayName(targetId);
         var targetSession = sessionManager.getSession(targetId);
         if (targetSession == null) {
             sender.sendMessage(Component.translatable("map.join.target_offline", targetDisplayName));
@@ -110,7 +102,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         }
 
         var senderMapName = Component.text(senderMap.name());
-        var targetDisplayName = playerService.getPlayerDisplayName2(targetId);
+        var targetDisplayName = api.players.getDisplayName(targetId);
         if (!doesPlayerOwnMap(sender, senderMap) && !senderMap.isPublished()) {
             sender.sendMessage(Component.translatable("map.invite.no_permission", targetDisplayName, senderMapName));
             return;
@@ -148,7 +140,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
 
     @Override
     public void registerRequest(@NotNull Player sender, @NotNull String targetId) {
-        var targetDisplayName = playerService.getPlayerDisplayName2(targetId);
+        var targetDisplayName = api.players.getDisplayName(targetId);
 
         var targetSession = sessionManager.getSession(targetId);
         if (targetSession == null) {
@@ -234,7 +226,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
                 String inviteRequest = isInvite ? "invite" : "request";
                 String playBuild = inviteMap.isPublished() ? "play" : "build";
 
-                var senderDisplayName = playerService.getPlayerDisplayName2(invite.senderId());
+                var senderDisplayName = api.players.getDisplayName(invite.senderId());
 
                 String translateString = "map." + playBuild + "." + inviteRequest + "." + acceptReject;
                 sender.sendMessage(Component.translatable(translateString, senderDisplayName, Component.text(inviteMap.name())));
@@ -248,7 +240,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     }
 
     private @Nullable MapData getCurrentMap(@NotNull Player player) {
-        return MiscFunctionality.getCurrentMap(sessionManager, mapService, player);
+        return MiscFunctionality.getCurrentMap(sessionManager, api.maps, player);
     }
 
     private static void processAcceptOrRejectError(@NotNull InviteError error, @NotNull Player sender, String acceptReject) {

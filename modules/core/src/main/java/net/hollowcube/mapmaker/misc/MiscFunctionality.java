@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.misc;
 import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.api.ApiClient;
+import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.map.MapData;
@@ -132,16 +133,20 @@ public final class MiscFunctionality {
     }
 
     @Blocking
-    public static @Nullable MapData getCurrentMap(@NotNull SessionManager sessionManager, @NotNull ApiClient api, @NotNull Player player) {
+    public static @Nullable MapData getCurrentMap(@NotNull SessionManager sessionManager, @NotNull MapClient maps, @NotNull Player player) {
         var playerId = PlayerData.fromPlayer(player).id();
-        return getCurrentMap(sessionManager, api, playerId);
+        return getCurrentMap(sessionManager, maps, playerId);
     }
 
     @Blocking
-    public static @Nullable MapData getCurrentMap(@NotNull SessionManager sessionManager, @NotNull ApiClient api, @NotNull String playerId) {
+    public static @Nullable MapData getCurrentMap(@NotNull SessionManager sessionManager, @NotNull MapClient maps, @NotNull String playerId) {
         var presence = sessionManager.getPresence(playerId);
         if (presence == null || !presence.type().equals(MapPresence.TYPE)) return null;
-        return api.maps.get(presence.mapId());
+        try {
+            return maps.get(presence.mapId());
+        } catch (ApiClient.NotFoundError _) {
+            return null;
+        }
     }
 
     public static void applyCosmetics(@NotNull Player player, @NotNull PlayerData playerData) {

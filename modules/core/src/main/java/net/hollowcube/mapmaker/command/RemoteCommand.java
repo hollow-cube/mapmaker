@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.api.interaction.InteractionClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.entity.Player;
 
 import java.util.ArrayList;
@@ -26,7 +25,7 @@ public class RemoteCommand extends CommandDsl {
 
     private final Argument<?>[] args;
 
-    public RemoteCommand(ApiClient api, PlayerService playerService, Command decl) {
+    public RemoteCommand(ApiClient api, Command decl) {
         super(decl.name());
         this.interactions = api.interactions;
         this.decl = decl;
@@ -56,7 +55,7 @@ public class RemoteCommand extends CommandDsl {
                 case WORD -> Argument.Word(remoteArg.name());
                 case STRING -> Argument.GreedyString(remoteArg.name());
                 case CHOICE -> Argument.Word(remoteArg.name()).with(Objects.requireNonNull(remoteArg.choices()));
-                case PLAYER -> CoreArgument.AnyPlayerId(remoteArg.name(), playerService);
+                case PLAYER -> CoreArgument.AnyPlayerId(remoteArg.name(), api.players);
             };
         }
 

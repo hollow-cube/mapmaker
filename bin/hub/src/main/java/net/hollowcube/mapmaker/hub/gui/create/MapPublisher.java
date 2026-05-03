@@ -4,7 +4,6 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -24,16 +23,16 @@ import java.util.function.Supplier;
 final class MapPublisher {
 
     private final ApiClient api;
-    private final MapService mapService;
     private final ServerBridge bridge;
     private final MapData map;
 
     private final Button button;
 
-    @Blocking MapPublisher(ApiClient api, MapService mapService, ServerBridge bridge, MapData map,
-                 Supplier<InventoryHost> hostSupplier, Consumer<MapData> onPublish) {
+    @Blocking MapPublisher(
+        ApiClient api, ServerBridge bridge, MapData map,
+        Supplier<InventoryHost> hostSupplier, Consumer<MapData> onPublish
+    ) {
         this.api = api;
-        this.mapService = mapService;
         this.bridge = bridge;
         this.map = map;
 
@@ -127,9 +126,9 @@ final class MapPublisher {
     private PublishStage getCurrentStage() {
         long currentPlaytime;
         try {
-            var saveState = this.mapService.getLatestSaveState(this.map.id(), this.map.owner(), SaveStateType.EDITING, null);
+            var saveState = api.maps.getLatestSaveState(map.id(), map.owner(), SaveStateType.EDITING, null);
             currentPlaytime = saveState.getPlaytime();
-        } catch (MapService.NotFoundError _) {
+        } catch (ApiClient.NotFoundError _) {
             return PublishStage.ERROR_BUILD_AMOUNT;
         }
 

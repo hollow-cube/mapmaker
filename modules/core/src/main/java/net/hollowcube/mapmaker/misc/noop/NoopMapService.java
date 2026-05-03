@@ -57,19 +57,4 @@ public class NoopMapService implements MapService {
         throw new UnsupportedOperationException("not implemented");
     }
 
-    @Override
-    public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
-        throw new NotFoundError(mapId);
-    }
-
-    @Override
-    public @Nullable SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId) {
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    @Override
-    public @Nullable SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
-        return null;
-    }
-
 }

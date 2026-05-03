@@ -34,17 +34,6 @@ public interface MapService {
 
     void restorePlaytimeLeaderboard(@NotNull String authorizer, @NotNull String mapId);
 
-    // Save states
-
-    @NotNull
-    SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer);
-
-    @Nullable
-    SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId);
-
-    @Nullable
-    SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update);
-
     class NotFoundError extends RuntimeException {
         public NotFoundError(@NotNull String id) {
             super("Map not found: " + id);

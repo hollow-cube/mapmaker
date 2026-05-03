@@ -41,7 +41,7 @@ public class PlayCommand extends CommandDsl {
         this.sessionManager = sessionManager;
         this.bridge = bridge;
 
-        mapArg = CoreArgument.Map("map", mapService)
+        mapArg = CoreArgument.Map("map", api.maps)
             .description("The ID of the map to play");
 
         category = CommandCategories.SOCIAL;
@@ -64,7 +64,7 @@ public class PlayCommand extends CommandDsl {
             return;
         }
 
-        var currentMap = MiscFunctionality.getCurrentMap(sessionManager, mapService, player);
+        var currentMap = MiscFunctionality.getCurrentMap(sessionManager, api.maps, player);
         if (currentMap != null && currentMap.id().equals(map.id())) {
             player.sendMessage(Component.translatable("command.play.already_playing", currentMap.settings().getNameComponent()));
             return;

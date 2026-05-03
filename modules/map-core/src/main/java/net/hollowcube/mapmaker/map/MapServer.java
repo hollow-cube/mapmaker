@@ -30,8 +30,6 @@ public interface MapServer {
         return new ServiceContext(
             this.api(),
             this.playerService(),
-            this.sessionService(),
-            this.mapService(),
             this.bridge()
         );
     }

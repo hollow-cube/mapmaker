@@ -53,7 +53,7 @@ public class TopTimesCommand extends CommandDsl {
                 return;
             }
         } else {
-            map = MiscFunctionality.getCurrentMap(sessions, api, player);
+            map = MiscFunctionality.getCurrentMap(sessions, api.maps, player);
             if (map == null) {
                 player.sendMessage(NO_MAP_PLAYED);
                 return;

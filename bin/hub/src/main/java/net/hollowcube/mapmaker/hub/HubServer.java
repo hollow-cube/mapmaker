@@ -79,7 +79,7 @@ public class HubServer extends AbstractMapServer {
 
     @Override
     protected ServerBridge createBridge() {
-        return globalConfig.noop() ? new NoopServerBridge() : new HubServerBridge(mapService(), sessionService());
+        return globalConfig.noop() ? new NoopServerBridge() : new HubServerBridge(api(), sessionService());
     }
 
     @Override
@@ -112,7 +112,7 @@ public class HubServer extends AbstractMapServer {
     // Static so it can be referenced from DevHubServer
     public static void registerCommands(AbstractMapServer server, CommandManager commandManager, HubMapWorld hubWorld, Scheduler scheduler) {
         commandManager.register(new HelpCommand(commandManager, CommandCategories.GLOBAL));
-        commandManager.register(new PlayerInfoCommand(server.playerService(), server.mapService(), server.sessionManager()));
+        commandManager.register(new PlayerInfoCommand(server.api(), server.sessionManager()));
 
         commandManager.register(new HubFlyCommand());
         commandManager.register(new HubSpawnCommand());

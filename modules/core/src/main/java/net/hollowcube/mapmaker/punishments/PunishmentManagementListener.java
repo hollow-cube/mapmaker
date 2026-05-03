@@ -8,9 +8,9 @@ import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.PlayerSettings;
+import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.punishments.event.PunishmentCreatedEvent;
 import net.hollowcube.mapmaker.punishments.event.PunishmentRevokedEvent;
 import net.hollowcube.mapmaker.punishments.types.Punishment;
@@ -41,15 +41,15 @@ public class PunishmentManagementListener implements Closeable {
         .inactiveThreshold(Duration.ofMinutes(5))
         .build();
 
-    private final PlayerService playerService;
+    private final PlayerClient players;
 
     private final MessageConsumer consumer;
 
     public PunishmentManagementListener(
-        @NotNull PlayerService playerService,
+        @NotNull PlayerClient players,
         @NotNull JetStreamWrapper jetStream
     ) {
-        this.playerService = playerService;
+        this.players = players;
 
         this.consumer = jetStream.subscribe(STREAM, CONSUMER_CONFIG, PunishmentUpdateMessage.class, this::handlePunishmentUpdate);
     }
@@ -106,8 +106,8 @@ public class PunishmentManagementListener implements Closeable {
         var typeName = punishment.type().name().toLowerCase(Locale.ROOT);
         var announcement = Component.translatable(
             created ? "punishment.staff_announce." + typeName + ".created" : "punishment.staff_announce." + typeName + ".revoked",
-            playerService.getPlayerDisplayName2(punishment.playerId()),
-            playerService.getPlayerDisplayName2(punishment.executorId()),
+            players.getDisplayName(punishment.playerId()),
+            players.getDisplayName(punishment.executorId()),
             Component.text(Objects.requireNonNullElse(punishment.ladderId(), punishment.comment()))
         );
         for (var player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {

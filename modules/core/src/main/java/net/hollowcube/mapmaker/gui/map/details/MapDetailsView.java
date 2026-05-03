@@ -28,7 +28,6 @@ import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
 public class MapDetailsView extends Panel {
     private final ApiClient api;
-    private final MapService mapService;
     private final ServerBridge bridge;
     private final MapData map;
     private final boolean showJoinButton;
@@ -50,7 +49,6 @@ public class MapDetailsView extends Panel {
     ) {
         super(9, 10);
         this.api = api;
-        this.mapService = mapService;
         this.bridge = bridge;
         this.map = mapData;
         this.showJoinButton = showJoinButton;
@@ -118,10 +116,10 @@ public class MapDetailsView extends Panel {
         async(() -> {
             try {
                 var playerId = PlayerData.fromPlayer(host.player()).id();
-                var saveState = mapService.getLatestSaveState(map.id(), playerId, SaveStateType.PLAYING, null);
+                var saveState = api.maps.getLatestSaveState(map.id(), playerId, SaveStateType.PLAYING, null);
 
                 playButton.translationKey("gui.map_details.continue_map", formatMapPlaytime(saveState.getPlaytime(), true));
-            } catch (MapService.NotFoundError ignored) {
+            } catch (ApiClient.NotFoundError _) {
                 // Its ok, leave as default key
             }
         });

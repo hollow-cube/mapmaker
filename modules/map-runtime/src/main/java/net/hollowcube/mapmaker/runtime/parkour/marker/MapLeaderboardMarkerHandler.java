@@ -48,7 +48,7 @@ public class MapLeaderboardMarkerHandler extends ObjectEntityHandler {
                         LeaderboardData.Entry::score,
                         0L
                 ),
-                playerId -> world.server().playerService().getPlayerDisplayName2(playerId).build(),
+            playerId -> world.server().api().players.getDisplayName(playerId).build(),
                 0, 0, 0, scale);
         leaderboard.setPadding(true);
         if (hasBackground) leaderboard.entriesDisplay().setUseDefaultBackground(true);

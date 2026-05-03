@@ -249,7 +249,7 @@ public abstract class AbstractMapServer implements MapServer {
             throw new RuntimeException(e);
         }
 
-        sessionManager = new SessionManager(sessionService(), playerService(), jetStream);
+        sessionManager = new SessionManager(sessionService(), playerService(), api().players, jetStream);
         shutdowner.queue("session-manager", sessionManager::close);
         FutureUtil.submitVirtual(sessionManager()::sync); // Sync existing sessions with remote
 
@@ -259,30 +259,30 @@ public abstract class AbstractMapServer implements MapServer {
         // Must be initialized this late because of all its dependencies. this is pretty yikes im not a big fan
         var inviteServiceUrl = System.getenv("MAPMAKER_PLAYER_INVITE_SERVICE_URL");
         if (inviteServiceUrl != null)
-            this.inviteService = new PlayerInviteServiceImpl(otel, inviteServiceUrl, playerService, mapService, sessionManager, bridge);
+            this.inviteService = new PlayerInviteServiceImpl(otel, inviteServiceUrl, api, sessionManager, bridge);
         else if (globalConfig.noop()) this.inviteService = new NoopPlayerInviteService();
         else {
-            this.inviteService = new PlayerInviteServiceImpl(otel, "http://localhost:9127", playerService, mapService, sessionManager, bridge); // tilt
+            this.inviteService = new PlayerInviteServiceImpl(otel, "http://localhost:9127", api, sessionManager, bridge); // tilt
         }
 
-        var services = new ServiceContext(api(), playerService(), sessionService(), mapService(), bridge());
+        var services = new ServiceContext(api(), playerService(), bridge());
 
         if (!globalConfig.noop()) {
-            mapInviteListener = new MapInviteListener(mapService, playerService, sessionManager, jetStream);
+            mapInviteListener = new MapInviteListener(api, sessionManager, jetStream);
             shutdowner.queue("map-invite-listener", mapInviteListener::close);
 
-            mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(mapService, playerService, sessionManager, bridge(), jetStream);
+            mapInviteAcceptedOrRejectedListener = new MapInviteAcceptedOrRejectedListener(api, sessionManager, bridge(), jetStream);
             shutdowner.queue("map-invite-acceptance-listener", mapInviteAcceptedOrRejectedListener::close);
 
-            var punishmentCreatedListener = new PunishmentManagementListener(playerService, jetStream);
+            var punishmentCreatedListener = new PunishmentManagementListener(api.players, jetStream);
             shutdowner.queue("punishment-listener", punishmentCreatedListener::close);
 
-            chatMessageListener = new ChatMessageListener(sessionManager, playerService, mapService, punishmentService, jetStream);
+            chatMessageListener = new ChatMessageListener(sessionManager, api, punishmentService, jetStream);
             facets.put(ChatMessageListener.class, chatMessageListener);
             shutdowner.queue("chat-message-listener", chatMessageListener::close);
             MinecraftServer.getPacketListenerManager().setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
 
-            playerDataUpdateConsumer = new PlayerDataUpdateConsumer(playerService, jetStream);
+            playerDataUpdateConsumer = new PlayerDataUpdateConsumer(api.players, jetStream);
             shutdowner.queue("player-data-listener", playerDataUpdateConsumer::close);
 
             var notificationsConsumer = new NotificationsConsumer(services, jetStream);
@@ -385,14 +385,6 @@ public abstract class AbstractMapServer implements MapServer {
         addBinding(SessionManager.class, sessionManager, "sessionManager");
         addBinding(ServerBridge.class, bridge(), "bridge");
 
-        var services = new ServiceContext(
-            api(),
-            playerService(),
-            sessionService(),
-            mapService(),
-            bridge()
-        );
-
         boolean fullInstance = !globalConfig.noop();
 
         commandManager.register(new MinestomCommand());
@@ -411,35 +403,35 @@ public abstract class AbstractMapServer implements MapServer {
         commandManager.register(new UwUCommand(playerService()));
 
         if (fullInstance) {
-            commandManager.register(new UnblockCommand(playerService()));
-            commandManager.register(new BlockCommand(playerService()));
-            commandManager.register(new FriendCommand(playerService(), mapService(), sessionManager()));
+            commandManager.register(new UnblockCommand(api().players, playerService()));
+            commandManager.register(new BlockCommand(api().players, playerService()));
+            commandManager.register(new FriendCommand(api(), playerService(), mapService(), sessionManager()));
         }
 
         if (fullInstance) {
             commandManager.register(new PlayCommand(api(), mapService(), sessionManager(), bridge()));
-            commandManager.register(new WhereCommand(sessionManager(), playerService(), mapService()));
-            commandManager.register(new ListCommand(sessionManager(), playerService()));
-            commandManager.register(new MsgCommand(sessionManager(), mapService(), chatMessageListener, playerService()));
-            commandManager.register(new ChannelCommand.Global(sessionManager(), mapService(), chatMessageListener));
-            commandManager.register(new ChannelCommand.Local(sessionManager(), mapService(), chatMessageListener));
-            commandManager.register(new ChannelCommand.Reply(sessionManager(), mapService(), chatMessageListener));
-            commandManager.register(new ChannelCommand.Staff(sessionManager(), mapService(), chatMessageListener));
+            commandManager.register(new WhereCommand(api(), sessionManager()));
+            commandManager.register(new ListCommand(sessionManager(), api().players));
+            commandManager.register(new MsgCommand(sessionManager(), api().maps, chatMessageListener, playerService()));
+            commandManager.register(new ChannelCommand.Global(sessionManager(), api().maps, chatMessageListener));
+            commandManager.register(new ChannelCommand.Local(sessionManager(), api().maps, chatMessageListener));
+            commandManager.register(new ChannelCommand.Reply(sessionManager(), api().maps, chatMessageListener));
+            commandManager.register(new ChannelCommand.Staff(sessionManager(), api().maps, chatMessageListener));
             commandManager.register(new ChatCommand(playerService()));
         }
 
         if (fullInstance) {
-            commandManager.register(new RequestCommand(inviteService(), playerService(), sessionManager()));
-            commandManager.register(new RejectCommand(inviteService(), playerService(), sessionManager()));
-            commandManager.register(new InviteCommand(inviteService(), playerService(), sessionManager()));
-            commandManager.register(new AcceptCommand(inviteService(), playerService(), sessionManager()));
-            commandManager.register(new JoinCommand(inviteService(), playerService(), sessionManager()));
+            commandManager.register(new RequestCommand(inviteService(), playerService(), api().players, sessionManager()));
+            commandManager.register(new RejectCommand(inviteService(), playerService(), api().players, sessionManager()));
+            commandManager.register(new InviteCommand(inviteService(), playerService(), api().players, sessionManager()));
+            commandManager.register(new AcceptCommand(inviteService(), playerService(), api().players, sessionManager()));
+            commandManager.register(new JoinCommand(inviteService(), playerService(), api().players, sessionManager()));
         }
 
         commandManager.register(new MapCommand(api(), playerService(), mapService(), bridge(), jetStream));
 
         if (fullInstance) {
-            commandManager.register(new SFindCommand(mapService(), playerService(), sessionManager()));
+            commandManager.register(new SFindCommand(api(), sessionManager()));
             commandManager.register(new VanishCommand(sessionManager(), playerService()));
             commandManager.register(new UnvanishCommand(sessionManager(), playerService()));
             commandManager.register(new StaffCommand(playerService()));
@@ -447,14 +439,14 @@ public abstract class AbstractMapServer implements MapServer {
 
         if (fullInstance) {
             commandManager.register(new PHelpCommand(punishmentService()));
-            commandManager.register(new PStatusCommand(playerService(), punishmentService()));
-            commandManager.register(new PHistoryCommand(playerService(), punishmentService()));
+            commandManager.register(new PStatusCommand(api().players, punishmentService()));
+            commandManager.register(new PHistoryCommand(api().players, punishmentService()));
         }
 
         if (fullInstance) {
-            commandManager.register(new UnbanCommand(punishmentService(), playerService()));
-            FutureUtil.submitVirtual(() -> commandManager.register(new MuteCommand(punishmentService(), playerService())));
-            commandManager.register(new UnmuteCommand(punishmentService(), playerService()));
+            commandManager.register(new UnbanCommand(punishmentService(), api().players));
+            FutureUtil.submitVirtual(() -> commandManager.register(new MuteCommand(punishmentService(), api().players)));
+            commandManager.register(new UnmuteCommand(punishmentService(), api()));
             commandManager.register(new KickCommand(punishmentService(), sessionManager()));
         }
 
@@ -472,7 +464,7 @@ public abstract class AbstractMapServer implements MapServer {
 
         var interactions = api().interactions.getCommands();
         for (var interaction : interactions) {
-            var cmd = new RemoteCommand(api(), playerService(), interaction);
+            var cmd = new RemoteCommand(api(), interaction);
             remoteCommandNames.add(cmd.name());
             commandManager.register(cmd);
         }
@@ -566,7 +558,7 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     protected @NotNull DebugCommand createDebugCommand() {
-        var cmd = new DebugCommand(playerService(), mapService(), bridge());
+        var cmd = new DebugCommand(api(), bridge());
         cmd.createPermissionedSubcommand("reload-commands", (player, _) -> {
             loadRemoteCommands();
             player.sendMessage(Component.text("Reloaded commands"));

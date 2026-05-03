@@ -25,14 +25,14 @@ public class MainLeaderboardFeature implements HubFeature {
 
     @Override
     public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
+        var api = server.api();
         var mapService = server.mapService();
-        var playerService = server.playerService();
         parkourLeaderboard = new Leaderboard2(
                 () -> mapService.getGlobalLeaderboard(MapService.LEADERBOARD_MAPS_BEATEN, null),
                 playerId -> mapService.getGlobalLeaderboard(MapService.LEADERBOARD_MAPS_BEATEN, playerId).player().score(),
                 () -> mapService.getGlobalLeaderboard(MapService.LEADERBOARD_TOP_TIMES, null),
                 playerId -> mapService.getGlobalLeaderboard(MapService.LEADERBOARD_TOP_TIMES, playerId).player().score(),
-                playerId -> playerService.getPlayerDisplayName2(playerId).build(),
+            playerId -> api.players.getDisplayName(playerId).build(),
                 10);
         buildingLeaderboard = new Leaderboard2(
                 null, null,

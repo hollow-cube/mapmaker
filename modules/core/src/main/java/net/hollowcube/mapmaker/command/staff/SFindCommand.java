@@ -7,9 +7,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
@@ -25,20 +23,14 @@ public class SFindCommand extends CommandDsl {
     private final Argument<String> targetArg;
 
     private final ApiClient api;
-    private final MapService mapService;
-    private final PlayerService playerService;
     private final SessionManager sessionManager;
 
     public SFindCommand(
         @NotNull ApiClient api,
-        @NotNull MapService mapService,
-        @NotNull PlayerService playerService,
         @NotNull SessionManager sessionManager
     ) {
         super("sfind");
         this.api = api;
-        this.mapService = mapService;
-        this.playerService = playerService;
         this.sessionManager = sessionManager;
 
         category = CommandCategories.STAFF;
@@ -59,7 +51,7 @@ public class SFindCommand extends CommandDsl {
             return;
         }
 
-        var targetName = playerService.getPlayerDisplayName2(target).build();
+        var targetName = api.players.getDisplayName(target).build();
         switch (presence.type()) {
             case Presence.TYPE_MAPMAKER_HUB ->
                 player.sendMessage(Component.translatable("command.sfind.result.hub", targetName));

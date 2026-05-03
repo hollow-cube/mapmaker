@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
@@ -18,13 +19,13 @@ public class MapLeaderboardRestoreCommand extends CommandDsl {
 
     private final MapService mapService;
 
-    public MapLeaderboardRestoreCommand(@NotNull MapService mapService) {
+    public MapLeaderboardRestoreCommand(@NotNull MapService mapService, @NotNull MapClient maps) {
         super("restore");
         this.mapService = mapService;
 
         description = "Syncs the leaderboard with internal source of truth. Do not use unless you know this is correct";
 
-        mapArg = CoreArgument.Map("map", mapService)
+        mapArg = CoreArgument.Map("map", maps)
                 .description("The ID of the map to restore");
 
         addSyntax(playerOnly(this::handleRestoreLeaderboard), mapArg);

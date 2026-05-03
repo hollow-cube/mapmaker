@@ -1,11 +1,17 @@
 package net.hollowcube.mapmaker.api.maps;
 
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.api.PaginatedList;
 import net.hollowcube.mapmaker.api.ResultList;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
+import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.codec.Transcoder;
+import net.minestom.server.registry.RegistryTranscoder;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -95,6 +101,18 @@ public interface MapClient {
     }
 
     default ResultList<PlayerMapProgress> searchMapProgress(String playerId, List<String> mapIds) {
+        throw notImplemented();
+    }
+
+    default SaveState getLatestSaveState(String mapId, String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
+        throw notImplemented();
+    }
+
+    default SaveState getBestSaveState(String mapId, String playerId) {
+        throw notImplemented();
+    }
+
+    default void updateSaveState(String mapId, String playerId, String saveStateId, SaveStateUpdateRequest update) {
         throw notImplemented();
     }
 
@@ -267,6 +285,57 @@ public interface MapClient {
                 new TypeToken<>() {}
             );
         }
+
+        @Override
+        public SaveState getLatestSaveState(String mapId, String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
+            JsonObject raw = http.get(
+                "getLatestSaveState",
+                V4_PREFIX + "/" + mapId + "/states/" + playerId + "/latest" + query(type == null ? null : type.name().toLowerCase()),
+                new TypeToken<>() {}
+            );
+
+            var saveState = AbstractHttpService.GSON.fromJson(raw, SaveState.class);
+            if (serializer != null) {
+                var stateObj = raw.get(serializer.name()) instanceof JsonObject jo ? jo : new JsonObject();
+
+                // Upgrade the save state if relevant
+                // Note that this is a non-backwards compatible change, so once we write a new state an old server cannot necessarily
+                // read this state. For now, we will likely ignore this, however in the future joining a map will require checking
+                // the state and finding a compatible server (server data version > state data version).
+                if (!stateObj.isEmpty() && saveState.dataVersion < DataFixer.maxVersion()) {
+                    var upgraded = DataFixer.upgrade(serializer.dataType(), Transcoder.JSON, stateObj, saveState.dataVersion, DataFixer.maxVersion());
+                    if (!(upgraded instanceof JsonObject upgradedObject))
+                        throw new IllegalStateException("invalid save state upgrade: " + upgraded);
+                    stateObj = upgradedObject;
+                    saveState.dataVersion = DataFixer.maxVersion();
+                }
+
+                saveState.serializer = serializer;
+                var coder = new RegistryTranscoder<>(Transcoder.JSON, MinecraftServer.process());
+                saveState.state = serializer.codec().decode(coder, stateObj).orElseThrow();
+            }
+
+            return saveState;
+        }
+
+        @Override
+        public SaveState getBestSaveState(String mapId, String playerId) {
+            return http.get(
+                "getLatestSaveState",
+                V4_PREFIX + "/" + mapId + "/states/" + playerId + "/best",
+                new TypeToken<>() {}
+            );
+        }
+
+        @Override
+        public void updateSaveState(String mapId, String playerId, String saveStateId, SaveStateUpdateRequest update) {
+            http.put(
+                "updateSaveState",
+                V4_PREFIX + "/" + mapId + "/states/" + playerId + "/" + saveStateId,
+                update.updates()
+            );
+        }
+
     }
 
     record Noop() implements MapClient {}

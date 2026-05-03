@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.command.chat;
 
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.session.SessionManager;
@@ -16,12 +16,13 @@ import java.util.concurrent.ThreadLocalRandom;
 public abstract class AbstractChatCommand extends CommandDsl {
 
     private final SessionManager sessions;
-    private final MapService maps;
+    private final MapClient maps;
     private final ChatMessageListener messages;
 
 
     public AbstractChatCommand(
-        @NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages,
+        @NotNull SessionManager sessions, @NotNull MapClient maps,
+        @NotNull ChatMessageListener messages,
         @NotNull String name, @NotNull String... aliases
     ) {
         super(name, aliases);

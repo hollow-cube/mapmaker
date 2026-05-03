@@ -8,10 +8,8 @@ import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.temp.ChatMessageData;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
@@ -50,13 +48,9 @@ public class MessageComponents {
             .build();
 
     private final @NotNull ApiClient api;
-    private final @NotNull MapService mapService;
-    private final @NotNull PlayerService playerService;
 
-    public MessageComponents(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull PlayerService playerService) {
+    public MessageComponents(@NotNull ApiClient api) {
         this.api = api;
-        this.mapService = mapService;
-        this.playerService = playerService;
     }
 
     // region Component Parts
@@ -65,7 +59,7 @@ public class MessageComponents {
     private void map(@NotNull MessageComponent.Builder builder, @NotNull String mapId, @NotNull Player player) {
         var uuid = player.getUuid().toString();
         var map = mapDataCache.get(mapId, api.maps::get);
-        var author = usernameCache.get(map.owner(), id -> playerService.getPlayerDisplayName2(id).build());
+        var author = usernameCache.get(map.owner(), id -> api.players.getDisplayName(id).build());
         var progress = api.maps.searchMapProgress(uuid, List.of(mapId)).first();
 
         var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);

@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.command.invite;
 
 import net.hollowcube.command.CommandContext;
+import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
@@ -10,8 +11,8 @@ import org.jetbrains.annotations.NotNull;
 public class RejectCommand extends AbstractInviteServiceCommand {
 
     public RejectCommand(@NotNull PlayerInviteService inviteService, @NotNull PlayerService playerService,
-                         @NotNull SessionManager sessionManager) {
-        super("reject", inviteService, playerService, sessionManager, "The player to reject", false);
+                         @NotNull PlayerClient players, @NotNull SessionManager sessionManager) {
+        super("reject", inviteService, playerService, players, sessionManager, "The player to reject", false);
 
         description = "Denies any pending request or invite from a player";
 

@@ -2,10 +2,10 @@ package net.hollowcube.mapmaker.misc;
 
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.player.DisplayName;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -53,10 +53,10 @@ public class BossBars {
 
     // Helpers for common boss bar configurations
 
-    public static List<BossBar> createPlayingBossBar(PlayerService playerService, MapData map) {
+    public static List<BossBar> createPlayingBossBar(PlayerClient players, MapData map) {
         Component ownerBossBarName;
         try {
-            ownerBossBarName = playerService.getPlayerDisplayName2(map.owner())
+            ownerBossBarName = players.getDisplayName(map.owner())
                     .build(DisplayName.Context.BOSS_BAR);
         } catch (Exception e) {
             ExceptionReporter.reportException(e);

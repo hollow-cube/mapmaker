@@ -8,8 +8,6 @@ import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.invite.types.CreatedMapInviteMessage;
 import net.hollowcube.mapmaker.invite.types.InviteType;
-import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
@@ -34,20 +32,15 @@ public final class MapInviteListener implements Closeable {
         .build();
 
     private final ApiClient api;
-    private final MapService mapService;
-    private final PlayerService playerService;
     private final SessionManager sessionManager;
 
     private final MessageConsumer consumer;
 
     public MapInviteListener(
         @NotNull ApiClient api,
-        @NotNull MapService mapService, @NotNull PlayerService playerService,
         @NotNull SessionManager sessionManager, @NotNull JetStreamWrapper jetStream
     ) {
         this.api = api;
-        this.mapService = mapService;
-        this.playerService = playerService;
         this.sessionManager = sessionManager;
 
         this.consumer = jetStream.subscribe(STREAM, CONSUMER_CONFIG, CreatedMapInviteMessage.class, this::handleInviteMessage);
@@ -82,7 +75,7 @@ public final class MapInviteListener implements Closeable {
         }
 
         var senderName = Component.text(senderSession.username());
-        var senderDisplayName = this.playerService.getPlayerDisplayName2(message.senderId());
+        var senderDisplayName = api.players.getDisplayName(message.senderId());
 
         var playBuild = map.isPublished() ? "play" : "build";
         var inviteRequest = message.type() == InviteType.INVITE ? "invite" : "request";

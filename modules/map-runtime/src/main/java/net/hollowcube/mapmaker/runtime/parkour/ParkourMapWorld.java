@@ -5,6 +5,7 @@ import net.hollowcube.common.events.PlayerMoveVehicleEvent;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.dfu.DFU;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapRating;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
@@ -293,9 +294,9 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         final var playerData = PlayerData.fromPlayer(player);
         SaveState saveState;
         try {
-            saveState = server().mapService().getLatestSaveState(map().id(),
+            saveState = server().api().maps.getLatestSaveState(map().id(),
                 playerData.id(), saveStateType, PlayState.SERIALIZER);
-        } catch (MapService.NotFoundError ignored) {
+        } catch (ApiClient.NotFoundError _) {
             // No save state yet, create one locally.
             // We do an upsert to save, so it will be created in the map service at that point.
             saveState = new SaveState(UUID.randomUUID().toString(),
@@ -310,10 +311,10 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         ));
 
         if (RateMapItem.isMapRatable(this)) {
-            RateMapItem.initLastRating(server().mapService(), player, map());
+            RateMapItem.initLastRating(server().api().maps, player, map());
         }
 
-        player.setTag(BEST_SAVESTATE, server().mapService().getBestSaveState(map().id(), player.getUuid().toString()));
+        player.setTag(BEST_SAVESTATE, server().api().maps.getBestSaveState(map().id(), player.getUuid().toString()));
 
         return createPlayingState(saveState);
     }
@@ -450,7 +451,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
                 final MapRating lastRating = lastRatingFuture.resultNow();
                 // Note that we dont want to open the GUI if you have since opened a different inventory because its really annoying in practice.
                 if ((lastRating == null || lastRating.state() == MapRating.State.UNRATED) && player.getOpenInventory() == null) {
-                    Panel.open(player, new RateMapView(server().mapService(), map(), MapRating.State.UNRATED, newState ->
+                    Panel.open(player, new RateMapView(server().api().maps, map(), MapRating.State.UNRATED, newState ->
                         player.setTag(RateMapItem.LAST_RATING_TAG, CompletableFuture.completedFuture(new MapRating(newState, null)))));
                 }
             }
@@ -568,7 +569,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     @Override
     protected @Nullable List<BossBar> createBossBars() {
-        return BossBars.createPlayingBossBar(server().playerService(), map());
+        return BossBars.createPlayingBossBar(server().api().players, map());
     }
 
     //endregion

@@ -45,7 +45,7 @@ public class RateMapView extends Panel {
         add(7, 0, new Button("gui.map_rating.report_map", 2, 1)
                 .background("generic2/btn/default/2_1")
                 .sprite("map_details/action/report", 15, 3)
-                .onLeftClick(() -> host.pushView(new MapReportView(mapService, map))));
+            .onLeftClick(() -> host.pushView(new MapReportView(maps, map))));
 
         this.likeButton = add(1, 2, new Button(null, 3, 3)
                 .onLeftClickAsync(() -> handleRatingStateChange(MapRating.State.LIKED)));

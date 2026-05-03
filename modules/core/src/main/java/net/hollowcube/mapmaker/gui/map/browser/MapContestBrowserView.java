@@ -40,7 +40,7 @@ public class MapContestBrowserView extends MapBrowserView {
         if (!isInitial) return;
 
         var playerId = host.player().getUuid().toString();
-        pagination.reset(MapSearchParams.builder(playerId)
+        pagination.reset(MapSearchParams.builder()
             .contest("c9354e33-96c2-414a-9f4a-8c2ff4669086"));
     }
 

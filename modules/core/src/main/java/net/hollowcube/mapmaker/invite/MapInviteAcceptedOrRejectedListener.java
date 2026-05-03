@@ -8,10 +8,8 @@ import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.invite.types.MapInviteAcceptedOrRejectedMessage;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge.JoinMapState;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
@@ -38,8 +36,6 @@ public final class MapInviteAcceptedOrRejectedListener implements Closeable {
         .build();
 
     private final ApiClient api;
-    private final MapService mapService;
-    private final PlayerService playerService;
     private final SessionManager sessionManager;
     private final ServerBridge serverBridge;
 
@@ -47,13 +43,10 @@ public final class MapInviteAcceptedOrRejectedListener implements Closeable {
 
     public MapInviteAcceptedOrRejectedListener(
         @NotNull ApiClient api,
-        @NotNull MapService mapService, @NotNull PlayerService playerService,
         @NotNull SessionManager sessionManager, @NotNull ServerBridge serverBridge,
         @NotNull JetStreamWrapper jetStream
     ) {
         this.api = api;
-        this.mapService = mapService;
-        this.playerService = playerService;
         this.sessionManager = sessionManager;
         this.serverBridge = serverBridge;
 
@@ -97,7 +90,7 @@ public final class MapInviteAcceptedOrRejectedListener implements Closeable {
         }
 
         var targetName = Component.text(targetSession.username());
-        var targetDisplayName = this.playerService.getPlayerDisplayName2(targetId);
+        var targetDisplayName = api.players.getDisplayName(targetId);
 
         var playBuild = map.isPublished() ? "play" : "build";
         var inviteRequest = message.type() == InviteType.INVITE ? "invite" : "request";

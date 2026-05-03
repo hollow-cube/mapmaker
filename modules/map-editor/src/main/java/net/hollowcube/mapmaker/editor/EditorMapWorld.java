@@ -322,7 +322,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         final var playerData = PlayerData.fromPlayer(player);
         SaveState saveState;
         try {
-            saveState = server().mapService().getLatestSaveState(map().id(), playerData.id(),
+            saveState = server().api().maps.getLatestSaveState(map().id(), playerData.id(),
                 SaveStateType.EDITING, EditState.SERIALIZER);
         } catch (MapService.NotFoundError ignored) {
             // No save state yet, create one locally.
@@ -404,7 +404,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
             var playerData = PlayerData.fromPlayer(player);
             var saveStateUpdate = saveState.createUpsertRequest();
-            server().mapService().updateSaveState(map().id(), playerData.id(), saveState.id(), saveStateUpdate);
+            server().api().maps.updateSaveState(map().id(), playerData.id(), saveState.id(), saveStateUpdate);
 
             logger.info("Updated data for {}", player.getUuid());
         } catch (Exception e) {

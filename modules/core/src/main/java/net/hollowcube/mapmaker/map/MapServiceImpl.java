@@ -1,18 +1,12 @@
 package net.hollowcube.mapmaker.map;
 
-import com.google.gson.JsonObject;
-import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.codec.Transcoder;
-import net.minestom.server.registry.RegistryTranscoder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Locale;
 import java.util.UUID;
 
 public class MapServiceImpl extends AbstractHttpService implements MapService {
@@ -167,78 +161,6 @@ public class MapServiceImpl extends AbstractHttpService implements MapService {
             }
             default -> throw new InternalError("Failed to restore playtime leaderboard: " + res.body());
         }
-    }
-
-    @Override
-    public @NotNull SaveState getLatestSaveState(@NotNull String mapId, @NotNull String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId + "/latest?typeFilter=" + (type == null ? "" : type.name().toLowerCase(Locale.ROOT))))
-            .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> readTypedSaveState(GSON.fromJson(res.body(), JsonObject.class), serializer);
-            case 404 -> throw new NotFoundError("latest");
-            default -> throw new InternalError("Failed to get latest savestate: " + res.body());
-        };
-    }
-
-    private @NotNull SaveState readTypedSaveState(@NotNull JsonObject obj, @Nullable SaveStateType.Serializer<?> serializer) {
-        var saveState = GSON.fromJson(obj, SaveState.class);
-        if (serializer != null) {
-            var stateObj = obj.get(serializer.name()) instanceof JsonObject jo ? jo : new JsonObject();
-
-            // Upgrade the save state if relevant
-            // Note that this is a non-backwards compatible change, so once we write a new state an old server cannot necessarily
-            // read this state. For now, we will likely ignore this, however in the future joining a map will require checking
-            // the state and finding a compatible server (server data version > state data version).
-            if (!stateObj.isEmpty() && saveState.dataVersion < DataFixer.maxVersion()) {
-                var upgraded = DataFixer.upgrade(serializer.dataType(), Transcoder.JSON, stateObj, saveState.dataVersion, DataFixer.maxVersion());
-                if (!(upgraded instanceof JsonObject upgradedObject))
-                    throw new IllegalStateException("invalid save state upgrade: " + upgraded);
-                stateObj = upgradedObject;
-                saveState.dataVersion = DataFixer.maxVersion();
-            }
-
-            saveState.serializer = serializer;
-            var coder = new RegistryTranscoder<>(Transcoder.JSON, MinecraftServer.process());
-            saveState.state = serializer.codec().decode(coder, stateObj).orElseThrow();
-        }
-        return saveState;
-    }
-
-    @Override
-    public @Nullable SaveState getBestSaveState(@NotNull String mapId, @NotNull String playerId) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId + "/best"))
-            .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), SaveState.class);
-            case 404 -> null;
-            default -> throw new InternalError("Failed to get latest savestate: " + res.body());
-        };
-    }
-
-    @Override
-    public @Nullable SaveStateUpdateResponse updateSaveState(@NotNull String mapId, @NotNull String playerId, @NotNull String id, @NotNull SaveStateUpdateRequest update) {
-        update.updates.addProperty("dataVersion", DataFixer.maxVersion());
-        var reqBody = GSON.toJson(update.updates);
-        var req = HttpRequest.newBuilder()
-            .method("PATCH", HttpRequest.BodyPublishers.ofString(reqBody))
-            .uri(URI.create(urlV3 + "/maps/" + mapId + "/savestates/" + playerId + "/" + id))
-            .header(AUTHORIZER_HEADER, UUID.randomUUID().toString()) //todo
-            .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> {
-                if (res.body().isEmpty()) yield null;
-                else yield GSON.fromJson(res.body(), SaveStateUpdateResponse.class);
-            }
-            case 404 -> throw new NotFoundError(id);
-            default -> throw new InternalError("Failed to update savestate (" + res.statusCode() + "): " + res.body());
-        };
     }
 
 }

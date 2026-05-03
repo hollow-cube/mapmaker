@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +20,7 @@ public class MapListCommand extends CommandDsl {
 
     private final Argument<String> targetArg;
 
-    public MapListCommand(@NotNull ApiClient api, @NotNull PlayerService playerService, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
+    public MapListCommand(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
         super("list");
         this.api = api;
         this.mapService = mapService;
@@ -29,7 +28,7 @@ public class MapListCommand extends CommandDsl {
 
         description = "Show all the maps published by a player";
 
-        this.targetArg = CoreArgument.AnyPlayerId("target", playerService)
+        this.targetArg = CoreArgument.AnyPlayerId("target", api.players)
             .description("The player you want to see the maps of");
 
         addSyntax(playerOnly(this::execute));

@@ -13,6 +13,10 @@ import static java.util.stream.Collectors.toMap;
 @RuntimeGson
 public record ResultList<T>(List<T> results) implements Iterable<T> {
 
+    public boolean isEmpty() {
+        return results.isEmpty();
+    }
+
     @Override
     public Iterator<T> iterator() {
         return results.iterator();

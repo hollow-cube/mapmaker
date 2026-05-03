@@ -373,8 +373,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         // Write the save state to the database
         try {
             var playerData = PlayerData.fromPlayer(player);
-            world.server().mapService().updateSaveState(
-                    world.map().id(), playerData.id(), saveState.id(), update);
+            world.server().api().maps.updateSaveState(world.map().id(), playerData.id(), saveState.id(), update);
         } catch (Exception e) {
             var wrappedException = new RuntimeException("failed to save player save state", e);
             ExceptionReporter.reportException(wrappedException, player);

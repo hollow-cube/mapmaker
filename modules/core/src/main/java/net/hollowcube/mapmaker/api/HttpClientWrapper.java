@@ -98,6 +98,26 @@ public class HttpClientWrapper {
         return parseOrThrowResponse(res, responseType);
     }
 
+    public void put(String operation, String url, Object requestBody) {
+        var body = AbstractHttpService.GSON.toJson(requestBody);
+        var res = doRequest(operation,
+            HttpRequest.newBuilder()
+                .uri(java.net.URI.create(baseUrl + url))
+                .PUT(HttpRequest.BodyPublishers.ofString(body)),
+            HttpResponse.BodyHandlers.ofString());
+        maybeThrowResponse(res);
+    }
+
+    public <T> T put(String operation, String url, Object requestBody, TypeToken<T> responseType) {
+        var body = AbstractHttpService.GSON.toJson(requestBody);
+        var res = doRequest(operation,
+            HttpRequest.newBuilder()
+                .uri(java.net.URI.create(baseUrl + url))
+                .PUT(HttpRequest.BodyPublishers.ofString(body)),
+            HttpResponse.BodyHandlers.ofString());
+        return parseOrThrowResponse(res, responseType);
+    }
+
     public void delete(String operation, String url) {
         var res = doRequest(operation,
             HttpRequest.newBuilder()

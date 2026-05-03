@@ -23,7 +23,6 @@ public class FriendListCommand extends CommandDsl {
 
     private final ApiClient api;
     private final PlayerService playerService;
-    private final MapService mapService;
     private final SessionManager sessionManager;
 
     public FriendListCommand(
@@ -35,7 +34,6 @@ public class FriendListCommand extends CommandDsl {
         super("list");
         this.api = api;
         this.playerService = playerService;
-        this.mapService = mapService;
         this.sessionManager = sessionManager;
 
         this.addSyntax(playerOnly(this::exec));
@@ -59,7 +57,7 @@ public class FriendListCommand extends CommandDsl {
             .append(
                 Component.translatable("command.friend.list.header", Component.text(friends.page()), Component.text(pageCount)));
         for (PlayerFriend friend : friends.items()) {
-            DisplayName displayName = this.playerService.getPlayerDisplayName2(friend.playerId());
+            DisplayName displayName = api.players.getDisplayName(friend.playerId());
             Component username = displayName.asComponent();
             PlayerSession session = this.sessionManager.getSession(friend.playerId());
             if (friend.online() && session != null && !session.hidden()) {
