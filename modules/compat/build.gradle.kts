@@ -11,5 +11,5 @@ dependencies {
     implementation(libs.posthog)
     implementation(libs.zstd)
     implementation(libs.feather)
-    implementation(libs.apollo)
+    implementation(libs.caffeine)
 }
