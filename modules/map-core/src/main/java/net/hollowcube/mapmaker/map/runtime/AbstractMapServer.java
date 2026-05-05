@@ -16,9 +16,6 @@ import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.semconv.ResourceAttributes;
-import net.hollowcube.canvas.View;
-import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.ServerRuntime;
@@ -73,7 +70,6 @@ import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.entity.MapEntities;
 import net.hollowcube.mapmaker.map.util.ACHook;
 import net.hollowcube.mapmaker.map.util.AnonHealthCheck;
-import net.hollowcube.mapmaker.map.util.DynamicController;
 import net.hollowcube.mapmaker.map.util.ServerStatsHud;
 import net.hollowcube.mapmaker.misc.ExpBarRenderer;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
@@ -113,10 +109,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -148,7 +145,6 @@ public abstract class AbstractMapServer implements MapServer {
 
     private final CommandManager commandManager = new CommandManagerImpl();
 
-    private DynamicController guiController = new DynamicController();
     private Map<Class<?>, Object> facets = new HashMap<>(); // Not concurrent, not editable after start.
 
     private volatile boolean isReady = false; // Corresponds to the associated health check
@@ -292,7 +288,6 @@ public abstract class AbstractMapServer implements MapServer {
 
         ChatAnnouncer.setupAnnouncements(config, sessionManager(), shutdowner);
 
-        facets.put(Controller.class, guiController);
         prepareStart();
 
         // Copy the facets map to prevent modification
@@ -350,11 +345,6 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     @Override
-    public @NotNull Controller guiController() {
-        return guiController;
-    }
-
-    @Override
     public @NotNull Scheduler scheduler() {
         return MinecraftServer.getSchedulerManager();
     }
@@ -408,13 +398,14 @@ public abstract class AbstractMapServer implements MapServer {
         if (fullInstance) commandManager.register(new RulesCommand());
         commandManager.register(createDebugCommand());
         commandManager.register(new StoreCommand(playerService()));
-        commandManager.register(new HypercubeCommand(playerService()));
+        commandManager.register(new HypercubeCommand(api(), playerService()));
         commandManager.register(new DiscordCommand());
         if (fullInstance) commandManager.register(new TotpCommand(playerService()));
         commandManager.register(new NoobCommand());
         commandManager.register(new HideCommand(playerService()));
         commandManager.register(new SettingsCommand());
         commandManager.register(new BugReportCommand());
+        commandManager.register(new UwUCommand(playerService()));
 
         if (fullInstance) {
             commandManager.register(new UnblockCommand(playerService()));
@@ -508,17 +499,7 @@ public abstract class AbstractMapServer implements MapServer {
 
         if (type != null) {
             facets.put(type, instance);
-            guiController.addBinding(type.getSimpleName().toLowerCase(Locale.ROOT), instance);
         }
-
-        for (var name : names) {
-            guiController.addBinding(name, instance);
-        }
-    }
-
-    @Override
-    public void showView(@NotNull Player player, @NotNull Function<Context, View> viewProvider) {
-        guiController.show(player, viewProvider);
     }
 
     /**
@@ -686,6 +667,13 @@ public abstract class AbstractMapServer implements MapServer {
 
         // Resend the skin - TODO: this is a minestom bug, it should automatically resend metadata after reconfig but this is a temp fix.
         player.sendPacket(player.getMetadataPacket());
+
+        if (Boolean.TRUE.equals(player.getTag(CompatProvider.FIRST_JOIN_TAG))) {
+            var now = LocalDateTime.now(ZoneOffset.ofHours(-5));
+            if (now.getDayOfMonth() == 1 && now.getMonthValue() == 4) {
+                player.sendMessage(Component.translatable("join.uwu"));
+            }
+        }
     }
 
     protected void handlePlayerDisconnect(@NotNull Player player) {

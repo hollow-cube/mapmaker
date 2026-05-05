@@ -19,8 +19,6 @@ interface ButtonClickAliases {
         return onLeftClickAsync((clickType, _) -> onClick.onClick(clickType));
     }
 
-    Button onLeftClick();
-
     Button onLeftClick(Button.OnClickTypeSlot onClick);
 
     Button onLeftClickAsync(Button.OnClickTypeSlot onClick);

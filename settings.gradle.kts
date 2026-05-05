@@ -22,8 +22,6 @@ includeBuild("modules/molang")
 includeBuild("modules/schem")
 
 include(
-    "modules:canvas:api",
-    "modules:canvas:impl-standalone",
     "modules:command",
     "modules:common",
     "modules:compat",
@@ -37,7 +35,6 @@ include(
     "modules:terraform",
 
     "modules:test",
-    "modules:map-core-test",
 )
 
 include(

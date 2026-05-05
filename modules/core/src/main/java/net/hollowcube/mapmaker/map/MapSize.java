@@ -1,12 +1,14 @@
 package net.hollowcube.mapmaker.map;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
 
-public enum MapSize {
+public enum MapSize implements ComponentLike {
     NORMAL(0, 150, "house_1"),
     LARGE(1, 300, "house_2"),
     MASSIVE(2, 600, "house_3"),
@@ -20,10 +22,14 @@ public enum MapSize {
     private final int size;
     private final String icon;
 
+    private final Component nameComponent;
+
     MapSize(int id, int size, @Nullable String icon) {
         this.id = id;
         this.size = size;
         this.icon = icon;
+
+        this.nameComponent = Component.translatable("map.size." + this.name().toLowerCase());
     }
 
     public int id() {
@@ -41,5 +47,10 @@ public enum MapSize {
     public boolean unlocks(@NotNull MapSize other) {
         if (DISABLED_SIZES.contains(other)) return false;
         return this.ordinal() >= other.ordinal();
+    }
+
+    @Override
+    public @NotNull Component asComponent() {
+        return nameComponent;
     }
 }

@@ -11,6 +11,8 @@ public record ActionTriggerData(
         boolean repeatable,
         ActionTriggerCondition condition
 ) {
+    public static final ActionTriggerData EMPTY = new ActionTriggerData(new ActionList(), false, ActionTriggerCondition.DEFAULT);
+
     private static final int MAX_ACTIONS = 21;
     public static final StructCodec<ActionTriggerData> CODEC = StructCodec.struct(
             "actions", ActionRegistry.listCodec(MAX_ACTIONS), ActionTriggerData::actions,

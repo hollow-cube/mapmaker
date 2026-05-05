@@ -6,7 +6,6 @@ dependencies {
     api(project(":modules:map-core"))
     api(project(":modules:map-runtime"))
     implementation(project(":modules:compat"))
-    implementation(project(":modules:canvas:api"))
     implementation(project(":modules:datafix"))
 
     implementation(libs.minestom)

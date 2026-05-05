@@ -1,8 +1,5 @@
 package net.hollowcube.mapmaker.map;
 
-import net.hollowcube.canvas.View;
-import net.hollowcube.canvas.internal.Context;
-import net.hollowcube.canvas.internal.Controller;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
@@ -11,12 +8,10 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.session.SessionManager;
-import net.minestom.server.entity.Player;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-import java.util.function.Function;
 
 public class MockMapServer implements MapServer {
     public ApiClient api;
@@ -27,7 +22,6 @@ public class MockMapServer implements MapServer {
     public PlayerInviteService inviteService;
     public SessionManager sessionManager;
     public ServerBridge bridge;
-    public Controller guiController;
     public Scheduler scheduler;
     public CommandManager commandManager;
 
@@ -77,11 +71,6 @@ public class MockMapServer implements MapServer {
     }
 
     @Override
-    public @NotNull Controller guiController() {
-        return Objects.requireNonNull(guiController, "GUI Controller is not initialized");
-    }
-
-    @Override
     public @NotNull Scheduler scheduler() {
         return Objects.requireNonNull(scheduler, "Scheduler is not initialized");
     }
@@ -91,8 +80,4 @@ public class MockMapServer implements MapServer {
         throw new IllegalArgumentException("MockMapServer does not support facets");
     }
 
-    @Override
-    public void showView(@NotNull Player player, @NotNull Function<Context, View> viewProvider) {
-        guiController().show(player, viewProvider);
-    }
 }

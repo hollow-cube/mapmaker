@@ -32,7 +32,7 @@ public class FireworkVictoryEffectImpl extends AbstractVictoryEffectImpl {
 
     @Override
     public void trigger(@NotNull Player player, @NotNull Point position) {
-        var viewersAndSelf = new ArrayList<>(player.getViewers());
+        var viewersAndSelf = new ArrayList<Player>(player.getViewers());
         viewersAndSelf.add(player);
         player.scheduleNextTick(ignored -> showFirework(
                 PacketGroupingAudience.of(viewersAndSelf),

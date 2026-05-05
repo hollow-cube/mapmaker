@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.panels;
 
-import net.hollowcube.canvas.ClickType;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.kyori.adventure.text.Component;

@@ -2,19 +2,25 @@ package net.hollowcube.mapmaker.hub.gui.create;
 
 import net.hollowcube.common.components.ExtraComponents;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapSlot;
 import net.hollowcube.mapmaker.api.players.PlayerDataStub;
 import net.hollowcube.mapmaker.gui.common.ExtraPanels;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
+import net.hollowcube.mapmaker.gui.store.StoreHelpers;
+import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.util.Autocompletors;
 import net.hollowcube.mapmaker.util.Sanity;
 import net.kyori.adventure.text.Component;
@@ -43,8 +49,11 @@ public class EditMapView extends Panel {
         material != Material.RECOVERY_COMPASS &&
         !material.name().endsWith("glass_pane");
 
+    private static final int NAME_INPUT_MAX = 100;
+
     private final ApiClient api;
     private final MapService mapService;
+    private final PlayerService playerService;
 
     private MapSlot slot;
     private final MapPublisher publisher;
@@ -57,12 +66,14 @@ public class EditMapView extends Panel {
     @Blocking
     public EditMapView(
         ApiClient api, MapService mapService,
+        PlayerService playerService,
         ServerBridge bridge, MapSlot slot,
         Runnable onPublish
     ) {
         super(9, 10);
         this.api = api;
         this.mapService = mapService;
+        this.playerService = playerService;
         this.slot = slot;
 
         Consumer<MapData> publishCallback = publishedMap -> {
@@ -75,13 +86,14 @@ public class EditMapView extends Panel {
         add(0, 0, title("Edit Map"));
 
         add(0, 0, backOrClose());
-        this.nameText = add(1, 0, new Text("gui.create_maps.edit.name", 7, 1, slot.map().settings().getNameSafe()).align(8, 5));
+        var name = FontUtil.shorten(slot.map().settings().getNameSafe(), NAME_INPUT_MAX, 5);
+        this.nameText = add(1, 0, new Text("gui.create_maps.edit.name", 7, 1, name).align(8, 5));
         this.nameText.lorePostfix(LORE_POSTFIX_CLICKEDIT)
             .onLeftClick(this::beginNameEdit);
         add(8, 0, new Button("gui.create_maps.edit.actions", 1, 1)
             .background("generic2/btn/default/1_1")
             .sprite("icon2/1_1/ellipsis", 1, 1)
-            .onLeftClick(() -> host.pushView(new EditMapActionsView(api, mapService, bridge, slot.map().id()))));
+            .onLeftClick(() -> host.pushView(new EditMapActionsView(mapService, slot.map()))));
 
         add(1, 1, infoText(1, "icon", -2));
         this.iconButton = add(1, 2, new Button("gui.create_maps.edit.icon", 1, 1)
@@ -119,8 +131,7 @@ public class EditMapView extends Panel {
         // When we want to show a read-only view we will need to change this, for now not necessary.
         Sanity.check(pd.id().equals(slot.map().owner()), "can only view your own maps right now");
 
-//        var builderSlots = pd.mapBuilders();
-        var builderSlots = 3; // TODO: missing slots in old endpoint
+        var builderSlots = pd.mapBuilders();
 
         builderButtons.clear();
         boolean addedAddButton = false;
@@ -150,8 +161,13 @@ public class EditMapView extends Panel {
                     .sprite("icon2/1_1/plus", 1, 1)
                     .onLeftClick(this::beginAddMapBuilder);
             } else {
-                button = new Button("gui.create_maps.edit.builders.locked", 1, 1)
-                    .sprite("icon2/1_1/lock", 1, 1);
+                boolean hasCubits = pd.cubits() >= ShopUpgrade.MAP_BUILDER_2.cubits();
+                String cubitsKey = hasCubits ? "has_cubits" : "no_cubits";
+
+                button = new Button("gui.create_maps.edit.builders.locked." + cubitsKey, 1, 1)
+                    .sprite("icon2/1_1/lock", 1, 1)
+                    .onLeftClick(this::buyBuilderPrimary)
+                    .onRightClick(this::buyBuilderSecondary);
             }
 
             builderButtons.add(i, 0, button);
@@ -187,7 +203,9 @@ public class EditMapView extends Panel {
                     ? message.substring(0, MapData.MAX_NAME_LENGTH) : message;
 
                 slot.map().settings().setName(limitedName);
-                nameText.text(limitedName);
+
+                var name = FontUtil.shorten(slot.map().settings().getNameSafe(), NAME_INPUT_MAX, 5);
+                nameText.text(name);
                 updatePublishStage();
             },
             slot.map().settings().getName()
@@ -235,6 +253,44 @@ public class EditMapView extends Panel {
         }
     }
 
+    private void buyBuilderPrimary() {
+        var playerData = PlayerData.fromPlayer(host.player());
+        boolean hasCubits = playerData.cubits() >= ShopUpgrade.MAP_BUILDER_2.cubits();
+
+        if (hasCubits) {
+            host.pushView(confirm("Buy Trusted Builder", FutureUtil.virtual(this::buyBuilderSlot)));
+        } else {
+            this.host.pushView(new StoreView(playerService, StoreView.TAB_HYPERCUBE));
+        }
+    }
+
+    private void buyBuilderSecondary() {
+        var playerData = PlayerData.fromPlayer(host.player());
+        boolean hasCubits = playerData.cubits() >= ShopUpgrade.MAP_BUILDER_2.cubits();
+
+        this.host.pushView(new StoreView(
+            playerService,
+            hasCubits ? StoreView.TAB_HYPERCUBE : StoreView.TAB_CUBITS
+        ));
+    }
+
+    @Blocking
+    private void buyBuilderSlot(Player player) {
+        var playerData = PlayerData.fromPlayer(player);
+        var nextSlot = latestBuilderUpgrade(playerData);
+        if (nextSlot == null) return;
+
+        StoreHelpers.buyUpgrade(playerService, player, nextSlot);
+        sync(this::drawBuilderButtons);
+    }
+
+    private static @Nullable ShopUpgrade latestBuilderUpgrade(PlayerData playerData) {
+        for (var upgrade : ShopUpgrade.MAP_BUILDERS) {
+            if (!upgrade.has(playerData)) return upgrade;
+        }
+        return null;
+    }
+
     private void beginAddMapBuilder() {
         host.pushView(AnvilSearchView.<PlayerDataStub>builder()
             .icon("icon2/anvil/construction_hat")
@@ -255,6 +311,8 @@ public class EditMapView extends Panel {
                     button.lorePostfix(List.of(Component.translatable("gui.create_maps.edit.builders.add.search.entry.already_invited.lore")));
                 } else if (isPlayerInvited(pds.id())) {
                     button.lorePostfix(List.of(Component.translatable("gui.create_maps.edit.builders.add.search.entry.already_added.lore")));
+                } else if (!pds.getSetting(PlayerSettings.ALLOW_BUILDER_INVITES)) {
+                    button.lorePostfix(List.of(Component.translatable("gui.create_maps.edit.builders.add.search.entry.invites_disabled.lore")));
                 }
                 return button;
             })
@@ -265,7 +323,8 @@ public class EditMapView extends Panel {
 
     @Blocking
     private boolean addMapBuilder(PlayerDataStub pds) {
-        if (isPlayerInvited(pds.id())) return false;
+        if (isPlayerInvited(pds.id()) || !pds.getSetting(PlayerSettings.ALLOW_BUILDER_INVITES))
+            return false;
 
         api.maps.inviteMapBuilder(slot.map().id(), pds.id());
         slot = slot.withLocalBuilder(pds.id());

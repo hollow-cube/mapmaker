@@ -41,7 +41,8 @@ final class TestConnectionImpl implements TestConnection {
 
         player.setPendingOptions(instance, false);
         player.setRespawnPoint(pos);
-        playerConnection.setConnectionState(ConnectionState.PLAY);
+        playerConnection.setClientState(ConnectionState.PLAY);
+        playerConnection.setServerState(ConnectionState.PLAY);
         player.UNSAFE_init().join();
 
 //        process.connection().transitionConfigToPlay(player);

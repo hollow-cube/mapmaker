@@ -32,6 +32,8 @@ import net.hollowcube.mapmaker.runtime.parkour.action.HotbarItems;
 import net.hollowcube.mapmaker.runtime.parkour.action.LegacyActionStateManager;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditLivesAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditTimerAction;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.SetTimeAction;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.SetWeatherAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.variables.VariableStorage;
 import net.hollowcube.mapmaker.runtime.parkour.block.CheckpointPlateBlock;
 import net.hollowcube.mapmaker.runtime.parkour.block.ClientBlockPlacementListener;
@@ -322,6 +324,11 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
         player.removeTag(BEST_SAVESTATE);
 
+        if (player instanceof MapPlayer mp) {
+            mp.setWeather(instance().getWeather(), 1);
+            mp.clearLocalTime();
+        }
+
         super.removePlayer(player);
     }
 
@@ -418,8 +425,12 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
                 finishScore = NumberUtil.roundMillisToTicks((long) finishScore);
             }
 
+            boolean isBetterScore =
+                (lb.asc() && finishScore < bestScore) ||
+                (!lb.asc() && finishScore > bestScore);
+
             var diffScore = bestScore - finishScore;
-            var diffColor = diffScore < 0 && lb.asc() ? NamedTextColor.RED : NamedTextColor.GREEN;
+            var diffColor = isBetterScore ? NamedTextColor.GREEN : NamedTextColor.RED;
             var diffSymbol = diffScore < 0 ? "+" : "-";
             player.sendMessage(Component.translatable(
                 "map.completed." + lb.format().name().toLowerCase() + ".with_prior",
@@ -428,9 +439,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
                 text(diffSymbol, diffColor).children(List.of(lb.format().format(Math.abs(diffScore))))
             ));
 
-            if (finishState.getEffectivePlaytime() < bestState.getEffectivePlaytime()) {
-                player.setTag(BEST_SAVESTATE, finishState);
-            }
+            if (isBetterScore) player.setTag(BEST_SAVESTATE, finishState);
         }
 
         // Will be called when the completion animation is finished
@@ -503,6 +512,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         super.loadWorldTag(tag);
 
         instance().setTag(SPAWN_CHECKPOINT_EFFECTS, tag.getTag(SPAWN_CHECKPOINT_EFFECTS));
+        applyGlobalSpawnActions(this);
     }
 
     @Override
@@ -510,6 +520,24 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         super.saveWorldTag(tag);
 
         tag.setTag(SPAWN_CHECKPOINT_EFFECTS, instance().getTag(SPAWN_CHECKPOINT_EFFECTS));
+    }
+
+    public static void applyGlobalSpawnActions(AbstractMapWorld<?, ?> world) {
+        var spawnActions = OpUtils.or(world.instance().getTag(SPAWN_CHECKPOINT_EFFECTS), () -> ActionTriggerData.EMPTY).actions();
+
+        var time = OpUtils.mapOr(
+            spawnActions.findLast(SetTimeAction.class),
+            SetTimeAction::time,
+            world.map().getSetting(MapSettings.TIME_OF_DAY)
+        );
+        world.instance().setTime(time.time());
+
+        var weather = OpUtils.mapOr(
+            spawnActions.findLast(SetWeatherAction.class),
+            SetWeatherAction::weather,
+            world.map().getSetting(MapSettings.WEATHER_TYPE)
+        );
+        world.instance().setWeather(weather.weather(), 1);
     }
 
     protected void computeDefaultResetHeight() {

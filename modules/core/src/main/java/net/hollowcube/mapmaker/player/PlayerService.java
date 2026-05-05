@@ -65,8 +65,6 @@ public interface PlayerService {
     CreateCheckoutLinkResponse createCheckoutLink(
         @NotNull String source, @NotNull String username, @NotNull String product);
 
-    @Nullable HypercubeStatus getHypercubeStatus(@NotNull String playerId);
-
     enum TotpResult {
         SUCCESS,
         INVALID_FORMAT,

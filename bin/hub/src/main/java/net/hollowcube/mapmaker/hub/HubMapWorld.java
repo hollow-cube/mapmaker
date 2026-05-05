@@ -48,7 +48,7 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
             HubPlayerState.class);
 
         itemRegistry().register(new PlayMapsItem(server.api(), server.mapService(), server.bridge()));
-        itemRegistry().register(new CreateMapsItem(server.api(), server.playerService(), server.mapService(), server.bridge(), server.guiController()));
+        itemRegistry().register(new CreateMapsItem(server.api(), server.playerService(), server.mapService(), server.bridge()));
         itemRegistry().register(new OrgMapsItem());
         itemRegistry().register(new OpenCosmeticsMenuItem(server.playerService()));
         itemRegistry().register(OpenStoreItem.INSTANCE);

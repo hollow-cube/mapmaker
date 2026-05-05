@@ -23,10 +23,7 @@ import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Metadata;
-import net.minestom.server.entity.MetadataDef;
-import net.minestom.server.entity.Player;
-import net.minestom.server.entity.RelativeFlags;
+import net.minestom.server.entity.*;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.attribute.AttributeModifier;
 import net.minestom.server.entity.attribute.AttributeOperation;
@@ -38,8 +35,6 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-
-import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
 
 public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMapWorld> {
@@ -167,28 +162,34 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         }
 
         static CompletableFuture<Void> resetTeleport(Player player, Pos position) {
-            try {
-                player.sendPacket(new BundlePacket());
+            return player.teleport(position, Vec.ZERO, null, RelativeFlags.NONE)
+                .thenRun(() -> {
+                    try {
+                        player.sendPacket(new BundlePacket());
 
-                var chunk = player.getInstance().getChunkAt(position);
-                if (chunk != null) {
-                    player.sendPacket(chunk.getFullDataPacket());
-                    var ghostBlocks = GhostBlockHolder.forPlayerOptional(player);
-                    if (ghostBlocks != null) ghostBlocks.resendChunk(chunk);
-                }
+                        var chunk = player.getInstance().getChunkAt(position);
+                        if (chunk != null) {
+                            player.sendPacket(chunk.getFullDataPacket());
+                            var ghostBlocks = GhostBlockHolder.forPlayerOptional(player);
+                            if (ghostBlocks != null) ghostBlocks.resendChunk(chunk);
+                        }
 
-                player.setFlyingWithElytra(false);
-                var future = player.teleport(position, Vec.ZERO, null, RelativeFlags.NONE);
+                        player.setFlyingWithElytra(false);
+                        var meta = EntityMetadataStealer.steal(player);
 
-                // Force the player immediately into whatever pose the server thinks they should be in at the target pos.
-                if (player instanceof MapPlayer mp) mp.updatePose();
-                player.sendPacket(new EntityMetaDataPacket(player.getEntityId(),
-                        Map.of(MetadataDef.Player.POSE.index(), Metadata.Pose(player.getPose()))));
-
-                return future;
-            } finally {
-                player.sendPacket(new BundlePacket());
-            }
+                        // Force the player immediately into whatever pose the server thinks they should be in at the target pos.
+                        ((MapPlayer) player).updatePose();
+                        player.sendPacket(new EntityMetaDataPacket(
+                            player.getEntityId(),
+                            Map.of(
+                                MetadataDef.Player.POSE.index(), Metadata.Pose(player.getPose()),
+                                MetadataDef.Player.ENTITY_FLAGS.index(), Metadata.Byte(meta.get(MetadataDef.Player.ENTITY_FLAGS))
+                            )
+                        ));
+                    } finally {
+                        player.sendPacket(new BundlePacket());
+                    }
+                });
         }
     }
 
@@ -331,9 +332,10 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
 
             // If this is a verification, immediately remove them from the world and send them back to the hub
             if (world.map().verification() == MapVerification.PENDING) {
+                var lb = world.map().settings().leaderboard();
                 player.sendMessage(Component.translatable(
-                    "map.completed.first",
-                    Component.text(formatMapPlaytime(saveState.getEffectivePlaytime(), true))
+                    "map.completed." + lb.format().name().toLowerCase() + ".first",
+                    lb.format().format(saveState.getScore())
                 ));
 
                 FutureUtil.submitVirtual(() -> world.server().bridge().joinHub(player));

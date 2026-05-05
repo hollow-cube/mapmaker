@@ -4,9 +4,8 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapTags;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
-import net.kyori.adventure.text.Component;
 
-import java.util.List;
+import static net.hollowcube.mapmaker.gui.common.ExtraPanels.LORE_POSTFIX_CLICKCHANGEORREMOVE;
 
 public class EditableMapTagList extends Panel {
     private final MapData map;
@@ -18,17 +17,6 @@ public class EditableMapTagList extends Panel {
         this.onUpdate = onUpdate;
 
         update();
-    }
-
-    static List<Component> getTagTranslationArgs(MapTags.Tag tag) {
-        return List.of(
-            Component.translatable(getFullTagTranslation(tag) + ".name"),
-            Component.translatable(getFullTagTranslation(tag) + ".lore")
-        );
-    }
-
-    private static String getFullTagTranslation(MapTags.Tag tag) {
-        return "gui.create_maps.tags." + tag.type().translationName() + '.' + tag.translationName();
     }
 
     private static String getCategory(int index) {
@@ -47,7 +35,8 @@ public class EditableMapTagList extends Panel {
             var tag = tags.get(i);
             final int index = i;
             add(i, 0, new Button(1, 1)
-                .translationKey("gui.create_maps.tags.display", getTagTranslationArgs(tag))
+                .translationKey(tag.baseTranslationKey())
+                .lorePostfix(LORE_POSTFIX_CLICKCHANGEORREMOVE)
                 .sprite("icon2/1_1/" + tag.sprite(), 1, 1)
                 .onLeftClick(() -> host.pushTransientView(new SelectTagView(map, newTag -> handleReplaceTag(index, newTag))))
                 .onRightClick(() -> handleRemoveTag(index)));

@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.GenericMessages;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -20,10 +21,12 @@ import java.util.Locale;
 import static net.hollowcube.mapmaker.gui.store.StoreView.TAB_HYPERCUBE;
 
 public class HypercubeCommand extends CommandDsl {
+    private final ApiClient api;
     private final PlayerService playerService;
 
-    public HypercubeCommand(@NotNull PlayerService playerService) {
+    public HypercubeCommand(@NotNull ApiClient api, @NotNull PlayerService playerService) {
         super("hypercube");
+        this.api = api;
         this.playerService = playerService;
 
         addSyntax(playerOnly(this::handleHypercubeInfo));
@@ -32,14 +35,14 @@ public class HypercubeCommand extends CommandDsl {
     private void handleHypercubeInfo(@NotNull Player player, @NotNull CommandContext context) {
         try {
             var playerId = PlayerData.fromPlayer(player).id();
-            var status = playerService.getHypercubeStatus(playerId);
-            if (status == null) {
+            var hypercube = api.players.getHypercube(playerId);
+            if (hypercube == null) {
                 Panel.open(player, new StoreView(playerService, TAB_HYPERCUBE));
                 return;
             }
 
             player.sendMessage(GenericMessages.COMMAND_HYPERCUBE_SUBSCRIPTION_INFO.with(
-                formatInstant(status.since()), formatInstant(status.until())
+                formatInstant(hypercube.start()), formatInstant(hypercube.end())
             ));
         } catch (Exception e) {
             ExceptionReporter.reportException(e, player);
@@ -62,16 +65,12 @@ public class HypercubeCommand extends CommandDsl {
         if (day >= 11 && day <= 13) {
             return "th";
         }
-        switch (day % 10) {
-            case 1:
-                return "st";
-            case 2:
-                return "nd";
-            case 3:
-                return "rd";
-            default:
-                return "th";
-        }
+        return switch (day % 10) {
+            case 1 -> "st";
+            case 2 -> "nd";
+            case 3 -> "rd";
+            default -> "th";
+        };
     }
 
 }

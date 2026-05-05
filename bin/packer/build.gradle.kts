@@ -18,11 +18,9 @@ application {
 val packerOut = layout.buildDirectory.dir("packer-out")
 val minecraftCacheDirectory = rootDir.resolve(".gradle").resolve("minecraft-cache")
 val mcVersions = mapOf(
-    "1.21.4" to 769,
-    "1.21.5" to 770,
-    "1.21.6" to 771,
     "1.21.8" to 772,
     "1.21.9" to 773,
+    "26.1" to 775,
 )
 
 tasks.register<DefaultTask>("downloadMinecraft") {

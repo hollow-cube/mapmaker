@@ -3,7 +3,9 @@ package net.hollowcube.mapmaker.runtime.parkour;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.SaveStateType;
+import net.hollowcube.mapmaker.map.setting.NoSpectateMode;
 import net.hollowcube.mapmaker.runtime.PlayState;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.EnableNoSpecAction;
 import net.hollowcube.mapmaker.runtime.parkour.item.ToggleFlightItem;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -19,6 +21,13 @@ public class SpectateHelper {
 
     public static boolean canSpectate(ParkourMapWorld world, Player player) {
         var mode = world.map().getSetting(MapSettings.NO_SPECTATOR);
+        if (mode == NoSpectateMode.ON) {
+            // should maybe cache this its kinda expensive to spam-recompute. but need to be careful about test world not updating.
+            var spawnActions = world.getTag(ParkourMapWorld.SPAWN_CHECKPOINT_EFFECTS);
+            if (spawnActions.actions().findLast(EnableNoSpecAction.class) != null)
+                mode = NoSpectateMode.AFTER_COMPLETION;
+        }
+
         return switch (mode) {
             case ON -> false;
             case OFF -> true;

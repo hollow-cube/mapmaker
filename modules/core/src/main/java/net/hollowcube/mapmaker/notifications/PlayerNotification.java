@@ -91,26 +91,30 @@ public record PlayerNotification(
     }
 
     public record ActionExecutor(
-        boolean requiresConfirmation,
+        @Nullable String confirmText, // empty if no message, null for no confirmation
         boolean requiresRefresh,
         boolean executeAsync,
         Runnable executor
     ) {
 
         public static ActionExecutor of(Runnable executor) {
-            return new ActionExecutor(false, false, false, executor);
+            return new ActionExecutor(null, false, false, executor);
         }
 
         public static ActionExecutor ofAsync(Runnable executor) {
-            return new ActionExecutor(false, false, true, executor);
+            return new ActionExecutor(null, false, true, executor);
         }
 
         public ActionExecutor withConfirmation() {
-            return new ActionExecutor(true, this.requiresRefresh, this.executeAsync, this.executor);
+            return new ActionExecutor("", this.requiresRefresh, this.executeAsync, this.executor);
+        }
+
+        public ActionExecutor withConfirmation(String message) {
+            return new ActionExecutor(message, this.requiresRefresh, this.executeAsync, this.executor);
         }
 
         public ActionExecutor withRefresh() {
-            return new ActionExecutor(this.requiresConfirmation, true, this.executeAsync, this.executor);
+            return new ActionExecutor(this.confirmText, true, this.executeAsync, this.executor);
         }
 
         public void execute(InventoryHost host, Runnable refresh, Runnable complete) {
@@ -126,8 +130,8 @@ public record PlayerNotification(
                     onFinish.run();
                 }
             };
-            if (this.requiresConfirmation) {
-                host.pushView(ExtraPanels.confirm(execute));
+            if (this.confirmText != null) {
+                host.pushView(ExtraPanels.confirm(this.confirmText.isEmpty() ? null : this.confirmText, execute));
             } else {
                 execute.run();
             }

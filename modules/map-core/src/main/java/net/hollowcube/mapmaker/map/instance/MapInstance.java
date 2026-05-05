@@ -11,7 +11,10 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
-import net.minestom.server.instance.*;
+import net.minestom.server.instance.Chunk;
+import net.minestom.server.instance.ChunkLoader;
+import net.minestom.server.instance.InstanceContainer;
+import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.Blocking;
@@ -46,7 +49,7 @@ public class MapInstance extends InstanceContainer {
         super(UUID.randomUUID(), dimensionType, null, Key.key(dimensionName));
         this.lightingMode = lightingMode;
 
-        setTimeRate(0); //todo eventually this should be a map setting
+        defaultClock().pause();
         setTime(6000);
 
         // Lighting and dummy chunk loader. The chunk loader will be replaced if there is world data

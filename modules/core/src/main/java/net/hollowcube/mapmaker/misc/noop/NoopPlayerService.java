@@ -81,11 +81,6 @@ public class NoopPlayerService implements PlayerService {
     }
 
     @Override
-    public @Nullable HypercubeStatus getHypercubeStatus(@NotNull String playerId) {
-        return null;
-    }
-
-    @Override
     public @NotNull TotpResult checkTotp(@NotNull String playerId, @Nullable String code) {
         throw new UnsupportedOperationException();
     }

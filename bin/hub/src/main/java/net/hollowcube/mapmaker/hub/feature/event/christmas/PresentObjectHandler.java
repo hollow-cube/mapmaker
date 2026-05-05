@@ -58,6 +58,11 @@ public class PresentObjectHandler extends ObjectEntityHandler {
     }
 
     @Override
+    public void removeViewer(MapWorld world, Player player) {
+        this.model.removeViewer(player);
+    }
+
+    @Override
     public void onPlayerInteract(Player player) {
         if (!canSendToPlayer(player)) return; // Sanity check
         var world = MapWorld.forPlayer(player);

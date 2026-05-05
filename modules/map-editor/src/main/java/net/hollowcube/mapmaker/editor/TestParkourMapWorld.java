@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiPredicate;
 
 import static net.kyori.adventure.text.Component.translatable;
@@ -47,7 +48,7 @@ public class TestParkourMapWorld extends ParkourMapWorld implements SubWorld {
     }
 
     @Override
-    public void close() {
+    public CompletableFuture<Void> close() {
         throw new UnsupportedOperationException("Test world may not be closed directly.");
     }
 

@@ -6,6 +6,7 @@ import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.compat.api.ModChannelRegisterEvent;
 import net.hollowcube.compat.api.packet.PacketRegistry;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.GlobalEventHandler;
@@ -17,7 +18,7 @@ import java.util.List;
 public class BlacklistedModsProvider implements CompatProvider {
 
     private static final Component KICK_MESSAGE = Component.text(
-        "You've been kicked for using mod(s) which are disallowed on the server.\nPlease remove them to join."
+        "You've been kicked for using mod(s) which are disallowed on the server."
     ).color(NamedTextColor.RED);
 
     @Override
@@ -41,7 +42,9 @@ public class BlacklistedModsProvider implements CompatProvider {
 
     private static void disconnectWithMods(Player player, List<Component> mods) {
         if (mods.isEmpty()) return;
-
-        PlayerUtil.disconnect(player, KICK_MESSAGE);
+        var text = Component.text(
+            "\nPlease remove the following mod(s) to join:\n"
+        ).color(NamedTextColor.RED).append(Component.join(JoinConfiguration.commas(true), mods).color(NamedTextColor.GRAY));
+        PlayerUtil.disconnect(player, KICK_MESSAGE.append(text));
     }
 }

@@ -6,7 +6,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.instance.IChunkLoader;
+import net.minestom.server.instance.ChunkLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.PlayerProvider;
@@ -57,7 +57,7 @@ public interface Env {
         return createFlatInstance(null);
     }
 
-    default @NotNull Instance createFlatInstance(IChunkLoader chunkLoader) {
+    default @NotNull Instance createFlatInstance(ChunkLoader chunkLoader) {
         var instance = process().instance().createInstanceContainer(chunkLoader);
         instance.setGenerator(unit -> unit.modifier().fillHeight(0, 40, Block.STONE));
         return instance;

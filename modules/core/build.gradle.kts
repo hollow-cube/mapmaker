@@ -7,7 +7,6 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":modules:canvas:api"))
     implementation(project(":modules:command"))
     implementation(project(":modules:compat"))
     implementation(project(":modules:common"))

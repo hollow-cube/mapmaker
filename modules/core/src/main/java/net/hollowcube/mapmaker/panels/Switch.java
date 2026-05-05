@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.panels;
 
-import net.hollowcube.canvas.ClickType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

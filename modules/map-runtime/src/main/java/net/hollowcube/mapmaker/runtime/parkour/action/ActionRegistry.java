@@ -67,6 +67,10 @@ public final class ActionRegistry {
         register(EditVariableAction.KEY, EditVariableAction.CODEC, EditVariableAction.EDITOR);
         register(EditVelocityAction.KEY, EditVelocityAction.CODEC, EditVelocityAction.EDITOR, Action.Type.STATUS);
         register(PlaySoundAction.KEY, PlaySoundAction.CODEC, PlaySoundAction.EDITOR);
+        register(StopSoundAction.KEY, StopSoundAction.CODEC, StopSoundAction.EDITOR);
+        register(EnableNoSpecAction.KEY, EnableNoSpecAction.CODEC, EnableNoSpecAction.EDITOR, Action.Type.SPAWN);
+        register(SetTimeAction.KEY, SetTimeAction.CODEC, SetTimeAction.EDITOR);
+        register(SetWeatherAction.KEY, SetWeatherAction.CODEC, SetWeatherAction.EDITOR);
     }
 
     private static <T extends Action> RegistryKey<StructCodec<? extends Action>> register(Key name, StructCodec<T> codec, Action.Editor<T> editor, Action.Type... types) {

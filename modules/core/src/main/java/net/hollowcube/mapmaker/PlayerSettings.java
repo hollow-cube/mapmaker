@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker;
 
+import net.hollowcube.mapmaker.chat.components.ChatLanguage;
 import net.hollowcube.mapmaker.map.VisibilityRule;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.hollowcube.mapmaker.temp.ClientChatMessageData;
@@ -12,6 +13,7 @@ public final class PlayerSettings {
 
     public static final PlayerSetting<String> CHAT_CHANNEL = PlayerSetting.String("chat_channel", ClientChatMessageData.CHANNEL_GLOBAL);
     public static final PlayerSetting<Boolean> COSMETICS_SHOW_LOCKED = PlayerSetting.Bool("cosmetics.show_locked", true);
+    public static final PlayerSetting<ChatLanguage> CHAT_LANGUAGE = PlayerSetting.Enum("chat_language", ChatLanguage.ORIGINAL);
 
     // Hub
 
@@ -22,7 +24,7 @@ public final class PlayerSettings {
 
     // Playing (parkour) maps
 
-    public static PlayerSetting<VisibilityRule> NEARBY_PLAYER_VISIBILITY = PlayerSetting.Enum("nearby_player_visibility", VisibilityRule.GHOST);
+    public static final PlayerSetting<VisibilityRule> NEARBY_PLAYER_VISIBILITY = PlayerSetting.Enum("nearby_player_visibility", VisibilityRule.GHOST);
 
 
     // Moderation
@@ -38,6 +40,7 @@ public final class PlayerSettings {
 
     public static PlayerSetting<Boolean> AUTO_REJECT_FRIEND_REQUESTS = PlayerSetting.Bool("auto_reject_friend_requests", false);
     public static PlayerSetting<Boolean> ALLOW_DIRECT_MESSAGES = PlayerSetting.Bool("allow_direct_messages", true);
+    public static PlayerSetting<Boolean> ALLOW_BUILDER_INVITES = PlayerSetting.Bool("allow_builder_invites", true);
     public static PlayerSetting<Boolean> ENABLE_PING_SOUNDS = PlayerSetting.Bool("enable_ping_sounds", true);
 
 }

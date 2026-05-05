@@ -61,6 +61,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -187,11 +188,13 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         super.loadWorldTag(tag);
 
         if (terraformInstanceStorage != null) terraformInstanceStorage.load(tag);
+
         instance().setTag(SPAWN_CHECKPOINT_EFFECTS, tag.getTag(SPAWN_CHECKPOINT_EFFECTS));
+        ParkourMapWorld.applyGlobalSpawnActions(this);
     }
 
     @Override
-    public void close() {
+    public CompletableFuture<Void> close() {
         if (autoSaveTask != null) autoSaveTask.cancel();
         autoSaveTask = null;
 
@@ -202,12 +205,20 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
             testWorldLock.unlock();
         }
 
+        var future = new CompletableFuture<Void>();
         FutureUtil.submitVirtual(() -> {
             save(false);
 
             MinecraftServer.getSchedulerManager()
-                .scheduleEndOfTick(super::close);
+                .scheduleEndOfTick(() -> {
+                    try {
+                        super.close();
+                    } finally {
+                        future.complete(null);
+                    }
+                });
         });
+        return future;
     }
 
     @Blocking
@@ -427,7 +438,10 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         var checkpointData = getTag(SPAWN_CHECKPOINT_EFFECTS).toMutable();
         var host = Panel.open(player, new SpawnActionEditorView(checkpointData));
         host.setTag(ActionEditorView.ACTION_LOCATION, entity.getPosition());
-        host.onClose(() -> instance().setTag(SPAWN_CHECKPOINT_EFFECTS, checkpointData.toImmutable()));
+        host.onClose(() -> {
+            instance().setTag(SPAWN_CHECKPOINT_EFFECTS, checkpointData.toImmutable());
+            ParkourMapWorld.applyGlobalSpawnActions(this);
+        });
     }
 
     @Override

@@ -64,7 +64,14 @@ public record PlaySoundAction(
         if (this.event == null) return;
 
         player.stopSound(SoundStop.named(this.event));
-        player.playSound(Sound.sound(this.event, Sound.Source.MASTER, this.volume, this.pitch));
+        player.playSound(Sound.sound(this.event, getSoundSource(this.event), this.volume, this.pitch), Sound.Emitter.self());
+    }
+
+    public static Sound.Source getSoundSource(SoundEvent event) {
+        if (event.name().contains("music") || event.name().contains("music_disc")) {
+            return Sound.Source.RECORD;
+        }
+        return Sound.Source.VOICE;
     }
 
 }

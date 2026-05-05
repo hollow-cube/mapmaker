@@ -43,7 +43,8 @@ public class SelectTagView extends Panel {
                 continue;
 
             var button = new Button(1, 1)
-                .translationKey("gui.create_maps.tags.select", EditableMapTagList.getTagTranslationArgs(tag))
+                .translationKey(tag.baseTranslationKey())
+                .lorePostfix(LORE_POSTFIX_CLICKCHOOSE)
                 .sprite("icon2/1_1/" + tag.sprite(), 1, 1)
                 .onLeftClick(() -> {
                     onSelect.accept(tag);

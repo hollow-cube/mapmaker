@@ -29,7 +29,6 @@ import net.minestom.server.event.player.PlayerDeathEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.event.trait.PlayerInstanceEvent;
-import net.minestom.server.instance.Weather;
 import net.minestom.server.instance.WorldBorder;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
@@ -313,9 +312,9 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         }
 
         // Apply pending state changes.
-        var iter = pendingStateChanges.entrySet().iterator();
-        while (iter.hasNext()) {
-            final var entry = iter.next();
+        var stateChanges = new ArrayList<>(pendingStateChanges.entrySet());
+        pendingStateChanges.clear();
+        for (var entry : stateChanges) {
             final var player = entry.getKey();
             final var lastState = playerStates.get(player);
             final var change = entry.getValue();
@@ -336,7 +335,6 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
                 }
             } finally {
                 stateChangeEvent.commit();
-                iter.remove();
             }
         }
 
@@ -367,19 +365,6 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
             0f, 0f, 0,
             0, ServerFlag.WORLD_BORDER_SIZE
         ));
-
-        instance().setTime(switch (map().getSetting(MapSettings.TIME_OF_DAY)) {
-            case NOON -> 6000;
-            case SUNRISE -> 23000;
-            case SUNSET -> 13000;
-            case NIGHT -> 18000;
-        });
-
-        instance().setWeather(switch (map().getSetting(MapSettings.WEATHER_TYPE)) {
-            case CLEAR -> new Weather(0, 0);
-            case RAINING -> new Weather(1f, 0f);
-            case THUNDERSTORM -> new Weather(1f, 1f);
-        }, 1);
     }
 
     @Blocking
@@ -389,7 +374,7 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         this.bossBars = createBossBars();
     }
 
-    public void close() {
+    public CompletableFuture<Void> close() {
         if (!(Thread.currentThread() instanceof TickSchedulerThread))
             throw new UnsupportedOperationException("close must be called from the scheduler thread!");
         if (!players().isEmpty())
@@ -399,6 +384,9 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         // At the beginning of the _next_ tick (as in, after this safe point tick), unregister the instance.
         MinecraftServer.getSchedulerManager().scheduleNextTick(() ->
             MinecraftServer.getInstanceManager().unregisterInstance(instance()));
+
+        // We dont need to wait for the instance unregister, its fine.
+        return CompletableFuture.completedFuture(null);
     }
 
     protected @Nullable List<BossBar> createBossBars() {

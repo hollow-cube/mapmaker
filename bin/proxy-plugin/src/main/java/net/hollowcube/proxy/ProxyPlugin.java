@@ -48,15 +48,13 @@ public class ProxyPlugin {
     private static final Key TRANSFER_DATA_COOKIE = Key.key("mapmaker", "transfer_data");
 
     private static final Set<ProtocolVersion> SUPPORTED_VERSIONS = Set.of(
-        ProtocolVersion.MINECRAFT_1_21_4,
-        ProtocolVersion.MINECRAFT_1_21_5,
-        ProtocolVersion.MINECRAFT_1_21_6,
         ProtocolVersion.MINECRAFT_1_21_7,
         ProtocolVersion.MINECRAFT_1_21_9,
-        ProtocolVersion.MINECRAFT_1_21_11
+        ProtocolVersion.MINECRAFT_1_21_11,
+        ProtocolVersion.MINECRAFT_26_1
     );
-    private static final ProtocolVersion RECOMMEND_VERSION = ProtocolVersion.MINECRAFT_1_21_11;
-    private static final String PROTOCOL_VERSION_STRING = "1.21.4-1.21.11";
+    private static final ProtocolVersion RECOMMEND_VERSION = ProtocolVersion.MINECRAFT_26_1;
+    private static final String PROTOCOL_VERSION_STRING = "1.21.7-26.1.1";
 
     private final Logger logger;
     private final ProxyServer proxy;

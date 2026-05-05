@@ -15,16 +15,8 @@ import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.LivingEntity;
-import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.event.EventDispatcher;
-import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
-import net.minestom.server.event.player.PlayerEntityInteractEvent;
-import net.minestom.server.network.packet.client.play.ClientInteractEntityPacket;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,24 +89,6 @@ public final class MapServerInitializer {
         MinecraftServer.getExceptionManager().setExceptionHandler(t -> {
             logger.error("An uncaught exception has been handled", t);
             PostHog.captureException(t);
-        });
-
-        //todo minestom bug, need to fix
-        MinecraftServer.getPacketListenerManager().setPlayListener(ClientInteractEntityPacket.class, (packet, player) -> {
-            final Entity entity = player.getInstance().getEntityById(packet.targetId());
-            final double interactionRange = player.getAttributeValue(Attribute.ENTITY_INTERACTION_RANGE);
-            if (entity == null || !entity.isViewer(player) || player.getDistance(entity) > interactionRange)
-                return;
-
-            ClientInteractEntityPacket.Type type = packet.type();
-            if (type instanceof ClientInteractEntityPacket.Attack) {
-                if (entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) // Can't attack dead entities
-                    return;
-                EventDispatcher.call(new EntityAttackEvent(player, entity));
-            } else if (type instanceof ClientInteractEntityPacket.InteractAt interactAt) {
-                Point interactPosition = new Vec(interactAt.targetX(), interactAt.targetY(), interactAt.targetZ());
-                EventDispatcher.call(new PlayerEntityInteractEvent(player, entity, interactAt.hand(), interactPosition));
-            }
         });
 
         var httpConfig = config.get(HttpConfig.class);

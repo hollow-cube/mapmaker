@@ -42,6 +42,7 @@ public class EmptyChunk extends Chunk {
         CHUNK_DATA = new ChunkData(Map.of(), NetworkBuffer.makeArray(networkBuffer -> {
             for (Section section : SECTIONS) {
                 networkBuffer.write(SHORT, (short) section.blockPalette().count());
+                networkBuffer.write(SHORT, (short) 0); // fluid count
                 networkBuffer.write(Palette.BLOCK_SERIALIZER, section.blockPalette());
                 networkBuffer.write(Palette.biomeSerializer(MinecraftServer.getBiomeRegistry().size()), section.biomePalette());
             }

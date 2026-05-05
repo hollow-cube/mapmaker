@@ -50,6 +50,6 @@ public class MapPlayCommand extends CommandDsl {
             return;
         }
 
-        bridge.joinMap(player, new ServerBridge.JoinConfig(map.id(), ServerBridge.JoinMapState.PLAYING, "staff_edit_map", isolateOverride));
+        bridge.joinMap(player, new ServerBridge.JoinConfig(map.id(), ServerBridge.JoinMapState.PLAYING, "staff_play_map", isolateOverride));
     }
 }

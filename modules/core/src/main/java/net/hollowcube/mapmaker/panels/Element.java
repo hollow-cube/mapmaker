@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.panels;
 
-import net.hollowcube.canvas.ClickType;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;

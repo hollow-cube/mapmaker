@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.panels;
 
-import net.hollowcube.canvas.ClickType;
 import net.hollowcube.posthog.PostHog;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;

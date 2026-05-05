@@ -7,7 +7,6 @@ dependencies {
     api(project(":modules:common"))
     api(project(":modules:core"))
     api(project(":modules:nbs"))
-    implementation(project(":modules:canvas:api"))
     implementation(project(":modules:compat"))
     implementation(project(":modules:datafix"))
 
@@ -29,6 +28,4 @@ dependencies {
     implementation(libs.slf4j.jul)
     implementation(libs.logback)
     implementation(libs.nats)
-
-    testImplementation(project(":modules:map-core-test"))
 }

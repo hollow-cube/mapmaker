@@ -20,7 +20,7 @@ public interface ClientboundModPacket<T extends ClientboundModPacket<T>>  {
         send(player, false);
     }
 
-    default void sendToViewers(Collection<Player> players) {
+    default void sendToViewers(Collection<? extends Player> players) {
         players.forEach(this::send);
     }
 

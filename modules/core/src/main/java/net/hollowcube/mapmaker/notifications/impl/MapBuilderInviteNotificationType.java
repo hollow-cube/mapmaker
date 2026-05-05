@@ -61,7 +61,7 @@ public final class MapBuilderInviteNotificationType implements PlayerNotificatio
                                 player.sendMessage(Component.translatable("gui.notification.map_builder.invite.accept.gone"));
                                 player.closeInventory();
                             } catch (ApiClient.BadRequestError _) {
-                                // TODO: missing translation, and open store
+                                // TODO: open store
                                 player.sendMessage(Component.translatable("gui.notification.map_builder.invite.accept.no_slots"));
                                 return; // dont delete in this case
                             }
@@ -72,7 +72,7 @@ public final class MapBuilderInviteNotificationType implements PlayerNotificatio
                                 // Ignored, it may have been deleted by the server
                             }
                         })
-                        .withConfirmation()
+                        .withConfirmation("Accept Invite")
                         .withRefresh()
                 ),
                 PlayerNotification.Action.of(
@@ -94,7 +94,7 @@ public final class MapBuilderInviteNotificationType implements PlayerNotificatio
                                 // Ignored, it may have been deleted by the server
                             }
                         })
-                        .withConfirmation()
+                        .withConfirmation("Reject Invite")
                         .withRefresh()
                 )
             )
