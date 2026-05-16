@@ -8,6 +8,7 @@ import net.hollowcube.luau.slopgen.Idents;
 import net.hollowcube.luau.slopgen.LuaNames;
 import net.hollowcube.luau.slopgen.Model;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
@@ -24,11 +25,11 @@ public final class LibraryEmitter {
         .build();
 
     private final Idents idents;
-    private final AtomResolver atomResolver;
+    private final @Nullable ClassName atomsClass;
 
-    public LibraryEmitter(Idents idents, AtomResolver atomResolver) {
+    public LibraryEmitter(Idents idents, @Nullable ClassName atomsClass) {
         this.idents = idents;
-        this.atomResolver = atomResolver;
+        this.atomsClass = atomsClass;
     }
 
     public JavaFile emit(Model.Library library) {
@@ -75,7 +76,7 @@ public final class LibraryEmitter {
                     upperPrefix(ex, m.javaMethodName().toUpperCase()),
                     library.glueType(),
                     lower(ex.luaName()) + "$" + m.javaMethodName(),
-                    m.meta().methodName()));
+                    m.meta()));
             }
         }
 
@@ -198,7 +199,7 @@ public final class LibraryEmitter {
         var b = beginDispatchOrMeta(ex, "namecall", "state.nameCallAtomRaw()", /*removeBeforeAtom=*/false);
         for (var m : ex.methods()) {
             short atom = idents.atomFor(m.luaName());
-            var label = atomResolver.label(m.luaName(), atom);
+            var label = LuaNames.atomLabel(atomsClass, m.luaName(), atom);
             b.beginControlFlow("case $L/*$L*/ -> ", label, m.luaName());
             b.addStatement("state.remove(1)");
             if (m.isVoid()) {
@@ -218,7 +219,7 @@ public final class LibraryEmitter {
         for (var p : ex.properties()) {
             if (p.setter() == null) continue;
             short atom = idents.atomFor(p.luaName());
-            var label = atomResolver.label(p.luaName(), atom);
+            var label = LuaNames.atomLabel(atomsClass, p.luaName(), atom);
             b.beginControlFlow("case $L/*$L*/ -> ", label, p.luaName());
             b.addStatement("self.$L(state)", p.setter().javaMethodName());
             b.addStatement("yield 0");
@@ -233,7 +234,7 @@ public final class LibraryEmitter {
         for (var p : ex.properties()) {
             if (p.getter() == null) continue;
             short atom = idents.atomFor(p.luaName());
-            var label = atomResolver.label(p.luaName(), atom);
+            var label = LuaNames.atomLabel(atomsClass, p.luaName(), atom);
             b.addStatement("case $L/*$L*/ -> self.$L(state)",
                 label, p.luaName(), p.getter().javaMethodName());
         }
@@ -414,7 +415,7 @@ public final class LibraryEmitter {
             b.addStatement("state.setField(-2, $S)", LuaNames.NAMECALL_META_NAME);
             for (var m : ex.metaMethods()) {
                 b.addStatement("state.pushFunction($L)", upperPrefix(ex, m.javaMethodName().toUpperCase()));
-                b.addStatement("state.setField(-2, $S)", m.meta().methodName());
+                b.addStatement("state.setField(-2, $S)", m.meta());
             }
             b.addStatement("state.setReadOnly(-1, true)");
             b.addStatement("state.setUserDataMetaTable($L)", upperPrefix(ex, "TAG"));
@@ -436,7 +437,7 @@ public final class LibraryEmitter {
         for (var p : library.staticProperties()) {
             if (p.getter() == null) continue;
             short atom = idents.atomFor(p.luaName());
-            var label = atomResolver.label(p.luaName(), atom);
+            var label = LuaNames.atomLabel(atomsClass, p.luaName(), atom);
             b.addStatement("case $L/*$L*/ -> $T.$L(state)",
                 label, p.luaName(),
                 p.getter().enclosingType(),
@@ -445,7 +446,7 @@ public final class LibraryEmitter {
         for (var m : library.staticMethods()) {
             if (m.isVoid()) continue;
             short atom = idents.atomFor(m.luaName());
-            var label = atomResolver.label(m.luaName(), atom);
+            var label = LuaNames.atomLabel(atomsClass, m.luaName(), atom);
             b.beginControlFlow("case $L/*$L*/ -> ", label, m.luaName());
             b.addStatement("state.pushFunction($L)", m.luaName().toUpperCase());
             b.addStatement("yield 1");

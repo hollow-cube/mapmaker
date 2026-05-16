@@ -125,8 +125,8 @@ public final class EngineApiDiff {
     private void compareMetaMethodList(String prefix, List<Model.MetaMethod> oldList, List<Model.MetaMethod> newList) {
         var oldByName = new HashMap<String, Model.MetaMethod>();
         var newByName = new HashMap<String, Model.MetaMethod>();
-        for (var m : oldList) oldByName.put(m.meta().name(), m);
-        for (var m : newList) newByName.put(m.meta().name(), m);
+        for (var m : oldList) oldByName.put(m.meta(), m);
+        for (var m : newList) newByName.put(m.meta(), m);
         for (var key : oldByName.keySet()) {
             var oldM = oldByName.get(key);
             var newM = newByName.get(key);

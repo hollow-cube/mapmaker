@@ -1,10 +1,8 @@
 package net.hollowcube.luau.slopgen;
 
 import net.hollowcube.luau.gen.LuaLibrary;
-import net.hollowcube.luau.slopgen.emit.AtomResolver;
 import net.hollowcube.luau.slopgen.emit.AtomTableEmitter;
 import net.hollowcube.luau.slopgen.emit.LibraryEmitter;
-import net.hollowcube.luau.slopgen.parse.LibraryModelBuilder;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -50,7 +48,7 @@ public class LuaLibraryProcessor extends AbstractProcessor {
         // related).
         var idents = new Idents();
         var modelBuilder = new LibraryModelBuilder(processingEnv, idents);
-        var emitter = new LibraryEmitter(idents, AtomResolver.symbolic(AtomTableEmitter.LUA_STRING_ATOMS));
+        var emitter = new LibraryEmitter(idents, AtomTableEmitter.LUA_STRING_ATOMS);
 
         Path fragmentDir = resolveFragmentDir();
 

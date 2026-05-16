@@ -2,7 +2,10 @@ package net.hollowcube.mapmaker.scripting.api;
 
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaType;
-import net.hollowcube.luau.gen.*;
+import net.hollowcube.luau.gen.LuaExport;
+import net.hollowcube.luau.gen.LuaLibrary;
+import net.hollowcube.luau.gen.LuaMethod;
+import net.hollowcube.luau.gen.LuaProperty;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
@@ -405,8 +408,8 @@ public final class LibPlayer {
         //region Meta Methods
 
         /// Two `Player` values are equal when they refer to the same player.
-        @LuaMethod(meta = Meta.EQ)
-        public int luaToString(LuaState state) {
+        @LuaMethod(meta = "__eq")
+        public int luaEq(LuaState state) {
             var result = state.isUserData(1)
                          && state.toUserData(1) instanceof Player p
                          && p.player.getUuid().equals(player.getUuid());

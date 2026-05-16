@@ -32,6 +32,7 @@ dependencies {
 val engineApiOutputDir: DirectoryProperty = project.objects.directoryProperty()
     .convention(layout.buildDirectory.dir("luau-api"))
 val engineApiOutputFile: Provider<RegularFile> = engineApiOutputDir.file("engine-api.json")
+val engineApiEditorFile: Provider<RegularFile> = engineApiOutputDir.file("engine-api.editor.json")
 val luauDeclOutputFile: Provider<RegularFile> = engineApiOutputDir.file("engine.d.luau")
 
 /// Configuration-cache-compatible argument providers — they capture lazy properties, not the
@@ -43,8 +44,14 @@ abstract class AggregateArgs : CommandLineArgumentProvider {
     abstract val fragments: ConfigurableFileCollection
     @get:OutputFile
     abstract val output: RegularFileProperty
+
+    @get:OutputFile
+    abstract val editorOutput: RegularFileProperty
     override fun asArguments(): Iterable<String> {
-        val args = mutableListOf("--output", output.get().asFile.absolutePath)
+        val args = mutableListOf(
+            "--output", output.get().asFile.absolutePath,
+            "--editor-output", editorOutput.get().asFile.absolutePath,
+        )
         val dirs = fragments.files.map { it.absolutePath }
         if (dirs.isNotEmpty()) {
             args += "--fragments"
@@ -87,6 +94,7 @@ val aggregateEngineApi = tasks.register<JavaExec>("aggregateEngineApi") {
     val provider = project.objects.newInstance<AggregateArgs>()
     provider.fragments.from(luauApiFragments)
     provider.output.set(engineApiOutputFile)
+    provider.editorOutput.set(engineApiEditorFile)
     argumentProviders.add(provider)
 }
 

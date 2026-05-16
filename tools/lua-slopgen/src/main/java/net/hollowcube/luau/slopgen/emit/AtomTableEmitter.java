@@ -30,7 +30,7 @@ public final class AtomTableEmitter {
         for (var e : originatingElements) typeBuilder.addOriginatingElement(e);
 
         for (var entry : idents.entries()) {
-            typeBuilder.addField(FieldSpec.builder(short.class, AtomNames.javaIdentifier(entry.luaName()))
+            typeBuilder.addField(FieldSpec.builder(short.class, LuaNames.atomIdentifier(entry.luaName()))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .initializer("(short) $L", entry.value())
                 .build());

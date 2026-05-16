@@ -1,12 +1,15 @@
-package net.hollowcube.luau.slopgen.parse;
+package net.hollowcube.luau.slopgen;
 
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.TypeName;
-import net.hollowcube.luau.gen.*;
-import net.hollowcube.luau.slopgen.Idents;
-import net.hollowcube.luau.slopgen.LuaNames;
-import net.hollowcube.luau.slopgen.Model;
-import net.hollowcube.luau.slopgen.docs.*;
+import net.hollowcube.luau.gen.LuaExport;
+import net.hollowcube.luau.gen.LuaLibrary;
+import net.hollowcube.luau.gen.LuaMethod;
+import net.hollowcube.luau.gen.LuaProperty;
+import net.hollowcube.luau.slopgen.docs.DocTag;
+import net.hollowcube.luau.slopgen.docs.Docs;
+import net.hollowcube.luau.slopgen.docs.JavadocTagParser;
+import net.hollowcube.luau.slopgen.docs.LuaDocsValidator;
 import net.hollowcube.luau.slopgen.types.LuauParseException;
 import net.hollowcube.luau.slopgen.types.LuauType;
 import net.hollowcube.luau.slopgen.types.LuauTypeParser;
@@ -52,8 +55,8 @@ public final class LibraryModelBuilder {
 
         var staticGetters = new LinkedHashMap<String, Model.Accessor>();
         var staticSetters = new LinkedHashMap<String, Model.Accessor>();
-        var staticGetterDocs = new LinkedHashMap<String, MemberDocs>();
-        var staticSetterDocs = new LinkedHashMap<String, MemberDocs>();
+        var staticGetterDocs = new LinkedHashMap<String, Docs>();
+        var staticSetterDocs = new LinkedHashMap<String, Docs>();
         var staticMethods = new ArrayList<Model.Method>();
         var rawExports = new ArrayList<Model.Export>();
 
@@ -145,8 +148,8 @@ public final class LibraryModelBuilder {
 
         var getters = new LinkedHashMap<String, Model.Accessor>();
         var setters = new LinkedHashMap<String, Model.Accessor>();
-        var getterDocs = new LinkedHashMap<String, MemberDocs>();
-        var setterDocs = new LinkedHashMap<String, MemberDocs>();
+        var getterDocs = new LinkedHashMap<String, Docs>();
+        var setterDocs = new LinkedHashMap<String, Docs>();
         var methods = new ArrayList<Model.Method>();
         var metaMethods = new ArrayList<Model.MetaMethod>();
 
@@ -181,7 +184,7 @@ public final class LibraryModelBuilder {
                     getters.put(name, buildGetter(method, javaName, javaType, memberDocs));
                     getterDocs.put(name, memberDocs);
                 }
-            } else if (luaMethod.meta() != Meta.NONE) {
+            } else if (!luaMethod.meta().isEmpty()) {
                 docsValidator.validateMeta(method, memberDocs, isVoid);
                 metaMethods.add(buildMetaMethod(method, luaMethod.meta(), javaName, isVoid, memberDocs));
             } else {
@@ -206,7 +209,7 @@ public final class LibraryModelBuilder {
     /// `@luaGeneric` on the enclosing `@LuaExport` class. The type-level generic is already
     /// in scope for every member; redeclaring it on a single method would be ambiguous.
     private void checkGenericShadowing(
-        ExecutableElement method, MemberDocs docs, Set<String> typeGenericNames, String typeLuaName
+        ExecutableElement method, Docs docs, Set<String> typeGenericNames, String typeLuaName
     ) {
         if (typeGenericNames.isEmpty()) return;
         for (var g : docs.generics()) {
@@ -222,7 +225,7 @@ public final class LibraryModelBuilder {
 
     private Model.Method buildMethod(
         ExecutableElement source, String luaName, String javaName, boolean isVoid,
-        TypeName enclosingType, MemberDocs docs
+        TypeName enclosingType, Docs docs
     ) {
         return new Model.Method(
             luaName, javaName, isVoid, enclosingType,
@@ -233,7 +236,7 @@ public final class LibraryModelBuilder {
     }
 
     private Model.MetaMethod buildMetaMethod(
-        ExecutableElement source, Meta meta, String javaName, boolean isVoid, MemberDocs docs
+        ExecutableElement source, String meta, String javaName, boolean isVoid, Docs docs
     ) {
         return new Model.MetaMethod(
             meta, javaName, isVoid,
@@ -244,7 +247,7 @@ public final class LibraryModelBuilder {
     }
 
     private Model.Accessor buildGetter(
-        ExecutableElement source, String javaName, TypeName enclosingType, MemberDocs docs
+        ExecutableElement source, String javaName, TypeName enclosingType, Docs docs
     ) {
         var firstReturn = docs.returns().isEmpty() ? null : docs.returns().get(0);
         LuauType type = parseTypeOrNil(source, firstReturn == null ? "" : firstReturn.typeExpr());
@@ -252,7 +255,7 @@ public final class LibraryModelBuilder {
     }
 
     private Model.Accessor buildSetter(
-        ExecutableElement source, String javaName, TypeName enclosingType, MemberDocs docs
+        ExecutableElement source, String javaName, TypeName enclosingType, Docs docs
     ) {
         String paramName = "";
         String typeExpr = "";
@@ -265,20 +268,20 @@ public final class LibraryModelBuilder {
         return new Model.Accessor(javaName, enclosingType, docs.description(), paramName, type);
     }
 
-    private List<Model.GenericParam> mapGenerics(List<TagGeneric> generics) {
+    private List<Model.GenericParam> mapGenerics(List<DocTag.Generic> generics) {
         var out = new ArrayList<Model.GenericParam>(generics.size());
         for (var g : generics) out.add(new Model.GenericParam(g.name(), g.pack(), g.description()));
         return out;
     }
 
-    private List<Model.Param> mapParams(ExecutableElement source, List<TagParam> params) {
+    private List<Model.Param> mapParams(ExecutableElement source, List<DocTag.Param> params) {
         var out = new ArrayList<Model.Param>(params.size());
         for (var p : params) out.add(new Model.Param(
             p.name(), p.optional(), parseTypeOrNil(source, p.typeExpr()), p.description()));
         return out;
     }
 
-    private List<Model.Return> mapReturns(ExecutableElement source, List<TagReturn> returns) {
+    private List<Model.Return> mapReturns(ExecutableElement source, List<DocTag.Return> returns) {
         var out = new ArrayList<Model.Return>(returns.size());
         for (var r : returns) out.add(new Model.Return(parseTypeOrNil(source, r.typeExpr()), r.description()));
         return out;
@@ -303,7 +306,7 @@ public final class LibraryModelBuilder {
         }
     }
 
-    private MemberDocs parseDocs(Element element) {
+    private Docs parseDocs(Element element) {
         return JavadocTagParser.parse(env.getElementUtils().getDocComment(element));
     }
 
@@ -312,8 +315,8 @@ public final class LibraryModelBuilder {
     /// edit (you usually add a setter to an existing typed getter).
     private void validateAccessorPairing(
         List<Model.Property> properties,
-        Map<String, MemberDocs> getterDocs,
-        Map<String, MemberDocs> setterDocs,
+        Map<String, Docs> getterDocs,
+        Map<String, Docs> setterDocs,
         Element fallback
     ) {
         for (var p : properties) {

@@ -2,11 +2,9 @@ package net.hollowcube.mapmaker.scripting;
 
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.compiler.LuauCompiler;
-import net.hollowcube.luau.gen.runtime.GeneratedStringAtoms;
 import net.hollowcube.luau.require.RequireResolver;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.scripting.api.*;
 import net.hollowcube.mapmaker.scripting.require.FsModuleLoader;
 import net.hollowcube.mapmaker.scripting.require.ResourceRequireResolver;
 import net.hollowcube.mapmaker.scripting.require.ZipRequireResolver;
@@ -86,23 +84,23 @@ public class WorldScriptContext {
         state.openLibs();
 
         state.openRequire(resolver);
-        GeneratedStringAtoms.register(state);
-
-        LuaGlobals.register(state);
-        LuaVector.register(state);
-        LuaRuntime$luau.register(state);
-        LuaText$luau.register(state);
-        LibItem.registerSlotGlobal(state);
-
-        LibBase$luau.register(state);
-        LibTask$luau.register(state);
-        LibEnv$luau.register(state);
-        LibWorld$luau.register(state);
-        LibPlayer$luau.register(state);
-        LibPlayers$luau.register(state);
-        LibEntity$luau.register(state);
-        LibItem$luau.register(state);
-        LibStore$luau.register(state);
+//        GeneratedStringAtoms.register(state);
+//
+//        LuaGlobals.register(state);
+//        LuaVector.register(state);
+//        LuaRuntime$luau.register(state);
+//        LuaText$luau.register(state);
+//        LibItem.registerSlotGlobal(state);
+//
+//        LibBase$luau.register(state);
+//        LibTask$luau.register(state);
+//        LibEnv$luau.register(state);
+//        LibWorld$luau.register(state);
+//        LibPlayer$luau.register(state);
+//        LibPlayers$luau.register(state);
+//        LibEntity$luau.register(state);
+//        LibItem$luau.register(state);
+//        LibStore$luau.register(state);
 
         state.sandbox();
         return state;

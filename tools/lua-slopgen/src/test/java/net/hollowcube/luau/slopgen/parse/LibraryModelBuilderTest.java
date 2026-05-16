@@ -6,8 +6,8 @@ import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
 import com.palantir.javapoet.ClassName;
 import net.hollowcube.luau.gen.LuaLibrary;
-import net.hollowcube.luau.gen.Meta;
 import net.hollowcube.luau.slopgen.Idents;
+import net.hollowcube.luau.slopgen.LibraryModelBuilder;
 import net.hollowcube.luau.slopgen.Model;
 import org.junit.jupiter.api.Test;
 
@@ -69,7 +69,7 @@ class LibraryModelBuilderTest {
             }
             """);
         assertEquals(1, library.staticProperties().size());
-        var prop = library.staticProperties().get(0);
+        var prop = library.staticProperties().getFirst();
         assertEquals("version", prop.luaName());
         assertNotNull(prop.getter());
         assertNull(prop.setter());
@@ -90,10 +90,10 @@ class LibraryModelBuilderTest {
             }
             """);
         assertEquals(1, library.staticMethods().size());
-        var m = library.staticMethods().get(0);
+        var m = library.staticMethods().getFirst();
         assertEquals("build", m.luaName());
         assertEquals("build", m.javaMethodName());
-        assertEquals(false, m.isVoid());
+        assertFalse(m.isVoid());
     }
 
     @Test
@@ -114,14 +114,14 @@ class LibraryModelBuilderTest {
             }
             """);
         assertEquals(1, library.exports().size());
-        var ex = library.exports().get(0);
+        var ex = library.exports().getFirst();
         assertEquals("Thing", ex.luaName());
-        assertEquals(true, ex.isFinal());
+        assertTrue(ex.isFinal());
         assertNull(ex.superExport());
-        assertEquals(false, ex.hasSubtypes());
+        assertFalse(ex.hasSubtypes());
         assertEquals(1, ex.properties().size());
-        assertEquals("name", ex.properties().get(0).luaName());
-        assertNull(ex.properties().get(0).setter());
+        assertEquals("name", ex.properties().getFirst().luaName());
+        assertNull(ex.properties().getFirst().setter());
     }
 
     @Test
@@ -143,9 +143,9 @@ class LibraryModelBuilderTest {
                 }
             }
             """);
-        var ex = library.exports().get(0);
+        var ex = library.exports().getFirst();
         assertEquals(1, ex.properties().size(), "getter+setter must merge into one Property");
-        var prop = ex.properties().get(0);
+        var prop = ex.properties().getFirst();
         assertEquals("color", prop.luaName());
         assertNotNull(prop.getter());
         assertNotNull(prop.setter());
@@ -170,12 +170,12 @@ class LibraryModelBuilderTest {
                 }
             }
             """);
-        var ex = library.exports().get(0);
+        var ex = library.exports().getFirst();
         assertEquals(2, ex.methods().size());
-        assertEquals("poke", ex.methods().get(0).luaName());
-        assertEquals(true, ex.methods().get(0).isVoid());
+        assertEquals("poke", ex.methods().getFirst().luaName());
+        assertTrue(ex.methods().getFirst().isVoid());
         assertEquals("compute", ex.methods().get(1).luaName());
-        assertEquals(false, ex.methods().get(1).isVoid());
+        assertFalse(ex.methods().get(1).isVoid());
     }
 
     @Test
@@ -211,7 +211,7 @@ class LibraryModelBuilderTest {
         assertEquals(byName.get("B"), c.superExport());
         assertTrue(a.hasSubtypes());
         assertTrue(b.hasSubtypes());
-        assertEquals(false, c.hasSubtypes());
+        assertFalse(c.hasSubtypes());
     }
 
     @Test
@@ -222,20 +222,19 @@ class LibraryModelBuilderTest {
             import net.hollowcube.luau.gen.LuaLibrary;
             import net.hollowcube.luau.gen.LuaExport;
             import net.hollowcube.luau.gen.LuaMethod;
-            import net.hollowcube.luau.gen.Meta;
             @LuaLibrary(name = "@t/meta")
             public final class LibMeta {
                 @LuaExport
                 public static final class Vec {
-                    @LuaMethod(meta = Meta.ADD)
+                    @LuaMethod(meta = "__add")
                     public int plus(LuaState state) { return 1; }
                 }
             }
             """);
-        var ex = library.exports().get(0);
+        var ex = library.exports().getFirst();
         assertTrue(ex.methods().isEmpty());
         assertEquals(1, ex.metaMethods().size());
-        assertEquals(Meta.ADD, ex.metaMethods().get(0).meta());
+        assertEquals("__add", ex.metaMethods().getFirst().meta());
     }
 
     @Test
@@ -250,7 +249,7 @@ class LibraryModelBuilderTest {
                 public record Hot() {}
             }
             """);
-        var ex = library.exports().get(0);
+        var ex = library.exports().getFirst();
         assertEquals("Hot", ex.luaName());
         assertNull(ex.superExport(), "record's superclass (Record) is filtered out");
     }
@@ -275,8 +274,8 @@ class LibraryModelBuilderTest {
         var atoms = capturing.idents.entries();
         assertEquals(2, atoms.size());
         // Source-declaration order — alpha first, beta second.
-        assertEquals("alpha", atoms.get(0).luaName());
-        assertEquals((short) 1, atoms.get(0).value());
+        assertEquals("alpha", atoms.getFirst().luaName());
+        assertEquals((short) 1, atoms.getFirst().value());
         assertEquals("beta", atoms.get(1).luaName());
         assertEquals((short) 2, atoms.get(1).value());
     }
@@ -299,13 +298,13 @@ class LibraryModelBuilderTest {
                 }
             }
             """);
-        var ex = library.exports().get(0);
+        var ex = library.exports().getFirst();
         assertEquals(1, ex.generics().size());
-        var g = ex.generics().get(0);
+        var g = ex.generics().getFirst();
         assertEquals("A", g.name());
         assertTrue(g.pack(), "T... should produce pack=true");
         // Method-level generics are empty — the `A` reference is bound by the type-level decl.
-        assertTrue(ex.methods().get(0).generics().isEmpty());
+        assertTrue(ex.methods().getFirst().generics().isEmpty());
     }
 
     @Test
@@ -335,12 +334,12 @@ class LibraryModelBuilderTest {
                 }
             }
             """);
-        var ex = library.exports().get(0);
+        var ex = library.exports().getFirst();
         assertEquals(1, ex.generics().size());
-        assertEquals("T", ex.generics().get(0).name());
-        assertEquals(false, ex.generics().get(0).pack());
+        assertEquals("T", ex.generics().getFirst().name());
+        assertFalse(ex.generics().getFirst().pack());
         // Each member has zero of its own generics; T is inherited from the type.
-        assertTrue(ex.methods().get(0).generics().isEmpty());
+        assertTrue(ex.methods().getFirst().generics().isEmpty());
         assertEquals(1, ex.properties().size());
     }
 
@@ -414,11 +413,11 @@ class LibraryModelBuilderTest {
                 }
             }
             """);
-        var ex = library.exports().get(0);
+        var ex = library.exports().getFirst();
         assertEquals(1, ex.generics().size());
-        assertEquals("A", ex.generics().get(0).name());
-        assertEquals(1, ex.methods().get(0).generics().size());
-        assertEquals("R", ex.methods().get(0).generics().get(0).name());
+        assertEquals("A", ex.generics().getFirst().name());
+        assertEquals(1, ex.methods().getFirst().generics().size());
+        assertEquals("R", ex.methods().getFirst().generics().getFirst().name());
     }
 
     @Test
@@ -482,7 +481,7 @@ class LibraryModelBuilderTest {
     private static Model.Library parseSingle(String fqcn, String source) {
         var capturing = compileWithCapture(fqcn, source);
         assertEquals(1, capturing.captured.size(), "expected exactly one Model.Library");
-        return capturing.captured.get(0);
+        return capturing.captured.getFirst();
     }
 
     private static Compilation compile(String fqcn, String source) {

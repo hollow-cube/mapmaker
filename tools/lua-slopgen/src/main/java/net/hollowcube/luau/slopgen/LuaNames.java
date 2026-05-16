@@ -1,5 +1,9 @@
 package net.hollowcube.luau.slopgen;
 
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
+import org.jetbrains.annotations.Nullable;
+
 public final class LuaNames {
     public static final String RUNTIME_PACKAGE_NAME = "net.hollowcube.luau.gen.runtime";
 
@@ -51,6 +55,27 @@ public final class LuaNames {
             .replaceAll("([A-Za-z])([0-9])", "$1_$2")
             .replaceAll("([0-9])([A-Za-z])", "$1_$2")
             .toLowerCase();
+    }
+
+
+    /// Maps a Lua atom name (an arbitrary string) to a Java identifier of the form `A_<sanitized>`.
+    /// The `A_` prefix gives namespace separation and avoids keyword collisions; non-identifier
+    /// characters in the source name are stripped. Two distinct Lua names that sanitize to the same
+    /// identifier would collide and must be detected upstream — the current atom set has no such
+    /// pairs, so collision-disambiguation is a TODO if it ever bites.
+    public static String atomIdentifier(String luaName) {
+        var sb = new StringBuilder(luaName.length() + 2);
+        sb.append("A_");
+        for (int i = 0; i < luaName.length(); i++) {
+            char c = luaName.charAt(i);
+            if (Character.isLetterOrDigit(c) || c == '_') sb.append(c);
+        }
+        return sb.toString();
+    }
+
+    public static CodeBlock atomLabel(@Nullable ClassName atomsClass, String luaName, short atom) {
+        if (atomsClass == null) return CodeBlock.of("$L", atom);
+        return CodeBlock.of("$T.$L", atomsClass, atomIdentifier(luaName));
     }
 
 }

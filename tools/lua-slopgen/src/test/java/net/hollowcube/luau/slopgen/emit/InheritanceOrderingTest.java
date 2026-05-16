@@ -101,7 +101,7 @@ class InheritanceOrderingTest {
         var idents = new Idents();
         for (var ex : library.exports())
             for (var p : ex.properties()) idents.atomFor(p.luaName());
-        return new LibraryEmitter(idents, AtomResolver.literal()).emit(library).toString();
+        return new LibraryEmitter(idents, null).emit(library).toString();
     }
 
     private static Model.Library buildEntityChain(boolean reverse) {

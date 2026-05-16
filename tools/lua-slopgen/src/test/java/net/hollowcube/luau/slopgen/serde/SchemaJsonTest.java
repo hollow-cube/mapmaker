@@ -2,7 +2,6 @@ package net.hollowcube.luau.slopgen.serde;
 
 import com.palantir.javapoet.ClassName;
 import net.hollowcube.luau.gen.LuaLibrary;
-import net.hollowcube.luau.gen.Meta;
 import net.hollowcube.luau.slopgen.Model;
 import net.hollowcube.luau.slopgen.Schema;
 import net.hollowcube.luau.slopgen.SchemaJson;
@@ -12,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class SchemaJsonTest {
 
@@ -60,7 +59,7 @@ class SchemaJsonTest {
             List.of(new Model.Return(unionStringNumber, "result of compute")));
 
         var meta = new Model.MetaMethod(
-            Meta.ADD, "plus", false,
+            "__add", "plus", false,
             "add docs",
             List.of(), List.of(),
             List.of(new Model.Return(numberT, "")));
@@ -90,10 +89,45 @@ class SchemaJsonTest {
             List.of(),
             "library description");
 
-        var schema = SchemaJson.fragment(lib);
-        var json = SchemaJson.toJson(schema);
+        var json = SchemaJson.toJson(SchemaJson.fragment(lib));
+
+        // The published shape carries no Java implementation detail and renames luaName→name.
+        assertFalse(json.contains("\"javaMethodName\""), "javaMethodName must not be published");
+        assertFalse(json.contains("\"enclosingType\""), "enclosingType must not be published");
+        assertFalse(json.contains("\"isVoid\""), "isVoid must not be published");
+        assertFalse(json.contains("\"scope\""), "scope must not be published");
+        assertFalse(json.contains("\"luaName\""), "luaName must be published as name");
+        // GLOBAL libraries live under `globals`, not the `libraries` object.
+        assertTrue(json.contains("\"globals\""), "global library must serialize under globals");
+
         var roundTripped = SchemaJson.read(json);
-        assertEquals(schema, roundTripped);
+
+        // Read-back restores scope from the collection a library came from, and reconstructs the
+        // dropped Java fields with blanks (empty method name, null enclosing type, isVoid derived
+        // from an empty returns list). Nothing that consumes the JSON reads those.
+        var strippedGetter = new Model.Accessor("", null, "name docs", null, stringT);
+        var strippedSetter = new Model.Accessor("", null, "", "value", stringT);
+        var strippedProp = new Model.Property("name", strippedGetter, strippedSetter);
+        var strippedMethod = new Model.Method(
+            "compute", "", false, null, "compute docs",
+            method.generics(), method.params(), method.returns());
+        var strippedMeta = new Model.MetaMethod(
+            "__add", "", false, "add docs",
+            List.of(), List.of(), meta.returns());
+        var strippedExport = new Model.Export(
+            export.javaType(), "Animal", null, false,
+            export.generics(),
+            List.of(strippedProp), List.of(strippedMethod), List.of(strippedMeta),
+            7, true, "animal");
+        var strippedStatic = new Model.Method(
+            "build", "", false, null, "static method docs",
+            List.of(), List.of(), staticMethod.returns());
+        var strippedLib = new Model.Library(
+            lib.sourceType(), lib.glueType(), "@t/sample", LuaLibrary.Scope.GLOBAL,
+            List.of(strippedExport), List.of(strippedStatic), List.of(),
+            "library description");
+
+        assertEquals(SchemaJson.fragment(strippedLib), roundTripped);
     }
 
     @Test
@@ -114,5 +148,58 @@ class SchemaJsonTest {
         assertEquals(schema.libraries().size(), roundTripped.libraries().size());
         assertEquals(libA, roundTripped.libraries().get("@a/lib"));
         assertEquals(libB, roundTripped.libraries().get("@b/lib"));
+    }
+
+    @Test
+    void editorJsonIsSlimAndMinified() {
+        var stringT = new LuauType.Named(null, "string", List.of());
+
+        var dog = new Model.Export(
+            ClassName.get("fixtures", "LibZoo", "Dog"),
+            "Dog",
+            ClassName.get("fixtures", "LibZoo", "Animal"),
+            true,
+            List.of(),
+            List.of(),
+            List.of(new Model.Method(
+                "bark", "bark", true, ClassName.get("fixtures", "LibZoo", "Dog"),
+                "Bark.", List.of(), List.of(), List.of())),
+            List.of(),
+            42, false,
+            "A dog.");
+        var lib = new Model.Library(
+            ClassName.get("fixtures", "LibZoo"),
+            ClassName.get("fixtures", "LibZoo$luau"),
+            "@t/zoo", LuaLibrary.Scope.REQUIRE,
+            List.of(dog), List.of(), List.of(),
+            "Zoo library.");
+
+        var editor = SchemaJson.toEditorJson(SchemaJson.fragment(lib));
+
+        // Minified: no pretty-print whitespace.
+        assertFalse(editor.contains("\n"), "editor JSON must be minified");
+        assertFalse(editor.contains("  "), "editor JSON must not be indented");
+
+        // No Java/codegen detail at all.
+        for (var k : List.of("sourceType", "glueType", "javaType", "isFinal",
+            "userDataTag", "hasSubtypes", "javaMethodName", "enclosingType",
+            "isVoid", "scope", "luaName")) {
+            assertFalse(editor.contains("\"" + k + "\""), k + " must not appear in editor JSON");
+        }
+
+        // superExport is the parent's Luau name, not a Java type.
+        assertTrue(editor.contains("\"superExport\":\"Animal\""),
+            "superExport must be the parent Luau name");
+        assertFalse(editor.contains("fixtures.LibZoo"), "no Java FQCNs in editor JSON");
+
+        // Empty collections / blank strings are pruned (bark has no params/returns/generics).
+        assertFalse(editor.contains("[]"), "empty arrays must be pruned");
+        assertFalse(editor.contains("\"generics\""), "empty generics must be pruned");
+        assertFalse(editor.contains("\"returns\""), "void method has no returns key");
+
+        // Luau surface is preserved.
+        assertTrue(editor.contains("\"name\":\"Dog\""));
+        assertTrue(editor.contains("\"name\":\"bark\""));
+        assertTrue(editor.contains("\"description\":\"A dog.\""));
     }
 }

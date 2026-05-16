@@ -56,26 +56,25 @@ class EndToEndTest {
                 import net.hollowcube.luau.gen.LuaExport;
                 import net.hollowcube.luau.gen.LuaLibrary;
                 import net.hollowcube.luau.gen.LuaMethod;
-                import net.hollowcube.luau.gen.Meta;
                 @LuaLibrary(name = "@e2e/meta")
                 public final class LibAllMeta {
                     @LuaExport public static final class Vec {
                         /// @luaReturn Vec
-                        @LuaMethod(meta = Meta.ADD)      public int add(LuaState s) { return 1; }
+                        @LuaMethod(meta = "__add")      public int add(LuaState s) { return 1; }
                         /// @luaReturn Vec
-                        @LuaMethod(meta = Meta.SUB)      public int sub(LuaState s) { return 1; }
+                        @LuaMethod(meta = "__sub")      public int sub(LuaState s) { return 1; }
                         /// @luaReturn Vec
-                        @LuaMethod(meta = Meta.UNM)      public int unm(LuaState s) { return 1; }
+                        @LuaMethod(meta = "__unm")      public int unm(LuaState s) { return 1; }
                         /// @luaReturn boolean
-                        @LuaMethod(meta = Meta.EQ)       public int eq(LuaState s) { return 1; }
+                        @LuaMethod(meta = "__eq")       public int eq(LuaState s) { return 1; }
                         /// @luaReturn boolean
-                        @LuaMethod(meta = Meta.LT)       public int lt(LuaState s) { return 1; }
+                        @LuaMethod(meta = "__lt")       public int lt(LuaState s) { return 1; }
                         /// @luaReturn number
-                        @LuaMethod(meta = Meta.LEN)      public int len(LuaState s) { return 1; }
+                        @LuaMethod(meta = "__len")      public int len(LuaState s) { return 1; }
                         /// @luaReturn string
-                        @LuaMethod(meta = Meta.TOSTRING) public int str(LuaState s) { return 1; }
+                        @LuaMethod(meta = "__tostring") public int str(LuaState s) { return 1; }
                         /// @luaReturn nil
-                        @LuaMethod(meta = Meta.CALL)     public int call(LuaState s) { return 1; }
+                        @LuaMethod(meta = "__call")     public int call(LuaState s) { return 1; }
                     }
                 }
                 """));

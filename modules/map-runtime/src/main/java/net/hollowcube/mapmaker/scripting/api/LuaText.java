@@ -5,7 +5,6 @@ import net.hollowcube.luau.gen.LuaExport;
 import net.hollowcube.luau.gen.LuaLibrary;
 import net.hollowcube.luau.gen.LuaLibrary.Scope;
 import net.hollowcube.luau.gen.LuaMethod;
-import net.hollowcube.luau.gen.Meta;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -108,7 +107,7 @@ public final class LuaText {
         //region Meta Methods
 
         /// Concatenates two `Text` values, or a `Text` with any string-able value.
-        @LuaMethod(meta = Meta.CONCAT)
+        @LuaMethod(meta = "__concat")
         public int luaConcat(LuaState state) {
             var rhs = checkAnyText(state, 1);
             push(state, Component.textOfChildren(value, rhs));
@@ -116,14 +115,14 @@ public final class LuaText {
         }
 
         /// Returns the length of the rendered plain text, ignoring formatting.
-        @LuaMethod(meta = Meta.LEN)
+        @LuaMethod(meta = "__len")
         public int luaLen(LuaState state) {
             state.pushInteger(PLAIN_TEXT_SERIALIZER.serialize(value).length());
             return 1;
         }
 
         /// Returns the plain-text form, without any formatting.
-        @LuaMethod(meta = Meta.TOSTRING)
+        @LuaMethod(meta = "__tostring")
         public int luaToString(LuaState state) {
             state.pushString(PLAIN_TEXT_SERIALIZER.serialize(value));
             return 1;

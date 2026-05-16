@@ -6,7 +6,7 @@ import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
 import net.hollowcube.luau.gen.LuaLibrary;
 import net.hollowcube.luau.slopgen.Idents;
-import net.hollowcube.luau.slopgen.parse.LibraryModelBuilder;
+import net.hollowcube.luau.slopgen.LibraryModelBuilder;
 import org.junit.jupiter.api.Test;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -172,13 +172,12 @@ class LibraryEmitterTest {
             import net.hollowcube.luau.gen.LuaLibrary;
             import net.hollowcube.luau.gen.LuaExport;
             import net.hollowcube.luau.gen.LuaMethod;
-            import net.hollowcube.luau.gen.Meta;
             @LuaLibrary(name = "@t/meta")
             public final class LibMeta {
                 @LuaExport
                 public static final class Vec {
                     /// @luaReturn Vec
-                    @LuaMethod(meta = Meta.ADD)
+                    @LuaMethod(meta = "__add")
                     public int plus(LuaState state) { return 1; }
                 }
             }
@@ -239,18 +238,21 @@ class LibraryEmitterTest {
 
     @AutoService(Processor.class)
     public static final class EmittingProcessor extends AbstractProcessor {
-        @Override public Set<String> getSupportedAnnotationTypes() {
+        @Override
+        public Set<String> getSupportedAnnotationTypes() {
             return Set.of(LuaLibrary.class.getName());
         }
 
-        @Override public SourceVersion getSupportedSourceVersion() {
+        @Override
+        public SourceVersion getSupportedSourceVersion() {
             return SourceVersion.latestSupported();
         }
 
-        @Override public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        @Override
+        public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
             var idents = new Idents();
             var builder = new LibraryModelBuilder(processingEnv, idents);
-            var emitter = new LibraryEmitter(idents, AtomResolver.literal());
+            var emitter = new LibraryEmitter(idents, null);
             for (var el : roundEnv.getElementsAnnotatedWith(LuaLibrary.class)) {
                 if (el instanceof TypeElement t) {
                     var library = builder.build(t);

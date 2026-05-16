@@ -10,9 +10,13 @@ import java.util.List;
 /// from one or more directories, validates cross-module references, and writes a single
 /// aggregate `engine-api.json`.
 ///
+/// With `--editor-output` it additionally writes the editor variant: the same Luau surface,
+/// stripped of all Java/codegen detail and minified, for shipping to the editor app.
+///
 /// Usage:
 /// ```
 /// AggregateMain --output build/luau-api/engine-api.json
+///               [--editor-output build/luau-api/engine-api.editor.json]
 ///               [--strict]
 ///               [--fragments dir1 dir2 …]
 /// ```
@@ -27,6 +31,11 @@ public final class AggregateMain {
         var result = Aggregator.aggregateFromDirs(ctx.fragmentDirs);
         Aggregator.writeSchema(result.schema(), ctx.output);
         System.out.println("Wrote engine API: " + ctx.output);
+
+        if (ctx.editorOutput != null) {
+            Aggregator.writeEditorSchema(result.schema(), ctx.editorOutput);
+            System.out.println("Wrote editor engine API: " + ctx.editorOutput);
+        }
 
         if (!result.diagnostics().isEmpty()) {
             var stream = ctx.strict ? System.err : System.out;
@@ -43,6 +52,7 @@ public final class AggregateMain {
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
                 case "--output" -> ctx.output = Path.of(args[++i]);
+                case "--editor-output" -> ctx.editorOutput = Path.of(args[++i]);
                 case "--strict" -> ctx.strict = true;
                 case "--fragments" -> {
                     while (i + 1 < args.length && !args[i + 1].startsWith("--")) {
@@ -64,6 +74,7 @@ public final class AggregateMain {
 
     private static final class Ctx {
         Path output;
+        Path editorOutput;
         boolean strict;
         List<Path> fragmentDirs = new ArrayList<>();
     }

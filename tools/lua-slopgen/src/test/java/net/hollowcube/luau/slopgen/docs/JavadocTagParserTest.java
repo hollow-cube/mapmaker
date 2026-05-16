@@ -174,7 +174,7 @@ class JavadocTagParserTest {
         var docs = JavadocTagParser.parse("@luaParam");
         assertTrue(docs.params().isEmpty());
         assertEquals(1, docs.diagnostics().size());
-        assertTrue(docs.diagnostics().get(0).message().contains("Malformed"));
+        assertTrue(docs.diagnostics().getFirst().message().contains("Malformed"));
     }
 
     @Test

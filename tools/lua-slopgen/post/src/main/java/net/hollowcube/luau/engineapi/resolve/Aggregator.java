@@ -76,6 +76,17 @@ public final class Aggregator {
         }
     }
 
+    /// Write the editor variant — the slim, Java-free, minified form shipped to the editor app
+    /// for type info. See [SchemaJson#toEditorJson].
+    public static void writeEditorSchema(Schema schema, Path output) {
+        try {
+            if (output.getParent() != null) Files.createDirectories(output.getParent());
+            Files.writeString(output, SchemaJson.toEditorJson(schema), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to write editor schema: " + output, e);
+        }
+    }
+
     public static Schema readSchema(Path path) {
         try (Reader r = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
             return SchemaJson.read(r);

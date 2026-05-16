@@ -3,7 +3,6 @@ package net.hollowcube.luau.slopgen;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.TypeName;
 import net.hollowcube.luau.gen.LuaLibrary;
-import net.hollowcube.luau.gen.Meta;
 import net.hollowcube.luau.slopgen.types.LuauType;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,7 +60,7 @@ public sealed interface Model {
     }
 
     record MetaMethod(
-        Meta meta,
+        String meta,
         String javaMethodName,
         boolean isVoid,
         String description,

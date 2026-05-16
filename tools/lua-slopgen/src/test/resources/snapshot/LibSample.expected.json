@@ -6,20 +6,17 @@
       "sourceType": "fixtures.LibSample",
       "glueType": "fixtures.LibSample$luau",
       "moduleName": "@test/sample",
-      "scope": "REQUIRE",
       "exports": [
         {
           "javaType": "fixtures.LibSample.Animal",
-          "luaName": "Animal",
+          "name": "Animal",
           "superExport": null,
           "isFinal": false,
           "generics": [],
           "properties": [
             {
-              "luaName": "name",
+              "name": "name",
               "getter": {
-                "javaMethodName": "getName",
-                "enclosingType": "fixtures.LibSample.Animal",
                 "description": "The animal's display name.",
                 "paramName": null,
                 "type": {
@@ -40,16 +37,14 @@
         },
         {
           "javaType": "fixtures.LibSample.Dog",
-          "luaName": "Dog",
+          "name": "Dog",
           "superExport": "fixtures.LibSample.Animal",
           "isFinal": true,
           "generics": [],
           "properties": [
             {
-              "luaName": "breed",
+              "name": "breed",
               "getter": {
-                "javaMethodName": "getBreed",
-                "enclosingType": "fixtures.LibSample.Dog",
                 "description": "",
                 "paramName": null,
                 "type": {
@@ -60,8 +55,6 @@
                 }
               },
               "setter": {
-                "javaMethodName": "setBreed",
-                "enclosingType": "fixtures.LibSample.Dog",
                 "description": "",
                 "paramName": "value",
                 "type": {
@@ -75,10 +68,7 @@
           ],
           "methods": [
             {
-              "luaName": "bark",
-              "javaMethodName": "bark",
-              "isVoid": true,
-              "enclosingType": "fixtures.LibSample.Dog",
+              "name": "bark",
               "description": "Make the dog bark loudly.",
               "generics": [],
               "params": [],
@@ -94,10 +84,8 @@
       "staticMethods": [],
       "staticProperties": [
         {
-          "luaName": "version",
+          "name": "version",
           "getter": {
-            "javaMethodName": "getVersion",
-            "enclosingType": "fixtures.LibSample",
             "description": "The current sample API version.",
             "paramName": null,
             "type": {
@@ -112,5 +100,6 @@
       ],
       "description": "A fixture library with a static getter, a base export, and a final subtype."
     }
-  }
+  },
+  "globals": []
 }
