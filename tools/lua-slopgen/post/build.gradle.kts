@@ -33,7 +33,7 @@ val engineApiOutputDir: DirectoryProperty = project.objects.directoryProperty()
     .convention(layout.buildDirectory.dir("luau-api"))
 val engineApiOutputFile: Provider<RegularFile> = engineApiOutputDir.file("engine-api.json")
 val engineApiEditorFile: Provider<RegularFile> = engineApiOutputDir.file("engine-api.editor.json")
-val luauDeclOutputFile: Provider<RegularFile> = engineApiOutputDir.file("engine.d.luau")
+val luauDeclOutputDir: Provider<Directory> = engineApiOutputDir.dir("types")
 
 /// Configuration-cache-compatible argument providers — they capture lazy properties, not the
 /// `Configuration` object, so Gradle can fingerprint and replay them without re-resolving at
@@ -75,8 +75,9 @@ abstract class DiffArgs : CommandLineArgumentProvider {
 abstract class DeclArgs : CommandLineArgumentProvider {
     @get:InputFile
     abstract val schema: RegularFileProperty
-    @get:OutputFile
-    abstract val output: RegularFileProperty
+
+    @get:OutputDirectory
+    abstract val output: DirectoryProperty
     override fun asArguments(): Iterable<String> = listOf(
         "--schema", schema.get().asFile.absolutePath,
         "--output", output.get().asFile.absolutePath,
@@ -116,8 +117,8 @@ val compareEngineApi = tasks.register<JavaExec>("compareEngineApi") {
 
 val buildLuauDeclarations = tasks.register<JavaExec>("buildLuauDeclarations") {
     group = "verification"
-    description = "Generate Luau .d.luau declaration files from the aggregated engine API. " +
-            "Currently a stub that writes an empty placeholder."
+    description = "Generate the Luau type bundle (global.d.luau + one require-able .luau per " +
+            "library, relative requires) from the aggregated engine API."
 
     classpath = sourceSets.main.get().runtimeClasspath
     mainClass.set("net.hollowcube.luau.engineapi.task.DeclMain")
@@ -126,9 +127,10 @@ val buildLuauDeclarations = tasks.register<JavaExec>("buildLuauDeclarations") {
 
     val provider = project.objects.newInstance<DeclArgs>()
     provider.schema.set(engineApiOutputFile)
-    provider.output.set(luauDeclOutputFile)
+    provider.output.set(luauDeclOutputDir)
     argumentProviders.add(provider)
 }
+
 
 tasks.test {
     System.getProperty("slopgen.update_goldens")?.let {

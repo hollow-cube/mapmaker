@@ -1,5 +1,6 @@
 package net.hollowcube.luau.engineapi.resolve;
 
+import net.hollowcube.luau.engineapi.emit.EditorJson;
 import net.hollowcube.luau.slopgen.Model;
 import net.hollowcube.luau.slopgen.Schema;
 import net.hollowcube.luau.slopgen.SchemaJson;
@@ -76,12 +77,12 @@ public final class Aggregator {
         }
     }
 
-    /// Write the editor variant — the slim, Java-free, minified form shipped to the editor app
-    /// for type info. See [SchemaJson#toEditorJson].
+    /// Write the editor document — the slim, Java-free, minified editor JSON with the generated
+    /// global + per-module Luau type text embedded under `types`. See [EditorJson].
     public static void writeEditorSchema(Schema schema, Path output) {
         try {
             if (output.getParent() != null) Files.createDirectories(output.getParent());
-            Files.writeString(output, SchemaJson.toEditorJson(schema), StandardCharsets.UTF_8);
+            Files.writeString(output, EditorJson.build(schema), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new UncheckedIOException("Failed to write editor schema: " + output, e);
         }

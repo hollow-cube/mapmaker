@@ -1,6 +1,7 @@
 package net.hollowcube.luau.engineapi.resolve;
 
 import net.hollowcube.luau.slopgen.Model;
+import net.hollowcube.luau.slopgen.types.LuauBuiltins;
 import net.hollowcube.luau.slopgen.types.LuauType;
 
 import java.util.HashSet;
@@ -15,9 +16,7 @@ import java.util.Set;
 /// Operates directly on the parsed [LuauType] AST stored on the model — no string re-parsing.
 public final class CrossModuleResolver {
 
-    private static final Set<String> BUILT_IN_PRIMITIVES = Set.of(
-        "nil", "boolean", "number", "string", "thread", "buffer", "vector",
-        "any", "unknown", "never");
+    private static final Set<String> BUILT_IN_PRIMITIVES = LuauBuiltins.PRIMITIVES;
 
     private final SymbolTable symbols;
     private final List<ResolveDiagnostic> diagnostics;

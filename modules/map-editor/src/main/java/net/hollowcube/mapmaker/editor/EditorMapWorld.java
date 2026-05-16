@@ -133,6 +133,11 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         } else {
             terraformInstanceStorage = null;
         }
+
+        // Script editor loading
+//        if ("f973cc98-e806-464d-9435-fc4b1d49fde7".equals(map.id())) {
+//            server.jetStream().subscribe("")
+//        }
     }
 
     public Terraform terraform() {

@@ -33,7 +33,12 @@ public final class AggregateMain {
         System.out.println("Wrote engine API: " + ctx.output);
 
         if (ctx.editorOutput != null) {
-            Aggregator.writeEditorSchema(result.schema(), ctx.editorOutput);
+            try {
+                Aggregator.writeEditorSchema(result.schema(), ctx.editorOutput);
+            } catch (net.hollowcube.luau.engineapi.emit.GlobalDeclEmitter.UnrepresentableGlobalException e) {
+                System.err.println("error: " + e.getMessage());
+                System.exit(2);
+            }
             System.out.println("Wrote editor engine API: " + ctx.editorOutput);
         }
 
